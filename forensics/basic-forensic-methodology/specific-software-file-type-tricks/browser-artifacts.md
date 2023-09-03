@@ -12,10 +12,10 @@
 
 </details>
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化しましょう。\
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化します。\
 今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -39,26 +39,26 @@
 * **ファビコン：** タブ、URL、ブックマークなどで見つかる小さなアイコンです。ユーザーが訪れたウェブサイトや場所に関する追加情報を取得するための別の情報源として使用できます。
 * **ブラウザセッション：** 自己説明的です。
 * **ダウンロード：** 自己説明的です。
-* **フォームデータ：** フォーム内に入力された内容は、ブラウザによって保存されることが多いため、次回ユーザーがフォームに入力する際に以前に入力されたデータをブラウザが提案できます。
+* **フォームデータ：** フォーム内に入力された内容は、ブラウザによって保存されることがあります。したがって、次回ユーザーがフォームに入力する際に、ブラウザは以前に入力されたデータを提案することができます。
 * **サムネイル：** 自己説明的です。
 * **カスタム辞書.txt：** ユーザーによって辞書に追加された単語。
 
 ## Firefox
 
 Firefoxは、\~/_**.mozilla/firefox/**_（Linux）、**/Users/$USER/Library/Application Support/Firefox/Profiles/**（MacOS）、_**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\\**_（Windows）にプロファイルフォルダを作成します。\
-このフォルダ内には、ユーザープロファイルの名前が記載された_**profiles.ini**_ファイルが表示されるはずです。\
-各プロファイルには、そのデータが保存されるフォルダの名前を示す「**Path**」変数があります。フォルダは、_profiles.ini_ファイルと同じディレクトリに存在するはずです。存在しない場合は、おそらく削除されたものです。
+このフォルダ内には、ユーザープロファイルの名前が記載された _**profiles.ini**_ ファイルが表示されるはずです。\
+各プロファイルには、そのデータが保存されるフォルダの名前を示す "**Path**" 変数があります。このフォルダは、_profiles.ini_ と同じディレクトリに存在するはずです。存在しない場合は、おそらく削除されたものです。
 
-各プロファイルのフォルダ（_\~/.mozilla/firefox/\<ProfileName>/_）内には、次の興味深いファイルが見つかるはずです。
+各プロファイルのフォルダ（_\~/.mozilla/firefox/\<ProfileName>/_）内には、次の興味深いファイルがあるはずです。
 
-* _**places.sqlite**_：履歴（moz\_\_places）、ブックマーク（moz\_bookmarks）、およびダウンロード（moz\_\_annos）に関するデータ。Windowsでは、ツール[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html)を使用して、_**places.sqlite**_内の履歴を読み取ることができます。
+* _**places.sqlite**_：履歴（moz\_\_places）、ブックマーク（moz\_bookmarks）、およびダウンロード（moz\_\_annos）に関するデータ。Windowsでは、ツール[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html)を使用して、_**places.sqlite**_ 内の履歴を読み取ることができます。
 * 履歴をダンプするクエリ：`select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`
 * リンクタイプは、以下のように示される番号です：
 * 1：ユーザーがリンクをクリックしました
 * 2：ユーザーがURLを入力しました
 * 3：ユーザーがお気に入りを使用しました
-* 4：Iframeからロードされました
-* 5：HTTPリダイレクト301経由でアクセスされました
+* 4：Iframeから読み込まれました
+* 5：HTTPリダイレクト301経由でアクセスされ
 * _**logins.json**_ : 暗号化されたユーザー名とパスワード
 * **ブラウザの組み込みのフィッシング対策:** `grep 'browser.safebrowsing' ~/Library/Application Support/Firefox/Profiles/*/prefs.js`
 * セーフサーチ設定が無効にされている場合、"safebrowsing.malware.enabled"と"phishing.enabled"がfalseとして返されます
@@ -84,7 +84,7 @@ done < $passfile
 
 ## Google Chrome
 
-Google Chromeは、ユーザーのホームディレクトリ内の_**\~/.config/google-chrome/**_（Linux）、_**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\\**_（Windows）、または_**/Users/$USER/Library/Application Support/Google/Chrome/**_（MacOS）にプロファイルを作成します。ほとんどの情報は、前述のパス内の_**Default/**_または_**ChromeDefaultData/**_フォルダに保存されます。ここで、次の興味深いファイルを見つけることができます：
+Google Chromeは、ユーザーのホームディレクトリ内の_**\~/.config/google-chrome/**_（Linux）、_**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\\**_（Windows）、または_**/Users/$USER/Library/Application Support/Google/Chrome/**_（MacOS）にプロファイルを作成します。ほとんどの情報は、前述のパス内の_Default/_または_ChromeDefaultData/_フォルダに保存されます。ここで、次の興味深いファイルを見つけることができます：
 
 * _**History**_：URL、ダウンロード、さらには検索キーワードまで。Windowsでは、ツール[ChromeHistoryView](https://www.nirsoft.net/utils/chrome\_history\_view.html)を使用して履歴を読み取ることができます。"Transition Type"列の意味は次のとおりです：
 * Link：ユーザーがリンクをクリックしました
@@ -104,28 +104,28 @@ Google Chromeは、ユーザーのホームディレクトリ内の_**\~/.config
 * _**Last Session**_および_**Last Tabs**_：これらのファイルには、Chromeが最後に閉じられたときにブラウザでアクティブだったサイトが保存されています。
 * _**Extensions**_：拡張機能とアドオンのフォルダ
 * **Thumbnails**：サムネイル
-* **Preferences**：このファイルには、プラグイン、拡張機能、ジオロケーションを使用するサイト、ポップアップ、通知、DNSプリフェッチング、証明書例外など、多くの有用な情報が含まれています。特定のChromeの設定が有効になっているかどうかを調査しようとしている場合、おそらくこの設定をここで見つけることができるでしょう。
+* **Preferences**：このファイルには、プラグイン、拡張機能、ジオロケーションを使用するサイト、ポップアップ、通知、DNSプリフェッチング、証明書の例外など、多くの有用な情報が含まれています。特定のChromeの設定が有効になっているかどうかを調査しようとしている場合、おそらくこの設定をここで見つけることができるでしょう。
 * **ブラウザの組み込みのフィッシング対策**：`grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`を使用します
-* 単純に「**safebrowsing**」をgrepして、結果の中で`{"enabled: true,"}`を見つけると、フィッシング対策とマルウェア保護がオンになっていることを示します。
+* 単純に「**safebrowsing**」をgrepして、結果に`{"enabled: true,"}`があるかどうかを確認すると、フィッシング対策とマルウェア保護が有効になっていることがわかります。
 
 ## **SQLite DBデータの回復**
 
-前のセクションで観察できるように、ChromeとFirefoxの両方がデータを保存するために**SQLite**データベースを使用しています。ツール[**sqlparse**](https://github.com/padfoot999/sqlparse) **または** [**sqlparse\_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases)を使用して、削除されたエントリを回復することができます。
+前のセクションで観察できるように、ChromeとFirefoxの両方がデータを保存するために**SQLite**データベースを使用しています。ツール[**sqlparse**](https://github.com/padfoot999/sqlparse)または[**sqlparse\_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases)を使用して、削除されたエントリを回復することが可能です。
 
 ## **Internet Explorer 11**
 
 Internet Explorerは、データとメタデータを異なる場所に保存します。メタデータを使用してデータを見つけることができます。
 
 メタデータは、フォルダ`%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data`にあります（VXはV01、V16、またはV24になります）。\
-前のフォルダには、ファイルV01.logもあります。このファイルの**変更時刻**とWebcacheVX.dataファイルの**異なる場合**、コマンド`esentutl /r V01 /d`を実行して、可能な**非互換性**を修正する必要があります。
+前のフォルダには、ファイルV01.logも含まれています。このファイルの**変更時刻**とWebcacheVX.dataファイルの**異なる場合**、コマンド`esentutl /r V01 /d`を実行して、可能な**非互換性**を修正する必要があります。
 
 このアーティファクトを**回復**した後（これはESEデータベースであり、photorecを使用してExchange DatabaseまたはEDBのオプションで回復できます）、プログラム[ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html)を使用して開くことができます。開いたら、"**Containers**"という名前のテーブルに移動します。
 
 ![](<../../../.gitbook/assets/image (446).png>)
 
-このテーブルの中で、保存された情報の各部分がどの他のテーブルまたはコンテナに保存されているかを見つけることができます。それに続いて、ブラウザによって保存されたデータの**場所**と**メタデータ**を見つけることができます。
+このテーブルの中には、保存された情報の各部分がどの他のテーブルまたはコンテナに保存されているかが記載されています。それに続いて、ブラウザによって保存されたデータの場所とメタデータが示されています。
 
-**このテーブルは、他のMicrosoftのツール（例：skype）のキャッシュのメタデータも示していることに注意してください**
+**このテーブルは、他のMicrosoftツール（例：skype）のキャッシュのメタデータも示しています**
 
 ### キャッシュ
 
@@ -148,7 +148,7 @@ Internet Explorerは、データとメタデータを異なる場所に保存し
 
 キャッシュ情報は、_**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5**_および_**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5\low**_にあります。
 
-これらのフォルダ内の情報は、ユーザーが表示していた内容の**スナップショット**です。キャッシュのサイズは**250 MB**であり、タイムスタンプはページが訪問された時点（初回、NTFSの作成日、最後の時間、NTFSの変更日時）を示しています。
+これらのフォルダ内の情報は、ユーザーが表示していた内容のスナップショットです。キャッシュのサイズは**250 MB**であり、タイムスタンプはページが訪問された時点（初回、NTFSの作成日、最後の時間、NTFSの変更日時）を示しています。
 
 ### クッキー
 
@@ -175,81 +175,79 @@ Internet Explorerは、データとメタデータを異なる場所に保存し
 
 #### **メタデータ**
 
-[ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html)というツールを使用して、ダウンロードのメタデータを含むコンテナを確認できます。
+ツール[ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html)をチェックすると、ダウンロードのメタデータが含まれるコンテナを見つけることができます。
 
 ![](<../../../.gitbook/assets/image (445).png>)
 
-"ResponseHeaders"列の情報を取得し、その情報を16進数から変換することで、ダウンロードされたファイルのURL、ファイルタイプ、および場所を取得できます。
+「ResponseHeaders」列の情報を取得し、その情報を16進数から変換することで、URL、ファイルの種類、ダウンロードされたファイルの場所を取得できます。
 
 #### ファイル
 
-パス _**%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory**_ を確認してください。
+パス「_**%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory**_」を確認してください。
 
 ### **履歴**
 
-[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html)というツールを使用して履歴を読み取ることができます。ただし、最初にブラウザと抽出された履歴ファイルの場所を指定する必要があります。
+ツール[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html)を使用して履歴を読み取ることができます。ただし、最初にブラウザと抽出された履歴ファイルの場所を指定する必要があります。
 
 #### **メタデータ**
 
-* ModifiedTime: URLが最初に見つかった時刻
-* AccessedTime: 最後のアクセス時刻
-* AccessCount: アクセス回数
+* ModifiedTime：URLが最初に見つかった時刻
+* AccessedTime：最後の時刻
+* AccessCount：アクセス回数
 
 #### **ファイル**
 
-_**userprofile%\Appdata\Local\Microsoft\Windows\History\History.IE5**_ および _**userprofile%\Appdata\Local\Microsoft\Windows\History\Low\History.IE5**_ を検索してください。
+「_**userprofile%\Appdata\Local\Microsoft\Windows\History\History.IE5**_」および「_**userprofile%\Appdata\Local\Microsoft\Windows\History\Low\History.IE5**_」を検索します。
 
 ### **入力済みのURL**
 
-この情報は、レジストリのNTDUSER.DAT内のパスに見つけることができます。
+この情報は、レジストリNTDUSER.DATのパス「_**Software\Microsoft\InternetExplorer\TypedURLs**_」にあります。
 
-* _**Software\Microsoft\InternetExplorer\TypedURLs**_
-* ユーザーが入力した最後の50のURLを保存します
-* _**Software\Microsoft\InternetExplorer\TypedURLsTime**_
-* URLが入力された最後の時刻を保存します
+* ユーザーが入力した最後の50個のURLを保存します。
+* 「_**Software\Microsoft\InternetExplorer\TypedURLsTime**_」には、URLが最後に入力された時刻が保存されます。
 
 ## Microsoft Edge
 
-Microsoft Edgeのアーティファクトを分析するためには、前のセクション（IE 11）のキャッシュと場所に関する説明がすべて有効であることに注意してください。ただし、この場合のベースの場所は _**%userprofile%\Appdata\Local\Packages**_ です（次のパスで確認できます）：
+Microsoft Edgeのアーティファクトを分析するために、前のセクション（IE 11）のキャッシュと場所に関する説明はすべて有効ですが、基本的な場所は「_**%userprofile%\Appdata\Local\Packages**_」です（次のパスで確認できます）。
 
-* プロファイルパス： _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC**_
-* 履歴、クッキー、ダウンロード： _**C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat**_
-* 設定、ブックマーク、読み取りリスト： _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb**_
-* キャッシュ： _**C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC#!XXX\MicrosoftEdge\Cache**_
-* 最後のアクティブなセッション： _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active**_
+* プロファイルパス：「_**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC**_」
+* 履歴、クッキー、ダウンロード：「_**C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat**_」
+* 設定、ブックマーク、読み取りリスト：「_**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb**_」
+* キャッシュ：「_**C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC#!XXX\MicrosoftEdge\Cache**_」
+* 最後のアクティブなセッション：「_**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active**_」
 
 ## **Safari**
 
-データベースは `/Users/$User/Library/Safari` にあります。
+データベースは`/Users/$User/Library/Safari`にあります。
 
-* **History.db**: `history_visits`テーブルと`history_items`テーブルには、履歴とタイムスタンプに関する情報が含まれています。
+* **History.db**：`history_visits`と`history_items`テーブルには、履歴とタイムスタンプに関する情報が含まれています。
 * `sqlite3 ~/Library/Safari/History.db "SELECT h.visit_time, i.url FROM history_visits h INNER JOIN history_items i ON h.history_item = i.id"`
-* **Downloads.plist**: ダウンロードされたファイルに関する情報が含まれています。
-* **Book-marks.plist**: ブックマークされたURL。
-* **TopSites.plist**: ユーザーが最も頻繁に閲覧するウェブサイトのリスト。
-* **Extensions.plist**: 古いスタイルのSafariブラウザ拡張機能のリストを取得するために使用します。
+* **Downloads.plist**：ダウンロードされたファイルに関する情報が含まれています。
+* **Book-marks.plist**：ブックマークされたURL。
+* **TopSites.plist**：ユーザーが最も頻繁に閲覧するウェブサイトのリスト。
+* **Extensions.plist**：古いスタイルのSafariブラウザ拡張機能のリストを取得するために使用します。
 * `plutil -p ~/Library/Safari/Extensions/Extensions.plist| grep "Bundle Directory Name" | sort --ignore-case`
 * `pluginkit -mDvvv -p com.apple.Safari.extension`
-* **UserNotificationPermissions.plist**: 通知を送信することが許可されているドメイン。
+* **UserNotificationPermissions.plist**：通知をプッシュすることが許可されているドメイン。
 * `plutil -p ~/Library/Safari/UserNotificationPermissions.plist | grep -a3 '"Permission" => 1'`
-* **LastSession.plist**: ユーザーがSafariを終了したときに開かれていたタブ。
+* **LastSession.plist**：ユーザーがSafariを終了したときに開かれていたタブ。
 * `plutil -p ~/Library/Safari/LastSession.plist | grep -iv sessionstate`
-* **ブラウザの組み込みのフィッシング対策**: `defaults read com.apple.Safari WarnAboutFraudulentWebsites`
+* **ブラウザの組み込みのフィッシング対策**：`defaults read com.apple.Safari WarnAboutFraudulentWebsites`
 * 設定が有効であることを示すために、返答は1である必要があります
 
 ## Opera
 
-データベースは `/Users/$USER/Library/Application Support/com.operasoftware.Opera` にあります。
+データベースは`/Users/$USER/Library/Application Support/com.operasoftware.Opera`にあります。
 
 Operaは、Google Chromeとまったく同じ形式でブラウザの履歴とダウンロードデータを保存します。これは、ファイル名だけでなく、テーブル名にも適用されます。
 
-* **ブラウザの組み込みのフィッシング対策**: `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
-* **fraud\_protection\_enabled** は **true** である必要があります
+* **ブラウザの組み込みのフィッシング対策**：`grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
+* **fraud\_protection\_enabled**は**true**である必要があります
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化できます。\
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -258,10 +256,10 @@ Operaは、Google Chromeとまったく同じ形式でブラウザの履歴と�
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をご覧ください。独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクションです。
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
-* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

@@ -50,7 +50,7 @@ _あなたの会社もここに掲載されるかもしれません。_
 
 ### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
 
-<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**しましょう。
@@ -67,7 +67,7 @@ _あなたの会社もここに掲載されるかもしれません。_
 
 [**Intruder**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)は、脆弱性管理を簡単にします。攻撃対象の範囲を把握し、企業が脆弱性を抱えている箇所を確認し、システムが最も公開されている問題に優先順位を付けることで、最も重要なことに集中できます。
 
-内部インフラストラクチャからWebアプリ、API、クラウドシステムまで、すべての技術スタックをカバーする単一のプラットフォームで数千のチェックを実行します。[AWS、GCP、Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure)とシームレスに統合し、DevOpsを効率化してチームが修正を迅速に実装できるようにします。
+内部インフラからWebアプリ、API、クラウドシステムまで、一つのプラットフォームで数千のチェックを実行します。[AWS、GCP、Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure)とシームレスに統合し、DevOpsを効率化してチームが修正を迅速に実装できるようにします。
 
 Intruderは休むことはありません。24時間体制でシステムを監視します。詳細を知りたいですか？サイトを訪れ、[**無料トライアル**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)で試してみてください。
 
@@ -96,11 +96,13 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 <figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl)は、**アムステルダム**を拠点とするプロのサイバーセキュリティ企業であり、**最新のサイバーセキュリティ脅威から**世界中のビジネスを**保護**するために**攻撃的なセキュリティサービス**を提供しています。
+[**WebSec**](https://websec.nl)は、**アムステルダム**を拠点とするプロのサイバーセキュリティ企業であり、**最新のサイバーセキュリティ脅威から世界中のビジネスを保護**するために**攻撃的なセキュリティサービス**を提供しています。
 
-WebSecは**オールインワンのセキュリティ企業**であり、ペンテスト、セキュリティ監査、セキュリティ意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティエキスパートの外部委託など、すべてを行っています。
+WebSecは**オールインワンのセキュリティ企業**であり、ペンテスト、セキュリティ監査、セキュリティ意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティエキスパートの外部委託など、すべてを行います。
 
-WebSecのもう一つの素晴らしい点は、業界平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持っている**ということです。彼らのウェブサイトには「**私たちがハックできなければ、お金はいただきません！**」と記載されています。詳細については、彼らの[**ウェブサイト**](https://websec.nl/en/)と[**ブログ**](https://websec.nl/blog/)をご
+WebSecのもう一つの素晴らしい点は、業界平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持っている**ということです。彼らのウェブサイトには「**私たちがハックできなければ、お金はかかりません！**」と記載されています。詳細については、彼らの[**ウェブサイト**](https://websec.nl/en/)と[**ブログ**](https://websec.nl/blog/)をご覧ください！
+
+上記に加えて、WebSecはHackTricksを**熱心
 ### [DragonJAR](https://www.dragonjar.org/)
 
 <figure><img src=".gitbook/assets/image (1) (1) (2) (4) (1).png" alt=""><figcaption></figcaption></figure>
@@ -125,7 +127,7 @@ WebSecのもう一つの素晴らしい点は、業界平均とは異なり、We
 
 さらに、この書籍で説明されている技術やヒントは、教育および情報提供の目的でのみ提供されるものであり、いかなる違法または悪意のある活動にも使用してはなりません。著者および出版者は、違法または非倫理的な活動を是認または支持するものではなく、この書籍内に含まれる情報の使用は、ユーザー自身のリスクと裁量によるものです。
 
-ユーザーは、この書籍に含まれる情報に基づいて行われるすべての行動について、自己の責任を負い、ここに記載されている技術やヒントを実装しようとする場合は常に専門の助言と支援を求めるべきです。
+ユーザーは、この書籍内に含まれる情報に基づいて行われるすべての行動について、自己の責任を負い、ここに記載されている技術やヒントを実装しようとする場合は常に専門の助言と支援を求めるべきです。
 
 この書籍を使用することで、ユーザーは、この書籍またはその中に含まれる情報の使用によって生じるいかなる損害、損失、または害に対しても、著者および出版者を一切の責任から免責し、解放することに同意します。
 {% endhint %}

@@ -1,6 +1,6 @@
 # ブルートフォース - チートシート
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
@@ -12,17 +12,17 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか、またはHackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか、またはHackTricksをPDFでダウンロードしたいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
 
 ## デフォルトの資格情報
 
-使用されている技術のデフォルトの資格情報をGoogleで検索するか、次のリンクを試してみてください：
+使用されている技術のデフォルトの資格情報をGoogleで検索するか、次のリンクを試してください：
 
 * [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 * [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -48,14 +48,25 @@ crunch 6 8 -t ,@@^^%%
 ```
 ### Cewl
 
-Cewlは、ウェブサイトや文書をスクレイピングしてカスタム・ワードリストを生成するためのツールである。パスワードのブルートフォースや辞書攻撃の実行に役立つ。Cewlは、与えられた入力を分析し、単語の長さ、頻度、パターンなどの様々な基準に基づいて関連する単語を抽出することによって動作する。
+Cewl is a tool used for generating custom wordlists by scraping websites or documents. It can be helpful in performing brute force attacks by creating wordlists based on the target's specific interests or preferences.
 
-Cewlを使用するには、ターゲットURLまたはテキストを含むファイルを提供する必要がある。その後、Cewlはターゲットとなるウェブサイトをクロールしたり、ドキュメントを分析して単語を抽出する。また、リンクをたどり、複数のページを再帰的にスクレイピングすることもできる。
+To use Cewl, you need to provide it with a starting URL or a file containing text. It will then crawl the website or analyze the document to extract words and phrases. By applying various filters and options, you can customize the wordlist generation process to suit your needs.
 
-Cewlには、単語リスト生成プロセスをカスタマイズするためのオプションがいくつか用意されている。単語の長さの最小値と最大値を指定したり、特定の単語やパターンを除外したり、正規表現を使って抽出された単語をフィルタリングすることもできます。さらに、Cewlは様々な出力形式をサポートしており、生成された単語リストを様々なファイル形式で保存することができます。
+Cewl can be particularly useful when targeting individuals or organizations with specific interests or when trying to crack passwords based on personal information. By creating wordlists that are tailored to the target, you increase the chances of success in a brute force attack.
 
-Cewlの使用は、侵入テストやパスワード・クラッキングの際に有益である。ターゲットに合わせた単語リストを作成することで、ブルートフォース攻撃の成功確率を高めることができる。しかし、Cewlを悪意のある目的で使用することは違法であり、非倫理的であることに注意する必要があります。このようなツールを使用する前に、必ず適切な権限を持っていることを確認してください。
+To run Cewl, you can use the following command:
 
+```
+cewl [options] <URL or file>
+```
+
+Some common options include:
+
+- `-d`: Set the depth of the crawl (default is 2).
+- `-m`: Set the minimum word length (default is 3).
+- `-w`: Specify the output file for the wordlist.
+
+Cewl is a powerful tool that can enhance the effectiveness of brute force attacks by generating targeted wordlists. However, it is important to use it responsibly and ethically, ensuring that you have proper authorization before conducting any penetration testing activities.
 ```bash
 cewl example.com -m 5 -w words.txt
 ```
@@ -67,7 +78,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Wisterは、単語リスト生成ツールであり、特定のターゲットに関連する使用に適したユニークで理想的な単語リストを作成するために、与えられた単語から複数のバリエーションを作成することができます。
+Wisterは、単語リスト生成ツールであり、特定のターゲットに関連する使用するためのユニークで理想的な単語リストを作成するために、与えられた単語から複数のバリエーションを作成することができます。
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -101,7 +112,7 @@ Finished in 0.920s.
 * [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 * [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
@@ -125,162 +136,125 @@ msf> run
 ```
 ### AJP
 
-AJP（Apache JServ Protocol）は、Apache Tomcatがウェブサーバーと通信するために使用するプロトコルです。HTTPプロトコルに似ていますが、ウェブサーバーとアプリケーションサーバー間の通信により効率的です。
+AJP (Apache JServ Protocol) is a protocol used by Apache Tomcat to communicate with web servers. It is similar to the HTTP protocol but is more efficient for handling Java-based applications.
 
-#### Brute Forcing AJP
+A common attack method against AJP is brute force, where an attacker attempts to guess the username and password combination to gain unauthorized access to the server. Brute force attacks can be automated using tools like Hydra or Medusa, which systematically try different combinations until the correct one is found.
 
-AJPをブルートフォースするには、`ajpfuzzer` や `ajp-buster` のようなツールを使うことができます。これらのツールは、AJPプロトコルの弱い認証情報や脆弱性をテストすることができます。
+To protect against brute force attacks on AJP, it is important to use strong and unique passwords for all user accounts. Additionally, implementing account lockouts after a certain number of failed login attempts can help prevent unauthorized access.
 
-以下は `ajpfuzzer` の使い方の例です：
-
-```bash
-ajpfuzzer -H <target_host> -p <target_port> -u <username> -w <wordlist>
-```
-
-`<target_host>` をターゲットサーバーのIPアドレスまたはホスト名に、`<target_port>` をAJPポート（通常は8009）に、`<username>` をテストしたいユーザー名に、`<wordlist>` を可能なパスワードを含むワードリストファイルへのパスに置き換えてください。
-
-`ajp-buster` の使い方も同様です：
-
-```bash
-ajp-buster -H <target_host> -p <target_port> -U <username> -P <password>
-```
-
-`<target_host>` と `<target_port>` をターゲットサーバーのIPアドレスまたはホスト名とAJPポートに、`<username>` と`<password>`をテストしたい認証情報に置き換えてください。
-
-総当たり攻撃を実行する前に、常に適切な認証を得ることを忘れないでください。
-
+Regularly monitoring server logs for any suspicious activity and promptly addressing any detected brute force attempts is also crucial for maintaining the security of AJP-enabled servers.
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-# Cassandra
+# ブルートフォース攻撃
 
-Cassandraは、分散型データベース管理システムであり、Apache Software Foundationによって開発されました。Cassandraは、高い可用性とスケーラビリティを提供することを目的としています。
+ブルートフォース攻撃は、暗号化されたデータを解読するために使用される一般的な攻撃手法です。この攻撃手法では、すべての可能な組み合わせを試し、正しいパスワードや鍵を見つけることを目指します。
 
-## ブルートフォース攻撃
+## ブルートフォース攻撃の手法
 
-ブルートフォース攻撃は、Cassandraデータベースに対して非常に効果的な攻撃手法です。この攻撃では、すべての可能な組み合わせを試し、正しい認証情報を見つけることを目指します。
+ブルートフォース攻撃にはいくつかの手法があります。
 
-以下は、Cassandraデータベースに対するブルートフォース攻撃の手順です。
+1. 辞書攻撃: 事前に作成された辞書ファイルを使用して、一連の単語やフレーズを試します。一般的なパスワードや一般的なフレーズを使用している場合、この攻撃手法は効果的です。
 
-1. ユーザー名のリストを作成します。
-2. パスワードのリストを作成します。
-3. ユーザー名とパスワードの組み合わせを順番に試します。
-4. 正しい認証情報が見つかるまで、組み合わせを繰り返します。
+2. 総当たり攻撃: すべての可能な組み合わせを順番に試します。この攻撃手法は非常に時間がかかるため、短いパスワードや単純な鍵の場合にのみ有効です。
 
-ブルートフォース攻撃は、パスワードが弱い場合やデフォルトの認証情報が使用されている場合に特に効果的です。したがって、Cassandraデータベースのセキュリティを強化するためには、強力なパスワードポリシーを実装し、デフォルトの認証情報を変更することが重要です。
+3. ハイブリッド攻撃: 辞書攻撃と総当たり攻撃を組み合わせた攻撃手法です。まず辞書攻撃を試し、成功しない場合に総当たり攻撃に移ります。
 
-また、ブルートフォース攻撃を防ぐために、Cassandraデータベースにはログイン試行回数の制限やアカウントロックアウトの機能を設定することも推奨されます。これにより、攻撃者が大量の試行を行うことを防ぐことができます。
+## ブルートフォース攻撃のリソース
+
+ブルートフォース攻撃を実行するためには、いくつかのリソースが必要です。
+
+1. パフォーマンスの高いハードウェア: ブルートフォース攻撃は非常に計算量が多いため、高性能なハードウェアが必要です。
+
+2. 辞書ファイル: ブルートフォース攻撃に使用する辞書ファイルは、一連の一般的な単語やフレーズを含んでいます。
+
+3. ブルートフォース攻撃ツール: ブルートフォース攻撃を自動化するためのツールが必要です。これにより、大量の組み合わせを効率的に試すことができます。
+
+## ブルートフォース攻撃の対策
+
+ブルートフォース攻撃からデータを保護するためには、いくつかの対策を講じることが重要です。
+
+1. 強力なパスワードポリシーの実施: パスワードは長く複雑であるべきです。また、定期的にパスワードを変更することも重要です。
+
+2. ロックアウト機能の有効化: 一定回数の誤った試行後にアカウントをロックする機能を有効にすることで、ブルートフォース攻撃を防ぐことができます。
+
+3. 二要素認証の使用: パスワードに加えて、追加の認証要素を使用することで、セキュリティを強化することができます。
+
+4. ブルートフォース攻撃の検知と監視: ブルートフォース攻撃を検知し、適切な対策を講じるための監視システムを導入することが重要です。
+
+以上がブルートフォース攻撃に関する基本的な情報です。これらの情報を活用して、データを保護するための適切な対策を講じることが重要です。
 ```bash
 nmap --script cassandra-brute -p 9160 <IP>
 ```
 # CouchDB
 
-CouchDBは、ドキュメント指向のデータベースであり、HTTPプロトコルを使用してデータにアクセスすることができます。CouchDBは、データベースのブルートフォース攻撃に対して脆弱な場合があります。
+CouchDBは、ドキュメント指向のデータベースであり、HTTPプロトコルを使用してデータにアクセスすることができます。CouchDBは、データベースのブルートフォース攻撃に対して脆弱性を持っていることが知られています。ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、パスワードや認証情報を推測するために連続的に試行する攻撃手法です。
 
-## ブルートフォース攻撃
+CouchDBのブルートフォース攻撃を防ぐためには、以下の方法があります。
 
-ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、パスワードや認証トークンなどの秘密情報を推測するために使用されます。CouchDBのブルートフォース攻撃では、一連のパスワードを試し、正しいパスワードを見つけるまで続けます。
+1. 強力なパスワードの使用: CouchDBには、強力なパスワードを使用することが重要です。パスワードは、長さが十分であり、大文字と小文字、数字、特殊文字を組み合わせたものを選ぶべきです。
 
-以下は、CouchDBのブルートフォース攻撃を実行するための手順です。
+2. ログイン試行回数の制限: CouchDBには、ログイン試行回数を制限する機能があります。これにより、攻撃者が連続してパスワードを試行することを防ぐことができます。ログイン試行回数の制限は、CouchDBの設定ファイルで構成することができます。
 
-1. ユーザー名とパスワードのリストを作成します。
-2. リスト内の各ユーザー名とパスワードの組み合わせを使用してCouchDBにログインを試みます。
-3. 正しいユーザー名とパスワードの組み合わせが見つかるまで、ステップ2を繰り返します。
+3. IP制限: CouchDBには、特定のIPアドレスからのアクセスを制限する機能もあります。これにより、不正なアクセス元からのブルートフォース攻撃を防ぐことができます。IP制限は、CouchDBの設定ファイルで設定することができます。
 
-ブルートフォース攻撃は、パスワードが強力である場合や、アカウントがロックアウトされるまで続けられる場合に効果的です。しかし、CouchDBはデフォルトで連続した認証試行の制限を設けているため、攻撃者は制限に達する前に攻撃を中止する必要があります。
-
-## 防御策
-
-CouchDBのブルートフォース攻撃からデータを保護するためには、以下の防御策を実装することが重要です。
-
-- 強力なパスワードポリシーを採用し、複雑なパスワードを使用します。
-- ログイン試行回数の制限を設定し、一定回数の認証試行後にアカウントをロックアウトするようにします。
-- IPアドレスベースのブラックリストやホワイトリストを使用して、不正なアクセスを制限します。
-- セキュリティパッチやアップデートを定期的に適用し、最新のセキュリティ対策を保ちます。
-
-これらの防御策を実装することで、CouchDBのブルートフォース攻撃からデータを保護することができます。
+これらの対策を実施することで、CouchDBのブルートフォース攻撃を防ぐことができます。ただし、常に最新のセキュリティパッチを適用し、セキュリティ意識を高めることも重要です。
 ```bash
 msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
-## Docker レジストリ
+# Docker レジストリ
 
 Docker レジストリは、Docker イメージを保存および管理するための中央リポジトリです。Docker イメージは、アプリケーションやサービスのコンテナ化されたバージョンを表します。
 
 Docker レジストリには、公開レジストリとプライベートレジストリの2つのタイプがあります。公開レジストリは、誰でもアクセスできる一般的なイメージのリポジトリです。一方、プライベートレジストリは、特定の組織やユーザーによって制御されるイメージのリポジトリです。
 
-Docker レジストリへのアクセスを制限するために、認証情報を使用することができます。一般的な認証方法には、ユーザー名とパスワード、トークン、または SSH 鍵があります。
+Docker レジストリへのアクセスを制限するために、認証やアクセス制御の仕組みを使用することができます。これにより、機密性の高いイメージを保護し、不正なアクセスから保護することができます。
 
-Docker レジストリへの不正アクセスを試みる際には、ブルートフォース攻撃が使用されることがあります。ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、すべての可能な組み合わせを試行し、正しい認証情報を見つけることを目指します。
+Docker レジストリへの攻撃を防ぐために、強力なパスワードポリシーや二要素認証を使用することが重要です。また、ブルートフォース攻撃から保護するために、パスワードの複雑さを確保することも重要です。
 
-ブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実装し、アカウントロックアウト機能を有効にすることが重要です。また、2要素認証やIP制限などの追加のセキュリティ対策も検討することができます。
-
-Docker レジストリのセキュリティを確保するためには、定期的な脆弱性スキャンやログ監視、アクセス制御の確立などの対策を実施することが重要です。
+Docker レジストリのセキュリティを向上させるためには、定期的な脆弱性スキャンやパッチ適用、ログの監視などのセキュリティ対策を実施することが推奨されます。
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
 ```
 # Elasticsearch
 
-Elasticsearchは、Apache Luceneの上に構築された分散型のRESTful検索・分析エンジンです。ログやイベントデータの分析、全文検索、リアルタイム分析によく使われています。Elasticsearch は、大量のデータを保存、検索、分析するためのスケーラブルで効率的なソリューションを提供します。
+Elasticsearch is a distributed, RESTful search and analytics engine built on top of Apache Lucene. It provides a scalable solution for storing, searching, and analyzing large volumes of data in real-time.
 
-## Brute-Force Attacks
+## Brute Force Attacks
 
-ブルートフォース攻撃は Elasticsearch インスタンスへの不正アクセスによく使われる方法です。ブルートフォース攻撃では、攻撃者は正しい認証情報が見つかるまで、ユーザ名とパスワードのすべての可能な組み合わせを系統的に試します。
+Brute force attacks are a common method used by hackers to gain unauthorized access to Elasticsearch instances. In a brute force attack, the hacker systematically tries all possible combinations of usernames and passwords until the correct credentials are found.
 
-ブルートフォース攻撃から保護するためには、強力な認証メカニズムを実装し、パスワードの複雑性要件を強制することが重要です。さらに、ログイン試行が何度も失敗するのを防ぐために、レート制限とアカウント・ロックアウト・ポリシーを実装することができる。
+To protect against brute force attacks, it is important to implement strong security measures, such as:
 
-## Tools for Brute-Force Attacks
-Elasticsearchに対してブルートフォースアタックを行うためのツールはいくつかあります。ポピュラーなツールには以下のようなものがあります：
+1. **Use strong passwords**: Ensure that all Elasticsearch user accounts have strong, unique passwords that are not easily guessable.
 
-- **Patator**: Elasticsearch を含む様々なプロトコルをサポートする多目的ブルートフォースツールです。
-- **Hydra**: Elasticsearchに対してブルートフォースアタックを行うことができる強力なネットワークログインクラッカーです。
-- **Medusa**: Elasticsearch をサポートする、高速、並列、モジュール型のログインブルートフォースです。
+2. **Implement account lockouts**: Set up account lockouts after a certain number of failed login attempts. This can help prevent brute force attacks by temporarily locking out the attacker.
 
-これらのツールを不正アクセスのために使用することは違法であり、非倫理的であることに注意することが重要です。これらのツールは、侵入テストやセキュリティ調査のような正当な目的にのみ使用してください。
+3. **Enable IP whitelisting**: Restrict access to Elasticsearch instances by allowing only trusted IP addresses to connect. This can help prevent unauthorized access from unknown sources.
 
-## Prevention Techniques
+4. **Monitor for suspicious activity**: Regularly monitor Elasticsearch logs for any signs of brute force attacks or unauthorized access attempts. Implementing a log monitoring system can help detect and respond to such incidents in a timely manner.
 
-Elasticsearchに対するブルートフォース攻撃を防ぐには、以下のテクニックの実装を検討してください：
-
-- **Strong Passwords**: ブルートフォース攻撃に耐性のある、強力で複雑なパスワードの使用を強制する。
-- **Account Lockout**: ログインに一定回数失敗すると、ユーザーアカウントを一時的にロックするアカウントロックアウトポリシーを導入する。
-- **Rate Limiting**: 特定の時間枠内でのログイン試行回数を制限するレート制限メカニズムを導入する。
-- **Monitoring and Logging**: Elasticsearchのログに不審な動きがないか監視し、ログインの失敗を追跡するロギングメカニズムを実装する。
-- **Two-Factor Authentication**: 二要素認証を導入し、認証プロセスにさらなるセキュリティ層を追加する。
-
-これらの防止テクニックを実装することで、ブルートフォース攻撃のリスクを大幅に減らし、Elasticsearchインスタンスのセキュリティを強化することができます。
+By following these security best practices, you can significantly reduce the risk of brute force attacks on your Elasticsearch instances.
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 9200 http-get /
 ```
-### FTP
+## FTP
 
-FTP（File Transfer Protocol）は、ファイルの転送に使用されるプロトコルです。FTPサーバーに対してブルートフォース攻撃を行うことで、正当な認証情報を推測し、アクセスを試みることができます。
+FTP（File Transfer Protocol）は、ファイルをサーバーとクライアント間で転送するためのプロトコルです。FTPサーバーには、ファイルのアップロードやダウンロードを行うための認証情報が必要です。
 
-#### ブルートフォース攻撃
+ブルートフォース攻撃は、FTPサーバーへのアクセスを試みる際に使用される一般的な攻撃手法の1つです。この攻撃では、辞書やパスワードリストを使用して、可能なすべてのパスワードの組み合わせを試行します。攻撃者は、正しいパスワードを見つけるまで、繰り返しログイン試行を行います。
 
-ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、すべての可能な組み合わせを試すことで、正当な認証情報を見つけ出す手法です。FTPサーバーに対してブルートフォース攻撃を行う場合、一連のユーザー名とパスワードの組み合わせを試し、正しい組み合わせを見つけることを目指します。
+ブルートフォース攻撃は、パスワードが弱い場合に効果的ですが、強力なパスワードを使用している場合は成功する可能性が低くなります。また、攻撃者が大量のログイン試行を行うため、サーバーの負荷が増加する可能性があります。
 
-#### ブルートフォース攻撃の手法
+FTPサーバーのセキュリティを向上させるためには、以下の対策を講じることが重要です。
 
-以下に、FTPサーバーに対するブルートフォース攻撃の一般的な手法を示します。
+- 強力なパスワードポリシーを実施する
+- ログイン試行回数の制限を設定する
+- IPアドレスベースのアクセス制御を実装する
+- ログイン試行の監視とアラートシステムを導入する
 
-1. 辞書攻撃：事前に作成された辞書ファイルを使用して、一連のユーザー名とパスワードの組み合わせを試します。辞書ファイルには、一般的なパスワードや一般的なユーザー名が含まれていることがあります。
-
-2. ブルートフォース攻撃：すべての可能な組み合わせを試すため、ユーザー名とパスワードの組み合わせを生成します。この手法は非常に時間がかかる場合がありますが、正しい組み合わせを見つける可能性が高くなります。
-
-3. ハイブリッド攻撃：辞書攻撃とブルートフォース攻撃を組み合わせた手法です。まず、辞書攻撃を試し、成功しなかった場合にはブルートフォース攻撃を行います。
-
-#### ブルートフォース攻撃のツール
-
-以下に、FTPサーバーに対するブルートフォース攻撃に使用できる一般的なツールを示します。
-
-- Hydra：多くのプロトコルに対応したブルートフォース攻撃ツールです。FTPサーバーに対しても使用することができます。
-
-- Medusa：ブルートフォース攻撃に特化したツールで、高速かつ効率的な攻撃を行うことができます。
-
-- Ncrack：ネットワーク認証クラッキングツールで、FTPサーバーに対してブルートフォース攻撃を行うことができます。
-
-これらのツールは、正当な認証情報を見つけ出すために使用されますが、合法的な目的でのみ使用することが重要です。
+FTPサーバーのセキュリティを確保するためには、ブルートフォース攻撃に対する防御策を適切に実施することが重要です。
 ```bash
 hydra -l root -P passwords.txt [-t 32] <IP> ftp
 ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
@@ -298,81 +272,88 @@ medusa -h <IP> -u <username> -P  <passwords.txt> -M  http -m DIR:/path/to/auth -
 ```
 ### HTTP - ポストフォーム
 
-この技術では、攻撃者はウェブサイトのログインフォームの資格情報を推測するためにブルートフォース攻撃を使用します。攻撃者は、異なるユーザ名とパスワードの組み合わせを使用して、ウェブサイトのログインエンドポイントに複数のHTTP POSTリクエストを送信します。
+Brute forcing a login form is a common technique used to gain unauthorized access to a web application. In this method, an attacker systematically tries different combinations of usernames and passwords until a successful login is achieved.
 
-攻撃者は、スクリプトやツールを使用して、このプロセスを自動化することができます。これらのリクエストを自動的に生成して送信することができます。サーバーから受け取ったレスポンスを分析することで、攻撃者は特定の資格情報の組み合わせが有効かどうかを判断することができます。
+To perform a brute force attack on an HTTP POST form, the following steps can be followed:
 
-ログインフォームのブルートフォース攻撃は時間がかかるため、アカウントのロックアウトやレート制限などのセキュリティメカニズムをトリガーする可能性があります。そのため、パスワードスプレー攻撃やクレデンシャルスタッフィング攻撃などのより効率的で検出されにくい技術を使用することを推奨します。
+1. Identify the login form: Inspect the HTML source code of the login page to locate the form element that accepts the username and password.
+
+2. Prepare a wordlist: Create a list of possible usernames and passwords that will be used for the brute force attack. This list can be generated using common passwords, dictionary words, or custom combinations.
+
+3. Automate the attack: Use a scripting language or a tool like Burp Suite to automate the process of sending POST requests to the login form. The script or tool should iterate through the wordlist, sending a request for each combination of username and password.
+
+4. Handle response codes: Analyze the response codes received from the server after each request. A successful login attempt will typically result in a redirect or a specific response code indicating a successful authentication.
+
+5. Implement rate limiting: To avoid detection and potential account lockouts, it is important to implement rate limiting in the brute force attack. This can be done by introducing delays between each request or by limiting the number of requests per minute.
+
+6. Monitor and analyze logs: Keep track of the login attempts and monitor the server logs for any suspicious activity. This will help identify any successful login attempts or potential security breaches.
+
+It is important to note that brute forcing a login form is a time-consuming process and may not always be successful. Additionally, it is illegal and unethical to perform brute force attacks without proper authorization.
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
+http**s**の場合は、「http-post-form」を「**https-post-form」に変更する必要があります。
 
-http**s**の場合は、"http-post-form "から **"https-post-form"**に変更する必要があります。
 ### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 ```
-IMAP（Internet Message Access Protocol）は、メールサーバー上の電子メールメッセージを取得・管理するためのプロトコルである。これにより、ユーザーは自分のメールアカウントにリモートでアクセスし、メッセージの閲覧、削除、移動など様々な操作を行うことができる。
+IMAP (Internet Message Access Protocol) is a widely used protocol for email retrieval. It allows users to access their email messages on a remote mail server. IMAP supports both online and offline modes, allowing users to manage their email messages even when they are not connected to the server.
 
 #### Brute Forcing IMAP Credentials
 
-ブルートフォースとは、パスワードを推測するために使われる一般的なテクニックです。IMAP のコンテキストでは、ブルートフォース攻撃は、正しいユーザ名とパスワードの組み合わせを推測することで、電子メールアカウントに不正にアクセスするために使用できます。
+Brute forcing is a common technique used to gain unauthorized access to IMAP accounts. It involves systematically trying all possible combinations of usernames and passwords until the correct credentials are found.
 
-IMAP 認証情報に対してブルートフォース攻撃を行うには、Hydra や Medusa のようなツールを使うことができます。これらのツールは、IMAPサーバーに対して異なるユーザー名とパスワードの組み合わせを試すプロセスを自動化します。
+To perform a brute force attack on an IMAP server, you can use tools like Hydra or Medusa. These tools automate the process of trying different username and password combinations, making it easier to find the correct credentials.
 
-以下は Hydra を使って IMAP 認証情報をブルートフォースするコマンドの例です：
+Before launching a brute force attack, it is important to gather information about the target, such as the email address format and any known usernames. This information can help narrow down the list of possible usernames to try.
 
-```plaintext
-hydra -L users.txt -P passwords.txt imap://target.com
-```
+When attempting a brute force attack, it is crucial to use a strong password list that includes common passwords, dictionary words, and variations of known passwords. Additionally, it is recommended to use a tool that supports multi-threading, as this can significantly speed up the attack.
 
-このコマンドでは、`users.txt`と`passwords.txt`はそれぞれユーザー名とパスワードのリストを含むファイルである。`target.com`はターゲットIMAPサーバーである。
+To avoid detection and mitigate the risk of being blocked by the server, it is advisable to set a delay between each login attempt. This delay should be long enough to avoid triggering any account lockout mechanisms but short enough to maintain a reasonable attack speed.
 
-ブルートフォースは攻撃的で時間のかかるテクニックであることに注意することが重要です。これは侵入検知システム(IDS)によって検知される可能性があり、アカウントのロックアウトやその他のセキュリティ対策につながる可能性があります。従って、ブルート・フォース技法は、適切な認可の下、責任を持って使用することを推奨します。
-
+It is important to note that brute forcing is an illegal activity unless performed with proper authorization. Always ensure that you have the necessary permissions and legal rights before attempting any brute force attacks.
 ```bash
 hydra -l USERNAME -P /path/to/passwords.txt -f <IP> imap -V
 hydra -S -v -l USERNAME -P /path/to/passwords.txt -s 993 -f <IP> imap -V
 nmap -sV --script imap-brute -p <PORT> <IP>
 ```
-IRC（Internet Relay Chat）は、インターネット上でリアルタイムのテキストベースのコミュニケーションを可能にするプロトコルです。IRCは、チャットルームと呼ばれるグループチャットの形式を使用し、ユーザーがテキストメッセージを送信および受信することができます。IRCは、オープンなプロトコルであり、クライアントソフトウェアを使用してアクセスすることができます。
+IRC（Internet Relay Chat）は、インターネット上でリアルタイムのテキストベースのコミュニケーションを行うためのプロトコルです。IRCは、チャットルームと呼ばれるグループチャットや、個別のプライベートメッセージを通じてユーザー間でのコミュニケーションを可能にします。
 
-IRCサーバーに対するブルートフォース攻撃は、ユーザー名とパスワードの組み合わせを総当たりで試行し、正しい認証情報を見つけることを試みる攻撃手法です。この攻撃は、弱いパスワードを使用しているユーザーアカウントを特定するために使用されます。
+IRCサーバーに接続するためには、IRCクライアントソフトウェアを使用します。一般的なIRCクライアントには、mIRC、HexChat、irssiなどがあります。IRCクライアントを使用すると、IRCサーバーに接続し、チャットルームに参加したり、他のユーザーとのプライベートメッセージを送受信したりすることができます。
 
-ブルートフォース攻撃を実行するためには、ブルートフォースツールを使用する必要があります。これらのツールは、自動化された方法で大量のユーザー名とパスワードの組み合わせを試行することができます。攻撃者は、一般的なパスワードや辞書攻撃を使用して、より効率的に攻撃を行うことができます。
+IRCは、ユーザー名とパスワードを使用して認証することができます。一部のIRCサーバーでは、ブルートフォース攻撃を使用してパスワードを解読しようとする試みが行われることがあります。ブルートフォース攻撃は、すべての可能なパスワードの組み合わせを試し、正しいパスワードを見つけることを試みる方法です。
 
-ブルートフォース攻撃は、セキュリティ対策が不十分なシステムに対して非常に効果的な攻撃手法です。したがって、ユーザーは強力なパスワードを使用し、2要素認証などの追加のセキュリティ対策を実装することが重要です。また、システム管理者はブルートフォース攻撃を検知および防御するための適切な対策を講じる必要があります。
+ブルートフォース攻撃を防ぐためには、強力なパスワードを使用することが重要です。また、アカウントロックアウトやログイン試行回数の制限などのセキュリティ対策も有効です。さらに、IRCサーバーの管理者は、不審なアクティビティを監視し、不正なログイン試行を検出するためのログやアラートシステムを設定することができます。
+
+IRCサーバーのブルートフォース攻撃は、セキュリティ上の脆弱性となり得るため、適切な対策を講じることが重要です。
 ```bash
 nmap -sV --script irc-brute,irc-sasl-brute --script-args userdb=/path/users.txt,passdb=/path/pass.txt -p <PORT> <IP>
 ```
 ### ISCSI
 
-iSCSI (Internet Small Computer System Interface) は、TCP/IP ネットワークを介してブロックベースのデータストレージを提供するプロトコルです。iSCSI を使用すると、リモートのストレージデバイスをローカルのホストに接続し、データの読み書きを行うことができます。
+iSCSI (Internet Small Computer System Interface) is a protocol that allows the transmission of SCSI commands over IP networks. It enables the use of storage devices over a network, making it possible to access remote storage resources as if they were local.
 
-iSCSI は、ブロックレベルのアクセスを提供するため、ファイルシステムを使用せずにデータを直接読み書きすることができます。これにより、高速なデータ転送が可能となります。
+iSCSI uses the TCP/IP protocol suite to establish connections between the initiator (client) and the target (storage device). The initiator sends SCSI commands to the target, which processes them and returns the results.
 
-iSCSI のセキュリティは、CHAP（Challenge-Handshake Authentication Protocol）やIPsec（Internet Protocol Security）などの認証および暗号化メカニズムを使用して確保することができます。
+Brute forcing iSCSI targets involves systematically trying different combinations of usernames and passwords to gain unauthorized access to the target. This technique can be used to exploit weak or default credentials and gain unauthorized access to sensitive data stored on the target.
 
-iSCSI の攻撃手法としては、ブルートフォース攻撃があります。これは、パスワードを推測するために総当たりで試行する方法です。ブルートフォース攻撃は、弱いパスワードを使用している場合に有効な攻撃手法となります。
+To perform a brute force attack on an iSCSI target, you can use tools like Hydra or Medusa, which are capable of automating the process of trying different username and password combinations. These tools can be configured with a list of usernames and passwords to try, and they will systematically attempt each combination until a successful login is achieved.
 
-iSCSI のセキュリティを強化するためには、強力なパスワードポリシーを実装し、パスワードの推測を困難にすることが重要です。また、セキュリティプロトコルを適切に設定し、不正なアクセスを防止する必要があります。
+It is important to note that brute forcing iSCSI targets is an unethical and illegal activity unless you have explicit permission from the target owner to perform such actions. Always ensure you are conducting penetration testing or security assessments within the boundaries of the law and with proper authorization.
 ```bash
 nmap -sV --script iscsi-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 3260 <IP>
 ```
-### JWT
+JWT（JSON Web Token）は、認証と情報の安全な伝送を可能にするための開放的な標準です。JWTは、JSON形式で情報をエンコードし、署名または暗号化してトークンとして使用します。JWTは、ユーザーの認証情報やクレーム（権限、ロールなど）を含むことができます。JWTは、クライアントとサーバー間での信頼性のある通信を確保するために使用されます。
 
-JWT（JSON Web Token）は、認証と情報の安全な伝送を可能にするためのオープンスタンダードです。JWTは、クライアントとサーバー間でデータを安全にやり取りするために使用されます。
+JWTの攻撃に対する防御策として、ブルートフォース攻撃があります。ブルートフォース攻撃は、すべての可能な組み合わせを試行し、正しいトークンを見つけることを試みる攻撃です。この攻撃を防ぐためには、強力なパスワードポリシーを実装し、パスワードの複雑さを確保する必要があります。また、アカウントロックアウトやCAPTCHAなどのセキュリティメカニズムを導入することも有効です。
 
-JWTは、3つのセクションから構成されています：ヘッダ、ペイロード、署名。ヘッダは、トークンのタイプと使用する署名アルゴリズムを指定します。ペイロードは、トークンに含まれる情報を格納します。署名は、トークンの信頼性を確保するために使用されます。
+ブルートフォース攻撃を防ぐための他の方法として、トークンの有効期限を短くすることや、認証試行回数の制限を設けることも考えられます。さらに、セキュリティテストやペネトレーションテストを定期的に実施し、システムの脆弱性を特定し、修正することも重要です。
 
-JWTの一般的な攻撃手法の1つは、ブルートフォース攻撃です。ブルートフォース攻撃では、すべての可能な組み合わせを試して、正しい署名を見つけることを試みます。これにより、攻撃者はトークンを偽造して、認証をバイパスすることができます。
+JWTのセキュリティを確保するためには、適切な暗号化アルゴリズムを使用し、署名キーを厳密に管理する必要があります。また、信頼できる認証局を使用して署名を検証することも重要です。
 
-ブルートフォース攻撃を防ぐためには、強力なパスワードや署名キーを使用し、適切なセキュリティ対策を実施する必要があります。また、トークンの有効期限を短く設定することも重要です。これにより、攻撃者が十分な時間を持ってブルートフォース攻撃を行うことができなくなります。
-
-さらに、JWTの署名アルゴリズムを慎重に選択することも重要です。強力な署名アルゴリズムを使用することで、攻撃者が署名を解読することを困難にします。
-
-最後に、JWTのセキュリティを確保するためには、トークンの送信と保存にHTTPSを使用することが重要です。HTTPSは、データの暗号化と送信元の認証を提供するため、トークンの漏洩や改ざんを防ぐのに役立ちます。
+以上が、JWTに関する情報とブルートフォース攻撃に対する防御策です。
 ```bash
 #hashcat
 hashcat -m 16500 -a 0 jwt.txt .\wordlists\rockyou.txt
@@ -395,17 +376,21 @@ python3 jwt-cracker.py -jwt eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1w
 #https://github.com/lmammino/jwt-cracker
 jwt-cracker "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ" "abcdefghijklmnopqrstuwxyz" 6
 ```
-### LDAP
+## LDAP
 
-LDAP（Lightweight Directory Access Protocol）は、ディレクトリサービスにアクセスするためのプロトコルです。ディレクトリサービスは、ユーザー、グループ、コンピュータなどの情報を格納するために使用されます。LDAPは、ディレクトリサービスへのクエリや変更の要求を処理するために使用されます。
+LDAP（Lightweight Directory Access Protocol）は、ディレクトリサービスにアクセスするためのプロトコルです。ディレクトリサービスは、ユーザー、グループ、コンピュータなどの情報を格納するために使用されます。LDAPは、ディレクトリサービスに対して検索、追加、変更、削除などの操作を行うための方法を提供します。
 
-LDAPのブルートフォース攻撃は、辞書攻撃とも呼ばれ、LDAPサーバーに対してユーザー名とパスワードの組み合わせを総当たりで試行することです。この攻撃は、弱いパスワードを使用しているユーザーアカウントを特定するために使用されます。
+LDAPサーバーに対するブルートフォース攻撃は、一連のパスワードを試し、正しいパスワードを見つけることを目指します。これにより、攻撃者はLDAPサーバーに不正アクセスすることができます。
 
-ブルートフォース攻撃を実行するためには、辞書ファイルを作成し、LDAPサーバーに対してユーザー名とパスワードの組み合わせを順番に試行します。攻撃者は、辞書ファイルを作成する際に、一般的なパスワードや一般的なユーザー名のリストを使用することがあります。
+ブルートフォース攻撃は、一般的に辞書攻撃として知られています。攻撃者は、一連の一般的なパスワードや辞書に含まれる単語を試し、正しいパスワードを見つけることを試みます。攻撃者は、パスワードポリシーの弱さやユーザーの選択した弱いパスワードに依存しています。
 
-ブルートフォース攻撃は、パスワードポリシーが弱い場合や、強力なパスワードを使用することが困難な状況で特に有効です。攻撃者は、パスワードの推測を試みることで、システムへの不正アクセスを試みることができます。
+ブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実装し、ユーザーに強力なパスワードの使用を促す必要があります。また、アカウントロックアウト機能を有効にすることも重要です。これにより、一定回数の誤ったパスワード試行後にアカウントがロックアウトされ、攻撃者の試行を制限することができます。
 
-ブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実装し、アカウントロックアウト機能を有効にすることが重要です。また、二要素認証やIP制限などの追加のセキュリティ対策も有効です。
+ブルートフォース攻撃を検出するためには、ログイン試行の異常な増加を監視する必要があります。また、IPアドレスやユーザーアカウントのブラックリストを作成し、不正なアクセスをブロックすることも有効です。
+
+LDAPサーバーのセキュリティを強化するためには、最新のセキュリティパッチを適用し、不要なサービスやポートを無効化することが重要です。また、アクセス制御リスト（ACL）を使用して、不正なアクセスを制限することも推奨されます。
+
+ブルートフォース攻撃は、セキュリティ上の脆弱性を悪用するため、LDAPサーバーのセキュリティを強化することは非常に重要です。
 ```bash
 nmap --script ldap-brute -p 389 <IP>
 ```
@@ -415,73 +400,56 @@ MQTT（Message Queuing Telemetry Transport）は、軽量なメッセージン�
 
 MQTTは、パブリッシャーとサブスクライバーの2つの役割を持つクライアント間の非同期通信を可能にします。パブリッシャーはメッセージをトピックにパブリッシュし、サブスクライバーは特定のトピックにサブスクライブしてメッセージを受信します。
 
-MQTTのセキュリティに関しては、以下のポイントに注意する必要があります。
+MQTTのセキュリティには注意が必要です。デフォルトの設定では、認証や暗号化が行われないため、攻撃者による盗聴や改ざんのリスクがあります。したがって、適切なセキュリティ対策を講じることが重要です。
 
-- ユーザー名とパスワードの認証を使用して、クライアントの正当性を確認します。
-- TLS（Transport Layer Security）を使用して通信を暗号化します。
-- トピックのアクセス制御リスト（ACL）を設定して、不正なアクセスを制限します。
+MQTTのブルートフォース攻撃は、パスワードの推測に基づいて行われます。攻撃者は、一連のパスワードを試し、正しいパスワードを見つけることを目指します。この攻撃を防ぐためには、強力なパスワードポリシーを実装し、アカウントロックアウトやログイン試行回数の制限などのセキュリティメカニズムを使用することが重要です。
 
-MQTTのブルートフォース攻撃は、パスワードの推測を試みることで行われます。攻撃者は一連のパスワードを試し、正しいパスワードを見つけることを目指します。この攻撃を防ぐためには、強力なパスワードポリシーを実装し、アカウントロックアウト機能を有効にすることが重要です。
+ブルートフォース攻撃を検出するためには、ログイン試行回数の異常な増加や異なるIPアドレスからのログイン試行などの異常なアクティビティを監視することが重要です。また、ログイン試行回数の制限やCAPTCHAの導入などの対策を講じることも有効です。
 
-ブルートフォース攻撃を検出するためには、ログイン試行の異常な増加を監視し、異常なアクティビティを検知するセキュリティツールを使用することが推奨されます。また、IPアドレスのブラックリストやCAPTCHAの導入も有効な対策です。
+MQTTのセキュリティを強化するためには、TLS（Transport Layer Security）プロトコルを使用して通信を暗号化することが推奨されます。また、認証機構を導入し、信頼できるクライアントのみが接続できるようにすることも重要です。
 
-MQTTのセキュリティを強化するためには、以下の対策を実施することが重要です。
-
-- デフォルトのユーザー名とパスワードを変更する。
-- TLSを使用して通信を暗号化する。
-- トピックのアクセス制御リスト（ACL）を設定する。
-- ブルートフォース攻撃を防ぐために強力なパスワードポリシーを実装する。
-- ログイン試行の異常な増加を監視し、異常なアクティビティを検知するセキュリティツールを使用する。
-- IPアドレスのブラックリストやCAPTCHAの導入を検討する。
-
-これらの対策を実施することで、MQTTのセキュリティを強化し、悪意のある攻撃から保護することができます。
+以上がMQTTに関する概要です。セキュリティには十分な注意を払い、適切な対策を講じることが重要です。
 ```
 ncrack mqtt://127.0.0.1 --user test –P /root/Desktop/pass.txt -v
 ```
-# Mongo DB
+# ブルートフォース攻撃
 
-MongoDBは、NoSQLデータベースであり、ブルートフォース攻撃の潜在的な標的です。ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、パスワードや認証情報を推測するために連続的に試行する攻撃手法です。
+ブルートフォース攻撃は、Mongoデータベースに対して非常に効果的な攻撃手法です。この攻撃手法では、すべての可能なパスワードの組み合わせを試し、正しいパスワードを見つけることを目指します。
 
-MongoDBのブルートフォース攻撃を防ぐためには、以下の対策を講じることが重要です。
+以下は、Mongoデータベースに対するブルートフォース攻撃の手順です。
 
-- 強力なパスワードポリシーを実施する：長さ、複雑さ、一意性の要件を設定し、パスワードの再利用を防止します。
-- パスワードロックアウトポリシーを設定する：一定回数の誤ったパスワード試行後にアカウントをロックするように設定します。
-- 2要素認証（2FA）を有効にする：追加のセキュリティレイヤーとして、2FAを使用します。
-- IP制限を設定する：特定のIPアドレスからのアクセスのみを許可するように設定します。
-- ネットワークセキュリティグループを使用する：ネットワークセキュリティグループを使用して、不正なトラフィックをブロックします。
+1. ユーザー名のリストを取得します。
+2. パスワードのリストを取得します。
+3. ユーザー名とパスワードの組み合わせを作成します。
+4. 作成した組み合わせを使用してMongoデータベースにログインを試みます。
+5. 正しい組み合わせが見つかるまで、ステップ4を繰り返します。
 
-これらの対策を実施することで、MongoDBのブルートフォース攻撃を防ぐことができます。
+ブルートフォース攻撃は非常に時間がかかる場合がありますが、強力なパスワードを使用している場合には成功する可能性が低くなります。したがって、セキュリティを強化するためには、強力なパスワードポリシーを採用することが重要です。
+
+また、ブルートフォース攻撃を防ぐためには、以下の対策を講じることが推奨されます。
+
+- パスワードの複雑さを増す
+- ログイン試行回数の制限を設定する
+- 2要素認証を使用する
+
+以上がMongoデータベースに対するブルートフォース攻撃に関する情報です。セキュリティを強化するためには、適切な対策を講じることが重要です。
 ```bash
 nmap -sV --script mongodb-brute -n -p 27017 <IP>
 use auxiliary/scanner/mongodb/mongodb_login
 ```
 ### MySQL
 
-MySQLは、オープンソースのリレーショナルデータベース管理システムです。多くのウェブアプリケーションやウェブサイトで使用されており、データの保存と取得に使用されます。
+MySQLは、オープンソースのリレーショナルデータベース管理システムであり、多くのウェブアプリケーションやウェブサイトで使用されています。MySQLデータベースへの不正アクセスを試みる際に、ブルートフォース攻撃は一般的な手法の1つです。
 
-MySQLのブルートフォース攻撃は、パスワードを推測してアカウントに不正にアクセスする試みです。以下に、MySQLのブルートフォース攻撃に対するいくつかの一般的な手法を示します。
+ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、パスワードを推測するために連続的に試行する手法です。攻撃者は、一連のパスワードを自動的に生成し、それらを順番に試して、正しいパスワードを見つけることを目指します。
 
-#### 1. 辞書攻撃
+MySQLのブルートフォース攻撃では、一般的にユーザー名とパスワードの組み合わせを試行します。攻撃者は、一般的なユーザー名やパスワード、辞書攻撃、またはランダムな文字列を使用して攻撃を行います。
 
-辞書攻撃は、事前に作成されたパスワードリストを使用してブルートフォース攻撃を行う方法です。攻撃者は、一般的なパスワードや一般的な単語の組み合わせを試し、正しいパスワードを見つけることを試みます。
+ブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実装し、パスワードの複雑さを確保することが重要です。また、アカウントロックアウト機能やIP制限などのセキュリティメカニズムを使用することも有効です。
 
-#### 2. ブルートフォース攻撃ツールの使用
+MySQLのブルートフォース攻撃を検出するためには、ログイン試行の異常な増加や特定のユーザー名/パスワードの連続試行などのパターンを監視することが重要です。また、侵入検知システムやログ監視ツールを使用することも推奨されます。
 
-ブルートフォース攻撃ツールを使用することで、攻撃者は自動的にパスワードの推測を行うことができます。これらのツールは、パスワードの長さ、文字セット、および他のパラメータを設定することができます。
-
-#### 3. パスワードポリシーの弱点の利用
-
-パスワードポリシーの弱点を利用することで、攻撃者は推測しやすいパスワードを見つけることができます。一部のシステムでは、パスワードの複雑さや長さに制限がない場合があります。
-
-#### 4. ユーザー名の推測
-
-攻撃者は、一般的なユーザー名や一般的なパターンを使用してユーザー名を推測することができます。これにより、攻撃者はパスワードの推測範囲を狭めることができます。
-
-#### 5. ログイン試行回数の制限の回避
-
-一部のシステムでは、ログイン試行回数が制限されています。攻撃者は、複数のIPアドレスやプロキシを使用してこの制限を回避することができます。
-
-これらの手法を使用してMySQLのブルートフォース攻撃を行うことは、違法であり、個人や組織に重大な被害をもたらす可能性があります。セキュリティを強化するためには、強力なパスワードポリシーの実装、ログイン試行回数の制限、およびセキュリティパッチの適用が重要です。
+ブルートフォース攻撃は、時間とリソースがかかるため、強力なパスワードやセキュリティ対策があれば、成功する可能性は低くなります。したがって、MySQLデータベースのセキュリティを確保するためには、適切な対策を講じることが重要です。
 ```bash
 # hydra
 hydra -L usernames.txt -P pass.txt <IP> mysql
@@ -492,20 +460,15 @@ msf> use auxiliary/scanner/mysql/mysql_login; set VERBOSE false
 # medusa
 medusa -h <IP/Host> -u <username> -P <password_list> <-f | to stop medusa on first success attempt> -t <threads> -M mysql
 ```
-# OracleSQL
+# Brute Force
 
-OracleSQLは、Oracleデータベースに対してブルートフォース攻撃を実行するためのテクニックです。ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、パスワードや認証情報を推測するために、すべての可能な組み合わせを試す手法です。
+Brute force is a common method used in penetration testing to crack passwords or encryption keys by systematically trying all possible combinations until the correct one is found. This technique is often used when other methods, such as dictionary attacks or rainbow table attacks, are not successful.
 
-OracleSQLにおけるブルートフォース攻撃は、以下の手順で実行されます。
+In the context of Oracle SQL, brute force can be used to gain unauthorized access to a database by guessing the username and password combination. This can be done by using automated tools or scripts that iterate through a list of commonly used usernames and passwords, or by manually trying different combinations.
 
-1. ユーザー名のリストを作成します。
-2. パスワードのリストを作成します。
-3. ユーザー名とパスワードの組み合わせを総当たりで試します。
-4. 正しい組み合わせが見つかるまで、繰り返し試行します。
+To protect against brute force attacks, it is important to use strong and unique passwords, implement account lockout policies, and monitor for suspicious login attempts. Additionally, using two-factor authentication can add an extra layer of security by requiring a second form of verification, such as a code sent to a mobile device, in addition to the username and password.
 
-ブルートフォース攻撃は、パスワードが弱い場合やデフォルトの認証情報が使用されている場合に特に効果的です。しかし、Oracleデータベースは一般的にセキュリティが強固であり、ブルートフォース攻撃に対して防御策が取られていることが多いです。
-
-ブルートフォース攻撃は、合法的なセキュリティテストやペネトレーションテストの一環として使用されることもありますが、不正な目的で使用することは違法です。セキュリティテストを実施する場合は、適切な許可を得て行う必要があります。
+While brute force attacks can be effective, they can also be time-consuming and resource-intensive. Therefore, it is important for organizations to regularly assess and strengthen their security measures to mitigate the risk of brute force attacks.
 ```bash
 patator oracle_login sid=<SID> host=<IP> user=FILE0 password=FILE1 0=users-oracle.txt 1=pass-oracle.txt -x ignore:code=ORA-01017
 
@@ -527,301 +490,7 @@ msf> set SID <SID>
 #for some reason nmap fails sometimes when executing this script
 nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 ```
-**oracle_login**を**patator**で使用するためには、以下の手順で**インストール**する必要があります:
-
-```plaintext
-$ sudo apt-get install python3-dev python3-pip
-$ sudo pip3 install cx_Oracle
-$ sudo apt-get install libaio1
-$ sudo apt-get install libaio-dev
-$ sudo apt-get install libssl-dev
-$ sudo apt-get install libffi-dev
-$ sudo apt-get install libxml2-dev libxslt1-dev zlib1g-dev
-$ sudo apt-get install libjpeg-dev libfreetype6-dev
-$ sudo apt-get install libmysqlclient-dev
-$ sudo apt-get install libpq-dev
-$ sudo apt-get install freetds-dev
-$ sudo apt-get install firebird-dev
-$ sudo apt-get install libsqlite3-dev
-$ sudo apt-get install libmariadbclient-dev
-$ sudo apt-get install libldap2-dev libsasl2-dev
-$ sudo apt-get install libkrb5-dev
-$ sudo apt-get install libpcap-dev
-$ sudo apt-get install libssh-dev
-$ sudo apt-get install libsnmp-dev
-$ sudo apt-get install libssh2-1-dev
-$ sudo apt-get install libssh2-1
-$ sudo apt-get install libcurl4-openssl-dev
-$ sudo apt-get install libssl-dev
-$ sudo apt-get install libssl1.0-dev
-$ sudo apt-get install libssl1.1
-$ sudo apt-get install libssl1.0.2
-$ sudo apt-get install libssl1.0.0
-$ sudo apt-get install libssl1.0.2-dbg
-$ sudo apt-get install libssl1.0.0-dbg
-$ sudo apt-get install libssl1.0.2-dbgsym
-$ sudo apt-get install libssl1.0.0-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.1-dbg
-$ sudo apt-get install libssl1.1-dbgsym
-$ sudo apt-get install libssl1.
+**oracle_login**を**patator**と一緒に使用するためには、以下の手順で**インストール**する必要があります:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -829,42 +498,30 @@ pip3 install cx_Oracle --upgrade
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
-### POP
+Brute force is a common method used in hacking to gain unauthorized access to a system or account by systematically trying all possible combinations of passwords until the correct one is found. This method is often used when there is no other known vulnerability or weakness in the system's security.
 
-POP（Post Office Protocol）は、電子メールの受信に使用されるプロトコルです。POPサーバに接続し、メールボックス内のメッセージをダウンロードすることができます。
+Brute force attacks can be time-consuming and resource-intensive, especially if the password being targeted is long and complex. However, with the help of powerful computers and specialized software, hackers can automate the process and significantly speed up the attack.
 
-POPは、通常、TCPポート110を使用して通信します。POPクライアントは、サーバに接続し、ユーザ名とパスワードを提供して認証します。認証が成功すると、クライアントはメールボックス内のメッセージを取得できます。
+To protect against brute force attacks, it is important to use strong and unique passwords that are not easily guessable. Additionally, implementing account lockout policies, which temporarily lock an account after a certain number of failed login attempts, can also help mitigate the risk of brute force attacks.
 
-POPは、ブルートフォース攻撃の対象になる可能性があります。攻撃者は、一連のパスワードを試し、正しいパスワードを見つけることを試みます。この攻撃を防ぐためには、強力なパスワードポリシーを実装し、アカウントロックアウト機能を使用することが重要です。
-
-また、POPサーバは、セキュリティの脆弱性を持つことがあります。アップデートとパッチの適用を定期的に行うことで、これらの脆弱性を最小限に抑えることができます。
-
-さらに、POPのセキュリティを向上させるためには、SSL/TLSを使用して通信を暗号化することが推奨されます。これにより、データの盗聴や改ざんを防ぐことができます。
-
-POPは便利なプロトコルですが、適切なセキュリティ対策を講じることが重要です。
+It is worth noting that brute force attacks are illegal and unethical. Engaging in such activities without proper authorization is a criminal offense and can result in severe penalties.
 ```bash
 hydra -l USERNAME -P /path/to/passwords.txt -f <IP> pop3 -V
 hydra -S -v -l USERNAME -P /path/to/passwords.txt -s 995 -f <IP> pop3 -V
 ```
 ### PostgreSQL
 
-PostgreSQLは、オープンソースのリレーショナルデータベース管理システムです。PostgreSQLは、高い信頼性、拡張性、データの整合性を提供することで知られています。PostgreSQLは、多くのセキュリティ機能を備えており、データの保護を強化するためのさまざまな手法を提供しています。
+PostgreSQLはオープンソースのリレーショナルデータベース管理システムです。ブルートフォース攻撃は、PostgreSQLデータベースに対して非常に効果的な攻撃手法の1つです。ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、パスワードや認証情報を推測するために、すべての可能な組み合わせを試行する方法です。
 
-#### ブルートフォース攻撃
+ブルートフォース攻撃は、通常、辞書攻撃と組み合わせて使用されます。辞書攻撃では、一般的なパスワードや単語のリストを使用して、推測を行います。ブルートフォース攻撃は、辞書攻撃が成功しなかった場合に使用され、すべての可能な組み合わせを試すことで、パスワードを特定します。
 
-ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、パスワードや認証情報を推測するために使用される攻撃手法です。この攻撃手法では、すべての可能な組み合わせを試し、正しいパスワードを見つけるまで続けます。
+PostgreSQLのブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実装し、パスワードの長さと複雑さを要件として設定することが重要です。また、アカウントロックアウト機能を有効にすることも推奨されます。これにより、一定回数の認証試行が失敗した場合に、アカウントが一時的にロックされるようになります。
 
-PostgreSQLに対するブルートフォース攻撃を防ぐためには、以下の手法を使用することができます。
+さらに、PostgreSQLのバージョンを最新に保つことも重要です。新しいバージョンには、セキュリティの脆弱性が修正されている場合があります。定期的なパッチ適用とアップグレードを行うことで、攻撃者が既知の脆弱性を悪用することを防ぐことができます。
 
-- パスワードポリシーの強化: PostgreSQLでは、パスワードの複雑さや有効期限を設定することができます。強力なパスワードポリシーを設定することで、ブルートフォース攻撃のリスクを軽減することができます。
+最後に、PostgreSQLのアクセス制御リスト（ACL）を適切に設定することも重要です。必要な権限のみを付与し、不要な権限を削除することで、攻撃者の侵入を防ぐことができます。
 
-- ログイン試行回数の制限: PostgreSQLでは、ログイン試行回数を制限することができます。一定回数のログイン試行が失敗した場合、アカウントが一時的にロックされるように設定することで、ブルートフォース攻撃を防ぐことができます。
-
-- IPアドレスの制限: PostgreSQLでは、特定のIPアドレスからのアクセスを制限することができます。信頼できるIPアドレスのみがアクセスできるように設定することで、ブルートフォース攻撃を防ぐことができます。
-
-- 二要素認証の使用: PostgreSQLでは、二要素認証を使用することができます。パスワードに加えて、追加の認証要素（例：ワンタイムパスワード）を要求することで、ブルートフォース攻撃をより困難にすることができます。
-
-これらの手法を組み合わせることで、PostgreSQLへのブルートフォース攻撃を効果的に防ぐことができます。
+以上が、PostgreSQLに対するブルートフォース攻撃の防御方法です。これらの対策を実施することで、データベースのセキュリティを強化することができます。
 ```bash
 hydra -L /root/Desktop/user.txt –P /root/Desktop/pass.txt <IP> postgres
 medusa -h <IP> –U /root/Desktop/user.txt –P /root/Desktop/pass.txt –M postgres
@@ -880,42 +537,63 @@ nmap -sV --script pgsql-brute --script-args userdb=/var/usernames.txt,passdb=/va
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
 ```
-### RDP
+## RDP
 
-RDP（Remote Desktop Protocol）は、Windowsオペレーティングシステムで使用されるリモートデスクトップ接続プロトコルです。RDPを使用すると、リモートコンピュータに対してキーボード、マウス、ディスプレイなどの入出力デバイスを使用してアクセスできます。
+RDP (Remote Desktop Protocol) is a proprietary protocol developed by Microsoft that allows users to remotely access and control a computer over a network. It is commonly used for remote administration and remote support purposes.
 
-RDPのブルートフォース攻撃は、辞書攻撃や総当たり攻撃を使用して、RDPサーバーの認証情報を推測することを試みます。これにより、攻撃者は正当なユーザーとしてリモートシステムにアクセスできる可能性があります。
+### Brute Force Attack on RDP
 
-以下は、RDPブルートフォース攻撃の手順です。
+A brute force attack on RDP involves systematically trying all possible combinations of usernames and passwords until the correct credentials are found. This is done by using automated tools that can rapidly attempt multiple login attempts.
 
-1. ユーザー名のリストを作成します。一般的なユーザー名や一般的なパターンを使用することができます。
+#### Methodology
 
-2. パスワードのリストを作成します。一般的なパスワードや辞書攻撃に使用される一般的な単語を含めることができます。
+1. **Enumeration**: Gather information about the target RDP server, such as the IP address, port number, and available usernames.
+2. **Password List**: Create or obtain a password list that contains commonly used passwords, leaked passwords, or passwords specific to the target organization.
+3. **Brute Force Tool**: Use a brute force tool, such as Hydra or Medusa, to automate the login attempts using the obtained username list and password list.
+4. **Configure Tool**: Set the tool to target the RDP protocol and specify the IP address and port number of the target RDP server.
+5. **Launch Attack**: Start the brute force attack and let the tool systematically try all possible combinations of usernames and passwords.
+6. **Monitor Progress**: Monitor the tool's progress and check for any successful login attempts.
+7. **Post-Attack**: Once the attack is complete, analyze the results and report any successful login credentials.
 
-3. ブルートフォースツールを使用して、RDPサーバーに対してユーザー名とパスワードの組み合わせを試行します。
+#### Countermeasures
 
-4. 正しいユーザー名とパスワードの組み合わせが見つかるまで、試行を繰り返します。
+To protect against brute force attacks on RDP, consider implementing the following countermeasures:
 
-RDPブルートフォース攻撃は、強力なパスワードポリシーやアカウントロックアウトの設定がない場合に特に効果的です。攻撃者は、リモートシステムへの不正アクセスを試みるために、自動化されたツールを使用することができます。
+- **Strong Passwords**: Enforce the use of strong, complex passwords that are resistant to brute force attacks.
+- **Account Lockout Policy**: Implement an account lockout policy that locks out user accounts after a certain number of failed login attempts.
+- **Network Segmentation**: Separate the RDP server from the rest of the network to limit the attack surface.
+- **Two-Factor Authentication**: Implement two-factor authentication to add an extra layer of security to the RDP login process.
+- **IP Whitelisting**: Restrict RDP access to specific IP addresses or ranges to limit unauthorized access.
+- **Monitoring and Alerting**: Implement monitoring and alerting systems to detect and respond to brute force attacks in real-time.
+
+By following these countermeasures, you can significantly reduce the risk of a successful brute force attack on RDP.
 ```bash
 ncrack -vv --user <User> -P pwds.txt rdp://<IP>
 hydra -V -f -L <userslist> -P <passwlist> rdp://<IP>
 ```
 # Redis
 
-Redisは、高速でオープンソースのキーバリューストアです。データ構造サーバとして機能し、メモリ内でデータを保持します。Redisは、データの読み書きに高速なインメモリ操作を提供し、さまざまなデータ構造（文字列、リスト、セット、ソート済みセット、ハッシュなど）をサポートしています。
+Redis（Remote Dictionary Server）は、高速でオープンソースのキーバリューストアです。Redisは、メモリ内でデータを保持するため、高速な読み書きアクセスが可能です。また、データの永続化もサポートしています。
 
 ## ブルートフォース攻撃
 
-ブルートフォース攻撃は、Redisのパスワードや認証情報を推測するために使用される攻撃手法です。攻撃者は、一連の可能なパスワードを試し、正しいパスワードを見つけることを試みます。
+ブルートフォース攻撃は、暗号化されたデータやパスワードを解読するために使用される攻撃手法です。この攻撃手法では、すべての可能な組み合わせを試行し、正しい組み合わせを見つけるまで続けます。
 
-以下は、ブルートフォース攻撃を実行するための一般的な手法です。
+Redisに対するブルートフォース攻撃では、一連のパスワードを試行し、正しいパスワードを見つけることを目指します。攻撃者は、一般的なパスワードや辞書攻撃を使用して、パスワードを推測します。
 
-1. 辞書攻撃: 事前に作成されたパスワードリストを使用して、パスワードを推測します。
-2. パスワードの組み合わせ: 一連の文字や数字の組み合わせを使用して、パスワードを推測します。
-3. パスワードの総当たり攻撃: すべての可能な文字や数字の組み合わせを試し、パスワードを推測します。
+ブルートフォース攻撃は、強力なパスワードポリシーが実装されていない場合や、弱いパスワードが使用されている場合に特に効果的です。攻撃者は、パスワードの推測に時間がかかる場合でも、自動化されたツールを使用して攻撃を行うことができます。
 
-ブルートフォース攻撃は非常に時間がかかる場合がありますが、弱いパスワードを使用している場合には効果的です。したがって、強力なパスワードポリシーを実装し、ブルートフォース攻撃から保護することが重要です。
+## ブルートフォース攻撃の防止策
+
+ブルートフォース攻撃からRedisを保護するためには、以下の対策を講じることが重要です。
+
+- 強力なパスワードポリシーを実装する：長いパスワード、大文字と小文字の組み合わせ、数字や特殊文字の使用など、セキュアなパスワードポリシーを設定します。
+- ログイン試行回数の制限：一定回数のログイン試行が失敗した場合、アカウントへのアクセスを一時的にブロックするなど、ログイン試行回数の制限を設けます。
+- CAPTCHAの使用：CAPTCHA（Completely Automated Public Turing test to tell Computers and Humans Apart）を使用して、自動化されたブルートフォース攻撃を防止します。
+- IPアドレスの制限：特定のIPアドレスからのアクセスを制限することで、不正なアクセスを防止します。
+- ログの監視：ログを監視し、異常なアクティビティを検出することで、ブルートフォース攻撃を早期に検知します。
+
+これらの対策を組み合わせることで、Redisへのブルートフォース攻撃からの保護を強化することができます。
 ```bash
 msf> use auxiliary/scanner/redis/redis_login
 nmap --script redis-brute -p 6379 <IP>
@@ -923,61 +601,35 @@ hydra –P /path/pass.txt redis://<IP>:<PORT> # 6379 is the default
 ```
 ### Rexec
 
-Rexecは、ユーザーがリモートシステム上でコマンドを実行できるようにするリモート実行サービスです。ネットワーク管理やトラブルシューティングの場面でよく使われる。Rexecは、クライアントとサーバー間の接続を確立し、この接続を介して実行するコマンドを送信することで動作します。
+Rexec is a remote execution service that allows users to execute commands on a remote system. It is commonly used for administrative purposes, such as managing multiple servers or performing system maintenance tasks.
 
-ブルートフォースRexecは、リモートシステムへ不正にアクセスするために、ユーザー名とパスワードの組み合わせを推測しようとするものである。これは、正しい組み合わせが見つかるまで、系統的に様々な組み合わせを試すことで可能です。
+One common method of brute-forcing Rexec is by attempting to guess the username and password combination. This can be done by using a list of commonly used usernames and passwords, or by generating a list of possible combinations based on known information about the target system.
 
-Rexecをブルートフォースするには、HydraやMedusaのようなツールを使うことができる。これらのツールは、異なるユーザー名とパスワードの組み合わせを試すプロセスを自動化し、より速く、より効率的にします。
+Another approach is to use a tool like Hydra, which is specifically designed for brute-forcing various protocols, including Rexec. Hydra allows you to specify a list of usernames and passwords, and it will automatically try each combination until it finds a successful login.
 
-Rexecをブルートフォースする場合、よく使われるユーザー名とパスワード、そしてターゲットシステムについて知っているかもしれない特定の情報を含むワードリストを使うことが重要です。これは成功の可能性を高めることができる。
-
-ブルートフォースRexecは時間のかかるプロセスであり、必ずしも成功するとは限らない。さらに、適切な権限なしにシステムへの不正アクセスを試みることは、非倫理的かつ違法と見なされます。ハッキングを試みる前に、必ず必要な権限と法的権利を持っていることを確認してください。
+It is important to note that brute-forcing Rexec or any other service is generally considered unethical and illegal without proper authorization. It is recommended to only use these techniques in a controlled environment, such as during a penetration testing engagement, with the explicit permission of the target system owner.
 ```bash
 hydra -l <username> -P <password_file> rexec://<Victim-IP> -v -V
 ```
 ### Rlogin
 
-Rloginはリモート・ログイン・プロトコルで、ユーザーがネットワーク経由でリモート・システムにログインできるようにする。Unixベースのシステムでよく使われる。RloginはTCPポート513を使用します。
+Rlogin is a remote login protocol that allows users to log into a remote system over a network. It is commonly used in Unix-based systems. 
 
-#### Brute Forcing Rlogin
+Brute forcing Rlogin involves systematically trying different username and password combinations until the correct credentials are found. This can be done using automated tools or scripts that iterate through a list of common usernames and passwords. 
 
-Rloginに対して総当たり攻撃を行うには、HydraやMedusaのようなツールを使うことができる。これらのツールを使うと、ログインに成功するまで、さまざまなユーザー名とパスワードの組み合わせを試すプロセスを自動化できます。
-
-以下は、Hydraを使ってRloginを総当たり攻撃するコマンドの例です：
-
-```plaintext
-hydra -l <username> -P <password_list> rlogin://<target_ip>
-```
-
-`<username>`はターゲットのユーザー名、`<password_list>`はパスワードのリストを含むファイルへのパス、`<target_ip>`はターゲット・システムのIPアドレスに置き換えてください。
-
-ブルートフォースは時間のかかるプロセスであり、侵入検知システムによって検知される可能性があることに注意することが重要です。ターゲット・システムに特化したパスワード・リストを使用したり、John the Ripperのようなパスワード・クラッキング・ツールを使用するなど、ターゲットを絞ったアプローチを使用することを推奨します。
-
-#### Rloginへのブルートフォース攻撃の軽減
-
-Rloginに対するブルートフォース攻撃から身を守るには、以下のような対策がある：
-
-- すべてのユーザーアカウントに強力で一意のパスワードを使用する。
-- ユーザーまたはIPアドレスをロックアウトする前に許可されるログイン試行回数を制限する。
-- 一定回数のログイン試行失敗後にユーザーアカウントを一時的にロックするアカウント・ロックアウト・ポリシーを導入する。
-- 不審なログイン操作のログを監視および分析する。
-- システムの機能に必要でない場合は、Rloginアクセスを無効にするか制限する。
-
-これらのベストプラクティスに従うことで、Rloginでブルートフォース攻撃が成功するリスクを減らすことができる。
+It is important to note that brute forcing is an aggressive and potentially illegal hacking technique. It is recommended to only use this technique with proper authorization and for legitimate purposes, such as penetration testing.
 ```bash
 hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```
 ### Rsh
 
-Rsh (Remote Shell) は、リモートシステム上でコマンドを実行できるネットワークプロトコルです。リモート管理タスクによく使われる。しかし、Rsh には暗号化や認証の仕組みがないため、安全ではないと考えられていることに注意する必要があります。
+Rsh (Remote Shell) is a network protocol that allows users to execute commands on a remote system. It is commonly used for remote administration tasks. However, it is important to note that Rsh is considered insecure due to its lack of encryption and authentication mechanisms.
 
-#### Brute Forcing Rsh
+One common attack method against Rsh is brute force. Brute force involves systematically trying all possible combinations of usernames and passwords until the correct credentials are found. This can be done using automated tools or scripts that iterate through a list of commonly used usernames and passwords.
 
-Rshのブルートフォースでは、正しい認証情報が見つかるまで、ユーザー名とパスワードのさまざまな組み合わせを系統的に試します。これは、プロセスを自動化するさまざまなツールやスクリプトを使用して行うことができます。
+To protect against brute force attacks on Rsh, it is recommended to disable or restrict access to the Rsh service. Additionally, strong and unique passwords should be used to minimize the risk of successful brute force attacks.
 
-Rshをブルートフォースするには、HydraやMedusaのようなツールを使用することができます。これらのツールでは、ユーザー名とパスワードのリストを指定することができ、ログインが成功するまで自動的にそれぞれの組み合わせを試します。
-
-Rshのブルートフォースは、システムに不正にアクセスするための違法かつ非倫理的な行為であるため、非常に推奨されていないことに注意することが重要です。ペネトレーションテスト活動を試みる前に、必ず適切な認可を得ていることを確認してください。
+It is worth mentioning that Rsh is an outdated protocol and has been largely replaced by more secure alternatives such as SSH (Secure Shell). SSH provides encryption and authentication, making it a much safer choice for remote administration tasks.
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
 ```
@@ -985,7 +637,13 @@ hydra -L <Username_list> rsh://<Victim_IP> -v -V
 
 ### Rsync
 
-Rsyncは、ファイルの同期や転送によく使われるユーティリティです。異なるシステム間でファイルのコピーや更新を効率的に行うことができます。Rsync は、侵入テスト中にターゲット システムとの間でファイルを転送する際に特に役立ちます。Rsync の効果的な使用方法を理解することで、テスト中のファイル転送プロセスを効率化できます。
+Rsyncは、ファイル転送と同期のための強力なツールです。このツールは、ローカルマシンとリモートマシン間でファイルを転送するために使用されます。Rsyncは、ファイルの差分を計算し、変更された部分のみを転送することができます。これにより、転送時間と帯域幅を節約することができます。
+
+Rsyncは、SSHプロトコルを使用してファイルを転送するため、データのセキュリティも確保されます。また、転送中に途中でエラーが発生した場合でも、再開することができます。
+
+Rsyncは、LinuxやUnixシステムで広く使用されており、非常に柔軟なオプションを提供しています。ファイルの転送や同期に関するさまざまなニーズに対応するため、多くのコマンドラインオプションが用意されています。
+
+Rsyncは、ブルートフォース攻撃には使用されませんが、ファイル転送や同期のための重要なツールとして知られています。
 ```bash
 nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 873 <IP>
 ```
@@ -993,31 +651,23 @@ nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/va
 
 RTSP（Real Time Streaming Protocol）は、ストリーミングメディアを配信するためのプロトコルです。RTSPは、クライアントとサーバー間でメディアの制御情報をやり取りするために使用されます。RTSPは、リアルタイムのビデオやオーディオのストリームを効率的に転送するために設計されています。
 
-RTSPの攻撃手法の一つに、ブルートフォース攻撃があります。ブルートフォース攻撃は、辞書やパスワードのリストを使用して、正しい認証情報を推測することを試みます。攻撃者は、ユーザー名とパスワードの組み合わせを総当たりで試し、正しい組み合わせを見つけることを目指します。
+RTSPの攻撃には、ブルートフォース攻撃が使用されることがあります。ブルートフォース攻撃は、辞書やランダムなパスワードの組み合わせを試し、正しいパスワードを見つけることを試みます。攻撃者は、RTSPサーバーに対して大量のパスワードを試すことで、不正アクセスを試みることができます。
 
-RTSPサーバーのブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実装し、ユーザーが簡単に推測できない複雑なパスワードを使用することが重要です。また、アカウントロックアウト機能を有効にすることで、一定回数の認証試行が失敗した場合にアカウントをロックすることも有効です。
+ブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実装し、パスワードの複雑さを確保する必要があります。また、アカウントロックアウト機能を有効にすることも重要です。これにより、一定回数の誤ったパスワード試行後にアカウントがロックされるため、攻撃者のブルートフォース攻撃を防ぐことができます。
 
-ブルートフォース攻撃は、RTSPサーバーに対する一般的な攻撃手法の一つですが、適切なセキュリティ対策を講じることで、攻撃者の侵入を防ぐことができます。
+さらに、RTSPサーバーへのアクセスを制限するために、ファイアウォールやIP制限などのセキュリティ対策を実施することも推奨されます。これにより、不正なアクセスを試みる攻撃者のIPアドレスをブロックすることができます。
+
+RTSPサーバーのセキュリティを確保するためには、定期的な脆弱性評価やペネトレーションテストを実施することも重要です。これにより、潜在的な脆弱性を特定し、適切な対策を講じることができます。
 ```bash
 hydra -l root -P passwords.txt <IP> rtsp
 ```
 ### SNMP
 
-SNMP（Simple Network Management Protocol）は、ネットワークデバイスの管理と監視に使用されるプロトコルです。SNMPは、ネットワーク上のデバイスの情報を取得し、設定を変更するために使用されます。SNMPは、エージェントとマネージャの間で通信を行います。
+SNMP（Simple Network Management Protocol）は、ネットワークデバイスの管理と監視に使用されるプロトコルです。SNMPは、ネットワーク上のデバイスの情報を収集し、設定を変更するために使用されます。SNMPは、エージェントとマネージャの間で情報をやり取りするために使用されます。
 
-SNMPの攻撃は、デバイスの情報を取得したり、設定を変更したりするために使用されます。攻撃者は、デバイスの情報を収集し、ネットワークの脆弱性を特定することができます。また、攻撃者は、デバイスの設定を変更して、ネットワークのセキュリティを侵害することもできます。
+SNMPは、デバイスの情報を取得するために、ブルートフォース攻撃に使用されることがあります。ブルートフォース攻撃では、辞書やパスワードリストを使用して、デバイスのコミュニティストリング（SNMPの認証情報）を推測しようとします。推測に成功すれば、攻撃者はデバイスにアクセスし、情報を取得したり、設定を変更したりすることができます。
 
-SNMPの攻撃には、ブルートフォース攻撃が使用されることがあります。ブルートフォース攻撃では、攻撃者はすべての可能なコミュニティストリングを試し、正しいコミュニティストリングを見つけることを試みます。コミュニティストリングが見つかった場合、攻撃者はデバイスの情報を取得したり、設定を変更したりすることができます。
-
-SNMPの攻撃を防ぐためには、以下の対策を実施することが重要です。
-
-- デフォルトのコミュニティストリングを変更する
-- SNMPバージョン2cまたは3を使用する
-- SNMPトラップを適切に設定する
-- SNMPアクセスを制限する
-- SNMPパスワードを強力なものにする
-
-これらの対策を実施することで、SNMPの攻撃からネットワークを保護することができます。
+ブルートフォース攻撃は、効果的な攻撃手法の1つですが、デバイスが強力なパスワードポリシーを使用している場合や、攻撃者が十分な時間とリソースを持っていない場合には成功しづらいです。したがって、セキュリティを強化するためには、強力なパスワードポリシーの使用や、SNMPのセキュリティ設定の適切な構成が重要です。
 ```bash
 msf> use auxiliary/scanner/snmp/snmp_login
 nmap -sU --script snmp-brute <target> [--script-args snmp-brute.communitiesdb=<wordlist> ]
@@ -1026,51 +676,29 @@ hydra -P /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt ta
 ```
 ### SMB
 
-SMB（Server Message Block）は、Windowsベースのシステムで使用されるネットワークプロトコルです。SMBは、ファイル共有、プリンタ共有、リモート管理などの機能を提供します。
+SMB（Server Message Block）は、ネットワーク上でファイル共有やリソース共有を行うためのプロトコルです。SMBは、Windowsオペレーティングシステムで広く使用されており、ファイルやプリンターなどのリソースをネットワーク上で共有するための機能を提供します。
 
-SMBのブルートフォース攻撃は、SMBサーバーに対して総当たり攻撃を行う手法です。攻撃者は、ユーザー名とパスワードの組み合わせを試行し、正しい認証情報を見つけることを目指します。
+SMBのブルートフォース攻撃は、辞書攻撃の一種であり、ユーザー名とパスワードの組み合わせを総当たりで試行し、正しい認証情報を見つけることを目指します。この攻撃は、弱いパスワードを使用しているユーザーアカウントを特定するために使用されます。
 
-ブルートフォース攻撃を実行するためには、ツールやスクリプトを使用することが一般的です。一部のツールは、辞書攻撃やハイブリッド攻撃などの高度な攻撃手法をサポートしています。
+ブルートフォース攻撃は、自動化ツールを使用して実行することができます。これにより、大量のユーザー名とパスワードの組み合わせを高速で試行することができます。攻撃者は、一般的なパスワードや辞書攻撃によって成功する可能性が高いパスワードを使用しているユーザーアカウントを特定することができます。
 
-SMBサーバーのブルートフォース攻撃は、弱いパスワードを使用しているユーザーアカウントを特定するための効果的な手法です。しかし、攻撃者はアカウントロックアウトやログインアラートなどのセキュリティメカニズムに注意する必要があります。
+SMBのブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実施し、パスワードの複雑さを強化する必要があります。また、アカウントロックアウトポリシーを設定することで、一定回数の認証失敗後にアカウントをロックすることも有効です。さらに、マルウェアや不正アクセスを検知するためのセキュリティソリューションの導入も重要です。
 ```bash
 nmap --script smb-brute -p 445 <IP>
 hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
 ```
-### SMTP
-
-SMTP（Simple Mail Transfer Protocol）は、電子メールの送信に使用されるプロトコルです。SMTPサーバーに接続し、メールを送信するためのコマンドを使用します。SMTPは、メールアドレスの検証やメールの送信制限などのセキュリティ機能を提供します。
-
-#### ブルートフォース攻撃
-
-ブルートフォース攻撃は、SMTPサーバーへの不正アクセスを試みる手法の一つです。攻撃者は、パスワードの推測や辞書攻撃などの方法を使用して、正しい認証情報を見つけ出そうとします。
-
-以下は、SMTPサーバーへのブルートフォース攻撃を実行するための手順です。
-
-1. ユーザー名のリストを作成します。
-2. パスワードのリストを作成します。
-3. ユーザー名とパスワードの組み合わせを試し、SMTPサーバーに接続します。
-4. 正しい認証情報が見つかるまで、ステップ3を繰り返します。
-
-ブルートフォース攻撃は、強力なパスワードポリシーが実装されていない場合や、弱いパスワードが使用されている場合に特に効果的です。攻撃者は、自動化ツールを使用して大量の認証試行を行うことができます。
-
-ブルートフォース攻撃を防ぐためには、以下の対策を実施することが重要です。
-
-- 強力なパスワードポリシーを実装する。
-- ログイン試行回数の制限を設定する。
-- IPアドレスベースのブロックリストを使用する。
-- 二要素認証を導入する。
-
-ブルートフォース攻撃は、セキュリティ上の脆弱性を突く手法の一つです。攻撃者が正しい認証情報を見つけると、機密情報へのアクセスや不正なメール送信などの悪用が可能となります。したがって、SMTPサーバーのセキュリティを強化するために、適切な対策を講じることが重要です。
+SMTP（Simple Mail Transfer Protocol）は、電子メールの送信に使用されるプロトコルです。SMTPサーバーに接続し、メールを送信するために必要な情報を提供します。SMTPは、メールアドレスの確認やメールの送信制限などのセキュリティ機能を提供します。SMTPサーバーへのアクセスを悪用することで、スパムメールの送信や不正なアクティビティを行うことができます。Brute force攻撃は、SMTPサーバーへのアクセスを試行する際に使用される一般的な手法の1つです。Brute force攻撃では、辞書攻撃やランダムなパスワードの試行など、さまざまな方法でパスワードを推測し、正しいパスワードを見つけることを試みます。Brute force攻撃は、パスワードが弱い場合やセキュリティ対策が不十分な場合に特に効果的です。
 ```bash
 hydra -l <username> -P /path/to/passwords.txt <IP> smtp -V
 hydra -l <username> -P /path/to/passwords.txt -s 587 <IP> -S -v -V #Port 587 for SMTP with SSL
 ```
-SOCKS (Socket Secure)は、ネットワークプロトコルの一種であり、プロキシサーバーを介してTCP/IP接続を確立するために使用されます。 SOCKSプロトコルは、クライアントとサーバーの間でデータを転送するためのプロキシチャネルを提供します。 SOCKSプロキシは、ユーザーのIPアドレスを隠すために使用されることがあります。 SOCKSプロキシを使用すると、ユーザーは自分のIPアドレスを隠すことができ、インターネット上のリソースに匿名でアクセスすることができます。
+SOCKSは、ネットワークプロトコルであり、プロキシサーバーを介してTCP/IP接続を確立するために使用されます。 SOCKSプロトコルは、クライアントとサーバーの間でデータを中継するために使用されます。 SOCKSプロキシは、ユーザーのIPアドレスを隠すために使用されることがあります。 SOCKSプロキシを使用すると、ユーザーは自分のIPアドレスを隠すことができ、ウェブサイトやアプリケーションに匿名でアクセスすることができます。
 
-SOCKSプロキシを使用したブルートフォース攻撃では、攻撃者は複数のユーザー名とパスワードの組み合わせを試し、認証を回避するためにプロキシを使用します。攻撃者は、ブルートフォース攻撃を実行するために特別なツールやスクリプトを使用することができます。この攻撃は、弱いパスワードを使用しているユーザーアカウントを特定するために使用されます。
+SOCKSプロキシをハッキングに使用する場合、ブルートフォース攻撃は一般的な手法です。ブルートフォース攻撃では、ハッカーはすべての可能なパスワードの組み合わせを試し、正しいパスワードを見つけることを試みます。これにより、ハッカーはシステムに不正アクセスすることができます。
 
-ブルートフォース攻撃は、セキュリティテストや侵入テストの一環として使用されることもあります。セキュリティ専門家は、ブルートフォース攻撃を使用して、システムの脆弱性を特定し、適切な対策を講じることができます。ただし、ブルートフォース攻撃は合法的な目的でのみ使用されるべきであり、不正なアクセスやデータの盗難などの悪意のある行為には使用されるべきではありません。
+ブルートフォース攻撃を実行するためには、ハッカーは通常、辞書攻撃やランダムなパスワード生成などの手法を使用します。辞書攻撃では、ハッカーは一連の一般的なパスワードを試し、ランダムなパスワード生成では、ハッカーはランダムな文字列の組み合わせを試します。
+
+ブルートフォース攻撃は非常に時間がかかる場合がありますが、十分な計算リソースと時間があれば、ハッカーは成功する可能性があります。したがって、セキュリティを強化するためには、強力なパスワードポリシーを実装し、ブルートフォース攻撃を防ぐための対策を講じることが重要です。
 ```bash
 nmap  -vvv -sCV --script socks-brute --script-args userdb=users.txt,passdb=/usr/share/seclists/Passwords/xato-net-10-million-passwords-1000000.txt,unpwndb.timelimit=30m -p 1080 <IP>
 ```
@@ -1078,16 +706,16 @@ nmap  -vvv -sCV --script socks-brute --script-args userdb=users.txt,passdb=/usr/
 
 SSH（Secure Shell）は、ネットワーク上で安全なリモートアクセスを提供するプロトコルです。SSHを使用すると、暗号化されたトンネルを介してリモートサーバーに接続し、コマンドを実行したりファイルを転送したりすることができます。
 
-SSHのブルートフォース攻撃は、辞書攻撃や総当たり攻撃などの手法を使用して、SSHサーバーの認証情報を推測することを試みます。これにより、攻撃者は正当なユーザーとしてサーバーにアクセスすることができます。
+SSHのブルートフォース攻撃は、辞書攻撃とも呼ばれ、SSHサーバーへの不正アクセスを試みる手法です。攻撃者は、一連のパスワードを試し、正しいパスワードを見つけることを目指します。
 
-SSHのブルートフォース攻撃を防ぐためには、以下の対策を講じることが重要です。
+SSHブルートフォース攻撃を防ぐためには、以下の対策を講じることが重要です。
 
-- 強力なパスワードポリシーを実施する：長さ、複雑さ、一意性の要件を設定し、パスワードの定期的な変更を促す。
-- 公開鍵認証を使用する：公開鍵と秘密鍵のペアを生成し、サーバーに公開鍵を登録することで、パスワード認証を回避する。
-- ログイン試行回数の制限：一定回数のログイン試行が失敗した場合に、一時的なブロックやCAPTCHAの表示を行う。
-- ログ監視とアラート：異常なログイン試行を監視し、異常なアクティビティを検知するためのアラートを設定する。
+- 強力なパスワードポリシーを実施する：長さ、複雑さ、一意性の要件を設定し、定期的なパスワード変更を促す。
+- ログイン試行回数の制限：一定の時間内に許可されるログイン試行回数を制限する。
+- パスワード認証の無効化：公開鍵認証を使用してSSH接続を設定し、パスワード認証を無効にする。
+- ネットワークレベルのセキュリティ：SSHサーバーへのアクセスを制限するために、ファイアウォールやネットワークセグメンテーションを使用する。
 
-これらの対策を実施することで、SSHのブルートフォース攻撃からサーバーを保護することができます。
+SSHブルートフォース攻撃は、セキュリティ上の脅威となる可能性があるため、適切な対策を講じることが重要です。
 ```bash
 hydra -l root -P passwords.txt [-t 32] <IP> ssh
 ncrack -p 22 --user root -P passwords.txt <IP> [-T 5]
@@ -1095,7 +723,7 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M ssh
 patator ssh_login host=<ip> port=22 user=root 0=/path/passwords.txt password=FILE0 -x ignore:mesg='Authentication failed'
 ```
 #### 弱いSSHキー/Debianの予測可能なPRNG
-一部のシステムでは、暗号化素材を生成するために使用されるランダムシードに既知の欠陥があります。これにより、キースペースが劇的に減少し、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)などのツールでブルートフォース攻撃が可能になります。また、[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)のような弱いキーの事前生成セットも利用可能です。
+一部のシステムでは、暗号化素材を生成するために使用されるランダムシードに既知の欠陥があります。これにより、キースペースが劇的に減少し、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)などのツールでブルートフォース攻撃が可能になります。また、[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)などの弱いキーの事前生成セットも利用可能です。
 
 ### SQL Server
 ```bash
@@ -1108,13 +736,13 @@ msf> use auxiliary/scanner/mssql/mssql_login #Be careful, you can block accounts
 ```
 ### Telnet
 
-Telnetは、ネットワーク上でリモートコンピュータに接続するためのプロトコルです。通常、ユーザー名とパスワードを使用して認証を行い、リモートコンピュータにログインすることができます。
+Telnetは、ネットワーク上のリモートコンピュータに接続するためのプロトコルです。このプロトコルを使用すると、リモートコンピュータにログインし、コマンドを実行することができます。Telnetは、ユーザー名とパスワードを使用して認証するため、セキュリティ上のリスクがあります。そのため、Telnetを使用する際には注意が必要です。
 
-Telnetは、ネットワーク上のサービスやデバイスに対してコマンドを送信するために使用されることがあります。しかし、Telnetはセキュリティ上の脆弱性があるため、暗号化されたSSHプロトコルに置き換えられることが一般的です。
+Telnetの攻撃手法の一つは、ブルートフォース攻撃です。ブルートフォース攻撃では、すべての可能なパスワードの組み合わせを試し、正しいパスワードを見つけることを試みます。これにより、不正アクセスを試みる攻撃者が正しいパスワードを推測することができる可能性があります。
 
-ハッカーは、Telnetサービスに対してブルートフォース攻撃を行うことがあります。ブルートフォース攻撃では、ハッカーはさまざまなユーザー名とパスワードの組み合わせを試し、正しい認証情報を見つけ出すことを試みます。
+ブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実施し、パスワードの長さと複雑さを増やすことが重要です。また、アカウントロックアウト機能を有効にすることで、一定回数の誤ったパスワード入力後にアカウントをロックすることも有効です。
 
-ブルートフォース攻撃を防ぐためには、強力なパスワードポリシーを実装し、アカウントロックアウト機能を有効にすることが重要です。また、Telnetサービスを使用する代わりに、より安全なSSHプロトコルを使用することをお勧めします。
+Telnetの代替手段として、よりセキュアなSSH（Secure Shell）プロトコルを使用することをおすすめします。SSHは、暗号化された通信を提供し、セキュリティ上のリスクを軽減することができます。
 ```bash
 hydra -l root -P passwords.txt [-t 32] <IP> telnet
 ncrack -p 23 --user root -P passwords.txt <IP> [-T 5]
@@ -1122,19 +750,13 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M telnet
 ```
 ### VNC
 
-VNC（Virtual Network Computing）は、リモートデスクトッププロトコル（RDP）の一種であり、リモートマシンへのアクセスを提供します。VNCは、クライアントとサーバーの間でデスクトップ画面を共有するために使用されます。
+VNC（Virtual Network Computing）は、リモートデスクトッププロトコル（RDP）の一種であり、リモートマシンへのアクセスを提供するために使用されます。VNCは、クライアントとサーバーの間でデスクトップ画面の情報を送受信することによって動作します。
 
-VNCのブルートフォース攻撃は、パスワードの推測を行い、正しいパスワードを見つけることを試みます。ブルートフォース攻撃は、一般的なパスワードや辞書攻撃を使用して実行されることがあります。
+VNCのブルートフォース攻撃は、パスワードの推測を行い、正しいパスワードを見つけることを目指します。この攻撃は、一般的なパスワードリストを使用して自動化されることが多く、多くの試行とエラーが行われます。
 
-以下は、VNCのブルートフォース攻撃の手順です。
+VNCのブルートフォース攻撃を実行するためには、ブルートフォースツールを使用する必要があります。一般的なツールには、Hydra、Medusa、Ncrackなどがあります。これらのツールは、複数の接続を同時に試行し、パスワードを推測するためのさまざまな方法を提供します。
 
-1. ブルートフォース攻撃ツールを使用して、VNCサーバーに接続します。
-2. ユーザー名とパスワードのリストを作成します。一般的なパスワードや辞書攻撃に使用することができます。
-3. ブルートフォース攻撃ツールを設定し、ユーザー名とパスワードのリストを使用して攻撃を開始します。
-4. ブルートフォース攻撃ツールは、ユーザー名とパスワードの組み合わせを試し、正しい組み合わせを見つけるまで続けます。
-5. 正しいユーザー名とパスワードの組み合わせが見つかると、攻撃者はVNCサーバーにアクセスできるようになります。
-
-VNCのブルートフォース攻撃は、強力なパスワードポリシーが実装されていない場合に特に有効です。攻撃者は、短いパスワードや一般的なパスワードを使用しているユーザーを狙うことができます。
+VNCのブルートフォース攻撃は、セキュリティ上の脆弱性を悪用するため、合法的な目的でのみ使用することが重要です。また、攻撃を実行する前に、適切な許可を得る必要があります。
 ```bash
 hydra -L /root/Desktop/user.txt –P /root/Desktop/pass.txt -s <PORT> <IP> vnc
 medusa -h <IP> –u root -P /root/Desktop/pass.txt –M vnc
@@ -1150,25 +772,30 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```
 ### Winrm
 
-Winrm（Windows Remote Management）は、Windowsシステムでリモート管理を可能にするためのプロトコルです。Winrmは、HTTPまたはHTTPSを介して通信し、PowerShellスクリプトやコマンドをリモートで実行することができます。
+Winrmは、Windowsリモート管理（WinRM）プロトコルを使用して、リモートでWindowsマシンを管理するためのサービスです。WinRMは、Windows PowerShellや他のリモート管理ツールを使用して、リモートマシンにコマンドを実行したり、設定を変更したりするために使用されます。
 
-Winrmを使用してリモートシステムにアクセスするためには、以下の手順を実行する必要があります。
+Winrmは、デフォルトで有効になっている場合がありますが、一部のセキュリティ設定によって無効にされている場合もあります。Winrmを使用してリモートマシンにアクセスするためには、Winrmサービスが実行されていることを確認し、必要に応じて設定を変更する必要があります。
 
-1. Winrmサービスを有効にする：`winrm quickconfig`コマンドを実行して、Winrmサービスを有効にします。
+Winrmを使用してリモートマシンにアクセスするための一般的な手法の1つは、ブルートフォース攻撃です。ブルートフォース攻撃では、辞書やパスワードリストを使用して、可能なすべてのパスワードの組み合わせを試行し、正しいパスワードを見つけることを試みます。
 
-2. ファイアウォールの設定：Winrmポート（通常は5985または5986）をファイアウォールで開放する必要があります。
+ブルートフォース攻撃は、パスワードが弱い場合や、パスワードポリシーが緩い場合に特に効果的です。しかし、ブルートフォース攻撃は時間がかかる場合があり、大量のリクエストを送信するため、検出される可能性があります。
 
-3. 認証の設定：Winrmを使用するためには、適切な認証設定が必要です。デフォルトでは、WinrmはNTLM認証を使用しますが、Kerberos認証やSSL証明書を使用することもできます。
+ブルートフォース攻撃を実行するためには、ブルートフォースツールを使用する必要があります。一般的なブルートフォースツールには、Hydra、Medusa、Ncrackなどがあります。これらのツールは、多くのプロトコルやサービスに対応しており、パスワードの試行を自動化するための機能を提供しています。
 
-Winrmを使用してリモートシステムにアクセスすると、様々なタスクを実行することができます。例えば、ファイルの転送、プロセスの実行、イベントログの監視などが可能です。
+ブルートフォース攻撃を実行する際には、以下のポイントに注意する必要があります。
 
-Winrmは、システム管理者やセキュリティテスターにとって非常に便利なツールですが、悪意のある攻撃者にとっても潜在的な脆弱性となり得ます。したがって、Winrmを使用する際には、適切なセキュリティ対策を講じることが重要です。
+- パスワードリストを適切に選択し、一般的なパスワードや弱いパスワードを含めることが重要です。
+- ブルートフォース攻撃は時間がかかる場合があるため、十分な時間を確保する必要があります。
+- 大量のリクエストを送信するため、攻撃が検出される可能性があるため、適切な対策を講じる必要があります。
+
+ブルートフォース攻撃は、セキュリティテストやペネトレーションテストの一環として使用されることがありますが、許可なく他人のシステムに対して実行することは違法です。適切な許可を得て、法的な範囲内でのみブルートフォース攻撃を実行してください。
 ```bash
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフロー**を簡単に構築し、自動化することができます。
+\
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフロー**を簡単に構築し、自動化することができます。\
 今すぐアクセスを取得してください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -1181,14 +808,14 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 * [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (ハッシュ、WPA2キャプチャ、およびMSOffice、ZIP、PDFのアーカイブ)
 * [https://crackstation.net/](https://crackstation.net) (ハッシュ)
 * [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-* [https://gpuhash.me/](https://gpuhash.me) (ハッシュとファイルハッシュ)
+* [https://gpuhash.me/](https://gpuhash.me) (ハッシュおよびファイルハッシュ)
 * [https://hashes.org/search.php](https://hashes.org/search.php) (ハッシュ)
 * [https://www.cmd5.org/](https://www.cmd5.org) (ハッシュ)
 * [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5、NTLM、SHA1、MySQL5、SHA256、SHA512)
 * [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 * [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-ハッシュをブルートフォース攻撃する前に、これをチェックしてください。
+ハッシュをブルートフォースする前に、これをチェックしてください。
 
 ### ZIP
 ```bash
@@ -1208,7 +835,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### 既知の平文zip攻撃
 
-暗号化されたzip内のファイルの**平文**（または平文の一部）を知る必要があります。暗号化されたzip内のファイルの**ファイル名とサイズを確認する**には、**`7z l encrypted.zip`**を実行します。\
+暗号化されたzip内のファイルの**平文**（または平文の一部）を知る必要があります。暗号化されたzip内のファイルの**ファイル名とサイズを確認**するには、**`7z l encrypted.zip`**を実行します。\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)をリリースページからダウンロードしてください。
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -1223,23 +850,13 @@ unzip unlocked.zip #User new_pwd as password
 ```
 ### 7z
 
-7zは、高い圧縮率を持つオープンソースのファイルアーカイバです。7zファイルは、他のファイルアーカイブ形式よりも小さくなる傾向があります。7zは、パスワードで保護されたファイルを作成することもできます。
-
-#### 7zのブルートフォース攻撃
+7zは、高い圧縮率を持つオープンソースのファイルアーカイバです。7zファイルは、他のファイルアーカイブ形式よりも小さくなる傾向があります。この形式は、7-Zipソフトウェアによって作成および解凍することができます。
 
 7zファイルのパスワードを解読するために、ブルートフォース攻撃を使用することができます。ブルートフォース攻撃は、すべての可能なパスワードの組み合わせを試すことで、正しいパスワードを見つける手法です。
 
-以下は、7zファイルのブルートフォース攻撃を実行するための手順です。
+ブルートフォース攻撃は非常に時間がかかる場合がありますが、パスワードが弱い場合や短い場合には効果的です。ただし、強力なパスワードを使用している場合や、パスワードがランダムな場合には、ブルートフォース攻撃は非現実的な方法となる可能性があります。
 
-1. ブルートフォース攻撃ツールを使用して、7zファイルのパスワードを解読します。一般的なツールには、John the RipperやHashcatなどがあります。
-
-2. ブルートフォース攻撃ツールに、パスワードの辞書ファイルを指定します。辞書ファイルには、一般的なパスワードやキーワードのリストが含まれています。
-
-3. ブルートフォース攻撃ツールに、7zファイルのパスワードを解読するためのルールを指定します。ルールには、パスワードの長さや使用できる文字の種類などが含まれます。
-
-4. ブルートフォース攻撃ツールを実行し、すべての可能なパスワードの組み合わせを試します。攻撃が成功すると、正しいパスワードが見つかります。
-
-ブルートフォース攻撃は、時間がかかる場合があります。パスワードの長さや複雑さによっては、解読に数時間以上かかることもあります。また、ブルートフォース攻撃は、合法的な目的でのみ使用することが重要です。
+7zファイルのブルートフォース攻撃を実行するためには、専用のツールやスクリプトを使用することができます。これらのツールは、自動的にパスワードの組み合わせを生成し、7zファイルに対して試行します。ただし、ブルートフォース攻撃は合法的な目的でのみ使用することが重要です。
 ```bash
 cat /usr/share/wordlists/rockyou.txt | 7za t backup.7z
 ```
@@ -1250,17 +867,19 @@ wget https://raw.githubusercontent.com/magnumripper/JohnTheRipper/bleeding-jumbo
 apt-get install libcompress-raw-lzma-perl
 ./7z2john.pl file.7z > 7zhash.john
 ```
-### PDF
+## ブルートフォース攻撃
 
-PDF（Portable Document Format）は、電子文書のフォーマットであり、さまざまなプラットフォームで利用されています。PDFファイルは、テキスト、画像、図表などの情報を保持し、異なるデバイスやソフトウェアで一貫した表示を提供します。
+ブルートフォース攻撃は、パスワードや認証情報を推測するために使用される一般的な攻撃手法です。この攻撃では、攻撃者は自動化されたツールを使用して、可能なすべての組み合わせを試し、正しいパスワードを見つけることを試みます。
 
-PDFファイルのブルートフォース攻撃は、パスワードの総当たり攻撃を行うことを意味します。これにより、パスワードが不明なPDFファイルにアクセスすることが可能になります。
+ブルートフォース攻撃は、パスワードの弱さや予測可能性に依存しています。一般的な攻撃手法には、辞書攻撃、総当たり攻撃、ハイブリッド攻撃などがあります。
 
-ブルートフォース攻撃は、一般的に辞書攻撃やランダムな文字列の組み合わせを使用して行われます。攻撃者は、パスワードの長さや文字セットに基づいて、可能な組み合わせを試行し続けます。
+辞書攻撃は、事前に作成された辞書ファイルを使用してパスワードを推測します。この攻撃手法では、一般的なパスワードや一般的な単語の組み合わせが試されます。
 
-PDFファイルのブルートフォース攻撃は、パスワードが強力である場合には非常に困難です。しかし、弱いパスワードや一般的な単語の使用など、セキュリティ上の脆弱性がある場合には成功する可能性があります。
+総当たり攻撃は、すべての可能な組み合わせを順番に試す攻撃手法です。この攻撃手法は非常に時間がかかる場合がありますが、パスワードが予測可能な場合には効果的です。
 
-ブルートフォース攻撃を防ぐためには、強力なパスワードを使用することが重要です。また、2要素認証やアカウントロックなどのセキュリティ対策も有効です。
+ハイブリッド攻撃は、辞書攻撃と総当たり攻撃を組み合わせた攻撃手法です。まず、辞書攻撃を試し、その後、総当たり攻撃を使用して残りの組み合わせを試します。
+
+ブルートフォース攻撃は非常に効果的ですが、時間がかかる場合があります。攻撃者は、クラウド/SaaSプラットフォームを使用して攻撃をスケーリングすることができます。ただし、ブルートフォース攻撃は合法的な目的でのみ使用されるべきです。
 ```bash
 apt-get install pdfcrack
 pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
@@ -1271,7 +890,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDFオーナーパスワード
 
-PDFオーナーパスワードをクラックするには、次を参照してください：[https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDFオーナーパスワードをクラックするには、次を確認してください：[https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -1287,19 +906,19 @@ john jwt.john #It does not work with Kali-John
 ```
 ### NTLM クラッキング
 
-NTLM クラッキングは、Windows ベースのシステムで使用される NTLM ハッシュを解読するための攻撃手法です。NTLM ハッシュは、ユーザーのパスワードをハッシュ化したものであり、クラッカーがこれを解読することで、パスワードを取得することができます。
+NTLM クラッキングは、Windows ベースのシステムで使用される認証プロトコルである NTLM のパスワードを解読する手法です。NTLM ハッシュを取得するために、パスワードのハッシュを総当たり攻撃することが一般的です。
 
-NTLM クラッキングには、以下のような手法があります。
+NTLM クラッキングには、以下の手法があります。
 
-1. 辞書攻撃: 事前に作成された辞書ファイルを使用して、一連のパスワード候補を試す方法です。クラッカーは、一致するハッシュを見つけるまで、辞書ファイル内のすべての単語やフレーズを試します。
+1. 辞書攻撃: 事前に作成されたパスワードリストを使用して、ユーザーのパスワードを総当たりで試行します。一般的なパスワードや一般的な単語の組み合わせを含むリストが使用されます。
 
-2. ブルートフォース攻撃: すべての可能な組み合わせを試す方法です。クラッカーは、パスワードの長さや文字セットに基づいて、すべての組み合わせを順番に試します。この方法は非常に時間がかかる場合があります。
+2. ブルートフォース攻撃: パスワードの全ての組み合わせを試行する方法です。この手法は非常に時間がかかるため、効率的なハッシュアルゴリズムを使用して高速化することが重要です。
 
-3. ハイブリッド攻撃: 辞書攻撃とブルートフォース攻撃を組み合わせた方法です。まず、辞書攻撃を試し、一致するハッシュが見つからない場合には、ブルートフォース攻撃に移行します。
+3. ハイブリッド攻撃: 辞書攻撃とブルートフォース攻撃を組み合わせた手法です。まず辞書攻撃を試みて、成功しなかった場合にブルートフォース攻撃に移行します。
 
-NTLM クラッキングは、強力なパスワードポリシーが実装されていない場合や、弱いパスワードが使用されている場合に特に有効です。クラッカーは、高速なハッシュ関数や GPU を使用することで、クラッキングの効率を向上させることができます。
+NTLM クラッキングには、高性能なハードウェアやクラウドベースの計算リソースを利用することも可能です。これにより、クラッキングの速度を大幅に向上させることができます。
 
-NTLM クラッキングに対する防御策としては、強力なパスワードポリシーの実装、多要素認証の使用、ハッシュのソルト化などがあります。これらの対策を講じることで、NTLM クラッキングのリスクを軽減することができます。
+NTLM クラッキングは、パスワードの強度やハッシュアルゴリズムのセキュリティに依存します。より強力なパスワードポリシーやハッシュアルゴリズムを使用することで、NTLM クラッキングのリスクを軽減することができます。
 ```bash
 Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
@@ -1307,20 +926,15 @@ hashcat -a 0 -m 1000 --username file_NTLM.hashes /usr/share/wordlists/rockyou.tx
 ```
 # Keepass
 
-Keepassは、パスワード管理ツールであり、パスワードの保存、生成、自動入力をサポートします。Keepassは、強力な暗号化アルゴリズムを使用してパスワードデータベースを保護し、マスターパスワードを使用してアクセスを制御します。
+Keepassは、パスワード管理ツールであり、個人や組織が複数のアカウントのパスワードを安全に管理するために使用されます。Keepassは、強力な暗号化アルゴリズムを使用してパスワードデータベースを保護し、マスターパスワードを使用してアクセスを制御します。
 
-Keepassのブルートフォース攻撃は、マスターパスワードを特定するために使用されます。ブルートフォース攻撃は、すべての可能な組み合わせを試し、正しいパスワードを見つけるまで続けます。
+Keepassのブルートフォース攻撃は、暗号化されたパスワードデータベースのマスターパスワードを解読するために使用される攻撃手法です。ブルートフォース攻撃では、すべての可能な組み合わせのパスワードを試し、正しいパスワードを見つけるまで続けます。
 
-Keepassのブルートフォース攻撃を実行するためには、次の手順を実行する必要があります。
+ブルートフォース攻撃は、非常に時間がかかる場合があります。しかし、強力なパスワードを使用している場合や、パスワードの長さが十分に長い場合は、解読が困難になります。
 
-1. ブルートフォース攻撃ツールを使用して、Keepassデータベースファイルを解析します。
-2. ブルートフォース攻撃ツールを使用して、マスターパスワードを特定します。
-3. ブルートフォース攻撃ツールを使用して、マスターパスワードを試行します。
-4. 正しいマスターパスワードが見つかるまで、ブルートフォース攻撃を続けます。
+Keepassのブルートフォース攻撃を防ぐためには、強力なマスターパスワードを使用し、定期的に変更することが重要です。また、パスワードデータベースをクラウドストレージに保存する場合は、セキュリティを強化するために二要素認証を有効にすることをお勧めします。
 
-ブルートフォース攻撃は非常に時間がかかる場合があります。パスワードの長さや複雑さによっては、数日または数週間かかることもあります。また、ブルートフォース攻撃は、Keepassデータベースが強力なパスワードで保護されている場合にのみ有効です。強力なパスワードを使用することで、ブルートフォース攻撃を困難にすることができます。
-
-Keepassのブルートフォース攻撃は、合法的な目的のためにのみ使用されるべきです。不正な目的で使用することは違法です。
+Keepassは、パスワード管理のための便利なツールですが、適切なセキュリティ対策を講じることが重要です。
 ```bash
 sudo apt-get install -y kpcli #Install keepass tools like keepass2john
 keepass2john file.kdbx > hash #The keepass is only using password
@@ -1334,17 +948,15 @@ Keberoastingは、Active Directory（AD）環境で使用されるサービス�
 
 攻撃者は、AD環境内のサービスアカウントのユーザー名を特定し、そのユーザー名を使用してKerberosチケットを要求します。次に、攻撃者は取得したチケットをオフラインで解析し、サービスアカウントのパスワードをクラックします。
 
-Keberoastingは、サービスアカウントがパスワードをハッシュ形式で保存しているために可能となります。攻撃者は、サービスアカウントのハッシュを取得し、オフラインでブルートフォース攻撃を行うことでパスワードを特定します。
+Keberoastingは、攻撃者がサービスアカウントのパスワードをクラックするために、弱いパスワードハッシュを持つサービスアカウントを特定することに依存しています。攻撃者は、特定のサービスアカウントがパスワードハッシュを保持していることを確認するために、Active Directory内のサービスプリンシパル名（SPN）を調査します。
 
-この攻撃手法は、一般的にはドメイン内のサービスアカウントのパスワードをクラックするために使用されます。攻撃者は、クラックしたパスワードを使用して特権のあるアクセス権を取得し、システム内での横断移動や特権昇格などの攻撃を行うことができます。
-
-Keberoasting攻撃を防ぐためには、サービスアカウントのパスワードを強力なものに設定し、定期的に変更することが重要です。また、サービスアカウントのハッシュを保護するために、適切なアクセス制御と監視を実施することも必要です。
+Keberoasting攻撃は、パスワードポリシーの強化やサービスアカウントのパスワードの定期的な変更などの対策が不十分な場合に成功する可能性があります。したがって、セキュリティ上のリスクを軽減するためには、強力なパスワードポリシーの実施とサービスアカウントの適切な管理が重要です。
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### LUKSイメージ
+### ラックスイメージ
 
 #### 方法1
 
@@ -1355,17 +967,15 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### 方法2
+#### メソッド2
 
-ブルートフォースとは、パスワードを解読したり、システムに不正アクセスしたりするために使われる一般的な方法である。これは、正しいパスワードが見つかるまで、可能な限りの文字の組み合わせを体系的に試すというものです。この方法は、時間とリソースを必要としますが、パスワードが弱かったり、容易に推測できる場合には効果的です。
+Brute force is a common method used in hacking to gain unauthorized access to a system or account. It involves systematically trying all possible combinations of passwords until the correct one is found. This method is effective when the password is weak or easily guessable. However, it can be time-consuming and resource-intensive.
 
-Hydra、Medusa、John the Ripperなど、ブルートフォースアタックを実行するためのツールがいくつかある。これらのツールでは、攻撃に使用するターゲット・システム、ユーザー名、パスワード・リストを指定することができる。
+To perform a brute force attack, hackers use automated tools that generate and test a large number of password combinations. These tools can be customized to target specific systems or accounts, increasing the chances of success. Brute force attacks can be carried out on various protocols, such as HTTP, FTP, SSH, and others.
 
-ブルートフォース攻撃を行う際には、一般的なパスワード、辞書的な単語、ターゲットの個人情報のバリエーションを含む優れたパスワードリストを使用することが重要です。また、マルチスレッドに対応したツールを使用することをお勧めします。
+To protect against brute force attacks, it is important to use strong and unique passwords that are not easily guessable. Additionally, implementing account lockout policies can help prevent multiple login attempts within a short period of time. Monitoring and analyzing login attempts can also help detect and mitigate brute force attacks.
 
-ブルートフォース攻撃は、特にターゲットシステムがアカウントロックアウトやCAPTCHAのようなセキュリティ対策を実装している場合、常に成功するわけではないことは注目に値する。さらに、ブルートフォース攻撃は侵入検知システムによって検知される可能性があるため、このタイプの攻撃を実行する際には慎重かつ思慮深く行動することが重要です。
-
-全体として、ブルートフォース攻撃はハッカーの強力な武器になり得ますが、責任を持って倫理的に使用されるべきです。ブルートフォース・アタックを試みる前に適切な承認を得ること、そしてターゲット・システムが攻撃を要求する個人または組織によって所有または管理されていることを確認することが重要です。
+Remember, brute force attacks are illegal and unethical unless performed with proper authorization for legitimate purposes such as penetration testing. Always obtain proper authorization before attempting any hacking techniques.
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -1384,17 +994,13 @@ dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c9
 ```
 ### PGP/GPGの秘密鍵
 
-```html
-PGP/GPGの秘密鍵は、暗号化とデジタル署名に使用される重要な要素です。秘密鍵は、公開鍵と対になっており、データの暗号化や署名の作成に使用されます。
+Brute forcing a PGP/GPG private key is an extremely difficult task due to the large key space. The private key is typically protected by a passphrase, which adds an additional layer of security. However, if the passphrase is weak or easily guessable, it may be possible to brute force the key.
 
-秘密鍵を保護することは非常に重要であり、漏洩すると重大なセキュリティリスクにつながります。秘密鍵を保護するためには、以下のベストプラクティスを守ることが必要です。
+To brute force a PGP/GPG private key, you would need to generate all possible key combinations and test each one until the correct passphrase is found. This process can be time-consuming and resource-intensive, especially for longer and more complex passphrases.
 
-- 秘密鍵を安全な場所に保存する。物理的なアクセスが制限された場所や暗号化されたデバイスに保存することが推奨されます。
-- パスフレーズを使用して秘密鍵を保護する。強力なパスフレーズを設定し、定期的に変更することが重要です。
-- 秘密鍵を必要な場合にのみ使用する。秘密鍵を不必要に公開しないようにし、必要な場合にのみ使用するようにします。
+There are several tools available that can assist in brute forcing PGP/GPG private keys, such as `pgcrack` and `gpg2john`. These tools automate the process of generating key combinations and testing them against the private key.
 
-秘密鍵の漏洩を防ぐためには、セキュリティ意識の高い行動が必要です。定期的なセキュリティ監査や脆弱性スキャンを実施し、セキュリティ対策を強化することが重要です。
-```
+It is important to note that brute forcing a PGP/GPG private key is generally considered unethical and illegal without proper authorization. It is recommended to only use these techniques for legitimate purposes, such as recovering a forgotten passphrase or testing the strength of your own private key.
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -1411,8 +1017,8 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 パスワードで保護された列を持つxlsxファイルがある場合、次の手順で保護を解除できます：
 
-* **Googleドライブにアップロード**すると、パスワードが自動的に削除されます
-* **手動で**それを**削除**するには：
+* **Googleドライブにアップロード**し、パスワードは自動的に削除されます
+* 手動で**削除**するには：
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -1423,21 +1029,20 @@ zip -r file.xls .
 ```
 ### PFX証明書
 
-PFX証明書は、Microsoft Windowsで一般的に使用される証明書形式です。PFXは、証明書とその関連する秘密鍵を1つのファイルに結合するため、便利な形式として知られています。PFX証明書は、デジタル署名や暗号化などのセキュリティ関連の操作に使用されます。
+PFX証明書は、公開鍵暗号方式で使用されるデジタル証明書の一種です。PFXは、個人情報交換ファイル（Personal Information Exchange）の略称です。PFX証明書は、秘密鍵と公開鍵のペアを含み、一般的にはパスワードで保護されています。
 
-PFX証明書をブルートフォース攻撃する場合、以下の手順を実行します。
+PFX証明書は、デジタル署名や暗号化などのセキュリティ関連の操作に使用されます。PFX証明書を使用すると、データの機密性や整合性を確保することができます。
 
-1. 辞書攻撃: 一般的なパスワードや一般的な単語のリストを使用して、PFX証明書のパスワードを推測します。
-2. ブルートフォース攻撃: 辞書攻撃が成功しなかった場合、すべての可能な組み合わせを試すために、パスワードのすべての組み合わせを総当たりで試します。これは非常に時間がかかる場合があります。
+PFX証明書を作成するには、秘密鍵と公開鍵のペアを生成し、それらをPFXフォーマットにエクスポートする必要があります。PFX証明書は、一般的にはパスワードで保護されているため、安全なパスワードの選択と管理が重要です。
 
-ブルートフォース攻撃は、パスワードの強度が弱い場合に効果的です。しかし、強力なパスワードを使用している場合は、ブルートフォース攻撃は非現実的な時間がかかる可能性があります。
+PFX証明書は、WebサーバーのSSL/TLS証明書や電子メールの署名証明書など、さまざまな用途で使用されます。PFX証明書の管理と保護は、セキュリティの重要な側面です。
 ```bash
 # From https://github.com/Ridter/p12tool
 ./p12tool crack -c staff.pfx -f /usr/share/wordlists/rockyou.txt
 # From https://github.com/crackpkcs12/crackpkcs12
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
@@ -1476,18 +1081,18 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat攻撃
+#### Hashcatの攻撃方法
 
-* **ワードリスト攻撃** (`-a 0`) with ルール
+* **ワードリスト攻撃** (`-a 0`) とルール
 
-**Hashcat**はすでに**ルールを含むフォルダ**を持っていますが、[**ここで他の興味深いルールを見つけることができます**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)。
+**Hashcat**にはすでに**ルールが含まれたフォルダ**がありますが、[**ここで他の興味深いルールを見つけることができます**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)。
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 * **ワードリスト組み合わせ**攻撃
 
 hashcatを使用して、2つのワードリストを1つに組み合わせることができます。\
-もし、リスト1に単語**"hello"**が含まれており、2つ目のリストには単語**"world"**と**"earth"**が2行含まれている場合、`helloworld`と`helloearth`という単語が生成されます。
+もし、リスト1には単語**"hello"**が含まれ、2つ目のリストには単語**"world"**と**"earth"**がそれぞれ2行ずつ含まれていた場合、`helloworld`と`helloearth`という単語が生成されます。
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -1538,124 +1143,131 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Hashcatモード
+#### Hashcatのモード
 
-Hashcatは、さまざまなハッシュ関数をクラックするためのさまざまなモードを提供しています。以下に、一部の一般的なモードを示します。
+Hashcatは、さまざまなハッシュアルゴリズムをクラックするためのさまざまなモードを提供しています。以下にいくつかの一般的なモードを示します。
 
-- **0**: Straightモード。ハッシュを直接クラックします。
-- **100**: DCCモード。DCC（Distributed Checksum Clearinghouse）ハッシュをクラックします。
-- **1400**: WPA/WPA2ハンドシェイクモード。WPA/WPA2ハンドシェイクをクラックします。
-- **1700**: Kerberos 5 TGS-REP etype 23モード。Kerberos 5 TGS-REP etype 23ハッシュをクラックします。
-- **2500**: WPA/WPA2ハンドシェイクモード（PMKID）。WPA/WPA2ハンドシェイクのPMKIDをクラックします。
-- **3000**: LMハッシュモード。LMハッシュをクラックします。
-- **5000**: MD5ハッシュモード。MD5ハッシュをクラックします。
-- **5600**: NetNTLMv1ハッシュモード。NetNTLMv1ハッシュをクラックします。
-- **10000**: NTLMハッシュモード。NTLMハッシュをクラックします。
-- **16800**: SHA-512ハッシュモード。SHA-512ハッシュをクラックします。
+- **ハッシュモード**（モード0）：ハッシュ値を解読するための基本的なモードです。ハッシュアルゴリズムに応じて、ハッシュ値を解読するためのルールや攻撃方法を指定することができます。
 
-これらは、Hashcatがサポートするモードの一部です。ハッシュの種類に応じて、適切なモードを選択することが重要です。
+- **ワードリストモード**（モード1）：事前に作成されたワードリストを使用して、ハッシュ値を解読するモードです。ワードリストには、一般的なパスワードや辞書ワードが含まれています。
+
+- **組み合わせモード**（モード2）：複数のワードリストを組み合わせて使用し、ハッシュ値を解読するモードです。これにより、複数のワードリストを組み合わせて攻撃することができます。
+
+- **ルールベースモード**（モード3）：ルールを使用して、ワードリストの単語を変形させ、ハッシュ値を解読するモードです。ルールには、文字の追加、置換、削除などの変換方法が含まれています。
+
+- **ハイブリッドモード**（モード4）：ワードリストとルールを組み合わせて使用し、ハッシュ値を解読するモードです。ワードリストとルールの組み合わせにより、より効率的な攻撃が可能となります。
+
+これらのモードは、Hashcatの柔軟性とパフォーマンスを最大限に活用するための重要なツールです。ハッシュクラッキングの目的や環境に応じて、適切なモードを選択することが重要です。
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-# Linux ハッシュをクラックする - /etc/shadow ファイル
+# Linuxハッシュのクラック - /etc/shadowファイル
 
-## Introduction
+## 概要
 
-Linuxシステムでは、ユーザー・パスワードは`/etc/shadow`ファイルに保存される。このファイルには、元のパスワードを一方向暗号化したハッシュ・パスワードが格納されている。ハッカーとして`/etc/shadow`ファイルにアクセスすれば、これらのハッシュをクラックして元のパスワードを入手しようと試みることができる。
+Linuxシステムでは、ユーザーのパスワードは/etc/shadowファイルにハッシュ化されて保存されます。このファイルは通常、rootユーザーのみがアクセスできるようになっています。しかし、ハッシュ関数の性質上、ハッシュ値から元のパスワードを復元することは不可能ではありません。このため、ハッシュを解読することで、ユーザーのパスワードを取得することができます。
 
-## Brute-Force Attack
+## ブルートフォース攻撃
 
-Linuxのハッシュをクラックする一般的な方法のひとつに、ブルートフォース攻撃がある。この攻撃では、ハッカーは正しいパスワードが見つかるまで、可能な限りの文字の組み合わせを体系的に試行する。これは、特に複雑なパスワードの場合、時間のかかるプロセスとなる。
+ブルートフォース攻撃は、ハッシュ値を解読するための一般的な手法です。この攻撃では、可能なすべてのパスワードの組み合わせを試し、ハッシュ値と一致するものを見つけることを目指します。
 
-## 辞書攻撃
+以下は、ブルートフォース攻撃の手順です。
 
-もう1つのアプローチは辞書攻撃で、ハッカーはよく使われるパスワードや辞書に載っている単語をあらかじめ生成したリストを使う。攻撃者は各単語のハッシュを/etc/shadowファイル内のハッシュと比較し、一致するものを見つけようとする。この方法はブルートフォースよりも速いが、ユーザーが弱いパスワードや一般的なパスワードを選ぶことに依存する。
+1. ハッシュ値を取得します。/etc/shadowファイルからユーザーのハッシュ値を抽出します。
+2. パスワードリストを作成します。攻撃者は、一般的なパスワードや辞書攻撃に使用するためのパスワードリストを作成します。
+3. パスワードリストを使用して攻撃を開始します。攻撃者は、パスワードリスト内の各パスワードをハッシュ化し、ハッシュ値と一致するかどうかを確認します。
+4. 一致するパスワードが見つかるまで繰り返します。攻撃者は、すべてのパスワードを試すまで繰り返します。
 
-## レインボーテーブル
+## ツールとリソース
 
-レインボーテーブルとは、ハッシュとそれに対応する平文パスワードの事前計算テーブルである。このテーブルを使えば、与えられたハッシュの元のパスワードを素早く見つけることができる。しかし、レインボーテーブルはサイズが大きくなり、大きな記憶領域を必要とします。
+ブルートフォース攻撃を実行するためには、以下のツールとリソースが必要です。
 
-## Online Hash Cracking Services
+- パスワードリスト: ブルートフォース攻撃に使用するパスワードのリストです。一般的なパスワードや辞書攻撃に使用されることがあります。
+- ハッシュクラッキングツール: ハッシュ値を解読するためのツールです。John the RipperやHashcatなどが一般的に使用されます。
 
-ハッシュ・クラッキング機能を提供するオンライン・サービスがある。これらのサービスは、強力なハードウェアとアルゴリズムを利用して、ハッシュを素早くクラックする。しかし、これらのサービスを利用することは倫理的、法的な問題を引き起こす可能性があるため、注意が必要である。
+## 対策方法
 
-## Conclusion
+ユーザーのパスワードを保護するためには、以下の対策を実施することが重要です。
 
-`etc/shadow`ファイルからLinuxのハッシュをクラックするのは、難しい作業になる。様々なクラッキング技術やツールの知識が必要となる。ハッカーとして、ハッシュ・クラッキング活動に関連するリスクと法的な意味を理解することは重要です。
+- 強力なパスワードポリシーの設定: ユーザーには、複雑なパスワードを使用するように要求するポリシーを設定します。
+- パスワードのハッシュ化: パスワードはハッシュ関数を使用して保存されるべきです。また、ソルトを使用してハッシュ値をより安全にすることも重要です。
+- パスワードリストの使用禁止: システム上で一般的なパスワードリストの使用を禁止します。
+- ログイン試行回数の制限: ログイン試行回数を制限することで、ブルートフォース攻撃を防ぐことができます。
+
+以上がLinuxハッシュのクラックに関する情報です。ユーザーのパスワードを保護するためには、適切な対策を実施することが重要です。
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-# Cracking Windows Hashes
+# Windowsハッシュのクラック
 
-## Introduction
+## 概要
 
-このセクションでは、Windowsハッシュをクラックするプロセスについて説明する。Windowsハッシュは、Windowsオペレーティング・システムに保存されているユーザー・パスワードの暗号化表現である。このハッシュをクラックすることで、元の平文パスワードを得ることができ、ユーザーアカウントへの不正アクセスなど、様々な目的に利用できる。
+Windowsオペレーティングシステムでは、ユーザーのパスワードはハッシュ値として保存されます。このハッシュ値を解読することで、パスワードを特定することができます。このセクションでは、Windowsハッシュのクラックについて説明します。
 
-## Methodologies
+## ツールとリソース
 
-Windowsのハッシュをクラックする方法論やツールはいくつかある。ここでは、一般的に使用される2つの方法、すなわちブルートフォース攻撃と 辞書攻撃について説明する。
+Windowsハッシュをクラックするために使用できるさまざまなツールとリソースがあります。以下はいくつかの一般的なものです。
 
-### Brute-Force Attacks
+- **John the Ripper**: パスワードクラッキングツールで、Windowsハッシュの解読に使用できます。
+- **Hashcat**: 高速なパスワードリカバリツールで、Windowsハッシュのクラックに使用できます。
+- **RainbowCrack**: レインボーテーブルを使用して、Windowsハッシュを解読するための効率的なツールです。
+- **Online Hash Crack**: オンラインサービスで、Windowsハッシュのクラックを行うことができます。
 
-ブルートフォース攻撃は、正しいパスワードが見つかるまで、可能な限りの文字の組み合わせを体系的に試すものである。この方法は、多数の組み合わせを試す必要があるため、時間とリソースを消費します。しかし、パスワードが弱く、容易に推測できる場合には有効です。
+## ブルートフォース攻撃
 
-Windowsのハッシュに対してブルートフォース攻撃を行うには、John the RipperやHashcatのようなツールを使うことができる。これらのツールは、強力なアルゴリズムとテクニックを利用し、クラッキング・プロセスを高速化する。
+ブルートフォース攻撃は、すべての可能な組み合わせを試すことでパスワードを解読する手法です。Windowsハッシュのクラックにおいても、ブルートフォース攻撃は有効な手法の一つです。
 
-### 辞書攻撃
+以下は、ブルートフォース攻撃を使用してWindowsハッシュをクラックする手順です。
 
-辞書攻撃は、辞書として知られる、よく使われるパスワードのあらかじめ生成されたリストを使ってハッシュをクラックする。この方法は、試行する組み合わせの数を減らすことができるため、ブルートフォースよりも効率的です。しかし、ユーザーが辞書からパスワードを選択したという前提に依存します。
+1. パスワードリストの作成: ブルートフォース攻撃に使用するパスワードのリストを作成します。一般的なパスワードや辞書攻撃に使用される単語を含めることができます。
 
-Windowsのハッシュに対する辞書攻撃を行うには、HashcatやHydraのようなツールを使うことができる。これらのツールでは、辞書ファイルを指定してクラッキング・プロセスを自動化することができる。
+2. ツールの設定: 使用するツール（例：John the Ripper、Hashcat）を設定します。ハッシュの種類や攻撃方法などを指定します。
 
-## リソース
+3. 攻撃の実行: ツールを使用してブルートフォース攻撃を実行します。ツールはパスワードリストの各項目を試し、ハッシュと一致するパスワードを見つけるまで続けます。
 
-Windowsのハッシュを解読するのに役立つ様々なリソースがあります。以下のようなものがある：
+4. パスワードの特定: ツールが一致するパスワードを見つけた場合、それがWindowsハッシュのパスワードとなります。
 
-- 単語リスト：辞書攻撃に使用できる単語、パスワード、一般的なフレーズのコレクションです。
-- レインボー・テーブル：ハッシュとそれに対応する平文パスワードの対応付けを事前に計算したテーブルで、クラッキング・プロセスを高速化する。
-- オンライン・データベース：一部のウェブサイトでは、流出したパスワードのデータベースを提供しており、Windowsのハッシュをクラックするのに利用できる。
+## 注意事項
 
-これらのリソースを活用し、適切な方法を採用することで、Windowsハッシュのクラックに成功し、オリジナルのパスワードを入手する可能性を高めることができる。しかし、適切な権限なしにWindowsのハッシュをクラックすることは違法であり、非倫理的であることに注意することが重要である。
+Windowsハッシュのクラックは合法的な目的でのみ使用してください。また、クラックするパスワードは自分のものであるか、明示的な許可を得たものに限定してください。不正なアクセスやプライバシー侵害は法的な問題となります。
+
+## まとめ
+
+Windowsハッシュのクラックは、ユーザーのパスワードを解読するための重要な手法です。ブルートフォース攻撃や専用のツールを使用することで、Windowsハッシュのクラックを行うことができます。ただし、合法的な目的で使用し、適切な許可を得ることが重要です。
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-# 一般的なアプリケーションのハッシュをクラックする。
+# Brute Force
 
-## Introduction
+Brute force is a common method used to crack application hashes. It involves systematically trying every possible combination of characters until the correct password is found.
 
-このセクションでは、一般的なアプリケーションのハッシュをクラックするプロセスについて説明します。ハッシュ・クラッキングは、ハッシュ化された表現から平文のパスワードを復元するために使用される技法です。ハッシュをクラックすることで、様々なアプリケーションやシステムに不正にアクセスすることができます。
+## Dictionary Attack
 
-## Types of Hashes
+A dictionary attack is a type of brute force attack that uses a pre-defined list of commonly used passwords, known as a dictionary, to crack hashes. This method is effective because many users choose weak passwords that are easily guessable.
 
-アプリケーションでよく使われるハッシュにはいくつかの種類がある。最も一般的なものには以下のようなものがある：
+## Hybrid Attack
 
-- **MD5**: これは広く使われているハッシュ関数で、128ビットのハッシュ値を生成する。古いアプリケーションやシステムでよく使われている。
-- **SHA-1**: これも広く使われているハッシュ関数で、160ビットのハッシュ値を生成する。古いアプリケーションやシステムでもよく使われている。
-- **SHA-256**: これはより安全なハッシュ関数で、256ビットのハッシュ値を生成する。最近のアプリケーションやシステムでよく使われている。
+A hybrid attack combines elements of both brute force and dictionary attacks. It involves using a combination of dictionary words and additional characters or numbers to crack hashes. This method is useful for cracking passwords that are not in the dictionary but still follow a predictable pattern.
 
-## ハッシュ・クラッキングのテクニック
+## Mask Attack
 
-ハッシュをクラックするためには、様々なテクニックがある。最も一般的なものには次のようなものがある：
+A mask attack is a type of brute force attack that uses a predefined pattern, or mask, to generate passwords. The mask specifies which characters are fixed and which can vary. This method is useful when the password follows a specific format, such as having a certain number of letters followed by a certain number of digits.
 
-- **総当たり**: このテクニックでは、正しいパスワードが見つかるまで、可能な限りの文字の組み合わせを試すことになる。時間のかかる作業だが、弱いパスワードの解読には効果的だ。
-- **辞書攻撃**: このテクニックでは、辞書として知られる、よく使われるパスワードの事前生成リストを使用してハッシュをクラックする。ブルートフォースよりも速いですが、複雑なパスワードには効果がないかもしれません。
-- **レインボーテーブル**: この手法では、ハッシュ値とそれに対応する平文パスワードの事前計算されたテーブルを使用してハッシュをクラックする。ブルートフォース攻撃や辞書攻撃よりも速いが、大量のストレージを必要とする。
+## Rainbow Tables
 
-## ハッシュ・クラッキングのツール
+Rainbow tables are precomputed tables of hashes and their corresponding plaintext passwords. They can be used to quickly look up the plaintext password for a given hash, bypassing the need for brute force or dictionary attacks. However, rainbow tables can be large and require a significant amount of storage space.
 
-ハッシュをクラックするためのツールはいくつかある。代表的なものには以下のようなものがある：
+## GPU Acceleration
 
-- **John the Ripper**: これは、様々なハッシュタイプとクラッキング技術をサポートする強力なパスワードクラッキングツールです。
-- **Hashcat**: これも人気のあるパスワードクラッキングツールで、幅広いハッシュタイプとクラッキングテクニックをサポートしている。
-- **Hydra**: これは、様々なプロトコルをサポートし、ハッシュクラッキングに使用することができ、汎用性の高いオンラインパスワードクラッキングツールです。
+Graphics Processing Units (GPUs) can be used to accelerate the brute force cracking process. GPUs are highly parallel processors that can perform many calculations simultaneously, making them well-suited for password cracking. Tools like hashcat and John the Ripper support GPU acceleration.
 
 ## Conclusion
 
-一般的なアプリケーション・ハッシュのクラックは、ハッカーや侵入テスト担当者にとって不可欠なスキルです。様々なタイプのハッシュ、クラッキング技術、そして利用可能なツールを理解することで、アプリケーションやシス テムへの不正アクセスを効果的に行うことができます。しかし、ハッシュ・クラッキングは、適切な承認を得て、正当な目的でのみ実行されるべきであることに注意することが重要です。
+Brute force attacks, including dictionary attacks, hybrid attacks, and mask attacks, are commonly used to crack application hashes. Rainbow tables and GPU acceleration can also be used to speed up the cracking process. It is important to use strong, unique passwords to protect against these types of attacks.
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -1669,7 +1281,7 @@ Windowsのハッシュを解読するのに役立つ様々なリソースがあ�
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
@@ -1677,7 +1289,7 @@ Windowsのハッシュを解読するのに役立つ様々なリソースがあ�
 
 </details>
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.io/)を使用して、世界で最も**高度なコミュニティツール**によって強化された**ワークフローを簡単に構築**および**自動化**します。\

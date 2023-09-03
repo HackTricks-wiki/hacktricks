@@ -1,6 +1,6 @@
 # ACLs - DACLs/SACLs/ACEs
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
@@ -12,9 +12,9 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したり、HackTricksを**PDFでダウンロード**したりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 * **ハッキングのトリックを共有**するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
@@ -33,17 +33,17 @@ ACLは、オブジェクトとそのプロパティに適用される保護を�
 
 ### **自由裁量アクセス制御リスト（DACL）**
 
-DACL（ACLとも呼ばれることが多い）は、オブジェクトに割り当てられたアクセス許可を識別するユーザーとグループを識別します。セキュアオブジェクトに対してアクセス権限を持つペアのACE（アカウント+アクセス権限）のリストを含みます。
+DACL（ACLとも呼ばれることが多い）は、オブジェクトに割り当てられたアクセス許可を識別するユーザーとグループを特定します。それは、セキュアオブジェクトに対してペアのACE（アカウント+アクセス権）のリストを含んでいます。
 
 ### **システムアクセス制御リスト（SACL）**
 
-SACLを使用すると、セキュリティの保護されたオブジェクトへのアクセスを監視できます。SACL内のACEは、セキュリティイベントログに記録されるアクセスの種類を決定します。モニタリングツールを使用すると、悪意のあるユーザーが保護されたオブジェクトにアクセスしようとすると、適切な人に警告を発することができます。また、インシデントのシナリオでは、ログを使用して過去の手順を追跡することができます。最後に、トラブルシューティングのためにアクセスの問題をログに記録することもできます。
+SACLを使用すると、セキュリティの保護されたオブジェクトへのアクセスを監視できます。SACLのACEは、セキュリティイベントログに記録されるアクセスの種類を決定します。モニタリングツールを使用すると、悪意のあるユーザーがセキュリティの保護されたオブジェクトにアクセスしようとすると、適切な人々に警告を発することができます。また、インシデントのシナリオでは、ログを使用して過去の手順を追跡することができます。そして最後に、トラブルシューティングのためにアクセスの問題をログに記録することもできます。
 
 ## システムがACLを使用する方法
 
-システムに**ログインしたユーザーは、そのログオンセッションのセキュリティ情報を持つアクセストークンを保持**しています。ユーザーがログオンすると、システムはアクセストークンを作成します。ユーザーの代わりに実行される**すべてのプロセスには、アクセストークンのコピー**があります。トークンには、ユーザー、ユーザーのグループ、およびユーザーの特権を識別するログオンSID（セキュリティ識別子）も含まれています。
+システムに**ログインしている各ユーザーは、そのログオンセッションのセキュリティ情報を持つアクセストークンを保持**しています。ユーザーがログオンすると、システムはアクセストークンを作成します。ユーザーの代わりに実行される**すべてのプロセスにはアクセストークンのコピーがあります**。トークンはユーザー、ユーザーのグループ、およびユーザーの特権を識別します。トークンには、現在のログオンセッションを識別するログオンSID（セキュリティ識別子）も含まれています。
 
-スレッドがセキュリティオブジェクトにアクセスしようとすると、LSASS（ローカルセキュリティ機関）がアクセスを許可または拒否します。これを行うために、LSASSはスレッドに適用されるACEを探すために、SDSデータストリーム内のDACL（自由裁量アクセス制御リスト）を検索します。
+スレッドがセキュリティの保護されたオブジェクトにアクセスしようとすると、LSASS（ローカルセキュリティ機関）はアクセスを許可または拒否します。これを行うために、LSASSはスレッドに適用されるACEを探すためにSDSデータストリーム内のDACL（自由裁量アクセス制御リスト）を検索します。
 
 オブジェクトのDACLの各ACEは、セキュリティプリンシパルまたはログオンセッションに対して許可または拒否されるアクセス権を指定します。オブジェクトの所有者がそのオブジェクトのDACLにACEを作成していない場合、システムはすぐにアクセスを許可します。
 
@@ -53,20 +53,20 @@ LSASSがACEを見つけた場合、各ACEの委任SIDをスレッドのアクセ
 
 ADのすべてのセキュリティオブジェクトに適用できる**3つの主要なACEのタイプ**があります。
 
-| **ACE**                  | **説明**                                                                                                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`アクセス拒否ACE`**    | ユーザーまたはグループがオブジェクトに対して明示的にアクセスが拒否されていることを示すために、DACL内で使用されます。                                                         |
-| **`アクセス許可ACE`**    | ユーザーまたはグループがオブジェクトに対して明示的にアクセスが許可されていることを示すために、DACL内で使用されます。                                                         |
-| **`システム監査ACE`**    | ユーザーまたはグループがオブジェクトにアクセスしようとすると、SACL内のACEが監査ログを生成します。アクセスが許可されたかどうか、およびどの種類のアクセスが行
+| **ACE**                  | **説明**                                                                                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`アクセス拒否ACE`**  | ユーザーまたはグループがオブジェクトへのアクセスが明示的に拒否されていることを示すためにDACL内で使用されます                                                                                   |
+| **`アクセス許可ACE`** | ユーザーまたはグループがオブジェクトへのアクセスが明示的に許可されていることを示すためにDACL内で使用されます                                                                                  |
+| **`システム監査ACE`**   | ユーザーまたはグループがオブジェクトにアクセスしようとすると、SACL内のACEが監査ログを生成します。アクセスが許可されたか
 ### ACEの順序
 
-要求されたアクセスが明示的に許可または拒否されると、システムはACEのチェックを停止しますので、DACL内のACEの順序は重要です。
+要求されたアクセスが明示的に許可または拒否された場合、システムはACEのチェックを停止しますので、DACL内のACEの順序は重要です。
 
 DACL内のACEの優先順位は「正準」順序と呼ばれます。Windows 2000およびWindows Server 2003では、正準順序は次のとおりです。
 
 1. すべての「明示的」ACEは、任意の「継承」ACEの前にグループ内に配置されます。
 2. 「明示的」ACEのグループ内では、「アクセス拒否」ACEは「アクセス許可」ACEの前に配置されます。
-3. 「継承」グループ内では、子オブジェクトの親から継承されたACEが最初に配置され、その後、祖父から継承されたACEなど、オブジェクトツリーを上に向かって継承されたACEが配置されます。その後、アクセス拒否ACEはアクセス許可ACEの前に配置されます。
+3. 「継承」グループ内では、子オブジェクトの親から継承されたACEが最初に配置され、その後、祖父から継承されたACEなど、オブジェクトツリーを上に向かって継承されたACEが配置されます。その後、「アクセス拒否」ACEは「アクセス許可」ACEの前に配置されます。
 
 以下の図は、ACEの正準順序を示しています。
 
@@ -76,26 +76,24 @@ DACL内のACEの優先順位は「正準」順序と呼ばれます。Windows 20
 
 正準順序により、次のことが実現されます。
 
-* 明示的な「アクセス拒否ACE」は、明示的な「アクセス許可ACE」に関係なく強制されます。つまり、オブジェクトの所有者は、ユーザーグループへのアクセスを許可し、そのグループの一部にアクセスを拒否する権限を定義できます。
-* すべての「明示的ACE」は、継承されたACEの前に処理されます。これは、任意のアクセス制御の概念と一致しています。子オブジェクト（たとえばファイル）へのアクセスは、親オブジェクト（たとえばフォルダ）の所有者ではなく、子オブジェクトの所有者の裁量によるものです。子オブジェクトの所有者は、直接子オブジェクトに対してアクセス権を定義できます。その結果、継承されたアクセス許可の効果が変更されます。
+* 明示的な「アクセス拒否」ACEは、明示的な「アクセス許可」ACEに関係なく強制されます。つまり、オブジェクトの所有者は、ユーザーグループへのアクセスを許可し、そのグループの一部にアクセスを拒否する権限を定義できます。
+* すべての明示的なACEは、継承されたACEの前に処理されます。これは、任意のアクセス制御の概念と一致しています。子オブジェクト（たとえばファイル）へのアクセスは、親オブジェクト（たとえばフォルダ）の所有者ではなく、子オブジェクトの所有者の裁量によるものです。子オブジェクトの所有者は、直接子オブジェクトに対してアクセス権を定義できます。その結果、継承されたアクセス許可の効果が変更されます。
 
-
-
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築および自動化できます。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化できます。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ### GUIの例
 
-これは、ACL、DACL、およびACEを表示するフォルダのクラシックなセキュリティタブです：
+これは、ACL、DACL、およびACEを表示するフォルダのクラシックなセキュリティタブです。
 
 ![](../../.gitbook/assets/classicsectab.jpg)
 
-「詳細」ボタンをクリックすると、継承などの追加オプションが表示されます：
+「詳細」ボタンをクリックすると、継承などの追加オプションが表示されます。
 
 ![](../../.gitbook/assets/aceinheritance.jpg)
 
@@ -103,7 +101,7 @@ DACL内のACEの優先順位は「正準」順序と呼ばれます。Windows 20
 
 ![](../../.gitbook/assets/editseprincipalpointers1.jpg)
 
-最後に、監査タブのSACLがあります：
+最後に、監査タブのSACLがあります。
 
 ![](../../.gitbook/assets/audit-tab.jpg)
 
@@ -111,7 +109,7 @@ DACL内のACEの優先順位は「正準」順序と呼ばれます。Windows 20
 
 この例では、アクセス許可されたグループは「Everyone」であり、アクセス拒否されたグループは「Marketing」であり、それは「Everyone」の一部です。
 
-「Cost」フォルダへのMarketingグループのアクセスを拒否したい場合、CostフォルダのACEが正準順序であれば、Marketingを拒否するACEはEveryoneを許可するACEの前に配置されます。
+「Cost」フォルダへのMarketingグループのアクセスを拒否したい場合、CostフォルダのACEが正準順序になっている場合、Marketingを拒否するACEはEveryoneを許可するACEの前に配置されます。
 
 アクセスチェック中、オペレーティングシステムはオブジェクトのDACLに表示される順序でACEを処理するため、許可するACEの前に拒否するACEが処理されます。その結果、Marketingグループのメンバーはアクセスが拒否されます。他のユーザーはオブジェクトにアクセスが許可されます。
 
@@ -119,9 +117,9 @@ DACL内のACEの優先順位は「正準」順序と呼ばれます。Windows 20
 
 この例では、CostフォルダにはMarketing（親オブジェクト）へのアクセスを拒否する継承可能なACEがあります。つまり、Marketingグループのメンバー（または子）であるすべてのユーザーは、継承によってアクセスが拒否されます。
 
-マーケティングディレクターであるBobにアクセスを許可したい場合、BobはMarketingグループのメンバーとして、継承によってCostフォルダへのアクセスが拒否されます。子オブジェクト（ユーザーBob）の所有者は、Costフォルダへのアクセスを許可する明示的なACEを定義します。子オブジェクトのACEが正準順序であれば、Bobにアクセスを許可する明示的なACEは、Marketingグループへのアクセスを拒否する継承されたACEを含む、継承されたACEの前に配置されます。
+マーケティングディレクターであるBobにアクセスを許可したい場合、BobはMarketingグループのメンバーとして、継承によってCostフォルダへのアクセスが拒否されます。子オブジェクト（ユーザーBob）の所有者は、Costフォルダへのアクセスを許可する明示的なACEを定義します。子オブジェクトのACEが正準順序になっている場合、Bobへのアクセスを許可する明示的なACEは、Marketingグループへのアクセスを拒否する継承されたACEを含む継承されたACEよりも前に配置されます。
 
-アクセスチェック中、オペレーティングシステムはMarketingグループへのアクセスを拒否するACEに到達する前に、Bobにアクセスを許可するACEに到達します。その結果、BobはMarketingグループのメンバーであるにもかかわらず、オブジェクトにアクセスが許可されます。他のMarketingグループのメンバーはアクセスが拒否されます。
+アクセスチェック中、オペレーティングシステムはMarketingグループへのアクセスを拒否するACEに到達する前に、Bobへのアクセスを許可するACEに到達します。その結果、BobはMarketingグループのメンバーであるにもかかわらず、オブジェクトにアクセスが許可されます。他のMarketingグループのメンバーはアクセスが拒否されます。
 
 ### アクセス制御エントリ
 
@@ -141,7 +139,7 @@ ACEは基本的に同じです。それらを区別するのは、継承とオ�
 
 ジェネリックACEは、継承される子オブジェクトの種類を制御するための制限された制御を提供します。基本的に、コンテナと非コンテナの区別しかできません。
 
-たとえば、NTFSのFolderオブジェクトのDACLには、フォルダの内容をリストするためのジェネリックACEが含まれる場合があります。フォルダの内容をリストすることは、コンテナオブジェクトでのみ実行できる操作ですので、操作を許可するACEはCONTAINER\_INHERIT\_ACEとしてフラグ付けされます。フォルダ内のコンテナオブジェクト（
+たとえば、NTFSのFolderオブジェクトのDACLには、フォルダの内容をリストするためのジェネリックACEが含まれる場合があります。フォルダの内容をリストすることは、コンテナオブジェクトでのみ実行できる操作ですので、操作を許可するACEはCONTAINER\_INHERIT\_ACEとしてフラグ付けされます。フォルダ内の
 ### アクセス制御エントリのレイアウト
 
 | ACEフィールド | 説明                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -154,16 +152,16 @@ ACEは基本的に同じです。それらを区別するのは、継承とオ�
 
 ### アクセスマスクのレイアウト
 
-| ビット（範囲） | 意味                               | 説明/例                                     |
-| -------------- | ---------------------------------- | ------------------------------------------- |
-| 0 - 15         | オブジェクト固有のアクセス権         | データの読み取り、実行、データの追加         |
-| 16 - 22        | 標準アクセス権                     | 削除、ACLの書き込み、所有者の書き込み         |
-| 23             | セキュリティACLにアクセスできる     |                                             |
-| 24 - 27        | 予約済み                           |                                             |
-| 28             | 汎用ALL（読み取り、書き込み、実行） | 以下のすべて                               |
+| ビット（範囲） | 意味                               | 説明/例                                   |
+| -------------- | ---------------------------------- | ----------------------------------------- |
+| 0 - 15         | オブジェクト固有のアクセス権         | データの読み取り、実行、データの追加       |
+| 16 - 22        | 標準アクセス権                     | 削除、ACLの書き込み、所有者の書き込み      |
+| 23             | セキュリティACLにアクセスできる     |                                           |
+| 24 - 27        | 予約済み                           |                                           |
+| 28             | 汎用ALL（読み取り、書き込み、実行） | 以下のすべて                             |
 | 29             | 汎用実行                           | プログラムを実行するために必要なすべてのもの |
-| 30             | 汎用書き込み                       | ファイルに書き込むために必要なすべてのもの   |
-| 31             | 汎用読み取り                       | ファイルを読み取るために必要なすべてのもの   |
+| 30             | 汎用書き込み                       | ファイルに書き込むために必要なすべてのもの |
+| 31             | 汎用読み取り                       | ファイルを読み取るために必要なすべてのもの |
 
 ## 参考文献
 
@@ -174,18 +172,18 @@ ACEは基本的に同じです。それらを区別するのは、継承とオ�
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを発見してください。
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください**。
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクションを発見してください。
+* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築して自動化します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築および自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

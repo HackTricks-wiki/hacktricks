@@ -1,6 +1,6 @@
 # Linuxフォレンジックス
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
@@ -14,9 +14,9 @@
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
 
@@ -49,23 +49,23 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 ```
 #### 可疑情報
 
-基本情報を取得する際に、以下のような奇妙なことをチェックする必要があります：
+基本情報を取得する際に、以下のような奇妙なことに注意してください：
 
 * **ルートプロセス**は通常、低いPIDで実行されます。したがって、大きなPIDを持つルートプロセスが見つかった場合は疑わしいと考えられます。
-* `/etc/passwd`内のシェルのないユーザーの**登録済みログイン**をチェックします。
-* シェルのないユーザーの**パスワードハッシュ**を`/etc/shadow`内でチェックします。
+* `/etc/passwd`内のシェルのないユーザーの**登録済みログイン**を確認してください。
+* シェルのないユーザーの**パスワードハッシュ**を`/etc/shadow`内で確認してください。
 
 ### メモリダンプ
 
-実行中のシステムのメモリを取得するために、[**LiME**](https://github.com/504ensicsLabs/LiME)を使用することをお勧めします。\
-それを**コンパイル**するためには、被害者のマシンが使用している**同じカーネル**を使用する必要があります。
+実行中のシステムのメモリを取得するためには、[**LiME**](https://github.com/504ensicsLabs/LiME)を使用することをおすすめします。\
+**コンパイル**するためには、被害者のマシンと同じカーネルを使用する必要があります。
 
 {% hint style="info" %}
-被害者のマシンには、LiMEや他の何かを**インストールすることはできない**ことを忘れないでください。なぜなら、それによっていくつかの変更が加えられるからです。
+被害者のマシンには、LiMEや他の何かを**インストールすることはできません**。なぜなら、それによっていくつかの変更が加えられるからです。
 {% endhint %}
 
 したがって、Ubuntuの同一バージョンがある場合は、`apt-get install lime-forensics-dkms`を使用できます。\
-それ以外の場合は、[**LiME**](https://github.com/504ensicsLabs/LiME)をgithubからダウンロードし、正しいカーネルヘッダーを使用してコンパイルする必要があります。被害者マシンの**正確なカーネルヘッダー**を取得するためには、単にディレクトリ`/lib/modules/<kernel version>`を自分のマシンにコピーし、それを使用してLiMEを**コンパイル**します：
+それ以外の場合は、[**LiME**](https://github.com/504ensicsLabs/LiME)をgithubからダウンロードし、正しいカーネルヘッダーを使用してコンパイルする必要があります。被害者マシンの**正確なカーネルヘッダー**を取得するためには、単に`/lib/modules/<kernel version>`ディレクトリを自分のマシンに**コピー**し、それを使用してLiMEをコンパイルします：
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -73,7 +73,7 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 LiMEは3つの**フォーマット**をサポートしています：
 
 * Raw（すべてのセグメントを連結したもの）
-* Padded（Rawと同じですが、右ビットにゼロが入っています）
+* Padded（Rawと同じですが、右ビットにはゼロが入っています）
 * Lime（メタデータを含む推奨フォーマット）
 
 LiMEはまた、`path=tcp:4444`のような方法を使用して、システムに保存する代わりにダンプを**ネットワーク経由で送信する**ためにも使用できます。
@@ -85,7 +85,7 @@ LiMEはまた、`path=tcp:4444`のような方法を使用して、システム�
 まず、**システムをシャットダウンする**必要があります。これは常にオプションではありません。会社がシャットダウンする余裕のないプロダクションサーバーの場合もあります。\
 システムをシャットダウンするには、**通常のシャットダウン**と**「プラグを抜く」シャットダウン**の2つの方法があります。前者は**プロセスが通常通り終了**し、**ファイルシステムが同期**されることを許しますが、**マルウェア**が**証拠を破壊**する可能性もあります。後者の「プラグを抜く」アプローチでは、**一部の情報が失われる**可能性があります（メモリのイメージを既に取得しているため、情報の損失はほとんどありません）が、**マルウェアは何もできません**。したがって、**マルウェア**が存在する可能性がある場合は、システムで**`sync`** **コマンド**を実行してからプラグを抜いてください。
 
-#### ディスクのイメージを取る
+#### ディスクのイメージを取得する
 
 ケースに関連する何かにコンピュータを接続する**前に**、情報を変更しないようにするために、それが**読み取り専用でマウントされることを確認する**必要があります。
 ```bash
@@ -151,10 +151,10 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
 今すぐアクセスを取得してください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -163,7 +163,7 @@ ThisisTheMasterSecret
 
 ### 変更されたシステムファイル
 
-一部のLinuxシステムには、多くのインストール済みコンポーネントの整合性を検証する機能があり、異常または場所にないファイルを特定する効果的な方法を提供します。たとえば、Linuxの`rpm -Va`は、RedHat Package Managerを使用してインストールされたすべてのパッケージを検証するために設計されています。
+一部のLinuxシステムには、多くのインストール済みコンポーネントの整合性を検証する機能があり、異常なファイルや場所にないファイルを特定する効果的な方法です。たとえば、Linuxの`rpm -Va`は、RedHat Package Managerを使用してインストールされたすべてのパッケージを検証するために設計されています。
 ```bash
 #RedHat
 rpm -Va
@@ -194,7 +194,7 @@ rpm -qa --root=/ mntpath/var/lib/rpm
 ```
 ### その他
 
-上記のコマンドでは、すべてのインストールされたプログラムがリストされるわけではありません。なぜなら、一部のアプリケーションは特定のシステム向けのパッケージとして利用できず、ソースコードからインストールする必要があるからです。そのため、_**/usr/local**_ や _**/opt**_ などの場所を調べることで、ソースコードからコンパイルしてインストールされた他のアプリケーションが見つかるかもしれません。
+上記のコマンドでは、すべてのインストールされたプログラムがリストされるわけではありません。なぜなら、一部のアプリケーションは特定のシステム向けのパッケージとして利用できず、ソースコードからインストールする必要があるからです。そのため、_**/usr/local**_ や _**/opt**_ などの場所を調査することで、ソースコードからコンパイルしてインストールされた他のアプリケーションが見つかるかもしれません。
 ```bash
 ls /opt /usr/local
 ```
@@ -206,10 +206,10 @@ find /sbin/ -exec dpkg -S {} \; | grep "no path found"
 #RedHat
 find /sbin/ –exec rpm -qf {} \; | grep "is not"
 ```
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
 今すぐアクセスを取得してください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -236,7 +236,7 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 ```
 ### サービス
 
-マルウェアが新しい、許可されていないサービスとして浸透することは非常に一般的です。Linuxには、コンピュータの起動時にサービスを開始するために使用されるいくつかのスクリプトがあります。初期化の起動スクリプトである_**/etc/inittab**_は、_**/etc/rc.d/**_ディレクトリまたは一部の古いバージョンでは_**/etc/rc.boot/**_ディレクトリ、またはDebianなどの他のバージョンのLinuxでは_**/etc/init.d/**_ディレクトリの下のさまざまな起動スクリプトを呼び出します。さらに、一部の一般的なサービスは、Linuxのバージョンに応じて_**/etc/inetd.conf**_または_**/etc/xinetd/**_に有効にされます。デジタル調査官は、これらの起動スクリプトの各エントリを異常なものとして調査する必要があります。
+マルウェアが新しい、許可されていないサービスとして浸透することは非常に一般的です。Linuxには、コンピュータの起動時にサービスを開始するために使用されるいくつかのスクリプトがあります。初期化の起動スクリプトである _**/etc/inittab**_ は、_**/etc/rc.d/**_ ディレクトリまたは一部の古いバージョンでは _**/etc/rc.boot/**_ ディレクトリ、または _**/etc/init.d/**_ ディレクトリなど、他のスクリプトを呼び出します。また、Debianなどの他のバージョンのLinuxでは、起動スクリプトは _**/etc/init.d/**_ ディレクトリに格納されています。さらに、一部の一般的なサービスは、Linuxのバージョンに応じて _**/etc/inetd.conf**_ または _**/etc/xinetd/**_ に有効にされています。デジタル調査官は、これらの起動スクリプトの各エントリを異常なものとして調査する必要があります。
 
 * _**/etc/inittab**_
 * _**/etc/rc.d/**_
@@ -249,15 +249,15 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 
 ### カーネルモジュール
 
-Linuxシステムでは、マルウェアパッケージのルートキットコンポーネントとしてカーネルモジュールが一般的に使用されます。カーネルモジュールは、システムの起動時に`/lib/modules/'uname -r'`および`/etc/modprobe.d`ディレクトリ、および`/etc/modprobe`または`/etc/modprobe.conf`ファイルの設定情報に基づいてロードされます。これらの領域は、マルウェアに関連するアイテムを調査するために検査する必要があります。
+Linuxシステムでは、マルウェアパッケージのルートキットコンポーネントとしてカーネルモジュールが一般的に使用されます。カーネルモジュールは、システムの起動時に `/lib/modules/'uname -r'` ディレクトリと `/etc/modprobe.d` ディレクトリ、および `/etc/modprobe` または `/etc/modprobe.conf` ファイルの設定情報に基づいてロードされます。これらの領域は、マルウェアに関連するアイテムを調査するために検査する必要があります。
 
 ### その他の自動起動場所
 
 Linuxは、ユーザーがシステムにログインするときに実行可能ファイルを自動的に起動するために使用するいくつかの設定ファイルがあり、これらにはマルウェアの痕跡が含まれる可能性があります。
 
-* _**/etc/profile.d/\***_、_**/etc/profile**_、_**/etc/bash.bashrc**_は、どのユーザーアカウントでもログインしたときに実行されます。
-* _**∼/.bashrc**_、_**∼/.bash\_profile**_、_**\~/.profile**_、_**∼/.config/autostart**_は、特定のユーザーがログインしたときに実行されます。
-* _**/etc/rc.local**_は、通常のシステムサービスがすべて起動した後、マルチユーザーランレベルに切り替えるプロセスの最後に実行されます。
+* _**/etc/profile.d/\***_ , _**/etc/profile**_ , _**/etc/bash.bashrc**_ は、どのユーザーアカウントがログインしても実行されます。
+* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**\~/.profile**_ , _**∼/.config/autostart**_ は、特定のユーザーがログインしたときに実行されます。
+* _**/etc/rc.local**_ は、通常のシステムサービスがすべて起動した後、マルチユーザーランレベルに切り替えるプロセスの最後に実行されます。
 
 ## ログの調査
 
@@ -265,29 +265,29 @@ Linuxは、ユーザーがシステムにログインするときに実行可能
 
 ### 純粋なログ
 
-システムログおよびセキュリティログに記録された**ログイン**イベントは、特定のアカウントを介して**マルウェア**または**侵入者がアクセス**したことを特定の時間に示すことができます。マルウェア感染の周辺での他のイベントは、システムログにキャプチャされることがあります。例えば、インシデントの時点での新しいサービスの作成や新しいアカウントの作成などです。\
+システムログやセキュリティログに記録された**ログイン**イベントは、特定のアカウントを介して**マルウェア**または**侵入者がアクセス**したことを特定の時間に示すことがあります。マルウェア感染の周辺で発生した他のイベントは、システムログにキャプチャされる場合があります。例えば、インシデントの発生時に新しいサービスや新しいアカウントの作成などです。\
 興味深いシステムログイン：
 
-* **/var/log/syslog**（Debian）または**/var/log/messages**（Redhat）
+* **/var/log/syslog** (debian) または **/var/log/messages** (Redhat)
 * システム全体のアクティビティに関する一般的なメッセージと情報を表示します。
-* **/var/log/auth.log**（Debian）または**/var/log/secure**（Redhat）
-* 成功または失敗したログイン、および認証プロセスの認証ログを保持します。ストレージはシステムのタイプに依存します。
+* **/var/log/auth.log** (debian) または **/var/log/secure** (Redhat)
+* 成功または失敗したログイン、および認証プロセスの認証ログを保持します。保存場所はシステムのタイプによります。
 * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
-* **/var/log/boot.log**：起動メッセージとブート情報。
-* **/var/log/maillog**または**var/log/mail.log**：メールサーバーログで、ポストフィックス、smtpd、またはサーバー上で実行されている関連するメールサービスの情報に便利です。
-* **/var/log/kern.log**：カーネルログと警告情報を保持します。カーネルのアクティビティログ（例：dmesg、kern.log、klog）は、特定のサービスが繰り返しクラッシュしたことを示す可能性があります。これは、不安定なトロイの木馬バージョンがインストールされたことを示しています。
-* **/var/log/dmesg**：デバイスドライバーメッセージのリポジトリです。このファイルのメッセージを表示するには、**dmesg**を使用します。
-* **/var/log/faillog**：失敗したログインの情報を記録します。したがって、ログイン資格情報のハックやブルートフォース攻撃などの潜在的なセキュリティ侵害を調査するのに便利です。
-* **/var/log/cron**：Crond関連のメッセージ（cronジョブ）の記録を保持します。cronデーモンがジョブを開始したときなどです。
-* **/var/log/daemon.log**：バックグラウンドサービスの実行状況を追跡しますが、それらをグラフィカルに表現しません。
-* **/var/log/btmp**：すべての失敗したログイン試行のメモを保持します。
-* **/var/log/httpd/**：Apache httpdデーモンのerror\_logおよびaccess\_logファイルが含まれるディレクトリです。httpdが遭遇したすべてのエラーは、**error\_log**ファイルに保持されます。メモリの問題や他のシステム関連のエラーなどです。**access\_log**は、HTTP経由で受信したすべてのリクエストをログに記録します。
-* **/var/log/mysqld.log**または**/var/log/mysql.log**：MySQLログファイルで、開始、停止、再起動などのすべてのデバッグ、失敗、成功メッセージを記録します。ディレクトリはシステムが決定します。RedHat、CentOS、Fedora、およびその他のRedHatベースのシステムでは、/var/log/mariadb/mariadb.logを使用します。ただし、Debian/Ubuntuでは/var/log/mysql/error.logディレクトリを使用します。
-* **/var/log/xferlog**：FTPファイル転送セッションを保持します。ファイル名やユーザーによるFTP転送などの情報が含まれます。
-* **/var/log/\***：このディレクトリに予期しないログがないか常に確認する必要があります
+* **/var/log/boot.log**: 起動メッセージとブート情報。
+* **/var/log/maillog** または **var/log/mail.log:** メールサーバーログで、ポストフィックス、smtpd、またはサーバー上で実行されている関連するメールサービスの情報に便利です。
+* **/var/log/kern.log**: カーネルログと警告情報を保持します。カーネルのアクティビティログ（例：dmesg、kern.log、klog）は、特定のサービスが繰り返しクラッシュしたことを示す可能性があり、不安定なトロイの木馬バージョンがインストールされていることを示す可能性があります。
+* **/var/log/dmesg**: デバイスドライバーメッセージのリポジトリです。このファイルのメッセージを表示するには、**dmesg** を使用します。
+* **/var/log/faillog:** 失敗したログインの情報を記録します。したがって、ログイン資格情報のハックやブルートフォース攻撃などの潜在的なセキュリティ侵害を調査するのに便利です。
+* **/var/log/cron**: Crond関連のメッセージ（cronジョブ）の記録を保持します。cronデーモンがジョブを開始したときなどです。
+* **/var/log/daemon.log:** バックグラウンドサービスの実行状況を追跡しますが、グラフィカルには表示されません。
+* **/var/log/btmp**: すべての失敗したログイン試行の記録を保持します。
+* **/var/log/httpd/**: Apache httpdデーモンの error\_log と access\_log ファイルが含まれるディレクトリです。httpdが遭遇したすべてのエラーは、**error\_log** ファイルに保持されます。メモリの問題やその他のシステム関連のエラーなどです。**access\_log** は、HTTP経由で受信したすべてのリクエストをログに記録します。
+* **/var/log/mysqld.log** または **/var/log/mysql.log**: MySQLのログファイルで、開始、停止、再起動などのすべてのデバッグ、失敗、成功メッセージを記録します。ディレクトリはシステムによって決まります。RedHat、CentOS、Fedora、およびその他のRedHatベースのシステムでは、/var/log/mariadb/mariadb.log を使用します。ただし、Debian/Ubuntuでは、/var/log/mysql/error.log ディレクトリを使用します。
+* **/var/log/xferlog**: FTPファイル転送セッションを保持します。ファイル名やユーザーによるFTP転送などの情報が含まれます。
+* **/var/log/\*** : このディレクトリに予期しないログがないか常に確認する必要があります
 
 {% hint style="info" %}
-Linuxシステムのログと監査サブシステムは、侵入やマルウェアのインシデントで無効化または削除される場合があります。Linuxシステムのログには一般に最も有用な悪意のある活動に関する情報が含まれるため、侵入者は定期的にそれらを削除します。したがって、利用可能なログファイルを調査する際には、削除または改ざんの兆候となるギャップや順序外のエントリを探すことが重要です。
+Linuxシステムのログと監査サブシステムは、侵入やマルウェアのインシデントで無効化または削除される場合があります。Linuxシステムのログは一般的に悪意のある活動に関する最も有用な情報の一部を含んでいるため、侵入者は定期的にそれらを削除します。したがって、利用可能なログファイルを調査する際には、削除や改ざんの兆候となるギャップや順序の逆転を探すことが重要です。
 {% endhint %}
 
 ### コマンド履歴
@@ -301,20 +301,19 @@ Linuxシステムのログと監査サブシステムは、侵入やマルウェ
 
 ### ログイン
 
-`last -Faiwx`コマンドを使用すると、ログインしたユーザーのリストを取得できます。\
-これらのログインが意味をな
+`last -
 ### アプリケーションのトレース
 
-* **SSH**: システムへのSSH接続は、侵害されたシステムからの接続として、各ユーザーアカウントのファイルにエントリが作成されます（_**∼/.ssh/authorized\_keys**_ および _**∼/.ssh/known\_keys**_）。これらのエントリには、リモートホストのホスト名またはIPアドレスが明示されている場合があります。
-* **Gnomeデスクトップ**: ユーザーアカウントには、Gnomeデスクトップで実行されるアプリケーションを使用して最近アクセスされたファイルに関する情報が含まれる _**∼/.recently-used.xbel**_ ファイルがある場合があります。
-* **VIM**: ユーザーアカウントには、VIMの使用に関する詳細が含まれる _**∼/.viminfo**_ ファイルがある場合があります。これには、検索文字列の履歴やvimを使用して開かれたファイルへのパスなどが含まれます。
+* **SSH**: 侵害されたシステムからSSHを使用してシステムへの接続が行われると、各ユーザーアカウントのファイルにエントリが作成されます（_**∼/.ssh/authorized\_keys**_および_**∼/.ssh/known\_keys**_）。これらのエントリには、リモートホストのホスト名またはIPアドレスが明らかになる場合があります。
+* **Gnomeデスクトップ**: ユーザーアカウントには、Gnomeデスクトップで実行されるアプリケーションを使用して最近アクセスされたファイルに関する情報が含まれる_**∼/.recently-used.xbel**_ファイルがある場合があります。
+* **VIM**: ユーザーアカウントには、VIMの使用に関する詳細（検索文字列の履歴やvimを使用して開かれたファイルへのパスなど）が含まれる_**∼/.viminfo**_ファイルがある場合があります。
 * **Open Office**: 最近のファイル。
-* **MySQL**: ユーザーアカウントには、MySQLを使用して実行されたクエリが含まれる _**∼/.mysql\_history**_ ファイルがある場合があります。
-* **Less**: ユーザーアカウントには、検索文字列の履歴やlessを介して実行されたシェルコマンドなど、lessの使用に関する詳細が含まれる _**∼/.lesshst**_ ファイルがある場合があります。
+* **MySQL**: ユーザーアカウントには、MySQLを使用して実行されたクエリが含まれる_**∼/.mysql\_history**_ファイルがある場合があります。
+* **Less**: ユーザーアカウントには、検索文字列の履歴やlessを介して実行されたシェルコマンドなど、lessの使用に関する詳細が含まれる_**∼/.lesshst**_ファイルがある場合があります。
 
 ### USBログ
 
-[**usbrip**](https://github.com/snovvcrash/usbrip)は、Linuxのログファイル（ディストリビューションによっては `/var/log/syslog*` または `/var/log/messages*`）を解析してUSBイベント履歴テーブルを作成するための純粋なPython 3で書かれた小さなソフトウェアです。
+[**usbrip**](https://github.com/snovvcrash/usbrip)は、Linuxのログファイル（ディストリビューションによっては`/var/log/syslog*`または`/var/log/messages*`）を解析してUSBイベント履歴テーブルを作成するための純粋なPython 3で書かれた小さなソフトウェアです。
 
 **使用されたすべてのUSBデバイスを知る**ことは興味深いですし、USBデバイスの「違反イベント」（そのリストに含まれていないUSBデバイスの使用）を見つけるために認可されたUSBデバイスのリストを持っているとさらに便利です。
 
@@ -325,29 +324,105 @@ usbrip ids download #Download USB ID database
 ```
 ### 例
 
-#### ファイルの復元
+#### Example 1: Collecting Volatile Data
 
-ファイルの復元は、削除されたファイルを回復するための手法です。削除されたファイルは、実際にはディスク上に残っていることがあります。復元するためには、ファイルのヘッダやフッタ、およびファイルの中身を特定する必要があります。一般的なツールとしては、`foremost`や`scalpel`があります。
+#### 例1: 揮発性データの収集
 
-#### メモリの解析
+To collect volatile data from a Linux system, follow these steps:
 
-メモリの解析は、実行中のシステムのメモリを調査するための手法です。メモリには、プロセスの情報やユーザーのアクティビティなど、重要な情報が含まれています。メモリの解析には、`Volatility`や`Rekall`などのツールが使用されます。
+Linuxシステムから揮発性データを収集するには、以下の手順に従います。
 
-#### ネットワークトラフィックの解析
+1. Log in to the Linux system using appropriate credentials.
 
-ネットワークトラフィックの解析は、ネットワーク上で送受信されるデータを調査する手法です。ネットワークトラフィックには、通信の詳細やパケットの内容など、重要な情報が含まれています。ネットワークトラフィックの解析には、`Wireshark`や`tcpdump`などのツールが使用されます。
+   適切な資格情報を使用してLinuxシステムにログインします。
 
-#### ログの解析
+2. Open a terminal and run the following command to list all running processes:
 
-ログの解析は、システムやアプリケーションのログファイルを調査する手法です。ログには、システムの動作やイベントの記録が含まれています。ログの解析には、`grep`や`awk`などのツールが使用されます。
+   ターミナルを開き、次のコマンドを実行して実行中のすべてのプロセスをリストします。
 
-#### レジストリの解析
+   ```bash
+   ps aux
+   ```
 
-レジストリの解析は、Windowsシステムのレジストリデータベースを調査する手法です。レジストリには、システムの設定やユーザーのアクティビティなど、重要な情報が含まれています。レジストリの解析には、`RegRipper`や`Registry Explorer`などのツールが使用されます。
+3. Take note of any suspicious or unfamiliar processes running on the system.
 
-#### フォレンジックイメージの作成
+   システムで実行されている不審なプロセスや見慣れないプロセスに注意を払います。
 
-フォレンジックイメージの作成は、証拠を保護するためにディスクやメモリのコピーを作成する手法です。フォレンジックイメージは、解析や復元作業を行う際に使用されます。フォレンジックイメージの作成には、`dd`や`dcfldd`などのツールが使用されます。
+4. Run the following command to gather information about network connections:
+
+   次のコマンドを実行してネットワーク接続に関する情報を収集します。
+
+   ```bash
+   netstat -antp
+   ```
+
+5. Analyze the network connections and identify any suspicious or unauthorized connections.
+
+   ネットワーク接続を分析し、不審な接続や不正な接続を特定します。
+
+6. Run the following command to check the open files and processes associated with them:
+
+   次のコマンドを実行して、開いているファイルとそれに関連するプロセスを確認します。
+
+   ```bash
+   lsof
+   ```
+
+7. Look for any unusual or unexpected files or processes that may indicate malicious activity.
+
+   悪意のある活動を示す可能性のある異常なファイルやプロセスを探します。
+
+8. Finally, collect any relevant logs or system information that may be useful for further analysis.
+
+   最後に、さらなる分析に役立つ可能性のある関連するログやシステム情報を収集します。
+
+#### Example 2: Analyzing File Metadata
+
+#### 例2: ファイルメタデータの分析
+
+To analyze file metadata in a Linux system, follow these steps:
+
+Linuxシステムでファイルメタデータを分析するには、以下の手順に従います。
+
+1. Identify the file you want to analyze.
+
+   分析したいファイルを特定します。
+
+2. Run the following command to view the metadata of the file:
+
+   次のコマンドを実行して、ファイルのメタデータを表示します。
+
+   ```bash
+   stat <filename>
+   ```
+
+   Replace `<filename>` with the actual name of the file.
+
+   `<filename>`を実際のファイル名に置き換えます。
+
+3. Take note of the file's permissions, owner, size, and timestamps.
+
+   ファイルのパーミッション、所有者、サイズ、およびタイムスタンプに注意を払います。
+
+4. Run the following command to check the file's hash value:
+
+   次のコマンドを実行して、ファイルのハッシュ値を確認します。
+
+   ```bash
+   md5sum <filename>
+   ```
+
+   Replace `<filename>` with the actual name of the file.
+
+   `<filename>`を実際のファイル名に置き換えます。
+
+5. Compare the obtained hash value with the known hash value of the file to verify its integrity.
+
+   取得したハッシュ値をファイルの既知のハッシュ値と比較して、整合性を確認します。
+
+6. Additionally, you can use tools like `file`, `strings`, or `hexdump` to gather more information about the file.
+
+   さらに、`file`、`strings`、または`hexdump`などのツールを使用して、ファイルに関する詳細情報を収集することもできます。
 ```
 usbrip events history #Get USB history of your curent linux machine
 usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR user
@@ -355,98 +430,100 @@ usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR
 usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
-さらなる例や情報は、GitHub内で確認できます：[https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+さらなる例や情報は、[https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)で確認できます。
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**することができます。\
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフロー**を簡単に構築および**自動化**できます。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## ユーザーアカウントとログオンアクティビティの確認
 
-不正なイベントに関連して近くで作成または使用された、異常な名前やアカウントを含む_**/etc/passwd**_、_**/etc/shadow**_、および**セキュリティログ**を調査します。また、sudoによるブルートフォース攻撃の可能性もチェックします。\
-さらに、ユーザーに与えられた予期しない特権を持つファイル（_**/etc/sudoers**_や_**/etc/groups**_など）も確認します。\
+不正なイベントに関連して近くで作成または使用された、異常な名前やアカウントを含む_**/etc/passwd**_、_**/etc/shadow**_、および**セキュリティログ**を調べます。また、sudoによるブルートフォース攻撃の可能性もチェックします。\
+さらに、ユーザーに与えられた予期しない特権を確認するために、_**/etc/sudoers**_や_**/etc/groups**_などのファイルもチェックします。\
 最後に、パスワードのないアカウントや簡単に推測できるパスワードを持つアカウントを探します。
 
 ## ファイルシステムの調査
 
-ファイルシステムのデータ構造は、**マルウェア**のインシデントに関連する**情報**（イベントのタイミングや**マルウェア**の実際の**内容**など）を提供する場合があります。\
-**マルウェア**は、ファイルシステムの解析を困難にするために、日時スタンプを変更するなどの手法を使用することが増えています。他の悪意のあるコードは、ファイルシステムに格納されるデータ量を最小限に抑えるために、特定の情報のみをメモリに保存するように設計されています。\
-このようなアンチフォレンジック技術に対処するためには、ファイルシステムの日時スタンプのタイムライン分析に**注意を払う**必要があります。また、マルウェアが見つかる可能性のある一般的な場所に保存されたファイルにも注意を払う必要があります。
+ファイルシステムのデータ構造は、**マルウェア**のインシデントに関連する**情報**、イベントの**タイミング**、および実際の**マルウェア**の**内容**など、大量の情報を提供する場合があります。\
+**マルウェア**は、ファイルシステムの解析を妨げるために設計されることが増えています。一部のマルウェアは、タイムライン分析でそれらを見つけるのをより困難にするために、悪意のあるファイルの日時スタンプを変更します。他の悪意のあるコードは、ファイルシステムに格納されるデータ量を最小限に抑えるために、特定の情報のみをメモリに保存するように設計されています。\
+このようなアンチフォレンジックテクニックに対処するためには、ファイルシステムの日時スタンプのタイムライン分析に**注意を払う**必要があります。また、マルウェアが見つかる可能性のある一般的な場所に保存されたファイルにも注意を払う必要があります。
 
-* **autopsy**を使用すると、疑わしい活動を発見するのに役立つイベントのタイムラインを確認できます。また、**Sleuth Kit**の`mactime`機能を直接使用することもできます。
+* **autopsy**を使用すると、疑わしい活動を発見するのに役立つイベントのタイムラインを表示できます。また、**Sleuth Kit**の`mactime`機能も直接使用できます。
 * **$PATH**内に予期しないスクリプトがないか確認します（おそらくいくつかのshスクリプトやphpスクリプトがありますか？）
-* `/dev`内のファイルは特殊なファイルであるはずですが、マルウェアに関連する特殊でないファイルが見つかる場合があります。
+* `/dev`内のファイルは特殊なファイルでしたが、ここにはマルウェアに関連する特殊でないファイルがあるかもしれません。
 * ".. "（ドットドットスペース）や"..^G "（ドットドットコントロールG）などの異常なまたは**隠しファイル**や**ディレクトリ**を探します。
-* システム上の/bin/bashのsetuidコピー `find / -user root -perm -04000 –print`
-* 削除された**inodeの日時スタンプ**を確認し、同じ時期に大量のファイルが削除されている場合は、ルートキットのインストールやトロイの木馬化されたサービスのインストールなどの悪意のある活動を示している可能性があります。
+* システム上の/bin/bashのsetuidコピーを探す`find / -user root -perm -04000 –print`
+* 削除された**inodeの日時スタンプを確認し、同じ時期に大量のファイルが削除されている**場合、ルートキットのインストールやトロイの木馬化されたサービスのような悪意のある活動を示している可能性があります。
 * inodeは次に利用可能な基準で割り当てられるため、**同じ時期にシステムに配置された悪意のあるファイルは連続したinodeが割り当てられる**場合があります。したがって、マルウェアの1つのコンポーネントが見つかった後は、隣接するinodeを調査することが生産的である場合があります。
-* _/bin_や_/sbin_などのディレクトリも確認し、新しいまたは変更されたファイルの**変更された時刻**を調べます。
-* ファイルやフォルダをアルファベット順ではなく、作成日時順に並べ替えたディレクトリのファイルとフォルダを見ると、より最近のファイルやフォルダがわかります（通常、最後のものです）。
+* _/bin_や_/sbin_などのディレクトリもチェックし、新しいまたは変更されたファイルの**変更された時刻**を調べます。
+* ファイルやフォルダをアルファベット順ではなく、作成日時でソートされたディレクトリのファイルとフォルダを見ると、より最近のファイルやフォルダがわかります（通常、最後のものです）。
 
 `ls -laR --sort=time /bin`を使用して、フォルダの最新のファイルを確認できます。\
 `ls -lai /bin |sort -n`を使用して、フォルダ内のファイルのinodeを確認できます。
 
 {% hint style="info" %}
-**攻撃者**は**時間**を**変更**して**ファイルを正規に見せかける**ことができますが、**inode**を変更することはできません。同じフォルダ内の他のファイルと同じように、あるファイルが作成および変更されたと示されているが、**inode**が予期しないほど大きい場合、そのファイルの**タイムスタンプが変更された**ことを意味します。
+**攻撃者**は**ファイルの時間**を**変更**して**ファイルを正規に見せる**ことができますが、**inode**は**変更できません**。同じフォルダ内の他のファイルと同じ時刻に作成および変更されたことを示す**ファイル**があり、しかし**inode**が**予期しないほど大きい**場合、そのファイルのタイムスタンプが**変更された**ことを意味します。
 {% endhint %}
 
-## 異なるファイルシステムバージョンの比較
+## 異なるファイルシステムバージョンのファイルを比較する
 
-#### 追加されたファイルの検索
+#### 追加されたファイルを見つける
 ```bash
 git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
 ```
 #### 変更されたコンテンツの検索
 
-To find modified content in a Linux system, you can use various techniques and tools. Here are some methods you can follow:
+To find modified content on a Linux system, you can use various techniques and tools. Here are some steps you can follow:
 
-1. **File Timestamps**: Check the timestamps of files to identify recently modified files. The `stat` command can be used to view the access, modification, and change timestamps of a file.
+1. **Timeline Analysis**: Analyze the system's timeline to identify any suspicious activities or changes. This can be done using tools like `fls`, `mactime`, or `timestomp`.
 
-2. **Log Files**: Analyze system log files such as `/var/log/syslog` or `/var/log/auth.log` to identify any suspicious activities or modifications.
+2. **File System Analysis**: Examine the file system for any recently modified files. Tools like `find`, `ls`, or `stat` can help you identify files with recent modification timestamps.
 
-3. **File Integrity Monitoring (FIM)**: Use FIM tools like `Tripwire` or `AIDE` to monitor and detect changes in critical system files. These tools can generate reports highlighting any modifications.
+3. **Log Analysis**: Review system logs, such as `/var/log/syslog` or `/var/log/auth.log`, for any unusual activities or events that may indicate modifications.
 
-4. **Version Control Systems**: If the system uses version control systems like `Git`, you can check the commit history to identify any recent changes made to files.
+4. **Metadata Analysis**: Analyze file metadata, such as file permissions, ownership, and timestamps, to identify any discrepancies or unauthorized changes. Tools like `stat`, `ls`, or `file` can provide this information.
 
-5. **System Audit Logs**: Review system audit logs, such as those generated by `auditd`, to identify any unauthorized modifications or access to files.
+5. **Hash Comparison**: Calculate and compare file hashes to detect any modifications. Tools like `md5sum`, `sha1sum`, or `sha256sum` can be used for this purpose.
 
-6. **Memory Analysis**: Analyze the system's memory using tools like `Volatility` to identify any suspicious processes or modifications in memory.
+6. **Memory Analysis**: Perform memory forensics to identify any modified or injected processes. Tools like `Volatility` or `LiME` can help you analyze the system's memory.
 
-Remember to document any findings and preserve the integrity of the evidence during the investigation process.
+Remember to document your findings and maintain a chain of custody to ensure the integrity of the evidence.
 ```bash
 git diff --no-index --diff-filter=M _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
 #### 削除されたファイルの検索
 
-To find deleted files on a Linux system, you can use various techniques and tools. Here are some methods you can try:
+Deleted files can often be recovered during a forensic investigation. When a file is deleted, it is not immediately removed from the storage device. Instead, the file system marks the space occupied by the file as available for reuse. This means that the file's content may still exist on the disk until it is overwritten by new data.
 
-1. **File Recovery Tools**: Use specialized file recovery tools like `extundelete`, `testdisk`, or `foremost` to scan the file system and recover deleted files.
+削除されたファイルは、フォレンジック調査中にしばしば回復することができます。ファイルが削除されると、ストレージデバイスから直ちに削除されるわけではありません。代わりに、ファイルシステムはファイルが占めていたスペースを再利用可能としてマークします。つまり、新しいデータによって上書きされるまで、ファイルの内容はディスク上に残る可能性があります。
 
-2. **File System Journal**: Check the file system journal to identify recently deleted files. The journal records metadata changes, including file deletions. Tools like `jcat` and `icat` can help you analyze the journal.
+To find deleted files on a Linux system, you can use various tools and techniques. Here are some common methods:
 
-3. **Inode Analysis**: Inodes store information about files on a Linux system. By examining the inode table, you can identify deleted files that still have their metadata intact. Tools like `istat` and `ifind` can assist in this analysis.
+Linuxシステム上で削除されたファイルを見つけるために、さまざまなツールと技術を使用することができます。以下に一般的な方法をいくつか紹介します。
 
-4. **Carving**: File carving involves searching for file signatures or specific file headers in unallocated disk space. This technique can help recover deleted files that no longer have their metadata available. Tools like `scalpel` and `foremost` are commonly used for file carving.
+1. **File Carving**: File carving is a technique used to recover deleted files by searching for file signatures or headers in unallocated disk space. Tools like `foremost` and `scalpel` can be used for file carving.
 
-Remember to work on a copy of the disk or partition to avoid modifying the original data. Additionally, it's crucial to document your findings and follow proper forensic procedures to maintain the integrity of the evidence.
+   **ファイルカービング**: ファイルカービングは、割り当てられていないディスク領域でファイルのシグネチャやヘッダを検索して削除されたファイルを回復するための技術です。`foremost`や`scalpel`などのツールを使用してファイルカービングを行うことができます。
 
-#### 削除されたファイルを見つける
+2. **Metadata Analysis**: Metadata of files, such as timestamps and file attributes, can provide valuable information about deleted files. Tools like `exiftool` and `fsstat` can be used to analyze file metadata.
 
-Linuxシステム上で削除されたファイルを見つけるために、さまざまな手法とツールを使用することができます。以下にいくつかの試みるべき方法を示します：
+   **メタデータの分析**: タイムスタンプやファイル属性などのファイルのメタデータは、削除されたファイルに関する貴重な情報を提供することができます。`exiftool`や`fsstat`などのツールを使用してファイルのメタデータを分析することができます。
 
-1. **ファイル復元ツール**：`extundelete`、`testdisk`、または`foremost`などの専門のファイル復元ツールを使用して、ファイルシステムをスキャンし、削除されたファイルを回復します。
+3. **File System Journal**: Some Linux file systems, such as ext3 and ext4, maintain a journal that records file system changes. This journal can be analyzed to identify deleted files. Tools like `extundelete` and `debugfs` can be used to examine the file system journal.
 
-2. **ファイルシステムジャーナル**：ファイルシステムジャーナルをチェックして、最近削除されたファイルを特定します。ジャーナルは、ファイルの削除を含むメタデータの変更を記録します。`jcat`や`icat`などのツールを使用して、ジャーナルを分析することができます。
+   **ファイルシステムジャーナル**: ext3やext4などの一部のLinuxファイルシステムは、ファイルシステムの変更を記録するジャーナルを保持しています。このジャーナルを分析して削除されたファイルを特定することができます。`extundelete`や`debugfs`などのツールを使用してファイルシステムジャーナルを調査することができます。
 
-3. **Inodeの分析**：InodeはLinuxシステム上のファイルに関する情報を格納しています。Inodeテーブルを調査することで、メタデータが残っている削除されたファイルを特定することができます。`istat`や`ifind`などのツールがこの分析をサポートします。
+4. **System Logs**: System logs can contain information about file deletions. Tools like `grep` can be used to search for relevant log entries.
 
-4. **カービング**：カービングは、未割り当てのディスク領域でファイルのシグネチャや特定のファイルヘッダを検索する手法です。この技術を使用すると、メタデータが利用できなくなった削除されたファイルを回復することができます。`scalpel`や`foremost`などのツールがファイルカービングによく使用されます。
+   **システムログ**: システムログにはファイルの削除に関する情報が含まれている場合があります。`grep`などのツールを使用して関連するログエントリを検索することができます。
 
-元のデータを変更しないために、ディスクまたはパーティションのコピーで作業することを忘れないでください。また、証拠の完全性を保つために、調査結果を文書化し、適切な法的手続きに従うことが重要です。
+Remember that the success of recovering deleted files depends on various factors, such as the time elapsed since deletion and the extent of disk activity. It is important to perform forensic analysis as soon as possible to increase the chances of successful file recovery.
+
+削除されたファイルの回復の成功は、削除後の経過時間やディスクのアクティビティの範囲など、さまざまな要素に依存します。成功したファイルの回復の可能性を高めるために、できるだけ早くフォレンジック分析を実施することが重要です。
 ```bash
 git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
 ```
@@ -454,9 +531,9 @@ git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2
 
 **`-diff-filter=[(A|C|D|M|R|T|U|X|B)…​[*]]`**
 
-追加されたファイル (`A`)、コピーされたファイル (`C`)、削除されたファイル (`D`)、変更されたファイル (`M`)、名前が変更されたファイル (`R`)、タイプが変更されたファイル（通常のファイル、シンボリックリンク、サブモジュールなど） (`T`)、マージされていないファイル (`U`)、不明なファイル (`X`)、ペアリングが壊れたファイル (`B`) のみを選択します。フィルター文字の組み合わせには、任意の組み合わせ（なしも含む）が使用できます。組み合わせに `*`（全てまたは無し）が追加されると、比較に他の基準に一致するファイルがある場合、すべてのパスが選択されます。他の基準に一致するファイルがない場合、何も選択されません。
+追加されたファイル (`A`)、コピーされたファイル (`C`)、削除されたファイル (`D`)、変更されたファイル (`M`)、名前が変更されたファイル (`R`)、タイプが変更されたファイル（通常のファイル、シンボリックリンク、サブモジュールなど） (`T`)、マージされていないファイル (`U`)、不明なファイル (`X`)、ペアリングが壊れたファイル (`B`) のみを選択します。フィルター文字の組み合わせには、任意の組み合わせが使用できます（組み合わせに `*`（すべてまたはなし）が追加された場合、他の基準に一致するファイルがある場合はすべてのパスが選択されます。他の基準に一致するファイルがない場合は、何も選択されません）。
 
-また、これらの大文字の文字は、除外するために小文字にすることもできます。例：`--diff-filter=ad` は追加されたパスと削除されたパスを除外します。
+また、これらの大文字の文字は除外するために小文字にすることもできます。例：`--diff-filter=ad` は追加されたファイルと削除されたファイルを除外します。
 
 すべての差分がすべてのタイプを持つわけではないことに注意してください。たとえば、インデックスから作業ツリーへの差分には、追加されたエントリが存在しない場合があります（差分に含まれるパスのセットはインデックスに含まれるものに制限されるため）。同様に、コピーされたエントリと名前が変更されたエントリは、それらのタイプの検出が無効になっている場合には表示されません。
 
@@ -471,18 +548,18 @@ git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2
 
 **サイバーセキュリティ企業で働いていますか？** **HackTricks**で**あなたの会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**する[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
 **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築して自動化しましょう。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築して自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

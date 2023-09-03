@@ -1,9 +1,8 @@
 # 便利なLinuxコマンド
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
-\
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -13,10 +12,10 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
@@ -139,10 +138,10 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスを取得してください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -172,34 +171,52 @@ i686-mingw32msvc-gcc -o executable useradd.c
 `grep`コマンドは、テキストファイル内で特定のパターンを検索するために使用されます。以下は、`grep`コマンドの一般的な使用法です。
 
 ```bash
-grep [オプション] パターン ファイル名
+grep [オプション] パターン [ファイル名]
 ```
 
 - `[オプション]`：`grep`コマンドのオプションを指定します。例えば、`-i`オプションは大文字と小文字を区別しない検索を行います。
 - `パターン`：検索するテキストのパターンを指定します。
-- `ファイル名`：検索対象のファイル名を指定します。
+- `[ファイル名]`：検索対象のファイル名を指定します。省略すると、標準入力から読み取ります。
 
-例えば、以下のコマンドは、`file.txt`というファイル内で「hello」という文字列を検索します。
+以下は、いくつかの一般的な`grep`コマンドの例です。
 
-```bash
-grep hello file.txt
-```
-
-`grep`コマンドは、検索結果を表示するだけでなく、他のコマンドと組み合わせて使用することもできます。例えば、`grep`コマンドの出力を別のファイルにリダイレクトすることもできます。
+- ファイル内で特定の文字列を検索する：
 
 ```bash
-grep hello file.txt > output.txt
+grep "文字列" ファイル名
 ```
 
-また、`grep`コマンドは正規表現を使用してパターンを指定することもできます。正規表現を使用することで、より柔軟な検索が可能になります。
+- 大文字と小文字を区別せずに検索する：
 
 ```bash
-grep -E '[0-9]{3}-[0-9]{3}-[0-9]{4}' file.txt
+grep -i "文字列" ファイル名
 ```
 
-上記の例では、`file.txt`内で電話番号のパターン（XXX-XXX-XXXX）を検索しています。
+- 正規表現を使用して検索する：
 
-`grep`コマンドは、Linuxシステムで非常に便利なツールです。検索やパターンマッチングに関連する作業を効率的に行うために、`grep`コマンドを積極的に活用しましょう。
+```bash
+grep -E "パターン" ファイル名
+```
+
+- ファイル内で特定の文字列を含まない行を検索する：
+
+```bash
+grep -v "文字列" ファイル名
+```
+
+- ファイル内で特定の文字列を含む行の数をカウントする：
+
+```bash
+grep -c "文字列" ファイル名
+```
+
+- ファイル内で特定の文字列を含む行の前後の行も表示する：
+
+```bash
+grep -A [行数] -B [行数] "文字列" ファイル名
+```
+
+`grep`コマンドは非常に強力であり、テキストファイル内での検索に広く使用されています。これらの例を使用して、必要な情報を効率的に見つけることができます。
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -281,93 +298,38 @@ egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13
 ```
 ## Nmap検索のヘルプ
 
-Nmap is a powerful network scanning tool used to discover hosts and services on a computer network. It provides a wide range of options and features to customize and optimize the scanning process. Here are some useful commands and options to help you get started with Nmap:
+Nmap is a powerful network scanning tool that allows you to discover hosts and services on a computer network. It provides a wide range of options and features to customize your scans and obtain detailed information about the target network.
 
-Nmapは、コンピュータネットワーク上のホストやサービスを発見するために使用される強力なネットワークスキャンツールです。スキャンプロセスをカスタマイズして最適化するためのさまざまなオプションと機能を提供しています。以下に、Nmapを使い始めるための便利なコマンドとオプションをいくつか紹介します。
+Nmapは、コンピュータネットワーク上のホストやサービスを発見するための強力なネットワークスキャンツールです。さまざまなオプションと機能を提供し、スキャンをカスタマイズして対象ネットワークに関する詳細な情報を取得することができます。
 
-### Basic Scanning
+To get started with Nmap, you can use the following basic command:
 
-基本的なスキャン
-
-To perform a basic scan of a target host, use the following command:
-
-ターゲットホストの基本的なスキャンを実行するには、次のコマンドを使用します。
+Nmapを使い始めるには、次の基本コマンドを使用します:
 
 ```
-nmap <target>
+nmap [target]
 ```
 
-Replace `<target>` with the IP address or hostname of the target host.
+Replace `[target]` with the IP address or hostname of the target you want to scan.
 
-`<target>`をターゲットホストのIPアドレスまたはホスト名に置き換えてください。
+`[target]`の部分をスキャンしたい対象のIPアドレスまたはホスト名に置き換えてください。
 
-### Specifying Ports
+Nmap also provides various scan techniques and options to customize your scans. Some commonly used options include:
 
-ポートの指定
+Nmapは、さまざまなスキャンテクニックとオプションを提供しており、スキャンをカスタマイズすることができます。よく使用されるオプションには、次のものがあります:
 
-By default, Nmap scans the most common 1,000 ports. However, you can specify a custom range of ports to scan using the `-p` option. For example:
+- `-p [port]`: Specifies the port number(s) to scan. You can specify a single port, a range of ports, or a comma-separated list of ports.
+- `-p [ポート]`: スキャンするポート番号を指定します。単一のポート、ポートの範囲、またはカンマ区切りのポートのリストを指定することができます。
 
-デフォルトでは、Nmapは最も一般的な1,000ポートをスキャンします。ただし、`-p`オプションを使用してスキャンするポートのカスタム範囲を指定することができます。例えば：
+- `-sV`: Enables version detection, which attempts to determine the version of the services running on the target ports.
+- `-sV`: バージョン検出を有効にし、対象ポートで実行されているサービスのバージョンを特定しようとします。
 
-```
-nmap -p <port-range> <target>
-```
+- `-O`: Enables operating system detection, which tries to determine the operating system running on the target host.
+- `-O`: オペレーティングシステム検出を有効にし、対象ホストで実行されているオペレーティングシステムを特定しようとします。
 
-Replace `<port-range>` with the desired range of ports (e.g., `80-100` for ports 80 to 100).
+These are just a few examples of the options available in Nmap. You can explore more options and techniques by referring to the Nmap documentation.
 
-`<port-range>`を希望するポートの範囲（例：ポート80から100の場合は`80-100`）に置き換えてください。
-
-### Service and Version Detection
-
-サービスとバージョンの検出
-
-Nmap can also detect the services and versions running on open ports. Use the `-sV` option to enable service and version detection. For example:
-
-Nmapは、オープンポートで実行されているサービスとバージョンを検出することもできます。サービスとバージョンの検出を有効にするには、`-sV`オプションを使用します。例えば：
-
-```
-nmap -sV <target>
-```
-
-Replace `<target>` with the IP address or hostname of the target host.
-
-`<target>`をターゲットホストのIPアドレスまたはホスト名に置き換えてください。
-
-### OS Detection
-
-OSの検出
-
-Nmap can also attempt to detect the operating system running on the target host. Use the `-O` option to enable OS detection. For example:
-
-Nmapは、ターゲットホストで実行されているオペレーティングシステムを検出する試みも行うことができます。OS検出を有効にするには、`-O`オプションを使用します。例えば：
-
-```
-nmap -O <target>
-```
-
-Replace `<target>` with the IP address or hostname of the target host.
-
-`<target>`をターゲットホストのIPアドレスまたはホスト名に置き換えてください。
-
-### Script Scanning
-
-スクリプトスキャン
-
-Nmap has a scripting engine that allows you to run scripts to automate various tasks during the scanning process. Use the `--script` option to specify a script to run. For example:
-
-Nmapには、スキャンプロセス中にさまざまなタスクを自動化するためのスクリプトを実行するためのスクリプトエンジンがあります。実行するスクリプトを指定するには、`--script`オプションを使用します。例えば：
-
-```
-nmap --script <script> <target>
-```
-
-Replace `<script>` with the name of the script and `<target>` with the IP address or hostname of the target host.
-
-`<script>`をスクリプトの名前、`<target>`をターゲットホストのIPアドレスまたはホスト名に置き換えてください。
-
-These are just a few examples of the many options and features available in Nmap. For more information, refer to the [Nmap documentation](https://nmap.org/documentation.html).
-
-これは、Nmapで利用可能な多くのオプションと機能のうちのいくつかの例です。詳細については、[Nmapのドキュメント](https://nmap.org/documentation.html)を参照してください。
+これらは、Nmapで利用可能なオプションの一部の例です。Nmapのドキュメントを参照することで、さらに多くのオプションやテクニックを探索することができます。
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -376,124 +338,94 @@ nmap --script-help "(default or version) and smb)"
 ```
 ## Bash
 
-Bash（Bourne Again SHell）は、LinuxおよびUNIXシステムで広く使用されているデフォルトのシェルです。Bashは、コマンドラインでの操作やスクリプトの作成に使用されます。
+Bash（Bourne Again SHell）は、LinuxおよびUNIXシステムで広く使用されているデフォルトのシェルです。Bashは、コマンドラインでの作業を容易にするために使用されます。以下に、Bashで使用できるいくつかの便利なコマンドを示します。
 
-### 一般的なコマンド
-
-以下は、Bashでよく使用される一般的なコマンドのいくつかです。
+### ファイルとディレクトリの操作
 
 - `ls`：現在のディレクトリ内のファイルとディレクトリを表示します。
 - `cd`：ディレクトリを変更します。
 - `pwd`：現在のディレクトリのパスを表示します。
 - `mkdir`：新しいディレクトリを作成します。
-- `rm`：ファイルやディレクトリを削除します。
-- `cp`：ファイルやディレクトリをコピーします。
-- `mv`：ファイルやディレクトリを移動します。
+- `rm`：ファイルまたはディレクトリを削除します。
+- `cp`：ファイルまたはディレクトリをコピーします。
+- `mv`：ファイルまたはディレクトリを移動または名前を変更します。
+
+### ファイルの編集
+
 - `cat`：ファイルの内容を表示します。
-- `grep`：テキストファイル内でパターンに一致する行を検索します。
-- `chmod`：ファイルやディレクトリのアクセス権を変更します。
-
-### ファイル操作
-
-Bashを使用して、ファイルの作成、編集、および操作を行うことができます。
-
-- `touch`：新しいファイルを作成します。
-- `nano`：テキストエディタを使用してファイルを編集します。
-- `vi`：テキストエディタを使用してファイルを編集します。
+- `less`：ファイルの内容をページ単位で表示します。
 - `head`：ファイルの先頭から指定された行数を表示します。
 - `tail`：ファイルの末尾から指定された行数を表示します。
+- `grep`：指定されたパターンに一致する行を検索します。
 
-### プロセス管理
-
-Bashを使用して、実行中のプロセスを管理することができます。
+### プロセスの管理
 
 - `ps`：実行中のプロセスを表示します。
 - `top`：システムのリソース使用状況と実行中のプロセスを表示します。
 - `kill`：プロセスを終了します。
 
-### ネットワーキング
-
-Bashを使用して、ネットワーク関連の操作を行うことができます。
-
-- `ping`：ホストに対してICMPエコーリクエストを送信し、応答を受け取ります。
-- `ifconfig`：ネットワークインターフェースの設定を表示および変更します。
-- `netstat`：ネットワーク接続と統計情報を表示します。
-
-これらは、Bashで使用される一般的なコマンドの一部です。Bashの機能は非常に広範であり、さまざまなタスクを実行するための多くのコマンドがあります。
+これらは、Bashで使用できる便利なコマンドの一部です。これらのコマンドを使いこなすことで、Linuxシステムでの作業がより効率的になります。
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
 ## Iptables
 
-Iptablesは、Linuxシステムでネットワークトラフィックを制御するための強力なツールです。ファイアウォールルールを作成し、パケットのフィルタリング、NAT（ネットワークアドレス変換）、ポート転送などの機能を提供します。
+Iptables is a powerful firewall utility for Linux systems. It allows you to configure and manage network traffic by creating rules and chains. With iptables, you can control incoming and outgoing traffic, filter packets based on various criteria, and set up network address translation (NAT).
 
-### Iptablesの基本的なコマンド
+### Basic Usage
 
-以下は、Iptablesの基本的なコマンドです。
-
-- ファイアウォールルールの表示：
+To view the current iptables rules, use the following command:
 
 ```bash
 iptables -L
 ```
 
-- ファイアウォールルールの追加：
+To add a new rule, use the `iptables -A` command followed by the desired options. For example, to allow incoming SSH connections, you can use the following command:
 
 ```bash
-iptables -A <chain> -p <protocol> --dport <port> -j <action>
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 ```
 
-- ファイアウォールルールの削除：
+To delete a rule, use the `iptables -D` command followed by the rule number. For example, to delete the rule at position 3 in the INPUT chain, you can use the following command:
 
 ```bash
-iptables -D <chain> <rule_number>
+iptables -D INPUT 3
 ```
 
-- ファイアウォールルールの保存：
+### Common Options
+
+Here are some common options that you can use with iptables:
+
+- `-A` (append): Adds a new rule to the end of a chain.
+- `-D` (delete): Deletes a rule from a chain.
+- `-I` (insert): Inserts a new rule at a specific position in a chain.
+- `-L` (list): Lists all the rules in a chain.
+- `-F` (flush): Deletes all the rules in a chain.
+- `-P` (policy): Sets the default policy for a chain.
+- `-s` (source): Specifies the source IP address or network.
+- `-d` (destination): Specifies the destination IP address or network.
+- `-p` (protocol): Specifies the protocol (e.g., tcp, udp).
+- `--dport` (destination port): Specifies the destination port number.
+- `-j` (jump): Specifies the target action for a rule.
+
+### Saving and Restoring Rules
+
+To save your iptables rules, you can use the `iptables-save` command. This will output the current rules in a format that can be easily restored later.
 
 ```bash
-iptables-save > <file_name>
+iptables-save > rules.txt
 ```
 
-- ファイアウォールルールの復元：
+To restore the saved rules, you can use the `iptables-restore` command.
 
 ```bash
-iptables-restore < <file_name>
+iptables-restore < rules.txt
 ```
 
-### Iptablesのチェーン
+### Conclusion
 
-Iptablesでは、パケットの処理を制御するためにチェーンを使用します。以下は、Iptablesで使用される主要なチェーンの一部です。
-
-- INPUT：入力トラフィックを処理するためのチェーン
-- OUTPUT：出力トラフィックを処理するためのチェーン
-- FORWARD：転送トラフィックを処理するためのチェーン
-
-### Iptablesのアクション
-
-Iptablesでは、パケットに対して実行されるアクションを指定することができます。以下は、Iptablesで使用される主要なアクションの一部です。
-
-- ACCEPT：パケットを受け入れる
-- DROP：パケットを破棄する
-- REJECT：パケットを破棄し、送信元に拒否メッセージを返す
-- LOG：パケットをログに記録する
-
-### Iptablesの応用例
-
-以下は、Iptablesを使用して特定のポートをブロックする例です。
-
-```bash
-iptables -A INPUT -p tcp --dport 22 -j DROP
-```
-
-このコマンドは、SSHポート（ポート22）への入力トラフィックをブロックします。
-
-### Iptablesの注意点
-
-Iptablesの設定は慎重に行う必要があります。誤った設定はネットワークの可用性に影響を与える可能性があります。設定変更前には、バックアップを作成し、テスト環境での動作を確認することをお勧めします。
-
-以上が、Iptablesの基本的な概要です。Iptablesを使用してネットワークトラフィックを制御するためのさまざまな機能を活用してください。
+Iptables is a versatile tool for managing network traffic on Linux systems. By understanding its basic usage and common options, you can effectively configure and secure your system's firewall.
 ```bash
 #Delete curent rules and chains
 iptables --flush
@@ -528,7 +460,7 @@ iptables -P OUTPUT ACCEPT
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
@@ -536,10 +468,10 @@ iptables -P OUTPUT ACCEPT
 
 </details>
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も**高度なコミュニティツール**によって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

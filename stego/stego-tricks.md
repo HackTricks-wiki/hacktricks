@@ -6,8 +6,8 @@
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 * **ハッキングのトリックを共有する**ために、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
@@ -64,12 +64,12 @@ exiftoolに似たツールです。\
 `strings -n 6 file`：最小長さ6の文字列を抽出します。\
 `strings -n 6 file | head -n 20`：最小長さ6の最初の20個の文字列を抽出します。\
 `strings -n 6 file | tail -n 20`：最小長さ6の最後の20個の文字列を抽出します。\
-`strings -e s -n 6 file`：7ビット文字列を抽出します。\
-`strings -e S -n 6 file`：8ビット文字列を抽出します。\
-`strings -e l -n 6 file`：16ビット文字列（リトルエンディアン）を抽出します。\
-`strings -e b -n 6 file`：16ビット文字列（ビッグエンディアン）を抽出します。\
-`strings -e L -n 6 file`：32ビット文字列（リトルエンディアン）を抽出します。\
-`strings -e B -n 6 file`：32ビット文字列（ビッグエンディアン）を抽出します。
+`strings -e s -n 6 file`：7ビットの文字列を抽出します。\
+`strings -e S -n 6 file`：8ビットの文字列を抽出します。\
+`strings -e l -n 6 file`：16ビットの文字列（リトルエンディアン）を抽出します。\
+`strings -e b -n 6 file`：16ビットの文字列（ビッグエンディアン）を抽出します。\
+`strings -e L -n 6 file`：32ビットの文字列（リトルエンディアン）を抽出します。\
+`strings -e B -n 6 file`：32ビットの文字列（ビッグエンディアン）を抽出します。
 
 ### cmp - 比較
 
@@ -82,13 +82,13 @@ cmp original.jpg stego.jpg -b -l
 ### スペースに隠されたデータ
 
 もしもある**テキスト行**が予想よりも**大きい**場合、見えない文字を使って**スペース**の中に**隠された情報**が含まれている可能性があります。󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨\
-データを**抽出**するためには、以下のリンクを使用できます: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+データを**抽出**するためには、以下のリンクを使用できます：[https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化することができます。\
-今すぐアクセスを取得してください:
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -96,11 +96,11 @@ cmp original.jpg stego.jpg -b -l
 
 ### identify
 
-[GraphicMagick](https://imagemagick.org/script/download.php)ツールを使用して、ファイルがどの種類の画像であるかを確認することができます。また、画像が破損しているかどうかも確認します。
+[GraphicMagick](https://imagemagick.org/script/download.php)ツールを使用して、ファイルがどの種類の画像であるかを確認します。また、画像が破損しているかどうかも確認します。
 ```
 ./magick identify -verbose stego.jpg
 ```
-画像が損傷している場合、メタデータコメントを追加することで復元することができるかもしれません（非常にひどく損傷している場合はこれは機能しません）。
+画像が損傷している場合、メタデータコメントを追加するだけで復元できる場合があります（非常にひどく損傷している場合は機能しないかもしれません）:
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
@@ -114,7 +114,7 @@ Steghideは、さまざまな種類の画像や音声ファイルにデータを
 
 また、ウェブを使用してsteghideからコンテンツを抽出することもできます：[https://futureboy.us/stegano/decinput.html](https://futureboy.us/stegano/decinput.html)
 
-**Steghideのブルートフォース攻撃**: [stegcracker](https://github.com/Paradoxis/StegCracker.git) `stegcracker <file> [<wordlist>]`
+**Bruteforcing** Steghide: [stegcracker](https://github.com/Paradoxis/StegCracker.git) `stegcracker <file> [<wordlist>]`
 
 ### Zsteg \[PNG, BMP] <a href="#zsteg" id="zsteg"></a>
 
@@ -126,11 +126,11 @@ zstegは、pngおよびbmpファイルに隠されたデータを検出するツ
 
 ### stegoVeritas JPG、PNG、GIF、TIFF、BMP
 
-このツールは、ファイルのメタデータをチェックしたり、変換された画像を作成したり、LSBをブルートフォースしたりするなど、さまざまなシンプルで高度なトリックを実行することができます。完全な機能については、`stegoveritas.py -h`を参照してください。すべてのチェックを実行するには、`stegoveritas.py stego.jpg`を実行します。
+このツールは、ファイルのメタデータをチェックしたり、変換された画像を作成したり、LSBをブルートフォースしたりするなど、さまざまなシンプルで高度なトリックを実行することができます。その全ての機能については、`stegoveritas.py -h`を参照してください。すべてのチェックを実行するには、`stegoveritas.py stego.jpg`を実行します。
 
 ### Stegsolve
 
-画像自体にメッセージやテキストが隠されている場合、それを表示するには、カラーフィルタを適用したり、一部のカラーレベルを変更したりする必要があります。GIMPやPhotoshopのようなツールを使用してこれを行うこともできますが、Stegsolveを使用すると簡単になります。これは、画像に多くの便利なカラーフィルタを適用する小さなJavaツールです。CTFの課題では、Stegsolveはしばしば本当の時間節約者です。\
+画像自体にメッセージやテキストが隠されている場合、それを表示するためには、カラーフィルタを適用したり、カラーレベルを変更したりする必要があります。GIMPやPhotoshopのようなツールを使用してこれを行うこともできますが、Stegsolveを使用すると簡単になります。これは、画像に多くの便利なカラーフィルタを適用する小さなJavaツールです。CTFの課題では、Stegsolveはしばしば本当の時間節約者です。\
 [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)から入手できます。\
 使用するには、画像を開き、`<` `>`ボタンをクリックします。
 
@@ -145,7 +145,7 @@ Fast Fourier Tを使用して隠されたコンテンツを検出するには：
 
 ### Stegpy \[PNG, BMP, GIF, WebP, WAV]
 
-ステガノグラフィを使用して画像や音声ファイルに情報をエンコードするためのプログラムです。データは平文または暗号化として保存することができます。\
+ステガノグラフィーを介して画像や音声ファイルに情報をエンコードするためのプログラムです。データは平文または暗号化として保存することができます。\
 [GitHub](https://github.com/dhsdshdhk/stegpy)で見つけることができます。
 
 ### Pngcheck
@@ -185,7 +185,7 @@ WavStegは、wavファイルに最下位ビットを使用してデータを隠�
 
 ### Sonic visualizer <a href="#sonic-visualizer" id="sonic-visualizer"></a>
 
-Sonic visualizerは、オーディオファイルの内容を表示および分析するためのツールです。オーディオステガノグラフィの課題に直面した場合、他の多くのツールでは検出できないオーディオファイルの隠れた形状を明らかにするのに非常に役立ちます。\
+Sonic visualizerは、オーディオファイルの内容を表示および分析するためのツールです。オーディオステガノグラフィーチャレンジに直面したときに非常に役立ちます。他の多くのツールでは検出できないオーディオファイルの隠れた形状を明らかにすることができます。\
 行き詰まった場合は、常にオーディオのスペクトログラムをチェックしてください。[公式ウェブサイト](https://www.sonicvisualiser.org/)
 
 ### DTMF Tones - ダイヤル音

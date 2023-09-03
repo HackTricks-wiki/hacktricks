@@ -8,11 +8,11 @@
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築および自動化します。\
@@ -53,8 +53,8 @@
 * **公開鍵アルゴリズム**：公開鍵を生成するために使用されるアルゴリズム。RSAのようなもの。
 * **公開鍵曲線**：楕円曲線公開鍵アルゴリズムで使用される曲線（適用される場合）。nistp521のようなもの。
 * **公開鍵指数**：公開鍵を導出するために使用される指数（適用される場合）。65537のようなもの。
-* **公開鍵サイズ**：公開鍵空間のサイズ（ビット単
-* **Authority Key Identifier**: 発行者証明書の公開鍵から派生したキー識別子を含んでいます。これは発行者公開鍵のハッシュです。
+* **公開鍵サイズ**：ビット単位での公開
+* **Authority Key Identifier**: 発行者証明書の公開鍵から派生した鍵識別子を含んでいます。これは発行者公開鍵のハッシュです。
 * **Authority Information Access** (AIA): この拡張機能には最大2種類の情報が含まれています：
 * この証明書の発行者を取得する方法に関する情報（CA発行者アクセス方法）
 * この証明書の失効を確認するためのOCSPレスポンダのアドレス（OCSPアクセス方法）。
@@ -63,31 +63,31 @@
 
 ### OCSPとCRL Distribution Pointsの違い
 
-**OCSP**（RFC 2560）は、**OCSPクライアントとOCSPレスポンダ**から構成される標準プロトコルです。このプロトコルは、**CRL全体をダウンロードすることなく、指定されたデジタル公開鍵証明書の失効ステータスを判定**します。\
-**CRL**は証明書の有効性を確認するための**従来の方法**です。CRLは、失効または無効になった証明書のシリアル番号のリストを提供します。CRLを使用することで、検証者は提示された証明書の失効ステータスを確認することができます。CRLは512エントリまでしか対応していません。\
+**OCSP**（RFC 2560）は、**OCSPクライアントとOCSPレスポンダ**から構成される標準プロトコルです。このプロトコルは、**完全なCRLをダウンロードすることなく、指定されたデジタル公開鍵証明書の失効ステータスを判断**します。\
+**CRL**は証明書の有効性を確認するための**従来の方法**です。CRLは、失効または無効になった証明書のシリアル番号のリストを提供します。CRLを使用することで、検証者は提示された証明書の失効ステータスを確認できます。CRLは512エントリまでしか制限されていません。\
 [ここから](https://www.arubanetworks.com/techdocs/ArubaOS%206\_3\_1\_Web\_Help/Content/ArubaFrameStyles/CertRevocation/About\_OCSP\_and\_CRL.htm)。
 
-### 証明書透明性とは
+### Certificate Transparencyとは
 
-証明書透明性は、ドメイン所有者、CA、およびドメインユーザーによるSSL証明書の発行と存在を公開し、検証することによって、証明書に基づく脅威を解決しようとするものです。具体的には、証明書透明性には次の3つの主な目標があります：
+Certificate Transparencyは、SSL証明書に基づく脅威を解決するために、ドメイン所有者、CA、およびドメインユーザーによるSSL証明書の発行と存在を公開し、検証することを目的としています。具体的には、Certificate Transparencyには次の3つの主な目標があります：
 
-* ドメインの所有者が証明書を確認することなく、CAがそのドメインのためにSSL証明書を発行することを不可能（または少なくとも非常に困難）にする。
+* ドメインの所有者が証明書を確認できるようにするために、CAがドメインのためにSSL証明書を発行することができない（または非常に困難にする）。
 * 証明書が誤ってまたは悪意を持って発行されたかどうかを、任意のドメイン所有者またはCAが確認できるようにするためのオープンな監査およびモニタリングシステムを提供する。
 * 誤ってまたは悪意を持って発行された証明書によってユーザーがだまされることを（可能な限り）防ぐ。
 
-#### **証明書ログ**
+#### 証明書ログ
 
-証明書ログは、証明書の**暗号化された、公開監査可能な、追加のみのレコード**を維持するシンプルなネットワークサービスです。**誰でもログに証明書を提出できます**が、証明書機関が最も頻繁に提出するでしょう。同様に、誰でもログをクエリできます。クエリ結果は暗号的な証明として使用でき、ログが適切に動作しているか、または特定の証明書がログに記録されているかを検証できます。ログサーバーの数は大きくなくても構いません（たとえば、世界中で1000を下回る程度）。それぞれのログサーバーは、CA、ISP、または他の関係者によって独立して運営される可能性があります。
+証明書ログは、証明書の**暗号化された、公開監査可能な、追加のみのレコード**を維持するシンプルなネットワークサービスです。**誰でもログに証明書を提出できます**が、証明書機関が最も頻繁に提出するでしょう。同様に、誰でもログをクエリできます。クエリ結果は暗号的な証明として使用でき、ログが適切に動作しているか、または特定の証明書がログに記録されているかを検証できます。ログサーバーの数は大きくする必要はありません（たとえば、世界中で1000を下回る程度）。それぞれのログサーバーは、CA、ISP、または他の関係者によって独立して運営される可能性があります。
 
 #### クエリ
 
-[https://crt.sh/](https://crt.sh)で任意のドメインの証明書透明性のログをクエリできます。
+[https://crt.sh/](https://crt.sh)で任意のドメインのCertificate Transparencyログをクエリできます。
 
 ## フォーマット
 
 証明書を保存するために使用できるさまざまなフォーマットがあります。
 
-#### **PEMフォーマット**
+#### PEMフォーマット
 
 * 証明書に最も一般的に使用されるフォーマットです
 * ほとんどのサーバー（例：Apache）は、証明書と秘密鍵を別々のファイルに保存することを想定しています\
@@ -95,7 +95,7 @@
 \- PEM証明書に使用される拡張子は.cer、.crt、.pem、.keyファイルです\
 \- Apacheや同様のサーバーはPEM形式の証明書を使用します
 
-#### **DERフォーマット**
+#### DERフォーマット
 
 * DERフォーマットは証明書のバイナリ形式です
 * すべてのタイプの証明書と秘密鍵をDER形式でエンコードすることができます
@@ -103,17 +103,17 @@
 * DER形式の証明書は、一般的に「.cer」や「.der」の拡張子を使用します
 * DERは主にJavaプラットフォームで使用されます
 
-#### **P7B/PKCS#7フォーマット**
+#### P7B/PKCS#7フォーマット
 
 * PKCS#7またはP7Bフォーマットは、Base64 ASCII形式で保存され、拡張子が.p7bまたは.p7cのファイルです
 * P7Bファイルには証明書とチェーン証明書（中間CA）のみが含まれており、秘密鍵は含まれていません
 * P7Bファイルをサポートする最も一般的なプラットフォームは、Microsoft WindowsとJava Tomcatです
 
-#### **PFX/P12/PKCS#12フォーマット**
+#### PFX/P12/PKCS#12フォーマット
 
-* PKCS#12またはPFX/P12フォーマットは、サーバー証明書、中間証明書、および秘密鍵を1つの暗号化可能なファイルに格納するバイナリ形式です
-* これらのファイルには通常、.pfxや.p12などの拡張子が付いています
-* これらは通常、証明書と秘密鍵をインポートおよびエクスポートするためにWindowsマシンで使用されます
+* PKCS#12またはPFX/P12フォーマットは、サーバー証明書、中間証明書、および秘密鍵を1つの暗号化可能なファイルに格納するためのバイナリ形式です
+* これらのファイルには通常、.pfxや.p12などの拡張子があります
+* これらは通常、Windowsマシンで証明書と秘密鍵をインポートおよびエクスポートするために使用されます
 
 ### フォーマットの変換
 
@@ -121,35 +121,41 @@
 ```
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
-#### **PEMをDERに変換する**
+To convert a PEM (Privacy Enhanced Mail) certificate file to DER (Distinguished Encoding Rules) format, you can use the OpenSSL command-line tool. The following command can be used for the conversion:
 
-To convert a PEM certificate to DER format, you can use the OpenSSL command-line tool. The following command can be used:
-
-```
+```bash
 openssl x509 -in certificate.pem -outform der -out certificate.der
 ```
 
 Replace `certificate.pem` with the path to your PEM certificate file, and `certificate.der` with the desired output file name for the DER format.
 
-PEM形式の証明書をDER形式に変換するには、OpenSSLのコマンドラインツールを使用することができます。次のコマンドを使用します。
+This command will read the PEM certificate file and convert it to DER format, saving the result in the specified output file.
 
-```
-openssl x509 -in certificate.pem -outform der -out certificate.der
-```
-
-`certificate.pem`をPEM証明書ファイルのパスに、`certificate.der`をDER形式の出力ファイル名に置き換えてください。
+Note that PEM and DER are two different formats for representing certificates. PEM is a base64-encoded format that includes header and footer lines, while DER is a binary format. The conversion from PEM to DER is often required when working with certain systems or applications that only accept DER-encoded certificates.
 ```
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
 ```
 **DERをPEMに変換する**
 
-DER形式の証明書をPEM形式に変換するには、次のコマンドを使用します。
+DER形式の証明書をPEM形式に変換する方法を説明します。
 
-```plaintext
-openssl x509 -inform der -in certificate.der -out certificate.pem
-```
+1. OpenSSLコマンドを使用して、DER形式の証明書をPEM形式に変換します。
 
-このコマンドは、`certificate.der`という名前のDER形式の証明書を読み込み、`certificate.pem`という名前のPEM形式の証明書に変換します。
+   ```shell
+   openssl x509 -inform der -in certificate.der -out certificate.pem
+   ```
+
+   このコマンドでは、`certificate.der`は変換したいDER形式の証明書ファイルのパスを指定します。変換後のPEM形式の証明書は`certificate.pem`という名前で保存されます。
+
+2. 変換されたPEM形式の証明書をテキストエディタで開きます。
+
+   ```shell
+   vi certificate.pem
+   ```
+
+   PEM形式の証明書はBase64エンコードされているため、テキストエディタで内容を確認できます。
+
+以上で、DER形式の証明書をPEM形式に変換する手順が完了です。
 ```
 openssl x509 -inform der -in certificatename.der -out certificatename.pem
 ```
@@ -161,18 +167,25 @@ openssl crl2pkcs7 -nocrl -certfile certificatename.pem -out certificatename.p7b 
 ```
 **PKCS7をPEMに変換する**
 
-PKCS7形式の証明書をPEM形式に変換する方法は次のとおりです。
+PKCS7形式の証明書をPEM形式に変換する方法を説明します。
 
-1. PKCS7形式の証明書をテキストエディタで開きます。
-2. ファイルの先頭に`-----BEGIN PKCS7-----`という行を追加します。
-3. ファイルの末尾に`-----END PKCS7-----`という行を追加します。
-4. ファイルを保存し、拡張子を`.pem`に変更します。
+1. まず、PKCS7形式の証明書ファイルを用意します。
 
-これにより、PKCS7形式の証明書がPEM形式に変換されます。
+2. 次に、OpenSSLコマンドを使用して、PKCS7形式の証明書をPEM形式に変換します。以下のコマンドを実行します。
+
+   ```
+   openssl pkcs7 -print_certs -in input.p7b -out output.pem
+   ```
+
+   このコマンドは、`input.p7b`という名前のPKCS7形式の証明書ファイルを読み込み、`output.pem`という名前のPEM形式の証明書ファイルに変換します。
+
+3. 変換が完了すると、`output.pem`ファイルにPEM形式の証明書が保存されます。
+
+これで、PKCS7形式の証明書をPEM形式に変換することができました。
 ```
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.pem
 ```
-**pfxをPEMに変換する**
+**PFXをPEMに変換する**
 
 **注意:** PKCS#12またはPFX形式は、サーバー証明書、中間証明書、および秘密鍵を1つの暗号化可能なファイルに格納するためのバイナリ形式です。PFXファイルは通常、.pfxや.p12などの拡張子を持ちます。PFXファイルは、通常、Windowsマシンで証明書と秘密鍵をインポートおよびエクスポートするために使用されます。
 ```
@@ -189,24 +202,17 @@ openssl pkcs12 -in certificatename.pfx -nocerts -nodes -out certificatename.pem
 
 PEM形式の証明書をPKCS8形式に変換する方法を説明します。
 
-1. 最初に、OpenSSLコマンドを使用してPEM形式の証明書をPKCS8形式に変換します。
+1. 最初に、OpenSSLコマンドを使用してPEM形式の証明書をPKCS8形式に変換します。以下のコマンドを実行します。
 
-   ```plaintext
-   openssl pkcs8 -topk8 -inform PEM -outform DER -in private.pem -out private.pk8 -nocrypt
+   ```
+   openssl pkcs8 -topk8 -inform PEM -outform PEM -in private_key.pem -out private_key_pkcs8.pem
    ```
 
-   このコマンドは、`private.pem`という名前のPEM形式の証明書を`private.pk8`という名前のPKCS8形式の証明書に変換します。
+   このコマンドは、`private_key.pem`という名前のPEM形式の秘密鍵をPKCS8形式に変換し、`private_key_pkcs8.pem`という名前で保存します。
 
-2. 変換されたPKCS8形式の証明書は、DER形式で保存されます。
+2. コマンドを実行すると、パスワードの入力を求められる場合があります。元のPEM形式の秘密鍵にパスワードが設定されている場合は、パスワードを入力してください。
 
-   - `-topk8`オプションは、PKCS8形式の証明書を生成するために使用されます。
-   - `-inform PEM`オプションは、入力ファイルがPEM形式であることを指定します。
-   - `-outform DER`オプションは、出力ファイルをDER形式で保存することを指定します。
-   - `-in private.pem`オプションは、変換するPEM形式の証明書のファイルパスを指定します。
-   - `-out private.pk8`オプションは、変換後のPKCS8形式の証明書の保存先のファイルパスを指定します。
-   - `-nocrypt`オプションは、パスワードを使用せずに証明書を変換することを指定します。
-
-3. 変換が成功すると、`private.pk8`という名前のPKCS8形式の証明書が生成されます。
+3. 変換が完了すると、`private_key_pkcs8.pem`という名前のファイルにPKCS8形式の秘密鍵が保存されます。
 
 これで、PEM形式の証明書をPKCS8形式に変換することができました。
 ```
@@ -221,26 +227,30 @@ openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 ```
 **2- CERとプライベートキーをPFXに変換する**
 
-To convert a CER (certificate) file and a private key to a PFX (PKCS#12) file, you can use the OpenSSL tool. The PFX file format allows you to combine the certificate and private key into a single file, which is commonly used for importing certificates into various systems.
+To convert a CER (certificate) file and a private key to a PFX (Personal Information Exchange) file, you can use the OpenSSL command-line tool. The PFX file is a container format that combines the certificate and private key into a single file.
 
-Here is the command to convert the CER and private key files to PFX:
+Here are the steps to convert the CER and private key to PFX:
 
-```plaintext
-openssl pkcs12 -export -out certificate.pfx -inkey privatekey.key -in certificate.cer
-```
+1. Open a command prompt or terminal.
+2. Navigate to the directory where the CER and private key files are located.
+3. Run the following OpenSSL command:
 
-Replace `privatekey.key` with the path to your private key file, and `certificate.cer` with the path to your certificate file. The resulting PFX file will be named `certificate.pfx`.
+   ```
+   openssl pkcs12 -export -out certificate.pfx -inkey privatekey.key -in certificate.cer
+   ```
 
-During the conversion process, you will be prompted to set a password for the PFX file. Make sure to choose a strong password and keep it secure.
+   Replace `privatekey.key` with the filename of your private key file, and `certificate.cer` with the filename of your CER file. You can also change `certificate.pfx` to the desired output filename.
 
-After the conversion is complete, you can use the PFX file to import the certificate and private key into applications or systems that support the PFX format.
+4. Enter a password when prompted. This password will be used to protect the PFX file.
+
+After running the command, OpenSSL will generate the PFX file containing the certificate and private key. Make sure to keep the PFX file secure, as it contains sensitive information.
 ```
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile  cacert.cer
 ```
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
+[**Trickest**](https://trickest.io/)を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -249,10 +259,10 @@ openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certif
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
