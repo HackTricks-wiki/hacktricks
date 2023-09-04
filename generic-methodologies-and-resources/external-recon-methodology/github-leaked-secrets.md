@@ -23,10 +23,11 @@ Ahora que hemos construido la lista de activos de nuestro alcance, es hora de bu
 
 * [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
 
-### Filtraciones de claves de API en github
+### Filtraciones de claves de API en Github
 
 * [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 * [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+* [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 * [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 * [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
 * [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
