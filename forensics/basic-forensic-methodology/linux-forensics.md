@@ -12,7 +12,7 @@ Obtén acceso hoy mismo:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
@@ -83,7 +83,7 @@ También se puede utilizar LiME para **enviar el volcado a través de la red** e
 #### Apagado
 
 En primer lugar, deberás **apagar el sistema**. Esto no siempre es una opción, ya que a veces el sistema será un servidor de producción que la empresa no puede permitirse apagar.\
-Hay **2 formas** de apagar el sistema, un **apagado normal** y un **apagado "desenchufar"**. El primero permitirá que los **procesos terminen como de costumbre** y que el **sistema de archivos** se **sincronice**, pero también permitirá que el posible **malware** **destruya evidencia**. El enfoque de "desenchufar" puede implicar **alguna pérdida de información** (no se perderá mucha información, ya que ya se tomó una imagen de la memoria) y el **malware no tendrá oportunidad** de hacer nada al respecto. Por lo tanto, si **sospechas** que puede haber un **malware**, simplemente ejecuta el **comando `sync`** en el sistema y desenchúfalo.
+Hay **2 formas** de apagar el sistema, un **apagado normal** y un **apagado "desenchufar"**. El primero permitirá que los **procesos terminen como de costumbre** y que el **sistema de archivos** se **sincronice**, pero también permitirá que el posible **malware** **destruya evidencia**. El enfoque de "desenchufar" puede implicar **alguna pérdida de información** (no se perderá mucha información ya que ya se tomó una imagen de la memoria) y el **malware no tendrá oportunidad** de hacer nada al respecto. Por lo tanto, si **sospechas** que puede haber un **malware**, simplemente ejecuta el **comando `sync`** en el sistema y desenchúfalo.
 
 #### Tomar una imagen del disco
 
@@ -154,8 +154,8 @@ ThisisTheMasterSecret
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\
-Obtenga acceso hoy:
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Obtenga acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -163,7 +163,7 @@ Obtenga acceso hoy:
 
 ### Archivos del sistema modificados
 
-Algunos sistemas Linux tienen una función para verificar la integridad de muchos componentes instalados, lo que proporciona una forma efectiva de identificar archivos inusuales o fuera de lugar. Por ejemplo, `rpm -Va` en Linux está diseñado para verificar todos los paquetes que se instalaron usando el Administrador de paquetes RedHat.
+Algunos sistemas Linux tienen una función para **verificar la integridad de muchos componentes instalados**, lo que proporciona una forma efectiva de identificar archivos inusuales o fuera de lugar. Por ejemplo, `rpm -Va` en Linux está diseñado para verificar todos los paquetes que se instalaron utilizando el Administrador de paquetes RedHat.
 ```bash
 #RedHat
 rpm -Va
@@ -265,17 +265,17 @@ Busque en todos los archivos de registro disponibles en el sistema comprometido 
 
 ### Registros puros
 
-Los eventos de **inicio de sesión** registrados en los registros del sistema y de seguridad, incluidos los inicios de sesión a través de la red, pueden revelar que el **malware** o un **intruso ha obtenido acceso** a un sistema comprometido a través de una cuenta específica en un momento determinado. Otros eventos en torno al momento de una infección por malware se pueden capturar en los registros del sistema, incluida la **creación** de un **nuevo servicio** o nuevas cuentas en el momento de un incidente.\
+Los eventos de **inicio de sesión** registrados en los registros del sistema y de seguridad, incluidos los inicios de sesión a través de la red, pueden revelar que el **malware** o un **intruso ha obtenido acceso** a un sistema comprometido a través de una cuenta específica en un momento determinado. Otros eventos en torno al momento de una infección de malware pueden capturarse en los registros del sistema, incluida la **creación** de un **nuevo servicio** o nuevas cuentas en el momento de un incidente.\
 Inicios de sesión del sistema interesantes:
 
 * **/var/log/syslog** (debian) o **/var/log/messages** (Redhat)
-* Muestra mensajes generales e información sobre el sistema. Es un registro de datos de toda la actividad en todo el sistema global.
+* Muestra mensajes generales e información sobre el sistema. Es un registro de datos de toda la actividad en el sistema global.
 * **/var/log/auth.log** (debian) o **/var/log/secure** (Redhat)
 * Guarda registros de autenticación tanto para inicios de sesión exitosos como fallidos, y procesos de autenticación. El almacenamiento depende del tipo de sistema.
 * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
 * **/var/log/boot.log**: mensajes de inicio y información de arranque.
 * **/var/log/maillog** o **var/log/mail.log**: es para registros del servidor de correo, útil para obtener información sobre postfix, smtpd u otros servicios relacionados con el correo electrónico que se ejecutan en su servidor.
-* **/var/log/kern.log**: mantiene registros y advertencias del kernel. Los registros de actividad del kernel (por ejemplo, dmesg, kern.log, klog) pueden mostrar que un servicio en particular se bloqueó repetidamente, lo que podría indicar que se instaló una versión troyanizada inestable.
+* **/var/log/kern.log**: guarda registros y advertencias del kernel. Los registros de actividad del kernel (por ejemplo, dmesg, kern.log, klog) pueden mostrar que un servicio en particular se bloqueó repetidamente, lo que podría indicar que se instaló una versión troyanizada inestable.
 * **/var/log/dmesg**: un repositorio para mensajes de controladores de dispositivos. Use **dmesg** para ver los mensajes en este archivo.
 * **/var/log/faillog**: registra información sobre inicios de sesión fallidos. Por lo tanto, es útil para examinar posibles violaciones de seguridad como hackeos de credenciales de inicio de sesión y ataques de fuerza bruta.
 * **/var/log/cron**: registra mensajes relacionados con Crond (trabajos cron). Por ejemplo, cuando el demonio cron inicia un trabajo.
@@ -343,21 +343,21 @@ Más ejemplos e información en el github: [https://github.com/snovvcrash/usbrip
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
 Obtenga acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## Revisar cuentas de usuario y actividades de inicio de sesión
 
-Examine los archivos _**/etc/passwd**_, _**/etc/shadow**_ y los **registros de seguridad** en busca de nombres o cuentas inusuales creadas y/o utilizadas en proximidad a eventos no autorizados conocidos. También verifique posibles ataques de fuerza bruta de sudo.\
+Examine los archivos _**/etc/passwd**_, _**/etc/shadow**_ y los registros de seguridad en busca de nombres o cuentas inusuales creadas y/o utilizadas en proximidad a eventos no autorizados conocidos. Además, verifique posibles ataques de fuerza bruta a sudo.\
 Además, verifique archivos como _**/etc/sudoers**_ y _**/etc/groups**_ en busca de privilegios inesperados otorgados a los usuarios.\
-Por último, busque cuentas sin contraseñas o contraseñas **fáciles de adivinar**.
+Por último, busque cuentas sin contraseñas o contraseñas fáciles de adivinar.
 
 ## Examinar el sistema de archivos
 
-Las estructuras de datos del sistema de archivos pueden proporcionar cantidades sustanciales de **información** relacionada con un incidente de **malware**, incluyendo el **momento** de los eventos y el **contenido** real del **malware**.\
-El **malware** se está diseñando cada vez más para **evitar el análisis del sistema de archivos**. Algunos malware alteran las marcas de fecha y hora en archivos maliciosos para dificultar su detección mediante el análisis de la línea de tiempo. Otros códigos maliciosos están diseñados para almacenar solo cierta información en la memoria para minimizar la cantidad de datos almacenados en el sistema de archivos.\
+Las estructuras de datos del sistema de archivos pueden proporcionar cantidades sustanciales de **información** relacionada con un incidente de **malware**, incluido el **momento** de los eventos y el **contenido** real del **malware**.\
+El **malware** se está diseñando cada vez más para **frustrar el análisis del sistema de archivos**. Algunos malware alteran las marcas de fecha y hora en archivos maliciosos para dificultar su detección mediante el análisis de la línea de tiempo. Otros códigos maliciosos están diseñados para almacenar solo cierta información en la memoria para minimizar la cantidad de datos almacenados en el sistema de archivos.\
 Para lidiar con estas técnicas antiforense, es necesario prestar **atención cuidadosa al análisis de la línea de tiempo** de las marcas de fecha y hora del sistema de archivos y a los archivos almacenados en ubicaciones comunes donde se puede encontrar malware.
 
 * Usando **autopsy** puedes ver la línea de tiempo de eventos que pueden ser útiles para descubrir actividades sospechosas. También puedes usar la función `mactime` de **Sleuth Kit** directamente.
@@ -368,13 +368,13 @@ Para lidiar con estas técnicas antiforense, es necesario prestar **atención cu
 * Revise las marcas de fecha y hora de los **inodos eliminados para ver si se eliminaron grandes cantidades de archivos alrededor del mismo tiempo**, lo que podría indicar actividad maliciosa como la instalación de un rootkit o un servicio troyanizado.
 * Debido a que los inodos se asignan en función de la disponibilidad siguiente, **los archivos maliciosos colocados en el sistema aproximadamente al mismo tiempo pueden tener inodos consecutivos asignados**. Por lo tanto, después de localizar un componente del malware, puede ser productivo inspeccionar los inodos vecinos.
 * También verifique directorios como _/bin_ o _/sbin_ ya que la **hora de modificación y/o cambio** de archivos nuevos o modificados puede ser interesante.
-* Es interesante ver los archivos y carpetas de un directorio **ordenados por fecha de creación** en lugar de alfabéticamente para ver qué archivos o carpetas son más recientes (los últimos generalmente).
+* Es interesante ver los archivos y carpetas de un directorio **ordenados por fecha de creación** en lugar de alfabéticamente para ver qué archivos o carpetas son más recientes (generalmente los últimos).
 
 Puede verificar los archivos más recientes de una carpeta usando `ls -laR --sort=time /bin`\
 Puede verificar los inodos de los archivos dentro de una carpeta usando `ls -lai /bin |sort -n`
 
 {% hint style="info" %}
-Tenga en cuenta que un **atacante** puede **modificar** la **hora** para que los **archivos parezcan** **legítimos**, pero no puede modificar el **inodo**. Si encuentra que un **archivo indica** que se creó y modificó al **mismo tiempo** que el resto de los archivos en la misma carpeta, pero el **inodo** es **inesperadamente más grande**, entonces las **marcas de tiempo de ese archivo fueron modificadas**.
+Tenga en cuenta que un **atacante** puede **modificar** la **hora** para que los **archivos parezcan** **legítimos**, pero no puede modificar el **inodo**. Si encuentra que un **archivo** indica que se creó y modificó al **mismo tiempo** que el resto de los archivos en la misma carpeta, pero el **inodo** es **inesperadamente más grande**, entonces las **marcas de tiempo de ese archivo fueron modificadas**.
 {% endhint %}
 
 ## Comparar archivos de diferentes versiones del sistema de archivos
@@ -409,15 +409,13 @@ Cuando se realiza un análisis forense en un sistema Linux, es importante buscar
 
 1. **Recuperación de archivos eliminados**: Utilice herramientas como `extundelete` o `testdisk` para buscar y recuperar archivos eliminados en sistemas de archivos ext3 y ext4.
 
-2. **Análisis de espacio no asignado**: Utilice herramientas como `foremost` o `scalpel` para buscar en el espacio no asignado del disco en busca de archivos eliminados.
+2. **Análisis de espacio no asignado**: Utilice herramientas como `foremost` o `scalpel` para buscar archivos en el espacio no asignado del disco, donde los archivos eliminados pueden residir.
 
-3. **Análisis de registros de sistema**: Revise los registros de sistema en busca de pistas sobre archivos eliminados. Los registros de sistema pueden contener información sobre archivos que han sido eliminados o modificados.
+3. **Análisis de registros de sistema**: Revise los registros de sistema en busca de pistas sobre archivos eliminados. Los registros de sistema pueden contener información sobre archivos que se han eliminado o modificaciones realizadas en el sistema de archivos.
 
-4. **Análisis de metadatos**: Examine los metadatos de los archivos existentes para encontrar referencias a archivos eliminados. Los metadatos pueden incluir información sobre archivos que han sido eliminados, como nombres de archivo antiguos o rutas de acceso.
+4. **Análisis de metadatos**: Examine los metadatos de los archivos existentes para encontrar referencias a archivos eliminados. Los metadatos pueden incluir información sobre archivos que se han eliminado, como nombres de archivo antiguos o ubicaciones anteriores.
 
-5. **Análisis de fragmentos**: Utilice herramientas como `foremost` o `scalpel` para buscar fragmentos de archivos eliminados en el disco.
-
-Recuerde que es importante realizar estas acciones en una copia forense del sistema para evitar modificar o dañar la evidencia.
+Recuerde que es importante realizar estas acciones en una copia forense del sistema para preservar la integridad de los datos y evitar cualquier modificación accidental.
 ```bash
 git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
 ```
@@ -443,7 +441,7 @@ Tenga en cuenta que no todas las diferencias pueden tener todos los tipos. Por e
 ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
 **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.

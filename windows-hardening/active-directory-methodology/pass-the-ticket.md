@@ -15,7 +15,7 @@
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -26,8 +26,8 @@ Este tipo de ataque es similar a Pasar la Clave, pero en lugar de usar hashes pa
 
 **Leer**:
 
-* [Obtención de tickets en Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-* [Obtención de tickets en Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+* [Obtención de tickets de Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+* [Obtención de tickets de Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
 ### **Intercambio de tickets de Linux y Windows entre plataformas**
 
@@ -64,7 +64,7 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

@@ -15,7 +15,7 @@
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -62,7 +62,7 @@ Y las bases de datos principales son:
 
 La extensión ".dbx" significa que las **bases de datos** están **encriptadas**. Dropbox utiliza **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/previous-versions/ms995355\(v=msdn.10\)?redirectedfrom=MSDN))
 
-Para comprender mejor la encriptación que utiliza Dropbox, puedes leer [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+Para entender mejor la encriptación que utiliza Dropbox, puedes leer [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
 
 Sin embargo, la información principal es:
 
@@ -76,9 +76,9 @@ Además de esa información, para descifrar las bases de datos aún necesitas:
 * La **clave DPAPI encriptada**: Puedes encontrarla en el registro dentro de `NTUSER.DAT\Software\Dropbox\ks\client` (exporta estos datos como binarios)
 * Las colmenas **`SYSTEM`** y **`SECURITY`**
 * Las **claves maestras DPAPI**: Que se pueden encontrar en `\Users\<nombre de usuario>\AppData\Roaming\Microsoft\Protect`
-* El nombre de usuario y la contraseña del usuario de Windows
+* El **nombre de usuario** y la **contraseña** del usuario de Windows
 
-Luego puedes usar la herramienta [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi\_data\_decryptor.html)**:**
+Luego puedes utilizar la herramienta [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi\_data\_decryptor.html)**:**
 
 ![](<../../../.gitbook/assets/image (448).png>)
 
@@ -93,12 +93,12 @@ La base de datos **`config.dbx`** contiene:
 * **Email**: El correo electrónico del usuario
 * **usernamedisplayname**: El nombre del usuario
 * **dropbox\_path**: Ruta donde se encuentra la carpeta de Dropbox
-* **Host\_id: Hash** utilizado para autenticarse en la nube. Esto solo se puede revocar desde la web.
-* **Root\_ns**: Identificador de usuario
+* **Host\_id: Hash** utilizado para autenticarse en la nube. Esto solo puede ser revocado desde la web.
+* **Root\_ns**: Identificador del usuario
 
 La base de datos **`filecache.db`** contiene información sobre todos los archivos y carpetas sincronizados con Dropbox. La tabla `File_journal` es la que contiene más información útil:
 
-* **Server\_path**: Ruta donde se encuentra el archivo dentro del servidor (esta ruta va precedida por el `host_id` del cliente).
+* **Server\_path**: Ruta donde se encuentra el archivo dentro del servidor (esta ruta está precedida por el `host_id` del cliente).
 * **local\_sjid**: Versión del archivo
 * **local\_mtime**: Fecha de modificación
 * **local\_ctime**: Fecha de creación
@@ -114,7 +114,7 @@ Otras tablas dentro de esta base de datos contienen información más interesant
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.io/) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

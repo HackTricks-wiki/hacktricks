@@ -1,4 +1,4 @@
-# Artefactos del navegador
+# Artefactos del Navegador
 
 <details>
 
@@ -15,31 +15,31 @@
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Artefactos del navegador <a href="#3def" id="3def"></a>
+## Artefactos del Navegador <a href="#3def" id="3def"></a>
 
 Cuando hablamos de artefactos del navegador, nos referimos al historial de navegación, marcadores, lista de archivos descargados, datos de caché, etc.
 
 Estos artefactos son archivos almacenados en carpetas específicas del sistema operativo.
 
-Cada navegador almacena sus archivos en un lugar diferente al de otros navegadores y todos tienen nombres diferentes, pero la mayoría de las veces almacenan el mismo tipo de datos (artefactos).
+Cada navegador almacena sus archivos en un lugar diferente al de otros navegadores y todos tienen nombres diferentes, pero generalmente almacenan el mismo tipo de datos (artefactos).
 
 Veamos los artefactos más comunes almacenados por los navegadores.
 
-* **Historial de navegación:** Contiene datos sobre el historial de navegación del usuario. Puede utilizarse para rastrear si el usuario ha visitado sitios maliciosos, por ejemplo.
-* **Datos de autocompletado:** Estos son los datos que el navegador sugiere en función de lo que más buscas. Puede utilizarse junto con el historial de navegación para obtener más información.
+* **Historial de Navegación:** Contiene datos sobre el historial de navegación del usuario. Puede utilizarse para rastrear si el usuario ha visitado sitios maliciosos, por ejemplo.
+* **Datos de Autocompletado:** Estos son los datos que el navegador sugiere en función de lo que más buscas. Puede utilizarse junto con el historial de navegación para obtener más información.
 * **Marcadores:** Autoexplicativo.
-* **Extensiones y complementos:** Autoexplicativo.
+* **Extensiones y Complementos:** Autoexplicativo.
 * **Caché:** Al navegar por sitios web, el navegador crea todo tipo de datos en caché (imágenes, archivos JavaScript, etc.) por diversas razones. Por ejemplo, para acelerar el tiempo de carga de los sitios web. Estos archivos en caché pueden ser una gran fuente de datos durante una investigación forense.
-* **Inicios de sesión:** Autoexplicativo.
+* **Inicios de Sesión:** Autoexplicativo.
 * **Favicons:** Son los pequeños iconos que se encuentran en las pestañas, URLs, marcadores, etc. Se pueden utilizar como otra fuente para obtener más información sobre el sitio web o los lugares que visitó el usuario.
-* **Sesiones del navegador:** Autoexplicativo.
+* **Sesiones del Navegador:** Autoexplicativo.
 * **Descargas:** Autoexplicativo.
-* **Datos de formularios:** Todo lo que se escribe dentro de los formularios a menudo se almacena en el navegador, para que la próxima vez que el usuario ingrese algo en un formulario, el navegador pueda sugerir datos ingresados previamente.
+* **Datos de Formularios:** Todo lo que se escribe en los formularios a menudo se almacena en el navegador, para que la próxima vez que el usuario ingrese algo en un formulario, el navegador pueda sugerir datos ingresados previamente.
 * **Miniaturas:** Autoexplicativo.
 * **Custom Dictionary.txt**: Palabras agregadas al diccionario por el usuario.
 
@@ -47,7 +47,7 @@ Veamos los artefactos más comunes almacenados por los navegadores.
 
 Firefox crea la carpeta de perfiles en \~/_**.mozilla/firefox/**_ (Linux), en **/Users/$USER/Library/Application Support/Firefox/Profiles/** (MacOS), _**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\\**_ (Windows)_**.**_\
 Dentro de esta carpeta, debería aparecer el archivo _**profiles.ini**_ con el nombre(s) del perfil(es) de usuario.\
-Cada perfil tiene una variable "**Path**" con el nombre de la carpeta donde se almacenarán sus datos. La carpeta debería estar **presente en el mismo directorio donde se encuentra el archivo \_profiles.ini**\_\*\*. Si no lo está, probablemente fue eliminada.
+Cada perfil tiene una variable "**Path**" con el nombre de la carpeta donde se almacenarán sus datos. La carpeta debe estar **presente en el mismo directorio donde se encuentra el archivo \_profiles.ini**\_\*\*. Si no lo está, probablemente fue eliminada.
 
 Dentro de la carpeta **de cada perfil** (_\~/.mozilla/firefox/\<NombrePerfil>/_) deberías poder encontrar los siguientes archivos interesantes:
 
@@ -57,27 +57,27 @@ Dentro de la carpeta **de cada perfil** (_\~/.mozilla/firefox/\<NombrePerfil>/_)
 * 1: El usuario siguió un enlace
 * 2: El usuario escribió la URL
 * 3: El usuario utilizó un favorito
-* 4: Cargado desde un iframe
+* 4: Cargado desde un Iframe
 * 5: Accedido a través de una redirección HTTP 301
 * 6: Accedido a través de una redirección HTTP 302
 * 7: Archivo descargado
-* 8: El usuario siguió un enlace dentro de un iframe
+* 8: El usuario siguió un enlace dentro de un Iframe
 * Consulta para volcar las descargas: `SELECT datetime(lastModified/1000000,'unixepoch') AS down_date, content as File, url as URL FROM moz_places, moz_annos WHERE moz_places.id = moz_annos.place_id;`
 *
 * _**bookmarkbackups/**_ : Copias de seguridad de marcadores
 * _**formhistory.sqlite**_ : Datos de formularios web (como correos electrónicos)
-* _**handlers.json**_ : Controladores de protocolo (por ejemplo, qué aplicación va a manejar el protocolo _mailto://_)
+* _**handlers.json**_ : Manejadores de protocolos (por ejemplo, qué aplicación va a manejar el protocolo _mailto://_)
 * _**persdict.dat**_ : Palabras agregadas al diccionario
 * _**addons.json**_ y \_**extensions.sqlite** \_ : Complementos y extensiones instalados
 * _**cookies.sqlite**_ : Contiene **cookies**. En Windows, se puede utilizar [**MZCookiesView**](https://www.nirsoft.net/utils/mzcv.html) para inspeccionar este archivo.
-*   _**cache2/entries**_ o _**startupCache**_ : Datos de caché (\~350MB). También se pueden utilizar trucos como la **recuperación de datos** para obtener los archivos guardados en la caché. Se puede utilizar [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html) para ver los **archivos guardados en la caché**.
+*   _**cache2/entries**_ o _**startupCache**_ : Datos de caché (\~350MB). También se pueden utilizar técnicas como **data carving** para obtener los archivos guardados en la caché. Se puede utilizar [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html) para ver los **archivos guardados en la caché**.
 
 Información que se puede obtener:
 
-* URL, recuento de recuperación, nombre de archivo, tipo de contenido, tamaño de archivo, hora de la última modificación, hora de la última recuperación, última modificación del servidor, respuesta del servidor
+* URL, recuento de descargas, nombre de archivo, tipo de contenido, tamaño del archivo, hora de la última modificación, hora de la última descarga, última modificación del servidor, respuesta del servidor
 * _**favicons.sqlite**_ : Favicons
 * _**prefs.js**_ : Configuraciones y preferencias
-* _**downloads.sqlite**_ : Base de datos de descargas antiguas (ahora está dentro de places.sqlite)
+* _**downloads.sqlite**_ : Base de datos antigua de descargas (ahora está dentro de places.sqlite)
 * _**thumbnails/**_ : Miniaturas
 * _**logins.json**_ : Nombres de usuario y contraseñas encriptados
 * **Anti-phishing incorporado en el navegador:** `grep 'browser.safebrowsing' ~/Library/Application Support/Firefox/Profiles/*/prefs.js`
@@ -270,7 +270,7 @@ Opera **almacena el historial del navegador y los datos de descarga en el mismo 
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.io/) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas de la comunidad más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

@@ -15,18 +15,18 @@
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## ¿Qué es un Certificado?
 
-En criptografía, un **certificado de clave pública**, también conocido como **certificado digital** o **certificado de identidad**, es un documento electrónico utilizado para demostrar la propiedad de una clave pública. El certificado incluye información sobre la clave, información sobre la identidad de su propietario (llamado el sujeto) y la firma digital de una entidad que ha verificado el contenido del certificado (llamada el emisor). Si la firma es válida y el software que examina el certificado confía en el emisor, entonces puede utilizar esa clave para comunicarse de forma segura con el sujeto del certificado.
+En criptografía, un **certificado de clave pública**, también conocido como **certificado digital** o **certificado de identidad**, es un documento electrónico utilizado para demostrar la propiedad de una clave pública. El certificado incluye información sobre la clave, información sobre la identidad de su propietario (llamado el sujeto) y la firma digital de una entidad que ha verificado el contenido del certificado (llamada el emisor). Si la firma es válida y el software que examina el certificado confía en el emisor, entonces puede usar esa clave para comunicarse de manera segura con el sujeto del certificado.
 
 En un esquema típico de [infraestructura de clave pública](https://en.wikipedia.org/wiki/Public-key\_infrastructure) (PKI), el emisor del certificado es una [autoridad de certificación](https://en.wikipedia.org/wiki/Certificate\_authority) (CA), generalmente una empresa que cobra a los clientes por emitir certificados para ellos. En cambio, en un esquema de [red de confianza](https://en.wikipedia.org/wiki/Web\_of\_trust), las personas firman las claves de los demás directamente, en un formato que realiza una función similar a la de un certificado de clave pública.
 
-El formato más común para los certificados de clave pública está definido por [X.509](https://en.wikipedia.org/wiki/X.509). Debido a que X.509 es muy general, el formato está adicionalmente restringido por perfiles definidos para ciertos casos de uso, como [Infraestructura de Clave Pública (X.509)](https://en.wikipedia.org/wiki/PKIX) según se define en el RFC 5280.
+El formato más común para los certificados de clave pública está definido por [X.509](https://en.wikipedia.org/wiki/X.509). Debido a que X.509 es muy general, el formato está más restringido por perfiles definidos para ciertos casos de uso, como [Infraestructura de Clave Pública (X.509)](https://en.wikipedia.org/wiki/PKIX) según se define en RFC 5280.
 
 ## Campos Comunes de x509
 
@@ -47,7 +47,7 @@ El formato más común para los certificados de clave pública está definido po
 * **Localidad (L)**: Lugar local donde se puede encontrar la organización.
 * **Organización (O)**: Nombre de la organización
 * **Unidad Organizativa (OU)**: División de una organización (como "Recursos Humanos").
-* **No Antes**: La fecha y hora más temprana en la que el certificado es válido. Por lo general, se establece unas horas o días antes del momento en que se emitió el certificado, para evitar problemas de [desviación de reloj](https://en.wikipedia.org/wiki/Clock\_skew#On\_a\_network).
+* **No Antes**: La fecha y hora más temprana en la que el certificado es válido. Por lo general, se establece unas horas o días antes del momento en que se emitió el certificado, para evitar problemas de [desincronización de relojes](https://en.wikipedia.org/wiki/Clock\_skew#On\_a\_network).
 * **No Después**: La fecha y hora a partir de la cual el certificado ya no es válido.
 * **Clave Pública**: Una clave pública perteneciente al sujeto del certificado. (Esta es una de las partes principales, ya que es lo que firma la CA)
 * **Algoritmo de Clave Pública**: Algoritmo utilizado para generar la clave pública. Como RSA.
@@ -57,13 +57,13 @@ El formato más común para los certificados de clave pública está definido po
 * **Algoritmo de Firma**: El algoritmo utilizado para firmar el certificado de clave pública.
 * **Firma**: Una firma del cuerpo del certificado por la clave privada del emisor.
 * **Extensiones x509v3**
-* **Uso de Clave**: Los usos criptográficos válidos de la clave pública del certificado. Los valores comunes incluyen validación de firma digital, cifrado de clave y firma de certificado.
+* **Uso de Clave**: Los usos criptográficos válidos de la clave pública del certificado. Los valores comunes incluyen la validación de firma digital, el cifrado de clave y la firma de certificados.
 * En un certificado web, esto aparecerá como una _extensión X509v3_ y tendrá el valor `Firma Digital`
-* **Uso Extendido de Clave**: Las aplicaciones en las que se puede utilizar el certificado. Los valores comunes incluyen autenticación de servidor TLS, protección de correo electrónico y firma de código.
-* En un certificado web, esto aparecerá como una _extensión X509v3_ y tendrá el valor `Autenticación de Servidor Web TLS`
+* **Uso Extendido de Clave**: Las aplicaciones en las que se puede utilizar el certificado. Los valores comunes incluyen la autenticación del servidor TLS, la protección de correo electrónico y la firma de código.
+* En un certificado web, esto aparecerá como una _extensión X509v3_ y tendrá el valor `Autenticación del Servidor Web TLS`
 * **Nombre Alternativo del Sujeto:** Permite a los usuarios especificar nombres de host adicionales para un solo certificado SSL. El uso de la extensión SAN es una práctica estándar para los certificados SSL y está en camino de reemplazar el uso del nombre común.
 * **Restricción Básica:** Esta extensión describe si el certificado es un certificado de CA o un certificado de entidad final. Un certificado de CA es algo que firma certificados de otros y un certificado de entidad final es el certificado utilizado en una página web, por ejemplo (la última parte de la cadena).
-* **Identificador de Clave del Sujeto** (SKI): Esta extensión declara un **identificador** único para la **clave pública** en el certificado. Es requerido en todos los certificados de CA. Las CAs propagan su propio SKI a la extensión Identificador de Clave del Emisor (AKI) en los certificados emitidos. Es el hash de la clave pública del sujeto.
+* **Identificador de Clave del Sujeto** (SKI): Esta extensión declara un **identificador** único para la **clave** pública en el certificado. Es necesario en todos los certificados de CA. Las CA propagan su propio SKI a la extensión Identificador de Clave del Emisor (AKI) en los certificados emitidos. Es el hash de la clave pública del sujeto.
 * **Identificador de clave de autoridad**: Contiene un identificador de clave que se deriva de la clave pública en el certificado emisor. Es el hash de la clave pública del emisor.
 * **Acceso a la información de la autoridad** (AIA): Esta extensión contiene como máximo dos tipos de información:
 * Información sobre **cómo obtener el emisor de este certificado** (método de acceso del emisor de CA)
@@ -73,7 +73,7 @@ El formato más común para los certificados de clave pública está definido po
 
 ### Diferencia entre OCSP y Puntos de distribución de la lista de revocación (CRL)
 
-**OCSP** (RFC 2560) es un protocolo estándar que consta de un **cliente OCSP y un respondedor OCSP**. Este protocolo **determina el estado de revocación de un certificado de clave pública digital dado** **sin tener que descargar** la **CRL completa**.\
+**OCSP** (RFC 2560) es un protocolo estándar que consta de un **cliente OCSP y un respondedor OCSP**. Este protocolo **determina el estado de revocación de un certificado de clave pública digital dado** **sin tener que descargar** la **lista de revocación completa**.\
 **CRL** es el **método tradicional** para verificar la validez del certificado. Una **CRL proporciona una lista de números de serie de certificados** que han sido revocados o ya no son válidos. Las CRL permiten al verificador verificar el estado de revocación del certificado presentado mientras lo verifica. Las CRL están limitadas a 512 entradas.\
 De [aquí](https://www.arubanetworks.com/techdocs/ArubaOS%206\_3\_1\_Web\_Help/Content/ArubaFrameStyles/CertRevocation/About\_OCSP\_and\_CRL.htm).
 
@@ -115,13 +115,13 @@ Existen diferentes formatos que se pueden utilizar para almacenar un certificado
 
 #### **Formato P7B/PKCS#7**
 
-* El formato PKCS#7 o P7B se almacena en formato Base64 ASCII y tiene una extensión de archivo .p7b o .p7c.
+* El formato PKCS#7 o P7B se almacena en formato ASCII codificado en Base64 y tiene una extensión de archivo .p7b o .p7c.
 * Un archivo P7B solo contiene certificados y certificados de cadena (CA intermedias), no la clave privada.
 * Las plataformas más comunes que admiten archivos P7B son Microsoft Windows y Java Tomcat.
 
 #### **Formato PFX/P12/PKCS#12**
 
-* El formato PKCS#12 o PFX/P12 es un formato binario para almacenar el certificado del servidor, certificados intermedios y la clave privada en un solo archivo cifrable.
+* El formato PKCS#12 o PFX/P12 es un formato binario para almacenar el certificado del servidor, los certificados intermedios y la clave privada en un solo archivo cifrable.
 * Estos archivos suelen tener extensiones como .pfx y .p12.
 * Se utilizan principalmente en máquinas con Windows para importar y exportar certificados y claves privadas.
 
@@ -131,15 +131,13 @@ Existen diferentes formatos que se pueden utilizar para almacenar un certificado
 ```
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
-To convert a PEM (Privacy-Enhanced Mail) certificate file to DER (Distinguished Encoding Rules) format, you can use the OpenSSL command-line tool. The following command can be used for the conversion:
+To convert a PEM (Privacy Enhanced Mail) certificate file to DER (Distinguished Encoding Rules) format, you can use the OpenSSL command-line tool. The following command can be used:
 
 ```bash
-openssl x509 -in certificate.pem -outform der -out certificate.der
+openssl x509 -outform der -in certificate.pem -out certificate.der
 ```
 
-Replace `certificate.pem` with the path to your PEM certificate file. After running the command, a new file named `certificate.der` will be created, containing the certificate in DER format.
-
-#### **Convert DER to PEM**
+This command takes the input file `certificate.pem` in PEM format and converts it to DER format, saving the output in the file `certificate.der`.
 ```
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
 ```
@@ -170,7 +168,7 @@ openssl crl2pkcs7 -nocrl -certfile certificatename.pem -out certificatename.p7b 
 ```
 **Convertir PKCS7 a PEM**
 
-A veces, es posible que necesites convertir un archivo en formato PKCS7 a formato PEM para su uso en ciertos sistemas o aplicaciones. Aquí te mostramos cómo hacerlo:
+A veces, es posible que necesites convertir un archivo en formato PKCS7 a formato PEM para su uso en diferentes aplicaciones o sistemas. Aquí te mostramos cómo hacerlo:
 
 1. Abre una terminal y asegúrate de tener instalado OpenSSL en tu sistema.
 
@@ -182,15 +180,15 @@ A veces, es posible que necesites convertir un archivo en formato PKCS7 a format
 
    Asegúrate de reemplazar "archivo.p7b" con la ruta y el nombre de tu archivo PKCS7.
 
-3. Una vez que se ejecute el comando, se generará un nuevo archivo en formato PEM con el nombre "archivo.pem".
+3. Una vez que se ejecute el comando, se generará un nuevo archivo en formato PEM con el nombre "archivo.pem". Este archivo contendrá los certificados extraídos del archivo PKCS7.
 
-Ahora tienes tu archivo PKCS7 convertido a formato PEM y listo para ser utilizado en tu sistema o aplicación preferida.
+Ahora has convertido con éxito un archivo PKCS7 a formato PEM. Puedes utilizar el archivo PEM resultante en diferentes aplicaciones o sistemas que admitan este formato.
 ```
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.pem
 ```
 **Convertir pfx a PEM**
 
-**Nota:** El formato PKCS#12 o PFX es un formato binario para almacenar el certificado del servidor, los certificados intermedios y la clave privada en un archivo encriptable. Los archivos PFX generalmente tienen extensiones como .pfx y .p12. Los archivos PFX se utilizan típicamente en máquinas con Windows para importar y exportar certificados y claves privadas.
+**Nota:** El formato PKCS#12 o PFX es un formato binario para almacenar el certificado del servidor, los certificados intermedios y la clave privada en un archivo encriptable. Los archivos PFX suelen tener extensiones como .pfx y .p12. Los archivos PFX se utilizan típicamente en máquinas con Windows para importar y exportar certificados y claves privadas.
 ```
 openssl pkcs12 -in certificatename.pfx -out certificatename.pem
 ```
@@ -217,11 +215,9 @@ Para convertir un archivo PEM a PKCS8, puedes utilizar la herramienta OpenSSL. A
 
    Asegúrate de reemplazar "archivo.pem" con el nombre de tu archivo PEM y "archivo.pk8" con el nombre que deseas para el archivo PKCS8 resultante.
 
-3. Se te pedirá que ingreses una contraseña para proteger la clave privada en el archivo PKCS8. Ingresa una contraseña segura y recuérdala, ya que la necesitarás para acceder a la clave privada en el futuro.
+3. Una vez que se ejecute el comando, se generará un nuevo archivo con el formato PKCS8 en la ubicación especificada.
 
-4. Una vez que se complete el proceso, tendrás un archivo en formato PKCS8 listo para usar.
-
-Recuerda que la conversión de PEM a PKCS8 solo cambia el formato del archivo y no afecta la clave privada en sí. Asegúrate de proteger adecuadamente el archivo PKCS8 y la contraseña asociada para mantener la seguridad de tu clave privada.
+Recuerda que el formato PKCS8 es compatible con una amplia gama de aplicaciones y sistemas, por lo que esta conversión puede ser útil en diversas situaciones.
 ```
 openSSL pkcs8 -in certificatename.pem -topk8 -nocrypt -out certificatename.pk8
 ```
@@ -234,7 +230,7 @@ openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 ```
 **2- Convertir CER y Clave Privada a PFX**
 
-En algunos casos, es posible que necesite convertir un archivo de certificado CER y una clave privada en un archivo PFX. Esto puede ser útil si desea importar el certificado y la clave privada en un formato más comúnmente utilizado, como PFX.
+En algunos casos, es posible que necesite convertir un archivo de certificado CER y una clave privada en un archivo PFX. Esto puede ser útil si desea importar el certificado y la clave privada en un formato único para su uso en diferentes aplicaciones o sistemas.
 
 Para realizar esta conversión, puede utilizar la herramienta OpenSSL. Asegúrese de tener OpenSSL instalado en su sistema antes de continuar.
 
@@ -250,16 +246,16 @@ Para realizar esta conversión, puede utilizar la herramienta OpenSSL. Asegúres
 
 3. Se le pedirá que ingrese una contraseña para proteger el archivo PFX. Ingrese una contraseña segura y recuerde guardarla en un lugar seguro.
 
-4. Una vez que se complete el proceso, se creará un nuevo archivo PFX que contiene el certificado y la clave privada combinados.
+4. Una vez que se complete el proceso, se generará un archivo PFX que contiene el certificado y la clave privada en un formato único.
 
-Ahora puede utilizar el archivo PFX para importar el certificado y la clave privada en aplicaciones o sistemas que admitan este formato.
+Ahora puede utilizar el archivo PFX en diferentes aplicaciones o sistemas que admitan este formato para importar el certificado y la clave privada.
 ```
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile  cacert.cer
 ```
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.io/) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
