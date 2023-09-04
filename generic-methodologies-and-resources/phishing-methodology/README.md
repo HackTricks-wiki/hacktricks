@@ -446,7 +446,7 @@ Check out the following page for some examples:
 
 The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
 
-This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2) or [**CredSniper**](https://github.com/ustayready/CredSniper) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
+This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) and [**muraena**](https://github.com/muraenateam/muraena) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
 
 1. You **impersonate the login** form of the real webpage.
 2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.

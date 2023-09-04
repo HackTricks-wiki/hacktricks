@@ -27,6 +27,7 @@ Now that we have built the list of assets of our scope it's time to search for s
 
 * [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 * [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+* [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 * [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 * [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
 * [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
