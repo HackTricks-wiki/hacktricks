@@ -4,10 +4,10 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
 
 </details>
@@ -15,8 +15,8 @@
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化します。\
-今すぐアクセスしてください：
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -39,32 +39,34 @@
 * **ファビコン：** タブ、URL、ブックマークなどで見つかる小さなアイコンです。ユーザーが訪れたウェブサイトや場所に関する追加情報を取得するための別の情報源として使用できます。
 * **ブラウザセッション：** 自己説明的です。
 * **ダウンロード：** 自己説明的です。
-* **フォームデータ：** フォーム内に入力された内容は、ブラウザによって保存されることがあります。したがって、次回ユーザーがフォームに入力する際に、ブラウザは以前に入力されたデータを提案することができます。
+* **フォームデータ：** フォーム内に入力された内容は、ブラウザによって保存されることが多いため、次回ユーザーがフォームに入力する際に以前に入力されたデータをブラウザが提案できます。
 * **サムネイル：** 自己説明的です。
 * **カスタム辞書.txt：** ユーザーによって辞書に追加された単語。
 
 ## Firefox
 
 Firefoxは、\~/_**.mozilla/firefox/**_（Linux）、**/Users/$USER/Library/Application Support/Firefox/Profiles/**（MacOS）、_**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\\**_（Windows）にプロファイルフォルダを作成します。\
-このフォルダ内には、ユーザープロファイルの名前が記載された _**profiles.ini**_ ファイルが表示されるはずです。\
-各プロファイルには、そのデータが保存されるフォルダの名前を示す "**Path**" 変数があります。このフォルダは、_profiles.ini_ と同じディレクトリに存在するはずです。存在しない場合は、おそらく削除されたものです。
+このフォルダ内には、ユーザープロファイルの名前が記載された_**profiles.ini**_ファイルが表示されるはずです。\
+各プロファイルには、そのデータが保存されるフォルダの名前を示す「**Path**」変数があります。フォルダは、_profiles.ini_と同じディレクトリに存在するはずです。存在しない場合は、おそらく削除されたものです。
 
-各プロファイルのフォルダ（_\~/.mozilla/firefox/\<ProfileName>/_）内には、次の興味深いファイルがあるはずです。
+各プロファイルのフォルダ（_\~/.mozilla/firefox/\<ProfileName>/_）内には、次の興味深いファイルが見つかるはずです。
 
-* _**places.sqlite**_：履歴（moz\_\_places）、ブックマーク（moz\_bookmarks）、およびダウンロード（moz\_\_annos）に関するデータ。Windowsでは、ツール[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html)を使用して、_**places.sqlite**_ 内の履歴を読み取ることができます。
+* _**places.sqlite**_：履歴（moz\_\_places）、ブックマーク（moz\_bookmarks）、およびダウンロード（moz\_\_annos）に関するデータ。Windowsでは、ツール[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html)を使用して_**places.sqlite**_内の履歴を読み取ることができます。
 * 履歴をダンプするクエリ：`select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`
 * リンクタイプは、以下のように示される番号です：
 * 1：ユーザーがリンクをクリックしました
 * 2：ユーザーがURLを入力しました
 * 3：ユーザーがお気に入りを使用しました
 * 4：Iframeから読み込まれました
-* 5：HTTPリダイレクト301経由でアクセスされ
+* 5：HTTPリダイレクト301経由でアク
+* _**downloads.sqlite**_ : 古いダウンロードデータベース（現在はplaces.sqlite内にあります）
+* _**thumbnails/**_ : サムネイル
 * _**logins.json**_ : 暗号化されたユーザー名とパスワード
 * **ブラウザの組み込みのフィッシング対策:** `grep 'browser.safebrowsing' ~/Library/Application Support/Firefox/Profiles/*/prefs.js`
 * セーフサーチ設定が無効にされている場合、"safebrowsing.malware.enabled"と"phishing.enabled"がfalseとして返されます
 * _**key4.db**_または_**key3.db**_ : マスターキー？
 
-マスターパスワードを復号化するために、[https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox\_decrypt)を使用することができます。\
+マスターパスワードを復号化するために、[https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox\_decrypt)を使用できます。\
 以下のスクリプトと呼び出しを使用して、パスワードファイルをブルートフォースで指定できます：
 
 {% code title="brute.sh" %}
@@ -104,13 +106,13 @@ Google Chromeは、ユーザーのホームディレクトリ内の_**\~/.config
 * _**Last Session**_および_**Last Tabs**_：これらのファイルには、Chromeが最後に閉じられたときにブラウザでアクティブだったサイトが保存されています。
 * _**Extensions**_：拡張機能とアドオンのフォルダ
 * **Thumbnails**：サムネイル
-* **Preferences**：このファイルには、プラグイン、拡張機能、ジオロケーションを使用するサイト、ポップアップ、通知、DNSプリフェッチング、証明書の例外など、多くの有用な情報が含まれています。特定のChromeの設定が有効になっているかどうかを調査しようとしている場合、おそらくこの設定をここで見つけることができるでしょう。
+* **Preferences**：このファイルには、プラグイン、拡張機能、ジオロケーションを使用するサイト、ポップアップ、通知、DNSプリフェッチング、証明書例外など、多くの有用な情報が含まれています。特定のChromeの設定が有効になっているかどうかを調査しようとしている場合、おそらくこの中にその設定が見つかるでしょう。
 * **ブラウザの組み込みのフィッシング対策**：`grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`を使用します
 * 単純に「**safebrowsing**」をgrepして、結果に`{"enabled: true,"}`があるかどうかを確認すると、フィッシング対策とマルウェア保護が有効になっていることがわかります。
 
 ## **SQLite DBデータの回復**
 
-前のセクションで観察できるように、ChromeとFirefoxの両方がデータを保存するために**SQLite**データベースを使用しています。ツール[**sqlparse**](https://github.com/padfoot999/sqlparse)または[**sqlparse\_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases)を使用して、削除されたエントリを回復することが可能です。
+前のセクションで観察できるように、ChromeとFirefoxの両方がデータを保存するために**SQLite**データベースを使用しています。ツール[**sqlparse**](https://github.com/padfoot999/sqlparse) **または** [**sqlparse\_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases)を使用して、削除されたエントリを回復することが可能です。
 
 ## **Internet Explorer 11**
 
@@ -119,7 +121,7 @@ Internet Explorerは、データとメタデータを異なる場所に保存し
 メタデータは、フォルダ`%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data`にあります（VXはV01、V16、またはV24になります）。\
 前のフォルダには、ファイルV01.logも含まれています。このファイルの**変更時刻**とWebcacheVX.dataファイルの**異なる場合**、コマンド`esentutl /r V01 /d`を実行して、可能な**非互換性**を修正する必要があります。
 
-このアーティファクトを**回復**した後（これはESEデータベースであり、photorecを使用してExchange DatabaseまたはEDBのオプションで回復できます）、プログラム[ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html)を使用して開くことができます。開いたら、"**Containers**"という名前のテーブルに移動します。
+このアーティファクトを回復したら（これはESEデータベースであり、photorecを使用してExchange DatabaseまたはEDBのオプションで回復できます）、プログラム[ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html)を使用して開くことができます。開いたら、"**Containers**"という名前のテーブルに移動します。
 
 ![](<../../../.gitbook/assets/image (446).png>)
 
@@ -247,8 +249,8 @@ Operaは、Google Chromeとまったく同じ形式でブラウザの履歴と�
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化します。\
-今すぐアクセスを取得：
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化できます。\
+今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 

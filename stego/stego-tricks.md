@@ -6,7 +6,7 @@
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 * **ハッキングのトリックを共有する**ために、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
@@ -25,7 +25,7 @@
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
 Binwalkは、画像や音声ファイルなどのバイナリファイルを検索して、埋め込まれた隠しファイルやデータを見つけるためのツールです。\
-`apt`を使用してインストールでき、[ソース](https://github.com/ReFirmLabs/binwalk)はGithubで見つけることができます。\
+`apt`でインストールでき、[ソース](https://github.com/ReFirmLabs/binwalk)はGithubで見つけることができます。\
 **便利なコマンド**:\
 `binwalk file`：指定したファイルに埋め込まれたデータを表示します。\
 `binwalk -e file`：指定したファイルからデータを表示して抽出します。\
@@ -34,7 +34,7 @@ Binwalkは、画像や音声ファイルなどのバイナリファイルを検�
 ### Foremost <a href="#foremost" id="foremost"></a>
 
 Foremostは、ヘッダー、フッター、および内部データ構造に基づいてファイルを回復するプログラムです。特にpng画像を扱う際に非常に便利です。Foremostが抽出するファイルを選択するには、**/etc/foremost.conf**の設定ファイルを変更します。\
-`apt`を使用してインストールでき、[ソース](https://github.com/korczis/foremost)はGithubで見つけることができます。\
+`apt`でインストールでき、[ソース](https://github.com/korczis/foremost)はGithubで見つけることができます。\
 **便利なコマンド**:\
 `foremost -i file`：指定したファイルからデータを抽出します。
 
@@ -48,7 +48,7 @@ Foremostは、ヘッダー、フッター、および内部データ構造に基
 ### Exiv2 <a href="#exiv2" id="exiv2"></a>
 
 exiftoolに似たツールです。\
-`apt`を使用してインストールでき、[ソース](https://github.com/Exiv2/exiv2)はGithubで見つけることができます。\
+`apt`でインストールでき、[ソース](https://github.com/Exiv2/exiv2)はGithubで見つけることができます。\
 [公式ウェブサイト](http://www.exiv2.org/)\
 **便利なコマンド**:\
 `exiv2 file`：指定したファイルのメタデータを表示します。
@@ -87,7 +87,7 @@ cmp original.jpg stego.jpg -b -l
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化することができます。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も先進的なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化することができます。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -181,7 +181,7 @@ WavStegは、wavファイルに最下位ビットを使用してデータを隠�
 ### Deepsound
 
 音声ファイルにAES-265で暗号化された情報を隠したり、検索したりすることができます。[公式ページ](http://jpinsoft.net/deepsound/download.aspx)からダウンロードしてください。\
-隠された情報を検索するには、プログラムを実行して音声ファイルを開きます。DeepSoundが隠されたデータを見つけた場合、解除するためのパスワードが必要です。
+隠された情報を検索するには、プログラムを実行し、音声ファイルを開くだけです。DeepSoundが隠されたデータを見つけた場合、解除するためのパスワードが必要です。
 
 ### Sonic visualizer <a href="#sonic-visualizer" id="sonic-visualizer"></a>
 
@@ -225,7 +225,7 @@ QRコードを読み取るには：[https://online-barcode-reader.inliteresearch
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**

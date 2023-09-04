@@ -15,30 +15,30 @@
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによる**ワークフローの構築と自動化**を簡単に行うことができます。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 From: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
-PDFは非常に複雑なドキュメントファイル形式であり、[何年もの間にわたって書かれるほど](https://www.sultanik.com/pocorgtfo/)のトリックや隠し場所があります。これは、CTFフォレンジックの課題でも人気があります。NSAは2008年に「Hidden Data and Metadata in Adobe PDF Files: Publication Risks and Countermeasures」というタイトルのガイドを作成しましたが、元のURLでは入手できなくなっています。ただし、[ここでコピーを見つけることができます](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf)。Ange Albertiniは、[PDFファイル形式のトリックの](https://github.com/corkami/docs/blob/master/PDF/PDF.md)GitHub上のウィキも保持しています。
+PDFは非常に複雑なドキュメントファイル形式であり、[何年もの間にわたって書かれるほど](https://www.sultanik.com/pocorgtfo/)のトリックや隠し場所があります。これは、CTFフォレンジックの課題でも人気があります。NSAは2008年に「Hidden Data and Metadata in Adobe PDF Files: Publication Risks and Countermeasures」というタイトルのガイドを作成しました。元のURLでは入手できなくなっていますが、[ここでコピーを見つけることができます](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf)。Ange AlbertiniはGitHubで[PDFファイル形式のトリック](https://github.com/corkami/docs/blob/master/PDF/PDF.md)のウィキを管理しています。
 
-PDF形式は部分的にはHTMLのようなプレーンテキストですが、多くのバイナリ「オブジェクト」を含んでいます。Didier Stevensは、[フォーマットに関する良い入門資料](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/)を書いています。バイナリオブジェクトには、圧縮または暗号化されたデータが含まれることもあり、JavaScriptやFlashのようなスクリプト言語でのコンテンツも含まれます。PDFの構造を表示するには、テキストエディタで閲覧するか、OrigamiのようなPDF対応のファイル形式エディタで開くことができます。
+PDF形式は部分的にはHTMLのようなプレーンテキストですが、多くのバイナリ「オブジェクト」を含んでいます。Didier Stevensは、その形式について[良い入門資料](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/)を書いています。バイナリオブジェクトには、圧縮または暗号化されたデータが含まれることもあり、JavaScriptやFlashのようなスクリプト言語でのコンテンツも含まれます。PDFの構造を表示するには、テキストエディタで閲覧するか、OrigamiのようなPDF対応のファイル形式エディタで開くことができます。
 
 [qpdf](https://github.com/qpdf/qpdf)は、PDFを探索し、情報を変換または抽出するのに役立つツールの1つです。もう1つはRubyのフレームワークである[Origami](https://github.com/mobmewireless/origami-pdf)です。
 
-隠しデータを探索する際にチェックするいくつかの隠し場所には、次のものがあります。
+隠しデータを探索する際にチェックすべき隠し場所には、次のものがあります。
 
 * 非表示のレイヤー
 * Adobeのメタデータ形式「XMP」
-* PDFの「増分生成」機能（以前のバージョンはユーザーには表示されませんが、保持されます）
+* PDFの「増分生成」機能（以前のバージョンはユーザーには表示されないが保持される）
 * 白い背景に白いテキスト
 * 画像の後ろにテキスト
 * 重なり合った画像の後ろに画像
 * 非表示のコメント
 
-また、[PeepDF](https://github.com/jesparza/peepdf)のようなPythonパッケージもあり、PDFファイル形式で作業するためのもので、独自の解析スクリプトを作成することができます。
+また、[PeepDF](https://github.com/jesparza/peepdf)などのPythonパッケージもあり、PDFファイル形式で作業するためのもので、独自の解析スクリプトを作成することができます。
 
 <details>
 

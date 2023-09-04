@@ -7,15 +7,15 @@
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築および自動化します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築および自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -26,7 +26,7 @@
 
 典型的な[公開鍵基盤](https://en.wikipedia.org/wiki/Public-key\_infrastructure)（PKI）スキームでは、証明書の発行者は通常、顧客に証明書を発行するために料金を請求する企業である[証明書機関](https://en.wikipedia.org/wiki/Certificate\_authority)（CA）です。これに対して、[信頼のウェブ](https://en.wikipedia.org/wiki/Web\_of\_trust)スキームでは、個人が直接お互いの鍵に署名し、公開鍵証明書と同様の機能を果たす形式で行います。
 
-公開鍵証明書の最も一般的な形式は、[X.509](https://en.wikipedia.org/wiki/X.509)で定義されています。X.509は非常に一般的なため、特定のユースケースのために定義されたプロファイルによってさらに制約されています。たとえば、RFC 5280で定義されている[公開鍵基盤（X.509）](https://en.wikipedia.org/wiki/PKIX)などです。
+公開鍵証明書の最も一般的な形式は、[X.509](https://en.wikipedia.org/wiki/X.509)で定義されています。X.509は非常に一般的なため、特定の使用ケースに対して定義されたプロファイルによってさらに制約されています。たとえば、RFC 5280で定義されている[公開鍵基盤（X.509）](https://en.wikipedia.org/wiki/PKIX)などです。
 
 ## x509共通フィールド
 
@@ -52,32 +52,31 @@
 * **公開鍵**：証明書のサブジェクトに属する公開鍵（これはCAによって署名される主要な部分の1つです）
 * **公開鍵アルゴリズム**：公開鍵を生成するために使用されるアルゴリズム。RSAのようなもの。
 * **公開鍵曲線**：楕円曲線公開鍵アルゴリズムで使用される曲線（適用される場合）。nistp521のようなもの。
-* **公開鍵指数**：公開鍵を導出するために使用される指数（適用される場合）。65537のようなもの。
-* **公開鍵サイズ**：ビット単位での公開
+* **公開鍵指数**：公開鍵を導出するために使用される指数（適用される場合）。65537のような
 * **Authority Key Identifier**: 発行者証明書の公開鍵から派生した鍵識別子を含んでいます。これは発行者公開鍵のハッシュです。
-* **Authority Information Access** (AIA): この拡張機能には最大2種類の情報が含まれています：
+* **Authority Information Access**（AIA）：この拡張機能には、次の2つの情報が含まれています：
 * この証明書の発行者を取得する方法に関する情報（CA発行者アクセス方法）
 * この証明書の失効を確認するためのOCSPレスポンダのアドレス（OCSPアクセス方法）。
-* **CRL Distribution Points**: この拡張機能は、この証明書の失効を確認するためのCRLの場所を識別します。証明書を処理するアプリケーションは、この拡張機能からCRLの場所を取得し、CRLをダウンロードしてこの証明書の失効を確認することができます。
-* **CT Precertificate SCTs**: 証明書に関する証明書透明性のログ
+* **CRL Distribution Points**：この拡張機能は、この証明書の失効を確認するためのCRLの場所を識別します。証明書を処理するアプリケーションは、この拡張機能からCRLの場所を取得し、CRLをダウンロードしてこの証明書の失効を確認することができます。
+* **CT Precertificate SCTs**：証明書に関する証明書透明性のログ
 
 ### OCSPとCRL Distribution Pointsの違い
 
-**OCSP**（RFC 2560）は、**OCSPクライアントとOCSPレスポンダ**から構成される標準プロトコルです。このプロトコルは、**完全なCRLをダウンロードすることなく、指定されたデジタル公開鍵証明書の失効ステータスを判断**します。\
-**CRL**は証明書の有効性を確認するための**従来の方法**です。CRLは、失効または無効になった証明書のシリアル番号のリストを提供します。CRLを使用することで、検証者は提示された証明書の失効ステータスを確認できます。CRLは512エントリまでしか制限されていません。\
+**OCSP**（RFC 2560）は、**OCSPクライアントとOCSPレスポンダ**から構成される標準プロトコルです。このプロトコルは、**完全なCRLをダウンロードすることなく、指定されたデジタル公開鍵証明書の失効ステータスを判定**します。\
+**CRL**は証明書の有効性を確認するための**従来の方法**です。CRLは、失効または無効になった証明書のシリアル番号のリストを提供します。CRLを使用することで、検証者は提示された証明書の失効ステータスを確認することができます。CRLは512エントリまでしか制限されていません。\
 [ここから](https://www.arubanetworks.com/techdocs/ArubaOS%206\_3\_1\_Web\_Help/Content/ArubaFrameStyles/CertRevocation/About\_OCSP\_and\_CRL.htm)。
 
 ### Certificate Transparencyとは
 
 Certificate Transparencyは、SSL証明書に基づく脅威を解決するために、ドメイン所有者、CA、およびドメインユーザーによるSSL証明書の発行と存在を公開し、検証することを目的としています。具体的には、Certificate Transparencyには次の3つの主な目標があります：
 
-* ドメインの所有者が証明書を確認できるようにするために、CAがドメインのためにSSL証明書を発行することができない（または非常に困難にする）。
+* ドメインの所有者が証明書を確認できない場合、CAがそのドメインのためにSSL証明書を発行することが不可能（または少なくとも非常に困難）になる。
 * 証明書が誤ってまたは悪意を持って発行されたかどうかを、任意のドメイン所有者またはCAが確認できるようにするためのオープンな監査およびモニタリングシステムを提供する。
 * 誤ってまたは悪意を持って発行された証明書によってユーザーがだまされることを（可能な限り）防ぐ。
 
 #### 証明書ログ
 
-証明書ログは、証明書の**暗号化された、公開監査可能な、追加のみのレコード**を維持するシンプルなネットワークサービスです。**誰でもログに証明書を提出できます**が、証明書機関が最も頻繁に提出するでしょう。同様に、誰でもログをクエリできます。クエリ結果は暗号的な証明として使用でき、ログが適切に動作しているか、または特定の証明書がログに記録されているかを検証できます。ログサーバーの数は大きくする必要はありません（たとえば、世界中で1000を下回る程度）。それぞれのログサーバーは、CA、ISP、または他の関係者によって独立して運営される可能性があります。
+証明書ログは、証明書の**暗号化された、公開監査可能な、追加のみのレコード**を維持するシンプルなネットワークサービスです。**誰でもログに証明書を提出できます**が、証明機関が最も頻繁に提出するでしょう。同様に、誰でもログをクエリできます。クエリ結果は暗号的な証明として使用でき、ログが適切に動作しているか、特定の証明書がログに記録されているかを検証できます。ログサーバーの数は大きくする必要はありません（たとえば、世界中で1000を下回る程度）。それぞれのログサーバーは、証明機関、ISP、またはその他の関係者によって独立して運営される可能性があります。
 
 #### クエリ
 
@@ -92,7 +91,7 @@ Certificate Transparencyは、SSL証明書に基づく脅威を解決するた�
 * 証明書に最も一般的に使用されるフォーマットです
 * ほとんどのサーバー（例：Apache）は、証明書と秘密鍵を別々のファイルに保存することを想定しています\
 \- 通常、これらはBase64でエンコードされたASCIIファイルです\
-\- PEM証明書に使用される拡張子は.cer、.crt、.pem、.keyファイルです\
+\- PEM証明書に使用される拡張子は、.cer、.crt、.pem、.keyファイルです\
 \- Apacheや同様のサーバーはPEM形式の証明書を使用します
 
 #### DERフォーマット
@@ -105,15 +104,15 @@ Certificate Transparencyは、SSL証明書に基づく脅威を解決するた�
 
 #### P7B/PKCS#7フォーマット
 
-* PKCS#7またはP7Bフォーマットは、Base64 ASCII形式で保存され、拡張子が.p7bまたは.p7cのファイルです
-* P7Bファイルには証明書とチェーン証明書（中間CA）のみが含まれており、秘密鍵は含まれていません
+* PKCS#7またはP7Bフォーマットは、Base64 ASCII形式で保存され、拡張子は.p7bまたは.p7cです
+* P7Bファイルには証明書とチェーン証明書（中間CA）のみが含まれます。秘密鍵は含まれていません
 * P7Bファイルをサポートする最も一般的なプラットフォームは、Microsoft WindowsとJava Tomcatです
 
 #### PFX/P12/PKCS#12フォーマット
 
 * PKCS#12またはPFX/P12フォーマットは、サーバー証明書、中間証明書、および秘密鍵を1つの暗号化可能なファイルに格納するためのバイナリ形式です
-* これらのファイルには通常、.pfxや.p12などの拡張子があります
-* これらは通常、Windowsマシンで証明書と秘密鍵をインポートおよびエクスポートするために使用されます
+* これらのファイルには通常、.pfxや.p12などの拡張子が付いています
+* これらは通常、証明書と秘密鍵をインポートおよびエクスポートするためにWindowsマシンで使用されます
 
 ### フォーマットの変換
 
@@ -121,17 +120,17 @@ Certificate Transparencyは、SSL証明書に基づく脅威を解決するた�
 ```
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
-To convert a PEM (Privacy Enhanced Mail) certificate file to DER (Distinguished Encoding Rules) format, you can use the OpenSSL command-line tool. The following command can be used for the conversion:
+#### **PEMをDERに変換する**
+
+PEM形式の証明書をDER形式に変換するには、次のコマンドを使用します。
 
 ```bash
-openssl x509 -in certificate.pem -outform der -out certificate.der
+openssl x509 -outform der -in certificate.pem -out certificate.der
 ```
 
-Replace `certificate.pem` with the path to your PEM certificate file, and `certificate.der` with the desired output file name for the DER format.
+このコマンドは、OpenSSLツールを使用して証明書を変換します。`-outform der`オプションは、出力形式をDERに指定します。`-in`オプションは、変換するPEM形式の証明書ファイルを指定します。`-out`オプションは、変換後のDER形式の証明書ファイルの名前を指定します。
 
-This command will read the PEM certificate file and convert it to DER format, saving the result in the specified output file.
-
-Note that PEM and DER are two different formats for representing certificates. PEM is a base64-encoded format that includes header and footer lines, while DER is a binary format. The conversion from PEM to DER is often required when working with certain systems or applications that only accept DER-encoded certificates.
+変換されたDER形式の証明書は、指定したファイル名で保存されます。
 ```
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
 ```
@@ -250,7 +249,7 @@ openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certif
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -259,10 +258,10 @@ openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certif
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をご覧ください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

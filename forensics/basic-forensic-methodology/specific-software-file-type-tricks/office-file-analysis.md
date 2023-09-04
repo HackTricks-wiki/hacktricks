@@ -15,16 +15,16 @@
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も**高度なコミュニティツール**によって強化された**ワークフローを簡単に構築**および**自動化**できます。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## はじめに
 
-マイクロソフトは、**数十種類のオフィスドキュメントファイル形式**を作成しています。そのうち多くは、**マクロ**（VBAスクリプト）を**含める**ことができるため、フィッシング攻撃やマルウェアの配布に人気があります。
+マイクロソフトは**数十種類のオフィスドキュメントファイル形式**を作成しており、その多くは**マクロ**（VBAスクリプト）を**含む**ため、フィッシング攻撃やマルウェアの配布に人気があります。
 
-大まかに言えば、オフィスファイル形式には2つの世代があります。**OLE形式**（RTF、DOC、XLS、PPTなどのファイル拡張子）と、"**Office Open XML**"形式（DOCX、XLSX、PPTXなどのファイル拡張子）です。**両方の**形式は、リンクまたは埋め込まれたコンテンツ（オブジェクト）を**有効にする**構造化された複合ファイルバイナリ形式です。OOXMLファイルはzipファイルコンテナですので、隠されたデータをチェックする最も簡単な方法の1つは、単にドキュメントを`unzip`することです：
+大まかに言えば、オフィスファイル形式には2つの世代があります：**OLE形式**（RTF、DOC、XLS、PPTなどのファイル拡張子）と「**Office Open XML**」形式（DOCX、XLSX、PPTXなどのファイル拡張子を含む）。**両方の**形式は、リンクまたは埋め込まれたコンテンツ（オブジェクト）を**有効にする**構造化された複合ファイルバイナリ形式です。OOXMLファイルはzipファイルコンテナですので、隠されたデータをチェックする最も簡単な方法の1つは、単にドキュメントを`unzip`することです：
 ```
 $ unzip example.docx
 Archive:  example.docx
@@ -65,50 +65,34 @@ $ tree
 │   └── theme1.xml
 └── webSettings.xml
 ```
-以下は、ファイルとフォルダの階層によって一部の構造が作成されています。残りの部分はXMLファイル内で指定されています。[_New Steganographic Techniques for the OOXML File Format_, 2011](http://download.springer.com/static/pdf/713/chp%3A10.1007%2F978-3-642-23300-5\_27.pdf?originUrl=http%3A%2F%2Flink.springer.com%2Fchapter%2F10.1007%2F978-3-642-23300-5\_27\&token2=exp=1497911340\~acl=%2Fstatic%2Fpdf%2F713%2Fchp%25253A10.1007%25252F978-3-642-23300-5\_27.pdf%3ForiginUrl%3Dhttp%253A%252F%252Flink.springer.com%252Fchapter%252F10.1007%252F978-3-642-23300-5\_27\*\~hmac=aca7e2655354b656ca7d699e8e68ceb19a95bcf64e1ac67354d8bca04146fd3d)では、データ隠蔽技術のアイデアについて詳しく説明していますが、CTFチャレンジの作成者は常に新しいアイデアを考え出しています。
+如您所见，文件和文件夹层次结构创建了一部分结构，其余部分在XML文件中指定。[_New Steganographic Techniques for the OOXML File Format_, 2011](http://download.springer.com/static/pdf/713/chp%3A10.1007%2F978-3-642-23300-5\_27.pdf?originUrl=http%3A%2F%2Flink.springer.com%2Fchapter%2F10.1007%2F978-3-642-23300-5\_27\&token2=exp=1497911340\~acl=%2Fstatic%2Fpdf%2F713%2Fchp%25253A10.1007%25252F978-3-642-23300-5\_27.pdf%3ForiginUrl%3Dhttp%253A%252F%252Flink.springer.com%252Fchapter%252F10.1007%252F978-3-642-23300-5\_27\*\~hmac=aca7e2655354b656ca7d699e8e68ceb19a95bcf64e1ac67354d8bca04146fd3d)详细介绍了一些数据隐藏技术的想法，但CTF挑战的作者们总是会想出新的技巧。
 
-再び、OLEおよびOOXMLドキュメントの調査と分析のためのPythonツールセットが存在します: [oletools](http://www.decalage.info/python/oletools)。特にOOXMLドキュメントについては、[OfficeDissector](https://www.officedissector.com)が非常に強力な分析フレームワーク（およびPythonライブラリ）です。後者には、使用方法の[クイックガイド](https://github.com/grierforensics/officedissector/blob/master/doc/html/\_sources/txt/ANALYZING\_OOXML.txt)も含まれています。
+再次强调，存在用于检查和分析OLE和OOXML文档的Python工具集：[oletools](http://www.decalage.info/python/oletools)。特别针对OOXML文档，[OfficeDissector](https://www.officedissector.com)是一个非常强大的分析框架（和Python库）。后者包括一个[使用指南](https://github.com/grierforensics/officedissector/blob/master/doc/html/\_sources/txt/ANALYZING\_OOXML.txt)。
 
-時には、隠された静的データを見つけることが課題ではなく、VBAマクロを分析してその動作を判断することが課題となります。これはより現実的なシナリオであり、フィールドのアナリストが日常的に行う作業です。前述の解析ツールは、マクロの存在を示すことができ、おそらくそれを抽出することもできます。Windows上のOfficeドキュメントの典型的なVBAマクロは、PowerShellスクリプトを%TEMP%にダウンロードし、実行しようとします。その場合、PowerShellスクリプトの分析タスクも発生します。ただし、悪意のあるVBAマクロは通常複雑ではありません。なぜなら、VBAは[通常、コード実行の起点として使用されるだけだからです](https://www.lastline.com/labsblog/party-like-its-1999-comeback-of-vba-malware-downloaders-part-3/)。複雑なVBAマクロを理解する必要がある場合や、マクロが難読化されておりアンパッカールーチンがある場合でも、Microsoft Officeのライセンスを所有している必要はありません。[Libre Office](http://libreoffice.org)を使用することができます。[そのインターフェース](http://www.debugpoint.com/2014/09/debugging-libreoffice-macro-basic-using-breakpoint-and-watch/)は、プログラムのデバッグを行ったことがある人にとっては馴染み深いものです。ブレークポイントを設定し、ウォッチ変数を作成し、アンパックされた後の値をキャプチャすることができます。特定のドキュメントのマクロをコマンドラインから起動することさえできます。
+有时，挑战不在于找到隐藏的静态数据，而是分析VBA宏以确定其行为。这是一个更现实的场景，也是领域中的分析人员每天执行的任务。前面提到的分析工具可以指示是否存在宏，并可能为您提取它。在Windows上，Office文档中的典型VBA宏将下载一个PowerShell脚本到%TEMP%并尝试执行它，这样您现在也有了一个PowerShell脚本分析任务。但恶意VBA宏很少复杂，因为VBA通常只用作启动代码执行的平台。如果您确实需要理解复杂的VBA宏，或者宏被混淆并具有解包例程，您不需要拥有Microsoft Office的许可证来调试它。您可以使用[Libre Office](http://libreoffice.org)：[其界面](http://www.debugpoint.com/2014/09/debugging-libreoffice-macro-basic-using-breakpoint-and-watch/)对于任何调试过程序的人来说都是熟悉的；您可以设置断点、创建监视变量并在解包后但执行任何有效负载行为之前捕获值。您甚至可以从命令行启动特定文档的宏。
 ```
 $ soffice path/to/test.docx macro://./standard.module1.mymacro
 ```
 ## [oletools](https://github.com/decalage2/oletools)
 
-oletoolsは、OLEオブジェクトを分析するための一連のツールです。OLEオブジェクトは、Microsoft Officeファイル（.doc、.xls、.pptなど）に埋め込まれたバイナリデータです。oletoolsを使用すると、OLEオブジェクトを抽出し、分析することができます。
+oletoolsは、OLEオブジェクトを分析するための一連のツールです。OLEオブジェクトは、Microsoft Officeファイル（.doc、.xls、.pptなど）に埋め込まれたバイナリデータです。oletoolsを使用すると、OLEオブジェクトを分析し、潜在的な脅威やセキュリティ上の問題を特定することができます。
 
-### olevba
+oletoolsには、次のようなツールが含まれています。
 
-olevbaは、VBA（Visual Basic for Applications）マクロを分析するためのツールです。VBAマクロは、Microsoft Officeファイルに埋め込まれたスクリプトです。olevbaを使用すると、VBAマクロのコードを抽出し、分析することができます。これにより、悪意のあるコードやセキュリティ上の問題を特定することができます。
+- **olebrowse**: OLEオブジェクトをブラウズし、そのプロパティやストリームを表示します。
+- **oleid**: OLEオブジェクトの種類を識別し、潜在的な脅威を特定します。
+- **olevba**: VBAマクロを分析し、潜在的なマルウェアの存在を検出します。
+- **olemeta**: OLEオブジェクトのメタデータを表示します。
+- **oledump**: OLEオブジェクトをダンプし、その内容を分析します。
 
-### oledump
-
-oledumpは、OLEオブジェクトを分析するための強力なツールです。このツールを使用すると、OLEオブジェクトのヘッダ情報、ストリーム、VBAマクロ、埋め込まれたファイルなどを詳細に分析することができます。oledumpは、悪意のあるコードやデータの特定、ファイルの解析、フォレンジック調査などに役立ちます。
-
-### oledir
-
-oledirは、OLEオブジェクトのディレクトリ情報を表示するためのツールです。このツールを使用すると、OLEオブジェクト内のストリームや埋め込まれたファイルの一覧を確認することができます。oledirは、ファイルの解析やフォレンジック調査において、重要な情報を提供します。
-
-### oleid
-
-oleidは、OLEオブジェクトの識別情報を表示するためのツールです。このツールを使用すると、OLEオブジェクトのファイルタイプ、バージョン、セキュリティ属性などを確認することができます。oleidは、ファイルの解析やフォレンジック調査において、OLEオブジェクトの特性を理解するのに役立ちます。
-
-### olemeta
-
-olemetaは、OLEオブジェクトのメタデータを表示するためのツールです。このツールを使用すると、OLEオブジェクトの作成者、作成日時、最終更新日時などの情報を確認することができます。olemetaは、ファイルの解析やフォレンジック調査において、重要な情報を提供します。
-
-### oleview
-
-oleviewは、OLEオブジェクトのビューアです。このツールを使用すると、OLEオブジェクトの内容を表示することができます。oleviewは、ファイルの解析やフォレンジック調査において、OLEオブジェクトの内容を確認するのに役立ちます。
-
-oletoolsは、OLEオブジェクトの分析において非常に便利なツールです。これらのツールを使用することで、悪意のあるコードやデータを特定し、ファイルの解析やフォレンジック調査を効果的に行うことができます。
+これらのツールを使用すると、Officeファイル内のOLEオブジェクトを詳細に調査し、潜在的なセキュリティ上の問題を特定することができます。oletoolsは、フォレンジック分析やセキュリティ監査などの目的で広く使用されています。
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
 ## 自動実行
 
-`AutoOpen`、`AutoExec`、または`Document_Open`のようなマクロ関数は、**自動的に実行**されます。
+`AutoOpen`、`AutoExec`、または`Document_Open`のようなマクロ関数は、**自動的に** **実行**されます。
 
 ## 参考文献
 
@@ -117,7 +101,7 @@ olevba -c /path/to/document #Extract macros
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって**パワード**されたワークフローを簡単に構築し、**自動化**します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も**高度なコミュニティツール**によって**強化されたワークフロー**を簡単に構築し、**自動化**することができます。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -126,10 +110,10 @@ olevba -c /path/to/document #Extract macros
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

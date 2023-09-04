@@ -5,7 +5,7 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。これは、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 * **ハッキングのトリックを共有する**には、[**hacktricks repo**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
@@ -15,7 +15,7 @@
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -29,7 +29,7 @@ Windowsでは、OneDriveフォルダは`\Users\<username>\AppData\Local\Microsof
 * 変更日
 * クラウド内のファイル数
 * フォルダ内のファイル数
-* **CID**：OneDriveユーザーの一意のID
+* **CID**: OneDriveユーザーの一意のID
 * レポート生成時間
 * OSのHDのサイズ
 
@@ -38,7 +38,7 @@ CIDを見つけたら、**このIDを含むファイルを検索**すること�
 ## Google Drive
 
 Windowsでは、メインのGoogle Driveフォルダは`\Users\<username>\AppData\Local\Google\Drive\user_default`にあります。\
-このフォルダには、Sync\_log.logというファイルが含まれており、アカウントのメールアドレス、ファイル名、タイムスタンプ、ファイルのMD5ハッシュなどの情報が記録されています。削除されたファイルも、対応するMD5とともにそのログファイルに表示されます。
+このフォルダには、アカウントのメールアドレス、ファイル名、タイムスタンプ、ファイルのMD5ハッシュなどの情報が含まれるSync\_log.logというファイルがあります。削除されたファイルも、対応するMD5とともにそのログファイルに表示されます。
 
 ファイル**`Cloud_graph\Cloud_graph.db`**は、テーブル**`cloud_graph_entry`**を含むsqliteデータベースです。このテーブルには、**同期されたファイル**の**名前**、変更時間、サイズ、およびファイルのMD5チェックサムが含まれています。
 
@@ -46,7 +46,7 @@ Windowsでは、メインのGoogle Driveフォルダは`\Users\<username>\AppDat
 
 ## Dropbox
 
-Dropboxは、ファイルを管理するために**SQLiteデータベース**を使用しています。これには、次のフォルダにデータベースがあります。
+Dropboxは**SQLiteデータベース**を使用してファイルを管理します。これには、次のフォルダにデータベースがあります。
 
 * `\Users\<username>\AppData\Local\Dropbox`
 * `\Users\<username>\AppData\Local\Dropbox\Instance1`
@@ -65,16 +65,16 @@ Dropboxが使用する暗号化をよりよく理解するために、[https://b
 
 ただし、主な情報は次のとおりです。
 
-* **エントロピー**：d114a55212655f74bd772e37e64aee9b
-* **ソルト**：0D638C092E8B82FC452883F95F355B8E
-* **アルゴリズム**：PBKDF2
-* **イテレーション**：1066
+* **エントロピー**: d114a55212655f74bd772e37e64aee9b
+* **ソルト**: 0D638C092E8B82FC452883F95F355B8E
+* **アルゴリズム**: PBKDF2
+* **イテレーション**: 1066
 
 その情報に加えて、データベースを復号化するには、次のものが必要です。
 
-* **暗号化されたDPAPIキー**：これは、レジストリ内の`NTUSER.DAT\Software\Dropbox\ks\client`にあります（このデータをバイナリ形式でエクスポートします）
+* **暗号化されたDPAPIキー**: レジストリ内の`NTUSER.DAT\Software\Dropbox\ks\client`に見つけることができます（このデータをバイナリとしてエクスポートします）
 * **`SYSTEM`**および**`SECURITY`**ハイブ
-* **DPAPIマスターキー**：これは`\Users\<username>\AppData\Roaming\Microsoft\Protect`に見つけることができます
+* **DPAPIマスターキー**: `\Users\<username>\AppData\Roaming\Microsoft\Protect`に見つけることができます
 * Windowsユーザーの**ユーザー名**と**パスワード**
 
 その後、[**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi\_data\_decryptor.html)****ツールを使用できます。
@@ -113,7 +113,7 @@ sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the con
 <figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.io/) を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) を使用して、世界で最も高度なコミュニティツールによって強化された **ワークフローを簡単に構築** および **自動化** します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -122,10 +122,10 @@ sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the con
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで **会社を宣伝** したいですか？または、**最新バージョンのPEASSを入手** したいですか？または、HackTricksを **PDFでダウンロード** したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見しましょう、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションです
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com) を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**Telegramグループ**](https://t.me/peass) に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)** をフォローしてください。**
+* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
