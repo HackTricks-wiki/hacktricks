@@ -24,17 +24,11 @@ The types of resources contained within a bundle may consist of applications, li
 ls -lR /Applications/Safari.app/Contents
 ```
 
-*   `Contents/_CodeSignature`
-
-    Contains **code-signing information** about the application (i.e., hashes, etc.).
-*   `Contents/MacOS`
-
-    Contains the **application’s binary** (which is executed when the user double-clicks the application icon in the UI).
-*   `Contents/Resources`
-
-    Contains **UI elements of the application**, such as images, documents, and nib/xib files (that describe various user interfaces).
-* `Contents/Info.plist`\
-  The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
+* `Contents/_CodeSignature` -> Contains **code-signing information** about the application (i.e., hashes, etc.).
+  * `openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64`
+* `Contents/MacOS` -> Contains the **application’s binary** (which is executed when the user double-clicks the application icon in the UI).
+* `Contents/Resources` -> Contains **UI elements of the application**, such as images, documents, and nib/xib files (that describe various user interfaces).
+* `Contents/Info.plist` -> The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
   * **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
   *   Pairs that may be of interest when analyzing an application include:\\
 

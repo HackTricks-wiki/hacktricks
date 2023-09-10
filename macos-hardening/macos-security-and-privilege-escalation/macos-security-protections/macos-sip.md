@@ -26,7 +26,7 @@ The protection rules for these directories and their subdirectories are specifie
 For instance, the following configuration:
 
 ```javascript
-javascriptCopy code/usr
+/usr
 * /usr/libexec/cups
 * /usr/local
 * /usr/share/man
@@ -41,7 +41,7 @@ ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
 
-In this case, the **`sunlnk`** flag signifies that the `/usr/libexec/cups` directory itself cannot be deleted, though files within it can be created, modified, or deleted.
+In this case, the **`sunlnk`** flag signifies that the `/usr/libexec/cups` directory itself **cannot be deleted**, though files within it can be created, modified, or deleted.
 
 On the other hand:
 
@@ -147,31 +147,41 @@ The command **`diskutil apfs list`** lists the **details of the APFS volumes** a
 |   |
 |   +-> Volume disk3s1 7A27E734-880F-4D91-A703-FB55861D49B7
 |   |   ---------------------------------------------------
-|   |   APFS Volume Disk (Role):   disk3s1 (System)
-|   |   Name:                      Macintosh HD (Case-insensitive)
-|   |   Mount Point:               /System/Volumes/Update/mnt1
-|   |   Capacity Consumed:         12819210240 B (12.8 GB)
+<strong>|   |   APFS Volume Disk (Role):   disk3s1 (System)
+</strong>|   |   Name:                      Macintosh HD (Case-insensitive)
+<strong>|   |   Mount Point:               /System/Volumes/Update/mnt1
+</strong>|   |   Capacity Consumed:         12819210240 B (12.8 GB)
 |   |   Sealed:                    Broken
 |   |   FileVault:                 Yes (Unlocked)
 |   |   Encrypted:                 No
 |   |   |
 |   |   Snapshot:                  FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
 |   |   Snapshot Disk:             disk3s1s1
-|   |   Snapshot Mount Point:      /
-<strong>|   |   Snapshot Sealed:           Yes
+<strong>|   |   Snapshot Mount Point:      /
+</strong><strong>|   |   Snapshot Sealed:           Yes
 </strong>[...]
++-> Volume disk3s5 281959B7-07A1-4940-BDDF-6419360F3327
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk3s5 (Data)
+    |   Name:                      Macintosh HD - Data (Case-insensitive)
+<strong>    |   Mount Point:               /System/Volumes/Data
+</strong><strong>    |   Capacity Consumed:         412071784448 B (412.1 GB)
+</strong>    |   Sealed:                    No
+    |   FileVault:                 Yes (Unlocked)
 </code></pre>
 
-In the previous output it's possible to see that **macOS System volume snapshot is sealed** (cryptographically signed by the OS). SO, if SIP is bypassed and modifies it, the **OS won't boot anymore**.
+In the previous output it's possible to see that **user-accessible locations** are mounted under `/System/Volumes/Data`.
 
-It's also possible to verify that seal is enabled by running:
+Moreover, **macOS System volume snapshot** is mounted in `/` and it's **sealed** (cryptographically signed by the OS). So, if SIP is bypassed and modifies it, the **OS won't boot anymore**.
 
-```
+It's also possible to **verify that seal is enabled** by running:
+
+```bash
 csrutil authenticated-root status
 Authenticated Root status: enabled
 ```
 
-Moreover, it's mounted as **read-only**:
+Moreover, the snapshot disk is also mounted as **read-only**:
 
 ```
 mount

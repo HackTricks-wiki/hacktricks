@@ -82,6 +82,20 @@ Basically, a bundle is a **directory structure** within the file system. Interes
 [macos-bundles.md](macos-bundles.md)
 {% endcontent-ref %}
 
+## Dyld Shared Cache
+
+On macOS (and iOS) all system shared libraries, like frameworks and dylibs, are **combined into a single file**, called the **dyld shared cache**. This improved performance, since code can be loaded faster.
+
+Similar to the dyld shared cache, the kernel and the kernel extensions are also compiled into a kernel cache, which is loaded at boot time.
+
+In order to extract the libraries from the single file dylib shared cache it was possible to use the binary  [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip) which migh not be working nowadays:
+
+{% code overflow="wrap" %}
+```bash
+dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
+```
+{% endcode %}
+
 ## Special File Permissions
 
 ### Folder permissions
