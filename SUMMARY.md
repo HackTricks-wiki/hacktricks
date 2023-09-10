@@ -365,6 +365,7 @@
 * [80,443 - Pentesting Web Methodology](network-services-pentesting/pentesting-web/README.md)
   * [403 & 401 Bypasses](network-services-pentesting/pentesting-web/403-and-401-bypasses.md)
   * [AEM - Adobe Experience Cloud](network-services-pentesting/pentesting-web/aem-adobe-experience-cloud.md)
+  * [Angular](network-services-pentesting/pentesting-web/angular.md)
   * [Apache](network-services-pentesting/pentesting-web/apache.md)
   * [Artifactory Hacking guide](network-services-pentesting/pentesting-web/artifactory-hacking-guide.md)
   * [Bolt CMS](network-services-pentesting/pentesting-web/bolt-cms.md)
