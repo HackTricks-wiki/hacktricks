@@ -4,9 +4,9 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* あなたは**サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するために、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -25,26 +25,26 @@
 
 たとえば、次の設定：
 ```javascript
-javascriptCopy code/usr
+/usr
 * /usr/libexec/cups
 * /usr/local
 * /usr/share/man
 ```
-次のように示されています。**`/usr`**ディレクトリは一般的にSIPによって保護されています。ただし、指定された3つのサブディレクトリ（`/usr/libexec/cups`、`/usr/local`、および`/usr/share/man`）では変更が許可されており、先頭にアスタリスク（\*）が付いてリストされています。
+次のように示されています。**`/usr`** ディレクトリは一般的にSIPによって保護されています。ただし、3つのサブディレクトリ（`/usr/libexec/cups`、`/usr/local`、および`/usr/share/man`）では変更が許可されており、先頭にアスタリスク（\*）が付いてリストされています。
 
-ディレクトリやファイルがSIPによって保護されているかどうかを確認するには、**`ls -lOd`**コマンドを使用して**`restricted`**または**`sunlnk`**フラグの存在をチェックします。例えば:
+ディレクトリやファイルがSIPによって保護されているかどうかを確認するには、**`ls -lOd`** コマンドを使用して **`restricted`** または **`sunlnk`** フラグの存在をチェックできます。例えば:
 ```bash
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
-この場合、**`sunlnk`** フラグは、`/usr/libexec/cups` ディレクトリ自体は削除できないことを示していますが、その中のファイルは作成、変更、削除が可能です。
+この場合、**`sunlnk`** フラグは、`/usr/libexec/cups` ディレクトリ自体は**削除できない**ことを示していますが、その中のファイルは作成、変更、削除が可能です。
 
 一方、
 ```bash
 ls -lOd /usr/libexec
 drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 ```
-ここでは、**`restricted`** フラグは、`/usr/libexec` ディレクトリがSIPによって保護されていることを示しています。SIPで保護されたディレクトリでは、ファイルの作成、変更、削除ができません。
+ここでは、**`restricted`** フラグは `/usr/libexec` ディレクトリがSIPによって保護されていることを示しています。SIPで保護されたディレクトリでは、ファイルの作成、変更、削除ができません。
 
 ### SIPの状態
 
@@ -56,7 +56,7 @@ SIPを無効にする必要がある場合は、コンピュータをリカバ�
 ```bash
 csrutil disable
 ```
-SIPを有効にしたままデバッグ保護を削除したい場合は、次の手順で行うことができます:
+SIPを有効にしたままデバッグ保護を削除したい場合は、次の手順で行うことができます。
 ```bash
 csrutil enable --without debug
 ```
@@ -71,7 +71,7 @@ SIPは他にもいくつかの制限を課しています。たとえば、**署
 攻撃者がSIPを回避することに成功した場合、以下のことが得られます：
 
 * すべてのユーザーのメール、メッセージ、Safariの履歴などを読むことができる
-* ウェブカメラ、マイクなどの許可を付与することができる（SIPで保護されたTCCデータベースに直接書き込むことによって）
+* ウェブカメラ、マイクなどの許可を付与することができる（SIPで保護されたTCCデータベースに直接書き込むことにより）
 * 永続性：SIPで保護された場所にマルウェアを保存し、誰も削除することができなくなります。また、MRTを改ざんすることもできます。
 * カーネル拡張の簡単な読み込み（これには他の厳格な保護策もあります）。
 
@@ -81,7 +81,7 @@ SIPは他にもいくつかの制限を課しています。たとえば、**署
 
 ### 存在しないSIPファイル
 
-潜在的な抜け穴の1つは、**`rootless.conf`に指定されたファイルが現在存在しない場合**、作成することができるというものです。マルウェアはこれを利用してシステム上で**永続性を確立**することができます。たとえば、悪意のあるプログラムは、`rootless.conf`にリストされているが存在しない場合に、`/System/Library/LaunchDaemons`に.plistファイルを作成することができます。
+潜在的な抜け穴の1つは、**`rootless.conf`に指定されたファイルが現在存在しない場合**、作成することができるというものです。マルウェアはこれを利用してシステム上で**永続性を確立**することができます。たとえば、悪意のあるプログラムが`rootless.conf`にリストされているが存在しない場合、`/System/Library/LaunchDaemons`に.plistファイルを作成することができます。
 
 ### com.apple.rootless.install.heritable
 
@@ -112,21 +112,31 @@ SIPは他にもいくつかの制限を課しています。たとえば、**署
 以下に詳細を示します：
 
 1. **不変のシステム**：シールドされたシステムスナップショットにより、macOSシステムボリュームは「不変」となり、変更することができなくなります。これにより、セキュリティやシステムの安定性に影響を及ぼす可能性のある不正な変更や誤った変更を防止します。
-2. **システムソフトウェアの更新**：macOSのアップデートやアップグ
+2. **システムソフトウェアの更新**：macOSのアップデートやアップグレードを
 |   |   スナップショットディスク:             disk3s1s1
-|   |   スナップショットマウントポイント:      /
-<strong>|   |   スナップショットシールド:           はい
+<strong>|   |   スナップショットマウントポイント:      /
+</strong><strong>|   |   スナップショットシールド:           はい
 </strong>[...]
++-> ボリューム disk3s5 281959B7-07A1-4940-BDDF-6419360F3327
+|   ---------------------------------------------------
+|   APFSボリュームディスク（役割）:   disk3s5（データ）
+|   名前:                      Macintosh HD - Data（大文字と小文字を区別しない）
+<strong>    |   マウントポイント:               /System/Volumes/Data
+</strong><strong>    |   使用済み容量:         412071784448 B（412.1 GB）
+</strong>    |   シールド:                    いいえ
+|   FileVault:                 はい（ロック解除済み）
 </code></pre>
 
-前の出力では、**macOSシステムボリュームのスナップショットがシールされている**ことがわかります（OSによって暗号的に署名されています）。したがって、SIPがバイパスされて変更された場合、**OSは起動しなくなります**。
+前の出力では、**ユーザーがアクセス可能な場所**が`/System/Volumes/Data`の下にマウントされていることがわかります。
 
-シールが有効であることも確認できます。次のコマンドを実行してください。
-```
+さらに、**macOSシステムボリュームのスナップショット**は`/`にマウントされており、**シールド**（OSによって暗号的に署名されている）されています。したがって、SIPがバイパスされて変更された場合、**OSは起動しなくなります**。
+
+また、シールドが有効であることを**確認する**には、次のコマンドを実行します：
+```bash
 csrutil authenticated-root status
 Authenticated Root status: enabled
 ```
-さらに、それは**読み取り専用**としてマウントされています。
+さらに、スナップショットディスクは**読み取り専用**としてマウントされます。
 ```
 mount
 /dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
@@ -135,9 +145,9 @@ mount
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 

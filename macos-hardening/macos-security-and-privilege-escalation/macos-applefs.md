@@ -5,9 +5,9 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
@@ -18,8 +18,8 @@ APFS、またはApple File Systemは、Apple Inc.によって開発された現�
 
 APFSのいくつかの注目すべき特徴は次のとおりです：
 
-1. **スペース共有**：APFSでは、複数のボリュームが単一の物理デバイス上の**同じ基礎の空きストレージを共有**できます。これにより、ボリュームは手動でのリサイズや再パーティショニングの必要なく、動的に成長および縮小することができます。
-1. これは、ファイルディスクの従来のパーティションと比較して、**APFSでは異なるパーティション（ボリューム）がディスクスペースを共有**していることを意味します。一方、通常のパーティションは固定サイズを持っていました。
+1. **スペース共有**：APFSは、複数のボリュームが単一の物理デバイス上の**同じ基礎の空きストレージを共有**できるようにします。これにより、ボリュームは手動でのリサイズや再パーティショニングの必要なく、動的に成長および縮小することができます。
+1. これは、APFSでは異なるパーティション（ボリューム）がディスクスペースを共有することを意味しますが、通常のパーティションは固定サイズを持っていました。
 2. **スナップショット**：APFSは、ファイルシステムの**読み取り専用**の特定時点のインスタンスであるスナップショットの作成をサポートしています。スナップショットは、追加のストレージを最小限に消費し、迅速に作成または元に戻すことができるため、効率的なバックアップとシステムのロールバックを可能にします。
 3. **クローン**：APFSは、オリジナルと同じストレージを共有するファイルまたはディレクトリのクローンを作成できます。この機能により、ストレージスペースを複製せずにファイルやディレクトリのコピーを効率的に作成することができます。
 4. **暗号化**：APFSは、フルディスク暗号化だけでなく、ファイルごとやディレクトリごとの暗号化も**ネイティブでサポート**しており、さまざまなユースケースでデータのセキュリティを向上させます。
