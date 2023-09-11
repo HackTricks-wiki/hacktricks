@@ -21,59 +21,20 @@ otool -tv /bin/ps #Decompile application
 ```
 ### objdump
 
-El comando `objdump` es una herramienta de línea de comandos que se utiliza para inspeccionar archivos binarios y objetos en sistemas operativos macOS. Proporciona información detallada sobre el contenido y la estructura interna de los archivos, como los símbolos, las secciones y las instrucciones de ensamblador.
-
-#### Uso básico
-
-El siguiente comando muestra el contenido de un archivo binario:
-
-```bash
-objdump -d archivo_binario
-```
-
-Esto mostrará el código ensamblador del archivo, junto con información sobre los símbolos y las secciones.
-
-#### Inspección de símbolos
-
-El comando `objdump` también se puede utilizar para inspeccionar los símbolos presentes en un archivo binario. Puede mostrar una lista de todos los símbolos definidos en el archivo utilizando el siguiente comando:
-
-```bash
-objdump -t archivo_binario
-```
-
-Esto mostrará una lista de símbolos junto con su dirección y tipo.
-
-#### Depuración de archivos binarios
-
-`objdump` también se puede utilizar para depurar archivos binarios. Puede mostrar información de depuración, como los puntos de interrupción y los registros de depuración, utilizando el siguiente comando:
-
-```bash
-objdump -g archivo_binario
-```
-
-Esto mostrará información detallada sobre los puntos de interrupción y los registros de depuración presentes en el archivo.
-
-#### Fuzzing de archivos binarios
-
-El comando `objdump` también se puede utilizar para realizar fuzzing en archivos binarios. Puede generar archivos de entrada aleatorios y utilizarlos como entrada para el archivo binario utilizando el siguiente comando:
-
-```bash
-objdump -f archivo_binario
-```
-
-Esto generará archivos de entrada aleatorios y los utilizará como entrada para el archivo binario, lo que puede ayudar a identificar vulnerabilidades y errores en el archivo.
-
-En resumen, `objdump` es una herramienta útil para inspeccionar, depurar y realizar fuzzing en archivos binarios en sistemas operativos macOS. Proporciona información detallada sobre los símbolos, las secciones y las instrucciones de ensamblador, lo que puede ser útil para identificar vulnerabilidades y errores en los archivos.
+{% code overflow="wrap" %}
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
 objdump -m --syms /bin/ls # Check if the symbol table exists to get function names
 objdump -m --full-contents /bin/ls # Dump every section
 objdump -d /bin/ls # Dissasemble the binary
+objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemble a function using intel flavour
 ```
+{% endcode %}
+
 ### jtool2
 
-Esta herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y ofrece algunas características adicionales.
+La herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y proporciona algunas características adicionales. [**Descárgala aquí**](http://www.newosxbook.com/tools/jtool.html).
 ```bash
 # Install
 brew install --cask jtool2
@@ -86,19 +47,18 @@ jtool2 -D /bin/ls # Decompile binary
 
 # Get signature information
 ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
-
 ```
 ### Firma de código
 
-La firma de código es un proceso utilizado en macOS para verificar la autenticidad e integridad de una aplicación. Cada aplicación en macOS debe estar firmada con un certificado válido para garantizar que no ha sido alterada o comprometida. La firma de código utiliza criptografía asimétrica para crear una firma digital única que se adjunta a la aplicación.
+La firma de código es un proceso utilizado en macOS para verificar la autenticidad e integridad de una aplicación. Cada aplicación en macOS debe estar firmada con un certificado válido para garantizar que no ha sido alterada o comprometida. La firma de código utiliza criptografía asimétrica para generar una firma digital única que se adjunta a la aplicación.
 
 La firma de código se puede verificar utilizando la herramienta `codesign` en la línea de comandos. Esta herramienta permite inspeccionar y verificar la firma de una aplicación, así como también identificar cualquier problema de seguridad o manipulación.
 
-Al inspeccionar una aplicación con `codesign`, se pueden obtener detalles sobre el certificado utilizado para firmarla, la identidad del desarrollador y cualquier recurso adicional que se haya firmado junto con la aplicación.
+Al inspeccionar una aplicación con `codesign`, se pueden obtener detalles sobre el certificado utilizado para firmarla, la identidad del desarrollador y cualquier recurso adicional que se haya incluido en la firma. Esto puede ser útil para verificar la legitimidad de una aplicación antes de instalarla o ejecutarla.
 
-La verificación de la firma de código es esencial para garantizar la seguridad de las aplicaciones en macOS. Si una aplicación no está firmada correctamente o si su firma ha sido manipulada, puede representar un riesgo para la seguridad del sistema.
+Además de la inspección, `codesign` también se puede utilizar para firmar aplicaciones y paquetes de instalación. Esto es especialmente útil para desarrolladores que desean distribuir sus aplicaciones de manera segura y garantizar su autenticidad.
 
-Es importante tener en cuenta que la firma de código no garantiza la ausencia de vulnerabilidades en una aplicación, pero ayuda a garantizar su autenticidad y que no ha sido alterada desde su firma original.
+En resumen, la firma de código es un componente importante de la seguridad en macOS, ya que ayuda a prevenir la ejecución de aplicaciones maliciosas o manipuladas. Al utilizar la herramienta `codesign`, los usuarios pueden inspeccionar y verificar la firma de una aplicación para garantizar su legitimidad y seguridad.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -164,7 +124,7 @@ Los parámetros que esta función espera son:
 | **4to argumento** | **rcx**                                                         | **2do argumento para el método**                        |
 | **5to argumento** | **r8**                                                          | **3er argumento para el método**                        |
 | **6to argumento** | **r9**                                                          | **4to argumento para el método**                        |
-| **7mo+ argumento**| <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p>  | **5to+ argumento para el método**                       |
+| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento para el método**                       |
 
 ### Swift
 
@@ -204,7 +164,7 @@ Ten en cuenta que para **instrumentar binarios del sistema** (como `cloudconfigu
 
 MacOS genera muchos registros que pueden ser muy útiles al ejecutar una aplicación para tratar de entender **qué está haciendo**.
 
-Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** cierta información **identificable** del **usuario** o de la **computadora**. Sin embargo, es posible **instalar un certificado para revelar esta información**. Sigue las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** información **identificable** del **usuario** o **equipo**. Sin embargo, es posible **instalar un certificado para revelar esta información**. Sigue las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
 ### Hopper
 
@@ -218,7 +178,7 @@ En el panel central puedes ver el **código desensamblado**. Y puedes verlo como
 
 <figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
-Al hacer clic derecho en un objeto de código, puedes ver las **referencias hacia/desde ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo descompilado):
+Al hacer clic derecho en un objeto de código, puedes ver **referencias hacia/desde ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo descompilado):
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -226,7 +186,7 @@ Además, en la **parte inferior central puedes escribir comandos de Python**.
 
 #### Panel derecho
 
-En el panel derecho puedes ver información interesante como el **historial de navegación** (para saber cómo llegaste a la situación actual), el **gráfico de llamadas** donde puedes ver todas las **funciones que llaman a esta función** y todas las funciones que **esta función llama**, e información sobre las **variables locales**.
+En el panel derecho puedes ver información interesante como el **historial de navegación** (para saber cómo llegaste a la situación actual), el **gráfico de llamadas** donde puedes ver todas las **funciones que llaman a esta función** y todas las funciones que **esta función llama**, e información de **variables locales**.
 
 ### dtruss
 ```bash
@@ -272,48 +232,37 @@ sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
 # Inspeccionando, depurando y fuzzing de aplicaciones en macOS
 
-En este directorio, encontrarás herramientas y técnicas para inspeccionar, depurar y realizar fuzzing en aplicaciones en macOS. Estas técnicas te permitirán analizar el comportamiento de las aplicaciones, identificar vulnerabilidades y encontrar posibles puntos de escalada de privilegios.
-
-## Contenido
-
-- [Introducción](#introducción)
-- [Inspeccionando aplicaciones](#inspeccionando-aplicaciones)
-- [Depurando aplicaciones](#depurando-aplicaciones)
-- [Fuzzing de aplicaciones](#fuzzing-de-aplicaciones)
-
-## Introducción
-
-Antes de comenzar a inspeccionar, depurar o realizar fuzzing en aplicaciones en macOS, es importante comprender los conceptos básicos de estas técnicas y cómo se aplican en el contexto de macOS. Asegúrate de tener un conocimiento sólido de los lenguajes de programación utilizados en las aplicaciones que deseas analizar, así como de las herramientas y entornos de desarrollo disponibles en macOS.
+En este directorio, encontrarás herramientas y técnicas para inspeccionar, depurar y realizar fuzzing en aplicaciones en macOS. Estas técnicas te permitirán analizar el comportamiento de las aplicaciones, identificar vulnerabilidades y encontrar posibles formas de escalada de privilegios.
 
 ## Inspeccionando aplicaciones
 
-La inspección de aplicaciones implica examinar el código fuente y los recursos de una aplicación para comprender su funcionamiento interno. Esto puede incluir la revisión de archivos binarios, bibliotecas compartidas, archivos de configuración y otros componentes relevantes. Al inspeccionar una aplicación, puedes identificar posibles vulnerabilidades, como contraseñas en texto plano, claves de API expuestas o errores de programación que podrían ser explotados.
+La inspección de aplicaciones implica examinar el código y los recursos de una aplicación para comprender su funcionamiento interno. Esto puede ayudarte a identificar posibles vulnerabilidades y a comprender cómo interactúa la aplicación con el sistema operativo.
 
-Algunas herramientas útiles para la inspección de aplicaciones en macOS incluyen:
+### Herramientas de inspección
 
-- [Hopper Disassembler](https://www.hopperapp.com/) - Un desensamblador interactivo para macOS que te permite analizar y comprender el código de la aplicación.
-- [class-dump](https://github.com/nygard/class-dump) - Una herramienta de línea de comandos que extrae la declaración de clases Objective-C de un archivo binario.
-- [strings](https://ss64.com/osx/strings.html) - Un comando de terminal que busca y muestra cadenas de texto legibles en archivos binarios.
+- [Hopper Disassembler](https://www.hopperapp.com/) - Un desensamblador de macOS que te permite examinar el código de una aplicación y comprender su estructura interna.
+- [class-dump](https://github.com/nygard/class-dump) - Una herramienta de línea de comandos que extrae la declaración de clases y métodos de un binario ejecutable.
+- [otool](https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/MachOTopics/0-Introduction/introduction.html) - Una herramienta de línea de comandos que muestra información sobre los archivos binarios de macOS.
 
 ## Depurando aplicaciones
 
-La depuración de aplicaciones implica rastrear y solucionar problemas en el código de una aplicación. Esto puede incluir la identificación y corrección de errores, la optimización del rendimiento y la comprensión del flujo de ejecución de la aplicación. Al depurar una aplicación, puedes descubrir vulnerabilidades y puntos débiles que podrían ser explotados.
+La depuración de aplicaciones implica ejecutar una aplicación en un entorno controlado y examinar su comportamiento en tiempo de ejecución. Esto te permite identificar y solucionar problemas, así como descubrir posibles vulnerabilidades.
 
-Algunas herramientas útiles para la depuración de aplicaciones en macOS incluyen:
+### Herramientas de depuración
 
-- [LLDB](https://lldb.llvm.org/) - Un depurador de código abierto que se utiliza comúnmente en macOS para depurar aplicaciones.
-- [Xcode](https://developer.apple.com/xcode/) - Un entorno de desarrollo integrado (IDE) que incluye herramientas de depuración y análisis de rendimiento para aplicaciones macOS.
+- [lldb](https://lldb.llvm.org/) - Un depurador de macOS que te permite examinar y manipular el estado de una aplicación en tiempo de ejecución.
+- [Xcode](https://developer.apple.com/xcode/) - Un entorno de desarrollo integrado (IDE) que incluye herramientas de depuración para aplicaciones macOS.
 
 ## Fuzzing de aplicaciones
 
-El fuzzing de aplicaciones implica enviar entradas aleatorias o maliciosas a una aplicación para encontrar vulnerabilidades y errores de programación. Al realizar fuzzing en una aplicación, puedes descubrir posibles puntos de escalada de privilegios o vulnerabilidades que podrían ser explotadas por un atacante.
+El fuzzing es una técnica que implica enviar entradas aleatorias o maliciosas a una aplicación para encontrar posibles vulnerabilidades. Esta técnica es especialmente útil para descubrir vulnerabilidades de seguridad desconocidas.
 
-Algunas herramientas útiles para el fuzzing de aplicaciones en macOS incluyen:
+### Herramientas de fuzzing
 
-- [AFL](https://github.com/google/AFL) - Un marco de fuzzing de código abierto que se utiliza para encontrar vulnerabilidades en aplicaciones.
+- [AFL](http://lcamtuf.coredump.cx/afl/) - Un framework de fuzzing que te permite generar entradas aleatorias y monitorear el comportamiento de una aplicación.
 - [Peach Fuzzer](https://peachfuzzer.com/) - Una plataforma de fuzzing que te permite generar casos de prueba personalizados y automatizar el proceso de fuzzing.
 
-Recuerda que al realizar inspección, depuración o fuzzing de aplicaciones en macOS, debes asegurarte de tener los permisos y autorizaciones adecuados para acceder y analizar las aplicaciones. Además, siempre debes seguir las leyes y regulaciones aplicables y obtener el consentimiento adecuado antes de realizar cualquier actividad de análisis o pruebas.
+¡Explora estas herramientas y técnicas para mejorar tus habilidades de inspección, depuración y fuzzing de aplicaciones en macOS!
 ```bash
 syscall:::entry
 /pid == $1/
@@ -401,12 +350,12 @@ Dentro de lldb, volcar un proceso con `process save-core`
 | **nexti (n / ni)**            | Ejecutar la siguiente instrucción. Este comando omitirá las llamadas a funciones.                                                                                                                                                                                                                                                                                                                                                 |
 | **stepi (s / si)**            | Ejecutar la siguiente instrucción. A diferencia del comando nexti, este comando entrará en las llamadas a funciones.                                                                                                                                                                                                                                                                                                                       |
 | **finish (f)**                | Ejecutar el resto de las instrucciones en la función actual ("frame") y detenerse.                                                                                                                                                                                                                                                                                                                                   |
-| **control + c**               | Pausar la ejecución. Si el proceso se ha ejecutado (r) o continuado (c), esto hará que el proceso se detenga ...donde sea que se esté ejecutando actualmente.                                                                                                                                                                                                                                                                             |
+| **control + c**               | Pausar la ejecución. Si el proceso se ha ejecutado (r) o continuado (c), esto hará que el proceso se detenga ... donde sea que se esté ejecutando actualmente.                                                                                                                                                                                                                                                                             |
 | **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #Lista de puntos de interrupción</p><p>br e/dis &#x3C;num> #Habilitar/Deshabilitar punto de interrupción</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
 | **help**                      | <p>help breakpoint #Obtener ayuda del comando breakpoint</p><p>help memory write #Obtener ayuda para escribir en la memoria</p>                                                                                                                                                                                                                                                                                                         |
 | **reg**                       | <p>reg read</p><p>reg read $rax</p><p>reg write $rip 0x100035cc0</p>                                                                                                                                                                                                                                                                                                                                                      |
 | **x/s \<reg/memory address>** | Mostrar la memoria como una cadena terminada en nulo.                                                                                                                                                                                                                                                                                                                                                                           |
-| **x/i \<reg/memory address>** | Mostrar la memoria como instrucción de ensamblador.                                                                                                                                                                                                                                                                                                                                                                               |
+| **x/i \<reg/memory address>** | Mostrar la memoria como instrucción de ensamblaje.                                                                                                                                                                                                                                                                                                                                                                               |
 | **x/b \<reg/memory address>** | Mostrar la memoria como byte.                                                                                                                                                                                                                                                                                                                                                                                               |
 | **print object (po)**         | <p>Esto imprimirá el objeto referenciado por el parámetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Tenga en cuenta que la mayoría de las API o métodos Objective-C de Apple devuelven objetos y, por lo tanto, deben mostrarse mediante el comando "print object" (po). Si po no produce una salida significativa, use <code>x/b</code></p> |
 | **memory**                    | <p>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escribir AAAA en esa dirección<br>memory write -f s $rip+0x11f+7 "AAAA" #Escribir AAAA en la dirección</p>                                                                                                                                                                                                                            |

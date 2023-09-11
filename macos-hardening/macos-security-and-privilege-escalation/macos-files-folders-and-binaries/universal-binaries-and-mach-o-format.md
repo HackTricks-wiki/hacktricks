@@ -39,8 +39,8 @@ struct fat_header {
 struct fat_arch {
 cpu_type_t	cputype;	/* especificador de CPU (int) */
 cpu_subtype_t	cpusubtype;	/* especificador de máquina (int) */
-uint32_t	offset;		/* desplazamiento del archivo a este archivo de objeto */
-uint32_t	size;		/* tamaño de este archivo de objeto */
+uint32_t	offset;		/* desplazamiento del archivo a este objeto */
+uint32_t	size;		/* tamaño de este objeto */
 uint32_t	align;		/* alineación como una potencia de 2 */
 };
 </code></pre>
@@ -78,7 +78,7 @@ o utilizando la herramienta [Mach-O View](https://sourceforge.net/projects/macho
 
 <figure><img src="../../../.gitbook/assets/image (5) (1) (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-Como podrás pensar, por lo general un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
+Como podrás pensar, generalmente un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
 
 ## **Encabezado Mach-O**
 
@@ -127,7 +127,7 @@ O utilizando [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 ## **Comandos de carga de Mach-O**
 
-Esto especifica el **diseño del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y qué **bibliotecas compartidas** se requieren.\
+Esto especifica el **diseño del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y las **bibliotecas compartidas** requeridas.\
 Los comandos básicamente instruyen al cargador dinámico **(dyld) cómo cargar el binario en memoria.**
 
 Todos los comandos de carga comienzan con una estructura **load\_command**, definida en el **`loader.h`** mencionado anteriormente:
@@ -142,14 +142,14 @@ Hay alrededor de **50 tipos diferentes de comandos de carga** que el sistema man
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-Básicamente, este tipo de comando de carga define **cómo cargar las secciones** que se almacenan en DATA cuando se ejecuta el binario.
+Básicamente, este tipo de comando de carga define **cómo cargar los segmentos \_\_TEXT** (código ejecutable) **y \_\_DATA** (datos para el proceso) **según los desplazamientos indicados en la sección de Datos** cuando se ejecuta el binario.
 {% endhint %}
 
 Estos comandos **definen segmentos** que se **mapean** en el **espacio de memoria virtual** de un proceso cuando se ejecuta.
 
 Existen **diferentes tipos** de segmentos, como el segmento **\_\_TEXT**, que contiene el código ejecutable de un programa, y el segmento **\_\_DATA**, que contiene datos utilizados por el proceso. Estos **segmentos se encuentran en la sección de datos** del archivo Mach-O.
 
-**Cada segmento** se puede dividir aún más en múltiples **secciones**. La estructura del comando de carga contiene **información** sobre **estas secciones** dentro del segmento correspondiente.
+**Cada segmento** se puede dividir aún más en múltiples **secciones**. La **estructura del comando de carga** contiene **información** sobre **estas secciones** dentro del segmento correspondiente.
 
 En el encabezado primero se encuentra el **encabezado del segmento**:
 
@@ -197,7 +197,7 @@ Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento*
 
 <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-También es posible obtener la **información de los encabezados** desde la **línea de comandos** con:
+También es posible obtener **información de encabezados** desde la **línea de comandos** con:
 ```bash
 otool -lv /bin/ls
 ```
@@ -205,16 +205,16 @@ Segmentos comunes cargados por este comando:
 
 * **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir ni ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
 * Esta asignación es importante para **mitigar las vulnerabilidades de referencia a puntero nulo**.
-* **`__TEXT`**: Contiene **código ejecutable** y **datos** que son **de solo lectura**. Secciones comunes de este segmento:
+* **`__TEXT`**: Contiene **código ejecutable** con permisos de **lectura** y **ejecución** (sin escritura). Secciones comunes de este segmento:
 * `__text`: Código binario compilado
 * `__const`: Datos constantes
 * `__cstring`: Constantes de cadena
 * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
-* **`__DATA`**: Contiene datos que son **escribibles**.
+* **`__DATA`**: Contiene datos que son **legibles** y **escribibles** (sin ejecución).
 * `__data`: Variables globales (que han sido inicializadas)
 * `__bss`: Variables estáticas (que no han sido inicializadas)
 * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C
-* **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como "símbolo, cadena y entradas de tabla de reubicación".
+* **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como "entradas de tabla de símbolos, cadenas y reubicación".
 * **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también puede encontrarse en el segmento \_\_DATA, dentro de varias secciones \_\_objc\_\*.
 
 ### **`LC_MAIN`**
@@ -228,7 +228,7 @@ Sin embargo, puedes encontrar información sobre esta sección en [**esta public
 
 ### **LC\_LOAD\_DYLINKER**
 
-Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo de kernel.
+Contiene la **ruta del ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo de kernel.
 
 ### **`LC_LOAD_DYLIB`**
 
@@ -275,14 +275,14 @@ Los desplazamientos de cualquier constructor se encuentran en la sección **\_\_
 El corazón del archivo es la región final, los datos, que consiste en una serie de segmentos como se muestra en la región de comandos de carga. **Cada segmento puede contener una serie de secciones de datos**. Cada una de estas secciones **contiene código o datos** de un tipo particular.
 
 {% hint style="success" %}
-Los datos son básicamente la parte que contiene toda la información cargada por los comandos de carga LC\_SEGMENTS\_64
+Los datos son básicamente la parte que contiene toda la **información** que se carga mediante los comandos de carga **LC\_SEGMENTS\_64**
 {% endhint %}
 
 ![](<../../../.gitbook/assets/image (507) (3).png>)
 
 Esto incluye:
 
-* **Tabla de funciones:** Que contiene información sobre las funciones del programa.
+* **Tabla de funciones**: Que contiene información sobre las funciones del programa.
 * **Tabla de símbolos**: Que contiene información sobre las funciones externas utilizadas por el binario.
 * También podría contener funciones internas, nombres de variables y más.
 

