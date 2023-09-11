@@ -63,9 +63,11 @@ Si no estás familiarizado con macOS, debes comenzar aprendiendo los conceptos b
 [macos-protocols.md](macos-protocols.md)
 {% endcontent-ref %}
 
+* **macOS de código abierto**: [https://opensource.apple.com/](https://opensource.apple.com/)
+
 ### MacOS MDM
 
-En las empresas, los sistemas **macOS** probablemente estén **gestionados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
+En las empresas, los sistemas **macOS** probablemente estén **gestionados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona eso**:
 
 {% content-ref url="../macos-red-teaming/macos-mdm/" %}
 [macos-mdm](../macos-red-teaming/macos-mdm/)
