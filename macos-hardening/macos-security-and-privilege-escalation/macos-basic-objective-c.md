@@ -1,13 +1,13 @@
-# macOSの基本的なObjective-C
+# macOS Objective-C
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのスウェット**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
@@ -26,8 +26,6 @@ Objective-Cで書かれたプログラムは、[Mach-Oバイナリ](macos-files-
 ```bash
 class-dump Kindle.app
 ```
-注意：これらの名前は、バイナリの逆アセンブルを困難にするために曖昧化されている可能性があります。
-
 ## クラス、メソッド、オブジェクト
 
 ### インターフェース、プロパティ、メソッド
@@ -46,6 +44,40 @@ class-dump Kindle.app
 @end
 ```
 ### **クラス**
+
+A class is a blueprint for creating objects in Objective-C. It defines the properties and methods that an object of that class will have. In Objective-C, classes are defined using the `@interface` and `@implementation` keywords.
+
+クラスは、Objective-Cでオブジェクトを作成するための設計図です。そのクラスのオブジェクトが持つプロパティとメソッドを定義します。Objective-Cでは、クラスは`@interface`と`@implementation`キーワードを使用して定義されます。
+
+### **Properties**
+
+Properties are the variables that hold the state of an object. They define the characteristics of an object and can be accessed and modified using dot notation. Properties can be declared as `readwrite`, which means they can be both read and written to, or `readonly`, which means they can only be read.
+
+プロパティは、オブジェクトの状態を保持する変数です。プロパティはオブジェクトの特性を定義し、ドット表記を使用してアクセスおよび変更することができます。プロパティは`readwrite`として宣言することもできます（読み書き可能）、または`readonly`として宣言することもできます（読み取り専用）。
+
+### **Methods**
+
+Methods are the actions that an object can perform. They define the behavior of an object and can be called to perform specific tasks. Methods are declared in the `@interface` section of a class and implemented in the `@implementation` section.
+
+メソッドは、オブジェクトが実行できるアクションです。メソッドはオブジェクトの振る舞いを定義し、特定のタスクを実行するために呼び出すことができます。メソッドはクラスの`@interface`セクションで宣言され、`@implementation`セクションで実装されます。
+
+### **Inheritance**
+
+Inheritance allows one class to inherit the properties and methods of another class. The class that is being inherited from is called the superclass, and the class that inherits from it is called the subclass. In Objective-C, inheritance is denoted by using the `:` symbol.
+
+継承により、あるクラスは別のクラスのプロパティとメソッドを継承することができます。継承元のクラスはスーパークラスと呼ばれ、それを継承するクラスはサブクラスと呼ばれます。Objective-Cでは、継承は`:`記号を使用して示されます。
+
+### **Polymorphism**
+
+Polymorphism allows objects of different classes to be treated as objects of a common superclass. This means that a variable of the superclass type can hold objects of different subclasses, and the appropriate method will be called based on the actual type of the object.
+
+ポリモーフィズムにより、異なるクラスのオブジェクトを共通のスーパークラスのオブジェクトとして扱うことができます。つまり、スーパークラスの型の変数は、異なるサブクラスのオブジェクトを保持することができ、適切なメソッドがオブジェクトの実際の型に基づいて呼び出されます。
+
+### **Encapsulation**
+
+Encapsulation is the practice of hiding the internal details of an object and providing a public interface for interacting with the object. This helps to ensure that the object's internal state is not accidentally modified and allows for better code organization and maintenance.
+
+カプセル化は、オブジェクトの内部の詳細を隠し、オブジェクトとの対話のための公開インターフェースを提供することです。これにより、オブジェクトの内部状態が誤って変更されることを防ぎ、より良いコードの組織化とメンテナンスが可能になります。
 ```objectivec
 @implementation MyVehicle : NSObject
 
@@ -77,7 +109,7 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **クラスメソッド**
 
-クラスメソッドは、インスタンスメソッドで使用されるハイフン（-）ではなく、**プラス記号（+）**で定義されます。例えば、**NSString**クラスのメソッド**`stringWithString`**です。
+クラスメソッドは、インスタンスメソッドで使用されるハイフン（-）ではなく、**プラス記号**（+）で定義されます。例えば、**NSString**クラスのメソッド**`stringWithString`**は以下のようになります：
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
@@ -95,7 +127,7 @@ NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
 ### **インスタンス変数**
 
-セッターとゲッターメソッドの代わりに、インスタンス変数を使用することもできます。これらの変数は、プロパティと同じ名前で始まる "\_" を付けた名前を持ちます。
+セッターとゲッターメソッドの代わりに、インスタンス変数を使用することもできます。これらの変数は、プロパティと同じ名前で始まる "\_" で始まります。
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
@@ -104,9 +136,9 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 ```
 ### プロトコル
 
-プロトコルは、メソッドの宣言の集合です（プロパティなし）。プロトコルを実装するクラスは、宣言されたメソッドを実装します。
+プロトコルは、メソッドの宣言の集まりです（プロパティは含まれません）。プロトコルを実装するクラスは、宣言されたメソッドを実装します。
 
-メソッドには2つのタイプがあります: **必須**と**オプション**。**デフォルト**では、メソッドは**必須**です（ただし、**`@required`** タグを使用しても指定できます）。メソッドがオプションであることを示すには、**`@optional`** を使用します。
+メソッドには2つのタイプがあります: **必須**と**オプション**です。**デフォルト**では、メソッドは**必須**です（ただし、**`@required`** タグを使用しても指定できます）。メソッドがオプションであることを示すには、**`@optional`** を使用します。
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -118,33 +150,33 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 ```
 ### すべて一緒に
 
-Objective-C is the primary programming language used for macOS and iOS development. Understanding Objective-C is essential for analyzing and exploiting vulnerabilities in macOS applications. In this section, we will cover the basics of Objective-C and how it relates to macOS security and privilege escalation.
+Objective-C is the primary programming language used for macOS and iOS development. Understanding Objective-C is essential for analyzing and exploiting vulnerabilities in macOS applications. In this chapter, we will cover the basics of Objective-C and how it is used in macOS development.
 
 #### Objective-C Basics
 
-Objective-C is an object-oriented programming language that is a superset of the C programming language. It adds syntax and features to C to support object-oriented programming. Objective-C uses a messaging system to send messages between objects, which is different from the function call mechanism used in C.
+Objective-C is an object-oriented programming language that is a superset of the C programming language. It adds syntax and features for object-oriented programming, such as classes, objects, and messaging.
 
 #### Classes and Objects
 
-In Objective-C, classes are used to define objects. An object is an instance of a class. Classes define the properties and behaviors of objects. Objects can have instance variables, which are variables that hold data specific to an instance of a class. Objects can also have methods, which are functions that perform actions or provide information about the object.
+In Objective-C, a class is a blueprint for creating objects. It defines the properties and behaviors that objects of that class will have. An object is an instance of a class, and it represents a specific entity or concept.
 
-#### Inheritance and Polymorphism
+#### Messaging
 
-Objective-C supports inheritance, which allows a class to inherit properties and behaviors from another class. Inheritance promotes code reuse and allows for the creation of more specialized classes based on existing ones.
-
-Polymorphism is another important concept in Objective-C. It allows objects of different classes to be treated as objects of a common superclass. This enables code to be written that can work with objects of different types without needing to know the specific type at compile time.
+Messaging is a fundamental concept in Objective-C. It is the primary way to interact with objects and invoke methods. In Objective-C, you send a message to an object, and the object responds by executing the appropriate method.
 
 #### Memory Management
 
-Objective-C uses reference counting for memory management. Each object has a reference count that keeps track of how many references to the object exist. When the reference count reaches zero, the object is deallocated and its memory is freed.
+Objective-C uses reference counting for memory management. Each object has a reference count, and when the count reaches zero, the object is deallocated. Developers need to manage memory properly to avoid memory leaks and crashes.
 
 #### Objective-C Runtime
 
-The Objective-C runtime is a library that provides the infrastructure for Objective-C programs to work. It includes functions and data structures that enable dynamic method dispatch, introspection, and other runtime features.
+The Objective-C runtime is a library that provides support for dynamic method dispatch, introspection, and other runtime features. It allows developers to perform tasks such as dynamically adding methods to classes or inspecting the properties of an object at runtime.
 
-#### Conclusion
+#### Objective-C and macOS Security
 
-Understanding the basics of Objective-C is crucial for analyzing and exploiting vulnerabilities in macOS applications. By understanding how Objective-C works, you can better understand how to identify and exploit security weaknesses in Objective-C-based applications.
+Understanding Objective-C is crucial for analyzing and exploiting vulnerabilities in macOS applications. By understanding how Objective-C works, you can identify potential security weaknesses and develop effective exploit techniques.
+
+In the next chapter, we will dive deeper into Objective-C and explore advanced topics such as method swizzling, class posing, and runtime manipulation. These techniques are commonly used in macOS privilege escalation and security research.
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -266,11 +298,11 @@ NSMutableArray *mutColorsArray = [NSMutableArray array];
 [mutColorsArray addObject:@"yellow"];
 [mutColorsArray replaceObjectAtIndex:0 withObject:@"purple"];
 
-// Sets
+// Inmutable Sets
 NSSet *fruitsSet1 = [NSSet setWithObjects:@"apple", @"banana", @"orange", nil];
 NSSet *fruitsSet2 = [NSSet setWithArray:@[@"apple", @"banana", @"orange"]];
 
-// Inmutable sets
+// Mutable sets
 NSMutableSet *mutFruitsSet = [NSMutableSet setWithObjects:@"apple", @"banana", @"orange", nil];
 [mutFruitsSet addObject:@"grape"];
 [mutFruitsSet removeObject:@"apple"];
@@ -297,11 +329,11 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 [mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
 [mutFruitColorsDictionary removeObjectForKey:@"grape"];
 ```
+{% endcode %}
+
 ### ブロック
 
-ブロックは、関数のように振る舞い、関数に渡したり、配列や辞書に格納したりすることができる**オブジェクトとして機能する関数**です。また、値が与えられた場合には値を表すこともできるため、ラムダに似ています。
-
-{% code overflow="wrap" %}
+ブロックは、関数のように振る舞い、関数に渡したり、配列や辞書に格納したりすることができる**オブジェクトとして機能する**関数です。また、値が与えられた場合には値を表すこともできるため、ラムダに似ています。
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -386,10 +418,10 @@ NSString* tmp = @"something temporary";
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを。
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するために、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

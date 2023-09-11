@@ -7,8 +7,8 @@
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
@@ -45,7 +45,7 @@ uint32_t	align;		/* 2の累乗としてのアライメント */
 };
 </code></pre>
 
-ヘッダーには**マジック**バイトが続き、ファイルが含む**アーキテクチャの数**（`nfat_arch`）と、各アーキテクチャには`fat_arch`構造体があります。
+ヘッダーには**マジック**バイトが続き、ファイルが含む**アーキテクチャ**の数（`nfat_arch`）と、各アーキテクチャには`fat_arch`構造体があります。
 
 次のコマンドで確認します：
 
@@ -142,16 +142,16 @@ uint32_t cmdsize;       /* total size of command in bytes */
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-基本的に、このタイプのロードコマンドは、バイナリが実行されるときにDATAに格納されたセクションをどのようにロードするかを定義します。
+基本的に、このタイプのロードコマンドは、バイナリが実行されるときに、データセクションで示されるオフセットに従って、**\_\_TEXT**（実行可能コード）と**\_\_DATA**（プロセス用のデータ）セグメントをどのようにロードするかを定義します。
 {% endhint %}
 
-これらのコマンドは、プロセスが実行されるときに仮想メモリ空間にマップされるセグメントを定義します。
+これらのコマンドは、プロセスが実行されるときに、仮想メモリ空間にマップされるセグメントを定義します。
 
-__TEXTセグメントは、プログラムの実行可能コードを保持し、__DATAセグメントはプロセスによって使用されるデータを含んでいます。これらのセグメントは、Mach-Oファイルのデータセクションに配置されています。
+**\_\_TEXT**セグメントは、プログラムの実行可能コードを保持し、**\_\_DATA**セグメントはプロセスによって使用されるデータを含んでいます。これらのセグメントは、Mach-Oファイルのデータセクションに配置されています。
 
-各セグメントは、さらに複数のセクションに分割することができます。ロードコマンドの構造には、それぞれのセグメント内のこれらのセクションに関する情報が含まれています。
+**各セグメント**は、さらに**複数のセクション**に分割することができます。ロードコマンドの構造には、各セグメント内のこれらのセクションに関する情報が含まれています。
 
-ヘッダーの最初には、セグメントヘッダーがあります：
+ヘッダーの最初には、**セグメントヘッダー**があります：
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
@@ -172,7 +172,7 @@ int32_t		initprot;	/* initial VM protection */
 
 <figure><img src="../../../.gitbook/assets/image (2) (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-このヘッダーは、それに続くヘッダーのセクションの数を定義しています：
+このヘッダーは、その後に表示されるセクションヘッダーの数を定義しています：
 ```c
 struct section_64 { /* for 64-bit architectures */
 char		sectname[16];	/* name of this section */
@@ -203,23 +203,23 @@ otool -lv /bin/ls
 ```
 このコマンドによって読み込まれる一般的なセグメントは次のとおりです：
 
-* **`__PAGEZERO`**：カーネルに対して、**アドレスゼロをマップ**しないように指示します。このセグメントは、読み取り、書き込み、実行ができないようにするために、構造体内のmaxprotとminprot変数がゼロに設定されます。
-* この割り当ては、**NULLポインタの逆参照の脆弱性を軽減**するために重要です。
-* **`__TEXT`**：**実行可能なコード**と**読み取り専用のデータ**を含んでいます。このセグメントの一般的なセクションは次のとおりです：
-* `__text`：コンパイルされたバイナリコード
-* `__const`：定数データ
-* `__cstring`：文字列定数
-* `__stubs`と`__stubs_helper`：ダイナミックライブラリの読み込みプロセス中に関与します。
-* **`__DATA`**：**書き込み可能な**データを含んでいます。
-* `__data`：初期化されたグローバル変数
-* `__bss`：初期化されていない静的変数
-* `__objc_*`（\_\_objc\_classlist、\_\_objc\_protolistなど）：Objective-Cランタイムで使用される情報
-* **`__LINKEDIT`**：リンカ（dyld）のための情報を含んでいます。「シンボル、文字列、および再配置テーブルエントリ」などです。
-* **`__OBJC`**：Objective-Cランタイムで使用される情報を含んでいます。ただし、この情報は\_\_DATAセグメント内のさまざまな\_\_objc\_\*セクションにも見つかる場合があります。
+- **`__PAGEZERO`**：カーネルに対して、**アドレスゼロをマップ**しないように指示します。このページは**読み取り、書き込み、実行ができない**ようになっています。構造体内のmaxprotとminprot変数はゼロに設定され、このページには**読み書き実行権限がない**ことを示しています。
+- この割り当ては、**NULLポインタの逆参照の脆弱性を軽減**するために重要です。
+- **`__TEXT`**：**実行可能なコード**を含み、**読み取り**と**実行**の権限があります（書き込みはありません）。このセグメントの一般的なセクションは次のとおりです：
+  - `__text`：コンパイルされたバイナリコード
+  - `__const`：定数データ
+  - `__cstring`：文字列定数
+  - `__stubs`と`__stubs_helper`：ダイナミックライブラリの読み込みプロセス中に関与します。
+- **`__DATA`**：**読み取り可能**で**書き込み可能**なデータを含みます（実行はできません）。
+  - `__data`：初期化されたグローバル変数
+  - `__bss`：初期化されていない静的変数
+  - `__objc_*`（\_\_objc\_classlist、\_\_objc\_protolistなど）：Objective-Cランタイムで使用される情報
+- **`__LINKEDIT`**：リンカ（dyld）のための情報を含みます。シンボル、文字列、および再配置テーブルエントリなどです。
+- **`__OBJC`**：Objective-Cランタイムで使用される情報を含みます。ただし、この情報は\_\_DATAセグメント内のさまざまな\_\_objc\_\*セクションにも見つかる場合があります。
 
 ### **`LC_MAIN`**
 
-**entryoff属性**にエントリーポイントが含まれています。ロード時に、**dyld**はこの値を（メモリ内の）**バイナリのベースに追加**し、バイナリのコードの実行を開始するためにこの命令にジャンプします。
+**entryoff属性**にエントリーポイントが含まれています。ロード時に、**dyld**は単純にこの値を（メモリ内の）バイナリのベースに**追加**し、バイナリのコードの実行を開始するためにこの命令に**ジャンプ**します。
 
 ### **LC\_CODE\_SIGNATURE**
 
@@ -234,7 +234,7 @@ Macho-Oファイルの**コード署名に関する情報**が含まれていま
 
 このロードコマンドは、Mach-Oバイナリが必要とする**動的ライブラリの依存関係**を記述します。Mach-Oバイナリが必要とする各ライブラリには、LC\_LOAD\_DYLIBロードコマンドがあります。
 
-* このロードコマンドは、実際の依存する動的ライブラリを記述する**`dylib_command`**型の構造体です。
+- このロードコマンドは、実際の依存する動的ライブラリを記述する**`dylib_command`**型の構造体です。
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -275,14 +275,14 @@ Mach-Oバイナリには、**1つ以上のコンストラクタ**が含まれて
 ファイルの中心部は、データであり、ロードコマンド領域に配置されたセグメントの数で構成されています。**各セグメントには複数のデータセクションが含まれる**ことがあります。これらのセクションは、特定のタイプのコードまたはデータを含んでいます。
 
 {% hint style="success" %}
-データは基本的に、ロードコマンドLC\_SEGMENTS\_64によってロードされるすべての情報を含む部分です。
+データは基本的に、ロードコマンド**LC\_SEGMENTS\_64**によってロードされるすべての**情報**を含む部分です。
 {% endhint %}
 
 ![](<../../../.gitbook/assets/image (507) (3).png>)
 
 これには以下が含まれます：
 
-* **関数テーブル**：プログラムの関数に関する情報を保持します。
+* **関数テーブル**：プログラム関数に関する情報を保持します。
 * **シンボルテーブル**：バイナリで使用される外部関数に関する情報を含みます。
 * 内部関数、変数名なども含まれる場合があります。
 
@@ -290,7 +290,7 @@ Mach-Oバイナリには、**1つ以上のコンストラクタ**が含まれて
 
 <figure><img src="../../../.gitbook/assets/image (2) (1) (4).png" alt=""><figcaption></figcaption></figure>
 
-またはCLIから：
+またはCLIからも確認できます：
 ```bash
 size -m /bin/ls
 ```

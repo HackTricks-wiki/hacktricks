@@ -21,70 +21,20 @@ otool -tv /bin/ps #Decompile application
 ```
 ### objdump
 
-objdumpは、バイナリファイルの解析とデバッグに使用されるユーティリティです。objdumpを使用すると、実行可能ファイルやオブジェクトファイルのセクション、シンボル、リロケーションエントリなどの情報を表示することができます。
-
-#### 使用法
-
-```
-objdump [オプション] <ファイル>
-```
-
-#### オプション
-
-- `-d` : ディスアセンブルされたコードを表示します。
-- `-t` : シンボルテーブルを表示します。
-- `-r` : リロケーションエントリを表示します。
-- `-s` : セクションの内容を表示します。
-- `-h` : セクションヘッダを表示します。
-- `-x` : ヘッダ情報を表示します。
-
-#### 例
-
-```
-objdump -d binary
-```
-
-このコマンドは、バイナリファイルのディスアセンブルされたコードを表示します。
-
-```
-objdump -t binary
-```
-
-このコマンドは、バイナリファイルのシンボルテーブルを表示します。
-
-```
-objdump -r binary
-```
-
-このコマンドは、バイナリファイルのリロケーションエントリを表示します。
-
-```
-objdump -s binary
-```
-
-このコマンドは、バイナリファイルのセクションの内容を表示します。
-
-```
-objdump -h binary
-```
-
-このコマンドは、バイナリファイルのセクションヘッダを表示します。
-
-```
-objdump -x binary
-```
-
-このコマンドは、バイナリファイルのヘッダ情報を表示します。
+{% code overflow="wrap" %}
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
 objdump -m --syms /bin/ls # Check if the symbol table exists to get function names
 objdump -m --full-contents /bin/ls # Dump every section
 objdump -d /bin/ls # Dissasemble the binary
+objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemble a function using intel flavour
 ```
+{% endcode %}
+
 ### jtool2
 
-このツールは、**codesign**、**otool**、および**objdump**の**代替**として使用することができ、いくつかの追加機能も提供します。
+このツールは、**codesign**、**otool**、および**objdump**の**代替**として使用でき、いくつかの追加機能も提供します。[**ここからダウンロードできます**](http://www.newosxbook.com/tools/jtool.html)。
 ```bash
 # Install
 brew install --cask jtool2
@@ -97,7 +47,6 @@ jtool2 -D /bin/ls # Decompile binary
 
 # Get signature information
 ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
-
 ```
 ### Codesign
 
@@ -105,9 +54,11 @@ Codesign（コードサイン）は、macOSにおけるアプリケーション�
 
 コードサインには、開発者証明書を使用します。開発者証明書は、Apple Developer Programに登録することで入手できます。アプリケーションをコードサインするには、開発者証明書を使用してアプリケーションにデジタル署名を付与する必要があります。
 
-コードサインされたアプリケーションは、macOSにおいて信頼されたアプリケーションとして扱われます。ユーザーは、コードサインされたアプリケーションが改ざんされていないことや、信頼できる開発者によって作成されたものであることを確認できます。
+コードサインされたアプリケーションは、macOSにおいて信頼されたアプリケーションとして扱われます。ユーザーがコードサインされたアプリケーションを実行する際には、macOSがアプリケーションの署名を検証し、信頼性を確認します。
 
-コードサインは、アプリケーションのセキュリティを向上させるだけでなく、特権エスカレーション攻撃などの悪意のある活動を防ぐための重要な手段です。
+コードサインは、アプリケーションの改ざんや不正な変更を防ぐために重要です。また、コードサインによって、アプリケーションが正当な権限を持つことも確認されます。
+
+コードサインのプロセスは、アプリケーションのセキュリティと特権エスカレーションの観点から重要です。アプリケーションをコードサインすることで、セキュリティの向上と悪意のある攻撃からの保護が期待できます。
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -126,12 +77,12 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html)は、インストールする前に**.pkg**ファイル（インストーラ）を検査し、中身を確認するのに役立つツールです。\
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html)は、インストールする前に**.pkg**ファイル（インストーラ）を調査し、中身を確認するのに役立つツールです。\
 これらのインストーラには、マルウェアの作者が通常悪用する`preinstall`と`postinstall`のbashスクリプトが含まれています。
 
 ### hdiutil
 
-このツールは、Appleのディスクイメージ（**.dmg**）ファイルを実行する前に検査するためにマウントすることができます。
+このツールは、Appleのディスクイメージ（**.dmg**）ファイルを実行する前に調査するためにマウントすることができます。
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
@@ -167,11 +118,11 @@ Objective-Cを使用するバイナリで関数が呼び出されると、コン
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
 | **1番目の引数**   | **rdi**                                                         | **self: メソッドが呼び出されるオブジェクト**         |
 | **2番目の引数**   | **rsi**                                                         | **op: メソッドの名前**                                 |
-| **3番目の引数**   | **rdx**                                                         | **メソッドへの最初の引数**                             |
-| **4番目の引数**   | **rcx**                                                         | **メソッドへの2番目の引数**                             |
-| **5番目の引数**   | **r8**                                                          | **メソッドへの3番目の引数**                             |
-| **6番目の引数**   | **r9**                                                          | **メソッドへの4番目の引数**                             |
-| **7番目以降の引数** | <p><strong>rsp+</strong><br><strong>(スタック上)</strong></p> | **メソッドへの5番目以降の引数**                         |
+| **3番目の引数**   | **rdx**                                                         | **メソッドへの第1引数**                               |
+| **4番目の引数**   | **rcx**                                                         | **メソッドへの第2引数**                               |
+| **5番目の引数**   | **r8**                                                          | **メソッドへの第3引数**                               |
+| **6番目の引数**   | **r9**                                                          | **メソッドへの第4引数**                               |
+| **7番目以降の引数** | <p><strong>rsp+</strong><br><strong>(スタック上)</strong></p> | **メソッドへの第5引数以降**                            |
 
 ### Swift
 
@@ -204,14 +155,14 @@ Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 {% endhint %}
 
 {% hint style="warning" %}
-macOS上のシステムバイナリ（`cloudconfigurationd`など）を**インストゥルメント**するには、**SIPを無効にする必要があります**（署名を削除するだけでは機能しません）。
+MacOS上のシステムバイナリ（`cloudconfigurationd`など）を**インストゥルメント**するには、**SIPを無効にする必要があります**（署名を削除するだけでは機能しません）。
 {% endhint %}
 
 ### 統合ログ
 
 MacOSは、アプリケーションを実行する際に非常に役立つログを生成します。これにより、アプリケーションが**何をしているか**を理解することができます。
 
-さらに、一部のログには、一部の**ユーザー**または**コンピューター**の**識別可能な情報**を**非表示**にするためのタグ`<private>`が含まれています。ただし、**この情報を開示するための証明書をインストールすることが可能**です。[**こちら**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)の説明に従ってください。
+さらに、一部のログには、一部の**ユーザー**または**コンピューター**の**識別可能な情報**を**非表示**にするためのタグ`<private>`が含まれています。ただし、この情報を開示するためには、[**こちら**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)の説明に従って証明書をインストールすることが可能です。
 
 ### Hopper
 
@@ -242,7 +193,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 ```
 ### ktrace
 
-これは、**SIPが有効化されている場合でも**使用することができます。
+これは、**SIPが有効化されている場合でも使用できます**。
 ```bash
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
@@ -364,7 +315,7 @@ lldb内で、`process save-core`を使用してプロセスをダンプします
 | **continue (c)**              | デバッグ対象のプロセスの実行を継続します。                                                                                                                                                                                                                                                                                                                                                                               |
 | **nexti (n / ni)**            | 次の命令を実行します。このコマンドは関数呼び出しをスキップします。                                                                                                                                                                                                                                                                                                                                                 |
 | **stepi (s / si)**            | 次の命令を実行します。nextiコマンドとは異なり、このコマンドは関数呼び出しに入ります。                                                                                                                                                                                                                                                                                                                       |
-| **finish (f)**                | 現在の関数（"フレーム"）の残りの命令を実行し、停止します。                                                                                                                                                                                                                                                                                                                                   |
+| **finish (f)**                | 現在の関数（"フレーム"）の残りの命令を実行して停止します。                                                                                                                                                                                                                                                                                                                                   |
 | **control + c**               | 実行を一時停止します。プロセスが実行（r）または継続（c）されている場合、プロセスは現在実行中の場所で停止します。                                                                                                                                                                                                                                                                             |
 | **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #ブレークポイントリスト</p><p>br e/dis &#x3C;num> #ブレークポイントの有効化/無効化</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
 | **help**                      | <p>help breakpoint #ブレークポイントコマンドのヘルプを取得する</p><p>help memory write #メモリへの書き込みのヘルプを取得する</p>                                                                                                                                                                                                                                                                                                         |
@@ -399,7 +350,7 @@ lldb内で、`process save-core`を使用してプロセスをダンプします
 * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
 * また、**`ptrace`**システムコールを**`PT_DENY_ATTACH`**フラグとともに呼び出すこともできます。これにより、デバッガがアタッチおよびトレースを防止します。
 * **`sysctl`**または**`ptrace`**関数が**インポート**されているかどうかを確認できます（ただし、マルウェアは動的にインポートする可能性があります）
-* この記事によれば、"[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)"：\
+* この記事によると、"[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)"：\
 "_メッセージ「Process # exited with **status = 45 (0x0000002d)**」は、デバッグ対象が**PT\_DENY\_ATTACH**を使用していることを示す兆候です_"
 
 ## ファジング
@@ -474,9 +425,9 @@ CLIツールに対応しています。
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-macOSのGUIツールとの互換性があります。ただし、一部のmacOSアプリは固有の要件を持っています。例えば、ユニークなファイル名、正しい拡張子、サンドボックスからのファイルの読み取り(`~/Library/Containers/com.apple.Safari/Data`)が必要です。
+macOSのGUIツールとの互換性があります。ただし、一部のmacOSアプリは固有の要件を持っています。例えば、ユニークなファイル名、正しい拡張子、サンドボックスからのファイルの読み取りが必要です (`~/Library/Containers/com.apple.Safari/Data`)...
 
-以下にいくつかの例を示します:
+いくつかの例:
 
 {% code overflow="wrap" %}
 ```bash
