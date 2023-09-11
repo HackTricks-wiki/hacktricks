@@ -148,7 +148,7 @@ There are about **50 different types of load commands** that the system handles 
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-Basically, this type of Load Command define **how to load the sections** that are stored in DATA when the binary is executed.
+Basically, this type of Load Command define **how to load the \_\_TEXT** (executable code) **and \_\_DATA** (data for the process) **segments** according to the **offsets indicated in the Data section** when the binary is executed.
 {% endhint %}
 
 These commands **define segments** that are **mapped** into the **virtual memory space** of a process when it is executed.
@@ -215,12 +215,12 @@ Common segments loaded by this cmd:
 
 * **`__PAGEZERO`:** It instructs the kernel to **map** the **address zero** so it **cannot be read from, written to, or executed**. The maxprot and minprot variables in the structure are set to zero to indicate there are **no read-write-execute rights on this page**.&#x20;
   * This allocation is important to **mitigate NULL pointer dereference vulnerabilities**.
-* **`__TEXT`**: Contains **executable** **code** and **data** that is **read-only.** Common sections of this segment:
+* **`__TEXT`**: Contains **executable** **code** with **read** and **execute** permissions (no writable)**.** Common sections of this segment:
   * `__text`: Compiled binary code
   * `__const`: Constant data
   * `__cstring`: String constants
   * `__stubs` and `__stubs_helper`: Involved during the dynamic library loading process
-* **`__DATA`**: Contains data that is **writable.**
+* **`__DATA`**: Contains data that is **readable** and **writable** (no executable)**.**
   * `__data`: Global variables (that have been initialized)
   * `__bss`: Static variables (that have not been initialized)
   * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Information used by the Objective-C runtime
@@ -289,7 +289,7 @@ The offsets of any constructors are held in the **\_\_mod\_init\_func** section 
 The heart of the file is the final region, the data, which consists of a number of segments as laid out in the load-commands region. **Each segment can contain a number of data sections**. Each of these sections **contains code or data** of one particular type.
 
 {% hint style="success" %}
-The data is basically the part containing all the information loaded by the load commands LC\_SEGMENTS\_64
+The data is basically the part containing all the **information** that is loaded by the load commands **LC\_SEGMENTS\_64**
 {% endhint %}
 
 ![](<../../../.gitbook/assets/image (507) (3).png>)

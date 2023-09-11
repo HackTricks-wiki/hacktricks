@@ -1,4 +1,4 @@
-# macOS Basic Objective-C
+# macOS Objective-C
 
 <details>
 
@@ -258,11 +258,11 @@ NSMutableArray *mutColorsArray = [NSMutableArray array];
 [mutColorsArray addObject:@"yellow"];
 [mutColorsArray replaceObjectAtIndex:0 withObject:@"purple"];
 
-// Sets
+// Inmutable Sets
 NSSet *fruitsSet1 = [NSSet setWithObjects:@"apple", @"banana", @"orange", nil];
 NSSet *fruitsSet2 = [NSSet setWithArray:@[@"apple", @"banana", @"orange"]];
 
-// Inmutable sets
+// Mutable sets
 NSMutableSet *mutFruitsSet = [NSMutableSet setWithObjects:@"apple", @"banana", @"orange", nil];
 [mutFruitsSet addObject:@"grape"];
 [mutFruitsSet removeObject:@"apple"];
