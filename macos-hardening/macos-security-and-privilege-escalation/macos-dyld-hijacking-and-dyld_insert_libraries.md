@@ -207,16 +207,37 @@ Create a new certificate in the Keychain and use it to sign the binary:
 
 {% code overflow="wrap" %}
 ```bash
+# Apply runtime proetction
 codesign -s <cert-name> --option=runtime ./hello
-DYLD_INSERT_LIBRARIES=inject.dylib ./hello
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello #Library won't be injected
 
+# Apply library validation
 codesign -f -s <cert-name> --option=library ./hello
-DYLD_INSERT_LIBRARIES=example.dylib ./hello-signed #Will throw an error because signature of binary and library aren't signed by same cert
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed #Will throw an error because signature of binary and library aren't signed by same cert (signs must be from a valid Apple-signed developer certificate)
 
-codesign -s <cert-name> inject.dylib
-DYLD_INSERT_LIBRARIES=example.dylib ./hello-signed #Throw an error because an Apple dev certificate is needed
+# Sign it
+## If the signature is from an unverified developer the injection will still work
+## If it's from a verified developer, it won't
+codesign -f -s <cert-name> inject.dylib
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed
+
+# Apply CS_RESTRICT protection
+codesign -f -s <cert-name> --option=restrict hello-signed
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
 {% endcode %}
+
+{% hint style="danger" %}
+Note that even if there are binaries signed with flags **`0x0(none)`**, they can get the **`CS_RESTRICT`** flag dynamically when executed and therefore this technique won't work in them.
+
+You can check if a proc has this flag with (get [**csops here**](https://github.com/axelexic/CSOps)):&#x20;
+
+```bash
+csops -status <pid>
+```
+
+and then check if the flag 0x800 is enabled.
+{% endhint %}
 
 <details>
 

