@@ -34,7 +34,7 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 
 ### jtool2
 
-La herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y proporciona algunas características adicionales. [**Descárgala aquí**](http://www.newosxbook.com/tools/jtool.html).
+La herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y proporciona algunas características adicionales. [**Descárgala aquí**](http://www.newosxbook.com/tools/jtool.html) o instálala con `brew`.
 ```bash
 # Install
 brew install --cask jtool2
@@ -54,11 +54,11 @@ La firma de código es un proceso utilizado en macOS para verificar la autentici
 
 La firma de código se puede verificar utilizando la herramienta `codesign` en la línea de comandos. Esta herramienta permite inspeccionar y verificar la firma de una aplicación, así como también identificar cualquier problema de seguridad o manipulación.
 
-Al inspeccionar una aplicación con `codesign`, se pueden obtener detalles sobre el certificado utilizado para firmarla, la identidad del desarrollador y cualquier recurso adicional que se haya incluido en la firma. Esto puede ser útil para verificar la legitimidad de una aplicación antes de instalarla o ejecutarla.
+Al inspeccionar una aplicación con `codesign`, se pueden obtener detalles sobre el certificado utilizado para firmarla, la identidad del desarrollador y cualquier recurso adicional que se haya incluido en la firma. Esto puede ser útil para verificar la legitimidad de una aplicación antes de instalarla en un sistema.
 
-Además de la inspección, `codesign` también se puede utilizar para firmar aplicaciones y paquetes de instalación. Esto es especialmente útil para desarrolladores que desean distribuir sus aplicaciones de manera segura y garantizar su autenticidad.
+La verificación de la firma de código es especialmente importante en el contexto de la escalada de privilegios. Si un atacante logra comprometer una aplicación firmada, puede intentar explotar vulnerabilidades en el sistema operativo para obtener privilegios elevados. Por lo tanto, es fundamental asegurarse de que las aplicaciones instaladas en un sistema estén debidamente firmadas y no hayan sido manipuladas.
 
-En resumen, la firma de código es un componente importante de la seguridad en macOS, ya que ayuda a prevenir la ejecución de aplicaciones maliciosas o manipuladas. Al utilizar la herramienta `codesign`, los usuarios pueden inspeccionar y verificar la firma de una aplicación para garantizar su legitimidad y seguridad.
+La firma de código es una medida de seguridad importante en macOS y debe ser considerada al evaluar la seguridad de una aplicación o al realizar pruebas de penetración en un sistema.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -147,7 +147,7 @@ Puedes encontrar más información sobre la [**información almacenada en estas 
 ### Binarios comprimidos
 
 * Verificar la entropía alta
-* Verificar las cadenas (si hay casi ninguna cadena comprensible, está comprimido)
+* Verificar las cadenas (si no hay cadenas comprensibles, está comprimido)
 * El empaquetador UPX para MacOS genera una sección llamada "\_\_XHDR"
 
 ## Análisis dinámico
@@ -186,24 +186,19 @@ Además, en la **parte inferior central puedes escribir comandos de Python**.
 
 #### Panel derecho
 
-En el panel derecho puedes ver información interesante como el **historial de navegación** (para saber cómo llegaste a la situación actual), el **gráfico de llamadas** donde puedes ver todas las **funciones que llaman a esta función** y todas las funciones que **esta función llama**, e información de **variables locales**.
+En el panel derecho puedes ver información interesante como el **historial de navegación** (para saber cómo llegaste a la situación actual), el **gráfico de llamadas** donde puedes ver todas las **funciones que llaman a esta función** y todas las funciones que **esta función llama**, e información sobre las **variables locales**.
 
-### dtruss
-```bash
-dtruss -c ls #Get syscalls of ls
-dtruss -c -p 1000 #get syscalls of PID 1000
-```
-### ktrace
-
-Puedes usar este incluso con **SIP activado**.
-```bash
-ktrace trace -s -S -t c -c ls | grep "ls("
-```
 ### dtrace
 
-Permite a los usuarios acceder a las aplicaciones a un nivel extremadamente **bajo** y proporciona una forma de **rastrear** los **programas** e incluso cambiar su flujo de ejecución. Dtrace utiliza **sondas** que se **colocan en todo el kernel** y se encuentran en ubicaciones como el inicio y el final de las llamadas al sistema.
+Permite a los usuarios acceder a las aplicaciones a un nivel extremadamente **bajo** y proporciona una forma para que los usuarios **rastreen** **programas** e incluso cambien su flujo de ejecución. DTrace utiliza **sondas** que se **colocan en todo el kernel** y se encuentran en ubicaciones como el inicio y el final de las llamadas al sistema.
 
 DTrace utiliza la función **`dtrace_probe_create`** para crear una sonda para cada llamada al sistema. Estas sondas se pueden activar en el **punto de entrada y salida de cada llamada al sistema**. La interacción con DTrace se realiza a través de /dev/dtrace, que solo está disponible para el usuario root.
+
+{% hint style="success" %}
+Para habilitar Dtrace sin desactivar completamente la protección SIP, puedes ejecutar en modo de recuperación: `csrutil enable --without dtrace`
+
+También puedes **ejecutar** los binarios **`dtrace`** o **`dtruss`** que **has compilado**.
+{% endhint %}
 
 Las sondas disponibles de dtrace se pueden obtener con:
 ```bash
@@ -246,7 +241,7 @@ La inspección de aplicaciones implica examinar el código y los recursos de una
 
 ## Depurando aplicaciones
 
-La depuración de aplicaciones implica ejecutar una aplicación en un entorno controlado y examinar su comportamiento en tiempo de ejecución. Esto te permite identificar y solucionar problemas, así como descubrir posibles vulnerabilidades.
+La depuración de aplicaciones implica ejecutar una aplicación en un entorno controlado y examinar su comportamiento en tiempo de ejecución. Esto te permite identificar y solucionar problemas, así como encontrar posibles vulnerabilidades.
 
 ### Herramientas de depuración
 
@@ -255,12 +250,12 @@ La depuración de aplicaciones implica ejecutar una aplicación en un entorno co
 
 ## Fuzzing de aplicaciones
 
-El fuzzing es una técnica que implica enviar entradas aleatorias o maliciosas a una aplicación para encontrar posibles vulnerabilidades. Esta técnica es especialmente útil para descubrir vulnerabilidades de seguridad desconocidas.
+El fuzzing de aplicaciones implica enviar entradas aleatorias o maliciosas a una aplicación para encontrar posibles vulnerabilidades. Esto puede ayudarte a identificar errores de programación, condiciones de carrera y otros problemas de seguridad.
 
 ### Herramientas de fuzzing
 
-- [AFL](http://lcamtuf.coredump.cx/afl/) - Un framework de fuzzing que te permite generar entradas aleatorias y monitorear el comportamiento de una aplicación.
-- [Peach Fuzzer](https://peachfuzzer.com/) - Una plataforma de fuzzing que te permite generar casos de prueba personalizados y automatizar el proceso de fuzzing.
+- [AFL](https://github.com/google/AFL) - American Fuzzy Lop es una herramienta de fuzzing que utiliza técnicas de generación de mutaciones para encontrar errores en aplicaciones.
+- [Peach Fuzzer](https://peachfuzzer.com/) - Una plataforma de fuzzing que te permite crear y ejecutar casos de prueba automatizados para encontrar vulnerabilidades en aplicaciones.
 
 ¡Explora estas herramientas y técnicas para mejorar tus habilidades de inspección, depuración y fuzzing de aplicaciones en macOS!
 ```bash
@@ -300,6 +295,35 @@ printf("=%d\n", arg1);
 #Log sys calls with values
 sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 ```
+### dtruss
+
+`dtruss` is a command-line tool available on macOS that allows you to trace and inspect system calls made by a process. It can be used for debugging and analyzing the behavior of applications.
+
+To use `dtruss`, you need to specify the process ID (PID) of the target application. You can find the PID using the `ps` command or by using tools like Activity Monitor.
+
+Once you have the PID, you can run `dtruss` with the following syntax:
+
+```bash
+sudo dtruss -p <PID>
+```
+
+The `sudo` command is required because `dtruss` needs root privileges to trace system calls.
+
+When `dtruss` is running, it will display a list of system calls made by the target process, along with their arguments and return values. This can be useful for understanding how an application interacts with the operating system and identifying any potential security vulnerabilities or performance issues.
+
+Note that `dtruss` can generate a large amount of output, so it's often helpful to redirect the output to a file for later analysis. You can do this by appending `> output.txt` to the `dtruss` command.
+
+Keep in mind that `dtruss` is a powerful tool that should be used responsibly and with proper authorization. It can be used for legitimate purposes like debugging and troubleshooting, but it can also be misused for unauthorized access or information gathering. Always ensure that you have the necessary permissions and legal authorization before using `dtruss` or any other similar tool.
+```bash
+dtruss -c ls #Get syscalls of ls
+dtruss -c -p 1000 #get syscalls of PID 1000
+```
+### ktrace
+
+Puedes usar este incluso con **SIP activado**.
+```bash
+ktrace trace -s -S -t c -c ls | grep "ls("
+```
 ### ProcessMonitor
 
 [**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) es una herramienta muy útil para verificar las acciones relacionadas con los procesos que un proceso está realizando (por ejemplo, monitorear qué nuevos procesos está creando un proceso).
@@ -308,9 +332,13 @@ sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 
 [**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) permite monitorear eventos de archivos (como creación, modificaciones y eliminaciones) proporcionando información detallada sobre dichos eventos.
 
+### Crescendo
+
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) es una herramienta GUI con la apariencia y sensación que los usuarios de Windows pueden conocer de _Procmon_ de Microsoft Sysinternal. Permite iniciar y detener la grabación de eventos de todo tipo, filtrarlos por categorías (archivo, proceso, red, etc.) y guardar los eventos grabados como archivo json.
+
 ### Apple Instruments
 
-[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) son parte de las herramientas de desarrollo de Xcode, utilizadas para monitorear el rendimiento de las aplicaciones, identificar fugas de memoria y rastrear la actividad del sistema de archivos.
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) son parte de las herramientas de desarrollador de Xcode, utilizadas para monitorear el rendimiento de las aplicaciones, identificar fugas de memoria y rastrear la actividad del sistema de archivos.
 
 ![](<../../../.gitbook/assets/image (15).png>)
 
@@ -339,28 +367,15 @@ lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
+Puedes configurar la variante de Intel al usar lldb creando un archivo llamado **`.lldbinit`** en tu carpeta de inicio con la siguiente línea:
+```bash
+settings set target.x86-disassembly-flavor intel
+```
 {% hint style="warning" %}
 Dentro de lldb, volcar un proceso con `process save-core`
 {% endhint %}
 
-| **Comando (lldb)**            | **Descripción**                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **run (r)**                   | Iniciar la ejecución, que continuará sin interrupciones hasta que se alcance un punto de interrupción o el proceso se termine.                                                                                                                                                                                                                                                                                                                     |
-| **continue (c)**              | Continuar la ejecución del proceso depurado.                                                                                                                                                                                                                                                                                                                                                                               |
-| **nexti (n / ni)**            | Ejecutar la siguiente instrucción. Este comando omitirá las llamadas a funciones.                                                                                                                                                                                                                                                                                                                                                 |
-| **stepi (s / si)**            | Ejecutar la siguiente instrucción. A diferencia del comando nexti, este comando entrará en las llamadas a funciones.                                                                                                                                                                                                                                                                                                                       |
-| **finish (f)**                | Ejecutar el resto de las instrucciones en la función actual ("frame") y detenerse.                                                                                                                                                                                                                                                                                                                                   |
-| **control + c**               | Pausar la ejecución. Si el proceso se ha ejecutado (r) o continuado (c), esto hará que el proceso se detenga ... donde sea que se esté ejecutando actualmente.                                                                                                                                                                                                                                                                             |
-| **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #Lista de puntos de interrupción</p><p>br e/dis &#x3C;num> #Habilitar/Deshabilitar punto de interrupción</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
-| **help**                      | <p>help breakpoint #Obtener ayuda del comando breakpoint</p><p>help memory write #Obtener ayuda para escribir en la memoria</p>                                                                                                                                                                                                                                                                                                         |
-| **reg**                       | <p>reg read</p><p>reg read $rax</p><p>reg write $rip 0x100035cc0</p>                                                                                                                                                                                                                                                                                                                                                      |
-| **x/s \<reg/memory address>** | Mostrar la memoria como una cadena terminada en nulo.                                                                                                                                                                                                                                                                                                                                                                           |
-| **x/i \<reg/memory address>** | Mostrar la memoria como instrucción de ensamblaje.                                                                                                                                                                                                                                                                                                                                                                               |
-| **x/b \<reg/memory address>** | Mostrar la memoria como byte.                                                                                                                                                                                                                                                                                                                                                                                               |
-| **print object (po)**         | <p>Esto imprimirá el objeto referenciado por el parámetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Tenga en cuenta que la mayoría de las API o métodos Objective-C de Apple devuelven objetos y, por lo tanto, deben mostrarse mediante el comando "print object" (po). Si po no produce una salida significativa, use <code>x/b</code></p> |
-| **memory**                    | <p>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escribir AAAA en esa dirección<br>memory write -f s $rip+0x11f+7 "AAAA" #Escribir AAAA en la dirección</p>                                                                                                                                                                                                                            |
-| **disassembly**               | <p>dis #Desensamblar la función actual<br>dis -c 6 #Desensamblar 6 líneas<br>dis -c 0x100003764 -e 0x100003768 #Desde una dirección hasta la otra<br>dis -p -c 4 #Comenzar en la dirección actual desensamblando</p>                                                                                                                                                                                                                                 |
-| **parray**                    | parray 3 (char \*\*)$x1 #Comprobar el array de 3 componentes en el registro x1                                                                                                                                                                                                                                                                                                                                                           |
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descripción</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Iniciar la ejecución, que continuará sin interrupciones hasta que se alcance un punto de interrupción o el proceso termine.</td></tr><tr><td><strong>continue (c)</strong></td><td>Continuar la ejecución del proceso depurado.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Ejecutar la siguiente instrucción. Este comando omitirá las llamadas a funciones.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Ejecutar la siguiente instrucción. A diferencia del comando nexti, este comando entrará en las llamadas a funciones.</td></tr><tr><td><strong>finish (f)</strong></td><td>Ejecutar el resto de las instrucciones en la función actual ("frame") y detenerse.</td></tr><tr><td><strong>control + c</strong></td><td>Pausar la ejecución. Si el proceso se ha ejecutado (r) o continuado (c), esto hará que el proceso se detenga ...donde sea que se esté ejecutando actualmente.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p>b main #Cualquier función llamada main</p><p>b &#x3C;nombrebin>`main #Función principal del binario</p><p>b set -n main --shlib &#x3C;nombrelib> #Función principal del binario indicado</p><p>b -[NSDictionary objectForKey:]</p><p>b -a 0x0000000100004bd9</p><p>br l #Lista de puntos de interrupción</p><p>br e/dis &#x3C;número> #Habilitar/Deshabilitar punto de interrupción</p><p>breakpoint delete &#x3C;número></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Obtener ayuda del comando breakpoint</p><p>help memory write #Obtener ayuda para escribir en la memoria</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">formato</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;direcciónreg/memoria></strong></td><td>Mostrar la memoria como una cadena terminada en nulo.</td></tr><tr><td><strong>x/i &#x3C;direcciónreg/memoria></strong></td><td>Mostrar la memoria como instrucción de ensamblador.</td></tr><tr><td><strong>x/b &#x3C;direcciónreg/memoria></strong></td><td>Mostrar la memoria como byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Esto imprimirá el objeto al que hace referencia el parámetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Tenga en cuenta que la mayoría de las API o métodos de Objective-C de Apple devuelven objetos y, por lo tanto, deben mostrarse mediante el comando "print object" (po). Si po no produce una salida significativa, use <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escribir AAAA en esa dirección<br>memory write -f s $rip+0x11f+7 "AAAA" #Escribir AAAA en la dirección</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Desensamblar la función actual</p><p>dis -n &#x3C;nombrefunc> #Desensamblar función</p><p>dis -n &#x3C;nombrefunc> -b &#x3C;nombrebase> #Desensamblar función<br>dis -c 6 #Desensamblar 6 líneas<br>dis -c 0x100003764 -e 0x100003768 #Desde una dirección hasta la otra<br>dis -p -c 4 #Comenzar en la dirección actual desensamblando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 #Comprobar matriz de 3 componentes en el registro x1</td></tr></tbody></table>
 
 {% hint style="info" %}
 Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene el **nombre del método** como una cadena terminada en nulo ("C"). Para imprimir el nombre a través de lldb, haga lo siguiente:
@@ -378,15 +393,14 @@ Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene e
 #### Detección de VM
 
 * El comando **`sysctl hw.model`** devuelve "Mac" cuando el **host es un MacOS**, pero algo diferente cuando es una VM.
-* Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`**, algunos malwares intentan detectar si es una VM.
-* Algunos malwares también pueden **detectar** si la máquina es **VMware** basándose en la dirección MAC (00:50:56).
+* Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`**, algunos malware intentan detectar si es una VM.
+* Algunos malware también pueden **detectar** si la máquina es **VMware** basándose en la dirección MAC (00:50:56).
 * También es posible encontrar si un proceso está siendo depurado con un código simple como:
 * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
-* También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un depurador se adjunte y rastree.
+* También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un depurador se adjunte y realice un seguimiento.
 * Puede verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
-* Como se señala en este artículo, "[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)":\
+* Como se señala en este artículo, "[Derrotando Técnicas Anti-Depuración: variantes de ptrace en macOS](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)":\
 "_El mensaje Process # exited with **status = 45 (0x0000002d)** generalmente es una señal reveladora de que el objetivo de depuración está utilizando **PT\_DENY\_ATTACH**_"
-
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
@@ -395,7 +409,7 @@ ReportCrash **analiza los procesos que se bloquean y guarda un informe de bloque
 Para aplicaciones y otros procesos **que se ejecutan en el contexto de lanzamiento por usuario**, ReportCrash se ejecuta como un LaunchAgent y guarda los informes de bloqueo en `~/Library/Logs/DiagnosticReports/` del usuario.\
 Para demonios, otros procesos **que se ejecutan en el contexto de lanzamiento del sistema** y otros procesos privilegiados, ReportCrash se ejecuta como un LaunchDaemon y guarda los informes de bloqueo en `/Library/Logs/DiagnosticReports` del sistema.
 
-Si te preocupa que los informes de bloqueo **se envíen a Apple**, puedes desactivarlos. Si no, los informes de bloqueo pueden ser útiles para **descubrir cómo se bloqueó un servidor**.
+Si te preocupa que los informes de bloqueo **se envíen a Apple**, puedes desactivarlos. Si no, los informes de bloqueo pueden ser útiles para **determinar cómo se bloqueó un servidor**.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -461,7 +475,7 @@ Funciona para herramientas de línea de comandos.
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-Funciona con herramientas de GUI de macOS. Ten en cuenta que algunas aplicaciones de macOS tienen requisitos específicos como nombres de archivo únicos, la extensión correcta, necesitan leer los archivos desde el sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
+Funciona con herramientas de GUI de macOS. Ten en cuenta que algunas aplicaciones de macOS tienen requisitos específicos como nombres de archivo únicos, la extensión correcta, necesidad de leer los archivos desde el sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
 
 Algunos ejemplos:
 
