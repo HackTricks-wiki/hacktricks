@@ -142,6 +142,7 @@
 
 * [macOS Security & Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/README.md)
   * [macOS Apps - Inspecting, debugging and Fuzzing](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/README.md)
+    * [Introduction to x64](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/introduction-to-x64.md)
     * [Introduction to ARM64](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
   * [macOS AppleFS](macos-hardening/macos-security-and-privilege-escalation/macos-applefs.md)
   * [macOS Bypassing Firewalls](macos-hardening/macos-security-and-privilege-escalation/macos-bypassing-firewalls.md)
@@ -177,6 +178,7 @@
     * [macOS TCC](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/README.md)
       * [macOS Apple Scripts](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-apple-scripts.md)
       * [macOS TCC Bypasses](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses.md)
+    * [macOS Dangerous Entitlements](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-dangerous-entitlements.md)
   * [macOS Users](macos-hardening/macos-security-and-privilege-escalation/macos-users.md)
 * [macOS Red Teaming](macos-hardening/macos-red-teaming/README.md)
   * [macOS MDM](macos-hardening/macos-red-teaming/macos-mdm/README.md)

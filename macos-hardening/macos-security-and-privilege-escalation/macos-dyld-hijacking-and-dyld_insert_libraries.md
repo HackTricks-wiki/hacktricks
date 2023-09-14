@@ -14,7 +14,7 @@
 
 ## DYLD\_INSERT\_LIBRARIESの基本的な例
 
-**シェルを実行するために注入するライブラリ**：
+**シェルを実行するために注入するライブラリ**:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -86,7 +86,7 @@ compatibility version 1.0.0
 {% endtab %}
 {% endtabs %}
 
-前の情報から、**ロードされたライブラリの署名をチェックしていない**ことがわかり、次の場所からライブラリをロードしようとしていることがわかりました：
+前の情報から、**ロードされたライブラリの署名をチェックしていない**ことがわかり、次の場所からライブラリをロードしようとしています：
 
 * `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib`
 * `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib`
@@ -151,10 +151,10 @@ cp libjli.dylib "/Applications/Burp Suite Professional.app/Contents/Resources/jr
 ```
 {% endcode %}
 
-そして、バイナリを**実行**し、**ライブラリがロードされたか**を確認します：
+そして、バイナリを**実行**して、**ライブラリがロードされたか**を確認します：
 
 <pre class="language-context"><code class="lang-context">./java
-<strong>2023-05-15 15:20:36.677 java[78809:21797902] [+] ./java で dylib がハイジャックされました
+<strong>2023-05-15 15:20:36.677 java[78809:21797902] [+] ./java において dylib がハイジャックされました
 </strong>Usage: java [options] &#x3C;mainclass> [args...]
 (to execute a class)
 </code></pre>
@@ -163,9 +163,9 @@ cp libjli.dylib "/Applications/Burp Suite Professional.app/Contents/Resources/jr
 Telegram のカメラの許可を乱用するためにこの脆弱性を乱用する方法についての素晴らしい解説は、[https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) で見つけることができます。
 {% endhint %}
 
-## より大規模なスケール
+## 大規模なスケール
 
-予期しないバイナリにライブラリを注入しようとする場合、イベントメッセージをチェックしてプロセス内でライブラリがロードされたタイミングを確認することができます（この場合、printfと`/bin/bash`の実行を削除します）。
+予期しないバイナリにライブラリを注入しようとする場合、イベントメッセージをチェックしてプロセス内でライブラリがロードされたタイミングを確認することができます（この場合、printfと`/bin/bash`の実行を削除してください）。
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
@@ -186,13 +186,11 @@ sudo chmod -s hello
 
 The `__RESTRICT` section and `__restrict` segment are used in macOS to restrict the loading of dynamic libraries. When a binary is compiled with the `-segprot` flag, the `__restrict` segment is created to specify the protection settings for the `__RESTRICT` section.
 
-The `__RESTRICT` section contains a list of dynamic libraries that are restricted from being loaded by the dynamic linker (`dyld`). This restriction is enforced by the `__restrict` segment, which specifies the protection settings for the `__RESTRICT` section.
+In the `__RESTRICT` section, the binary specifies the libraries that are allowed to be loaded dynamically. This prevents the binary from loading any other libraries that are not explicitly allowed. The `__restrict` segment contains the protection settings for the `__RESTRICT` section, such as read, write, and execute permissions.
 
-By manipulating the `__RESTRICT` section and the `__restrict` segment, an attacker can hijack the dynamic library loading process and execute malicious code. This technique is known as dyld hijacking.
+By manipulating the `__RESTRICT` section and `__restrict` segment, an attacker can hijack the dynamic library loading process and force the binary to load a malicious library instead. This can lead to privilege escalation and other security vulnerabilities.
 
-To perform dyld hijacking, an attacker needs to find a vulnerable binary that loads dynamic libraries and has the `__RESTRICT` section. The attacker then creates a malicious dynamic library with the same name as one of the libraries listed in the `__RESTRICT` section. When the vulnerable binary is executed, the attacker's malicious library is loaded instead of the legitimate one, allowing the attacker to execute arbitrary code with the privileges of the vulnerable binary.
-
-To prevent dyld hijacking, it is important to ensure that binaries are compiled with proper protection settings and that the `__RESTRICT` section is properly configured. Additionally, regular security updates should be applied to mitigate any known vulnerabilities that could be exploited for dyld hijacking.
+To prevent this type of attack, it is important to properly configure the `__RESTRICT` section and `__restrict` segment to only allow trusted libraries to be loaded dynamically. Additionally, regular security updates should be applied to address any known vulnerabilities in the dynamic libraries used by the binary.
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
@@ -203,25 +201,44 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
 
 {% code overflow="wrap" %}
 ```bash
+# Apply runtime proetction
 codesign -s <cert-name> --option=runtime ./hello
-DYLD_INSERT_LIBRARIES=inject.dylib ./hello
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello #Library won't be injected
 
+# Apply library validation
 codesign -f -s <cert-name> --option=library ./hello
-DYLD_INSERT_LIBRARIES=example.dylib ./hello-signed #Will throw an error because signature of binary and library aren't signed by same cert
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed #Will throw an error because signature of binary and library aren't signed by same cert (signs must be from a valid Apple-signed developer certificate)
 
-codesign -s <cert-name> inject.dylib
-DYLD_INSERT_LIBRARIES=example.dylib ./hello-signed #Throw an error because an Apple dev certificate is needed
+# Sign it
+## If the signature is from an unverified developer the injection will still work
+## If it's from a verified developer, it won't
+codesign -f -s <cert-name> inject.dylib
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed
+
+# Apply CS_RESTRICT protection
+codesign -f -s <cert-name> --option=restrict hello-signed
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
 {% endcode %}
+
+{% hint style="danger" %}
+注意してください、バイナリにはフラグ**`0x0(none)`**で署名されているものがあっても、実行時に**`CS_RESTRICT`**フラグを動的に取得することができるため、このテクニックはそれらでは機能しません。
+
+(procにこのフラグがあるかどうかを確認するには、[**ここでcsopsを取得**](https://github.com/axelexic/CSOps)してください):&#x20;
+```bash
+csops -status <pid>
+```
+そして、フラグ0x800が有効になっているかどうかを確認します。
+{% endhint %}
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝したいですか？** または、**PEASSの最新バージョンにアクセスしたいですか？** または、**HackTricksをPDFでダウンロードしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
