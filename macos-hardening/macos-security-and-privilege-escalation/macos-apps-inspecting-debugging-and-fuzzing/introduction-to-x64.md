@@ -18,7 +18,7 @@ x64、またはx86-64は、デスクトップやサーバーのコンピュー�
 
 ### **レジスタ**
 
-x64はx86アーキテクチャを拡張し、`rax`、`rbx`、`rcx`、`rdx`、`rbp`、`rsp`、`rsi`、`rdi`、`r8`から`r15`というラベルが付いた**16個の汎用レジスタ**を備えています。これらのレジスタはそれぞれ**64ビット（8バイト）**の値を格納することができます。これらのレジスタには互換性と特定のタスクのための32ビット、16ビット、8ビットのサブレジスタもあります。
+x64はx86アーキテクチャを拡張し、`rax`、`rbx`、`rcx`、`rdx`、`rbp`、`rsp`、`rsi`、`rdi`、`r8`から`r15`という**16個の汎用レジスタ**を備えています。これらのレジスタはそれぞれ**64ビット（8バイト）**の値を格納することができます。これらのレジスタには互換性と特定のタスクのための32ビット、16ビット、8ビットのサブレジスタもあります。
 
 1. **`rax`** - 通常、関数からの**戻り値**に使用されます。
 2. **`rbx`** - メモリ操作の**ベースレジスタ**としてよく使用されます。
@@ -42,21 +42,21 @@ x64の呼び出し規約はオペレーティングシステムによって異�
 
 x64の命令は豊富なセットを持ち、以前のx86の命令との互換性を維持し、新しい命令も導入しています。
 
-* **`mov`**：**レジスタ**または**メモリ位置**から別のレジスタまたはメモリ位置に値を**移動**します。
+* **`mov`**：**レジスタ**または**メモリの場所**から別の場所に値を**移動**します。
 * 例：`mov rax, rbx` — `rbx`から`rax`に値を移動します。
-* **`push`** と **`pop`**：スタックに値を**プッシュ**または**ポップ**します。
+* **`push`** と **`pop`**：スタックに値をプッシュまたはポップします。
 * 例：`push rax` — `rax`の値をスタックにプッシュします。
 * 例：`pop rax` — スタックのトップの値を`rax`にポップします。
 * **`add`** と **`sub`**：**加算**と**減算**の演算です。
 * 例：`add rax, rcx` — `rax`と`rcx`の値を加算し、結果を`rax`に格納します。
-* **`mul`** と **`div`**：**乗算**と**除算**の演算です。注意：これらはオペランドの使用に関して特定の動作をします。
+* **`mul`** と **`div`**：**乗算**と**除算**の演算です。注意：オペランドの使用に関して特定の動作があります。
 * **`call`** と **`ret`**：関数の**呼び出し**と**戻り**に使用されます。
 * **`int`**：ソフトウェアの**割り込み**をトリガーするために使用されます。例：32ビットx86 Linuxでは、システムコールには`int 0x80`が使用されました。
 * **`cmp`**：2つの値を比較し、結果に基づいてCPUのフラグを設定します。
 * 例：`cmp rax, rdx` — `rax`と`rdx`を比較します。
-* **`je`、`jne`、`jl`、`jge`、...**：前の`cmp`またはテストの結果に基づいて制御フローを変更する**条件付きジャンプ**命令です。
+* **`je`**、**`jne`**、**`jl`**、**`jge`**など：前の`cmp`またはテストの結果に基づいて制御フローを変更する**条件付きジャンプ**命令です。
 * 例：`cmp rax, rdx`命令の後、`je label` — `rax`が`rdx`と等しい場合、`label`にジャンプします。
-* **`syscall`**：一部のx64システム（現代のUnixなど）で**システムコール**に使用されます。
+* **`syscall`**：一部のx64システム（現代のUnixなど）での**システムコール**に使用されます。
 * **`sysenter`**：一部のプラットフォームで最適化された**システムコール**命令です。
 ### **関数プロローグ**
 
@@ -102,7 +102,7 @@ x64の命令は豊富なセットを持ち、以前のx86の命令との互換�
 ```
 したがって、**Unix/BSDクラス**から`open`シスコール（**5**）を呼び出すためには、`0x2000000`を追加する必要があります。
 
-したがって、`open`を呼び出すためのシスコール番号は`0x2000005`になります。
+したがって、openを呼び出すためのシスコール番号は`0x2000005`になります。
 
 ### シェルコード
 
@@ -115,12 +115,17 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 ```
 {% endcode %}
 
-バイトを抽出するには：
+バイトを抽出するには:
+
+{% code overflow="wrap" %}
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/extract.sh
-for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
+for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
 echo -n '\\x'$c
 done
+
+# Another option
+otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g' | sed 's/\\x$//g'
 ```
 <details>
 
@@ -284,7 +289,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### バインドシェル
 
-バインドシェルは、[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) から**ポート4444**で利用できます。
+[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) からのバインドシェルは、**ポート4444**で利用できます。
 ```armasm
 section .text
 global _main
@@ -427,7 +432,7 @@ syscall
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
