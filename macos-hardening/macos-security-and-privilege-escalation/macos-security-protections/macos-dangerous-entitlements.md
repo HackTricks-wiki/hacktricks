@@ -13,8 +13,10 @@
 </details>
 
 {% hint style="warning" %}
-Note that entitlements starting with **`com.apple`** are not available to third-parties, only APple can grant them.
+Note that entitlements starting with **`com.apple`** are not available to third-parties, only Apple can grant them.
 {% endhint %}
+
+## High
 
 ### `com.apple.security.get-task-allow`
 
@@ -22,7 +24,45 @@ This entitlement allows to get the task port of the process run by the binary wi
 
 ### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
 
-**This entitlement allows to** get the **task port for any** process, except the kernel. Check [**this for more info**](../mac-os-architecture/macos-ipc-inter-process-communication/).
+This entitlement allows to get the **task port for any** process, except the kernel. Check [**this for more info**](../mac-os-architecture/macos-ipc-inter-process-communication/).
+
+### `com.apple.security.cs.debugger`
+
+Apps with the Debugging Tool Entitlement can call `task_for_pid()` to retrieve a valid task port for unsigned and third-party apps with the `Get Task Allow` entitlement set to `true`. However, even with the debugging tool entitlement, a debugger can’t get the task ports of processes that don’t have the `Get Task Allow` entitlement, and that are therefore protected by System Integrity Protection. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
+
+### `com.apple.security.cs.disable-library-validation`
+
+This entitlement allows to **load frameworks, plug-ins, or libraries without being either signed by Apple or signed with the same Team ID** as the main executable, so an attacker could abuse some arbitrary library load to inject code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
+
+### `com.apple.security.cs.allow-dyld-environment-variables`
+
+This entitlement allows to **use DYLD environment variables** that could be used to inject libraries and code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
+
+## Medium
+
+### `com.apple.security.cs.allow-jit`
+
+This entitlement allows to **create memory that is writable and executable** by passing the `MAP_JIT` flag to the `mmap()` system function. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
+
+### `com.apple.security.cs.allow-unsigned-executable-memory`
+
+This entitlement allows to **override or patch C code**, use the long-deprecated **`NSCreateObjectFileImageFromMemory`** (which is fundamentally insecure), or use the **DVDPlayback** framework. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
+
+{% hint style="danger" %}
+Including this entitlement exposes your app to common vulnerabilities in memory-unsafe code languages. Carefully consider whether your app needs this exception.
+{% endhint %}
+
+### `com.apple.security.cs.disable-executable-page-protection`
+
+This entitlement allows to **modify sections of its own executable files** on disk to forcefully exit. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection).
+
+{% hint style="danger" %}
+The Disable Executable Memory Protection Entitlement is an extreme entitlement that removes a fundamental security protection from your app, making it possible for an attacker to rewrite your app’s executable code without detection. Prefer narrower entitlements if possible.
+{% endhint %}
+
+### `com.apple.security.cs.allow-relative-library-loads`
+
+TODO
 
 <details>
 

