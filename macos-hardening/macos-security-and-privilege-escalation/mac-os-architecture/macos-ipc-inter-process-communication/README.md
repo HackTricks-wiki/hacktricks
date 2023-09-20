@@ -14,11 +14,11 @@
 
 ## ポートを介したMachメッセージング
 
-Machは、リソースの共有において**タスク**を最小単位として使用し、各タスクは**複数のスレッド**を含むことができます。これらの**タスクとスレッドは、1:1でPOSIXプロセスとスレッドにマッピング**されます。
+Machは、リソースの共有において**タスク**を最小単位として使用し、各タスクは**複数のスレッド**を含むことができます。これらの**タスクとスレッドは、POSIXプロセスとスレッドに1：1でマッピング**されます。
 
 タスク間の通信は、Machインタープロセス通信（IPC）を使用して行われ、片方向の通信チャネルを利用します。**メッセージはポート間で転送**され、カーネルによって管理される**メッセージキュー**のような役割を果たします。
 
-タスクが実行できる操作を定義するポート権限は、この通信に重要です。可能な**ポート権限**は次のとおりです：
+タスクが実行できる操作を定義するポート権限は、この通信に重要です。可能な**ポート権限**は次のとおりです。
 
 * **受信権限**：ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（複数プロデューサ、単一コンシューマ）キューであるため、システム全体で**ポートごとに受信権限は1つだけ**存在できます（複数のプロセスが1つのパイプの読み取りエンドに対するファイルディスクリプタを保持できるパイプとは異なります）。
 * **受信権限を持つタスク**は、メッセージを受信し、メッセージを送信するための**送信権限を作成**することができます。元々は**自分自身のタスクがポートに対して受信権限を持っていました**。
@@ -26,13 +26,13 @@ Machは、リソースの共有において**タスク**を最小単位として
 * 送信権限は**クローン**することができ、送信権限を所有するタスクは権限を**第三のタスクに付与**することができます。
 * **一度だけ送信権限**：ポートに1つのメッセージを送信し、その後消えます。
 * **ポートセット権限**：単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、それに含まれるポートからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートで同時にリッスンするために使用できます。
-* **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダーです。ポートが破棄されると、ポートへのすべての既存のポート権限がデッドネームに変わります。
+* **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダーです。ポートが破棄されると、ポートへのすべての既存のポート権限はデッドネームに変わります。
 
 **タスクはSEND権限を他のタスクに転送**することができ、それによりメッセージを送信することができるようになります。**SEND権限はクローン**することもできるため、タスクはSEND権限を複製して**第三のタスクに付与**することができます。これにより、中間プロセスである**ブートストラップサーバー**との効果的な通信が可能になります。
 
 #### 手順：
 
-上記に述べられているように、通信チャネルを確立するためには、**ブートストラップサーバー**（macでは**launchd**）が関与します。
+前述のように、通信チャネルを確立するためには、**ブートストラップサーバー**（macでは**launchd**）が関与します。
 
 1. タスク**A**は**新しいポート**を初期化し、プロセス内で**受信権限**を取得します。
 2. 受信権限を保持しているタスク**A**は、ポートのために**SEND権限を生成**します。
@@ -42,35 +42,16 @@ Machは、リソースの共有において**タスク**を最小単位として
 
 ブートストラップサーバーは、タスクが主張するサービス名を認証することはできません。これは、タスクが潜在的に**システムタスクをなりすます**ことができる可能性があることを意味します。たとえば、認証サービス名を偽って**承認リクエストをすべて承認**することができます。
 
-その後、Appleはシステム提供のサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに保存します：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバーは、これらのサービス名ごとに**受信権限を作成**し、保持します。
+その後、Appleはシステムが提供するサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに保存しています：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバーは、これらのサービス名ごとに**受信権限を作成**し、保持します。
 
-これらの事前定義されたサービスに対しては、**検索プロセスが若干異なります**。サービス名が検索されると、launchdはサービスを動的に起動します。新しいワークフローは次のようになります：
+これらの事前定義されたサービスに対しては、**検索プロセスが若干異なります**。サービス名が検索されると、launchdはサービスを動的に起動します。新しいワークフローは次のようになります。
 
-* タスク**B**は、サービス名のためにブートストラップ**検索**を開始します。
+* タスク**B**は、サービス名のためにブートストラップの**検索**を開始します。
 * **launchd**は、タスクが実行中かどうかをチェックし、実行されていない場合は**起動**します。
-* タスク**A**（サービス）は、**ブートストラップチェックイン**を実行します。ここで、**ブートストラップ**サーバーはSEND
-### Mach サービス
-
-前述の SIP で保護されたディレクトリにあるアプリケーションで指定された名前は、他のプロセスによって登録されることはありません。
-
-たとえば、`/System/Library/LaunchAgents/com.apple.xpc.loginitemregisterd.plist` は名前 `com.apple.xpc.loginitemregisterd` を登録します。
-```json
-plutil -p com.apple.xpc.loginitemregisterd.plist
-{
-"EnablePressuredExit" => 1
-"Label" => "com.apple.xpc.loginitemregisterd"
-"MachServices" => {
-"com.apple.xpc.loginitemregisterd" => 1
-}
-"ProcessType" => "Adaptive"
-"Program" => "/usr/libexec/loginitemregisterd"
-}
-```
-もし以下のようなコードで登録しようとすると、登録できません。
-
+* タスク**A**（サービス）は、**ブートストラップチェックイン**を実行します。ここで、**ブートストラップ**サーバーはSEND権限を
 ### コード例
 
-**sender** がポートを割り当て、名前 `org.darlinghq.example` のために **send right** を作成し、それを **ブートストラップサーバー** に送信することに注意してください。一方、sender はその名前の **send right** を要求し、それを使用してメッセージを送信しました。
+**送信者**がポートを**割り当て**し、名前`org.darlinghq.example`の**送信権**を作成して**ブートストラップサーバー**に送信する方法に注目してください。送信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**します。
 
 {% tabs %}
 {% tab title="receiver.c" %}
@@ -244,15 +225,15 @@ printf("Sent a message\n");
 * さらに、**`kext_request`** APIを呼び出すためには、Appleのバイナリにのみ与えられる**`com.apple.private.kext*`**という他の権限が必要です。
 * **タスク名ポート**: _タスクポート_の非特権バージョンです。タスクを参照することはできますが、制御することはできません。これを通じて利用できる唯一のものは`task_info()`です。
 * **タスクポート**（またはカーネルポート）**:** このポートに対して送信権限を持つと、タスクを制御することができます（メモリの読み書き、スレッドの作成など）。
-* 呼び出し元タスクのこのポートの**名前を取得**するには、`mach_task_self()`を呼び出します。このポートは**`exec()`を跨いでのみ継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別な場合として、suidバイナリの`exec()`後にもタスクは新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行う際に["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
+* 呼び出し元タスクのこのポートの**名前を取得**するには、`mach_task_self()`を呼び出します。このポートは**`exec()`を跨いでのみ継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別なケースとして、suidバイナリの`exec()`後にもタスクは新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行う際に["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
 * これらはポートへのアクセス制限です（バイナリ`AppleMobileFileIntegrity`の`macos_task_policy`から）：
-* アプリに**`com.apple.security.get-task-allow`権限**がある場合、**同じユーザーのプロセスはタスクポートにアクセス**できます（デバッグのためにXcodeによって一般的に追加されます）。**公開リリース**では、**公証**プロセスはこれを許可しません。
+* アプリには**`com.apple.security.get-task-allow`権限**がある場合、**同じユーザーのプロセスはタスクポートにアクセス**できます（デバッグのためにXcodeによって一般的に追加されます）。**公開リリース**では、**公証**プロセスはこれを許可しません。
 * **`com.apple.system-task-ports`権限**を持つアプリは、カーネルを除く**任意の**プロセスのタスクポートを取得できます。以前のバージョンでは**`task_for_pid-allow`**と呼ばれていました。これはAppleのアプリケーションにのみ付与されます。
-* **ルートユーザーは、ハード化されたランタイムでコンパイルされていないアプリケーション**（およびAppleのアプリケーションではないもの）のタスクポートにアクセスできます。
+* **ルートユーザーは、ハード化されたランタイムでコンパイルされていないアプリケーションのタスクポートにアクセス**できます（Appleのものではありません）。
 
 ### タスクポートを介したスレッドへのシェルコードのインジェクション
 
-シェルコードを取得するには、次の場所から取得できます：
+シェルコードは次から取得できます：
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -976,20 +957,18 @@ XPCは、同じシステム上で実行される異なるプログラム間で�
 XPCの主な利点は次のとおりです：
 
 1. **セキュリティ**：作業を異なるプロセスに分割することで、各プロセスに必要な権限のみを付与することができます。これにより、プロセスが侵害された場合でも、被害を最小限に抑えることができます。
-2. **安定性**：XPCは、クラッシュを発生させたコンポーネントに隔離するのに役立ちます。プロセスがクラッシュした場合、システムの他の部分に影響を与えることなく再起動することができます。
-3. **パフォーマンス**：XPCは簡単な並行性を可能にし、異なるプロセスで同時にさまざまなタスクを実行することができます。
+2. **安定性**：XPCは、クラッシュを発生したコンポーネントに限定して分離するのに役立ちます。プロセスがクラッシュした場合、システムの他の部分に影響を与えることなく再起動することができます。
+3. **パフォーマンス**：XPCは、異なるプロセスで同時に異なるタスクを実行できるため、簡単な並行性を実現します。
 
-唯一の**欠点**は、アプリケーションを複数のプロセスに分割してXPCを介して通信させることは、**効率が低下する**ということです。しかし、現在のシステムではほとんど気づかれず、利点の方がはるかに優れています。
-
-QuickTime Playerの例では、XPCを使用してビデオのデコードを担当するコンポーネントがあります。このコンポーネントは計算タスクを実行するために特別に設計されており、侵害された場合でも、ファイルやネットワークへのアクセスなど、攻撃者に有益な利得を提供しません。
+唯一の**欠点**は、アプリケーションを複数のプロセスに分割してXPCを介して通信させることが**効率的ではない**ということです。しかし、現在のシステムではほとんど気づかれず、利点の方が優れています。
 
 ### アプリケーション固有のXPCサービス
 
-アプリケーションのXPCコンポーネントは、**アプリケーション自体の中にあります**。たとえば、Safariでは、**`/Applications/Safari.app/Contents/XPCServices`**にそれらを見つけることができます。拡張子は**`.xpc`**（例：**`com.apple.Safari.SandboxBroker.xpc`**）であり、**メインバイナリ**もそれに含まれています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`
+アプリケーションのXPCコンポーネントは、**アプリケーション自体の中にあります**。たとえば、Safariでは、**`/Applications/Safari.app/Contents/XPCServices`**にそれらを見つけることができます。拡張子は**`.xpc`**（例：**`com.apple.Safari.SandboxBroker.xpc`**）であり、メインのバイナリ内にもバンドルされています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`Info.plist：/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-XPCコンポーネントは、他のXPCコンポーネントやメインのアプリバイナリとは異なる**エンタイトルメントと特権**を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは、それを呼び出したアプリケーションと同じセキュリティセッションで実行されます。
+XPCコンポーネントは、他のXPCコンポーネントやメインのアプリバイナリとは異なる権限と特権を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは、それを呼び出したアプリケーションと**同じセキュリティセッションで実行**されます。
 
-XPCサービスは、必要に応じて**launchd**によって**起動**され、すべてのタスクが**完了**した後に**シャットダウン**され、システムリソースを解放します。**アプリケーション固有のXPCコンポーネントは、アプリケーションのみが利用できる**ため、潜在的な脆弱性に関連するリスクを低減します。
+XPCサービスは、必要に応じて**launchd**によって**起動**され、すべてのタスクが**完了**した後に**シャットダウン**され、システムリソースを解放します。**アプリケーション固有のXPCコンポーネントは、アプリケーションのみが利用**できるため、潜在的な脆弱性に関連するリスクを低減します。
 
 ### システム全体のXPCサービス
 
@@ -1033,7 +1012,7 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
 ### XPCイベントメッセージ
 
-アプリケーションは、異なるイベントメッセージに**サブスクライブ**することができ、そのようなイベントが発生したときに**オンデマンドで起動**することができます。これらのサービスの設定は、**`LaunchEvent`**キーを含む**`launchd plistファイル`**によって行われます。これらのファイルは、前述のものと同じディレクトリにあります。
+アプリケーションは、異なるイベントメッセージに**サブスクライブ**することができ、そのようなイベントが発生したときに**オンデマンドで開始**されることができます。これらのサービスのセットアップは、**`LaunchEvent`**キーを含む**`launchd plistファイル`**によって行われます。これらのファイルは、前述のものと同じディレクトリにあります。
 
 ### XPC接続プロセスのチェック
 
@@ -1051,7 +1030,7 @@ Appleはまた、アプリが**いくつかの権限とその取得方法を設�
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
 {% endcontent-ref %}
 
-### C言語のコード例
+### Cコードの例
 
 {% tabs %}
 {% tab title="xpc_server.c" %}
@@ -1122,19 +1101,12 @@ int main(int argc, const char * argv[]) {
         xpc_type_t type = xpc_get_type(event);
         
         if (type == XPC_TYPE_DICTIONARY) {
-            const char *message = xpc_dictionary_get_string(event, "message");
-            printf("Received message: %s\n", message);
+            const char *description = xpc_dictionary_get_string(event, "description");
+            printf("Received event: %s\n", description);
         }
     });
     
     xpc_connection_resume(connection);
-    
-    xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-    xpc_dictionary_set_string(message, "message", "Hello from xpc_client");
-    
-    xpc_connection_send_message(connection, message);
-    
-    xpc_release(message);
     
     dispatch_main();
     
@@ -1143,8 +1115,6 @@ int main(int argc, const char * argv[]) {
 ```
 
 {% endtab %}
-
-{% tab title="xpc_server.c" %}
 ```c
 // gcc xpc_client.c -o xpc_client
 
@@ -1178,8 +1148,8 @@ return 0;
 このファイルは、XML形式で記述されており、以下のような要素を含んでいます。
 
 - Label: サービスの識別子として使用される文字列です。
-- ProgramArguments: サービスが実行するコマンドや引数のリストです。
-- EnvironmentVariables: サービスが使用する環境変数のリストです。
+- ProgramArguments: サービスが実行するコマンドや引数を指定します。
+- EnvironmentVariables: サービスが使用する環境変数を指定します。
 - RunAtLoad: サービスを起動時に自動的に実行するかどうかを指定します。
 - KeepAlive: サービスが異常終了した場合に自動的に再起動するかどうかを指定します。
 
@@ -1303,29 +1273,15 @@ NSLog(@"Received response: %@", response);
 return 0;
 }
 ```
-# macOS IPC (Inter-Process Communication)
+{% tab title="xyz.hacktricks.svcoc.plist" %}xyz.hacktricks.svcoc.plistファイルは、macOSでのIPC（プロセス間通信）を設定するためのプロパティリストファイルです。IPCは、異なるプロセス間でデータを送受信するための仕組みです。このファイルを使用することで、プロセス間でのセキュリティと特権のエスカレーションを制御することができます。
 
-Inter-Process Communication (IPC) is a mechanism that allows different processes to communicate with each other and share data. In macOS, there are several IPC mechanisms available, including:
+このプロパティリストファイルでは、IPCの設定を定義するためのキーと値が含まれています。例えば、プロセス間通信のタイプやポート番号、セキュリティポリシーなどが設定できます。
 
-- **Mach Ports**: Mach ports are the fundamental IPC mechanism in macOS. They allow processes to send messages to each other and share resources.
-- **UNIX Domain Sockets**: UNIX domain sockets provide a communication channel between processes running on the same machine.
-- **Distributed Objects**: Distributed objects allow objects to be shared between processes using the Objective-C runtime.
-- **XPC**: XPC (eXtensible Procedure Call) is a lightweight IPC mechanism introduced in macOS 10.7. It allows processes to communicate with each other and perform remote procedure calls.
+xyz.hacktricks.svcoc.plistファイルを使用することで、IPCのセキュリティを強化し、特権のエスカレーションを防ぐことができます。適切な設定を行うことで、悪意のあるプロセスからの攻撃や情報漏洩を防ぐことができます。
 
-Understanding how IPC works in macOS is important for both security and privilege escalation. By exploiting vulnerabilities in IPC mechanisms, an attacker can gain unauthorized access to sensitive data or escalate their privileges on the system.
+このファイルを編集する際には、慎重に行う必要があります。誤った設定は、システムの安定性やセキュリティに悪影響を及ぼす可能性があります。必要な変更を行う前に、十分な知識と理解を持っていることを確認してください。
 
-In this section, we will explore the different IPC mechanisms available in macOS and discuss potential security vulnerabilities and privilege escalation techniques associated with them. We will also cover best practices for securing IPC communications and mitigating potential risks.
-
-## Table of Contents
-
-- [Mach Ports](mach-ports.md)
-- [UNIX Domain Sockets](unix-domain-sockets.md)
-- [Distributed Objects](distributed-objects.md)
-- [XPC](xpc.md)
-
-{% endtab %}
-
-{% tab title="日本語" %}
+注意：このファイルを使用する際には、適切な権限を持つユーザーで実行する必要があります。また、変更を行った後は、システムを再起動する必要がある場合があります。{% endtab %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -1377,10 +1333,10 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
