@@ -53,27 +53,6 @@ For these predefined services, the **lookup process differs slightly**. When a s
 
 However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
 
-### Mach Services
-
-The names specified in the applications located in the previous mentioned SIP protected directories cannot be registered by other processes.
-
-For example, `/System/Library/LaunchAgents/com.apple.xpc.loginitemregisterd.plist` registers the name `com.apple.xpc.loginitemregisterd`:
-
-```json
-plutil -p com.apple.xpc.loginitemregisterd.plist
-{
-  "EnablePressuredExit" => 1
-  "Label" => "com.apple.xpc.loginitemregisterd"
-  "MachServices" => {
-    "com.apple.xpc.loginitemregisterd" => 1
-  }
-  "ProcessType" => "Adaptive"
-  "Program" => "/usr/libexec/loginitemregisterd"
-}
-```
-
-If you try to register it with a code such as the following, you won't be able to.
-
 ### Code example
 
 Note how the **sender** **allocates** a port, create a **send right** for the name `org.darlinghq.example` and send it to the **bootstrap server** while the sender asked for the **send right** of that name and used it to **send a message**.
@@ -799,15 +778,13 @@ The primary benefits of XPC include:
 2. **Stability**: XPC helps isolate crashes to the component where they occur. If a process crashes, it can be restarted without affecting the rest of the system.
 3. **Performance**: XPC allows for easy concurrency, as different tasks can be run simultaneously in different processes.
 
-The only **drawback** is that **separating an application is several processes** making them communicate via XPC is **less efficient**. But in todays systems this isn't almost noticeable and the benefits are much better.
-
-An example can be seen in QuickTime Player, where a component using XPC is responsible for video decoding. The component is specifically designed to perform computational tasks, thus, in the event of a breach, it wouldn't provide any useful gains to the attacker, such as access to files or the network.
+The only **drawback** is that **separating an application in several processes** making them communicate via XPC is **less efficient**. But in todays systems this isn't almost noticeable and the benefits are better.
 
 ### Application Specific XPC services
 
-The XPC components of an applications are **inside the application itself.** For example, in Safari you can find them in **`/Applications/Safari.app/Contents/XPCServices`**. They have extension **`.xpc`** (like **`com.apple.Safari.SandboxBroker.xpc`**) and are **also bundles** with the main binary inside of it: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`
+The XPC components of an application are **inside the application itself.** For example, in Safari you can find them in **`/Applications/Safari.app/Contents/XPCServices`**. They have extension **`.xpc`** (like **`com.apple.Safari.SandboxBroker.xpc`**) and are **also bundles** with the main binary inside of it: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` and an `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-As you might be thinking a **XPC component will have different entitlements and privileges** than the other XPC components or the main app binary. EXCEPT if an XPC service is configured with [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) set to “True” in its **Info.plist** file. In this case, the XPC service will run in the same security session as the application that called it.
+As you might be thinking a **XPC component will have different entitlements and privileges** than the other XPC components or the main app binary. EXCEPT if a XPC service is configured with [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) set to “True” in its **Info.plist** file. In this case, the XPC service will run in the **same security session as the application** that called it.
 
 XPC services are **started** by **launchd** when required and **shut down** once all tasks are **complete** to free system resources. **Application-specific XPC components can only be utilized by the application**, thereby reducing the risk associated with potential vulnerabilities.
 
@@ -1087,7 +1064,7 @@ int main(void) {
 ```
 {% endtab %}
 
-{% tab title="Untitled" %}
+{% tab title="xyz.hacktricks.svcoc.plist" %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">

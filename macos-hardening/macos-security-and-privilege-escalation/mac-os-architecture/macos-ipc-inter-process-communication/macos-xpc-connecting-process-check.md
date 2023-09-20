@@ -21,10 +21,13 @@ When a connection is stablished to an XPC service, the server will check if the 
 2. Check if the connecting process is signed with the **organization’s certificate**, (team ID verification).
    * If this **isn't verified**, **any developer certificate** from Apple can be used for signing, and connect to the service.
 3. Check if the connecting process **contains a proper bundle ID**.
-4. Check if the connecting process has a **proper software version number**.
+   * If this **isn't verified**, any tool **signed by the same org** could be used to interact with the XPC service.
+4. (4 or 5) Check if the connecting process has a **proper software version number**.
    * If this **isn't verified,** an old, insecure clients, vulnerable to process injection could be used to connect to the XPC service even with the other checks in place.
-5. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
-6. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents PID reuse attacks.
+5. (4 or 5) Check if the connecting process has hardened runtime without dangerous entitlements (like the ones that allows to load arbitrary libraries or use DYLD env vars)
+   1. If this **isn't verified,** the client might be **vulnerable to code injection**
+6. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
+7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents PID reuse attacks.
    * Developers rarely use the audit token API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
 
 For more information about the PID reuse attack check:
@@ -66,9 +69,13 @@ NSString requirementString = @"anchor apple generic and identifier \"xyz.hacktri
 - Check the version used
 */
 
-// Check the requirements
+// Check the requirements with the PID (vulnerable)
 SecRequirementCreateWithString(requirementString, kSecCSDefaultFlags, &requirementRef);
 SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
+
+// Check the requirements wuing the auditToken (secure)
+SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
+SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
 {% endcode %}
 

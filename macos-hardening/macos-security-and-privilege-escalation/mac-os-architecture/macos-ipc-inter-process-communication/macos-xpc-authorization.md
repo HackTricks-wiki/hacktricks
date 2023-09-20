@@ -18,7 +18,7 @@ Apple also proposes another way to authenticate if the connecting process has **
 
 When an application needs to **execute actions as a privileged user**, instead of running the app as a privileged user it usually installs as root a HelperTool as an XPC service that could be called from the app to perform those actions. However, the app calling the service should have enough authorization.
 
-### ShuoldAcceptNewConnection always YES
+### ShouldAcceptNewConnection always YES
 
 An example could be found in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` it tries to **connect** to the **HelperTool**. And in `HelperTool/HelperTool.m` the function **`shouldAcceptNewConnection`** **won't check** any of the requirements indicated previously. It'll always return YES:
 
@@ -266,6 +266,34 @@ Then, you can read who can access the right with:
 
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
+```
+
+### Permissive rights
+
+You can find **all the permissions configurations** [**in here**](https://www.dssw.co.uk/reference/authorization-rights/), but the combinations that won't require user interaction would be:
+
+1. **'authenticate-user': 'false'**
+   * This is the most direct key. If set to `false`, it specifies that a user does not need to provide authentication to gain this right.
+   * Ths is used in **combination with one of the 2 below or indicating a group** the user must belongs to.
+2. **'allow-root': 'true'**
+   * If a user is operating as the root user (which has elevated permissions), and this key is set to `true`, the root user could potentially gain this right without further authentication. However, typically, getting to a root user status already requires authentication, so this isn't a "no authentication" scenario for most users.
+3. **'session-owner': 'true'**
+   * If set to `true`, the owner of the session (the currently logged-in user) would automatically get this right. This might bypass additional authentication if the user is already logged in.
+4. **'shared': 'true'**
+   * This key doesn't grant rights without authentication. Instead, if set to `true`, it means that once the right has been authenticated, it can be shared among multiple processes without each one needing to re-authenticate. But the initial granting of the right would still require authentication unless combined with other keys like `'authenticate-user': 'false'`.
+
+You can [**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) to get the interesting rights:
+
+```
+Rights with 'authenticate-user': 'false':
+is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
+
+Rights with 'allow-root': 'true':
+com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek, com-apple-openscripting-additions-send, com-apple-reportpanic-fixright, com-apple-servicemanagement-blesshelper, com-apple-xtype-fontmover-install, com-apple-xtype-fontmover-remove, com-apple-dt-instruments-process-analysis, com-apple-dt-instruments-process-kill, com-apple-pcastagentconfigd-wildcard, com-apple-trust-settings-admin, com-apple-wifivelocity, com-apple-wireless-diagnostics, is-root, system-install-iap-software, system-install-software, system-install-software-iap, system-preferences, system-preferences-accounts, system-preferences-datetime, system-preferences-energysaver, system-preferences-network, system-preferences-printing, system-preferences-security, system-preferences-sharing, system-preferences-softwareupdate, system-preferences-startupdisk, system-preferences-timemachine, system-print-operator, system-privilege-admin, system-services-networkextension-filtering, system-services-networkextension-vpn, system-services-systemconfiguration-network, system-sharepoints-wildcard
+
+
+Rights with 'session-owner': 'true':
+authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
 
 <details>
