@@ -1,4 +1,4 @@
-# Bypassar protecciones del sistema de archivos: solo lectura / sin ejecución / Distroless
+# Bypass de protecciones del sistema de archivos: solo lectura / sin ejecución / Distroless
 
 <details>
 
@@ -12,9 +12,16 @@
 
 </details>
 
+## Videos
+
+En los siguientes videos puedes encontrar las técnicas mencionadas en esta página explicadas con más detalle:
+
+* [**DEF CON 31 - Explorando la manipulación de memoria de Linux para sigilo y evasión**](https://www.youtube.com/watch?v=poHirez8jk4)
+* [**Intrusiones sigilosas con DDexec-ng y dlopen() en memoria - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM\_gjjiARaU)
+
 ## Escenario de solo lectura / sin ejecución
 
-Cada vez es más común encontrar máquinas Linux montadas con **protección de sistema de archivos de solo lectura (ro)**, especialmente en contenedores. Esto se debe a que ejecutar un contenedor con sistema de archivos ro es tan fácil como establecer **`readOnlyRootFilesystem: true`** en el `securitycontext`:
+Cada vez es más común encontrar máquinas Linux montadas con **protección de sistema de archivos de solo lectura (ro)**, especialmente en contenedores. Esto se debe a que ejecutar un contenedor con sistema de archivos de solo lectura es tan fácil como establecer **`readOnlyRootFilesystem: true`** en el `securitycontext`:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -29,7 +36,7 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-Sin embargo, incluso si el sistema de archivos está montado como ro, **`/dev/shm`** seguirá siendo escribible, por lo que es falso que no podamos escribir nada en el disco. Sin embargo, esta carpeta estará **montada con protección sin ejecución**, por lo que si descargas un binario aquí, **no podrás ejecutarlo**.
+Sin embargo, incluso si el sistema de archivos está montado como solo lectura, **`/dev/shm`** seguirá siendo escribible, por lo que es falso que no podamos escribir nada en el disco. Sin embargo, esta carpeta estará **montada con protección sin ejecución**, por lo que si descargas un binario aquí, **no podrás ejecutarlo**.
 
 {% hint style="warning" %}
 Desde la perspectiva de un equipo de red, esto **complica la descarga y ejecución** de binarios que no están en el sistema (como puertas traseras o enumeradores como `kubectl`).
@@ -43,16 +50,16 @@ Sin embargo, esto no es suficiente para ejecutar tu puerta trasera binaria u otr
 
 ## Bypasses de memoria
 
-Si quieres ejecutar un binario pero el sistema de archivos no lo permite, la mejor manera de hacerlo es **ejecutándolo desde la memoria**, ya que las protecciones no se aplican allí.
+Si quieres ejecutar un binario pero el sistema de archivos no lo permite, la mejor manera de hacerlo es **ejecutándolo desde la memoria**, ya que las **protecciones no se aplican allí**.
 
 ### Bypass de FD + exec syscall
 
 Si tienes motores de script potentes dentro de la máquina, como **Python**, **Perl** o **Ruby**, puedes descargar el binario para ejecutarlo desde la memoria, almacenarlo en un descriptor de archivo de memoria (`create_memfd` syscall), que no estará protegido por esas protecciones, y luego llamar a una **syscall `exec`** indicando el **fd como el archivo a ejecutar**.
 
-Para esto, puedes usar fácilmente el proyecto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Puedes pasarle un binario y generará un script en el lenguaje indicado con el **binario comprimido y codificado en b64** con las instrucciones para **decodificar y descomprimirlo** en un **fd** creado llamando a la syscall `create_memfd` y una llamada a la syscall **exec** para ejecutarlo.
+Para esto, puedes usar fácilmente el proyecto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Puedes pasarle un binario y generará un script en el lenguaje indicado con el **binario comprimido y codificado en base64** con las instrucciones para **decodificar y descomprimirlo** en un **fd** creado llamando a la syscall `create_memfd` y una llamada a la syscall **exec** para ejecutarlo.
 
 {% hint style="warning" %}
-Esto no funciona en otros lenguajes de script como PHP o Node porque no tienen una **forma predeterminada de llamar syscalls en bruto** desde un script, por lo que no es posible llamar a `create_memfd` para crear el **fd de memoria** para almacenar el binario.
+Esto no funciona en otros lenguajes de script como PHP o Node porque no tienen una forma **predeterminada de llamar syscalls en bruto** desde un script, por lo que no es posible llamar a `create_memfd` para crear el **fd de memoria** para almacenar el binario.
 
 Además, crear un **fd regular** con un archivo en `/dev/shm` no funcionará, ya que no se te permitirá ejecutarlo debido a la protección **sin ejecución** que se aplicará.
 {% endhint %}
@@ -61,7 +68,7 @@ Además, crear un **fd regular** con un archivo en `/dev/shm` no funcionará, ya
 
 [**DDexec / EverythingExec**](https://github.com/arget13/DDexec) es una técnica que te permite **modificar la memoria de tu propio proceso** sobrescribiendo su **`/proc/self/mem`**.
 
-Por lo tanto, al controlar el código ensamblador que se está ejecutando en el proceso, puedes escribir un **shellcode** y "mutar" el proceso para **ejecutar cualquier código arbitrario**.
+Por lo tanto, **controlando el código ensamblador** que se está ejecutando en el proceso, puedes escribir un **shellcode** y "mutar" el proceso para **ejecutar cualquier código arbitrario**.
 
 {% hint style="success" %}
 **DDexec / EverythingExec** te permitirá cargar y **ejecutar** tu propio **shellcode** o **cualquier binario** desde la **memoria**.

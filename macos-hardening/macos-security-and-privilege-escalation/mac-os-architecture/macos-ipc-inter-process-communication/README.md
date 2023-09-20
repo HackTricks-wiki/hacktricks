@@ -52,28 +52,9 @@ Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente
 * launchd duplica el **derecho de ENVÍO y lo envía a la tarea B**.
 
 Sin embargo, este proceso solo se aplica a las tareas predefinidas del sistema. Las tareas que no son del sistema aún funcionan como se describe originalmente, lo que podría permitir la suplantación.
-### Servicios Mach
-
-Los nombres especificados en las aplicaciones ubicadas en los directorios protegidos por SIP mencionados anteriormente no pueden ser registrados por otros procesos.
-
-Por ejemplo, `/System/Library/LaunchAgents/com.apple.xpc.loginitemregisterd.plist` registra el nombre `com.apple.xpc.loginitemregisterd`:
-```json
-plutil -p com.apple.xpc.loginitemregisterd.plist
-{
-"EnablePressuredExit" => 1
-"Label" => "com.apple.xpc.loginitemregisterd"
-"MachServices" => {
-"com.apple.xpc.loginitemregisterd" => 1
-}
-"ProcessType" => "Adaptive"
-"Program" => "/usr/libexec/loginitemregisterd"
-}
-```
-Si intentas registrarlo con un código como el siguiente, no podrás hacerlo.
-
 ### Ejemplo de código
 
-Observa cómo el **receptor** **asigna** un puerto, crea un **derecho de envío** para el nombre `org.darlinghq.example` y lo envía al **servidor de inicio** mientras que el receptor solicitó el **derecho de envío** de ese nombre y lo utilizó para **enviar un mensaje**.
+Observa cómo el **receptor** **asigna** un puerto, crea un **derecho de envío** para el nombre `org.darlinghq.example` y lo envía al **servidor de arranque** mientras el receptor solicita el **derecho de envío** de ese nombre y lo utiliza para **enviar un mensaje**.
 
 {% tabs %}
 {% tab title="receptor.c" %}
@@ -179,16 +160,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // Receive a response from the server
-    kr = mach_msg(msg, MACH_RCV_MSG, 0, msg->msgh_size, server_port, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
-    if (kr != KERN_SUCCESS) {
-        printf("Failed to receive message: %s\n", mach_error_string(kr));
-        return 1;
-    }
-
-    // Print the response
-    printf("Received message: %s\n", buffer);
-
     return 0;
 }
 ```
@@ -260,11 +231,11 @@ printf("Sent a message\n");
 * Estas son las restricciones para acceder al puerto (desde `macos_task_policy` del binario `AppleMobileFileIntegrity`):
 * Si la aplicación tiene el permiso de **`com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de la tarea** (comúnmente agregado por Xcode para depurar). El proceso de **notarización** no lo permitirá en las versiones de producción.
 * Las aplicaciones con el permiso **`com.apple.system-task-ports`** pueden obtener el **puerto de la tarea para cualquier** proceso, excepto el kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se otorga a las aplicaciones de Apple.
-* **Root puede acceder a los puertos de tarea** de las aplicaciones **no** compiladas con un tiempo de ejecución **reforzado** (y no de Apple).
+* **Root puede acceder a los puertos de tarea** de aplicaciones **no** compiladas con un tiempo de ejecución **reforzado** (y no de Apple).
 
 ### Inyección de shellcode en un hilo a través del puerto de la tarea&#x20;
 
-Puedes obtener un shellcode desde:
+Puedes obtener un shellcode de:
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -524,7 +495,7 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 
 En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la API de **pthread** de tipo **posix**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
 
-Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no era necesario trabajar con APIs compatibles con posix, solo con Mach. Inyecciones **más complejas** requerirían que el hilo también sea **compatible con posix**.
+Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no era necesario trabajar con APIs compatibles con posix, solo con Mach. Inyecciones **más complejas** requerirían que el hilo también sea compatible con posix.
 
 Por lo tanto, para **mejorar el hilo**, se debe llamar a **`pthread_create_from_mach_thread`**, que creará un pthread válido. Luego, este nuevo pthread podría **llamar a dlopen** para **cargar una dylib** del sistema, por lo que en lugar de escribir nuevo shellcode para realizar diferentes acciones, es posible cargar bibliotecas personalizadas.
 
@@ -727,13 +698,11 @@ kr = mach_vm_write(remoteTask,                   // Puerto de la tarea
                    (vm_address_t) injectedCode,  // Origen
                    0xa9);                       // Longitud del origen
 
-
 if (kr != KERN_SUCCESS)
 {
     fprintf(stderr, "No se puede escribir en la memoria del hilo remoto: Error %s\n", mach_error_string(kr));
     return (-3);
 }
-
 
 // Establecer los permisos en la memoria asignada para el código del hilo remoto
 kr = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
@@ -752,7 +721,6 @@ if (kr != KERN_SUCCESS)
     fprintf(stderr, "No se pueden establecer los permisos de memoria para la pila del hilo remoto: Error %s\n", mach_error_string(kr));
     return (-4);
 }
-
 
 // Crear hilo para ejecutar el shellcode
 struct arm_unified_thread_state remoteThreadState64;
@@ -783,8 +751,6 @@ if (kr != KERN_SUCCESS) {
 return (0);
 }
 
-
-
 int main(int argc, const char * argv[])
 {
 if (argc < 3)
@@ -804,7 +770,6 @@ else
 {
     fprintf(stderr, "Dylib no encontrada\n");
 }
-
 }
 ```
 </details>
@@ -834,17 +799,15 @@ Los principales beneficios de XPC incluyen:
 2. **Estabilidad**: XPC ayuda a aislar los bloqueos en el componente donde ocurren. Si un proceso se bloquea, se puede reiniciar sin afectar al resto del sistema.
 3. **Rendimiento**: XPC permite una fácil concurrencia, ya que se pueden ejecutar tareas diferentes simultáneamente en diferentes procesos.
 
-La única **desventaja** es que **separar una aplicación en varios procesos** y hacer que se comuniquen a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto casi no se nota y los beneficios son mucho mejores.
-
-Un ejemplo se puede ver en QuickTime Player, donde un componente que utiliza XPC es responsable de la decodificación de video. El componente está diseñado específicamente para realizar tareas computacionales, por lo que, en caso de una violación, no proporcionaría ninguna ganancia útil al atacante, como acceso a archivos o a la red.
+La única **desventaja** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto casi no se nota y los beneficios son mayores.
 
 ### Servicios XPC específicos de la aplicación
 
-Los componentes XPC de una aplicación están **dentro de la propia aplicación**. Por ejemplo, en Safari se pueden encontrar en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y también son **paquetes** con el binario principal dentro de él: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`
+Los componentes XPC de una aplicación están **dentro de la propia aplicación**. Por ejemplo, en Safari se pueden encontrar en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y también son **paquetes** con el binario principal dentro de él: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` y un `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Como podrás pensar, un **componente XPC tendrá diferentes derechos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) establecido en "True" en su archivo **Info.plist**. En este caso, el servicio XPC se ejecutará en la misma sesión de seguridad que la aplicación que lo llamó.
+Como podrás pensar, un **componente XPC tendrá diferentes derechos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) establecido en "True" en su archivo **Info.plist**. En este caso, el servicio XPC se ejecutará en la **misma sesión de seguridad que la aplicación** que lo llamó.
 
-Los servicios XPC se **inician** mediante **launchd** cuando sea necesario y se **cierran** una vez que todas las tareas están **completas** para liberar recursos del sistema. Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación, lo que reduce el riesgo asociado con posibles vulnerabilidades.
+Los servicios XPC se **inician** mediante **launchd** cuando se requieren y se **cierran** una vez que todas las tareas están **completas** para liberar recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, lo que reduce el riesgo asociado con posibles vulnerabilidades.
 
 ### Servicios XPC de todo el sistema
 
@@ -1110,23 +1073,37 @@ NSLog(@"Received response: %@", response);
 return 0;
 }
 ```
-# Comunicación interproceso en macOS
+{% tab title="xyz.hacktricks.svcoc.plist" %}
 
-La comunicación interproceso (IPC) es un mecanismo utilizado por los procesos en un sistema operativo para intercambiar información y coordinar sus acciones. En macOS, hay varios métodos de IPC disponibles, incluyendo notificaciones, sockets de dominio UNIX y puertos mach.
+# xyz.hacktricks.svcoc.plist
 
-## Notificaciones
+Este archivo de propiedad de `xyz.hacktricks.svcoc` es un archivo de preferencias de lanzamiento de macOS que se utiliza para configurar la comunicación entre procesos en el sistema operativo.
 
-Las notificaciones son una forma de IPC que permite a los procesos enviar y recibir mensajes a través del sistema de notificaciones de macOS. Los procesos pueden registrarse para recibir notificaciones sobre eventos específicos y enviar notificaciones a otros procesos.
+## Descripción
 
-## Sockets de dominio UNIX
+En macOS, la comunicación entre procesos se realiza a través de un mecanismo llamado IPC (Inter-Process Communication). Este mecanismo permite que los procesos se comuniquen entre sí y compartan información de manera segura.
 
-Los sockets de dominio UNIX son otro método de IPC en macOS. Los procesos pueden crear sockets de dominio UNIX y utilizarlos para enviar y recibir datos entre sí. Los sockets de dominio UNIX son especialmente útiles para la comunicación entre procesos en la misma máquina.
+El archivo `xyz.hacktricks.svcoc.plist` contiene la configuración de IPC para el proceso `xyz.hacktricks.svcoc`. Define cómo se establece la comunicación entre este proceso y otros procesos en el sistema.
 
-## Puertos mach
+## Ubicación
 
-Los puertos mach son un mecanismo de IPC de bajo nivel en macOS. Los procesos pueden crear puertos mach y utilizarlos para enviar y recibir mensajes. Los puertos mach ofrecen una mayor flexibilidad y control sobre la comunicación entre procesos, pero también requieren un mayor nivel de conocimiento y experiencia para utilizarlos correctamente.
+El archivo `xyz.hacktricks.svcoc.plist` se encuentra en la siguiente ubicación en el sistema de archivos de macOS:
 
-En resumen, la comunicación interproceso es una parte fundamental del sistema operativo macOS y se utiliza para permitir que los procesos se comuniquen entre sí. Hay varios métodos de IPC disponibles en macOS, incluyendo notificaciones, sockets de dominio UNIX y puertos mach. Cada método tiene sus propias ventajas y desventajas, y es importante comprenderlos para utilizarlos de manera segura y eficiente.
+```
+/Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
+```
+
+## Modificación
+
+La modificación del archivo `xyz.hacktricks.svcoc.plist` puede permitir la escalada de privilegios en el sistema. Los atacantes pueden modificar la configuración de IPC para establecer comunicación con procesos maliciosos y obtener acceso no autorizado al sistema.
+
+Es importante asegurarse de que el archivo `xyz.hacktricks.svcoc.plist` tenga permisos adecuados y esté protegido contra modificaciones no autorizadas.
+
+## Referencias
+
+- [https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+
+{% endtab %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
