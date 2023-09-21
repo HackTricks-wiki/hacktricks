@@ -35,6 +35,35 @@
 
 {% embed url="https://anhtai.me/oscp-fun-guide/" %}
 
+{% embed url="https://www.thehacker.recipes/" %}
+
+{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings" %}
+
+{% embed url="https://gtfobins.github.io/" %}
+
+{% embed url="https://github.com/RistBS/Awesome-RedTeam-Cheatsheet" %}
+
+{% embed url="https://github.com/S1ckB0y1337/Active-Directory-Exploitation-Cheat-Sheet" %}
+
+{% embed url="https://hideandsec.sh/" %}
+
+{% embed url="https://cheatsheet.haax.fr/" %}
+
+{% embed url="https://infosecwriteups.com/" %}
+
+{% embed url="https://www.exploit-db.com/" %}
+
+{% embed url="https://wadcoms.github.io/" %}
+
+{% embed url="https://lolbas-project.github.io" %}
+
+{% embed url="https://pentestbook.six2dez.com/" %}
+
+{% embed url="https://www.hackingarticles.in/" %}
+
+{% embed url="https://pentestlab.blog/" %}
+
+{% embed url="https://ippsec.rocks/" %}
 
 
 <details>
