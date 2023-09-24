@@ -1108,6 +1108,42 @@ sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
 
+### Client inside a Dylib code
+
+```
+// gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
+// gcc injection example:
+// DYLD_INSERT_LIBRARIES=oc_xpc_client.dylib /path/to/vuln/bin
+
+#import <Foundation/Foundation.h>
+
+@protocol MyXPCProtocol
+- (void)sayHello:(NSString *)some_string withReply:(void (^)(NSString *))reply;
+@end
+
+__attribute__((constructor))
+static void customConstructor(int argc, const char **argv)
+{
+        NSString*  _serviceName = @"xyz.hacktricks.svcoc";
+
+        NSXPCConnection* _agentConnection = [[NSXPCConnection alloc] initWithMachServiceName:_serviceName options:4096];
+    
+        [_agentConnection setRemoteObjectInterface:[NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)]];
+    
+        [_agentConnection resume];
+
+        [[_agentConnection remoteObjectProxyWithErrorHandler:^(NSError* error) {
+            (void)error;
+            NSLog(@"Connection Failure");
+        }] sayHello:@"Hello, Server!" withReply:^(NSString *response) {
+            NSLog(@"Received response: %@", response);
+    }    ];
+        NSLog(@"Done!");
+
+    return;
+}
+```
+
 ## References
 
 * [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)

