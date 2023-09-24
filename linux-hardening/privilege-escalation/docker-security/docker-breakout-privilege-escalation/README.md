@@ -12,10 +12,10 @@
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -70,9 +70,9 @@ Dockerデーモンは、[デフォルトでポート（通常は2375、2376）�
 
 ## 権限の乱用からの脱出
 
-コンテナの権限を確認し、以下のいずれかの権限がある場合、それから脱出することができるかもしれません：**`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+コンテナの権限を確認する必要があります。以下のいずれかの権限がある場合、それから脱出することができるかもしれません：**`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
-現在のコンテナの権限は、**前述の自動ツール**または次のコマンドを使用して確認できます：
+現在のコンテナの権限は、**前述の自動ツール**または次の方法で確認できます：
 ```bash
 capsh --print
 ```
@@ -96,7 +96,7 @@ capsh --print
 * `--cgroupns=host`
 * `Mount /dev`
 
-`--privileged`フラグは、重大なセキュリティ上の懸念を引き起こし、このフラグを有効にした状態でDockerコンテナを起動することによってエスケープを行います。このフラグを使用すると、コンテナはすべてのデバイスに完全なアクセス権を持ち、seccomp、AppArmor、およびLinuxの機能の制限がありません。`--privileged`の効果については、次のページで詳しく説明されています。
+`--privileged`フラグは、重大なセキュリティ上の懸念を引き起こし、このフラグを有効にした状態でDockerコンテナを起動することによってエスカレートすることができます。このフラグを使用すると、コンテナはすべてのデバイスに完全なアクセス権を持ち、seccomp、AppArmor、およびLinuxの機能による制限がありません。`--privileged`の効果については、以下のページで詳しく確認できます。
 
 {% content-ref url="../docker-privileged.md" %}
 [docker-privileged.md](../docker-privileged.md)
@@ -308,7 +308,7 @@ sleep 1
 echo "Done! Output:"
 cat ${OUTPUT_PATH}
 ```
-特権付きコンテナ内でPoCを実行すると、次のような出力が得られるはずです。
+特権コンテナ内でPoCを実行すると、次のような出力が得られるはずです。
 ```bash
 root@container:~$ ./release_agent_pid_brute.sh
 Checking pid 100
@@ -375,10 +375,10 @@ bash -p #From non priv inside mounted folder
 もし、**コンテナ内でrootとしてアクセス**でき、かつ**非特権ユーザーとしてホストから脱出**できた場合、コンテナ内での特権昇格を行うために両方のシェルを悪用することができます。これは、コンテナ内でのデフォルトの機能であるMKNODの機能を利用することができるためです。詳細は[**この記事**](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)で説明されています。\
 この機能により、コンテナ内のrootユーザーは**ブロックデバイスファイルを作成**することが許可されます。デバイスファイルは、**ハードウェアやカーネルモジュールにアクセス**するために使用される特殊なファイルです。たとえば、/dev/sdaのブロックデバイスファイルは、システムディスクの生データを**読み取るためのアクセス**を提供します。
 
-Dockerは、ブロックデバイスがコンテナ内から悪用されることを防ぐために、コンテナにcgroupポリシーを設定してブロックデバイスの読み書きをブロックします。\
-ただし、もしブロックデバイスが**コンテナ内で作成された場合、コンテナの外部から/proc/PID/root/フォルダを介してアクセス**することができます。ただし、制限として、プロセスはコンテナの外部と内部で**同じユーザーによって所有されている必要があります**。
+Dockerは、ブロックデバイスが**コンテナ内から悪用されないように**、コンテナに対してcgroupポリシーを設定して読み書きをブロックします。\
+ただし、もしブロックデバイスが**コンテナ内で作成された場合、コンテナの外部から/proc/PID/root/フォルダを介してアクセス**することができます。ただし、そのプロセスはコンテナの外部と内部で**同じユーザーによって所有されている必要があります**。
 
-**悪用**の例は、この[**解説記事**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/)から引用されています。
+**悪用**の例は、この[**解説記事**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/)から引用します。
 ```bash
 # On the container as root
 cd /
@@ -451,14 +451,16 @@ cat /proc/635813/fd/4
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-もしコンテナがDockerの[ホストネットワーキングドライバ(`--network=host`)](https://docs.docker.com/network/host/)で設定されている場合、そのコンテナのネットワークスタックはDockerホストから分離されていません（コンテナはホストのネットワーキング名前空間を共有しています）し、コンテナには独自のIPアドレスが割り当てられません。言い換えると、**コンテナはすべてのサービスを直接ホストのIPにバインド**します。さらに、コンテナは共有インターフェース上でホストが送受信している**すべてのネットワークトラフィックを傍受**することができます（`tcpdump -i eth0`を使用）。
+もしコンテナがDockerの[ホストネットワーキングドライバ(`--network=host`)](https://docs.docker.com/network/host/)で設定されている場合、そのコンテナのネットワークスタックはDockerホストから分離されず（コンテナはホストのネットワーキング名前空間を共有しています）、コンテナには独自のIPアドレスが割り当てられません。言い換えれば、**コンテナはすべてのサービスを直接ホストのIPにバインド**します。さらに、コンテナは共有インターフェース上でホストが送受信している**すべてのネットワークトラフィックを傍受**することができます（`tcpdump -i eth0`）。
 
-例えば、次のような場合に使用できます：
+例えば、これを使用してホストとメタデータインスタンス間のトラフィックを**スニフィングやスプーフィング**することができます。
+
+以下の例のように：
 
 * [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 * [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
 
-また、ホスト内で**localhostにバインドされたネットワークサービスにアクセス**したり、ノードの**メタデータの権限にアクセス**したりすることもできます（これはコンテナがアクセスできるものとは異なる場合があります）。
+また、ホスト内部から**localhostにバインドされたネットワークサービスにアクセス**したり、ノードの**メタデータの権限にアクセス**することもできます（これはコンテナがアクセスできるものとは異なる場合があります）。
 
 ### hostIPC
 ```
@@ -477,11 +479,11 @@ unshare -UrmCpf bash
 # Check them with
 cat /proc/self/status | grep CapEff
 ```
-### シンボリックリンクを使用したユーザーネームスペースの乱用
+### シンボリックリンクを介したユーザーネームスペースの乱用
 
-[https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)の記事で説明されている2番目のテクニックでは、ユーザーネームスペースを使用したバインドマウントの乱用により、ホスト内のファイル（特定の場合はファイルの削除）に影響を与えることができます。
+[https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)の記事で説明されている2番目のテクニックでは、ユーザーネームスペースを使用してバインドマウントを乱用し、ホスト内のファイル（特定の場合はファイルの削除）に影響を与える方法が示されています。
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
 今すぐアクセスを取得：
@@ -492,29 +494,29 @@ cat /proc/self/status | grep CapEff
 
 ### Runc exploit (CVE-2019-5736)
 
-`docker exec`をrootとして実行できる場合（おそらくsudoを使用して）、CVE-2019-5736を乱用してコンテナから特権を昇格させることができます（[ここ](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)にあるexploitを使用します）。このテクニックは、基本的にはコンテナからホストの**/bin/sh**バイナリを**上書き**するものであり、docker execを実行するとペイロードがトリガーされます。
+`docker exec`をrootとして実行できる場合（おそらくsudoで実行できる場合）、CVE-2019-5736を乱用してコンテナから特権を昇格させることができます（[ここ](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)にあるexploitを使用します）。このテクニックは、基本的にはコンテナからホストの**/bin/sh**バイナリを**上書き**するものであり、docker execを実行するとペイロードがトリガーされます。
 
 ペイロードを適宜変更し、`go build main.go`でmain.goをビルドします。ビルドされたバイナリは、実行のためにdockerコンテナに配置する必要があります。\
-実行時に`[+] Overwritten /bin/sh successfully`と表示されると、ホストマシンから次のコマンドを実行する必要があります：
+実行すると、`[+] Overwritten /bin/sh successfully`と表示されると、ホストマシンから次のコマンドを実行する必要があります：
 
 `docker exec -it <container-name> /bin/sh`
 
 これにより、main.goファイルに存在するペイロードがトリガーされます。
 
-詳細については：[https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
+詳細については、[https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)を参照してください。
 
 {% hint style="info" %}
-コンテナは他のCVEにも脆弱である可能性があります。リストは[https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)で確認できます。
+コンテナが脆弱である可能性のある他のCVEもあります。リストは[https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)で見つけることができます。
 {% endhint %}
 
 ## Dockerカスタムエスケープ
 
-### Dockerエスケープの対象範囲
+### Dockerエスケープの対象
 
-* **ネームスペース**：ネームスペースを介して他のプロセスと完全に分離されるため、ネームスペースによる他のプロセスとのやり取りから脱出することはできません（デフォルトでは、IPCs、UNIXソケット、ネットワークサービス、D-Bus、他のプロセスの`/proc`を介した通信はできません）。
-* **ルートユーザー**：デフォルトでは、プロセスを実行するユーザーはルートユーザーです（ただし、権限は制限されています）。
+* **ネームスペース**：プロセスはネームスペースによって他のプロセスと完全に分離されるため、ネームスペースによる他のプロセスとの相互作用を回避することはできません（デフォルトでは、IPCs、UNIXソケット、ネットワークサービス、D-Bus、他のプロセスの`/proc`を介した通信はできません）。
+* **ルートユーザー**：デフォルトでは、プロセスを実行するユーザーはルートユーザーです（ただし、特権は制限されています）。
 * **機能**：Dockerは次の機能を残します：`cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
-* **シスコール**：これらはルートユーザーが呼び出せないシスコールです（機能の不足+Seccompのため）。他のシスコールを使用して脱出を試みることができます。
+* **シスコール**：これらはルートユーザーが呼び出せないシスコールです（機能の不足+Seccompのため）。他のシスコールを使用してエスケープを試みることができます。
 
 {% tabs %}
 {% tab title="x64 syscalls" %}
@@ -914,27 +916,119 @@ cat /proc/self/status | grep CapEff
 | 527 | pkey_alloc |
 | 528 | pkey_free |
 | 529 | statx |
-| 530 | io_pgetevents |
-| 531 | rseq |
-| 532 | pidfd_send_signal |
-| 533 | io_uring_setup |
-| 534 | io_uring_enter |
-| 535 | io_uring_register |
-| 536 | open_tree |
-| 537 | move_mount |
-| 538 | fsopen |
-| 539 | fsconfig |
-| 540 | fsmount |
-| 541 | fspick |
-| 542 | pidfd_open |
-| 543 | clone3 |
-| 544 | close_range |
-| 545 | openat2 |
-| 546 | pidfd_getfd |
-| 547 | faccessat2 |
-| 548 | process_madvise |
-
-{% endtab %}
+| 530 | rseq |
+| 531 | io_pgetevents |
+| 532 | semtimedop |
+| 533 | semget |
+| 534 | semctl |
+| 535 | shmget |
+| 536 | shmctl |
+| 537 | shmat |
+| 538 | shmdt |
+| 539 | msgget |
+| 540 | msgsnd |
+| 541 | msgrcv |
+| 542 | msgctl |
+| 543 | clock_gettime |
+| 544 | clock_settime |
+| 545 | clock_adjtime |
+| 546 | clock_getres |
+| 547 | clock_nanosleep |
+| 548 | timer_gettime |
+| 549 | timer_settime |
+| 550 | timerfd_gettime |
+| 551 | timerfd_settime |
+| 552 | utimensat |
+| 553 | pselect6 |
+| 554 | ppoll |
+| 555 | io_pgetevents_time64 |
+| 556 | recvmmsg_time64 |
+| 557 | mq_timedsend_time64 |
+| 558 | mq_timedreceive_time64 |
+| 559 | semtimedop_time64 |
+| 560 | rt_sigtimedwait_time64 |
+| 561 | futex_time64 |
+| 562 | sched_rr_get_interval_time64 |
+| 563 | pidfd_send_signal |
+| 564 | io_uring_enter |
+| 565 | io_uring_register |
+| 566 | open_tree |
+| 567 | move_mount |
+| 568 | fsopen |
+| 569 | fsconfig |
+| 570 | fsmount |
+| 571 | fspick |
+| 572 | pidfd_open |
+| 573 | clone3 |
+| 574 | close_range |
+| 575 | openat2 |
+| 576 | pidfd_getfd |
+| 577 | faccessat2 |
+| 578 | process_madvise |
+| 579 | epoll_pwait2 |
+| 580 | mount_setattr |
+| 581 | quotactl_fd |
+| 582 | landlock_create_ruleset |
+| 583 | landlock_add_rule |
+| 584 | landlock_restrict_self |
+| 585 | memfd_secret |
+| 586 | process_mrelease |
+| 587 | pwritevf |
+| 588 | preadvf |
+| 589 | fallocate |
+| 590 | copy_file_range |
+| 591 | copy_file_range2 |
+| 592 | copy_file_range4 |
+| 593 | futex_time64 |
+| 594 | sched_rr_get_interval_time64 |
+| 595 | io_pgetevents_time64 |
+| 596 | recvmmsg_time64 |
+| 597 | mq_timedsend_time64 |
+| 598 | mq_timedreceive_time64 |
+| 599 | semtimedop_time64 |
+| 600 | rt_sigtimedwait_time64 |
+| 601 | futex_time64 |
+| 602 | sched_rr_get_interval_time64 |
+| 603 | io_pgetevents_time64 |
+| 604 | recvmmsg_time64 |
+| 605 | mq_timedsend_time64 |
+| 606 | mq_timedreceive_time64 |
+| 607 | semtimedop_time64 |
+| 608 | rt_sigtimedwait_time64 |
+| 609 | futex_time64 |
+| 610 | sched_rr_get_interval_time64 |
+| 611 | io_pgetevents_time64 |
+| 612 | recvmmsg_time64 |
+| 613 | mq_timedsend_time64 |
+| 614 | mq_timedreceive_time64 |
+| 615 | semtimedop_time64 |
+| 616 | rt_sigtimedwait_time64 |
+| 617 | futex_time64 |
+| 618 | sched_rr_get_interval_time64 |
+| 619 | io_pgetevents_time64 |
+| 620 | recvmmsg_time64 |
+| 621 | mq_timedsend_time64 |
+| 622 | mq_timedreceive_time64 |
+| 623 | semtimedop_time64 |
+| 624 | rt_sigtimedwait_time64 |
+| 625 | futex_time64 |
+| 626 | sched_rr_get_interval_time64 |
+| 627 | io_pgetevents_time64 |
+| 628 | recvmmsg_time64 |
+| 629 | mq_timedsend_time64 |
+| 630 | mq_timedreceive_time64 |
+| 631 | semtimedop_time64 |
+| 632 | rt_sigtimedwait_time64 |
+| 633 | futex_time64 |
+| 634 | sched_rr_get_interval_time64 |
+| 635 | io_pgetevents_time64 |
+| 636 | recvmmsg_time64 |
+| 637 | mq_timedsend_time64 |
+| 638 | mq_timedreceive_time64 |
+| 639 | semtimedop_time64 |
+| 640 | rt_sigtimedwait_time64 |
+| 641 | futex_time64 |
+| 642 | sched_rr_get_interval_time64
 ```
 0x029 -- pivot_root
 0x059 -- acct
@@ -1016,11 +1110,9 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket)
 * [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
 
+<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

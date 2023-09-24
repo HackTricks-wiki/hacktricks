@@ -12,14 +12,13 @@
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 
 ## **基本的なDockerエンジンのセキュリティ**
 
@@ -131,7 +130,7 @@ Dockerホストを変更した際、新しいホストから操作するため�
 
 ***
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
@@ -147,14 +146,14 @@ Dockerホストを変更した際、新しいホストから操作するため�
 
 **ネームスペース**
 
-ネームスペースは、プロジェクトを他のプロジェクトから分離し、プロセス間通信、ネットワーク、マウントを分離するために役立ちます。Dockerプロセスを他のプロセス（そして/procフォルダさえも）から分離するために使用することができます。
+ネームスペースは、プロジェクトを他のプロジェクトから分離し、プロセス間通信、ネットワーク、マウントを分離するために役立ちます。Dockerプロセスを他のプロセス（そして/procフォルダさえも）から乱用することができないように分離するのに役立ちます。
 
-バイナリの**`unshare`**（**`unshare`**シスコールを使用する）を使用して、新しいネームスペースを作成することが可能です。Dockerはデフォルトでこれを防止していますが、kubernetesは（この記述時点では）防止していません。\
+バイナリの**`unshare`**（**`unshare`**シスコールを使用する）を使用して、新しいネームスペースを作成することが可能です。Dockerはデフォルトでこれを防止しますが、kubernetesは（この執筆時点では）防止しません。\
 とにかく、これは新しいネームスペースを作成するのに役立ちますが、**ホストのデフォルトのネームスペースに戻ることはできません**（ホストのネームスペース内のいくつかの`/proc`にアクセスできる場合は、**`nsenter`**を使用してホストのネームスペースに入ることができます）。
 
 **CGroups**
 
-これにより、リソースを制限することができ、プロセスの分離のセキュリティには影響しません（`release_agent`は脱出に使用される可能性があります）。
+これにより、リソースを制限することができ、プロセスの分離のセキュリティには影響しません（逃げるために使用できる`release_agent`を除く）。
 
 **Capabilitiesの削除**
 
@@ -183,7 +182,7 @@ Dockerには、アクティベートできるテンプレートがあります�
 
 ### Namespaces
 
-**Namespaces**は、Linuxカーネルの機能であり、一連の**プロセス**が一連の**リソース**を見る一方、別の一連の**プロセス**が異なる一連のリソースを見るようにカーネルリソースを分割する機能です。この機能は、同じ名前空間を持つリソースとプロセスがあるが、それらの名前空間は異なるリソースを参照するようになっています。リソースは複数のスペースに存在する場合があります。
+**Namespaces**は、Linuxカーネルの機能であり、一連の**プロセス**が一連の**リソース**を見る一方、別の一連の**プロセス**が異なる一連のリソースを見るようにカーネルリソースを分割します。この機能は、一連のリソースとプロセスに同じ名前空間を持たせることで機能し、ただし、これらの名前空間は異なるリソースを参照します。リソースは複数のスペースに存在する場合があります。
 
 Dockerは、コンテナの分離を実現するために、次のLinuxカーネルのNamespacesを使用しています：
 
@@ -201,8 +200,8 @@ Dockerは、コンテナの分離を実現するために、次のLinuxカーネ
 
 ### cgroups
 
-Linuxカーネルの機能である**cgroups**は、一連のプロセスの間でCPU、メモリ、IO、ネットワーク帯域幅などのリソースを制限する機能を提供します。 Dockerでは、cgroup機能を使用してリソース制御を行うことができるコンテナを作成することができます。\
-以下は、ユーザースペースのメモリを500mに制限し、カーネルメモリを50mに制限し、CPUシェアを512に設定したコンテナの例です。CPUシェアは、コンテナのCPU使用率を制御する比率です。デフォルト値は1024で、0から1024の範囲です。3つのコンテナが同じCPUシェア1024を持っている場合、CPUリソースの競合が発生した場合、各コンテナは最大33%のCPUを使用できます。blkio-weightは、コンテナのIOを制御する比率です。デフォルト値は500で、10から1000の範囲です。
+Linuxカーネルの機能である**cgroups**は、一連のプロセスの間でCPU、メモリ、IO、ネットワーク帯域幅などのリソースを制限する機能を提供します。 Dockerでは、cgroup機能を使用してリソース制御が可能なコンテナを作成できます。\
+以下は、ユーザースペースのメモリを500mに制限し、カーネルメモリを50mに制限し、CPUシェアを512に設定し、blkioweightを400に設定したコンテナの例です。 CPUシェアは、コンテナのCPU使用率を制御する比率です。デフォルト値は1024で、0から1024の範囲です。 CPUリソースの競合が発生した場合、3つのコンテナが同じCPUシェア1024を持っている場合、各コンテナは最大33%のCPUを使用できます。 blkio-weightは、コンテナのIOを制御する比率です。デフォルト値は500で、10から1000の範囲です。
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
@@ -220,9 +219,9 @@ ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the 
 
 ### Capabilities
 
-Capabilitiesは、rootユーザーに許可されるcapabilitiesをより細かく制御することができます。DockerはLinuxカーネルのcapability機能を使用して、ユーザーの種類に関係なく、コンテナ内で実行できる操作を制限します。
+Capabilitiesは、rootユーザーに許可される可能性のある機能をより細かく制御することができます。DockerはLinuxカーネルの機能を使用して、ユーザーの種類に関係なく、コンテナ内で実行できる操作を制限します。
 
-Dockerコンテナが実行されると、プロセスは分離から脱出するために使用できる機密のcapabilitiesを削除します。これにより、プロセスが機密のアクションを実行して脱出することができないようになります。
+Dockerコンテナが実行されると、プロセスは分離から脱出するために使用できる機能を削除します。これにより、プロセスが機密なアクションを実行して脱出することができないようになります。
 
 {% content-ref url="../linux-capabilities.md" %}
 [linux-capabilities.md](../linux-capabilities.md)
@@ -230,7 +229,7 @@ Dockerコンテナが実行されると、プロセスは分離から脱出す�
 
 ### DockerにおけるSeccomp
 
-これは、Dockerがコンテナ内で使用できるsyscallsを制限するセキュリティ機能です。
+これは、コンテナ内で使用できるシスコールを制限するセキュリティ機能です。
 
 {% content-ref url="seccomp.md" %}
 [seccomp.md](seccomp.md)
@@ -246,9 +245,9 @@ AppArmorは、カーネルの拡張機能であり、コンテナを制限され
 
 ### DockerにおけるSELinux
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux)は、ラベリングシステムです。すべてのプロセスとすべてのファイルシステムオブジェクトにはラベルがあります。SELinuxポリシーは、システム上の他のすべてのラベルとプロセスラベルが許可される操作に関するルールを定義します。
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux)は、ラベリングシステムです。すべてのプロセスとすべてのファイルシステムオブジェクトにはラベルがあります。SELinuxポリシーは、システム上の他のすべてのラベルとの関係でプロセスラベルが許可される操作についてのルールを定義します。
 
-コンテナエンジンは、通常`container_t`という単一の制約付きSELinuxラベルでコンテナプロセスを起動し、コンテナ内のコンテナを`container_file_t`というラベルでラベル付けします。SELinuxポリシールールは基本的に、`container_t`プロセスが`container_file_t`とラベル付けされたファイルを読み取り/書き込み/実行できるということを示しています。
+コンテナエンジンは、通常`container_t`という単一の制約されたSELinuxラベルでコンテナプロセスを起動し、コンテナ内のコンテナを`container_file_t`というラベルでラベル付けします。SELinuxポリシールールは基本的に、`container_t`プロセスが`container_file_t`というラベルが付いたファイルを読み取り/書き込み/実行できるということを示しています。
 
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
@@ -278,18 +277,13 @@ docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :;
 
 バンド幅 DoS（Denial of Service）は、攻撃者がターゲットのネットワークやシステムに対して、大量のトラフィックを送信することによって、サービスの提供を妨害する攻撃手法です。
 
-攻撃者は、高帯域幅のネットワーク接続を利用して、ターゲットのネットワークに大量のデータを送信します。これにより、ネットワークの帯域幅が飽和し、正規のトラフィックが遮断されます。結果として、サービスの提供が停止し、ユーザーはサービスにアクセスできなくなります。
+攻撃者は、高帯域幅のネットワーク接続を利用して、大量のデータをターゲットに送信します。これにより、ターゲットのネットワークやシステムのリソースが過負荷となり、正規のユーザーからのアクセスが妨げられます。
 
-バンド幅 DoS 攻撃は、ネットワークの帯域幅を効果的に利用するため、攻撃者によって容易に実行されることがあります。この攻撃手法は、ネットワークの脆弱性を悪用することなく、サービスの停止を引き起こすため、対策が重要です。
+バンド幅 DoS 攻撃は、ネットワークの帯域幅を使い果たすことで、サービスの可用性を低下させることが目的です。攻撃者は、大量のトラフィックを生成するために、ボットネットやゾンビネットワークを利用することがあります。
 
-バンド幅 DoS 攻撃に対する対策としては、以下のような手法があります。
+バンド幅 DoS 攻撃に対抗するためには、ネットワークのトラフィックを監視し、異常なトラフィックを検出して遮断することが重要です。また、ファイアウォールやロードバランサなどのセキュリティ対策を実施することも有効です。
 
-- ファイアウォールやIPS（Intrusion Prevention System）を使用して、不正なトラフィックを検出およびブロックする。
-- ネットワークのトラフィックを監視し、異常なトラフィックを検知するシステムを導入する。
-- ネットワークの帯域幅を適切に管理し、トラフィックの過負荷を防ぐ。
-- クラウドプロバイダやネットワークサービスプロバイダによるトラフィックのフィルタリングや制限を利用する。
-
-バンド幅 DoS 攻撃は、ネットワークやシステムの可用性に重大な影響を与える可能性があるため、セキュリティ対策を適切に実施することが重要です。
+バンド幅 DoS 攻撃は、ネットワークやシステムの可用性を脅かす重大な攻撃手法です。セキュリティ対策を適切に実施することで、このような攻撃から保護することができます。
 ```bash
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
 ```
@@ -436,7 +430,7 @@ file: ./my_secret_file.txt
 
 ## Docker認証プラグインのバイパス
 
-もしdockerソケットにアクセス権限があるか、dockerグループのユーザーにアクセス権限があるが、docker認証プラグインによって制限されている場合、**バイパス**できるかどうかを確認してください。
+もしdockerソケットにアクセス権限があるか、**dockerグループのユーザーであるが、docker認証プラグインによって制限されている場合**、それを**バイパス**できるかどうかを確認してください。
 
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
@@ -451,8 +445,8 @@ file: ./my_secret_file.txt
 
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 * [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/\_fel1x/status/1151487051986087936)
-* [https://ajxchapman.github.io/containers/2020/11
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。
+* [https://ajxchapman.github.io/containers/2020/11/19
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -461,10 +455,10 @@ file: ./my_secret_file.txt
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

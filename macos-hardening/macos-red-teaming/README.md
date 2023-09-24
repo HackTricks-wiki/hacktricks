@@ -12,12 +12,12 @@
 
 </details>
 
-## MDMの悪用
+## MDMの乱用
 
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
 
-管理プラットフォームにアクセスするために**管理者の資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
+管理プラットフォームへのアクセスのために**管理者の資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
 
 MacOS環境でのレッドチーミングには、MDMの動作原理についての理解が非常に重要です：
 
@@ -25,25 +25,25 @@ MacOS環境でのレッドチーミングには、MDMの動作原理について
 [macos-mdm](macos-mdm/)
 {% endcontent-ref %}
 
-### MDMをC2として悪用する
+### MDMをC2として乱用する
 
-MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています。
+MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています...
 
-独自のMDMを実行するには、[**https://mdmcert.download/**](https://mdmcert.download/)で取得しようとすることができる**ベンダーによって署名されたCSR**が必要です。また、Appleデバイス用の独自のMDMを実行するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用することができます。
+独自のMDMを実行するには、[**https://mdmcert.download/**](https://mdmcert.download/)で取得しようとすることができる**ベンダーによって署名されたCSR**が必要です。また、Appleデバイス用の独自のMDMとして[**MicroMDM**](https://github.com/micromdm/micromdm)を使用することができます。
 
-ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントによって署名されている必要があります...ただし、MDMの登録時に**デバイスは信頼されたCAとしてMDMのSSL証明書を追加**するため、今では何でも署名できます。
+ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントによって署名されている必要があります...ただし、MDMの登録時に**デバイスはMDMのSSL証明書を信頼できるCAとして追加**するため、今では何でも署名できます。
 
 デバイスをMDMに登録するには、ルートとして**`mobileconfig`**ファイルをインストールする必要があります。これは**pkg**ファイルを介して配信することができます（zipで圧縮し、Safariからダウンロードすると解凍されます）。
 
 **MythicエージェントOrthrus**は、この技術を使用しています。
 
-### JAMF PROの悪用
+### JAMF PROの乱用
 
-JAMFは、**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）、**MDM**（デバイスの設定、デバイスの証明書...）を実行できます。
+JAMFは、**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）、**MDM**（デバイスの設定、デバイス証明書...）を実行できます。
 
 #### JAMFの自己登録
 
-`https://<company-name>.jamfcloud.com/enroll/`のようなページにアクセスして、**自己登録が有効になっているかどうか**を確認します。有効な場合、**資格情報を入力するように求められる**場合があります。
+`https://<company-name>.jamfcloud.com/enroll/`のようなページにアクセスして、**自己登録が有効になっているかどうか**を確認します。有効な場合、**資格情報を要求**する場合があります。
 
 [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py)スクリプトを使用してパスワードスプレー攻撃を実行できます。
 
@@ -53,10 +53,10 @@ JAMFは、**カスタムスクリプト**（システム管理者によって開
 
 #### JAMFデバイス認証
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見当時は**誰でも共有**されていました。秘密は**`jk23ucnq91jfu9aj`**です。\
-さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に永続化されます。
+**`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見当時は**共有**されていました。秘密は**`jk23ucnq91jfu9aj`**でした。\
+さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に**永続化**されます。
 
 #### JAMFデバイスの乗っ取り
 
@@ -78,7 +78,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 ```
 {% endcode %}
 
-したがって、攻撃者は、インストール時にこのファイルを上書きする悪意のあるパッケージ（`pkg`）をドロップすることができます。これにより、TyphonエージェントからのMythic C2リスナーへのURLが設定され、JAMFをC2として悪用することができるようになります。
+したがって、攻撃者は、インストール時にこのファイルを上書きし、URLをTyphonエージェントのMythic C2リスナーに設定する悪意のあるパッケージ（`pkg`）をドロップすることができます。これにより、JAMFをC2として悪用することができるようになります。
 
 {% code overflow="wrap" %}
 ```bash
@@ -102,9 +102,9 @@ sudo jamf policy -id 0
 
 <figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-また、Jamfを介して実行したい**カスタムスクリプト**を管理者が配置し、実行後に削除するために、`/Library/Application Support/Jamf/tmp/`の場所を監視することもできます。これらのスクリプトには**資格情報**が含まれている可能性があります。
+また、Jamfを介して実行したい**カスタムスクリプト**を管理者が配置し、実行して削除するために、`/Library/Application Support/Jamf/tmp/`の場所を監視することもできます。これらのスクリプトには**資格情報**が含まれている可能性があります。
 
-ただし、これらのスクリプトには**パラメータ**として資格情報が渡される場合があるため、`ps aux | grep -i jamf`を監視する必要があります（rootでなくても可）。
+ただし、これらのスクリプトには**パラメータ**として**資格情報**が渡される場合があるため、`ps aux | grep -i jamf`を監視する必要があります（rootでなくても可能です）。
 
 スクリプト[**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py)は、新しいファイルの追加と新しいプロセス引数のリッスンを行うことができます。
 

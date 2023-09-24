@@ -1,6 +1,6 @@
 # 便利なLinuxコマンド
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。
 今すぐアクセスを取得：
@@ -11,11 +11,11 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
@@ -138,7 +138,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
@@ -171,52 +171,20 @@ i686-mingw32msvc-gcc -o executable useradd.c
 `grep`コマンドは、テキストファイル内で特定のパターンを検索するために使用されます。以下は、`grep`コマンドの一般的な使用法です。
 
 ```bash
-grep [オプション] パターン [ファイル名]
+grep pattern file
 ```
 
-- `[オプション]`：`grep`コマンドのオプションを指定します。例えば、`-i`オプションは大文字と小文字を区別しない検索を行います。
-- `パターン`：検索するテキストのパターンを指定します。
-- `[ファイル名]`：検索対象のファイル名を指定します。省略すると、標準入力から読み取ります。
+- `pattern`は検索する文字列または正規表現パターンです。
+- `file`は検索対象のファイルです。
 
-以下は、いくつかの一般的な`grep`コマンドの例です。
+`grep`コマンドは、指定したファイル内でパターンに一致する行を表示します。以下は、いくつかの一般的なオプションです。
 
-- ファイル内で特定の文字列を検索する：
+- `-i`オプションは、大文字と小文字を区別せずに検索します。
+- `-r`オプションは、ディレクトリ内のすべてのファイルを再帰的に検索します。
+- `-l`オプションは、一致する行を含むファイルの名前のみを表示します。
+- `-v`オプションは、パターンに一致しない行を表示します。
 
-```bash
-grep "文字列" ファイル名
-```
-
-- 大文字と小文字を区別せずに検索する：
-
-```bash
-grep -i "文字列" ファイル名
-```
-
-- 正規表現を使用して検索する：
-
-```bash
-grep -E "パターン" ファイル名
-```
-
-- ファイル内で特定の文字列を含まない行を検索する：
-
-```bash
-grep -v "文字列" ファイル名
-```
-
-- ファイル内で特定の文字列を含む行の数をカウントする：
-
-```bash
-grep -c "文字列" ファイル名
-```
-
-- ファイル内で特定の文字列を含む行の前後の行も表示する：
-
-```bash
-grep -A [行数] -B [行数] "文字列" ファイル名
-```
-
-`grep`コマンドは非常に強力であり、テキストファイル内での検索に広く使用されています。これらの例を使用して、必要な情報を効率的に見つけることができます。
+`grep`コマンドは、ログファイルや設定ファイルなど、テキストベースのファイルを検索する際に非常に便利です。
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -298,38 +266,73 @@ egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13
 ```
 ## Nmap検索のヘルプ
 
-Nmap is a powerful network scanning tool that allows you to discover hosts and services on a computer network. It provides a wide range of options and features to customize your scans and obtain detailed information about the target network.
+Nmap is a powerful network scanning tool used to discover hosts and services on a computer network. It provides a wide range of options and features to customize and optimize the scanning process. Here are some useful Nmap commands and their descriptions:
 
-Nmapは、コンピュータネットワーク上のホストやサービスを発見するための強力なネットワークスキャンツールです。さまざまなオプションと機能を提供し、スキャンをカスタマイズして対象ネットワークに関する詳細な情報を取得することができます。
+Nmapは、コンピューターネットワーク上のホストやサービスを発見するために使用される強力なネットワークスキャンツールです。スキャンプロセスをカスタマイズして最適化するためのさまざまなオプションと機能を提供します。以下に、いくつかの便利なNmapコマンドとその説明を示します。
 
-To get started with Nmap, you can use the following basic command:
+### Basic Scanning
 
-Nmapを使い始めるには、次の基本コマンドを使用します:
+基本的なスキャン
 
-```
-nmap [target]
-```
+- `nmap target`: Performs a basic scan on the specified target.
 
-Replace `[target]` with the IP address or hostname of the target you want to scan.
+  `nmap ターゲット`: 指定したターゲットに対して基本的なスキャンを実行します。
 
-`[target]`の部分をスキャンしたい対象のIPアドレスまたはホスト名に置き換えてください。
+- `nmap -F target`: Performs a fast scan on the specified target, scanning only the most common ports.
 
-Nmap also provides various scan techniques and options to customize your scans. Some commonly used options include:
+  `nmap -F ターゲット`: 指定したターゲットに対して高速スキャンを実行し、最も一般的なポートのみをスキャンします。
 
-Nmapは、さまざまなスキャンテクニックとオプションを提供しており、スキャンをカスタマイズすることができます。よく使用されるオプションには、次のものがあります:
+### Port Scanning
 
-- `-p [port]`: Specifies the port number(s) to scan. You can specify a single port, a range of ports, or a comma-separated list of ports.
-- `-p [ポート]`: スキャンするポート番号を指定します。単一のポート、ポートの範囲、またはカンマ区切りのポートのリストを指定することができます。
+ポートスキャン
 
-- `-sV`: Enables version detection, which attempts to determine the version of the services running on the target ports.
-- `-sV`: バージョン検出を有効にし、対象ポートで実行されているサービスのバージョンを特定しようとします。
+- `nmap -p port target`: Scans the specified port on the target.
 
-- `-O`: Enables operating system detection, which tries to determine the operating system running on the target host.
-- `-O`: オペレーティングシステム検出を有効にし、対象ホストで実行されているオペレーティングシステムを特定しようとします。
+  `nmap -p ポート ターゲット`: ターゲット上の指定したポートをスキャンします。
 
-These are just a few examples of the options available in Nmap. You can explore more options and techniques by referring to the Nmap documentation.
+- `nmap -p- target`: Scans all ports on the target.
 
-これらは、Nmapで利用可能なオプションの一部の例です。Nmapのドキュメントを参照することで、さらに多くのオプションやテクニックを探索することができます。
+  `nmap -p- ターゲット`: ターゲット上のすべてのポートをスキャンします。
+
+### Service and Version Detection
+
+サービスとバージョンの検出
+
+- `nmap -sV target`: Performs service and version detection on the target.
+
+  `nmap -sV ターゲット`: ターゲット上でサービスとバージョンの検出を実行します。
+
+### OS Detection
+
+OS検出
+
+- `nmap -O target`: Performs OS detection on the target.
+
+  `nmap -O ターゲット`: ターゲット上でOSの検出を実行します。
+
+### Script Scanning
+
+スクリプトスキャン
+
+- `nmap --script script target`: Executes the specified script against the target.
+
+  `nmap --script スクリプト ターゲット`: 指定したスクリプトをターゲットに対して実行します。
+
+### Output Options
+
+出力オプション
+
+- `nmap -oN output.txt target`: Saves the scan results in normal format to the specified file.
+
+  `nmap -oN 出力.txt ターゲット`: スキャン結果を指定したファイルに通常の形式で保存します。
+
+- `nmap -oX output.xml target`: Saves the scan results in XML format to the specified file.
+
+  `nmap -oX 出力.xml ターゲット`: スキャン結果を指定したファイルにXML形式で保存します。
+
+These are just a few examples of the many options and features available in Nmap. For more information, refer to the [Nmap documentation](https://nmap.org/docs.html).
+
+これらは、Nmapで利用可能な多くのオプションと機能の一部です。詳細については、[Nmapのドキュメント](https://nmap.org/docs.html)を参照してください。
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -460,15 +463,15 @@ iptables -P OUTPUT ACCEPT
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も**高度なコミュニティツール**によって強化された**ワークフローを簡単に構築**および**自動化**します。\

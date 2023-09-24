@@ -1,9 +1,9 @@
 # DCSync
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築し、自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -12,11 +12,11 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したり、HackTricksを**PDFでダウンロード**したりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
 * [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>
 
@@ -26,7 +26,7 @@
 
 **DCSyncに関する重要な注意事項：**
 
-* **DCSync攻撃は、ドメインコントローラの動作をシミュレートし、他のドメインコントローラに情報のレプリケーションを要求**します。これは、ディレクトリレプリケーションサービスリモートプロトコル（MS-DRSR）を使用するものであり、Active Directoryの有効で必要な機能であるため、オフまたは無効にすることはできません。
+* **DCSync攻撃は、ドメインコントローラの動作をシミュレートし、他のドメインコントローラに情報のレプリケーションを要求**します。これは、MS-DRSR（Directory Replication Service Remote Protocol）を使用するものであり、Active Directoryの有効で必要な機能であるため、オフまたは無効にすることはできません。
 * デフォルトでは、**Domain Admins、Enterprise Admins、Administrators、およびDomain Controllers**グループのみが必要な特権を持っています。
 * もし、任意のアカウントのパスワードが可逆暗号化で保存されている場合、Mimikatzにはパスワードを平文で返すオプションがあります。
 
@@ -54,18 +54,19 @@ Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 ### リモートでの攻撃
 
-DCSyncは、Active Directory（AD）ドメインコントローラ（DC）からユーザーのハッシュを取得するための攻撃手法です。この攻撃は、リモートで実行することができます。
+DCSyncは、Active Directory（AD）ドメインコントローラ（DC）からユーザーのハッシュを取得するための攻撃手法です。この攻撃手法を使用すると、攻撃者はドメイン内のユーザーアカウントのハッシュを取得し、そのハッシュを使用して認証をバイパスすることができます。
 
-攻撃者は、以下の手順に従ってDCSyncを実行します。
+DCSync攻撃をリモートで実行するためには、攻撃者は有効なドメインユーザーアカウントを持っている必要があります。攻撃者は、このアカウントを使用してドメインコントローラに接続し、DCSync攻撃を実行します。
 
-1. 攻撃者は、攻撃対象のADドメインに対して有効なユーザーの資格情報を取得します。
-2. 攻撃者は、攻撃対象のドメインコントローラに対してリモートで接続します。
-3. 攻撃者は、DCSyncツールを使用して、攻撃対象のユーザーのハッシュを取得します。
-4. 攻撃者は、取得したハッシュを使用して、攻撃対象のユーザーの特権を悪用することができます。
+以下は、リモートでDCSync攻撃を実行する手順です。
 
-DCSync攻撃は、攻撃者が有効なユーザーの資格情報を取得できる場合にのみ成功します。したがって、攻撃者は、ソーシャルエンジニアリングや他の手法を使用して、有効なユーザーの資格情報を入手する必要があります。
+1. 攻撃者は有効なドメインユーザーアカウントを取得します。
+2. 攻撃者は、攻撃対象のドメインコントローラにリモートで接続します。
+3. 攻撃者は、DCSync攻撃を実行するための適切なツールを使用します。このツールは、攻撃者がドメインコントローラに接続した後に実行する必要があります。
+4. 攻撃者は、DCSync攻撃を実行するための適切なコマンドを入力します。このコマンドは、攻撃者がユーザーアカウントのハッシュを取得するために使用します。
+5. 攻撃者は、取得したハッシュを使用して認証をバイパスすることができます。
 
-この攻撃手法は、リモートで実行されるため、攻撃者は物理的に攻撃対象のネットワークにアクセスする必要はありません。ただし、攻撃者は攻撃対象のドメインコントローラに対してリモートで接続する必要があります。
+リモートでDCSync攻撃を実行することにより、攻撃者はドメイン内のユーザーアカウントのハッシュを取得し、そのハッシュを使用して権限を乗っ取ることができます。この攻撃手法は、セキュリティ上の脆弱性を悪用するため、適切なセキュリティ対策が必要です。
 ```powershell
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
@@ -74,9 +75,9 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 ```
 `-just-dc`は3つのファイルを生成します：
 
-* **NTLMハッシュ**を含む1つのファイル
-* **Kerberosキー**を含む1つのファイル
-* **[可逆暗号化](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption)**が有効になっているNTDSのクリアテキストパスワードを含む1つのファイル。可逆暗号化を使用しているユーザーは、次のコマンドを使用して取得できます。
+* NTLMハッシュを含む1つのファイル
+* Kerberosキーを含む1つのファイル
+* [可逆暗号化](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption)が有効になっているNTDSのクリアテキストパスワードを含む1つのファイル。可逆暗号化が有効なユーザーは次のコマンドで取得できます。
 
 ```powershell
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
@@ -84,7 +85,7 @@ Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD
 
 ### 持続性
 
-ドメイン管理者であれば、`powerview`のヘルプを使用して、この権限を任意のユーザーに付与することができます。
+ドメイン管理者であれば、`powerview`のヘルプを使用してこれらの権限を任意のユーザーに付与することができます。
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
@@ -108,15 +109,15 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築および自動化します。\

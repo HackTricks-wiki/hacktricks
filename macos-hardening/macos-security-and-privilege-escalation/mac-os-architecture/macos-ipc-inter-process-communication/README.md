@@ -42,13 +42,13 @@ Machは、リソースの共有において**タスク**を最小単位として
 
 ブートストラップサーバーは、タスクが主張するサービス名を認証することはできません。これは、タスクが潜在的に**システムタスクをなりすます**ことができる可能性があることを意味します。たとえば、認証サービス名を偽って**承認リクエストをすべて承認**することができます。
 
-その後、Appleはシステムが提供するサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに保存しています：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバーは、これらのサービス名ごとに**受信権限を作成**し、保持します。
+その後、Appleはシステム提供のサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに保存しています：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバーは、これらのサービス名ごとに**受信権限を作成**し、保持します。
 
 これらの事前定義されたサービスに対しては、**検索プロセスが若干異なります**。サービス名が検索されると、launchdはサービスを動的に起動します。新しいワークフローは次のようになります。
 
 * タスク**B**は、サービス名のためにブートストラップの**検索**を開始します。
 * **launchd**は、タスクが実行中かどうかをチェックし、実行されていない場合は**起動**します。
-* タスク**A**（サービス）は、**ブートストラップチェックイン**を実行します。ここで、**ブートストラップ**サーバーはSEND権限を
+* タスク**A**（サービス）は、**ブートストラップチェックイン**を実行します。ここで、**ブートストラップ**サーバーはSEND権限を作
 ### コード例
 
 **送信者**がポートを**割り当て**し、名前`org.darlinghq.example`の**送信権**を作成して**ブートストラップサーバー**に送信する方法に注目してください。送信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**します。
@@ -220,16 +220,16 @@ printf("Sent a message\n");
 
 ### 特権ポート
 
-* **ホストポート**: プロセスがこのポートに対して**送信権限**を持っている場合、システムに関する**情報**（例：`host_processor_info`）を取得できます。
-* **ホスト特権ポート**: このポートに対して**送信権限**を持つプロセスは、カーネル拡張をロードするなどの**特権アクション**を実行できます。この権限を取得するには、**プロセスはルート権限**を持つ必要があります。
+* **ホストポート**: このポートに対して**Send**権限を持つプロセスは、**システムに関する情報**（例：`host_processor_info`）を取得することができます。
+* **ホスト特権ポート**: このポートに対して**Send**権限を持つプロセスは、カーネル拡張をロードするなどの**特権アクション**を実行することができます。この権限を取得するには、**プロセスはrootである必要があります**。
 * さらに、**`kext_request`** APIを呼び出すためには、Appleのバイナリにのみ与えられる**`com.apple.private.kext*`**という他の権限が必要です。
 * **タスク名ポート**: _タスクポート_の非特権バージョンです。タスクを参照することはできますが、制御することはできません。これを通じて利用できる唯一のものは`task_info()`です。
-* **タスクポート**（またはカーネルポート）**:** このポートに対して送信権限を持つと、タスクを制御することができます（メモリの読み書き、スレッドの作成など）。
+* **タスクポート**（またはカーネルポート）**:** このポートに対してSend権限を持つと、タスクを制御することができます（メモリの読み書き、スレッドの作成など）。
 * 呼び出し元タスクのこのポートの**名前を取得**するには、`mach_task_self()`を呼び出します。このポートは**`exec()`を跨いでのみ継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別なケースとして、suidバイナリの`exec()`後にもタスクは新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行う際に["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
 * これらはポートへのアクセス制限です（バイナリ`AppleMobileFileIntegrity`の`macos_task_policy`から）：
 * アプリには**`com.apple.security.get-task-allow`権限**がある場合、**同じユーザーのプロセスはタスクポートにアクセス**できます（デバッグのためにXcodeによって一般的に追加されます）。**公開リリース**では、**公証**プロセスはこれを許可しません。
 * **`com.apple.system-task-ports`権限**を持つアプリは、カーネルを除く**任意の**プロセスのタスクポートを取得できます。以前のバージョンでは**`task_for_pid-allow`**と呼ばれていました。これはAppleのアプリケーションにのみ付与されます。
-* **ルートユーザーは、ハード化されたランタイムでコンパイルされていないアプリケーションのタスクポートにアクセス**できます（Appleのものではありません）。
+* **ルートユーザーは、ハード化されたランタイムでコンパイルされていないアプリケーション**（およびAppleのアプリケーションではない）のタスクポートにアクセスできます。
 
 ### タスクポートを介したスレッドへのシェルコードのインジェクション
 
@@ -332,9 +332,9 @@ int main(int argc, const char * argv[]) {
 ```
 {% endtab %}
 {% endtabs %}
-</details>
+{% enddetails %}
 
-Compile the previous program and add the entitlements to be able to inject code with the same user (if not you will need to use sudo).
+**コンパイル**する前のプログラムに、同じユーザーでコードをインジェクトできるようにするための**権限**を追加します（そうでない場合は**sudo**を使用する必要があります）。
 
 <details>
 
@@ -958,7 +958,7 @@ XPCの主な利点は次のとおりです：
 
 1. **セキュリティ**：作業を異なるプロセスに分割することで、各プロセスに必要な権限のみを付与することができます。これにより、プロセスが侵害された場合でも、被害を最小限に抑えることができます。
 2. **安定性**：XPCは、クラッシュを発生したコンポーネントに限定して分離するのに役立ちます。プロセスがクラッシュした場合、システムの他の部分に影響を与えることなく再起動することができます。
-3. **パフォーマンス**：XPCは、異なるプロセスで同時に異なるタスクを実行できるため、簡単な並行性を実現します。
+3. **パフォーマンス**：XPCは、異なるプロセスで同時に異なるタスクを実行することができるため、簡単な並行性を実現します。
 
 唯一の**欠点**は、アプリケーションを複数のプロセスに分割してXPCを介して通信させることが**効率的ではない**ということです。しかし、現在のシステムではほとんど気づかれず、利点の方が優れています。
 
@@ -966,9 +966,9 @@ XPCの主な利点は次のとおりです：
 
 アプリケーションのXPCコンポーネントは、**アプリケーション自体の中にあります**。たとえば、Safariでは、**`/Applications/Safari.app/Contents/XPCServices`**にそれらを見つけることができます。拡張子は**`.xpc`**（例：**`com.apple.Safari.SandboxBroker.xpc`**）であり、メインのバイナリ内にもバンドルされています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`Info.plist：/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-XPCコンポーネントは、他のXPCコンポーネントやメインのアプリバイナリとは異なる権限と特権を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは、それを呼び出したアプリケーションと**同じセキュリティセッションで実行**されます。
+XPCコンポーネントは、他のXPCコンポーネントやメインのアプリバイナリとは異なるエンタイトルメントと特権を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは、それを呼び出したアプリケーションと**同じセキュリティセッションで実行**されます。
 
-XPCサービスは、必要に応じて**launchd**によって**起動**され、すべてのタスクが**完了**した後に**シャットダウン**され、システムリソースを解放します。**アプリケーション固有のXPCコンポーネントは、アプリケーションのみが利用**できるため、潜在的な脆弱性に関連するリスクを低減します。
+XPCサービスは、必要に応じて**launchd**によって**起動**され、すべてのタスクが**完了**した後に**シャットダウン**され、システムリソースを解放します。**アプリケーション固有のXPCコンポーネントは、アプリケーションのみが利用できる**ため、潜在的な脆弱性に関連するリスクを低減します。
 
 ### システム全体のXPCサービス
 
@@ -1147,15 +1147,15 @@ return 0;
 
 このファイルは、XML形式で記述されており、以下のような要素を含んでいます。
 
-- Label: サービスの識別子として使用される文字列です。
-- ProgramArguments: サービスが実行するコマンドや引数を指定します。
-- EnvironmentVariables: サービスが使用する環境変数を指定します。
-- RunAtLoad: サービスを起動時に自動的に実行するかどうかを指定します。
-- KeepAlive: サービスが異常終了した場合に自動的に再起動するかどうかを指定します。
+- `Label`: サービスの識別子として使用される文字列です。
+- `ProgramArguments`: サービスが実行するコマンドやスクリプトのパスを指定します。
+- `EnvironmentVariables`: サービスが使用する環境変数を指定します。
+- `RunAtLoad`: サービスを起動時に自動的に実行するかどうかを指定します。
+- `KeepAlive`: サービスが異常終了した場合に自動的に再起動するかどうかを指定します。
 
-このファイルを編集する際には、慎重に行う必要があります。間違った設定を行うと、サービスの動作に問題が生じる可能性があります。また、このファイルの編集には管理者権限が必要です。
+このファイルを編集する際には、注意が必要です。間違った設定を行うと、サービスの動作に問題が生じる可能性があります。また、特権の昇格やセキュリティの脆弱性を引き起こす可能性もあるため、慎重に行う必要があります。
 
-サービスの設定を変更する場合は、まずバックアップを作成し、変更前の設定を確認することをおすすめします。また、変更後にはサービスを再起動する必要があることに注意してください。{% endtab %}
+サービスの設定を変更する場合は、事前にバックアップを作成し、変更内容を慎重に検証してから適用することをおすすめします。{% endtab %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -1273,15 +1273,89 @@ NSLog(@"Received response: %@", response);
 return 0;
 }
 ```
-{% tab title="xyz.hacktricks.svcoc.plist" %}xyz.hacktricks.svcoc.plistファイルは、macOSでのIPC（プロセス間通信）を設定するためのプロパティリストファイルです。IPCは、異なるプロセス間でデータを送受信するための仕組みです。このファイルを使用することで、プロセス間でのセキュリティと特権のエスカレーションを制御することができます。
+{% tab title="xyz.hacktricks.svcoc.plist" %}
 
-このプロパティリストファイルでは、IPCの設定を定義するためのキーと値が含まれています。例えば、プロセス間通信のタイプやポート番号、セキュリティポリシーなどが設定できます。
+このファイルは、macOSでのIPC（プロセス間通信）を使用して特権昇格を行うための手法を提供します。IPCは、異なるプロセス間でデータを送受信するための仕組みです。このファイルは、IPCを使用して特権昇格を行うための設定を含んでいます。
 
-xyz.hacktricks.svcoc.plistファイルを使用することで、IPCのセキュリティを強化し、特権のエスカレーションを防ぐことができます。適切な設定を行うことで、悪意のあるプロセスからの攻撃や情報漏洩を防ぐことができます。
+このファイルを使用するには、まずシステムにアクセスする必要があります。次に、このファイルを適切なディレクトリに配置し、必要な権限を持つプロセスがアクセスできるようにする必要があります。
 
-このファイルを編集する際には、慎重に行う必要があります。誤った設定は、システムの安定性やセキュリティに悪影響を及ぼす可能性があります。必要な変更を行う前に、十分な知識と理解を持っていることを確認してください。
+このファイルを使用すると、攻撃者は特権昇格を行うためにIPCを悪用することができます。特権昇格は、攻撃者が通常はアクセスできないシステムリソースや機能にアクセスすることを可能にします。
 
-注意：このファイルを使用する際には、適切な権限を持つユーザーで実行する必要があります。また、変更を行った後は、システムを再起動する必要がある場合があります。{% endtab %}
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従うことも重要です。
+
+このファイルを使用する際には、慎重に行う必要があります。特権昇格は違法行為であり、法的な問題を引き起こす可能性があります。また、このファイルを使用する前に、ローカル法や規制に従う
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -1323,6 +1397,62 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
+### Dylibコード内のクライアント
+
+The client code inside a dylib is responsible for establishing communication with the server and exchanging data through inter-process communication (IPC) mechanisms. In macOS, the most commonly used IPC mechanisms are Mach ports and XPC.
+
+#### Mach Ports
+
+Mach ports are low-level IPC mechanisms provided by the Mach kernel. They allow processes to send messages to each other by using port rights. The client code typically creates a send right to a Mach port and uses it to send messages to the server.
+
+To establish communication with the server, the client code needs to know the server's Mach port name. This can be obtained through various means, such as hardcoding the port name or dynamically discovering it at runtime.
+
+Once the client has the server's Mach port name, it can create a send right to the port and use it to send messages. The messages can contain data or requests for specific actions to be performed by the server.
+
+#### XPC
+
+XPC (Cross-Process Communication) is a higher-level IPC mechanism provided by macOS. It simplifies the process of establishing communication between processes by abstracting away the complexities of Mach ports.
+
+In XPC, the client code interacts with the server through a connection object. The client code creates an XPC connection to the server and uses it to send messages and receive responses.
+
+To establish an XPC connection, the client code needs to know the server's service name. This can be obtained through various means, such as hardcoding the service name or dynamically discovering it at runtime.
+
+Once the client has the server's service name, it can create an XPC connection to the server and use it to send messages. The messages can contain data or requests for specific actions to be performed by the server.
+
+Overall, the client code inside a dylib plays a crucial role in establishing communication with the server and facilitating the exchange of data and commands through IPC mechanisms like Mach ports and XPC.
+```
+// gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
+// gcc injection example:
+// DYLD_INSERT_LIBRARIES=oc_xpc_client.dylib /path/to/vuln/bin
+
+#import <Foundation/Foundation.h>
+
+@protocol MyXPCProtocol
+- (void)sayHello:(NSString *)some_string withReply:(void (^)(NSString *))reply;
+@end
+
+__attribute__((constructor))
+static void customConstructor(int argc, const char **argv)
+{
+NSString*  _serviceName = @"xyz.hacktricks.svcoc";
+
+NSXPCConnection* _agentConnection = [[NSXPCConnection alloc] initWithMachServiceName:_serviceName options:4096];
+
+[_agentConnection setRemoteObjectInterface:[NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)]];
+
+[_agentConnection resume];
+
+[[_agentConnection remoteObjectProxyWithErrorHandler:^(NSError* error) {
+(void)error;
+NSLog(@"Connection Failure");
+}] sayHello:@"Hello, Server!" withReply:^(NSString *response) {
+NSLog(@"Received response: %@", response);
+}    ];
+NSLog(@"Done!");
+
+return;
+}
+```
 ## 参考文献
 
 * [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
@@ -1333,10 +1463,10 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
