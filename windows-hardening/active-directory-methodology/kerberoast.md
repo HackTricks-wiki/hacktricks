@@ -1,6 +1,6 @@
 # Kerberoast
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -15,19 +15,19 @@ Obtenga acceso hoy mismo:
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Kerberoast
 
-El objetivo de **Kerberoasting** es recolectar **tickets TGS para servicios que se ejecutan en nombre de cuentas de usuario** en el AD, no en cuentas de computadora. Por lo tanto, **parte** de estos tickets TGS están **encriptados** con **claves** derivadas de las contraseñas de usuario. Como consecuencia, sus credenciales podrían ser **descifradas sin conexión**.\
-Puede saber que una **cuenta de usuario** se está utilizando como un **servicio** porque la propiedad **"ServicePrincipalName"** no es **nula**.
+El objetivo de **Kerberoasting** es obtener **tickets TGS para servicios que se ejecutan en nombre de cuentas de usuario** en el AD, no en cuentas de computadora. Por lo tanto, **parte** de estos tickets TGS están **encriptados** con **claves** derivadas de las contraseñas de usuario. Como consecuencia, sus credenciales podrían ser **descifradas sin conexión**.\
+Puede saber que se está utilizando una **cuenta de usuario** como un **servicio** porque la propiedad **"ServicePrincipalName"** no es **nula**.
 
-Por lo tanto, para realizar Kerberoasting, solo se necesita una cuenta de dominio que pueda solicitar TGS, lo cual puede ser cualquiera ya que no se requieren privilegios especiales.
+Por lo tanto, para realizar Kerberoasting, solo se necesita una cuenta de dominio que pueda solicitar TGS, lo cual puede ser cualquier persona ya que no se requieren privilegios especiales.
 
-**Necesita credenciales válidas dentro del dominio.**
+**Necesitas credenciales válidas dentro del dominio.**
 
 ### **Ataque**
 
@@ -63,11 +63,7 @@ Get-NetUser -SPN | select serviceprincipalname #Powerview
 ```
 * **Técnica 1: Solicitar TGS y extraerlo de la memoria**
 
-En esta técnica, el objetivo es solicitar un Service Ticket (TGS) a un servidor de dominio y luego extraerlo de la memoria del sistema. El TGS contiene información sensible, como la clave de sesión del servicio, que puede ser utilizada para realizar ataques de fuerza bruta y obtener las contraseñas de los usuarios.
-
-Para llevar a cabo esta técnica, se pueden utilizar herramientas como Mimikatz o Rubeus. Estas herramientas permiten solicitar un TGS para un servicio específico y luego extraerlo de la memoria del sistema. Una vez que se ha obtenido el TGS, se puede utilizar para realizar ataques de fuerza bruta y obtener las contraseñas de los usuarios.
-
-Es importante tener en cuenta que esta técnica requiere privilegios de administrador en el sistema objetivo y puede ser detectada por soluciones de seguridad que monitorean la memoria del sistema en busca de comportamientos sospechosos. Por lo tanto, se recomienda utilizar esta técnica con precaución y solo en entornos controlados y autorizados.
+En esta técnica, aprovechamos una vulnerabilidad en el protocolo Kerberos para solicitar un Service Ticket Granting Service (TGS) a un controlador de dominio. Luego, extraemos el TGS de la memoria del sistema para obtener las credenciales necesarias para realizar ataques de fuerza bruta offline. Este método es efectivo cuando se tiene acceso a un controlador de dominio y se puede ejecutar código en él.
 ```powershell
 #Get TGS in memory from a single user
 Add-Type -AssemblyName System.IdentityModel
@@ -107,9 +103,7 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 Cuando se solicita un TGS, se genera el evento de Windows `4769 - Se solicitó un ticket de servicio Kerberos`.
 {% endhint %}
 
-
-
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** utilizando las herramientas comunitarias más avanzadas del mundo.\
@@ -117,7 +111,7 @@ Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-### Cracking
+### Descifrado
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
@@ -131,24 +125,25 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 ```
 Puedes encontrar herramientas útiles para ataques de **kerberoast** aquí: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)`**, se debe a la hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
-- `ntpdate <IP del DC>` - Obsoleto a partir de Ubuntu 16.04
-- `rdate -n <IP del DC>`
+Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW (Demasiada diferencia de tiempo)`**, se debe a la hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
+
+* `ntpdate <IP del DC>` - Obsoleto a partir de Ubuntu 16.04
+* `rdate -n <IP del DC>`
 
 ### Mitigación
 
-Kerberoast es muy sigiloso si es explotable.
+Kerberoast es muy sigiloso si es explotable
 
-* Evento de seguridad ID 4769: se solicitó un ticket de Kerberos.
+* Evento de seguridad ID 4769 - Se solicitó un ticket de Kerberos
 * Dado que 4769 es muy frecuente, vamos a filtrar los resultados:
-* El nombre del servicio no debe ser krbtgt.
-* El nombre del servicio no debe terminar con $ (para filtrar las cuentas de máquina utilizadas para servicios).
-* El nombre de la cuenta no debe ser machine@domain (para filtrar las solicitudes de máquinas).
-* El código de error de fallo es '0x0' (para filtrar los fallos, 0x0 es éxito).
-* Lo más importante, el tipo de cifrado del ticket es 0x17.
+* El nombre del servicio no debe ser krbtgt
+* El nombre del servicio no debe terminar con $ (para filtrar las cuentas de máquina utilizadas para servicios)
+* El nombre de la cuenta no debe ser machine@domain (para filtrar las solicitudes de máquinas)
+* El código de error de fallo es '0x0' (para filtrar los fallos, 0x0 es éxito)
+* Lo más importante, el tipo de cifrado del ticket es 0x17
 * Mitigación:
-* Las contraseñas de las cuentas de servicio deben ser difíciles de adivinar (más de 25 caracteres).
-* Utilizar cuentas de servicio administradas (cambio automático de contraseña periódicamente y gestión delegada de SPN).
+* Las contraseñas de las cuentas de servicio deben ser difíciles de adivinar (más de 25 caracteres)
+* Utilizar cuentas de servicio administradas (cambio automático de contraseña periódicamente y gestión delegada de SPN)
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
@@ -161,12 +156,12 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al repositorio [hacktricks](https://github.com/carlospolop/hacktricks) y al repositorio [hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\

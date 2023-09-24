@@ -12,15 +12,15 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y en hackear lo inhackeable, ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## Definición
 
-En primer lugar, vamos a definir el concepto. El secuestro de DLL es, en el sentido más amplio, **engañar a una aplicación legítima/confiable para que cargue una DLL arbitraria**. Términos como _Secuestro del Orden de Búsqueda de DLL_, _Secuestro del Orden de Carga de DLL_, _Suplantación de DLL_, _Inyección de DLL_ y _Carga Lateral de DLL_ se utilizan a menudo -equivocadamente- para referirse a lo mismo.
+En primer lugar, vamos a definir el concepto. El secuestro de DLL es, en el sentido más amplio, **engañar a una aplicación legítima/confiable para que cargue una DLL arbitraria**. Términos como _Secuestro del Orden de Búsqueda de DLL_, _Secuestro del Orden de Carga de DLL_, _Suplantación de DLL_, _Inyección de DLL_ y _Carga Lateral de DLL_ se utilizan a menudo -erróneamente- para referirse a lo mismo.
 
 El secuestro de DLL se puede utilizar para **ejecutar** código, obtener **persistencia** y **elevar privilegios**. De los 3, el **menos probable** de encontrar es la **elevación de privilegios** con diferencia. Sin embargo, como esto forma parte de la sección de elevación de privilegios, me centraré en esta opción. Además, ten en cuenta que, independientemente del objetivo, el secuestro de DLL se realiza de la misma manera.
 
@@ -33,7 +33,7 @@ Existen **varios enfoques** entre los que elegir, y el éxito depende de cómo e
 3. **Secuestro de DLL fantasma**: colocar una DLL maliciosa en lugar de una DLL faltante/inexistente que una aplicación legítima intenta cargar \[[4](http://www.hexacorn.com/blog/2013/12/08/beyond-good-ol-run-key-part-5/)].
 4. **Redirección de DLL**: cambiar la ubicación en la que se busca la DLL, por ejemplo, editando la variable de entorno `%PATH%`, o los archivos `.exe.manifest` / `.exe.local` para incluir la carpeta que contiene la DLL maliciosa \[[5](https://docs.microsoft.com/en-gb/windows/win32/sbscs/application-manifests), [6](https://docs.microsoft.com/en-gb/windows/win32/dlls/dynamic-link-library-redirection)].
 5. **Reemplazo de DLL de WinSxS**: reemplazar la DLL legítima por la DLL maliciosa en la carpeta relevante de WinSxS de la DLL objetivo. A menudo se denomina carga lateral de DLL \[[7](https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/rpt-dll-sideloading.pdf)].
-6. **Secuestro de DLL con ruta relativa**: copiar (y opcionalmente renombrar) la aplicación legítima en una carpeta donde el usuario pueda escribir, junto con la DLL maliciosa. En la forma en que se utiliza, esto tiene similitudes con la Ejecución de Proxy Binario (Firmado) \[[8](https://attack.mitre.org/techniques/T1218/)]. Una variación de esto es lo que se llama de manera algo oximorónica 'trae tu propio LOLbin' \[[9](https://www.microsoft.com/security/blog/2019/09/26/bring-your-own-lolbin-multi-stage-fileless-nodersok-campaign-delivers-rare-node-js-based-malware/)], en el que la aplicación legítima se trae con la DLL maliciosa (en lugar de copiarse desde la ubicación legítima en la máquina de la víctima).
+6. **Secuestro de DLL con ruta relativa**: copiar (y opcionalmente renombrar) la aplicación legítima en una carpeta donde el usuario pueda escribir, junto con la DLL maliciosa. En la forma en que se utiliza, esto tiene similitudes con la Ejecución de Proxy Binario (Firmado) \[[8](https://attack.mitre.org/techniques/T1218/)]. Una variación de esto es lo que se llama (de manera algo oximorónica) '_bring your own LOLbin_' \[[9](https://www.microsoft.com/security/blog/2019/09/26/bring-your-own-lolbin-multi-stage-fileless-nodersok-campaign-delivers-rare-node-js-based-malware/)], en la que la aplicación legítima se lleva junto con la DLL maliciosa (en lugar de copiarse desde la ubicación legítima en la máquina de la víctima).
 
 ## Encontrar DLLs faltantes
 
@@ -228,7 +228,7 @@ break;
 return TRUE;
 }
 ```
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 

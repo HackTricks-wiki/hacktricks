@@ -17,11 +17,11 @@
 ### **Establecer una sesión de depuración** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
 [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) es responsable de manejar la **comunicación** entre el depurador y el depurado.\
-Crea dos tuberías con nombres por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (uno terminará en **`-in`** y el otro en **`-out`** y el resto del nombre será el mismo).
+Crea 2 tuberías con nombre por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (una terminará en **`-in`** y la otra en **`-out`** y el resto del nombre será el mismo).
 
-Entonces, si vas al directorio **`$TMPDIR`** de los usuarios, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
+Entonces, si vas al directorio **`$TMPDIR`** del usuario, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 La función [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) manejará la comunicación desde un depurador.
 
@@ -177,9 +177,9 @@ En las versiones x64, esto es sencillo utilizando la técnica de **búsqueda de 
 
 Lo único que queda por hacer es encontrar una dirección desde la cual comenzar nuestra búsqueda de firmas. Para hacer esto, aprovechamos otra función de depuración expuesta, **`MT_GetDCB`**. Esto devuelve una serie de bits de información útiles sobre el proceso objetivo, pero en nuestro caso, nos interesa un campo que contiene la **dirección de una función auxiliar**, **`m_helperRemoteStartAddr`**. Utilizando esta dirección, sabemos exactamente **dónde se encuentra `libcorclr.dll`** en la memoria del proceso objetivo y podemos comenzar nuestra búsqueda de la DFT.
 
-Conociendo esta dirección, es posible sobrescribir el puntero de función con nuestro propio código shell.
+Conociendo esta dirección, es posible sobrescribir el puntero de función con nuestro propio código malicioso.
 
-El código POC completo utilizado para la inyección en PowerShell se puede encontrar [aquí](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+El código completo de POC utilizado para la inyección en PowerShell se puede encontrar [aquí](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## Referencias
 

@@ -1,10 +1,10 @@
 # DCSync
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
-Obtenga acceso hoy mismo:
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Obtenga acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -15,8 +15,8 @@ Obtenga acceso hoy mismo:
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -26,7 +26,7 @@ El permiso **DCSync** implica tener estos permisos sobre el propio dominio: **DS
 
 **Notas importantes sobre DCSync:**
 
-* El ataque **DCSync simula el comportamiento de un Controlador de Dominio y solicita a otros Controladores de Dominio que repliquen información** utilizando el Protocolo Remoto de Replicación de Directorio (MS-DRSR). Debido a que MS-DRSR es una función válida y necesaria de Active Directory, no se puede desactivar ni deshabilitar.
+* El ataque **DCSync simula el comportamiento de un Controlador de Dominio y solicita a otros Controladores de Dominio que repliquen información** utilizando el Protocolo Remoto de Replicación de Directorios (MS-DRSR). Debido a que MS-DRSR es una función válida y necesaria de Active Directory, no se puede desactivar ni deshabilitar.
 * Por defecto, solo los grupos **Domain Admins, Enterprise Admins, Administrators y Domain Controllers** tienen los privilegios necesarios.
 * Si alguna contraseña de cuenta se almacena con cifrado reversible, Mimikatz ofrece la opción de devolver la contraseña en texto claro.
 
@@ -54,39 +54,45 @@ The following steps outline the process to exploit DCSync locally:
 
 5. If successful, `mimikatz` will retrieve the password hash and display it on the screen.
 
-By exploiting DCSync locally, an attacker can gain access to password hashes, which can then be cracked to obtain the actual passwords. This technique highlights the importance of securing domain controllers and limiting administrative access to prevent unauthorized access and potential password leaks.
+By exploiting DCSync locally, an attacker can gain access to password hashes, which can then be cracked to obtain the actual passwords. This technique highlights the importance of securing domain controllers and implementing strong password policies within an Active Directory environment.
+
+### Explotar Localmente
+
+DCSync es una técnica que permite a un atacante hacerse pasar por un controlador de dominio y solicitar la replicación de datos de contraseñas del controlador de dominio objetivo. Esta técnica se puede utilizar para extraer los hashes de contraseñas de la base de datos de Active Directory sin necesidad de privilegios administrativos.
+
+Para explotar DCSync localmente, el atacante necesita tener acceso administrativo a una máquina dentro del dominio. Una vez obtenido el acceso, el atacante puede utilizar la herramienta `mimikatz` para ejecutar el comando DCSync y recuperar los hashes de contraseñas.
+
+Los siguientes pasos describen el proceso para explotar DCSync localmente:
+
+1. Ejecutar un símbolo del sistema elevado en la máquina comprometida.
+
+2. Descargar y ejecutar la herramienta `mimikatz` en la máquina comprometida.
+
+3. Cargar el módulo `lsadump` dentro de `mimikatz` ejecutando el comando `privilege::debug` seguido de `lsadump::dcsync /domain:<nombre_dominio> /user:<nombre_usuario>`.
+
+4. Reemplazar `<nombre_dominio>` con el nombre del dominio objetivo y `<nombre_usuario>` con el nombre de usuario de la cuenta cuyo hash de contraseña se desea recuperar.
+
+5. Si tiene éxito, `mimikatz` recuperará el hash de contraseña y lo mostrará en la pantalla.
+
+Al explotar DCSync localmente, un atacante puede obtener acceso a los hashes de contraseñas, los cuales luego pueden ser descifrados para obtener las contraseñas reales. Esta técnica resalta la importancia de asegurar los controladores de dominio e implementar políticas de contraseñas sólidas dentro de un entorno de Active Directory.
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 ### Explotar de forma remota
 
-DCSync is a technique that allows an attacker to impersonate a domain controller and request password data from the targeted domain controller. This technique takes advantage of the replication process in Active Directory to retrieve password hashes from the targeted domain controller without being detected.
+DCSync is a technique that allows an attacker to impersonate a domain controller and request password data from the targeted domain controller. This technique takes advantage of the replication process in Active Directory to extract password hashes from the targeted domain controller without being detected.
 
-To exploit this vulnerability remotely, the attacker needs to have remote access to a domain-joined machine or a compromised user account with sufficient privileges. The attacker can then use tools like Mimikatz or Impacket to execute the DCSync attack.
+To exploit this vulnerability remotely, the attacker needs to have remote access to a machine within the target network. Once inside, the attacker can use tools like Mimikatz to execute the DCSync attack.
 
-The DCSync attack can be executed in two ways: using the DRSUAPI method or the LDAP method. The DRSUAPI method is the preferred method as it allows the attacker to retrieve password hashes for all domain users, including the krbtgt account, which is used for Kerberos authentication.
+The DCSync attack can be executed in two ways: using the DRSUAPI method or the LDAP method. Both methods allow the attacker to retrieve password hashes from the targeted domain controller.
 
-To execute the DCSync attack remotely using the DRSUAPI method, the attacker needs to run the following command:
+To execute the DCSync attack using the DRSUAPI method, the attacker needs to have administrative privileges on the target machine. By using the "lsadump::dcsync" command in Mimikatz, the attacker can request the password hashes for a specific user or for all users in the domain.
 
-```
-mimikatz # lsadump::dcsync /domain:<domain_name> /user:<username>
-```
+To execute the DCSync attack using the LDAP method, the attacker needs to have a valid domain user account. By using the "lsadump::lsa /inject /name:<username>" command in Mimikatz, the attacker can request the password hashes for the specified user.
 
-Replace `<domain_name>` with the name of the targeted domain and `<username>` with the username of the account for which the password hash is being retrieved.
+Once the password hashes are obtained, the attacker can use tools like John the Ripper or Hashcat to crack the hashes and obtain the plaintext passwords.
 
-The LDAP method can be used if the DRSUAPI method is not available. However, it has some limitations, such as not being able to retrieve the krbtgt account password hash.
-
-To execute the DCSync attack remotely using the LDAP method, the attacker needs to run the following command:
-
-```
-mimikatz # lsadump::dcsync /user:<username> /domain:<domain_name> /dc:<dc_name>
-```
-
-Replace `<username>` with the username of the account for which the password hash is being retrieved, `<domain_name>` with the name of the targeted domain, and `<dc_name>` with the name of the domain controller.
-
-It is important to note that the DCSync attack requires administrative privileges on the targeted domain controller. Additionally, the attack can be detected by monitoring for event ID 4662 in the Windows Security event logs.
-
-By exploiting the DCSync vulnerability remotely, an attacker can retrieve password hashes from a domain controller and use them to perform offline password cracking or gain unauthorized access to other systems within the domain.
+To protect against DCSync attacks, it is important to implement strong security measures such as enforcing complex passwords, enabling multi-factor authentication, and regularly monitoring and auditing Active Directory for any suspicious activity.
 ```powershell
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
@@ -132,15 +138,15 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family).
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com).
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al repositorio [hacktricks](https://github.com/carlospolop/hacktricks) y al repositorio [hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

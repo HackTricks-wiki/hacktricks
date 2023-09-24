@@ -1,6 +1,6 @@
 # Comandos útiles de Linux
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -15,8 +15,8 @@ Obtén acceso hoy mismo:
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -139,7 +139,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
@@ -181,7 +181,7 @@ grep [opciones] [patrón] [archivo(s)]
 
 - `[opciones]`: se utilizan para especificar opciones adicionales, como la búsqueda recursiva en directorios o la ignorancia de mayúsculas y minúsculas.
 - `[patrón]`: es el patrón que se desea buscar en el archivo(s).
-- `[archivo(s)]`: son los archivos en los que se realizará la búsqueda. Si no se especifica ningún archivo, `grep` leerá la entrada estándar.
+- `[archivo(s)]`: son los archivos en los que se desea realizar la búsqueda. Si no se especifica ningún archivo, `grep` leerá la entrada estándar.
 
 ### Ejemplos de uso
 
@@ -197,7 +197,7 @@ grep "palabra_clave" archivo.txt
 grep "palabra_clave" archivo1.txt archivo2.txt archivo3.txt
 ```
 
-3. Buscar una palabra clave en todos los archivos de un directorio (de forma recursiva):
+3. Buscar una palabra clave de forma recursiva en un directorio:
 
 ```
 grep -r "palabra_clave" directorio/
@@ -209,10 +209,10 @@ grep -r "palabra_clave" directorio/
 grep -i "palabra_clave" archivo.txt
 ```
 
-5. Buscar líneas que coincidan con un patrón específico utilizando expresiones regulares:
+5. Utilizar expresiones regulares para realizar una búsqueda avanzada:
 
 ```
-grep "patrón" archivo.txt
+grep -E "patrón_regex" archivo.txt
 ```
 
 Estos son solo algunos ejemplos básicos de cómo utilizar el comando `grep`. Puedes consultar la página de manual (`man grep`) para obtener más información sobre las opciones y funcionalidades avanzadas de `grep`.
@@ -302,13 +302,13 @@ Nmap es una herramienta de escaneo de red muy poderosa y versátil. Aquí hay al
 - `nmap -sn <IP>`: Realiza un escaneo de ping para determinar si una dirección IP está activa.
 - `nmap -sS <IP>`: Realiza un escaneo TCP SYN para determinar los puertos abiertos en una dirección IP.
 - `nmap -sU <IP>`: Realiza un escaneo UDP para determinar los puertos abiertos en una dirección IP.
-- `nmap -p <puertos> <IP>`: Escanea los puertos específicos en una dirección IP.
-- `nmap -A <IP>`: Realiza un escaneo agresivo que incluye detección de sistema operativo, versión de servicios y script de escaneo.
-- `nmap -O <IP>`: Intenta detectar el sistema operativo de una dirección IP.
-- `nmap -v <IP>`: Ejecuta el escaneo en modo verbose para obtener más información detallada.
-- `nmap -oN <archivo> <IP>`: Guarda los resultados del escaneo en un archivo específico.
+- `nmap -p <puertos> <IP>`: Escanea puertos específicos en una dirección IP.
+- `nmap -A <IP>`: Realiza un escaneo agresivo que incluye detección de sistema operativo, versión de servicios y scripts de detección de vulnerabilidades.
+- `nmap -O <IP>`: Intenta determinar el sistema operativo de una dirección IP.
+- `nmap -v <IP>`: Ejecuta Nmap en modo verbose para obtener más información detallada.
+- `nmap -h`: Muestra la ayuda y la lista completa de opciones de Nmap.
 
-Estos son solo algunos ejemplos de los comandos más comunes que puedes utilizar con Nmap. Recuerda que Nmap es una herramienta muy potente y hay muchas opciones y funcionalidades adicionales disponibles. Puedes consultar la documentación oficial de Nmap para obtener más información sobre cómo utilizar esta herramienta de manera efectiva.
+Estos son solo algunos ejemplos de cómo puedes utilizar Nmap para realizar escaneos de red. Recuerda que es importante utilizar esta herramienta de manera ética y obtener el permiso adecuado antes de realizar cualquier escaneo en una red que no sea de tu propiedad.
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -321,50 +321,50 @@ Bash (Bourne Again SHell) es un intérprete de comandos de Unix y un lenguaje de
 
 ### Comandos básicos de Bash
 
+A continuación se presentan algunos comandos básicos de Bash que son útiles para la administración del sistema:
+
 - `ls`: muestra el contenido de un directorio.
 - `cd`: cambia el directorio actual.
-- `pwd`: muestra la ruta del directorio actual.
+- `pwd`: muestra el directorio de trabajo actual.
 - `mkdir`: crea un nuevo directorio.
 - `rm`: elimina archivos y directorios.
 - `cp`: copia archivos y directorios.
 - `mv`: mueve o renombra archivos y directorios.
 - `cat`: muestra el contenido de un archivo.
 - `grep`: busca patrones en archivos.
-- `chmod`: cambia los permisos de un archivo o directorio.
-- `chown`: cambia el propietario de un archivo o directorio.
-- `ssh`: inicia una sesión segura en un servidor remoto.
-- `sudo`: ejecuta un comando con privilegios de superusuario.
+- `chmod`: cambia los permisos de archivos y directorios.
+- `chown`: cambia el propietario de archivos y directorios.
+- `chgrp`: cambia el grupo de archivos y directorios.
 
 ### Redirección y tuberías
 
-- `>`: redirige la salida de un comando a un archivo.
-- `>>`: redirige y agrega la salida de un comando a un archivo.
-- `<`: redirige la entrada de un archivo a un comando.
-- `|`: redirige la salida de un comando a la entrada de otro comando.
+Bash permite redirigir la entrada y salida de los comandos utilizando los siguientes operadores:
 
-### Variables y expansión de comandos
+- `>`: redirige la salida de un comando a un archivo, sobrescribiendo el contenido existente.
+- `>>`: redirige la salida de un comando a un archivo, agregando al contenido existente.
+- `<`: redirige la entrada de un comando desde un archivo.
+- `|`: redirige la salida de un comando a la entrada de otro comando, creando una tubería.
 
-- `$variable`: accede al valor de una variable.
-- `export variable`: hace que una variable esté disponible para los procesos secundarios.
-- `$(comando)`: ejecuta un comando y devuelve su salida.
-- ``comando``: ejecuta un comando y devuelve su salida.
+### Variables de entorno
 
-### Comandos útiles de Bash
+Bash utiliza variables de entorno para almacenar información sobre el entorno del sistema. Algunas variables de entorno comunes son:
 
-- `history`: muestra el historial de comandos.
-- `grep`: busca patrones en archivos.
-- `find`: busca archivos y directorios.
-- `tar`: crea o extrae archivos comprimidos.
-- `wget`: descarga archivos desde Internet.
-- `curl`: realiza solicitudes HTTP.
-- `top`: muestra los procesos en ejecución.
-- `kill`: envía una señal a un proceso.
-- `ps`: muestra los procesos en ejecución.
-- `df`: muestra el espacio en disco utilizado y disponible.
-- `du`: muestra el tamaño de los archivos y directorios.
-- `man`: muestra el manual de un comando.
+- `PATH`: contiene una lista de directorios donde se encuentran los ejecutables.
+- `HOME`: el directorio de inicio del usuario actual.
+- `USER`: el nombre de usuario del usuario actual.
+- `SHELL`: la ruta al intérprete de comandos actual.
 
-Estos son solo algunos de los comandos básicos y útiles de Bash. Bash ofrece una amplia gama de funcionalidades y comandos que pueden ayudarte a administrar y automatizar tareas en tu sistema Linux.
+Puede ver el valor de una variable de entorno utilizando el comando `echo $VARIABLE`.
+
+### Scripting de Bash
+
+Bash también se puede utilizar para escribir scripts, que son secuencias de comandos almacenados en un archivo. Los scripts de Bash se pueden ejecutar utilizando el comando `bash script.sh` o haciendo el archivo ejecutable y ejecutándolo directamente con `./script.sh`.
+
+Los scripts de Bash pueden contener variables, estructuras de control, bucles y funciones, lo que los hace muy flexibles y poderosos para la automatización de tareas.
+
+### Conclusion
+
+Bash es una herramienta poderosa para la administración del sistema en Linux y macOS. Con una comprensión sólida de los comandos básicos y la capacidad de escribir scripts, puede realizar una variedad de tareas de manera eficiente y automatizada.
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
@@ -454,12 +454,12 @@ iptables -P OUTPUT ACCEPT
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\

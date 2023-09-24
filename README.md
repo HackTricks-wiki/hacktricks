@@ -32,7 +32,7 @@ Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [RootedCON](https://www.rootedcon.com/)
 
-<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
 [**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro en ebullición para profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
 
@@ -40,7 +40,7 @@ Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Intigriti](https://www.intigriti.com)
 
-<figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 **Intigriti** es la plataforma de caza de bugs y hacking ético **número 1 de Europa**.
 
@@ -50,10 +50,10 @@ Consejo de caza de bugs: **regístrate** en **Intigriti**, una plataforma premiu
 
 ### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.
 
 Obtén acceso hoy mismo:
 
@@ -109,25 +109,25 @@ Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks
 
 <figure><img src=".gitbook/assets/image (1) (1) (2) (4) (1).png" alt=""><figcaption></figcaption></figure>
 
-[**DragonJAR es una empresa líder en ciberseguridad ofensiva**](https://www.dragonjar.org/) **ubicada en Colombia**. DragonJAR ofrece [servicios integrales de seguridad informática ofensiva, como **pentesting**](https://www.dragonjar.org/servicios-de-seguridad-informatica) en diversas áreas y prácticamente **cualquier tecnología**, simulaciones de ataque **Red Team**, pruebas de seguridad **física**, **pruebas de estrés**, ingeniería social, revisión de seguridad en **código fuente** y capacitación en seguridad informática. Además, organizan la **DragonJAR Security Conference**, [un congreso internacional de seguridad informática](https://www.dragonjarcon.org/) que se ha realizado durante más de una década, convirtiéndose en un escaparate para las últimas investigaciones de seguridad en español y de gran relevancia en la región.
+[**DragonJAR es una empresa líder en ciberseguridad ofensiva**](https://www.dragonjar.org/) **ubicada en Colombia**. DragonJAR ofrece [servicios integrales de seguridad informática ofensiva, como **pentesting**](https://www.dragonjar.org/servicios-de-seguridad-informatica) en diversas áreas y prácticamente **cualquier tecnología**, simulaciones de ataque **Red Team**, pruebas de seguridad **física**, **pruebas de estrés**, ingeniería social, revisión de seguridad en **código fuente** y capacitación en seguridad informática. Además, organizan la **DragonJAR Security Conference**, [un congreso internacional de seguridad informática](https://www.dragonjarcon.org/) que se ha realizado durante más de una década, convirtiéndose en el escaparate para las últimas investigaciones de seguridad en español y de gran relevancia en la región.
 
 ## Licencia
 
-**Derechos de autor © Carlos Polop 2023. A menos que se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto en** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **de Carlos Polop está bajo licencia** [**Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
+**Copyright © Carlos Polop 2023. Excepto donde se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto de** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **de Carlos Polop está bajo licencia** [**Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
 **Si deseas utilizarlo con fines comerciales, contáctame.**
 
 ## **Descargo de responsabilidad**
 
 {% hint style="danger" %}
-Este libro, 'HackTricks', tiene fines educativos e informativos únicamente. El contenido de este libro se proporciona tal cual, y los autores y editores no hacen ninguna representación o garantía de ningún tipo, expresa o implícita, sobre la integridad, precisión, confiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos en este libro. Cualquier confianza que deposites en dicha información es estrictamente bajo tu propio riesgo.
+Este libro, 'HackTricks', tiene fines educativos e informativos únicamente. El contenido de este libro se proporciona tal cual, y los autores y editores no hacen ninguna representación o garantía de ningún tipo, expresa o implícita, sobre la integridad, exactitud, confiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos en este libro. Cualquier confianza que deposites en dicha información es estrictamente bajo tu propio riesgo.
 
 Los autores y editores no serán responsables en ningún caso de ninguna pérdida o daño, incluyendo, entre otros, pérdida o daño indirecto o consecuente, o cualquier pérdida o daño que surja de la pérdida de datos o beneficios derivados del uso de este libro.
 
-Además, las técnicas y consejos descritos en este libro se proporcionan únicamente con fines educativos e informativos, y no deben utilizarse para actividades ilegales o maliciosas. Los autores y editores no aprueban ni respaldan ninguna actividad ilegal o éticamente cuestionable, y cualquier uso de la información contenida en este libro es bajo tu propio riesgo y discreción.
+Además, las técnicas y consejos descritos en este libro se proporcionan únicamente con fines educativos e informativos, y no deben utilizarse para actividades ilegales o maliciosas. Los autores y editores no aprueban ni respaldan ninguna actividad ilegal o éticamente incorrecta, y cualquier uso de la información contenida en este libro es bajo el propio riesgo y discreción del usuario.
 
 El usuario es el único responsable de cualquier acción tomada basada en la información contenida en este libro, y siempre debe buscar asesoramiento y asistencia profesional al intentar implementar cualquiera de las técnicas o consejos descritos en él.
 
-Al utilizar este libro, el usuario acepta liberar a los autores y editores de cualquier responsabilidad por cualquier daño, pérdida o perjuicio que pueda resultar del uso de este libro o de cualquiera de la información contenida en él.
+Al utilizar este libro, el usuario acepta liberar a los autores y editores de cualquier responsabilidad y responsabilidad por cualquier daño, pérdida o daño que pueda resultar del uso de este libro o de cualquiera de la información contenida en él.
 {% endhint %}
 
 <details>

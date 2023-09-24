@@ -54,7 +54,7 @@ Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente
 Sin embargo, este proceso solo se aplica a las tareas predefinidas del sistema. Las tareas que no son del sistema aún funcionan como se describe originalmente, lo que podría permitir la suplantación.
 ### Ejemplo de código
 
-Observa cómo el **receptor** **asigna** un puerto, crea un **derecho de envío** para el nombre `org.darlinghq.example` y lo envía al **servidor de arranque** mientras el receptor solicita el **derecho de envío** de ese nombre y lo utiliza para **enviar un mensaje**.
+Observa cómo el **receptor** **asigna** un puerto, crea un **derecho de envío** para el nombre `org.darlinghq.example` y lo envía al **servidor de inicio** mientras el receptor solicita el **derecho de envío** de ese nombre y lo utiliza para **enviar un mensaje**.
 
 {% tabs %}
 {% tab title="receptor.c" %}
@@ -235,7 +235,7 @@ printf("Sent a message\n");
 
 ### Inyección de shellcode en un hilo a través del puerto de la tarea&#x20;
 
-Puedes obtener un shellcode de:
+Puedes obtener un shellcode desde:
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -493,9 +493,9 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ```
 ### Inyección de Dylib en un hilo a través del puerto de tarea
 
-En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la API de **pthread** de tipo **posix**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
+En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la API **posix `pthread`**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
 
-Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no era necesario trabajar con APIs compatibles con posix, solo con Mach. Inyecciones **más complejas** requerirían que el hilo también sea compatible con posix.
+Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no era necesario trabajar con APIs compatibles con posix, solo con Mach. Las inyecciones **más complejas** requerirían que el hilo también sea **compatible con posix**.
 
 Por lo tanto, para **mejorar el hilo**, se debe llamar a **`pthread_create_from_mach_thread`**, que creará un pthread válido. Luego, este nuevo pthread podría **llamar a dlopen** para **cargar una dylib** del sistema, por lo que en lugar de escribir nuevo shellcode para realizar diferentes acciones, es posible cargar bibliotecas personalizadas.
 
@@ -847,7 +847,7 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-Los que están en **`LaunchDameons`** son ejecutados por root. Por lo tanto, si un proceso no privilegiado puede comunicarse con uno de ellos, podría ser capaz de escalar privilegios.
+Los que están en **`LaunchDameons`** son ejecutados por root. Por lo tanto, si un proceso sin privilegios puede comunicarse con uno de ellos, podría ser capaz de escalar privilegios.
 
 ### Mensajes de eventos XPC
 
@@ -927,6 +927,18 @@ return 0;
 }
 ```
 {% tab title="xpc_client.c" %}
+
+El archivo `xpc_client.c` contiene un ejemplo de cliente XPC para macOS. XPC (Comunicación entre Procesos) es un mecanismo de comunicación entre procesos utilizado en macOS para permitir que los procesos se comuniquen entre sí de manera segura. Este archivo muestra cómo crear un cliente XPC básico que se conecta a un servicio XPC y envía mensajes a través de él.
+
+El cliente XPC se crea utilizando la API `xpc_connection_create` para establecer una conexión con el servicio XPC. Luego, se utiliza la función `xpc_connection_send_message_with_reply` para enviar un mensaje al servicio y esperar una respuesta. El mensaje se crea utilizando la función `xpc_dictionary_create` y se envía utilizando la función `xpc_connection_send_message`.
+
+Una vez que se envía el mensaje, el cliente XPC espera una respuesta utilizando la función `xpc_connection_send_message_with_reply_sync`. Esta función bloquea el hilo actual hasta que se recibe una respuesta del servicio XPC. La respuesta se procesa utilizando la función `xpc_dictionary_get_string` para obtener el contenido del mensaje de respuesta.
+
+Finalmente, se utiliza la función `xpc_release` para liberar la memoria asignada a los objetos XPC creados durante la comunicación.
+
+Este ejemplo de cliente XPC es solo una introducción básica a la comunicación entre procesos en macOS utilizando XPC. Se pueden realizar muchas otras operaciones y configuraciones más avanzadas utilizando la API XPC.
+
+{% endtab %}
 ```c
 // gcc xpc_client.c -o xpc_client
 
@@ -1075,33 +1087,15 @@ return 0;
 ```
 {% tab title="xyz.hacktricks.svcoc.plist" %}
 
-# xyz.hacktricks.svcoc.plist
+El archivo `xyz.hacktricks.svcoc.plist` es un archivo de propiedad de `macOS` que se utiliza para configurar y controlar los servicios de `SVCOC` (Servicio de Comunicación entre Procesos de Objeto Compartido). Este archivo contiene información sobre los servicios que se deben iniciar y configurar durante el arranque del sistema.
 
-Este archivo de propiedad de `xyz.hacktricks.svcoc` es un archivo de preferencias de lanzamiento de macOS que se utiliza para configurar la comunicación entre procesos en el sistema operativo.
+La comunicación entre procesos en `macOS` se realiza a través de `IPC` (Inter-Process Communication), que permite a los procesos compartir información y recursos entre sí. El `IPC` se basa en el uso de puertos y mensajes para enviar y recibir datos entre procesos.
 
-## Descripción
+El archivo `xyz.hacktricks.svcoc.plist` se encuentra en la ubicación `/Library/LaunchDaemons/` y se utiliza para definir los servicios que se ejecutarán como demonios durante el arranque del sistema. Estos servicios pueden ser utilizados por otros procesos para comunicarse entre sí.
 
-En macOS, la comunicación entre procesos se realiza a través de un mecanismo llamado IPC (Inter-Process Communication). Este mecanismo permite que los procesos se comuniquen entre sí y compartan información de manera segura.
+Es importante tener en cuenta que la modificación incorrecta de este archivo puede afectar el funcionamiento del sistema y causar problemas de seguridad. Por lo tanto, se recomienda tener precaución al realizar cambios en este archivo y seguir las mejores prácticas de seguridad de `macOS`.
 
-El archivo `xyz.hacktricks.svcoc.plist` contiene la configuración de IPC para el proceso `xyz.hacktricks.svcoc`. Define cómo se establece la comunicación entre este proceso y otros procesos en el sistema.
-
-## Ubicación
-
-El archivo `xyz.hacktricks.svcoc.plist` se encuentra en la siguiente ubicación en el sistema de archivos de macOS:
-
-```
-/Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
-```
-
-## Modificación
-
-La modificación del archivo `xyz.hacktricks.svcoc.plist` puede permitir la escalada de privilegios en el sistema. Los atacantes pueden modificar la configuración de IPC para establecer comunicación con procesos maliciosos y obtener acceso no autorizado al sistema.
-
-Es importante asegurarse de que el archivo `xyz.hacktricks.svcoc.plist` tenga permisos adecuados y esté protegido contra modificaciones no autorizadas.
-
-## Referencias
-
-- [https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+Para obtener más información sobre la configuración y el uso de `IPC` en `macOS`, consulte la documentación oficial de `Apple`.
 
 {% endtab %}
 ```xml
@@ -1144,6 +1138,52 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 # Clean
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
+```
+### Cliente dentro de un código Dylib
+
+The client code inside a Dylib is responsible for establishing communication with the server and exchanging messages through inter-process communication (IPC). This code is typically written in Objective-C or C and is compiled into a dynamic library (Dylib) that can be loaded by other processes.
+
+To interact with the server, the client code uses IPC mechanisms such as Mach ports or UNIX domain sockets. These mechanisms allow processes to send and receive messages, making it possible for the client to request services from the server and receive responses.
+
+The client code needs to follow a specific protocol defined by the server in order to communicate effectively. This protocol includes the format of the messages, the expected responses, and any authentication or encryption requirements.
+
+By embedding the client code within a Dylib, it can be easily loaded and used by multiple processes. This allows for code reuse and simplifies the implementation of IPC communication between processes.
+
+It is important to ensure that the client code is secure and does not introduce vulnerabilities that could be exploited by malicious actors. Proper input validation, secure communication channels, and authentication mechanisms should be implemented to prevent unauthorized access or data leakage.
+
+Overall, the client code inside a Dylib plays a crucial role in facilitating communication between processes and enabling the exchange of information and services.
+```
+// gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
+// gcc injection example:
+// DYLD_INSERT_LIBRARIES=oc_xpc_client.dylib /path/to/vuln/bin
+
+#import <Foundation/Foundation.h>
+
+@protocol MyXPCProtocol
+- (void)sayHello:(NSString *)some_string withReply:(void (^)(NSString *))reply;
+@end
+
+__attribute__((constructor))
+static void customConstructor(int argc, const char **argv)
+{
+NSString*  _serviceName = @"xyz.hacktricks.svcoc";
+
+NSXPCConnection* _agentConnection = [[NSXPCConnection alloc] initWithMachServiceName:_serviceName options:4096];
+
+[_agentConnection setRemoteObjectInterface:[NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)]];
+
+[_agentConnection resume];
+
+[[_agentConnection remoteObjectProxyWithErrorHandler:^(NSError* error) {
+(void)error;
+NSLog(@"Connection Failure");
+}] sayHello:@"Hello, Server!" withReply:^(NSString *response) {
+NSLog(@"Received response: %@", response);
+}    ];
+NSLog(@"Done!");
+
+return;
+}
 ```
 ## Referencias
 

@@ -1,6 +1,6 @@
 # ACLs - DACLs/SACLs/ACEs
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
@@ -15,8 +15,8 @@ Obtén acceso hoy mismo:
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -37,7 +37,7 @@ Un DACL (a menudo mencionado como ACL) identifica a los usuarios y grupos a los 
 
 ### **Lista de control de acceso del sistema (SACL)**
 
-Los SACLs permiten supervisar el acceso a objetos seguros. Los ACEs en un SACL determinan **qué tipos de acceso se registran en el Registro de eventos de seguridad**. Con herramientas de supervisión, esto podría generar una alarma para las personas adecuadas si los usuarios malintencionados intentan acceder al objeto seguro, y en un escenario de incidente podemos utilizar los registros para rastrear los pasos hacia atrás en el tiempo. Y por último, se puede habilitar el registro para solucionar problemas de acceso.
+Los SACLs permiten supervisar el acceso a objetos seguros. Los ACEs en un SACL determinan **qué tipos de acceso se registran en el Registro de eventos de seguridad**. Con herramientas de supervisión, esto puede generar una alarma para las personas adecuadas si los usuarios malintencionados intentan acceder al objeto seguro, y en un escenario de incidente podemos utilizar los registros para rastrear los pasos hacia atrás en el tiempo. Y por último, se puede habilitar el registro para solucionar problemas de acceso.
 
 ## Cómo utiliza el sistema las ACLs
 
@@ -92,7 +92,7 @@ El orden canónico asegura que se cumpla lo siguiente:
 * Un ACE de **denegación de acceso explícito se aplica independientemente de cualquier ACE de acceso permitido explícito**. Esto significa que el propietario del objeto puede definir permisos que permitan el acceso a un grupo de usuarios y denieguen el acceso a un subconjunto de ese grupo.
 * Todos los ACEs **explícitos se procesan antes que cualquier ACE heredado**. Esto es consistente con el concepto de control de acceso discrecional: el acceso a un objeto hijo (por ejemplo, un archivo) está a discreción del propietario del hijo, no del propietario del objeto padre (por ejemplo, una carpeta). El propietario de un objeto hijo puede definir permisos directamente en el hijo. El resultado es que los efectos de los permisos heredados se modifican.
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
@@ -122,7 +122,7 @@ Y por último, tenemos el SACL en la pestaña de Auditoría:
 
 En este ejemplo, el grupo de acceso permitido es "Everyone" y el grupo de acceso denegado es "Marketing", un subconjunto de "Everyone".
 
-Deseas denegar el acceso del grupo "Marketing" a una carpeta llamada "Cost". Si los ACEs de la carpeta "Cost" están en orden canónico, el ACE que deniega a "Marketing" se coloca antes del ACE que permite a "Everyone".
+Deseas denegar el acceso del grupo "Marketing" a una carpeta llamada "Cost". Si los ACEs de la carpeta "Cost" están en orden canónico, el ACE que deniega el acceso a "Marketing" se coloca antes del ACE que permite a "Everyone".
 
 Durante una verificación de acceso, el sistema operativo recorre los ACEs en el orden en que aparecen en el DACL del objeto, de modo que el ACE de denegación se procesa antes que el ACE de permitir. Como resultado, los usuarios que son miembros del grupo "Marketing" se les deniega el acceso. Todos los demás tienen acceso al objeto.
 
@@ -166,7 +166,7 @@ Esta capacidad es la razón por la que los ACE específicos del objeto se llaman
 
 Existen diferencias similares en cómo los dos tipos de ACE controlan el acceso a los objetos.
 
-Un ACE específico del objeto puede aplicarse a cualquier propiedad individual de un objeto o a un conjunto de propiedades para ese objeto. Este tipo de ACE se utiliza solo en una ACL para objetos de Active Directory, que, a diferencia de otros tipos de objetos, almacenan la mayor parte de su información en propiedades. A menudo es deseable colocar controles independientes en cada propiedad de un objeto de Active Directory, y los ACEs específicos del objeto hacen posible eso.
+Un ACE específico del objeto puede aplicarse a cualquier propiedad individual de un objeto o a un conjunto de propiedades para ese objeto. Este tipo de ACE se utiliza solo en una ACL para objetos de Active Directory, que, a diferencia de otros tipos de objetos, almacenan la mayor parte de su información en propiedades. A menudo es deseable colocar controles independientes en cada propiedad de un objeto de Active Directory, y los ACE específicos del objeto hacen posible eso.
 
 Por ejemplo, al definir permisos para un objeto de usuario, puedes usar un ACE específico del objeto para permitir que el Principal Self (es decir, el usuario) tenga acceso de escritura a la propiedad Phone-Home-Primary (homePhone), y puedes usar otros ACEs específicos del objeto para denegar el acceso del Principal Self a la propiedad Logon-Hours (logonHours) y otras propiedades que establecen restricciones en la cuenta de usuario.
 
@@ -206,15 +206,15 @@ La siguiente tabla muestra el diseño de cada ACE.
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al repositorio de [hacktricks](https://github.com/carlospolop/hacktricks) y [hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con facilidad, utilizando las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con facilidad, impulsados por las **herramientas comunitarias más avanzadas del mundo**.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
