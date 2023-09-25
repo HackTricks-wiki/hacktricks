@@ -25,7 +25,7 @@ Las recompensas de HackenProof se lanzan solo cuando sus clientes depositan el p
 **Conviértete en la leyenda del hacker web3**\
 Gana puntos de reputación con cada error verificado y conquista la cima de la clasificación semanal.
 
-[**Regístrate en HackenProof**](https://hackenproof.com/register) ¡comienza a ganar con tus hacks!
+[**Regístrate en HackenProof**](https://hackenproof.com/register) y comienza a ganar con tus hacks!
 
 {% embed url="https://hackenproof.com/register" %}
 
@@ -64,10 +64,11 @@ Si no estás familiarizado con macOS, debes comenzar aprendiendo los conceptos b
 {% endcontent-ref %}
 
 * **macOS de código abierto**: [https://opensource.apple.com/](https://opensource.apple.com/)
+* Para descargar un `tar.gz`, cambia una URL como [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) a [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
-En las empresas, los sistemas **macOS** probablemente estén **gestionados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona eso**:
+En las empresas, es muy probable que los sistemas **macOS** estén **gestionados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
 
 {% content-ref url="../macos-red-teaming/macos-mdm/" %}
 [macos-mdm](../macos-red-teaming/macos-mdm/)
@@ -89,32 +90,32 @@ En las empresas, los sistemas **macOS** probablemente estén **gestionados con u
 
 ### Permisos de Archivos
 
-Si un **proceso en ejecución como root escribe** un archivo que puede ser controlado por un usuario, el usuario podría aprovechar esto para **elevar privilegios**.\
+Si un **proceso que se ejecuta como root escribe** un archivo que puede ser controlado por un usuario, el usuario podría aprovechar esto para **elevar privilegios**.\
 Esto podría ocurrir en las siguientes situaciones:
 
-* El archivo utilizado ya fue creado por un usuario (propiedad del usuario).
-* El archivo utilizado es escribible por el usuario debido a un grupo.
-* El archivo utilizado está dentro de un directorio propiedad del usuario (el usuario podría crear el archivo).
-* El archivo utilizado está dentro de un directorio propiedad de root, pero el usuario tiene acceso de escritura sobre él debido a un grupo (el usuario podría crear el archivo).
+* El archivo utilizado ya fue creado por un usuario (propiedad del usuario)
+* El archivo utilizado es escribible por el usuario debido a un grupo
+* El archivo utilizado está dentro de un directorio propiedad del usuario (el usuario podría crear el archivo)
+* El archivo utilizado está dentro de un directorio propiedad de root pero el usuario tiene acceso de escritura sobre él debido a un grupo (el usuario podría crear el archivo)
 
 Poder **crear un archivo** que va a ser **utilizado por root**, permite a un usuario aprovechar su contenido o incluso crear **enlaces simbólicos/hardlinks** para apuntarlo a otro lugar.
 
-Para este tipo de vulnerabilidades, no olvides **verificar los instaladores `.pkg`** vulnerables:
+Para este tipo de vulnerabilidades, no olvides **verificar los instaladores `.pkg` vulnerables**:
 
 {% content-ref url="macos-files-folders-and-binaries/macos-installers-abuse.md" %}
 [macos-installers-abuse.md](macos-files-folders-and-binaries/macos-installers-abuse.md)
 {% endcontent-ref %}
+### Abuso de privilegios y derechos mediante el abuso de procesos
 
-### Abuso de Privilegios y Entitlements a través del abuso de procesos
-
-Si un proceso puede **inyectar código en otro proceso con mejores privilegios o entitlements** o contactarlo para realizar acciones con privilegios, podría elevar privilegios y eludir medidas defensivas como [Sandbox](macos-security-protections/macos-sandbox/) o [TCC](macos-security-protections/macos-tcc/).
+Si un proceso puede **inyectar código en otro proceso con mejores privilegios o derechos** o contactarlo para realizar acciones con privilegios, podría escalar privilegios y evadir medidas defensivas como [Sandbox](macos-security-protections/macos-sandbox/) o [TCC](macos-security-protections/macos-tcc/).
 
 {% content-ref url="macos-proces-abuse/" %}
 [macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
-### Manejadores de aplicaciones de extensiones de archivos y esquemas de URL
 
-Las aplicaciones extrañas registradas por extensiones de archivos podrían ser abusadas y diferentes aplicaciones pueden registrarse para abrir protocolos específicos.
+### Manipulación de extensiones de archivo y controladores de aplicaciones de esquema de URL
+
+Las aplicaciones extrañas registradas por extensiones de archivo podrían ser abusadas y diferentes aplicaciones pueden registrarse para abrir protocolos específicos.
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
@@ -125,7 +126,7 @@ Las aplicaciones extrañas registradas por extensiones de archivos podrían ser 
 ### CVE-2020-9771 - Bypass de TCC y escalada de privilegios en mount\_apfs
 
 **Cualquier usuario** (incluso los no privilegiados) puede crear y montar una instantánea de Time Machine y **acceder a TODOS los archivos** de esa instantánea.\
-El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), lo cual debe ser otorgado por un administrador.
+El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador.
 
 {% code overflow="wrap" %}
 ```bash
