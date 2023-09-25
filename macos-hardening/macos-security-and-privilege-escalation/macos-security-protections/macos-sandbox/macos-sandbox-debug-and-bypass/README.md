@@ -95,7 +95,7 @@ echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
 {% endhint %}
 
-Let's debug the chess application to see when is the Sandbox loaded:
+Let's debug the application to see when is the Sandbox loaded:
 
 ```bash
 # Load app in debugging
@@ -282,6 +282,20 @@ Note that **even shellcodes** in ARM64 needs to be linked in `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
+```
+
+### Entitlements
+
+Note that even if some **actions** might be **allowed by at he sandbox** if an application has an specific **entitlement**, like in:
+
+```scheme
+(when (entitlement "com.apple.security.network.client")
+      (allow network-outbound (remote ip))
+      (allow mach-lookup
+             (global-name "com.apple.airportd")
+             (global-name "com.apple.cfnetwork.AuthBrokerAgent")
+             (global-name "com.apple.cfnetwork.cfnetworkagent")
+             [...]
 ```
 
 ### Abusing Auto Start Locations

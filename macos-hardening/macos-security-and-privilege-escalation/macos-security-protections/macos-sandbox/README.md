@@ -16,7 +16,7 @@
 
 MacOS Sandbox (initially called Seatbelt) **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
 
-Any app with the **entitlement** **`com.apple.security.app-sandbox`** will be executed inside the sandbox. **Apple binaries** are usually executed inside a Sanbox and in order to publish inside the **App Store**, **this entitlement is mandatory**. So most applications will be executed inside the sandbox.
+Any app with the **entitlement** **`com.apple.security.app-sandbox`** will be executed inside the sandbox. **Apple binaries** are usually executed inside a Sandbox and in order to publish inside the **App Store**, **this entitlement is mandatory**. So most applications will be executed inside the sandbox.
 
 In order to control what a process can or cannot do the **Sandbox has hooks** in all **syscalls** across the kernel. **Depending** on the **entitlements** of the app the Sandbox will **allow** certain actions.
 
@@ -27,7 +27,7 @@ Some important components of the Sandbox are:
 * A **daemon** running in userland `/usr/libexec/sandboxd`
 * The **containers** `~/Library/Containers`
 
-Inside the containers folder you can find **a folder for each app executed sanboxed** with the name of the bundle id:
+Inside the containers folder you can find **a folder for each app executed sandboxed** with the name of the bundle id:
 
 ```bash
 ls -l ~/Library/Containers
@@ -73,6 +73,11 @@ Note that even if the symlinks are there to "escape" from the Sandbox and access
 # Get permissions
 plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 
+# Binary sandbox profile
+<key>SandboxProfileData</key>
+<data>
+AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
+		
 # In this file you can find the entitlements:
 <key>Entitlements</key>
 	<dict>
@@ -82,6 +87,11 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 		<true/>
 		<key>com.apple.appattest.spi</key>
 		<true/>
+		<key>keychain-access-groups</key>
+		<array>
+			<string>6N38VWS5BX.ru.keepcoder.Telegram</string>
+			<string>6N38VWS5BX.ru.keepcoder.TelegramShare</string>
+		</array>
 [...]
 
 # Some parameters
@@ -102,6 +112,8 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 		<string>/Users/username/Documents</string>
 		<string>/Users/username/Library/Calendars</string>
 		<string>/Users/username/Desktop</string>
+<key>RedirectedPaths</key>
+	<array/>
 [...]
 ```
 
@@ -211,6 +223,12 @@ Bypasses examples:
 
 * [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
 * [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (they are able to write files outside the sandbox whose name starts with `~$`).
+
+### MacOS Sandbox Profiles
+
+macOS stores system sandbox profiles in two locations: **/usr/share/sandbox/** and **/System/Library/Sandbox/Profiles**.
+
+And if a third-party application carry the _**com.apple.security.app-sandbox**_ entitlement, the system applies the **/System/Library/Sandbox/Profiles/application.sb** profile to that process.
 
 ### Debug & Bypass Sandbox
 
