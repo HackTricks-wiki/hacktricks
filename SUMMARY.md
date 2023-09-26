@@ -540,7 +540,7 @@
   * [Cookie Bomb](pentesting-web/hacking-with-cookies/cookie-bomb.md)
 * [CORS - Misconfigurations & Bypass](pentesting-web/cors-bypass.md)
 * [CRLF (%0D%0A) Injection](pentesting-web/crlf-0d-0a.md)
-* [Cross-site WebSocket hijacking (CSWSH)](pentesting-web/cross-site-websocket-hijacking-cswsh.md)
+* [WebSocket Attacks](pentesting-web/websocket-attacks.md)
 * [CSRF (Cross Site Request Forgery)](pentesting-web/csrf-cross-site-request-forgery.md)
 * [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection/README.md)
   * [SS-Leaks](pentesting-web/dangling-markup-html-scriptless-injection/ss-leaks.md)
