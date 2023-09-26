@@ -129,6 +129,12 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 
 These items are stored in the file /Users/\<username>/Library/Application Support/com.apple.backgroundtaskmanagementagent
 
+### ZIP as Login Item
+
+If you store a **ZIP** file as a **Login Item** the **`Archive Utility`** will open it and if the zip was for example stored in **`~/Library`** and contained the Folder **`LaunchAgents/file.plist`** with a backdoor, that folder will be created (it isn't by default) and the plist will be added so the next time the user logs in again, the **backdoor indicated in the plist will be executed**.
+
+Another options would be to create the files **`.bash_profile`** and **`.zshenv`** inside the user HOME so if the folder LaunchAgents already exist this technique would still work.
+
 ### At
 
 “At tasks” are used to **schedule tasks at specific times**.\
@@ -184,6 +190,34 @@ In the previous example we have created and deleted a **LoginHook**, it's also p
 
 The root user one is stored in `/private/var/root/Library/Preferences/com.apple.loginwindow.plist`
 
+### Applications Preferences
+
+In **`~/Library/Preferences`** are store the preferences of the user in the Applications. Some of these preferences can hold a configuration to **execute other applications/scripts**.
+
+For example, the Terminal can execute a command in the Startup:
+
+<figure><img src="../.gitbook/assets/image (676).png" alt="" width="495"><figcaption></figcaption></figure>
+
+This config is reflected in the file **`~/Library/Preferences/com.apple.Terminal.plist`** like this:
+
+```bash
+[...]
+"Window Settings" => {
+    "Basic" => {
+      "CommandString" => "touch /tmp/terminal_pwn"
+      "Font" => {length = 267, bytes = 0x62706c69 73743030 d4010203 04050607 ... 00000000 000000cf }
+      "FontAntialias" => 1
+      "FontWidthSpacing" => 1.004032258064516
+      "name" => "Basic"
+      "ProfileCurrentVersion" => 2.07
+      "RunCommandAsShell" => 0
+      "type" => "Window Settings"
+    }
+[...]
+```
+
+So, if the plist of the preferences of the terminal in the system could be overwritten, the the **`open`** functionality can be used to **open the terminal and that command will be executed**.
+
 ### Emond
 
 Apple introduced a logging mechanism called **emond**. It appears it was never fully developed, and development may have been **abandoned** by Apple for other mechanisms, but it remains **available**.
@@ -200,7 +234,9 @@ ls -l /private/var/db/emondClients
 
 ### Startup Items
 
-\{% hint style="danger" %\} **This is deprecated, so nothing should be found in the following directories.** \{% endhint %\}
+{% hint style="danger" %}
+**This is deprecated, so nothing should be found in the following directories.**
+{% endhint %}
 
 A **StartupItem** is a **directory** that gets **placed** in one of these two folders. `/Library/StartupItems/` or `/System/Library/StartupItems/`
 
