@@ -4,9 +4,9 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -14,11 +14,11 @@
 
 ## 基本情報
 
-MacOSサンドボックス（最初はSeatbeltと呼ばれていました）は、**サンドボックスプロファイルで指定された許可されたアクションに制限**されるように、サンドボックス内で実行されるアプリケーションの動作を制御します。これにより、**アプリケーションが予期されたリソースにのみアクセスすることが保証**されます。
+MacOS Sandbox（最初はSeatbeltと呼ばれていました）は、**サンドボックスプロファイルで指定された許可されたアクションに制限**された状態で実行されるアプリケーションの動作を制限します。これにより、**アプリケーションが予期されたリソースにのみアクセスすることが保証**されます。
 
 **`com.apple.security.app-sandbox`**という**エンタイトルメント**を持つアプリは、サンドボックス内で実行されます。**Appleのバイナリ**は通常、サンドボックス内で実行され、**App Store**に公開するためには、**このエンタイトルメントが必須**です。したがって、ほとんどのアプリケーションはサンドボックス内で実行されます。
 
-プロセスが何を行えるか、行えないかを制御するために、サンドボックスにはカーネル全体の**すべてのシスコールにフック**があります。アプリの**エンタイトルメント**に応じて、サンドボックスは特定のアクションを**許可**します。
+プロセスが何を行えるか、行えないかを制御するために、**サンドボックスにはカーネル全体のすべてのシスコールにフックがあります**。アプリのエンタイトルメントに応じて、サンドボックスは特定のアクションを許可します。
 
 サンドボックスの重要なコンポーネントには次のものがあります：
 
@@ -27,7 +27,7 @@ MacOSサンドボックス（最初はSeatbeltと呼ばれていました）は�
 * ユーザーランドで実行される**デーモン** `/usr/libexec/sandboxd`
 * **コンテナ** `~/Library/Containers`
 
-コンテナフォルダ内には、**バンドルIDの名前で実行される各サンドボックス化されたアプリのフォルダ**があります：
+コンテナフォルダ内には、**バンドルIDの名前でサンドボックス内で実行される各アプリのフォルダ**があります：
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -38,7 +38,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-各バンドルIDフォルダ内には、アプリの**plist**と**データディレクトリ**が含まれています。
+各バンドルIDフォルダの中には、アプリの**plist**と**データディレクトリ**があります。
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -68,6 +68,11 @@ drwx------   2 username  staff    64 Mar 24 18:02 tmp
 # Get permissions
 plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 
+# Binary sandbox profile
+<key>SandboxProfileData</key>
+<data>
+AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
+
 # In this file you can find the entitlements:
 <key>Entitlements</key>
 <dict>
@@ -77,6 +82,11 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 <true/>
 <key>com.apple.appattest.spi</key>
 <true/>
+<key>keychain-access-groups</key>
+<array>
+<string>6N38VWS5BX.ru.keepcoder.Telegram</string>
+<string>6N38VWS5BX.ru.keepcoder.TelegramShare</string>
+</array>
 [...]
 
 # Some parameters
@@ -97,6 +107,8 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 <string>/Users/username/Documents</string>
 <string>/Users/username/Library/Calendars</string>
 <string>/Users/username/Desktop</string>
+<key>RedirectedPaths</key>
+<array/>
 [...]
 ```
 ### サンドボックスプロファイル
@@ -131,7 +143,7 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 * **`/System/Library/Sandbox/Profiles`**&#x20;
 * 他のサンドボックスプロファイルは[https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles)で確認できます。
 
-**App Store**のアプリは、**プロファイル** **`/System/Library/Sandbox/Profiles/application.sb`**を使用します。このプロファイルでは、**`com.apple.security.network.server`**などのエンタイトルメントがプロセスがネットワークを使用することを許可しているかどうかを確認できます。
+**App Store**アプリは、**プロファイル** **`/System/Library/Sandbox/Profiles/application.sb`**を使用します。このプロファイルでは、**`com.apple.security.network.server`**などのエンタイトルメントがプロセスがネットワークを使用することを許可しているかどうかを確認できます。
 
 SIPは、/System/Library/Sandbox/rootless.confにあるplatform\_profileという名前のサンドボックスプロファイルです。
 
@@ -142,6 +154,19 @@ SIPは、/System/Library/Sandbox/rootless.confにあるplatform\_profileとい�
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
 {% code title="touch.sb" %}
+
+```plaintext
+(version 1)
+(deny default)
+(allow file-read-metadata)
+(allow file-write-metadata)
+(allow file-read-data (literal "/path/to/file"))
+(allow file-write-data (literal "/path/to/file"))
+```
+
+このポリシーファイルは、`touch`コマンドを使用してファイルにアクセスするためのサンドボックスルールを定義します。このポリシーファイルでは、デフォルトですべてのアクセスを拒否し、ファイルのメタデータの読み取りと書き込み、指定されたパスのファイルのデータの読み取りと書き込みを許可します。
+
+このポリシーファイルを使用すると、`touch`コマンドを使用して指定されたパスのファイルにアクセスできるようになります。
 ```scheme
 (version 1)
 (deny default)
@@ -162,17 +187,49 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 ```
 {% code title="touch2.sb" %}
 
-このファイルは、macOSのサンドボックスに関する情報を提供します。サンドボックスは、アプリケーションが制限された環境で実行されるようにするセキュリティ機能です。サンドボックスは、アプリケーションがシステムリソースにアクセスする際に制限を課すことで、悪意のある動作や特権のエスカレーションを防止します。
+以下は、macOSのサンドボックスに関する情報です。
 
-このファイルでは、サンドボックスの基本的な機能と制限について説明します。サンドボックスの設定方法やカスタマイズ方法についても解説します。
+## 概要
 
-サンドボックスは、アプリケーションのセキュリティを強化するために重要な役割を果たします。正しく設定されたサンドボックスは、悪意のある攻撃からシステムを保護することができます。
+macOSのサンドボックスは、アプリケーションのセキュリティを強化するための重要な機能です。サンドボックスは、アプリケーションが制限された環境で実行されるように設計されており、悪意のあるコードや攻撃からシステムを保護します。
 
-このファイルは、macOSのサンドボックスに関する情報を提供します。サンドボックスは、アプリケーションが制限された環境で実行されるようにするセキュリティ機能です。サンドボックスは、アプリケーションがシステムリソースにアクセスする際に制限を課すことで、悪意のある動作や特権のエスカレーションを防止します。
+## サンドボックスの機能
 
-このファイルでは、サンドボックスの基本的な機能と制限について説明します。サンドボックスの設定方法やカスタマイズ方法についても解説します。
+macOSのサンドボックスには、以下のような機能があります。
 
-サンドボックスは、アプリケーションのセキュリティを強化するために重要な役割を果たします。正しく設定されたサンドボックスは、悪意のある攻撃からシステムを保護することができます。
+- ファイルシステムへのアクセス制限
+- ネットワークアクセスの制限
+- プロセス間通信の制限
+- ハードウェアリソースへのアクセス制限
+- システム設定の制限
+
+これらの機能により、アプリケーションは自身の環境内で動作し、システムの他の部分へのアクセスを制限されます。
+
+## サンドボックスの設定
+
+アプリケーションをサンドボックスで実行するためには、適切な設定が必要です。以下の手順に従って、サンドボックスを設定することができます。
+
+1. アプリケーションのInfo.plistファイルを開きます。
+2. `NSAppTransportSecurity`キーを追加し、`NSAllowsArbitraryLoads`を`NO`に設定します。
+3. `com.apple.security.app-sandbox`キーを追加し、`YES`に設定します。
+
+これにより、アプリケーションはサンドボックス内で実行されるようになります。
+
+## サンドボックスの制限
+
+サンドボックスは、アプリケーションのセキュリティを強化するために設計されていますが、制限もあります。以下の制限に注意してください。
+
+- サンドボックス内でのファイルシステムへのアクセスは制限されます。
+- ネットワークアクセスは制限されます。
+- システムリソースへのアクセスは制限されます。
+
+これらの制限により、アプリケーションは制約された環境で動作することになります。
+
+## まとめ
+
+macOSのサンドボックスは、アプリケーションのセキュリティを強化するための重要な機能です。適切な設定と制限により、アプリケーションは制約された環境で安全に動作することができます。
+
+{% endcode %}
 ```scheme
 (version 1)
 (deny default)
@@ -200,7 +257,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {% endtabs %}
 
 {% hint style="info" %}
-注意してください。**Windows**上で実行される**Apple製のソフトウェア**は、アプリケーションのサンドボックス化などの追加のセキュリティ対策はありません。
+注意：**Windows上で実行されるApple製のソフトウェア**は、アプリケーションのサンドボックス化などの追加のセキュリティ対策はありません。
 {% endhint %}
 
 バイパスの例：
@@ -208,21 +265,27 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 * [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
 * [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)（`~$`で始まる名前のサンドボックス外のファイルを書き込むことができます）。
 
-### デバッグ＆サンドボックスのバイパス
+### MacOSサンドボックスプロファイル
 
-**macOSでは、プロセスはサンドボックス化された状態で生まれません：iOSとは異なり、サンドボックスはプログラムの最初の命令が実行される前にカーネルによって適用されますが、macOSではプロセスは自らサンドボックスに入ることを選択する必要があります。**
+macOSは、システムのサンドボックスプロファイルを2つの場所に保存します：**/usr/share/sandbox/** と **/System/Library/Sandbox/Profiles**。
 
-プロセスは、`com.apple.security.app-sandbox`という権限を持っている場合、ユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を参照してください：
+また、サードパーティのアプリケーションが _**com.apple.security.app-sandbox**_ の権限を持っている場合、システムはそのプロセスに **/System/Library/Sandbox/Profiles/application.sb** プロファイルを適用します。
+
+### サンドボックスのデバッグとバイパス
+
+**macOSでは、プロセスはサンドボックスに入るために自ら選択する必要がありますが、iOSとは異なり、プロセスはサンドボックスで実行される前にカーネルによってサンドボックスが適用されます。**
+
+プロセスは、`com.apple.security.app-sandbox` の権限を持っている場合、ユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を参照してください：
 
 {% content-ref url="macos-sandbox-debug-and-bypass/" %}
 [macos-sandbox-debug-and-bypass](macos-sandbox-debug-and-bypass/)
 {% endcontent-ref %}
 
-### **PIDの特権をチェックする**
+### **PIDの特権を確認する**
 
-[これによると](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s)、**`sandbox_check`**（`__mac_syscall`です）は、特定のPIDのサンドボックスによって操作が許可されているかどうかをチェックできます。
+[これによると](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s)、**`sandbox_check`**（`__mac_syscall`です）は、特定のPIDのサンドボックスによって操作が許可されているかどうかを確認できます。
 
-[**ツールsbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c)は、PIDが特定のアクションを実行できるかどうかをチェックできます：
+[**ツールsbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c)は、PIDが特定のアクションを実行できるかどうかを確認できます：
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access
@@ -231,7 +294,7 @@ sbtool <pid> all
 ```
 ### App StoreアプリでのカスタムSBPL
 
-企業は、デフォルトのものではなく、**カスタムのサンドボックスプロファイル**を使用してアプリを実行することができます。これには、Appleによって承認される必要がある**`com.apple.security.temporary-exception.sbpl`**というエンタイトルメントを使用する必要があります。
+企業は、デフォルトのものではなく、**カスタムのサンドボックスプロファイル**を使用してアプリを実行することができます。ただし、Appleによって承認される必要がある**`com.apple.security.temporary-exception.sbpl`**というエンタイトルメントを使用する必要があります。
 
 このエンタイトルメントの定義は、**`/System/Library/Sandbox/Profiles/application.sb:`**で確認することができます。
 ```scheme
@@ -247,7 +310,7 @@ sbtool <pid> all
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝したいですか**？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたり**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**

@@ -51,32 +51,7 @@ system("cat ~/Desktop/del.txt");
 
 エンタイトルメントは、アプリケーションがmacOSのセキュリティ保護機能をバイパスするために使用されることがあります。攻撃者は、特定のエンタイトルメントを要求することで、アプリケーションのセキュリティ制約を回避し、特権の昇格を行うことができます。
 
-エンタイトルメントファイルは、XML形式で記述されており、各エンタイトルメントは`<key>`と`<true/>`のタグで定義されます。攻撃者は、このファイルを改ざんすることで、アプリケーションに不正なエンタイトルメントを与えることができます。
-
-エンタイトルメントファイルは、アプリケーションバンドル内の`Contents`ディレクトリに配置されます。攻撃者は、アプリケーションバンドルを解析し、エンタイトルメントファイルを特定することができます。
-
-エンタイトルメントファイルの例を以下に示します。
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>com.apple.security.network.client</key>
-    <true/>
-    <key>com.apple.security.files.user-selected.read-write</key>
-    <true/>
-    <key>com.apple.security.device.audio-input</key>
-    <true/>
-</dict>
-</plist>
-```
-
-この例では、アプリケーションがネットワーククライアントとして動作し、ユーザーが選択したファイルを読み書きし、オーディオ入力デバイスにアクセスするためのエンタイトルメントが与えられています。
-
-攻撃者は、エンタイトルメントファイルを改ざんすることで、アプリケーションに不正なエンタイトルメントを与えることができます。これにより、アプリケーションは本来の制約を回避し、攻撃者が望む操作やリソースにアクセスすることが可能になります。
-
-エンタイトルメントファイルの改ざんを防ぐためには、アプリケーションの署名を検証し、改ざんがないことを確認する必要があります。また、エンタイトルメントの要求に対しては、最小限の必要な権限のみを与えるようにすることが重要です。
+このファイルを悪意のある目的で使用することは、違法行為であり、厳しく禁止されています。セキュリティの向上と個人のプライバシーの保護のために、正当な目的でのみ使用してください。
 
 {% endtab %}
 ```xml
@@ -133,7 +108,7 @@ echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
 {% endhint %}
 
-チェスアプリケーションをデバッグして、サンドボックスがいつ読み込まれるかを確認しましょう。
+アプリケーションをデバッグして、サンドボックスがいつロードされるかを確認しましょう。
 ```bash
 # Load app in debugging
 lldb ./sand
@@ -312,13 +287,25 @@ ARM64の場合でも、**シェルコードでさえ**`libSystem.dylib`にリン
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
+### 権限
+
+注意してください、特定の権限がアプリケーションにある場合、サンドボックスで許可されている**アクション**でも、次のように特定の**権限**がある場合は許可されません。
+```scheme
+(when (entitlement "com.apple.security.network.client")
+(allow network-outbound (remote ip))
+(allow mach-lookup
+(global-name "com.apple.airportd")
+(global-name "com.apple.cfnetwork.AuthBrokerAgent")
+(global-name "com.apple.cfnetwork.cfnetworkagent")
+[...]
+```
 ### Auto Startの場所の悪用
 
-もしサンドボックス化されたプロセスが、**後でサンドボックス化されていないアプリケーションがバイナリを実行する場所に書き込む**ことができれば、バイナリをそこに**配置することで脱出**することができます。この種の場所の良い例は、`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
+もしサンドボックス化されたプロセスが、**後でサンドボックス化されていないアプリケーションがバイナリを実行する場所に書き込む**ことができれば、バイナリをそこに**配置するだけで脱出**することができます。この種の場所の良い例は、`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
 
 これには**2つのステップ**が必要かもしれません: より**許可のあるサンドボックス**(`file-read*`、`file-write*`)を持つプロセスを作成し、実際には**サンドボックス化されていない場所に書き込む**コードを実行します。
 
-**Auto Startの場所**については、次のページを参照してください:
+このページをチェックしてください: **Auto Startの場所**についてのページ:
 
 {% content-ref url="../../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
@@ -334,10 +321,10 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
