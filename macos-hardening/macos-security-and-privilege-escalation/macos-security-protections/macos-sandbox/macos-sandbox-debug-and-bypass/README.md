@@ -60,23 +60,17 @@ Aquí hay un ejemplo de cómo se ve el archivo `entitlements.xml`:
     <true/>
     <key>com.apple.security.files.user-selected.read-write</key>
     <true/>
-    <key>com.apple.security.print</key>
+    <key>com.apple.security.files.downloads.read-write</key>
+    <true/>
+    <key>com.apple.security.files.user-selected.read-only</key>
     <true/>
 </dict>
 </plist>
 ```
 
-En este ejemplo, la aplicación tiene los siguientes permisos:
+En este ejemplo, la aplicación tiene permisos para acceder a la red, leer y escribir archivos seleccionados por el usuario, leer y escribir archivos descargados y solo leer archivos seleccionados por el usuario.
 
-- `com.apple.security.network.client`: Permite a la aplicación realizar solicitudes de red salientes.
-- `com.apple.security.files.user-selected.read-write`: Permite a la aplicación leer y escribir en archivos seleccionados por el usuario.
-- `com.apple.security.print`: Permite a la aplicación imprimir documentos.
-
-Estos permisos se definen utilizando claves y valores en el archivo `entitlements.xml`. Las claves representan los permisos y los valores indican si el permiso está habilitado (`true`) o deshabilitado (`false`).
-
-Es importante tener en cuenta que modificar el archivo `entitlements.xml` puede tener implicaciones de seguridad y puede violar las políticas de sandbox de macOS. Se recomienda tener cuidado al realizar cambios en este archivo y seguir las mejores prácticas de seguridad.
-
-{% endtab %}
+Es importante tener en cuenta que los permisos y capacidades en el archivo `entitlements.xml` deben ser otorgados por Apple y no se pueden modificar directamente.
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -133,7 +127,7 @@ echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
 {% endhint %}
 
-Vamos a depurar la aplicación de ajedrez para ver cuándo se carga el Sandbox:
+Vamos a depurar la aplicación para ver cuándo se carga el Sandbox:
 ```bash
 # Load app in debugging
 lldb ./sand
@@ -207,7 +201,7 @@ libsystem_kernel.dylib`:
 (lldb) c
 Proceso 2517 reanudado
 ¡Bypass de Sandbox realizado!
-El proceso 2517 salió con el estado = 0 (0x00000000)
+El proceso 2517 salió con estado = 0 (0x00000000)
 ```
 {% hint style="warning" %}
 **Incluso si se ha eludido el Sandbox, TCC** le preguntará al usuario si desea permitir que el proceso lea archivos desde el escritorio.
@@ -312,6 +306,18 @@ Tenga en cuenta que **incluso los shellcodes** en ARM64 deben estar enlazados en
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
+```
+### Privilegios
+
+Ten en cuenta que aunque algunas **acciones** puedan estar **permitidas por el sandbox**, si una aplicación tiene un **privilegio específico**, como en:
+```scheme
+(when (entitlement "com.apple.security.network.client")
+(allow network-outbound (remote ip))
+(allow mach-lookup
+(global-name "com.apple.airportd")
+(global-name "com.apple.cfnetwork.AuthBrokerAgent")
+(global-name "com.apple.cfnetwork.cfnetworkagent")
+[...]
 ```
 ### Abuso de ubicaciones de inicio automático
 
