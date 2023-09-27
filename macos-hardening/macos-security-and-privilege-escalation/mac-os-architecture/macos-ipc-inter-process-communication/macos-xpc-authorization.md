@@ -16,11 +16,11 @@
 
 Appleは、接続プロセスが**公開されたXPCメソッドを呼び出す権限**を持っているかどうかを認証する別の方法も提案しています。
 
-アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてHelperToolをrootとしてインストールします。ただし、サービスを呼び出すアプリには十分な認証が必要です。
+アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてHelperToolをrootとしてインストールします。ただし、サービスを呼び出すアプリは十分な認証を持っている必要があります。
 
 ### ShouldAcceptNewConnection は常に YES
 
-[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)には、例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、関数**`shouldAcceptNewConnection`**は、以前に指定された要件のいずれも**チェックしません**。常にYESを返します：
+[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)に例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、**`shouldAcceptNewConnection`**関数は、以前に指定された要件のいずれも**チェックしません**。常にYESを返します：
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -182,7 +182,7 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-このプロセスの最後には、`commandInfo`内で宣言された権限が`/var/db/auth.db`に保存されます。各メソッドごとに、**認証が必要な**、**権限名**と**`kCommandKeyAuthRightDefault`**が含まれていることに注意してください。後者は、**この権限を取得できるユーザー**を示します。
+このプロセスの最後には、`commandInfo`内で宣言された権限が`/var/db/auth.db`に保存されます。各メソッドごとに、**認証が必要な**権限名と**`kCommandKeyAuthRightDefault`**が含まれていることに注意してください。後者は、**この権限を取得できるユーザー**を示しています。
 
 権限にアクセスできるユーザーを示すために、さまざまなスコープがあります。それらの一部は[AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h)で定義されています（[ここですべてを見つけることができます](https://www.dssw.co.uk/reference/authorization-rights/)）。要約すると：
 
@@ -190,7 +190,7 @@ block(authRightName, authRightDefault, authRightDesc);
 
 ### 権限の検証
 
-`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのメソッドを実行する権限を持っているかどうか**を確認するために、**`checkAuthorization`**関数を呼び出します。この関数は、呼び出し元プロセスが送信した**authData**が**正しい形式**であるかをチェックし、その後、特定のメソッドを呼び出すために**どの権限が必要か**をチェックします。すべてがうまくいけば、**返される`error`は`nil`**になります。
+`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのメソッドを実行する権限を持っているかどうか**を確認するために、関数**`checkAuthorization`**を呼び出します。この関数は、呼び出し元プロセスが送信した**authData**が**正しい形式**であるかをチェックし、その後、特定のメソッドを呼び出すために**どの権限が必要か**をチェックします。すべてがうまくいけば、**返される`error`は`nil`**になります。
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -263,16 +263,16 @@ security authorizationdb read com.apple.safaridriver.allow
 * これは、以下の2つのいずれかと組み合わせて使用するか、ユーザーが所属するグループを示すために使用されます。
 
 2. **'allow-root': 'true'**
-* ユーザーがルートユーザーとして操作している場合（昇格された権限を持つユーザー）、このキーが`true`に設定されている場合、ルートユーザーは追加の認証なしでこの権限を取得する可能性があります。ただし、通常、ルートユーザーの状態に到達するにはすでに認証が必要なため、ほとんどのユーザーにとってこれは「認証なし」のシナリオではありません。
+* ユーザーがルートユーザーとして操作しており（昇格された権限を持つ）、このキーが`true`に設定されている場合、ルートユーザーは追加の認証なしでこの権限を取得する可能性があります。ただし、通常、ルートユーザーの状態に到達するにはすでに認証が必要なため、ほとんどのユーザーにとってこれは「認証なし」のシナリオではありません。
 
 3. **'session-owner': 'true'**
 * `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権限を取得します。これにより、ユーザーがすでにログインしている場合、追加の認証がバイパスされる場合があります。
 
 4. **'shared': 'true'**
-* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です。ただし、'authenticate-user': 'false'などの他のキーと組み合わせる場合は、認証が必要ありません。
+* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です（'authenticate-user': 'false'などの他のキーと組み合わせている場合を除く）。
 
-興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます。
-```
+興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます：
+```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
 
@@ -306,7 +306,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 この場合、EvenBetterAuthorizationSample と同じものがあります、[**この行をチェックしてください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
 
 使用されているプロトコルの名前を知ることで、そのヘッダ定義を **ダンプ** することができます。
-```
+```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
 [...]
@@ -326,7 +326,7 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 <figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 * launchdのplistファイルで：
-```
+```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
 
 [...]
@@ -346,7 +346,7 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 * アクセスを要求するために使用する空の認証
 * XPCサービスへの接続
 * 接続が成功した場合に関数を呼び出す
-```
+```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
 #import <Foundation/Foundation.h>
