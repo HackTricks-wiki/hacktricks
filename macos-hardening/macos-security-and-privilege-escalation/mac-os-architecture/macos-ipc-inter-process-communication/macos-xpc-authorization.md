@@ -1,4 +1,4 @@
-# Autorización XPC de macOS
+# Autorización XPC en macOS
 
 <details>
 
@@ -6,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -266,10 +266,10 @@ Puedes encontrar **todas las configuraciones de permisos** [**aquí**](https://w
 3. **'session-owner': 'true'**
 * Si se establece en `true`, el propietario de la sesión (el usuario que ha iniciado sesión actualmente) obtendría automáticamente este derecho. Esto podría evitar la autenticación adicional si el usuario ya ha iniciado sesión.
 4. **'shared': 'true'**
-* Esta clave no otorga derechos sin autenticación. En cambio, si se establece en `true`, significa que una vez que se haya autenticado el derecho, se puede compartir entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del derecho aún requeriría autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
+* Esta clave no otorga derechos sin autenticación. En cambio, si se establece en `true`, significa que una vez que el derecho se haya autenticado, se puede compartir entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del derecho aún requeriría autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
 
 Puedes [**utilizar este script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) para obtener los derechos interesantes:
-```
+```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
 
@@ -294,7 +294,7 @@ Verifica el **`/var/db/auth.db`** para ver si es posible obtener permisos para l
 
 ### Comunicación de Protocolo
 
-Luego, necesitas encontrar el esquema de protocolo para poder establecer una comunicación con el servicio XPC.
+Luego, necesitas encontrar el esquema del protocolo para poder establecer una comunicación con el servicio XPC.
 
 La función **`shouldAcceptNewConnection`** indica el protocolo que se está exportando:
 
@@ -303,7 +303,7 @@ La función **`shouldAcceptNewConnection`** indica el protocolo que se está exp
 En este caso, tenemos lo mismo que en EvenBetterAuthorizationSample, [**verifica esta línea**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
 Conociendo el nombre del protocolo utilizado, es posible **volcar su definición de encabezado** con:
-```
+```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
 [...]
@@ -316,14 +316,14 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-Por último, solo necesitamos saber el **nombre del Mach Service expuesto** para establecer una comunicación con él. Hay varias formas de encontrar esto:
+Por último, solo necesitamos saber el **nombre del Mach Service expuesto** para establecer una comunicación con él. Hay varias formas de encontrarlo:
 
 * En el **`[HelperTool init]`** donde puedes ver el Mach Service que se está utilizando:
 
 <figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 * En el plist de launchd:
-```
+```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
 
 [...]
@@ -343,7 +343,7 @@ En este ejemplo se crea:
 * Una autenticación vacía para solicitar acceso
 * Una conexión al servicio XPC
 * Una llamada a la función si la conexión fue exitosa
-```
+```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
 #import <Foundation/Foundation.h>
