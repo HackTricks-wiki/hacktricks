@@ -284,7 +284,7 @@ You can find **all the permissions configurations** [**in here**](https://www.ds
 
 You can [**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) to get the interesting rights:
 
-```
+```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
 
@@ -320,7 +320,7 @@ In this case, we have the same as in EvenBetterAuthorizationSample, [**check thi
 
 Knowing, the name of the used protocol, it's possible to **dump its header definition** with:
 
-```
+```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
 [...]
@@ -342,7 +342,7 @@ Lastly, we just need to know the **name of the exposed Mach Service** in order t
 
 * In the launchd plist:
 
-```
+```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
 
 [...]
@@ -364,7 +364,7 @@ In this example is created:
 * A connection to the XPC service
 * A call to the function if the connection was successfull
 
-```
+```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
 #import <Foundation/Foundation.h>
