@@ -186,7 +186,7 @@
     * [macOS Serial Number](macos-hardening/macos-red-teaming/macos-mdm/macos-serial-number.md)
   * [macOS Keychain](macos-hardening/macos-red-teaming/macos-keychain.md)
 * [macOS Useful Commands](macos-hardening/macos-useful-commands.md)
-* [macOS Auto Start Locations](macos-hardening/macos-auto-start-locations.md)
+* [macOS Auto Start](macos-hardening/macos-auto-start-locations.md)
 
 ## 🪟 Windows Hardening
 
