@@ -28,22 +28,22 @@ Aquí puedes encontrar ubicaciones de inicio útiles para **bypass de sandbox** 
 
 * **`/Library/LaunchAgents`**
 * **Disparador**: Reinicio
-* Se requiere root
+* Se requiere acceso de root
 * **`/Library/LaunchDaemons`**
 * **Disparador**: Reinicio
-* Se requiere root
+* Se requiere acceso de root
 * **`/System/Library/LaunchAgents`**
 * **Disparador**: Reinicio
-* Se requiere root
+* Se requiere acceso de root
 * **`/System/Library/LaunchDaemons`**
 * **Disparador**: Reinicio
-* Se requiere root
+* Se requiere acceso de root
 * **`~/Library/LaunchAgents`**
 * **Disparador**: Volver a iniciar sesión
 * **`~/Library/LaunchDemons`**
 * **Disparador**: Volver a iniciar sesión
 
-#### Descripción y Explotación
+#### Descripción y explotación
 
 **`launchd`** es el **primer** **proceso** ejecutado por el kernel de OX S al iniciar y el último en finalizar al apagar. Siempre debe tener el **PID 1**. Este proceso **lee y ejecuta** las configuraciones indicadas en los **plists** de **ASEP** en:
 
@@ -521,7 +521,7 @@ Esto creará un archivo en 1 hora:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-Verifique la cola de trabajos utilizando `atq:`
+Verifique la cola de trabajos usando `atq:`
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
@@ -627,7 +627,7 @@ app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 
 Compílalo con: `osacompile -l JavaScript -o folder.scpt source.js`
 
-Luego ejecuta el siguiente script para habilitar las Acciones de Carpeta y adjuntar el script compilado previamente a la carpeta **`/users/username/Desktop`**:
+Luego ejecuta el siguiente script para habilitar las Acciones de Carpeta y adjuntar el script compilado previamente con la carpeta **`/users/username/Desktop`**:
 ```javascript
 var se = Application("System Events");
 se.folderActionsEnabled = true;
@@ -636,7 +636,7 @@ var fa = se.FolderAction({name: "Desktop", path: "/Users/username/Desktop"});
 se.folderActions.push(fa);
 fa.scripts.push(myScript);
 ```
-Ejecuta el script con: `osascript -l JavaScript /Users/carlospolop/attach.scpt`
+Ejecuta el script con: `osascript -l JavaScript /Users/username/attach.scpt`
 
 
 
@@ -713,7 +713,7 @@ Informe: [https://theevilbit.github.io/beyond/beyond\_0027/](https://theevilbit.
 #### Ubicación
 
 * `~/Library/Preferences/com.apple.dock.plist`
-* **Disparador**: Cuando el usuario hace clic en la aplicación dentro del dock
+* **Disparador**: Cuando el usuario hace clic en la aplicación dentro del Dock
 
 #### Descripción y Explotación
 
