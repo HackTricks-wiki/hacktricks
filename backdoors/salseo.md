@@ -99,17 +99,17 @@ Open the SalseoLoader project using Visual Studio.
 
 ### Add before the main function: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### Install DllExport for this project
 
 #### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 #### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
 
-![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1).png>)
 
 In your project folder have appeared the files: **DllExport.bat** and **DllExport\_Configure.bat**
 
