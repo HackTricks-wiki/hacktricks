@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
@@ -28,7 +28,7 @@ Dockerエンジンは、コンテナの実行と管理を担当します。Docke
 
 ![](<../../../.gitbook/assets/image (625) (1) (1).png>)
 
-### **Dockerエンジンの安全なアクセス**
+### **Dockerエンジンへの安全なアクセス**
 
 Dockerクライアントは、Unixソケットを使用してDockerエンジンに**ローカルでアクセス**するか、httpメカニズムを使用して**リモートでアクセス**することができます。リモートで使用する場合は、httpsと**TLS**を使用して機密性、整合性、および認証を確保する必要があります。
 
@@ -92,9 +92,9 @@ Dockerコンテナイメージは、公開またはプライベートレジス�
 以下は、Dockerコンテンツの信頼性に関する詳細です：
 
 - Dockerコンテンツの信頼性は、[Notaryオープンソースプロジェクト](https://github.com/docker/notary)の実装です。Notaryオープンソースプロジェクトは、[The Update Framework (TUF)プロジェクト](https://theupdateframework.github.io)に基づいています。
-- Dockerコンテンツの信頼性は、`export DOCKER_CONTENT_TRUST=1`で有効になります。Dockerバージョン1.10以降、コンテンツの信頼性はデフォルトで有効になっていません。
+- Dockerコンテンツの信頼性は、`export DOCKER_CONTENT_TRUST=1`で有効になります。Dockerバージョン1.10以降、コンテンツの信頼性はデフォルトでは有効になっていません。
 - コンテンツの信頼性が有効になっている場合、署名されたイメージのみをプルすることができます。イメージをプッシュする際には、タグキーを入力する必要があります。
-- パブリッシャーが初めてdocker pushを使用してイメージをプッシュするときには、ルートキーとタグキーのパスフレーズを入力する必要があります。他のキーは自動的に生成されます。
+- パブリッシャーが初めてdocker pushを使用してイメージをプッシュする場合、ルートキーとタグキーのパスフレーズを入力する必要があります。他のキーは自動的に生成されます。
 - Dockerは、Yubikeyを使用したハードウェアキーのサポートも追加しており、詳細は[こちら](https://blog.docker.com/2015/11/docker-content-trust-yubikey/)で確認できます。
 
 以下は、コンテンツの信頼性が有効になっており、イメージが署名されていない場合に表示されるエラーメッセージです。
@@ -130,10 +130,10 @@ Dockerホストを変更した際、新しいホストから操作するため�
 
 ***
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -146,14 +146,14 @@ Dockerホストを変更した際、新しいホストから操作するため�
 
 **ネームスペース**
 
-ネームスペースは、プロジェクトを他のプロジェクトから分離し、プロセス間通信、ネットワーク、マウントを分離するために役立ちます。Dockerプロセスを他のプロセス（そして/procフォルダさえも）から乱用することができないように分離するのに役立ちます。
+ネームスペースは、プロジェクトを他のプロジェクトから分離し、プロセス間通信、ネットワーク、マウントを分離するために役立ちます。Dockerプロセスを他のプロセス（さらには/procフォルダ）から分離するために使用され、他のプロセスを悪用して脱出することを防ぎます。
 
-バイナリの**`unshare`**（**`unshare`**シスコールを使用する）を使用して、新しいネームスペースを作成することが可能です。Dockerはデフォルトでこれを防止しますが、kubernetesは（この執筆時点では）防止しません。\
-とにかく、これは新しいネームスペースを作成するのに役立ちますが、**ホストのデフォルトのネームスペースに戻ることはできません**（ホストのネームスペース内のいくつかの`/proc`にアクセスできる場合は、**`nsenter`**を使用してホストのネームスペースに入ることができます）。
+バイナリの**`unshare`**（**`unshare`**シスコールを使用）を使用して、新しいネームスペースを作成することが可能です。Dockerはデフォルトでこれを防止しますが、kubernetesは（この記述時点では）防止しません。\
+とにかく、これは新しいネームスペースを作成するのに役立ちますが、ホストのデフォルトのネームスペースに戻ることはできません（ホストのネームスペース内のいくつかの`/proc`にアクセスできる場合は、**`nsenter`**を使用してホストのネームスペースに入ることができます）。
 
 **CGroups**
 
-これにより、リソースを制限することができ、プロセスの分離のセキュリティには影響しません（逃げるために使用できる`release_agent`を除く）。
+これにより、リソースを制限することができ、プロセスの分離のセキュリティには影響しません（`release_agent`は脱出に使用される可能性があります）。
 
 **Capabilitiesの削除**
 
@@ -247,7 +247,7 @@ AppArmorは、カーネルの拡張機能であり、コンテナを制限され
 
 [SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux)は、ラベリングシステムです。すべてのプロセスとすべてのファイルシステムオブジェクトにはラベルがあります。SELinuxポリシーは、システム上の他のすべてのラベルとの関係でプロセスラベルが許可される操作についてのルールを定義します。
 
-コンテナエンジンは、通常`container_t`という単一の制約されたSELinuxラベルでコンテナプロセスを起動し、コンテナ内のコンテナを`container_file_t`というラベルでラベル付けします。SELinuxポリシールールは基本的に、`container_t`プロセスが`container_file_t`というラベルが付いたファイルを読み取り/書き込み/実行できるということを示しています。
+コンテナエンジンは、通常`container_t`という単一の制約付きSELinuxラベルでコンテナプロセスを起動し、コンテナ内のコンテナを`container_file_t`としてラベル付けします。SELinuxポリシールールは基本的に、`container_t`プロセスが`container_file_t`とラベル付けされたファイルを読み取り/書き込み/実行できるということを示しています。
 
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
@@ -273,17 +273,7 @@ sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 
 # While loop
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 ```
-# バンド幅 DoS
-
-バンド幅 DoS（Denial of Service）は、攻撃者がターゲットのネットワークやシステムに対して、大量のトラフィックを送信することによって、サービスの提供を妨害する攻撃手法です。
-
-攻撃者は、高帯域幅のネットワーク接続を利用して、大量のデータをターゲットに送信します。これにより、ターゲットのネットワークやシステムのリソースが過負荷となり、正規のユーザーからのアクセスが妨げられます。
-
-バンド幅 DoS 攻撃は、ネットワークの帯域幅を使い果たすことで、サービスの可用性を低下させることが目的です。攻撃者は、大量のトラフィックを生成するために、ボットネットやゾンビネットワークを利用することがあります。
-
-バンド幅 DoS 攻撃に対抗するためには、ネットワークのトラフィックを監視し、異常なトラフィックを検出して遮断することが重要です。また、ファイアウォールやロードバランサなどのセキュリティ対策を実施することも有効です。
-
-バンド幅 DoS 攻撃は、ネットワークやシステムの可用性を脅かす重大な攻撃手法です。セキュリティ対策を適切に実施することで、このような攻撃から保護することができます。
+* バンド幅 DoS
 ```bash
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
 ```
@@ -321,7 +311,7 @@ In addition to the security measures mentioned above, there are a few other step
 
 5. **Implement network segmentation**: Use network segmentation to isolate your Docker containers from other systems and networks. This can help contain any potential breaches.
 
-6. **Regularly update Docker**: Keep your Docker installation and all related components up to date with the latest security patches and updates.
+6. **Regularly update Docker**: Keep your Docker installation and Docker images up to date with the latest security patches and updates.
 
 By following these additional steps, you can enhance the security of your Docker environment and reduce the risk of privilege escalation and other security threats.
 ```bash
@@ -387,7 +377,7 @@ secrets:
 my_secret:
 file: ./my_secret_file.txt
 ```
-次に、通常通り `docker-compose up --build my_service` でComposeを起動します。
+次に、通常通り `docker-compose up --build my_service` でComposeを開始します。
 
 [Kubernetes](https://kubernetes.io/docs/concepts/configuration/secret/)を使用している場合、シークレットのサポートがあります。[Helm-Secrets](https://github.com/futuresimple/helm-secrets)は、Kubernetesでのシークレット管理を容易にするのに役立ちます。さらに、KubernetesとDocker Enterpriseの両方には、ロールベースのアクセス制御（RBAC）があります。RBACにより、チームにとってシークレットの管理がより簡単で安全になります。
 
@@ -407,22 +397,22 @@ file: ./my_secret_file.txt
 
 * **`--privileged`フラグを使用せず、コンテナ内にDockerソケットをマウントしないでください**。Dockerソケットはコンテナの生成を可能にするため、`--privileged`フラグを使用して別のコンテナを実行するなど、ホストの完全な制御を簡単に取得する方法です。
 * コンテナ内で**rootとして実行しないでください。異なるユーザー**[**とユーザーネームスペース**](https://docs.docker.com/engine/security/userns-remap/)を使用してください**。**コンテナ内のrootは、ホストと同じです（ユーザーネームスペースでリマップされていない限り）。主にLinuxのネームスペース、機能、およびcgroupsによって軽く制限されています。
-* [**すべての機能をドロップ**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)**（`--cap-drop=all`）し、必要な機能のみを有効にしてください**（`--cap-add=...`）。多くのワークロードでは機能は必要ありませんし、それらを追加することで攻撃の範囲が広がります。
-* [**“no-new-privileges”セキュリティオプションを使用**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/)して、プロセスが特権を取得するのを防止してください。たとえば、suidバイナリを介して特権を取得することがあります。
-* [**コンテナに利用可能なリソースを制限**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**してください**。リソース制限は、サービス拒否攻撃からマシンを保護することができます。
+* [**すべての機能をドロップ**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`)し、必要な機能のみを有効にしてください**（`--cap-add=...`）。多くのワークロードでは、機能は必要ありません。機能を追加すると、潜在的な攻撃の範囲が広がります。
+* [**「no-new-privileges」セキュリティオプションを使用**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/)して、プロセスが特権を取得するのを防止してください。たとえば、suidバイナリを介して特権を取得することがあります。
+* [**コンテナに利用可能なリソースを制限**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)してください。リソース制限は、サービス拒否攻撃からマシンを保護するのに役立ちます。
 * **[seccomp](https://docs.docker.com/engine/security/seccomp/)**、**[AppArmor](https://docs.docker.com/engine/security/apparmor/)**（またはSELinux）プロファイルを調整して、コンテナで使用可能なアクションとシスコールを最小限に制限してください。
 * [**公式のDockerイメージ**](https://docs.docker.com/docker-hub/official_images/)を使用し、署名を要求するか、それらを基に独自のイメージをビルドしてください。バックドアが仕込まれたイメージを継承または使用しないでください。また、ルートキーとパスフレーズを安全な場所に保存してください。DockerはUCPでキーを管理する予定です。
 * 定期的にイメージを再ビルドして、ホストとイメージにセキュリティパッチを適用してください。
 * シークレットを適切に管理し、攻撃者がアクセスしにくいようにしてください。
-* Dockerデーモンを公開する場合は、クライアントとサーバーの認証にHTTPSを使用してください。
-* Dockerfileでは、ADDの代わりにCOPYを使用してください。ADDは自動的にZIPファイルを展開し、リモートURLやZIPファイルを介して攻撃を受ける可能性があります。COPYにはこれらの機能がありません。可能な限りADDを使用せず、リモートURLやZIPファイルを介した攻撃に対して脆弱にならないようにしてください。
+* Dockerデーモンを公開する場合は、HTTPSを使用してクライアントとサーバーの認証を行ってください。
+* Dockerfileでは、ADDの代わりにCOPYを使用してください。ADDは自動的にZIPファイルを展開し、リモートURLやZIPファイルを介して攻撃を受ける可能性があります。COPYにはこれらの機能がありません。可能な限り、ADDを使用せずにリモートURLやZIPファイルを介した攻撃に対して脆弱にならないようにしてください。
 * 各マイクロサービスには**個別のコンテナ**を使用してください。
-* コンテナ内にsshを配置しないでください。コンテナへのsshは「docker exec」を使用して行うことができます。
+* コンテナ内にsshを配置しないでください。コンテナへのsshは「docker exec」を使用できます。
 * **より小さな**コンテナ**イメージ**を使用してください。
 
 ## Dockerの脱獄/特権エスカレーション
 
-もし**Dockerコンテナ内にいる**か、**dockerグループのユーザーにアクセス権がある**場合、**脱獄して特権をエスカレーション**することができます。
+もし**Dockerコンテナ内にいる**か、**dockerグループのユーザーにアクセス権限がある**場合、**脱獄して特権をエスカレーション**することができます。
 
 {% content-ref url="docker-breakout-privilege-escalation/" %}
 [docker-breakout-privilege-escalation](docker-breakout-privilege-escalation/)
@@ -430,7 +420,7 @@ file: ./my_secret_file.txt
 
 ## Docker認証プラグインのバイパス
 
-もしdockerソケットにアクセス権限があるか、**dockerグループのユーザーであるが、docker認証プラグインによって制限されている場合**、それを**バイパス**できるかどうかを確認してください。
+もしdockerソケットにアクセス権限があるか、**dockerグループのユーザーにアクセス権限があるが、docker認証プラグインによって制限されている場合**、それを**バイパス**できるかどうかを確認してください。
 
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
@@ -445,9 +435,9 @@ file: ./my_secret_file.txt
 
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 * [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/\_fel1x/status/1151487051986087936)
-* [https://ajxchapman.github.io/containers/2020/11/19
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。
-今すぐアクセスを取得：
+* [https://
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。
+今すぐアクセスを取得してください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -456,9 +446,9 @@ file: ./my_secret_file.txt
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

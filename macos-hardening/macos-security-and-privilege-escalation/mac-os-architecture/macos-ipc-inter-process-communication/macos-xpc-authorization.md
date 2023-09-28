@@ -16,11 +16,11 @@
 
 Appleは、接続プロセスが**公開されたXPCメソッドを呼び出す権限**を持っているかどうかを認証する別の方法も提案しています。
 
-アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてHelperToolをrootとしてインストールします。ただし、サービスを呼び出すアプリは十分な認証を持っている必要があります。
+アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてHelperToolをrootとしてインストールします。ただし、サービスを呼び出すアプリには十分な認証が必要です。
 
 ### ShouldAcceptNewConnection は常に YES
 
-[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)に例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、**`shouldAcceptNewConnection`**関数は、以前に指定された要件のいずれも**チェックしません**。常にYESを返します：
+[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)には、例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、関数**`shouldAcceptNewConnection`**は、以前に指定された要件のいずれも**チェックしません**。常にYESを返します：
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -45,7 +45,7 @@ return YES;
 
 ### アプリケーションの権限
 
-ただし、HelperToolからメソッドが呼び出される際には、**認可が行われます**。
+ただし、**HelperToolからメソッドが呼び出される際には、いくつかの認可が行われます**。
 
 `App/AppDelegate.m`の`applicationDidFinishLaunching`関数は、アプリが起動した後に空の認可参照を作成します。これは常に機能するはずです。\
 その後、`setupAuthorizationRights`を呼び出して、その認可参照にいくつかの権限を追加しようとします。
@@ -240,7 +240,7 @@ return error;
 ```
 注意してください。そのメソッドを呼び出すための要件を確認するために、関数`authorizationRightForCommand`は以前のコメントオブジェクト`commandInfo`をチェックします。その後、関数を呼び出す権限があるかどうかを確認するために`AuthorizationCopyRights`を呼び出します（フラグによってユーザーとの対話が許可されることに注意してください）。
 
-この場合、関数`readLicenseKeyAuthorization`を呼び出すために`kCommandKeyAuthRightDefault`が`@kAuthorizationRuleClassAllow`と定義されています。したがって、**誰でもそれを呼び出すことができます**。
+この場合、関数`readLicenseKeyAuthorization`を呼び出すために、`kCommandKeyAuthRightDefault`は`@kAuthorizationRuleClassAllow`に定義されています。したがって、**誰でもそれを呼び出すことができます**。
 
 ### DB情報
 
@@ -263,15 +263,15 @@ security authorizationdb read com.apple.safaridriver.allow
 * これは、以下の2つのいずれかと組み合わせて使用するか、ユーザーが所属するグループを示すために使用されます。
 
 2. **'allow-root': 'true'**
-* ユーザーがルートユーザーとして操作しており（昇格された権限を持つ）、このキーが`true`に設定されている場合、ルートユーザーは追加の認証なしでこの権限を取得する可能性があります。ただし、通常、ルートユーザーの状態に到達するにはすでに認証が必要なため、ほとんどのユーザーにとってこれは「認証なし」のシナリオではありません。
+* ユーザーがルートユーザーとして操作している場合（昇格された権限を持つユーザー）、このキーが`true`に設定されている場合、ルートユーザーは追加の認証なしでこの権限を取得する可能性があります。ただし、通常、ルートユーザーの状態に到達するにはすでに認証が必要なため、ほとんどのユーザーにとってこれは「認証なし」のシナリオではありません。
 
 3. **'session-owner': 'true'**
 * `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権限を取得します。これにより、ユーザーがすでにログインしている場合、追加の認証がバイパスされる場合があります。
 
 4. **'shared': 'true'**
-* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です（'authenticate-user': 'false'などの他のキーと組み合わせている場合を除く）。
+* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です。ただし、'authenticate-user': 'false'などの他のキーと組み合わせる場合は、認証が必要ありません。
 
-興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます：
+興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます。
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -287,9 +287,9 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### EvenBetterAuthorization の使用を確認する
 
-もし、関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは以前に言及した認証のスキーマを使用しています:
+もし、関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは以前に言及した認証スキーマを使用しています:
 
-<figure><img src="../../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 この関数が `AuthorizationCreateFromExternalForm`、`authorizationRightForCommand`、`AuthorizationCopyRights`、`AuhtorizationFree` などの関数を呼び出している場合、[**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) を使用しています。
 
@@ -297,13 +297,13 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### プロトコル通信
 
-次に、XPCサービスとの通信を確立するためにプロトコルスキーマを見つける必要があります。
+次に、XPCサービスとの通信を確立するために、プロトコルスキーマを見つける必要があります。
 
 関数 **`shouldAcceptNewConnection`** はエクスポートされているプロトコルを示しています:
 
-<figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-この場合、EvenBetterAuthorizationSample と同じものがあります、[**この行をチェックしてください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
+この場合、EvenBetterAuthorizationSample と同じものがあります。[**この行をチェックしてください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
 
 使用されているプロトコルの名前を知ることで、そのヘッダ定義を **ダンプ** することができます。
 ```bash
@@ -323,7 +323,7 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
 * **`[HelperTool init]`**で、使用されているMachサービスが表示されています：
 
-<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
 * launchdのplistファイルで：
 ```xml

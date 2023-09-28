@@ -7,8 +7,8 @@
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
 
 </details>
 
@@ -45,7 +45,7 @@ uint32_t	align;		/* 2の累乗としてのアライメント */
 };
 </code></pre>
 
-ヘッダーには**マジックバイト**が続き、ファイルが含む**アーキテクチャの数**（`nfat_arch`）と、各アーキテクチャには`fat_arch`構造体があります。
+ヘッダーには**マジック**バイトが続き、ファイルが含む**アーキテクチャ**の数（`nfat_arch`）と、各アーキテクチャには`fat_arch`構造体があります。
 
 次のコマンドで確認します：
 
@@ -195,7 +195,7 @@ uint32_t	reserved3;	/* reserved */
 
 もし、**セクションオフセット**（0x37DC）に**アーキテクチャが始まるオフセット**（この場合は`0x18000`）を**追加**すると、`0x37DC + 0x18000 = 0x1B7DC`となります。
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 また、**コマンドライン**からも**ヘッダ情報**を取得することができます。
 ```bash
@@ -203,9 +203,9 @@ otool -lv /bin/ls
 ```
 このコマンドによって読み込まれる一般的なセグメントは次のとおりです：
 
-* **`__PAGEZERO`**：カーネルに対して、**アドレスゼロをマップ**するよう指示します。このページは**読み取り、書き込み、実行ができない**ようになっています。構造体内のmaxprotとminprot変数はゼロに設定され、このページには**読み書き実行権限がない**ことを示しています。
+* **`__PAGEZERO`**：カーネルに対して、**アドレスゼロをマップ**するよう指示します。このページは**読み取り、書き込み、実行ができない**ようになっています。構造体内のmaxprotとminprot変数はゼロに設定され、このページには**読み書き実行の権限がない**ことを示しています。
 * この割り当ては、**NULLポインタの逆参照の脆弱性を軽減**するために重要です。
-* **`__TEXT`**：**実行可能なコード**を含み、**読み取り**と**実行**の権限があります（書き込みはありません）。このセグメントの一般的なセクション：
+* **`__TEXT`**：**実行可能なコード**を含み、**読み取り**と**実行**の権限があります（書き込みはありません）。このセグメントの一般的なセクションは次のとおりです：
 * `__text`：コンパイルされたバイナリコード
 * `__const`：定数データ
 * `__cstring`：文字列定数
@@ -290,7 +290,7 @@ Mach-Oバイナリには、**1つ以上のコンストラクタ**が含まれて
 
 <figure><img src="../../../.gitbook/assets/image (2) (1) (4).png" alt=""><figcaption></figcaption></figure>
 
-またはCLIから確認することもできます：
+またはCLIからも確認できます：
 ```bash
 size -m /bin/ls
 ```

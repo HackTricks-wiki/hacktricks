@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
@@ -52,27 +52,27 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
 {% hint style="info" %}
-予期しない場所に **dockerソケット** がある場合は、パラメータ **`-H unix:///path/to/docker.sock`** を使用して **`docker`** コマンドでそれと通信することができます。
+予期しない場所に**dockerソケット**がある場合は、パラメータ**`-H unix:///path/to/docker.sock`**を使用して**`docker`**コマンドを使用してそれと通信することができます。
 {% endhint %}
 
-Dockerデーモンは、[デフォルトでポート（通常は2375、2376）でリスニング](../../../../network-services-pentesting/2375-pentesting-docker.md)することもあります。また、Systemdベースのシステムでは、Dockerデーモンとの通信はSystemdソケット `fd://` を介して行われる場合があります。
+Dockerデーモンは、[ポート（デフォルトでは2375、2376）でリスニングすることもあります](../../../../network-services-pentesting/2375-pentesting-docker.md)。また、Systemdベースのシステムでは、Dockerデーモンとの通信はSystemdソケット`fd://`を介して行われる場合があります。
 
 {% hint style="info" %}
 さらに、他のハイレベルランタイムのランタイムソケットにも注意してください：
 
-* dockershim: `unix:///var/run/dockershim.sock`
-* containerd: `unix:///run/containerd/containerd.sock`
-* cri-o: `unix:///var/run/crio/crio.sock`
-* frakti: `unix:///var/run/frakti.sock`
-* rktlet: `unix:///var/run/rktlet.sock`
+* dockershim：`unix:///var/run/dockershim.sock`
+* containerd：`unix:///run/containerd/containerd.sock`
+* cri-o：`unix:///var/run/crio/crio.sock`
+* frakti：`unix:///var/run/frakti.sock`
+* rktlet：`unix:///var/run/rktlet.sock`
 * ...
 {% endhint %}
 
-## 権限の乱用からの脱出
+## Capabilitiesの悪用からの脱出
 
-コンテナの権限を確認する必要があります。以下のいずれかの権限がある場合、それから脱出することができるかもしれません：**`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+コンテナのcapabilitiesをチェックする必要があります。以下のいずれかのcapabilitiesがある場合、それから脱出することができるかもしれません：**`CAP_SYS_ADMIN`**、**`CAP_SYS_PTRACE`**、**`CAP_SYS_MODULE`**、**`DAC_READ_SEARCH`**、**`DAC_OVERRIDE, CAP_SYS_RAWIO`**、**`CAP_SYSLOG`**、**`CAP_NET_RAW`**、**`CAP_NET_ADMIN`**
 
-現在のコンテナの権限は、**前述の自動ツール**または次の方法で確認できます：
+現在のコンテナのcapabilitiesは、**前述の自動ツール**または次のコマンドを使用して確認できます：
 ```bash
 capsh --print
 ```
@@ -96,7 +96,7 @@ capsh --print
 * `--cgroupns=host`
 * `Mount /dev`
 
-`--privileged`フラグは、重大なセキュリティ上の懸念を引き起こし、このフラグを有効にした状態でDockerコンテナを起動することによってエスカレートすることができます。このフラグを使用すると、コンテナはすべてのデバイスに完全なアクセス権を持ち、seccomp、AppArmor、およびLinuxの機能による制限がありません。`--privileged`の効果については、以下のページで詳しく確認できます。
+`--privileged`フラグは、重大なセキュリティ上の懸念を引き起こし、このフラグを有効にしてDockerコンテナを起動することによってエスカレートすることができます。このフラグを使用すると、コンテナはすべてのデバイスに完全なアクセス権を持ち、seccomp、AppArmor、およびLinuxの機能の制限がありません。`--privileged`のすべての効果については、次のページを参照してください：
 
 {% content-ref url="../docker-privileged.md" %}
 [docker-privileged.md](../docker-privileged.md)
@@ -104,7 +104,7 @@ capsh --print
 
 ### 特権 + hostPID
 
-これらの権限を持つ場合、単に`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`を実行することで、ホストでrootとして実行されているプロセス（init、pid:1）の名前空間に移動することができます。
+これらの権限を持つ場合、単に`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`を実行することで、rootとしてホストで実行されているプロセス（pid:1）の名前空間に移動することができます。
 
 コンテナでテストしてみてください。
 ```bash
@@ -154,7 +154,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 ### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
-#### 特権エスケープ既存のrelease\_agentの悪用（[cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)）- PoC1
+#### 特権エスケープ - 既存のrelease\_agentの悪用（[cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)）- PoC1
 
 {% code title="初期PoC" %}
 ```bash
@@ -338,14 +338,15 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ```
 #### 特権エスケープと感度の高いマウントの悪用
 
-**ホストの基礎情報を提供する可能性のあるいくつかのマウントされたファイル**があります。これらのファイルのいくつかは、**ホストが何かが起こったときに実行するものを示す場合さえも**あります（これにより攻撃者はコンテナから脱出することができます）。
+**ホストの基礎情報を提供する可能性のあるいくつかのマウントされたファイル**があります。これらのファイルのいくつかは、**ホストが何かが起こったときに実行するものを示す場合さえもあります**（これにより攻撃者はコンテナから脱出することができます）。
+
 これらのファイルの悪用により、次のことが可能になります：
 
-* release\_agent（以前に説明済み）
-* [binfmt\_misc](sensitive-mounts.md#proc-sys-fs-binfmt\_misc)
-* [core\_pattern](sensitive-mounts.md#proc-sys-kernel-core\_pattern)
-* [uevent\_helper](sensitive-mounts.md#sys-kernel-uevent\_helper)
-* [modprobe](sensitive-mounts.md#proc-sys-kernel-modprobe)
+- release_agent（すでに前述済み）
+- [binfmt_misc](sensitive-mounts.md#proc-sys-fs-binfmt_misc)
+- [core_pattern](sensitive-mounts.md#proc-sys-kernel-core_pattern)
+- [uevent_helper](sensitive-mounts.md#sys-kernel-uevent_helper)
+- [modprobe](sensitive-mounts.md#proc-sys-kernel-modprobe)
 
 ただし、このページでチェックするための**他の感度の高いファイル**も見つけることができます：
 
@@ -355,7 +356,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 
 ### 任意のマウント
 
-いくつかの場合、**コンテナにはホストからのボリュームがマウントされている**ことがあります。このボリュームが正しく設定されていない場合、**感度の高いデータにアクセス/変更することができる**可能性があります：シークレットの読み取り、sshのauthorized\_keysの変更...
+いくつかの場合、**コンテナにはホストからのボリュームがマウントされている**ことがあります。このボリュームが正しく設定されていない場合、**感度の高いデータにアクセス/変更することができる**可能性があります：シークレットの読み取り、sshのauthorized_keysの変更...
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
@@ -375,10 +376,10 @@ bash -p #From non priv inside mounted folder
 もし、**コンテナ内でrootとしてアクセス**でき、かつ**非特権ユーザーとしてホストから脱出**できた場合、コンテナ内での特権昇格を行うために両方のシェルを悪用することができます。これは、コンテナ内でのデフォルトの機能であるMKNODの機能を利用することができるためです。詳細は[**この記事**](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)で説明されています。\
 この機能により、コンテナ内のrootユーザーは**ブロックデバイスファイルを作成**することが許可されます。デバイスファイルは、**ハードウェアやカーネルモジュールにアクセス**するために使用される特殊なファイルです。たとえば、/dev/sdaのブロックデバイスファイルは、システムディスクの生データを**読み取るためのアクセス**を提供します。
 
-Dockerは、ブロックデバイスが**コンテナ内から悪用されないように**、コンテナに対してcgroupポリシーを設定して読み書きをブロックします。\
-ただし、もしブロックデバイスが**コンテナ内で作成された場合、コンテナの外部から/proc/PID/root/フォルダを介してアクセス**することができます。ただし、そのプロセスはコンテナの外部と内部で**同じユーザーによって所有されている必要があります**。
+Dockerは、ブロックデバイスが**コンテナ内から悪用されないように**するために、コンテナに対してcgroupポリシーを設定してブロックデバイスの読み書きをブロックします。\
+ただし、もしブロックデバイスが**コンテナ内で作成された場合、外部の誰かがコンテナの外部から/proc/PID/root/フォルダを介してアクセス**することができます。ただし、そのプロセスはコンテナの外部と内部で**同じユーザーによって所有されている必要があります**。
 
-**悪用**の例は、この[**解説記事**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/)から引用します。
+**悪用**の例は、この[**解説記事**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/)から引用されています。
 ```bash
 # On the container as root
 cd /
@@ -420,7 +421,9 @@ HTB{7h4T_w45_Tr1cKy_1_D4r3_54y}
 ```
 docker run --rm -it --pid=host ubuntu bash
 ```
-たとえば、`ps auxn`のようなコマンドを使用してプロセスをリストアップし、コマンド内の機密情報を検索することができます。
+以下は、特権昇格に関するDockerセキュリティの内容です。以下の英文を日本語に翻訳し、同じマークダウンとHTMLの構文を保ったまま返してください。コード、ハッキング技術の名前、ハッキング用語、クラウド/SaaSプラットフォームの名前（Workspace、aws、gcpなど）、'leak'という単語、ペンテスト、マークダウンタグなどは翻訳しないでください。また、翻訳とマークダウン構文以外の追加要素は含めないでください。
+
+例えば、`ps auxn`のようなコマンドを使用してプロセスをリストアップし、コマンド内の機密情報を検索することができます。
 
 次に、**/proc/内のホストの各プロセスにアクセスできるため、envの秘密情報を盗むことができます**。以下のコマンドを実行してください。
 ```bash
@@ -451,16 +454,14 @@ cat /proc/635813/fd/4
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-もしコンテナがDockerの[ホストネットワーキングドライバ(`--network=host`)](https://docs.docker.com/network/host/)で設定されている場合、そのコンテナのネットワークスタックはDockerホストから分離されず（コンテナはホストのネットワーキング名前空間を共有しています）、コンテナには独自のIPアドレスが割り当てられません。言い換えれば、**コンテナはすべてのサービスを直接ホストのIPにバインド**します。さらに、コンテナは共有インターフェース上でホストが送受信している**すべてのネットワークトラフィックを傍受**することができます（`tcpdump -i eth0`）。
+もしコンテナがDockerの[ホストネットワーキングドライバ(`--network=host`)](https://docs.docker.com/network/host/)で設定されている場合、そのコンテナのネットワークスタックはDockerホストから分離されていません（コンテナはホストのネットワーキング名前空間を共有しています）し、コンテナには独自のIPアドレスが割り当てられません。言い換えると、**コンテナはすべてのサービスを直接ホストのIPにバインド**します。さらに、コンテナは共有インターフェース上でホストが送受信している**すべてのネットワークトラフィックを傍受**することができます（`tcpdump -i eth0`を使用）。
 
-例えば、これを使用してホストとメタデータインスタンス間のトラフィックを**スニフィングやスプーフィング**することができます。
-
-以下の例のように：
+例えば、次のような場合に使用できます：
 
 * [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 * [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
 
-また、ホスト内部から**localhostにバインドされたネットワークサービスにアクセス**したり、ノードの**メタデータの権限にアクセス**することもできます（これはコンテナがアクセスできるものとは異なる場合があります）。
+また、ホスト内で**localhostにバインドされたネットワークサービスにアクセス**したり、ノードの**メタデータの権限にアクセス**することもできます（これはコンテナがアクセスできるものとは異なる場合があります）。
 
 ### hostIPC
 ```
@@ -483,7 +484,7 @@ cat /proc/self/status | grep CapEff
 
 [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)の記事で説明されている2番目のテクニックでは、ユーザーネームスペースを使用してバインドマウントを乱用し、ホスト内のファイル（特定の場合はファイルの削除）に影響を与える方法が示されています。
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**し、自動化することができます。\
 今すぐアクセスを取得：
@@ -494,10 +495,10 @@ cat /proc/self/status | grep CapEff
 
 ### Runc exploit (CVE-2019-5736)
 
-`docker exec`をrootとして実行できる場合（おそらくsudoで実行できる場合）、CVE-2019-5736を乱用してコンテナから特権を昇格させることができます（[ここ](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)にあるexploitを使用します）。このテクニックは、基本的にはコンテナからホストの**/bin/sh**バイナリを**上書き**するものであり、docker execを実行するとペイロードがトリガーされます。
+`docker exec`をrootとして実行できる場合（おそらくsudoで実行できる場合）、CVE-2019-5736を乱用して特権を昇格させることができます（[ここ](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)にあるexploitを使用します）。このテクニックは、基本的には**コンテナからホストの/bin/shバイナリを上書き**し、docker execを実行するとペイロードがトリガーされます。
 
 ペイロードを適宜変更し、`go build main.go`でmain.goをビルドします。ビルドされたバイナリは、実行のためにdockerコンテナに配置する必要があります。\
-実行すると、`[+] Overwritten /bin/sh successfully`と表示されると、ホストマシンから次のコマンドを実行する必要があります：
+実行すると、`[+] Overwritten /bin/sh successfully`と表示されたら、ホストマシンから次のコマンドを実行する必要があります：
 
 `docker exec -it <container-name> /bin/sh`
 
@@ -513,7 +514,7 @@ cat /proc/self/status | grep CapEff
 
 ### Dockerエスケープの対象
 
-* **ネームスペース**：プロセスはネームスペースによって他のプロセスと完全に分離されるため、ネームスペースによる他のプロセスとの相互作用を回避することはできません（デフォルトでは、IPCs、UNIXソケット、ネットワークサービス、D-Bus、他のプロセスの`/proc`を介した通信はできません）。
+* **ネームスペース**：プロセスはネームスペースによって他のプロセスと完全に分離されるため、ネームスペースによる他のプロセスとの相互作用を回避することはできません（デフォルトでは、IPCs、UNIXソケット、ネットワークサービス、D-Bus、他のプロセスの/procを介した通信はできません）。
 * **ルートユーザー**：デフォルトでは、プロセスを実行するユーザーはルートユーザーです（ただし、特権は制限されています）。
 * **機能**：Dockerは次の機能を残します：`cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 * **シスコール**：これらはルートユーザーが呼び出せないシスコールです（機能の不足+Seccompのため）。他のシスコールを使用してエスケープを試みることができます。
@@ -916,119 +917,27 @@ cat /proc/self/status | grep CapEff
 | 527 | pkey_alloc |
 | 528 | pkey_free |
 | 529 | statx |
-| 530 | rseq |
-| 531 | io_pgetevents |
-| 532 | semtimedop |
-| 533 | semget |
-| 534 | semctl |
-| 535 | shmget |
-| 536 | shmctl |
-| 537 | shmat |
-| 538 | shmdt |
-| 539 | msgget |
-| 540 | msgsnd |
-| 541 | msgrcv |
-| 542 | msgctl |
-| 543 | clock_gettime |
-| 544 | clock_settime |
-| 545 | clock_adjtime |
-| 546 | clock_getres |
-| 547 | clock_nanosleep |
-| 548 | timer_gettime |
-| 549 | timer_settime |
-| 550 | timerfd_gettime |
-| 551 | timerfd_settime |
-| 552 | utimensat |
-| 553 | pselect6 |
-| 554 | ppoll |
-| 555 | io_pgetevents_time64 |
-| 556 | recvmmsg_time64 |
-| 557 | mq_timedsend_time64 |
-| 558 | mq_timedreceive_time64 |
-| 559 | semtimedop_time64 |
-| 560 | rt_sigtimedwait_time64 |
-| 561 | futex_time64 |
-| 562 | sched_rr_get_interval_time64 |
-| 563 | pidfd_send_signal |
-| 564 | io_uring_enter |
-| 565 | io_uring_register |
-| 566 | open_tree |
-| 567 | move_mount |
-| 568 | fsopen |
-| 569 | fsconfig |
-| 570 | fsmount |
-| 571 | fspick |
-| 572 | pidfd_open |
-| 573 | clone3 |
-| 574 | close_range |
-| 575 | openat2 |
-| 576 | pidfd_getfd |
-| 577 | faccessat2 |
-| 578 | process_madvise |
-| 579 | epoll_pwait2 |
-| 580 | mount_setattr |
-| 581 | quotactl_fd |
-| 582 | landlock_create_ruleset |
-| 583 | landlock_add_rule |
-| 584 | landlock_restrict_self |
-| 585 | memfd_secret |
-| 586 | process_mrelease |
-| 587 | pwritevf |
-| 588 | preadvf |
-| 589 | fallocate |
-| 590 | copy_file_range |
-| 591 | copy_file_range2 |
-| 592 | copy_file_range4 |
-| 593 | futex_time64 |
-| 594 | sched_rr_get_interval_time64 |
-| 595 | io_pgetevents_time64 |
-| 596 | recvmmsg_time64 |
-| 597 | mq_timedsend_time64 |
-| 598 | mq_timedreceive_time64 |
-| 599 | semtimedop_time64 |
-| 600 | rt_sigtimedwait_time64 |
-| 601 | futex_time64 |
-| 602 | sched_rr_get_interval_time64 |
-| 603 | io_pgetevents_time64 |
-| 604 | recvmmsg_time64 |
-| 605 | mq_timedsend_time64 |
-| 606 | mq_timedreceive_time64 |
-| 607 | semtimedop_time64 |
-| 608 | rt_sigtimedwait_time64 |
-| 609 | futex_time64 |
-| 610 | sched_rr_get_interval_time64 |
-| 611 | io_pgetevents_time64 |
-| 612 | recvmmsg_time64 |
-| 613 | mq_timedsend_time64 |
-| 614 | mq_timedreceive_time64 |
-| 615 | semtimedop_time64 |
-| 616 | rt_sigtimedwait_time64 |
-| 617 | futex_time64 |
-| 618 | sched_rr_get_interval_time64 |
-| 619 | io_pgetevents_time64 |
-| 620 | recvmmsg_time64 |
-| 621 | mq_timedsend_time64 |
-| 622 | mq_timedreceive_time64 |
-| 623 | semtimedop_time64 |
-| 624 | rt_sigtimedwait_time64 |
-| 625 | futex_time64 |
-| 626 | sched_rr_get_interval_time64 |
-| 627 | io_pgetevents_time64 |
-| 628 | recvmmsg_time64 |
-| 629 | mq_timedsend_time64 |
-| 630 | mq_timedreceive_time64 |
-| 631 | semtimedop_time64 |
-| 632 | rt_sigtimedwait_time64 |
-| 633 | futex_time64 |
-| 634 | sched_rr_get_interval_time64 |
-| 635 | io_pgetevents_time64 |
-| 636 | recvmmsg_time64 |
-| 637 | mq_timedsend_time64 |
-| 638 | mq_timedreceive_time64 |
-| 639 | semtimedop_time64 |
-| 640 | rt_sigtimedwait_time64 |
-| 641 | futex_time64 |
-| 642 | sched_rr_get_interval_time64
+| 530 | io_pgetevents |
+| 531 | rseq |
+| 532 | pidfd_send_signal |
+| 533 | io_uring_setup |
+| 534 | io_uring_enter |
+| 535 | io_uring_register |
+| 536 | open_tree |
+| 537 | move_mount |
+| 538 | fsopen |
+| 539 | fsconfig |
+| 540 | fsmount |
+| 541 | fspick |
+| 542 | pidfd_open |
+| 543 | clone3 |
+| 544 | close_range |
+| 545 | openat2 |
+| 546 | pidfd_getfd |
+| 547 | faccessat2 |
+| 548 | process_madvise |
+
+{% endtab %}
 ```
 0x029 -- pivot_root
 0x059 -- acct
@@ -1110,7 +1019,7 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket)
 * [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:

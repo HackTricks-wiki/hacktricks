@@ -21,11 +21,11 @@
 
 したがって、ユーザーの**`$TMPDIR`**に移動すると、.Netアプリケーションをデバッグするために使用できる**デバッグ用のFIFO**を見つけることができます。
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 関数[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259)は、デバッガからの通信を処理します。
 
-デバッガが最初に行う必要があることは、**新しいデバッグセッションを作成する**ことです。これは、`.NET`ソースから取得できる`MessageHeader`構造体で始まる`out`パイプを介してメッセージを送信することで行われます。
+デバッガが最初に行う必要があることは、**新しいデバッグセッションを作成する**ことです。これは、`.NET`のソースから取得できる`MessageHeader`構造体で始まる`out`パイプを介してメッセージを送信することで行われます。
 ```c
 struct MessageHeader
 {
@@ -66,7 +66,7 @@ sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 ```
-次に、`sessionRequestData`構造体を送信する必要があります。この構造体には、セッションを識別するためのGUIDが含まれています。
+以下は、`sessionRequestData`構造体を送信する必要があります。この構造体には、セッションを識別するためのGUIDが含まれています。
 ```c
 // All '9' is a GUID.. right??
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
@@ -80,7 +80,7 @@ read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 ### メモリの読み取り
 
-デバッグセッションが確立されている場合、[`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896)というメッセージタイプを使用してメモリを**読み取る**ことができます。メモリを読み取るために必要な主なコードは次のとおりです：
+デバッグセッションが確立されている場合、[`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896)というメッセージタイプを使用して、メモリを**読み取る**ことができます。メモリを読み取るために必要な主なコードは次のとおりです：
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 
@@ -171,11 +171,11 @@ vmmap -pages 35829 | grep "rwx/rwx"
 ```
 次に、実行をトリガーするためには、関数ポインタが上書きされる場所を知る必要があります。.NET CoreランタイムがJITコンパイルのためのヘルパー関数を提供するために使用する**Dynamic Function Table (DFT)**内のポインタを上書きすることが可能です。サポートされている関数ポインタのリストは、[`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h)内で見つけることができます。
 
-x64バージョンでは、**シグネチャハンティング**テクニックを使用して、**`libcorclr.dll`**内のシンボル**`_hlpDynamicFuncTable`**への参照を検索することで、これを簡単に行うことができます。次に、このポインタを参照解除することができます。
+x64バージョンでは、**シグネチャハンティング**テクニックを使用して、**`libcorclr.dll`**内のシンボル**`_hlpDynamicFuncTable`**への参照を検索することで、これを簡単に行うことができます。次に、この参照をデリファレンスすることができます。
 
 <figure><img src="../../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
-残る作業は、シグネチャ検索を開始するためのアドレスを見つけることです。これには、別の公開されたデバッガ関数**`MT_GetDCB`**を利用します。これにより、ターゲットプロセスに関する有用な情報がいくつか返されますが、今回の場合は、**`m_helperRemoteStartAddr`**というヘルパー関数のアドレスが含まれるフィールドに興味があります。このアドレスを使用することで、ターゲットプロセスのメモリ内に**`libcorclr.dll`が配置されている場所**を知ることができ、DFTの検索を開始することができます。
+残る作業は、シグネチャ検索を開始するためのアドレスを見つけることです。これには、別の公開されたデバッガ関数**`MT_GetDCB`**を利用します。これにより、ターゲットプロセスに関する有用な情報がいくつか返されますが、私たちの場合は、**`m_helperRemoteStartAddr`**というヘルパー関数のアドレスが含まれるフィールドに興味があります。このアドレスを使用することで、ターゲットプロセスのメモリ内に**`libcorclr.dll`が配置されている場所**を知ることができ、DFTの検索を開始することができます。
 
 このアドレスを知ることで、関数ポインタを自分のシェルコードで上書きすることが可能です。
 
@@ -189,10 +189,10 @@ PowerShellにインジェクトするために使用される完全なPOCコー�
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
