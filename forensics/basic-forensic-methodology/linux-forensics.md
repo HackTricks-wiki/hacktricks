@@ -1,6 +1,6 @@
 # Forense en Linux
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -151,10 +151,10 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
 Obtenga acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -163,7 +163,7 @@ Obtenga acceso hoy mismo:
 
 ### Archivos del sistema modificados
 
-Algunos sistemas Linux tienen una función para **verificar la integridad de muchos componentes instalados**, lo que proporciona una forma efectiva de identificar archivos inusuales o fuera de lugar. Por ejemplo, `rpm -Va` en Linux está diseñado para verificar todos los paquetes que se instalaron utilizando el Administrador de paquetes RedHat.
+Algunos sistemas Linux tienen una función para verificar la integridad de muchos componentes instalados, lo que proporciona una forma efectiva de identificar archivos inusuales o fuera de lugar. Por ejemplo, `rpm -Va` en Linux está diseñado para verificar todos los paquetes que se instalaron utilizando el Administrador de paquetes RedHat.
 ```bash
 #RedHat
 rpm -Va
@@ -206,7 +206,7 @@ find /sbin/ -exec dpkg -S {} \; | grep "no path found"
 #RedHat
 find /sbin/ –exec rpm -qf {} \; | grep "is not"
 ```
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\
@@ -265,18 +265,18 @@ Busque en todos los archivos de registro disponibles en el sistema comprometido 
 
 ### Registros puros
 
-Los eventos de **inicio de sesión** registrados en los registros del sistema y de seguridad, incluidos los inicios de sesión a través de la red, pueden revelar que el **malware** o un **intruso ha obtenido acceso** a un sistema comprometido a través de una cuenta específica en un momento determinado. Otros eventos en torno al momento de una infección por malware se pueden capturar en los registros del sistema, incluida la **creación** de un **nuevo servicio** o nuevas cuentas en el momento de un incidente.\
+Los eventos de **inicio de sesión** registrados en los registros del sistema y de seguridad, incluidos los inicios de sesión a través de la red, pueden revelar que el **malware** o un **intruso ha obtenido acceso** a un sistema comprometido a través de una cuenta específica en un momento determinado. Otros eventos en torno al momento de una infección de malware pueden capturarse en los registros del sistema, incluida la **creación** de un **nuevo servicio** o nuevas cuentas en el momento de un incidente.\
 Inicios de sesión del sistema interesantes:
 
 * **/var/log/syslog** (debian) o **/var/log/messages** (Redhat)
-* Muestra mensajes generales e información sobre el sistema. Es un registro de datos de toda la actividad en todo el sistema global.
+* Muestra mensajes generales e información sobre el sistema. Es un registro de datos de toda la actividad en el sistema global.
 * **/var/log/auth.log** (debian) o **/var/log/secure** (Redhat)
 * Guarda registros de autenticación tanto para inicios de sesión exitosos como fallidos, y procesos de autenticación. El almacenamiento depende del tipo de sistema.
 * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
 * **/var/log/boot.log**: mensajes de inicio y información de arranque.
 * **/var/log/maillog** o **var/log/mail.log**: es para registros del servidor de correo, útil para obtener información sobre postfix, smtpd u otros servicios relacionados con el correo electrónico que se ejecutan en su servidor.
-* **/var/log/kern.log**: mantiene registros y advertencias del kernel. Los registros de actividad del kernel (por ejemplo, dmesg, kern.log, klog) pueden mostrar que un servicio en particular se bloqueó repetidamente, lo que podría indicar que se instaló una versión troyanizada inestable.
-* **/var/log/dmesg**: un repositorio para mensajes de controladores de dispositivos. Use **dmesg** para ver los mensajes en este archivo.
+* **/var/log/kern.log**: guarda registros y advertencias del kernel. Los registros de actividad del kernel (por ejemplo, dmesg, kern.log, klog) pueden mostrar que un servicio en particular se bloqueó repetidamente, lo que podría indicar que se instaló una versión troyanizada inestable.
+* **/var/log/dmesg**: un repositorio para mensajes del controlador de dispositivos. Use **dmesg** para ver los mensajes en este archivo.
 * **/var/log/faillog**: registra información sobre inicios de sesión fallidos. Por lo tanto, es útil para examinar posibles violaciones de seguridad como hackeos de credenciales de inicio de sesión y ataques de fuerza bruta.
 * **/var/log/cron**: registra mensajes relacionados con Crond (trabajos cron). Por ejemplo, cuando el demonio cron inicia un trabajo.
 * **/var/log/daemon.log**: realiza un seguimiento de los servicios en segundo plano en ejecución, pero no los representa gráficamente.
@@ -340,41 +340,41 @@ usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
 Más ejemplos e información en el github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
-Obtén acceso hoy mismo:
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Obtenga acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## Revisar cuentas de usuario y actividades de inicio de sesión
 
-Examina los archivos _**/etc/passwd**_, _**/etc/shadow**_ y los registros de seguridad en busca de nombres o cuentas inusuales creadas y/o utilizadas en proximidad a eventos no autorizados conocidos. También verifica posibles ataques de fuerza bruta de sudo.\
-Además, verifica archivos como _**/etc/sudoers**_ y _**/etc/groups**_ en busca de privilegios inesperados otorgados a los usuarios.\
-Por último, busca cuentas sin contraseñas o con contraseñas fáciles de adivinar.
+Examine los archivos _**/etc/passwd**_, _**/etc/shadow**_ y los **registros de seguridad** en busca de nombres o cuentas inusuales creadas y/o utilizadas en proximidad cercana a eventos no autorizados conocidos. Además, verifique posibles ataques de fuerza bruta de sudo.\
+Además, verifique archivos como _**/etc/sudoers**_ y _**/etc/groups**_ en busca de privilegios inesperados otorgados a los usuarios.\
+Por último, busque cuentas sin contraseñas o contraseñas **fáciles de adivinar**.
 
 ## Examinar el sistema de archivos
 
 Las estructuras de datos del sistema de archivos pueden proporcionar cantidades sustanciales de **información** relacionada con un incidente de **malware**, incluyendo el **momento** de los eventos y el **contenido** real del **malware**.\
-El **malware** se está diseñando cada vez más para **evitar el análisis del sistema de archivos**. Algunos malware alteran las marcas de fecha y hora en archivos maliciosos para dificultar su detección mediante el análisis de la línea de tiempo. Otros códigos maliciosos están diseñados para almacenar solo cierta información en la memoria para minimizar la cantidad de datos almacenados en el sistema de archivos.\
+El **malware** se está diseñando cada vez más para **frustrar el análisis del sistema de archivos**. Algunos malware alteran las marcas de fecha y hora en archivos maliciosos para dificultar su localización mediante el análisis de la línea de tiempo. Otros códigos maliciosos están diseñados para almacenar solo cierta información en la memoria para minimizar la cantidad de datos almacenados en el sistema de archivos.\
 Para lidiar con estas técnicas antiforense, es necesario prestar **atención cuidadosa al análisis de la línea de tiempo** de las marcas de fecha y hora del sistema de archivos y a los archivos almacenados en ubicaciones comunes donde se puede encontrar malware.
 
 * Usando **autopsy** puedes ver la línea de tiempo de eventos que pueden ser útiles para descubrir actividades sospechosas. También puedes usar la función `mactime` de **Sleuth Kit** directamente.
-* Verifica la existencia de **scripts inesperados** dentro de **$PATH** (¿tal vez algunos scripts sh o php?)
+* Verifique la existencia de **scripts inesperados** dentro de **$PATH** (¿tal vez algunos scripts sh o php?)
 * Los archivos en `/dev` solían ser archivos especiales, es posible que encuentres archivos no especiales relacionados con malware aquí.
-* Busca archivos y directorios inusuales o **ocultos**, como ".. " (punto punto espacio) o "..^G " (punto punto control-G)
+* Busque archivos y directorios inusuales o **ocultos**, como ".. " (punto punto espacio) o "..^G " (punto punto control-G)
 * Copias setuid de /bin/bash en el sistema `find / -user root -perm -04000 –print`
-* Revisa las marcas de fecha y hora de los **inodos eliminados para ver si se eliminaron grandes cantidades de archivos alrededor del mismo tiempo**, lo que podría indicar actividad maliciosa como la instalación de un rootkit o un servicio troyanizado.
+* Revise las marcas de fecha y hora de los **inodos eliminados para ver si se eliminaron grandes cantidades de archivos alrededor del mismo tiempo**, lo que podría indicar actividad maliciosa como la instalación de un rootkit o un servicio troyanizado.
 * Debido a que los inodos se asignan en función de la disponibilidad siguiente, **los archivos maliciosos colocados en el sistema aproximadamente al mismo tiempo pueden tener inodos consecutivos asignados**. Por lo tanto, después de localizar un componente del malware, puede ser productivo inspeccionar los inodos vecinos.
-* También verifica directorios como _/bin_ o _/sbin_ ya que la **hora de modificación y/o cambio** de archivos nuevos o modificados puede ser interesante.
+* También verifique directorios como _/bin_ o _/sbin_ ya que la **hora de modificación y/o cambio** de archivos nuevos o modificados puede ser interesante.
 * Es interesante ver los archivos y carpetas de un directorio **ordenados por fecha de creación** en lugar de alfabéticamente para ver cuáles son los archivos o carpetas más recientes (generalmente los últimos).
 
-Puedes verificar los archivos más recientes de una carpeta usando `ls -laR --sort=time /bin`\
-Puedes verificar los inodos de los archivos dentro de una carpeta usando `ls -lai /bin |sort -n`
+Puede verificar los archivos más recientes de una carpeta usando `ls -laR --sort=time /bin`\
+Puede verificar los inodos de los archivos dentro de una carpeta usando `ls -lai /bin |sort -n`
 
 {% hint style="info" %}
-Ten en cuenta que un **atacante** puede **modificar** la **hora** para que los **archivos parezcan** **legítimos**, pero no puede modificar el **inodo**. Si encuentras que un **archivo indica** que fue creado y modificado al **mismo tiempo** que el resto de los archivos en la misma carpeta, pero el **inodo** es **inesperadamente más grande**, entonces las **marcas de tiempo de ese archivo fueron modificadas**.
+Tenga en cuenta que un **atacante** puede **modificar** la **hora** para que los **archivos parezcan** **legítimos**, pero no puede modificar el **inodo**. Si encuentra que un **archivo** indica que se creó y modificó al **mismo tiempo** que el resto de los archivos en la misma carpeta, pero el **inodo** es **inesperadamente más grande**, entonces las **marcas de tiempo de ese archivo fueron modificadas**.
 {% endhint %}
 
 ## Comparar archivos de diferentes versiones del sistema de archivos
@@ -397,7 +397,7 @@ Aquí hay algunos pasos que puedes seguir para encontrar contenido modificado en
 
 4. **Buscar archivos ocultos**: Busca archivos ocultos o archivos con nombres sospechosos que puedan indicar actividad maliciosa. Utiliza comandos como `ls -a` para mostrar archivos ocultos en el sistema.
 
-5. **Analizar metadatos**: Examina los metadatos de los archivos sospechosos, como el propietario, los permisos y las fechas de creación y modificación. Los cambios inusuales en los metadatos pueden indicar actividad maliciosa.
+5. **Analizar metadatos**: Examina los metadatos de los archivos sospechosos, como el propietario, los permisos y las fechas de creación y modificación. Si los metadatos difieren de los archivos originales, es posible que hayan sido modificados.
 
 Recuerda que estos pasos son solo una guía básica y que cada caso puede requerir técnicas adicionales o más avanzadas. Es importante contar con un conocimiento sólido de Linux y de las herramientas forenses disponibles para realizar un análisis exhaustivo y preciso.
 ```bash
@@ -448,7 +448,7 @@ Tenga en cuenta que no todas las diferencias pueden tener todos los tipos. Por e
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\

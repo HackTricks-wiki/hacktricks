@@ -1,9 +1,9 @@
 # DCSync
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
 Obtenga acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -14,8 +14,8 @@ Obtenga acceso hoy:
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -38,61 +38,49 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 ```
 ### Explotar Localmente
 
-DCSync is a technique that allows an attacker to impersonate a domain controller and request the replication of password data from the targeted domain controller. This technique can be used to extract password hashes from the Active Directory database without the need for administrative privileges.
+Exploit Locally refers to the process of exploiting vulnerabilities or weaknesses in a system or network from within the local environment. This method allows an attacker to gain unauthorized access or control over the target system without the need for remote exploitation.
 
-To exploit DCSync locally, the attacker needs to have administrative access to a machine within the domain. Once access is obtained, the attacker can use the `mimikatz` tool to execute the DCSync command and retrieve the password hashes.
+#### DCSync
 
-The following steps outline the process to exploit DCSync locally:
+DCSync is a technique used to extract password hashes from a domain controller (DC) in an Active Directory (AD) environment. It takes advantage of the replication process between domain controllers to request and retrieve password data.
 
-1. Launch an elevated command prompt on the compromised machine.
+##### How DCSync Works
 
-2. Download and execute the `mimikatz` tool on the compromised machine.
+DCSync works by impersonating a domain controller and requesting password data from another domain controller in the same AD environment. It exploits the "Directory Replication Service Remote Protocol" (MS-DRSR) to perform this operation.
 
-3. Load the `lsadump` module within `mimikatz` by running the command `privilege::debug` followed by `lsadump::dcsync /domain:<domain_name> /user:<username>`.
+To execute DCSync, an attacker needs to have administrative privileges or have compromised a user account with sufficient privileges. Once the attacker has gained access to a domain controller, they can use the "lsadump::dcsync" module in tools like Mimikatz to request and retrieve password hashes for specified user accounts.
 
-4. Replace `<domain_name>` with the name of the targeted domain and `<username>` with the username of the account whose password hash you want to retrieve.
+##### Mitigating DCSync Attacks
 
-5. If successful, `mimikatz` will retrieve the password hash and display it on the screen.
+To mitigate DCSync attacks, it is recommended to follow these best practices:
 
-By exploiting DCSync locally, an attacker can gain access to password hashes, which can then be cracked to obtain the actual passwords. This technique highlights the importance of securing domain controllers and implementing strong password policies within an Active Directory environment.
+1. Implement the principle of least privilege (PoLP) to limit the privileges of user accounts and minimize the impact of compromised accounts.
+2. Regularly review and update user account privileges to ensure they are appropriate and necessary.
+3. Enable and enforce strong password policies, including regular password changes and complexity requirements.
+4. Implement multi-factor authentication (MFA) to add an extra layer of security to user accounts.
+5. Monitor and analyze event logs for any suspicious activity related to DCSync or other privilege escalation techniques.
+6. Keep domain controllers and other systems up to date with the latest security patches and updates.
+7. Educate users and administrators about the risks of social engineering and phishing attacks, which are often used to gain initial access to a network.
 
-### Explotar Localmente
-
-DCSync es una técnica que permite a un atacante hacerse pasar por un controlador de dominio y solicitar la replicación de datos de contraseñas del controlador de dominio objetivo. Esta técnica se puede utilizar para extraer los hashes de contraseñas de la base de datos de Active Directory sin necesidad de privilegios administrativos.
-
-Para explotar DCSync localmente, el atacante necesita tener acceso administrativo a una máquina dentro del dominio. Una vez obtenido el acceso, el atacante puede utilizar la herramienta `mimikatz` para ejecutar el comando DCSync y recuperar los hashes de contraseñas.
-
-Los siguientes pasos describen el proceso para explotar DCSync localmente:
-
-1. Ejecutar un símbolo del sistema elevado en la máquina comprometida.
-
-2. Descargar y ejecutar la herramienta `mimikatz` en la máquina comprometida.
-
-3. Cargar el módulo `lsadump` dentro de `mimikatz` ejecutando el comando `privilege::debug` seguido de `lsadump::dcsync /domain:<nombre_dominio> /user:<nombre_usuario>`.
-
-4. Reemplazar `<nombre_dominio>` con el nombre del dominio objetivo y `<nombre_usuario>` con el nombre de usuario de la cuenta cuyo hash de contraseña se desea recuperar.
-
-5. Si tiene éxito, `mimikatz` recuperará el hash de contraseña y lo mostrará en la pantalla.
-
-Al explotar DCSync localmente, un atacante puede obtener acceso a los hashes de contraseñas, los cuales luego pueden ser descifrados para obtener las contraseñas reales. Esta técnica resalta la importancia de asegurar los controladores de dominio e implementar políticas de contraseñas sólidas dentro de un entorno de Active Directory.
+By implementing these measures, organizations can significantly reduce the risk of DCSync attacks and enhance the security of their Active Directory environment.
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 ### Explotar de forma remota
 
-DCSync is a technique that allows an attacker to impersonate a domain controller and request password data from the targeted domain controller. This technique takes advantage of the replication process in Active Directory to extract password hashes from the targeted domain controller without being detected.
+DCSync is a technique that allows an attacker to impersonate a domain controller and request password data from the targeted domain controller. This technique takes advantage of the replication process in Active Directory to retrieve password hashes from the targeted domain controller without being detected.
 
-To exploit this vulnerability remotely, the attacker needs to have remote access to a machine within the target network. Once inside, the attacker can use tools like Mimikatz to execute the DCSync attack.
+To exploit this vulnerability remotely, the attacker needs to have remote access to a machine within the target network. Once inside, the attacker can use tools like Mimikatz or Impacket to execute the DCSync attack.
 
 The DCSync attack can be executed in two ways: using the DRSUAPI method or the LDAP method. Both methods allow the attacker to retrieve password hashes from the targeted domain controller.
 
-To execute the DCSync attack using the DRSUAPI method, the attacker needs to have administrative privileges on the target machine. By using the "lsadump::dcsync" command in Mimikatz, the attacker can request the password hashes for a specific user or for all users in the domain.
+To execute the DCSync attack using the DRSUAPI method, the attacker needs to have administrative privileges on the target machine. The attacker can use the "lsadump::dcsync" command in Mimikatz to request password data from the domain controller.
 
-To execute the DCSync attack using the LDAP method, the attacker needs to have a valid domain user account. By using the "lsadump::lsa /inject /name:<username>" command in Mimikatz, the attacker can request the password hashes for the specified user.
+To execute the DCSync attack using the LDAP method, the attacker needs to have a valid domain user account. The attacker can use tools like Impacket's "secretsdump.py" to retrieve password hashes from the domain controller.
 
-Once the password hashes are obtained, the attacker can use tools like John the Ripper or Hashcat to crack the hashes and obtain the plaintext passwords.
+It is important to note that the DCSync attack requires the attacker to have sufficient privileges and access to the target network. Additionally, this attack can be detected by monitoring tools that detect abnormal replication requests or unauthorized access attempts.
 
-To protect against DCSync attacks, it is important to implement strong security measures such as enforcing complex passwords, enabling multi-factor authentication, and regularly monitoring and auditing Active Directory for any suspicious activity.
+To protect against the DCSync attack, it is recommended to implement strong password policies, regularly update and patch domain controllers, and monitor network traffic for any suspicious activity.
 ```powershell
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
@@ -143,7 +131,7 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\

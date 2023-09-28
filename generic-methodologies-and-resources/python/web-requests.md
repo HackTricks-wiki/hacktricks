@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -96,16 +96,18 @@ Para explotar una RCE (Ejecución Remota de Código) utilizando Python, puedes u
 import requests
 
 url = "URL_DEL_OBJETIVO"
-payload = "PAYLOAD_DE_LA_RCE"
+payload = "PAYLOAD_DE_EXPLOTACIÓN"
 
 response = requests.get(url + payload)
 
 print(response.text)
 ```
 
-Asegúrate de reemplazar "URL_DEL_OBJETIVO" con la URL del objetivo que deseas atacar y "PAYLOAD_DE_LA_RCE" con el payload específico de la RCE que estás utilizando. Este comando utiliza la biblioteca `requests` de Python para enviar una solicitud GET al objetivo con el payload de la RCE. Luego, imprime la respuesta recibida del objetivo.
+Asegúrate de reemplazar "URL_DEL_OBJETIVO" con la URL del objetivo que deseas atacar y "PAYLOAD_DE_EXPLOTACIÓN" con el payload específico que deseas utilizar para la explotación.
 
-Recuerda que la explotación de una RCE puede ser ilegal y solo debe realizarse con el permiso explícito del propietario del sistema objetivo.
+Este comando utiliza la biblioteca `requests` de Python para enviar una solicitud GET al objetivo con el payload de explotación especificado. Luego, imprime la respuesta recibida del objetivo.
+
+Recuerda que la explotación de una RCE puede ser ilegal y solo debe realizarse con el permiso explícito del propietario del sistema objetivo y con fines legítimos, como pruebas de penetración autorizadas o investigación de seguridad.
 ```python
 import requests
 import re
@@ -132,7 +134,7 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\

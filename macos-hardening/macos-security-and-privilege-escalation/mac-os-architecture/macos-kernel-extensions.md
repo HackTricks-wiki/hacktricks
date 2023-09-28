@@ -22,7 +22,7 @@ Obviamente, esto es tan poderoso que es complicado cargar una extensión de kern
 
 * Al entrar en **modo de recuperación**, las extensiones de kernel deben estar **permitidas para ser cargadas**:
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * La extensión de kernel debe estar **firmada con un certificado de firma de código de kernel**, que solo puede ser otorgado por **Apple**. Quien revisará en detalle la **empresa** y las **razones** por las que se necesita.
 * La extensión de kernel también debe estar **notarizada**, Apple podrá verificarla en busca de malware.

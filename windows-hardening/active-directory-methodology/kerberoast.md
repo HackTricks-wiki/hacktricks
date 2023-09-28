@@ -1,6 +1,6 @@
 # Kerberoast
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -15,15 +15,15 @@ Obtenga acceso hoy mismo:
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Kerberoast
 
-El objetivo de **Kerberoasting** es obtener **tickets TGS para servicios que se ejecutan en nombre de cuentas de usuario** en el AD, no en cuentas de computadora. Por lo tanto, **parte** de estos tickets TGS están **encriptados** con **claves** derivadas de las contraseñas de usuario. Como consecuencia, sus credenciales podrían ser **descifradas sin conexión**.\
-Puede saber que se está utilizando una **cuenta de usuario** como un **servicio** porque la propiedad **"ServicePrincipalName"** no es **nula**.
+El objetivo de **Kerberoasting** es recolectar **tickets TGS para servicios que se ejecutan en nombre de cuentas de usuario** en el AD, no en cuentas de computadora. Por lo tanto, **parte** de estos tickets TGS están **encriptados** con **claves** derivadas de las contraseñas de usuario. Como consecuencia, sus credenciales podrían ser **descifradas sin conexión**.\
+Puede saber que una **cuenta de usuario** se está utilizando como un **servicio** porque la propiedad **"ServicePrincipalName"** no es **nula**.
 
 Por lo tanto, para realizar Kerberoasting, solo se necesita una cuenta de dominio que pueda solicitar TGS, lo cual puede ser cualquier persona ya que no se requieren privilegios especiales.
 
@@ -63,7 +63,19 @@ Get-NetUser -SPN | select serviceprincipalname #Powerview
 ```
 * **Técnica 1: Solicitar TGS y extraerlo de la memoria**
 
-En esta técnica, aprovechamos una vulnerabilidad en el protocolo Kerberos para solicitar un Service Ticket Granting Service (TGS) a un controlador de dominio. Luego, extraemos el TGS de la memoria del sistema para obtener las credenciales necesarias para realizar ataques de fuerza bruta offline. Este método es efectivo cuando se tiene acceso a un controlador de dominio y se puede ejecutar código en él.
+En esta técnica, el objetivo es solicitar un Service Ticket (TGS) a un servidor de dominio y luego extraerlo de la memoria del sistema. El TGS contiene información sensible, como la clave de sesión del servicio, que puede ser utilizada para realizar ataques de fuerza bruta y obtener acceso no autorizado a la cuenta de servicio correspondiente. A continuación se detallan los pasos para llevar a cabo esta técnica:
+
+1. Identificar el servicio objetivo: Primero, es necesario identificar el servicio de destino al que se desea acceder. Esto se puede hacer mediante el escaneo de la red o mediante la enumeración de servicios en el dominio.
+
+2. Solicitar un TGS: Una vez identificado el servicio objetivo, se debe solicitar un TGS al servidor de dominio correspondiente. Esto se logra enviando una solicitud de autenticación Kerberos al servidor.
+
+3. Extraer el TGS de la memoria: Una vez que se ha obtenido el TGS, se debe extraer de la memoria del sistema. Esto se puede lograr utilizando herramientas como Mimikatz, que permiten buscar y extraer información sensible de la memoria.
+
+4. Descifrar la clave de sesión: Una vez que se ha extraído el TGS, se puede intentar descifrar la clave de sesión del servicio. Esto se puede hacer utilizando técnicas de fuerza bruta o mediante el uso de diccionarios de contraseñas.
+
+5. Utilizar la clave de sesión: Una vez que se ha descifrado la clave de sesión, se puede utilizar para autenticarse como el servicio correspondiente. Esto puede permitir el acceso no autorizado a recursos protegidos por el servicio.
+
+Es importante tener en cuenta que esta técnica requiere privilegios de administrador en el sistema objetivo y puede ser detectada por soluciones de seguridad que monitorean la memoria del sistema en busca de actividades sospechosas. Por lo tanto, se recomienda utilizar esta técnica con precaución y solo en entornos controlados y autorizados.
 ```powershell
 #Get TGS in memory from a single user
 Add-Type -AssemblyName System.IdentityModel
@@ -103,7 +115,7 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 Cuando se solicita un TGS, se genera el evento de Windows `4769 - Se solicitó un ticket de servicio Kerberos`.
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** utilizando las herramientas comunitarias más avanzadas del mundo.\
@@ -125,7 +137,7 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 ```
 Puedes encontrar herramientas útiles para ataques de **kerberoast** aquí: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW (Demasiada diferencia de tiempo)`**, se debe a la hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
+Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`**, se debe a la hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
 
 * `ntpdate <IP del DC>` - Obsoleto a partir de Ubuntu 16.04
 * `rdate -n <IP del DC>`
@@ -134,7 +146,7 @@ Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_S
 
 Kerberoast es muy sigiloso si es explotable
 
-* Evento de seguridad ID 4769 - Se solicitó un ticket de Kerberos
+* Evento de seguridad ID 4769: se solicitó un ticket de Kerberos
 * Dado que 4769 es muy frecuente, vamos a filtrar los resultados:
 * El nombre del servicio no debe ser krbtgt
 * El nombre del servicio no debe terminar con $ (para filtrar las cuentas de máquina utilizadas para servicios)
@@ -161,7 +173,7 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\

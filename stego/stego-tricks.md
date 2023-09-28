@@ -84,7 +84,7 @@ cmp original.jpg stego.jpg -b -l
 Si encuentras que una **línea de texto** es **más grande** de lo que debería ser, entonces es posible que se incluya alguna **información oculta** dentro de los **espacios** utilizando caracteres invisibles.󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨\
 Para **extraer** los **datos**, puedes utilizar: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
-<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
@@ -136,7 +136,7 @@ Para usarlo, simplemente abre la imagen y haz clic en los botones `<` `>`.
 
 ### FFT
 
-Para encontrar contenido oculto utilizando Fast Fourier T:
+Para encontrar contenido oculto utilizando la Transformada Rápida de Fourier:
 
 * [http://bigwww.epfl.ch/demo/ip/demos/FFT/](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 * [https://www.ejectamenta.com/Fourifier-fullscreen/](https://www.ejectamenta.com/Fourifier-fullscreen/)

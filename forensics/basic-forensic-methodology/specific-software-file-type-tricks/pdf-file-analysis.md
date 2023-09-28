@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -22,7 +22,7 @@ Obtén acceso hoy mismo:
 
 Desde: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
-El formato de archivo PDF es extremadamente complicado, con suficientes trucos y lugares ocultos [para escribir durante años](https://www.sultanik.com/pocorgtfo/). Esto también lo hace popular para los desafíos de forensia de CTF. La NSA escribió una guía sobre estos lugares ocultos en 2008 titulada "Datos ocultos y metadatos en archivos PDF de Adobe: riesgos de publicación y contramedidas". Ya no está disponible en su URL original, pero puedes [encontrar una copia aquí](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf). Ange Albertini también mantiene un wiki en GitHub de [trucos del formato de archivo PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md).
+El formato de archivo PDF es extremadamente complicado, con suficientes trucos y lugares ocultos [para escribir durante años](https://www.sultanik.com/pocorgtfo/). Esto también lo hace popular para los desafíos de forenses de CTF. La NSA escribió una guía sobre estos lugares ocultos en 2008 titulada "Hidden Data and Metadata in Adobe PDF Files: Publication Risks and Countermeasures". Ya no está disponible en su URL original, pero puedes [encontrar una copia aquí](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf). Ange Albertini también mantiene un wiki en GitHub de [trucos del formato de archivo PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md).
 
 El formato PDF es parcialmente texto plano, como HTML, pero con muchos "objetos" binarios en su contenido. Didier Stevens ha escrito [buen material introductorio](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) sobre el formato. Los objetos binarios pueden ser datos comprimidos o incluso datos encriptados, e incluyen contenido en lenguajes de script como JavaScript o Flash. Para mostrar la estructura de un PDF, puedes navegarlo con un editor de texto o abrirlo con un editor de formato de archivo PDF como Origami.
 

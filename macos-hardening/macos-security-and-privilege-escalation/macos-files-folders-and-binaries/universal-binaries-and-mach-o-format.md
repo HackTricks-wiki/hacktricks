@@ -45,7 +45,7 @@ uint32_t	align;		/* alineación como una potencia de 2 */
 };
 </code></pre>
 
-El encabezado tiene los bytes **mágicos** seguidos del **número** de **arquitecturas** que contiene el archivo (`nfat_arch`) y cada arquitectura tendrá una estructura `fat_arch`.
+El encabezado tiene los bytes **mágicos** seguidos del **número** de **arquitecturas** que el archivo **contiene** (`nfat_arch`) y cada arquitectura tendrá una estructura `fat_arch`.
 
 Verifícalo con:
 
@@ -127,7 +127,7 @@ O utilizando [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 ## **Comandos de carga de Mach-O**
 
-Esto especifica el **diseño del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y las **bibliotecas compartidas** requeridas.\
+Esto especifica la **estructura del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y las **bibliotecas compartidas** requeridas.\
 Los comandos básicamente instruyen al cargador dinámico **(dyld) cómo cargar el binario en memoria.**
 
 Todos los comandos de carga comienzan con una estructura **load\_command**, definida en el **`loader.h`** mencionado anteriormente:
@@ -149,7 +149,7 @@ Estos comandos **definen segmentos** que se **mapean** en el **espacio de memori
 
 Existen **diferentes tipos** de segmentos, como el segmento **\_\_TEXT**, que contiene el código ejecutable de un programa, y el segmento **\_\_DATA**, que contiene datos utilizados por el proceso. Estos **segmentos se encuentran en la sección de datos** del archivo Mach-O.
 
-**Cada segmento** se puede **dividir** en múltiples **secciones**. La **estructura del comando de carga** contiene **información** sobre **estas secciones** dentro del segmento correspondiente.
+**Cada segmento** se puede dividir aún más en múltiples **secciones**. La **estructura del comando de carga** contiene **información** sobre **estas secciones** dentro del segmento correspondiente.
 
 En el encabezado primero se encuentra el **encabezado del segmento**:
 
@@ -195,7 +195,7 @@ Ejemplo de **encabezado de sección**:
 
 Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener **información de encabezados** desde la **línea de comandos** con:
 ```bash
@@ -203,7 +203,7 @@ otool -lv /bin/ls
 ```
 Segmentos comunes cargados por este comando:
 
-* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir ni ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
+* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
 * Esta asignación es importante para **mitigar las vulnerabilidades de referencia a puntero nulo**.
 * **`__TEXT`**: Contiene **código ejecutable** con permisos de **lectura** y **ejecución** (sin escritura). Secciones comunes de este segmento:
 * `__text`: Código binario compilado
@@ -266,7 +266,7 @@ Algunas bibliotecas potencialmente relacionadas con malware son:
 * **CoreWLAN**: Escaneo de Wifi.
 
 {% hint style="info" %}
-Un binario Mach-O puede contener uno o **más** **constructores**, que se **ejecutarán** **antes** de la dirección especificada en **LC\_MAIN**.\
+Un binario Mach-O puede contener uno o **más** **constructores**, que se ejecutarán **antes** de la dirección especificada en **LC\_MAIN**.\
 Los desplazamientos de cualquier constructor se encuentran en la sección **\_\_mod\_init\_func** del segmento **\_\_DATA\_CONST**.
 {% endhint %}
 

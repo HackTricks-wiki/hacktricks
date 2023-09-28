@@ -6,13 +6,13 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -22,9 +22,9 @@ Obtén acceso hoy mismo:
 
 ## **Seguridad básica del motor de Docker**
 
-El motor de Docker se encarga de ejecutar y gestionar los contenedores. El motor de Docker utiliza características del kernel de Linux como **Namespaces** y **Cgroups** para proporcionar un aislamiento básico entre los contenedores. También utiliza características como **la eliminación de capacidades**, **Seccomp**, **SELinux/AppArmor para lograr un mejor aislamiento**.
+El motor de Docker se encarga de ejecutar y gestionar los contenedores. El motor de Docker utiliza características del kernel de Linux como **Namespaces** y **Cgroups** para proporcionar un aislamiento básico entre los contenedores. También utiliza características como **la eliminación de capacidades**, **Seccomp** y **SELinux/AppArmor para lograr un mejor aislamiento**.
 
-Finalmente, se puede utilizar un **plugin de autenticación** para **limitar las acciones** que los usuarios pueden realizar.
+Por último, se puede utilizar un **plugin de autenticación** para **limitar las acciones** que los usuarios pueden realizar.
 
 ![](<../../../.gitbook/assets/image (625) (1) (1).png>)
 
@@ -33,7 +33,7 @@ Finalmente, se puede utilizar un **plugin de autenticación** para **limitar las
 El cliente de Docker puede acceder al motor de Docker **localmente utilizando un socket Unix o de forma remota utilizando http**. Para utilizarlo de forma remota, es necesario utilizar https y **TLS** para garantizar la confidencialidad, integridad y autenticación.
 
 De forma predeterminada, Docker escucha en el socket Unix `unix:///var/`\
-`run/docker.sock` y en las distribuciones de Ubuntu, las opciones de inicio de Docker se especifican en `/etc/default/docker`. Para permitir que la API y el cliente de Docker accedan al motor de Docker de forma remota, necesitamos **exponer el demonio de Docker utilizando un socket http**. Esto se puede hacer mediante:
+`run/docker.sock` y en las distribuciones de Ubuntu, las opciones de inicio de Docker se especifican en `/etc/default/docker`. Para permitir que la API y el cliente de Docker accedan al motor de Docker de forma remota, es necesario **exponer el demonio de Docker utilizando un socket http**. Esto se puede hacer mediante:
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H
 tcp://192.168.56.101:2376" -> add this to /etc/default/docker
@@ -94,9 +94,9 @@ A continuación se detallan algunos aspectos sobre la confianza en el contenido 
 * La confianza en el contenido de Docker se habilita con `export DOCKER_CONTENT_TRUST=1`. A partir de la versión 1.10 de Docker, la confianza en el contenido no está habilitada de forma predeterminada.
 * Cuando la confianza en el contenido está habilitada, solo podemos **descargar imágenes firmadas**. Al empujar una imagen, debemos ingresar la clave de etiquetado.
 * Cuando el editor **envía** la imagen por **primera vez** usando `docker push`, es necesario ingresar una **frase de contraseña** para la **clave raíz y la clave de etiquetado**. Las demás claves se generan automáticamente.
-* Docker también ha agregado soporte para claves de hardware utilizando Yubikey y los detalles están disponibles [aquí](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+* Docker también ha agregado soporte para claves de hardware utilizando YubiKey y los detalles están disponibles [aquí](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 
-A continuación se muestra el **error** que obtenemos cuando **la confianza en el contenido está habilitada y la imagen no está firmada**.
+A continuación se muestra el **error** que obtenemos cuando la **confianza en el contenido está habilitada y la imagen no está firmada**.
 ```shell-session
 $ docker pull smakam/mybusybox
 Using default tag: latest
@@ -121,7 +121,7 @@ Cuando cambié el host de Docker, tuve que mover las claves raíz y las claves d
 
 ***
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
@@ -270,7 +270,7 @@ La Denegación de Servicio de Ancho de Banda, también conocida como Bandwidth D
 
 Este tipo de ataque puede ser llevado a cabo de varias formas, como el envío de paquetes de datos masivos, el uso de técnicas de amplificación de tráfico o la explotación de vulnerabilidades en los protocolos de red.
 
-Para protegerse contra la Denegación de Servicio de Ancho de Banda, es importante implementar medidas de seguridad como el filtrado de tráfico, la limitación de ancho de banda y la detección de patrones de tráfico anormales. Además, es recomendable contar con un plan de respuesta a incidentes para mitigar los efectos de un ataque en caso de que ocurra.
+Para protegerse contra la Denegación de Servicio de Ancho de Banda, es importante implementar medidas de seguridad como el filtrado de tráfico, la limitación de ancho de banda y la detección de patrones de tráfico anormales. Además, es recomendable contar con un plan de respuesta a incidentes para mitigar los efectos de un ataque de este tipo.
 
 En resumen, la Denegación de Servicio de Ancho de Banda es un ataque que busca saturar la capacidad de ancho de banda de un sistema o red, lo que puede causar una disminución en el rendimiento y afectar la disponibilidad de los servicios. Es importante implementar medidas de seguridad adecuadas para protegerse contra este tipo de ataque.
 ```bash
@@ -365,7 +365,7 @@ A continuación se muestra el contenido traducido al español:
 ```markdown
 Luego, inicie Compose como de costumbre con `docker-compose up --build my_service`.
 
-Si estás utilizando [Kubernetes](https://kubernetes.io/docs/concepts/configuration/secret/), tiene soporte para secretos. [Helm-Secrets](https://github.com/futuresimple/helm-secrets) puede ayudar a facilitar la gestión de secretos en K8s. Además, K8s tiene Controles de Acceso Basados en Roles (RBAC), al igual que Docker Enterprise. RBAC facilita la gestión y seguridad del acceso a los secretos para los equipos.
+Si estás utilizando [Kubernetes](https://kubernetes.io/docs/concepts/configuration/secret/), tiene soporte para secretos. [Helm-Secrets](https://github.com/futuresimple/helm-secrets) puede ayudar a facilitar la gestión de secretos en K8s. Además, K8s tiene Controles de Acceso Basados en Roles (RBAC), al igual que Docker Enterprise. RBAC hace que la gestión de secretos sea más manejable y segura para los equipos.
 
 ### gVisor
 
@@ -393,12 +393,12 @@ Si estás utilizando [Kubernetes](https://kubernetes.io/docs/concepts/configurat
 * Si **expones el demonio de Docker, utiliza HTTPS** con autenticación de cliente y servidor.
 * En tu Dockerfile, **prefiere COPY en lugar de ADD**. ADD extrae automáticamente archivos comprimidos y puede copiar archivos desde URL. COPY no tiene estas capacidades. Siempre que sea posible, evita usar ADD para no ser susceptible a ataques a través de URL remotas y archivos Zip.
 * Ten **contenedores separados para cada microservicio**.
-* **No incluyas SSH** dentro del contenedor, se puede utilizar "docker exec" para acceder por SSH al contenedor.
+* **No incluyas ssh** dentro del contenedor, se puede utilizar "docker exec" para acceder por ssh al contenedor.
 * Utiliza **imágenes de contenedor más pequeñas**.
 
 ## Escape de Docker / Escalada de privilegios
 
-Si estás **dentro de un contenedor de Docker** o tienes acceso a un usuario en el **grupo de Docker**, puedes intentar **escapar y escalar privilegios**:
+Si estás **dentro de un contenedor de Docker** o tienes acceso a un usuario en el **grupo docker**, puedes intentar **escapar y escalar privilegios**:
 
 {% content-ref url="docker-breakout-privilege-escalation/" %}
 [docker-breakout-privilege-escalation](docker-breakout-privilege-escalation/)
@@ -406,7 +406,7 @@ Si estás **dentro de un contenedor de Docker** o tienes acceso a un usuario en 
 
 ## Bypass del plugin de autenticación de Docker
 
-Si tienes acceso al socket de Docker o tienes acceso a un usuario en el **grupo de Docker pero tus acciones están limitadas por un plugin de autenticación de Docker**, verifica si puedes **burlarlo**:
+Si tienes acceso al socket de Docker o tienes acceso a un usuario en el **grupo docker pero tus acciones están limitadas por un plugin de autenticación de Docker**, verifica si puedes **burlarlo**:
 
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
@@ -415,7 +415,7 @@ Si tienes acceso al socket de Docker o tienes acceso a un usuario en el **grupo 
 ## Reforzamiento de Docker
 
 * La herramienta [**docker-bench-security**](https://github.com/docker/docker-bench-security) es un script que verifica docenas de prácticas recomendadas comunes para implementar contenedores de Docker en producción. Las pruebas son todas automatizadas y se basan en el [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un contenedor con suficientes privilegios. Descubre **cómo ejecutarlo en el archivo README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un contenedor con suficientes privilegios. Descubre **cómo ejecutarlo en el README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Referencias
 
@@ -429,7 +429,7 @@ Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un conten
 * [https://en.wikipedia.org/wiki/Linux\_namespaces](https://en.wikipedia.org/wiki/Linux\_namespaces)
 * [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 ```
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** utilizando las herramientas comunitarias más avanzadas del mundo.
 Obtén acceso hoy mismo:

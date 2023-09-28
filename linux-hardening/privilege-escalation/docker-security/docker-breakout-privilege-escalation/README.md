@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -485,7 +485,7 @@ cat /proc/self/status | grep CapEff
 
 La segunda técnica explicada en la publicación [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indica cómo se puede abusar de los enlaces simbólicos con los espacios de nombres de usuario para afectar archivos dentro del host (en ese caso específico, eliminar archivos).
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
 Obtenga acceso hoy mismo:
@@ -515,7 +515,7 @@ Existen otras CVE a las que el contenedor puede ser vulnerable, puede encontrar 
 
 ### Superficie de escape de Docker
 
-* **Namespaces:** El proceso debe estar **completamente separado de otros procesos** a través de los espacios de nombres, por lo que no podemos escapar interactuando con otros procesos debido a los espacios de nombres (por defecto, no se puede comunicar a través de IPC, sockets Unix, servicios de red, D-Bus, `/proc` de otros procesos).
+* **Namespaces:** El proceso debe estar **completamente separado de otros procesos** a través de los espacios de nombres, por lo que no podemos escapar interactuando con otros procesos debido a los espacios de nombres (por defecto no se puede comunicar a través de IPC, sockets Unix, servicios de red, D-Bus, `/proc` de otros procesos).
 * **Usuario root**: Por defecto, el usuario que ejecuta el proceso es el usuario root (sin embargo, sus privilegios están limitados).
 * **Capacidades**: Docker deja las siguientes capacidades: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 * **Syscalls**: Estos son los syscalls que el **usuario root no podrá llamar** (debido a la falta de capacidades + Seccomp). Los otros syscalls podrían ser utilizados para intentar escapar.
@@ -542,7 +542,7 @@ Existen otras CVE a las que el contenedor puede ser vulnerable, puede encontrar 
 0x140 -- kexec_file_load
 0x141 -- bpf
 ```
-{% tab title="syscalls arm64" %}
+{% tab title="llamadas al sistema arm64" %}
 ```
 0x029 -- pivot_root
 0x059 -- acct
@@ -624,7 +624,7 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket)
 * [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:

@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
@@ -41,7 +41,7 @@ Las reglas de AppLocker aplicadas a un host también se pueden **leer desde el r
 
 ### Bypass
 
-* Carpetas **escribibles** útiles para evadir la política de AppLocker: Si AppLocker permite ejecutar cualquier cosa dentro de `C:\Windows\System32` o `C:\Windows`, hay **carpetas escribibles** que puedes usar para **evadir esto**.
+* Carpetas **escribibles** útiles para eludir la política de AppLocker: Si AppLocker permite ejecutar cualquier cosa dentro de `C:\Windows\System32` o `C:\Windows`, hay **carpetas escribibles** que puedes usar para **eludir esto**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -186,17 +186,9 @@ $ExecutionContext.SessionState.LanguageMode
 ```
 ### Bypass
 
-Un bypass es una técnica utilizada para evadir o eludir medidas de seguridad y obtener acceso no autorizado a un sistema o recurso protegido. En el contexto de la seguridad de Windows, existen varios métodos de bypass que pueden ser utilizados para comprometer la autenticación, las credenciales, el Control de Cuentas de Usuario (UAC) y el Sistema de Archivos Encriptados (EFS). Estos métodos pueden ser aprovechados por los hackers para obtener acceso no autorizado a sistemas Windows y comprometer la seguridad de los datos.
+Un bypass es una técnica utilizada para evadir o eludir medidas de seguridad y obtener acceso no autorizado a un sistema o recurso. En el contexto de la seguridad de Windows, existen varios métodos de bypass que pueden ser utilizados para comprometer la autenticación, las credenciales, el Control de Cuentas de Usuario (UAC) y el Sistema de Archivos Encriptados (EFS). Estos métodos pueden ser aprovechados por los hackers para obtener acceso no autorizado a sistemas Windows y comprometer la seguridad de los datos.
 
-En el caso de la autenticación, un bypass puede implicar eludir o evadir los mecanismos de autenticación para obtener acceso a una cuenta de usuario sin conocer las credenciales correctas. Esto puede lograrse mediante técnicas como la fuerza bruta, el uso de contraseñas débiles o la explotación de vulnerabilidades en el sistema de autenticación.
-
-En cuanto a las credenciales, un bypass puede referirse a la obtención de credenciales de usuario legítimas sin el conocimiento o consentimiento del propietario. Esto puede lograrse mediante técnicas como el phishing, el keylogging o la explotación de vulnerabilidades en aplicaciones o servicios que almacenan o transmiten credenciales.
-
-El Control de Cuentas de Usuario (UAC) es una característica de seguridad de Windows que ayuda a prevenir cambios no autorizados en el sistema mediante la solicitud de confirmación o consentimiento del usuario antes de realizar ciertas acciones. Sin embargo, los hackers pueden utilizar técnicas de bypass para eludir o evadir el UAC y obtener acceso elevado o realizar cambios no autorizados en el sistema.
-
-El Sistema de Archivos Encriptados (EFS) es una característica de seguridad de Windows que permite encriptar archivos y carpetas para proteger su contenido. Sin embargo, los hackers pueden utilizar técnicas de bypass para eludir o evadir la encriptación y acceder al contenido de los archivos encriptados sin conocer la clave de encriptación correcta.
-
-En resumen, los bypass son técnicas utilizadas por los hackers para evadir o eludir medidas de seguridad en sistemas Windows, comprometiendo la autenticación, las credenciales, el UAC y el EFS. Es importante que los administradores de sistemas y los usuarios tomen medidas para fortalecer la seguridad de sus sistemas y protegerse contra estos tipos de ataques.
+En este capítulo, exploraremos diferentes técnicas de bypass que pueden ser utilizadas para evadir las medidas de seguridad en Windows y obtener acceso no autorizado a sistemas y recursos protegidos. Aprenderemos cómo los hackers pueden aprovechar las vulnerabilidades en la autenticación, las credenciales, el UAC y el EFS para comprometer la seguridad de Windows. También discutiremos las contramedidas y las mejores prácticas para fortalecer la seguridad de Windows y proteger los sistemas y datos sensibles.
 ```powershell
 #Easy bypass
 Powershell -version 2
@@ -266,16 +258,16 @@ El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que 
 
 ## UAC - Control de cuentas de usuario
 
-[Control de cuentas de usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que permite una **solicitud de consentimiento para actividades elevadas**.
+[Control de cuentas de usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una función que permite una **solicitud de consentimiento para actividades elevadas**.
 
 {% content-ref url="windows-security-controls/uac-user-account-control.md" %}
 [uac-user-account-control.md](windows-security-controls/uac-user-account-control.md)
 {% endcontent-ref %}
 
-<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para crear y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
 Obtenga acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -288,6 +280,6 @@ Obtenga acceso hoy mismo:
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -1,6 +1,6 @@
 # ACLs - DACLs/SACLs/ACEs
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
@@ -26,18 +26,18 @@ Una **ACL es una lista ordenada de ACEs** que define las protecciones que se apl
 
 El descriptor de seguridad de un objeto puede contener **dos ACLs**:
 
-1. Un **DACL** que **identifica** los **usuarios** y **grupos** a los que se les permite o deniega el acceso.
+1. Un **DACL** que **identifica** a los **usuarios** y **grupos** a los que se les permite o se les niega el acceso.
 2. Un **SACL** que controla **cómo** se audita el acceso.
 
 Cuando un usuario intenta acceder a un archivo, el sistema Windows ejecuta un AccessCheck y compara el descriptor de seguridad con el token de acceso del usuario y evalúa si se le concede acceso y qué tipo de acceso en función de los ACEs establecidos.
 
 ### **Lista de control de acceso discrecional (DACL)**
 
-Un DACL (a menudo mencionado como ACL) identifica a los usuarios y grupos a los que se les asignan o deniegan permisos de acceso en un objeto. Contiene una lista de ACEs emparejados (Cuenta + Derecho de acceso) para el objeto securizable.
+Un DACL (a menudo mencionado como ACL) identifica a los usuarios y grupos a los que se les asignan o se les niegan permisos de acceso en un objeto. Contiene una lista de ACEs emparejados (Cuenta + Derecho de acceso) para el objeto securizable.
 
 ### **Lista de control de acceso del sistema (SACL)**
 
-Los SACLs permiten supervisar el acceso a objetos seguros. Los ACEs en un SACL determinan **qué tipos de acceso se registran en el Registro de eventos de seguridad**. Con herramientas de supervisión, esto puede generar una alarma para las personas adecuadas si los usuarios malintencionados intentan acceder al objeto seguro, y en un escenario de incidente podemos utilizar los registros para rastrear los pasos hacia atrás en el tiempo. Y por último, se puede habilitar el registro para solucionar problemas de acceso.
+Los SACLs permiten supervisar el acceso a objetos seguros. Los ACEs en un SACL determinan **qué tipos de acceso se registran en el Registro de eventos de seguridad**. Con herramientas de supervisión, esto podría generar una alarma para las personas adecuadas si los usuarios malintencionados intentan acceder al objeto seguro, y en un escenario de incidente podemos utilizar los registros para rastrear los pasos hacia atrás en el tiempo. Y por último, se puede habilitar el registro para solucionar problemas de acceso.
 
 ## Cómo utiliza el sistema las ACLs
 
@@ -89,10 +89,10 @@ La siguiente figura muestra el orden canónico de los ACEs:
 
 El orden canónico asegura que se cumpla lo siguiente:
 
-* Un ACE de **denegación de acceso explícito se aplica independientemente de cualquier ACE de acceso permitido explícito**. Esto significa que el propietario del objeto puede definir permisos que permitan el acceso a un grupo de usuarios y denieguen el acceso a un subconjunto de ese grupo.
-* Todos los ACEs **explícitos se procesan antes que cualquier ACE heredado**. Esto es consistente con el concepto de control de acceso discrecional: el acceso a un objeto hijo (por ejemplo, un archivo) está a discreción del propietario del hijo, no del propietario del objeto padre (por ejemplo, una carpeta). El propietario de un objeto hijo puede definir permisos directamente en el hijo. El resultado es que los efectos de los permisos heredados se modifican.
+* Un **ACE de denegación de acceso explícito se aplica independientemente de cualquier ACE de acceso permitido explícito**. Esto significa que el propietario del objeto puede definir permisos que permitan el acceso a un grupo de usuarios y denieguen el acceso a un subconjunto de ese grupo.
+* Todos los **ACEs explícitos se procesan antes que cualquier ACE heredado**. Esto es consistente con el concepto de control de acceso discrecional: el acceso a un objeto hijo (por ejemplo, un archivo) está a discreción del propietario del hijo, no del propietario del objeto padre (por ejemplo, una carpeta). El propietario de un objeto hijo puede definir permisos directamente en el hijo. El resultado es que los efectos de los permisos heredados se modifican.
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
@@ -124,21 +124,21 @@ En este ejemplo, el grupo de acceso permitido es "Everyone" y el grupo de acceso
 
 Deseas denegar el acceso del grupo "Marketing" a una carpeta llamada "Cost". Si los ACEs de la carpeta "Cost" están en orden canónico, el ACE que deniega el acceso a "Marketing" se coloca antes del ACE que permite a "Everyone".
 
-Durante una verificación de acceso, el sistema operativo recorre los ACEs en el orden en que aparecen en el DACL del objeto, de modo que el ACE de denegación se procesa antes que el ACE de permitir. Como resultado, los usuarios que son miembros del grupo "Marketing" se les deniega el acceso. Todos los demás tienen acceso al objeto.
+Durante una verificación de acceso, el sistema operativo recorre los ACEs en el orden en que aparecen en el DACL del objeto, de modo que el ACE de denegación se procesa antes que el ACE de permiso. Como resultado, los usuarios que son miembros del grupo "Marketing" se les deniega el acceso. Todos los demás tienen acceso al objeto.
 
 ### Ejemplo: Explícito antes que heredado
 
 En este ejemplo, la carpeta "Cost" tiene un ACE heredable que deniega el acceso a "Marketing" (el objeto padre). En otras palabras, todos los usuarios que son miembros (o hijos) del grupo "Marketing" se les deniega el acceso por herencia.
 
-Deseas permitir el acceso a Bob, quien es el director de marketing. Como miembro del grupo "Marketing", Bob tiene denegado el acceso a la carpeta "Cost" por herencia. El propietario del objeto hijo (usuario Bob) define un ACE explícito que permite el acceso a la carpeta "Cost". Si los ACEs del objeto hijo están en orden canónico, el ACE explícito que permite el acceso a Bob se coloca antes que cualquier ACE heredado, incluido el ACE heredado que deniega el acceso al grupo "Marketing".
+Deseas permitir el acceso a Bob, quien es el director de marketing. Como miembro del grupo "Marketing", Bob tiene denegado el acceso a la carpeta "Cost" por herencia. El propietario del objeto hijo (usuario Bob) define un ACE explícito que permite el acceso a la carpeta "Cost". Si los ACEs del objeto hijo están en orden canónico, el ACE explícito que permite a Bob acceder se coloca antes que cualquier ACE heredado, incluido el ACE heredado que deniega el acceso al grupo "Marketing".
 
-Durante una verificación de acceso, el sistema operativo llega al ACE que permite el acceso a Bob antes de llegar al ACE que deniega el acceso al grupo "Marketing". Como resultado, se le permite a Bob acceder al objeto a pesar de ser miembro del grupo "Marketing". Otros miembros del grupo "Marketing" tienen denegado el acceso.
+Durante una verificación de acceso, el sistema operativo llega al ACE que permite a Bob acceder antes de llegar al ACE que deniega el acceso al grupo "Marketing". Como resultado, Bob tiene acceso al objeto aunque sea miembro del grupo "Marketing". Otros miembros del grupo "Marketing" tienen denegado el acceso.
 
 ### Entradas de Control de Acceso
 
 Como se mencionó anteriormente, una ACL (Lista de Control de Acceso) es una lista ordenada de ACEs (Entradas de Control de Acceso). Cada ACE contiene lo siguiente:
 
-* Un SID (Identificador de Seguridad) que identifica a un usuario o grupo en particular.
+* Un SID (Identificador de Seguridad) que identifica a un usuario o grupo específico.
 * Una máscara de acceso que especifica los derechos de acceso.
 * Un conjunto de indicadores de bits que determinan si los objetos secundarios pueden heredar el ACE o no.
 * Un indicador que indica el tipo de ACE.
@@ -154,7 +154,7 @@ Un ACE genérico ofrece un control limitado sobre los tipos de objetos secundari
 
 Por ejemplo, el DACL (Lista de Control de Acceso Discrecional) en un objeto Carpeta en NTFS puede incluir un ACE genérico que permite a un grupo de usuarios listar el contenido de la carpeta. Debido a que listar el contenido de una carpeta es una operación que solo se puede realizar en un objeto Contenedor, el ACE que permite la operación puede ser marcado como CONTAINER\_INHERIT\_ACE. Solo los objetos Contenedor en la carpeta (es decir, otras carpetas) heredan el ACE. Los objetos no contenedores (es decir, archivos) no heredan el ACE del objeto padre.
 
-Un ACE genérico se aplica a un objeto completo. Si un ACE genérico le da a un usuario en particular acceso de lectura, el usuario puede leer toda la información asociada con el objeto, tanto los datos como las propiedades. Esto no es una limitación grave para la mayoría de los tipos de objetos. Por ejemplo, los objetos de archivo tienen pocas propiedades, que se utilizan para describir características del objeto en lugar de almacenar información. La mayor parte de la información en un objeto de archivo se almacena como datos del objeto; por lo tanto, hay poca necesidad de controles separados sobre las propiedades de un archivo.
+Un ACE genérico se aplica a un objeto completo. Si un ACE genérico otorga a un usuario en particular acceso de lectura, el usuario puede leer toda la información asociada con el objeto, tanto los datos como las propiedades. Esto no es una limitación grave para la mayoría de los tipos de objetos. Por ejemplo, los objetos de archivo tienen pocas propiedades, que se utilizan para describir características del objeto en lugar de almacenar información. La mayor parte de la información en un objeto de archivo se almacena como datos del objeto; por lo tanto, hay poca necesidad de controles separados sobre las propiedades de un archivo.
 
 ### ACE específico del objeto
 
@@ -211,7 +211,7 @@ La siguiente tabla muestra el diseño de cada ACE.
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con facilidad, impulsados por las **herramientas comunitarias más avanzadas del mundo**.\

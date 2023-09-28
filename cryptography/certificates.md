@@ -7,12 +7,12 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -235,29 +235,21 @@ openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 ```
 **2- Convertir CER y Clave Privada a PFX**
 
-En algunos casos, es posible que necesite convertir un archivo de certificado CER y una clave privada en un archivo PFX. Esto puede ser útil si desea importar el certificado y la clave privada en un formato único para su uso en diferentes aplicaciones o sistemas.
+En algunos casos, es posible que necesite convertir un archivo de certificado en formato CER y una clave privada en formato PEM a un archivo de intercambio de información personal (PFX). Un archivo PFX combina el certificado y la clave privada en un solo archivo, lo que facilita su uso en diferentes aplicaciones y sistemas.
 
-Para realizar esta conversión, puede utilizar la herramienta OpenSSL. Asegúrese de tener OpenSSL instalado en su sistema antes de continuar.
+Para convertir el archivo CER y la clave privada a PFX, puede utilizar la herramienta OpenSSL. A continuación se muestra el comando que puede utilizar:
 
-1. Abra una ventana de comandos y navegue hasta el directorio donde se encuentra el archivo de certificado CER y la clave privada.
+```bash
+openssl pkcs12 -export -out certificate.pfx -inkey privatekey.pem -in certificate.cer
+```
 
-2. Ejecute el siguiente comando para combinar el certificado y la clave privada en un archivo PFX:
+Este comando toma el archivo de clave privada `privatekey.pem` y el archivo de certificado `certificate.cer` y los combina en un archivo PFX llamado `certificate.pfx`. Durante el proceso, se le pedirá que proporcione una contraseña para proteger el archivo PFX.
 
-   ```
-   openssl pkcs12 -export -out certificado.pfx -inkey claveprivada.key -in certificado.cer
-   ```
-
-   Asegúrese de reemplazar "certificado.pfx" con el nombre que desee para el archivo PFX, "claveprivada.key" con el nombre del archivo de clave privada y "certificado.cer" con el nombre del archivo de certificado CER.
-
-3. Se le pedirá que ingrese una contraseña para proteger el archivo PFX. Ingrese una contraseña segura y recuerde guardarla en un lugar seguro.
-
-4. Una vez que se complete el proceso, se generará un archivo PFX que contiene el certificado y la clave privada en un formato único.
-
-Ahora puede utilizar el archivo PFX en diferentes aplicaciones o sistemas que admitan este formato para importar el certificado y la clave privada.
+Una vez que haya convertido con éxito el archivo CER y la clave privada a PFX, puede utilizar el archivo resultante en aplicaciones y sistemas que admitan el formato PFX.
 ```
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile  cacert.cer
 ```
-<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\
@@ -271,8 +263,8 @@ Obtén acceso hoy mismo:
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

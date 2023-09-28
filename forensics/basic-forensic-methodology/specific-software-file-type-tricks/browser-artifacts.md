@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -31,7 +31,7 @@ Cada navegador almacena sus archivos en un lugar diferente al de otros navegador
 Veamos los artefactos más comunes almacenados por los navegadores.
 
 * **Historial de Navegación:** Contiene datos sobre el historial de navegación del usuario. Puede utilizarse para rastrear si el usuario ha visitado sitios maliciosos, por ejemplo.
-* **Datos de Autocompletado:** Estos son los datos que el navegador sugiere en función de lo que más buscas. Puede utilizarse junto con el historial de navegación para obtener más información.
+* **Datos de Autocompletar:** Estos son los datos que el navegador sugiere en función de lo que más buscas. Puede utilizarse junto con el historial de navegación para obtener más información.
 * **Marcadores:** Autoexplicativo.
 * **Extensiones y Complementos:** Autoexplicativo.
 * **Caché:** Al navegar por sitios web, el navegador crea todo tipo de datos en caché (imágenes, archivos JavaScript, etc.) por diversas razones. Por ejemplo, para acelerar el tiempo de carga de los sitios web. Estos archivos en caché pueden ser una gran fuente de datos durante una investigación forense.
@@ -74,7 +74,7 @@ Dentro de la carpeta **de cada perfil** (_\~/.mozilla/firefox/\<NombrePerfil>/_)
 
 Información que se puede obtener:
 
-* URL, recuento de descargas, nombre de archivo, tipo de contenido, tamaño del archivo, hora de la última modificación, hora de la última descarga, última modificación del servidor, respuesta del servidor
+* URL, Conteo de descargas, Nombre de archivo, Tipo de contenido, Tamaño del archivo, Hora de la última modificación, Hora de la última descarga, Última modificación del servidor, Respuesta del servidor
 * _**favicons.sqlite**_ : Favicons
 * _**prefs.js**_ : Configuraciones y preferencias
 * _**downloads.sqlite**_ : Base de datos antigua de descargas (ahora está dentro de places.sqlite)
@@ -185,7 +185,7 @@ La información de metadatos sobre las cookies almacenadas:
 * CreationTime: Primera vez que se creó la cookie
 * ModifiedTime: Última vez que se modificó la cookie
 * AccessedTime: Última vez que se accedió a la cookie
-* ExpiryTime: Hora de vencimiento de la cookie
+* ExpiryTime: Hora de caducidad de la cookie
 
 #### Archivos
 
@@ -214,7 +214,7 @@ La herramienta [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_his
 
 * ModifiedTime: Primera vez que se encuentra una URL
 * AccessedTime: Última vez
-* AccessCount: Número de veces que se accedió
+* AccessCount: Número de veces que se ha accedido
 
 #### **Archivos**
 
@@ -267,7 +267,7 @@ Opera **almacena el historial del navegador y los datos de descarga en el mismo 
 * **Anti-phishing integrado en el navegador:** `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
 * **fraud\_protection\_enabled** debería ser **true**
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas de la comunidad más avanzadas del mundo.\

@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -80,12 +80,13 @@ oletools es una colección de scripts y herramientas de línea de comandos para 
 Estas herramientas pueden ser útiles en el análisis forense de archivos de Office para detectar malware, exploits y otros comportamientos sospechosos. Algunas de las herramientas incluidas en oletools son:
 
 - **olebrowse**: una herramienta para examinar la estructura interna de los archivos OLE y extraer información relevante.
-- **oleid**: una herramienta para identificar el tipo de archivo OLE y verificar si contiene macros maliciosas.
-- **olevba**: una herramienta para analizar macros de Office y extraer información sobre su comportamiento.
+- **oleid**: una herramienta para identificar el tipo de archivo OLE y las características específicas.
+- **olevba**: una herramienta para analizar macros de Visual Basic for Applications (VBA) en archivos de Office y detectar posibles amenazas.
+- **olemeta**: una herramienta para extraer metadatos de archivos OLE y mostrar información detallada sobre ellos.
+- **oledump**: una herramienta para analizar archivos OLE y extraer objetos incrustados, secuencias de comandos y otros datos relevantes.
 - **rtfobj**: una herramienta para extraer objetos incrustados de archivos RTF (Rich Text Format).
-- **olemap**: una herramienta para mapear la estructura interna de los archivos OLE y mostrar las relaciones entre los objetos.
 
-Estas herramientas son de código abierto y están disponibles en GitHub para su descarga y uso. Pueden ser una adición valiosa a la caja de herramientas de un analista forense o de un investigador de seguridad.
+Estas herramientas son de código abierto y están disponibles en GitHub para su descarga y uso. oletools es una herramienta muy útil para los profesionales de la seguridad y el análisis forense que trabajan con archivos de Office y necesitan analizarlos en busca de posibles amenazas o comportamientos maliciosos.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
@@ -98,7 +99,7 @@ Las funciones de macro como `AutoOpen`, `AutoExec` o `Document_Open` se ejecutar
 
 * [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\

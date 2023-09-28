@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -75,7 +75,7 @@ Además de esa información, para descifrar las bases de datos aún necesitas:
 
 * La **clave DPAPI encriptada**: Puedes encontrarla en el registro dentro de `NTUSER.DAT\Software\Dropbox\ks\client` (exporta estos datos como binarios)
 * Las colmenas **`SYSTEM`** y **`SECURITY`**
-* Las claves maestras de DPAPI: Que se pueden encontrar en `\Users\<nombre de usuario>\AppData\Roaming\Microsoft\Protect`
+* Las **claves maestras DPAPI**: Que se pueden encontrar en `\Users\<nombre de usuario>\AppData\Roaming\Microsoft\Protect`
 * El nombre de usuario y la contraseña del usuario de Windows
 
 Luego puedes usar la herramienta [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi\_data\_decryptor.html)**:**
@@ -94,7 +94,7 @@ La base de datos **`config.dbx`** contiene:
 * **usernamedisplayname**: El nombre del usuario
 * **dropbox\_path**: Ruta donde se encuentra la carpeta de Dropbox
 * **Host\_id: Hash** utilizado para autenticarse en la nube. Esto solo se puede revocar desde la web.
-* **Root\_ns**: Identificador de usuario
+* **Root\_ns**: Identificador del usuario
 
 La base de datos **`filecache.db`** contiene información sobre todos los archivos y carpetas sincronizados con Dropbox. La tabla `File_journal` es la que contiene más información útil:
 
@@ -111,7 +111,7 @@ Otras tablas dentro de esta base de datos contienen información más interesant
 * **deleted\_fields**: Archivos eliminados de Dropbox
 * **date\_added**
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\

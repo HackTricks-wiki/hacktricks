@@ -1,6 +1,6 @@
 # Comandos útiles de Linux
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -139,7 +139,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
@@ -181,7 +181,7 @@ grep [opciones] [patrón] [archivo(s)]
 
 - `[opciones]`: se utilizan para especificar opciones adicionales, como la búsqueda recursiva en directorios o la ignorancia de mayúsculas y minúsculas.
 - `[patrón]`: es el patrón que se desea buscar en el archivo(s).
-- `[archivo(s)]`: son los archivos en los que se desea realizar la búsqueda. Si no se especifica ningún archivo, `grep` leerá la entrada estándar.
+- `[archivo(s)]`: son los archivos en los que se realizará la búsqueda. Si no se especifica ningún archivo, `grep` leerá la entrada estándar.
 
 ### Ejemplos de uso
 
@@ -197,22 +197,28 @@ grep "palabra_clave" archivo.txt
 grep "palabra_clave" archivo1.txt archivo2.txt archivo3.txt
 ```
 
-3. Buscar una palabra clave de forma recursiva en un directorio:
+3. Buscar una palabra clave en todos los archivos de un directorio (recursivamente):
 
 ```
 grep -r "palabra_clave" directorio/
 ```
 
-4. Ignorar mayúsculas y minúsculas al buscar una palabra clave:
+4. Buscar una palabra clave ignorando mayúsculas y minúsculas:
 
 ```
 grep -i "palabra_clave" archivo.txt
 ```
 
-5. Utilizar expresiones regulares para realizar una búsqueda avanzada:
+5. Buscar una palabra clave y mostrar el número de línea donde se encuentra:
 
 ```
-grep -E "patrón_regex" archivo.txt
+grep -n "palabra_clave" archivo.txt
+```
+
+6. Buscar una palabra clave utilizando una expresión regular:
+
+```
+grep -E "expresión_regular" archivo.txt
 ```
 
 Estos son solo algunos ejemplos básicos de cómo utilizar el comando `grep`. Puedes consultar la página de manual (`man grep`) para obtener más información sobre las opciones y funcionalidades avanzadas de `grep`.
@@ -300,15 +306,15 @@ egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13
 Nmap es una herramienta de escaneo de red muy poderosa y versátil. Aquí hay algunos comandos útiles para ayudarte a aprovechar al máximo Nmap:
 
 - `nmap -sn <IP>`: Realiza un escaneo de ping para determinar si una dirección IP está activa.
-- `nmap -sS <IP>`: Realiza un escaneo TCP SYN para determinar los puertos abiertos en una dirección IP.
-- `nmap -sU <IP>`: Realiza un escaneo UDP para determinar los puertos abiertos en una dirección IP.
+- `nmap -sS <IP>`: Realiza un escaneo de tipo SYN para determinar los puertos abiertos en una dirección IP.
+- `nmap -sV <IP>`: Realiza un escaneo de versión para determinar la versión y el servicio que se ejecuta en los puertos abiertos de una dirección IP.
 - `nmap -p <puertos> <IP>`: Escanea puertos específicos en una dirección IP.
-- `nmap -A <IP>`: Realiza un escaneo agresivo que incluye detección de sistema operativo, versión de servicios y scripts de detección de vulnerabilidades.
-- `nmap -O <IP>`: Intenta determinar el sistema operativo de una dirección IP.
-- `nmap -v <IP>`: Ejecuta Nmap en modo verbose para obtener más información detallada.
-- `nmap -h`: Muestra la ayuda y la lista completa de opciones de Nmap.
+- `nmap -A <IP>`: Realiza un escaneo agresivo que incluye detección de versión, detección de sistema operativo y escaneo de scripts.
+- `nmap -O <IP>`: Intenta determinar el sistema operativo que se ejecuta en una dirección IP.
+- `nmap -T<0-5> <IP>`: Establece el nivel de agresividad del escaneo, donde 0 es el más lento y 5 es el más rápido.
+- `nmap -v <IP>`: Muestra una salida detallada del escaneo.
 
-Estos son solo algunos ejemplos de cómo puedes utilizar Nmap para realizar escaneos de red. Recuerda que es importante utilizar esta herramienta de manera ética y obtener el permiso adecuado antes de realizar cualquier escaneo en una red que no sea de tu propiedad.
+Estos son solo algunos ejemplos de los comandos más comunes que puedes utilizar con Nmap. Recuerda que Nmap es una herramienta muy potente y puede proporcionar mucha información sobre una red, por lo que es importante utilizarla de manera ética y responsable.
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -319,11 +325,9 @@ nmap --script-help "(default or version) and smb)"
 
 Bash (Bourne Again SHell) es un intérprete de comandos de Unix y un lenguaje de programación de shell. Es el shell predeterminado en la mayoría de las distribuciones de Linux y macOS. Bash proporciona una interfaz de línea de comandos para interactuar con el sistema operativo y ejecutar comandos.
 
-### Comandos básicos de Bash
+### Comandos básicos
 
-A continuación se presentan algunos comandos básicos de Bash que son útiles para la administración del sistema:
-
-- `ls`: muestra el contenido de un directorio.
+- `ls`: lista los archivos y directorios en el directorio actual.
 - `cd`: cambia el directorio actual.
 - `pwd`: muestra el directorio de trabajo actual.
 - `mkdir`: crea un nuevo directorio.
@@ -334,37 +338,43 @@ A continuación se presentan algunos comandos básicos de Bash que son útiles p
 - `grep`: busca patrones en archivos.
 - `chmod`: cambia los permisos de archivos y directorios.
 - `chown`: cambia el propietario de archivos y directorios.
-- `chgrp`: cambia el grupo de archivos y directorios.
+- `ssh`: inicia una sesión segura en un servidor remoto.
+- `sudo`: ejecuta un comando con privilegios de superusuario.
 
 ### Redirección y tuberías
 
-Bash permite redirigir la entrada y salida de los comandos utilizando los siguientes operadores:
-
-- `>`: redirige la salida de un comando a un archivo, sobrescribiendo el contenido existente.
-- `>>`: redirige la salida de un comando a un archivo, agregando al contenido existente.
-- `<`: redirige la entrada de un comando desde un archivo.
-- `|`: redirige la salida de un comando a la entrada de otro comando, creando una tubería.
+- `>`: redirige la salida de un comando a un archivo.
+- `>>`: redirige y agrega la salida de un comando a un archivo existente.
+- `<`: redirige la entrada de un archivo a un comando.
+- `|`: redirige la salida de un comando a la entrada de otro comando.
 
 ### Variables de entorno
 
-Bash utiliza variables de entorno para almacenar información sobre el entorno del sistema. Algunas variables de entorno comunes son:
+- `export`: establece una variable de entorno.
+- `env`: muestra las variables de entorno.
+- `echo`: muestra el valor de una variable de entorno.
 
-- `PATH`: contiene una lista de directorios donde se encuentran los ejecutables.
-- `HOME`: el directorio de inicio del usuario actual.
-- `USER`: el nombre de usuario del usuario actual.
-- `SHELL`: la ruta al intérprete de comandos actual.
+### Comandos de búsqueda y filtrado
 
-Puede ver el valor de una variable de entorno utilizando el comando `echo $VARIABLE`.
+- `find`: busca archivos y directorios en función de diferentes criterios.
+- `grep`: busca patrones en archivos.
+- `sort`: ordena líneas de texto.
+- `wc`: cuenta líneas, palabras y caracteres en un archivo.
+- `head`: muestra las primeras líneas de un archivo.
+- `tail`: muestra las últimas líneas de un archivo.
 
-### Scripting de Bash
+### Comandos de administración del sistema
 
-Bash también se puede utilizar para escribir scripts, que son secuencias de comandos almacenados en un archivo. Los scripts de Bash se pueden ejecutar utilizando el comando `bash script.sh` o haciendo el archivo ejecutable y ejecutándolo directamente con `./script.sh`.
+- `top`: muestra los procesos en ejecución y su uso de recursos.
+- `ps`: muestra los procesos en ejecución.
+- `kill`: envía una señal a un proceso.
+- `shutdown`: apaga o reinicia el sistema.
+- `ifconfig`: muestra y configura las interfaces de red.
+- `netstat`: muestra las conexiones de red y las estadísticas.
+- `ping`: envía paquetes ICMP a un host para verificar la conectividad.
+- `traceroute`: muestra la ruta que toman los paquetes a través de la red.
 
-Los scripts de Bash pueden contener variables, estructuras de control, bucles y funciones, lo que los hace muy flexibles y poderosos para la automatización de tareas.
-
-### Conclusion
-
-Bash es una herramienta poderosa para la administración del sistema en Linux y macOS. Con una comprensión sólida de los comandos básicos y la capacidad de escribir scripts, puede realizar una variedad de tareas de manera eficiente y automatizada.
+Estos son solo algunos de los comandos básicos de Bash. Hay muchos más comandos y opciones disponibles que pueden ayudarte a administrar y trabajar con eficacia en un sistema Linux.
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
@@ -400,9 +410,9 @@ Here are some common options that you can use with iptables:
 - `-A` (append): Adds a new rule to the end of a chain.
 - `-D` (delete): Deletes a rule from a chain.
 - `-I` (insert): Inserts a new rule at a specific position in a chain.
-- `-p` (protocol): Specifies the protocol (e.g., tcp, udp).
+- `-p` (protocol): Specifies the protocol of the packet (e.g., tcp, udp).
 - `--dport` (destination port): Specifies the destination port number.
-- `-j` (jump): Specifies the target action for the rule (e.g., ACCEPT, DROP).
+- `-j` (jump): Specifies the target action for the packet (e.g., ACCEPT, DROP).
 
 ### Chains
 
@@ -459,7 +469,7 @@ iptables -P OUTPUT ACCEPT
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
