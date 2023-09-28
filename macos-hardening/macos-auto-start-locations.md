@@ -1,4 +1,4 @@
-# macOS Auto Start Locations
+# macOS Auto Start
 
 <details>
 
@@ -14,7 +14,15 @@
 
 This section is heavily based on the blog series [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/), the goal is to add **more Autostart Locations** (if possible), indicate **which techniques are still working** nowadays with latest version of macOS (13.4) and to specify the **permissions** needed.
 
+## Sandbox Bypass
+
+{% hint style="success" %}
+Here you can find start locations useful for **sandbox bypass** that allows you to simply execute something by **writing it into a file** and **waiting** for a very **common** **action**, a determined **amount of time** or an **action you can usually perform** from inside a snadbox without needing root permissions.
+{% endhint %}
+
 ### Launchd
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 
 #### Locations
 
@@ -35,7 +43,7 @@ This section is heavily based on the blog series [**Beyond the good ol' LaunchAg
 * **`~/Library/LaunchDemons`**
   * **Trigger**: Relog-in
 
-#### Description & Payload
+#### Description & Exploitation
 
 **`launchd`** is the **first** **process** executed by OX S kernel at startup and the last one to finish at shut down. It should always have the **PID 1**. This process will **read and execute** the configurations indicated in the **ASEP** **plists** in:
 
@@ -91,6 +99,8 @@ launchctl list
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0001/](https://theevilbit.github.io/beyond/beyond\_0001/)\
 Writeup (xterm): [https://theevilbit.github.io/beyond/beyond\_0018/](https://theevilbit.github.io/beyond/beyond\_0018/)
 
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+
 #### Locations
 
 * **`~/.zshrc`, `~/.zlogin`, `~/.zshenv`, `~/.zprofile`**
@@ -111,7 +121,7 @@ Writeup (xterm): [https://theevilbit.github.io/beyond/beyond\_0018/](https://the
 * `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
   * **Trigger**: Expected to trigger with xterm, but it **isn't installed** and even after installed this error is thrown: xterm: `DISPLAY is not set`
 
-#### Description
+#### Description & Exploitation
 
 Shell startup files are executed when our shell environment like `zsh` or `bash` is **starting up**. macOS defaults to `/bin/zsh` these days, and **whenever we open `Terminal` or SSH** into the device, this is the shell environment we are placed into. `bash` and `sh` are still available, however they have to be specifically started.
 
@@ -122,9 +132,234 @@ The man page of zsh, which we can read with **`man zsh`** has a long description
 echo "touch /tmp/hacktricks" >> ~/.zshrc
 ```
 
+### Re-opened Applications
+
+{% hint style="danger" %}
+Configuring the indicated exploitation and loging-out and loging-in or even rebooting didn't work for me to execute the app. (The app wasn't being executed, maybe it needs to be running when these actions are performed)
+{% endhint %}
+
+**Writeup**: [https://theevilbit.github.io/beyond/beyond\_0021/](https://theevilbit.github.io/beyond/beyond\_0021/)
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+
+#### Location
+
+* **`~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`**
+  * **Trigger**: Restart reopening applications
+
+#### Description & Exploitation
+
+All the applications to reopen are inside the plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
+
+So, make the reopen applications launch your own one, you just need to **add your app to the list**.
+
+The UUID can be found listing that directory or with `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'`
+
+To check the applications that will be reopened you can do:
+
+```bash
+defaults -currentHost read com.apple.loginwindow TALAppsToRelaunchAtLogin
+#or
+plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
+```
+
+To **add an application to this list** you can use:
+
+```bash
+# Adding iTerm2
+/usr/libexec/PlistBuddy -c "Add :TALAppsToRelaunchAtLogin: dict" \
+    -c "Set :TALAppsToRelaunchAtLogin:$:BackgroundState 2" \
+    -c "Set :TALAppsToRelaunchAtLogin:$:BundleID com.googlecode.iterm2" \
+    -c "Set :TALAppsToRelaunchAtLogin:$:Hide 0" \
+    -c "Set :TALAppsToRelaunchAtLogin:$:Path /Applications/iTerm.app" \
+    ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
+```
+
+### Terminal
+
+In **`~/Library/Preferences`** are store the preferences of the user in the Applications. Some of these preferences can hold a configuration to **execute other applications/scripts**.
+
+For example, the Terminal can execute a command in the Startup:
+
+<figure><img src="../.gitbook/assets/image (676).png" alt="" width="495"><figcaption></figcaption></figure>
+
+This config is reflected in the file **`~/Library/Preferences/com.apple.Terminal.plist`** like this:
+
+```bash
+[...]
+"Window Settings" => {
+    "Basic" => {
+      "CommandString" => "touch /tmp/terminal_pwn"
+      "Font" => {length = 267, bytes = 0x62706c69 73743030 d4010203 04050607 ... 00000000 000000cf }
+      "FontAntialias" => 1
+      "FontWidthSpacing" => 1.004032258064516
+      "name" => "Basic"
+      "ProfileCurrentVersion" => 2.07
+      "RunCommandAsShell" => 0
+      "type" => "Window Settings"
+    }
+[...]
+```
+
+So, if the plist of the preferences of the terminal in the system could be overwritten, the the **`open`** functionality can be used to **open the terminal and that command will be executed**.
+
+You can add this from the cli with:
+
+{% code overflow="wrap" %}
+```bash
+# Add
+/usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" 'touch /tmp/terminal-start-command'" $HOME/Library/Preferences/com.apple.Terminal.plist
+/usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"RunCommandAsShell\" 0" $HOME/Library/Preferences/com.apple.Terminal.plist
+
+# Remove
+/usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" ''" $HOME/Library/Preferences/com.apple.Terminal.plist
+```
+{% endcode %}
+
+### Audio Plugins
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0013/](https://theevilbit.github.io/beyond/beyond\_0013/)\
+Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
+
+#### Location
+
+* **`/Library/Audio/Plug-Ins/HAL`**
+  * Root required
+  * **Trigger**: Restart coreaudiod or the computer
+* **`/Library/Audio/Plug-ins/Components`**
+  * Root required
+  * **Trigger**: Restart coreaudiod or the computer
+* **`~/Library/Audio/Plug-ins/Components`**
+  * **Trigger**: Restart coreaudiod or the computer
+* **`/System/Library/Components`**
+  * Root required
+  * **Trigger**: Restart coreaudiod or the computer
+
+#### Description
+
+According to the previous writeups it's possible to **compile some audio plugins** and get them loaded.&#x20;
+
+### QuickLook Plugins
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+
+#### Location
+
+* `/System/Library/QuickLook`
+* `/Library/QuickLook`
+* `~/Library/QuickLook`
+* `/Applications/AppNameHere/Contents/Library/QuickLook/`
+* `~/Applications/AppNameHere/Contents/Library/QuickLook/`
+
+#### Description & Exploitation
+
+QuickLook plugins can be executed when you **trigger the preview of a file** (press space bar with the file selected in Finder) and a **plugin supporting that file type** is installed.
+
+It's possible to compile your own QuickLook plugin, place it in one of the prevous locations to load it and then go to a supported file and press space to trigger it.
+
+### ~~Login/Logout Hooks~~
+
+{% hint style="danger" %}
+This didn't work for me, neither with the user LoginHook nor with the root LogoutHook
+{% endhint %}
+
+**Writeup**: [https://theevilbit.github.io/beyond/beyond\_0022/](https://theevilbit.github.io/beyond/beyond\_0022/)
+
+Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+
+#### Location
+
+* You need to be able to execute something like `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`
+  * `Lo`cated in `~/Library/Preferences/com.apple.loginwindow.plist`
+
+They are deprecated but can be used to execute commands when a user logs in.
+
+```bash
+cat > $HOME/hook.sh << EOF
+#!/bin/bash
+echo 'My is: \`id\`' > /tmp/login_id.txt
+EOF
+chmod +x $HOME/hook.sh
+defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh
+defaults write com.apple.loginwindow LogoutHook /Users/$USER/hook.sh
+```
+
+This setting is stored in `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist`
+
+```bash
+defaults read /Users/$USER/Library/Preferences/com.apple.loginwindow.plist
+{
+    LoginHook = "/Users/username/hook.sh";
+    LogoutHook = "/Users/username/hook.sh";
+    MiniBuddyLaunch = 0;
+    TALLogoutReason = "Shut Down";
+    TALLogoutSavesState = 0;
+    oneTimeSSMigrationComplete = 1;
+}
+```
+
+To delete it:
+
+```bash
+defaults delete com.apple.loginwindow LoginHook
+defaults delete com.apple.loginwindow LogoutHook
+```
+
+The root user one is stored in **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
+
+## Conditional Sandbox Bypass
+
+{% hint style="success" %}
+Here you can find start locations useful for **sandbox bypass** that allows you to simply execute something by **writing it into a file** and **expecting not super common conditions** like specific **programs installed, "uncommon" user** actions or environments.
+{% endhint %}
+
+### Cron
+
+**Writeup**: [https://theevilbit.github.io/beyond/beyond\_0004/](https://theevilbit.github.io/beyond/beyond\_0004/)
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * However, you need to be able to execute `crontab` binary
+  * Or be root
+
+#### Location
+
+* **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
+  * Root required for direct write access. No root required if you can execute `crontab <file>`
+  * **Trigger**: Depends on the cron job
+
+#### Description & Exploitation
+
+List the cron jobs of the **current user** with:
+
+```bash
+crontab -l
+```
+
+You can also see all the cron jobs of the users in **`/usr/lib/cron/tabs/`** and **`/var/at/tabs/`** (needs root).
+
+In MacOS several folders executing scripts with **certain frequency** can be found in:
+
+```bash
+# The one with the cron jobs is /usr/lib/cron/tabs/
+ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
+```
+
+There you can find the regular **cron** **jobs**, the **at** **jobs** (not very used) and the **periodic** **jobs** (mainly used for cleaning temporary files). The daily periodic jobs can be executed for example with: `periodic daily`.
+
+To add a **user cronjob programatically** it's possible to use:
+
+```bash
+echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
+crontab /tmp/cron
+```
+
 ### iTerm2
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0002/](https://theevilbit.github.io/beyond/beyond\_0002/)
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 
 #### Locations
 
@@ -135,7 +370,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0002/](https://theevilbit.
 * **`~/Library/Preferences/com.googlecode.iterm2.plist`**
   * **Trigger**: Open iTerm
 
-#### Description
+#### Description & Exploitation
 
 Scripts stored in **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** will be executed. For example:
 
@@ -179,6 +414,9 @@ You can set the command to execute with:
 # Add
 /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" 'touch /tmp/iterm-start-command'" $HOME/Library/Preferences/com.googlecode.iterm2.plist
 
+# Call iTerm
+open /Applications/iTerm.app/Contents/MacOS/iTerm2
+
 # Remove
 /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" ''" $HOME/Library/Preferences/com.googlecode.iterm2.plist
 ```
@@ -188,196 +426,25 @@ You can set the command to execute with:
 Highly probable there are **other ways to abuse the iTerm2 preferences** to execute arbitrary commands.
 {% endhint %}
 
-### Re-opened Applications
-
-**Writeup**: [https://theevilbit.github.io/beyond/beyond\_0021/](https://theevilbit.github.io/beyond/beyond\_0021/)
-
-#### Location
-
-* **`~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`**
-  * **Trigger**: Restart reopening applications
-
-#### Description & Exploit
-
-All the applications to reopen are inside the plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
-
-So, make the reopen applications launch your own one, you just need to **add your app to the list**.
-
-The UUID can be found listing that directory or with `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'`
-
-To check the applications that will be reopened you can do:
-
-```bash
-defaults -currentHost read com.apple.loginwindow TALAppsToRelaunchAtLogin
-#or
-plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
-```
-
-To **add an application to this list** you can use:
-
-```bash
-# Adding iTerm2
-/usr/libexec/PlistBuddy -c "Add :TALAppsToRelaunchAtLogin: dict" \
-    -c "Set :TALAppsToRelaunchAtLogin:$:BackgroundState 2" \
-    -c "Set :TALAppsToRelaunchAtLogin:$:BundleID com.googlecode.iterm2" \
-    -c "Set :TALAppsToRelaunchAtLogin:$:Hide 0" \
-    -c "Set :TALAppsToRelaunchAtLogin:$:Path /Applications/iTerm.app" \
-    ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
-```
-
-{% hint style="danger" %}
-Adding the previous section and loging-out and loging-in or even rebooting didn't work for me to execute the app. (The app wasn't being executed, maybe it needs to be running when these actions are performed)
-{% endhint %}
-
-### Cron
-
-**Writeup**: [https://theevilbit.github.io/beyond/beyond\_0004/](https://theevilbit.github.io/beyond/beyond\_0004/)
-
-#### Location
-
-* **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
-  * Root required for direct write access. No root required if you can execute `crontab <file>`
-  * **Trigger**: Depends on the cron job
-
-#### Description & Exploit
-
-List the cron jobs of the **current user** with:
-
-```bash
-crontab -l
-```
-
-You can also see all the cron jobs of the users in **`/usr/lib/cron/tabs/`** and **`/var/at/tabs/`** (needs root).
-
-In MacOS several folders executing scripts with **certain frequency** can be found in:
-
-```bash
-ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
-```
-
-There you can find the regular **cron** **jobs**, the **at** **jobs** (not very used) and the **periodic** **jobs** (mainly used for cleaning temporary files). The daily periodic jobs can be executed for example with: `periodic daily`.
-
-To add a **user cronjob programatically** it's possible to use:
-
-```bash
-echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
-crontab /tmp/cron
-```
-
-### Periodic
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0019/](https://theevilbit.github.io/beyond/beyond\_0019/)
-
-#### Location
-
-* `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
-  * Root required
-  * **Trigger**: When the time comes
-* `/etc/daily.local`, `/etc/weekly.local` or `/etc/monthly.local`
-  * Root required
-  * **Trigger**: When the time comes
-
-#### Description & Exploit
-
-The periodic scripts (**`/etc/periodic`**) are executed because of the **launch daemons** configured in `/System/Library/LaunchDaemons/com.apple.periodic*`. Note that scripts stored in `/etc/periodic/` are **executed** as the **owner of the file,** so this won't work for a potential privilege escalation.
-
-{% code overflow="wrap" %}
-```bash
-# Launch daemons that will execute the periodic scripts
-ls -l /System/Library/LaunchDaemons/com.apple.periodic*
--rw-r--r--  1 root  wheel  887 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-daily.plist
--rw-r--r--  1 root  wheel  895 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-monthly.plist
--rw-r--r--  1 root  wheel  891 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-weekly.plist
-
-# The scripts located in their locations
-ls -lR /etc/periodic
-total 0
-drwxr-xr-x  11 root  wheel  352 May 13 00:29 daily
-drwxr-xr-x   5 root  wheel  160 May 13 00:29 monthly
-drwxr-xr-x   3 root  wheel   96 May 13 00:29 weekly
-
-/etc/periodic/daily:
-total 72
--rwxr-xr-x  1 root  wheel  1642 May 13 00:29 110.clean-tmps
--rwxr-xr-x  1 root  wheel   695 May 13 00:29 130.clean-msgs
-[...]
-
-/etc/periodic/monthly:
-total 24
--rwxr-xr-x  1 root  wheel   888 May 13 00:29 199.rotate-fax
--rwxr-xr-x  1 root  wheel  1010 May 13 00:29 200.accounting
--rwxr-xr-x  1 root  wheel   606 May 13 00:29 999.local
-
-/etc/periodic/weekly:
-total 8
--rwxr-xr-x  1 root  wheel  620 May 13 00:29 999.local
-```
-{% endcode %}
-
-There are other periodic scripts that will be executed indicated in **`/etc/defaults/periodic.conf`**:
-
-```bash
-grep "Local scripts" /etc/defaults/periodic.conf
-daily_local="/etc/daily.local"				# Local scripts
-weekly_local="/etc/weekly.local"			# Local scripts
-monthly_local="/etc/monthly.local"			# Local scripts
-```
-
-If you manage to write any of the files `/etc/daily.local`, `/etc/weekly.local` or `/etc/monthly.local` it will be **executed sooner or later**.
-
-### PAM
-
-Writeup: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0005/](https://theevilbit.github.io/beyond/beyond\_0005/)
-
-#### Location
-
-* Root always required
-
-#### Description
-
-As PAM is more focused in **persistence** and malware that on easy execution inside macOS, this blog won't give a detailed explanation, **read the writeups to understand this technique better**.
-
-### SSHRC
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
-
-#### Location
-
-* **`~/.ssh/rc`**
-  * **Trigger**: Login via ssh
-* **`/etc/ssh/sshrc`**
-  * Root required
-  * **Trigger**: Login via ssh
-
-#### Description
-
-By default, unless `PermitUserRC no` in `/etc/ssh/sshd_config`, when a user **logins via SSH** the scripts **`/etc/ssh/sshrc`** and **`~/.ssh/rc`** will be executed.
-
 ### xbar
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0007/](https://theevilbit.github.io/beyond/beyond\_0007/)
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But xbar must be installed
 
 #### Location
 
 * **`~/Library/Application\ Support/xbar/plugins/`**
   * **Trigger**: Once xbar is executed
 
-#### Description
-
-If the popular program [**xbar**](https://github.com/matryer/xbar) is installed, it's possible to write a shell script in **`~/Library/Application\ Support/xbar/plugins/`** which will be executed when xbar is started:
-
-```bash
-cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
-#!/bin/bash
-touch /tmp/xbar
-EOF
-chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
-```
-
 ### Hammerspoon
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond\_0008/](https://theevilbit.github.io/beyond/beyond\_0008/)
+
+Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+
+* But Hammerspoon must be installed
 
 #### Location
 
@@ -396,66 +463,185 @@ hs.execute("id > /tmp/hs.txt")
 EOF
 ```
 
-### Preference Pane
+### SSHRC
 
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0009/](https://theevilbit.github.io/beyond/beyond\_0009/)
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
 
-#### Location
-
-* **`/System/Library/PreferencePanes`**
-* **`/Library/PreferencePanes`**
-* **`~/Library/PreferencePanes`**
-
-#### Description
-
-It doesn't look like this is working anymore.
-
-### Spotlight Importers
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0011/](https://theevilbit.github.io/beyond/beyond\_0011/)
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But ssh needs to be enabled and used
 
 #### Location
 
-* **`/Library/Spotlight`**&#x20;
-* **`~/Library/Spotlight`**
+* **`~/.ssh/rc`**
+  * **Trigger**: Login via ssh
+* **`/etc/ssh/sshrc`**
+  * Root required
+  * **Trigger**: Login via ssh
+
+#### Description & Exploitation
+
+By default, unless `PermitUserRC no` in `/etc/ssh/sshd_config`, when a user **logins via SSH** the scripts **`/etc/ssh/sshrc`** and **`~/.ssh/rc`** will be executed.
 
 #### Description
 
-You will end up in a **heavy sandbox**, so you probably don't want to use this technique.
+If the popular program [**xbar**](https://github.com/matryer/xbar) is installed, it's possible to write a shell script in **`~/Library/Application\ Support/xbar/plugins/`** which will be executed when xbar is started:
 
-### Audio Plugins
+```bash
+cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
+#!/bin/bash
+touch /tmp/xbar
+EOF
+chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
+```
 
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0013/](https://theevilbit.github.io/beyond/beyond\_0013/)\
-Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
+### **Login Items**
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0003/](https://theevilbit.github.io/beyond/beyond\_0003/)
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But you need to execute `osascript` with args
+
+#### Locations
+
+* **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
+  * **Trigger:** Login
+  * Exploit payload stored calling **`osascript`**
+* **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
+  * **Trigger:** Login
+  * Root required
+
+#### Description
+
+In System Preferences -> Users & Groups -> **Login Items** you can find **items to be executed when the user logs in**.\
+It it's possible to list them, add and remove from the command line:
+
+```bash
+#List all items:
+osascript -e 'tell application "System Events" to get the name of every login item'
+
+#Add an item:
+osascript -e 'tell application "System Events" to make login item at end with properties {path:"/path/to/itemname", hidden:false}' 
+
+#Remove an item:
+osascript -e 'tell application "System Events" to delete login item "itemname"' 
+```
+
+These items are stored in the file **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
+
+**Login items** can **also** be indicated in using the API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) which will store the configuration in **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
+
+### ZIP as Login Item
+
+(Check previos section about Login Items, this is an extension)
+
+If you store a **ZIP** file as a **Login Item** the **`Archive Utility`** will open it and if the zip was for example stored in **`~/Library`** and contained the Folder **`LaunchAgents/file.plist`** with a backdoor, that folder will be created (it isn't by default) and the plist will be added so the next time the user logs in again, the **backdoor indicated in the plist will be executed**.
+
+Another options would be to create the files **`.bash_profile`** and **`.zshenv`** inside the user HOME so if the folder LaunchAgents already exist this technique would still work.
+
+### At
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0014/](https://theevilbit.github.io/beyond/beyond\_0014/)
 
 #### Location
 
-* **`/Library/Audio/Plug-Ins/HAL`**
-  * Root required
-  * **Trigger**: Restart coreaudiod or the computer
-* **`/Library/Audio/Plug-ins/Components`**
-  * Root required
-  * **Trigger**: Restart coreaudiod or the computer
-* **`~/Library/Audio/Plug-ins/Components`**
-  * **Trigger**: Restart coreaudiod or the computer
-* **`/System/Library/Components`**
-  * Root required
-  * **Trigger**: Restart coreaudiod or the computer
+* Need to **execute** **`at`** and it must be **enabled**
 
-#### Description
+#### **Description**
 
-According to the previous writeups it's possible to **compile some audio plugins** and get them loaded.&#x20;
+“At tasks” are used to **schedule tasks at specific times**.\
+These tasks differ from cron in that **they are one time tasks** t**hat get removed after executing**. However, they will **survive a system restart** so they can’t be ruled out as a potential threat.
+
+By **default** they are **disabled** but the **root** user can **enable** **them** with:
+
+```bash
+sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
+```
+
+This will create a file in 1 hour:
+
+```bash
+echo "echo 11 > /tmp/at.txt" | at now+1
+```
+
+Check the job queue using `atq:`
+
+```shell-session
+sh-3.2# atq
+26	Tue Apr 27 00:46:00 2021
+22	Wed Apr 28 00:29:00 2021
+```
+
+Above we can see two jobs scheduled. We can print the details of the job using `at -c JOBNUMBER`
+
+```shell-session
+sh-3.2# at -c 26
+#!/bin/sh
+# atrun uid=0 gid=0
+# mail csaby 0
+umask 22
+SHELL=/bin/sh; export SHELL
+TERM=xterm-256color; export TERM
+USER=root; export USER
+SUDO_USER=csaby; export SUDO_USER
+SUDO_UID=501; export SUDO_UID
+SSH_AUTH_SOCK=/private/tmp/com.apple.launchd.co51iLHIjf/Listeners; export SSH_AUTH_SOCK
+__CF_USER_TEXT_ENCODING=0x0:0:0; export __CF_USER_TEXT_ENCODING
+MAIL=/var/mail/root; export MAIL
+PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin; export PATH
+PWD=/Users/csaby; export PWD
+SHLVL=1; export SHLVL
+SUDO_COMMAND=/usr/bin/su; export SUDO_COMMAND
+HOME=/var/root; export HOME
+LOGNAME=root; export LOGNAME
+LC_CTYPE=UTF-8; export LC_CTYPE
+SUDO_GID=20; export SUDO_GID
+_=/usr/bin/at; export _
+cd /Users/csaby || {
+	 echo 'Execution directory inaccessible' >&2
+	 exit 1
+}
+unset OLDPWD
+echo 11 > /tmp/at.txt
+```
+
+{% hint style="warning" %}
+If AT tasks aren't enabled the created tasks won't be executed.
+{% endhint %}
+
+The **job files** can be found at `/private/var/at/jobs/`
+
+```
+sh-3.2# ls -l /private/var/at/jobs/
+total 32
+-rw-r--r--  1 root  wheel    6 Apr 27 00:46 .SEQ
+-rw-------  1 root  wheel    0 Apr 26 23:17 .lockfile
+-r--------  1 root  wheel  803 Apr 27 00:46 a00019019bdcd2
+-rwx------  1 root  wheel  803 Apr 27 00:46 a0001a019bdcd2
+```
+
+The filename contains the queue, the job number, and the time it’s scheduled to run. For example let’s take a loot at `a0001a019bdcd2`.
+
+* `a` - this is the queue
+* `0001a` - job number in hex, `0x1a = 26`
+* `019bdcd2` - time in hex. It represents the minutes passed since epoch. `0x019bdcd2` is `26991826` in decimal. If we multiply it by 60 we get `1619509560`, which is `GMT: 2021. April 27., Tuesday 7:46:00`.
+
+If we print the job file, we find that it contains the same information we got using `at -c`.
 
 ### Folder Actions
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0024/](https://theevilbit.github.io/beyond/beyond\_0024/)\
 Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But you need to be able to call osascript with arguments and be able to configure Folder Actions
+
 #### Location
 
-* `/Library/Scripts/Folder Action Scripts`
+* **`/Library/Scripts/Folder Action Scripts`**
   * Root required
-* `~/Library/Scripts/Folder Action Scripts`
+  * **Trigger**: Access to the specified folder
+* **`~/Library/Scripts/Folder Action Scripts`**
+  * **Trigger**: Access to the specified folder
 
 #### Description & Exploitation
 
@@ -471,6 +657,8 @@ There are a couple ways to implement this:
 1. Use the [Automator](https://support.apple.com/guide/automator/welcome/mac) program to create a Folder Action workflow file (.workflow) and install it as a service.
 2. Right-click on a folder, select `Folder Actions Setup...`, `Run Service`, and manually attach a script.
 3. Use OSAScript to send Apple Event messages to the `System Events.app` to programmatically query and register a new `Folder Action.`
+
+
 
 * This is the way to implement persistence using an OSAScript to send Apple Event messages to `System Events.app`
 
@@ -553,9 +741,28 @@ Now that we have an empty environment
 And this didn't work for me, but those are the instructions from the writeup:(
 {% endhint %}
 
+### Spotlight Importers
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0011/](https://theevilbit.github.io/beyond/beyond\_0011/)
+
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you will end in a new one
+
+#### Location
+
+* **`/Library/Spotlight`**&#x20;
+* **`~/Library/Spotlight`**
+
+#### Description
+
+You will end up in a **heavy sandbox**, so you probably don't want to use this technique.
+
 ### Dock shortcuts
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0027/](https://theevilbit.github.io/beyond/beyond\_0027/)
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But you need to have installed a malicious application inside the system
 
 #### Location
 
@@ -578,48 +785,13 @@ killall Dock
 ```
 {% endcode %}
 
-### emond
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0023/](https://theevilbit.github.io/beyond/beyond\_0023/)
-
-I cannot find this component in my macOS so for more info check the writeup
-
-### QuickLook Plugins
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)
-
-#### Location
-
-* `/System/Library/QuickLook`
-* `/Library/QuickLook`
-* `~/Library/QuickLook`
-* `/Applications/AppNameHere/Contents/Library/QuickLook/`
-* `~/Applications/AppNameHere/Contents/Library/QuickLook/`
-
-#### Description & Exploitation
-
-QuickLook plugins can be executed when you **trigger the preview of a file** (press space bar with the file selected in Finder) and a **plugin supporting that file type** is installed.
-
-It's possible to compile your own QuickLook plugin, place it in one of the prevous locations to load it and then go to a supported file and press space to trigger it.
-
-### Authorization Plugins
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)\
-Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
-
-#### Location
-
-* `/Library/Security/SecurityAgentPlugins/`
-  * Root required
-  * It's also needed&#x20;
-
-#### Description & Exploitation
-
-Todo
-
 ### Color Pickers
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0017](https://theevilbit.github.io/beyond/beyond\_0017/)
+
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * A very specific action needs to happen
+  * You will end in another sandbox
 
 #### Location
 
@@ -648,74 +820,35 @@ Note that the binary loading your library has a **very restrictive sandbox**: `/
 ```
 {% endcode %}
 
-### XQuartz
+### Finder Sync Plugins
 
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0018/](https://theevilbit.github.io/beyond/beyond\_0018/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond\_0026/](https://theevilbit.github.io/beyond/beyond\_0026/)\
+**Writeup**: [https://objective-see.org/blog/blog\_0x11.html](https://objective-see.org/blog/blog\_0x11.html)
+
+* Useful to bypass sandbox: **No, because you need to execute your own app**
 
 #### Location
 
-* **`/opt/X11/etc/X11/xinit/privileged_startx.d`**
-  * Root required
-  * **Trigger**: With XQuartz
+* A specific app
 
 #### Description & Exploit
 
-XQuartz is **no longer installed in macOS**, so if you want more info check the writeup.
+An application example with a Finder Sync Extension [**can be found here**](https://github.com/D00MFist/InSync).
 
-### kext
-
-In order to install a KEXT as a startup item, it needs to be **installed in one of the following locations**:
-
-* `/System/Library/Extensions`
-  * KEXT files built into the OS X operating system.
-* `/Library/Extensions`
-  * KEXT files installed by 3rd party software
-
-You can list currently loaded kext files with:
+Applications can have `Finder Sync Extensions`. This extension will go inside an application that will be executed. Moreover, for the extension to be able to execute its code it **must be signed** with some valid Apple developer certificate, it must be **sandboxed** (although relaxed exceptions could be added) and it must be registered with something like:
 
 ```bash
-kextstat #List loaded kext
-kextload /path/to/kext.kext #Load a new one based on path
-kextload -b com.apple.driver.ExampleBundle #Load a new one based on path
-kextunload /path/to/kext.kext
-kextunload -b com.apple.driver.ExampleBundle
+pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
+pluginkit -e use -i com.example.InSync.InSync
 ```
-
-For more information about [**kernel extensions check this section**](macos-security-and-privilege-escalation/mac-os-architecture#i-o-kit-drivers).
-
-### amstoold
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0029/](https://theevilbit.github.io/beyond/beyond\_0029/)
-
-#### Location
-
-* **`/usr/local/bin/amstoold`**
-  * Root required
-
-#### Description & Exploitation
-
-Apparently the `plist` from `/System/Library/LaunchAgents/com.apple.amstoold.plist` was using this binary while exposing a XPC service... the thing is that the binary didn't exist, so you could place something there and when the XPC service gets called your binary will be called.
-
-I can no longer find this in my macOS.
-
-### xsanctl
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0015/](https://theevilbit.github.io/beyond/beyond\_0015/)
-
-#### Location
-
-* **`/Library/Preferences/Xsan/.xsanrc`**
-  * Root required
-  * **Trigger**: When the service is run (rarely)
-
-#### Description & exploit
-
-Apparently it's not very common to run this script and I couldn't even find it in my macOS, so if you want more info check the writeup.
 
 ### Screen Saver
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0016/](https://theevilbit.github.io/beyond/beyond\_0016/)\
 Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
+
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you will end in a common application sandbox
 
 #### Location
 
@@ -819,185 +952,170 @@ void custom(int argc, const char **argv) {
 @end
 ```
 
-### **Login Items**
+### ~~Preference Pane~~
 
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0003/](https://theevilbit.github.io/beyond/beyond\_0003/)
+{% hint style="danger" %}
+It doesn't look like this is working anymore.
+{% endhint %}
 
-#### Locations
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0009/](https://theevilbit.github.io/beyond/beyond\_0009/)
 
-* **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-  * **Trigger:** Login
-  * Exploit payload stored calling **`osascript`**
-    * TODO: Find a way to directly it in disk (uf there is any)
-* **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
-  * **Trigger:** Login
-  * Root required
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * It needs a specific user action
+
+#### Location
+
+* **`/System/Library/PreferencePanes`**
+* **`/Library/PreferencePanes`**
+* **`~/Library/PreferencePanes`**
 
 #### Description
 
-In System Preferences -> Users & Groups -> **Login Items** you can find **items to be executed when the user logs in**.\
-It it's possible to list them, add and remove from the command line:
+It doesn't look like this is working anymore.
 
-```bash
-#List all items:
-osascript -e 'tell application "System Events" to get the name of every login item'
+## Root Sandbox Bypass
 
-#Add an item:
-osascript -e 'tell application "System Events" to make login item at end with properties {path:"/path/to/itemname", hidden:false}' 
+{% hint style="success" %}
+Here you can find start locations useful for **sandbox bypass** that allows you to simply execute something by **writing it into a file** being **root** and/or requiring other **weird conditions.**
+{% endhint %}
 
-#Remove an item:
-osascript -e 'tell application "System Events" to delete login item "itemname"' 
-```
+### Periodic
 
-These items are stored in the file **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0019/](https://theevilbit.github.io/beyond/beyond\_0019/)
 
-**Login items** can **also** be indicated in using the API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) which will store the configuration in **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
-
-### ZIP as Login Item
-
-If you store a **ZIP** file as a **Login Item** the **`Archive Utility`** will open it and if the zip was for example stored in **`~/Library`** and contained the Folder **`LaunchAgents/file.plist`** with a backdoor, that folder will be created (it isn't by default) and the plist will be added so the next time the user logs in again, the **backdoor indicated in the plist will be executed**.
-
-Another options would be to create the files **`.bash_profile`** and **`.zshenv`** inside the user HOME so if the folder LaunchAgents already exist this technique would still work.
-
-### At
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0014/](https://theevilbit.github.io/beyond/beyond\_0014/)
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you need to be root
 
 #### Location
 
-* Need to **execute** **`at`** and it must be **enabled**
+* `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
+  * Root required
+  * **Trigger**: When the time comes
+* `/etc/daily.local`, `/etc/weekly.local` or `/etc/monthly.local`
+  * Root required
+  * **Trigger**: When the time comes
 
-#### **Description**
+#### Description & Exploitation
 
-“At tasks” are used to **schedule tasks at specific times**.\
-These tasks differ from cron in that **they are one time tasks** t**hat get removed after executing**. However, they will **survive a system restart** so they can’t be ruled out as a potential threat.
+The periodic scripts (**`/etc/periodic`**) are executed because of the **launch daemons** configured in `/System/Library/LaunchDaemons/com.apple.periodic*`. Note that scripts stored in `/etc/periodic/` are **executed** as the **owner of the file,** so this won't work for a potential privilege escalation.
 
-By **default** they are **disabled** but the **root** user can **enable** **them** with:
+{% code overflow="wrap" %}
+```bash
+# Launch daemons that will execute the periodic scripts
+ls -l /System/Library/LaunchDaemons/com.apple.periodic*
+-rw-r--r--  1 root  wheel  887 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-daily.plist
+-rw-r--r--  1 root  wheel  895 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-monthly.plist
+-rw-r--r--  1 root  wheel  891 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-weekly.plist
+
+# The scripts located in their locations
+ls -lR /etc/periodic
+total 0
+drwxr-xr-x  11 root  wheel  352 May 13 00:29 daily
+drwxr-xr-x   5 root  wheel  160 May 13 00:29 monthly
+drwxr-xr-x   3 root  wheel   96 May 13 00:29 weekly
+
+/etc/periodic/daily:
+total 72
+-rwxr-xr-x  1 root  wheel  1642 May 13 00:29 110.clean-tmps
+-rwxr-xr-x  1 root  wheel   695 May 13 00:29 130.clean-msgs
+[...]
+
+/etc/periodic/monthly:
+total 24
+-rwxr-xr-x  1 root  wheel   888 May 13 00:29 199.rotate-fax
+-rwxr-xr-x  1 root  wheel  1010 May 13 00:29 200.accounting
+-rwxr-xr-x  1 root  wheel   606 May 13 00:29 999.local
+
+/etc/periodic/weekly:
+total 8
+-rwxr-xr-x  1 root  wheel  620 May 13 00:29 999.local
+```
+{% endcode %}
+
+There are other periodic scripts that will be executed indicated in **`/etc/defaults/periodic.conf`**:
 
 ```bash
-sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
+grep "Local scripts" /etc/defaults/periodic.conf
+daily_local="/etc/daily.local"				# Local scripts
+weekly_local="/etc/weekly.local"			# Local scripts
+monthly_local="/etc/monthly.local"			# Local scripts
 ```
 
-This will create a file in 1 hour:
+If you manage to write any of the files `/etc/daily.local`, `/etc/weekly.local` or `/etc/monthly.local` it will be **executed sooner or later**.
 
-```bash
-echo "echo 11 > /tmp/at.txt" | at now+1
-```
+### PAM
 
-Check the job queue using `atq:`
+Writeup: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0005/](https://theevilbit.github.io/beyond/beyond\_0005/)
 
-```shell-session
-sh-3.2# atq
-26	Tue Apr 27 00:46:00 2021
-22	Wed Apr 28 00:29:00 2021
-```
-
-Above we can see two jobs scheduled. We can print the details of the job using `at -c JOBNUMBER`
-
-```shell-session
-sh-3.2# at -c 26
-#!/bin/sh
-# atrun uid=0 gid=0
-# mail csaby 0
-umask 22
-SHELL=/bin/sh; export SHELL
-TERM=xterm-256color; export TERM
-USER=root; export USER
-SUDO_USER=csaby; export SUDO_USER
-SUDO_UID=501; export SUDO_UID
-SSH_AUTH_SOCK=/private/tmp/com.apple.launchd.co51iLHIjf/Listeners; export SSH_AUTH_SOCK
-__CF_USER_TEXT_ENCODING=0x0:0:0; export __CF_USER_TEXT_ENCODING
-MAIL=/var/mail/root; export MAIL
-PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin; export PATH
-PWD=/Users/csaby; export PWD
-SHLVL=1; export SHLVL
-SUDO_COMMAND=/usr/bin/su; export SUDO_COMMAND
-HOME=/var/root; export HOME
-LOGNAME=root; export LOGNAME
-LC_CTYPE=UTF-8; export LC_CTYPE
-SUDO_GID=20; export SUDO_GID
-_=/usr/bin/at; export _
-cd /Users/csaby || {
-	 echo 'Execution directory inaccessible' >&2
-	 exit 1
-}
-unset OLDPWD
-echo 11 > /tmp/at.txt
-```
-
-{% hint style="warning" %}
-If AT tasks aren't enabled the created tasks won't be executed.
-{% endhint %}
-
-The **job files** can be found at `/private/var/at/jobs/`
-
-```
-sh-3.2# ls -l /private/var/at/jobs/
-total 32
--rw-r--r--  1 root  wheel    6 Apr 27 00:46 .SEQ
--rw-------  1 root  wheel    0 Apr 26 23:17 .lockfile
--r--------  1 root  wheel  803 Apr 27 00:46 a00019019bdcd2
--rwx------  1 root  wheel  803 Apr 27 00:46 a0001a019bdcd2
-```
-
-The filename contains the queue, the job number, and the time it’s scheduled to run. For example let’s take a loot at `a0001a019bdcd2`.
-
-* `a` - this is the queue
-* `0001a` - job number in hex, `0x1a = 26`
-* `019bdcd2` - time in hex. It represents the minutes passed since epoch. `0x019bdcd2` is `26991826` in decimal. If we multiply it by 60 we get `1619509560`, which is `GMT: 2021. April 27., Tuesday 7:46:00`.
-
-If we print the job file, we find that it contains the same information we got using `at -c`.
-
-### Login/Logout Hooks
-
-**Writeup**: [https://theevilbit.github.io/beyond/beyond\_0022/](https://theevilbit.github.io/beyond/beyond\_0022/)
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you need to be root
 
 #### Location
 
-* You need to be able to execute something like `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`
+* Root always required
 
-They are deprecated but can be used to execute commands when a user logs in.
+#### Description & Exploitation
 
-```bash
-cat > $HOME/hook.sh << EOF
-#!/bin/bash
-echo 'My is: \`id\`' > /tmp/login_id.txt
-EOF
-chmod +x $HOME/hook.sh
-defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh
-defaults write com.apple.loginwindow LogoutHook /Users/$USER/hook.sh
+As PAM is more focused in **persistence** and malware that on easy execution inside macOS, this blog won't give a detailed explanation, **read the writeups to understand this technique better**.
+
+### Authorization Plugins
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)\
+Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
+
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you need to be root and make extra configs
+
+#### Location
+
+* `/Library/Security/SecurityAgentPlugins/`
+  * Root required
+  * It's also needed to configure the authorization database to use the plugin
+
+#### Description & Exploitation
+
+You can create an authorization plugin that will be executed when a user logs in to maintain persistence. For more information about how to create one of these plugins check the previous writeups (and be careful, a poorly written one can lock you out and you will need to clean your mac from recovery mode).
+
+### Man.conf
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0030/](https://theevilbit.github.io/beyond/beyond\_0030/)
+
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you need to be root and the user must use man
+
+#### Location
+
+* **`/private/etc/man.conf`**
+  * Root required
+  * **`/private/etc/man.conf`**: Whenever man is used
+
+#### Description & Exploit
+
+The config file **`/private/etc/man.conf`** indicate the binary/script to use when opening man documentation files. So the path to the executable could be modified so anytime the user uses man to read some docs a backdoor is executed.
+
+For example set in **`/private/etc/man.conf`**:
+
+```
+MANPAGER /tmp/view
 ```
 
-This setting is stored in `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist`
+And then create `/tmp/view` as:
 
 ```bash
-defaults read /Users/$USER/Library/Preferences/com.apple.loginwindow.plist
-{
-    LoginHook = "/Users/username/hook.sh";
-    LogoutHook = "/Users/username/hook.sh";
-    MiniBuddyLaunch = 0;
-    TALLogoutReason = "Shut Down";
-    TALLogoutSavesState = 0;
-    oneTimeSSMigrationComplete = 1;
-}
+#!/bin/zsh
+
+touch /tmp/manconf
+
+/usr/bin/less -s
 ```
-
-To delete it:
-
-```bash
-defaults delete com.apple.loginwindow LoginHook
-defaults delete com.apple.loginwindow LogoutHook
-```
-
-The root user one is stored in **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
-
-{% hint style="danger" %}
-This didn't work for me, neither with the user LoginHook nor with the root LoginHook
-{% endhint %}
 
 ### Apache2
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond\_0023/](https://theevilbit.github.io/beyond/beyond\_0023/)
+
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you need to be root and apache needs to be running
 
 #### Location
 
@@ -1037,29 +1155,12 @@ static void myconstructor(int argc, const char **argv)
 }
 ```
 
-### Finder Sync Plugins
-
-**Writeup**: [https://theevilbit.github.io/beyond/beyond\_0026/](https://theevilbit.github.io/beyond/beyond\_0026/)\
-**Writeup**: [https://objective-see.org/blog/blog\_0x11.html](https://objective-see.org/blog/blog\_0x11.html)
-
-#### Location
-
-* A specific app
-
-#### Description & Exploit
-
-An application example with a Finder Sync Extension [**can be found here**](https://github.com/D00MFist/InSync).
-
-Applications can have `Finder Sync Extensions`. This extension will go inside an application that will be executed. Moreover, for the extension to be able to execute its code it **must be signed** with some valid Apple developer certificate, it must be **sandboxed** (although relaxed exceptions could be added) and it must be registered with something like:
-
-```bash
-pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
-pluginkit -e use -i com.example.InSync.InSync
-```
-
 ### BSM audit framework
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0031/](https://theevilbit.github.io/beyond/beyond\_0031/)
+
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you need to be root, auditd be running and cause a warning
 
 #### Location
 
@@ -1076,91 +1177,6 @@ echo "touch /tmp/auditd_warn" >> /etc/security/audit_warn
 ```
 
 You could force a warning with `sudo audit -n`.
-
-### Man.conf
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0030/](https://theevilbit.github.io/beyond/beyond\_0030/)
-
-#### Location
-
-* **`/private/etc/man.conf`**
-  * Root required
-  * **`/private/etc/man.conf`**: Whenever man is used
-
-#### Description & Exploit
-
-The config file **`/private/etc/man.conf`** indicate the binary/script to use when opening man documentation files. So the path to the executable could be modified so anytime the user uses man to read some docs a backdoor is executed.
-
-For example set in **`/private/etc/man.conf`**:
-
-```
-MANPAGER /tmp/view
-```
-
-And then create `/tmp/view` as:
-
-```bash
-#!/bin/zsh
-
-touch /tmp/manconf
-
-/usr/bin/less -s
-```
-
-### Terminal
-
-In **`~/Library/Preferences`** are store the preferences of the user in the Applications. Some of these preferences can hold a configuration to **execute other applications/scripts**.
-
-For example, the Terminal can execute a command in the Startup:
-
-<figure><img src="../.gitbook/assets/image (676).png" alt="" width="495"><figcaption></figcaption></figure>
-
-This config is reflected in the file **`~/Library/Preferences/com.apple.Terminal.plist`** like this:
-
-```bash
-[...]
-"Window Settings" => {
-    "Basic" => {
-      "CommandString" => "touch /tmp/terminal_pwn"
-      "Font" => {length = 267, bytes = 0x62706c69 73743030 d4010203 04050607 ... 00000000 000000cf }
-      "FontAntialias" => 1
-      "FontWidthSpacing" => 1.004032258064516
-      "name" => "Basic"
-      "ProfileCurrentVersion" => 2.07
-      "RunCommandAsShell" => 0
-      "type" => "Window Settings"
-    }
-[...]
-```
-
-So, if the plist of the preferences of the terminal in the system could be overwritten, the the **`open`** functionality can be used to **open the terminal and that command will be executed**.
-
-You can add this from the cli with:
-
-{% code overflow="wrap" %}
-```bash
-# Add
-/usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" 'touch /tmp/terminal-start-command'" $HOME/Library/Preferences/com.apple.Terminal.plist
-/usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"RunCommandAsShell\" 0" $HOME/Library/Preferences/com.apple.Terminal.plist
-
-# Remove
-/usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" ''" $HOME/Library/Preferences/com.apple.Terminal.plist
-```
-{% endcode %}
-
-### Emond
-
-Apple introduced a logging mechanism called **emond**. It appears it was never fully developed, and development may have been **abandoned** by Apple for other mechanisms, but it remains **available**.
-
-This little-known service may **not be much use to a Mac admin**, but to a threat actor one very good reason would be to use it as a **persistence mechanism that most macOS admins probably wouldn't know** to look for. Detecting malicious use of emond shouldn't be difficult, as the System LaunchDaemon for the service looks for scripts to run in only one place:
-
-```bash
-ls -l /private/var/db/emondClients
-```
-
-{% hint style="danger" %}
-**As this isn't used much, anything in that folder should be suspicious**
-{% endhint %}
 
 ### Startup Items
 
@@ -1214,7 +1230,93 @@ RunService "$1"
 {% endtab %}
 {% endtabs %}
 
-### /etc/rc.common
+### ~~emond~~
+
+{% hint style="danger" %}
+I cannot find this component in my macOS so for more info check the writeup
+{% endhint %}
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0023/](https://theevilbit.github.io/beyond/beyond\_0023/)
+
+Apple introduced a logging mechanism called **emond**. It appears it was never fully developed, and development may have been **abandoned** by Apple for other mechanisms, but it remains **available**.
+
+This little-known service may **not be much use to a Mac admin**, but to a threat actor one very good reason would be to use it as a **persistence mechanism that most macOS admins probably wouldn't know** to look for. Detecting malicious use of emond shouldn't be difficult, as the System LaunchDaemon for the service looks for scripts to run in only one place:
+
+```bash
+ls -l /private/var/db/emondClients
+```
+
+### ~~XQuartz~~
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0018/](https://theevilbit.github.io/beyond/beyond\_0018/)
+
+#### Location
+
+* **`/opt/X11/etc/X11/xinit/privileged_startx.d`**
+  * Root required
+  * **Trigger**: With XQuartz
+
+#### Description & Exploit
+
+XQuartz is **no longer installed in macOS**, so if you want more info check the writeup.
+
+### ~~kext~~
+
+{% hint style="danger" %}
+It's so complicated to install kext even as root taht I won't consider this to escape from sandboxes or even for persistence (unless you have an exploit)
+{% endhint %}
+
+#### Location
+
+In order to install a KEXT as a startup item, it needs to be **installed in one of the following locations**:
+
+* `/System/Library/Extensions`
+  * KEXT files built into the OS X operating system.
+* `/Library/Extensions`
+  * KEXT files installed by 3rd party software
+
+You can list currently loaded kext files with:
+
+```bash
+kextstat #List loaded kext
+kextload /path/to/kext.kext #Load a new one based on path
+kextload -b com.apple.driver.ExampleBundle #Load a new one based on path
+kextunload /path/to/kext.kext
+kextunload -b com.apple.driver.ExampleBundle
+```
+
+For more information about [**kernel extensions check this section**](macos-security-and-privilege-escalation/mac-os-architecture#i-o-kit-drivers).
+
+### ~~amstoold~~
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0029/](https://theevilbit.github.io/beyond/beyond\_0029/)
+
+#### Location
+
+* **`/usr/local/bin/amstoold`**
+  * Root required
+
+#### Description & Exploitation
+
+Apparently the `plist` from `/System/Library/LaunchAgents/com.apple.amstoold.plist` was using this binary while exposing a XPC service... the thing is that the binary didn't exist, so you could place something there and when the XPC service gets called your binary will be called.
+
+I can no longer find this in my macOS.
+
+### ~~xsanctl~~
+
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0015/](https://theevilbit.github.io/beyond/beyond\_0015/)
+
+#### Location
+
+* **`/Library/Preferences/Xsan/.xsanrc`**
+  * Root required
+  * **Trigger**: When the service is run (rarely)
+
+#### Description & exploit
+
+Apparently it's not very common to run this script and I couldn't even find it in my macOS, so if you want more info check the writeup.
+
+### ~~/etc/rc.common~~
 
 {% hint style="danger" %}
 **This isn't working in modern MacOS versions**
@@ -1315,17 +1417,7 @@ RunService ()
 }
 ```
 
-### Profiles
-
-Configuration profiles can force a user to use certain browser settings, DNS proxy settings, or VPN settings. Many other payloads are possible which make them ripe for abuse.
-
-You can enumerate them running:
-
-```bash
-ls -Rl /Library/Managed\ Preferences/
-```
-
-### Other persistence techniques and tools
+## Persistence techniques and tools
 
 * [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
 * [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
