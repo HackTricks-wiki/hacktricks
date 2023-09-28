@@ -257,7 +257,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.
 
 QuickLook plugins can be executed when you **trigger the preview of a file** (press space bar with the file selected in Finder) and a **plugin supporting that file type** is installed.
 
-It's possible to compile your own QuickLook plugin, place it in one of the prevous locations to load it and then go to a supported file and press space to trigger it.
+It's possible to compile your own QuickLook plugin, place it in one of the previous locations to load it and then go to a supported file and press space to trigger it.
 
 ### ~~Login/Logout Hooks~~
 
@@ -677,7 +677,7 @@ app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 
 Compile it with: `osacompile -l JavaScript -o folder.scpt source.js`
 
-Then execute the following script to enable Folder Actions and attach the previously compiled script with the folde **`/users/username/Desktop`**:
+Then execute the following script to enable Folder Actions and attach the previously compiled script with the folder **`/users/username/Desktop`**:
 
 ```javascript
 var se = Application("System Events");
@@ -688,7 +688,7 @@ se.folderActions.push(fa);
 fa.scripts.push(myScript);
 ```
 
-Execute script with: `osascript -l JavaScript /Users/carlospolop/attach.scpt`
+Execute script with: `osascript -l JavaScript /Users/username/attach.scpt`
 
 
 
