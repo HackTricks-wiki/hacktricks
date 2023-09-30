@@ -22,9 +22,17 @@ It's also possible to **grant apps access** to files by **explicit intents** fro
 
 ![An example of a TCC prompt](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
-**TCC** is handled by the **daemon** located in `/System/Library/PrivateFrameworks/TCC.framework/Resources/tccd`configured in `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registering the mach service `com.apple.tccd.system`).
+**TCC** is handled by the **daemon** located in `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` and configured in `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registering the mach service `com.apple.tccd.system`).
 
 There is a **user-mode tccd** running per logged in user defined in `/System/Library/LaunchAgents/com.apple.tccd.plist` registering the mach services `com.apple.tccd` and `com.apple.usernotifications.delegate.com.apple.tccd`.
+
+Here you cna see the tccd running as system and as user:
+
+```bash
+ps -ef | grep tcc
+    0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
+  501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
+```
 
 Permissions are **inherited from the parent** application and the **permissions** are **tracked** based on the **Bundle ID** and the **Developer ID**.
 
@@ -97,9 +105,17 @@ Checking both databases you can check the permissions an app has allowed, has fo
 
 {% hint style="info" %}
 Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... There is no public list that defines all of them but you can check this [**list of known ones**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
+
+**Full Disk Access** is name is `kTCCServiceSystemPolicyAllFiles` and `kTCCServiceAppleEvents` allows the app to send events to other applications that are commonly used for automating tasks
 {% endhint %}
 
 You could also check **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
+
+{% hint style="success" %}
+Nota that even if one of the databases are inside the users home, **users cannot directly modify these databases because of SIP** (even if you are root). The only way a new rule can be configured or modified is via System Preferences pane or prompts where the app asks the user.
+
+However, remember that users _can_ **delete or query rules** using **`tccutil`** .&#x20;
+{% endhint %}
 
 ### TCC Signature Checks
 
@@ -116,9 +132,12 @@ echo FADE0C00000000CC000000010000000600000007000000060000000F0000000E00000000000
 ## Get signature checks
 csreq -t -r /tmp/telegram_csreq.bin
 (anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "6N38VWS5BX") and identifier "ru.keepcoder.Telegram"
-
 ```
 {% endcode %}
+
+{% hint style="warning" %}
+Therefore, other applications using the same name and bundle ID won't be able to access granted permissions given to other apps.
+{% endhint %}
 
 ### Entitlements
 
@@ -168,7 +187,9 @@ otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| gr
 ```
 
 {% hint style="info" %}
-It's curious that the **`com.apple.macl`** attribute is managed by the **Sandbox**, not tccd
+It's curious that the **`com.apple.macl`** attribute is managed by the **Sandbox**, not tccd.
+
+Also note that if you move a file that allows the UUID of an app in your computer to a different compiter, because the same app will have different UIDs, it won't grant access to that app.
 {% endhint %}
 
 The extended attribute `com.apple.macl` **can’t be cleared** like other extended attributes because it’s **protected by SIP**. However, as [**explained in this post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), it's possible to disable it **zipping** the file, **deleting** it and **unzipping** it.
@@ -176,6 +197,10 @@ The extended attribute `com.apple.macl` **can’t be cleared** like other extend
 ## References
 
 * [**https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
+* [**https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command**](https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command)
+*   [**https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
+
+
 
 <details>
 
