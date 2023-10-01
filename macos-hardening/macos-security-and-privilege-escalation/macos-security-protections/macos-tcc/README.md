@@ -36,10 +36,12 @@ Los permisos se heredan de la aplicación padre y se rastrean según el ID de pa
 
 ### Base de datos TCC
 
-Las selecciones se almacenan en la base de datos TCC del sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`** o en **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para las preferencias por usuario. La base de datos está protegida contra la edición con SIP (System Integrity Protection), pero se puede leer otorgando **acceso completo al disco**.
+Las selecciones se almacenan en la base de datos TCC del sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`** o en **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para las preferencias por usuario. Las bases de datos están protegidas contra la edición con SIP (Protección de Integridad del Sistema), pero puedes leerlas.
+
+Además, un proceso con **acceso completo al disco** puede editar la base de datos en modo de usuario.
 
 {% hint style="info" %}
-La **interfaz de usuario del centro de notificaciones** puede realizar **cambios en la base de datos TCC del sistema**:
+La interfaz de usuario del centro de notificaciones puede realizar cambios en la base de datos TCC del sistema:
 
 {% code overflow="wrap" %}
 ```bash
@@ -96,7 +98,7 @@ Al verificar ambas bases de datos, puedes verificar los permisos que una aplicac
 {% hint style="info" %}
 Algunos permisos de TCC son: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... No hay una lista pública que defina todos ellos, pero puedes consultar esta [**lista de los conocidos**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 
-El nombre completo de **Full Disk Access** es `kTCCServiceSystemPolicyAllFiles` y `kTCCServiceAppleEvents` permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para automatizar tareas.
+El nombre completo de **Full Disk Access** es **`kTCCServiceSystemPolicyAllFiles`** y **`kTCCServiceAppleEvents`** permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Además, **`kTCCServiceSystemPolicySysAdminFiles`** permite cambiar el atributo **`NFSHomeDirectory`** de un usuario, lo que cambia su carpeta de inicio y, por lo tanto, permite **evadir TCC**.
 {% endhint %}
 
 También puedes verificar los **permisos ya otorgados** a las aplicaciones en `Preferencias del Sistema --> Seguridad y privacidad --> Privacidad --> Archivos y carpetas`.
@@ -104,7 +106,7 @@ También puedes verificar los **permisos ya otorgados** a las aplicaciones en `P
 {% hint style="success" %}
 Ten en cuenta que aunque una de las bases de datos esté dentro del directorio del usuario, **los usuarios no pueden modificar directamente estas bases de datos debido a SIP** (incluso si eres root). La única forma de configurar o modificar una nueva regla es a través del panel de Preferencias del Sistema o de las solicitudes en las que la aplicación pide permiso al usuario.
 
-Sin embargo, recuerda que los usuarios **pueden** **eliminar o consultar reglas** utilizando **`tccutil`**.
+Sin embargo, recuerda que los usuarios _pueden_ **eliminar o consultar reglas** utilizando **`tccutil`**.
 {% endhint %}
 
 ### Verificación de firmas de TCC
@@ -179,6 +181,10 @@ También hay que tener en cuenta que si mueves un archivo que permite el UUID de
 
 El atributo extendido `com.apple.macl` **no se puede borrar** como otros atributos extendidos porque está **protegido por SIP**. Sin embargo, como [**se explica en esta publicación**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), es posible desactivarlo **comprimiendo** el archivo, **borrándolo** y **descomprimiéndolo**.
 
+### Bypasses de TCC
+
+
+
 ## Referencias
 
 * [**https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
@@ -193,8 +199,8 @@ El atributo extendido `com.apple.macl` **no se puede borrar** como otros atribut
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

