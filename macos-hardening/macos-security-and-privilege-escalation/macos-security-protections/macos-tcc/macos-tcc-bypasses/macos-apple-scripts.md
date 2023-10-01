@@ -17,9 +17,9 @@
 It's a scripting language used for task automation **interacting with remote processes**. It makes pretty easy to **ask other processes to perform some actions**. **Malware** may abuse these features to abuse functions exported by other processes.\
 For example, a malware could **inject arbitrary JS code in browser opened pages**. Or **auto click** some allow permissions requested to the user;
 
-```
-tell window 1 of process “SecurityAgent” 
-     click button “Always Allow” of group 1
+```applescript
+tell window 1 of process "SecurityAgent"
+     click button "Always Allow" of group 1
 end tell
 ```
 

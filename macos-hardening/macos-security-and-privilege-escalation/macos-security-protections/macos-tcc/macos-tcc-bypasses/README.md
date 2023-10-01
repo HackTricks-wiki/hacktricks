@@ -32,9 +32,9 @@ The **extended attribute `com.apple.macl`** is added to the new **file** to give
 
 ### SSH Bypass
 
-By default an access via **SSH** will have **"Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
+By default an access via **SSH used to have "Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
 
-![](<../../../../.gitbook/assets/image (569).png>)
+![](<../../../../../.gitbook/assets/image (569).png>)
 
 Here you can find examples of how some **malwares have been able to bypass this protection**:
 
@@ -70,7 +70,7 @@ For more info about Apple Scripts check:
 
 For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
 
-<figure><img src="../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### Over iTerm
 
@@ -149,9 +149,9 @@ $> ls ~/Documents
 
 Notes had access to TCC protected locations but when a note is created this is **created in a non-protected location**. So, you could ask notes to copy a protected file in a noe (so in a non-protected location) and then access the file:
 
-<figure><img src="../../../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
 
-### CVE-2021-XXXX - Translocation
+### CVE-2021-30782 - Translocation
 
 The binary `/usr/libexec/lsd` with the library `libsecurity_translocate` had the entitlement `com.apple.private.nullfs_allow` which allowed it to crate **nullfs** mount and had the entitlement `com.apple.private.tcc.allow` with **`kTCCServiceSystemPolicyAllFiles`** to access every file.
 
@@ -168,13 +168,49 @@ Several Apple applications used this library to access TCC protected information
 launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 
-### Apple Remote Dektop
+### Apple Remote Desktop
 
 As root you could enable this service and the **ARD agent will have full disk access** which could then be abused by a user to make it copy a new **TCC user database**.
 
-## By plugins
+## By **NFSHomeDirectory**
 
-Plugins are extra code usually in the form of libraries or plist, that will be **loaded by the main applicatio**n and will execute under its context. Therefore, if the main application had access to TCC restricted files (via granted permissions or entitlements), the **custom code will also have it**.
+TCC uses a database in the user's HOME folder to control access to resources specific to the user at **$HOME/Library/Application Support/com.apple.TCC/TCC.db**.\
+Therefore, if the user manages to restart TCC with a $HOME env variable pointing to a **different folder**, the user could create a new TCC database in **/Library/Application Support/com.apple.TCC/TCC.db** and trick TCC to grant any TCC permission to any app.
+
+{% hint style="success" %}
+Note that Apple uses the setting stored within the user's profile in the **`NFSHomeDirectory`** attribute for the **value of `$HOME`**, so if you compromise an application with permissions to modify this value (`kTCCServiceSystemPolicySysAdminFiles`), you can **weaponize** this option with a TCC bypass.
+{% endhint %}
+
+### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
+
+### [CVE-2020-27937 - Directory Utility](./#cve-2020-27937-directory-utility-1)
+
+### CVE-2021-30970 - Powerdir
+
+The **first POC** uses [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) and [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) to modify the **HOME** folder of the user.
+
+1. Get a _csreq_ blob for the target app.
+2. Plant a fake _TCC.db_ file with required access and the _csreq_ blob.
+3. Export the user’s Directory Services entry with [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
+4. Modify the Directory Services entry to change the user’s home directory.
+5. Import the modified Directory Services entry with [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
+6. Stop the user’s _tccd_ and reboot the process.
+
+The second POC used **`/usr/libexec/configd`** which had `com.apple.private.tcc.allow` with the value **`kTCCServiceSystemPolicySysAdminFiles`**.\
+It was possible to run **`configd`** with the **`-t`** option, an attacker could specify a **custom Bundle to load**. Therefore, the exploit **replaces** the **`dsexport`** and **`dsimport`** method of changing the user’s home directory with a **`configd` code injection**.
+
+For more info check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
+
+## By process injection
+
+There are different techniques to inject code inside a process and abuse its TCC privileges:
+
+{% content-ref url="../../../macos-proces-abuse/" %}
+[macos-proces-abuse](../../../macos-proces-abuse/)
+{% endcontent-ref %}
+
+Moreover, the most common process injection to bypass TCC found is via **plugins (load library)**.\
+Plugins are extra code usually in the form of libraries or plist, that will be **loaded by the main application** and will execute under its context. Therefore, if the main application had access to TCC restricted files (via granted permissions or entitlements), the **custom code will also have it**.
 
 ### CVE-2020-27937 - Directory Utility
 
@@ -226,14 +262,6 @@ System applications that open camera stream via Core Media I/O (apps with **`kTC
 Just storing in there a library with the common **constructor** will work to **inject code**.
 
 Several Apple applications were vulnerable to this.
-
-## By process injection
-
-There are different techniques to inject code inside a process and abuse its TCC privileges:
-
-{% content-ref url="../../macos-proces-abuse/" %}
-[macos-proces-abuse](../../macos-proces-abuse/)
-{% endcontent-ref %}
 
 ### Firefox
 
@@ -385,15 +413,15 @@ The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was
 
 ## By startup apps
 
-{% content-ref url="../../../macos-auto-start-locations.md" %}
-[macos-auto-start-locations.md](../../../macos-auto-start-locations.md)
+{% content-ref url="../../../../macos-auto-start-locations.md" %}
+[macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
 {% endcontent-ref %}
 
 ## By grep
 
 In several occasions files will store sensitive information like emails, phone numbers, messages... in non protected locations (which count as a vulnerability in Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
 
 ## Reference
 
