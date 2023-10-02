@@ -1,35 +1,42 @@
+# Protecciones de seguridad de macOS
+
+<details>
+
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>
+
 ## Gatekeeper
 
-**Gatekeeper** es una función de seguridad desarrollada para los sistemas operativos Mac, diseñada para garantizar que los usuarios **ejecuten solo software confiable** en sus sistemas. Funciona mediante la **validación del software** que un usuario descarga e intenta abrir desde **fuentes fuera de la App Store**, como una aplicación, un complemento o un paquete de instalación.
+**Gatekeeper** es una función de seguridad desarrollada para los sistemas operativos Mac, diseñada para garantizar que los usuarios **ejecuten solo software confiable** en sus sistemas. Funciona mediante la **validación** del software que un usuario descarga e intenta abrir desde **fuentes fuera de la App Store**, como una aplicación, un complemento o un paquete de instalación.
 
-El mecanismo clave de Gatekeeper radica en su proceso de **verificación**. Verifica si el software descargado está **firmado por un desarrollador reconocido**, asegurando la autenticidad del software. Además, verifica si el software está **notarizado por Apple**, confirmando que está libre de contenido malicioso conocido y que no ha sido manipulado después de la notarización.
+El mecanismo clave de Gatekeeper radica en su proceso de **verificación**. Verifica si el software descargado está **firmado por un desarrollador reconocido**, asegurando la autenticidad del software. Además, verifica si el software está **notarizado por Apple**, lo que confirma que está libre de contenido malicioso conocido y que no ha sido modificado después de la notarización.
 
-Además, Gatekeeper refuerza el control y la seguridad del usuario al **solicitar a los usuarios que aprueben la apertura** del software descargado por primera vez. Esta protección ayuda a evitar que los usuarios ejecuten involuntariamente código ejecutable potencialmente dañino que puedan haber confundido con un archivo de datos inofensivo.
-```bash
-# Check the status
-spctl --status
-# Enable Gatekeeper
-sudo spctl --master-enable
-# Disable Gatekeeper
-sudo spctl --master-disable
-```
-### Firmas de Aplicaciones
+Además, Gatekeeper refuerza el control y la seguridad del usuario al **solicitar la aprobación de los usuarios** para abrir el software descargado por primera vez. Esta protección ayuda a evitar que los usuarios ejecuten involuntariamente código ejecutable potencialmente dañino que podrían haber confundido con un archivo de datos inofensivo.
 
-Las firmas de aplicaciones, también conocidas como firmas de código, son un componente crítico de la infraestructura de seguridad de Apple. Se utilizan para **verificar la identidad del autor del software** (el desarrollador) y para asegurarse de que el código no ha sido manipulado desde la última vez que se firmó.
+### Firmas de aplicaciones
+
+Las firmas de aplicaciones, también conocidas como firmas de código, son un componente crítico de la infraestructura de seguridad de Apple. Se utilizan para **verificar la identidad del autor del software** (el desarrollador) y asegurarse de que el código no haya sido modificado desde la última vez que se firmó.
 
 Así es como funciona:
 
-1. **Firmar la Aplicación:** Cuando un desarrollador está listo para distribuir su aplicación, **firma la aplicación utilizando una clave privada**. Esta clave privada está asociada con un **certificado que Apple emite al desarrollador** cuando se inscribe en el Programa de Desarrolladores de Apple. El proceso de firma implica la creación de un hash criptográfico de todas las partes de la aplicación y la encriptación de este hash con la clave privada del desarrollador.
-2. **Distribuir la Aplicación:** La aplicación firmada se distribuye a los usuarios junto con el certificado del desarrollador, que contiene la clave pública correspondiente.
-3. **Verificar la Aplicación:** Cuando un usuario descarga e intenta ejecutar la aplicación, el sistema operativo Mac utiliza la clave pública del certificado del desarrollador para descifrar el hash. Luego recalcula el hash en función del estado actual de la aplicación y lo compara con el hash descifrado. Si coinciden, significa que **la aplicación no ha sido modificada** desde que el desarrollador la firmó, y el sistema permite que se ejecute la aplicación.
+1. **Firmar la aplicación:** Cuando un desarrollador está listo para distribuir su aplicación, **firma la aplicación utilizando una clave privada**. Esta clave privada está asociada con un **certificado que Apple emite al desarrollador** cuando se inscribe en el Programa de Desarrolladores de Apple. El proceso de firma implica crear un hash criptográfico de todas las partes de la aplicación y cifrar este hash con la clave privada del desarrollador.
+2. **Distribuir la aplicación:** La aplicación firmada se distribuye a los usuarios junto con el certificado del desarrollador, que contiene la clave pública correspondiente.
+3. **Verificar la aplicación:** Cuando un usuario descarga e intenta ejecutar la aplicación, su sistema operativo Mac utiliza la clave pública del certificado del desarrollador para descifrar el hash. Luego, recalcula el hash en función del estado actual de la aplicación y lo compara con el hash descifrado. Si coinciden, significa que **la aplicación no ha sido modificada** desde que el desarrollador la firmó, y el sistema permite que se ejecute la aplicación.
 
-Las firmas de aplicaciones son una parte esencial de la tecnología Gatekeeper de Apple. Cuando un usuario intenta **abrir una aplicación descargada de Internet**, Gatekeeper verifica la firma de la aplicación. Si está firmada con un certificado emitido por Apple a un desarrollador conocido y el código no ha sido manipulado, Gatekeeper permite que se ejecute la aplicación. De lo contrario, bloquea la aplicación y alerta al usuario.
+Las firmas de aplicaciones son una parte esencial de la tecnología Gatekeeper de Apple. Cuando un usuario intenta **abrir una aplicación descargada de Internet**, Gatekeeper verifica la firma de la aplicación. Si está firmada con un certificado emitido por Apple a un desarrollador conocido y el código no ha sido modificado, Gatekeeper permite que se ejecute la aplicación. De lo contrario, bloquea la aplicación y alerta al usuario.
 
-A partir de macOS Catalina, **Gatekeeper también verifica si la aplicación ha sido notarizada** por Apple, agregando una capa adicional de seguridad. El proceso de notarización verifica la aplicación en busca de problemas de seguridad conocidos y código malicioso, y si estos controles pasan, Apple agrega un ticket a la aplicación que Gatekeeper puede verificar.
+A partir de macOS Catalina, **Gatekeeper también verifica si la aplicación ha sido notarizada** por Apple, agregando una capa adicional de seguridad. El proceso de notarización verifica la aplicación en busca de problemas de seguridad conocidos y código malicioso, y si estas verificaciones se aprueban, Apple agrega un ticket a la aplicación que Gatekeeper puede verificar.
 
-#### Verificar Firmas
+#### Verificar firmas
 
-Cuando se verifica una **muestra de malware**, siempre se debe **verificar la firma** del binario, ya que el **desarrollador** que lo firmó puede estar **relacionado** con **malware**.
+Cuando verifiques alguna **muestra de malware**, siempre debes **verificar la firma** del binario, ya que el **desarrollador** que lo firmó puede estar **relacionado** con **malware**.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -48,33 +55,110 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### Notarización
 
-El proceso de notarización de Apple sirve como una salvaguarda adicional para proteger a los usuarios de software potencialmente dañino. Implica que el desarrollador envíe su aplicación para su examen por el **Servicio de Notarización de Apple**, que no debe confundirse con la Revisión de la Aplicación. Este servicio es un **sistema automatizado** que examina el software enviado en busca de la presencia de **contenido malicioso** y cualquier problema potencial con la firma de código.
+El proceso de notarización de Apple sirve como una salvaguarda adicional para proteger a los usuarios de software potencialmente dañino. Implica que el **desarrollador envíe su aplicación para su examen** por parte del **Servicio de Notarización de Apple**, que no debe confundirse con la Revisión de la Aplicación. Este servicio es un **sistema automatizado** que examina el software enviado en busca de la presencia de **contenido malicioso** y posibles problemas con la firma del código.
 
-Si el software **supera** esta inspección sin plantear ninguna preocupación, el Servicio de Notarización genera un ticket de notarización. Luego, se requiere que el desarrollador **adjunte este ticket a su software**, un proceso conocido como "grapado". Además, el ticket de notarización también se publica en línea donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
+Si el software **supera** esta inspección sin plantear ninguna preocupación, el Servicio de Notarización genera un ticket de notarización. Luego, se requiere que el desarrollador **adjunte este ticket a su software**, un proceso conocido como 'engrapado'. Además, el ticket de notarización también se publica en línea, donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
 
-En la primera instalación o ejecución del software por parte del usuario, la existencia del ticket de notarización, ya sea grapado al ejecutable o encontrado en línea, **informa a Gatekeeper que el software ha sido notarizado por Apple**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el cuadro de diálogo de inicio inicial, indicando que el software ha sido sometido a controles de contenido malicioso por parte de Apple. Este proceso mejora la confianza del usuario en la seguridad del software que instala o ejecuta en sus sistemas.
+En la primera instalación o ejecución del software por parte del usuario, la existencia del ticket de notarización, ya sea adjunto al ejecutable o encontrado en línea, **informa a Gatekeeper que el software ha sido notarizado por Apple**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el diálogo de inicio inicial, indicando que el software ha sido sometido a verificaciones de contenido malicioso por parte de Apple. Este proceso mejora la confianza del usuario en la seguridad del software que instalan o ejecutan en sus sistemas.
 
+### Enumeración de GateKeeper
+
+GateKeeper es tanto **varios componentes de seguridad** que evitan la ejecución de aplicaciones no confiables como también **uno de los componentes**.
+
+Es posible ver el **estado** de GateKeeper con:
+```bash
+# Check the status
+spctl --status
+```
+{% hint style="danger" %}
+Ten en cuenta que las comprobaciones de firma de GateKeeper se realizan solo en **archivos con el atributo de Cuarentena**, no en todos los archivos.
+{% endhint %}
+
+GateKeeper verificará si, según las **preferencias y la firma**, se puede ejecutar un binario:
+
+<figure><img src="../../../.gitbook/assets/image (678).png" alt=""><figcaption></figcaption></figure>
+
+La base de datos que guarda esta configuración se encuentra en **`/var/db/SystemPolicy`**. Puedes verificar esta base de datos como root con:
+```bash
+# Open database
+sqlite3 /var/db/SystemPolicy
+
+# Get allowed rules
+SELECT requirement,allow,disabled,label from authority where label != 'GKE' and disabled=0;
+requirement|allow|disabled|label
+anchor apple generic and certificate 1[subject.CN] = "Apple Software Update Certification Authority"|1|0|Apple Installer
+anchor apple|1|0|Apple System
+anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.9] exists|1|0|Mac App Store
+anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists and (certificate leaf[field.1.2.840.113635.100.6.1.14] or certificate leaf[field.1.2.840.113635.100.6.1.13]) and notarized|1|0|Notarized Developer ID
+[...]
+```
+Ten en cuenta cómo la primera regla terminó en "**App Store**" y la segunda en "**Developer ID**" y que en la imagen anterior estaba **habilitada para ejecutar aplicaciones de la App Store y desarrolladores identificados**. Si **modificas** esa configuración a App Store, las reglas de "**Notarized Developer ID**" desaparecerán.
+
+También hay miles de reglas de **tipo GKE**:
+```bash
+SELECT requirement,allow,disabled,label from authority where label = 'GKE' limit 5;
+cdhash H"b40281d347dc574ae0850682f0fd1173aa2d0a39"|1|0|GKE
+cdhash H"5fd63f5342ac0c7c0774ebcbecaf8787367c480f"|1|0|GKE
+cdhash H"4317047eefac8125ce4d44cab0eb7b1dff29d19a"|1|0|GKE
+cdhash H"0a71962e7a32f0c2b41ddb1fb8403f3420e1d861"|1|0|GKE
+cdhash H"8d0d90ff23c3071211646c4c9c607cdb601cb18f"|1|0|GKE
+```
+Estos son los hashes que provienen de **`/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`, `/var/db/gke.bundle/Contents/Resources/gk.db`** y **`/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`**
+
+Las opciones **`--master-disable`** y **`--global-disable`** de **`spctl`** deshabilitarán por completo estas verificaciones de firma:
+```bash
+# Disable GateKeeper
+spctl --global-disable
+spctl --master-disable
+
+# Enable it
+spctl --global-enable
+spctl --master-enable
+```
+Cuando esté completamente habilitada, aparecerá una nueva opción:
+
+<figure><img src="../../../.gitbook/assets/image (679).png" alt=""><figcaption></figcaption></figure>
+
+Es posible **verificar si una aplicación será permitida por GateKeeper** con:
+```bash
+spctl --assess -v /Applications/App.app
+```
+Es posible agregar nuevas reglas en GateKeeper para permitir la ejecución de ciertas aplicaciones con:
+```bash
+# Check if allowed - nop
+spctl --assess -v /Applications/App.app
+/Applications/App.app: rejected
+source=no usable signature
+
+# Add a label and allow this label in GateKeeper
+sudo spctl --add --label "whitelist" /Applications/App.app
+sudo spctl --enable --label "whitelist"
+
+# Check again - yep
+spctl --assess -v /Applications/App.app
+/Applications/App.app: accepted
+```
 ### Archivos en cuarentena
 
-Al **descargar** una aplicación o archivo, ciertas **aplicaciones** de macOS como navegadores web o clientes de correo electrónico **adjuntan un atributo de archivo extendido**, comúnmente conocido como la "**bandera de cuarentena**", al archivo descargado. Este atributo actúa como medida de seguridad para **marcar el archivo** como proveniente de una fuente no confiable (Internet) y potencialmente con riesgos. Sin embargo, no todas las aplicaciones adjuntan este atributo, por ejemplo, el software común de cliente BitTorrent generalmente omite este proceso.
+Al **descargar** una aplicación o archivo, ciertas aplicaciones de macOS como navegadores web o clientes de correo electrónico **adjuntan un atributo de archivo extendido**, comúnmente conocido como la "**bandera de cuarentena**", al archivo descargado. Este atributo actúa como una medida de seguridad para **marcar el archivo** como proveniente de una fuente no confiable (Internet) y potencialmente portador de riesgos. Sin embargo, no todas las aplicaciones adjuntan este atributo, por ejemplo, los programas comunes de cliente BitTorrent suelen omitir este proceso.
 
-**La presencia de una bandera de cuarentena señala la función de seguridad de Gatekeeper de macOS cuando un usuario intenta ejecutar el archivo**.
+**La presencia de una bandera de cuarentena indica a la función de seguridad Gatekeeper de macOS cuando un usuario intenta ejecutar el archivo**.
 
-En el caso de que **no esté presente la bandera de cuarentena** (como con los archivos descargados a través de algunos clientes BitTorrent), **es posible que no se realicen las comprobaciones de Gatekeeper**. Por lo tanto, los usuarios deben tener precaución al abrir archivos descargados de fuentes menos seguras o desconocidas.
+En el caso de que la **bandera de cuarentena no esté presente** (como en archivos descargados a través de algunos clientes BitTorrent), es posible que no se realicen las **verificaciones de Gatekeeper**. Por lo tanto, los usuarios deben tener precaución al abrir archivos descargados de fuentes menos seguras o desconocidas.
 
 {% hint style="info" %}
-La **comprobación** de la **validez** de las firmas de código es un proceso **intensivo en recursos** que incluye la generación de **hashes criptográficos** del código y todos sus recursos empaquetados. Además, la comprobación de la validez del certificado implica hacer una **comprobación en línea** a los servidores de Apple para ver si ha sido revocado después de emitido. Por estas razones, una comprobación completa de firma de código y notarización es **impráctica para ejecutar cada vez que se inicia una aplicación**.
+**Verificar** la **validez** de las firmas de código es un proceso **intensivo en recursos** que incluye generar **hashes** criptográficos del código y todos sus recursos empaquetados. Además, verificar la validez del certificado implica realizar una **verificación en línea** en los servidores de Apple para ver si ha sido revocado después de su emisión. Por estas razones, realizar una verificación completa de firma de código y notarización es **impráctico de ejecutar cada vez que se inicia una aplicación**.
 
-Por lo tanto, estas comprobaciones se **ejecutan solo al ejecutar aplicaciones con el atributo en cuarentena**.
+Por lo tanto, estas verificaciones solo se ejecutan al ejecutar aplicaciones con el atributo de cuarentena.
 {% endhint %}
 
 {% hint style="warning" %}
-**Tenga en cuenta que Safari y otros navegadores web y aplicaciones son los que necesitan marcar los archivos descargados**
+Este atributo debe ser **establecido por la aplicación que crea/descarga** el archivo.
 
-Además, **los archivos creados por procesos en sandbox** también se les agrega este atributo para evitar que se escapen del sandbox.
+Sin embargo, los archivos que están en un sandbox tendrán este atributo establecido en cada archivo que creen. Y las aplicaciones que no están en un sandbox pueden establecerlo por sí mismas o especificar la clave [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/lsfilequarantineenabled?language=objc) en el archivo **Info.plist**, lo que hará que el sistema establezca el atributo extendido `com.apple.quarantine` en los archivos creados.
 {% endhint %}
 
-Es posible **verificar su estado y habilitar/deshabilitar** (se requiere root) con:
+Es posible **verificar su estado y habilitar/deshabilitar** (se requiere acceso de root) con:
 ```bash
 spctl --status
 assessments enabled
@@ -83,13 +167,13 @@ spctl --enable
 spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
-También puedes **encontrar si un archivo tiene el atributo extendido de cuarentena** con:
+También puedes **verificar si un archivo tiene el atributo de cuarentena extendido** con:
 ```bash
 xattr portada.png
 com.apple.macl
 com.apple.quarantine
 ```
-Verifique el **valor** de los **atributos extendidos** con:
+Verifica el **valor** de los **atributos extendidos** y descubre la aplicación que escribió el atributo de cuarentena con:
 ```bash
 xattr -l portada.png
 com.apple.macl:
@@ -99,7 +183,11 @@ com.apple.macl:
 00000030  D0 DB 89 53 C3 FC 00 00 00 00 00 00 00 00 00 00  |...S............|
 00000040  00 00 00 00 00 00 00 00                          |........|
 00000048
-com.apple.quarantine: 0081;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
+com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
+# 00c1 -- It has been allowed to eexcute this file
+# 607842eb -- Timestamp
+# Brave -- App
+# F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
 ```
 Y **elimina** ese atributo con:
 ```bash
@@ -115,36 +203,49 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 {% endcode %}
 
-## XProtect
+La información de cuarentena también se almacena en una base de datos central gestionada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
 
-XProtect es una función integrada de **anti-malware** en macOS. Es parte del sistema de seguridad de Apple que trabaja silenciosamente en segundo plano para mantener su Mac seguro de malware conocido y complementos maliciosos.
+### XProtect
 
-XProtect funciona **verificando cualquier archivo descargado contra su base de datos** de malware conocido y tipos de archivo inseguros. Cuando descarga un archivo a través de ciertas aplicaciones, como Safari, Mail o Mensajes, XProtect escanea automáticamente el archivo. Si coincide con algún malware conocido en su base de datos, XProtect **impedirá que el archivo se ejecute** y le alertará sobre la amenaza.
+XProtect es una función incorporada de **anti-malware** en macOS. XProtect **verifica cualquier aplicación cuando se ejecuta por primera vez o se modifica en comparación con su base de datos** de malware conocido y tipos de archivo inseguros. Cuando descargas un archivo a través de ciertas aplicaciones, como Safari, Mail o Mensajes, XProtect escanea automáticamente el archivo. Si coincide con algún malware conocido en su base de datos, XProtect **impedirá que el archivo se ejecute** y te alertará sobre la amenaza.
 
-La base de datos de XProtect se **actualiza regularmente** por Apple con nuevas definiciones de malware, y estas actualizaciones se descargan e instalan automáticamente en su Mac. Esto asegura que XProtect siempre esté actualizado con las últimas amenazas conocidas.
+La base de datos de XProtect se **actualiza regularmente** por Apple con nuevas definiciones de malware, y estas actualizaciones se descargan e instalan automáticamente en tu Mac. Esto asegura que XProtect esté siempre actualizado con las últimas amenazas conocidas.
 
-Sin embargo, vale la pena señalar que **XProtect no es una solución antivirus completa**. Solo verifica una lista específica de amenazas conocidas y no realiza un escaneo de acceso como la mayoría del software antivirus. Por lo tanto, aunque XProtect proporciona una capa de protección contra el malware conocido, todavía se recomienda tener precaución al descargar archivos de Internet o abrir archivos adjuntos de correo electrónico.
+Sin embargo, vale la pena señalar que **XProtect no es una solución antivirus completa**. Solo verifica una lista específica de amenazas conocidas y no realiza un escaneo de acceso como la mayoría de los software antivirus.
 
-Puede obtener información sobre la última actualización de XProtect en ejecución:
+Puedes obtener información sobre la última actualización de XProtect ejecutando:
 
 {% code overflow="wrap" %}
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
 ```
+{% endcode %}
+
+XProtect se encuentra en una ubicación protegida por SIP en **/Library/Apple/System/Library/CoreServices/XProtect.bundle** y dentro del paquete se pueden encontrar las siguientes informaciones que utiliza XProtect:
+
+* **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: Permite que el código con esos cdhashes utilice privilegios heredados.
+* **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: Lista de complementos y extensiones que no se permiten cargar a través de BundleID y TeamID, o que indican una versión mínima.
+* **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Reglas Yara para detectar malware.
+* **`XProtect.bundle/Contents/Resources/gk.db`**: Base de datos SQLite3 con hashes de aplicaciones bloqueadas y TeamIDs.
+
+Tenga en cuenta que hay otra aplicación en **`/Library/Apple/System/Library/CoreServices/XProtect.app`** relacionada con XProtect que no está involucrada cuando se ejecuta una aplicación.
+
 ## MRT - Herramienta de eliminación de malware
 
-La Herramienta de eliminación de malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar el malware conocido de los sistemas infectados**.
+La Herramienta de eliminación de malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar malware conocido de sistemas infectados**.
 
-Una vez que se detecta malware en un Mac (ya sea por XProtect o por algún otro medio), MRT se puede utilizar para **eliminar automáticamente el malware**. MRT opera en segundo plano y se ejecuta típicamente cuando el sistema se actualiza o cuando se descarga una nueva definición de malware (parece que las reglas que MRT tiene para detectar malware están dentro del binario).
+Una vez que se detecta malware en un Mac (ya sea por XProtect o por otros medios), se puede utilizar MRT para **eliminar automáticamente el malware**. MRT funciona en segundo plano de forma silenciosa y se ejecuta normalmente cuando se actualiza el sistema o se descarga una nueva definición de malware (parece que las reglas que MRT utiliza para detectar malware están dentro del binario).
 
-Si bien tanto XProtect como MRT son parte de las medidas de seguridad de macOS, realizan funciones diferentes:
+Si bien tanto XProtect como MRT forman parte de las medidas de seguridad de macOS, desempeñan funciones diferentes:
 
-* **XProtect** es una herramienta preventiva. **Verifica los archivos a medida que se descargan** (a través de ciertas aplicaciones), y si detecta algún tipo de malware conocido, **evita que el archivo se abra**, evitando así que el malware infecte su sistema en primer lugar.
-* **MRT**, por otro lado, es una **herramienta reactiva**. Opera después de que se ha detectado malware en un sistema, con el objetivo de eliminar el software ofensivo para limpiar el sistema.
+* **XProtect** es una herramienta preventiva. **Verifica los archivos a medida que se descargan** (a través de ciertas aplicaciones) y, si detecta algún tipo de malware conocido, **impide que el archivo se abra**, evitando así que el malware infecte su sistema en primer lugar.
+* **MRT**, por otro lado, es una herramienta **reactiva**. Opera después de que se haya detectado malware en un sistema, con el objetivo de eliminar el software ofensivo para limpiar el sistema.
 
-## Limitantes de procesos
+La aplicación MRT se encuentra en **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-### SIP - Protección de integridad del sistema
+## Limitaciones de procesos
+
+### SIP - Protección de la integridad del sistema
 
 {% content-ref url="macos-sip.md" %}
 [macos-sip.md](macos-sip.md)
@@ -152,15 +253,15 @@ Si bien tanto XProtect como MRT son parte de las medidas de seguridad de macOS, 
 
 ### Sandbox
 
-El Sandbox de macOS **limita las aplicaciones** que se ejecutan dentro del sandbox a las **acciones permitidas especificadas en el perfil de Sandbox** con el que se está ejecutando la aplicación. Esto ayuda a garantizar que **la aplicación solo acceda a los recursos esperados**.
+La Sandbox de macOS **limita las aplicaciones** que se ejecutan dentro de ella a las **acciones permitidas especificadas en el perfil de Sandbox** con el que se está ejecutando la aplicación. Esto ayuda a garantizar que **la aplicación solo acceda a los recursos esperados**.
 
 {% content-ref url="macos-sandbox/" %}
 [macos-sandbox](macos-sandbox/)
 {% endcontent-ref %}
 
-### TCC - Transparencia, Consentimiento y Control
+### TCC - **Transparencia, Consentimiento y Control**
 
-**TCC (Transparencia, Consentimiento y Control)** es un mecanismo en macOS para **limitar y controlar el acceso de la aplicación a ciertas funciones**, generalmente desde una perspectiva de privacidad. Esto puede incluir cosas como servicios de ubicación, contactos, fotos, micrófono, cámara, accesibilidad, acceso completo al disco y mucho más.
+**TCC (Transparencia, Consentimiento y Control)** es un mecanismo en macOS para **limitar y controlar el acceso de las aplicaciones a ciertas funciones**, generalmente desde una perspectiva de privacidad. Esto puede incluir cosas como servicios de ubicación, contactos, fotos, micrófono, cámara, accesibilidad, acceso completo al disco y muchas más.
 
 {% content-ref url="macos-tcc/" %}
 [macos-tcc](macos-tcc/)
@@ -168,13 +269,13 @@ El Sandbox de macOS **limita las aplicaciones** que se ejecutan dentro del sandb
 
 ## Caché de confianza
 
-La caché de confianza de Apple macOS, a veces también denominada caché AMFI (Integridad de archivos móviles de Apple), es un mecanismo de seguridad en macOS diseñado para **evitar que se ejecute software no autorizado o malintencionado**. Esencialmente, es una lista de hashes criptográficos que el sistema operativo utiliza para **verificar la integridad y autenticidad del software**.
+La caché de confianza de Apple macOS, a veces también conocida como caché AMFI (Apple Mobile File Integrity), es un mecanismo de seguridad en macOS diseñado para **evitar que se ejecute software no autorizado o malicioso**. Esencialmente, es una lista de hashes criptográficos que el sistema operativo utiliza para **verificar la integridad y autenticidad del software**.
 
-Cuando una aplicación o archivo ejecutable intenta ejecutarse en macOS, el sistema operativo verifica la caché de confianza AMFI. Si se encuentra el **hash del archivo en la caché de confianza**, el sistema **permite** que el programa se ejecute porque lo reconoce como confiable.
+Cuando una aplicación o archivo ejecutable intenta ejecutarse en macOS, el sistema operativo verifica la caché de confianza de AMFI. Si se encuentra el **hash del archivo en la caché de confianza**, el sistema **permite** que el programa se ejecute porque lo reconoce como confiable.
 
 ## Restricciones de lanzamiento
 
 Controla desde dónde y qué puede lanzar un binario firmado por Apple:
 
-* No se puede lanzar una aplicación directamente si debe ser ejecutada por launchd
-* No se puede ejecutar una aplicación fuera de la ubicación de confianza (como /System/)
+* No se puede lanzar una aplicación directamente si debe ser ejecutada por launchd.
+* No se puede ejecutar una aplicación fuera de la ubicación de confianza (como /System/).
