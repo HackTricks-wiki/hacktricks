@@ -730,7 +730,6 @@
   * [Hybrid Malware Classifier Part 1](a.i.-exploiting/bra.i.nsmasher-presentation/hybrid-malware-classifier-part-1.md)
   * [ML Basics](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/README.md)
     * [Feature Engineering](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/feature-engineering.md)
-* [INE Courses and eLearnSecurity Certifications Reviews](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
 
 ## 🦂 C2
 
