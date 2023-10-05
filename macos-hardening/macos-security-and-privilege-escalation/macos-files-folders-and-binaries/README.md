@@ -87,13 +87,23 @@ En macOS (y iOS), todas las bibliotecas compartidas del sistema, como los framew
 
 Similar a la caché compartida de Dyld, el kernel y las extensiones del kernel también se compilan en una caché del kernel, que se carga al iniciar el sistema.
 
-Para extraer las bibliotecas del archivo único de la caché compartida de dylib, era posible utilizar la herramienta binaria [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip), que puede que no funcione en la actualidad:
+Para extraer las bibliotecas del archivo único de la caché compartida de dylib, era posible utilizar el binario [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip), que puede que no funcione en la actualidad:
 
 {% code overflow="wrap" %}
 ```bash
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
 ```
 {% endcode %}
+
+En versiones anteriores, es posible encontrar la **caché compartida** en **`/System/Library/dyld/`**.
+
+{% hint style="success" %}
+Ten en cuenta que incluso si la herramienta `dyld_shared_cache_util` no funciona, puedes pasar el **binario dyld compartido a Hopper** y Hopper podrá identificar todas las bibliotecas y permitirte **seleccionar cuál** quieres investigar:
+
+
+{% endhint %}
+
+<figure><img src="../../../.gitbook/assets/image (680).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Permisos especiales de archivos
 
@@ -105,17 +115,17 @@ En una **carpeta**, **leer** permite **listarla**, **escribir** permite **elimin
 
 Existen algunas banderas que se pueden establecer en los archivos y que harán que el archivo se comporte de manera diferente. Puedes **verificar las banderas** de los archivos dentro de un directorio con `ls -lO /ruta/directorio`
 
-* **`uchg`**: Conocida como bandera **uchange**, evitará cualquier acción que cambie o elimine el **archivo**. Para establecerla, usa: `chflags uchg archivo.txt`
-* El usuario root puede **eliminar la bandera** y modificar el archivo.
-* **`restricted`**: Esta bandera hace que el archivo esté **protegido por SIP** (no se puede agregar esta bandera a un archivo).
+* **`uchg`**: Conocida como la bandera **uchange**, evitará cualquier acción que cambie o elimine el **archivo**. Para establecerla, usa: `chflags uchg archivo.txt`
+* El usuario root puede **eliminar la bandera** y modificar el archivo
+* **`restricted`**: Esta bandera hace que el archivo esté **protegido por SIP** (no puedes agregar esta bandera a un archivo).
 * **`Sticky bit`**: Si un directorio tiene el sticky bit, **solo** el **propietario del directorio o root pueden renombrar o eliminar** archivos. Normalmente se establece en el directorio /tmp para evitar que los usuarios normales eliminen o muevan archivos de otros usuarios.
 
 ### **ACL de archivos**
 
 Las ACL de archivos contienen **ACE** (Entradas de Control de Acceso) donde se pueden asignar permisos más **granulares** a diferentes usuarios.
 
-Es posible otorgar estos permisos a una **carpeta**: `listar`, `buscar`, `agregar_archivo`, `agregar_subdirectorio`, `eliminar_hijo`, `eliminar_hijo`.\
-Y a un **archivo**: `leer`, `escribir`, `anexar`, `ejecutar`.
+Es posible otorgar estos permisos a un **directorio**: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
+Y a un **archivo**: `read`, `write`, `append`, `execute`.
 
 Cuando el archivo contiene ACL, verás un "+" al listar los permisos, como en:
 ```bash
