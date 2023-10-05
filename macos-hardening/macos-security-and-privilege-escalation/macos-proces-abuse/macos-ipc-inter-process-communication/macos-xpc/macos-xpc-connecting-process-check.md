@@ -32,8 +32,8 @@ When a connection is stablished to an XPC service, the server will check if the 
 
 For more information about the PID reuse attack check:
 
-{% content-ref url="macos-pid-reuse.md" %}
-[macos-pid-reuse.md](macos-pid-reuse.md)
+{% content-ref url="../../../mac-os-architecture/macos-ipc-inter-process-communication/macos-pid-reuse.md" %}
+[macos-pid-reuse.md](../../../mac-os-architecture/macos-ipc-inter-process-communication/macos-pid-reuse.md)
 {% endcontent-ref %}
 
 ### Trustcache - Downgrade Attacks Prevention
