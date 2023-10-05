@@ -21,7 +21,7 @@
 * **/etc**: 設定ファイル
 * **/Library**: 好み、キャッシュ、ログに関連する多くのサブディレクトリとファイルがここにあります。ルートと各ユーザーのディレクトリにLibraryフォルダが存在します。
 * **/private**: 文書化されていませんが、多くの言及されたフォルダはprivateディレクトリへのシンボリックリンクです。
-* **/sbin**: システム管理に関連する必須のシステムバイナリ
+* **/sbin**: システムの管理に関連する必須のシステムバイナリ
 * **/System**: OS Xを実行するためのファイル。ここには主にAppleの固有のファイルがあります（サードパーティではありません）。
 * **/tmp**: ファイルは3日後に削除されます（/private/tmpへのソフトリンクです）
 * **/Users**: ユーザーのホームディレクトリ。
@@ -34,8 +34,8 @@
 
 * **システムアプリケーション**は`/System/Applications`にあります。
 * **インストールされた**アプリケーションは通常`/Applications`または`~/Applications`にインストールされます。
-* **アプリケーションデータ**は、ルートとユーザーとして実行されるアプリケーションの場合は`/Library/Application Support`、ユーザーとして実行されるアプリケーションの場合は`~/Library/Application Support`にあります。
-* **ルートとして実行する必要がある**サードパーティのアプリケーション**デーモン**は通常`/Library/PrivilegedHelperTools/`にあります。
+* **アプリケーションデータ**は、ルートとユーザーとして実行されるアプリケーションの場合は`/Library/Application Support`に、ユーザーとして実行されるアプリケーションの場合は`~/Library/Application Support`にあります。
+* **ルートとして実行する必要がある**サードパーティのアプリケーション**デーモン**は通常`/Library/PrivilegedHelperTools/`に配置されます。
 * **サンドボックス化された**アプリは`~/Library/Containers`フォルダにマップされます。各アプリには、アプリケーションのバンドルID（`com.apple.Safari`など）に基づいた名前のフォルダがあります。
 * **カーネル**は`/System/Library/Kernels/kernel`にあります。
 * **Appleのカーネル拡張**は`/System/Library/Extensions`にあります。
@@ -87,7 +87,7 @@ macOS（およびiOS）では、フレームワークやdylibなどのシステ�
 
 dyld共有キャッシュと同様に、カーネルとカーネル拡張もカーネルキャッシュにコンパイルされ、起動時に読み込まれます。
 
-単一のファイルdylib共有キャッシュからライブラリを抽出するために、バイナリの[dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip)を使用することができましたが、現在は動作しない可能性があります。
+単一のファイルdylib共有キャッシュからライブラリを抽出するために、現在は動作しないかもしれないバイナリの[dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip)を使用することができました。
 
 {% code overflow="wrap" %}
 ```bash
@@ -95,27 +95,37 @@ dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexe
 ```
 {% endcode %}
 
+古いバージョンでは、**共有キャッシュ**を**`/System/Library/dyld/`**に見つけることができるかもしれません。
+
+{% hint style="success" %}
+`dyld_shared_cache_util`ツールが機能しなくても、**共有dyldバイナリをHopperに渡す**ことで、Hopperはすべてのライブラリを識別し、**調査したいライブラリを選択**することができます:
+
+
+{% endhint %}
+
+<figure><img src="../../../.gitbook/assets/image (680).png" alt="" width="563"><figcaption></figcaption></figure>
+
 ## 特殊なファイルの権限
 
 ### フォルダの権限
 
 **フォルダ**では、**読み取り**は**リスト表示**を許可し、**書き込み**は**ファイルの削除**と**書き込み**を許可し、**実行**は**ディレクトリの移動**を許可します。したがって、例えば、**ファイル内の読み取り権限**を持つユーザーが、**実行権限がない**ディレクトリ内にあるファイルを**読み取ることはできません**。
 
-### フラグの修飾子
+### フラグ修飾子
 
-ファイルに設定できるいくつかのフラグがあり、ファイルの動作を異なるものにすることができます。`ls -lO /path/directory`コマンドでディレクトリ内のファイルのフラグを**チェック**できます。
+ファイルに設定されているフラグによって、ファイルの動作が異なるようになります。`ls -lO /path/directory`でディレクトリ内のファイルのフラグを**チェック**できます。
 
-* **`uchg`**: **uchange**フラグとして知られ、**ファイルの変更や削除を防ぎます**。設定するには、`chflags uchg file.txt`と入力します。
-* ルートユーザーはフラグを**削除**してファイルを変更できます。
-* **`restricted`**: このフラグはファイルを**SIPで保護**します（このフラグをファイルに追加することはできません）。
-* **`Sticky bit`**: スティッキービットが設定されたディレクトリでは、**ディレクトリの所有者またはルートユーザーのみがファイルの名前を変更または削除**できます。通常、これは/tmpディレクトリに設定され、一般ユーザーが他のユーザーのファイルを削除または移動できないようにします。
+* **`uchg`**：**uchange**フラグとして知られており、**ファイル**の変更や削除を**防止**します。設定するには：`chflags uchg file.txt`
+* ルートユーザーはフラグを**削除**してファイルを変更できます
+* **`restricted`**：このフラグはファイルを**SIPで保護**します（このフラグをファイルに追加することはできません）。
+* **`Sticky bit`**：スティッキービットが設定されたディレクトリでは、**ディレクトリの所有者またはルートのみがファイルの名前を変更または削除**できます。通常、これは/tmpディレクトリに設定され、一般ユーザーが他のユーザーのファイルを削除または移動できないようにします。
 
 ### **ファイルACL**
 
 ファイルの**ACL（アクセス制御エントリ）**には、異なるユーザーに対してより**細かい権限**を割り当てることができる**ACE（アクセス制御エントリ）**が含まれています。
 
-**ディレクトリ**には、次の権限を付与することができます：`list`、`search`、`add_file`、`add_subdirectory`、`delete_child`、`delete_child`。\
-**ファイル**には、次の権限を付与することができます：`read`、`write`、`append`、`execute`。
+ディレクトリには、これらの権限を付与することができます：`list`、`search`、`add_file`、`add_subdirectory`、`delete_child`、`delete_child`。\
+ファイルには、`read`、`write`、`append`、`execute`の権限を付与することができます。
 
 ファイルにACLが含まれている場合、パーミッションをリスト表示する際に**"+"が表示されます**。
 ```bash
@@ -182,7 +192,7 @@ Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコ�
 * **LSRiskCategorySafe**：**完全に安全**；ダウンロード後にSafariが自動的に開く
 * **LSRiskCategoryNeutral**：警告はないが、**自動的に開かれない**
 * **LSRiskCategoryUnsafeExecutable**：「このファイルはアプリケーションです...」という**警告をトリガー**する
-* **LSRiskCategoryMayContainUnsafeExecutable**：実行可能ファイルを含むアーカイブなどに対して使用されます。Safariがすべてのコンテンツが安全または中立であることを判断できない場合、**警告をトリガー**します。
+* **LSRiskCategoryMayContainUnsafeExecutable**：実行可能ファイルを含むアーカイブなどに使用されます。Safariがすべてのコンテンツが安全または中立であることを判断できない場合、**警告をトリガー**します。
 
 ## ログファイル
 
@@ -191,7 +201,7 @@ Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコ�
 * **`/private/var/log/asl/*.asl`**：興味深い情報が含まれている可能性のあるApple System Logsです。
 * **`$HOME/Library/Preferences/com.apple.recentitems.plist`**：「Finder」を介して最近アクセスしたファイルとアプリケーションを保存します。
 * **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**：システム起動時に起動するアイテムを保存します。
-* **`$HOME/Library/Logs/DiskUtility.log`**：DiskUtilityアプリのログファイル（ドライブに関する情報、USBを含む）。
+* **`$HOME/Library/Logs/DiskUtility.log`**：DiskUtilityアプリのログファイル（ドライブに関する情報、USBを含む）
 * **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**：ワイヤレスアクセスポイントに関するデータ。
 * **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**：無効化されたデーモンのリスト。
 
@@ -202,7 +212,7 @@ Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコ�
 * **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>
