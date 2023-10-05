@@ -1,4 +1,4 @@
-# Autorización XPC de macOS
+# Autorización XPC en macOS
 
 <details>
 
@@ -6,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -188,7 +188,7 @@ Existen diferentes alcances para indicar quién puede acceder a un derecho. Algu
 
 <table><thead><tr><th width="284.3333333333333">Nombre</th><th width="165">Valor</th><th>Descripción</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Cualquiera</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Nadie</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>El usuario actual debe ser un administrador (dentro del grupo de administradores)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Pedir al usuario que se autentique.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Pedir al usuario que se autentique. Debe ser un administrador (dentro del grupo de administradores)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Especificar reglas</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Especificar comentarios adicionales sobre el derecho</td></tr></tbody></table>
 
-### Verificación de Derechos
+### Verificación de derechos
 
 En `HelperTool/HelperTool.m`, la función **`readLicenseKeyAuthorization`** verifica si el llamador está autorizado para **ejecutar dicho método** llamando a la función **`checkAuthorization`**. Esta función verificará que los datos de autenticación enviados por el proceso que llama tengan un **formato correcto** y luego verificará **qué se necesita para obtener el derecho** de llamar al método específico. Si todo va bien, el **error devuelto será `nil`**:
 ```objectivec
@@ -250,7 +250,7 @@ sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Entonces, puedes leer quién puede acceder al derecho con:
+Entonces, puedes leer quién puede acceder a los derechos con:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
@@ -286,13 +286,13 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 Si encuentras la función: **`[HelperTool checkAuthorization:command:]`**, es probable que el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
 
-<figure><img src="../../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Entonces, si esta función llama a funciones como `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, está utilizando [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Verifica el **`/var/db/auth.db`** para ver si es posible obtener permisos para llamar a alguna acción privilegiada sin interacción del usuario.
+Verifica el archivo **`/var/db/auth.db`** para ver si es posible obtener permisos para llamar a alguna acción privilegiada sin interacción del usuario.
 
-### Comunicación de Protocolo
+### Comunicación del Protocolo
 
 Luego, necesitas encontrar el esquema del protocolo para poder establecer una comunicación con el servicio XPC.
 

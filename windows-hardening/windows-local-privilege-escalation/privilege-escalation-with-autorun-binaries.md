@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
@@ -304,20 +304,21 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\she
 ```
 ### Opciones de Ejecución de Archivos de Imagen
 
-Las Opciones de Ejecución de Archivos de Imagen son una característica de Windows que permite a los usuarios configurar la ejecución de un archivo específico. Esta característica se utiliza comúnmente para depurar aplicaciones, pero también puede ser aprovechada por los atacantes para lograr una escalada de privilegios local.
+Image File Execution Options (IFEO) es una característica de Windows que permite a los desarrolladores depurar aplicaciones. Sin embargo, los atacantes también pueden aprovechar esta funcionalidad para lograr una escalada de privilegios local.
 
-Cuando se configura una opción de ejecución de archivos de imagen, se crea una clave de registro en `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options`. Dentro de esta clave, se crea una subclave con el nombre del archivo ejecutable y se configuran los valores correspondientes.
+Cuando se crea una clave de registro en `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options`, Windows ejecutará un binario especificado antes de ejecutar cualquier otro binario con el mismo nombre. Esto puede ser utilizado por los atacantes para reemplazar un binario legítimo con uno malicioso y obtener privilegios elevados.
 
-Un atacante puede aprovechar esta característica creando una subclave con el nombre de un archivo ejecutable privilegiado, como `cmd.exe` o `powershell.exe`, y configurar un valor de depurador para que se ejecute un binario malicioso en su lugar. Cuando el archivo ejecutable privilegiado se inicie, el binario malicioso también se ejecutará con los mismos privilegios, lo que permite al atacante obtener acceso elevado al sistema.
+Para lograr esto, el atacante debe crear una nueva clave en `Image File Execution Options` con el nombre del binario legítimo que desea reemplazar. Dentro de esta clave, se debe crear un valor de cadena llamado `Debugger` y se debe establecer su valor en la ruta del binario malicioso.
 
-Para prevenir este tipo de escalada de privilegios, se recomienda realizar las siguientes acciones:
+Cuando se inicie el binario legítimo, Windows ejecutará automáticamente el binario malicioso especificado en la clave `Debugger`. Esto permite al atacante ejecutar código con privilegios elevados.
+
+Para evitar este tipo de escalada de privilegios, se recomienda realizar las siguientes acciones:
 
 - Restringir el acceso a la clave de registro `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options` para evitar modificaciones no autorizadas.
-- Monitorear los cambios en la clave de registro mencionada anteriormente y alertar sobre cualquier modificación sospechosa.
-- Utilizar soluciones de seguridad que detecten y bloqueen la ejecución de binarios maliciosos.
-- Mantener el sistema operativo y las aplicaciones actualizadas con los últimos parches de seguridad.
+- Monitorear los cambios en la clave de registro mencionada anteriormente para detectar posibles modificaciones maliciosas.
+- Mantener actualizado el sistema operativo y las aplicaciones para mitigar vulnerabilidades conocidas que podrían ser explotadas para lograr una escalada de privilegios.
 
-Al seguir estas recomendaciones, se puede reducir el riesgo de escalada de privilegios local a través de las Opciones de Ejecución de Archivos de Imagen.
+Al comprender cómo los atacantes pueden aprovechar las opciones de ejecución de archivos de imagen, los administradores de sistemas pueden tomar medidas para proteger sus sistemas y prevenir posibles ataques de escalada de privilegios.
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
@@ -338,9 +339,9 @@ Encuentra más Autoruns como registros en [https://www.microsoftpressstore.com/a
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -350,8 +351,8 @@ Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - ¡
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

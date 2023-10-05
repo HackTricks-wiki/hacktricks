@@ -1,4 +1,4 @@
-# Ticket de Plata
+# Silver Ticket
 
 <details>
 
@@ -12,19 +12,19 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
-## Ticket de Plata
+## Silver ticket
 
-El ataque del Ticket de Plata se basa en **crear un TGS válido para un servicio una vez que se posee el hash NTLM del servicio** (como el hash de la **cuenta de PC**). Por lo tanto, es posible **obtener acceso a ese servicio** falsificando un TGS personalizado **como cualquier usuario**.
+El ataque de Silver ticket se basa en **crear un TGS válido para un servicio una vez que se posee el hash NTLM del servicio** (como el hash de la **cuenta de PC**). Por lo tanto, es posible **acceder a ese servicio** falsificando un TGS personalizado **como cualquier usuario**.
 
 En este caso, se **posee el hash NTLM de una cuenta de computadora** (que es una especie de cuenta de usuario en AD). Por lo tanto, es posible **crear** un **ticket** para **ingresar a esa máquina** con privilegios de **administrador** a través del servicio SMB. Las cuentas de computadora restablecen sus contraseñas cada 30 días de forma predeterminada.
 
-También se debe tener en cuenta que es posible y **PREFERIBLE** (opsec) **falsificar tickets utilizando las claves AES Kerberos (AES128 y AES256)**. Para saber cómo generar una clave AES, lee: [sección 4.4 de MS-KILE](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-kile/936a4878-9462-4753-aac8-087cd3ca4625) o el [Get-KerberosAESKey.ps1](https://gist.github.com/Kevin-Robertson/9e0f8bfdbf4c1e694e6ff4197f0a4372).
+También se debe tener en cuenta que es posible y **preferible** (opsec) **falsificar tickets utilizando las claves AES Kerberos (AES128 y AES256)**. Para saber cómo generar una clave AES, lee: [sección 4.4 de MS-KILE](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-kile/936a4878-9462-4753-aac8-087cd3ca4625) o el [Get-KerberosAESKey.ps1](https://gist.github.com/Kevin-Robertson/9e0f8bfdbf4c1e694e6ff4197f0a4372).
 
 {% code title="Linux" %}
 ```bash
@@ -51,7 +51,7 @@ kerberos::golden /user:Administrator /domain:jurassic.park /sid:S-1-5-21-1339291
 ```
 {% endcode %}
 
-El servicio **CIFS** es el que te permite **acceder al sistema de archivos de la víctima**. Puedes encontrar otros servicios aquí: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page\_id=183)**.** Por ejemplo, puedes usar el servicio **HOST** para crear una _**schtask**_ en una computadora. Luego puedes verificar si esto ha funcionado intentando listar las tareas de la víctima: `schtasks /S <nombre de host>` o puedes usar los servicios **HOST y RPCSS** para ejecutar consultas **WMI** en una computadora, pruébalo haciendo: `Get-WmiObject -Class win32_operatingsystem -ComputerName <nombre de host>`
+El servicio **CIFS** es el que te permite **acceder al sistema de archivos de la víctima**. Puedes encontrar otros servicios aquí: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page\_id=183)**.** Por ejemplo, puedes usar el servicio **HOST** para crear una _**schtask**_ en una computadora. Luego puedes verificar si esto ha funcionado intentando listar las tareas de la víctima: `schtasks /S <nombre de host>` o puedes usar los servicios **HOST y** **RPCSS** para ejecutar consultas **WMI** en una computadora, pruébalo haciendo: `Get-WmiObject -Class win32_operatingsystem -ComputerName <nombre de host>`
 
 ### Mitigación
 
@@ -158,7 +158,7 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 [dcsync.md](dcsync.md)
 {% endcontent-ref %}
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 

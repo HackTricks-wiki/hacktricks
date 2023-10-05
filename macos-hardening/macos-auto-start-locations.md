@@ -43,7 +43,7 @@ Aquí puedes encontrar ubicaciones de inicio útiles para **bypass de sandbox** 
 * **`~/Library/LaunchDemons`**
 * **Disparador**: Volver a iniciar sesión
 
-#### Descripción y Explotación
+#### Descripción y explotación
 
 **`launchd`** es el **primer** **proceso** ejecutado por el kernel de OX S al iniciar y el último en finalizar al apagar. Siempre debe tener el **PID 1**. Este proceso **lee y ejecuta** las configuraciones indicadas en los **plists** de **ASEP** en:
 
@@ -86,7 +86,7 @@ También es posible **descargar** con `launchctl unload <target.plist>` (el proc
 Para **asegurarse** de que no haya **nada** (como una anulación) **impidiendo** que un **Agente** o **Demonio** se **ejecute**, ejecute: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
 {% endhint %}
 
-Enumera todos los agentes y demonios cargados por el usuario actual:
+Lista todos los agentes y demonios cargados por el usuario actual:
 ```bash
 launchctl list
 ```
@@ -143,7 +143,7 @@ Configurar la explotación indicada y cerrar sesión e iniciar sesión o incluso
 
 #### Descripción y explotación
 
-Todas las aplicaciones que se reabrirán están dentro del archivo plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
+Todas las aplicaciones que se reabrirán se encuentran dentro del archivo plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
 
 Para hacer que las aplicaciones reabiertas ejecuten tu propia aplicación, solo necesitas **agregar tu aplicación a la lista**.
 
@@ -292,8 +292,8 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevi
 * `/System/Library/QuickLook`
 * `/Library/QuickLook`
 * `~/Library/QuickLook`
-* `/Applications/NombreDeLaAplicaciónAqui/Contents/Library/QuickLook/`
-* `~/Applications/NombreDeLaAplicaciónAqui/Contents/Library/QuickLook/`
+* `/Applications/AppNameHere/Contents/Library/QuickLook/`
+* `~/Applications/AppNameHere/Contents/Library/QuickLook/`
 
 #### Descripción y explotación
 
@@ -419,7 +419,7 @@ Las preferencias de iTerm2 se encuentran en **`~/Library/Preferences/com.googlec
 
 Esta configuración se puede ajustar en la configuración de iTerm2:
 
-<figure><img src="../.gitbook/assets/image.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Y el comando se refleja en las preferencias:
 ```bash
@@ -475,7 +475,7 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0007/](https://theevi
 
 #### Descripción
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) es una herramienta de automatización que permite la **programación de macOS a través del lenguaje de programación LUA**. Incluso podemos incrustar código completo de AppleScript y ejecutar scripts de shell.
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) es una herramienta de automatización que permite la escritura de scripts en macOS a través del lenguaje de programación LUA. Incluso podemos incrustar código completo de AppleScript y ejecutar scripts de shell.
 
 La aplicación busca un único archivo, `~/.hammerspoon/init.lua`, y cuando se inicia, se ejecutará el script.
 ```bash
@@ -488,15 +488,15 @@ EOF
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
 
 * Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-* Pero se necesita tener habilitado y usar SSH
+* Pero se necesita tener habilitado y usar ssh
 
 #### Ubicación
 
 * **`~/.ssh/rc`**
-* **Disparador**: Inicio de sesión a través de SSH
+* **Disparador**: Inicio de sesión a través de ssh
 * **`/etc/ssh/sshrc`**
 * Se requieren privilegios de root
-* **Disparador**: Inicio de sesión a través de SSH
+* **Disparador**: Inicio de sesión a través de ssh
 
 #### Descripción y Explotación
 
@@ -575,7 +575,7 @@ Esto creará un archivo en 1 hora:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-Comprueba la cola de trabajos utilizando `atq:`
+Verifique la cola de trabajos usando `atq:`
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
@@ -718,7 +718,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
 Luego, abre la aplicación `Folder Actions Setup`, selecciona la **carpeta que deseas vigilar** y selecciona en tu caso **`folder.scpt`** (en mi caso lo llamé output2.scp):
 
-<figure><img src="../.gitbook/assets/image (2).png" alt="" width="297"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1).png" alt="" width="297"><figcaption></figcaption></figure>
 
 Ahora, si abres esa carpeta con **Finder**, tu script se ejecutará.
 
@@ -767,9 +767,9 @@ Informe: [https://theevilbit.github.io/beyond/beyond\_0027/](https://theevilbit.
 #### Ubicación
 
 * `~/Library/Preferences/com.apple.dock.plist`
-* **Disparador**: Cuando el usuario hace clic en la aplicación dentro del Dock
+* **Disparador**: Cuando el usuario hace clic en la aplicación dentro del dock
 
-#### Descripción y Explotación
+#### Descripción y explotación
 
 Todas las aplicaciones que aparecen en el Dock se especifican dentro del plist: **`~/Library/Preferences/com.apple.dock.plist`**
 
@@ -912,7 +912,7 @@ Descripción: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](http
 * `~/Library/Screen Savers`
 * **Disparador**: Seleccionar el protector de pantalla
 
-<figure><img src="../.gitbook/assets/image (1).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Descripción y Exploit
 
@@ -1328,7 +1328,7 @@ Después de colocar un nuevo directorio en una de estas dos ubicaciones, se debe
 </dict>
 </plist>
 ```
-{% tab title="superservicename" %}
+{% tab title="superservicename" %}Nombre del servicio súper
 ```bash
 #!/bin/sh
 . /etc/rc.common
