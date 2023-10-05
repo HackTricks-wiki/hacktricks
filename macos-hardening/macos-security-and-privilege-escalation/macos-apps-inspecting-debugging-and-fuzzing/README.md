@@ -50,6 +50,9 @@ jtool2 -D /bin/ls # Decompile binary
 
 # Get signature information
 ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
+
+# Get MIG information
+jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
 
 ### Codesign
