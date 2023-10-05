@@ -12,9 +12,9 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-もしあなたが**ハッキングのキャリア**に興味があり、**解読不能なものを解読する**ことに興味があるなら、**採用しています！**（流暢なポーランド語の読み書きが必要です）。
+もし、**ハッキングのキャリア**に興味があり、**解読不能なものを解読する**ことに興味がある場合は、**採用中です**（流暢なポーランド語の読み書きが必要です）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -160,10 +160,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-サブキーのStartupが指す場所に作成されたショートカットは、ログオン/再起動時にサービスを起動します。スタートアップの場所は、ローカルマシンと現在のユーザーの両方で指定されます。
+サブキーのスタートアップが指す場所に作成されたショートカットは、ログオン/再起動時にサービスを起動します。スタートアップの場所は、ローカルマシンと現在のユーザーの両方で指定されます。
 
 {% hint style="info" %}
-もし\[User] Shell Folderのいずれかを**HKLM**で上書きできれば、それを自分が制御するフォルダに指定し、バックドアを配置することができます。これにより、ユーザーがシステムにログインするたびに特権が昇格されるバックドアが実行されます。
+\[User] Shell Folderのいずれかを**HKLM**の下で上書きできる場合、それを自分が制御するフォルダに指定し、バックドアを配置することができます。これにより、ユーザーがシステムにログインするたびに特権が昇格します。
 {% endhint %}
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -228,7 +228,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 {% endhint %}
 
 {% hint style="info" %}
-**Exploit 3 (PATHの書き込み権限とboot.iniの書き込み権限)**: boot.iniを書き込むことができれば、次回の再起動時に自動的にセーフモードで起動することができます。
+**Exploit 3 (PATHの書き込み権限とboot.iniの書き込み権限)**: boot.iniを書き込むことができれば、次回の再起動時にセーフモードでの自動起動を行うことができます。
 {% endhint %}
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
@@ -273,14 +273,14 @@ BHOは、Windows 10のInternet Explorer 11までサポートされています�
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-注意：レジストリには、各DLLごとに1つの新しいレジストリが含まれており、それは**CLSID**によって表されます。CLSIDの情報は、`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
+注意してください。レジストリには、各dllごとに1つの新しいレジストリが含まれ、それは**CLSID**によって表されます。CLSIDの情報は`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
 
-### Internet Explorerの拡張機能
+### インターネットエクスプローラーの拡張機能
 
 * `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 * `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-注意：レジストリには、各DLLごとに1つの新しいレジストリが含まれており、それは**CLSID**によって表されます。CLSIDの情報は、`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
+注意してください。レジストリには、各dllごとに1つの新しいレジストリが含まれ、それは**CLSID**によって表されます。CLSIDの情報は`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
 
 ### フォントドライバ
 
@@ -304,25 +304,17 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\she
 ```
 ### Image File Execution Options
 
-Image File Execution Options（IFEO）は、Windowsオペレーティングシステムで実行されるプロセスの動作をカスタマイズするための機能です。IFEOは、デバッグ用途で開発者が使用することを意図していますが、悪意のある目的で利用されることもあります。
+Image File Execution Options（IFEO）は、Windowsオペレーティングシステムで実行されるプロセスの動作をカスタマイズするための機能です。IFEOを使用すると、特定の実行可能ファイルが起動される際に、追加のデバッグ機能やモニタリング機能を有効にすることができます。
 
-IFEOを悪用すると、特権昇格攻撃を実行することができます。攻撃者は、IFEOを使用してシステム上で実行されるプロセスを置き換えることができます。これにより、攻撃者は特権レベルのプロセスを実行し、システムに対する完全な制御を取得することができます。
+IFEOは、特定の実行可能ファイルに対してデバッガを自動的に起動することができるため、特権昇格攻撃に悪用されることがあります。攻撃者は、IFEOを使用してシステム上の実行可能ファイルを指定し、そのファイルが起動されるたびに任意のコードを実行することができます。
 
-IFEOを使用した特権昇格攻撃は、次の手順で実行されます。
+IFEOを悪用する攻撃手法の一つは、`Debugger`というレジストリキーを使用する方法です。このキーには、デバッガとして実行されるプログラムのパスが指定されます。攻撃者は、IFEOを悪用するためにこのキーを作成し、任意のプログラムを指定することができます。
 
-1. 攻撃者は、IFEOに登録されているプロセスを特定します。
-2. 攻撃者は、IFEOに登録されているプロセスの実行ファイルを悪意のあるバイナリに置き換えます。
-3. システムがIFEOに登録されたプロセスを実行すると、攻撃者の悪意のあるバイナリが実行されます。
-4. 攻撃者の悪意のあるバイナリは、特権レベルで実行されるため、攻撃者はシステムに対する完全な制御を取得することができます。
+IFEOを悪用する攻撃手法のもう一つの例は、`GlobalFlag`というレジストリキーを使用する方法です。このキーには、デバッグフラグが指定されます。攻撃者は、IFEOを悪用するためにこのキーを作成し、任意のフラグを指定することができます。
 
-IFEOを悪用した攻撃を防ぐためには、次の対策を実施することが重要です。
+IFEOを悪用されると、攻撃者はシステム上で特権昇格を行うことができます。したがって、システムのセキュリティを向上させるためには、IFEOの悪用を防ぐための対策が必要です。これには、不要なIFEOエントリの削除、IFEOの変更を監視するセキュリティツールの導入、適切なアクセス制御の実施などが含まれます。
 
-- IFEOに登録されているプロセスを監視し、不正な変更がないか定期的に確認する。
-- IFEOに登録されているプロセスの実行ファイルのパスを制限する。
-- IFEOに登録されているプロセスの実行権限を制限する。
-- セキュリティソフトウェアを使用して、IFEOの変更を検知する。
-
-IFEOは、デバッグや開発の目的で有用な機能ですが、悪意のある攻撃に悪用される可能性もあるため、適切なセキュリティ対策を実施することが重要です。
+IFEOの悪用は、特権昇格攻撃の一形態であり、システムのセキュリティに重大な脅威をもたらす可能性があります。したがって、システム管理者はIFEOの悪用に対する注意を払い、適切な対策を講じる必要があります。
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
@@ -343,9 +335,9 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-もし興味があるなら、**ハッキングのキャリア**に興味があり、**解読不可能なものをハック**したい場合は、**採用中です**（流暢なポーランド語の読み書きが必要です）。
+もし興味があるなら、**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したい場合は、**採用中です**（流暢なポーランド語の読み書きが必要です）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 

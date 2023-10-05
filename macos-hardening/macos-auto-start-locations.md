@@ -7,8 +7,8 @@
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
@@ -45,12 +45,12 @@
 
 #### 説明と攻撃手法
 
-**`launchd`**は、OX Sカーネルによって起動時に実行される**最初のプロセス**であり、シャットダウン時に終了する最後のプロセスです。常に**PID 1**を持つべきです。このプロセスは、以下の場所にある**ASEP** **plists**で指定された設定を**読み取り、実行**します。
+**`launchd`**は、OX Sカーネルによって起動時に実行される**最初のプロセス**であり、シャットダウン時に終了する最後のプロセスです。常に**PID 1**を持つべきです。このプロセスは、次の場所にある**ASEP** **plists**で指定された設定を**読み取り**、**実行**します。
 
-* `/Library/LaunchAgents`: 管理者によってインストールされたユーザーごとのエージェント
-* `/Library/LaunchDaemons`: 管理者によってインストールされたシステム全体のデーモン
-* `/System/Library/LaunchAgents`: Appleが提供するユーザーごとのエージェント。
-* `/System/Library/LaunchDaemons`: Appleが提供するシステム全体のデーモン。
+* `/Library/LaunchAgents`：管理者によってインストールされたユーザーごとのエージェント
+* `/Library/LaunchDaemons`：管理者によってインストールされたシステム全体のデーモン
+* `/System/Library/LaunchAgents`：Appleが提供するユーザーごとのエージェント。
+* `/System/Library/LaunchDaemons`：Appleが提供するシステム全体のデーモン。
 
 ユーザーがログインすると、`/Users/$USER/Library/LaunchAgents`と`/Users/$USER/Library/LaunchDemons`にあるplistsが**ログインしたユーザーの権限**で開始されます。
 
@@ -83,10 +83,10 @@
 新しいデーモンまたはエージェントの設定ファイルは、**次回の再起動後または** `launchctl load <target.plist>`を使用して**ロードされます**。また、拡張子なしの.plistファイルを`launchctl -F <file>`でロードすることも可能です（ただし、これらのplistファイルは自動的に再起動後にロードされません）。
 `launchctl unload <target.plist>`を使用して**アンロード**することも可能です（それによって指定されたプロセスは終了します）。
 
-エージェントまたはデーモンが**実行されるのを妨げる**（オーバーライドなど）**何もないことを確認する**には、次のコマンドを実行します：`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`を実行して、**エージェント**または**デーモン**が**実行されるのを妨げる**（オーバーライドなど）**何もないことを確認**してください。
 {% endhint %}
 
-現在のユーザーによってロードされているすべてのエージェントとデーモンをリストアップします：
+現在のユーザーによってロードされたすべてのエージェントとデーモンをリストアップします：
 ```bash
 launchctl list
 ```
@@ -224,7 +224,7 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 
 #### 説明と攻撃手法
 
-[**`.terminal`** スクリプト](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx)を作成して開くと、**ターミナルアプリケーション**が自動的に起動し、そこに指定されたコマンドが実行されます。ターミナルアプリに特別な権限（TCCなど）がある場合、コマンドはその特別な権限で実行されます。
+[**`.terminal`** スクリプト](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx)を作成して開くと、**ターミナルアプリケーション**が自動的に起動し、そこで指定されたコマンドが実行されます。ターミナルアプリに特別な権限（TCCなど）がある場合、コマンドはその特別な権限で実行されます。
 
 以下を試してみてください:
 ```bash
@@ -299,12 +299,12 @@ open /tmp/test.terminal
 
 QuickLookプラグインは、ファイルのプレビューを**トリガー**（Finderでファイルを選択した状態でスペースバーを押す）すると実行され、そのファイルタイプをサポートする**プラグイン**がインストールされている場合に実行されます。
 
-独自のQuickLookプラグインをコンパイルし、前述のいずれかの場所に配置してロードし、サポートされているファイルに移動してスペースを押すことでトリガーすることが可能です。
+独自のQuickLookプラグインをコンパイルし、前述のいずれかの場所に配置し、サポートされているファイルに移動してスペースを押すことでトリガーすることが可能です。
 
 ### ~~ログイン/ログアウトフック~~
 
 {% hint style="danger" %}
-私にはうまくいきませんでした。ユーザーログインフックもルートログアウトフックもうまく動作しませんでした。
+私にはうまくいきませんでした。ユーザーログインフックもルートログアウトフックも機能しませんでした。
 {% endhint %}
 
 **解説**: [https://theevilbit.github.io/beyond/beyond\_0022/](https://theevilbit.github.io/beyond/beyond\_0022/)
@@ -345,35 +345,35 @@ defaults delete com.apple.loginwindow LogoutHook
 ```
 ルートユーザーのスタート位置は**`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**に保存されています。
 
-## 条件付きサンドボックスバイパス
+## 条件付きサンドボックス回避
 
 {% hint style="success" %}
-ここでは、**サンドボックスバイパス**に役立つスタート位置を見つけることができます。これにより、単純に**ファイルに書き込んで実行する**ことができます。特定の**インストールされたプログラム、"一般的でない"ユーザー**のアクションや環境など、**一般的でない条件**を期待します。
+ここでは、**サンドボックス回避**に役立つスタート位置を見つけることができます。これにより、単純に**ファイルに書き込んで実行する**ことができます。特定の**インストールされたプログラム、"一般的でない"ユーザー**のアクションや環境など、**一般的でない条件**を期待する必要があります。
 {% endhint %}
 
 ### Cron
 
 **解説**: [https://theevilbit.github.io/beyond/beyond\_0004/](https://theevilbit.github.io/beyond/beyond\_0004/)
 
-* サンドボックスバイパスに役立つ: [✅](https://emojipedia.org/check-mark-button)
+* サンドボックス回避に役立つ: [✅](https://emojipedia.org/check-mark-button)
 * ただし、`crontab`バイナリを実行できる必要があります
 * または、ルートユーザーである必要があります
 
 #### 位置
 
 * **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
-* 直接書き込みアクセスにはルートが必要です。`crontab <file>`を実行できる場合はルートは不要です。
+* 直接書き込みアクセスにはルート権限が必要です。`crontab <file>`を実行できる場合はルート権限は必要ありません。
 * **トリガー**: cronジョブに依存します。
 
 #### 説明と攻撃手法
 
-現在のユーザーのcronジョブをリストアップするには、以下を実行します：
+現在のユーザーのcronジョブをリストアップするには、以下のコマンドを使用します：
 ```bash
 crontab -l
 ```
 ユーザーのすべてのcronジョブは、**`/usr/lib/cron/tabs/`**と**`/var/at/tabs/`**（root権限が必要）にあります。
 
-MacOSでは、**特定の頻度**でスクリプトを実行するいくつかのフォルダが次の場所にあります：
+MacOSでは、**特定の頻度**でスクリプトを実行するいくつかのフォルダが見つかります。
 ```bash
 # The one with the cron jobs is /usr/lib/cron/tabs/
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
@@ -387,7 +387,7 @@ crontab /tmp/cron
 ```
 ### iTerm2
 
-解説: [https://theevilbit.github.io/beyond/beyond\_0002/](https://theevilbit.github.io/beyond/beyond\_0002/)
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0002/](https://theevilbit.github.io/beyond/beyond\_0002/)
 
 * サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
 
@@ -415,11 +415,11 @@ chmod +x "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh"
 ```bash
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
-**`~/Library/Preferences/com.googlecode.iterm2.plist`**にあるiTerm2の設定は、iTerm2ターミナルが開かれたときに実行するコマンドを示すことができます。
+**`~/Library/Preferences/com.googlecode.iterm2.plist`**にあるiTerm2の設定ファイルは、iTerm2ターミナルが開かれたときに実行するコマンドを示すことができます。
 
 この設定はiTerm2の設定で構成することができます：
 
-<figure><img src="../.gitbook/assets/image.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2).png" alt="" width="563"><figcaption></figcaption></figure>
 
 そして、コマンドは設定に反映されます：
 ```bash
@@ -479,7 +479,7 @@ iTerm2の設定を悪用する他の方法がある可能性が非常に高い�
 
 [**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon)は、**LUAスクリプト言語を通じてmacOSのスクリプト化を可能にする自動化ツール**です。AppleScriptのコードを埋め込むこともでき、シェルスクリプトを実行することもできます。
 
-このアプリは、単一のファイル`~/.hammerspoon/init.lua`を探し、起動時にスクリプトが実行されます。
+このアプリは、単一のファイルである`~/.hammerspoon/init.lua`を探し、起動時にスクリプトが実行されます。
 ```bash
 cat > "$HOME/.hammerspoon/init.lua" << EOF
 hs.execute("id > /tmp/hs.txt")
@@ -487,10 +487,10 @@ EOF
 ```
 ### SSHRC
 
-解説: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
 
 * サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
-* ただし、sshが有効化されて使用される必要があります
+* ただし、sshが有効になっていて使用されている必要があります
 
 #### 場所
 
@@ -502,7 +502,7 @@ EOF
 
 #### 説明と攻撃手法
 
-デフォルトでは、`/etc/ssh/sshd_config`の`PermitUserRC no`が設定されていない限り、ユーザーが**SSH経由でログイン**すると、スクリプト**`/etc/ssh/sshrc`**と**`~/.ssh/rc`**が実行されます。
+デフォルトでは、`/etc/ssh/sshd_config`の`PermitUserRC no`がない限り、ユーザーが**SSH経由でログイン**すると、スクリプト**`/etc/ssh/sshrc`**と**`~/.ssh/rc`**が実行されます。
 
 #### 説明
 
@@ -554,7 +554,7 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 
 **ZIP**ファイルを**ログインアイテム**として保存すると、**`Archive Utility`**がそれを開きます。たとえば、ZIPが**`~/Library`**に保存され、フォルダ**`LaunchAgents/file.plist`**がバックドアを含んでいる場合、そのフォルダが作成され（デフォルトでは作成されません）、plistが追加されます。したがって、次回ユーザーが再ログインすると、plistで指定された**バックドアが実行されます**。
 
-別のオプションとして、ユーザーのホームディレクトリに**`.bash_profile`**と**`.zshenv`**ファイルを作成することもできます。したがって、LaunchAgentsフォルダが既に存在する場合でも、このテクニックは機能します。
+別のオプションとして、ユーザーのホームディレクトリに**`.bash_profile`**と**`.zshenv`**というファイルを作成することもできます。したがって、LaunchAgentsフォルダが既に存在する場合でも、このテクニックは機能します。
 
 ### At
 
@@ -567,7 +567,7 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 #### **説明**
 
 「atタスク」は、**特定の時間にタスクをスケジュールする**ために使用されます。\
-これらのタスクはcronと異なり、**一度だけ実行された後に削除**される**一時的なタスク**です。ただし、システムの再起動後も残るため、潜在的な脅威として排除することはできません。
+これらのタスクはcronと異なり、**一度だけ実行された後に削除**される**一回限りのタスク**です。ただし、システムの再起動後も残るため、潜在的な脅威として排除することはできません。
 
 **デフォルトでは**無効ですが、**root**ユーザーは次のコマンドで**有効化**できます:
 ```bash
@@ -653,11 +653,11 @@ total 32
 
 #### 説明と攻撃手法
 
-フォルダーアクションスクリプトは、アタッチされているフォルダにアイテムが追加または削除された場合、またはウィンドウが開かれたり閉じられたり移動したりサイズが変更されたりすると実行されます。
+フォルダーアクションスクリプトは、アタッチされているフォルダにアイテムが追加または削除された場合、またはウィンドウが開かれたり閉じられたり、移動したりサイズが変更されたりすると実行されます。
 
 * Finder UIを介してフォルダを開く
-* フォルダにファイルを追加する（ドラッグ＆ドロップまたはターミナルからのシェルプロンプトでも可能）
-* フォルダからファイルを削除する（ドラッグ＆ドロップまたはターミナルからのシェルプロンプトでも可能）
+* フォルダにファイルを追加する（ドラッグ＆ドロップやターミナルからのシェルプロンプトでも可能）
+* フォルダからファイルを削除する（ドラッグ＆ドロップやターミナルからのシェルプロンプトでも可能）
 * UIを介してフォルダから移動する
 
 これを実装する方法はいくつかあります。
@@ -668,7 +668,7 @@ total 32
 
 * これは、OSAScriptを使用してApple Eventメッセージを`System Events.app`に送信して永続性を実装する方法です。
 
-実行されるスクリプトは次のとおりです：
+以下は実行されるスクリプトです：
 
 {% code title="source.js" %}
 ```applescript
@@ -731,22 +731,22 @@ app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
 {% endcode %}
 
-次のコマンドでコンパイルします: `osacompile -l JavaScript -o folder.scpt source.js`
+次のコマンドでコンパイルします：`osacompile -l JavaScript -o folder.scpt source.js`
 
-次の場所に移動します:
+次の場所に移動します：
 ```bash
 mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
 次に、「Folder Actions Setup」アプリを開き、**監視したいフォルダ**を選択し、この場合は**`folder.scpt`**（私の場合はoutput2.scpと呼びました）を選択します。
 
-<figure><img src="../.gitbook/assets/image (2).png" alt="" width="297"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1).png" alt="" width="297"><figcaption></figcaption></figure>
 
 これで、**Finder**でそのフォルダを開くと、スクリプトが実行されます。
 
-この設定は、**base64形式で保存された**plistファイルに保存されています。場所は**`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`**です。
+この設定は、**base64形式で保存された**`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`に保存されています。
 
-次に、GUIアクセスなしでこの永続化を準備してみましょう。
+次に、GUIアクセスなしでこの永続性を準備してみましょう：
 
 1. **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`**をバックアップするために`/tmp`にコピーします：
 * `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
@@ -760,7 +760,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 4. この設定を適用するために、Folder Actions Setup.appを開きます：`open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
 
 {% hint style="danger" %}
-私の場合はうまくいきませんでしたが、これがwriteupの指示です:(
+私の場合はうまくいきませんでしたが、これが手順です :(
 {% endhint %}
 
 ### Spotlight Importers
@@ -793,9 +793,9 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0027/](https://theevilbit.
 
 #### 説明と攻撃手法
 
-ドックに表示されるすべてのアプリケーションは、plistファイル**`~/Library/Preferences/com.apple.dock.plist`**で指定されています。
+ドックに表示されるすべてのアプリケーションは、plist内で指定されています：**`~/Library/Preferences/com.apple.dock.plist`**
 
-次のコードで、**アプリケーションを追加**することができます：
+次のように、**アプリケーションを追加**することができます：
 
 {% code overflow="wrap" %}
 ```bash
@@ -908,9 +908,9 @@ killall Dock
 
 #### 説明とエクスプロイト
 
-Finder Sync拡張機能を持つアプリケーションの例は[**こちらで見つけることができます**](https://github.com/D00MFist/InSync)。
+Finder Sync拡張機能を持つアプリケーションの例は[こちらで見つけることができます](https://github.com/D00MFist/InSync)。
 
-アプリケーションは`Finder Sync Extensions`を持つことができます。この拡張機能は実行されるアプリケーションの内部に配置されます。さらに、拡張機能が自身のコードを実行できるようにするためには、**有効なApple開発者証明書で署名**されている必要があり、**サンドボックス化**されている必要があります（ただし、緩和された例外が追加される場合もあります）。また、次のようなものに登録されている必要があります:
+アプリケーションは`Finder Sync Extensions`を持つことができます。この拡張機能は実行されるアプリケーションの内部に配置されます。さらに、拡張機能が自身のコードを実行できるようにするためには、**有効なAppleデベロッパー証明書で署名**されている必要があり、**サンドボックス化**されている必要があります（ただし、緩和された例外が追加される場合もあります）。また、次のようなものに登録されている必要があります:
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
 pluginkit -e use -i com.example.InSync.InSync
@@ -934,13 +934,13 @@ pluginkit -e use -i com.example.InSync.InSync
 * `~/Library/Screen Savers`
 * **トリガー**: スクリーンセーバーを選択する
 
-<figure><img src="../.gitbook/assets/image (1).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### 説明とエクスプロイト
 
 Xcodeで新しいプロジェクトを作成し、新しい**スクリーンセーバー**を生成するためのテンプレートを選択します。次に、ログを生成するための以下のコードなどを追加します。
 
-**ビルド**し、`.saver`バンドルを**`~/Library/Screen Savers`**にコピーします。その後、スクリーンセーバーGUIを開き、それをクリックするだけで、多くのログが生成されるはずです:
+**ビルド**し、`.saver`バンドルを**`~/Library/Screen Savers`**にコピーします。その後、スクリーンセーバーGUIを開き、クリックするだけで多くのログが生成されるはずです:
 
 {% code overflow="wrap" %}
 ```bash
@@ -954,7 +954,7 @@ Timestamp                       (process)[PID]
 {% endcode %}
 
 {% hint style="danger" %}
-このコードを読み込むバイナリ(`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`)の権限情報には、**`com.apple.security.app-sandbox`**が含まれているため、**一般的なアプリケーションのサンドボックス内**にいることに注意してください。
+このコードを読み込むバイナリ (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) のエンタイトルメント内には **`com.apple.security.app-sandbox`** が含まれているため、**一般的なアプリケーションサンドボックス内にいる**ことに注意してください。
 {% endhint %}
 
 セーバーコード：
@@ -1048,7 +1048,7 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 スポットライトは、macOSの組み込みの検索機能であり、ユーザーがコンピュータ上のデータに迅速かつ包括的にアクセスできるように設計されています。\
 この迅速な検索機能を実現するために、スポットライトは**専用のデータベース**を維持し、ほとんどのファイルを**解析してインデックスを作成**し、ファイル名とその内容の両方を素早く検索することができます。
 
-スポットライトの基本的なメカニズムは、'mds'という中央プロセスによって実現されており、これは**'メタデータサーバ'**の略です。このプロセスはスポットライトサービス全体を統括しています。これに加えて、複数の'mdworker'デーモンがあり、さまざまなメンテナンスタスクを実行します（`ps -ef | grep mdworker`で確認できます）。これらのタスクは、スポットライトのインポータープラグインまたは**".mdimporterバンドル"**によって可能になり、さまざまなファイル形式のコンテンツを理解してインデックス化することができます。
+スポットライトの基本的なメカニズムは、'mds'という中央プロセスによって実現されており、これは**'メタデータサーバ'**を表しています。このプロセスはスポットライトサービス全体を統括しています。これに加えて、複数の'mdworker'デーモンがあり、さまざまなメンテナンスタスクを実行します（`ps -ef | grep mdworker`で確認できます）。これらのタスクは、スポットライトのインポータープラグインまたは**".mdimporterバンドル"**によって可能にされ、スポットライトがさまざまなファイル形式のコンテンツを理解してインデックス化することができます。
 
 プラグインまたは**`.mdimporter`**バンドルは、前述の場所に配置されており、新しいバンドルが現れるとすぐにロードされます（サービスの再起動は不要です）。これらのバンドルは、管理できる**ファイルタイプと拡張子**を示さなければなりません。このようにして、スポットライトは、指定された拡張子を持つ新しいファイルが作成されたときにこれらのバンドルを使用します。
 
@@ -1104,9 +1104,9 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 {% endhint %}
 
 独自のインポータを作成するには、このプロジェクトを使用して開始できます：[https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) そして、名前を変更し、**`CFBundleDocumentTypes`**を変更し、**`UTImportedTypeDeclarations`**を追加して、サポートする拡張子をサポートし、**`schema.xml`**でそれらを反映させます。\
-次に、関数**`GetMetadataForFile`**のコードを**変更**して、処理された拡張子を持つファイルが作成されたときにペイロードを実行します。
+次に、関数**`GetMetadataForFile`**のコードを変更して、処理された拡張子を持つファイルが作成されたときにペイロードを実行します。
 
-最後に、新しい`.mdimporter`を**ビルドしてコピー**して、3つの前述の場所のいずれかに配置し、**ログを監視**するか、**`mdimport -L.`**をチェックすることで、ロードされたかどうかを確認できます。
+最後に、新しい`.mdimporter`をいずれかの場所に**ビルドしてコピー**し、**ログを監視**するか、**`mdimport -L.`**をチェックしてロードされているかどうかを確認できます。
 
 ### ~~Preference Pane~~
 
@@ -1132,7 +1132,7 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 ## Root Sandbox Bypass
 
 {% hint style="success" %}
-ここでは、**サンドボックスをバイパス**するために役立つスタート位置を見つけることができます。これにより、**ルート**で何かを**ファイルに書き込むだけで**実行したり、他の**奇妙な条件**を必要としたりすることができます。
+ここでは、**サンドボックスをバイパス**するために役立つスタート位置を見つけることができます。単に**ファイルに書き込むことで**何かを実行することができます。これには**root**であることや他の**奇妙な条件**が必要です。
 {% endhint %}
 
 ### Periodic
@@ -1140,20 +1140,20 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 解説：[https://theevilbit.github.io/beyond/beyond\_0019/](https://theevilbit.github.io/beyond/beyond\_0019/)
 
 * サンドボックスをバイパスするのに便利：[🟠](https://emojipedia.org/large-orange-circle)
-* ただし、ルートである必要があります
+* ただし、rootである必要があります
 
 #### 場所
 
 * `/etc/periodic/daily`、`/etc/periodic/weekly`、`/etc/periodic/monthly`、`/usr/local/etc/periodic`
-* ルートが必要です
+* rootが必要です
 * **トリガー**：時間が来たとき
 * `/etc/daily.local`、`/etc/weekly.local`、または`/etc/monthly.local`
-* ルートが必要です
+* rootが必要です
 * **トリガー**：時間が来たとき
 
 #### 説明と攻撃手法
 
-定期的なスクリプト（**`/etc/periodic`**）は、`/System/Library/LaunchDaemons/com.apple.periodic*`に設定された**ランチデーモン**のために実行されます。`/etc/periodic/`に保存されたスクリプトは、ファイルの所有者として**実行**されるため、潜在的な特権エスカレーションには機能しません。
+定期的なスクリプト（**`/etc/periodic`**）は、`/System/Library/LaunchDaemons/com.apple.periodic*`に設定された**ランチデーモン**のために実行されます。`/etc/periodic/`に保存されたスクリプトは、**ファイルの所有者として実行**されるため、潜在的な特権エスカレーションには機能しません。
 
 {% code overflow="wrap" %}
 ```bash
@@ -1195,12 +1195,10 @@ daily_local="/etc/daily.local"				# Local scripts
 weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
-もし、`/etc/daily.local`、`/etc/weekly.local`、または`/etc/monthly.local`のいずれかのファイルを書き込むことができれば、**遅かれ早かれ実行**されます。
-
 ### PAM
 
-解説: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
-解説: [https://theevilbit.github.io/beyond/beyond\_0005/](https://theevilbit.github.io/beyond/beyond\_0005/)
+Writeup: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0005/](https://theevilbit.github.io/beyond/beyond\_0005/)
 
 * サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
 * ただし、root権限が必要です
@@ -1211,15 +1209,15 @@ monthly_local="/etc/monthly.local"			# Local scripts
 
 #### 説明と攻撃手法
 
-PAMはmacOS内での簡単な実行よりも**持続性**とマルウェアに焦点を当てているため、このブログでは詳細な説明は行いません。このテクニックをよりよく理解するためには、解説を読んでください。
+PAMはmacOS内での簡単な実行よりも**持続性**とマルウェアに焦点を当てているため、このブログでは詳細な説明は行いません。このテクニックをよりよく理解するためには、上記の解説を読んでください。
 
-### 認証プラグイン
+### Authorization Plugins
 
-解説: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)\
-解説: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)\
+Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
 
 * サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
-* ただし、root権限が必要で追加の設定が必要です
+* ただし、root権限が必要で、追加の設定が必要です
 
 #### 場所
 
@@ -1229,14 +1227,14 @@ PAMはmacOS内での簡単な実行よりも**持続性**とマルウェアに�
 
 #### 説明と攻撃手法
 
-ユーザーがログインする際に実行される認証プラグインを作成して持続性を維持することができます。これらのプラグインの作成方法の詳細については、以前の解説を参照してください（注意が必要です。不適切に作成されたプラグインはロックアウトされ、回復モードからMacをクリーンアップする必要があります）。
+ユーザーがログインする際に実行される認証プラグインを作成して、持続性を維持することができます。これらのプラグインの作成方法についての詳細は、以前の解説を参照してください（注意：不適切に作成されたプラグインはロックアウトの原因となり、リカバリーモードからMacをクリーンアップする必要があります）。
 
 ### Man.conf
 
-解説: [https://theevilbit.github.io/beyond/beyond\_0030/](https://theevilbit.github.io/beyond/beyond\_0030/)
+Writeup: [https://theevilbit.github.io/beyond/beyond\_0030/](https://theevilbit.github.io/beyond/beyond\_0030/)
 
 * サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
-* ただし、root権限が必要でユーザーはmanを使用する必要があります
+* ただし、root権限が必要で、ユーザーはmanを使用する必要があります
 
 #### 場所
 
@@ -1246,9 +1244,9 @@ PAMはmacOS内での簡単な実行よりも**持続性**とマルウェアに�
 
 #### 説明と攻撃手法
 
-設定ファイル**`/private/etc/man.conf`**は、manドキュメントファイルを開く際に使用するバイナリ/スクリプトを示しています。したがって、実行可能ファイルのパスを変更することで、ユーザーがmanを使用してドキュメントを読むたびにバックドアが実行されます。
+設定ファイル**`/private/etc/man.conf`**は、manドキュメントファイルを開く際に使用するバイナリ/スクリプトを示しています。したがって、実行可能ファイルのパスを変更することで、ユーザーがmanを使用してドキュメントを読むたびにバックドアが実行されるようにすることができます。
 
-例えば、**`/private/etc/man.conf`**に以下を設定します:
+例えば、**`/private/etc/man.conf`**に設定を行います。
 ```
 MANPAGER /tmp/view
 ```
@@ -1305,8 +1303,8 @@ syslog(LOG_ERR, "[+] dylib constructor called from %s\n", argv[0]);
 
 解説: [https://theevilbit.github.io/beyond/beyond\_0031/](https://theevilbit.github.io/beyond/beyond\_0031/)
 
-* サンドボックスをバイパスするのに役立つ: [🟠](https://emojipedia.org/large-orange-circle)
-* ただし、ルート権限が必要で、auditdが実行されている必要があり、警告を引き起こす必要があります
+* サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
+* ただし、ルート権限が必要で、auditdが実行中で警告を引き起こす必要があります
 
 #### 場所
 
@@ -1375,14 +1373,14 @@ RunService "$1"
 ### emond
 
 {% hint style="danger" %}
-私のmacOSにはこのコンポーネントが見つかりませんので、詳細についてはwriteupを確認してください。
+私のmacOSにはこのコンポーネントが見つかりませんので、詳細はwriteupを確認してください。
 {% endhint %}
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0023/](https://theevilbit.github.io/beyond/beyond\_0023/)
 
 Appleは**emond**というログ記録メカニズムを導入しました。これは完全に開発されなかったようで、Appleは他のメカニズムのために開発を**放棄**した可能性がありますが、それは**利用可能**なままです。
 
-このあまり知られていないサービスは、Macの管理者にはあまり役に立たないかもしれませんが、脅威の存在する者にとっては、macOSの管理者がおそらく調べることを知らない**永続化メカニズム**として使用する非常に良い理由となるでしょう。 emondの悪用を検出することは難しくありません。なぜなら、サービスのSystem LaunchDaemonはスクリプトを実行する場所を1つだけ探し求めるからです。
+このあまり知られていないサービスは、Macの管理者にはあまり役に立たないかもしれませんが、脅威の存在する者にとっては、macOSの管理者がおそらく調べることを知らない**永続化メカニズム**として使用する非常に良い理由があります。 emondの悪用を検出することは難しくありません。なぜなら、サービスのSystem LaunchDaemonはスクリプトを実行する場所を1つだけ探すからです：
 ```bash
 ls -l /private/var/db/emondClients
 ```
@@ -1403,15 +1401,15 @@ XQuartzは**もはやmacOSにインストールされていない**ため、詳�
 ### ~~kext~~
 
 {% hint style="danger" %}
-ルートとしてさえkextをインストールするのは非常に複雑なので、サンドボックスからの脱出や持続性のためには考慮しないでください（エクスプロイトがある場合を除く）
+ルートとしてkextをインストールするのは非常に複雑なので、サンドボックスからの脱出や持続性のためには考慮しないでください（エクスプロイトがある場合を除く）
 {% endhint %}
 
 #### 場所
 
-KEXTをスタートアップアイテムとしてインストールするには、次のいずれかの場所に**インストールする必要があります**：
+KEXTを起動アイテムとしてインストールするには、次のいずれかの場所に**インストールする必要があります**：
 
 * `/System/Library/Extensions`
-* OS Xオペレーティングシステムに組み込まれたKEXTファイル。
+* OS Xオペレーティングシステムに組み込まれたKEXTファイル
 * `/Library/Extensions`
 * サードパーティのソフトウェアによってインストールされたKEXTファイル
 
