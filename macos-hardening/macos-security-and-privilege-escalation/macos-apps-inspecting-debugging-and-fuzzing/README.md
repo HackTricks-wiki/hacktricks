@@ -55,7 +55,11 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
 
-### Codesign
+### Codesign / ldid
+
+{% hint style="danger" %}
+**`Codesign`** can be found in **macOS** while **`ldid`** can be found in **iOS**
+{% endhint %}
 
 ```bash
 # Get signer
@@ -72,6 +76,16 @@ spctl --assess --verbose /Applications/Safari.app
 
 # Sign a binary
 codesign -s <cert-name-keychain> toolsdemo
+
+# Get signature info
+ldid -h <binary>
+
+# Get entitlements
+ldid -e <binary>
+
+# Change entilements
+## /tmp/entl.xml is a XML file with the new entitlements to add
+ldid -S/tmp/entl.xml <binary>
 ```
 
 ### SuspiciousPackage

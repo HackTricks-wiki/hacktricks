@@ -38,7 +38,11 @@ Permissions are **inherited from the parent** application and the **permissions*
 
 ### TCC Database
 
-The selections is then stored in the TCC system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** or in **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences. The databases are **protected from editing with SIP**(System Integrity Protection), but you can read them&#x20;
+The selections is then stored in the TCC system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** or in **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences. The databases are **protected from editing with SIP**(System Integrity Protection), but you can read them.
+
+{% hint style="danger" %}
+The TCC database in iOS is in **`/private/var/mobile/Library/TCC/TCC.db`**
+{% endhint %}
 
 Moreover, a process with **full disk access** can **edit the user-mode** database.
 
@@ -162,6 +166,10 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 ```
 
 This will avoid Calendar ask the user to access reminders, calendar and the address book.
+
+{% hint style="success" %}
+Apart from some official documentation about entitlements it's also possible to find unofficial **interesting information about entitlements in** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
+{% endhint %}
 
 ### Sensitive unprotected places
 

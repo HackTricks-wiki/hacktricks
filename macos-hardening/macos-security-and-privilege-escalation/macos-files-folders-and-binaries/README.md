@@ -88,20 +88,26 @@ On macOS (and iOS) all system shared libraries, like frameworks and dylibs, are 
 
 Similar to the dyld shared cache, the kernel and the kernel extensions are also compiled into a kernel cache, which is loaded at boot time.
 
-In order to extract the libraries from the single file dylib shared cache it was possible to use the binary  [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip) which might not be working nowadays:
+In order to extract the libraries from the single file dylib shared cache it was possible to use the binary  [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip) which might not be working nowadays but you can also use [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 
 {% code overflow="wrap" %}
 ```bash
+# dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
+
+# dyldextractor
+dyldex -l [dyld_shared_cache_path] # List libraries
+dyldex_all [dyld_shared_cache_path] # Extract all
+# More options inside the readme
 ```
 {% endcode %}
 
 In older versions you might be able to find the **shared cache** in **`/System/Library/dyld/`**.
 
+In iOS you can find them in **`/System/Library/Caches/com.apple.dyld/`**.
+
 {% hint style="success" %}
 Note that even if `dyld_shared_cache_util` tool doesn't work, you can pass the **shared dyld binary to Hopper** and Hopper will be able to identify all the libraries and let you **select which one** you want to investigate:
-
-
 {% endhint %}
 
 <figure><img src="../../../.gitbook/assets/image (680).png" alt="" width="563"><figcaption></figcaption></figure>
