@@ -34,7 +34,7 @@
 
 * [**OverSight**](https://objective-see.org/products/oversight.html): Objective-See application to detect **application that starts using webcam and mic.**
 
-## Process Injection detencion
+## Process Injection detection
 
 * [**Shield**](https://theevilbit.github.io/shield/): Applicaiton that **detects different process injection** techniques.
 
