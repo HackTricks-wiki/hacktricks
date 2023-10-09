@@ -14,7 +14,7 @@
 
 ## **x64の概要**
 
-x64、またはx86-64は、デスクトップやサーバーのコンピューティングで主に使用される64ビットのプロセッサアーキテクチャです。Intelによって生産されたx86アーキテクチャを起源とし、後にAMDがAMD64という名前で採用したもので、現在のパーソナルコンピュータやサーバーで広く使用されています。
+x64、またはx86-64は、デスクトップやサーバーのコンピューティングで主に使用される64ビットのプロセッサアーキテクチャです。Intelによって生産されたx86アーキテクチャを起源とし、後にAMDがAMD64という名前で採用しました。現在、個人コンピュータやサーバーで広く使用されているアーキテクチャです。
 
 ### **レジスタ**
 
@@ -26,8 +26,8 @@ x64はx86アーキテクチャを拡張し、`rax`、`rbx`、`rcx`、`rdx`、`rb
 4. **`rdx`** - 拡張算術演算など、さまざまな役割で使用されます。
 5. **`rbp`** - スタックフレームの**ベースポインタ**です。
 6. **`rsp`** - スタックの先頭を追跡する**スタックポインタ**です。
-7. **`rsi`** と **`rdi`** - 文字列/メモリ操作の**ソース**と**宛先**のインデックスに使用されます。
-8. **`r8`** から **`r15`** - x64で導入された追加の汎用レジスタ。
+7. **`rsi`**および**`rdi`** - 文字列/メモリ操作の**ソース**および**宛先**インデックスに使用されます。
+8. **`r8`**から**`r15`** - x64で導入された追加の汎用レジスタ。
 
 ### **呼び出し規約**
 
@@ -38,26 +38,27 @@ x64の呼び出し規約はオペレーティングシステムによって異�
 
 関数に6つ以上の入力がある場合、**残りはスタックに渡されます**。スタックポインタである**RSP**は、呼び出しの前に指すアドレスが16で割り切れる必要があるため、**16バイトアラインメント**する必要があります。つまり、通常、関数呼び出し前にRSPが適切にアラインされていることを確認する必要があります。ただし、実際のところ、この要件を満たさなくてもシステムコールは多くの場合動作します。
 
+### Swiftの呼び出し規約
+
+Swiftには独自の**呼び出し規約**があり、[**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)で見つけることができます。
+
 ### **一般的な命令**
 
-x64の命令は豊富なセットを持ち、以前のx86の命令との互換性を維持し、新しい命令も導入しています。
+x64の命令は豊富で、以前のx86の命令との互換性を保ちつつ、新しい命令も導入しています。
 
-* **`mov`**：**レジスタ**または**メモリの場所**から別の場所に値を**移動**します。
-* 例：`mov rax, rbx` — `rbx`から`rax`に値を移動します。
-* **`push`** と **`pop`**：スタックに値をプッシュまたはポップします。
+* **`mov`**：ある**レジスタ**または**メモリ位置**から別の場所に値を**移動**します。
+* 例：`mov rax, rbx` — `rbx`の値を`rax`に移動します。
+* **`push`**および**`pop`**：スタックに値をプッシュまたはポップします。
 * 例：`push rax` — `rax`の値をスタックにプッシュします。
 * 例：`pop rax` — スタックのトップの値を`rax`にポップします。
-* **`add`** と **`sub`**：**加算**と**減算**の演算です。
+* **`add`**および**`sub`**：**加算**および**減算**の演算です。
 * 例：`add rax, rcx` — `rax`と`rcx`の値を加算し、結果を`rax`に格納します。
-* **`mul`** と **`div`**：**乗算**と**除算**の演算です。注意：オペランドの使用に関して特定の動作があります。
-* **`call`** と **`ret`**：関数の**呼び出し**と**戻り**に使用されます。
-* **`int`**：ソフトウェアの**割り込み**をトリガーするために使用されます。例：32ビットx86 Linuxでは、システムコールには`int 0x80`が使用されました。
+* **`mul`**および**`div`**：**乗算**および**除算**の演算です。注意：これらはオペランドの使用に関して特定の動作をします。
+* **`call`**および**`ret`**：関数の**呼び出し**と**戻り**に使用されます。
+* **`int`**：ソフトウェアの**割り込み**をトリガーします。例：32ビットx86 Linuxでは、システムコールには`int 0x80`が使用されました。
 * **`cmp`**：2つの値を比較し、結果に基づいてCPUのフラグを設定します。
 * 例：`cmp rax, rdx` — `rax`と`rdx`を比較します。
-* **`je`**、**`jne`**、**`jl`**、**`jge`**など：前の`cmp`またはテストの結果に基づいて制御フローを変更する**条件付きジャンプ**命令です。
-* 例：`cmp rax, rdx`命令の後、`je label` — `rax`が`rdx`と等しい場合、`label`にジャンプします。
-* **`syscall`**：一部のx64システム（現代のUnixなど）での**システムコール**に使用されます。
-* **`sysenter`**：一部のプラットフォームで最適化された**システムコール**命令です。
+* **`je`**、**`jne`**、**`jl`**、**`jge`**など：前の`cmp`またはテストの結果に基づいて制
 ### **関数プロローグ**
 
 1. **古いベースポインタをプッシュする**: `push rbp`（呼び出し元のベースポインタを保存する）
@@ -102,7 +103,7 @@ x64の命令は豊富なセットを持ち、以前のx86の命令との互換�
 ```
 したがって、**Unix/BSDクラス**から`open`シスコール（**5**）を呼び出すためには、`0x2000000`を追加する必要があります。
 
-したがって、openを呼び出すためのシスコール番号は`0x2000005`になります。
+したがって、`open`を呼び出すためのシスコール番号は`0x2000005`になります。
 
 ### シェルコード
 
@@ -289,7 +290,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### バインドシェル
 
-[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) からのバインドシェルは、**ポート4444**で利用できます。
+バインドシェルは、[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) から**ポート4444**で利用できます。
 ```armasm
 section .text
 global _main
@@ -432,7 +433,7 @@ syscall
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
