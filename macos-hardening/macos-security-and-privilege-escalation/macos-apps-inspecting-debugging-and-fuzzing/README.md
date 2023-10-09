@@ -34,7 +34,7 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 
 ### jtool2
 
-La herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y proporciona algunas características adicionales. [**Descárgala aquí**](http://www.newosxbook.com/tools/jtool.html) o instálala con `brew`.
+Esta herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y ofrece algunas características adicionales. [**Descárgala aquí**](http://www.newosxbook.com/tools/jtool.html) o instálala con `brew`.
 ```bash
 # Install
 brew install --cask jtool2
@@ -51,17 +51,11 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 # Get MIG information
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-### Firma de código
+### Codesign / ldid
 
-La firma de código es un proceso utilizado en macOS para verificar la autenticidad e integridad de una aplicación. Cada aplicación en macOS debe estar firmada con un certificado válido para garantizar que no ha sido alterada o comprometida. La firma de código utiliza criptografía asimétrica para generar una firma digital única que se adjunta a la aplicación.
-
-La firma de código se puede verificar utilizando la herramienta `codesign` en la línea de comandos. Esta herramienta permite inspeccionar y verificar la firma de una aplicación, así como también identificar cualquier problema de seguridad o manipulación.
-
-Al inspeccionar una aplicación con `codesign`, se pueden obtener detalles sobre el certificado utilizado para firmarla, la identidad del desarrollador y cualquier recurso o biblioteca externa que la aplicación pueda utilizar.
-
-La verificación de la firma de código es una medida importante para garantizar la seguridad de las aplicaciones en macOS. Al verificar la firma de una aplicación, se puede detectar si ha sido modificada o si proviene de una fuente no confiable. Esto ayuda a prevenir la ejecución de aplicaciones maliciosas o comprometidas que podrían comprometer la seguridad del sistema.
-
-En resumen, la firma de código es un proceso esencial para garantizar la autenticidad e integridad de las aplicaciones en macOS. La herramienta `codesign` permite inspeccionar y verificar la firma de una aplicación, lo que ayuda a identificar cualquier problema de seguridad o manipulación.
+{% hint style="danger" %}
+**`Codesign`** se encuentra en **macOS** mientras que **`ldid`** se encuentra en **iOS**
+{% endhint %}
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -77,6 +71,16 @@ spctl --assess --verbose /Applications/Safari.app
 
 # Sign a binary
 codesign -s <cert-name-keychain> toolsdemo
+
+# Get signature info
+ldid -h <binary>
+
+# Get entitlements
+ldid -e <binary>
+
+# Change entilements
+## /tmp/entl.xml is a XML file with the new entitlements to add
+ldid -S/tmp/entl.xml <binary>
 ```
 ### SuspiciousPackage
 
@@ -127,7 +131,7 @@ Los parámetros que esta función espera son:
 | **4to argumento** | **rcx**                                                         | **2do argumento para el método**                        |
 | **5to argumento** | **r8**                                                          | **3er argumento para el método**                        |
 | **6to argumento** | **r9**                                                          | **4to argumento para el método**                        |
-| **7mo+ argumento**| <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p>  | **5to+ argumento para el método**                       |
+| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento para el método**                       |
 
 ### Swift
 
@@ -253,14 +257,22 @@ La depuración de aplicaciones implica ejecutar una aplicación en un entorno co
 
 ## Fuzzing de aplicaciones
 
-El fuzzing de aplicaciones implica enviar entradas aleatorias o maliciosas a una aplicación para encontrar posibles vulnerabilidades. Esto puede ayudarte a identificar errores de programación, condiciones de carrera y otros problemas de seguridad.
+El fuzzing es una técnica que implica enviar entradas aleatorias o maliciosas a una aplicación para encontrar posibles vulnerabilidades. Esta técnica es especialmente útil para descubrir vulnerabilidades de seguridad desconocidas.
 
 ### Herramientas de fuzzing
 
-- [AFL](https://github.com/google/AFL) - American Fuzzy Lop es una herramienta de fuzzing que utiliza técnicas de generación de mutaciones para encontrar errores en aplicaciones.
-- [Peach Fuzzer](https://peachfuzzer.com/) - Una plataforma de fuzzing que te permite crear y ejecutar casos de prueba automatizados para encontrar vulnerabilidades en aplicaciones.
+- [AFL](http://lcamtuf.coredump.cx/afl/) - Un marco de fuzzing que utiliza la instrumentación de código para generar entradas aleatorias y encontrar posibles vulnerabilidades.
+- [Peach Fuzzer](https://peachfuzzer.com/) - Una plataforma de fuzzing que te permite crear y ejecutar pruebas de fuzzing personalizadas.
+- [Radamsa](https://gitlab.com/akihe/radamsa) - Una herramienta de generación de mutaciones que se utiliza en combinación con otras herramientas de fuzzing.
 
-¡Explora estas herramientas y técnicas para mejorar tus habilidades de inspección, depuración y fuzzing de aplicaciones en macOS!
+## Recursos adicionales
+
+Aquí tienes algunos recursos adicionales que pueden ser útiles para inspeccionar, depurar y realizar fuzzing en aplicaciones en macOS:
+
+- [Apple Developer Documentation](https://developer.apple.com/documentation/) - Documentación oficial de Apple sobre el desarrollo de aplicaciones en macOS.
+- [Reverse Engineering Resources](https://github.com/onethawt/reverseengineering-resources) - Una lista curada de recursos de ingeniería inversa, que incluye herramientas y tutoriales.
+
+¡Diviértete explorando y descubriendo las vulnerabilidades de las aplicaciones en macOS!
 ```bash
 syscall:::entry
 /pid == $1/
@@ -304,13 +316,19 @@ sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 
 To use `dtruss`, you need to specify the process ID (PID) of the target application. You can find the PID using the `ps` command or by using tools like Activity Monitor.
 
-Once you have the PID, you can run `dtruss` with the `-p` option followed by the PID. This will start tracing the system calls made by the application in real-time.
+Once you have the PID, you can run `dtruss` with the following syntax:
 
-By default, `dtruss` will display the system calls along with their arguments and return values. This can be useful for understanding how the application interacts with the operating system.
+```bash
+sudo dtruss -p <PID>
+```
 
-You can also filter the output of `dtruss` using various options. For example, you can use the `-n` option to only display system calls from a specific library or the `-s` option to only display system calls with a specific name.
+The `sudo` command is required because `dtruss` needs root privileges to trace system calls.
 
-`dtruss` can be a powerful tool for inspecting and debugging macOS applications. However, it should be used responsibly and only on applications that you have permission to analyze.
+When `dtruss` is running, it will display a list of system calls made by the target process, along with their arguments and return values. This can be useful for understanding how an application interacts with the operating system and identifying any potential security vulnerabilities or performance issues.
+
+Note that `dtruss` can generate a large amount of output, so it's recommended to redirect the output to a file for further analysis. You can do this by appending `> output.txt` to the `dtruss` command.
+
+Keep in mind that `dtruss` is a powerful tool that should be used responsibly and with proper authorization. It can be used for legitimate purposes like debugging and troubleshooting, but it can also be misused for unauthorized access or malicious activities. Always ensure that you have the necessary permissions and legal authorization before using `dtruss` or any other similar tool.
 ```bash
 dtruss -c ls #Get syscalls of ls
 dtruss -c -p 1000 #get syscalls of PID 1000
@@ -394,7 +412,7 @@ Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene e
 * Algunos malware también pueden **detectar** si la máquina es **VMware** basándose en la dirección MAC (00:50:56).
 * También es posible encontrar si un proceso está siendo depurado con un código simple como:
 * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
-* También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un depurador se adjunte y rastree.
+* También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un depurador se adjunte y realice un seguimiento.
 * Puede verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
 * Como se señala en este artículo, "[Derrotando Técnicas Anti-Depuración: variantes de ptrace en macOS](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)":\
 "_El mensaje Process # exited with **status = 45 (0x0000002d)** generalmente es una señal reveladora de que el objetivo de depuración está utilizando **PT\_DENY\_ATTACH**_"
@@ -416,12 +434,12 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-### Dormir
+### Suspensión
 
-Cuando se realiza fuzzing en un MacOS, es importante evitar que la Mac se duerma:
+Cuando se realiza fuzzing en MacOS, es importante evitar que la Mac entre en suspensión:
 
 * systemsetup -setsleep Never
-* pmset, Preferencias del Sistema
+* pmset, Preferencias del sistema
 * [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
 #### Desconexión SSH
@@ -472,7 +490,7 @@ Funciona para herramientas de línea de comandos.
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-Funciona con herramientas de GUI de macOS. Ten en cuenta que algunas aplicaciones de macOS tienen requisitos específicos como nombres de archivo únicos, la extensión correcta, necesidad de leer los archivos desde el sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
+Funciona con herramientas de GUI de macOS. Ten en cuenta que algunas aplicaciones de macOS tienen requisitos específicos como nombres de archivo únicos, la extensión correcta, necesitan leer los archivos desde el sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
 
 Algunos ejemplos:
 

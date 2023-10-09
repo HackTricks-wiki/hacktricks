@@ -35,7 +35,7 @@
 * Las **aplicaciones del sistema** se encuentran en `/System/Applications`
 * Las aplicaciones **instaladas** generalmente se instalan en `/Applications` o en `~/Applications`
 * Los datos de la **aplicación** se pueden encontrar en `/Library/Application Support` para las aplicaciones que se ejecutan como root y en `~/Library/Application Support` para las aplicaciones que se ejecutan como el usuario.
-* Los **daemonios** de aplicaciones de terceros que **necesitan ejecutarse como root** generalmente se encuentran en `/Library/PrivilegedHelperTools/`
+* Los **demonios** de aplicaciones de terceros que **necesitan ejecutarse como root** generalmente se encuentran en `/Library/PrivilegedHelperTools/`
 * Las aplicaciones **sandboxed** se mapean en la carpeta `~/Library/Containers`. Cada aplicación tiene una carpeta con el nombre del ID de paquete de la aplicación (`com.apple.Safari`).
 * El **kernel** se encuentra en `/System/Library/Kernels/kernel`
 * Las **extensiones de kernel de Apple** se encuentran en `/System/Library/Extensions`
@@ -75,7 +75,7 @@ macOS almacena información como contraseñas en varios lugares:
 * **`.noindex`**: Los archivos y carpetas con esta extensión no serán indexados por Spotlight.
 ### Paquetes de macOS
 
-Básicamente, un paquete es una **estructura de directorios** dentro del sistema de archivos. Curiosamente, por defecto este directorio **se ve como un objeto único en Finder** (como `.app`).&#x20;
+Básicamente, un paquete es una **estructura de directorios** dentro del sistema de archivos. Curiosamente, por defecto este directorio **se ve como un objeto único en Finder** (como `.app`).
 
 {% content-ref url="macos-bundles.md" %}
 [macos-bundles.md](macos-bundles.md)
@@ -83,24 +83,30 @@ Básicamente, un paquete es una **estructura de directorios** dentro del sistema
 
 ## Caché compartida de Dyld
 
-En macOS (y iOS), todas las bibliotecas compartidas del sistema, como los frameworks y dylibs, se **combinan en un solo archivo**, llamado **caché compartida de Dyld**. Esto mejora el rendimiento, ya que el código se puede cargar más rápido.
+En macOS (y iOS), todas las bibliotecas compartidas del sistema, como los frameworks y dylibs, se **combinan en un solo archivo**, llamado la **caché compartida de Dyld**. Esto mejora el rendimiento, ya que el código se puede cargar más rápido.
 
 Similar a la caché compartida de Dyld, el kernel y las extensiones del kernel también se compilan en una caché del kernel, que se carga al iniciar el sistema.
 
-Para extraer las bibliotecas del archivo único de la caché compartida de dylib, era posible utilizar el binario [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip), que puede que no funcione en la actualidad:
+Para extraer las bibliotecas del archivo único de la caché compartida de dylib, era posible utilizar el binario [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip), que puede que no funcione en la actualidad, pero también puedes usar [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 
 {% code overflow="wrap" %}
 ```bash
+# dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
+
+# dyldextractor
+dyldex -l [dyld_shared_cache_path] # List libraries
+dyldex_all [dyld_shared_cache_path] # Extract all
+# More options inside the readme
 ```
 {% endcode %}
 
 En versiones anteriores, es posible encontrar la **caché compartida** en **`/System/Library/dyld/`**.
 
+En iOS, puedes encontrarlas en **`/System/Library/Caches/com.apple.dyld/`**.
+
 {% hint style="success" %}
-Ten en cuenta que incluso si la herramienta `dyld_shared_cache_util` no funciona, puedes pasar el **binario dyld compartido a Hopper** y Hopper podrá identificar todas las bibliotecas y permitirte **seleccionar cuál** quieres investigar:
-
-
+Ten en cuenta que incluso si la herramienta `dyld_shared_cache_util` no funciona, puedes pasar el **binario compartido de dyld a Hopper** y Hopper podrá identificar todas las bibliotecas y permitirte **seleccionar cuál** quieres investigar:
 {% endhint %}
 
 <figure><img src="../../../.gitbook/assets/image (680).png" alt="" width="563"><figcaption></figcaption></figure>
@@ -109,7 +115,7 @@ Ten en cuenta que incluso si la herramienta `dyld_shared_cache_util` no funciona
 
 ### Permisos de carpeta
 
-En una **carpeta**, **leer** permite **listarla**, **escribir** permite **eliminar** y **escribir** archivos en ella, y **ejecutar** permite **atravesar** el directorio. Por lo tanto, por ejemplo, un usuario con **permiso de lectura sobre un archivo** dentro de un directorio donde no tiene permiso de **ejecución no podrá leer** el archivo.
+En una **carpeta**, **leer** permite **listarla**, **escribir** permite **eliminar** y **escribir** archivos en ella, y **ejecutar** permite **atravesar** el directorio. Por lo tanto, por ejemplo, un usuario con **permiso de lectura sobre un archivo** dentro de un directorio donde no tiene permiso de **ejecución** **no podrá leer** el archivo.
 
 ### Modificadores de bandera
 

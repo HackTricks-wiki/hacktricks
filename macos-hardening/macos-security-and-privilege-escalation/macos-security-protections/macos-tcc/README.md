@@ -34,14 +34,18 @@ ps -ef | grep tcc
 ```
 Los permisos se heredan de la aplicación padre y se rastrean según el ID de paquete y el ID de desarrollador.
 
-### Base de datos TCC
+### Base de datos de TCC
 
-Las selecciones se almacenan en la base de datos TCC del sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`** o en **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para las preferencias por usuario. Las bases de datos están protegidas contra la edición con SIP (Protección de Integridad del Sistema), pero puedes leerlas.
+Las selecciones se almacenan en la base de datos de TCC en todo el sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`** o en **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para las preferencias por usuario. Las bases de datos están protegidas contra la edición con SIP (Protección de Integridad del Sistema), pero se pueden leer.
+
+{% hint style="danger" %}
+La base de datos de TCC en iOS se encuentra en **`/private/var/mobile/Library/TCC/TCC.db`**
+{% endhint %}
 
 Además, un proceso con **acceso completo al disco** puede editar la base de datos en modo de usuario.
 
 {% hint style="info" %}
-La interfaz de usuario del centro de notificaciones puede realizar cambios en la base de datos TCC del sistema:
+La **interfaz de usuario del centro de notificaciones** puede realizar cambios en la base de datos de TCC del sistema:
 
 {% code overflow="wrap" %}
 ```bash
@@ -150,7 +154,11 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 ```
 Esto evitará que Calendar solicite al usuario acceso a recordatorios, calendario y la libreta de direcciones.
 
-### Lugares sensibles sin protección
+{% hint style="success" %}
+Además de la documentación oficial sobre los permisos, también es posible encontrar **información interesante sobre los permisos en** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
+{% endhint %}
+
+### Lugares sensibles desprotegidos
 
 * $HOME (en sí mismo)
 * $HOME/.ssh, $HOME/.aws, etc
