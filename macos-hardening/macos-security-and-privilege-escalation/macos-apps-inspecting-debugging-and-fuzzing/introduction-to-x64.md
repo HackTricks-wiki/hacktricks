@@ -29,7 +29,7 @@ x64 amplía la arquitectura x86, presentando **16 registros de propósito genera
 7. **`rsi`** y **`rdi`** - Utilizados como índices de **origen** y **destino** en operaciones de cadena/memoria.
 8. **`r8`** a **`r15`** - Registros de propósito general adicionales introducidos en x64.
 
-### **Convención de llamada**
+### **Convención de Llamada**
 
 La convención de llamada x64 varía entre sistemas operativos. Por ejemplo:
 
@@ -38,11 +38,15 @@ La convención de llamada x64 varía entre sistemas operativos. Por ejemplo:
 
 Si la función tiene más de seis entradas, el **resto se pasará en la pila**. **RSP**, el puntero de pila, debe estar **alineado en 16 bytes**, lo que significa que la dirección a la que apunta debe ser divisible por 16 antes de que ocurra cualquier llamada. Esto significa que normalmente tendríamos que asegurarnos de que RSP esté correctamente alineado en nuestro shellcode antes de realizar una llamada a una función. Sin embargo, en la práctica, las llamadas al sistema funcionan muchas veces incluso si este requisito no se cumple.
 
-### **Instrucciones comunes**
+### Convención de Llamada en Swift
+
+Swift tiene su propia **convención de llamada** que se puede encontrar en [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+
+### **Instrucciones Comunes**
 
 Las instrucciones x64 tienen un conjunto amplio, manteniendo la compatibilidad con instrucciones x86 anteriores e introduciendo nuevas.
 
-* **`mov`**: **Mueve** un valor de una **registro** o **ubicación de memoria** a otra.
+* **`mov`**: **Mueve** un valor de un **registro** o una **ubicación de memoria** a otro.
 * Ejemplo: `mov rax, rbx` — Mueve el valor de `rbx` a `rax`.
 * **`push`** y **`pop`**: Empuja o saca valores de la **pila**.
 * Ejemplo: `push rax` — Empuja el valor de `rax` a la pila.
@@ -57,7 +61,7 @@ Las instrucciones x64 tienen un conjunto amplio, manteniendo la compatibilidad c
 * **`je`, `jne`, `jl`, `jge`, ...**: Instrucciones de **salto condicional** que cambian el flujo de control en función de los resultados de una instrucción `cmp` o prueba anterior.
 * Ejemplo: Después de una instrucción `cmp rax, rdx`, `je label` — Salta a `label` si `rax` es igual a `rdx`.
 * **`syscall`**: Utilizado para **llamadas al sistema** en algunos sistemas x64 (como Unix modernos).
-* **`sysenter`**: Una instrucción de **llamada al sistema** optimizada en algunas plataformas.
+* **`sysenter`**: Una instrucción optimizada de **llamada al sistema** en algunas plataformas.
 ### **Prólogo de la función**
 
 1. **Guardar el antiguo puntero base**: `push rbp` (guarda el puntero base del llamador)
@@ -74,7 +78,7 @@ Las instrucciones x64 tienen un conjunto amplio, manteniendo la compatibilidad c
 
 ### syscalls
 
-Existen diferentes clases de syscalls, puedes [**encontrarlos aquí**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall\_sw.h)**:**
+Existen diferentes clases de syscalls, puedes [**encontrarlas aquí**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall\_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -83,7 +87,7 @@ Existen diferentes clases de syscalls, puedes [**encontrarlos aquí**](https://o
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-A continuación, puedes encontrar el número de llamada al sistema **en esta URL**: [**enlace**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master).
+A continuación, puedes encontrar el número de llamada al sistema [**en esta URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -220,7 +224,7 @@ syscall
 
 #### Leer con cat
 
-El objetivo es ejecutar `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, por lo que el segundo argumento (x1) es un array de parámetros (que en memoria significa una pila de direcciones).
+El objetivo es ejecutar `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, por lo que el segundo argumento (x1) es una matriz de parámetros (que en memoria significa una pila de direcciones).
 ```armasm
 bits 64
 section .text
@@ -261,11 +265,17 @@ Para invocar un comando con `sh`, simplemente se debe escribir el comando seguid
 sh -c "comando"
 ```
 
-Esto ejecutará el comando especificado utilizando `sh` como intérprete de shell.
+Donde "comando" es el comando que se desea ejecutar.
 
-Es importante tener en cuenta que al utilizar `sh`, se está utilizando un intérprete de shell básico y no se tienen todas las características avanzadas de otros intérpretes de shell como `bash`. Sin embargo, `sh` es ampliamente compatible y se encuentra disponible en la mayoría de los sistemas operativos basados en Unix, incluido macOS.
+El comando `sh` también se puede utilizar para ejecutar scripts de shell almacenados en archivos. Para hacer esto, se debe proporcionar la ruta del archivo después de `sh -c`. Por ejemplo:
 
-Al utilizar `sh` para invocar comandos, se puede aprovechar la flexibilidad y la potencia de los scripts de shell para automatizar tareas y realizar operaciones más complejas en el sistema operativo macOS.
+```bash
+sh -c "ruta_del_archivo"
+```
+
+Donde "ruta_del_archivo" es la ruta del archivo que se desea ejecutar.
+
+Al utilizar el comando `sh` para invocar comandos y ejecutar scripts de shell, se puede aprovechar la funcionalidad y flexibilidad de la línea de comandos en macOS para realizar diversas tareas y automatizar procesos.
 ```armasm
 bits 64
 section .text
