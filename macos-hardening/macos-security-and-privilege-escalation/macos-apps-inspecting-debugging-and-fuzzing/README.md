@@ -51,17 +51,11 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 # Get MIG information
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-### Codesign
+### Codesign / ldid
 
-Codesign（コードサイン）は、macOSにおけるアプリケーションの署名プロセスです。アプリケーションをコードサインすることで、そのアプリケーションが信頼できるものであることを証明し、ユーザーに安全性を提供します。
-
-コードサインには、開発者証明書を使用します。開発者証明書は、Apple Developer Programに登録することで入手できます。アプリケーションをコードサインするには、開発者証明書を使用してアプリケーションにデジタル署名を付与する必要があります。
-
-コードサインされたアプリケーションは、macOSにおいて信頼されたアプリケーションとして扱われます。ユーザーがコードサインされたアプリケーションを実行する際には、macOSがアプリケーションの署名を検証し、信頼性を確認します。
-
-コードサインは、アプリケーションの改ざんや不正な変更を防ぐために重要です。また、コードサインによって、アプリケーションが正当な権限を持つことも確認されます。
-
-コードサインのプロセスは、アプリケーションのセキュリティと特権エスカレーションの観点から重要です。アプリケーションをコードサインすることで、セキュリティの向上と悪意のある攻撃からの保護が期待できます。
+{% hint style="danger" %}
+**`Codesign`**は**macOS**に見つけることができますが、**`ldid`**は**iOS**に見つけることができます。
+{% endhint %}
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -77,15 +71,25 @@ spctl --assess --verbose /Applications/Safari.app
 
 # Sign a binary
 codesign -s <cert-name-keychain> toolsdemo
+
+# Get signature info
+ldid -h <binary>
+
+# Get entitlements
+ldid -e <binary>
+
+# Change entilements
+## /tmp/entl.xml is a XML file with the new entitlements to add
+ldid -S/tmp/entl.xml <binary>
 ```
 ### SuspiciousPackage
 
 [**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html)は、インストールする前に**.pkg**ファイル（インストーラ）を調査し、中身を確認するのに役立つツールです。\
-これらのインストーラには、マルウェアの作者が通常悪用する`preinstall`および`postinstall`のBashスクリプトが含まれています。
+これらのインストーラには、マルウェアの作者が通常悪用する`preinstall`と`postinstall`のbashスクリプトが含まれています。
 
 ### hdiutil
 
-このツールは、Appleディスクイメージ（**.dmg**）ファイルを実行する前に、それらを調査するためにマウントすることができます。
+このツールは、Appleのディスクイメージ（**.dmg**）ファイルを実行する前に調査するためにマウントすることができます。
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
@@ -121,11 +125,11 @@ Objective-Cを使用するバイナリで関数が呼び出されると、コン
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
 | **1番目の引数**   | **rdi**                                                         | **self: メソッドが呼び出されるオブジェクト**         |
 | **2番目の引数**   | **rsi**                                                         | **op: メソッドの名前**                                 |
-| **3番目の引数**   | **rdx**                                                         | **メソッドへの最初の引数**                             |
-| **4番目の引数**   | **rcx**                                                         | **メソッドへの2番目の引数**                             |
-| **5番目の引数**   | **r8**                                                          | **メソッドへの3番目の引数**                             |
-| **6番目の引数**   | **r9**                                                          | **メソッドへの4番目の引数**                             |
-| **7番目以降の引数** | <p><strong>rsp+</strong><br><strong>(スタック上)</strong></p> | **メソッドへの5番目以降の引数**                         |
+| **3番目の引数**   | **rdx**                                                         | **メソッドへの第1引数**                               |
+| **4番目の引数**   | **rcx**                                                         | **メソッドへの第2引数**                               |
+| **5番目の引数**   | **r8**                                                          | **メソッドへの第3引数**                               |
+| **6番目の引数**   | **r9**                                                          | **メソッドへの第4引数**                               |
+| **7番目以降の引数** | <p><strong>rsp+</strong><br><strong>(スタック上)</strong></p> | **メソッドへの第5引数以降**                            |
 
 ### Swift
 
@@ -143,12 +147,12 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
-詳細な情報は、[**このブログ記事**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)でこれらのセクションに保存されている情報についての詳細を見つけることができます。
+詳細な情報は、[**このブログ記事**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)で、これらのセクションに格納された情報についてさらに詳しく説明されています。
 
 ### パックされたバイナリ
 
 * 高いエントロピーをチェックする
-* 文字列をチェックする（理解できる文字列がほとんどない場合は、パックされている）
+* 文字列をチェックする（理解できる文字列がほとんどない場合は、パックされている可能性がある）
 * MacOS用のUPXパッカーは、"\_\_XHDR"というセクションを生成します
 
 ## 動的解析
@@ -165,7 +169,7 @@ MacOS上のシステムバイナリ（`cloudconfigurationd`など）を**イン�
 
 MacOSは、アプリケーションを実行する際に非常に役立つログを生成します。
 
-さらに、一部のログには、一部の**ユーザー**または**コンピューター**の**識別可能な情報**を**非表示**にするためのタグ`<private>`が含まれています。ただし、この情報を開示するためには、証明書を**インストールすることが可能**です。[**こちら**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)の説明に従ってください。
+さらに、一部のログには、一部の**ユーザー**や**コンピューター**の**識別可能な情報**を**非表示**にするためのタグ`<private>`が含まれています。ただし、この情報を開示するためには、[**こちら**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)の説明に従って証明書をインストールすることが可能です。
 
 ### Hopper
 
@@ -179,15 +183,15 @@ Hopperの左パネルでは、バイナリのシンボル（**ラベル**）、�
 
 <figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
-コードオブジェクトを右クリックすると、そのオブジェクトへの**参照**や名前の変更などを確認することができます（逆コンパイルされた擬似コードでは機能しません）。
+コードオブジェクトを右クリックすると、そのオブジェクトへの**参照**や名前の変更（逆コンパイルされた擬似コードでは機能しません）を確認することができます。
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
-さらに、**中央下部にはPythonコマンドを記述**することができます。
+さらに、**中央下部にはPythonコマンドを記述**することもできます。
 
 #### 右パネル
 
-右パネルでは、**ナビゲーション履歴**（現在の状況に到達するまでの経緯）、この関数を呼び出すすべての関数と、この関数が呼び出すすべての関数を表示する**コールグラフ**、および**ローカル変数**の情報など、興味深い情報を表示することができます。
+右パネルでは、**ナビゲーション履歴**（現在の状況に到達するまでの経緯）、この関数を呼び出すすべての関数と、この関数が呼び出すすべての関数を表示する**コールグラフ**、および**ローカル変数**の情報など、興味深い情報を確認することができます。
 
 ### dtrace
 
@@ -213,13 +217,13 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 ```
 プローブ名は、プロバイダー、モジュール、関数、および名前（`fbt:mach_kernel:ptrace:entry`）の4つの部分で構成されています。名前の一部を指定しない場合、Dtraceはその部分をワイルドカードとして適用します。
 
-プローブをアクティブにし、それらが発生したときに実行するアクションを指定するには、D言語を使用する必要があります。
+プローブをアクティブにするためにDTraceを設定し、それらが発生したときに実行するアクションを指定するには、D言語を使用する必要があります。
 
 詳細な説明とさらなる例は、[https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)で見つけることができます。
 
 #### 例
 
-`man -k dtrace`を実行して、**利用可能なDTraceスクリプト**の一覧を表示します。例：`sudo dtruss -n binary`
+**利用可能なDTraceスクリプト**のリストを表示するには、`man -k dtrace`を実行します。例：`sudo dtruss -n binary`
 
 * 行中で
 ```bash
@@ -333,7 +337,7 @@ fs_usage -w -f network curl #This tracks network actions
 
 ### lldb
 
-**lldb**は、**macOS**バイナリのデバッグにおけるデファクトツールです。
+**lldb**は、**macOS**バイナリのデバッグにおける事実上のツールです。
 ```bash
 lldb ./malware.bin
 lldb -p 1122
@@ -354,7 +358,7 @@ settings set target.x86-disassembly-flavor intel
 lldb内で、`process save-core`を使用してプロセスをダンプします。
 {% endhint %}
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) コマンド</strong></td><td><strong>説明</strong></td></tr><tr><td><strong>run (r)</strong></td><td>実行を開始し、ブレークポイントがヒットするかプロセスが終了するまで続行します。</td></tr><tr><td><strong>continue (c)</strong></td><td>デバッグ対象のプロセスの実行を続行します。</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>次の命令を実行します。このコマンドは関数呼び出しをスキップします。</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>次の命令を実行します。nextiコマンドとは異なり、このコマンドは関数呼び出しに入ります。</td></tr><tr><td><strong>finish (f)</strong></td><td>現在の関数（"フレーム"）の残りの命令を実行し、戻り値を返して停止します。</td></tr><tr><td><strong>control + c</strong></td><td>実行を一時停止します。プロセスが実行（r）または継続（c）されている場合、プロセスは現在の実行位置で停止します。</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p>b main # main関数が呼び出される場所</p><p>b &#x3C;binname>`main # バイナリのmain関数</p><p>b set -n main --shlib &#x3C;lib_name> # 指定されたバイナリのmain関数</p><p>b -[NSDictionary objectForKey:]</p><p>b -a 0x0000000100004bd9</p><p>br l # ブレークポイントのリスト</p><p>br e/dis &#x3C;num> # ブレークポイントの有効化/無効化</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint # ブレークポイントコマンドのヘルプを取得する</p><p>help memory write # メモリへの書き込みのヘルプを取得する</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/memory address></strong></td><td>メモリをヌル終端文字列として表示します。</td></tr><tr><td><strong>x/i &#x3C;reg/memory address></strong></td><td>メモリをアセンブリ命令として表示します。</td></tr><tr><td><strong>x/b &#x3C;reg/memory address></strong></td><td>メモリをバイトとして表示します。</td></tr><tr><td><strong>print object (po)</strong></td><td><p>これにより、パラメータで参照されるオブジェクトが表示されます</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>AppleのObjective-CのAPIやメソッドのほとんどはオブジェクトを返すため、「print object」（po）コマンドで表示する必要があります。 poが有意義な出力を生成しない場合は、<code>x/b</code>を使用します</p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 # そのアドレスにAAAAを書き込む<br>memory write -f s $rip+0x11f+7 "AAAA" # そのアドレスにAAAAを書き込む</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis # 現在の関数を逆アセンブルする</p><p>dis -n &#x3C;funcname> # 関数を逆アセンブルする</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> # 関数を逆アセンブルする<br>dis -c 6 # 6行を逆アセンブルする<br>dis -c 0x100003764 -e 0x100003768 # 1つのアドレスからもう一方まで逆アセンブルする<br>dis -p -c 4 # 現在のアドレスから逆アセンブルを開始する</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # x1レジスタの3つの要素の配列をチェックする</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) コマンド</strong></td><td><strong>説明</strong></td></tr><tr><td><strong>run (r)</strong></td><td>ブレークポイントがヒットするか、プロセスが終了するまで、実行を開始します。</td></tr><tr><td><strong>continue (c)</strong></td><td>デバッグ対象のプロセスの実行を継続します。</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>次の命令を実行します。このコマンドは関数呼び出しをスキップします。</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>次の命令を実行します。nextiコマンドとは異なり、このコマンドは関数呼び出しに入ります。</td></tr><tr><td><strong>finish (f)</strong></td><td>現在の関数（"フレーム"）の残りの命令を実行し、停止します。</td></tr><tr><td><strong>control + c</strong></td><td>実行を一時停止します。プロセスが実行されている場合、これによりプロセスは現在の実行位置で停止します。</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p>b main # main関数が呼び出される場所</p><p>b &#x3C;binname>`main # バイナリのメイン関数</p><p>b set -n main --shlib &#x3C;lib_name> # 指定されたバイナリのメイン関数</p><p>b -[NSDictionary objectForKey:]</p><p>b -a 0x0000000100004bd9</p><p>br l # ブレークポイントのリスト</p><p>br e/dis &#x3C;num> # ブレークポイントの有効化/無効化</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint # ブレークポイントコマンドのヘルプを取得</p><p>help memory write # メモリへの書き込みのヘルプを取得</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/memory address></strong></td><td>メモリをヌル終端文字列として表示します。</td></tr><tr><td><strong>x/i &#x3C;reg/memory address></strong></td><td>メモリをアセンブリ命令として表示します。</td></tr><tr><td><strong>x/b &#x3C;reg/memory address></strong></td><td>メモリをバイトとして表示します。</td></tr><tr><td><strong>print object (po)</strong></td><td><p>これにより、パラメータで参照されるオブジェクトが表示されます</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>AppleのObjective-CのAPIやメソッドのほとんどはオブジェクトを返すため、"print object"（po）コマンドで表示する必要があります。poが有意義な出力を生成しない場合は、<code>x/b</code>を使用してください</p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 # そのアドレスにAAAAを書き込む<br>memory write -f s $rip+0x11f+7 "AAAA" # そのアドレスにAAAAを書き込む</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis # 現在の関数を逆アセンブルする</p><p>dis -n &#x3C;funcname> # 関数を逆アセンブルする</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> # 関数を逆アセンブルする<br>dis -c 6 # 6行を逆アセンブルする<br>dis -c 0x100003764 -e 0x100003768 # 一つのアドレスからもう一つのアドレスまで逆アセンブルする<br>dis -p -c 4 # 現在のアドレスから逆アセンブルを開始する</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # x1レジスタの3つの要素の配列をチェックする</td></tr></tbody></table>
 
 {% hint style="info" %}
 **`objc_sendMsg`**関数を呼び出す際、**rsi**レジスタにはメソッドの名前がヌル終端（"C"）文字列として保持されます。lldbを使用して名前を表示するには、次のようにします：
@@ -371,22 +375,22 @@ lldb内で、`process save-core`を使用してプロセスをダンプします
 
 #### VM検出
 
-* **`sysctl hw.model`**コマンドは、ホストがMacOSである場合には「Mac」を返しますが、VMの場合は異なる値を返します。
-* **`hw.logicalcpu`**および**`hw.physicalcpu`**の値を操作することで、一部のマルウェアはVMであるかどうかを検出しようとします。
+* **`sysctl hw.model`**コマンドは、ホストがMacOSである場合には"Mac"を返しますが、VMの場合は異なる値を返します。
+* **`hw.logicalcpu`**と**`hw.physicalcpu`**の値を操作することで、一部のマルウェアはVMかどうかを検出しようとします。
 * 一部のマルウェアは、MACアドレス（00:50:56）に基づいてマシンがVMwareであるかどうかを検出することもできます。
 * 単純なコードを使用して、プロセスがデバッグされているかどうかを検出することもできます：
 * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
-* **`ptrace`**システムコールを**`PT_DENY_ATTACH`**フラグとともに呼び出すこともできます。これにより、デバッガがアタッチおよびトレースを行うことが防止されます。
-* **`sysctl`**または**`ptrace`**関数が**インポート**されているかどうかを確認できます（ただし、マルウェアは動的にインポートする可能性があります）
+* **`ptrace`**システムコールを**`PT_DENY_ATTACH`**フラグとともに呼び出すこともできます。これにより、デバッガがアタッチおよびトレースを行うことができなくなります。
+* **`sysctl`**または**`ptrace`**関数が**インポート**されているかどうかを確認することができます（ただし、マルウェアは動的にインポートする可能性があります）。
 * この記事によると、"[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)"：\
-"_メッセージ「Process # exited with **status = 45 (0x0000002d)**」は、デバッグ対象が**PT\_DENY\_ATTACH**を使用していることを示す兆候です_"
-## ファジング
+"_メッセージ「Process # exited with **status = 45 (0x0000002d)**」は、デバッグ対象が**PT\_DENY\_ATTACH**を使用していることを示す兆候です。_"
+## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
 ReportCrashは、クラッシュしたプロセスを分析し、クラッシュレポートをディスクに保存します。クラッシュレポートには、クラッシュの原因を診断するのに役立つ情報が含まれています。
 ユーザーごとのlaunchdコンテキストで実行されるアプリケーションや他のプロセスの場合、ReportCrashはLaunchAgentとして実行され、クラッシュレポートをユーザーの`~/Library/Logs/DiagnosticReports/`に保存します。
-デーモン、システムのlaunchdコンテキストで実行される他のプロセス、および他の特権プロセスの場合、ReportCrashはLaunchDaemonとして実行され、クラッシュレポートをシステムの`/Library/Logs/DiagnosticReports`に保存します。
+デーモン、システムのlaunchdコンテキストで実行される他のプロセスや他の特権プロセスの場合、ReportCrashはLaunchDaemonとして実行され、クラッシュレポートをシステムの`/Library/Logs/DiagnosticReports`に保存します。
 
 クラッシュレポートがAppleに送信されることを心配している場合は、それらを無効にすることができます。そうでない場合、クラッシュレポートはサーバーがどのようにクラッシュしたかを特定するのに役立ちます。
 ```bash
@@ -419,7 +423,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
 ### 内部ハンドラ
 
-**次のページをチェックアウト**して、指定されたスキームやプロトコルを処理するアプリを見つける方法を確認してください：
+**次のページをチェックアウト**して、指定されたスキームやプロトコルを処理するアプリを見つける方法を見つけてください：
 
 {% content-ref url="../macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](../macos-file-extension-apps.md)
@@ -452,9 +456,9 @@ CLIツールに対応しています。
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-macOSのGUIツールとの互換性があります。ただし、一部のmacOSアプリは固有の要件を持っています。例えば、ユニークなファイル名、正しい拡張子、サンドボックスからのファイルの読み取りが必要です (`~/Library/Containers/com.apple.Safari/Data`)...
+macOSのGUIツールとの互換性があります。ただし、一部のmacOSアプリは固有の要件を持っています。例えば、ユニークなファイル名、正しい拡張子、サンドボックスからのファイルの読み取り(`~/Library/Containers/com.apple.Safari/Data`)が必要です。
 
-いくつかの例:
+以下にいくつかの例を示します:
 
 {% code overflow="wrap" %}
 ```bash

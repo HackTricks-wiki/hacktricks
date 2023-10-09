@@ -24,24 +24,28 @@
 
 **TCC**は、`/System/Library/PrivateFrameworks/TCC.framework/Support/tccd`にある**デーモン**によって処理され、`/System/Library/LaunchDaemons/com.apple.tccd.system.plist`で構成されています（`com.apple.tccd.system`というマッハサービスを登録）。
 
-ログインしているユーザーごとに定義された**ユーザーモードのtccd**が`/System/Library/LaunchAgents/com.apple.tccd.plist`に実行され、マッハサービス`com.apple.tccd`と`com.apple.usernotifications.delegate.com.apple.tccd`を登録します。
+`/System/Library/LaunchAgents/com.apple.tccd.plist`に定義された**ログインユーザーごとのユーザーモードのtccd**が実行され、マッハサービス`com.apple.tccd`と`com.apple.usernotifications.delegate.com.apple.tccd`を登録します。
 
-ここでは、システムとユーザーとして実行されているtccdを見ることができます：
+ここでは、システムとユーザーごとに実行されるtccdを見ることができます：
 ```bash
 ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-アプリケーションの**親から継承された権限**と**Bundle ID**および**Developer ID**に基づいて、**権限**が**追跡**されます。
+アプリケーションの権限は、親アプリケーションから**継承**され、権限は**Bundle ID**と**Developer ID**に基づいて**追跡**されます。
 
 ### TCCデータベース
 
-選択は、TCCシステム全体のデータベースである**`/Library/Application Support/com.apple.TCC/TCC.db`**に保存されます。また、ユーザーごとの設定の場合は**`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**に保存されます。これらのデータベースは**SIP（System Integrity Protection）によって編集が制限されていますが、読み取ることはできます**。
+選択肢は、TCCシステム全体のデータベースに**`/Library/Application Support/com.apple.TCC/TCC.db`**として保存されます。また、ユーザーごとの設定の場合は**`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**に保存されます。これらのデータベースは**SIP（System Integrity Protection）によって編集が制限**されていますが、読み取ることはできます。
 
-さらに、**フルディスクアクセス**を持つプロセスは、**ユーザーモードのデータベースを編集**することができます。
+{% hint style="danger" %}
+iOSのTCCデータベースは**`/private/var/mobile/Library/TCC/TCC.db`**にあります。
+{% endhint %}
+
+さらに、**フルディスクアクセス**を持つプロセスは、**ユーザーモード**のデータベースを編集できます。
 
 {% hint style="info" %}
-**通知センターUI**は、**システムのTCCデータベースを変更**することができます：
+**通知センターUI**は、**システムのTCCデータベース**を変更することができます。
 
 {% code overflow="wrap" %}
 ```bash
@@ -110,14 +114,14 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 また、`システム環境設定 --> セキュリティとプライバシー --> プライバシー --> ファイルとフォルダー`で、アプリに与えられた**既存の権限**も確認できます。
 
 {% hint style="success" %}
-注意してくださいが、ユーザはこれらのデータベースを直接変更することはできません（rootであっても）SIPのためです。新しいルールを設定または変更する唯一の方法は、システム環境設定パネルまたはアプリがユーザに要求するプロンプトです。
+ユーザは、SIPのために（rootであっても）これらのデータベースを直接変更することはできません。新しいルールを設定または変更する唯一の方法は、システム環境設定パネルまたはアプリがユーザに要求するプロンプトです。
 
 ただし、ユーザは**`tccutil`**を使用してルールを**削除またはクエリ**することができます。&#x20;
 {% endhint %}
 
 ### TCC署名チェック
 
-TCCデータベースはアプリケーションの**バンドルID**を保存していますが、アプリが許可を使用するために正しいものであることを確認するための**署名**に関する**情報**も保存しています。
+TCCの**データベース**は、アプリケーションの**バンドルID**を保存するだけでなく、アプリが許可を使用するために正しいものであることを確認するための**署名**に関する**情報**も保存します。
 
 {% code overflow="wrap" %}
 ```bash
@@ -144,7 +148,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ただし、アプリが`~/Desktop`、`~/Downloads`、`~/Documents`などの特定のユーザーフォルダにアクセスするためには、特定のエンタイトルメントは必要ありません。システムはアクセスを透過的に処理し、必要に応じてユーザーにプロンプトを表示します。
 
-Appleのアプリはプロンプトを生成しません。エンタイトルメントリストに事前に付与された権限が含まれているため、ポップアップは表示されず、TCCデータベースにも表示されません。例えば：
+Appleのアプリはプロンプトを生成しません。それらはエンタイトルメントリストに事前に付与された権限を含んでいるため、ポップアップは表示されず、TCCデータベースにも表示されません。例えば：
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -155,17 +159,21 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 <string>kTCCServiceAddressBook</string>
 </array>
 ```
-これにより、Calendarがユーザーにリマインダー、カレンダー、アドレス帳へのアクセスを求めることを防ぎます。
+これにより、カレンダーがユーザーにリマインダー、カレンダー、アドレス帳へのアクセスを求めることを防ぎます。
 
-### 機密情報が保護されていない場所
+{% hint style="success" %}
+権限に関する公式ドキュメント以外にも、[https://newosxbook.com/ent.jl](https://newosxbook.com/ent.jl)で非公式な権限に関する興味深い情報を見つけることができます。
+{% endhint %}
 
-* $HOME (それ自体)
-* $HOME/.ssh、$HOME/.awsなど
+### 機密情報の保護されていない場所
+
+* $HOME (自体)
+* $HOME/.ssh, $HOME/.awsなど
 * /tmp
 
 ### ユーザーの意図 / com.apple.macl
 
-前述のように、**ファイルをAppにドラッグ＆ドロップすることで、Appにファイルへのアクセスを許可する**ことができます。このアクセスはTCCデータベースには特定されませんが、ファイルの**拡張属性**として指定されます。この属性には、許可されたAppのUUIDが**保存されます**：
+前述のように、ファイルをアプリにドラッグ＆ドロップすることで、そのアプリにファイルへのアクセスを許可することができます。このアクセスはTCCデータベースには特定されず、ファイルの拡張属性として保存されます。この属性には許可されたアプリのUUIDが保存されます。
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -183,10 +191,10 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 {% hint style="info" %}
 興味深いことに、**`com.apple.macl`**属性はtccdではなく**Sandbox**によって管理されています。
 
-また、コンピュータ内のアプリのUUIDを許可するファイルを別のコンピュータに移動すると、同じアプリでも異なるUIDを持つため、そのアプリにアクセス権限は付与されません。
+また、コンピュータ内のアプリのUUIDを許可するファイルを別のコンピュータに移動すると、同じアプリでも異なるUIDを持つため、そのアプリにアクセス権が付与されません。
 {% endhint %}
 
-拡張属性`com.apple.macl`は、他の拡張属性とは異なり、**SIPによって保護**されているため、**クリアすることはできません**。ただし、[**この投稿で説明されているように**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)、ファイルを**圧縮**し、**削除**してから**解凍**することで無効化することが可能です。
+拡張属性`com.apple.macl`は、他の拡張属性とは異なり、**SIPによって保護**されているため、**クリアすることはできません**。ただし、[**この投稿で説明されているように**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)、ファイルを**圧縮**し、**削除**してから**解凍**することで無効にすることが可能です。
 
 ### TCCバイパス
 

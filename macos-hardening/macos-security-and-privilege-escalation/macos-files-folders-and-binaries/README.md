@@ -21,7 +21,7 @@
 * **/etc**: 設定ファイル
 * **/Library**: 好み、キャッシュ、ログに関連する多くのサブディレクトリとファイルがここにあります。ルートと各ユーザーのディレクトリにLibraryフォルダが存在します。
 * **/private**: 文書化されていませんが、多くの言及されたフォルダはprivateディレクトリへのシンボリックリンクです。
-* **/sbin**: システムの管理に関連する必須のシステムバイナリ
+* **/sbin**: システム管理に関連する必須のシステムバイナリ
 * **/System**: OS Xを実行するためのファイル。ここには主にAppleの固有のファイルがあります（サードパーティではありません）。
 * **/tmp**: ファイルは3日後に削除されます（/private/tmpへのソフトリンクです）
 * **/Users**: ユーザーのホームディレクトリ。
@@ -34,8 +34,8 @@
 
 * **システムアプリケーション**は`/System/Applications`にあります。
 * **インストールされた**アプリケーションは通常`/Applications`または`~/Applications`にインストールされます。
-* **アプリケーションデータ**は、ルートとユーザーとして実行されるアプリケーションの場合は`/Library/Application Support`に、ユーザーとして実行されるアプリケーションの場合は`~/Library/Application Support`にあります。
-* **ルートとして実行する必要がある**サードパーティのアプリケーション**デーモン**は通常`/Library/PrivilegedHelperTools/`に配置されます。
+* **アプリケーションデータ**は、ルートとユーザーとして実行されるアプリケーションの場合は`/Library/Application Support`、ユーザーとして実行されるアプリケーションの場合は`~/Library/Application Support`にあります。
+* **ルートとして実行する必要がある**サードパーティのアプリケーション**デーモン**は通常`/Library/PrivilegedHelperTools/`にあります。
 * **サンドボックス化された**アプリは`~/Library/Containers`フォルダにマップされます。各アプリには、アプリケーションのバンドルID（`com.apple.Safari`など）に基づいた名前のフォルダがあります。
 * **カーネル**は`/System/Library/Kernels/kernel`にあります。
 * **Appleのカーネル拡張**は`/System/Library/Extensions`にあります。
@@ -75,7 +75,7 @@ MacOSは、パスワードなどの情報をいくつかの場所に保存しま
 * **`.noindex`**: この拡張子を持つファイルとフォルダはSpotlightによってインデックスされません。
 ### macOSバンドル
 
-基本的に、バンドルはファイルシステム内の**ディレクトリ構造**です。興味深いことに、このディレクトリはデフォルトでFinderで**単一のオブジェクトのように見えます**（例：`.app`）。
+基本的に、バンドルはファイルシステム内の**ディレクトリ構造**です。興味深いことに、このディレクトリはデフォルトではFinderで**単一のオブジェクトのように見えます**（例：`.app`）。
 
 {% content-ref url="macos-bundles.md" %}
 [macos-bundles.md](macos-bundles.md)
@@ -87,45 +87,51 @@ macOS（およびiOS）では、フレームワークやdylibなどのシステ�
 
 dyld共有キャッシュと同様に、カーネルとカーネル拡張もカーネルキャッシュにコンパイルされ、起動時に読み込まれます。
 
-単一のファイルdylib共有キャッシュからライブラリを抽出するために、現在は動作しないかもしれないバイナリの[dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip)を使用することができました。
+単一のファイルdylib共有キャッシュからライブラリを抽出するためには、以前はバイナリの[dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip)を使用することができましたが、現在は動作しないかもしれません。代わりに[**dyldextractor**](https://github.com/arandomdev/dyldextractor)を使用することもできます。
 
 {% code overflow="wrap" %}
 ```bash
+# dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
+
+# dyldextractor
+dyldex -l [dyld_shared_cache_path] # List libraries
+dyldex_all [dyld_shared_cache_path] # Extract all
+# More options inside the readme
 ```
 {% endcode %}
 
 古いバージョンでは、**共有キャッシュ**を**`/System/Library/dyld/`**に見つけることができるかもしれません。
 
+iOSでは、それらを**`/System/Library/Caches/com.apple.dyld/`**に見つけることができます。
+
 {% hint style="success" %}
-`dyld_shared_cache_util`ツールが機能しなくても、**共有dyldバイナリをHopperに渡す**ことで、Hopperはすべてのライブラリを識別し、**調査したいライブラリを選択**することができます:
-
-
+`dyld_shared_cache_util`ツールが機能しなくても、**共有dyldバイナリをHopperに渡す**ことができ、Hopperはすべてのライブラリを識別し、**調査したいライブラリを選択**することができます。
 {% endhint %}
 
 <figure><img src="../../../.gitbook/assets/image (680).png" alt="" width="563"><figcaption></figcaption></figure>
 
-## 特殊なファイルの権限
+## 特殊なファイルのパーミッション
 
-### フォルダの権限
+### フォルダのパーミッション
 
 **フォルダ**では、**読み取り**は**リスト表示**を許可し、**書き込み**は**ファイルの削除**と**書き込み**を許可し、**実行**は**ディレクトリの移動**を許可します。したがって、例えば、**ファイル内の読み取り権限**を持つユーザーが、**実行権限がない**ディレクトリ内にあるファイルを**読み取ることはできません**。
 
 ### フラグ修飾子
 
-ファイルに設定されているフラグによって、ファイルの動作が異なるようになります。`ls -lO /path/directory`でディレクトリ内のファイルのフラグを**チェック**できます。
+ファイルに設定されているフラグによって、ファイルの動作が異なるようになります。`ls -lO /path/directory`でディレクトリ内のファイルのフラグを**チェック**することができます。
 
 * **`uchg`**：**uchange**フラグとして知られており、**ファイル**の変更や削除を**防止**します。設定するには：`chflags uchg file.txt`
 * ルートユーザーはフラグを**削除**してファイルを変更できます
-* **`restricted`**：このフラグはファイルを**SIPで保護**します（このフラグをファイルに追加することはできません）。
+* **`restricted`**：このフラグは、ファイルを**SIPで保護**します（このフラグをファイルに追加することはできません）。
 * **`Sticky bit`**：スティッキービットが設定されたディレクトリでは、**ディレクトリの所有者またはルートのみがファイルの名前を変更または削除**できます。通常、これは/tmpディレクトリに設定され、一般ユーザーが他のユーザーのファイルを削除または移動できないようにします。
 
 ### **ファイルACL**
 
 ファイルの**ACL（アクセス制御エントリ）**には、異なるユーザーに対してより**細かい権限**を割り当てることができる**ACE（アクセス制御エントリ）**が含まれています。
 
-ディレクトリには、これらの権限を付与することができます：`list`、`search`、`add_file`、`add_subdirectory`、`delete_child`、`delete_child`。\
-ファイルには、`read`、`write`、`append`、`execute`の権限を付与することができます。
+ディレクトリにこれらの権限を付与することができます：`list`、`search`、`add_file`、`add_subdirectory`、`delete_child`、`delete_child`。\
+ファイルには次の権限があります：`read`、`write`、`append`、`execute`。
 
 ファイルにACLが含まれている場合、パーミッションをリスト表示する際に**"+"が表示されます**。
 ```bash
@@ -212,7 +218,7 @@ Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコ�
 * **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>
