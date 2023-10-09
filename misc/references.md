@@ -27,8 +27,6 @@
 
 {% embed url="https://ired.team/offensive-security-experiments/offensive-security-cheetsheets" %}
 
-{% embed url="http://www.lifeoverpentest.com/2018/02/enumeration-cheat-sheet-for-windows.html" %}
-
 {% embed url="https://chryzsh.gitbooks.io/pentestbook/basics_of_windows.html" %}
 
 {% embed url="https://github.com/wwong99/pentest-notes/blob/master/oscp_resources/OSCP-Survival-Guide.md" %}
