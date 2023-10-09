@@ -38,6 +38,10 @@ The x64 calling convention varies between operating systems. For instance:
 
 If the function has more than six inputs, the **rest will be passed on the stack**. **RSP**, the stack pointer, has to be **16 bytes aligned**, which means that the address it points to must be divisible by 16 before any call happens. This means that normally we would need to ensure that RSP is properly aligned in our shellcode before we make a function call. However, in practice, system calls work many times even if this requirement is not met.
 
+### Calling Convention in Swift
+
+Swift have its own **calling convention** that can be found in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+
 ### **Common Instructions**
 
 x64 instructions have a rich set, maintaining compatibility with earlier x86 instructions and introducing new ones.

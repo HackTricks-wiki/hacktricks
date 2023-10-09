@@ -165,6 +165,16 @@ LC 01: LC_SEGMENT_64              Mem: 0x100000000-0x100028000    __TEXT
 
 You can find further information about the [**information stored in these section in this blog post**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
+Moreover, **Swift binaries might have symbols** (for example libraries need to store symbols so its functions can be called). The **symbols usually have the info about the function name** and attr in a ugly way, so they are very useful and there are "**demanglers"** that can get the original name:
+
+```bash
+# Ghidra plugin
+https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
+
+# Swift cli
+swift demangle
+```
+
 ### Packed binaries
 
 * Check for high entropy
