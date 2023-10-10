@@ -143,6 +143,10 @@ Si deseas que las comprenda, simplemente puedes **declararlas**:
 
 Luego, encuentra un lugar en el código donde se **utilicen**:
 
+{% hint style="success" %}
+Ten en cuenta todas las referencias hechas a "block" para entender cómo puedes determinar que se está utilizando la estructura.
+{% endhint %}
+
 <figure><img src="../../.gitbook/assets/image (692).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Haz clic derecho en la variable -> Cambiar tipo de variable y selecciona en este caso **`swift_dispatch_block`**:
