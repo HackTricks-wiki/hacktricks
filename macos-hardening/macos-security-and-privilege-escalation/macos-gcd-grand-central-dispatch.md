@@ -151,6 +151,10 @@ So if you want it to understand them, you could just **declare them**:
 
 Then, find a place in the code where they are **used**:
 
+{% hint style="success" %}
+Note all of references made to "block" to understand how you could figure out that the struct is being used.
+{% endhint %}
+
 <figure><img src="../../.gitbook/assets/image (692).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Right click on the variable -> Retype Variable and select in this case **`swift_dispatch_block`**:
