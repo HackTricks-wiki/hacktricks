@@ -67,10 +67,24 @@ When an application or executable file tries to run on macOS, the operating syst
 
 ## Launch Constraints
 
-It controls from where and what can launch an Apple signed binary:
+It controls **from where and what** can launch an **Apple signed binary**:
 
 * You can't launch an app directly if should be run by launchd
 * You can't run an app outside of the trusted location (like /System/)
+
+The file that contains information about this constrains is located in macOS in **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`** (and in iOS it looks like it's in **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**).
+
+It looks like it was possible to use the tool [**img4tool**](https://github.com/tihmstar/img4tool) **to extract the cache**:
+
+```bash
+img4tool -e in.img4 -o out.bin 
+```
+
+(However, I haven't been able to compile it in M1).
+
+Then, you could use a script such as [**this one**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) to extract data.
+
+From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).
 
 <details>
 

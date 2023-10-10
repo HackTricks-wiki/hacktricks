@@ -48,6 +48,14 @@ Electron applications executed with specific env variables could be vulnerable t
 [macos-electron-applications-injection.md](macos-electron-applications-injection.md)
 {% endcontent-ref %}
 
+### Dirty NIB
+
+NIB files **define user interface (UI) elements** and their interactions within an application. However, they can **execute arbitrary commands** and **Gatekeeper doesn't stop** an already executed application from being executed if a **NIB file is modified**. Therefore, they could be used to make arbitrary programs execute arbitrary commands:
+
+{% content-ref url="macos-dirty-nib.md" %}
+[macos-dirty-nib.md](macos-dirty-nib.md)
+{% endcontent-ref %}
+
 ### .Net Applications Injection
 
 It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
