@@ -14,13 +14,13 @@
 
 ## ファイアウォール
 
-* [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): 各プロセスが行うすべての接続を監視します。モードによって（接続を許可する、接続を拒否する、アラートを表示する）、新しい接続が確立されるたびに**アラートを表示**します。また、この情報を表示するための非常に素敵なGUIもあります。
-* [**LuLu**](https://objective-see.org/products/lulu.html): Objective-Seeファイアウォール。これは基本的なファイアウォールで、疑わしい接続についてアラートを表示します（GUIはLittle Snitchのものほど洗練されていません）。
+* [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): 各プロセスが行うすべての接続を監視します。モードによって（接続を許可する、接続を拒否する、アラート）、新しい接続が確立されるたびに**アラートを表示**します。また、この情報を表示するための非常に素敵なGUIも備えています。
+* [**LuLu**](https://objective-see.org/products/lulu.html): Objective-Seeファイアウォール。これは基本的なファイアウォールで、**疑わしい接続に対してアラートを表示**します（GUIはLittle Snitchのものほど洗練されていません）。
 
-## 永続化検出
+## 持続性の検出
 
-* [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-Seeアプリケーションで、**マルウェアが永続化している可能性のある**複数の場所を検索します（ワンショットツールであり、監視サービスではありません）。
-* [**BlockBlock**](https://objective-see.org/products/blockblock.html): KnockKnockと同様に、永続性を生成するプロセスを監視します。
+* [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-Seeアプリケーションで、**マルウェアが持続する可能性のある**複数の場所を検索します（ワンショットツールであり、監視サービスではありません）。
+* [**BlockBlock**](https://objective-see.org/products/blockblock.html): KnockKnockと同様に、持続性を生成するプロセスを監視します。
 
 ## キーロガーの検出
 
