@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
@@ -20,25 +20,25 @@
 
 ### バッテリー
 
-ほとんどの**マザーボード**には**バッテリー**があります。バッテリーを**30分間取り外す**と、BIOSの設定が**リセット**されます（パスワードも含まれます）。
+ほとんどの**マザーボード**には**バッテリー**があります。BIOSの設定が**30分間リセット**されます（パスワードも含まれます）。
 
 ### CMOSジャンパー
 
-ほとんどの**マザーボード**には、設定をリセットできる**ジャンパー**があります。このジャンパーは、中央のピンと別のピンを接続します。これらのピンを接続すると、マザーボードがリセットされます。
+ほとんどの**マザーボード**には設定をリセットできる**ジャンパー**があります。このジャンパーは中央のピンと他のピンを接続します。これらのピンを接続すると、マザーボードがリセットされます。
 
 ### ライブツール
 
-たとえば、Live CD/USBから**Kali** Linuxを実行できる場合、_**killCmos**_や_**CmosPWD**_（これはKaliに含まれています）などのツールを使用して、BIOSのパスワードを**回復**することができます。
+たとえば**Kali** LinuxをLive CD/USBから実行できる場合、_**killCmos**_や_**CmosPWD**_（後者はKaliに含まれています）などのツールを使用して、BIOSのパスワードを**回復**することができます。
 
 ### オンラインBIOSパスワードの回復
 
 BIOSのパスワードを**3回間違える**と、BIOSは**エラーメッセージを表示**してブロックされます。\
-[https://bios-pw.org](https://bios-pw.org)にアクセスし、BIOSに表示される**エラーコード**を入力すると、**有効なパスワード**（同じ検索でも異なるパスワードが表示される場合があり、複数のパスワードが有効になる場合があります）を取得できるかもしれません。
+[https://bios-pw.org](https://bios-pw.org)にアクセスし、BIOSに表示される**エラーコード**を入力すると、**有効なパスワード**を入手できるかもしれません（**同じ検索でも異なるパスワードが表示され、複数のパスワードが有効**になる場合があります）。
 
 ## UEFI
 
 UEFIの設定を確認し、攻撃を行うためには、[chipsec](https://github.com/chipsec/chipsec/blob/master/chipsec-manual.pdf)を試してみる必要があります。\
-このツールを使用すると、簡単にSecure Bootを無効にすることができます：
+このツールを使用すると、簡単にSecure Bootを無効にすることができます。
 ```
 python chipsec_main.py -module exploits.secure.boot.pk
 ```
@@ -46,18 +46,18 @@ python chipsec_main.py -module exploits.secure.boot.pk
 
 ### コールドブート
 
-**RAMメモリは、コンピュータの電源が切れてから1〜2分間は持続的**です。もしメモリカードに**コールド**（例えば液体窒素）を適用すると、この時間を**最大10分間**まで延長することができます。
+**RAMメモリは、コンピュータの電源が切れてから1〜2分間は持続的**です。メモリカードに**冷却**（例：液体窒素）を適用すると、この時間を**最大10分間**延長することができます。
 
 その後、**dd.exe、mdd.exe、Memoryze、win32dd.exe、DumpIt**などのツールを使用して、**メモリダンプ**を行い、メモリを分析することができます。
 
-メモリを**volatility**を使用して分析する必要があります。
+メモリを**解析**するためには、**volatility**を使用する必要があります。
 
 ### [INCEPTION](https://github.com/carmaa/inception)
 
-Inceptionは、PCIベースのDMAを利用した**物理的なメモリ操作**およびハッキングツールです。このツールは、**FireWire**、**Thunderbolt**、**ExpressCard**、PCカード、およびその他のPCI/PCIe HWインターフェースを介して攻撃することができます。\
-自分のコンピュータを被害者のコンピュータにこれらの**インターフェース**のいずれかで接続し、**INCEPTION**が**物理メモリ**を**パッチ**して**アクセス**を提供しようとします。
+Inceptionは、PCIベースのDMAを利用した**物理的なメモリ操作**およびハッキングツールです。このツールは、**FireWire**、**Thunderbolt**、**ExpressCard**、PCカード、およびその他のPCI/PCIe HWインターフェースを介して攻撃を行うことができます。\
+自分のコンピュータを被害者のコンピュータにこれらの**インターフェース**のいずれかで接続し、**INCEPTION**が**物理メモリ**を**パッチ**してアクセス権を与えることを試みます。
 
-**INCEPTIONが成功すると、入力されたパスワードは有効になります。**
+**INCEPTIONが成功すると、入力されたパスワードはすべて有効になります。**
 
 **Windows10では動作しません。**
 
@@ -65,17 +65,17 @@ Inceptionは、PCIベースのDMAを利用した**物理的なメモリ操作**�
 
 ### Sticky Keys およびその他
 
-* **SETHC:** SHIFTキーが5回押されたときに_sethc.exe_が呼び出されます。
-* **UTILMAN:** WINDOWS+Uを押すと_Utilman.exe_が呼び出されます。
-* **OSK:** WINDOWS+Uを押し、その後オンスクリーンキーボードを起動すると_osk.exe_が呼び出されます。
-* **DISP:** WINDOWS+Pを押すと_DisplaySwitch.exe_が呼び出されます。
+* **SETHC:** SHIFTキーを5回押すと、_sethc.exe_が呼び出されます。
+* **UTILMAN:** WINDOWS+Uを押すと、_Utilman.exe_が呼び出されます。
+* **OSK:** WINDOWS+Uを押し、オンスクリーンキーボードを起動すると、_osk.exe_が呼び出されます。
+* **DISP:** WINDOWS+Pを押すと、_DisplaySwitch.exe_が呼び出されます。
 
 これらのバイナリは_**C:\Windows\System32**_内にあります。これらのバイナリのいずれかを、同じフォルダにある**cmd.exe**のコピーに**変更**することができ、これらのバイナリを呼び出すたびに、**SYSTEM**としてのコマンドプロンプトが表示されます。
 
 ### SAMの変更
 
 ツール_**chntpw**_を使用して、マウントされたWindowsファイルシステムの_**SAM**_ファイルを**変更**することができます。その後、例えばAdministratorユーザーのパスワードを変更することができます。\
-このツールはKALIで利用可能です。
+このツールはKALIに含まれています。
 ```
 chntpw -h
 chntpw -l <path_to_SAM>
@@ -85,16 +85,16 @@ chntpw -l <path_to_SAM>
 ### **Kon-Boot**
 
 **Kon-Boot**は、パスワードを知らずにWindowsにログインできる最高のツールの一つです。**システムBIOSにフックし、Windowsカーネルの内容を一時的に変更**することで動作します（新しいバージョンでは**UEFI**でも動作します）。その後、ログイン時に**任意のパスワードを入力**することができます。Kon-Bootなしでコンピュータを再起動すると、元のパスワードが復元され、一時的な変更は破棄され、システムは何も起こったかのように動作します。\
-詳細はこちらを参照してください：[https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/)
+詳細はこちら：[https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/)
 
 これはライブCD/USBであり、メモリを**パッチ**することができるため、**ログインするためにパスワードを知る必要はありません**。\
-Kon-Bootはまた、**StickyKeys**のトリックを実行するため、_**Shift**_ **を5回押すと管理者のコマンドプロンプトが表示されます**。
+Kon-Bootはまた、**StickyKeys**のトリックも実行するため、_**Shift**_ **を5回押すと管理者のコマンドプロンプトが表示されます**。
 
 ## **Windowsの実行**
 
 ### 初期のショートカット
 
-### ブートのショートカット
+### ブート時のショートカット
 
 * supr - BIOS
 * f8 - リカバリーモード
@@ -135,7 +135,7 @@ schtasks /create /SC ONLOGON /tr "c:/windows/system32/manage-bde.exe -protectors
 ```
 次回のログイン時に、新しいリカバリーキー（48個のゼロで構成される）が追加されます。
 
-有効なリカバリーキーを確認するには、次のコマンドを実行します。
+有効なリカバリーキーを確認するには、次のコマンドを実行できます。
 ```
 manage-bde -protectors -get c:
 ```
@@ -149,8 +149,8 @@ manage-bde -protectors -get c:
 
 - [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
