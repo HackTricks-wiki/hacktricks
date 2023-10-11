@@ -161,6 +161,32 @@ Kerberoast is very stealthy if exploitable
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
 
+## Kerberoast w/o domain account
+
+In September 2022 a vulnerability was discovered by [Charlie Clark](https://exploit.ph/), ST (Service Tickets) can be obtained through KRB_AS_REQ request without having to control any Active Directory account. If a principal can authenticate without pre-authentication (like AS-REP Roasting attack), it is possible to use it to launch an **KRB_AS_REQ** request and trick the request to ask for a **ST** instead of a **encrypted TGT**, by modifying the **sname** attribute in the req-body part of the request.
+
+The technique is fully explained in this article: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
+
+{% hint style="warning" %}
+You must provide a list of users because we don't have a valid account to query the LDAP using this technique.
+{% endhint %}
+
+#### Linux
+
+* [impacket/GetUserSPNs.py from PR #1413](https://github.com/fortra/impacket/pull/1413):
+
+```bash
+GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "dc.domain.local" "domain.local"/
+```
+
+#### Windows
+
+* [GhostPack/Rubeus from PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+
+```bash
+Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
+```
+
 **More information about Kerberoasting in ired.team in** [**here** ](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)**and** [**here**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)**.**
 
 <details>
