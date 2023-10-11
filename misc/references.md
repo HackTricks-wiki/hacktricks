@@ -8,7 +8,7 @@
 
 - [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
 - **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
@@ -33,6 +33,35 @@
 
 {% embed url="https://anhtai.me/oscp-fun-guide/" %}
 
+{% embed url="https://www.thehacker.recipes/" %}
+
+{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings" %}
+
+{% embed url="https://gtfobins.github.io/" %}
+
+{% embed url="https://github.com/RistBS/Awesome-RedTeam-Cheatsheet" %}
+
+{% embed url="https://github.com/S1ckB0y1337/Active-Directory-Exploitation-Cheat-Sheet" %}
+
+{% embed url="https://hideandsec.sh/" %}
+
+{% embed url="https://cheatsheet.haax.fr/" %}
+
+{% embed url="https://infosecwriteups.com/" %}
+
+{% embed url="https://www.exploit-db.com/" %}
+
+{% embed url="https://wadcoms.github.io/" %}
+
+{% embed url="https://lolbas-project.github.io" %}
+
+{% embed url="https://pentestbook.six2dez.com/" %}
+
+{% embed url="https://www.hackingarticles.in/" %}
+
+{% embed url="https://pentestlab.blog/" %}
+
+{% embed url="https://ippsec.rocks/" %}
 
 
 <details>
@@ -45,7 +74,7 @@
 
 - [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
 - **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
