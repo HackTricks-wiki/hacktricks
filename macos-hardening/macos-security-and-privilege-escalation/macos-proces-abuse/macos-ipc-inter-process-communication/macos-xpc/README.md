@@ -22,7 +22,7 @@ Los principales beneficios de XPC incluyen:
 
 1. **Seguridad**: Al separar el trabajo en diferentes procesos, cada proceso puede recibir solo los permisos que necesita. Esto significa que incluso si un proceso está comprometido, tiene una capacidad limitada para causar daño.
 2. **Estabilidad**: XPC ayuda a aislar los bloqueos en el componente donde ocurren. Si un proceso se bloquea, se puede reiniciar sin afectar al resto del sistema.
-3. **Rendimiento**: XPC permite una fácil concurrencia, ya que diferentes tareas se pueden ejecutar simultáneamente en diferentes procesos.
+3. **Rendimiento**: XPC permite una fácil concurrencia, ya que diferentes tareas pueden ejecutarse simultáneamente en diferentes procesos.
 
 La única **desventaja** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto apenas se nota y los beneficios son mayores.
 
@@ -94,6 +94,19 @@ Apple también permite que las aplicaciones **configuren algunos derechos y cóm
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
 {% endcontent-ref %}
 
+## Espía XPC
+
+Para espiar los mensajes XPC, puedes usar [**xpcspy**](https://github.com/hot3eed/xpcspy) que utiliza **Frida**.
+```bash
+# Install
+pip3 install xpcspy
+pip3 install xpcspy --no-deps # To not make xpcspy install Frida 15 and downgrade your Frida installation
+
+# Start sniffing
+xpcspy -U -r -W <bundle-id>
+## Using filters (i: for input, o: for output)
+xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
+```
 ## Ejemplo de código en C
 
 {% tabs %}
@@ -302,54 +315,18 @@ return 0;
 
 # xyz.hacktricks.svcoc.plist
 
-Este archivo de propiedad de la lista de servicios de macOS (plist) se utiliza para definir los servicios que se ejecutan en segundo plano en un proceso separado. Los servicios se comunican entre sí utilizando el marco XPC (Interfaz de comunicación entre procesos).
+Este archivo de propiedad de la lista de servicios de macOS (plist) se utiliza para definir los servicios que se ejecutan en segundo plano en un sistema macOS. Los servicios se definen utilizando el formato XPC (Interfaz de Comunicación entre Procesos) y se pueden utilizar para la comunicación entre procesos en macOS.
 
-## Ubicación del archivo
+El archivo plist contiene una serie de claves y valores que definen el servicio y su comportamiento. Algunas de las claves comunes incluyen:
 
-El archivo `xyz.hacktricks.svcoc.plist` se encuentra en la siguiente ubicación en macOS:
+- `Label`: El nombre único del servicio.
+- `ProgramArguments`: Los argumentos del programa que se ejecutará como parte del servicio.
+- `MachServices`: Los servicios Mach que el servicio puede utilizar para la comunicación entre procesos.
+- `Sockets`: Los sockets que el servicio puede utilizar para la comunicación entre procesos.
 
-```
-/Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
-```
+Para aprovecharse de un archivo plist de servicio, un atacante puede modificar el archivo para ejecutar su propio código malicioso en el contexto del servicio. Esto puede permitir al atacante obtener privilegios elevados en el sistema o realizar otras acciones maliciosas.
 
-## Contenido del archivo
-
-El archivo plist contiene información sobre el servicio, incluyendo su nombre, ruta de ejecución, argumentos y más. Aquí hay un ejemplo de cómo se ve el contenido del archivo:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>xyz.hacktricks.svcoc</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/usr/bin/python</string>
-        <string>/path/to/script.py</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-</dict>
-</plist>
-```
-
-## Modificación del archivo
-
-Para modificar el archivo `xyz.hacktricks.svcoc.plist`, se puede utilizar un editor de texto o la utilidad `plutil` en la línea de comandos. Asegúrese de tener privilegios de administrador para realizar cambios en el archivo.
-
-## Reinicio del servicio
-
-Después de realizar cambios en el archivo plist, se debe reiniciar el servicio para que los cambios surtan efecto. Esto se puede hacer utilizando el comando `launchctl` en la línea de comandos:
-
-```
-sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
-sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
-```
-
-Esto detendrá y reiniciará el servicio `xyz.hacktricks.svcoc`.
+Es importante asegurarse de que los archivos plist de servicio estén correctamente configurados y protegidos para evitar posibles abusos y ataques de escalada de privilegios.
 
 {% endtab %}
 ```xml
@@ -395,62 +372,57 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
 ## Cliente dentro de un código Dylb
 
-The Dylb code allows the creation of a client that can communicate with a server using the XPC mechanism in macOS. This client code can be embedded within an application or script to establish a connection with the server and exchange messages.
+The Dylb code allows the creation of a client that can communicate with a server using the XPC framework in macOS. This client code can be embedded within an application to establish inter-process communication (IPC) with the server.
 
 To create a client inside a Dylb code, follow these steps:
 
-1. Import the necessary modules:
-```python
-import os
-import sys
-from Foundation import NSXPCConnection, NSXPCInterface
+1. Import the necessary frameworks:
+```objective-c
+#import <Foundation/Foundation.h>
+#import <xpc/xpc.h>
 ```
 
-2. Define the server interface:
-```python
-server_interface = NSXPCInterface.interfaceWithProtocol_(YourServerProtocol)
-```
-Replace `YourServerProtocol` with the protocol defined for the server.
+2. Define the XPC connection and event handler:
+```objective-c
+static xpc_connection_t connection;
+static dispatch_queue_t queue;
 
-3. Create the connection to the server:
-```python
-connection = NSXPCConnection.alloc().initWithMachServiceName_options_(YourServerMachServiceName, 0)
-```
-Replace `YourServerMachServiceName` with the Mach service name of the server.
-
-4. Set the server interface for the connection:
-```python
-connection.setRemoteObjectInterface_(server_interface)
+void eventHandler(xpc_object_t event) {
+    // Handle incoming events from the server
+    // ...
+}
 ```
 
-5. Define the completion handler for the connection:
-```python
-def connection_handler():
-    # Handle connection completion
-    pass
-
-connection.setInvalidationHandler_(connection_handler)
-
-6. Establish the connection:
-```python
-connection.resume()
+3. Implement the client code:
+```objective-c
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        // Create the XPC connection
+        connection = xpc_connection_create_mach_service("com.example.server", queue, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
+        
+        // Set the event handler
+        xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
+            eventHandler(event);
+        });
+        
+        // Resume the connection
+        xpc_connection_resume(connection);
+        
+        // Send messages to the server
+        // ...
+        
+        // Run the main loop
+        dispatch_main();
+    }
+    return 0;
+}
 ```
 
-7. Use the connection to send messages to the server:
-```python
-# Example message sending
-connection.remoteObjectProxy().yourServerMethodWithCompletion_(yourParameter, completionHandler)
-```
-Replace `yourServerMethodWithCompletion_` with the method you want to call on the server, and `yourParameter` with the appropriate parameter for the method.
+4. Customize the code as needed, such as adding message sending functionality or handling server responses.
 
-8. Handle the server's response in the completion handler:
-```python
-def completionHandler(response):
-    # Handle server response
-    pass
-```
+Remember to replace `"com.example.server"` with the actual Mach service name of the server you want to communicate with.
 
-By following these steps, you can create a client inside a Dylb code that can communicate with a server using the XPC mechanism in macOS.
+By embedding this client code within your application, you can establish IPC with a server using the XPC framework in macOS. This allows for secure and efficient communication between processes.
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
 // gcc injection example:

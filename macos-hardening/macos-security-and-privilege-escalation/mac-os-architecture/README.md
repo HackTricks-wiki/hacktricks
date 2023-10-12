@@ -6,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -14,7 +14,7 @@
 
 ## Kernel XNU
 
-El **núcleo de macOS es XNU**, que significa "X is Not Unix" (X no es Unix). Este núcleo está compuesto fundamentalmente por el **microkernel Mach** (que se discutirá más adelante) y elementos de la Distribución de Software Berkeley (**BSD**). XNU también proporciona una plataforma para **controladores de kernel a través de un sistema llamado I/O Kit**. El núcleo XNU forma parte del proyecto de código abierto Darwin, lo que significa que **su código fuente es de libre acceso**.
+El **núcleo de macOS es XNU**, que significa "X is Not Unix" (X no es Unix). Este núcleo está compuesto fundamentalmente por el **microkernel Mach** (que se discutirá más adelante) y elementos de la **Distribución de Software Berkeley (BSD)**. XNU también proporciona una plataforma para **controladores de kernel a través de un sistema llamado I/O Kit**. El núcleo XNU forma parte del proyecto de código abierto Darwin, lo que significa que **su código fuente es de libre acceso**.
 
 Desde la perspectiva de un investigador de seguridad o un desarrollador de Unix, **macOS** puede parecer bastante **similar** a un sistema **FreeBSD** con una interfaz gráfica elegante y una serie de aplicaciones personalizadas. La mayoría de las aplicaciones desarrolladas para BSD se pueden compilar y ejecutar en macOS sin necesidad de modificaciones, ya que las herramientas de línea de comandos familiares para los usuarios de Unix están presentes en macOS. Sin embargo, debido a que el núcleo XNU incorpora Mach, existen algunas diferencias significativas entre un sistema similar a Unix tradicional y macOS, y estas diferencias pueden causar problemas potenciales o proporcionar ventajas únicas.
 
@@ -43,58 +43,97 @@ Además, **Mach y BSD mantienen modelos de seguridad diferentes**: el modelo de 
 
 ### I/O Kit - Controladores
 
-I/O Kit es el marco de **controladores de dispositivos orientado a objetos** de código abierto en el núcleo XNU y es responsable de la adición y gestión de **controladores de dispositivos cargados dinámicamente**. Estos controladores permiten agregar código modular al kernel de forma dinámica para su uso con diferentes hardware, por ejemplo. Se encuentran en:
+I/O Kit es el marco de **controladores de dispositivos orientado a objetos** de código abierto en el núcleo XNU y es responsable de la adición y gestión de **controladores de dispositivos cargados dinámicamente**. Estos controladores permiten agregar código modular al kernel de forma dinámica para su uso con diferentes hardware, por ejemplo.
 
-* `/System/Library/Extensions`
-* Archivos KEXT integrados en el sistema operativo OS X.
-* `/Library/Extensions`
-* Archivos KEXT instalados por software de terceros
-```bash
-#Use kextstat to print the loaded drivers
-kextstat
-Executing: /usr/bin/kmutil showloaded
-No variant specified, falling back to release
-Index Refs Address            Size       Wired      Name (Version) UUID <Linked Against>
-1  142 0                  0          0          com.apple.kpi.bsd (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-2   11 0                  0          0          com.apple.kpi.dsep (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-3  170 0                  0          0          com.apple.kpi.iokit (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-4    0 0                  0          0          com.apple.kpi.kasan (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-5  175 0                  0          0          com.apple.kpi.libkern (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-6  154 0                  0          0          com.apple.kpi.mach (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-7   88 0                  0          0          com.apple.kpi.private (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-8  106 0                  0          0          com.apple.kpi.unsupported (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
-10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
-```
-Hasta el número 9, los controladores enumerados se **cargan en la dirección 0**. Esto significa que no son controladores reales, sino **parte del kernel y no se pueden descargar**.
+{% content-ref url="macos-iokit.md" %}
+[macos-iokit.md](macos-iokit.md)
+{% endcontent-ref %}
 
-Para encontrar extensiones específicas, puedes usar:
-```bash
-kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
-kextfind -bundle-id -substring IOR #Search by substring in bundle-id
-```
-Para cargar y descargar extensiones del kernel, haz lo siguiente:
-```bash
-kextload com.apple.iokit.IOReportFamily
-kextunload com.apple.iokit.IOReportFamily
-```
 ### IPC - Comunicación entre Procesos
 
 {% content-ref url="macos-ipc-inter-process-communication/" %}
 [macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
 
-## Extensiones del Kernel de macOS
+### Kernelcache
 
-macOS es **muy restrictivo para cargar Extensiones del Kernel** (.kext) debido a los altos privilegios con los que se ejecutará el código. De hecho, por defecto es prácticamente imposible (a menos que se encuentre un bypass).
+El **kernelcache** es una versión **precompilada y preenlazada del núcleo XNU**, junto con controladores de dispositivos esenciales y extensiones del kernel. Se almacena en un formato **comprimido** y se descomprime en la memoria durante el proceso de inicio. El kernelcache facilita un **inicio más rápido** al tener una versión lista para ejecutarse del kernel y controladores importantes disponibles, lo que reduce el tiempo y los recursos que de otro modo se gastarían en cargar y enlazar dinámicamente estos componentes durante el inicio.
+
+En iOS se encuentra en **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** y en macOS se puede encontrar con **`find / -name kernelcache 2>/dev/null`**.
+#### IMG4
+
+El formato de archivo IMG4 es un formato de contenedor utilizado por Apple en sus dispositivos iOS y macOS para almacenar y verificar de manera segura los componentes del firmware (como el kernelcache). El formato IMG4 incluye un encabezado y varias etiquetas que encapsulan diferentes piezas de datos, incluyendo la carga útil real (como un kernel o un cargador de arranque), una firma y un conjunto de propiedades de manifiesto. El formato admite la verificación criptográfica, lo que permite al dispositivo confirmar la autenticidad e integridad del componente del firmware antes de ejecutarlo.
+
+Por lo general, está compuesto por los siguientes componentes:
+
+* **Carga útil (IM4P)**:
+* A menudo comprimido (LZFSE4, LZSS, ...)
+* Opcionalmente encriptado
+* **Manifiesto (IM4M)**:
+* Contiene la firma
+* Diccionario adicional de clave/valor
+* **Información de restauración (IM4R)**:
+* También conocido como APNonce
+* Evita la reproducción de algunas actualizaciones
+* OPCIONAL: Por lo general, esto no se encuentra
+
+Descomprimir el Kernelcache:
+```bash
+# pyimg4 (https://github.com/m1stadev/PyIMG4)
+pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+
+# img4tool (https://github.com/tihmstar/img4tool
+img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+#### Símbolos del Kernelcache
+
+A veces Apple lanza **kernelcache** con **símbolos**. Puedes descargar algunos firmwares con símbolos siguiendo los enlaces en [https://theapplewiki.com](https://theapplewiki.com/).
+
+### IPSW
+
+Estos son los **firmwares** de Apple que puedes descargar desde [**https://ipsw.me/**](https://ipsw.me/). Entre otros archivos, contendrá el **kernelcache**.\
+Para **extraer** los archivos, simplemente descomprímelo.
+
+Después de extraer el firmware, obtendrás un archivo como: **`kernelcache.release.iphone14`**. Está en formato **IMG4**, puedes extraer la información interesante con:
+
+* [**pyimg4**](https://github.com/m1stadev/PyIMG4)
+
+{% code overflow="wrap" %}
+```bash
+pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+{% endcode %}
+
+* [**img4tool**](https://github.com/tihmstar/img4tool)
+```bash
+img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+Puedes verificar los símbolos del kernelcache extraído con: **`nm -a kernelcache.release.iphone14.e | wc -l`**
+
+Con esto ahora podemos **extraer todas las extensiones** o la **que te interese:**
+```bash
+# List all extensions
+kextex -l kernelcache.release.iphone14.e
+## Extract com.apple.security.sandbox
+kextex -e com.apple.security.sandbox kernelcache.release.iphone14.e
+
+# Extract all
+kextex_all kernelcache.release.iphone14.e
+
+# Check the extension for symbols
+nm -a binaries/com.apple.security.sandbox | wc -l
+```
+## Extensiones del kernel de macOS
+
+macOS es **muy restrictivo para cargar extensiones del kernel** (.kext) debido a los altos privilegios con los que se ejecutará el código. De hecho, por defecto es prácticamente imposible (a menos que se encuentre un bypass).
 
 {% content-ref url="macos-kernel-extensions.md" %}
 [macos-kernel-extensions.md](macos-kernel-extensions.md)
 {% endcontent-ref %}
 
-### Extensiones del Sistema de macOS
+### Extensiones del sistema de macOS
 
-En lugar de utilizar Extensiones del Kernel, macOS creó las Extensiones del Sistema, que ofrecen APIs a nivel de usuario para interactuar con el kernel. De esta manera, los desarrolladores pueden evitar el uso de extensiones del kernel.
+En lugar de utilizar extensiones del kernel, macOS creó las extensiones del sistema, que ofrecen API de nivel de usuario para interactuar con el kernel. De esta manera, los desarrolladores pueden evitar el uso de extensiones del kernel.
 
 {% content-ref url="macos-system-extensions.md" %}
 [macos-system-extensions.md](macos-system-extensions.md)
@@ -113,6 +152,6 @@ En lugar de utilizar Extensiones del Kernel, macOS creó las Extensiones del Sis
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

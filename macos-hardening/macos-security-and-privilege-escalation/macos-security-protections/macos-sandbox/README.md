@@ -153,11 +153,22 @@ Para iniciar una aplicación con un **perfil de sandbox específico**, puedes us
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
-El archivo `touch.sb` es un archivo de política de sandbox para macOS. Define las restricciones de seguridad para la aplicación `touch`. El sandbox es un mecanismo de seguridad que limita los recursos y las acciones que una aplicación puede realizar en el sistema operativo. Esto ayuda a prevenir posibles vulnerabilidades y protege el sistema de posibles ataques.
+El archivo `touch.sb` contiene una política de sandboxing para restringir los privilegios de la aplicación `touch`. Esta política asegura que la aplicación solo tenga acceso a los recursos y funcionalidades permitidos, evitando así posibles vulnerabilidades y ataques de escalada de privilegios.
 
-El archivo `touch.sb` contiene reglas que especifican los permisos y las restricciones para la aplicación `touch`. Estas reglas definen qué recursos puede acceder la aplicación, como archivos, directorios, redes y servicios del sistema. También especifica las acciones que la aplicación puede realizar, como leer, escribir o ejecutar archivos.
+La política de sandboxing establece las siguientes restricciones:
 
-Al utilizar el archivo `touch.sb`, se puede restringir el acceso de la aplicación `touch` a ciertos recursos y acciones, lo que ayuda a proteger el sistema contra posibles abusos o ataques maliciosos. Es importante configurar adecuadamente las reglas de sandbox para garantizar la seguridad del sistema y prevenir posibles vulnerabilidades.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/doc`.
+- Acceso de escritura solo a los archivos en el directorio `/tmp`.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/man`.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/locale`.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/terminfo`.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/misc`.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/zoneinfo`.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/ssl`.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/curl`.
+- Acceso solo lectura a los archivos en el directorio `/usr/share/zsh`.
+
+Estas restricciones garantizan que la aplicación `touch` solo pueda leer y escribir en los directorios y archivos especificados, limitando su capacidad para acceder a otros recursos del sistema operativo. Esto ayuda a prevenir posibles ataques y protege la integridad y seguridad del sistema.
 ```scheme
 (version 1)
 (deny default)
@@ -218,9 +229,13 @@ macOS almacena los perfiles de sandbox del sistema en dos ubicaciones: **/usr/sh
 
 Y si una aplicación de terceros tiene la autorización _**com.apple.security.app-sandbox**_, el sistema aplica el perfil **/System/Library/Sandbox/Profiles/application.sb** a ese proceso.
 
-### Depurar y Bypass Sandbox
+### **Perfil de Sandbox de iOS**
 
-**Los procesos no nacen aislados en el sandbox en macOS: a diferencia de iOS**, donde el sandbox se aplica por el kernel antes de que se ejecute la primera instrucción de un programa, en macOS **un proceso debe elegir colocarse en el sandbox.**
+El perfil predeterminado se llama **container** y no tenemos la representación de texto SBPL. En memoria, este sandbox se representa como un árbol binario de Permitir/Denegar para cada permiso del sandbox.
+
+### Depurar y Bypass del Sandbox
+
+**Los procesos no nacen aislados en macOS: a diferencia de iOS**, donde el sandbox se aplica por el kernel antes de que se ejecute la primera instrucción de un programa, en macOS **un proceso debe elegir colocarse en el sandbox.**
 
 Los procesos se aíslan automáticamente desde el espacio de usuario cuando se inician si tienen la autorización: `com.apple.security.app-sandbox`. Para obtener una explicación detallada de este proceso, consulta:
 

@@ -45,7 +45,7 @@ Swift tiene su propia **convención de llamada** que se puede encontrar en [**ht
 
 ### **Instrucciones Comunes**
 
-Las instrucciones de ARM64 generalmente tienen el **formato `opcode dst, src1, src2`**, donde **`opcode`** es la **operación** que se va a realizar (como `add`, `sub`, `mov`, etc.), **`dst`** es el registro **destino** donde se almacenará el resultado, y **`src1`** y **`src2`** son los registros **fuente**. También se pueden usar valores inmediatos en lugar de registros fuente.
+Las instrucciones de ARM64 generalmente tienen el **formato `opcode dst, src1, src2`**, donde **`opcode`** es la **operación** que se va a realizar (como `add`, `sub`, `mov`, etc.), **`dst`** es el registro **destino** donde se almacenará el resultado, y **`src1`** y **`src2`** son los registros **fuente**. También se pueden utilizar valores inmediatos en lugar de registros fuente.
 
 * **`mov`**: **Mover** un valor de un **registro** a otro.
 * Ejemplo: `mov x0, x1` — Esto mueve el valor de `x1` a `x0`.
@@ -59,23 +59,23 @@ Las instrucciones de ARM64 generalmente tienen el **formato `opcode dst, src1, s
 * Ejemplo: `stp x0, x1, [x2]` — Esto almacena `x0` y `x1` en las ubicaciones de memoria en `x2` y `x2 + 8`, respectivamente.
 * **`add`**: **Sumar** los valores de dos registros y almacenar el resultado en un registro.
 * Ejemplo: `add x0, x1, x2` — Esto suma los valores en `x1` y `x2` y almacena el resultado en `x0`.
-* **`sub`**: **Restar** los valores de dos registros y almacenar el resultado en un registro.
+* **`sub`**: **Resta** los valores de dos registros y almacena el resultado en un registro.
 * Ejemplo: `sub x0, x1, x2` — Esto resta el valor en `x2` de `x1` y almacena el resultado en `x0`.
-* **`mul`**: **Multiplicar** los valores de **dos registros** y almacenar el resultado en un registro.
+* **`mul`**: **Multiplica** los valores de **dos registros** y almacena el resultado en un registro.
 * Ejemplo: `mul x0, x1, x2` — Esto multiplica los valores en `x1` y `x2` y almacena el resultado en `x0`.
-* **`div`**: **Dividir** el valor de un registro por otro y almacenar el resultado en un registro.
+* **`div`**: **Divide** el valor de un registro por otro y almacena el resultado en un registro.
 * Ejemplo: `div x0, x1, x2` — Esto divide el valor en `x1` por `x2` y almacena el resultado en `x0`.
-* **`bl`**: **Branch with link**, utilizado para **llamar** a una **subrutina**. Almacena la **dirección de retorno en `x30`**.
+* **`bl`**: **Branch with link**, se utiliza para **llamar** a una **subrutina**. Almacena la **dirección de retorno en `x30`**.
 * Ejemplo: `bl myFunction` — Esto llama a la función `myFunction` y almacena la dirección de retorno en `x30`.
-* **`blr`**: **Branch with Link to Register**, utilizado para **llamar** a una **subrutina** donde el destino está **especificado** en un **registro**. Almacena la dirección de retorno en `x30`.
+* **`blr`**: **Branch with Link to Register**, se utiliza para **llamar** a una **subrutina** donde el destino está **especificado** en un **registro**. Almacena la dirección de retorno en `x30`.
 * Ejemplo: `blr x1` — Esto llama a la función cuya dirección está contenida en `x1` y almacena la dirección de retorno en `x30`.
-* **`ret`**: **Retorno** de una **subrutina**, típicamente utilizando la dirección en **`x30`**.
+* **`ret`**: **Retorna** de una **subrutina**, típicamente utilizando la dirección en **`x30`**.
 * Ejemplo: `ret` — Esto retorna de la subrutina actual utilizando la dirección de retorno en `x30`.
-* **`cmp`**: **Comparar** dos registros y establecer banderas de condición.
+* **`cmp`**: **Compara** dos registros y establece las banderas de condición.
 * Ejemplo: `cmp x0, x1` — Esto compara los valores en `x0` y `x1` y establece las banderas de condición en consecuencia.
-* **`b.eq`**: **Branch if equal**, basado en la instrucción `cmp` previa.
-* Ejemplo: `b.eq label` — Si la instrucción `cmp` previa encontró dos valores iguales, esto salta a `label`.
-* **`b.ne`**: **Branch if Not Equal**. Esta instrucción verifica las banderas de condición (que fueron establecidas por una instrucción de comparación previa), y si los valores comparados no son iguales, salta a una etiqueta o dirección.
+* **`b.eq`**: **Branch if equal**, basado en la instrucción `cmp` anterior.
+* Ejemplo: `b.eq label` — Si la instrucción `cmp` anterior encontró dos valores iguales, esto salta a `label`.
+* **`b.ne`**: **Branch if Not Equal**. Esta instrucción verifica las banderas de condición (que fueron establecidas por una instrucción de comparación anterior), y si los valores comparados no son iguales, salta a una etiqueta o dirección.
 * Ejemplo: Después de una instrucción `cmp x0, x1`, `b.ne label` — Si los valores en `x0` y `x1` no son iguales, esto salta a `label`.
 * **`cbz`**: **Compare and Branch on Zero**. Esta instrucción compara un registro con cero, y si son iguales, salta a una etiqueta o dirección.
 * Ejemplo: `cbz x0, label` — Si el valor en `x0` es cero, esto salta a `label`.
@@ -83,11 +83,11 @@ Las instrucciones de ARM64 generalmente tienen el **formato `opcode dst, src1, s
 * Ejemplo: `cbnz x0, label` — Si el valor en `x0` no es cero, esto salta a `label`.
 * **`adrp`**: Calcula la **dirección de página de un símbolo** y la almacena en un registro.
 * Ejemplo: `adrp x0, symbol` — Esto calcula la dirección de página de `symbol` y la almacena en `x0`.
-* **`ldrsw`**: **Cargar** un valor firmado de **32 bits** desde la memoria y **extenderlo a 64 bits**.
+* **`ldrsw`**: **Carga** un valor firmado de **32 bits** desde la memoria y lo **extiende a 64 bits**.
 * Ejemplo: `ldrsw x0, [x1]` — Esto carga un valor firmado de 32 bits desde la ubicación de memoria apuntada por `x1`, lo extiende a 64 bits y lo almacena en `x0`.
-* **`stur`**: **Almacenar un valor de registro en una ubicación de memoria**, utilizando un desplazamiento desde otro registro.
+* **`stur`**: **Almacena un valor de registro en una ubicación de memoria**, utilizando un desplazamiento desde otro registro.
 * Ejemplo: `stur x0, [x1, #4]` — Esto almacena el valor en `x0` en la dirección de memoria que es 4 bytes mayor que la dirección actual en `x1`.
-* &#x20;**`svc`** : Realizar una **llamada al sistema**. Significa "Supervisor Call". Cuando el procesador ejecuta esta instrucción, **cambia del modo de usuario al modo kernel** y salta a una ubicación específica en la memoria donde se encuentra el código de manejo de llamadas al sistema del kernel.
+* &#x20;**`svc`** : Realiza una **llamada al sistema**. Significa "Supervisor Call". Cuando el procesador ejecuta esta instrucción, **cambia del modo de usuario al modo kernel** y salta a una ubicación específica en la memoria donde se encuentra el código de manejo de llamadas al sistema del kernel.
 *   Ejemplo:&#x20;
 
 ```armasm
@@ -98,33 +98,49 @@ svc 0       ; Realiza la llamada al sistema.
 
 ### **Prólogo de la función**
 
-1.  **Guardar el registro de enlace y el puntero de marco en la pila**:
+1.  **Guarda el registro de enlace y el puntero de marco en la pila**:
 
 {% code overflow="wrap" %}
 ```armasm
 stp x29, x30, [sp, #-16]!  ; almacena el par x29 y x30 en la pila y decrementa el puntero de pila
 ```
 {% endcode %}
-2. **Configurar el nuevo puntero de marco**: `mov x29, sp` (configura el nuevo puntero de marco para la función actual)
-3. **Asignar espacio en la pila para variables locales** (si es necesario): `sub sp, sp, <tamaño>` (donde `<tamaño>` es el número de bytes necesarios)
+2. **Configura el nuevo puntero de marco**: `mov x29, sp` (configura el nuevo puntero de marco para la función actual)
+3. **Asigna espacio en la pila para variables locales** (si es necesario): `sub sp, sp, <size>` (donde `<size>` es el número de bytes necesarios)
 
 ### **Epílogo de la función**
 
-1. **Desasignar variables locales (si se asignaron)**: `add sp, sp, <tamaño>`
-2.  **Restaurar el registro de enlace y el puntero de marco**:
+1. **Desasigna las variables locales (si se asignaron)**: `add sp, sp, <size>`
+2.  **Restaura el registro de enlace y el puntero de marco**:
 
 {% code overflow="wrap" %}
 ```armasm
 ldp x29, x30, [sp], #16  ; carga el par x29 y x30 desde la pila e incrementa el puntero de pila
 ```
 {% endcode %}
-3. **Retornar**: `ret` (devuelve el control al llamador utilizando la dirección en el registro de enlace)
+3. **Retorna**: `ret` (devuelve el control al llamador utilizando la dirección en el registro de enlace)
 
 ## macOS
 
-### syscalls
+### Llamadas al sistema BSD
 
-Consulta [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master).
+Consulta [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master). Las llamadas al sistema BSD tendrán **x16 > 0**.
+
+### Trampas de Mach
+
+Consulta [**syscall\_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall\_sw.c.auto.html). Las trampas de Mach tendrán **x16 < 0**, por lo que debes llamar a los números de la lista anterior con un **signo menos**: **`_kernelrpc_mach_vm_allocate_trap`** es **`-10`**.
+
+También puedes consultar **`libsystem_kernel.dylib`** en un desensamblador para encontrar cómo llamar a estas llamadas al sistema (y a las llamadas al sistema BSD).
+```bash
+# macOS
+dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
+
+# iOS
+dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
+```
+{% hint style="success" %}
+A veces es más fácil verificar el código **descompilado** de **`libsystem_kernel.dylib`** que verificar el **código fuente** porque el código de varias llamadas al sistema (BSD y Mach) se genera mediante scripts (verificar comentarios en el código fuente), mientras que en la dylib se puede encontrar qué se está llamando.
+{% endhint %}
 
 ### Shellcodes
 
