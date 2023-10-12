@@ -122,9 +122,27 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
 
 ## macOS
 
-### syscalls
+### BSD syscalls
 
-Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master).
+Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master). BSD syscalls will have **x16 > 0**.
+
+### Mach Traps
+
+Check out [**syscall\_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall\_sw.c.auto.html). Mach traps will have **x16 < 0**, so you need to call the numbers from the previous list with a **minus**: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
+
+You can also check **`libsystem_kernel.dylib`** in a disassembler to find how to call these (and BSD) syscalls:
+
+```bash
+# macOS
+dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
+
+# iOS
+dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
+```
+
+{% hint style="success" %}
+Sometimes it's easier to check the **decompiled** code from **`libsystem_kernel.dylib`** **than** checking the **source code** becasue the code of several syscalls (BSD and Mach) are generated via scripts (check comments in the source code) while in the dylib you can find what is being called.
+{% endhint %}
 
 ### Shellcodes
 

@@ -230,6 +230,10 @@ macOS stores system sandbox profiles in two locations: **/usr/share/sandbox/** a
 
 And if a third-party application carry the _**com.apple.security.app-sandbox**_ entitlement, the system applies the **/System/Library/Sandbox/Profiles/application.sb** profile to that process.
 
+### **iOS Sandbox Profile**
+
+The default profile is called **container** and we don't have the SBPL text representation. In memory, this sandbox is represented as Allow/Deny binary tree for each permissions from the asndbox.
+
 ### Debug & Bypass Sandbox
 
 **Processes are not born sandboxed on macOS: unlike iOS**, where the sandbox is applied by the kernel before the first instruction of a program executes, on macOS **a process must elect to place itself into the sandbox.**

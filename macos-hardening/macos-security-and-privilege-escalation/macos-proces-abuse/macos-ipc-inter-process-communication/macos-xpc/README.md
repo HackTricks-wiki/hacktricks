@@ -96,6 +96,21 @@ Apple also allows apps to **configure some rights and how to get them** so if th
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
 {% endcontent-ref %}
 
+## XPC Sniffer
+
+To sniff the XPC messages you could use [**xpcspy**](https://github.com/hot3eed/xpcspy) which uses **Frida**.
+
+```bash
+# Install
+pip3 install xpcspy
+pip3 install xpcspy --no-deps # To not make xpcspy install Frida 15 and downgrade your Frida installation
+
+# Start sniffing
+xpcspy -U -r -W <bundle-id>
+## Using filters (i: for input, o: for output)
+xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
+```
+
 ## C Code Example
 
 {% tabs %}

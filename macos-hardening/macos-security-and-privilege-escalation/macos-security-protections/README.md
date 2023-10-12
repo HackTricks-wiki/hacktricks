@@ -80,7 +80,7 @@ It looks like it was possible to use the tool [**img4tool**](https://github.com/
 img4tool -e in.img4 -o out.bin 
 ```
 
-(However, I haven't been able to compile it in M1).
+(However, I haven't been able to compile it in M1). You could also use [**pyimg4**](https://github.com/m1stadev/PyIMG4), but the following script doesn't work with that output.
 
 Then, you could use a script such as [**this one**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) to extract data.
 

@@ -43,52 +43,92 @@ Moreover, **Mach and BSD each maintain different security models**: **Mach's** s
 
 ### I/O Kit - Drivers
 
-I/O Kit is the open-source, object-oriented, **device-driver framework** in the XNU kernel and is responsible for the addition and management of **dynamically loaded device drivers**. These drivers allow for modular code to be added to the kernel dynamically for use with different hardware, for example. They are located in:
+I/O Kit is the open-source, object-oriented, **device-driver framework** in the XNU kernel and is responsible for the addition and management of **dynamically loaded device drivers**. These drivers allow for modular code to be added to the kernel dynamically for use with different hardware, for example.
 
-* `/System/Library/Extensions`
-  * KEXT files built into the OS X operating system.
-* `/Library/Extensions`
-  * KEXT files installed by 3rd party software
-
-```bash
-#Use kextstat to print the loaded drivers
-kextstat
-Executing: /usr/bin/kmutil showloaded
-No variant specified, falling back to release
-Index Refs Address            Size       Wired      Name (Version) UUID <Linked Against>
-    1  142 0                  0          0          com.apple.kpi.bsd (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    2   11 0                  0          0          com.apple.kpi.dsep (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    3  170 0                  0          0          com.apple.kpi.iokit (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    4    0 0                  0          0          com.apple.kpi.kasan (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    5  175 0                  0          0          com.apple.kpi.libkern (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    6  154 0                  0          0          com.apple.kpi.mach (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    7   88 0                  0          0          com.apple.kpi.private (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    8  106 0                  0          0          com.apple.kpi.unsupported (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
-   10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
-```
-
-Until the number 9 the listed drivers are **loaded in the address 0**. This means that those aren't real drivers but **part of the kernel and they cannot be unloaded**.
-
-In order to find specific extensions you can use:
-
-```bash
-kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
-kextfind -bundle-id -substring IOR #Search by substring in bundle-id
-```
-
-To load and unload kernel extensions do:
-
-```bash
-kextload com.apple.iokit.IOReportFamily
-kextunload com.apple.iokit.IOReportFamily
-```
+{% content-ref url="macos-iokit.md" %}
+[macos-iokit.md](macos-iokit.md)
+{% endcontent-ref %}
 
 ### IPC - Inter Process Communication
 
 {% content-ref url="macos-ipc-inter-process-communication/" %}
 [macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
+
+### Kernelcache
+
+The **kernelcache** is a **pre-compiled and pre-linked version of the XNU kernel**, along with essential device **drivers** and **kernel extensions**. It's stored in a **compressed** format and gets decompressed into memory during the boot-up process. The kernelcache facilitates a **faster boot time** by having a ready-to-run version of the kernel and crucial drivers available, reducing the time and resources that would otherwise be spent on dynamically loading and linking these components at boot time.
+
+In iOS it's located in **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** in macOS you can find it with **`find / -name kernelcache 2>/dev/null`**
+
+#### IMG4
+
+The IMG4 file format is a container format used by Apple in its iOS and macOS devices for securely **storing and verifying firmware** components (like **kernelcache**). The IMG4 format includes a header and several tags which encapsulate different pieces of data including the actual payload (like a kernel or bootloader), a signature, and a set of manifest properties. The format supports cryptographic verification, allowing the device to confirm the authenticity and integrity of the firmware component before executing it.
+
+It's usually composed of the following components:
+
+* **Payload (IM4P)**:
+  * Often compressed (LZFSE4, LZSS, …)
+  * Optionally encrypted
+* **Manifest (IM4M)**:
+  * Contains Signature
+  * Additional Key/Value dictionary
+* **Restore Info (IM4R)**:
+  * Also known as APNonce
+  * Prevents replaying of some updates
+  * OPTIONAL: Usually this isn't found
+
+Decompress the Kernelcache:
+
+```bash
+# pyimg4 (https://github.com/m1stadev/PyIMG4)
+pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+
+# img4tool (https://github.com/tihmstar/img4tool
+img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+
+#### Kernelcache Symbols
+
+Sometime Apple releases **kernelcache** with **symbols**. You can download some firmwares with symbols by following links on [https://theapplewiki.com](https://theapplewiki.com/).
+
+### IPSW
+
+These are Apple **firmwares** you can download from [**https://ipsw.me/**](https://ipsw.me/). Among other files it will contains the **kernelcache**.\
+To **extract** the files you can just **unzip** it.
+
+After extracting the firmware you will get a file like: **`kernelcache.release.iphone14`**. It's in **IMG4** format, you can extract the interesting info with:
+
+* [**pyimg4**](https://github.com/m1stadev/PyIMG4)
+
+{% code overflow="wrap" %}
+```bash
+pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+{% endcode %}
+
+* [**img4tool**](https://github.com/tihmstar/img4tool)
+
+```bash
+img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+
+You can check the extracted kernelcache for symbols with:  **`nm -a kernelcache.release.iphone14.e | wc -l`**
+
+With this we can now **extract all the extensions** or the **one you are insterested in:**
+
+```bash
+# List all extensions
+kextex -l kernelcache.release.iphone14.e
+## Extract com.apple.security.sandbox
+kextex -e com.apple.security.sandbox kernelcache.release.iphone14.e
+
+# Extract all
+kextex_all kernelcache.release.iphone14.e
+
+# Check the extension for symbols
+nm -a binaries/com.apple.security.sandbox | wc -l
+```
 
 ## macOS Kernel Extensions
 

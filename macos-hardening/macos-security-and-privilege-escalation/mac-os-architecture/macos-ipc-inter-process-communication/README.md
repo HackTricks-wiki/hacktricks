@@ -18,6 +18,10 @@ Mach uses **tasks** as the **smallest unit** for sharing resources, and each tas
 
 Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilising one-way communication channels. **Messages are transferred between ports**, which act like **message queues** managed by the kernel.
 
+Each process has an **IPC table**, in there it's possible to find the **mach ports of the process**. The name of a mach port is actually a number (a pointer to the kernel object).
+
+A process can also send a port name with some rights **to a different task** and the kernel will make this entry in the **IPC table of the other task** appear.
+
 Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are:
 
 * **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
@@ -52,6 +56,14 @@ For these predefined services, the **lookup process differs slightly**. When a s
 * launchd duplicates the **SEND right and sends it to Task B**.
 
 However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
+
+### Enumerate ports
+
+```bash
+lsmp -p <pid>
+```
+
+You can install this tool in iOS downloading it from [http://newosxbook.com/tools/binpack64-256.tar.gz ](http://newosxbook.com/tools/binpack64-256.tar.gz)
 
 ### Code example
 
