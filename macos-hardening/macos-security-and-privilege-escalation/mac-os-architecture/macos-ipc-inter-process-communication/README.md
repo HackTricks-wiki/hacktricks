@@ -18,40 +18,68 @@ Machは、リソースの共有において**タスク**を最小単位として
 
 タスク間の通信は、Machインタープロセス通信（IPC）を使用して行われ、片方向の通信チャネルを利用します。**メッセージはポート間で転送**され、カーネルによって管理される**メッセージキュー**のような役割を果たします。
 
-タスクが実行できる操作を定義するポート権限は、この通信に重要です。可能な**ポート権限**は次のとおりです。
+各プロセスには**IPCテーブル**があり、そこにはプロセスの**Machポート**が格納されています。Machポートの名前は実際には数値（カーネルオブジェクトへのポインタ）です。
 
-* **受信権限**：ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（複数プロデューサ、単一コンシューマ）キューであるため、システム全体で**ポートごとに受信権限は1つだけ**存在できます（複数のプロセスが1つのパイプの読み取りエンドに対するファイルディスクリプタを保持できるパイプとは異なります）。
-* **受信権限を持つタスク**は、メッセージを受信し、メッセージを送信するための**送信権限を作成**することができます。元々は**自分自身のタスクがポートに対して受信権限を持っていました**。
-* **送信権限**：ポートにメッセージを送信することを許可します。
-* 送信権限は**クローン**することができ、送信権限を所有するタスクは権限を**第三のタスクに付与**することができます。
-* **一度だけ送信権限**：ポートに1つのメッセージを送信し、その後消えます。
-* **ポートセット権限**：単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、それに含まれるポートからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートで同時にリッスンするために使用できます。
-* **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダーです。ポートが破棄されると、ポートへのすべての既存のポート権限がデッドネームに変わります。
+プロセスはまた、**ポート名とその権限**を**別のタスクに送信**することもでき、カーネルはこれを**他のタスクのIPCテーブルにエントリとして登録**します。
 
-**タスクはSEND権限を他のタスクに転送**することができ、それによりメッセージを送信することができるようになります。**SEND権限はクローン**することもできるため、タスクはSEND権限を複製して**第三のタスクに付与**することができます。これにより、中間プロセスである**ブートストラップサーバー**との効果的な通信が可能になります。
+この通信には、タスクが実行できる操作を定義する**ポート権限**が重要です。可能な**ポート権限**は次のとおりです。
+
+* **受信権**：ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（複数プロデューサ、単一コンシューマ）キューであり、システム全体で**ポートごとに受信権は1つだけ**存在できます（複数のプロセスが1つのパイプの読み取りエンドに対するファイルディスクリプタを保持できるパイプとは異なります）。
+* **受信権を持つタスク**はメッセージを受信し、メッセージを送信するための**送信権を作成**することができます。元々は**自分自身のタスクが自分自身のポートに対して受信権を持っていました**。
+* **送信権**：ポートにメッセージを送信することを許可します。
+* 送信権は**クローン**することができ、送信権を所有するタスクは権限を**第三のタスクに付与**することができます。
+* **一度だけ送信権**：ポートに1つのメッセージを送信し、その後消えます。
+* **ポートセット権**：単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、それに含まれるポートからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートで同時にリッスンするために使用できます。
+* **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダです。ポートが破棄されると、ポートへのすべての既存のポート権限がデッドネームに変わります。
+
+**タスクはSEND権を他のタスクに転送**することができ、それによりメッセージを送信できるようになります。**SEND権はクローン**することもでき、タスクはSEND権を複製して**第三のタスクに付与**することができます。これにより、中間プロセスである**ブートストラップサーバ**との効果的な通信が可能になります。
 
 #### 手順：
 
-前述のように、通信チャネルを確立するためには、**ブートストラップサーバー**（macでは**launchd**）が関与します。
+前述のように、通信チャネルを確立するためには、**ブートストラップサーバ**（macでは**launchd**）が関与します。
 
-1. タスク**A**は**新しいポート**を初期化し、プロセス内で**受信権限**を取得します。
-2. 受信権限を保持しているタスク**A**は、ポートのために**SEND権限を生成**します。
-3. タスク**A**は、**ブートストラップサーバー**との**接続**を確立し、**ポートのサービス名**と**SEND権限**をブートストラップ登録という手順を通じて提供します。
-4. タスク**B**は、サービス名のために**ブートストラップサーバー**とやり取りし、ブートストラップの**サービス名の検索**を実行します。成功した場合、**サーバーはタスクAから受け取ったSEND権限を複製**し、**タスクBに送信**します。
-5. SEND権限を取得したタスク**B**は、メッセージを**作成**し、それを**タスクAに送信**することができます。
+1. タスク**A**は**新しいポート**を初期化し、プロセス内で**受信権**を取得します。
+2. 受信権の所有者であるタスク**A**は、ポートのための**送信権を生成**します。
+3. タスク**A**は、**ブートストラップサーバ**との**接続**を確立し、**ポートのサービス名**と**送信権**をブートストラップ登録という手順を通じて提供します。
+4. タスク**B**は、サービス名のために**ブートストラップサーバ**とやり取りし、ブートストラップの**サービス名の検索**を実行します。成功した場合、**サーバはタスクAから受け取った送信権を複製**し、**タスクBに送信**します。
+5. 送信権を取得したタスク**B**は、メッセージを**作成**して**タスクAに送信**することができます。
 
-ブートストラップサーバーは、タスクが主張するサービス名を認証することはできません。これは、タスクが潜在的に**システムタスクをなりすます**ことができる可能性があることを意味します。たとえば、認証サービス名を偽って**承認リクエストをすべて承認**することができます。
+ブートストラップサーバは、タスクが主張するサービス名を**認証することはできません**。これは、タスクが潜在的に**システムタスクをなりすます**ことができる可能性があることを意味します。たとえば、**認証サービス名を偽って要求を承認**することができます。
 
-その後、Appleはシステム提供のサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに保存します：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバーは、これらのサービス名ごとに**受信権限を作成**し、保持します。
+その後、Appleはシステム提供のサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに格納しています：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバは、これらのサービス名ごとに**受信権を作成**し、保持します。
 
-これらの事前定義されたサービスに対しては、**検索プロセスが若干異なります**。サービス名が検索されると、launchdはサービスを動的に起動します。新しいワークフローは次のようになります。
+これらの事前定義されたサービスに対しては、**検索プロセスが若干異なり
+### ポートの列挙
 
-* タスク**B**は、サービス名のためにブートストラップの**検索**を開始します。
-* **launchd**は、タスクが実行中かどうかをチェックし、実行されていない場合は**起動**します。
-* タスク**A**（サービス）は、**ブートストラップチェックイン**を実行します。ここで、**ブートストラップ**サーバーはSEND権限を作成
-### コード例
+To enumerate ports on a macOS system, you can use various tools and techniques. Here are a few methods you can try:
 
-**送信者**がポートを**割り当て**し、名前`org.darlinghq.example`の**送信権**を作成して**ブートストラップサーバー**に送信する方法に注目してください。送信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**します。
+1. **Netstat**: Use the `netstat` command to display active network connections and listening ports. Run the following command in the terminal:
+   ```
+   netstat -an | grep LISTEN
+   ```
+   This will show a list of open ports and the associated processes.
+
+2. **Nmap**: Nmap is a powerful network scanning tool that can be used to enumerate ports on remote systems. Install Nmap on your macOS system and run the following command:
+   ```
+   nmap -p- <target_ip>
+   ```
+   Replace `<target_ip>` with the IP address of the system you want to scan. This command will scan all ports on the target system and display the open ones.
+
+3. **Lsof**: The `lsof` command can be used to list open files and the processes that have them open. Run the following command in the terminal:
+   ```
+   sudo lsof -i -P | grep LISTEN
+   ```
+   This will show a list of processes listening on open ports.
+
+Remember to use these techniques responsibly and only on systems you have permission to scan.
+```bash
+lsmp -p <pid>
+```
+このツールは、[http://newosxbook.com/tools/binpack64-256.tar.gz](http://newosxbook.com/tools/binpack64-256.tar.gz) からiOSにダウンロードしてインストールすることができます。
+
+### コードの例
+
+**送信者**は、ポートを割り当て、名前 `org.darlinghq.example` のための**送信権**を作成し、それを**ブートストラップサーバ**に送信します。一方、受信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**します。
 
 {% tabs %}
 {% tab title="receiver.c" %}
@@ -163,7 +191,7 @@ int main(int argc, char** argv) {
 ```
 {% endtab %}
 
-{% tab title="receiver.c" %}
+{% tab title="server.c" %}
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc sender.c -o sender
@@ -233,7 +261,7 @@ printf("Sent a message\n");
 
 ### タスクポートを介したスレッドへのシェルコードのインジェクション
 
-シェルコードは次から取得できます：
+シェルコードを取得するには、次の場所から取得できます：
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -332,9 +360,9 @@ int main(int argc, const char * argv[]) {
 ```
 {% endtab %}
 {% endtabs %}
-</details>
+{% enddetails %}
 
-Compile the previous program and add the entitlements to be able to inject code with the same user (if not you will need to use sudo).
+**コンパイル**する前のプログラムに、同じユーザーでコードをインジェクトできるようにするための**権限**を追加します（そうでない場合は**sudo**を使用する必要があります）。
 
 <details>
 
@@ -855,7 +883,7 @@ XPC（XNUとは、macOSで使用されるカーネル）インタープロセス
 
 ## MIG - Mach Interface Generator
 
-MIGは、Mach IPCコードの作成プロセスを簡素化するために作成されました。基本的には、サーバーとクライアントが指定された定義と通信するために必要なコードを生成します。生成されたコードは見た目が悪いかもしれませんが、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードを作成できます。
+MIGは、Mach IPCコードの作成プロセスを簡素化するために作成されました。基本的には、サーバーとクライアントが指定された定義と通信するために必要なコードを生成します。生成されたコードは見た目が悪くても、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードになります。
 
 詳細については、次を参照してください：
 
@@ -874,9 +902,9 @@ MIGは、Mach IPCコードの作成プロセスを簡素化するために作成
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのスウェット**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのスウェット**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

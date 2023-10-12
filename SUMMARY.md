@@ -149,6 +149,7 @@
   * [macOS Defensive Apps](macos-hardening/macos-security-and-privilege-escalation/macos-defensive-apps.md)
   * [macOS GCD - Grand Central Dispatch](macos-hardening/macos-security-and-privilege-escalation/macos-gcd-grand-central-dispatch.md)
   * [macOS Kernel & System Extensions](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
+    * [macOS IOKit](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-iokit.md)
     * [macOS Kernel Extensions](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-kernel-extensions.md)
     * [macOS System Extensions](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-system-extensions.md)
   * [macOS Network Services & Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)

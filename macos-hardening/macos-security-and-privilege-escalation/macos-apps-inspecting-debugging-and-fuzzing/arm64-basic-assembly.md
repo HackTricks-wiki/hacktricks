@@ -63,10 +63,10 @@ ARM64の命令は一般的に**`opcode dst, src1, src2`**の形式を持ちま�
 * 例: `div x0, x1, x2` — これは`x1`を`x2`で割り、結果を`x0`に格納します。
 * **`bl`**: **リンク付き分岐**で、**サブルーチン**を呼び出すために使用されます。**戻りアドレスを`x30`に格納**します。
 * 例: `bl myFunction` — これは`myFunction`関数を呼び出し、戻りアドレスを`x30`に格納します。
-* **`blr`**: **レジスタで指定された**ターゲットの**サブルーチン**を呼び出すために使用される**リンク付き分岐**です。**戻りアドレスを`x30`に格納**します。
+* **`blr`**: **レジスタで指定された**ターゲットの**サブルーチン**を呼び出すために使用される**リンク付き分岐**です。戻りアドレスを`x30`に格納します。
 * 例: `blr x1` — これは`x1`に格納されたアドレスの関数を呼び出し、戻りアドレスを`x30`に格納します。
-* **`ret`**: **サブルーチンからのリターン**で、通常は**`x30`のアドレス**を使用します。
-* 例: `ret` — これは`x30`に格納された戻りアドレスを使用して現在のサブルーチンからリターンします。
+* **`ret`**: **サブルーチンからのリターン**で、通常は**`x30`**のアドレスを使用します。
+* 例: `ret` — これは`x30`に格納された戻りアドレスを使用して現在のサブルーチンから戻ります。
 * **`cmp`**: 2つのレジスタを比較し、条件フラグを設定します。
 * 例: `cmp x0, x1` — これは`x0`と`x1`の値を比較し、条件フラグを適切に設定します。
 * **`b.eq`**: **等しい場合に分岐**し、前の`cmp`命令に基づきます。
@@ -81,20 +81,20 @@ ARM64の命令は一般的に**`opcode dst, src1, src2`**の形式を持ちま�
 * 例: `adrp x0, symbol` — これは`symbol`のページアドレスを計算し、`x0`に格納します。
 * **`ldrsw`**: メモリから**符号付き32ビット**値を**64ビットに符号拡張して**ロードします。
 * 例: `ldrsw x0, [x1]` — これは`x1`が指すメモリ位置から符号付き32ビット値をロードし、64ビットに符号拡張して`x0`に格納します。
-* **`stur`**: レジスタの値をメモリの場所に格納します。別のレジスタからのオフセットを使用します。
-* 例: `stur x0, [x1, #4]` — これは`x1`のアドレスよりも4バイト大きいメモリアドレスに`x0`の値を格納します。
-* &#x20;**`svc`** : **システムコール**を行います。"Supervisor Call"の略です。プロセッサがこの命令を実行すると、ユーザーモードからカーネルモードに切り替わり、カーネルのシステムコール処理コードが格納されているメモリの特定の場所にジャンプします。
-*   例:&#x20;
+* **`stur`**: レジスタの値をメモリの場所に格納します。格納場所は別のレジスタからのオフセットで指定します。
+* 例: `stur x0, [x1, #4]` — これは`x1`に現在格納されているアドレスよりも4バイト大きいメモリアドレスに`x0`の値を格納します。
+* **`svc`**: **システムコール**を行います。"Supervisor Call"の略です。プロセッサがこの命令を実行すると、ユーザーモードからカーネルモードに切り替わり、カーネルのシステムコール処理コードが配置されている特定のメモリ位置にジャンプします。
+* 例:
 
 ```armasm
 mov x8, 93  ; システムコール番号（exitの場合は93）をレジスタx8にロードします。
 mov x0, 0   ; 終了ステータスコード（0）をレジスタx0にロードします。
-svc 0       ; システムコールを行います。
+svc 0       ; システムコールを実行します。
 ```
 
 ### **関数プロローグ**
 
-1.  **リンクレジスタとフレームポインタをスタックに保存**します：
+1. **リンクレジスタとフレームポインタをスタックに保存**します：
 
 {% code overflow="wrap" %}
 ```armasm
@@ -107,7 +107,7 @@ stp x29, x30, [sp, #-16]!  ; ペアx29とx30をスタックに保存し、スタ
 ### **関数エピローグ**
 
 1. **ローカル変数を解放します（割り当てられている場合）**：`add sp, sp, <size>`
-2.  **リンクレジスタとフレームポインタを復元**します：
+2. **リンクレジスタとフレームポインタを復元**します：
 
 {% code overflow="wrap" %}
 ```armasm
@@ -118,9 +118,25 @@ ldp x29, x30, [sp], #16  ; ペアx29とx30をスタックから復元し、ス�
 
 ## macOS
 
-### syscalls
+### BSDシスコール
 
-[**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)を参照してください。
+[**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)を参照してください。BSDシスコールでは**x16 > 0**となります。
+
+### Machトラップ
+
+[**syscall\_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall\_sw.c.auto.html)を参照してください。Machトラップでは**x16 < 0**となりますので、前のリストの番号を**マイナス**で呼び出す必要があります。たとえば、**`_kernelrpc_mach_vm_allocate_trap`**は**`-10`**です。
+
+これら（およびBSD）のシスコールを呼び出す方法を見つけるために、逆アセンブラで**`libsystem_kernel.dylib`**を確認することもできます。
+```bash
+# macOS
+dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
+
+# iOS
+dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
+```
+{% hint style="success" %}
+時には、ソースコードをチェックするよりも、**`libsystem_kernel.dylib`**から**逆コンパイル**されたコードをチェックする方が簡単です。なぜなら、いくつかのシスコール（BSDとMach）のコードはスクリプトによって生成されるため（ソースコードのコメントをチェックしてください）、dylibでは何が呼び出されているかを見つけることができます。
+{% endhint %}
 
 ### シェルコード
 
@@ -319,7 +335,7 @@ touch_command: .asciz "touch /tmp/lalala"
 ```
 #### バインドシェル
 
-バインドシェルは、[https://raw.githubusercontent.com/daem0nc0re/macOS\_ARM64\_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS\_ARM64\_Shellcode/master/bindshell.s) から取得できます。ポート番号は **4444** です。
+バインドシェルは、[https://raw.githubusercontent.com/daem0nc0re/macOS\_ARM64\_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS\_ARM64\_Shellcode/master/bindshell.s) から**ポート4444**で利用できます。
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -474,7 +490,7 @@ svc  #0x1337
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
