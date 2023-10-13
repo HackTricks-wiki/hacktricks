@@ -32,9 +32,25 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Note that now **hardened** Electron applications with **RunAsNode** disabled will **ignore node parameters** (such as --inspect) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set.
+Note that now **hardened** Electron applications with **RunAsNode** and **`EnableNodeCliInspectArguments`** are disabled will **ignore node parameters** (such as --inspect) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set.
 
 However, you could still use the electron param `--remote-debugging-port=9229` but the previous payload won't work to execute other processes.
+
+You can check these flags from an application with:
+
+```bash
+npx @electron/fuses read --app /Applications/Slack.app
+
+Analyzing app: Slack.app
+Fuse Version: v1
+  RunAsNode is Disabled
+  EnableCookieEncryption is Enabled
+  EnableNodeOptionsEnvironmentVariable is Disabled
+  EnableNodeCliInspectArguments is Disabled
+  EnableEmbeddedAsarIntegrityValidation is Enabled
+  OnlyLoadAppFromAsar is Enabled
+  LoadBrowserProcessSpecificV8Snapshot is Disabled
+```
 {% endhint %}
 
 ## `NODE_OPTIONS`
