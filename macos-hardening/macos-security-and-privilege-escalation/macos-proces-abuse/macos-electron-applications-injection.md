@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
@@ -16,7 +16,7 @@
 
 ElectronアプリのJSコードは署名されていないため、攻撃者はアプリを書き込み可能な場所に移動し、悪意のあるJSコードをインジェクションしてそのアプリを起動し、TCCの権限を乱用することができます。
 
-ただし、**`kTCCServiceSystemPolicyAppBundles`**権限を変更するには、**必要です**。したがって、デフォルトではこれはもはや可能ではありません。
+ただし、**`kTCCServiceSystemPolicyAppBundles`**権限が必要ですが、デフォルトではこれは不可能になっています。
 
 ## Electronアプリケーションの検査
 
@@ -32,16 +32,33 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-注意してください。**hardened** Electronアプリケーションでは、**RunAsNode**が無効になっているため、起動時に--inspectなどのノードパラメータは**無視されます**。ただし、環境変数**`ELECTRON_RUN_AS_NODE`**が設定されている場合は、electronパラメータ`--remote-debugging-port=9229`を使用することができますが、以前のペイロードは他のプロセスを実行するためには機能しません。
+注意してください。現在、**強化された**Electronアプリケーションでは、**RunAsNode**と**`EnableNodeCliInspectArguments`**が無効になっているため、起動時に--inspectなどのノードパラメータは**無視されます**（環境変数**`ELECTRON_RUN_AS_NODE`**が設定されていない限り）。
+
+ただし、引き続きelectronパラメータ`--remote-debugging-port=9229`を使用することはできますが、以前のペイロードでは他のプロセスを実行することはできません。
+
+アプリケーションからこれらのフラグを確認することができます。
+```bash
+npx @electron/fuses read --app /Applications/Slack.app
+
+Analyzing app: Slack.app
+Fuse Version: v1
+RunAsNode is Disabled
+EnableCookieEncryption is Enabled
+EnableNodeOptionsEnvironmentVariable is Disabled
+EnableNodeCliInspectArguments is Disabled
+EnableEmbeddedAsarIntegrityValidation is Enabled
+OnlyLoadAppFromAsar is Enabled
+LoadBrowserProcessSpecificV8Snapshot is Disabled
+```
 {% endhint %}
 
 ## `NODE_OPTIONS`
 
 {% hint style="warning" %}
-この環境変数は、Electronアプリケーションが適切にハード化されており、それを許可している場合にのみ機能します。ハード化されている場合は、**環境変数`ELECTRON_RUN_AS_NODE`**も使用する必要があります。
+この環境変数は、Electronアプリケーションが適切に強化されておらず、それを許可している場合にのみ機能します。強化されている場合は、**環境変数 `ELECTRON_RUN_AS_NODE`** も使用する必要があります。
 {% endhint %}
 
-この組み合わせを使用すると、ペイロードを別のファイルに保存してそのファイルを実行できます：
+この組み合わせを使用すると、ペイロードを別のファイルに保存し、そのファイルを実行できます：
 
 {% code overflow="wrap" %}
 ```bash
@@ -92,10 +109,10 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたり**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
