@@ -301,7 +301,7 @@ The ACL **`writeextattr`** can be used to prevent anyone from writing an attribu
 
 ```bash
 touch /tmp/no-attr
-chmod +a "everyone deny writeextattr" /tmp/no-attr 
+chmod +a "everyone deny writeextattr" /tmp/no-attr
 xattr -w attrname vale /tmp/no-attr
 xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```

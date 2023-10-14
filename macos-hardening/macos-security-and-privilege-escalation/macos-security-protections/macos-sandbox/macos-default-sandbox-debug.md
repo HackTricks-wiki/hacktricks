@@ -92,7 +92,8 @@ EOF
 4. Sign the app (you need to create a certificate in the keychain)
 
 ```bash
-codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp
+codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
+./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
 
 # An d in case you need this in the future
 codesign --remove-signature SandboxedShellApp.app
