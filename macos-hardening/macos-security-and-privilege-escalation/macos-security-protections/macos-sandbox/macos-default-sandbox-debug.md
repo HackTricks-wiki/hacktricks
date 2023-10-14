@@ -48,7 +48,7 @@ int main(int argc, const char * argv[]) {
 ```
 {% endcode %}
 
-Compile it runnig: `clang -framework Foundation -o SandboxedShellApp main.m`
+Compile it running: `clang -framework Foundation -o SandboxedShellApp main.m`
 
 2. Build the `.app` bundle
 

