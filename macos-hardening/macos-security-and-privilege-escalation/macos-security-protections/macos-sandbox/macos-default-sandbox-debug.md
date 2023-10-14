@@ -78,11 +78,11 @@ Los permisos son declaraciones en el archivo de configuración de la sandbox que
 
 Los entitlements definen las capacidades y restricciones de una aplicación en la sandbox. Pueden permitir o denegar el acceso a recursos del sistema, como archivos, directorios, servicios de red y más. Al definir los entitlements, se establece el nivel de acceso que una aplicación tiene dentro de la sandbox.
 
-Es importante tener en cuenta que los entitlements deben ser cuidadosamente configurados para evitar posibles vulnerabilidades o abusos. Una configuración incorrecta de los entitlements puede permitir a una aplicación realizar acciones no deseadas o acceder a información confidencial.
+Es importante tener en cuenta que los entitlements deben ser cuidadosamente configurados para evitar posibles vulnerabilidades o abusos. Un mal manejo de los permisos puede permitir a una aplicación escapar de la sandbox y acceder a recursos no autorizados.
 
-Los entitlements se definen en el archivo de configuración de la sandbox utilizando una sintaxis específica. Cada permiso tiene un nombre y un valor asociado que determina si está permitido o denegado. Algunos ejemplos de entitlements comunes incluyen el acceso a la cámara, el micrófono, la ubicación del usuario y la red.
+Los entitlements se definen en el archivo de configuración de la sandbox utilizando una sintaxis específica. Cada permiso tiene un nombre y un valor asociado que determina si está permitido o denegado. Algunos ejemplos comunes de entitlements incluyen el acceso a la cámara, el micrófono, la ubicación del usuario y la comunicación con otros procesos.
 
-Es fundamental comprender y definir correctamente los entitlements para garantizar la seguridad y privacidad de las aplicaciones en la sandbox de macOS.
+Es fundamental comprender y definir correctamente los entitlements para garantizar la seguridad y la protección de las aplicaciones en la sandbox de macOS.
 ```bash
 cat << EOF > entitlements.plist
 <?xml version="1.0" encoding="UTF-8"?>
@@ -97,7 +97,8 @@ EOF
 ```
 4. Firma la aplicación (necesitas crear un certificado en el llavero)
 ```bash
-codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp
+codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
+./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
 
 # An d in case you need this in the future
 codesign --remove-signature SandboxedShellApp.app

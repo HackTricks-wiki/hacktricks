@@ -205,7 +205,7 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 {% endcode %}
 
-La información de cuarentena también se almacena en una base de datos central administrada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
+La información de cuarentena también se almacena en una base de datos central gestionada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
 
 ### XProtect
 
@@ -238,7 +238,7 @@ Cualquier forma de evadir Gatekeeper (lograr que el usuario descargue algo y lo 
 
 ### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
-Cuando se extraía con **Archive Utility**, los archivos con **rutas de más de 886** caracteres no heredaban el atributo extendido com.apple.quarantine, lo que permitía **evadir Gatekeeper para esos archivos**.
+Cuando se extraía con **Archive Utility**, los archivos con **rutas más largas de 886** caracteres no heredaban el atributo extendido com.apple.quarantine, lo que permitía **evadir Gatekeeper para esos archivos**.
 
 Consulta el [**informe original**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) para obtener más información.
 
@@ -246,7 +246,7 @@ Consulta el [**informe original**](https://labs.withsecure.com/publications/the-
 
 Cuando se crea una aplicación con **Automator**, la información sobre lo que necesita ejecutar se encuentra en `application.app/Contents/document.wflow`, no en el ejecutable. El ejecutable es simplemente un binario genérico de Automator llamado **Automator Application Stub**.
 
-Por lo tanto, podrías hacer que `application.app/Contents/MacOS/Automator\ Application\ Stub` **apunte con un enlace simbólico a otro Automator Application Stub dentro del sistema** y ejecutará lo que se encuentra en `document.wflow` (tu script) **sin activar Gatekeeper** porque el ejecutable real no tiene el atributo de cuarentena.
+Por lo tanto, podrías hacer que `application.app/Contents/MacOS/Automator\ Application\ Stub` **apunte con un enlace simbólico a otro Automator Application Stub dentro del sistema** y ejecutará lo que está dentro de `document.wflow` (tu script) **sin activar Gatekeeper** porque el ejecutable real no tiene el atributo de cuarentena.
 
 Ejemplo de ubicación esperada: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
 
@@ -254,7 +254,7 @@ Consulta el [**informe original**](https://ronmasas.com/posts/bypass-macos-gatek
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-En este bypass se creó un archivo zip con una aplicación que comenzaba a comprimir desde `application.app/Contents` en lugar de `application.app`. Por lo tanto, el atributo de **cuarentena** se aplicaba a todos los **archivos de `application.app/Contents`**, pero **no a `application.app`**, que es lo que Gatekeeper estaba verificando, por lo que Gatekeeper se eludía porque cuando se activaba `application.app`, **no tenía el atributo de cuarentena**.
+En este bypass, se creó un archivo zip con una aplicación que comenzaba a comprimir desde `application.app/Contents` en lugar de `application.app`. Por lo tanto, el **atributo de cuarentena** se aplicaba a todos los **archivos de `application.app/Contents`**, pero **no a `application.app`**, que es lo que Gatekeeper estaba verificando, por lo que Gatekeeper se eludía porque cuando se activaba `application.app`, **no tenía el atributo de cuarentena**.
 ```bash
 zip -r test.app/Contents test.zip
 ```
@@ -286,7 +286,7 @@ ditto -c -k test test.zip
 python3 -m http.server
 # Download the zip from the browser and decompress it, the file shuold be without a wuarantine xattr
 ```
-Consulta el [**informe original**](https://www.microsoft.com/es-es/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para obtener más información.
+Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para obtener más información.
 
 <details>
 
