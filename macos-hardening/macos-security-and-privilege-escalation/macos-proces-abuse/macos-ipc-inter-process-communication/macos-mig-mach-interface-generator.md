@@ -72,8 +72,6 @@ myipc_server_routine,
 #include <servers/bootstrap.h>
 #include "myipcServerUser.h"
 
-#define MACH_PORT_NAME "com.example.myipc"
-
 kern_return_t myipc_server(mach_port_t server_port);
 
 #endif /* myipcServer_h */
@@ -112,7 +110,7 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 ```
 この例では、定義で関数を1つだけ定義しましたが、もし複数の関数を定義した場合、それらは**`SERVERPREFmyipc_subsystem`**の配列内に含まれ、最初の関数はID **500**に割り当てられ、2番目の関数はID **501**に割り当てられます...
 
-実際には、この関係を**`myipcServer.h`**の**`subsystem_to_name_map_myipc`**構造体で特定することができます。
+実際には、この関係を**`myipcServer.h`**の**`subsystem_to_name_map_myipc`**構造体で特定することが可能です。
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -376,16 +374,18 @@ return r0;
 {% endtab %}
 {% endtabs %}
 
-実際には、関数 **`0x100004000`** に移動すると、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は関数が実装されているアドレスであり、**構造体は0x28バイトを取ります**。したがって、0バイトから始まる各0x28バイトで8バイトを取得し、それが呼び出される**関数のアドレス**になります。
-
-<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+実際には、関数 **`0x100004000`** に移動すると、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は関数が実装されているアドレスであり、**構造体は 0x28 バイトを占めます**。したがって、0 バイトから始まる各 0x28 バイトで 8 バイトを取得し、それが呼び出される**関数のアドレス**になります。
 
 <figure><img src="../../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
+<figure><img src="../../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+
 このデータは、[**この Hopper スクリプトを使用して**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py)抽出できます。
+
+<details>
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたり**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
