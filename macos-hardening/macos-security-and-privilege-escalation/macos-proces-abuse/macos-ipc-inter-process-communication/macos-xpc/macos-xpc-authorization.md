@@ -286,15 +286,15 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 Si encuentras la función: **`[HelperTool checkAuthorization:command:]`**, es probable que el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Entonces, si esta función llama a funciones como `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, está utilizando [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Verifica el **`/var/db/auth.db`** para ver si es posible obtener permisos para llamar a alguna acción privilegiada sin interacción del usuario.
+Verifica el archivo **`/var/db/auth.db`** para ver si es posible obtener permisos para llamar a alguna acción privilegiada sin interacción del usuario.
 
 ### Comunicación de Protocolo
 
-Luego, necesitas encontrar el esquema de protocolo para poder establecer una comunicación con el servicio XPC.
+Luego, necesitas encontrar el esquema del protocolo para poder establecer una comunicación con el servicio XPC.
 
 La función **`shouldAcceptNewConnection`** indica el protocolo que se está exportando:
 

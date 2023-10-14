@@ -86,7 +86,7 @@ También es posible **descargar** con `launchctl unload <target.plist>` (el proc
 Para **asegurarse** de que no haya **nada** (como una anulación) **impidiendo** que un **Agente** o **Demonio** se **ejecute**, ejecute: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
 {% endhint %}
 
-Lista todos los agentes y demonios cargados por el usuario actual:
+Enumera todos los agentes y demonios cargados por el usuario actual:
 ```bash
 launchctl list
 ```
@@ -292,8 +292,8 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevi
 * `/System/Library/QuickLook`
 * `/Library/QuickLook`
 * `~/Library/QuickLook`
-* `/Applications/AppNameHere/Contents/Library/QuickLook/`
-* `~/Applications/AppNameHere/Contents/Library/QuickLook/`
+* `/Applications/NombreDeLaAplicaciónAqui/Contents/Library/QuickLook/`
+* `~/Applications/NombreDeLaAplicaciónAqui/Contents/Library/QuickLook/`
 
 #### Descripción y explotación
 
@@ -475,7 +475,7 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0007/](https://theevi
 
 #### Descripción
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) es una herramienta de automatización que permite la escritura de scripts en macOS a través del lenguaje de programación LUA. Incluso podemos incrustar código completo de AppleScript y ejecutar scripts de shell.
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) es una herramienta de automatización que permite la **programación de macOS a través del lenguaje de programación LUA**. Incluso podemos incrustar código completo de AppleScript y ejecutar scripts de shell.
 
 La aplicación busca un único archivo, `~/.hammerspoon/init.lua`, y cuando se inicia, se ejecutará el script.
 ```bash
@@ -488,15 +488,15 @@ EOF
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
 
 * Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-* Pero se necesita tener habilitado y usar ssh
+* Pero se necesita tener habilitado y usar SSH
 
 #### Ubicación
 
 * **`~/.ssh/rc`**
-* **Disparador**: Inicio de sesión a través de ssh
+* **Disparador**: Inicio de sesión a través de SSH
 * **`/etc/ssh/sshrc`**
 * Se requieren privilegios de root
-* **Disparador**: Inicio de sesión a través de ssh
+* **Disparador**: Inicio de sesión a través de SSH
 
 #### Descripción y Explotación
 
@@ -575,7 +575,7 @@ Esto creará un archivo en 1 hora:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-Verifique la cola de trabajos usando `atq:`
+Comprueba la cola de trabajos utilizando `atq:`
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
@@ -912,7 +912,7 @@ Descripción: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](http
 * `~/Library/Screen Savers`
 * **Disparador**: Seleccionar el protector de pantalla
 
-<figure><img src="../.gitbook/assets/image (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Descripción y Exploit
 
@@ -1023,14 +1023,14 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 
 #### Descripción y explotación
 
-Spotlight es la función de búsqueda incorporada en macOS, diseñada para proporcionar a los usuarios acceso rápido y completo a los datos de sus computadoras.\
-Para facilitar esta capacidad de búsqueda rápida, Spotlight mantiene una base de datos propietaria y crea un índice analizando la mayoría de los archivos, lo que permite búsquedas rápidas tanto por nombres de archivo como por su contenido.
+Spotlight es la función de búsqueda incorporada en macOS, diseñada para proporcionar a los usuarios acceso rápido y completo a los datos en sus computadoras.\
+Para facilitar esta capacidad de búsqueda rápida, Spotlight mantiene una **base de datos propietaria** y crea un índice al **analizar la mayoría de los archivos**, lo que permite búsquedas rápidas tanto por nombres de archivo como por su contenido.
 
-El mecanismo subyacente de Spotlight involucra un proceso central llamado 'mds', que significa 'servidor de metadatos'. Este proceso orquesta todo el servicio de Spotlight. Además, existen múltiples demonios 'mdworker' que realizan diversas tareas de mantenimiento, como indexar diferentes tipos de archivos (`ps -ef | grep mdworker`). Estas tareas son posibles gracias a los complementos de importación de Spotlight, o "paquetes .mdimporter", que permiten que Spotlight comprenda e indexe contenido en una amplia gama de formatos de archivo.
+El mecanismo subyacente de Spotlight involucra un proceso central llamado 'mds', que significa **'servidor de metadatos'**. Este proceso orquesta todo el servicio de Spotlight. Además, existen múltiples demonios 'mdworker' que realizan una variedad de tareas de mantenimiento, como indexar diferentes tipos de archivos (`ps -ef | grep mdworker`). Estas tareas son posibles gracias a los complementos de importación de Spotlight, o **paquetes ".mdimporter"**, que permiten que Spotlight comprenda e indexe contenido en una amplia gama de formatos de archivo.
 
-Los complementos o paquetes `.mdimporter` se encuentran en los lugares mencionados anteriormente y si aparece un nuevo paquete, se carga en cuestión de minutos (no es necesario reiniciar ningún servicio). Estos paquetes deben indicar qué tipo de archivo y extensiones pueden gestionar, de esta manera, Spotlight los utilizará cuando se cree un nuevo archivo con la extensión indicada.
+Los complementos o paquetes **`.mdimporter`** se encuentran en los lugares mencionados anteriormente y si aparece un nuevo paquete, se carga en cuestión de minutos (no es necesario reiniciar ningún servicio). Estos paquetes deben indicar qué **tipo de archivo y extensiones pueden gestionar**, de esta manera, Spotlight los utilizará cuando se cree un nuevo archivo con la extensión indicada.
 
-Es posible encontrar todos los `mdimporters` cargados ejecutando:
+Es posible **encontrar todos los `mdimporters`** cargados ejecutando:
 ```bash
 mdimport -L
 Paths: id(501) (
@@ -1328,7 +1328,7 @@ Después de colocar un nuevo directorio en una de estas dos ubicaciones, se debe
 </dict>
 </plist>
 ```
-{% tab title="superservicename" %}Nombre del servicio súper
+{% tab title="superservicename" %}
 ```bash
 #!/bin/sh
 . /etc/rc.common

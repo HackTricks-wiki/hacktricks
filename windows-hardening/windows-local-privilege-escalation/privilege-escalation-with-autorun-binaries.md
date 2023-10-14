@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
@@ -163,7 +163,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 Cualquier acceso directo creado en la ubicación indicada por la subclave de inicio ejecutará el servicio durante el inicio de sesión o reinicio. La ubicación de inicio se especifica tanto en la Máquina Local como en el Usuario Actual.
 
 {% hint style="info" %}
-Si puedes sobrescribir cualquier Carpeta de Shell de \[Usuario] bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar una puerta trasera que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
+Si puedes sobrescribir cualquier \[Usuario] Carpeta de Shell bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar una puerta trasera que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
 {% endhint %}
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -192,12 +192,12 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Si puedes sobrescribir el valor del registro o el binario, podrás elevar los privilegios.
 {% endhint %}
 
-### Configuraciones de política
+### Configuraciones de Política
 
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-Verifica la clave **Run**.
+Verificar la clave **Run**.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -308,17 +308,17 @@ Image File Execution Options (IFEO) es una característica de Windows que permit
 
 Cuando se crea una clave de registro en `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options`, Windows ejecutará un binario especificado antes de ejecutar cualquier otro binario con el mismo nombre. Esto puede ser utilizado por los atacantes para reemplazar un binario legítimo con uno malicioso y obtener privilegios elevados.
 
-Para lograr esto, el atacante debe crear una nueva clave en `Image File Execution Options` con el nombre del binario legítimo que desea reemplazar. Dentro de esta clave, se debe crear un valor de cadena llamado `Debugger` y se debe establecer su valor en la ruta del binario malicioso.
+Para lograr esto, el atacante debe crear una nueva clave en `Image File Execution Options` con el nombre del binario legítimo que desea reemplazar. Luego, debe agregar un valor de cadena llamado `Debugger` y establecerlo en la ruta del binario malicioso.
 
-Cuando se inicie el binario legítimo, Windows ejecutará automáticamente el binario malicioso especificado en la clave `Debugger`. Esto permite al atacante ejecutar código con privilegios elevados.
+Cuando se inicie el binario legítimo, Windows ejecutará el binario malicioso en su lugar, lo que permite al atacante ejecutar código con privilegios elevados.
 
-Para evitar este tipo de escalada de privilegios, se recomienda realizar las siguientes acciones:
+Para evitar este tipo de ataque, se recomienda realizar las siguientes acciones:
 
-- Restringir el acceso a la clave de registro `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options` para evitar modificaciones no autorizadas.
-- Monitorear los cambios en la clave de registro mencionada anteriormente para detectar posibles modificaciones maliciosas.
-- Mantener actualizado el sistema operativo y las aplicaciones para mitigar vulnerabilidades conocidas que podrían ser explotadas para lograr una escalada de privilegios.
+- Restringir los permisos de escritura en la clave de registro `Image File Execution Options`.
+- Monitorear los cambios en la clave de registro `Image File Execution Options` en busca de modificaciones sospechosas.
+- Utilizar soluciones de seguridad que detecten y bloqueen este tipo de ataques.
 
-Al comprender cómo los atacantes pueden aprovechar las opciones de ejecución de archivos de imagen, los administradores de sistemas pueden tomar medidas para proteger sus sistemas y prevenir posibles ataques de escalada de privilegios.
+Al comprender cómo los atacantes pueden aprovechar las características legítimas de Windows, podemos tomar medidas para proteger nuestros sistemas y evitar la escalada de privilegios local.
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
@@ -339,9 +339,9 @@ Encuentra más Autoruns como registros en [https://www.microsoftpressstore.com/a
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -351,8 +351,8 @@ Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -12,15 +12,15 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere dominio del polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## Silver ticket
 
-El ataque de Silver ticket se basa en **crear un TGS válido para un servicio una vez que se posee el hash NTLM del servicio** (como el hash de la **cuenta de PC**). Por lo tanto, es posible **acceder a ese servicio** falsificando un TGS personalizado **como cualquier usuario**.
+El ataque de Silver ticket se basa en **crear un TGS válido para un servicio una vez que se posee el hash NTLM del servicio** (como el hash de la **cuenta de PC**). Por lo tanto, es posible **obtener acceso a ese servicio** falsificando un TGS personalizado **como cualquier usuario**.
 
 En este caso, se **posee el hash NTLM de una cuenta de computadora** (que es una especie de cuenta de usuario en AD). Por lo tanto, es posible **crear** un **ticket** para **ingresar a esa máquina** con privilegios de **administrador** a través del servicio SMB. Las cuentas de computadora restablecen sus contraseñas cada 30 días de forma predeterminada.
 
@@ -158,9 +158,9 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 [dcsync.md](dcsync.md)
 {% endcontent-ref %}
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
