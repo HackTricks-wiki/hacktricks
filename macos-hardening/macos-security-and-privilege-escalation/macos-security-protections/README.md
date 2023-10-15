@@ -84,6 +84,32 @@ The MRT application is located in **`/Library/Apple/System/Library/CoreServices/
 
 **macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.
 
+<figure><img src="../../../.gitbook/assets/image (711).png" alt=""><figcaption></figcaption></figure>
+
+This runs with a **daemon** located in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` and the **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+
+The way **`backgroundtaskmanagementd`** knows something is installed in a persistent folder is by **getting the FSEvents** and creating some **handlers** for those.
+
+Moreover, there is a plist file that contains **well known applications** that frequently persists maintained by apple located in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+
+```json
+[...]
+"us.zoom.ZoomDaemon" => {
+    "AssociatedBundleIdentifiers" => [
+      0 => "us.zoom.xos"
+    ]
+    "Attribution" => "Zoom"
+    "Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+    "ProgramArguments" => [
+      0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+    ]
+    "TeamIdentifier" => "BJ4HAAB9B3"
+  }
+[...]
+```
+
+### Enumeration
+
 It's possible to **enumerate all** the configured background items running the Apple cli tool:
 
 ```bash
@@ -102,8 +128,38 @@ xattr -rc dumpBTM # Remove quarantine attr
 
 This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.
 
-You can find more information:
+### Messing with BTM
 
+When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.
+
+* **Reseting the database**: Running the following command will reset the database (should rebuild it from the ground), however, for some reason, after running this, **no new persistence will be alerted until the system is rebooted**.
+  * **root** is required.
+
+```bash
+# Reset the database
+sfltool resettbtm
+```
+
+* **Stop the Agent**: It's possible to send a stop signal to the agent so it **won't be alerting the user** when new detections are found.
+
+```bash
+# Get PID
+pgrep BackgroundTaskManagementAgent
+1011
+
+# Stop it
+kill -SIGSTOP 1011
+
+# Check it's stopped (a T means it's stopped)
+ps -o state 1011
+T
+```
+
+* **Bug**: If the **process that created the persistence exists fast right after it**, the daemon will try to **get information** about it, **fail**, and **won't be able to send the event** indicating that a new thing is persisting.
+
+References and **more information about BTM**:
+
+* [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 * [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 * [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 

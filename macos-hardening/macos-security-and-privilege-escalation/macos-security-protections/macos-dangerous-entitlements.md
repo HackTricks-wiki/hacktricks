@@ -18,6 +18,14 @@ Note that entitlements starting with **`com.apple`** are not available to third-
 
 ## High
 
+### com.apple.rootless.install.heritable
+
+The entitlement **`com.apple.rootless.install.heritable`** allows to **bypass SIP**. Check [this for more info](macos-sip.md#com.apple.rootless.install.heritable).
+
+### **com.apple.rootless.install**
+
+The entitlement **`com.apple.rootless.install`** allows to **bypass SIP**. Check[ this for more info](macos-sip.md#com.apple.rootless.install).
+
 ### `com.apple.security.get-task-allow`
 
 This entitlement allows to get the task port of the process run by the binary with this entitlement and **inject code on it**. Check [**this for more info**](../mac-os-architecture/macos-ipc-inter-process-communication/).
@@ -37,6 +45,14 @@ This entitlement allows to **load frameworks, plug-ins, or libraries without bei
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
 This entitlement allows to **use DYLD environment variables** that could be used to inject libraries and code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
+
+### com.apple.private.apfs.revert-to-snapshot
+
+TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!
+
+### com.apple.private.apfs.create-sealed-snapshot
+
+TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!
 
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
