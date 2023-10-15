@@ -319,6 +319,13 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 
 [**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) is a very useful tool to check the process related actions a process is performing (for example, monitor which new processes a process is creating).
 
+### SpriteTree
+
+[**SpriteTree**](https://themittenmac.com/tools/) is a tool to prints the relations between processes.\
+You need to monitor your mac with a command like **`sudo eslogger fork exec rename create > cap.json`** (the terminal launching this required FDA). And then you can load the json in this tool to viwe all the relations:
+
+<figure><img src="../../../.gitbook/assets/image (710).png" alt="" width="375"><figcaption></figcaption></figure>
+
 ### FileMonitor
 
 [**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) allows to monitor file events (such as creation, modifications, and deletions) providing detailed information about such events.
