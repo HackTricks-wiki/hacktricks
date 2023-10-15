@@ -165,10 +165,10 @@ rootとしてこのサービスを有効にすると、**ARDエージェント�
 ## **NFSHomeDirectory**による
 
 TCCは、ユーザーのHOMEフォルダ内のデータベースを使用して、ユーザー固有のリソースへのアクセスを制御します。データベースの場所は**$HOME/Library/Application Support/com.apple.TCC/TCC.db**です。\
-したがって、ユーザーが$HOME環境変数を**異なるフォルダ**を指すように設定してTCCを再起動できれば、ユーザーは**/Library/Application Support/com.apple.TCC/TCC.db**に新しいTCCデータベースを作成し、TCCに任意のTCC許可を任意のアプリに与えるようにトリックをかけることができます。
+したがって、ユーザーが$HOME環境変数を**異なるフォルダ**を指すように設定してTCCを再起動できれば、ユーザーは**/Library/Application Support/com.apple.TCC/TCC.db**に新しいTCCデータベースを作成し、TCCに任意のTCC許可を与えることができます。
 
 {% hint style="success" %}
-Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に格納された設定を**`$HOME`の値**として使用しているため、この値を変更する権限（`kTCCServiceSystemPolicySysAdminFiles`）を持つアプリケーションを侵害すると、このオプションをTCCバイパスとして**武器化**することができます。
+Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に格納された設定を**`$HOME`の値**として使用しているため、この値（`kTCCServiceSystemPolicySysAdminFiles`を変更する権限を持つアプリケーションを侵害する場合、このオプションをTCCバイパスとして**利用**することができます。
 {% endhint %}
 
 ### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
@@ -181,19 +181,19 @@ Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に�
 
 1. ターゲットアプリケーションの_csreq_ blobを取得します。
 2. 必要なアクセスと_csreq_ blobを持つ偽の_TCC.db_ファイルを配置します。
-3. [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/)を使用して、ユーザーのディレクトリサービスエントリをエクスポートします。
+3. [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/)を使用してユーザーのディレクトリサービスエントリをエクスポートします。
 4. ユーザーのホームディレクトリを変更するためにディレクトリサービスエントリを変更します。
 5. [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/)を使用して変更されたディレクトリサービスエントリをインポートします。
 6. ユーザーの_tccd_を停止し、プロセスを再起動します。
 
 2番目のPOCでは、**`/usr/libexec/configd`**が`com.apple.private.tcc.allow`という値**`kTCCServiceSystemPolicySysAdminFiles`**を持っていました。\
-**`configd`**を**`-t`**オプションで実行することで、攻撃者は**カスタムバンドルをロード**することができました。したがって、このエクスプロイトは、ユーザーのホームディレクトリを変更する**`configd`コードインジェクション**で**`dsexport`**と**`dsimport`**の方法を置き換えます。
+**`configd`**を**`-t`**オプションで実行することができるため、攻撃者は**カスタムバンドルをロード**することができました。したがって、このエクスプロイトでは、ユーザーのホームディレクトリを変更する**`dsexport`**と**`dsimport`**の方法を**`configd`のコードインジェクション**で置き換えます。
 
 詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)を参照してください。
 
 ## プロセスインジェクションによる
 
-プロセス内にコードをインジェクトし、そのTCC特権を悪用するためのさまざまなテクニックがあります。
+プロセス内にコードをインジェクトし、そのTCC特権を悪用するためのさまざまな技術があります。
 
 {% content-ref url="../../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../../macos-proces-abuse/)
@@ -206,7 +206,7 @@ Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に�
 
 アプリケーション`/System/Library/CoreServices/Applications/Directory Utility.app`は、エンタイトルメント**`kTCCServiceSystemPolicySysAdminFiles`**を持ち、**`.daplug`**拡張子のプラグインをロードし、**ハードニングされていなかった**ランタイムを持っていました。
 
-このCVEを武器化するために、**`NFSHomeDirectory`**が**変更**され（前述のエンタイトルメントを悪用）、TCCをバイパスするためにユーザーのTCCデータベースを**乗っ取る**ことができます。
+このCVEを利用するために、**`NFSHomeDirectory`**が**変更**され（前述のエンタイトルメントを悪用）、TCCをバイパスするためにユーザーのTCCデータベースを**乗っ取る**ことができます。
 
 詳細については、[**元のレポート**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)を参照してください。
 
@@ -249,7 +249,7 @@ Core Media I/Oを介してカメラストリームを開くシステムアプリ
 
 そこに一般的な**コンストラクタ**を持つライブラリを保存するだけで、コードを**インジェクト**することができます。
 
-これにより、いくつかのAppleのアプリケーションが脆弱になりました。
+これに対していくつかのAppleのアプリケーションは脆弱でした。
 
 ### Firefox
 
@@ -277,7 +277,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-詳細については、[**元のレポート**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)をチェックしてください。
+詳細については、[**元のレポートをチェックしてください**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)。
 
 ### CVE-2020-10006
 
@@ -285,15 +285,15 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 
 ### CVE-2023-26818 - Telegram
 
-Telegram には、`com.apple.security.cs.allow-dyld-environment-variables` と `com.apple.security.cs.disable-library-validation` の権限があり、カメラでの録画などの権限にアクセスすることができました。[**writeup でペイロードを見つけることができます**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)。
+Telegram には `com.apple.security.cs.allow-dyld-environment-variables` と `com.apple.security.cs.disable-library-validation` の権限があり、カメラでの録画などの権限にアクセスすることができました。[**writeup でペイロードを見つけることができます**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)。
 
 ## オープンな呼び出しによる方法
 
-サンドボックス内で open を呼び出すことが可能です。
+サンドボックス内で open を呼び出すことができます。
 
 ### ターミナルスクリプト
 
-ターミナルには、**Full Disk Access (FDA)** を与えることが一般的です。少なくとも、テック系の人が使用するコンピュータではそうです。そして、それを使用して **`.terminal`** スクリプトを呼び出すことが可能です。
+テック系の人が使用するコンピュータでは、ターミナルに **Full Disk Access (FDA)** を与えることが一般的です。そして、それを使用して **`.terminal`** スクリプトを呼び出すことができます。
 
 **`.terminal`** スクリプトは、次のようなコマンドを **`CommandString`** キーで実行する plist ファイルです：
 ```xml
@@ -328,8 +328,8 @@ exploit_location]; task.standardOutput = pipe;
 
 ### CVE-2020-9771 - mount\_apfs TCC バイパスと特権エスカレーション
 
-**どのユーザーでも**（特権を持たないユーザーでも）タイムマシンのスナップショットを作成し、マウントすることができ、そのスナップショットの**すべてのファイルにアクセス**することができます。\
-必要なのは、使用されるアプリケーション（例：`Terminal`）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つための**特権**のみであり、これは管理者によって許可される必要があります。
+**どのユーザーでも**（特権を持たないユーザーも含む）タイムマシンのスナップショットを作成し、マウントすることができ、そのスナップショットの**すべてのファイルにアクセス**することができます。\
+必要なのは、使用されるアプリケーション（例：`Terminal`）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つための特権のみであり、これは管理者によって許可される必要があります。
 
 {% code overflow="wrap" %}
 ```bash
@@ -391,13 +391,13 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 **`/var/db/locationd/clients.plist`**には、**位置情報サービスにアクセスを許可されたクライアント**を示す、第3のTCCデータベースがあります。\
 フォルダ**`/var/db/locationd/`はDMGのマウントから保護されていなかった**ため、独自のplistをマウントすることが可能でした。
 
-## スタートアップアプリによる方法
+## スタートアップアプリによるバイパス
 
 {% content-ref url="../../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
 {% endcontent-ref %}
 
-## grepによる方法
+## grepによるバイパス
 
 いくつかの場合、ファイルには電子メール、電話番号、メッセージなどの機密情報が保管されていますが、これらはAppleの脆弱性としてカウントされます。
 
