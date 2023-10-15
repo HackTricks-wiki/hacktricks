@@ -99,7 +99,7 @@ Open the SalseoLoader project using Visual Studio.
 
 ### Add before the main function: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### Install DllExport for this project
 

@@ -27,13 +27,22 @@ When a connection is stablished to an XPC service, the server will check if the 
 5. (4 or 5) Check if the connecting process has hardened runtime without dangerous entitlements (like the ones that allows to load arbitrary libraries or use DYLD env vars)
    1. If this **isn't verified,** the client might be **vulnerable to code injection**
 6. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
-7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents PID reuse attacks.
-   * Developers rarely use the audit token API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
+7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents **PID reuse attacks**.
+   * Developers **rarely use the audit token** API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
+     * **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
+
+### Communication Attacks
 
 For more information about the PID reuse attack check:
 
-{% content-ref url="../../../mac-os-architecture/macos-ipc-inter-process-communication/macos-pid-reuse.md" %}
-[macos-pid-reuse.md](../../../mac-os-architecture/macos-ipc-inter-process-communication/macos-pid-reuse.md)
+{% content-ref url="macos-pid-reuse.md" %}
+[macos-pid-reuse.md](macos-pid-reuse.md)
+{% endcontent-ref %}
+
+For more information **`xpc_connection_get_audit_token`** attack check:
+
+{% content-ref url="macos-xpc_connection_get_audit_token-attack.md" %}
+[macos-xpc\_connection\_get\_audit\_token-attack.md](macos-xpc\_connection\_get\_audit\_token-attack.md)
 {% endcontent-ref %}
 
 ### Trustcache - Downgrade Attacks Prevention

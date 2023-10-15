@@ -14,6 +14,8 @@
 
 ## Mach messaging via Ports
 
+### Basic Information
+
 Mach uses **tasks** as the **smallest unit** for sharing resources, and each task can contain **multiple threads**. These **tasks and threads are mapped 1:1 to POSIX processes and threads**.
 
 Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilising one-way communication channels. **Messages are transferred between ports**, which act like **message queues** managed by the kernel.
@@ -21,6 +23,8 @@ Communication between tasks occurs via Mach Inter-Process Communication (IPC), u
 Each process has an **IPC table**, in there it's possible to find the **mach ports of the process**. The name of a mach port is actually a number (a pointer to the kernel object).
 
 A process can also send a port name with some rights **to a different task** and the kernel will make this entry in the **IPC table of the other task** appear.
+
+### Port Rights
 
 Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are:
 
@@ -34,6 +38,8 @@ Port rights, which define what operations a task can perform, are key to this co
 
 **Tasks can transfer SEND rights to others**, enabling them to send messages back. **SEND rights can also be cloned, so a task can duplicate and give the right to a third task**. This, combined with an intermediary process known as the **bootstrap server**, allows for effective communication between tasks.
 
+### Establishing a communication
+
 #### Steps:
 
 As it's mentioned, in order to establish the communication channel, the **bootstrap server** (**launchd** in mac) is involved.
@@ -43,6 +49,7 @@ As it's mentioned, in order to establish the communication channel, the **bootst
 3. Task **A** establishes a **connection** with the **bootstrap server**, providing the **port's service name** and the **SEND right** through a procedure known as the bootstrap register.
 4. Task **B** interacts with the **bootstrap server** to execute a bootstrap **lookup for the service** name. If successful, the **server duplicates the SEND right** received from Task A and **transmits it to Task B**.
 5. Upon acquiring a SEND right, Task **B** is capable of **formulating** a **message** and dispatching it **to Task A**.
+6. For a bi-directional communication usually task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** so it can send messages to TASK B (bi-directional communication).
 
 The bootstrap server **cannot authenticate** the service name claimed by a task. This means a **task** could potentially **impersonate any system task**, such as falsely **claiming an authorization service name** and then approving every request.
 
@@ -54,8 +61,43 @@ For these predefined services, the **lookup process differs slightly**. When a s
 * **launchd** checks if the task is running and if it isn’t, **starts** it.
 * Task **A** (the service) performs a **bootstrap check-in**. Here, the **bootstrap** server creates a SEND right, retains it, and **transfers the RECEIVE right to Task A**.
 * launchd duplicates the **SEND right and sends it to Task B**.
+* Task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** (the svc) so it can send messages to TASK B (bi-directional communication).
 
 However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
+
+### A Mach Message
+
+Mach messages are sent or received using the **`mach_msg` function** (which is essentially a syscall). When sending, the first argument for this call must be the **message**, which has to start with a **`mach_msg_header_t`** followed by the actual payload:
+
+```c
+typedef struct {
+	mach_msg_bits_t               msgh_bits;
+	mach_msg_size_t               msgh_size;
+	mach_port_t                   msgh_remote_port;
+	mach_port_t                   msgh_local_port;
+	mach_port_name_t              msgh_voucher_port;
+	mach_msg_id_t                 msgh_id;
+} mach_msg_header_t;
+```
+
+The process that can **receive** messages on a mach port is said to hold the _**receive right**_, while the **senders** hold a _**send**_ or a _**send-once**_** right**. Send-once, as the name implies, can only be used to send a single message and then is invalidated.
+
+In order to achieve an easy **bi-directional communication** a process can specify a **mach port** in the mach **message header** called the _reply port_ (**`msgh_local_port`**) where the **receiver** of the message can **send a reply** to this message. The bitflags in **`msgh_bits`** can be used to **indicate** that a **send-once** **right** should be derived and transferred for this port (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+
+{% hint style="success" %}
+Note that this kind of bi-directional communication is used in XPC messages that expect a replay (`xpc_connection_send_message_with_reply` and `xpc_connection_send_message_with_reply_sync`). But **usually different ports are created** as explained previously to create the bi-directional communication.
+{% endhint %}
+
+The other fields of the message header are:
+
+* `msgh_size`: the size of the entire packet.
+* `msgh_remote_port`: the port on which this message is sent.
+* `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach\_vouchers.html).
+* `msgh_id`: the ID of this message, which is interpreted by the receiver.
+
+{% hint style="danger" %}
+Note that **mach messages are sent over a **_**mach port**_, which is a **single receiver**, **multiple sender** communication channel built into the mach kernel. **Multiple processes** can **send messages** to a mach port, but at any point only **a single process can read** from it.
+{% endhint %}
 
 ### Enumerate ports
 
@@ -803,6 +845,8 @@ For more info check:
 * [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
 * [https://knight.sc/malware/2019/03/15/code-injection-on-macos.html](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
 * [https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
+* [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+* [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 <details>
 

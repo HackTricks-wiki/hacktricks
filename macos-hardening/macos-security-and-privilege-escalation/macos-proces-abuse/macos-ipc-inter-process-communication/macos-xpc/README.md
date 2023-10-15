@@ -84,8 +84,8 @@ Applications can **subscribe** to different event **messages**, enabling them to
 
 When a process tries to call a method from via an XPC connection, the **XPC service should check if that process is allowed to connect**. Here are the common ways to check that and the common pitfalls:
 
-{% content-ref url="macos-xpc-connecting-process-check.md" %}
-[macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
+{% content-ref url="macos-xpc-connecting-process-check/" %}
+[macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
 {% endcontent-ref %}
 
 ## XPC Authorization
