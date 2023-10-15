@@ -4,44 +4,48 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 ## サンドボックスの読み込みプロセス
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>画像は<a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a>から</p></figcaption></figure>
 
-前の画像では、**`com.apple.security.app-sandbox`**の権限を持つアプリケーションが実行されると、**サンドボックスがどのように読み込まれるか**が観察できます。
+前の画像では、**`com.apple.security.app-sandbox`**の権限を持つアプリケーションが実行されると、**サンドボックスがどのように読み込まれるか**がわかります。
 
 コンパイラは`/usr/lib/libSystem.B.dylib`をバイナリにリンクします。
 
 その後、**`libSystem.B`**は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`**がアプリの権限を**`securityd`**に送信します。Securitydはプロセスがサンドボックス内に隔離される必要があるかどうかをチェックし、必要な場合は隔離されます。\
-最後に、サンドボックスは**`__sandbox_ms`**を呼び出してアクティブ化され、**`__mac_syscall`**が呼び出されます。
+最後に、サンドボックスは**`__sandbox_ms`**を呼び出して、**`__mac_syscall`**を呼び出します。
 
 ## バイパスの可能性
 
 ### 隔離属性のバイパス
 
-**サンドボックス化されたプロセスによって作成されたファイル**は、サンドボックスからの脱出を防ぐために**隔離属性**が追加されます。ただし、サンドボックス化されたアプリケーション内で**隔離属性のない`.app`バンドルを作成**できれば、アプリバンドルのバイナリを**`/bin/bash`**に指定し、**plist**にいくつかの環境変数を追加して、launchctlを悪用して**サンドボックスを回避して新しいアプリを起動**することができます。
+**サンドボックス化されたプロセスが作成するファイル**は、サンドボックスからの脱出を防ぐために**隔離属性**が付加されます。ただし、サンドボックス化されたアプリケーション内に**隔離属性のない`.app`フォルダ**を作成できれば、アプリバンドルのバイナリを**`/bin/bash`**に指定し、**plist**にいくつかの環境変数を追加して**`open`**を悪用して**新しいアプリをサンドボックスから外して起動**することができます。
 
-これは、[**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)で行われたことです。
+これは[**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**で行われたことです**。
+
+{% hint style="danger" %}
+したがって、現時点では、隔離属性のない名前で終わるフォルダを作成できるだけであれば、macOSは**隔離**属性を**`.app`フォルダ**と**メインの実行可能ファイル**でのみ**チェック**します（そして、メインの実行可能ファイルを**`/bin/bash`**に指定します）。
+{% endhint %}
 
 ### Open機能の悪用
 
-[**Wordサンドボックス回避の最後の例**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)では、**`open`**のCLI機能がサンドボックスを回避するために悪用されることがわかります。
+[**Wordサンドボックス回避の最後の例**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)では、**`open`**のCLI機能がサンドボックスを回避するために悪用されることが示されています。
 
-### Auto Start Locationsの悪用
+### Auto Startの場所の悪用
 
-サンドボックス化されたプロセスが、**後でサンドボックス化されていないアプリケーションがバイナリを実行する場所に書き込む**ことができれば、バイナリをそこに配置することで**簡単に脱出**することができます。この種の場所の良い例は、`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
+サンドボックス化されたプロセスが、**後でサンドボックス化されていないアプリケーションがバイナリを実行する場所に書き込む**ことができれば、バイナリをそこに配置することで**脱出**することができます。この種の場所の良い例は、`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
 
-これには**2つのステップ**が必要な場合もあります。より許可のあるサンドボックス（`file-read*`、`file-write*`）を持つプロセスを作成し、実際には**サンドボックスを回避して実行**される場所に書き込むコードを実行することです。
+これには**2つのステップ**が必要な場合もあります：より**許可のあるサンドボックス**（`file-read*`、`file-write*`）を持つプロセスが、実際には**サンドボックスから外されて実行される場所**に書き込むコードを実行することです。
 
-**Auto Start locations**については、次のページを参照してください：
+**Auto Startの場所**については、次のページを参照してください：
 
 {% content-ref url="../../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
@@ -61,10 +65,9 @@
 
 * バイナリが**完全に静的にコンパイル**されている場合、そのライブラリをロードする必要はありません。
 * バイナリがライブラリをロードする必要がない場合（リンカもlibSystemに含まれているため）、libSystemをロードする必要はありません。
-
 ### シェルコード
 
-ARM64の場合でも、**シェルコードでさえも**`libSystem.dylib`にリンクする必要があります。
+ARM64の場合でも、シェルコードは`libSystem.dylib`にリンクする必要があることに注意してください。
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
@@ -161,7 +164,7 @@ Sandbox Bypassed!
 ```
 ### lldbを使用してSandboxのデバッグとバイパスする
 
-Sandboxされるべきアプリケーションをコンパイルしましょう：
+Sandboxが適用されるべきアプリケーションをコンパイルしましょう：
 
 {% tabs %}
 {% tab title="sand.c" %}
@@ -175,17 +178,9 @@ system("cat ~/Desktop/del.txt");
 
 このファイルは、macOSアプリケーションのエンタイトルメント（権限）を定義するために使用されます。エンタイトルメントは、アプリケーションが実行する特定の操作やリソースにアクセスするための許可を与えるものです。このファイルには、アプリケーションが必要とするエンタイトルメントのリストが含まれています。
 
-エンタイトルメントは、アプリケーションのセキュリティと特権のエスカレーションを制御するために重要です。正しく設定されていない場合、アプリケーションは制限されたリソースにアクセスできないか、予期しない操作を実行する可能性があります。
+エンタイトルメントは、アプリケーションがmacOSのセキュリティ保護機能をバイパスするために使用されることがあります。攻撃者は、特定のエンタイトルメントを要求することで、アプリケーションのセキュリティ制約を回避し、特権の昇格を行うことができます。
 
-このファイルを使用してエンタイトルメントを設定するには、次の手順に従ってください。
-
-1. 必要なエンタイトルメントを特定します。これは、アプリケーションが実行する操作やアクセスするリソースに基づいています。
-2. entitlements.xmlファイルを開き、必要なエンタイトルメントを追加します。各エンタイトルメントは、<key>と<true/>の間に記述されます。
-3. エンタイトルメントをアプリケーションに適用するために、アプリケーションのビルド設定でこのファイルを指定します。
-
-エンタイトルメントは、アプリケーションのセキュリティを向上させるために重要な役割を果たします。正しく設定されたエンタイトルメントは、アプリケーションの特権のエスカレーションを防ぎ、悪意のある操作から保護します。
-
-{% endtab %}
+このファイルを悪意のある目的で使用することは、違法行為であり、厳しく禁止されています。
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -234,7 +229,7 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 
 {% hint style="danger" %}
 アプリは、**Sandboxが許可しない**ファイル**`~/Desktop/del.txt`**を**読み取ろうとします**。\
-Sandboxがバイパスされると、それを読み取ることができるように、そこにファイルを作成してください：
+Sandboxがバイパスされると、それを読み取ることができるように、そこにファイルを作成してください。
 ```bash
 echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
