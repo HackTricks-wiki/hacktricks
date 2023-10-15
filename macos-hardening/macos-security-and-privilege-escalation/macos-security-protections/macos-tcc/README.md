@@ -18,15 +18,15 @@
 
 ユーザーの視点からは、TCCが動作しているのは、**TCCによって保護された機能へのアクセスをアプリケーションが要求したとき**です。これが発生すると、**ユーザーにはアクセスを許可するかどうかを尋ねるダイアログが表示**されます。
 
-また、ユーザーが**ファイルにアクセスを許可する**こともできます。たとえば、ユーザーが**ファイルをプログラムにドラッグ＆ドロップする**場合などです（もちろん、プログラムはそれにアクセスできる必要があります）。
+また、ユーザーが**ファイルにアクセスを許可する**こともできます。たとえば、ユーザーが**ファイルをプログラムにドラッグ＆ドロップする**場合（もちろん、プログラムはそれにアクセスできる必要があります）。
 
 ![TCCプロンプトの例](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
-**TCC**は、`/System/Library/PrivateFrameworks/TCC.framework/Support/tccd`にある**デーモン**によって処理され、`/System/Library/LaunchDaemons/com.apple.tccd.system.plist`で構成されています（`com.apple.tccd.system`というマッハサービスを登録します）。
+**TCC**は、`/System/Library/PrivateFrameworks/TCC.framework/Support/tccd`にある**デーモン**によって処理され、`/System/Library/LaunchDaemons/com.apple.tccd.system.plist`で構成されています（`com.apple.tccd.system`というマッハサービスを登録）。
 
-ログインしているユーザーごとに定義された**ユーザーモードのtccd**が`/System/Library/LaunchAgents/com.apple.tccd.plist`に実行され、マッハサービス`com.apple.tccd`と`com.apple.usernotifications.delegate.com.apple.tccd`を登録します。
+ログインしているユーザーごとに定義された**ユーザーモードのtccd**があり、`/System/Library/LaunchAgents/com.apple.tccd.plist`にあり、マッハサービス`com.apple.tccd`と`com.apple.usernotifications.delegate.com.apple.tccd`を登録しています。
 
-ここでは、システムとユーザーとして実行されているtccdを確認できます：
+ここでは、システムとユーザーとして実行されているtccdが表示されます：
 ```bash
 ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
@@ -36,7 +36,7 @@ ps -ef | grep tcc
 
 ### TCCデータベース
 
-選択肢は、TCCシステム全体のデータベースに**`/Library/Application Support/com.apple.TCC/TCC.db`**として保存されます。また、ユーザごとの設定の場合は**`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**に保存されます。これらのデータベースは**SIP**(System Integrity Protection)によって編集が制限されていますが、読み取ることはできます。
+選択肢は、TCCシステム全体のデータベースに**`/Library/Application Support/com.apple.TCC/TCC.db`**として保存されます。ユーザーごとの設定の場合は、**`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**に保存されます。これらのデータベースは**SIP（System Integrity Protection）によって編集が制限**されていますが、読み取ることはできます。
 
 {% hint style="danger" %}
 **iOS**のTCCデータベースは**`/private/var/mobile/Library/TCC/TCC.db`**にあります。
@@ -44,7 +44,7 @@ ps -ef | grep tcc
 
 **`/var/db/locationd/clients.plist`**には、**位置情報サービスにアクセス**できるクライアントが示される、**3番目の**TCCデータベースがあります。
 
-さらに、**フルディスクアクセス**を持つプロセスは、ユーザーモードのデータベースを編集できます。現在、アプリはデータベースを**読み取るためにもFDA**が必要です。
+さらに、**フルディスクアクセス**を持つプロセスは、ユーザーモードのデータベースを**編集**することができます。現在、アプリはデータベースを**読み取るためにもFDAが必要**です。
 
 {% hint style="info" %}
 **通知センターUI**は、**システムのTCCデータベース**を変更することができます。
@@ -62,7 +62,7 @@ com.apple.rootless.storage.TCC
 {% endhint %}
 
 {% tabs %}
-{% tab title="ユーザーDB" %}
+{% tab title="user DB" %}
 ```bash
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -104,13 +104,13 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {% endhint %}
 
 * **`auth_value`** には、denied(0)、unknown(1)、allowed(2)、またはlimited(3)の異なる値が入る可能性があります。
-* **`auth_reason`** には、以下の値が入ります: Error(1)、User Consent(2)、User Set(3)、System Set(4)、Service Policy(5)、MDM Policy(6)、Override Policy(7)、Missing usage string(8)、Prompt Timeout(9)、Preflight Unknown(10)、Entitled(11)、App Type Policy(12)
-* テーブルの**他のフィールド**についての詳細は、[**このブログ記事**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)を参照してください。
+* **`auth_reason`** には、以下の値が入る可能性があります: Error(1)、User Consent(2)、User Set(3)、System Set(4)、Service Policy(5)、MDM Policy(6)、Override Policy(7)、Missing usage string(8)、Prompt Timeout(9)、Preflight Unknown(10)、Entitled(11)、App Type Policy(12)
+* テーブルの**他のフィールド**に関する詳細については、[**このブログ記事**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)を参照してください。
 
 {% hint style="info" %}
-いくつかのTCCの許可は、kTCCServiceAppleEvents、kTCCServiceCalendar、kTCCServicePhotosなどです... すべてを定義する公開リストはありませんが、この[**既知のリスト**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service)をチェックすることができます。
+一部のTCCの許可は、kTCCServiceAppleEvents、kTCCServiceCalendar、kTCCServicePhotosなどです... これらをすべて定義する公開リストは存在しませんが、この[**既知のリスト**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service)を確認できます。
 
-**Full Disk Access**の名前は**`kTCCServiceSystemPolicyAllFiles`**であり、**`kTCCServiceAppleEvents`**は、**タスクの自動化**に一般的に使用される他のアプリケーションにイベントを送信するためのアプリに許可を与えます。さらに、**`kTCCServiceSystemPolicySysAdminFiles`**は、ユーザのホームフォルダを変更する**`NFSHomeDirectory`**属性を変更することができ、それによりTCCを**バイパス**することができます。
+**Full Disk Access** の名前は **`kTCCServiceSystemPolicyAllFiles`** であり、**`kTCCServiceAppleEvents`** は、一般的に**タスクの自動化**に使用される他のアプリケーションにイベントを送信することを許可します。さらに、**`kTCCServiceSystemPolicySysAdminFiles`** は、ユーザのホームフォルダを変更する**`NFSHomeDirectory`**属性を変更することができ、それによりTCCを**バイパス**することができます。
 {% endhint %}
 
 また、`システム環境設定 --> セキュリティとプライバシー --> プライバシー --> ファイルとフォルダー`で、アプリに与えられた**既存の許可**も確認できます。
@@ -118,7 +118,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {% hint style="success" %}
 注意してくださいが、ユーザはこれらのデータベースを直接変更することはできません。SIPのためです（rootであっても）。新しいルールを設定または変更する唯一の方法は、システム環境設定パネルまたはアプリがユーザに要求するプロンプトです。
 
-ただし、ユーザは**`tccutil`**を使用してルールを削除またはクエリすることができます。&#x20;
+ただし、ユーザは **`tccutil`** を使用してルールを**削除またはクエリ**することができます。&#x20;
 {% endhint %}
 
 #### リセット
@@ -129,9 +129,15 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
-### TCC シグネチャのチェック
+### ユーザーTCC DBからFDAへの特権昇格
 
-TCCの**データベース**は、アプリケーションの**Bundle ID**を保存するだけでなく、**許可を使用するために要求するアプリ**が正しいものであることを確認するための**シグネチャに関する情報**も保存します。
+ユーザーTCCデータベースに対する書き込み権限を取得すると、自分自身にFDA権限を付与することはできません。FDA権限はシステムデータベースに存在するものだけが付与できます。
+
+しかし、自分自身に「Finderへの自動化権限」を与えることができます。そして、FinderにはFDA権限があるため、あなたにもFDA権限が与えられます。
+
+### TCC署名チェック
+
+TCCデータベースはアプリケーションのバンドルIDを保存していますが、パーミッションを使用するために許可を求めるアプリが正しいものであることを確認するために、署名に関する情報も保存しています。
 
 {% code overflow="wrap" %}
 ```bash
@@ -226,8 +232,8 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 
 * **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[NFTコレクション](https://opensea.io/collection/the-peass-family)
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

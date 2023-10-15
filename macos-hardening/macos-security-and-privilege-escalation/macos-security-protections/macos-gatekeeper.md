@@ -16,11 +16,11 @@
 
 ## Gatekeeper
 
-**Gatekeeper（ゲートキーパー）**は、Macオペレーティングシステム向けに開発されたセキュリティ機能であり、ユーザーがシステム上で**信頼されたソフトウェアのみを実行**することを保証するために設計されています。これは、ユーザーがアプリ、プラグイン、またはインストーラーパッケージなどの**App Store以外のソースからダウンロードして開こうとするソフトウェアを検証**することによって機能します。
+**Gatekeeper**は、Macオペレーティングシステム向けに開発されたセキュリティ機能で、ユーザーがシステム上で信頼できるソフトウェアのみを実行することを保証するために設計されています。これは、ユーザーがアプリ、プラグイン、またはインストーラーパッケージなどの**App Store以外のソース**からダウンロードして開こうとするソフトウェアを**検証**することによって機能します。
 
-Gatekeeperの主要なメカニズムは、**検証**プロセスにあります。ダウンロードしたソフトウェアが**認識された開発者によって署名**されているかどうかをチェックし、ソフトウェアの信頼性を確認します。さらに、ソフトウェアが**Appleによって公証**されているかどうかも確認し、既知の悪意のあるコンテンツが含まれていないこと、および公証後に改ざんされていないことを確認します。
+Gatekeeperの主要なメカニズムは、**検証**プロセスにあります。ダウンロードしたソフトウェアが**認識された開発者によって署名されているかどうか**をチェックし、ソフトウェアの信頼性を確認します。さらに、ソフトウェアが**Appleによって公証**されているかどうかも確認し、既知の悪意のあるコンテンツが含まれていないこと、および公証後に改ざんされていないことを確認します。
 
-さらに、Gatekeeperは、ユーザーがダウンロードしたソフトウェアの初回の実行を承認するようユーザーに**プロンプトを表示**することで、ユーザーの制御とセキュリティを強化します。この保護機能により、ユーザーは無害なデータファイルと間違えて害のある実行可能コードを誤って実行することを防ぐことができます。
+さらに、Gatekeeperは、ユーザーがダウンロードしたソフトウェアの初回の開封を**承認するようユーザーに促す**ことで、ユーザーの制御とセキュリティを強化します。この保護機能により、ユーザーは無害なデータファイルと間違えて害を及ぼす可能性のある実行可能なコードを誤って実行することを防ぐことができます。
 
 ### アプリケーションの署名
 
@@ -28,11 +28,11 @@ Gatekeeperの主要なメカニズムは、**検証**プロセスにあります
 
 以下は、その動作方法です。
 
-1. **アプリケーションの署名:** 開発者がアプリケーションを配布する準備ができたら、**開発者が秘密鍵を使用してアプリケーションに署名**します。この秘密鍵は、開発者がApple Developer Programに登録する際にAppleから発行される**証明書**と関連付けられています。署名プロセスでは、アプリのすべての部分の暗号ハッシュを作成し、このハッシュを開発者の秘密鍵で暗号化します。
+1. **アプリケーションの署名:** 開発者がアプリケーションを配布する準備ができたら、**開発者の秘密鍵を使用してアプリケーションに署名**します。この秘密鍵は、開発者がApple Developer Programに登録する際にAppleから発行される**証明書**と関連付けられています。署名プロセスでは、アプリのすべての部分の暗号ハッシュを作成し、このハッシュを開発者の秘密鍵で暗号化します。
 2. **アプリケーションの配布:** 署名されたアプリケーションは、開発者の証明書と共にユーザーに配布されます。この証明書には、対応する公開鍵が含まれています。
 3. **アプリケーションの検証:** ユーザーがアプリケーションをダウンロードして実行しようとすると、Macオペレーティングシステムは開発者の証明書から公開鍵を使用してハッシュを復号化します。その後、アプリケーションの現在の状態に基づいてハッシュを再計算し、これを復号化されたハッシュと比較します。一致する場合、開発者が署名した後にアプリケーションが**変更されていない**ことを意味し、システムはアプリケーションの実行を許可します。
 
-アプリケーションの署名は、AppleのGatekeeperテクノロジーの重要な部分です。ユーザーが**インターネットからダウンロードしたアプリケーションを開こうとする**と、Gatekeeperはアプリケーションの署名を検証します。Appleが既知の開発者に発行した証明書で署名されており、コードが改ざんされていない場合、Gatekeeperはアプリケーションの実行を許可します。それ以外の場合、Gatekeeperはアプリケーションをブロックし、ユーザーに警告を表示します。
+アプリケーションの署名は、AppleのGatekeeperテクノロジーの重要な部分です。ユーザーが**インターネットからダウンロードしたアプリケーションを開こうとする**と、Gatekeeperはアプリケーションの署名を検証します。Appleが既知の開発者に発行した証明書で署名されており、コードが改ざんされていない場合、Gatekeeperはアプリケーションの実行を許可します。それ以外の場合、Gatekeeperはアプリケーションをブロックし、ユーザーに警告します。
 
 macOS Catalina以降、**GatekeeperはアプリケーションがAppleによって公証されているかどうかもチェック**します。公証プロセスでは、アプリケーションが既知のセキュリティの問題や悪意のあるコードを含んでいないかどうかをチェックし、これらのチェックに合格した場合、AppleはGatekeeperが検証できるアプリケーションにチケットを追加します。
 
@@ -59,7 +59,7 @@ codesign -s <cert-name-keychain> toolsdemo
 
 Appleの公証プロセスは、ユーザーを潜在的に有害なソフトウェアから保護するための追加の安全策として機能します。これは、開発者が自分のアプリケーションをAppleの公証サービスに提出することを含みます。このサービスは、App Reviewとは異なるものであり、提出されたソフトウェアを悪意のあるコンテンツやコード署名の潜在的な問題から検査する自動化システムです。
 
-ソフトウェアがこの検査を通過し、懸念事項がない場合、公証サービスは公証チケットを生成します。その後、開発者はこのチケットをソフトウェアに添付する必要があります。このプロセスは「ステープリング」と呼ばれます。さらに、公証チケットはオンラインで公開され、Gatekeeper（Appleのセキュリティテクノロジー）がアクセスできるようになります。
+ソフトウェアがこの検査を通過し、懸念事項がない場合、公証サービスは公証チケットを生成します。その後、開発者はこのチケットをソフトウェアに添付する必要があります。このプロセスは「ステープリング」と呼ばれます。さらに、公証チケットはオンラインで公開され、Gatekeeper（Appleのセキュリティ技術）がアクセスできるようになります。
 
 ユーザーがソフトウェアを初めてインストールまたは実行する際、実行可能ファイルにステープルされているか、オンラインで見つかるかにかかわらず、公証チケットの存在はGatekeeperにソフトウェアがAppleによって公証されたことを通知します。その結果、Gatekeeperは初回起動ダイアログに説明的なメッセージを表示し、ソフトウェアがAppleによって悪意のあるコンテンツのチェックを受けたことを示します。このプロセスにより、ユーザーは自分のシステムにインストールまたは実行するソフトウェアのセキュリティに対する信頼性が向上します。
 
@@ -67,20 +67,20 @@ Appleの公証プロセスは、ユーザーを潜在的に有害なソフトウ
 
 GateKeeperは、信頼されていないアプリケーションの実行を防止するための複数のセキュリティコンポーネントであり、またその一部でもあります。
 
-GateKeeperの状態は、次のコマンドで確認することができます：
+GateKeeperの状態を確認するには、次のコマンドを使用します：
 ```bash
 # Check the status
 spctl --status
 ```
 {% hint style="danger" %}
-GateKeeperの署名チェックは、**Quarantine属性を持つファイル**にのみ実行されます。すべてのファイルに対して実行されるわけではありません。
+GateKeeperの署名チェックは、**Quarantine属性を持つファイル**にのみ実行されます。
 {% endhint %}
 
-GateKeeperは、**設定と署名**に基づいてバイナリが実行可能かどうかをチェックします。
+GateKeeperは、**設定と署名**に基づいてバイナリが実行可能かどうかをチェックします：
 
 <figure><img src="../../../.gitbook/assets/image (678).png" alt=""><figcaption></figcaption></figure>
 
-この設定を保持するデータベースは、**`/var/db/SystemPolicy`**にあります。次のコマンドをrootとして実行して、このデータベースを確認できます。
+この設定を保持するデータベースは、**`/var/db/SystemPolicy`**にあります。次のコマンドをrootとして実行して、このデータベースを確認できます：
 ```bash
 # Open database
 sqlite3 /var/db/SystemPolicy
@@ -182,13 +182,13 @@ spctl --disable
 xattr -p com.apple.quarantine <file>
 ```
 
-このコマンドは、指定した `<file>` の拡張属性 `com.apple.quarantine` を表示します。
+このコマンドは、指定した `<file>` に拡張属性 `com.apple.quarantine` がある場合、その値を表示します。
 ```bash
 xattr portada.png
 com.apple.macl
 com.apple.quarantine
 ```
-次に、拡張属性の値を確認し、quarantine属性を書き込んだアプリを特定します。
+次に、**拡張属性**の**値**を確認し、次のコマンドでクォレンティン属性を書き込んだアプリを特定します。
 ```bash
 xattr -l portada.png
 com.apple.macl:
@@ -251,7 +251,7 @@ Gatekeeperを回避する方法（ユーザーに何かをダウンロードさ�
 
 ### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
-**Archive Utility**によって抽出されると、**886文字以上のパス**のファイルは、com.apple.quarantineの拡張属性を継承できず、これにより**Gatekeeperを回避することができます**。
+**Archive Utility**によって抽出されると、**886文字以上のパス**のファイルは、com.apple.quarantineの拡張属性を継承できず、これにより**Gatekeeperを回避**することが可能になります。
 
 詳細については、[**元のレポート**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)を参照してください。
 
@@ -259,7 +259,7 @@ Gatekeeperを回避する方法（ユーザーに何かをダウンロードさ�
 
 **Automator**でアプリケーションが作成されると、実行するために必要な情報は`application.app/Contents/document.wflow`に含まれており、実行可能ファイルには単なる一般的なAutomatorバイナリである**Automator Application Stub**があります。
 
-したがって、`application.app/Contents/MacOS/Automator\ Application\ Stub`を**シンボリックリンクでシステム内の別のAutomator Application Stubに指定**することで、`document.wflow`（スクリプト）内の内容を実行し、**Gatekeeperをトリガーせずに**実行することができます。実際の実行可能ファイルには隔離のxattrがないためです。&#x20;
+したがって、`application.app/Contents/MacOS/Automator\ Application\ Stub`を**シンボリックリンクでシステム内の別のAutomator Application Stubに指定**することで、`document.wflow`（スクリプト）内の内容を実行し、**Gatekeeperをトリガーせずに**実行することができます。実際の実行可能ファイルには検疫のxattrがないためです。&#x20;
 
 例として期待される場所：`/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
 
@@ -267,7 +267,7 @@ Gatekeeperを回避する方法（ユーザーに何かをダウンロードさ�
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-この回避方法では、zipファイルが`application.app`ではなく`application.app/Contents`から圧縮を開始するように作成されました。したがって、**`application.app/Contents`のファイル全体には隔離属性**が適用されましたが、**`application.app`には適用されませんでした**。Gatekeeperは`application.app`をチェックしていたため、Gatekeeperが回避されました。
+この回避方法では、zipファイルが`application.app`ではなく`application.app/Contents`から圧縮を開始するように作成されました。したがって、**`application.app/Contents`のファイル全体に検疫属性**が適用されましたが、`application.app`には適用されませんでした。Gatekeeperは`application.app`をチェックしていたため、Gatekeeperが回避されました。`application.app`がトリガーされるときには、検疫属性が存在しなかったためです。
 ```bash
 zip -r test.app/Contents test.zip
 ```
@@ -292,23 +292,29 @@ xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
 さらに、**AppleDouble**ファイル形式は、そのACEを含むファイルをコピーします。
 
-[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)では、xattrとして保存されているACLテキスト表現である**`com.apple.acl.text`**が、展開されたファイルのACLとして設定されることがわかります。したがって、他のxattrの書き込みを防止するACLを持つzipファイルにアプリケーションを圧縮した場合、quarantine xattrはアプリケーションに設定されませんでした。
+[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)では、xattrとして保存されているACLテキスト表現である**`com.apple.acl.text`**が、展開されたファイルにACLとして設定されることがわかります。したがって、他のxattrの書き込みを防止するACLを持つzipファイルにアプリケーションを圧縮した場合、quarantine xattrはアプリケーションに設定されませんでした。
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
 ditto -c -k test test.zip
 python3 -m http.server
 # Download the zip from the browser and decompress it, the file shuold be without a wuarantine xattr
 ```
-詳細な情報については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)をご覧ください。
+詳細な情報については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)を参照してください。
+
+## [2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
+
+macOSの内部の問題により、**Google Chromeはダウンロードされたファイルに隔離属性を設定していなかった**ことが発見されました。
+
+
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
 
 </details>

@@ -56,7 +56,7 @@ macOSアプリケーションでは、通常、`application.app/Contents/Framewo
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-[https://hexed.it/](https://hexed.it/)でこのファイルをロードし、前の文字列を検索することができます。この文字列の後には、各ヒューズが無効または有効であることを示すASCIIの数字「0」または「1」が表示されます。ヒューズの値を変更するには、16進コード（`0x30`は`0`であり、`0x31`は`1`です）を変更します。
+[https://hexed.it/](https://hexed.it/)でこのファイルを読み込み、前の文字列を検索することができます。この文字列の後には、各フューズが無効または有効であることを示すASCIIの数字「0」または「1」が表示されます。ヘックスコード（`0x30`は`0`であり、`0x31`は`1`です）を変更して、**フューズの値を変更**します。
 
 <figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
@@ -69,13 +69,15 @@ Electronアプリが使用している**外部のJS/HTMLファイル**が存在�
 {% hint style="danger" %}
 ただし、現時点では2つの制限があります：
 
-* アプリを変更するには、**`kTCCServiceSystemPolicyAppBundles`**権限が必要です。したがって、デフォルトではこれはもはや可能ではありません。
-* コンパイルされた**`asap`**ファイルには通常、ヒューズ**`embeddedAsarIntegrityValidation`**と**`onlyLoadAppFromAsar`**が有効になっています。
+* アプリを変更するには、**`kTCCServiceSystemPolicyAppBundles`**権限が必要です。したがって、デフォルトではこれは不可能になりました。
+* コンパイルされた**`asap`**ファイルには通常、フューズ**`embeddedAsarIntegrityValidation`**と**`onlyLoadAppFromAsar`**が有効になっています。
 
 これにより、この攻撃経路はより複雑になります（または不可能になります）。
 {% endhint %}
 
-## `ELECTRON_RUN_AS_NODE`を使用したRCE <a href="#electron_run_as_node" id="electron_run_as_node"></a>
+**`kTCCServiceSystemPolicyAppBundles`**の要件をバイパスすることも可能であり、アプリケーションを別のディレクトリ（たとえば**`/tmp`**）にコピーし、フォルダ**`app.app/Contents`**を**`app.app/NotCon`**に名前を変更し、**悪意のある**コードで**asar**ファイルを変更し、それを**`app.app/Contents`**に戻し、実行することができます。
+
+## `ELECTRON_RUN_AS_NODE`によるRCE <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
 [**ドキュメント**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node)によると、この環境変数が設定されている場合、プロセスは通常のNode.jsプロセスとして開始されます。
 
@@ -94,7 +96,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 
 ### アプリのPlistからのインジェクション
 
-[**ここで提案されているように**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)、この環境変数をplist内で悪用することで持続性を維持することができます。
+[**ここで提案されているように**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)、この環境変数をplistに悪用することで持続性を維持することができます：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -138,7 +140,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 
 ### アプリの Plist からのインジェクション
 
-この環境変数を plist に悪用することで、以下のキーを追加して持続性を維持することができます：
+この環境変数を plist に悪用することで、以下のキーを追加して持続性を確保することができます：
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -168,7 +170,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-もしfuse**`EnableNodeCliInspectArguments`**が無効になっている場合、アプリは起動時に`--inspect`のようなノードパラメータを**無視**します。ただし、環境変数**`ELECTRON_RUN_AS_NODE`**が設定されている場合は、それも**無視**されます。fuse**`RunAsNode`**も無効になっている場合は、前述のペイロードを使用して他のプロセスを実行することはできません。
+もしfuse**`EnableNodeCliInspectArguments`**が無効になっている場合、アプリは起動時に`--inspect`のようなノードパラメータを**無視**します。ただし、環境変数**`ELECTRON_RUN_AS_NODE`**が設定されている場合は、それも**無視**されます。fuse**`RunAsNode`**も無効になっている場合は、前述の環境変数も無効になります。
 
 ただし、引き続きelectronパラメータ`--remote-debugging-port=9229`を使用することはできますが、前述のペイロードは他のプロセスを実行するためには機能しません。
 {% endhint %}
@@ -248,7 +250,7 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
