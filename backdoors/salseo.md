@@ -71,18 +71,18 @@ Detecting and preventing the Salseo backdoor can be challenging due to its steal
 
 1. **Antivirus software**: Keeping antivirus software up to date can help detect and remove known instances of the Salseo backdoor.
 
-2. **Regular system updates**: Installing software updates and patches can help prevent the exploitation of vulnerabilities that the backdoor may use to gain access to the system.
+2. **Regular system updates**: Installing software updates and patches can help prevent the exploitation of vulnerabilities that the backdoor may rely on.
 
-3. **User awareness**: Educating users about the risks of opening suspicious email attachments or downloading files from untrusted sources can help prevent the installation of the backdoor.
+3. **User awareness**: Educating users about the risks of opening suspicious email attachments or downloading files from untrusted sources can help prevent the initial installation of the backdoor.
 
-4. **Network monitoring**: Monitoring network traffic for suspicious activity can help detect the presence of the backdoor and alert administrators to take appropriate action.
+4. **Network monitoring**: Monitoring network traffic for suspicious activity can help detect the presence of the backdoor or its communication with the attacker's command and control server.
 
-By taking these preventive measures, organizations can reduce the risk of falling victim to the Salseo backdoor and protect their systems and data from unauthorized access.
+By implementing these measures, organizations can reduce the risk of falling victim to the Salseo backdoor and other similar malware.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Ok, ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader.**
+Ok, ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader**.
 
 **Sube el binario SalseoLoader.exe a la máquina. No deberían ser detectados por ningún AV...**
 
@@ -133,7 +133,7 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Agrega antes de la función principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### Instala DllExport para este proyecto
 
@@ -147,7 +147,7 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 En la carpeta de tu proyecto han aparecido los archivos: **DllExport.bat** y **DllExport\_Configure.bat**
 
-### **D**esinstala DllExport
+### **Desinstala DllExport**
 
 Presiona **Desinstalar** (sí, es extraño pero confía en mí, es necesario)
 

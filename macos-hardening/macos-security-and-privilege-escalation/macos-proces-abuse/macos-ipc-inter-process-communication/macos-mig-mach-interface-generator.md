@@ -1,4 +1,4 @@
-# macOS MIG - Generador de Interfaz Mach
+# Generador de Interfaz Mach (MIG) de macOS
 
 <details>
 
@@ -69,12 +69,12 @@ myipc_server_routine,
 #include <stdio.h>
 #include <stdlib.h>
 #include <mach/mach.h>
-#include <mach/message.h>
-#include <mach/mig.h>
+#include <servers/bootstrap.h>
+#include "myipcServerUser.h"
 
-extern mach_port_t myipc_server_port;
+#define MACH_PORT_NAME "com.example.myipc"
 
-kern_return_t myipc_server(mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP);
+kern_return_t myipc_server(mach_port_t server_port);
 
 #endif /* myipcServer_h */
 ```
@@ -136,7 +136,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* Tamaño mínimo: se actualizará si es diferente */
+/* Tamaño mínimo: routine() lo actualizará si es diferente */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -190,30 +190,32 @@ mach_msg_server(myipc_server, sizeof(union __RequestUnion__SERVERPREFmyipc_subsy
 ```c
 #include <stdio.h>
 #include <stdlib.h>
-#include <servers/bootstrap.h>
+#include <mach/mach.h>
 #include "myipc.h"
 
 int main(int argc, char *argv[]) {
     mach_port_t server_port;
     kern_return_t kr;
-    char *message = "Hello, server!";
-    char reply[256];
+    int val = 0;
 
-    // Look up the server port
+    if (argc != 2) {
+        printf("Usage: %s <value>\n", argv[0]);
+        return 1;
+    }
+
+    val = atoi(argv[1]);
+
     kr = bootstrap_look_up(bootstrap_port, "com.example.myipc_server", &server_port);
     if (kr != KERN_SUCCESS) {
-        fprintf(stderr, "Failed to look up server port: %s\n", mach_error_string(kr));
-        exit(1);
+        printf("Failed to look up server port: %s\n", mach_error_string(kr));
+        return 1;
     }
 
-    // Send a message to the server
-    kr = myipc_send_message(server_port, message, reply, sizeof(reply));
+    kr = myipc_send_value(server_port, val);
     if (kr != KERN_SUCCESS) {
-        fprintf(stderr, "Failed to send message: %s\n", mach_error_string(kr));
-        exit(1);
+        printf("Failed to send value: %s\n", mach_error_string(kr));
+        return 1;
     }
-
-    printf("Received reply: %s\n", reply);
 
     return 0;
 }
@@ -270,12 +272,12 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Llamada a sign_extend_64 que puede ayudar a identificar esta función
-// Esto almacena en rax el puntero a la llamada que debe ser llamada
+// Esto almacena en rax el puntero a la llamada que debe ser realizada
 // Verificar el uso de la dirección 0x100004040 (array de direcciones de funciones)
 // 0x1f4 = 500 (el ID de inicio)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// If - else, el if devuelve falso, mientras que el else llama a la función correcta y devuelve verdadero
+// If - else, el if devuelve false, mientras que el else llama a la función correcta y devuelve true
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -376,9 +378,9 @@ return r0;
 
 En realidad, si vas a la función **`0x100004000`**, encontrarás el array de estructuras **`routine_descriptor`**, el primer elemento de la estructura es la dirección donde se implementa la función y la **estructura ocupa 0x28 bytes**, por lo que cada 0x28 bytes (a partir del byte 0) puedes obtener 8 bytes y esa será la **dirección de la función** que se llamará:
 
-<figure><img src="../../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
-
 <figure><img src="../../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Estos datos se pueden extraer [**usando este script de Hopper**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 

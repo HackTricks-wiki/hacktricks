@@ -1,4 +1,4 @@
-# Inyección de aplicaciones .Net en macOS
+# Inyección en aplicaciones .Net en macOS
 
 <details>
 
@@ -21,7 +21,7 @@ Crea dos tuberías con nombre por proceso .Net en [dbgtransportsession.cpp#L127]
 
 Entonces, si vas al directorio **`$TMPDIR`** del usuario, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 La función [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) manejará la comunicación desde un depurador.
 
@@ -66,7 +66,7 @@ Una vez construido, **enviamos esto al objetivo** utilizando la llamada al siste
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 ```
-Siguiendo nuestro encabezado, necesitamos enviar una estructura `sessionRequestData` que contiene un GUID para identificar nuestra sesión:
+Siguiendo nuestro encabezado, necesitamos enviar una estructura `sessionRequestData`, que contiene un GUID para identificar nuestra sesión:
 ```c
 // All '9' is a GUID.. right??
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));

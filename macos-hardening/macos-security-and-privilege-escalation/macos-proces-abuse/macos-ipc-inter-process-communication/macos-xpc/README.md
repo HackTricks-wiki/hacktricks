@@ -22,7 +22,7 @@ Los principales beneficios de XPC incluyen:
 
 1. **Seguridad**: Al separar el trabajo en diferentes procesos, cada proceso puede recibir solo los permisos que necesita. Esto significa que incluso si un proceso está comprometido, tiene una capacidad limitada para causar daño.
 2. **Estabilidad**: XPC ayuda a aislar los bloqueos en el componente donde ocurren. Si un proceso se bloquea, se puede reiniciar sin afectar al resto del sistema.
-3. **Rendimiento**: XPC permite una fácil concurrencia, ya que diferentes tareas pueden ejecutarse simultáneamente en diferentes procesos.
+3. **Rendimiento**: XPC permite una fácil concurrencia, ya que diferentes tareas se pueden ejecutar simultáneamente en diferentes procesos.
 
 La única **desventaja** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto apenas se nota y los beneficios son mayores.
 
@@ -82,8 +82,8 @@ Las aplicaciones pueden **suscribirse** a diferentes **mensajes de eventos**, lo
 
 Cuando un proceso intenta llamar a un método a través de una conexión XPC, el **servicio XPC debe verificar si ese proceso tiene permitido conectarse**. Aquí se muestran las formas comunes de verificar eso y las trampas comunes:
 
-{% content-ref url="macos-xpc-connecting-process-check.md" %}
-[macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
+{% content-ref url="macos-xpc-connecting-process-check/" %}
+[macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
 {% endcontent-ref %}
 
 ## Autorización XPC
@@ -315,18 +315,56 @@ return 0;
 
 # xyz.hacktricks.svcoc.plist
 
-Este archivo de propiedad de la lista de servicios de macOS (plist) se utiliza para definir los servicios que se ejecutan en segundo plano en un sistema macOS. Los servicios se definen utilizando el formato XPC (Interfaz de Comunicación entre Procesos) y se pueden utilizar para la comunicación entre procesos en macOS.
+Este archivo de propiedad de la lista de servicios de macOS (plist) se utiliza para definir los servicios que se ejecutan en segundo plano en un proceso separado. Los servicios se comunican entre sí utilizando el marco XPC (Interfaz de comunicación entre procesos).
 
-El archivo plist contiene una serie de claves y valores que definen el servicio y su comportamiento. Algunas de las claves comunes incluyen:
+## Ubicación del archivo
 
-- `Label`: El nombre único del servicio.
-- `ProgramArguments`: Los argumentos del programa que se ejecutará como parte del servicio.
-- `MachServices`: Los servicios Mach que el servicio puede utilizar para la comunicación entre procesos.
-- `Sockets`: Los sockets que el servicio puede utilizar para la comunicación entre procesos.
+El archivo `xyz.hacktricks.svcoc.plist` se encuentra en la siguiente ubicación en macOS:
 
-Para aprovecharse de un archivo plist de servicio, un atacante puede modificar el archivo para ejecutar su propio código malicioso en el contexto del servicio. Esto puede permitir al atacante obtener privilegios elevados en el sistema o realizar otras acciones maliciosas.
+```
+/Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
+```
 
-Es importante asegurarse de que los archivos plist de servicio estén correctamente configurados y protegidos para evitar posibles abusos y ataques de escalada de privilegios.
+## Contenido del archivo
+
+El archivo plist contiene información sobre el servicio, incluyendo su nombre, ruta de ejecución, argumentos y más. Aquí hay un ejemplo de cómo se ve el contenido del archivo:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>xyz.hacktricks.svcoc</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python</string>
+        <string>/path/to/script.py</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
+```
+
+## Modificación del archivo
+
+Para modificar el archivo `xyz.hacktricks.svcoc.plist`, se puede utilizar un editor de texto o la utilidad `plutil` en la línea de comandos. Asegúrese de tener privilegios de administrador para realizar cambios en el archivo.
+
+## Reinicio del servicio
+
+Después de realizar cambios en el archivo plist, es necesario reiniciar el servicio para que los cambios surtan efecto. Esto se puede hacer utilizando el comando `launchctl` en la línea de comandos:
+
+```
+sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
+sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
+```
+
+## Seguridad y consideraciones
+
+Es importante tener en cuenta que los servicios que se ejecutan en segundo plano pueden representar un riesgo de seguridad si no se configuran correctamente. Asegúrese de revisar y auditar regularmente los archivos plist para detectar posibles vulnerabilidades y abusos.
 
 {% endtab %}
 ```xml
@@ -408,8 +446,10 @@ int main(int argc, const char * argv[]) {
         // Resume the connection
         xpc_connection_resume(connection);
         
-        // Send messages to the server
-        // ...
+        // Send a message to the server
+        xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
+        xpc_dictionary_set_string(message, "key", "value");
+        xpc_connection_send_message(connection, message);
         
         // Run the main loop
         dispatch_main();
@@ -418,11 +458,11 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-4. Customize the code as needed, such as adding message sending functionality or handling server responses.
+4. Customize the code according to your requirements, such as handling incoming events and sending messages to the server.
 
-Remember to replace `"com.example.server"` with the actual Mach service name of the server you want to communicate with.
+Remember to replace `"com.example.server"` with the Mach service name of the server you want to communicate with.
 
-By embedding this client code within your application, you can establish IPC with a server using the XPC framework in macOS. This allows for secure and efficient communication between processes.
+By embedding this client code within your application, you can establish IPC with a server using the XPC framework in macOS.
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
 // gcc injection example:

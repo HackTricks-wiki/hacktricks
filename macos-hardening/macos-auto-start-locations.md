@@ -143,7 +143,7 @@ Configurar la explotación indicada y cerrar sesión e iniciar sesión o incluso
 
 #### Descripción y explotación
 
-Todas las aplicaciones que se reabrirán se encuentran dentro del archivo plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
+Todas las aplicaciones que se reabrirán están dentro del archivo plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
 
 Para hacer que las aplicaciones reabiertas ejecuten tu propia aplicación, solo necesitas **agregar tu aplicación a la lista**.
 
@@ -292,8 +292,8 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevi
 * `/System/Library/QuickLook`
 * `/Library/QuickLook`
 * `~/Library/QuickLook`
-* `/Applications/NombreDeLaAplicaciónAqui/Contents/Library/QuickLook/`
-* `~/Applications/NombreDeLaAplicaciónAqui/Contents/Library/QuickLook/`
+* `/Applications/AppNameHere/Contents/Library/QuickLook/`
+* `~/Applications/AppNameHere/Contents/Library/QuickLook/`
 
 #### Descripción y explotación
 
@@ -419,7 +419,7 @@ Las preferencias de iTerm2 se encuentran en **`~/Library/Preferences/com.googlec
 
 Esta configuración se puede ajustar en la configuración de iTerm2:
 
-<figure><img src="../.gitbook/assets/image (2).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Y el comando se refleja en las preferencias:
 ```bash
@@ -488,15 +488,15 @@ EOF
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
 
 * Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-* Pero se necesita tener habilitado y usar SSH
+* Pero se necesita tener habilitado y usar ssh
 
 #### Ubicación
 
 * **`~/.ssh/rc`**
-* **Disparador**: Inicio de sesión a través de SSH
+* **Disparador**: Inicio de sesión a través de ssh
 * **`/etc/ssh/sshrc`**
 * Se requieren privilegios de root
-* **Disparador**: Inicio de sesión a través de SSH
+* **Disparador**: Inicio de sesión a través de ssh
 
 #### Descripción y Explotación
 
@@ -575,7 +575,7 @@ Esto creará un archivo en 1 hora:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-Comprueba la cola de trabajos utilizando `atq:`
+Verifique la cola de trabajos usando `atq:`
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
@@ -718,7 +718,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
 Luego, abre la aplicación `Folder Actions Setup`, selecciona la **carpeta que deseas vigilar** y selecciona en tu caso **`folder.scpt`** (en mi caso lo llamé output2.scp):
 
-<figure><img src="../.gitbook/assets/image (2) (1).png" alt="" width="297"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1).png" alt="" width="297"><figcaption></figcaption></figure>
 
 Ahora, si abres esa carpeta con **Finder**, tu script se ejecutará.
 
@@ -912,7 +912,7 @@ Descripción: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](http
 * `~/Library/Screen Savers`
 * **Disparador**: Seleccionar el protector de pantalla
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Descripción y Exploit
 
@@ -1023,14 +1023,14 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 
 #### Descripción y explotación
 
-Spotlight es la función de búsqueda incorporada en macOS, diseñada para proporcionar a los usuarios acceso rápido y completo a los datos en sus computadoras.\
-Para facilitar esta capacidad de búsqueda rápida, Spotlight mantiene una **base de datos propietaria** y crea un índice al **analizar la mayoría de los archivos**, lo que permite búsquedas rápidas tanto por nombres de archivo como por su contenido.
+Spotlight es la función de búsqueda incorporada en macOS, diseñada para proporcionar a los usuarios acceso rápido y completo a los datos de sus computadoras.\
+Para facilitar esta capacidad de búsqueda rápida, Spotlight mantiene una base de datos propietaria y crea un índice analizando la mayoría de los archivos, lo que permite búsquedas rápidas tanto por nombres de archivo como por su contenido.
 
-El mecanismo subyacente de Spotlight involucra un proceso central llamado 'mds', que significa **'servidor de metadatos'**. Este proceso orquesta todo el servicio de Spotlight. Además, existen múltiples demonios 'mdworker' que realizan una variedad de tareas de mantenimiento, como indexar diferentes tipos de archivos (`ps -ef | grep mdworker`). Estas tareas son posibles gracias a los complementos de importación de Spotlight, o **paquetes ".mdimporter"**, que permiten que Spotlight comprenda e indexe contenido en una amplia gama de formatos de archivo.
+El mecanismo subyacente de Spotlight involucra un proceso central llamado 'mds', que significa 'servidor de metadatos'. Este proceso orquesta todo el servicio de Spotlight. Además, existen múltiples demonios 'mdworker' que realizan una variedad de tareas de mantenimiento, como indexar diferentes tipos de archivos (`ps -ef | grep mdworker`). Estas tareas son posibles gracias a los complementos de importación de Spotlight, o "paquetes .mdimporter", que permiten que Spotlight comprenda e indexe contenido en una amplia gama de formatos de archivo.
 
-Los complementos o paquetes **`.mdimporter`** se encuentran en los lugares mencionados anteriormente y si aparece un nuevo paquete, se carga en cuestión de minutos (no es necesario reiniciar ningún servicio). Estos paquetes deben indicar qué **tipo de archivo y extensiones pueden gestionar**, de esta manera, Spotlight los utilizará cuando se cree un nuevo archivo con la extensión indicada.
+Los complementos o paquetes `.mdimporter` se encuentran en los lugares mencionados anteriormente y si aparece un nuevo paquete, se carga en cuestión de minutos (no es necesario reiniciar ningún servicio). Estos paquetes deben indicar qué tipo de archivo y extensiones pueden gestionar, de esta manera, Spotlight los utilizará cuando se cree un nuevo archivo con la extensión indicada.
 
-Es posible **encontrar todos los `mdimporters`** cargados ejecutando:
+Es posible encontrar todos los `mdimporters` cargados ejecutando:
 ```bash
 mdimport -L
 Paths: id(501) (

@@ -39,8 +39,8 @@ return YES;
 ```
 Para obtener más información sobre cómo configurar correctamente esta comprobación:
 
-{% content-ref url="macos-xpc-connecting-process-check.md" %}
-[macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
+{% content-ref url="macos-xpc-connecting-process-check/" %}
+[macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
 {% endcontent-ref %}
 
 ### Derechos de la aplicación
@@ -266,7 +266,7 @@ Puedes encontrar **todas las configuraciones de permisos** [**aquí**](https://w
 3. **'session-owner': 'true'**
 * Si se establece en `true`, el propietario de la sesión (el usuario que ha iniciado sesión actualmente) obtendría automáticamente este derecho. Esto podría evitar la autenticación adicional si el usuario ya ha iniciado sesión.
 4. **'shared': 'true'**
-* Esta clave no otorga derechos sin autenticación. En cambio, si se establece en `true`, significa que una vez que se haya autenticado el derecho, se puede compartir entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del derecho aún requeriría autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
+* Esta clave no otorga derechos sin autenticación. En cambio, si se establece en `true`, significa que una vez que el derecho se haya autenticado, se puede compartir entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del derecho aún requeriría autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
 
 Puedes [**utilizar este script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) para obtener los derechos interesantes:
 ```bash
@@ -286,7 +286,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 Si encuentras la función: **`[HelperTool checkAuthorization:command:]`**, es probable que el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Entonces, si esta función llama a funciones como `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, está utilizando [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 

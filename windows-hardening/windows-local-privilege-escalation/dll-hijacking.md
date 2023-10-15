@@ -12,9 +12,9 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y en hackear lo imposible - ¡**estamos contratando**! (_se requiere dominio del polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -22,11 +22,11 @@ Si estás interesado en una **carrera de hacking** y en hackear lo imposible - �
 
 En primer lugar, vamos a definir el concepto. El secuestro de DLL es, en el sentido más amplio, **engañar a una aplicación legítima/confiable para que cargue una DLL arbitraria**. Términos como _Secuestro del Orden de Búsqueda de DLL_, _Secuestro del Orden de Carga de DLL_, _Suplantación de DLL_, _Inyección de DLL_ y _Carga Lateral de DLL_ se utilizan a menudo -erróneamente- para referirse a lo mismo.
 
-El secuestro de DLL se puede utilizar para **ejecutar** código, obtener **persistencia** y **elevar privilegios**. De los tres, el **menos probable** de encontrar es la **elevación de privilegios** con diferencia. Sin embargo, como esto forma parte de la sección de elevación de privilegios, me centraré en esta opción. Además, ten en cuenta que, independientemente del objetivo, el secuestro de DLL se realiza de la misma manera.
+El secuestro de DLL se puede utilizar para **ejecutar** código, obtener **persistencia** y **elevar privilegios**. De los 3, el **menos probable** de encontrar es la **elevación de privilegios** con diferencia. Sin embargo, como esto forma parte de la sección de elevación de privilegios, me centraré en esta opción. Además, ten en cuenta que, independientemente del objetivo, el secuestro de DLL se realiza de la misma manera.
 
 ### Tipos
 
-Existen una **variedad de enfoques** para elegir, y el éxito depende de cómo esté configurada la aplicación para cargar sus DLL requeridas. Los enfoques posibles incluyen:
+Existen **varios enfoques** entre los que elegir, y el éxito depende de cómo esté configurada la aplicación para cargar sus DLL requeridas. Los enfoques posibles incluyen:
 
 1. **Reemplazo de DLL**: reemplazar una DLL legítima por una DLL maliciosa. Esto se puede combinar con _Proxying de DLL_ \[[2](https://kevinalmansa.github.io/application%20security/DLL-Proxying/)], que garantiza que todas las funcionalidades de la DLL original se mantengan intactas.
 2. **Secuestro del orden de búsqueda de DLL**: las DLL especificadas por una aplicación sin una ruta se buscan en ubicaciones fijas en un orden específico \[[3](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order)]. El secuestro del orden de búsqueda se produce al colocar la DLL maliciosa en una ubicación que se busca antes de la DLL real. Esto a veces incluye el directorio de trabajo de la aplicación objetivo.
@@ -228,9 +228,9 @@ break;
 return TRUE;
 }
 ```
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡**estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -240,7 +240,7 @@ Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡*
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

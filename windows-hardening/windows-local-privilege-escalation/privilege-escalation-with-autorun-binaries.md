@@ -1,4 +1,4 @@
-# Escalación de privilegios con Autoruns
+# Escalada de privilegios con Autoruns
 
 <details>
 
@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
@@ -20,7 +20,7 @@ Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**
 
 ## WMIC
 
-**Wmic** se puede utilizar para ejecutar programas al **inicio**. Ver qué binarios están programados para ejecutarse al inicio con:
+**Wmic** se puede utilizar para ejecutar programas al **inicio**. Para ver qué binarios están programados para ejecutarse al inicio, utiliza:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -89,14 +89,14 @@ Las claves de registro Run y RunOnce hacen que los programas se ejecuten cada ve
 * `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 * `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-No se crea de forma predeterminada en Windows Vista y versiones más recientes. Las entradas de la clave de ejecución del registro pueden hacer referencia directamente a programas o enumerarlos como una dependencia. Por ejemplo, es posible cargar una DLL al iniciar sesión utilizando una clave "Depend" con RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
+No se crea de forma predeterminada en Windows Vista y versiones más recientes. Las entradas de la clave de ejecución del registro pueden hacer referencia directamente a programas o listarlos como una dependencia. Por ejemplo, es posible cargar una DLL al iniciar sesión utilizando una clave "Depend" con RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
 
 {% hint style="info" %}
-**Explotación 1**: Si puedes escribir dentro de cualquiera de los registros mencionados dentro de **HKLM**, puedes escalar privilegios cuando otro usuario inicie sesión.
+**Exploit 1**: Si puedes escribir dentro de cualquiera de los registros mencionados dentro de **HKLM**, puedes escalar privilegios cuando otro usuario inicie sesión.
 {% endhint %}
 
 {% hint style="info" %}
-**Explotación 2**: Si puedes sobrescribir cualquiera de los binarios indicados en cualquiera de los registros dentro de **HKLM**, puedes modificar ese binario con una puerta trasera cuando otro usuario inicie sesión y escalar privilegios.
+**Exploit 2**: Si puedes sobrescribir cualquiera de los binarios indicados en cualquiera de los registros dentro de **HKLM**, puedes modificar ese binario con una puerta trasera cuando otro usuario inicie sesión y escalar privilegios.
 {% endhint %}
 ```bash
 #CMD
@@ -163,7 +163,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 Cualquier acceso directo creado en la ubicación indicada por la subclave de inicio ejecutará el servicio durante el inicio de sesión o reinicio. La ubicación de inicio se especifica tanto en la Máquina Local como en el Usuario Actual.
 
 {% hint style="info" %}
-Si puedes sobrescribir cualquier \[Usuario] Carpeta de Shell bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar una puerta trasera que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
+Si puedes sobrescribir cualquier Carpeta de Shell de \[Usuario] bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar una puerta trasera que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
 {% endhint %}
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -339,9 +339,9 @@ Encuentra más Autoruns como registros en [https://www.microsoftpressstore.com/a
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - ¡**estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
