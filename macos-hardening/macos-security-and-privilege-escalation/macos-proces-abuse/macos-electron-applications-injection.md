@@ -60,7 +60,7 @@ Puedes cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la
 
 <figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
-Ten en cuenta que si intentas **sobrescribir** el binario del **`Framework Electron`** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
+Ten en cuenta que si intentas **sobrescribir** el binario del **`Electron Framework`** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
 
 ## RCE añadiendo código a Aplicaciones Electron
 
@@ -69,11 +69,13 @@ Puede haber **archivos JS/HTML externos** que una Aplicación Electron esté uti
 {% hint style="danger" %}
 Sin embargo, en este momento hay 2 limitaciones:
 
-* Se necesita el permiso **`kTCCServiceSystemPolicyAppBundles`** para modificar una Aplicación, por lo que por defecto esto ya no es posible.
+* Se necesita el permiso **`kTCCServiceSystemPolicyAppBundles`** para modificar una aplicación, por lo que por defecto esto ya no es posible.
 * El archivo compilado **`asap`** generalmente tiene los fusibles **`embeddedAsarIntegrityValidation`** y **`onlyLoadAppFromAsar`** habilitados.
 
 Esto hace que esta ruta de ataque sea más complicada (o imposible).
 {% endhint %}
+
+Ten en cuenta que es posible evitar el requisito de **`kTCCServiceSystemPolicyAppBundles`** copiando la aplicación a otro directorio (como **`/tmp`**), renombrando la carpeta **`app.app/Contents`** a **`app.app/NotCon`**, **modificando** el archivo **asar** con tu código **malicioso**, renombrándolo de nuevo a **`app.app/Contents`** y ejecutándolo.
 
 ## RCE con `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 

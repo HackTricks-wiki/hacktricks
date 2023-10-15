@@ -149,6 +149,15 @@ El binario `/usr/libexec/lsd` con la biblioteca `libsecurity_translocate` tenía
 
 Era posible agregar el atributo de cuarentena a "Library", llamar al servicio XPC **`com.apple.security.translocation`** y luego se mapearía Library a **`$TMPDIR/AppTranslocation/d/d/Library`**, donde se podían **acceder** todos los documentos dentro de Library.
 
+## CVE-2023-38571 - Música y TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
+
+**`Music`** tiene una característica interesante: cuando se está ejecutando, importará los archivos que se arrastren a **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** a la "biblioteca de medios" del usuario. Además, llama algo como: **`rename(a, b);`** donde `a` y `b` son:
+
+* `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
+* `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
+
+Este comportamiento de **`rename(a, b);`** es vulnerable a una **condición de carrera**, ya que es posible colocar dentro de la carpeta `Automatically Add to Music.localized` un archivo falso de **TCC.db** y luego, cuando se crea la nueva carpeta (b) para copiar el archivo, eliminarlo y apuntarlo a **`~/Library/Application Support/com.apple.TCC`**/.
+
 ### Rastreo de SQL
 
 Si la variable de entorno **`SQLITE_AUTO_TRACE`** está configurada, la biblioteca **`libsqlite3.dylib`** comenzará a **registrar** todas las consultas SQL. Muchas aplicaciones utilizaban esta biblioteca, por lo que era posible registrar todas sus consultas SQLite.
@@ -206,7 +215,7 @@ Los plugins son código adicional generalmente en forma de bibliotecas o plist, 
 
 La aplicación `/System/Library/CoreServices/Applications/Directory Utility.app` tenía el entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, cargaba plugins con extensión **`.daplug`** y **no tenía el runtime endurecido**.
 
-Para aprovechar esta CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del entitlement anterior) para poder **tomar el control de la base de datos de TCC** de los usuarios y eludir TCC.
+Para aprovechar esta CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del entitlement anterior) para poder **tomar el control de la base de datos de TCC de los usuarios** y eludir TCC.
 
 Para obtener más información, consulta el [**informe original**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 

@@ -39,15 +39,15 @@ Los permisos se heredan de la aplicación padre y se rastrean según el ID de pa
 Las selecciones se almacenan en la base de datos de TCC en todo el sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`** o en **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para las preferencias por usuario. Las bases de datos están protegidas contra la edición con SIP (Protección de Integridad del Sistema), pero se pueden leer.
 
 {% hint style="danger" %}
-La base de datos de TCC en iOS se encuentra en **`/private/var/mobile/Library/TCC/TCC.db`**
+La base de datos de TCC en **iOS** se encuentra en **`/private/var/mobile/Library/TCC/TCC.db`**
 {% endhint %}
 
 Hay una tercera base de datos de TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para acceder a los servicios de ubicación.
 
-Además, un proceso con acceso completo al disco puede editar la base de datos en modo de usuario. Ahora, una aplicación también necesita acceso completo al disco para leer la base de datos.
+Además, un proceso con **acceso completo al disco** puede editar la base de datos en modo de usuario. Ahora, una aplicación también necesita **FDA** para leer la base de datos.
 
 {% hint style="info" %}
-La interfaz de usuario del centro de notificaciones puede realizar cambios en la base de datos de TCC del sistema:
+La **interfaz de usuario del centro de notificaciones** puede realizar cambios en la base de datos de TCC del sistema:
 
 {% code overflow="wrap" %}
 ```bash
@@ -123,9 +123,15 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
+### Escalada de privilegios desde la base de datos de usuario TCC a FDA
+
+Obtener **permisos de escritura** sobre la base de datos de usuario TCC no te permite otorgarte a ti mismo los permisos de **`FDA`**, solo aquellos que residen en la base de datos del sistema pueden otorgarlos.
+
+Pero puedes otorgarte a ti mismo los **derechos de automatización para Finder**, y dado que Finder tiene `FDA`, tú también los tendrás.
+
 ### Verificación de firmas de TCC
 
-La **base de datos** de TCC almacena el **ID del paquete** de la aplicación, pero también **almacena** **información** sobre la **firma** para **asegurarse** de que la aplicación que solicita usar un permiso sea la correcta.
+La base de datos de TCC almacena el **ID de paquete** de la aplicación, pero también **almacena** información sobre la **firma** para asegurarse de que la aplicación que solicita usar un permiso sea la correcta.
 
 {% code overflow="wrap" %}
 ```bash
