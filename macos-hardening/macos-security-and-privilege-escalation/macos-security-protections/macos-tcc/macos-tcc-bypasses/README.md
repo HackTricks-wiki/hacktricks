@@ -139,7 +139,7 @@ $> ls ~/Documents
 ```
 ### CVE-2021-30761 - Notas
 
-Las notas tenían acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se crea en una ubicación **no protegida**. Por lo tanto, podrías pedirle a las notas que copien un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
+Las notas tenían acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se crea en una ubicación no protegida. Por lo tanto, podrías pedirle a las notas que copien un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
 
 <figure><img src="../../../../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -147,7 +147,7 @@ Las notas tenían acceso a ubicaciones protegidas por TCC, pero cuando se crea u
 
 El binario `/usr/libexec/lsd` con la biblioteca `libsecurity_translocate` tenía el permiso `com.apple.private.nullfs_allow`, lo que le permitía crear un montaje **nullfs** y tenía el permiso `com.apple.private.tcc.allow` con **`kTCCServiceSystemPolicyAllFiles`** para acceder a todos los archivos.
 
-Era posible agregar el atributo de cuarentena a "Library", llamar al servicio XPC **`com.apple.security.translocation`** y luego se mapearía Library a **`$TMPDIR/AppTranslocation/d/d/Library`** donde se podían **acceder** todos los documentos dentro de Library.
+Era posible agregar el atributo de cuarentena a "Library", llamar al servicio XPC **`com.apple.security.translocation`** y luego se mapearía Library a **`$TMPDIR/AppTranslocation/d/d/Library`**, donde se podían **acceder** todos los documentos dentro de Library.
 
 ### Rastreo de SQL
 
@@ -293,7 +293,7 @@ Es posible invocar `open` en un entorno sandbox.
 
 ### Scripts de Terminal
 
-Es bastante común otorgar **Acceso completo al disco (FDA)** a la terminal, al menos en computadoras utilizadas por personas técnicas. Y es posible invocar scripts **`.terminal`** utilizando esto.
+Es bastante común darle al terminal **Acceso completo al disco (FDA)**, al menos en computadoras utilizadas por personas técnicas. Y es posible invocar scripts **`.terminal`** utilizando esto.
 
 Los scripts **`.terminal`** son archivos plist como este, con el comando a ejecutar en la clave **`CommandString`**:
 ```xml
@@ -416,8 +416,8 @@ En varias ocasiones, los archivos almacenarán información sensible como correo
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

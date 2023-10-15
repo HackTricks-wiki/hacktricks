@@ -34,7 +34,7 @@ ps -ef | grep tcc
 ```
 Los permisos se heredan de la aplicación padre y se rastrean según el ID de paquete y el ID de desarrollador.
 
-### Base de datos de TCC
+### Bases de datos de TCC
 
 Las selecciones se almacenan en la base de datos de TCC en todo el sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`** o en **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para las preferencias por usuario. Las bases de datos están protegidas contra la edición con SIP (Protección de Integridad del Sistema), pero se pueden leer.
 
@@ -42,10 +42,12 @@ Las selecciones se almacenan en la base de datos de TCC en todo el sistema en **
 La base de datos de TCC en iOS se encuentra en **`/private/var/mobile/Library/TCC/TCC.db`**
 {% endhint %}
 
-Además, un proceso con **acceso completo al disco** puede editar la base de datos en modo de usuario.
+Hay una tercera base de datos de TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para acceder a los servicios de ubicación.
+
+Además, un proceso con acceso completo al disco puede editar la base de datos en modo de usuario. Ahora, una aplicación también necesita acceso completo al disco para leer la base de datos.
 
 {% hint style="info" %}
-La **interfaz de usuario del centro de notificaciones** puede realizar cambios en la base de datos de TCC del sistema:
+La interfaz de usuario del centro de notificaciones puede realizar cambios en la base de datos de TCC del sistema:
 
 {% code overflow="wrap" %}
 ```bash
@@ -102,10 +104,10 @@ Al verificar ambas bases de datos, puedes verificar los permisos que una aplicac
 {% hint style="info" %}
 Algunos permisos de TCC son: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... No hay una lista pública que defina todos ellos, pero puedes consultar esta [**lista de los conocidos**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 
-El nombre completo de **Full Disk Access** es **`kTCCServiceSystemPolicyAllFiles`** y **`kTCCServiceAppleEvents`** permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Además, **`kTCCServiceSystemPolicySysAdminFiles`** permite cambiar el atributo **`NFSHomeDirectory`** de un usuario, lo que cambia su carpeta de inicio y, por lo tanto, permite **evadir TCC**.
+El acceso completo al disco se llama **`kTCCServiceSystemPolicyAllFiles`** y **`kTCCServiceAppleEvents`** permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Además, **`kTCCServiceSystemPolicySysAdminFiles`** permite cambiar el atributo **`NFSHomeDirectory`** de un usuario, lo que cambia su carpeta de inicio y, por lo tanto, permite **burlar TCC**.
 {% endhint %}
 
-También puedes verificar los **permisos ya otorgados** a las aplicaciones en `Preferencias del Sistema --> Seguridad y privacidad --> Privacidad --> Archivos y carpetas`.
+También puedes verificar los **permisos ya otorgados** a las aplicaciones en `Preferencias del Sistema --> Seguridad y Privacidad --> Privacidad --> Archivos y Carpetas`.
 
 {% hint style="success" %}
 Ten en cuenta que aunque una de las bases de datos esté dentro del directorio del usuario, **los usuarios no pueden modificar directamente estas bases de datos debido a SIP** (incluso si eres root). La única forma de configurar o modificar una nueva regla es a través del panel de Preferencias del Sistema o de las solicitudes en las que la aplicación pide permiso al usuario.
@@ -113,9 +115,17 @@ Ten en cuenta que aunque una de las bases de datos esté dentro del directorio d
 Sin embargo, recuerda que los usuarios _pueden_ **eliminar o consultar reglas** utilizando **`tccutil`**.
 {% endhint %}
 
+#### Restablecer
+```bash
+# You can reset all the permissions given to an application with
+tccutil reset All app.some.id
+
+# Reset the permissions granted to all apps
+tccutil reset All
+```
 ### Verificación de firmas de TCC
 
-La **base de datos** de TCC almacena el **ID de paquete** de la aplicación, pero también **almacena información** sobre la **firma** para **asegurarse** de que la aplicación que solicita usar un permiso sea la correcta.
+La **base de datos** de TCC almacena el **ID del paquete** de la aplicación, pero también **almacena** **información** sobre la **firma** para **asegurarse** de que la aplicación que solicita usar un permiso sea la correcta.
 
 {% code overflow="wrap" %}
 ```bash
@@ -191,7 +201,9 @@ El atributo extendido `com.apple.macl` **no se puede borrar** como otros atribut
 
 ### Bypasses de TCC
 
-
+{% content-ref url="macos-tcc-bypasses/" %}
+[macos-tcc-bypasses](macos-tcc-bypasses/)
+{% endcontent-ref %}
 
 ## Referencias
 
@@ -209,6 +221,6 @@ El atributo extendido `com.apple.macl` **no se puede borrar** como otros atribut
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
