@@ -157,6 +157,15 @@ The binary `/usr/libexec/lsd` with the library `libsecurity_translocate` had the
 
 It was possible to add the quarantine attribute to "Library", call the **`com.apple.security.translocation`** XPC service and then it would map Library to **`$TMPDIR/AppTranslocation/d/d/Library`** where all the documents inside Library could be **accessed**.
 
+## CVE-2023-38571 - Music & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
+
+**`Music`** has an interesting feature: When it's running, it will **import** the files dropped to **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** into the user's "media library". Moreover, it calls something like: **`rename(a, b);`** where `a` and `b` are:
+
+* `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
+* `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
+
+This **`rename(a, b);`** bevabiour is vulnerable to a **Race Condition**, as it's possible to put inside the `Automatically Add to Music.localized` folder a fake **TCC.db** file and then when the new forder(b) is created to copy the file, delete it, and point it to **`~/Library/Application Support/com.apple.TCC`**/.
+
 ### SQL Tracing
 
 If the environment variable **`SQLITE_AUTO_TRACE`** is set, the library **`libsqlite3.dylib`** will start **logging** all the SQL queries. Many applications used this library, so it was possible to log all their SQLite queries.

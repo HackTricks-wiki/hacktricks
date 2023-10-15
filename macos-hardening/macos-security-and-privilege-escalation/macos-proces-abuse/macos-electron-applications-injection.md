@@ -79,6 +79,8 @@ However, at the moment there are 2 limitations:
 Making this attack path more complicated (or impossible).
 {% endhint %}
 
+Note that it's possible to bypass the requirement of **`kTCCServiceSystemPolicyAppBundles`** by copying the application to another directory (like **`/tmp`**), renaming the folder **`app.app/Contents`** to **`app.app/NotCon`**, **modifying** the **asar** file with your **malicious** code, renaming it back to **`app.app/Contents`** and executing it.
+
 ## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
 According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), if this env variable is set, it will start the process as a normal Node.js process.

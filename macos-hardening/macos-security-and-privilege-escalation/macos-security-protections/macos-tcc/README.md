@@ -36,7 +36,7 @@ ps -ef | grep tcc
 
 Permissions are **inherited from the parent** application and the **permissions** are **tracked** based on the **Bundle ID** and the **Developer ID**.
 
-### TCC DatabaseS
+### TCC Databases
 
 The selections is then stored in the TCC system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** or in **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences. The databases are **protected from editing with SIP**(System Integrity Protection), but you can read them.
 
@@ -134,6 +134,12 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
+
+### Privesc from User TCC DB to FDA
+
+Obtaining **write permissions** over the **user TCC** database you **can'**t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
+
+But you can **can** give yourself **`Automation rights to Finder`, and since `Finder` has `FDA`, so do you.**
 
 ### TCC Signature Checks
 

@@ -22,19 +22,6 @@ More information in:
 [macos-gatekeeper.md](macos-gatekeeper.md)
 {% endcontent-ref %}
 
-## MRT - Malware Removal Tool
-
-The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
-
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
-
-While both XProtect and MRT are part of macOS's security measures, they perform different functions:
-
-* **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
-* **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
-
-The MRT application is located in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
-
 ## Processes Limitants
 
 ### SIP - System Integrity Protection
@@ -59,13 +46,7 @@ MacOS Sandbox **limits applications** running inside the sandbox to the **allowe
 [macos-tcc](macos-tcc/)
 {% endcontent-ref %}
 
-## Trust Cache
-
-The Apple macOS trust cache, sometimes also referred to as the AMFI (Apple Mobile File Integrity) cache, is a security mechanism in macOS designed to **prevent unauthorized or malicious software from running**. Essentially, it is a list of cryptographic hashes that the operating system uses to v**erify the integrity and authenticity of the software**.
-
-When an application or executable file tries to run on macOS, the operating system checks the AMFI trust cache. If the **hash of the file is found in the trust cache**, the system **allows** the program to run because it recognises it as trusted.
-
-## Launch Constraints
+### Launch Constraints
 
 It controls **from where and what** can launch an **Apple signed binary**:
 
@@ -85,6 +66,52 @@ img4tool -e in.img4 -o out.bin
 Then, you could use a script such as [**this one**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) to extract data.
 
 From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).
+
+## MRT - Malware Removal Tool
+
+The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
+
+Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
+
+While both XProtect and MRT are part of macOS's security measures, they perform different functions:
+
+* **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
+* **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
+
+The MRT application is located in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+
+## Background Tasks Management
+
+**macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.
+
+It's possible to **enumerate all** the configured background items running the Apple cli tool:
+
+```bash
+# The tool will always ask for the users password
+sfltool dumpbtm
+```
+
+Moreover, it's also possible to list this information with [**DumpBTM**](https://github.com/objective-see/DumpBTM).
+
+```bash
+# You need to grant the Terminal Full Disk Access for this to work
+chmod +x dumpBTM
+xattr -rc dumpBTM # Remove quarantine attr
+./dumpBTM
+```
+
+This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.
+
+You can find more information:
+
+* [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
+* [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
+
+## Trust Cache
+
+The Apple macOS trust cache, sometimes also referred to as the AMFI (Apple Mobile File Integrity) cache, is a security mechanism in macOS designed to **prevent unauthorized or malicious software from running**. Essentially, it is a list of cryptographic hashes that the operating system uses to v**erify the integrity and authenticity of the software**.
+
+When an application or executable file tries to run on macOS, the operating system checks the AMFI trust cache. If the **hash of the file is found in the trust cache**, the system **allows** the program to run because it recognises it as trusted.
 
 <details>
 
