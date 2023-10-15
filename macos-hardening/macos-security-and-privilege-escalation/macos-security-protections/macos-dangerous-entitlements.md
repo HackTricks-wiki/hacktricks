@@ -1,4 +1,4 @@
-# macOS Dangerous Entitlements
+# macOS Dangerous Entitlements & TCC perms
 
 <details>
 
@@ -37,6 +37,22 @@ This entitlement allows to **load frameworks, plug-ins, or libraries without bei
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
 This entitlement allows to **use DYLD environment variables** that could be used to inject libraries and code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
+
+### **`kTCCServiceSystemPolicyAllFiles`**
+
+Gives **Full Disk Access** permissions, one of the TCC highest permissions you can have.
+
+### **`kTCCServiceAppleEvents`**
+
+Allows the app to send events to other applications that are commonly used for **automating tasks**. Controlling other apps, it can abuse the permissions granted to these other apps.
+
+### **`kTCCServiceSystemPolicySysAdminFiles`**
+
+Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.
+
+### **`kTCCServiceSystemPolicyAppBundles`**
+
+Allow to modify apps inside their folders (inside app.app), which is disallowed by default.
 
 ## Medium
 

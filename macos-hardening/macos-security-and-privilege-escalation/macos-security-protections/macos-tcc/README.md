@@ -26,7 +26,7 @@ It's also possible to **grant apps access** to files by **explicit intents** fro
 
 There is a **user-mode tccd** running per logged in user defined in `/System/Library/LaunchAgents/com.apple.tccd.plist` registering the mach services `com.apple.tccd` and `com.apple.usernotifications.delegate.com.apple.tccd`.
 
-Here you cna see the tccd running as system and as user:
+Here you can see the tccd running as system and as user:
 
 ```bash
 ps -ef | grep tcc
@@ -36,15 +36,17 @@ ps -ef | grep tcc
 
 Permissions are **inherited from the parent** application and the **permissions** are **tracked** based on the **Bundle ID** and the **Developer ID**.
 
-### TCC Database
+### TCC DatabaseS
 
 The selections is then stored in the TCC system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** or in **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences. The databases are **protected from editing with SIP**(System Integrity Protection), but you can read them.
 
 {% hint style="danger" %}
-The TCC database in iOS is in **`/private/var/mobile/Library/TCC/TCC.db`**
+The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
 {% endhint %}
 
-Moreover, a process with **full disk access** can **edit the user-mode** database.
+There is a **third** TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.
+
+Moreover, a process with **full disk access** can **edit the user-mode** database. Now an app also needs **FDA** to **read** the database.
 
 {% hint style="info" %}
 The **notification center UI** can make **changes in the system TCC database**:
@@ -122,6 +124,16 @@ Nota that even if one of the databases are inside the users home, **users cannot
 
 However, remember that users _can_ **delete or query rules** using **`tccutil`** .&#x20;
 {% endhint %}
+
+#### Reset
+
+```bash
+# You can reset all the permissions given to an application with
+tccutil reset All app.some.id
+
+# Reset the permissions granted to all apps
+tccutil reset All
+```
 
 ### TCC Signature Checks
 
@@ -206,7 +218,9 @@ The extended attribute `com.apple.macl` **can’t be cleared** like other extend
 
 ### TCC Bypasses
 
-
+{% content-ref url="macos-tcc-bypasses/" %}
+[macos-tcc-bypasses](macos-tcc-bypasses/)
+{% endcontent-ref %}
 
 ## References
 
