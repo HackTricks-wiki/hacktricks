@@ -17,9 +17,9 @@
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
 
-管理プラットフォームにアクセスするために**管理者の資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
+管理プラットフォームへのアクセスのために**管理者の資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
 
-MacOS環境でのレッドチーミングには、MDMの動作原理についての理解が非常に重要です。
+MacOS環境でのレッドチーミングには、MDMの動作原理についての理解が非常に重要です：
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
@@ -27,7 +27,7 @@ MacOS環境でのレッドチーミングには、MDMの動作原理について
 
 ### MDMをC2として乱用する
 
-MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています。
+MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています...
 
 独自のMDMを実行するには、[**https://mdmcert.download/**](https://mdmcert.download/)で取得しようとすることができる**ベンダーによって署名されたCSR**が必要です。また、Appleデバイス用の独自のMDMを実行するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用することができます。
 
@@ -53,10 +53,10 @@ JAMFは、**カスタムスクリプト**（システム管理者によって開
 
 #### JAMFデバイス認証
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見当時は**誰でも共有**されていました。秘密は**`jk23ucnq91jfu9aj`**です。\
-さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に永続化されます。
+**`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見当時は**共有**されていました。秘密は**`jk23ucnq91jfu9aj`**でした。\
+さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に**永続化**されます。
 
 #### JAMFデバイスの乗っ取り
 
@@ -157,7 +157,7 @@ MacOSのユーザーには3つのタイプがあります：
 ユーザーとグループに関するローカル情報は、_ /var/db/dslocal/nodes/Default _フォルダに保存されています。\
 たとえば、ユーザー名が _mark_ の情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存され、グループ _admin_ の情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ に保存されています。
 
-MacHoundはBloodhoundデータベースにHasSessionとAdminToエッジに加えて、**3つの新しいエッジ**を追加します：
+MacHoundはBloodhoundデータベースにHasSessionとAdminToのエッジに加えて、**3つの新しいエッジ**を追加します：
 
 * **CanSSH** - ホストへのSSHが許可されているエンティティ
 * **CanVNC** - ホストへのVNCが許可されているエンティティ

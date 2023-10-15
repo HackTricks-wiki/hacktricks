@@ -15,7 +15,7 @@
 ## 基本情報
 
 Electronが何であるかわからない場合は、[**ここにたくさんの情報があります**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps)。ただし、今のところ、Electronは**node**を実行することを知っておいてください。\
-そして、nodeには、指定されたファイル以外のコードを実行するために使用できる**パラメータ**と**環境変数**があります。
+そして、nodeには、指定されたファイル以外のコードを実行するために使用できるいくつかの**パラメータ**と**環境変数**があります。
 
 ### Electron Fuses
 
@@ -49,28 +49,28 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Electronフューズの変更
 
-[**ドキュメントによると**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)、**Electronフューズ**の設定は、**Electronバイナリ**内に設定されており、その中には文字列**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**が含まれています。
+[**ドキュメントによると**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)、**Electronフューズ**の設定は、**Electronバイナリ**内に設定されており、どこかに文字列**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**が含まれています。
 
-macOSアプリケーションでは、通常、`application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`に配置されています。
+macOSアプリケーションでは、通常、`application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`にあります。
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-[https://hexed.it/](https://hexed.it/)でこのファイルを読み込み、前の文字列を検索することができます。この文字列の後には、各フューズが無効または有効であることを示すASCIIの数字「0」または「1」が表示されます。ヘックスコード（`0x30`は`0`であり、`0x31`は`1`です）を変更して、**フューズの値を変更**します。
+[https://hexed.it/](https://hexed.it/)でこのファイルをロードし、前の文字列を検索することができます。この文字列の後には、各ヒューズが無効または有効であることを示すASCIIの数字「0」または「1」が表示されます。ヒューズの値を変更するには、16進コード（`0x30`は`0`であり、`0x31`は`1`です）を変更します。
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ただし、これらのバイトが変更された状態でアプリケーション内の**`Electron Framework`バイナリ**を上書きしようとすると、アプリが実行されなくなります。
 
 ## Electronアプリケーションへのコードの追加によるRCE
 
-Electronアプリが使用している**外部のJS/HTMLファイル**が存在する場合、攻撃者はこれらのファイルにコードを注入し、その署名がチェックされないため、アプリのコンテキストで任意のコードを実行することができます。
+Electronアプリが使用している**外部のJS/HTMLファイル**が存在する場合、攻撃者はこれらのファイルにコードを注入し、その署名がチェックされずにアプリのコンテキストで任意のコードを実行することができます。
 
 {% hint style="danger" %}
 ただし、現時点では2つの制限があります：
 
-* アプリを変更するには、**`kTCCServiceSystemPolicyAppBundles`**権限が必要です。したがって、デフォルトではこれは不可能になりました。
-* コンパイルされた**`asap`**ファイルには通常、フューズ**`embeddedAsarIntegrityValidation`**と**`onlyLoadAppFromAsar`**が有効になっています。
+* アプリを変更するには**`kTCCServiceSystemPolicyAppBundles`**パーミッションが必要です。したがって、デフォルトではこれは不可能になりました。
+* コンパイルされた**`asap`**ファイルには通常、ヒューズ**`embeddedAsarIntegrityValidation`**と**`onlyLoadAppFromAsar`**が有効になっています。
 
 これにより、この攻撃経路はより複雑になります（または不可能になります）。
 {% endhint %}

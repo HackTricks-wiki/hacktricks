@@ -4,10 +4,10 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* サイバーセキュリティ会社で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* サイバーセキュリティ会社で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
@@ -21,16 +21,16 @@ XPCは、同じシステム上で実行される異なるプログラム間で�
 XPCの主な利点は次のとおりです：
 
 1. **セキュリティ**：作業を異なるプロセスに分割することで、各プロセスに必要な権限のみを付与することができます。これにより、プロセスが侵害された場合でも、被害を最小限に抑えることができます。
-2. **安定性**：XPCは、クラッシュを発生したコンポーネントに限定して分離するのに役立ちます。プロセスがクラッシュした場合、システム全体に影響を与えることなく再起動することができます。
-3. **パフォーマンス**：XPCは簡単な並行性を可能にし、異なるプロセスで同時にさまざまなタスクを実行することができます。
+2. **安定性**：XPCは、クラッシュを発生したコンポーネントに限定して分離するのに役立ちます。プロセスがクラッシュした場合、システムの他の部分に影響を与えることなく再起動することができます。
+3. **パフォーマンス**：XPCにより、異なるタスクを異なるプロセスで同時に実行することが容易になります。
 
-唯一の**欠点**は、アプリケーションを**複数のプロセスに分割**し、それらがXPCを介して通信することは**効率が低下する**ことです。しかし、現在のシステムではほとんど気づかれず、利点の方が優れています。
+唯一の**欠点**は、アプリケーションを複数のプロセスに分割してXPCを介して通信することは**効率が低下する**ことです。しかし、現在のシステムではほとんど気づかれず、利点の方が優れています。
 
 ## アプリケーション固有のXPCサービス
 
 アプリケーションのXPCコンポーネントは、**アプリケーション自体の中にあります**。たとえば、Safariでは、**`/Applications/Safari.app/Contents/XPCServices`**にそれらを見つけることができます。拡張子は**`.xpc`**（例：**`com.apple.Safari.SandboxBroker.xpc`**）であり、**メインバイナリ**もそれと一緒に**バンドル**されています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-XPCコンポーネントは、他のXPCコンポーネントやメインのアプリバイナリとは異なる**エンタイトルメントと特権**を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは、それを呼び出したアプリケーションと**同じセキュリティセッションで実行**されます。
+XPCコンポーネントは、他のXPCコンポーネントやメインのアプリケーションバイナリとは異なる**エンタイトルメントと特権**を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは、それを呼び出したアプリケーションと**同じセキュリティセッションで実行**されます。
 
 XPCサービスは、必要に応じて**launchd**によって**起動**され、すべてのタスクが**完了**した後に**シャットダウン**され、システムリソースを解放します。**アプリケーション固有のXPCコンポーネントは、アプリケーションのみが利用**できるため、潜在的な脆弱性に関連するリスクを低減します。
 
@@ -72,23 +72,23 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-**`LaunchDameons`**内のものはrootで実行されます。したがって、特権を持たないプロセスがこれらのいずれかと通信できれば、特権を昇格させることができる可能性があります。
+**`LaunchDameons`**内のものはrootで実行されます。したがって、特権を持たないプロセスがこれらのいずれかと通信できれば、特権をエスカレーションすることができます。
 
 ## XPCイベントメッセージ
 
-アプリケーションは、異なるイベントメッセージに**サブスクライブ**することができ、これにより、そのようなイベントが発生したときに**オンデマンドで起動**することができます。これらのサービスのセットアップは、**`LaunchEvent`**キーを含む**launchd plistファイル**によって行われます。これらのファイルは、前述のものと同じディレクトリにあります。
+アプリケーションは、異なるイベントメッセージに**サブスクライブ**することができ、そのようなイベントが発生したときに**オンデマンドで起動**することができます。これらのサービスのセットアップは、**`LaunchEvent`**キーを含む**launchd plistファイル**によって行われます。これらのファイルは、前述のものと同じディレクトリにあります。
 
 ### XPC接続プロセスのチェック
 
 プロセスがXPC接続を介してメソッドを呼び出そうとするとき、**XPCサービスはそのプロセスが接続を許可されているかどうかをチェックする必要があります**。以下は、そのチェック方法と一般的な落とし穴です:
 
-{% content-ref url="macos-xpc-connecting-process-check.md" %}
-[macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
+{% content-ref url="macos-xpc-connecting-process-check/" %}
+[macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
 {% endcontent-ref %}
 
 ## XPC認証
 
-Appleはまた、アプリが**いくつかの権限とその取得方法を設定**できるようにしています。したがって、呼び出し元のプロセスがこれらの権限を持っている場合、XPCサービスからのメソッドの呼び出しが**許可されます**。
+Appleはまた、アプリが**いくつかの権限とその取得方法を設定**することも許可しています。したがって、呼び出し元のプロセスがこれらの権限を持っている場合、XPCサービスからのメソッドの呼び出しが**許可されます**:
 
 {% content-ref url="macos-xpc-authorization.md" %}
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
@@ -218,7 +218,7 @@ dispatch_main();
 return 0;
 }
 ```
-{% tab title="xyz.hacktricks.service.plist" %}xyz.hacktricks.service.plistファイルは、macOSでXPCサービスを作成するために使用されるプロパティリストファイルです。このファイルには、XPCサービスの設定と実行に関する情報が含まれています。
+{% tab title="xyz.hacktricks.service.plist" %}xyz.hacktricks.service.plistファイルは、macOSでXPCサービスを作成するために使用されるプロパティリストファイルです。このファイルには、サービスの設定と実行に関する情報が含まれています。
 
 以下は、xyz.hacktricks.service.plistファイルの例です。
 
@@ -231,45 +231,24 @@ return 0;
     <string>xyz.hacktricks.service</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/path/to/executable</string>
+        <string>/usr/bin/python</string>
+        <string>/path/to/xyz.hacktricks.service.py</string>
     </array>
-    <key>MachServices</key>
-    <dict>
-        <key>xyz.hacktricks.machservice</key>
-        <true/>
-    </dict>
-    <key>Sockets</key>
-    <dict>
-        <key>xyz.hacktricks.socket</key>
-        <string>xyz.hacktricks.socket</string>
-    </dict>
-    <key>StandardErrorPath</key>
-    <string>/path/to/error.log</string>
-    <key>StandardOutPath</key>
-    <string>/path/to/output.log</string>
+    <key>RunAtLoad</key>
+    <true/>
     <key>KeepAlive</key>
     <true/>
+    <key>StandardOutPath</key>
+    <string>/var/log/xyz.hacktricks.service.log</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/xyz.hacktricks.service.log</string>
 </dict>
 </plist>
 ```
 
-このプロパティリストファイルでは、次のキーと値が定義されています。
+この例では、`xyz.hacktricks.service`というラベルのXPCサービスが定義されています。サービスは`/usr/bin/python`を実行し、`/path/to/xyz.hacktricks.service.py`スクリプトを引数として渡します。`RunAtLoad`と`KeepAlive`キーは、サービスが起動時に実行されることと、異常終了時に再起動されることを示しています。`StandardOutPath`と`StandardErrorPath`キーは、ログファイルのパスを指定します。
 
-- `Label`: サービスの一意の識別子を指定します。
-- `ProgramArguments`: サービスの実行可能ファイルのパスを指定します。
-- `MachServices`: サービスが公開するMachサービスの名前と有効性を指定します。
-- `Sockets`: サービスが使用するソケットの名前とパスを指定します。
-- `StandardErrorPath`: サービスのエラーログの出力先パスを指定します。
-- `StandardOutPath`: サービスの出力ログの出力先パスを指定します。
-- `KeepAlive`: サービスが終了した場合に自動的に再起動するかどうかを指定します。
-
-このプロパティリストファイルを使用してXPCサービスを作成するには、次の手順を実行します。
-
-1. `xyz.hacktricks.service.plist`ファイルを作成します。
-2. 必要な設定をプロパティリストファイルに追加します。
-3. `launchctl load xyz.hacktricks.service.plist`コマンドを使用してサービスをロードします。
-
-これにより、XPCサービスが作成され、指定された設定に基づいて実行されます。
+このプロパティリストファイルを使用して、macOSでXPCサービスを作成および管理することができます。{% endtab %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -387,21 +366,13 @@ NSLog(@"Received response: %@", response);
 return 0;
 }
 ```
-{% tab title="xyz.hacktricks.svcoc.plist" %}
+{% tab title="xyz.hacktricks.svcoc.plist" %}xyz.hacktricks.svcoc.plistファイルは、macOSでXPCサービスを作成するために使用されるプロパティリスト（plist）ファイルです。XPCサービスは、異なるプロセス間での通信を可能にするために使用されます。このファイルには、XPCサービスの設定とプロパティが含まれています。
 
-このファイルは、macOSのXPCサービスの設定ファイルです。XPC（Inter-Process Communication）は、プロセス間通信を実現するためのフレームワークです。このファイルを使用して、XPCサービスの動作や特権のエスカレーションを制御することができます。
+XPCサービスは、セキュリティと特権エスカレーションの観点から重要です。悪意のあるユーザーがXPCサービスを悪用することで、システムに深刻な影響を与える可能性があります。
 
-このファイルを使用して、XPCサービスの起動時に実行されるコマンドやスクリプトを指定することができます。また、XPCサービスが使用できる特権やリソースの制限も設定することができます。
+xyz.hacktricks.svcoc.plistファイルを分析することで、XPCサービスの設定とプロパティを理解し、セキュリティ上の脆弱性を特定することができます。これにより、システムのハードニングとプライバシーの向上が可能になります。
 
-このファイルを調査することで、XPCサービスの動作や特権のエスカレーションに関する情報を収集することができます。また、悪意のあるXPCサービスを作成するための手がかりを見つけることもできます。
-
-このファイルを編集することで、XPCサービスの動作や特権のエスカレーションを制御することができます。ただし、注意が必要です。誤った設定は、システムの安定性やセキュリティに影響を与える可能性があります。
-
-このファイルの編集には、管理者権限が必要です。また、変更を反映させるためには、システムを再起動する必要があります。
-
-詳細な情報や具体的な手法については、[xyz.hacktricks.xyz](https://xyz.hacktricks.xyz/)を参照してください。
-
-{% endtab %}
+このファイルを分析する際には、潜在的な脆弱性やセキュリティ上の問題を特定するために、XPCサービスの動作と関連する情報を詳細に調査する必要があります。{% endtab %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -524,7 +495,7 @@ return;
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

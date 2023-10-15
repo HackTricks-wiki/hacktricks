@@ -20,7 +20,7 @@ Appleは、接続するプロセスが**公開されたXPCメソッドを呼び�
 
 ### ShouldAcceptNewConnection は常に YES
 
-[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)には、例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、**`shouldAcceptNewConnection`**関数は、以前に指定された要件のいずれも**チェックしません**。常にYESを返します：
+[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)に例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、関数**`shouldAcceptNewConnection`**は以前に指定された要件のいずれも**チェックしません**。常にYESを返します：
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -39,13 +39,13 @@ return YES;
 ```
 詳しい設定方法については、次のチェックを適切に構成する方法に関する情報を参照してください：
 
-{% content-ref url="macos-xpc-connecting-process-check.md" %}
-[macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
+{% content-ref url="macos-xpc-connecting-process-check/" %}
+[macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
 {% endcontent-ref %}
 
 ### アプリケーションの権限
 
-ただし、HelperToolからメソッドが呼び出される際には、**認可が行われています**。
+ただし、**HelperToolからメソッドが呼び出される際には、いくつかの認可が行われます**。
 
 `App/AppDelegate.m`の`applicationDidFinishLaunching`関数は、アプリが起動した後に空の認可参照を作成します。これは常に機能するはずです。\
 その後、`setupAuthorizationRights`を呼び出して、その認可参照にいくつかの権限を追加しようとします。
@@ -269,7 +269,7 @@ security authorizationdb read com.apple.safaridriver.allow
 * `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権限を取得します。ユーザーがすでにログインしている場合、これにより追加の認証がバイパスされる場合があります。
 
 4. **'shared': 'true'**
-* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です（'authenticate-user': 'false'などの他のキーと組み合わせない限り）。
+* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です。ただし、'authenticate-user': 'false'などの他のキーと組み合わせる場合は、認証が必要ありません。
 
 興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます。
 ```bash
@@ -289,7 +289,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 もし、関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは以前に言及した認証スキーマを使用しています:
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 この関数が `AuthorizationCreateFromExternalForm`、`authorizationRightForCommand`、`AuthorizationCopyRights`、`AuhtorizationFree` などの関数を呼び出している場合、[**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) を使用しています。
 
@@ -325,7 +325,7 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
 <figure><img src="../../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
-* launchdのplistファイル内：
+* launchdのplistファイルで：
 ```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
 

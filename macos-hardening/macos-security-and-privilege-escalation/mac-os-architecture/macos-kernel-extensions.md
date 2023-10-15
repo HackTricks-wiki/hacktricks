@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの企業を宣伝したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をご覧ください！
+* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの企業を宣伝したいですか？ または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をご覧ください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をチェックしてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションです。
 * [**PEASSとHackTricksの公式スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) **Discordグループ**または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローしてください。
@@ -22,10 +22,10 @@
 
 * **リカバリーモード**に入ると、カーネル拡張のロードが**許可される**必要があります。
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * カーネル拡張は、**カーネルコード署名証明書**で**署名されている必要があります**。この証明書は**Apple**によってのみ発行されます。Appleは、**企業**と**必要性**を詳細に検討します。
-* カーネル拡張はまた、**ノタリゼーション**も必要です。Appleは、マルウェアを検出するためにカーネル拡張を検証できます。
+* カーネル拡張はまた、**ノタリゼーション**を受ける必要があります。Appleは、マルウェアを検出するためにそれを検証できます。
 * その後、**ルートユーザー**がカーネル拡張をロードでき、パッケージ内のファイルはルートに所属する必要があります。
 * ロードプロセス中、パッケージはルートなしの保護された場所に準備される必要があります：`/Library/StagedExtensions`（`com.apple.rootless.storage.KernelExtensionManagement`権限が必要）
 * 最後に、ロードを試みると、[**ユーザーに確認の要求が表示されます**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html)。承認されると、コンピュータを**再起動**してロードする必要があります。
@@ -42,7 +42,7 @@ Catalinaでは、次のようになります：興味深いことに、**検証�
 
 * **`syspolicyd`**との通信を行い、カーネル拡張をロードできるかどうかを確認します。
 
-3. **`syspolicyd`**は、カーネル拡張が以前にロードされていない場合、**ユーザーに尋ねます**。
+3. **`syspolicyd`**は、カーネル拡張が以前にロードされていないかどうかを**ユーザーに尋ねます**。
 
 * **`syspolicyd`**は結果を**`kextd`**に伝えます。
 
@@ -59,10 +59,10 @@ kextdが利用できない場合、kextutilも同じチェックを実行でき�
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの企業を宣伝したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をご覧ください！
+* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの企業を宣伝したいですか？ または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をご覧ください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をチェックしてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションです。
 * [**PEASSとHackTricksの公式スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) **Discordグループ**または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org
+* [**💬**](https://emojipedia.org/speech-balloon/) **Discordグループ**または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9
 * **[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)** **と** [**hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)** にPRを送ることで、あなたのハッキングのテクニックを共有してください。
 
 </details>

