@@ -34,7 +34,7 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 
 ### jtool2
 
-La herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y proporciona algunas características adicionales. [**Descárgala aquí**](http://www.newosxbook.com/tools/jtool.html) o instálala con `brew`.
+Esta herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y ofrece algunas características adicionales. [**Descárgala aquí**](http://www.newosxbook.com/tools/jtool.html) o instálala con `brew`.
 ```bash
 # Install
 brew install --cask jtool2
@@ -159,10 +159,10 @@ https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
 # Swift cli
 swift demangle
 ```
-### Binarios comprimidos
+### Binarios empaquetados
 
 * Verificar la entropía alta
-* Verificar las cadenas (si hay casi ninguna cadena comprensible, está comprimido)
+* Verificar las cadenas (si hay casi ninguna cadena comprensible, empaquetado)
 * El empaquetador UPX para MacOS genera una sección llamada "\_\_XHDR"
 
 ## Análisis dinámico
@@ -172,14 +172,14 @@ Tenga en cuenta que para depurar binarios, **SIP debe estar desactivado** (`csru
 {% endhint %}
 
 {% hint style="warning" %}
-Tenga en cuenta que para **instrumentar binarios del sistema** (como `cloudconfigurationd`) en macOS, **SIP debe estar desactivado** (simplemente eliminar la firma no funcionará).
+Tenga en cuenta que para **instrumentar binarios del sistema**, (como `cloudconfigurationd`) en macOS, **SIP debe estar desactivado** (simplemente eliminar la firma no funcionará).
 {% endhint %}
 
 ### Registros unificados
 
 MacOS genera muchos registros que pueden ser muy útiles al ejecutar una aplicación para tratar de entender **qué está haciendo**.
 
-Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** información **identificable** del **usuario** o **computadora**. Sin embargo, es posible **instalar un certificado para revelar esta información**. Siga las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** alguna información **identificable** del **usuario** o **computadora**. Sin embargo, es posible **instalar un certificado para revelar esta información**. Siga las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
 ### Hopper
 
@@ -193,7 +193,7 @@ En el panel central se puede ver el **código desensamblado**. Y se puede ver co
 
 <figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
-Al hacer clic derecho en un objeto de código, se pueden ver **referencias hacia/desde ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo descompilado):
+Al hacer clic derecho en un objeto de código, se pueden ver **referencias a/desde ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo descompilado):
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -242,45 +242,63 @@ sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
 # Inspeccionando, depurando y fuzzing de aplicaciones en macOS
 
-En este directorio, encontrarás herramientas y técnicas para inspeccionar, depurar y realizar fuzzing en aplicaciones en macOS. Estas técnicas te permitirán analizar el comportamiento de las aplicaciones, identificar vulnerabilidades y encontrar posibles formas de escalada de privilegios.
+En este directorio, encontrarás herramientas y técnicas para inspeccionar, depurar y realizar fuzzing en aplicaciones en macOS. Estas técnicas te permitirán analizar el comportamiento de las aplicaciones, identificar vulnerabilidades y encontrar posibles puntos de escalada de privilegios.
 
-## Inspeccionando aplicaciones
+## Contenido
 
-La inspección de aplicaciones implica examinar el código y los recursos de una aplicación para comprender su funcionamiento interno. Esto puede ayudarte a identificar posibles vulnerabilidades y a comprender cómo interactúa la aplicación con el sistema operativo.
+- [Inspector de aplicaciones](#inspector-de-aplicaciones)
+- [Depuración de aplicaciones](#depuración-de-aplicaciones)
+- [Fuzzing de aplicaciones](#fuzzing-de-aplicaciones)
 
-### Herramientas de inspección
+## Inspector de aplicaciones
 
-- [Hopper Disassembler](https://www.hopperapp.com/) - Un desensamblador de macOS que te permite examinar el código de una aplicación y comprender su estructura interna.
-- [class-dump](https://github.com/nygard/class-dump) - Una herramienta de línea de comandos que extrae la declaración de clases y métodos de un binario ejecutable.
-- [otool](https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/MachOTopics/0-Introduction/introduction.html) - Una herramienta de línea de comandos que muestra información sobre los archivos binarios de macOS.
+El inspector de aplicaciones es una herramienta que te permite examinar el contenido y la estructura de una aplicación en macOS. Puedes utilizar esta herramienta para analizar los archivos binarios de una aplicación y obtener información sobre las bibliotecas utilizadas, los símbolos exportados y otras características relevantes.
 
-## Depurando aplicaciones
+Para utilizar el inspector de aplicaciones, sigue los siguientes pasos:
 
-La depuración de aplicaciones implica ejecutar una aplicación en un entorno controlado y examinar su comportamiento en tiempo de ejecución. Esto te permite identificar y solucionar problemas, así como descubrir posibles vulnerabilidades.
+1. Abre una terminal en macOS.
+2. Navega hasta el directorio donde se encuentra la aplicación que deseas inspeccionar.
+3. Ejecuta el siguiente comando para iniciar el inspector de aplicaciones:
 
-### Herramientas de depuración
+   ```bash
+   otool -L <nombre_de_la_aplicación>
+   ```
 
-- [lldb](https://lldb.llvm.org/) - Un depurador de macOS que te permite examinar y manipular el estado de una aplicación en tiempo de ejecución.
-- [Xcode](https://developer.apple.com/xcode/) - Un entorno de desarrollo integrado (IDE) que incluye herramientas de depuración para aplicaciones macOS.
+   Reemplaza `<nombre_de_la_aplicación>` con el nombre de la aplicación que deseas inspeccionar.
+
+El inspector de aplicaciones mostrará una lista de las bibliotecas utilizadas por la aplicación, junto con información adicional sobre cada biblioteca.
+
+## Depuración de aplicaciones
+
+La depuración de aplicaciones es un proceso que te permite analizar y solucionar problemas en el código de una aplicación. Puedes utilizar esta técnica para identificar vulnerabilidades y realizar pruebas de penetración en aplicaciones en macOS.
+
+Para depurar una aplicación en macOS, sigue los siguientes pasos:
+
+1. Abre una terminal en macOS.
+2. Navega hasta el directorio donde se encuentra la aplicación que deseas depurar.
+3. Ejecuta el siguiente comando para iniciar el depurador:
+
+   ```bash
+   lldb <nombre_de_la_aplicación>
+   ```
+
+   Reemplaza `<nombre_de_la_aplicación>` con el nombre de la aplicación que deseas depurar.
+
+Una vez que el depurador esté activo, puedes utilizar comandos específicos para examinar el estado de la aplicación, establecer puntos de interrupción y ejecutar instrucciones paso a paso.
 
 ## Fuzzing de aplicaciones
 
-El fuzzing es una técnica que implica enviar entradas aleatorias o maliciosas a una aplicación para encontrar posibles vulnerabilidades. Esta técnica es especialmente útil para descubrir vulnerabilidades de seguridad desconocidas.
+El fuzzing de aplicaciones es una técnica que te permite enviar entradas aleatorias o maliciosas a una aplicación con el fin de encontrar vulnerabilidades. Puedes utilizar esta técnica para descubrir errores de programación, vulnerabilidades de seguridad y posibles puntos de escalada de privilegios en aplicaciones en macOS.
 
-### Herramientas de fuzzing
+Para realizar fuzzing en una aplicación en macOS, sigue los siguientes pasos:
 
-- [AFL](http://lcamtuf.coredump.cx/afl/) - Un marco de fuzzing que utiliza la instrumentación de código para generar entradas aleatorias y encontrar posibles vulnerabilidades.
-- [Peach Fuzzer](https://peachfuzzer.com/) - Una plataforma de fuzzing que te permite crear y ejecutar pruebas de fuzzing personalizadas.
-- [Radamsa](https://gitlab.com/akihe/radamsa) - Una herramienta de generación de mutaciones que se utiliza en combinación con otras herramientas de fuzzing.
+1. Abre una terminal en macOS.
+2. Navega hasta el directorio donde se encuentra la aplicación que deseas fuzzear.
+3. Utiliza una herramienta de fuzzing, como [AFL](https://github.com/google/AFL), para generar y enviar entradas aleatorias o maliciosas a la aplicación.
 
-## Recursos adicionales
+Recuerda que el fuzzing puede ser un proceso intensivo en recursos y puede causar bloqueos o cuelgues en la aplicación. Asegúrate de realizar fuzzing en un entorno controlado y de tener permisos adecuados para realizar pruebas de penetración en la aplicación.
 
-Aquí tienes algunos recursos adicionales que pueden ser útiles para inspeccionar, depurar y realizar fuzzing en aplicaciones en macOS:
-
-- [Apple Developer Documentation](https://developer.apple.com/documentation/) - Documentación oficial de Apple sobre el desarrollo de aplicaciones en macOS.
-- [Reverse Engineering Resources](https://github.com/onethawt/reverseengineering-resources) - Una lista curada de recursos de ingeniería inversa, que incluye herramientas y tutoriales.
-
-¡Diviértete explorando y descubriendo las vulnerabilidades de las aplicaciones en macOS!
+¡Explora estas técnicas y herramientas para mejorar tus habilidades de hacking en macOS!
 ```bash
 syscall:::entry
 /pid == $1/
@@ -324,19 +342,13 @@ sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 
 To use `dtruss`, you need to specify the process ID (PID) of the target application. You can find the PID using the `ps` command or by using tools like Activity Monitor.
 
-Once you have the PID, you can run `dtruss` with the following syntax:
+Once you have the PID, you can run `dtruss` with the `-p` option followed by the PID. This will start tracing the system calls made by the application in real-time.
 
-```bash
-sudo dtruss -p <PID>
-```
+By default, `dtruss` will display the system calls along with their arguments and return values. This can be useful for understanding how the application interacts with the operating system.
 
-The `sudo` command is required because `dtruss` needs root privileges to trace system calls.
+You can also filter the output of `dtruss` using various options. For example, you can use the `-n` option to only display system calls from a specific library or the `-s` option to only display system calls with a specific name.
 
-When `dtruss` is running, it will display a list of system calls made by the target process, along with their arguments and return values. This can be useful for understanding how an application interacts with the operating system and identifying any potential security vulnerabilities or performance issues.
-
-Note that `dtruss` can generate a large amount of output, so it's recommended to redirect the output to a file for further analysis. You can do this by appending `> output.txt` to the `dtruss` command.
-
-Keep in mind that `dtruss` is a powerful tool that should be used responsibly and with proper authorization. It can be used for legitimate purposes like debugging and troubleshooting, but it can also be misused for unauthorized access or malicious activities. Always ensure that you have the necessary permissions and legal authorization before using `dtruss` or any other similar tool.
+`dtruss` can be a powerful tool for inspecting and debugging macOS applications. However, it should be used responsibly and only on applications that you have permission to analyze.
 ```bash
 dtruss -c ls #Get syscalls of ls
 dtruss -c -p 1000 #get syscalls of PID 1000
@@ -351,17 +363,24 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 
 [**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) es una herramienta muy útil para verificar las acciones relacionadas con los procesos que un proceso está realizando (por ejemplo, monitorear qué nuevos procesos está creando un proceso).
 
+### SpriteTree
+
+[**SpriteTree**](https://themittenmac.com/tools/) es una herramienta que muestra las relaciones entre procesos.\
+Necesitas monitorear tu Mac con un comando como **`sudo eslogger fork exec rename create > cap.json`** (la terminal que lanza esto requiere FDA). Y luego puedes cargar el json en esta herramienta para ver todas las relaciones:
+
+<figure><img src="../../../.gitbook/assets/image (710).png" alt="" width="375"><figcaption></figcaption></figure>
+
 ### FileMonitor
 
 [**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) permite monitorear eventos de archivos (como creación, modificaciones y eliminaciones) proporcionando información detallada sobre dichos eventos.
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) es una herramienta GUI con la apariencia y sensación que los usuarios de Windows pueden conocer de _Procmon_ de Microsoft Sysinternal. Permite iniciar y detener la grabación de eventos de todo tipo, filtrarlos por categorías (archivo, proceso, red, etc.) y guardar los eventos grabados como archivo json.
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) es una herramienta GUI con la apariencia y sensación que los usuarios de Windows pueden conocer de _Procmon_ de Microsoft Sysinternal. Te permite iniciar y detener la grabación de eventos de todo tipo, filtrarlos por categorías (archivo, proceso, red, etc.) y guardar los eventos grabados como archivo json.
 
 ### Apple Instruments
 
-[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) son parte de las herramientas de desarrollador de Xcode, utilizadas para monitorear el rendimiento de las aplicaciones, identificar fugas de memoria y rastrear la actividad del sistema de archivos.
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) son parte de las herramientas de desarrollador de Xcode, utilizadas para monitorear el rendimiento de la aplicación, identificar fugas de memoria y rastrear la actividad del sistema de archivos.
 
 ![](<../../../.gitbook/assets/image (15).png>)
 
@@ -398,7 +417,7 @@ settings set target.x86-disassembly-flavor intel
 Dentro de lldb, volcar un proceso con `process save-core`
 {% endhint %}
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descripción</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Iniciar la ejecución, que continuará sin interrupciones hasta que se alcance un punto de interrupción o el proceso termine.</td></tr><tr><td><strong>continue (c)</strong></td><td>Continuar la ejecución del proceso depurado.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Ejecutar la siguiente instrucción. Este comando omitirá las llamadas a funciones.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Ejecutar la siguiente instrucción. A diferencia del comando nexti, este comando entrará en las llamadas a funciones.</td></tr><tr><td><strong>finish (f)</strong></td><td>Ejecutar el resto de las instrucciones en la función actual ("frame") y detenerse.</td></tr><tr><td><strong>control + c</strong></td><td>Pausar la ejecución. Si el proceso se ha ejecutado (r) o continuado (c), esto hará que el proceso se detenga ...donde sea que se esté ejecutando actualmente.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p>b main #Cualquier función llamada main</p><p>b &#x3C;nombrebin>`main #Función principal del binario</p><p>b set -n main --shlib &#x3C;nombrelib> #Función principal del binario indicado</p><p>b -[NSDictionary objectForKey:]</p><p>b -a 0x0000000100004bd9</p><p>br l #Lista de puntos de interrupción</p><p>br e/dis &#x3C;número> #Habilitar/Deshabilitar punto de interrupción</p><p>breakpoint delete &#x3C;número></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Obtener ayuda del comando breakpoint</p><p>help memory write #Obtener ayuda para escribir en la memoria</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">formato</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;direcciónreg/memoria></strong></td><td>Mostrar la memoria como una cadena terminada en nulo.</td></tr><tr><td><strong>x/i &#x3C;direcciónreg/memoria></strong></td><td>Mostrar la memoria como instrucción de ensamblador.</td></tr><tr><td><strong>x/b &#x3C;direcciónreg/memoria></strong></td><td>Mostrar la memoria como byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Esto imprimirá el objeto al que hace referencia el parámetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Tenga en cuenta que la mayoría de las API o métodos de Objective-C de Apple devuelven objetos y, por lo tanto, deben mostrarse mediante el comando "print object" (po). Si po no produce una salida significativa, use <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escribir AAAA en esa dirección<br>memory write -f s $rip+0x11f+7 "AAAA" #Escribir AAAA en la dirección</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Desensamblar la función actual</p><p>dis -n &#x3C;nombrefunc> #Desensamblar función</p><p>dis -n &#x3C;nombrefunc> -b &#x3C;nombrebase> #Desensamblar función<br>dis -c 6 #Desensamblar 6 líneas<br>dis -c 0x100003764 -e 0x100003768 #Desde una dirección hasta la otra<br>dis -p -c 4 #Comenzar en la dirección actual desensamblando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 #Comprobar el array de 3 componentes en el registro x1</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descripción</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Iniciar la ejecución, que continuará sin interrupciones hasta que se alcance un punto de interrupción o el proceso termine.</td></tr><tr><td><strong>continue (c)</strong></td><td>Continuar la ejecución del proceso depurado.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Ejecutar la siguiente instrucción. Este comando omitirá las llamadas a funciones.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Ejecutar la siguiente instrucción. A diferencia del comando nexti, este comando entrará en las llamadas a funciones.</td></tr><tr><td><strong>finish (f)</strong></td><td>Ejecutar el resto de las instrucciones en la función actual ("frame") y detenerse.</td></tr><tr><td><strong>control + c</strong></td><td>Pausar la ejecución. Si el proceso se ha ejecutado (r) o continuado (c), esto hará que el proceso se detenga ... dondequiera que se esté ejecutando actualmente.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p>b main #Cualquier función llamada main</p><p>b &#x3C;nombre_bin>`main #Función principal del binario</p><p>b set -n main --shlib &#x3C;nombre_lib> #Función principal del binario indicado</p><p>b -[NSDictionary objectForKey:]</p><p>b -a 0x0000000100004bd9</p><p>br l #Lista de puntos de interrupción</p><p>br e/dis &#x3C;número> #Habilitar/Deshabilitar punto de interrupción</p><p>breakpoint delete &#x3C;número></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Obtener ayuda del comando breakpoint</p><p>help memory write #Obtener ayuda para escribir en la memoria</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">formato</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;dirección_reg/memoria></strong></td><td>Mostrar la memoria como una cadena terminada en nulo.</td></tr><tr><td><strong>x/i &#x3C;dirección_reg/memoria></strong></td><td>Mostrar la memoria como instrucción de ensamblador.</td></tr><tr><td><strong>x/b &#x3C;dirección_reg/memoria></strong></td><td>Mostrar la memoria como byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Esto imprimirá el objeto al que hace referencia el parámetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Tenga en cuenta que la mayoría de las API o métodos de Objective-C de Apple devuelven objetos y, por lo tanto, deben mostrarse mediante el comando "print object" (po). Si po no produce una salida significativa, use <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escribir AAAA en esa dirección<br>memory write -f s $rip+0x11f+7 "AAAA" #Escribir AAAA en la dirección</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Desensamblar la función actual</p><p>dis -n &#x3C;nombre_func> #Desensamblar función</p><p>dis -n &#x3C;nombre_func> -b &#x3C;nombre_base> #Desensamblar función<br>dis -c 6 #Desensamblar 6 líneas<br>dis -c 0x100003764 -e 0x100003768 #Desde una dirección hasta la otra<br>dis -p -c 4 #Comenzar en la dirección actual desensamblando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 #Comprobar el array de 3 componentes en el registro x1</td></tr></tbody></table>
 
 {% hint style="info" %}
 Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene el **nombre del método** como una cadena terminada en nulo ("C"). Para imprimir el nombre a través de lldb, haga lo siguiente:
@@ -417,7 +436,7 @@ Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene e
 
 * El comando **`sysctl hw.model`** devuelve "Mac" cuando el **host es un MacOS**, pero algo diferente cuando es una VM.
 * Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`**, algunos malware intentan detectar si es una VM.
-* Algunos malware también pueden **detectar** si la máquina es **VMware** basándose en la dirección MAC (00:50:56).
+* Algunos malware también pueden **detectar si la máquina es VMware** basándose en la dirección MAC (00:50:56).
 * También es posible encontrar si un proceso está siendo depurado con un código simple como:
 * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
 * También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un depurador se adjunte y realice un seguimiento.

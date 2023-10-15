@@ -27,19 +27,23 @@ Finalmente, se activará el sandbox con una llamada a **`__sandbox_ms`** que lla
 
 ### Bypass del atributo de cuarentena
 
-Los **archivos creados por procesos en el sandbox** se les añade el **atributo de cuarentena** para evitar que escapen del sandbox. Sin embargo, si logras **crear un paquete `.app` sin el atributo de cuarentena** dentro de una aplicación en el sandbox, podrías hacer que el binario del paquete de la aplicación apunte a **`/bin/bash`** y agregar algunas variables de entorno en el **plist** para abusar de launchctl y **ejecutar la nueva aplicación sin sandbox**.
+Los **archivos creados por procesos en el sandbox** se les añade el **atributo de cuarentena** para evitar que escapen del sandbox. Sin embargo, si logras **crear una carpeta `.app` sin el atributo de cuarentena** dentro de una aplicación en el sandbox, podrías hacer que el binario del paquete de la aplicación apunte a **`/bin/bash`** y agregar algunas variables de entorno en el **plist** para abusar de **`open`** y **ejecutar la nueva aplicación sin sandbox**.
 
-Esto es lo que se hizo en [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Esto es lo que se hizo en [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
-### Abuso de la funcionalidad Open
+{% hint style="danger" %}
+Por lo tanto, en este momento, si eres capaz de crear una carpeta con un nombre que termine en **`.app`** sin el atributo de cuarentena, puedes escapar del sandbox porque macOS solo **verifica** el atributo de **cuarentena** en la **carpeta `.app`** y en el **ejecutable principal** (y apuntaremos el ejecutable principal a **`/bin/bash`**).
+{% endhint %}
 
-En los [**últimos ejemplos de bypass del sandbox de Word**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) se puede apreciar cómo se puede abusar de la funcionalidad **`open`** de la línea de comandos para evadir el sandbox.
+### Abuso de la funcionalidad de Open
+
+En los [**últimos ejemplos de bypass del sandbox de Word**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) se puede apreciar cómo se puede abusar de la funcionalidad de la línea de comandos de **`open`** para evadir el sandbox.
 
 ### Abuso de ubicaciones de inicio automático
 
 Si un proceso en el sandbox puede **escribir** en un lugar donde **más tarde se ejecutará el binario de una aplicación sin sandbox**, podrá **escapar simplemente colocando** allí el binario. Un buen ejemplo de este tipo de ubicaciones son `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
 
-Para esto, incluso podrías necesitar **2 pasos**: hacer que un proceso con un **sandbox más permisivo** (`file-read*`, `file-write*`) ejecute tu código que realmente escribirá en un lugar donde se **ejecutará sin sandbox**.
+Para esto, es posible que incluso necesites **2 pasos**: hacer que un proceso con un sandbox **más permisivo** (`file-read*`, `file-write*`) ejecute tu código, que en realidad escribirá en un lugar donde se ejecutará **sin sandbox**.
 
 Consulta esta página sobre **ubicaciones de inicio automático**:
 
@@ -49,29 +53,28 @@ Consulta esta página sobre **ubicaciones de inicio automático**:
 
 ### Abuso de otros procesos
 
-Si desde el proceso en el sandbox puedes **comprometer otros procesos** que se ejecutan en sandbox menos restrictivos (o sin sandbox), podrás escapar a sus sandboxes:
+Si desde el proceso en el sandbox eres capaz de **comprometer otros procesos** que se ejecutan en sandboxes menos restrictivos (o sin sandbox), podrás escapar a sus sandboxes:
 
 {% content-ref url="../../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../../macos-proces-abuse/)
 {% endcontent-ref %}
 
-### Compilación estática y vinculación dinámica
+### Compilación estática y enlace dinámico
 
 [**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de evadir el Sandbox. Debido a que el sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca se sandboxearía:
 
-* Si el binario estuviera **completamente compilado estáticamente**, podría evitar cargar esa biblioteca.
-* Si el **binario no necesitara cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitaría cargar libSystem.&#x20;
-
+* Si el binario se **compila completamente de forma estática**, podría evitar cargar esa biblioteca.
+* Si el binario **no necesitara cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitaría cargar libSystem.&#x20;
 ### Shellcodes
 
-Ten en cuenta que **incluso los shellcodes** en ARM64 necesitan vincularse en `libSystem.dylib`:
+Ten en cuenta que **incluso los shellcodes** en ARM64 deben estar vinculados en `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
 ### Privilegios
 
-Tenga en cuenta que incluso si algunas **acciones** pueden estar **permitidas por el sandbox** si una aplicación tiene un **privilegio específico**, como en:
+Ten en cuenta que aunque algunas **acciones** puedan estar **permitidas por el sandbox**, si una aplicación tiene un **privilegio específico**, como en:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -186,9 +189,7 @@ Aquí hay un ejemplo de cómo se ve el archivo `entitlements.xml`:
     <true/>
     <key>com.apple.security.files.user-selected.read-write</key>
     <true/>
-    <key>com.apple.security.files.downloads.read-write</key>
-    <true/>
-    <key>com.apple.security.files.all</key>
+    <key>com.apple.security.print</key>
     <true/>
 </dict>
 </plist>
@@ -196,12 +197,13 @@ Aquí hay un ejemplo de cómo se ve el archivo `entitlements.xml`:
 
 En este ejemplo, la aplicación tiene los siguientes permisos:
 
-- `com.apple.security.network.client`: Permite a la aplicación realizar conexiones de red salientes.
-- `com.apple.security.files.user-selected.read-write`: Permite a la aplicación leer y escribir en los archivos seleccionados por el usuario.
-- `com.apple.security.files.downloads.read-write`: Permite a la aplicación leer y escribir en la carpeta de descargas.
-- `com.apple.security.files.all`: Permite a la aplicación leer y escribir en todos los archivos del sistema.
+- `com.apple.security.network.client`: Permite a la aplicación realizar solicitudes de red salientes.
+- `com.apple.security.files.user-selected.read-write`: Permite a la aplicación leer y escribir en archivos seleccionados por el usuario.
+- `com.apple.security.print`: Permite a la aplicación imprimir documentos.
 
-Estos permisos se definen en el archivo `entitlements.xml` y se utilizan para limitar las acciones que una aplicación puede realizar en el entorno de sandbox de macOS.
+Estos permisos se definen utilizando claves y valores en el archivo `entitlements.xml`. Las claves representan los permisos y los valores indican si el permiso está habilitado (`true`) o deshabilitado (`false`).
+
+Es importante tener en cuenta que modificar el archivo `entitlements.xml` puede tener implicaciones de seguridad y puede violar las políticas de sandbox de macOS. Se recomienda tener cuidado al realizar cambios en este archivo y seguir las mejores prácticas de seguridad.
 
 {% endtab %}
 ```xml
@@ -221,6 +223,8 @@ El archivo Info.plist de una aplicación sandbox debe contener una clave llamada
 Además de la clave "com.apple.security.app-sandbox", el archivo Info.plist también puede contener otras claves relacionadas con la configuración de la sandbox, como "com.apple.security.network.client" para permitir o denegar el acceso a la red, "com.apple.security.files.user-selected.read-write" para permitir o denegar el acceso a los archivos seleccionados por el usuario, y muchas más.
 
 Es importante tener en cuenta que el archivo Info.plist solo especifica las restricciones y permisos de la aplicación dentro de la sandbox. No proporciona una protección completa contra todas las vulnerabilidades y ataques posibles. Por lo tanto, es importante implementar otras medidas de seguridad y protección en la aplicación para garantizar una protección adecuada.
+
+Para obtener más información sobre cómo configurar el archivo Info.plist para la sandbox de macOS, consulte la documentación oficial de Apple sobre la seguridad de la sandbox de macOS.
 
 {% endtab %}
 ```xml
