@@ -1,4 +1,4 @@
-# Extensiones del Kernel de macOS
+# Vulnerabilidades del Kernel de macOS
 
 <details>
 
@@ -12,42 +12,10 @@
 
 </details>
 
-## Información básica
+## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-Las extensiones del kernel (Kexts) son **paquetes** con una extensión **`.kext`** que se **cargan directamente en el espacio del kernel de macOS**, proporcionando funcionalidad adicional al sistema operativo principal.
-
-### Requisitos
-
-Obviamente, esto es tan poderoso que es **complicado cargar una extensión del kernel**. Estos son los **requisitos** que debe cumplir una extensión del kernel para poder cargarse:
-
-* Cuando se **ingresa al modo de recuperación**, las **extensiones del kernel deben estar permitidas** para cargarse:
-
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-* La extensión del kernel debe estar **firmada con un certificado de firma de código del kernel**, que solo puede ser **concedido por Apple**. Quien revisará en detalle la empresa y las razones por las que se necesita.
-* La extensión del kernel también debe estar **notarizada**, Apple podrá verificarla en busca de malware.
-* Luego, el usuario **root** es el que puede **cargar la extensión del kernel** y los archivos dentro del paquete deben **pertenecer a root**.
-* Durante el proceso de carga, el paquete debe prepararse en una ubicación **protegida y no root**: `/Library/StagedExtensions` (requiere el permiso `com.apple.rootless.storage.KernelExtensionManagement`).
-* Finalmente, al intentar cargarla, el usuario recibirá una [**solicitud de confirmación**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html) y, si se acepta, se debe **reiniciar** la computadora para cargarla.
-
-### Proceso de carga
-
-En Catalina era así: Es interesante destacar que el proceso de **verificación** ocurre en **userland**. Sin embargo, solo las aplicaciones con el permiso **`com.apple.private.security.kext-management`** pueden **solicitar al kernel que cargue una extensión**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
-
-1. **`kextutil`** inicia el proceso de **verificación** para cargar una extensión
-* Se comunicará con **`kextd`** enviando un **servicio Mach**.
-2. **`kextd`** verificará varias cosas, como la **firma**
-* Se comunicará con **`syspolicyd`** para **verificar** si se puede **cargar** la extensión.
-3. **`syspolicyd`** **solicitará** al **usuario** si la extensión no se ha cargado previamente.
-* **`syspolicyd`** informará el resultado a **`kextd`**
-4. **`kextd`** finalmente podrá **indicarle al kernel que cargue** la extensión
-
-Si **`kextd`** no está disponible, **`kextutil`** puede realizar las mismas verificaciones.
-
-## Referencias
-
-* [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
-* [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)
+[**En este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) se explican varias vulnerabilidades que permitieron comprometer el kernel al comprometer el actualizador de software.\
+[**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
 
 <details>
 
