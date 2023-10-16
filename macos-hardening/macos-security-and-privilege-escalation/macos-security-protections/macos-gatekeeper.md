@@ -1,4 +1,4 @@
-# macOS Gatekeeper
+# macOS Gatekeeper / Cuarentena / XProtect
 
 <details>
 
@@ -59,9 +59,9 @@ codesign -s <cert-name-keychain> toolsdemo
 
 El proceso de notarización de Apple sirve como una salvaguarda adicional para proteger a los usuarios de software potencialmente dañino. Implica que el **desarrollador envíe su aplicación para su examen** por parte del **Servicio de Notarización de Apple**, que no debe confundirse con la Revisión de la Aplicación. Este servicio es un **sistema automatizado** que examina el software enviado en busca de **contenido malicioso** y posibles problemas con la firma del código.
 
-Si el software **supera** esta inspección sin plantear ninguna preocupación, el Servicio de Notarización genera un ticket de notarización. Luego, se requiere que el desarrollador **adjunte este ticket a su software**, un proceso conocido como 'grapado'. Además, el ticket de notarización también se publica en línea, donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
+Si el software **supera** esta inspección sin plantear ninguna preocupación, el Servicio de Notarización genera un ticket de notarización. Luego, se requiere que el desarrollador **adjunte este ticket a su software**, un proceso conocido como 'engrapado'. Además, el ticket de notarización también se publica en línea, donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
 
-En la primera instalación o ejecución del software por parte del usuario, la existencia del ticket de notarización, ya sea grapado al ejecutable o encontrado en línea, **informa a Gatekeeper que el software ha sido notarizado por Apple**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el diálogo de inicio inicial, indicando que el software ha sido sometido a verificaciones de contenido malicioso por parte de Apple. Este proceso mejora la confianza del usuario en la seguridad del software que instalan o ejecutan en sus sistemas.
+En la primera instalación o ejecución del software por parte del usuario, la existencia del ticket de notarización, ya sea adjunto al ejecutable o encontrado en línea, **informa a Gatekeeper que el software ha sido notarizado por Apple**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el diálogo de inicio inicial, indicando que el software ha sido sometido a verificaciones de contenido malicioso por parte de Apple. Este proceso mejora la confianza del usuario en la seguridad del software que instalan o ejecutan en sus sistemas.
 
 ### Enumeración de GateKeeper
 
@@ -205,7 +205,7 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 {% endcode %}
 
-La información de cuarentena también se almacena en una base de datos central administrada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
+La información de cuarentena también se almacena en una base de datos central gestionada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
 
 ### XProtect
 
@@ -226,11 +226,11 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 XProtect se encuentra en una ubicación protegida por SIP en **/Library/Apple/System/Library/CoreServices/XProtect.bundle** y dentro del paquete puedes encontrar la siguiente información que utiliza XProtect:
 
 * **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: Permite que el código con esos cdhashes utilice privilegios heredados.
-* **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: Lista de complementos y extensiones que no se permiten cargar a través de BundleID y TeamID, o que indican una versión mínima.
+* **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: Lista de complementos y extensiones que no se les permite cargar a través de BundleID y TeamID, o que indican una versión mínima.
 * **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Reglas Yara para detectar malware.
 * **`XProtect.bundle/Contents/Resources/gk.db`**: Base de datos SQLite3 con hashes de aplicaciones bloqueadas y TeamIDs.
 
-Ten en cuenta que hay otra aplicación en **`/Library/Apple/System/Library/CoreServices/XProtect.app`** relacionada con XProtect que no está involucrada cuando se ejecuta una aplicación.
+Ten en cuenta que hay otra aplicación en **`/Library/Apple/System/Library/CoreServices/XProtect.app`** relacionada con XProtect que no está involucrada en el proceso de Gatekeeper.
 
 ## Bypass de Gatekeeper
 
@@ -238,7 +238,7 @@ Cualquier forma de evadir Gatekeeper (lograr que el usuario descargue algo y lo 
 
 ### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
-Cuando se extraía con **Archive Utility**, los archivos con **rutas de más de 886** caracteres no heredaban el atributo extendido com.apple.quarantine, lo que permitía **evadir Gatekeeper para esos archivos**.
+Cuando se extraía con **Archive Utility**, los archivos con **rutas más largas de 886** caracteres no heredaban el atributo extendido com.apple.quarantine, lo que permitía **evadir Gatekeeper para esos archivos**.
 
 Consulta el [**informe original**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) para obtener más información.
 
@@ -246,7 +246,7 @@ Consulta el [**informe original**](https://labs.withsecure.com/publications/the-
 
 Cuando se crea una aplicación con **Automator**, la información sobre lo que necesita ejecutar se encuentra en `application.app/Contents/document.wflow`, no en el ejecutable. El ejecutable es simplemente un binario genérico de Automator llamado **Automator Application Stub**.
 
-Por lo tanto, podrías hacer que `application.app/Contents/MacOS/Automator\ Application\ Stub` **apunte con un enlace simbólico a otro Automator Application Stub dentro del sistema** y ejecutará lo que se encuentra en `document.wflow` (tu script) **sin activar Gatekeeper** porque el ejecutable real no tiene el atributo de cuarentena.
+Por lo tanto, podrías hacer que `application.app/Contents/MacOS/Automator\ Application\ Stub` **apunte con un enlace simbólico a otro Automator Application Stub dentro del sistema** y ejecutará lo que está dentro de `document.wflow` (tu script) **sin activar Gatekeeper** porque el ejecutable real no tiene el atributo de cuarentena.
 
 Ejemplo de ubicación esperada: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
 
@@ -254,7 +254,7 @@ Consulta el [**informe original**](https://ronmasas.com/posts/bypass-macos-gatek
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-En este bypass se creó un archivo zip con una aplicación que comenzaba a comprimir desde `application.app/Contents` en lugar de `application.app`. Por lo tanto, el **atributo de cuarentena** se aplicaba a todos los **archivos de `application.app/Contents`**, pero **no a `application.app`**, que es lo que Gatekeeper verificaba, por lo que Gatekeeper se eludía porque cuando se activaba `application.app`, **no tenía el atributo de cuarentena**.
+En este bypass, se creó un archivo zip con una aplicación que comenzaba a comprimir desde `application.app/Contents` en lugar de `application.app`. Por lo tanto, el **atributo de cuarentena** se aplicaba a todos los **archivos de `application.app/Contents`**, pero **no a `application.app`**, que es lo que Gatekeeper verificaba, por lo que Gatekeeper se eludía porque cuando se activaba `application.app`, **no tenía el atributo de cuarentena**.
 ```bash
 zip -r test.app/Contents test.zip
 ```
@@ -288,11 +288,9 @@ python3 -m http.server
 ```
 Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para obtener más información.
 
-## [2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
+### [CVE-2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
 
 Se descubrió que **Google Chrome no establecía el atributo de cuarentena** a los archivos descargados debido a algunos problemas internos de macOS.
-
-
 
 <details>
 
