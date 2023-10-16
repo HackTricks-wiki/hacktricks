@@ -149,16 +149,21 @@ El binario `/usr/libexec/lsd` con la biblioteca `libsecurity_translocate` tenía
 
 Era posible agregar el atributo de cuarentena a "Library", llamar al servicio XPC **`com.apple.security.translocation`** y luego se mapearía Library a **`$TMPDIR/AppTranslocation/d/d/Library`**, donde se podían **acceder** todos los documentos dentro de Library.
 
-## CVE-2023-38571 - Música y TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
+### CVE-2023-38571 - Música y TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
-**`Music`** tiene una característica interesante: cuando se está ejecutando, importará los archivos que se arrastren a **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** a la "biblioteca de medios" del usuario. Además, llama algo como: **`rename(a, b);`** donde `a` y `b` son:
+**`Music`** tiene una característica interesante: cuando se está ejecutando, **importará** los archivos que se arrastren a **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** a la "biblioteca multimedia" del usuario. Además, llama algo como: **`rename(a, b);`** donde `a` y `b` son:
 
 * `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
 * `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
 
-Este comportamiento de **`rename(a, b);`** es vulnerable a una **condición de carrera**, ya que es posible colocar dentro de la carpeta `Automatically Add to Music.localized` un archivo falso de **TCC.db** y luego, cuando se crea la nueva carpeta (b) para copiar el archivo, eliminarlo y apuntarlo a **`~/Library/Application Support/com.apple.TCC`**/.
+Este comportamiento de **`rename(a, b);`** es vulnerable a una **condición de carrera**, ya que es posible colocar dentro de la carpeta `Automatically Add to Music.localized` un archivo falso **TCC.db** y luego, cuando se crea la nueva carpeta (b) para copiar el archivo, eliminarlo y apuntarlo a **`~/Library/Application Support/com.apple.TCC`**/.
 
-### Rastreo de SQL
+### SQLITE\_SQLLOG\_DIR - CVE-2023-32422
+
+Si **`SQLITE_SQLLOG_DIR="ruta/carpeta"`**, básicamente significa que **cualquier base de datos abierta se copia en esa ruta**. En este CVE, este control se abusó para **escribir** dentro de una **base de datos SQLite** que va a ser **abierta por un proceso con FDA la base de datos TCC**, y luego abusar de **`SQLITE_SQLLOG_DIR`** con un **enlace simbólico en el nombre de archivo** para que cuando se **abra** esa base de datos, se sobrescriba la base de datos del usuario **TCC.db** con la abierta.
+[**Más información aquí**](https://youtu.be/f1HA5QhLQ7Y?t=20548).
+
+### **SQLITE\_AUTO\_TRACE**
 
 Si la variable de entorno **`SQLITE_AUTO_TRACE`** está configurada, la biblioteca **`libsqlite3.dylib`** comenzará a **registrar** todas las consultas SQL. Muchas aplicaciones utilizaban esta biblioteca, por lo que era posible registrar todas sus consultas SQLite.
 
@@ -196,7 +201,7 @@ El **primer POC** utiliza [**dsexport**](https://www.unix.com/man-page/osx/1/dse
 6. Detén el proceso _tccd_ del usuario y reinicia el proceso.
 
 El segundo POC utilizó **`/usr/libexec/configd`** que tenía `com.apple.private.tcc.allow` con el valor **`kTCCServiceSystemPolicySysAdminFiles`**.\
-Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga personalizada de paquete**. Por lo tanto, el exploit **reemplaza** el método de cambio del directorio de inicio del usuario mediante **inyección de código en `configd`**.
+Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga de paquete personalizada**. Por lo tanto, el exploit **reemplaza** el método de cambio del directorio de inicio del usuario mediante **inyección de código en `configd`**.
 
 Para obtener más información, consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 

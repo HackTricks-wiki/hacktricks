@@ -189,6 +189,7 @@
       * [macOS TCC Bypasses](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md)
         * [macOS Apple Scripts](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/macos-apple-scripts.md)
     * [macOS Dangerous Entitlements & TCC perms](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-dangerous-entitlements.md)
+    * [macOS FS Tricks](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks.md)
   * [macOS Users](macos-hardening/macos-security-and-privilege-escalation/macos-users.md)
 * [macOS Red Teaming](macos-hardening/macos-red-teaming/README.md)
   * [macOS MDM](macos-hardening/macos-red-teaming/macos-mdm/README.md)
