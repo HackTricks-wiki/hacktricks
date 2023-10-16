@@ -4,8 +4,8 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
@@ -16,7 +16,7 @@
 
 Gatekeeperは通常、**Quarantine + Gatekeeper + XProtect**の組み合わせを指すことが多く、これらの3つのmacOSセキュリティモジュールは、**ユーザーが潜在的に悪意のあるソフトウェアを実行するのを防ぐ**ために使用されます。
 
-詳細は次を参照してください：
+詳細は次の場所で確認できます：
 
 {% content-ref url="macos-gatekeeper.md" %}
 [macos-gatekeeper.md](macos-gatekeeper.md)
@@ -32,7 +32,7 @@ Gatekeeperは通常、**Quarantine + Gatekeeper + XProtect**の組み合わせ�
 
 ### サンドボックス
 
-MacOSサンドボックスは、サンドボックスプロファイルで指定された**許可されたアクションに制限されたアプリケーション**の実行を制限します。これにより、**アプリケーションが予期されたリソースにのみアクセスすることが保証**されます。
+MacOSサンドボックスは、サンドボックスプロファイルで指定された**許可されたアクションに制限されたアプリケーション**の実行を制限します。これにより、**アプリケーションが予期されたリソースにのみアクセスする**ことが保証されます。
 
 {% content-ref url="macos-sandbox/" %}
 [macos-sandbox](macos-sandbox/)
@@ -40,7 +40,7 @@ MacOSサンドボックスは、サンドボックスプロファイルで指定
 
 ### TCC - 透明性、同意、および制御
 
-**TCC（透明性、同意、および制御）**は、macOSの機構であり、一般的にはプライバシーの観点から**アプリケーションの特定の機能へのアクセスを制限および制御**します。これには、位置情報サービス、連絡先、写真、マイク、カメラ、アクセシビリティ、フルディスクアクセスなどが含まれる場合があります。
+**TCC（透明性、同意、および制御）**は、macOSの機構であり、一般的にはプライバシーの観点から**アプリケーションの特定の機能へのアクセスを制限および制御**します。これには、位置情報サービス、連絡先、写真、マイクロフォン、カメラ、アクセシビリティ、フルディスクアクセスなどが含まれる場合があります。
 
 {% content-ref url="macos-tcc/" %}
 [macos-tcc](macos-tcc/)
@@ -48,39 +48,28 @@ MacOSサンドボックスは、サンドボックスプロファイルで指定
 
 ### 起動制約
 
-**Appleの署名されたバイナリ**を**どこから**および**何を**起動できるかを制御します：
+macOSの起動制約は、**誰がプロセスを起動できるか**、**どのように**、**どこから**起動できるかを定義することによって、プロセスの起動を**規制する**セキュリティ機能です。macOS Venturaで導入されたトラストキャッシュ内の制約カテゴリにシステムバイナリを分類します。各実行可能バイナリには、**自己**、**親**、**責任**の制約を含む、その**起動**に対する**ルール**が設定されています。macOS Sonomaでは、サードパーティのアプリケーションに拡張された**環境**制約として、これらの機能は、プロセスの起動条件を制御することにより、潜在的なシステムの脆弱性を軽減するのに役立ちます。
 
-* launchdによって実行されるべきアプリを直接起動できません。
-* 信頼された場所（/System/など）の外部でアプリを実行できません。
-
-この制約に関する情報を含むファイルは、macOSの**`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**にあります（iOSでは、**`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**にあるようです）。
-
-ツール[**img4tool**](https://github.com/tihmstar/img4tool)を使用して、キャッシュを抽出することができるようです：
-```bash
-img4tool -e in.img4 -o out.bin
-```
-(ただし、M1ではコンパイルできませんでした)。[**pyimg4**](https://github.com/m1stadev/PyIMG4)を使用することもできますが、次のスクリプトはその出力では機能しません。
-
-次に、[**このスクリプト**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30)のようなスクリプトを使用してデータを抽出できます。
-
-そのデータから、**`0`の起動制約値**を持つアプリをチェックできます。これは制約されていないアプリです（各値の詳細については[**こちら**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)を参照してください）。
+{% content-ref url="macos-launch-environment-constraints.md" %}
+[macos-launch-environment-constraints.md](macos-launch-environment-constraints.md)
+{% endcontent-ref %}
 
 ## MRT - マルウェア除去ツール
 
-マルウェア除去ツール（MRT）は、macOSのセキュリティインフラの一部です。その名前からもわかるように、MRTの主な機能は、感染したシステムから既知のマルウェアを**削除すること**です。
+マルウェア除去ツール（MRT）は、macOSのセキュリティインフラのもう一つの部分です。その名前からもわかるように、MRTの主な機能は、感染したシステムから既知のマルウェアを**削除すること**です。
 
-マルウェアがMacで検出されると（XProtectまたは他の手段によって）、MRTを使用してマルウェアを自動的に**削除**することができます。MRTはバックグラウンドで静かに動作し、通常はシステムが更新されるか、新しいマルウェア定義がダウンロードされると実行されます（マルウェアを検出するためのMRTのルールはバイナリ内にあるようです）。
+マルウェアがMacで検出されると（XProtectまたは他の手段によって）、MRTはマルウェアを自動的に**削除するために使用**されることがあります。MRTはバックグラウンドで静かに動作し、通常はシステムが更新されるときや新しいマルウェア定義がダウンロードされるときに実行されます（マルウェアを検出するためのMRTのルールはバイナリ内にあるようです）。
 
-XProtectとMRTは、どちらもmacOSのセキュリティ対策の一部ですが、異なる機能を持っています：
+XProtectとMRTは、どちらもmacOSのセキュリティ対策の一部ですが、異なる機能を果たしています：
 
-* **XProtect**は予防ツールです。ファイルがダウンロードされると（特定のアプリケーションを介して）、**ファイルをチェック**し、既知のマルウェアの種類を検出した場合は、**ファイルを開かないように**して、最初にシステムにマルウェアが感染するのを防ぎます。
-* 一方、**MRT**は**反応型のツール**です。マルウェアがシステムで検出された後、問題のあるソフトウェアを削除してシステムをクリーンアップすることを目的としています。
+* **XProtect**は予防ツールです。ファイルが（特定のアプリケーションを介して）ダウンロードされるときに**ファイルをチェック**し、既知のマルウェアの種類を検出した場合は、**ファイルを開かないように**して、最初にシステムにマルウェアが感染するのを防ぎます。
+* 一方、**MRT**は**反応型のツール**です。マルウェアがシステムで検出された後、問題のあるソフトウェアを**削除**してシステムをクリーンアップすることを目的としています。
 
 MRTアプリケーションは、**`/Library/Apple/System/Library/CoreServices/MRT.app`**にあります。
 
 ## バックグラウンドタスクの管理
 
-**macOS**は、ツールがコードの実行を継続するためのよく知られた**手法（ログインアイテム、デーモンなど）**を使用するたびに**アラートを表示**するため、ユーザーは**どのソフトウェアが継続しているか**をよりよく把握できます。
+**macOS**は、ツールがコードの実行を継続するためのよく知られた**手法を使用するたびにアラート**を表示するようになりました。これにより、ユーザーは**どのソフトウェアが持続しているか**をよりよく把握することができます。
 
 <figure><img src="../../../.gitbook/assets/image (711).png" alt=""><figcaption></figcaption></figure>
 
@@ -143,7 +132,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-* **バグ**: もし**永続化を作成したプロセスがすぐに終了する**場合、デーモンはそれに関する**情報を取得しようと試み、**失敗し、新しい永続化が行われていることを示す**イベントを送信することができなくなります。
+* **バグ**: もし**永続性を作成したプロセスがすぐに終了する**場合、デーモンはそれに関する情報を取得しようと試み、失敗し、新しい永続性が存在することを示すイベントを送信することができません。
 
 BTMに関する参考文献と**詳細情報**:
 
@@ -151,20 +140,14 @@ BTMに関する参考文献と**詳細情報**:
 * [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 * [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
-## Trust Cache
-
-Apple macOSの信頼キャッシュ、時にはAMFI（Apple Mobile File Integrity）キャッシュとも呼ばれるものは、macOSでの**不正なソフトウェアや悪意のあるソフトウェアの実行を防止する**ためのセキュリティメカニズムです。基本的には、オペレーティングシステムがソフトウェアの**整合性と信頼性を検証するために使用する暗号ハッシュのリスト**です。
-
-macOSでアプリケーションや実行可能ファイルが実行しようとすると、オペレーティングシステムはAMFI信頼キャッシュをチェックします。もしファイルのハッシュが信頼キャッシュに見つかれば、システムはそのプログラムを実行を**許可**します。なぜなら、それを信頼できるものとして認識しているからです。
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか**？ HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するために、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有する**ために、PRを**hacktricksリポジトリ**と**hacktricks-cloudリポジトリ**に提出してください。
 
 </details>
