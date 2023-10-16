@@ -48,24 +48,11 @@ MacOS Sandbox **limits applications** running inside the sandbox to the **allowe
 
 ### Launch Constraints
 
-It controls **from where and what** can launch an **Apple signed binary**:
+Launch constraints in macOS are a security feature to **regulate process initiation** by defining **who can launch** a process, **how**, and **from where**. Introduced in macOS Ventura, they categorize system binaries into constraint categories within a **trust cache**. Every executable binary has set **rules** for its **launch**, including **self**, **parent**, and **responsible** constraints. Extended to third-party apps as **Environment** Constraints in macOS Sonoma, these features help mitigate potential system exploitations by governing process launching conditions.
 
-* You can't launch an app directly if should be run by launchd
-* You can't run an app outside of the trusted location (like /System/)
-
-The file that contains information about this constrains is located in macOS in **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`** (and in iOS it looks like it's in **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**).
-
-It looks like it was possible to use the tool [**img4tool**](https://github.com/tihmstar/img4tool) **to extract the cache**:
-
-```bash
-img4tool -e in.img4 -o out.bin 
-```
-
-(However, I haven't been able to compile it in M1). You could also use [**pyimg4**](https://github.com/m1stadev/PyIMG4), but the following script doesn't work with that output.
-
-Then, you could use a script such as [**this one**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) to extract data.
-
-From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).
+{% content-ref url="macos-launch-environment-constraints.md" %}
+[macos-launch-environment-constraints.md](macos-launch-environment-constraints.md)
+{% endcontent-ref %}
 
 ## MRT - Malware Removal Tool
 
@@ -162,12 +149,6 @@ References and **more information about BTM**:
 * [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 * [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 * [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
-
-## Trust Cache
-
-The Apple macOS trust cache, sometimes also referred to as the AMFI (Apple Mobile File Integrity) cache, is a security mechanism in macOS designed to **prevent unauthorized or malicious software from running**. Essentially, it is a list of cryptographic hashes that the operating system uses to v**erify the integrity and authenticity of the software**.
-
-When an application or executable file tries to run on macOS, the operating system checks the AMFI trust cache. If the **hash of the file is found in the trust cache**, the system **allows** the program to run because it recognises it as trusted.
 
 <details>
 
