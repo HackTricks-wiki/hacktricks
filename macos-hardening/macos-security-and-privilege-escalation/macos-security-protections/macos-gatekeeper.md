@@ -1,4 +1,4 @@
-# macOS Gatekeeper
+# macOS Gatekeeper / Quarantine / XProtect
 
 <details>
 
@@ -253,7 +253,7 @@ XProtect is located on. SIP protected location at **/Library/Apple/System/Librar
 * **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Yara rules to detect malware.
 * **`XProtect.bundle/Contents/Resources/gk.db`**: SQLite3 database with hashes of blocked applications and TeamIDs.
 
-Note that there is another App in **`/Library/Apple/System/Library/CoreServices/XProtect.app`** related to XProtect that isn't involved when an app is run.
+Note that there is another App in **`/Library/Apple/System/Library/CoreServices/XProtect.app`** related to XProtect that isn't involved with the Gatekeeper process..
 
 ## Gatekeeper Bypasses
 
@@ -319,11 +319,9 @@ python3 -m http.server
 
 Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
 
-## [2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
+### [CVE-2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
 
 It was discovered that **Google Chrome wasn't setting the quarantine attribute** to downloaded files because of some macOS internal problems.
-
-
 
 <details>
 
