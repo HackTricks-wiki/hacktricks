@@ -1,4 +1,4 @@
-# Protecciones de seguridad en macOS
+# Protecciones de seguridad de macOS
 
 <details>
 
@@ -6,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -22,9 +22,9 @@ Más información en:
 [macos-gatekeeper.md](macos-gatekeeper.md)
 {% endcontent-ref %}
 
-## Limitaciones de procesos
+## Limitantes de procesos
 
-### SIP - Protección de Integridad del Sistema
+### SIP - Protección de la integridad del sistema
 
 {% content-ref url="macos-sip.md" %}
 [macos-sip.md](macos-sip.md)
@@ -46,49 +46,38 @@ El Sandbox de macOS **limita las aplicaciones** que se ejecutan dentro del sandb
 [macos-tcc](macos-tcc/)
 {% endcontent-ref %}
 
-### Restricciones de lanzamiento
+### Restricciones de inicio
 
-Controla **desde dónde y qué** puede lanzar un **binario firmado por Apple**:
+Las restricciones de inicio en macOS son una característica de seguridad para **regular el inicio de procesos** mediante la definición de **quién puede iniciar** un proceso, **cómo** y **desde dónde**. Introducidas en macOS Ventura, categorizan los binarios del sistema en categorías de restricciones dentro de una **caché de confianza**. Cada binario ejecutable tiene reglas establecidas para su inicio, incluyendo restricciones **propias**, **padres** y **responsables**. Extendidas a aplicaciones de terceros como Restricciones de **Entorno** en macOS Sonoma, estas características ayudan a mitigar posibles explotaciones del sistema al gobernar las condiciones de inicio de procesos.
 
-* No se puede lanzar una aplicación directamente si debe ser ejecutada por launchd
-* No se puede ejecutar una aplicación fuera de la ubicación de confianza (como /System/)
-
-El archivo que contiene información sobre estas restricciones se encuentra en macOS en **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`** (y en iOS parece que está en **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**).
-
-Parece que era posible utilizar la herramienta [**img4tool**](https://github.com/tihmstar/img4tool) **para extraer la caché**:
-```bash
-img4tool -e in.img4 -o out.bin
-```
-Sin embargo, no he podido compilarlo en M1. También puedes usar [**pyimg4**](https://github.com/m1stadev/PyIMG4), pero el siguiente script no funciona con esa salida.
-
-Luego, puedes usar un script como [**este**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) para extraer datos.
-
-A partir de esos datos, puedes verificar las aplicaciones con un valor de **restricciones de inicio de `0`**, que son las que no están restringidas ([**ver aquí**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) para saber qué significa cada valor).
+{% content-ref url="macos-launch-environment-constraints.md" %}
+[macos-launch-environment-constraints.md](macos-launch-environment-constraints.md)
+{% endcontent-ref %}
 
 ## MRT - Herramienta de eliminación de malware
 
 La Herramienta de eliminación de malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar malware conocido de sistemas infectados**.
 
-Una vez que se detecta malware en un Mac (ya sea por XProtect o por otros medios), se puede utilizar MRT para **eliminar automáticamente el malware**. MRT funciona en segundo plano y se ejecuta normalmente cuando se actualiza el sistema o cuando se descarga una nueva definición de malware (parece que las reglas que MRT utiliza para detectar malware están dentro del binario).
+Una vez que se detecta malware en un Mac (ya sea por XProtect o por otros medios), se puede utilizar MRT para **eliminar automáticamente el malware**. MRT funciona en segundo plano de forma silenciosa y se ejecuta normalmente cuando se actualiza el sistema o cuando se descarga una nueva definición de malware (parece que las reglas que MRT tiene para detectar malware están dentro del binario).
 
-Si bien tanto XProtect como MRT forman parte de las medidas de seguridad de macOS, desempeñan funciones diferentes:
+Si bien tanto XProtect como MRT son parte de las medidas de seguridad de macOS, realizan funciones diferentes:
 
-* **XProtect** es una herramienta preventiva. **Verifica los archivos a medida que se descargan** (a través de ciertas aplicaciones) y, si detecta algún tipo de malware conocido, **impide que el archivo se abra**, evitando así que el malware infecte el sistema en primer lugar.
-* **MRT**, por otro lado, es una herramienta **reactiva**. Opera después de que se haya detectado malware en un sistema, con el objetivo de eliminar el software ofensivo y limpiar el sistema.
+* **XProtect** es una herramienta preventiva. **Verifica los archivos al descargarlos** (a través de ciertas aplicaciones) y si detecta algún tipo de malware conocido, **impide que el archivo se abra**, evitando así que el malware infecte el sistema en primer lugar.
+* **MRT**, por otro lado, es una herramienta **reactiva**. Opera después de que se haya detectado malware en un sistema, con el objetivo de eliminar el software ofensivo para limpiar el sistema.
 
 La aplicación MRT se encuentra en **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
 ## Gestión de tareas en segundo plano
 
-**macOS** ahora **alerta** cada vez que una herramienta utiliza una **técnica conocida para persistir la ejecución de código** (como elementos de inicio de sesión, demonios, etc.), para que el usuario sepa mejor **qué software está persistiendo**.
+**macOS** ahora **alerta** cada vez que una herramienta utiliza una **técnica conocida para persistir la ejecución de código** (como elementos de inicio de sesión, demonios...), para que el usuario sepa mejor **qué software está persistiendo**.
 
 <figure><img src="../../../.gitbook/assets/image (711).png" alt=""><figcaption></figcaption></figure>
 
 Esto se ejecuta con un **daemon** ubicado en `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` y el **agente** en `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
 
-La forma en que **`backgroundtaskmanagementd`** sabe si algo está instalado en una carpeta persistente es **obteniendo los FSEvents** y creando algunos **manejadores** para ellos.
+La forma en que **`backgroundtaskmanagementd`** sabe que algo está instalado en una carpeta persistente es **obteniendo los FSEvents** y creando algunos **manejadores** para ellos.
 
-Además, hay un archivo plist que contiene **aplicaciones conocidas** que persisten con frecuencia y que son mantenidas por Apple, ubicado en: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Además, hay un archivo plist que contiene **aplicaciones conocidas** que persisten con frecuencia mantenidas por Apple ubicado en: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -143,19 +132,13 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-* **Bug**: Si el **proceso que creó la persistencia** se cierra rápidamente después, el demonio intentará **obtener información** sobre él, **fallará** y **no podrá enviar el evento** que indica que algo nuevo está persistiendo.
+* **Error**: Si el **proceso que creó la persistencia se cierra rápidamente después**, el demonio intentará **obtener información** al respecto, **fallará** y **no podrá enviar el evento** que indica que algo nuevo está persistiendo.
 
 Referencias y **más información sobre BTM**:
 
 * [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 * [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 * [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
-
-## Caché de confianza
-
-La caché de confianza de Apple macOS, a veces también conocida como caché AMFI (Apple Mobile File Integrity), es un mecanismo de seguridad en macOS diseñado para **prevenir que se ejecute software no autorizado o malicioso**. Esencialmente, es una lista de hashes criptográficos que el sistema operativo utiliza para **verificar la integridad y autenticidad del software**.
-
-Cuando una aplicación o archivo ejecutable intenta ejecutarse en macOS, el sistema operativo verifica la caché de confianza de AMFI. Si el **hash del archivo se encuentra en la caché de confianza**, el sistema **permite** que el programa se ejecute porque lo reconoce como confiable.
 
 <details>
 
