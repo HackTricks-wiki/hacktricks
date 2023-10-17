@@ -46,6 +46,14 @@ This entitlement allows to **load frameworks, plug-ins, or libraries without bei
 
 This entitlement allows to **use DYLD environment variables** that could be used to inject libraries and code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
 
+### `com.apple.private.tcc.manager` and `com.apple.rootless.storage`.`TCC`
+
+[**According to this blog**](https://objective-see.org/blog/blog\_0x4C.html), these entitlements allows to **modify** the **TCC** database.
+
+### com.apple.private.tcc.manager.check-by-audit-token
+
+TODO: I don't know what this allows to do
+
 ### com.apple.private.apfs.revert-to-snapshot
 
 TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!
