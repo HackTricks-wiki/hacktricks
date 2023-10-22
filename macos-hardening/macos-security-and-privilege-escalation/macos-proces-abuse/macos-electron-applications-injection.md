@@ -22,8 +22,8 @@ Y node tiene algunos **parámetros** y **variables de entorno** que se pueden us
 Estas técnicas se discutirán a continuación, pero recientemente Electron ha agregado varias **banderas de seguridad para prevenirlas**. Estos son los [**Fusibles de Electron**](https://www.electronjs.org/docs/latest/tutorial/fuses) y estos son los que se utilizan para **prevenir** que las aplicaciones de Electron en macOS **carguen código arbitrario**:
 
 * **`RunAsNode`**: Si está deshabilitado, evita el uso de la variable de entorno **`ELECTRON_RUN_AS_NODE`** para inyectar código.
-* **`EnableNodeCliInspectArguments`**: Si está deshabilitado, los parámetros como `--inspect`, `--inspect-brk` no se respetarán. Evitando así la forma de inyectar código.
-* **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será validado por macOS. **Evitando** de esta manera la **inyección de código** mediante la modificación del contenido de este archivo.
+* **`EnableNodeCliInspectArguments`**: Si está deshabilitado, los parámetros como `--inspect`, `--inspect-brk` no se respetarán. Evitando así la inyección de código de esta manera.
+* **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será validado por macOS. **Previniendo** de esta manera la **inyección de código** al modificar el contenido de este archivo.
 * **`OnlyLoadAppFromAsar`**: Si está habilitado, en lugar de buscar para cargar en el siguiente orden: **`app.asar`**, **`app`** y finalmente **`default_app.asar`**. Solo verificará y usará app.asar, asegurando así que cuando se **combine** con el fusible **`embeddedAsarIntegrityValidation`**, sea **imposible** cargar código no validado.
 * **`LoadBrowserProcessSpecificV8Snapshot`**: Si está habilitado, el proceso del navegador utiliza el archivo llamado `browser_v8_context_snapshot.bin` para su instantánea de V8.
 
@@ -62,9 +62,9 @@ Puedes cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la
 
 Ten en cuenta que si intentas **sobrescribir** el binario del **`Electron Framework`** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
 
-## RCE añadiendo código a Aplicaciones Electron
+## RCE añadiendo código a las aplicaciones de Electron
 
-Puede haber **archivos JS/HTML externos** que una Aplicación Electron esté utilizando, por lo que un atacante podría inyectar código en estos archivos cuya firma no será verificada y ejecutar código arbitrario en el contexto de la aplicación.
+Puede haber **archivos JS/HTML externos** que una aplicación de Electron esté utilizando, por lo que un atacante podría inyectar código en estos archivos cuya firma no será verificada y ejecutar código arbitrario en el contexto de la aplicación.
 
 {% hint style="danger" %}
 Sin embargo, en este momento hay 2 limitaciones:
@@ -79,7 +79,7 @@ Ten en cuenta que es posible evitar el requisito de **`kTCCServiceSystemPolicyAp
 
 ## RCE con `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si esta variable de entorno está configurada, iniciará el proceso como un proceso Node.js normal.
+Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si esta variable de entorno está configurada, iniciará el proceso como un proceso normal de Node.js.
 
 {% code overflow="wrap" %}
 ```bash

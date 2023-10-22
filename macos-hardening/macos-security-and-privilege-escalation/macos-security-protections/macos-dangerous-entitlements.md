@@ -18,25 +18,25 @@ Ten en cuenta que los entitlements que comienzan con **`com.apple`** no están d
 
 ## Alto
 
-### com.apple.rootless.install.heritable
+### `com.apple.rootless.install.heritable`
 
 El entitlement **`com.apple.rootless.install.heritable`** permite **burlar SIP**. Consulta [esto para más información](macos-sip.md#com.apple.rootless.install.heritable).
 
-### **com.apple.rootless.install**
+### **`com.apple.rootless.install`**
 
 El entitlement **`com.apple.rootless.install`** permite **burlar SIP**. Consulta [esto para más información](macos-sip.md#com.apple.rootless.install).
-
-### `com.apple.security.get-task-allow`
-
-Este entitlement permite obtener el puerto de tarea del proceso ejecutado por el binario con este entitlement e **inyectar código en él**. Consulta [**esto para más información**](../mac-os-architecture/macos-ipc-inter-process-communication/).
 
 ### **`com.apple.system-task-ports` (anteriormente llamado `task_for_pid-allow`)**
 
 Este entitlement permite obtener el **puerto de tarea para cualquier** proceso, excepto el kernel. Consulta [**esto para más información**](../mac-os-architecture/macos-ipc-inter-process-communication/).
 
+### `com.apple.security.get-task-allow`
+
+Este entitlement permite a otros procesos con el entitlement **`com.apple.security.cs.debugger`** obtener el puerto de tarea del proceso ejecutado por el binario con este entitlement e **inyectar código en él**. Consulta [**esto para más información**](../mac-os-architecture/macos-ipc-inter-process-communication/).
+
 ### `com.apple.security.cs.debugger`
 
-Las aplicaciones con el Entitlement de Herramienta de Depuración pueden llamar a `task_for_pid()` para obtener un puerto de tarea válido para aplicaciones no firmadas y de terceros con el entitlement `Get Task Allow` establecido en `true`. Sin embargo, incluso con el entitlement de herramienta de depuración, un depurador no puede obtener los puertos de tarea de los procesos que no tienen el entitlement `Get Task Allow` y que, por lo tanto, están protegidos por System Integrity Protection. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
+Las aplicaciones con el Entitlement de Herramienta de Depuración pueden llamar a `task_for_pid()` para obtener un puerto de tarea válido para aplicaciones no firmadas y de terceros con el entitlement `Get Task Allow` establecido en `true`. Sin embargo, incluso con el entitlement de herramienta de depuración, un depurador **no puede obtener los puertos de tarea** de procesos que **no tienen el entitlement `Get Task Allow`**, y que por lo tanto están protegidos por System Integrity Protection. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -44,23 +44,23 @@ Este entitlement permite **cargar frameworks, complementos o bibliotecas sin est
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Este entitlement permite **usar variables de entorno DYLD** que podrían usarse para inyectar bibliotecas y código. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
+Este entitlement permite **usar variables de entorno DYLD** que podrían ser utilizadas para inyectar bibliotecas y código. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` y `com.apple.rootless.storage`.`TCC`
 
 [**Según este blog**](https://objective-see.org/blog/blog\_0x4C.html), estos entitlements permiten **modificar** la **base de datos TCC**.
 
-### com.apple.private.tcc.manager.check-by-audit-token
+### `com.apple.private.tcc.manager.check-by-audit-token`
 
 TODO: No sé qué permite hacer esto
 
-### com.apple.private.apfs.revert-to-snapshot
+### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. ¡Si sabes cómo hacerlo, envía un PR por favor!
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor.
 
-### com.apple.private.apfs.create-sealed-snapshot
+### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. ¡Si sabes cómo hacerlo, envía un PR por favor!
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor.
 
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
@@ -69,34 +69,34 @@ Otorga permisos de **Acceso Completo al Disco**, uno de los permisos más altos 
 ### **`kTCCServiceAppleEvents`**
 
 Permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Controlando otras aplicaciones, puede abusar de los permisos otorgados a estas otras aplicaciones.
-
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia su carpeta de inicio y, por lo tanto, permite **burlar TCC**.
+Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia su carpeta de inicio y, por lo tanto, permite **evadir TCC**.
+
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Permite modificar aplicaciones dentro de sus carpetas (dentro de app.app), lo cual está desactivado por defecto.
+Permite modificar aplicaciones dentro de sus carpetas (dentro de app.app), lo cual está deshabilitado de forma predeterminada.
 
 ## Medio
 
 ### `com.apple.security.cs.allow-jit`
 
-Este permiso permite **crear memoria que es escribible y ejecutable** al pasar la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
+Este permiso permite **crear memoria que es escribible y ejecutable** al pasar la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Este permiso permite **anular o parchear código C**, utilizar el obsoleto **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro) o utilizar el framework **DVDPlayback**. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
+Este permiso permite **anular o parchear código C**, utilizar el marco de trabajo **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro) o utilizar el marco de trabajo **DVDPlayback**. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
 
 {% hint style="danger" %}
-Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguajes de código inseguros en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
+Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguajes de código no seguro en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
 {% endhint %}
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Este permiso permite **modificar secciones de sus propios archivos ejecutables** en disco para salir forzosamente. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection).
+Este permiso permite **modificar secciones de sus propios archivos ejecutables** en disco para salir forzosamente. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection).
 
 {% hint style="danger" %}
-El permiso de Deshabilitar Protección de Memoria Ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
+El permiso de desactivación de protección de memoria ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
 {% endhint %}
 
 ### `com.apple.security.cs.allow-relative-library-loads`
@@ -111,6 +111,6 @@ TODO
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
