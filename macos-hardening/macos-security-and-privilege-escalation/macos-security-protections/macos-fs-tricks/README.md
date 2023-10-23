@@ -12,20 +12,50 @@
 
 </details>
 
-## FD Arbitrario
+## Combinaciones de permisos POSIX
 
-Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privilegios**, puedes abusar de **`crontab`** para abrir un archivo en `/etc/sudoers.d` con **`EDITOR=exploit.py`**, de modo que `exploit.py` obtendrá el FD del archivo dentro de `/etc/sudoers` y lo abusará.
+Permisos en un **directorio**:
+
+* **lectura** - puedes **enumerar** las entradas del directorio
+* **escritura** - puedes **eliminar/escribir** archivos en el directorio
+* **ejecución** - se te permite **atravesar** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él ni a ningún subdirectorio.
+
+### Combinaciones peligrosas
+
+**Cómo sobrescribir un archivo/carpeta propiedad de root**, pero:
+
+* Uno de los **directorio padre propietario** en la ruta es el usuario
+* Uno de los **directorio padre propietario** en la ruta es un **grupo de usuarios** con **acceso de escritura**
+* Un **grupo de usuarios** tiene acceso de **escritura** al **archivo**
+
+Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar** un **enlace simbólico/duro** en la ruta esperada para obtener una escritura arbitraria privilegiada.
+
+### Caso especial de la carpeta raíz R+X
+
+Si hay archivos en un **directorio** donde **solo root tiene acceso R+X**, estos **no son accesibles para nadie más**. Por lo tanto, una vulnerabilidad que permita **mover un archivo legible por un usuario**, que no se puede leer debido a esa **restricción**, desde esta carpeta **a otra diferente**, podría ser abusada para leer estos archivos.
+
+Ejemplo en: [https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
+
+## Enlace simbólico / Enlace duro
+
+Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un usuario de **menor privilegio**, o que podría ser **previamente creado** por un usuario de menor privilegio. El usuario simplemente podría **apuntarlo a otro archivo** a través de un enlace simbólico o enlace duro, y el proceso privilegiado escribirá en ese archivo.
+
+Verificar en las otras secciones donde un atacante podría **abusar de una escritura arbitraria para escalar privilegios**.
+
+## FD arbitrario
+
+Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privilegios**, puedes abusar de **`crontab`** para abrir un archivo en `/etc/sudoers.d` con **`EDITOR=exploit.py`**, de modo que `exploit.py` obtendrá el FD al archivo dentro de `/etc/sudoers` y lo abusará.
 
 Por ejemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## Trucos para evitar atributos de cuarentena
+## Trucos para evitar atributos de cuarentena xattrs
 
-### Bandera uchg
+### Bandera uchg / uchange / uimmutable
 
 Si un archivo/carpeta tiene este atributo inmutable, no será posible poner un xattr en él.
 ```bash
 echo asd > /tmp/asd
-chflags uchg /tmp/asd
+chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
 xattr -w com.apple.quarantine "" /tmp/asd
 xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 
@@ -92,13 +122,74 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Nota: aunque esto funcione, la sandbox escribe el atributo extendido de cuarentena antes)
+(Nota: aunque esto funcione, el sandbox escribe el atributo extendido de cuarentena antes)
 
 No es realmente necesario, pero lo dejo aquí por si acaso:
 
 {% content-ref url="macos-xattr-acls-extra-stuff.md" %}
 [macos-xattr-acls-extra-stuff.md](macos-xattr-acls-extra-stuff.md)
 {% endcontent-ref %}
+
+## Montar imágenes de disco (dmgs)
+
+Un usuario puede montar una imagen de disco personalizada creada incluso encima de algunas carpetas existentes. Así es como se puede crear un paquete de imagen de disco personalizado con contenido personalizado:
+
+{% code overflow="wrap" %}
+```bash
+# Create the volume
+hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
+mkdir /private/tmp/mnt
+
+# Mount it
+hdiutil attach -mountpoint /private/tmp/mnt /private/tmp/tmp.dmg 1>/dev/null
+
+# Add custom content to the volume
+mkdir /private/tmp/mnt/custom_folder
+echo "hello" > /private/tmp/mnt/custom_folder/custom_file
+
+# Detach it
+hdiutil detach /private/tmp/mnt 1>/dev/null
+
+# Next time you mount it, it will have the custom content you wrote
+```
+{% endcode %}
+
+## Escrituras Arbitrarias
+
+### Scripts sh periódicos
+
+Si tu script puede ser interpretado como un **script de shell**, puedes sobrescribir el script de shell **`/etc/periodic/daily/999.local`** que se ejecutará todos los días.
+
+Puedes **simular** la ejecución de este script con: **`sudo periodic daily`**
+
+### Daemons
+
+Escribe un **LaunchDaemon** arbitrario como **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** con un plist que ejecute un script arbitrario como:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>Label</key>
+<string>com.sample.Load</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Scripts/privesc.sh</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
+</dict>
+</plist>
+```
+Simplemente genera el script `/Applications/Scripts/privesc.sh` con los **comandos** que te gustaría ejecutar como root.
+
+### Archivo Sudoers
+
+Si tienes permisos de escritura arbitrarios, puedes crear un archivo dentro de la carpeta **`/etc/sudoers.d/`** otorgándote privilegios de **sudo**.
+
+## Referencias
+
+* [https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/)
 
 <details>
 
