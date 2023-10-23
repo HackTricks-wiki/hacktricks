@@ -36,7 +36,7 @@ Este entitlement permite a otros procesos con el entitlement **`com.apple.securi
 
 ### `com.apple.security.cs.debugger`
 
-Las aplicaciones con el Entitlement de Herramienta de Depuración pueden llamar a `task_for_pid()` para obtener un puerto de tarea válido para aplicaciones no firmadas y de terceros con el entitlement `Get Task Allow` establecido en `true`. Sin embargo, incluso con el entitlement de herramienta de depuración, un depurador **no puede obtener los puertos de tarea** de procesos que **no tienen el entitlement `Get Task Allow`**, y que por lo tanto están protegidos por System Integrity Protection. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
+Las aplicaciones con el Entitlement de Herramienta de Depuración pueden llamar a `task_for_pid()` para obtener un puerto de tarea válido para aplicaciones sin firmar y de terceros con el entitlement `Get Task Allow` establecido en `true`. Sin embargo, incluso con el entitlement de herramienta de depuración, un depurador **no puede obtener los puertos de tarea** de procesos que **no tienen el entitlement `Get Task Allow`**, y que por lo tanto están protegidos por System Integrity Protection. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -50,17 +50,21 @@ Este entitlement permite **usar variables de entorno DYLD** que podrían ser uti
 
 [**Según este blog**](https://objective-see.org/blog/blog\_0x4C.html), estos entitlements permiten **modificar** la **base de datos TCC**.
 
+### com.apple.private.security.kext-management
+
+Entitlement necesario para solicitar al **kernel que cargue una extensión de kernel**.
+
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
 TODO: No sé qué permite hacer esto
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor.
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor.
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor.
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor.
 
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
@@ -68,7 +72,7 @@ Otorga permisos de **Acceso Completo al Disco**, uno de los permisos más altos 
 
 ### **`kTCCServiceAppleEvents`**
 
-Permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Controlando otras aplicaciones, puede abusar de los permisos otorgados a estas otras aplicaciones.
+Permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Al controlar otras aplicaciones, puede abusar de los permisos otorgados a estas otras aplicaciones.
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
 Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia su carpeta de inicio y, por lo tanto, permite **evadir TCC**.
@@ -96,7 +100,7 @@ Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguaj
 Este permiso permite **modificar secciones de sus propios archivos ejecutables** en disco para salir forzosamente. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection).
 
 {% hint style="danger" %}
-El permiso de desactivación de protección de memoria ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
+El permiso de Deshabilitar Protección de Memoria Ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
 {% endhint %}
 
 ### `com.apple.security.cs.allow-relative-library-loads`
