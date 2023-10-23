@@ -50,6 +50,10 @@ This entitlement allows to **use DYLD environment variables** that could be used
 
 [**According to this blog**](https://objective-see.org/blog/blog\_0x4C.html), these entitlements allows to **modify** the **TCC** database.
 
+### com.apple.private.security.kext-management
+
+Entitlement needed to ask the **kernel to load a kernel extension**.
+
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
 TODO: I don't know what this allows to do
