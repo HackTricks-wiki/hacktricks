@@ -611,6 +611,7 @@
   * [Bypassing SOP with Iframes - 1](pentesting-web/postmessage-vulnerabilities/bypassing-sop-with-iframes-1.md)
   * [Bypassing SOP with Iframes - 2](pentesting-web/postmessage-vulnerabilities/bypassing-sop-with-iframes-2.md)
   * [Steal postmessage modifying iframe location](pentesting-web/postmessage-vulnerabilities/steal-postmessage-modifying-iframe-location.md)
+* [Proxy / WAF Protections Bypass](pentesting-web/proxy-waf-protections-bypass.md)
 * [Race Condition](pentesting-web/race-condition.md)
 * [Rate Limit Bypass](pentesting-web/rate-limit-bypass.md)
 * [Registration & Takeover Vulnerabilities](pentesting-web/registration-vulnerabilities.md)
