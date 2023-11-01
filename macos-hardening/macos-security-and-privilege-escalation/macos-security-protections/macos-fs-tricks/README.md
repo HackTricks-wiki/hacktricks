@@ -122,7 +122,7 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Nota que incluso si esto funciona, la sandbox escribe el atributo de cuarentena antes)
+(Tenga en cuenta que incluso si esto funciona, la sandbox escribirá el atributo de cuarentena antes)
 
 No es realmente necesario, pero lo dejo aquí por si acaso:
 
@@ -132,7 +132,7 @@ No es realmente necesario, pero lo dejo aquí por si acaso:
 
 ## Bypass de Firmas de Código
 
-Los paquetes contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **paquete**. Ten en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que no podemos modificarlo.
+Los paquetes contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **paquete**. Tenga en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que no podemos modificarlo.
 
 Sin embargo, hay algunos archivos cuya firma no se verificará, estos tienen la clave omit en el plist, como:
 ```xml
@@ -199,6 +199,9 @@ echo "hello" > /private/tmp/mnt/custom_folder/custom_file
 hdiutil detach /private/tmp/mnt 1>/dev/null
 
 # Next time you mount it, it will have the custom content you wrote
+
+# You can also create a dmg from an app using:
+hdiutil create -srcfolder justsome.app justsome.dmg
 ```
 {% endcode %}
 
