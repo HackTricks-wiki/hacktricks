@@ -50,6 +50,12 @@ For example: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y
 
 ## Avoid quarantine xattrs tricks
 
+### Remove it
+
+```bash
+xattr -d com.apple.quarantine /path/to/file_or_app
+```
+
 ### uchg / uchange / uimmutable flag
 
 If a file/folder has this immutable attribute it won't be possible to put an xattr on it
