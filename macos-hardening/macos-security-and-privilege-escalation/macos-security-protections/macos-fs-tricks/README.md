@@ -32,19 +32,19 @@
 
 ### フォルダのルートR+X特殊ケース
 
-**rootのみがR+Xアクセス権を持つディレクトリ**にファイルがある場合、他の誰にもアクセスできません。したがって、**制限**のために読み取ることができない**ユーザーが読み取ることができるファイル**を、このフォルダから**別のフォルダ**に移動する脆弱性がある場合、これらのファイルを読み取るために悪用することができます。
+**rootのみがR+Xアクセス権を持つディレクトリ**にファイルがある場合、他の誰にもアクセスできません。したがって、**制限**のために読み取ることができない**ユーザーによって読み取られるファイル**を、このフォルダから**別のフォルダ**に移動する脆弱性がある場合、これらのファイルを読み取るために悪用される可能性があります。
 
 例：[https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
 
 ## シンボリックリンク/ハードリンク
 
-特権プロセスが**制御可能なファイル**にデータを書き込んでいる場合、または**低特権ユーザー**によって**事前に作成**されたファイルにデータを書き込んでいる場合、ユーザーはシンボリックリンクまたはハードリンクを介して別のファイルにそれを指すことができ、特権プロセスはそのファイルに書き込みます。
+特権プロセスが**制御可能なファイル**にデータを書き込んでいる場合、または**低特権ユーザーによって事前に作成**された場合、ユーザーはシンボリックリンクまたはハードリンクを介して別のファイルに**ポイント**するだけで、特権プロセスはそのファイルに書き込みます。
 
 特権の任意の書き込みを悪用して特権をエスカレーションする方法については、他のセクションを確認してください。
 
 ## 任意のFD
 
-**プロセスが高特権でファイルまたはフォルダを開く**ことができる場合、**`crontab`**を悪用して`/etc/sudoers.d`内のファイルを**`EDITOR=exploit.py`**で開くことができます。そのため、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用します。
+**プロセスが高い特権でファイルまたはフォルダを開く**ことができる場合、**`crontab`**を悪用して`/etc/sudoers.d`内のファイルを**`EDITOR=exploit.py`**で開くことができます。そのため、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用します。
 
 例：[https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
@@ -134,7 +134,7 @@ ls -le test
 
 バンドルには、**`_CodeSignature/CodeResources`**というファイルが含まれており、バンドル内のすべての**ファイル**の**ハッシュ**が含まれています。ただし、CodeResourcesのハッシュは**実行可能ファイルに埋め込まれている**ため、それには手を出せません。
 
-ただし、いくつかのファイルの署名はチェックされないため、これらのファイルにはplist内のomitキーがあります。
+ただし、いくつかのファイルの署名はチェックされないため、これらのファイルにはplist内のomitというキーがあります。
 ```xml
 <dict>
 ...
@@ -199,6 +199,9 @@ echo "hello" > /private/tmp/mnt/custom_folder/custom_file
 hdiutil detach /private/tmp/mnt 1>/dev/null
 
 # Next time you mount it, it will have the custom content you wrote
+
+# You can also create a dmg from an app using:
+hdiutil create -srcfolder justsome.app justsome.dmg
 ```
 {% endcode %}
 
@@ -212,7 +215,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 
 ### デーモン
 
-任意のスクリプトを実行するplistを使用して、**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**のような任意の**LaunchDaemon**を書き込みます。
+任意のスクリプトを実行するplistを使用して、**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**のような任意の**LaunchDaemon**を作成します。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -241,10 +244,10 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの**企業を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
