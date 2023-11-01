@@ -138,6 +138,56 @@ Not really needed but I leave it there just in case:
 [macos-xattr-acls-extra-stuff.md](macos-xattr-acls-extra-stuff.md)
 {% endcontent-ref %}
 
+## Bypass Code Signatures
+
+Bundles contains the file **`_CodeSignature/CodeResources`** which contains the **hash** of every single **file** in the **bundle**. Note that the hash of CodeResources is also **embedded in the executable**, so we can't mess with that, either.
+
+However, there are some files whose signature won't be checked, these have the key omit in the plist, like:
+
+```xml
+<dict>
+...
+	<key>rules</key>
+	<dict>
+...
+		<key>^Resources/.*\.lproj/locversion.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>1100</real>
+		</dict>
+...
+	</dict>
+	<key>rules2</key>
+...
+		<key>^(.*/)?\.DS_Store$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>2000</real>
+		</dict>
+...
+		<key>^PkgInfo$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+...
+		<key>^Resources/.*\.lproj/locversion.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>1100</real>
+		</dict>
+...
+</dict>
+```
+
 ## Mount dmgs
 
 A user can mount a custom dmg created even on top of some existing folders. This is how you could create a custom dmg package with custom content:
