@@ -26,7 +26,7 @@ Permisos en un **directorio**:
 
 * Uno de los **directorio padre propietario** en la ruta es el usuario
 * Uno de los **directorio padre propietario** en la ruta es un **grupo de usuarios** con **acceso de escritura**
-* Un **grupo de usuarios** tiene acceso de **escritura** al **archivo**
+* Un **grupo de usuarios** tiene **acceso de escritura** al **archivo**
 
 Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar** un **enlace simbólico/duro** en la ruta esperada para obtener una escritura arbitraria privilegiada.
 
@@ -48,8 +48,12 @@ Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privile
 
 Por ejemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## Trucos para evitar atributos de cuarentena xattrs
+## Trucos para evitar atributos extendidos de cuarentena
 
+### Eliminarlo
+```bash
+xattr -d com.apple.quarantine /path/to/file_or_app
+```
 ### Bandera uchg / uchange / uimmutable
 
 Si un archivo/carpeta tiene este atributo inmutable, no será posible poner un xattr en él.
@@ -122,7 +126,7 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Tenga en cuenta que incluso si esto funciona, la sandbox escribirá el atributo de cuarentena antes)
+(Nota que incluso si esto funciona, la sandbox escribe el atributo de cuarentena antes)
 
 No es realmente necesario, pero lo dejo aquí por si acaso:
 
@@ -132,7 +136,7 @@ No es realmente necesario, pero lo dejo aquí por si acaso:
 
 ## Bypass de Firmas de Código
 
-Los paquetes contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **paquete**. Tenga en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que no podemos modificarlo.
+Los paquetes contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **paquete**. Ten en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que no podemos modificarlo.
 
 Sin embargo, hay algunos archivos cuya firma no se verificará, estos tienen la clave omit en el plist, como:
 ```xml
