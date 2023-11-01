@@ -209,6 +209,9 @@ echo "hello" > /private/tmp/mnt/custom_folder/custom_file
 hdiutil detach /private/tmp/mnt 1>/dev/null
 
 # Next time you mount it, it will have the custom content you wrote
+
+# You can also create a dmg from an app using:
+hdiutil create -srcfolder justsome.app justsome.dmg 
 ```
 {% endcode %}
 
