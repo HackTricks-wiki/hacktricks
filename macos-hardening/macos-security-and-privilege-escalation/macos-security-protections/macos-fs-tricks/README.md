@@ -38,7 +38,7 @@ Ejemplo en: [https://theevilbit.github.io/posts/exploiting\_directory\_permissio
 
 ## Enlace simbólico / Enlace duro
 
-Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un usuario de **menor privilegio**, o que podría ser **previamente creado** por un usuario de menor privilegio. El usuario simplemente podría **apuntarlo a otro archivo** a través de un enlace simbólico o enlace duro, y el proceso privilegiado escribirá en ese archivo.
+Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un **usuario con menos privilegios**, o que podría ser **previamente creado** por un usuario con menos privilegios. El usuario simplemente podría **apuntarlo a otro archivo** a través de un enlace simbólico o enlace duro, y el proceso privilegiado escribirá en ese archivo.
 
 Verificar en las otras secciones donde un atacante podría **abusar de una escritura arbitraria para escalar privilegios**.
 
@@ -122,7 +122,7 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Nota: aunque esto funcione, el sandbox escribe el atributo extendido de cuarentena antes)
+(Nota que incluso si esto funciona, la sandbox escribe el atributo de cuarentena antes)
 
 No es realmente necesario, pero lo dejo aquí por si acaso:
 
@@ -130,9 +130,57 @@ No es realmente necesario, pero lo dejo aquí por si acaso:
 [macos-xattr-acls-extra-stuff.md](macos-xattr-acls-extra-stuff.md)
 {% endcontent-ref %}
 
-## Montar imágenes de disco (dmgs)
+## Bypass de Firmas de Código
 
-Un usuario puede montar una imagen de disco personalizada creada incluso encima de algunas carpetas existentes. Así es como se puede crear un paquete de imagen de disco personalizado con contenido personalizado:
+Los paquetes contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **paquete**. Ten en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que no podemos modificarlo.
+
+Sin embargo, hay algunos archivos cuya firma no se verificará, estos tienen la clave omit en el plist, como:
+```xml
+<dict>
+...
+<key>rules</key>
+<dict>
+...
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
+...
+</dict>
+<key>rules2</key>
+...
+<key>^(.*/)?\.DS_Store$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>2000</real>
+</dict>
+...
+<key>^PkgInfo$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>20</real>
+</dict>
+...
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
+...
+</dict>
+```
+## Montar archivos DMG
+
+Un usuario puede montar un archivo DMG personalizado incluso encima de algunas carpetas existentes. Así es como puedes crear un paquete DMG personalizado con contenido personalizado:
 
 {% code overflow="wrap" %}
 ```bash
