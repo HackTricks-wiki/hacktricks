@@ -74,15 +74,8 @@ EOF
 ```
 3. エンタイトルメントを定義する
 
-エンタイトルメントとは、macOSのサンドボックス環境でアプリケーションに与えられる特権の範囲を定義するものです。エンタイトルメントは、アプリケーションが実行することができる特定の操作やリソースへのアクセスを制御します。
-
-エンタイトルメントは、アプリケーションのInfo.plistファイルに記述されます。このファイルには、アプリケーションが必要とするエンタイトルメントのリストが含まれています。エンタイトルメントは、アプリケーションが実行時に必要な特権を取得するために使用されます。
-
-エンタイトルメントは、アプリケーションが特定の操作やリソースにアクセスするために必要な権限を与えるものです。例えば、ネットワークアクセスやファイルシステムへのアクセスなどが含まれます。エンタイトルメントは、アプリケーションがサンドボックス内で必要な操作を実行するために必要な特権を提供します。
-
-エンタイトルメントは、アプリケーションが必要とする特定の機能やリソースに対して制限を設けることもできます。これにより、アプリケーションが不正な操作を行うことを防ぐことができます。
-
-エンタイトルメントは、アプリケーションのセキュリティとプライバシーを強化するために重要な役割を果たしています。正しく設定されたエンタイトルメントは、アプリケーションが必要な操作を実行するために必要な特権を提供し、同時に不正な操作を制限することができます。
+{% tabs %}
+{% tab title="sandbox" %}
 ```bash
 cat << EOF > entitlements.plist
 <?xml version="1.0" encoding="UTF-8"?>
@@ -95,7 +88,25 @@ cat << EOF > entitlements.plist
 </plist>
 EOF
 ```
-4. アプリに署名する（キーチェーンで証明書を作成する必要があります）
+{% tab title="sandbox + ダウンロード" %}
+```bash
+cat << EOF > entitlements.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>com.apple.security.app-sandbox</key>
+<true/>
+<key>com.apple.security.files.downloads.read-write</key>
+<true/>
+</dict>
+</plist>
+EOF
+```
+{% endtab %}
+{% endtabs %}
+
+4. アプリに署名します（キーチェーンで証明書を作成する必要があります）
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
@@ -110,7 +121,7 @@ codesign --remove-signature SandboxedShellApp.app
 * **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
