@@ -1,4 +1,4 @@
-# Escalada de privilegios con Autoruns
+# Escalación de privilegios con Autoruns
 
 <details>
 
@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
@@ -89,7 +89,7 @@ Las claves de registro Run y RunOnce hacen que los programas se ejecuten cada ve
 * `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 * `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-No se crea de forma predeterminada en Windows Vista y versiones más recientes. Las entradas de la clave de ejecución del registro pueden hacer referencia directamente a programas o listarlos como una dependencia. Por ejemplo, es posible cargar una DLL al iniciar sesión utilizando una clave "Depend" con RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
+No se crea de forma predeterminada en Windows Vista y versiones posteriores. Las entradas de la clave de ejecución del registro pueden hacer referencia directamente a programas o enumerarlos como una dependencia. Por ejemplo, es posible cargar una DLL al iniciar sesión utilizando una clave "Depend" con RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
 
 {% hint style="info" %}
 **Exploit 1**: Si puedes escribir dentro de cualquiera de los registros mencionados dentro de **HKLM**, puedes escalar privilegios cuando otro usuario inicie sesión.
@@ -268,7 +268,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 Un **Objeto de Ayuda del Navegador** (**BHO**) es un módulo DLL diseñado como un complemento para el navegador web Internet Explorer de Microsoft para proporcionar funcionalidad adicional. Estos módulos se ejecutan para cada nueva instancia de Internet Explorer y para cada nueva instancia de Windows Explorer. Sin embargo, se puede evitar que un BHO se ejecute en cada instancia de Explorer configurando la clave **NoExplorer** en 1.
 
-Los BHOs aún son compatibles en Windows 10 a través de Internet Explorer 11, mientras que los BHOs no son compatibles en el navegador web predeterminado Microsoft Edge.
+Los BHOs aún son compatibles en Windows 10, a través de Internet Explorer 11, mientras que los BHOs no son compatibles en el navegador web predeterminado Microsoft Edge.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -308,17 +308,17 @@ Image File Execution Options (IFEO) es una característica de Windows que permit
 
 Cuando se crea una clave de registro en `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options`, Windows ejecutará un binario especificado antes de ejecutar cualquier otro binario con el mismo nombre. Esto puede ser utilizado por los atacantes para reemplazar un binario legítimo con uno malicioso y obtener privilegios elevados.
 
-Para lograr esto, el atacante debe crear una nueva clave en `Image File Execution Options` con el nombre del binario legítimo que desea reemplazar. Luego, debe agregar un valor de cadena llamado `Debugger` y establecerlo en la ruta del binario malicioso.
+Para lograr esto, el atacante debe crear una nueva clave en `Image File Execution Options` con el nombre del binario legítimo que desea reemplazar. Dentro de esta clave, se debe crear un valor de cadena llamado `Debugger` y se debe establecer su valor en la ruta del binario malicioso.
 
-Cuando se inicie el binario legítimo, Windows ejecutará el binario malicioso en su lugar, lo que permite al atacante ejecutar código con privilegios elevados.
+Cuando se inicie el binario legítimo, Windows ejecutará automáticamente el binario malicioso especificado en la clave `Debugger`. Esto permite al atacante ejecutar código con privilegios elevados.
 
-Para evitar este tipo de ataque, se recomienda realizar las siguientes acciones:
+Para evitar este tipo de escalada de privilegios, se recomienda realizar las siguientes acciones:
 
-- Restringir los permisos de escritura en la clave de registro `Image File Execution Options`.
-- Monitorear los cambios en la clave de registro `Image File Execution Options` en busca de modificaciones sospechosas.
-- Utilizar soluciones de seguridad que detecten y bloqueen este tipo de ataques.
+- Restringir el acceso a la clave de registro `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options` para evitar modificaciones no autorizadas.
+- Monitorear los cambios en la clave de registro mencionada anteriormente para detectar posibles modificaciones maliciosas.
+- Mantener actualizado el sistema operativo y aplicar los parches de seguridad correspondientes para mitigar las vulnerabilidades conocidas que podrían ser explotadas para lograr una escalada de privilegios.
 
-Al comprender cómo los atacantes pueden aprovechar las características legítimas de Windows, podemos tomar medidas para proteger nuestros sistemas y evitar la escalada de privilegios local.
+Al tomar estas medidas, se puede reducir significativamente el riesgo de una escalada de privilegios local a través de Image File Execution Options.
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
@@ -339,9 +339,9 @@ Encuentra más Autoruns como registros en [https://www.microsoftpressstore.com/a
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - ¡**estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 

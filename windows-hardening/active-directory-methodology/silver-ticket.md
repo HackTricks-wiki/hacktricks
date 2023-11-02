@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere dominio del polaco escrito y hablado_).
 
@@ -24,7 +24,7 @@ El ataque de Silver ticket se basa en **crear un TGS válido para un servicio un
 
 En este caso, se **posee el hash NTLM de una cuenta de computadora** (que es una especie de cuenta de usuario en AD). Por lo tanto, es posible **crear** un **ticket** para **ingresar a esa máquina** con privilegios de **administrador** a través del servicio SMB. Las cuentas de computadora restablecen sus contraseñas cada 30 días de forma predeterminada.
 
-También se debe tener en cuenta que es posible y **preferible** (opsec) **falsificar tickets utilizando las claves AES Kerberos (AES128 y AES256)**. Para saber cómo generar una clave AES, lee: [sección 4.4 de MS-KILE](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-kile/936a4878-9462-4753-aac8-087cd3ca4625) o el [Get-KerberosAESKey.ps1](https://gist.github.com/Kevin-Robertson/9e0f8bfdbf4c1e694e6ff4197f0a4372).
+También se debe tener en cuenta que es posible y **preferible** (opsec) **falsificar tickets utilizando las claves AES de Kerberos (AES128 y AES256)**. Para saber cómo generar una clave AES, lee: [sección 4.4 de MS-KILE](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-kile/936a4878-9462-4753-aac8-087cd3ca4625) o el [Get-KerberosAESKey.ps1](https://gist.github.com/Kevin-Robertson/9e0f8bfdbf4c1e694e6ff4197f0a4372).
 
 {% code title="Linux" %}
 ```bash
@@ -158,7 +158,7 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 [dcsync.md](dcsync.md)
 {% endcontent-ref %}
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
 

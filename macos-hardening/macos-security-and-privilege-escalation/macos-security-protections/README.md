@@ -46,9 +46,9 @@ El Sandbox de macOS **limita las aplicaciones** que se ejecutan dentro del sandb
 [macos-tcc](macos-tcc/)
 {% endcontent-ref %}
 
-### Restricciones de inicio
+### Restricciones de lanzamiento/entorno y caché de confianza
 
-Las restricciones de inicio en macOS son una característica de seguridad para **regular el inicio de procesos** mediante la definición de **quién puede iniciar** un proceso, **cómo** y **desde dónde**. Introducidas en macOS Ventura, categorizan los binarios del sistema en categorías de restricciones dentro de una **caché de confianza**. Cada binario ejecutable tiene reglas establecidas para su inicio, incluyendo restricciones **propias**, **padres** y **responsables**. Extendidas a aplicaciones de terceros como Restricciones de **Entorno** en macOS Sonoma, estas características ayudan a mitigar posibles explotaciones del sistema al gobernar las condiciones de inicio de procesos.
+Las restricciones de lanzamiento en macOS son una característica de seguridad para **regular la iniciación de procesos** mediante la definición de **quién puede lanzar** un proceso, **cómo** y **desde dónde**. Introducidas en macOS Ventura, categorizan los binarios del sistema en categorías de restricción dentro de una **caché de confianza**. Cada binario ejecutable tiene reglas establecidas para su lanzamiento, incluyendo restricciones **propias**, **parentales** y **responsables**. Extendidas a aplicaciones de terceros como Restricciones de **Entorno** en macOS Sonoma, estas características ayudan a mitigar posibles explotaciones del sistema al gobernar las condiciones de lanzamiento de procesos.
 
 {% content-ref url="macos-launch-environment-constraints.md" %}
 [macos-launch-environment-constraints.md](macos-launch-environment-constraints.md)
@@ -56,13 +56,13 @@ Las restricciones de inicio en macOS son una característica de seguridad para *
 
 ## MRT - Herramienta de eliminación de malware
 
-La Herramienta de eliminación de malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar malware conocido de sistemas infectados**.
+La Herramienta de Eliminación de Malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar malware conocido de sistemas infectados**.
 
 Una vez que se detecta malware en un Mac (ya sea por XProtect o por otros medios), se puede utilizar MRT para **eliminar automáticamente el malware**. MRT funciona en segundo plano de forma silenciosa y se ejecuta normalmente cuando se actualiza el sistema o cuando se descarga una nueva definición de malware (parece que las reglas que MRT tiene para detectar malware están dentro del binario).
 
 Si bien tanto XProtect como MRT son parte de las medidas de seguridad de macOS, realizan funciones diferentes:
 
-* **XProtect** es una herramienta preventiva. **Verifica los archivos al descargarlos** (a través de ciertas aplicaciones) y si detecta algún tipo de malware conocido, **impide que el archivo se abra**, evitando así que el malware infecte el sistema en primer lugar.
+* **XProtect** es una herramienta preventiva. **Verifica los archivos al descargarlos** (a través de ciertas aplicaciones) y si detecta algún tipo de malware conocido, **evita que el archivo se abra**, evitando así que el malware infecte el sistema en primer lugar.
 * **MRT**, por otro lado, es una herramienta **reactiva**. Opera después de que se haya detectado malware en un sistema, con el objetivo de eliminar el software ofensivo para limpiar el sistema.
 
 La aplicación MRT se encuentra en **`/Library/Apple/System/Library/CoreServices/MRT.app`**
@@ -77,7 +77,7 @@ Esto se ejecuta con un **daemon** ubicado en `/System/Library/PrivateFrameworks/
 
 La forma en que **`backgroundtaskmanagementd`** sabe que algo está instalado en una carpeta persistente es **obteniendo los FSEvents** y creando algunos **manejadores** para ellos.
 
-Además, hay un archivo plist que contiene **aplicaciones conocidas** que persisten con frecuencia mantenidas por Apple ubicado en: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Además, hay un archivo plist que contiene **aplicaciones conocidas** que persisten con frecuencia y que son mantenidas por Apple, ubicado en: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {

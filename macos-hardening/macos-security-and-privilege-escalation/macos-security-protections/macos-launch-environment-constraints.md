@@ -29,7 +29,7 @@ Existen 4 tipos de restricciones:
 * **Restricciones Responsables**: Restricciones aplicadas al **proceso que llama al servicio** en una comunicación XPC.
 * **Restricciones de Carga de Biblioteca**: Utiliza restricciones de carga de biblioteca para describir selectivamente el código que se puede cargar.
 
-Entonces, cuando un proceso intenta lanzar otro proceso, llamando a `execve(_:_:_:)` o `posix_spawn(_:_:_:_:_:_:)`, el sistema operativo verifica que el **archivo ejecutable** cumpla con su **propia restricción propia**. También verifica que el **proceso padre** cumpla con la **restricción del padre del ejecutable**, y que el **proceso responsable** cumpla con la **restricción del proceso responsable del ejecutable**. Si alguna de estas restricciones de lanzamiento no se cumple, el sistema operativo no ejecuta el programa.
+Entonces, cuando un proceso intenta lanzar otro proceso, llamando a `execve(_:_:_:)` o `posix_spawn(_:_:_:_:_:_:)`, el sistema operativo verifica que el **archivo ejecutable** cumpla con su **propia restricción propia**. También verifica que el **archivo ejecutable del proceso padre** cumpla con la **restricción del proceso padre** del ejecutable, y que el **archivo ejecutable del proceso responsable** cumpla con la **restricción del proceso responsable** del ejecutable. Si alguna de estas restricciones de lanzamiento no se cumple, el sistema operativo no ejecuta el programa.
 
 Si al cargar una biblioteca alguna parte de la **restricción de la biblioteca no es verdadera**, tu proceso **no carga** la biblioteca.
 
@@ -164,7 +164,7 @@ En el momento de escribir esto (lanzamiento de Sonoma), el **proceso responsable
 
 ### Protección de Electron
 
-Incluso si es necesario que la aplicación se **abra mediante LaunchService** (en las restricciones de los padres). Esto se puede lograr utilizando **`open`** (que puede establecer variables de entorno) o utilizando la **API de Launch Services** (donde se pueden indicar variables de entorno).
+Incluso si es necesario que la aplicación se **abra mediante LaunchService** (en las restricciones del padre). Esto se puede lograr utilizando **`open`** (que puede establecer variables de entorno) o utilizando la **API de Launch Services** (donde se pueden indicar variables de entorno).
 
 ## Referencias
 

@@ -33,7 +33,7 @@ En la función **`processRestricted`** se establece la razón de la restricción
 
 * El binario es `setuid/setgid`
 * Existencia de la sección `__RESTRICT/__restrict` en el binario macho.
-* El software tiene permisos (tiempo de ejecución endurecido) sin el permiso [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) o [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
+* El software tiene permisos (tiempo de ejecución endurecido) sin el permiso [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) o [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)`/` [`com.apple.private.security.clear-library-validation`](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 * Verifica los **permisos** de un binario con: `codesign -dv --entitlements :- </path/to/bin>`
 * Si la biblioteca está firmada con un certificado diferente al del binario
 * Si la biblioteca y el binario están firmados con el mismo certificado, esto evitará las restricciones anteriores
@@ -59,7 +59,7 @@ Recuerda que **las restricciones anteriores también se aplican** para realizar 
 Al igual que en Windows, en MacOS también puedes **secuestrar dylibs** para hacer que las **aplicaciones ejecuten** **código arbitrario**.\
 Sin embargo, la forma en que las aplicaciones de **MacOS** cargan bibliotecas es **más restrictiva** que en Windows. Esto implica que los desarrolladores de **malware** aún pueden usar esta técnica para **ocultarse**, pero la probabilidad de poder **abusar de esto para escalar privilegios es mucho menor**.
 
-En primer lugar, es **más común** encontrar que los binarios de **MacOS indican la ruta completa** de las bibliotecas a cargar. Y en segundo lugar, **MacOS nunca busca** en las carpetas de **$PATH** las bibliotecas.
+En primer lugar, es **más común** encontrar que los **binarios de MacOS indican la ruta completa** de las bibliotecas a cargar. Y en segundo lugar, **MacOS nunca busca** en las carpetas de **$PATH** las bibliotecas.
 
 La **parte principal** del **código** relacionado con esta funcionalidad se encuentra en **`ImageLoader::recursiveLoadLibraries`** en `ImageLoader.cpp`.
 
@@ -71,10 +71,10 @@ Hay **4 comandos diferentes de encabezado** que un binario macho puede usar para
 * El comando **`LC_LOAD_UPWARD_DYLIB`** se utiliza cuando dos bibliotecas dependen una de la otra (esto se llama una _dependencia ascendente_).
 
 Sin embargo, hay **2 tipos de secuestro de dylib**:
-* **Bibliotecas débilmente enlazadas faltantes**: Esto significa que la aplicación intentará cargar una biblioteca que no existe configurada con **LC\_LOAD\_WEAK\_DYLIB**. Luego, **si un atacante coloca un dylib donde se espera, se cargará**.
+* **Bibliotecas vinculadas débilmente faltantes**: Esto significa que la aplicación intentará cargar una biblioteca que no existe configurada con **LC\_LOAD\_WEAK\_DYLIB**. Luego, **si un atacante coloca una dylib donde se espera que se cargue**.
 * El hecho de que el enlace sea "débil" significa que la aplicación seguirá funcionando incluso si no se encuentra la biblioteca.
 * El **código relacionado** con esto se encuentra en la función `ImageLoaderMachO::doGetDependentLibraries` de `ImageLoaderMachO.cpp`, donde `lib->required` es `false` solo cuando `LC_LOAD_WEAK_DYLIB` es verdadero.
-* **Encontrar bibliotecas débilmente enlazadas** en binarios con (más adelante tienes un ejemplo de cómo crear bibliotecas de secuestro):
+* **Encontrar bibliotecas vinculadas débilmente** en binarios con (más adelante tienes un ejemplo de cómo crear bibliotecas de secuestro):
 * ```bash
 otool -l </ruta/al/binario> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
 cmdsize 56
@@ -86,7 +86,7 @@ compatibility version 1.0.0
 * **Configurado con @rpath**: Los binarios Mach-O pueden tener los comandos **`LC_RPATH`** y **`LC_LOAD_DYLIB`**. Basándose en los **valores** de esos comandos, se van a **cargar bibliotecas** desde **directorios diferentes**.
 * **`LC_RPATH`** contiene las rutas de algunas carpetas utilizadas para cargar bibliotecas por el binario.
 * **`LC_LOAD_DYLIB`** contiene la ruta de bibliotecas específicas para cargar. Estas rutas pueden contener **`@rpath`**, que será **reemplazado** por los valores en **`LC_RPATH`**. Si hay varias rutas en **`LC_RPATH`**, se utilizarán todas para buscar la biblioteca a cargar. Ejemplo:
-* Si **`LC_LOAD_DYLIB`** contiene `@rpath/library.dylib` y **`LC_RPATH`** contiene `/application/app.app/Contents/Framework/v1/` y `/application/app.app/Contents/Framework/v2/`. Ambas carpetas se utilizarán para cargar `library.dylib`**.** Si la biblioteca no existe en `[...]/v1/` y el atacante puede colocarla allí para secuestrar la carga de la biblioteca en `[...]/v2/` ya que se sigue el orden de las rutas en **`LC_LOAD_DYLIB`**.
+* Si **`LC_LOAD_DYLIB`** contiene `@rpath/library.dylib` y **`LC_RPATH`** contiene `/application/app.app/Contents/Framework/v1/` y `/application/app.app/Contents/Framework/v2/`. Ambas carpetas se utilizarán para cargar `library.dylib`**.** Si la biblioteca no existe en `[...]/v1/` y el atacante podría colocarla allí para secuestrar la carga de la biblioteca en `[...]/v2/` ya que se sigue el orden de las rutas en **`LC_LOAD_DYLIB`**.
 * **Encontrar rutas y bibliotecas rpath** en binarios con: `otool -l </ruta/al/binario> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
 {% hint style="info" %}
@@ -115,35 +115,35 @@ Un buen **informe con detalles técnicos** sobre esta técnica se puede encontra
 
 De **`man dlopen`**:
 
-* Cuando la ruta **no contiene el carácter barra diagonal** (es decir, es solo un nombre de archivo), **dlopen() buscará**. Si **`$DYLD_LIBRARY_PATH`** se estableció al inicio, dyld buscará primero en ese directorio. Luego, si el archivo mach-o que llama o el ejecutable principal especifican un **`LC_RPATH`**, entonces dyld buscará en esos directorios. A continuación, si el proceso está **sin restricciones**, dyld buscará en el **directorio de trabajo actual**. Por último, para binarios antiguos, dyld intentará algunas alternativas. Si **`$DYLD_FALLBACK_LIBRARY_PATH`** se estableció al inicio, dyld buscará en esos directorios. De lo contrario, buscará en **`/usr/local/lib/`** (si el proceso está sin restricciones) y luego en **`/usr/lib/`** (esta información se tomó de **`man dlopen`**).
+* Cuando la ruta **no contiene un carácter de barra diagonal** (es decir, es solo un nombre de archivo), **dlopen() buscará**. Si **`$DYLD_LIBRARY_PATH`** se estableció al inicio, dyld buscará primero en ese directorio. Luego, si el archivo mach-o que llama o el ejecutable principal especifican un **`LC_RPATH`**, entonces dyld buscará en esos directorios. A continuación, si el proceso no tiene restricciones, dyld buscará en el **directorio de trabajo actual**. Por último, para binarios antiguos, dyld intentará algunas alternativas. Si **`$DYLD_FALLBACK_LIBRARY_PATH`** se estableció al inicio, dyld buscará en esos directorios. De lo contrario, buscará en **`/usr/local/lib/`** (si el proceso no tiene restricciones) y luego en **`/usr/lib/`** (esta información se tomó de **`man dlopen`**).
 1. `$DYLD_LIBRARY_PATH`
 2. `LC_RPATH`
-3. `CWD` (si no hay restricciones)
+3. `CWD` (si no tiene restricciones)
 4. `$DYLD_FALLBACK_LIBRARY_PATH`
-5. `/usr/local/lib/` (si no hay restricciones)
+5. `/usr/local/lib/` (si no tiene restricciones)
 6. `/usr/lib/`
 
 {% hint style="danger" %}
 Si no hay barras diagonales en el nombre, habría 2 formas de hacer un secuestro:
 
 * Si algún **`LC_RPATH`** es **editable** (pero se verifica la firma, por lo que también se necesita que el binario no tenga restricciones)
-* Si el binario está **sin restricciones** y luego es posible cargar algo desde el CWD (o abusando de una de las variables de entorno mencionadas)
+* Si el binario no tiene restricciones y luego es posible cargar algo desde el CWD (o abusando de una de las variables de entorno mencionadas)
 {% endhint %}
 
-* Cuando la ruta **se parece a una ruta de framework** (por ejemplo, `/stuff/foo.framework/foo`), si **`$DYLD_FRAMEWORK_PATH`** se estableció al inicio, dyld buscará primero en ese directorio la **ruta parcial del framework** (por ejemplo, `foo.framework/foo`). A continuación, dyld intentará la **ruta suministrada tal cual** (usando el directorio de trabajo actual para rutas relativas). Por último, para binarios antiguos, dyld intentará algunas alternativas. Si **`$DYLD_FALLBACK_FRAMEWORK_PATH`** se estableció al inicio, dyld buscará en esos directorios. De lo contrario, buscará en **`/Library/Frameworks`** (en macOS si el proceso está sin restricciones), luego en **`/System/Library/Frameworks`**.
+* Cuando la ruta **se parece a una ruta de framework** (por ejemplo, `/stuff/foo.framework/foo`), si **`$DYLD_FRAMEWORK_PATH`** se estableció al inicio, dyld buscará primero en ese directorio la **ruta parcial del framework** (por ejemplo, `foo.framework/foo`). A continuación, dyld intentará la **ruta suministrada tal cual** (usando el directorio de trabajo actual para rutas relativas). Por último, para binarios antiguos, dyld intentará algunas alternativas. Si **`$DYLD_FALLBACK_FRAMEWORK_PATH`** se estableció al inicio, dyld buscará en esos directorios. De lo contrario, buscará en **`/Library/Frameworks`** (en macOS si el proceso no tiene restricciones), luego en **`/System/Library/Frameworks`**.
 1. `$DYLD_FRAMEWORK_PATH`
-2. ruta suministrada (usando el directorio de trabajo actual para rutas relativas si no hay restricciones)
+2. ruta suministrada (usando el directorio de trabajo actual para rutas relativas si no tiene restricciones)
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
-4. `/Library/Frameworks` (si no hay restricciones)
+4. `/Library/Frameworks` (si no tiene restricciones)
 5. `/System/Library/Frameworks`
 
 {% hint style="danger" %}
 Si es una ruta de framework, la forma de secuestrarla sería:
 
-* Si el proceso está **sin restricciones**, abusando de la **ruta relativa desde el CWD** y las variables de entorno mencionadas (aunque no se menciona en la documentación si el proceso está restringido, las variables de entorno DYLD\_\* se eliminan)
+* Si el proceso no tiene restricciones, abusando de la **ruta relativa desde el CWD** y las variables de entorno mencionadas (aunque no se menciona en la documentación si el proceso está restringido, las variables de entorno DYLD\_\* se eliminan)
 {% endhint %}
 
-* Cuando la ruta **contiene una barra diagonal pero no es una ruta de framework** (es decir, una ruta completa o una ruta parcial a una dylib), dlopen() primero busca (si está configurado) en **`$DYLD_LIBRARY_PATH`** (con la parte final de la ruta). A continuación, dyld **prueba la ruta suministrada** (usando el directorio de trabajo actual para rutas relativas (pero solo para procesos sin restricciones)). Por último, para binarios antiguos, dyld intentará alternativas. Si **`$DYLD_FALLBACK_LIBRARY_PATH`** se estableció al inicio, dyld buscará en esos directorios, de lo contrario, dyld buscará en **`/usr/local/lib/`** (si el proceso está sin restricciones) y luego en **`/usr/lib/`**.
+* Cuando la ruta **contiene una barra diagonal pero no es una ruta de framework** (es decir, una ruta completa o una ruta parcial a una dylib), dlopen() primero busca (si está configurado) en **`$DYLD_LIBRARY_PATH`** (con la parte final de la ruta). A continuación, dyld **prueba la ruta suministrada** (usando el directorio de trabajo actual para rutas relativas (pero solo para procesos sin restricciones)). Por último, para binarios antiguos, dyld intentará alternativas. Si **`$DYLD_FALLBACK_LIBRARY_PATH`** se estableció al inicio, dyld buscará en esos directorios, de lo contrario, dyld buscará en **`/usr/local/lib/`** (si el proceso no tiene restricciones) y luego en **`/usr/lib/`**.
 1. `$DYLD_LIBRARY_PATH`
 2. ruta suministrada (usando el directorio de trabajo actual para rutas relativas si no hay restricciones)
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
@@ -159,9 +159,9 @@ Si hay barras en el nombre y no es un framework, la forma de secuestrarlo sería
 {% hint style="info" %}
 Nota: No hay archivos de configuración para controlar la búsqueda de `dlopen`.
 
-Nota: Si el ejecutable principal es un binario **set\[ug]id o firmado con entitlements**, entonces **se ignoran todas las variables de entorno**, y solo se puede usar una ruta completa (consulte las restricciones de `DYLD_INSERT_LIBRARIES` para obtener información más detallada).
+Nota: Si el ejecutable principal es un binario **set\[ug]id o firmado con entitlements**, entonces **se ignoran todas las variables de entorno**, y solo se puede usar una ruta completa (consultar las restricciones de `DYLD_INSERT_LIBRARIES` para obtener información más detallada).
 
-Nota: Las plataformas de Apple utilizan archivos "universales" para combinar bibliotecas de 32 bits y 64 bits. Esto significa que **no hay rutas de búsqueda separadas para 32 bits y 64 bits**.
+Nota: Las plataformas de Apple utilizan archivos "universales" para combinar bibliotecas de 32 y 64 bits. Esto significa que **no hay rutas de búsqueda separadas para 32 y 64 bits**.
 
 Nota: En las plataformas de Apple, la mayoría de las bibliotecas del sistema operativo se **combinan en la caché de dyld** y no existen en el disco. Por lo tanto, llamar a **`stat()`** para verificar si una biblioteca del sistema operativo existe **no funcionará**. Sin embargo, **`dlopen_preflight()`** utiliza los mismos pasos que **`dlopen()`** para encontrar un archivo mach-o compatible.
 {% endhint %}
@@ -279,17 +279,11 @@ sudo chmod -s hello
 
 The `__RESTRICT` section is a segment in macOS that is used to restrict the execution of certain processes. This section is designed to prevent unauthorized access and privilege escalation by limiting the actions that can be performed by a process.
 
-When a process is placed in the `__RESTRICT` section, it is restricted from executing certain operations, such as loading dynamic libraries or injecting code into other processes. This helps to protect the integrity and security of the system.
+The `__restrict` segment is responsible for enforcing these restrictions. It contains code that checks the permissions and privileges of a process before allowing it to execute certain actions. This segment ensures that only authorized processes can perform privileged operations, such as accessing sensitive data or modifying system settings.
 
-By leveraging the `__RESTRICT` section, an attacker can bypass these restrictions and inject malicious code into a process. This technique is known as library injection and can be used to escalate privileges and gain unauthorized access to sensitive information.
+By leveraging the `__RESTRICT` section and the `__restrict` segment, macOS provides an additional layer of security to prevent process abuse and privilege escalation attacks. It helps to ensure that only trusted processes can access and modify critical system resources.
 
-To perform library injection, the attacker needs to identify a vulnerable process and find a way to inject their malicious code into it. This can be done by exploiting vulnerabilities in the target process or by tricking the user into executing a malicious file.
-
-Once the malicious code is injected into the target process, the attacker can execute arbitrary commands, access sensitive data, or perform other malicious activities. This can lead to a complete compromise of the system and the leakage of sensitive information.
-
-To protect against library injection attacks, it is important to implement proper security measures, such as keeping the system and applications up to date, using strong authentication mechanisms, and regularly monitoring for suspicious activities. Additionally, developers should follow secure coding practices and perform regular security audits to identify and fix any vulnerabilities in their code.
-
-By understanding the risks associated with library injection and implementing appropriate security measures, users and organizations can better protect their systems and data from unauthorized access and privilege escalation.
+It is important to note that modifying or bypassing the `__RESTRICT` section and the `__restrict` segment can lead to serious security vulnerabilities. Therefore, it is crucial to understand and respect these restrictions to maintain the integrity and security of the macOS system.
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict

@@ -1,4 +1,4 @@
-# Generador de Interfaz Mach (MIG) de macOS
+# macOS MIG - Generador de Interfaz Mach
 
 <details>
 
@@ -272,12 +272,12 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Llamada a sign_extend_64 que puede ayudar a identificar esta función
-// Esto almacena en rax el puntero a la llamada que debe ser realizada
+// Esto almacena en rax el puntero a la llamada que debe ser llamada
 // Verificar el uso de la dirección 0x100004040 (array de direcciones de funciones)
 // 0x1f4 = 500 (el ID de inicio)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// If - else, el if devuelve false, mientras que el else llama a la función correcta y devuelve true
+// If - else, el if devuelve falso, mientras que el else llama a la función correcta y devuelve verdadero
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -378,9 +378,9 @@ return r0;
 
 En realidad, si vas a la función **`0x100004000`**, encontrarás el array de estructuras **`routine_descriptor`**, el primer elemento de la estructura es la dirección donde se implementa la función y la **estructura ocupa 0x28 bytes**, por lo que cada 0x28 bytes (a partir del byte 0) puedes obtener 8 bytes y esa será la **dirección de la función** que se llamará:
 
-<figure><img src="../../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
-
 <figure><img src="../../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Estos datos se pueden extraer [**usando este script de Hopper**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 

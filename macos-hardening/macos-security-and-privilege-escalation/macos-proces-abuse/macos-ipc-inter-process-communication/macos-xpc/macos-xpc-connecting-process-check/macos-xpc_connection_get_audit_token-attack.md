@@ -85,34 +85,34 @@ Para realizar el ataque:
 3. Esto significa que podemos enviar mensajes XPC a `diagnosticd`, pero cualquier **mensaje que `diagnosticd` envíe irá a `smd`**.
 * Para `smd`, tanto nuestros mensajes como los mensajes de `diagnosticd` llegan a la misma conexión.
 
-<figure><img src="../../../../../../.gitbook/assets/image.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 4. Le pedimos a **`diagnosticd`** que **comience a monitorizar** nuestro (o cualquier otro) proceso y **enviamos mensajes rutinarios 1004 a `smd`** (para instalar una herramienta privilegiada).
 5. Esto crea una condición de carrera que debe alcanzar una ventana muy específica en `handle_bless`. Necesitamos que la llamada a `xpc_connection_get_pid` devuelva el PID de nuestro propio proceso, ya que la herramienta auxiliar privilegiada está en nuestro paquete de aplicaciones. Sin embargo, la llamada a `xpc_connection_get_audit_token` dentro de la función `connection_is_authorized` debe usar el token de auditoría de `diagnosticd`.
 
 ## Variante 2: reenvío de respuestas
 
-Como se mencionó antes, el controlador de eventos para una conexión XPC nunca se ejecuta varias veces simultáneamente. Sin embargo, las respuestas de XPC se manejan de manera diferente. Existen dos funciones para enviar un mensaje que espera una respuesta:
+Como se mencionó antes, el controlador de eventos para una conexión XPC nunca se ejecuta varias veces simultáneamente. Sin embargo, las **respuestas XPC** se manejan de manera diferente. Existen dos funciones para enviar un mensaje que espera una respuesta:
 
 * `void xpc_connection_send_message_with_reply(xpc_connection_t connection, xpc_object_t message, dispatch_queue_t replyq, xpc_handler_t handler)`, en cuyo caso el mensaje XPC se recibe y se analiza en la cola especificada.
 * `xpc_object_t xpc_connection_send_message_with_reply_sync(xpc_connection_t connection, xpc_object_t message)`, en cuyo caso el mensaje XPC se recibe y se analiza en la cola de despacho actual.
 
-Por lo tanto, los paquetes de respuesta de XPC pueden analizarse mientras se está ejecutando un controlador de eventos de XPC. Si bien `_xpc_connection_set_creds` utiliza bloqueo, esto solo evita la sobrescritura parcial del token de auditoría, no bloquea el objeto de conexión completo, lo que permite reemplazar el token de auditoría entre el análisis de un paquete y la ejecución de su controlador de eventos.
+Por lo tanto, los **paquetes de respuesta XPC pueden analizarse mientras se está ejecutando un controlador de eventos XPC**. Si bien `_xpc_connection_set_creds` utiliza bloqueo, esto solo evita la sobrescritura parcial del token de auditoría, no bloquea el objeto de conexión completo, lo que permite **reemplazar el token de auditoría entre el análisis** de un paquete y la ejecución de su controlador de eventos.
 
 Para este escenario necesitaríamos:
 
-* Como antes, dos servicios mach _A_ y _B_ a los que podemos conectarnos.
-* Nuevamente, _A_ debe tener una comprobación de autorización para una acción específica que _B_ puede pasar (pero nuestra aplicación no puede).
-* _A_ nos envía un mensaje que espera una respuesta.
-* Podemos enviar un mensaje a _B_ al que responderá.
+* Como antes, dos servicios mach **A** y **B** a los que podemos conectarnos.
+* Nuevamente, **A** debe tener una comprobación de autorización para una acción específica que **B** puede pasar (pero nuestra aplicación no puede).
+* **A** nos envía un mensaje que espera una respuesta.
+* Podemos enviar un mensaje a **B** al que responderá.
 
-Esperamos a que _A_ nos envíe un mensaje que espera una respuesta (1), en lugar de responder, tomamos el puerto de respuesta y lo usamos para un mensaje que enviamos a _B_ (2). Luego, enviamos un mensaje que utiliza la acción prohibida y esperamos que llegue concurrentemente con la respuesta de _B_ (3).
+Esperamos a que **A** nos envíe un mensaje que espera una respuesta (1), en lugar de responder, tomamos el puerto de respuesta y lo usamos para un mensaje que enviamos a **B** (2). Luego, enviamos un mensaje que utiliza la acción prohibida y esperamos que llegue concurrentemente con la respuesta de **B** (3).
 
-<figure><img src="../../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Problemas de descubrimiento
 
-Pasamos mucho tiempo tratando de encontrar otras instancias, pero las condiciones dificultaron la búsqueda tanto estática como dinámicamente. Para buscar llamadas asíncronas a `xpc_connection_get_audit_token`, usamos Frida para enganchar esta función y comprobar si la traza de llamadas incluye `_xpc_connection_mach_event` (lo que significa que no se llama desde un controlador de eventos). Pero esto solo encuentra llamadas en el proceso al que estamos enganchados actualmente y de las acciones que se utilizan activamente. Analizar todos los servicios mach alcanzables en IDA/Ghidra fue muy lento, especialmente cuando las llamadas involucraban la caché compartida de dyld. Intentamos escribir un script para buscar llamadas a `xpc_connection_get_audit_token` alcanzables desde un bloque enviado usando `dispatch_async`, pero analizar bloques y llamadas que pasan a la caché compartida de dyld dificultó esto también. Después de pasar un tiempo en esto, decidimos que sería mejor enviar lo que teníamos.
+Pasamos mucho tiempo tratando de encontrar otras instancias, pero las condiciones dificultaron la búsqueda tanto estática como dinámicamente. Para buscar llamadas asíncronas a `xpc_connection_get_audit_token`, usamos Frida para enganchar esta función y comprobar si la traza de llamadas incluye `_xpc_connection_mach_event` (lo que significa que no se llama desde un controlador de eventos). Pero esto solo encuentra llamadas en el proceso al que actualmente estamos enganchados y de las acciones que se utilizan activamente. Analizar todos los servicios mach alcanzables en IDA/Ghidra fue muy lento, especialmente cuando las llamadas involucraban la caché compartida de dyld. Intentamos escribir un script para buscar llamadas a `xpc_connection_get_audit_token` alcanzables desde un bloque enviado usando `dispatch_async`, pero analizar bloques y llamadas que pasan a la caché compartida de dyld dificultó esto también. Después de pasar un tiempo en esto, decidimos que sería mejor enviar lo que teníamos.
 ## La solución <a href="#la-solución" id="la-solución"></a>
 
 Al final, informamos sobre el problema general y el problema específico en `smd`. Apple lo solucionó solo en `smd` reemplazando la llamada a `xpc_connection_get_audit_token` con `xpc_dictionary_get_audit_token`.
@@ -129,7 +129,7 @@ En cualquier caso, este problema aún persiste en iOS 17 y macOS 14, así que si
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

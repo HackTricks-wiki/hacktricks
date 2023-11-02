@@ -36,11 +36,16 @@ Este entitlement permite a otros procesos con el entitlement **`com.apple.securi
 
 ### `com.apple.security.cs.debugger`
 
-Las aplicaciones con el Entitlement de Herramienta de Depuración pueden llamar a `task_for_pid()` para obtener un puerto de tarea válido para aplicaciones sin firmar y de terceros con el entitlement `Get Task Allow` establecido en `true`. Sin embargo, incluso con el entitlement de herramienta de depuración, un depurador **no puede obtener los puertos de tarea** de procesos que **no tienen el entitlement `Get Task Allow`**, y que por lo tanto están protegidos por System Integrity Protection. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
+Las aplicaciones con el Entitlement de Herramienta de Depuración pueden llamar a `task_for_pid()` para obtener un puerto de tarea válido para aplicaciones no firmadas y de terceros con el entitlement `Get Task Allow` establecido en `true`. Sin embargo, incluso con el entitlement de herramienta de depuración, un depurador **no puede obtener los puertos de tarea** de procesos que **no tienen el entitlement `Get Task Allow`**, y que por lo tanto están protegidos por System Integrity Protection. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
 Este entitlement permite **cargar frameworks, complementos o bibliotecas sin estar firmados por Apple o firmados con el mismo ID de equipo** que el ejecutable principal, por lo que un atacante podría abusar de alguna carga de biblioteca arbitraria para inyectar código. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
+
+### `com.apple.private.security.clear-library-validation`
+
+Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`** pero en lugar de **desactivar directamente** la validación de la biblioteca, permite que el proceso **llame a una llamada de sistema `csops` para desactivarla**.\
+Consulta [**esto para más información**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
@@ -60,36 +65,51 @@ TODO: No sé qué permite hacer esto
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor.
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor.
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor!
+### `keychain-access-groups`
 
+Esta lista de permisos **keychain** agrupa a las aplicaciones a las que se les permite acceder:
+```xml
+<key>keychain-access-groups</key>
+<array>
+<string>ichat</string>
+<string>apple</string>
+<string>appleaccount</string>
+<string>InternetAccounts</string>
+<string>IMCore</string>
+</array>
+```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Otorga permisos de **Acceso Completo al Disco**, uno de los permisos más altos de TCC que se pueden tener.
+Otorga permisos de **Acceso completo al disco**, uno de los permisos más altos de TCC que se pueden tener.
 
 ### **`kTCCServiceAppleEvents`**
 
 Permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Al controlar otras aplicaciones, puede abusar de los permisos otorgados a estas otras aplicaciones.
+
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia su carpeta de inicio y, por lo tanto, permite **evadir TCC**.
+Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia su carpeta de inicio y, por lo tanto, permite **burlar TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Permite modificar aplicaciones dentro de sus carpetas (dentro de app.app), lo cual está deshabilitado de forma predeterminada.
+Permite modificar archivos dentro del paquete de aplicaciones (dentro de app.app), lo cual está **desactivado de forma predeterminada**.
+
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ## Medio
 
 ### `com.apple.security.cs.allow-jit`
 
-Este permiso permite **crear memoria que es escribible y ejecutable** al pasar la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
+Este permiso permite **crear memoria que se puede escribir y ejecutar** pasando la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Este permiso permite **anular o parchear código C**, utilizar el marco de trabajo **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro) o utilizar el marco de trabajo **DVDPlayback**. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
+Este permiso permite **anular o parchear código C**, utilizar el marco **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro) o utilizar el marco **DVDPlayback**. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
 
 {% hint style="danger" %}
 Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguajes de código no seguro en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
@@ -100,7 +120,7 @@ Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguaj
 Este permiso permite **modificar secciones de sus propios archivos ejecutables** en disco para salir forzosamente. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection).
 
 {% hint style="danger" %}
-El permiso de Deshabilitar Protección de Memoria Ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
+El permiso de Deshabilitar la Protección de Memoria Ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
 {% endhint %}
 
 ### `com.apple.security.cs.allow-relative-library-loads`
@@ -113,7 +133,7 @@ TODO
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
