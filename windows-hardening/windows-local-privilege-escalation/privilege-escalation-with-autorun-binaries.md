@@ -1,26 +1,26 @@
-# Autorunsを使用した特権エスカレーション
+# Autorunバイナリを使用した特権エスカレーション
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-もしあなたが**ハッキングのキャリア**に興味があり、アンハッカブルをハックしたいのであれば、**採用しています！**（流暢なポーランド語の読み書きが必要です）。
+もしあなたが**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したい場合 - **採用中です！**（流暢なポーランド語の読み書きが必要です）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## WMIC
 
-**Wmic**は、**起動時**にプログラムを実行するために使用することができます。次のコマンドで、起動時にプログラムが設定されているバイナリを確認できます：
+**Wmic**は、**起動時**にプログラムを実行するために使用できます。次のコマンドで、起動時にプログラムが設定されているバイナリを確認できます。
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -253,7 +253,7 @@ Active Setupはデスクトップが表示される前に実行されます。Ac
 * これは、Active Setupがログオン時にこのコンポーネントを実行する必要があると判断した場合に実行されるコマンドです。
 
 {% hint style="info" %}
-_**IsInstalled == "1"**_ である任意のキーの **StubPath** を書き換えることができれば、それをバックドアに指定して特権をエスカレーションさせることができます。また、**StubPath** キーが指す任意の **バイナリ** を上書きすることができれば、特権をエスカレーションさせることができます。
+_**IsInstalled == "1"**_ である任意のキーの **StubPath** を書き換えることができれば、それをバックドアに指定して特権を昇格させることができます。また、**StubPath** キーが指す任意の **バイナリ** を上書きすることができれば、特権を昇格させることができます。
 {% endhint %}
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -266,21 +266,21 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-**ブラウザヘルパーオブジェクト**（**BHO**）は、MicrosoftのInternet Explorerウェブブラウザのプラグインとして追加機能を提供するために設計されたDLLモジュールです。これらのモジュールは、Internet Explorerの新しいインスタンスごとおよびWindows Explorerの新しいインスタンスごとに実行されます。ただし、BHOは、キー**NoExplorer**を1に設定することで、各Explorerのインスタンスでの実行を防止することができます。
+**ブラウザヘルパーオブジェクト**（**BHO**）は、MicrosoftのInternet Explorerウェブブラウザのプラグインとして追加機能を提供するために設計されたDLLモジュールです。これらのモジュールは、Internet Explorerの各新しいインスタンスとWindows Explorerの各新しいインスタンスごとに実行されます。ただし、BHOは、キー**NoExplorer**を1に設定することで、各インスタンスのExplorerでの実行を防止することができます。
 
 BHOは、Windows 10のInternet Explorer 11までサポートされていますが、デフォルトのWebブラウザであるMicrosoft EdgeではBHOはサポートされていません。
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-注意してください。レジストリには、各dllごとに1つの新しいレジストリが含まれ、それは**CLSID**によって表されます。CLSIDの情報は`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
+注意：レジストリには、各DLLごとに1つの新しいレジストリが含まれており、それは**CLSID**によって表されます。CLSIDの情報は、`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
 
-### インターネットエクスプローラーの拡張機能
+### Internet Explorerの拡張機能
 
 * `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 * `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-注意してください。レジストリには、各dllごとに1つの新しいレジストリが含まれ、それは**CLSID**によって表されます。CLSIDの情報は`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
+注意：レジストリには、各DLLごとに1つの新しいレジストリが含まれており、それは**CLSID**によって表されます。CLSIDの情報は、`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
 
 ### フォントドライバ
 
@@ -304,25 +304,23 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\she
 ```
 ### Image File Execution Options
 
-Image File Execution Options（IFEO）は、Windowsオペレーティングシステムで実行されるプロセスの動作をカスタマイズするための機能です。IFEOは、デバッグ用途で開発者が使用することを意図していますが、悪意のある目的で利用されることもあります。
+Image File Execution Options（IFEO）は、Windowsオペレーティングシステムで実行されるプロセスの動作を変更するための機能です。IFEOは、デバッグ用途で開発者が使用することを意図していますが、悪意のある目的で利用されることもあります。
 
-IFEOを悪用すると、特権昇格攻撃を実行することができます。攻撃者は、IFEOを使用してシステム上で実行されるプロセスを置き換えることができます。これにより、攻撃者は特権レベルのプロセスを実行し、システムに対する完全な制御を取得することができます。
+IFEOを悪用すると、特権昇格攻撃を実行することができます。攻撃者は、IFEOを使用してシステム上で実行されるプロセスを変更し、特権のあるプロセスとして実行することができます。
 
-IFEOを使用した特権昇格攻撃は、次の手順で実行されます。
+IFEOを使用した特権昇格攻撃の手法の一つは、既存の実行可能ファイルにIFEOエントリを作成することです。このエントリには、攻撃者が実行したいプロセスのパスと、そのプロセスを実行するためのデバッガのパスが指定されます。その結果、攻撃者が指定したプロセスが実行される際に、デバッガが同時に起動されます。
 
-1. 攻撃者は、IFEOに登録されているプロセスを特定します。
-2. 攻撃者は、IFEOに登録されているプロセスの実行ファイルを悪意のあるプログラムに置き換えます。
-3. システムがIFEOに登録されたプロセスを実行すると、攻撃者の悪意のあるプログラムが実行されます。
-4. 攻撃者の悪意のあるプログラムは、特権レベルのアクセス権を持つため、攻撃者はシステムに対する完全な制御を取得することができます。
+攻撃者は、デバッガとして任意のプログラムを指定することができます。このプログラムは、攻撃者が特権のある操作を実行するために使用することができます。たとえば、システムレジストリの変更や、特権のあるファイルへのアクセスなどが考えられます。
 
-IFEOを悪用した攻撃を防ぐためには、次の対策を実施することが重要です。
+IFEOを悪用した特権昇格攻撃は、システムのセキュリティを脅かす重大な問題です。攻撃者は、システム上で特権のある操作を実行することができ、システム全体を乗っ取る可能性があります。
 
-- IFEOに登録されているプロセスを監視し、不正な変更がないか定期的に確認します。
-- IFEOに登録されているプロセスの実行ファイルのパスを制限します。
-- IFEOに登録されているプロセスの実行権限を制限します。
-- セキュリティソフトウェアを使用して、IFEOの変更を監視し、悪意のある変更を検出します。
+IFEOを悪用した攻撃からシステムを保護するためには、以下の対策を実施することが重要です。
 
-IFEOを悪用した特権昇格攻撃は、システムのセキュリティを脅かす重大な脆弱性です。適切な対策を実施することで、この攻撃からシステムを保護することができます。
+- 不要なIFEOエントリを削除する
+- IFEOエントリの変更を監視する
+- セキュリティソフトウェアを使用してIFEOの悪用を検出する
+
+これらの対策を実施することで、IFEOを悪用した特権昇格攻撃からシステムを保護することができます。
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
@@ -335,7 +333,7 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## もっと
 
-[https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)でレジストリのようなAutorunsを見つけることができます。
+[https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)で、レジストリのようなAutorunsをさらに見つけることができます。
 
 ## 参考文献
 
@@ -343,9 +341,9 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-もし**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したい場合は、**採用中です**（流暢なポーランド語の読み書きが必要です）。
+もし興味があるなら、**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したい場合は、**採用中です**（流暢なポーランド語の読み書きが必要です）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -353,10 +351,10 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

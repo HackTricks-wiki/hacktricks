@@ -33,18 +33,18 @@
 
 * バイナリが`setuid/setgid`である
 * machoバイナリに`__RESTRICT/__restrict`セクションが存在する
-* ソフトウェアには、[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)エンタイトルメントまたは[`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)エンタイトルメントがあります。
+* ソフトウェアには、[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)エンタイトルメントまたは[`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)`/` [`com.apple.private.security.clear-library-validation`](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)エンタイトルメントがあります。
 * バイナリのエンタイトルメントを次のコマンドで確認します：`codesign -dv --entitlements :- </path/to/bin>`
 * ライブラリがバイナリと異なる証明書で署名されている場合
 * ライブラリとバイナリが同じ証明書で署名されている場合、これにより前の制限がバイパスされます
 * エンタイトルメント**`system.install.apple-software`**および**`system.install.apple-software.standar-user`**を持つプログラムは、ユーザーにパスワードを求めずにAppleによって署名されたソフトウェアを**インストール**できます（特権昇格）
 
-より新しいバージョンでは、このロジックは関数**`configureProcessRestrictions`**の2番目の部分にあります。ただし、新しいバージョンでは、関数の**最初のチェックが実行**されます（iOSまたはシミュレーションに関連するif文は使用されないため、それらを削除できます）。
+より新しいバージョンでは、このロジックは関数**`configureProcessRestrictions`**の2番目の部分で見つけることができます。ただし、新しいバージョンでは、関数の**最初のチェック**が実行されます（iOSやシミュレーションに関連するif文は使用されないため、それらを削除できます）。
 {% endhint %}
 
-バイナリに**ハードランタイム**があるかどうかは、`codesign --display --verbose <bin>`で**確認**できます。**`CodeDirectory`**の**ランタイム**フラグをチェックします。例：**`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+バイナリに**ハードランタイム**があるかどうかは、`codesign --display --verbose <bin>`で**runtime**フラグを**`CodeDirectory`**の中でチェックすることで確認できます。例：**`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-これを悪用する方法の例と制限のチェック方法については、次の場所にあります。
+これを悪用する方法の例と制限のチェック方法は次の場所にあります：
 
 {% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
 [macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
@@ -56,19 +56,15 @@
 Dylibハイジャッキング攻撃を実行するには、**前述の制限も適用**することを忘れないでください。
 {% endhint %}
 
-Windowsと同様に、MacOSでも**dylibをハイジャック**して、**アプリケーション**で**任意のコードを実行**することができます。ただし、MacOSのアプリケーションがライブラリをロードする方法は、Windowsよりも**制限が多い**です。これにより、マルウェア開発者はこのテクニックを**ステルス**に使用できますが、特権昇格に悪用する可能性は低いです。
+Windowsと同様に、MacOSでも**dylibをハイジャック**して、**アプリケーションが任意のコードを実行**することができます。ただし、MacOSのアプリケーションがライブラリをロードする方法は、Windowsよりも**制限が多い**です。これは、**マルウェア**開発者がこのテクニックを**ステルス**に使用できる可能性がある一方で、特権昇格に悪用する可能性はずっと低いということを意味します。
 
-まず、**MacOSバイナリがライブラリをロードする際には、完全なパスを指定**することが**より一般的**です。そして、**MacOSはライブラリを$PATHのフォルダで検索しません**。
+まず、**MacOSバイナリがライブラリをロードする際には、完全なパスを指定**することが**より一般的**です。そして、**MacOSは決して**$PATH**のフォルダを検索しません。
 
-この機能に関連する**コードの主な部分**は、`ImageLoader.cpp`の**`ImageLoader::recursiveLoadLibraries`**にあります。
-
-machoバイナリが使用できる**4つの異なるヘッダコマンド**があります。
-
-* **`LC_LOAD_DYLIB`**コマンドは、dylibをロードするた
-* **弱リンクされたライブラリが見つからない**: これは、アプリケーションが存在しないライブラリを**LC\_LOAD\_WEAK\_DYLIB**で設定してロードしようとすることを意味します。その後、**攻撃者が予想される場所にdylibを配置すると、ロードされます**。
+この機能に関連する**コードの主な部分**は、`ImageLoader.cpp`
+* **弱リンクされたライブラリが見つからない**: これは、アプリケーションが存在しないライブラリを**LC\_LOAD\_WEAK\_DYLIB**で設定してロードしようとすることを意味します。その後、**攻撃者が期待される場所にdylibを配置すると、ロードされます**。
 * リンクが「弱い」ということは、ライブラリが見つからなくてもアプリケーションが続行されることを意味します。
 * これに関連する**コード**は、`ImageLoaderMachO.cpp`の`ImageLoaderMachO::doGetDependentLibraries`関数にあります。ここでは、`lib->required`は`LC_LOAD_WEAK_DYLIB`がtrueの場合にのみ`false`です。
-* バイナリ内の**弱リンクされたライブラリを見つける**には（後でハイジャックライブラリの作成方法の例があります）：
+* バイナリ内の**弱リンクされたライブラリを検索**するには（後でハイジャックライブラリの作成方法の例があります）：
 * ```bash
 otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
 cmdsize 56
@@ -77,11 +73,11 @@ time stamp 2 Wed Jun 21 12:23:31 1969
 current version 1.0.0
 compatibility version 1.0.0
 ```
-* **@rpathで設定された**: Mach-Oバイナリには、**`LC_RPATH`**と**`LC_LOAD_DYLIB`**というコマンドがあります。これらのコマンドの値に基づいて、**異なるディレクトリからライブラリがロード**されます。
+* **@rpathで設定された**: Mach-Oバイナリには、**`LC_RPATH`**と**`LC_LOAD_DYLIB`**というコマンドがあります。これらのコマンドの**値**に基づいて、**異なるディレクトリ**から**ライブラリがロード**されます。
 * **`LC_RPATH`**には、バイナリでライブラリをロードするために使用されるいくつかのフォルダのパスが含まれています。
-* **`LC_LOAD_DYLIB`**には、ロードする特定のライブラリのパスが含まれています。これらのパスには**`@rpath`**が含まれており、**`LC_RPATH`**の値で置き換えられます。**`LC_RPATH`**に複数のパスがある場合、すべてのパスが使用されてライブラリの検索に使用されます。例：
-* **`LC_LOAD_DYLIB`**に`@rpath/library.dylib`が含まれ、**`LC_RPATH`**に`/application/app.app/Contents/Framework/v1/`と`/application/app.app/Contents/Framework/v2/`が含まれている場合。両方のフォルダが`library.dylib`をロードするために使用されます。**`LC_LOAD_DYLIB`**のパスの順序に従って、ライブラリが`[...]/v1/`に存在しない場合、攻撃者はそれをそこに配置して`[...]/v2/`のライブラリのロードを乗っ取ることができます。
-* バイナリ内の**rpathパスとライブラリを見つける**には、`otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`を使用します。
+* **`LC_LOAD_DYLIB`**には、ロードする特定のライブラリのパスが含まれています。これらのパスには**`@rpath`**が含まれる場合、**`LC_RPATH`**の値で置き換えられます。**`LC_RPATH`**に複数のパスがある場合、すべてのパスが使用されてライブラリの検索に使用されます。例：
+* **`LC_LOAD_DYLIB`**に`@rpath/library.dylib`が含まれ、**`LC_RPATH`**に`/application/app.app/Contents/Framework/v1/`と`/application/app.app/Contents/Framework/v2/`が含まれている場合、両方のフォルダが`library.dylib`をロードするために使用されます。**`LC_LOAD_DYLIB`**のパスの順序に従います。
+* バイナリ内の**rpathパスとライブラリ**を検索するには：`otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
 {% hint style="info" %}
 **`@executable_path`**：**メインの実行可能ファイル**を含むディレクトリへの**パス**です。
@@ -92,10 +88,10 @@ compatibility version 1.0.0
 * **dylib**で使用される場合、**`@loader_path`**は**dylib**への**パス**を与えます。
 {% endhint %}
 
-この機能を悪用して特権をエスカレーションする方法は、**root**によって実行される**アプリケーション**が、攻撃者が書き込み権限を持つフォルダでライブラリを検索している**まれなケース**です。
+この機能を悪用して特権をエスカレーションする方法は、**root**によって実行される**アプリケーション**が、**攻撃者が書き込み権限を持つフォルダ**でライブラリを検索している**珍しいケース**です。
 
 {% hint style="success" %}
-アプリケーション内の**欠落しているライブラリ**を見つけるための便利な**スキャナー**は、[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)または[**CLIバージョン**](https://github.com/pandazheng/DylibHijack)です。\
+アプリケーション内の**欠落しているライブラリ**を見つけるための素晴らしい**スキャナ**は、[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)または[**CLIバージョン**](https://github.com/pandazheng/DylibHijack)です。\
 この技術に関する技術的な詳細を含む素晴らしい**レポート**は[**こちら**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)で見つけることができます。
 {% endhint %}
 
@@ -124,26 +120,26 @@ compatibility version 1.0.0
 * バイナリが**制限されていない**場合、CWDから何かをロードすることが可能です（または、言及されていないかもしれませんが、制限されていない場合、DYLD\_\*環境変数は削除されます）
 {% endhint %}
 
-* パスが**フレームワークのパスのように見える場合**（例：`/stuff/foo.framework/foo`）、**`$DYLD_FRAMEWORK_PATH`**が起動時に設定されている場合、dyldは最初にそのディレクトリをフレームワークの部分パス（`foo.framework/foo`など）で検索します。次に、dyldは**提供されたパスをそのまま**試します（相対パ
+* パスが**フレームワークのパスのように見える場合**（例：`/stuff/foo.framework/foo`）、**`$DYLD_FRAMEWORK_PATH`**が起動時に設定されている場合、dyldは最初にそのディレクトリをフレームワークの部分パス（`foo.framework/foo`など）で検索します。次に、dyldは**提供されたパスをそのまま**試します（相対パスの場合はカレントワーキングディレクトリを使用）。最後に、古いバイナリの場合、dyldはいくつかのフォールバックを試みます。**`$DYLD
 2. 供給されたパス（制限がない場合は相対パスの場合はカレントディレクトリを使用）
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
 4. `/usr/local/lib/`（制限がない場合）
 5. `/usr/lib/`
 
 {% hint style="danger" %}
-名前にスラッシュが含まれており、フレームワークではない場合、ハイジャックする方法は次のとおりです：
+名前にスラッシュが含まれており、フレームワークではない場合、それを乗っ取る方法は次のとおりです：
 
 * バイナリが**制限されていない**場合、CWDまたは`/usr/local/lib`から何かをロードすることが可能です（または、言及された環境変数のいずれかを乱用する）
 {% endhint %}
 
 {% hint style="info" %}
-注意：**dlopenの検索を制御する**設定ファイルはありません。
+注意：**dlopenの検索を制御する**設定ファイルは**存在しません**。
 
-注意：メインの実行可能ファイルが**set\[ug]idバイナリまたはエンタイトルメントで署名**されている場合、**すべての環境変数は無視**され、完全なパスのみ使用できます（詳細な情報については、[DYLD\_INSERT\_LIBRARIESの制限を確認](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md#check-dyld\_insert\_librery-restrictions)してください）
+注意：メインの実行可能ファイルが**set\[ug]idバイナリまたはエンタイトルメントで署名**されている場合、**すべての環境変数は無視**され、完全なパスのみ使用できます（詳細な情報については、[DYLD\_INSERT\_LIBRARIESの制限を確認](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md#check-dyld\_insert\_librery-restrictions)してください）。
 
 注意：Appleプラットフォームでは、32ビットと64ビットのライブラリを組み合わせるために「ユニバーサル」ファイルが使用されます。これは、**別々の32ビットと64ビットの検索パスは存在しない**ことを意味します。
 
-注意：Appleプラットフォームでは、ほとんどのOS dylibは**dyldキャッシュに統合**されており、ディスク上に存在しません。したがって、OS dylibが存在するかどうかを事前に確認するために**`stat()`**を呼び出すことはできません。ただし、**`dlopen_preflight()`**は、互換性のあるmach-oファイルを見つけるために**`dlopen()`**と同じ手順を使用します。
+注意：Appleプラットフォームでは、ほとんどのOS dylibは**dyldキャッシュに統合**されており、ディスク上に存在しません。したがって、OS dylibが存在するかどうかを事前に確認するために**`stat()`**を呼び出すことは**機能しません**。ただし、**`dlopen_preflight()`**は、互換性のあるmach-oファイルを見つけるために**`dlopen()`**と同じ手順を使用します。
 {% endhint %}
 
 **パスの確認**
@@ -291,9 +287,9 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 {% endcode %}
 
 {% hint style="danger" %}
-注意してください、バイナリにはフラグ**`0x0(none)`**で署名されているものがあるかもしれませんが、実行時に**`CS_RESTRICT`**フラグを動的に取得することができるため、このテクニックはそれらでは機能しません。
+注意してください、バイナリにはフラグ**`0x0(none)`**で署名されているものがあっても、実行時に**`CS_RESTRICT`**フラグを動的に取得することができるため、このテクニックはそれらでは機能しません。
 
-このフラグを持つプロセスを確認するには（[**ここでcsopsを取得**](https://github.com/axelexic/CSOps)）：&#x20;
+(procにこのフラグがあるかどうかを確認するには、[**ここでcsopsを取得**](https://github.com/axelexic/CSOps)してください):&#x20;
 ```bash
 csops -status <pid>
 ```
@@ -306,8 +302,8 @@ csops -status <pid>
 
 * あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

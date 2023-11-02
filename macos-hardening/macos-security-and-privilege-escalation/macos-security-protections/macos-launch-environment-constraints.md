@@ -7,23 +7,25 @@
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+*
+* .
 
 </details>
 
 ## 基本情報
 
-macOSの起動制約は、**プロセスの起動方法、起動者、起動元の場所を制御**することでセキュリティを強化するために導入されました。macOS Venturaから導入され、システムバイナリを異なる制約カテゴリに分類する**信頼キャッシュ**内で定義される制約フレームワークを提供します。これらの制約はシステム内のすべての実行可能バイナリに適用され、特定のバイナリの起動に必要な要件を規定する**ルール**のセットを含みます。これらのルールには、バイナリが満たす必要がある自己制約、親プロセスが満たす必要がある親制約、および他の関連エンティティが遵守する必要がある責任制約が含まれます。
+macOSの起動制約は、**プロセスの開始方法、実行者、および場所を制御**することでセキュリティを強化するために導入されました。macOS Venturaで導入され、システムバイナリを異なる制約カテゴリに分類する**信頼キャッシュ**内で定義される制約フレームワークを提供します。これらの制約はシステム内のすべての実行可能バイナリに適用され、特定のバイナリを起動するための要件を規定する**ルール**のセットを含みます。これらのルールには、バイナリが満たす必要がある自己制約、親プロセスが満たす必要がある親制約、および他の関連エンティティが守る必要がある責任制約が含まれます。
 
-このメカニズムは、macOS Sonomaから始まる**環境制約**を介してサードパーティのアプリにも適用され、開発者は環境制約のために**キーと値のセット**を指定することでアプリを保護することができます。
+このメカニズムは、macOS Sonomaからはサードパーティのアプリにも**環境制約**を適用することができます。これにより、開発者はアプリを保護するために**環境制約のキーと値のセット**を指定することができます。
 
-起動環境とライブラリの制約は、**`launchd`プロパティリストファイル**に保存するか、コードサイニングで使用する**別個のプロパティリストファイル**に保存します。
+起動環境とライブラリの制約は、**`launchd`プロパティリストファイル**に保存するか、**コードサイニングで使用する別のプロパティリスト**ファイルに保存します。
 
 制約には4つのタイプがあります：
 
 * **自己制約**：**実行中の**バイナリに適用される制約。
-* **親プロセス制約**：**プロセスの親**に適用される制約（たとえば**`launchd`**がXPサービスを実行している場合）。
+* **親プロセス制約**：**プロセスの親**に適用される制約（たとえば、**`launchd`**がXPサービスを実行している場合）。
 * **責任制約**：XPC通信でサービスを呼び出す**プロセスに適用**される制約。
 * **ライブラリロード制約**：ロードできるコードを選択的に記述するためにライブラリロード制約を使用します。
 
@@ -33,7 +35,7 @@ macOSの起動制約は、**プロセスの起動方法、起動者、起動元�
 
 ## LCカテゴリ
 
-LCは、事実と論理演算（and、orなど）から構成されるもので、事実を組み合わせます。
+LCは、**事実**と**論理演算**（and、orなど）から構成されるもので、事実を組み合わせます。
 
 [**LCが使用できる事実は文書化されています**](https://developer.apple.com/documentation/security/defining\_launch\_environment\_and\_library\_constraints)。例えば：
 
@@ -49,7 +51,7 @@ LCは、事実と論理演算（and、orなど）から構成されるもので�
 Appleのバイナリが署名されると、それは**信頼キャッシュ**内の**LCカテゴリ**に割り当てられます。
 
 * **iOS 16のLCカテゴリ**は[**ここで逆向きにドキュメント化されています**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)。
-* 現在の**LCカテゴリ（macOS 14 - Somona）**は逆向きになっており、[**ここで説明が見つかります**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)。
+* 現在の**LCカテゴリ（macOS 14** - Somona）は逆向きになっており、[**ここで説明が見つかります**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)。
 
 たとえば、カテゴリ1は：
 ```
@@ -158,7 +160,7 @@ uint8_t reserved0;
 
 ### XPCデーモンの保護
 
-この執筆時点（Sonomaリリース）では、デーモンXPCサービスの**責任あるプロセスはXPCサービス自体**であり、接続するクライアントではありません（FB: FB13206884を提出）。一瞬の間、バグであると仮定しても、私たちは**攻撃者のコードでXPCサービスを起動することはできません**が、それが**既にアクティブ**である場合（元のアプリによって呼び出された可能性があるため）、接続することを防ぐものは何もありません。したがって、制約を設定することは良い考えかもしれませんし、攻撃の時間枠を制限することもできますが、それは主要な問題を解決するものではなく、私たちのXPCサービスは依然として接続するクライアントを適切に検証する必要があります。それが唯一のセキュリティ確保方法です。また、最初に述べたように、現在はこの方法では機能しません。
+この執筆時点（Sonomaリリース）では、デーモンXPCサービスの**責任あるプロセスはXPCサービス自体**であり、接続するクライアントではありません（FB: FB13206884を提出）。一瞬バグだと仮定しても、私たちは**攻撃者のコードでXPCサービスを起動することはできません**が、それが**既にアクティブ**である場合（元のアプリによって呼び出された可能性があるため）、接続することを防ぐものは何もありません。したがって、制約を設定することは良い考えかもしれませんし、攻撃の時間枠を制限することもできますが、それは主要な問題を解決するものではなく、私たちのXPCサービスは依然として接続するクライアントを適切に検証する必要があります。それが唯一のセキュリティ確保方法です。また、最初に述べたように、現在はこの方法では機能しません。
 
 ### Electronの保護
 
@@ -177,9 +179,9 @@ uint8_t reserved0;
 
 * **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクションを発見してください。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 *
 * .
 
