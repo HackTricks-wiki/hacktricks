@@ -46,7 +46,7 @@ MacOS Sandbox **limits applications** running inside the sandbox to the **allowe
 [macos-tcc](macos-tcc/)
 {% endcontent-ref %}
 
-### Launch Constraints
+### Launch/Environment Constraints & Trust Cache
 
 Launch constraints in macOS are a security feature to **regulate process initiation** by defining **who can launch** a process, **how**, and **from where**. Introduced in macOS Ventura, they categorize system binaries into constraint categories within a **trust cache**. Every executable binary has set **rules** for its **launch**, including **self**, **parent**, and **responsible** constraints. Extended to third-party apps as **Environment** Constraints in macOS Sonoma, these features help mitigate potential system exploitations by governing process launching conditions.
 

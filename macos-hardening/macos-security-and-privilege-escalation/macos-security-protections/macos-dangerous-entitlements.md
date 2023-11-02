@@ -42,6 +42,11 @@ Apps with the Debugging Tool Entitlement can call `task_for_pid()` to retrieve a
 
 This entitlement allows to **load frameworks, plug-ins, or libraries without being either signed by Apple or signed with the same Team ID** as the main executable, so an attacker could abuse some arbitrary library load to inject code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
 
+### `com.apple.private.security.clear-library-validation`
+
+This entitlement is very similar to **`com.apple.security.cs.disable-library-validation`** but **instead** of **directly disabling** library validation, it allows the process to **call a `csops` system call to disable it**.\
+Check [**this for more info**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
+
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
 This entitlement allows to **use DYLD environment variables** that could be used to inject libraries and code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
@@ -66,6 +71,21 @@ TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-U
 
 TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!
 
+### `keychain-access-groups`
+
+This entitlement list **keychain** groups the application has access to:
+
+```xml
+<key>keychain-access-groups</key>
+<array>
+        <string>ichat</string>
+        <string>apple</string>
+        <string>appleaccount</string>
+        <string>InternetAccounts</string>
+        <string>IMCore</string>
+</array>
+```
+
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
 Gives **Full Disk Access** permissions, one of the TCC highest permissions you can have.
@@ -80,7 +100,9 @@ Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Allow to modify apps inside their folders (inside app.app), which is disallowed by default.
+Allow to modify files inside apps bundle (inside app.app), which is **disallowed by default**.
+
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ## Medium
 
