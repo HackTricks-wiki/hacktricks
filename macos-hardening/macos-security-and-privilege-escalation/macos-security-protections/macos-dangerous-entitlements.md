@@ -18,29 +18,34 @@ Note that entitlements starting with **`com.apple`** are not available to third-
 
 ## High
 
-### com.apple.rootless.install.heritable
+### `com.apple.rootless.install.heritable`
 
 The entitlement **`com.apple.rootless.install.heritable`** allows to **bypass SIP**. Check [this for more info](macos-sip.md#com.apple.rootless.install.heritable).
 
-### **com.apple.rootless.install**
+### **`com.apple.rootless.install`**
 
 The entitlement **`com.apple.rootless.install`** allows to **bypass SIP**. Check[ this for more info](macos-sip.md#com.apple.rootless.install).
-
-### `com.apple.security.get-task-allow`
-
-This entitlement allows to get the task port of the process run by the binary with this entitlement and **inject code on it**. Check [**this for more info**](../mac-os-architecture/macos-ipc-inter-process-communication/).
 
 ### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
 
 This entitlement allows to get the **task port for any** process, except the kernel. Check [**this for more info**](../mac-os-architecture/macos-ipc-inter-process-communication/).
 
+### `com.apple.security.get-task-allow`
+
+This entitlement allows other processes with the **`com.apple.security.cs.debugger`** entitlement to get the task port of the process run by the binary with this entitlement and **inject code on it**. Check [**this for more info**](../mac-os-architecture/macos-ipc-inter-process-communication/).
+
 ### `com.apple.security.cs.debugger`
 
-Apps with the Debugging Tool Entitlement can call `task_for_pid()` to retrieve a valid task port for unsigned and third-party apps with the `Get Task Allow` entitlement set to `true`. However, even with the debugging tool entitlement, a debugger can’t get the task ports of processes that don’t have the `Get Task Allow` entitlement, and that are therefore protected by System Integrity Protection. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
+Apps with the Debugging Tool Entitlement can call `task_for_pid()` to retrieve a valid task port for unsigned and third-party apps with the `Get Task Allow` entitlement set to `true`. However, even with the debugging tool entitlement, a debugger **can’t get the task ports** of processes that **don’t have the `Get Task Allow` entitlement**, and that are therefore protected by System Integrity Protection. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
 This entitlement allows to **load frameworks, plug-ins, or libraries without being either signed by Apple or signed with the same Team ID** as the main executable, so an attacker could abuse some arbitrary library load to inject code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
+
+### `com.apple.private.security.clear-library-validation`
+
+This entitlement is very similar to **`com.apple.security.cs.disable-library-validation`** but **instead** of **directly disabling** library validation, it allows the process to **call a `csops` system call to disable it**.\
+Check [**this for more info**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
@@ -50,17 +55,36 @@ This entitlement allows to **use DYLD environment variables** that could be used
 
 [**According to this blog**](https://objective-see.org/blog/blog\_0x4C.html), these entitlements allows to **modify** the **TCC** database.
 
-### com.apple.private.tcc.manager.check-by-audit-token
+### com.apple.private.security.kext-management
+
+Entitlement needed to ask the **kernel to load a kernel extension**.
+
+### `com.apple.private.tcc.manager.check-by-audit-token`
 
 TODO: I don't know what this allows to do
 
-### com.apple.private.apfs.revert-to-snapshot
+### `com.apple.private.apfs.revert-to-snapshot`
 
 TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!
 
-### com.apple.private.apfs.create-sealed-snapshot
+### `com.apple.private.apfs.create-sealed-snapshot`
 
 TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!
+
+### `keychain-access-groups`
+
+This entitlement list **keychain** groups the application has access to:
+
+```xml
+<key>keychain-access-groups</key>
+<array>
+        <string>ichat</string>
+        <string>apple</string>
+        <string>appleaccount</string>
+        <string>InternetAccounts</string>
+        <string>IMCore</string>
+</array>
+```
 
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
@@ -76,7 +100,9 @@ Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Allow to modify apps inside their folders (inside app.app), which is disallowed by default.
+Allow to modify files inside apps bundle (inside app.app), which is **disallowed by default**.
+
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ## Medium
 

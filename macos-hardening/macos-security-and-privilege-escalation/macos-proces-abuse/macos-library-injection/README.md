@@ -33,7 +33,7 @@ In the function **`processRestricted`** the reason of the restriction is set. Ch
 
 * The binary is `setuid/setgid`
 * Existence of `__RESTRICT/__restrict` section in the macho binary.
-* The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) entitlement or [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
+* The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) entitlement or [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)`/` [`com.apple.private.security.clear-library-validation`](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
   * Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
 * If the lib is signed with a different certificate as the binary
   * If the lib & the bin are signed with the same cert, this will bypass the previous restrictions

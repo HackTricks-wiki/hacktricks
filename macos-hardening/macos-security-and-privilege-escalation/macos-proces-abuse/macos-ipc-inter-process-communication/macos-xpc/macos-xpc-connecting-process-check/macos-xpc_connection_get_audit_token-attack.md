@@ -86,7 +86,7 @@ To perform the attack:
 3. What this means is that we can send XPC messages to `diagnosticd`, but any **messages `diagnosticd` sends go to `smd`**.&#x20;
    * For `smd`, both our and `diagnosticd`’s messages appear arrive on the same connection.
 
-<figure><img src="../../../../../../.gitbook/assets/image.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 4. We ask **`diagnosticd`** to **start monitoring** our (or any active) process and we **spam routine 1004 messages to `smd`** (to install a privileged tool).
 5. This creates a race condition that needs to hit a very specific window in `handle_bless`. We need the call to `xpc_connection_get_pid` to return the PID of our own process, as the privileged helper tool is in our app bundle. However, the call to `xpc_connection_get_audit_token` inside the `connection_is_authorized` function must use the audit token of `diganosticd`.
@@ -109,7 +109,7 @@ For this scenario we would need:
 
 We wait for _A_ to send us a message that expects a reply (1), instead of replying we take the reply port and use it for a message we send to _B_ (2). Then, we send a message that uses the forbidden action and we hope that it arrives concurrently with the reply from _B_ (3).
 
-<figure><img src="../../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Discovery Problems
 
