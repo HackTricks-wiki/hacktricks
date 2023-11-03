@@ -102,7 +102,7 @@ Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes
 
 Allow to modify files inside apps bundle (inside app.app), which is **disallowed by default**.
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ## Medium
 

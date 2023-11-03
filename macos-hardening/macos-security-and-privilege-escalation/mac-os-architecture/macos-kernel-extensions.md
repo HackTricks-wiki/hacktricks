@@ -22,7 +22,7 @@ Obviously, this is so powerful that it is **complicated to load a kernel extensi
 
 * When **entering recovery mode**, kernel **extensions must be allowed** to be loaded:
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * The kernel extension must be **signed with a kernel code signing certificate**, which can only be **granted by Apple**. Who will review in detail the company and the reasons why it is needed.
 * The kernel extension must also be **notarized**, Apple will be able to check it for malware.
