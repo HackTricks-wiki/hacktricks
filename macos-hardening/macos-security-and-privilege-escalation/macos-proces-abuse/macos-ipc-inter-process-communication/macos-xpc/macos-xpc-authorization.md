@@ -269,7 +269,7 @@ security authorizationdb read com.apple.safaridriver.allow
 * `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権限を取得します。ユーザーがすでにログインしている場合、これにより追加の認証がバイパスされる場合があります。
 
 4. **'shared': 'true'**
-* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です。ただし、'authenticate-user': 'false'などの他のキーと組み合わせる場合は、認証が必要ありません。
+* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有できることを意味します。ただし、権限の最初の付与には認証が必要です。ただし、'authenticate-user': 'false'などの他のキーと組み合わせる場合は、認証が必要ありません。
 
 興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます。
 ```bash
@@ -289,7 +289,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 もし、関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは以前に言及した認証のスキーマを使用しています:
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 この関数が `AuthorizationCreateFromExternalForm`、`authorizationRightForCommand`、`AuthorizationCopyRights`、`AuhtorizationFree` などの関数を呼び出している場合、[**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) を使用しています。
 
@@ -303,7 +303,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 <figure><img src="../../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-この場合、EvenBetterAuthorizationSample と同じものがあります、[**この行をチェックしてください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
+この場合、EvenBetterAuthorizationSample と同じものがあります。[**この行をチェックしてください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
 
 使用されているプロトコルの名前を知ることで、そのヘッダ定義を **ダンプ** することができます。
 ```bash

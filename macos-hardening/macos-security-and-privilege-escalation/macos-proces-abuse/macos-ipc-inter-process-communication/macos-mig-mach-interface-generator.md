@@ -352,7 +352,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// 計算されたアドレスに関数を呼び出す
+// 計算されたアドレスに対して呼び出しを行う
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -376,11 +376,11 @@ return r0;
 {% endtab %}
 {% endtabs %}
 
-実際には、関数 **`0x100004000`** に移動すると、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は関数が実装されているアドレスであり、**構造体は0x28バイトを占めます**。したがって、0バイトから始まる各0x28バイトで8バイトを取得し、それが呼び出される**関数のアドレス**になります。
-
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+実際には、関数 **`0x100004000`** に移動すると、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は関数が実装されているアドレスであり、**構造体は0x28バイトを取ります**。したがって、0バイトから始まる各0x28バイトで8バイトを取得し、それが呼び出される**関数のアドレス**になります。
 
 <figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 このデータは、[**この Hopper スクリプトを使用して**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py)抽出できます。
 

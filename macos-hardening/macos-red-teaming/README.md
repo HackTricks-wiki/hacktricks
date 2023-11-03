@@ -17,7 +17,7 @@
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
 
-管理プラットフォームへのアクセスのために**管理者の資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
+管理プラットフォームにアクセスするために**管理者の資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
 
 MacOS環境でのレッドチーミングには、MDMの動作原理についての理解が非常に重要です：
 
@@ -39,11 +39,11 @@ MDMは、プロファイルのインストール、クエリ、削除、アプ�
 
 ### JAMF PROの乱用
 
-JAMFは、**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）、**MDM**（デバイスの設定、デバイス証明書...）を実行できます。
+JAMFは、**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）、**MDM**（デバイスの設定、デバイスの証明書...）を実行できます。
 
 #### JAMFの自己登録
 
-`https://<company-name>.jamfcloud.com/enroll/`のようなページにアクセスして、**自己登録が有効になっているかどうか**を確認します。有効な場合、**資格情報を要求**する場合があります。
+`https://<company-name>.jamfcloud.com/enroll/`のようなページにアクセスして、**自己登録が有効になっているかどうか**を確認します。有効な場合、**資格情報を入力するように求められる**場合があります。
 
 [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py)スクリプトを使用してパスワードスプレー攻撃を実行できます。
 
@@ -51,12 +51,12 @@ JAMFは、**カスタムスクリプト**（システム管理者によって開
 
 ![](<../../.gitbook/assets/image (7) (1).png>)
 
-#### JAMFデバイス認証
+#### JAMFデバイスの認証
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見当時は**共有**されていました。秘密は**`jk23ucnq91jfu9aj`**でした。\
-さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に**永続化**されます。
+**`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見当時は**共有**されていました。その秘密は**`jk23ucnq91jfu9aj`**でした。\
+さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に**永続化**します。
 
 #### JAMFデバイスの乗っ取り
 
@@ -154,10 +154,10 @@ MacOSのユーザーには3つのタイプがあります：
 * **ネットワークユーザー** - 一時的なActive Directoryユーザーで、認証するためにDCサーバーへの接続が必要です。
 * **モバイルユーザー** - ローカルのバックアップを持つActive Directoryユーザーで、資格情報とファイルが保存されます。
 
-ユーザーとグループに関するローカル情報は、_ /var/db/dslocal/nodes/Default _フォルダに保存されています。\
-たとえば、ユーザー名が _mark_ の情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存され、グループ _admin_ の情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ に保存されています。
+ユーザーとグループに関するローカル情報は、_ /var/db/dslocal/nodes/Default _フォルダに保存されます。\
+たとえば、_mark_というユーザーの情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存され、_admin_というグループの情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ に保存されます。
 
-MacHoundはBloodhoundデータベースにHasSessionとAdminToのエッジに加えて、**3つの新しいエッジ**を追加します：
+MacHoundは、BloodhoundデータベースにHasSessionとAdminToのエッジに加えて、**3つの新しいエッジ**を追加します：
 
 * **CanSSH** - ホストへのSSHが許可されているエンティティ
 * **CanVNC** - ホストへのVNCが許可されているエンティティ
@@ -187,7 +187,7 @@ dsconfigad -show
 
 ## キーチェーンへのアクセス
 
-キーチェーンには、プロンプトを生成せずにアクセスできる場合に、赤チームの演習を進めるのに役立つ可能性のある機密情報が含まれています。
+キーチェーンには、プロンプトを生成せずにアクセスすると、赤チームの演習を進めるのに役立つ可能性のある機密情報が含まれています。
 
 {% content-ref url="macos-keychain.md" %}
 [macos-keychain.md](macos-keychain.md)
@@ -199,7 +199,7 @@ MacOS Red Teamingは、通常のWindows Red Teamingとは異なり、**MacOSは�
 
 ![](<../../.gitbook/assets/image (563).png>)
 
-## その他の赤チームのテクニック
+## その他のRed Teamテクニック
 
 ### Safari
 
@@ -220,8 +220,8 @@ Safariでファイルをダウンロードすると、それが「安全な」�
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 

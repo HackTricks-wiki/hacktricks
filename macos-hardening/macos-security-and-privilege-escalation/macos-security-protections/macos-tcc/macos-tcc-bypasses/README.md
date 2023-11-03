@@ -30,7 +30,7 @@ asd
 
 ### SSHバイパス
 
-デフォルトでは、**SSH経由でのアクセスは「フルディスクアクセス」**を持っていました。これを無効にするには、リストに表示されているが無効になっている状態にする必要があります（リストから削除してもこれらの特権は削除されません）：
+デフォルトでは、**SSH経由でのアクセスは「フルディスクアクセス」**を持っていました。これを無効にするには、リストに表示されているが無効になっている必要があります（リストから削除してもこれらの特権は削除されません）：
 
 ![](<../../../../../.gitbook/assets/image (569).png>)
 
@@ -50,15 +50,15 @@ SSHを有効にするには、現在は**フルディスクアクセス**が必�
 
 ### iCloud
 
-権限**`com.apple.private.icloud-account-access`**を持つことで、**`com.apple.iCloudHelper`** XPCサービスと通信することができ、iCloudトークンを提供します。
+権限**`com.apple.private.icloud-account-access`**を持つことで、**`com.apple.iCloudHelper`** XPCサービスと通信することができ、iCloudトークンを**提供**することができます。
 
-**iMovie**と**Garageband**はこの権限と他の権限を持っていました。
+**iMovie**と**Garageband**にはこの権限と他の権限がありました。
 
 その権限からiCloudトークンを取得するためのエクスプロイトについての詳細については、次のトークを参照してください：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automation
 
-**`kTCCServiceAppleEvents`**権限を持つアプリは、他のアプリを**制御することができます**。これは、他のアプリに付与された権限を悪用することができる可能性があることを意味します。
+**`kTCCServiceAppleEvents`**権限を持つアプリは、他のアプリを**制御**することができます。これは、他のアプリに付与された権限を**悪用**することができる可能性があります。
 
 Appleスクリプトについての詳細は次を参照してください：
 
@@ -70,7 +70,7 @@ Appleスクリプトについての詳細は次を参照してください：
 
 <figure><img src="../../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-#### iTermを介して
+#### iTerm上で
 
 FDAを持たないTerminalは、FDAを持つiTermを呼び出して、それを使用してアクションを実行できます：
 
@@ -179,10 +179,10 @@ rootとしてこのサービスを有効にすると、**ARDエージェント�
 ## **NFSHomeDirectory**による
 
 TCCは、ユーザーのHOMEフォルダ内のデータベースを使用して、ユーザー固有のリソースへのアクセスを制御します。データベースの場所は**$HOME/Library/Application Support/com.apple.TCC/TCC.db**です。\
-したがって、ユーザーが$HOME環境変数を**異なるフォルダ**を指すように設定してTCCを再起動できれば、ユーザーは**/Library/Application Support/com.apple.TCC/TCC.db**に新しいTCCデータベースを作成し、TCCに任意のTCC許可を任意のアプリに与えるようにトリックをかけることができます。
+したがって、ユーザーが$HOME環境変数を**異なるフォルダ**を指すように設定してTCCを再起動できれば、ユーザーは**/Library/Application Support/com.apple.TCC/TCC.db**に新しいTCCデータベースを作成し、TCCに任意のTCC許可を与えることができます。
 
 {% hint style="success" %}
-Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に格納された設定を**`$HOME`の値**として使用しているため、この値を変更する権限（`kTCCServiceSystemPolicySysAdminFiles`）を持つアプリケーションを侵害すると、このオプションをTCCバイパスとして**武器化**することができます。
+Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に格納された設定を**`$HOME`の値**として使用しているため、この値（`kTCCServiceSystemPolicySysAdminFiles`を変更する権限を持つアプリケーションを侵害する場合、このオプションをTCCバイパスとして**武器化**することができます。
 {% endhint %}
 
 ### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
@@ -201,7 +201,7 @@ Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に�
 6. ユーザーの_tccd_を停止し、プロセスを再起動します。
 
 2番目のPOCでは、**`/usr/libexec/configd`**が**`com.apple.private.tcc.allow`**という値**`kTCCServiceSystemPolicySysAdminFiles`**を持っていました。\
-**`configd`**を**`-t`**オプションで実行することで、攻撃者は**カスタムバンドルをロード**することができました。したがって、このエクスプロイトは、ユーザーのホームディレクトリを変更する**`dsexport`**と**`dsimport`**の方法を**`configd`のコードインジェクション**で置き換えます。
+**`configd`**を**`-t`**オプションで実行することができるため、攻撃者は**カスタムバンドルをロード**することができました。したがって、このエクスプロイトは、ユーザーのホームディレクトリを変更する**`dsexport`**と**`dsimport`**の方法を**`configd`コードインジェクション**で置き換えます。
 
 詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)を参照してください。
 
@@ -263,7 +263,7 @@ Core Media I/Oを介してカメラストリームを開くシステムアプリ
 
 そこに一般的な**コンストラクタ**を持つライブラリを保存するだけで、コードを**インジェクト**することができます。
 
-これにより、いくつかのAppleのアプリケーションが脆弱になりました。
+これに対していくつかのAppleのアプリケーションは脆弱でした。
 
 ### Firefox
 
@@ -291,19 +291,19 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-詳細については、[**元のレポート**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)をチェックしてください。
+詳細な情報については、[**元のレポートをチェックしてください**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)。
 
 ### CVE-2020-10006
 
-バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、プロセス内にコードを注入して TCC 権限を使用することができました。
+バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、プロセス内にコードを注入し、TCC の特権を使用することができました。
 
 ### CVE-2023-26818 - Telegram
 
-Telegram には `com.apple.security.cs.allow-dyld-environment-variables` と `com.apple.security.cs.disable-library-validation` の権限があり、カメラでの録画などの権限にアクセスすることができました。[**writeup でペイロードを見つけることができます**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)。
+Telegram には、`com.apple.security.cs.allow-dyld-environment-variables` と `com.apple.security.cs.disable-library-validation` の権限があり、カメラでの録画などの権限にアクセスすることができました。[**writeup でペイロードを見つけることができます**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)。
 
 ## オープンな呼び出しによる方法
 
-サンドボックス内で open を呼び出すことができます。
+サンドボックス化された状態でも `open` を呼び出すことができます。
 
 ### ターミナルスクリプト
 
@@ -405,17 +405,27 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 **`/var/db/locationd/clients.plist`**には、**位置情報サービスにアクセスを許可されたクライアント**を示す、第3のTCCデータベースがあります。\
 フォルダ**`/var/db/locationd/`はDMGのマウントから保護されていなかった**ため、独自のplistをマウントすることが可能でした。
 
-## スタートアップアプリによるバイパス
+## スタートアップアプリによる方法
 
 {% content-ref url="../../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
 {% endcontent-ref %}
 
-## grepによるバイパス
+## grepによる方法
 
-いくつかの場合、ファイルには電子メール、電話番号、メッセージなどの機密情報が保管されていますが、これらはAppleの脆弱性としてカウントされます。
+いくつかの場合、ファイルには電子メール、電話番号、メッセージなどの機密情報が保護されていない場所に保存されることがあります（これはAppleの脆弱性としてカウントされます）。
 
 <figure><img src="../../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
+
+## Synthetic Clicks
+
+これはもう機能しませんが、[**過去には機能しました**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+
+<figure><img src="../../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+[**CoreGraphicsイベント**](https://objectivebythesea.org/v2/talks/OBTS\_v2\_Wardle.pdf)を使用した別の方法:
+
+<figure><img src="../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## 参考
 
@@ -428,10 +438,10 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

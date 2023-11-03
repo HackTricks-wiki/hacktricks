@@ -58,18 +58,18 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 ```
 [https://hexed.it/](https://hexed.it/)でこのファイルをロードし、前の文字列を検索することができます。この文字列の後には、各ヒューズが無効または有効であることを示すASCIIの数字「0」または「1」が表示されます。ヒューズの値を変更するには、16進コード（`0x30`は`0`であり、`0x31`は`1`です）を変更します。
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 ただし、これらのバイトが変更された状態でアプリケーション内の**`Electron Framework`バイナリ**を上書きしようとすると、アプリが実行されなくなります。
 
 ## Electronアプリケーションへのコードの追加によるRCE
 
-Electronアプリが使用している**外部のJS/HTMLファイル**が存在する場合、攻撃者はこれらのファイルにコードを注入し、その署名がチェックされずにアプリのコンテキストで任意のコードを実行することができます。
+Electronアプリが使用している**外部のJS/HTMLファイル**が存在する場合、攻撃者はこれらのファイルにコードを注入し、シグネチャがチェックされないため、アプリのコンテキストで任意のコードを実行することができます。
 
 {% hint style="danger" %}
 ただし、現時点では2つの制限があります：
 
-* アプリを変更するには**`kTCCServiceSystemPolicyAppBundles`**パーミッションが必要です。したがって、デフォルトではこれは不可能になりました。
+* アプリを変更するには、**`kTCCServiceSystemPolicyAppBundles`**権限が必要です。したがって、デフォルトではこれはもはや可能ではありません。
 * コンパイルされた**`asap`**ファイルには通常、ヒューズ**`embeddedAsarIntegrityValidation`**と**`onlyLoadAppFromAsar`**が有効になっています。
 
 これにより、この攻撃経路はより複雑になります（または不可能になります）。
@@ -170,12 +170,12 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-もしfuse**`EnableNodeCliInspectArguments`**が無効になっている場合、アプリは起動時に`--inspect`のようなノードパラメータを**無視**します。ただし、環境変数**`ELECTRON_RUN_AS_NODE`**が設定されている場合は、それも**無視**されます。これはfuse**`RunAsNode`**が無効になっている場合も同様です。
+もしfuse**`EnableNodeCliInspectArguments`**が無効になっている場合、アプリは起動時に`--inspect`のようなノードのパラメータを**無視**します。ただし、環境変数**`ELECTRON_RUN_AS_NODE`**が設定されている場合は、それも**無視**されます。fuse**`RunAsNode`**が無効になっている場合も同様です。
 
 ただし、引き続き**electronパラメータ`--remote-debugging-port=9229`**を使用することはできますが、前述のペイロードでは他のプロセスを実行することはできません。
 {% endhint %}
 
-パラメータ**`--remote-debugging-port=9222`**を使用すると、Electronアプリからいくつかの情報を盗むことができます。例えば、**履歴**（GETコマンドを含む）やブラウザの**クッキー**（ブラウザ内で**復号**され、それらを提供する**JSONエンドポイント**が存在します）です。
+パラメータ**`--remote-debugging-port=9222`**を使用すると、Electronアプリから**履歴**（GETコマンドを含む）やブラウザの**クッキー**（ブラウザ内で**復号**され、それらを提供する**JSONエンドポイント**が存在する）などの情報を盗むことができます。
 
 これについては、[**こちら**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)と[**こちら**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)で学ぶことができます。また、自動ツール[WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut)や以下のようなシンプルなスクリプトを使用することもできます：
 ```python

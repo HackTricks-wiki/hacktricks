@@ -1,33 +1,33 @@
-# Autorunバイナリを使用した特権エスカレーション
+# Autorunsを使用した特権エスカレーション
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-もしあなたが**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したい場合 - **採用中です！**（流暢なポーランド語の読み書きが必要です）。
+もしあなたが**ハッキングのキャリア**に興味があり、アンハッカブルをハックしたいのであれば、**採用しています！**（流暢なポーランド語の読み書きが必要です）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## WMIC
 
-**Wmic**は、**起動時**にプログラムを実行するために使用できます。次のコマンドで、起動時にプログラムが設定されているバイナリを確認できます。
+**Wmic**は、**起動時**にプログラムを実行するために使用することができます。次のコマンドで、起動時にプログラムが設定されているバイナリを確認できます。
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## スケジュールされたタスク
 
-**タスク**は、**特定の頻度**で実行されるようにスケジュールすることができます。次のコマンドでスケジュールされたバイナリを確認します。
+**タスク**は、**特定の頻度**で実行されるようにスケジュールできます。次のコマンドでスケジュールされたバイナリを確認します。
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -306,21 +306,19 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\she
 
 Image File Execution Options（IFEO）は、Windowsオペレーティングシステムで実行されるプロセスの動作を変更するための機能です。IFEOは、デバッグ用途で開発者が使用することを意図していますが、悪意のある目的で利用されることもあります。
 
-IFEOを悪用すると、特権昇格攻撃を実行することができます。攻撃者は、IFEOを使用してシステム上で実行されるプロセスを変更し、特権のあるプロセスとして実行することができます。
+IFEOを悪用すると、特権昇格攻撃を実行することができます。攻撃者は、IFEOを使用してシステム上で実行されるプロセスを置き換えることができます。これにより、攻撃者は特権レベルのプロセスを実行し、システムに対する完全な制御を取得することができます。
 
-IFEOを使用した特権昇格攻撃の手法の一つは、既存の実行可能ファイルにIFEOエントリを作成することです。このエントリには、攻撃者が実行したいプロセスのパスと、そのプロセスを実行するためのデバッガのパスが指定されます。その結果、攻撃者が指定したプロセスが実行される際に、デバッガが同時に起動されます。
+IFEOを使用した特権昇格攻撃を実行するためには、攻撃者は管理者権限を持つ必要があります。攻撃者は、IFEOの設定を変更するためにレジストリエディタやコマンドラインツールを使用することができます。
 
-攻撃者は、デバッガとして任意のプログラムを指定することができます。このプログラムは、攻撃者が特権のある操作を実行するために使用することができます。たとえば、システムレジストリの変更や、特権のあるファイルへのアクセスなどが考えられます。
+IFEOを悪用する攻撃の一例として、システム上で実行されるプロセスの代わりに、特権を持つプロセスを実行するためのバイナリを指定することがあります。これにより、攻撃者は特権レベルのアクセスを取得し、システム上で様々な操作を行うことができます。
 
-IFEOを悪用した特権昇格攻撃は、システムのセキュリティを脅かす重大な問題です。攻撃者は、システム上で特権のある操作を実行することができ、システム全体を乗っ取る可能性があります。
-
-IFEOを悪用した攻撃からシステムを保護するためには、以下の対策を実施することが重要です。
+IFEOを悪用されないようにするためには、以下の対策を実施することが重要です。
 
 - 不要なIFEOエントリを削除する
 - IFEOエントリの変更を監視する
 - セキュリティソフトウェアを使用してIFEOの悪用を検出する
 
-これらの対策を実施することで、IFEOを悪用した特権昇格攻撃からシステムを保護することができます。
+IFEOは、Windowsのセキュリティにおいて重要な機能ですが、悪意のある攻撃に悪用される可能性もあるため、適切な対策を講じることが重要です。
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
@@ -341,7 +339,7 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 もし興味があるなら、**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したい場合は、**採用中です**（流暢なポーランド語の読み書きが必要です）。
 
@@ -354,7 +352,7 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

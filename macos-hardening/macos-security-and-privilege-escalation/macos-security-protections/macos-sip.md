@@ -4,9 +4,9 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* あなたは**サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するために、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -89,13 +89,15 @@ SIPは他にもいくつかの制限を課しています。たとえば、**署
 権限 **`com.apple.rootless.install.heritable`** はSIPを回避することができます
 {% endhint %}
 
-[**このブログポストの研究者たち**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)は、macOSのシステム整合性保護（SIP）メカニズムである「Shrootless」という脆弱性を発見しました。この脆弱性は、SIPのファイルシステム制限を回避するために、`system_installd`デーモンに付与された権限である**`com.apple.rootless.install.heritable`**に関連しています。
+[**このブログポストの研究者たち**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)は、macOSのシステム整合性保護（SIP）メカニズムである「Shrootless」という脆弱性を発見しました。この脆弱性は、**`system_installd`**デーモンに関連しており、**`com.apple.rootless.install.heritable`**という権限を持っています。この権限により、**`system_installd`**の子プロセスはSIPのファイルシステム制限を回避することができます。
 
-研究者たちは、Appleの署名されたパッケージ（.pkgファイル）のインストール中に、パッケージに含まれる**post-installスクリプト**を**`system_installd`が実行**することを発見しました。これらのスクリプトはデフォルトのシェルである**`zsh`**によって実行され、非対話モードでも存在する場合は**`/etc/zshenv`**ファイルからコマンドが自動的に実行されます。この動作は攻撃者によって悪用される可能性があります。悪意のある`/etc/zshenv`ファイルを作成し、`system_installd`が`zsh`を呼び出すのを待つことで、デバイス上で任意の操作を実行することができます。
+**`system_installd`**デーモンは、**Apple**によって署名されたパッケージをインストールします。
 
-さらに、**`/etc/zshenv`はSIPの回避だけでなく、一般的な攻撃手法として使用できる**ことが発見されました。各ユーザープロファイルには`~/.zshenv`ファイルがあり、これは`/etc/zshenv`と同じように動作しますが、ルート権限は必要ありません。このファイルは永続性のメカニズムとして使用することができ、`zsh`が起動するたびにトリガーされるか、特権の昇格メカニズムとして使用することができます。管理者ユーザーが`sudo -s`または`sudo <command>`を使用してルートに昇格する場合、`~/.zshenv`ファイルがトリガーされ、実質的にルートに昇格します。
+研究者たちは、Appleによって署名されたパッケージ（.pkgファイル）のインストール中に、パッケージに含まれる**post-install**スクリプトが**`system_installd`**によって実行されることを発見しました。これらのスクリプトはデフォルトのシェルである**`zsh`**によって実行され、非対話モードでも**`/etc/zshenv`**ファイルからコマンドが自動的に実行されます。この動作は攻撃者によって悪用される可能性があります。悪意のある`/etc/zshenv`ファイルを作成し、**`system_installd`が`zsh`を呼び出すのを待つ**ことで、デバイス上で任意の操作を実行することができます。
 
-[**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)では、同じ**`system_installd`**プロセスが悪用される可能性があることが発見されました。なぜなら、**post-installスクリプトが`/tmp`内のSIPで保護されたランダムに名前が付けられたフォルダに配置**されていたからです。ただし、**`/tmp`自体はSIPで保護されていない**ため、**仮想イメージをマウント**することが可能であり、その後、**インストーラー**が**post-installスクリプト**をそこに配置し、**仮想イメージをアンマウント**し、**すべてのフォルダを再作成**し、**ペイロード**を実行するための**post-installationスクリプト**を追加することができました。
+さらに、**`/etc/zshenv`はSIPの回避だけでなく、一般的な攻撃手法としても使用できます**。各ユーザープロファイルには`~/.zshenv`ファイルがあり、これは`/etc/zshenv`と同じように動作しますが、ルート権限は必要ありません。このファイルは、`zsh`が起動するたびにトリガーされる永続性のメカニズムとして、または特権の昇格のメカニズムとして使用することができます。管理者ユーザーが`sudo -s`または`sudo <command>`を使用してルートに昇格する場合、`~/.zshenv`ファイルがトリガーされ、実質的にルートに昇格します。
+
+[**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)では、同じ**`system_installd`**プロセスが悪用される可能性があることが発見されました。なぜなら、**post-installスクリプトが`/tmp`内のSIPで保護されたランダムに名前が付けられたフォルダに配置されていた**からです。ただし、**`/tmp`自体はSIPで保護されていない**ため、**仮想イメージをマウント**することが可能であり、その後、**インストーラー**が**post-installスクリプト**をそこに配置し、**仮想イメージをアンマウント**し、**すべてのフォルダを再作成**し、**ペイロード**を実行するための**post-installationスクリプト**を追加することができました。
 
 ### **com.apple.rootless.install**
 
@@ -107,12 +109,12 @@ SIPは他にもいくつかの制限を課しています。たとえば、**署
 
 ## シールドされたシステムスナップショット
 
-シールドされたシステムスナップショットは、Appleが**macOS Big Sur（macOS 11）**で導入した機能であり、**システム整合性保護（SIP）**メカニズムの一部として、追加のセキュリティとシステムの安定性を提供するものです。これらは、システムボリュームの読み取り専用バージョンです。
+シールドされたシステムスナップショットは、Appleが**macOS Big Sur（macOS 11）**で導入した機能であり、**システム整合性保護（SIP）**メカニズムの一部として、追加のセキュリティとシステムの安定性を提供するためのものです。これらは、システムボリュームの読み取り専用バージョンです。
 
 以下に詳細を示します：
 
-1. **不変のシステム**：シールドされたシステムスナップショットにより、macOSシステムボリュームは「不変」となり、変更することができなくなります。これにより、セキュリティやシステムの安定性に影響を及ぼす可能性のある不正な変更や誤った変更を防止します。
-2. **システムソフトウェアの更新**：macOSのアップデートやアップグレードを
+1. **不変のシステム**：シールドされたシステムスナップショットにより、macOSシステムボリュームは「不変」となり、変更することができなくなります。これにより、セキュリティやシステムの安定性に影響を及ぼす可能性のある、不
+|   |   スナップショット:                  FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
 |   |   スナップショットディスク:             disk3s1s1
 <strong>|   |   スナップショットマウントポイント:      /
 </strong><strong>|   |   スナップショットシールド:           はい
@@ -148,7 +150,7 @@ mount
 * **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
