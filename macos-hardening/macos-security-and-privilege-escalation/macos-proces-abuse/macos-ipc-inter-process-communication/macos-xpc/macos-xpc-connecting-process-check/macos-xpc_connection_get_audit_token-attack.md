@@ -23,7 +23,7 @@ Si no sabes qué son los mensajes Mach, comienza revisando esta página:
 {% endcontent-ref %}
 
 Por ahora, recuerda que:
-Los mensajes Mach se envían a través de un _puerto Mach_, que es un canal de comunicación de **un solo receptor, múltiples remitentes** integrado en el kernel Mach. **Múltiples procesos pueden enviar mensajes** a un puerto Mach, pero en cualquier momento **solo un proceso puede leer de él**. Al igual que los descriptores de archivos y los sockets, los puertos Mach son asignados y gestionados por el kernel, y los procesos solo ven un número entero, que pueden usar para indicar al kernel qué puerto Mach desean utilizar.
+Los mensajes Mach se envían a través de un _puerto Mach_, que es un canal de comunicación de **un solo receptor y múltiples remitentes** integrado en el kernel Mach. **Múltiples procesos pueden enviar mensajes** a un puerto Mach, pero en cualquier momento **solo un proceso puede leer de él**. Al igual que los descriptores de archivos y los sockets, los puertos Mach son asignados y gestionados por el kernel, y los procesos solo ven un número entero, que pueden usar para indicar al kernel qué puerto Mach desean utilizar.
 
 ## Conexión XPC
 
@@ -82,10 +82,10 @@ Para realizar el ataque:
 
 1. Establecemos nuestra **conexión** a **`smd`** siguiendo el protocolo XPC normal.
 2. Luego, establecemos una **conexión** a **`diagnosticd`**, pero en lugar de generar dos nuevos puertos mach y enviarlos, reemplazamos el derecho de envío del puerto del cliente con una copia del **derecho de envío que tenemos para la conexión a `smd`**.
-3. Esto significa que podemos enviar mensajes XPC a `diagnosticd`, pero cualquier **mensaje que `diagnosticd` envíe irá a `smd`**.
+3. Esto significa que podemos enviar mensajes XPC a `diagnosticd`, pero cualquier **mensaje que `diagnosticd` envíe va a `smd`**.
 * Para `smd`, tanto nuestros mensajes como los mensajes de `diagnosticd` llegan a la misma conexión.
 
-<figure><img src="../../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 4. Le pedimos a **`diagnosticd`** que **comience a monitorizar** nuestro (o cualquier otro) proceso y **enviamos mensajes rutinarios 1004 a `smd`** (para instalar una herramienta privilegiada).
 5. Esto crea una condición de carrera que debe alcanzar una ventana muy específica en `handle_bless`. Necesitamos que la llamada a `xpc_connection_get_pid` devuelva el PID de nuestro propio proceso, ya que la herramienta auxiliar privilegiada está en nuestro paquete de aplicaciones. Sin embargo, la llamada a `xpc_connection_get_audit_token` dentro de la función `connection_is_authorized` debe usar el token de auditoría de `diagnosticd`.
@@ -101,14 +101,14 @@ Por lo tanto, los **paquetes de respuesta XPC pueden analizarse mientras se est�
 
 Para este escenario necesitaríamos:
 
-* Como antes, dos servicios mach **A** y **B** a los que podemos conectarnos.
-* Nuevamente, **A** debe tener una comprobación de autorización para una acción específica que **B** puede pasar (pero nuestra aplicación no puede).
-* **A** nos envía un mensaje que espera una respuesta.
-* Podemos enviar un mensaje a **B** al que responderá.
+* Como antes, dos servicios mach _A_ y _B_ a los que podemos conectarnos.
+* Nuevamente, _A_ debe tener una comprobación de autorización para una acción específica que _B_ puede pasar (pero nuestra aplicación no puede).
+* _A_ nos envía un mensaje que espera una respuesta.
+* Podemos enviar un mensaje a _B_ al que responderá.
 
-Esperamos a que **A** nos envíe un mensaje que espera una respuesta (1), en lugar de responder, tomamos el puerto de respuesta y lo usamos para un mensaje que enviamos a **B** (2). Luego, enviamos un mensaje que utiliza la acción prohibida y esperamos que llegue concurrentemente con la respuesta de **B** (3).
+Esperamos a que _A_ nos envíe un mensaje que espera una respuesta (1), en lugar de responder, tomamos el puerto de respuesta y lo usamos para un mensaje que enviamos a _B_ (2). Luego, enviamos un mensaje que utiliza la acción prohibida y esperamos que llegue concurrentemente con la respuesta de _B_ (3).
 
-<figure><img src="../../../../../../.gitbook/assets/image (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Problemas de descubrimiento
 

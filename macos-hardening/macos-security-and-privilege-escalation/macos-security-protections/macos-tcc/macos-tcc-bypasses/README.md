@@ -6,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -26,47 +26,47 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para dar acceso a la **aplicación creadora** para leerlo.
+El atributo extendido `com.apple.macl` se agrega al nuevo archivo para dar acceso a la aplicación creadora para leerlo.
 
 ### Bypass de SSH
 
-Por defecto, el acceso a través de **SSH solía tener "Acceso completo al disco"**. Para desactivarlo, es necesario que esté en la lista pero desactivado (eliminarlo de la lista no eliminará esos privilegios):
+Por defecto, el acceso a través de SSH solía tener "Acceso completo al disco". Para desactivarlo, es necesario que esté en la lista pero desactivado (eliminarlo de la lista no eliminará esos privilegios):
 
 ![](<../../../../../.gitbook/assets/image (569).png>)
 
-Aquí puedes encontrar ejemplos de cómo algunos **malwares han logrado evadir esta protección**:
+Aquí puedes encontrar ejemplos de cómo algunos malwares han logrado evadir esta protección:
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
 {% hint style="danger" %}
-Ten en cuenta que ahora, para poder habilitar SSH, necesitas **Acceso completo al disco**.
+Ten en cuenta que ahora, para poder habilitar SSH, necesitas "Acceso completo al disco".
 {% endhint %}
 
 ### Manejar extensiones - CVE-2022-26767
 
-El atributo **`com.apple.macl`** se otorga a los archivos para darle a una **aplicación específica permisos para leerlo**. Este atributo se establece cuando se **arrastra y suelta** un archivo sobre una aplicación, o cuando un usuario **hace doble clic** en un archivo para abrirlo con la **aplicación predeterminada**.
+El atributo `com.apple.macl` se otorga a los archivos para darle a una determinada aplicación permisos para leerlo. Este atributo se establece cuando se arrastra y se suelta un archivo sobre una aplicación, o cuando un usuario hace doble clic en un archivo para abrirlo con la aplicación predeterminada.
 
-Por lo tanto, un usuario podría **registrar una aplicación maliciosa** para manejar todas las extensiones y llamar a Launch Services para **abrir** cualquier archivo (de modo que el archivo malicioso obtendrá acceso para leerlo).
+Por lo tanto, un usuario podría registrar una aplicación maliciosa para manejar todas las extensiones y llamar a Launch Services para abrir cualquier archivo (de modo que el archivo malicioso obtendrá acceso para leerlo).
 
 ### iCloud
 
-Con el permiso **`com.apple.private.icloud-account-access`**, es posible comunicarse con el servicio XPC **`com.apple.iCloudHelper`**, que **proporcionará tokens de iCloud**.
+Con el entitlement `com.apple.private.icloud-account-access`, es posible comunicarse con el servicio XPC `com.apple.iCloudHelper`, que proporcionará tokens de iCloud.
 
-**iMovie** y **Garageband** tenían este permiso y otros que lo permitían.
+**iMovie** y **Garageband** tenían este entitlement y otros que lo permitían.
 
-Para obtener más **información** sobre la explotación para **obtener tokens de iCloud** a partir de ese permiso, consulta la charla: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Para obtener más información sobre la explotación para obtener tokens de iCloud a partir de ese entitlement, consulta la charla: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automatización
 
-Una aplicación con el permiso **`kTCCServiceAppleEvents`** podrá **controlar otras aplicaciones**. Esto significa que podría abusar de los permisos otorgados a las otras aplicaciones.
+Una aplicación con el permiso `kTCCServiceAppleEvents` podrá controlar otras aplicaciones. Esto significa que podría abusar de los permisos otorgados a las otras aplicaciones.
 
-Para obtener más información sobre los Scripts de Apple, consulta:
+Para obtener más información sobre los Apple Scripts, consulta:
 
 {% content-ref url="macos-apple-scripts.md" %}
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, por ejemplo en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
+Por ejemplo, si una aplicación tiene permiso de Automatización sobre `iTerm`, por ejemplo en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
 
 <figure><img src="../../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -201,7 +201,7 @@ El **primer POC** utiliza [**dsexport**](https://www.unix.com/man-page/osx/1/dse
 6. Detén el proceso _tccd_ del usuario y reinicia el proceso.
 
 El segundo POC utilizó **`/usr/libexec/configd`** que tenía `com.apple.private.tcc.allow` con el valor **`kTCCServiceSystemPolicySysAdminFiles`**.\
-Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga de paquete personalizada**. Por lo tanto, el exploit **reemplaza** el método de cambio del directorio de inicio del usuario mediante **inyección de código en `configd`**.
+Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga personalizada de paquete**. Por lo tanto, el exploit **reemplaza** el método de cambio del directorio de inicio del usuario mediante **inyección de código en `configd`**.
 
 Para obtener más información, consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 
@@ -220,7 +220,7 @@ Los plugins son código adicional generalmente en forma de bibliotecas o plist, 
 
 La aplicación `/System/Library/CoreServices/Applications/Directory Utility.app` tenía el entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, cargaba plugins con extensión **`.daplug`** y **no tenía el runtime endurecido**.
 
-Para aprovechar esta CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del entitlement anterior) para poder **tomar el control de la base de datos de TCC de los usuarios** y eludir TCC.
+Para aprovechar esta CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del entitlement anterior) para poder **tomar el control de la base de datos de TCC** de los usuarios y eludir TCC.
 
 Para obtener más información, consulta el [**informe original**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 
@@ -303,7 +303,7 @@ Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-varia
 
 ## Mediante invocaciones abiertas
 
-Es posible invocar `open` en un entorno sandbox.
+Es posible invocar `open` incluso cuando se está en un entorno sandbox&#x20;
 
 ### Scripts de Terminal
 
@@ -417,12 +417,22 @@ En varias ocasiones, los archivos almacenarán información sensible como correo
 
 <figure><img src="../../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
 
+## Clicks sintéticos
+
+Esto ya no funciona, pero [**sí funcionó en el pasado**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+
+<figure><img src="../../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+Otra forma utilizando [**eventos de CoreGraphics**](https://objectivebythesea.org/v2/talks/OBTS\_v2\_Wardle.pdf):
+
+<figure><img src="../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
+
 ## Referencia
 
 * [**https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8**](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
 * [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 * [**20+ Formas de Evadir los Mecanismos de Privacidad de tu macOS**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
-* [**Knockout Win Against TCC - 20+ Nuevas Formas de Evadir los Mecanismos de Privacidad de tu MacOS**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
+* [**Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
 
 <details>
 
@@ -430,8 +440,8 @@ En varias ocasiones, los archivos almacenarán información sensible como correo
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

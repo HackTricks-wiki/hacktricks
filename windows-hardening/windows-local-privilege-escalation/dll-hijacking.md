@@ -6,15 +6,15 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere dominio del polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -47,17 +47,17 @@ y mostrar solo la **Actividad del sistema de archivos**:
 
 ![](<../../.gitbook/assets/image (314).png>)
 
-Si estás buscando **DLLs faltantes en general**, déjalo ejecutándose durante unos **segundos**.\
+Si estás buscando **DLLs faltantes en general**, debes dejar esto ejecutándose durante algunos **segundos**.\
 Si estás buscando una **DLL faltante dentro de un ejecutable específico**, debes configurar **otro filtro como "Nombre del proceso" "contiene" "\<nombre del ejecutable>", ejecutarlo y detener la captura de eventos**.
 ## Explotando Dlls faltantes
 
-Para escalar privilegios, la mejor oportunidad que tenemos es poder **escribir una dll que un proceso privilegiado intentará cargar** en algún **lugar donde se buscará**. De esta manera, podremos **escribir** una dll en una **carpeta** donde la dll se busca antes que en la carpeta donde se encuentra la **dll original** (caso extraño), o podremos **escribir en alguna carpeta donde se buscará la dll** y la **dll original no existe** en ninguna carpeta.
+Para escalar privilegios, la mejor oportunidad que tenemos es poder **escribir una dll que un proceso privilegiado intentará cargar** en algún **lugar donde se buscará**. De esta manera, podremos **escribir** una dll en una **carpeta** donde la dll se busca antes que la carpeta donde se encuentra la **dll original** (caso extraño), o podremos **escribir en alguna carpeta donde se buscará la dll** y la **dll original no existe** en ninguna carpeta.
 
 ### Orden de búsqueda de Dlls
 
 **Dentro de la** [**documentación de Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **puedes encontrar cómo se cargan específicamente las Dlls**.
 
-En general, una **aplicación de Windows** utilizará **rutas de búsqueda predefinidas para encontrar las DLL** y comprobará estas rutas en un orden específico. El secuestro de DLL generalmente ocurre colocando una DLL maliciosa en una de estas carpetas asegurándose de que la DLL se encuentre antes que la legítima. Este problema se puede mitigar haciendo que la aplicación especifique rutas absolutas a las DLL que necesita.
+En general, una **aplicación de Windows** utilizará **rutas de búsqueda predefinidas para encontrar las DLL** y verificará estas rutas en un orden específico. El secuestro de DLL generalmente ocurre colocando una DLL maliciosa en una de estas carpetas asegurándose de que la DLL se encuentre antes que la legítima. Este problema se puede mitigar haciendo que la aplicación especifique rutas absolutas a las DLL que necesita.
 
 Puedes ver el **orden de búsqueda de DLL en sistemas de 32 bits** a continuación:
 
@@ -228,7 +228,7 @@ break;
 return TRUE;
 }
 ```
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 
@@ -240,7 +240,7 @@ Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡*
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

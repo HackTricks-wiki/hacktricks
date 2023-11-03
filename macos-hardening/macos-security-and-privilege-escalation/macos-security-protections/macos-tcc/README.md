@@ -123,15 +123,70 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
-### Escalada de privilegios desde la base de datos de usuario TCC a FDA
+### Escalación de privilegios desde la base de datos de usuario TCC a FDA
 
-Obtener **permisos de escritura** sobre la base de datos de usuario TCC no te permite otorgarte a ti mismo los permisos de **`FDA`**, solo aquellos que residen en la base de datos del sistema pueden otorgarlos.
+Obtener **permisos de escritura** sobre la base de datos de usuario TCC no te permite otorgarte a ti mismo los permisos de **`FDA`**, solo la base de datos del sistema puede otorgar eso.
 
 Pero puedes otorgarte a ti mismo los **derechos de automatización para Finder**, y dado que Finder tiene `FDA`, tú también los tendrás.
 
+### De la omisión de SIP a la omisión de TCC
+
+Las bases de datos de **TCC** están protegidas por **SIP**, por lo que solo los procesos con los **privilegios indicados podrán modificar** las bases de datos. Por lo tanto, si un atacante encuentra una **omisión de SIP** en un **archivo** (puede modificar un archivo restringido por SIP), podrá **eliminar la protección** de una base de datos de TCC y otorgarse todos los permisos de TCC.
+
+Sin embargo, hay otra opción para abusar de esta **omisión de SIP para omitir TCC**: el archivo `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` es una lista de aplicaciones que requieren una excepción de TCC. Por lo tanto, si un atacante puede **eliminar la protección de SIP** de este archivo y agregar su **propia aplicación**, la aplicación podrá omitir TCC.
+Por ejemplo, para agregar Terminal:
+```bash
+# Get needed info
+codesign -d -r- /System/Applications/Utilities/Terminal.app
+```
+AllowApplicationsList.plist:
+
+Este archivo es utilizado por el Mecanismo de Control de Transparencia (TCC) en macOS para determinar qué aplicaciones tienen permiso para acceder a ciertos recursos protegidos, como la cámara, el micrófono o los datos de ubicación. El archivo AllowApplicationsList.plist contiene una lista de las aplicaciones permitidas y sus identificadores de paquete.
+
+Para agregar una aplicación a la lista de permitidas, debes editar este archivo y agregar una entrada con el identificador de paquete de la aplicación. Asegúrate de que el identificador de paquete sea correcto, ya que de lo contrario la aplicación no será reconocida.
+
+Es importante tener en cuenta que modificar este archivo requiere privilegios de administrador y puede afectar la seguridad del sistema si se realizan cambios incorrectos. Se recomienda tener precaución al editar este archivo y realizar copias de seguridad regulares del mismo.
+
+Aquí hay un ejemplo de cómo se ve el archivo AllowApplicationsList.plist:
+
+```xml
+<dict>
+    <key>AllowedApplications</key>
+    <array>
+        <string>com.example.app1</string>
+        <string>com.example.app2</string>
+    </array>
+</dict>
+```
+
+En este ejemplo, las aplicaciones "com.example.app1" y "com.example.app2" tienen permiso para acceder a los recursos protegidos por el TCC.
+
+Recuerda que es importante mantener actualizado este archivo y revisar regularmente las aplicaciones permitidas para garantizar la seguridad de tu sistema.
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>Services</key>
+<dict>
+<key>SystemPolicyAllFiles</key>
+<array>
+<dict>
+<key>CodeRequirement</key>
+<string>identifier &quot;com.apple.Terminal&quot; and anchor apple</string>
+<key>IdentifierType</key>
+<string>bundleID</string>
+<key>Identifier</key>
+<string>com.apple.Terminal</string>
+</dict>
+</array>
+</dict>
+</dict>
+</plist>
+```
 ### Verificación de firmas de TCC
 
-La base de datos de TCC almacena el **ID de paquete** de la aplicación, pero también **almacena** información sobre la **firma** para asegurarse de que la aplicación que solicita usar un permiso sea la correcta.
+La **base de datos** de TCC almacena el **ID del paquete** de la aplicación, pero también **almacena** **información** sobre la **firma** para **asegurarse** de que la aplicación que solicita usar un permiso sea la correcta.
 
 {% code overflow="wrap" %}
 ```bash

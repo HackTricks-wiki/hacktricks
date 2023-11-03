@@ -23,7 +23,7 @@ Estas técnicas se discutirán a continuación, pero recientemente Electron ha a
 
 * **`RunAsNode`**: Si está deshabilitado, evita el uso de la variable de entorno **`ELECTRON_RUN_AS_NODE`** para inyectar código.
 * **`EnableNodeCliInspectArguments`**: Si está deshabilitado, los parámetros como `--inspect`, `--inspect-brk` no se respetarán. Evitando así la inyección de código de esta manera.
-* **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será validado por macOS. **Previniendo** de esta manera la **inyección de código** al modificar el contenido de este archivo.
+* **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será validado por macOS. **Evitando** de esta manera la **inyección de código** al modificar el contenido de este archivo.
 * **`OnlyLoadAppFromAsar`**: Si está habilitado, en lugar de buscar para cargar en el siguiente orden: **`app.asar`**, **`app`** y finalmente **`default_app.asar`**. Solo verificará y usará app.asar, asegurando así que cuando se **combine** con el fusible **`embeddedAsarIntegrityValidation`**, sea **imposible** cargar código no validado.
 * **`LoadBrowserProcessSpecificV8Snapshot`**: Si está habilitado, el proceso del navegador utiliza el archivo llamado `browser_v8_context_snapshot.bin` para su instantánea de V8.
 
@@ -58,18 +58,18 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 ```
 Puedes cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la cadena anterior. Después de esta cadena, puedes ver en ASCII un número "0" o "1" que indica si cada fusible está desactivado o activado. Simplemente modifica el código hexadecimal (`0x30` es `0` y `0x31` es `1`) para **modificar los valores de los fusibles**.
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 Ten en cuenta que si intentas **sobrescribir** el binario del **`Electron Framework`** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
 
-## RCE añadiendo código a las aplicaciones de Electron
+## RCE añadiendo código a Aplicaciones Electron
 
-Puede haber **archivos JS/HTML externos** que una aplicación de Electron esté utilizando, por lo que un atacante podría inyectar código en estos archivos cuya firma no será verificada y ejecutar código arbitrario en el contexto de la aplicación.
+Puede haber **archivos JS/HTML externos** que una Aplicación Electron esté utilizando, por lo que un atacante podría inyectar código en estos archivos cuya firma no será verificada y ejecutar código arbitrario en el contexto de la aplicación.
 
 {% hint style="danger" %}
 Sin embargo, en este momento hay 2 limitaciones:
 
-* Se necesita el permiso **`kTCCServiceSystemPolicyAppBundles`** para modificar una aplicación, por lo que por defecto esto ya no es posible.
+* Se necesita el permiso **`kTCCServiceSystemPolicyAppBundles`** para modificar una Aplicación, por lo que por defecto esto ya no es posible.
 * El archivo compilado **`asap`** generalmente tiene los fusibles **`embeddedAsarIntegrityValidation`** y **`onlyLoadAppFromAsar`** habilitados.
 
 Esto hace que esta ruta de ataque sea más complicada (o imposible).
@@ -79,7 +79,7 @@ Ten en cuenta que es posible evitar el requisito de **`kTCCServiceSystemPolicyAp
 
 ## RCE con `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si esta variable de entorno está configurada, iniciará el proceso como un proceso normal de Node.js.
+Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si esta variable de entorno está configurada, iniciará el proceso como un proceso Node.js normal.
 
 {% code overflow="wrap" %}
 ```bash
@@ -175,7 +175,7 @@ Si el fusible **`EnableNodeCliInspectArguments`** está desactivado, la aplicaci
 Sin embargo, aún puedes usar el parámetro de electron `--remote-debugging-port=9229`, pero la carga útil anterior no funcionará para ejecutar otros procesos.
 {% endhint %}
 
-Usando el parámetro **`--remote-debugging-port=9222`**, es posible robar información de la aplicación Electron, como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **descifradas** dentro del navegador y hay un **endpoint json** que las proporcionará).
+Usando el parámetro **`--remote-debugging-port=9222`** es posible robar información de la aplicación Electron, como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **descifradas** dentro del navegador y hay un **endpoint json** que las proporcionará).
 
 Puedes aprender cómo hacerlo [**aquí**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) y [**aquí**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) y utilizar la herramienta automática [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) o un simple script como:
 ```python
@@ -187,7 +187,7 @@ print(ws.recv()
 ```
 ### Inyección desde el archivo Plist de la aplicación
 
-Podrías abusar de esta variable de entorno en un plist para mantener la persistencia agregando estas claves:
+Podrías abusar de esta variable de entorno en un archivo plist para mantener la persistencia agregando estas claves:
 ```xml
 <dict>
 <key>ProgramArguments</key>
