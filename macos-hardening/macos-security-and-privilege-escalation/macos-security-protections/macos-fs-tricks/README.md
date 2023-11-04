@@ -182,6 +182,12 @@ Sin embargo, hay algunos archivos cuya firma no se verificará, estos tienen la 
 ...
 </dict>
 ```
+Es posible calcular la firma de un recurso desde la línea de comandos con:
+
+{% code overflow="wrap" %}
+```bash
+openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
+```
 ## Montar archivos DMG
 
 Un usuario puede montar un archivo DMG personalizado incluso encima de algunas carpetas existentes. Así es como puedes crear un paquete DMG personalizado con contenido personalizado:

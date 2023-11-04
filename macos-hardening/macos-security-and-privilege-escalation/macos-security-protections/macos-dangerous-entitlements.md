@@ -44,18 +44,22 @@ Este entitlement permite **cargar frameworks, complementos o bibliotecas sin est
 
 ### `com.apple.private.security.clear-library-validation`
 
-Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`** pero en lugar de **desactivar directamente** la validación de la biblioteca, permite que el proceso **llame a una llamada de sistema `csops` para desactivarla**.\
+Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`** pero en lugar de **desactivar directamente** la validación de la biblioteca, permite al proceso **llamar a una llamada de sistema `csops` para desactivarla**.\
 Consulta [**esto para más información**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Este entitlement permite **usar variables de entorno DYLD** que podrían ser utilizadas para inyectar bibliotecas y código. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
+Este entitlement permite **usar variables de entorno DYLD** que podrían usarse para inyectar bibliotecas y código. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` y `com.apple.rootless.storage`.`TCC`
 
 [**Según este blog**](https://objective-see.org/blog/blog\_0x4C.html), estos entitlements permiten **modificar** la **base de datos TCC**.
 
-### com.apple.private.security.kext-management
+### **`system.install.apple-software`** y **`system.install.apple-software.standar-user`**
+
+Estos entitlements permiten **instalar software sin solicitar permisos** al usuario, lo cual puede ser útil para una **escalada de privilegios**.
+
+### `com.apple.private.security.kext-management`
 
 Entitlement necesario para solicitar al **kernel que cargue una extensión de kernel**.
 
@@ -65,14 +69,14 @@ TODO: No sé qué permite hacer esto
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor!
-
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. ¡Si sabes cómo hacerlo, envía un PR por favor!
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, envía un PR por favor!
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría ser utilizado para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, por favor envía un PR.
+
 ### `keychain-access-groups`
 
-Esta lista de permisos **keychain** agrupa a las aplicaciones a las que se les permite acceder:
+Esta lista de permisos **keychain** agrupa a las aplicaciones que tienen acceso a:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -109,7 +113,7 @@ Este permiso permite **crear memoria que es escribible y ejecutable** al pasar l
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Este permiso permite **anular o parchear código C**, utilizar el marco de **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro) o utilizar el marco **DVDPlayback**. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
+Este permiso permite **anular o parchear código C**, utilizar el marco **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro) o utilizar el marco **DVDPlayback**. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
 
 {% hint style="danger" %}
 Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguajes de código no seguro en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
