@@ -1,4 +1,4 @@
-# macOS危険な権限とTCCの許可
+# macOS 危険な権限とTCCの許可
 
 <details>
 
@@ -16,47 +16,51 @@
 **`com.apple`**で始まる権限は、サードパーティには利用できません。Appleのみがそれらを付与できます。
 {% endhint %}
 
-## 高
+## High
 
 ### `com.apple.rootless.install.heritable`
 
-権限**`com.apple.rootless.install.heritable`**は**SIPをバイパス**することができます。詳細については[こちらを参照](macos-sip.md#com.apple.rootless.install.heritable)してください。
+権限**`com.apple.rootless.install.heritable`**は**SIPをバイパス**することができます。詳細については[こちらを参照してください](macos-sip.md#com.apple.rootless.install.heritable)。
 
 ### **`com.apple.rootless.install`**
 
-権限**`com.apple.rootless.install`**は**SIPをバイパス**することができます。詳細については[こちらを参照](macos-sip.md#com.apple.rootless.install)してください。
+権限**`com.apple.rootless.install`**は**SIPをバイパス**することができます。詳細については[こちらを参照してください](macos-sip.md#com.apple.rootless.install)。
 
 ### **`com.apple.system-task-ports`（以前は`task_for_pid-allow`と呼ばれていました）**
 
-この権限は、カーネルを除く**任意の**プロセスの**タスクポートを取得**することができます。詳細については[**こちらを参照**](../mac-os-architecture/macos-ipc-inter-process-communication/)してください。
+この権限は、**カーネルを除く**すべてのプロセスの**タスクポートを取得**することができます。詳細については[**こちらを参照してください**](../mac-os-architecture/macos-ipc-inter-process-communication/)。
 
 ### `com.apple.security.get-task-allow`
 
-この権限は、**`com.apple.security.cs.debugger`**権限を持つ他のプロセスが、この権限を持つバイナリで実行されるプロセスのタスクポートを取得し、それにコードを**インジェクト**することができます。詳細については[**こちらを参照**](../mac-os-architecture/macos-ipc-inter-process-communication/)してください。
+この権限は、**`com.apple.security.cs.debugger`**権限を持つ他のプロセスが、この権限を持つバイナリで実行されるプロセスのタスクポートを取得し、**コードを注入**することができます。詳細については[**こちらを参照してください**](../mac-os-architecture/macos-ipc-inter-process-communication/)。
 
 ### `com.apple.security.cs.debugger`
 
-デバッグツール権限を持つアプリは、`Get Task Allow`権限が`true`に設定された署名されていないサードパーティアプリに対して`task_for_pid()`を呼び出して有効なタスクポートを取得することができます。ただし、デバッガは、**`Get Task Allow`権限を持たないプロセスのタスクポート**を取得することはできません。これにより、システム整合性保護によって保護されているプロセスのタスクポートを取得することはできません。詳細については[**こちらを参照**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger)してください。
+デバッグツール権限を持つアプリは、`Get Task Allow`権限が`true`に設定された未署名のサードパーティアプリに対して`task_for_pid()`を呼び出して有効なタスクポートを取得することができます。ただし、デバッグツール権限を持っていても、デバッガは**`Get Task Allow`権限を持たないプロセスのタスクポート**を取得することはできません。したがって、これらのプロセスはシステム整合性保護によって保護されています。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger)。
 
 ### `com.apple.security.cs.disable-library-validation`
 
-この権限は、Appleによって署名されていないか、メインの実行可能ファイルと同じチームIDで署名されていないフレームワーク、プラグイン、またはライブラリを**ロードすることができます**。したがって、攻撃者は任意のライブラリのロードを悪用してコードをインジェクトすることができます。詳細については[**こちらを参照**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)してください。
+この権限は、Appleによって署名されていないか、メインの実行可能ファイルと同じチームIDで署名されていないフレームワーク、プラグイン、またはライブラリを**ロードすることができます**。したがって、攻撃者は任意のライブラリのロードを悪用してコードを注入することができます。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)。
 
 ### `com.apple.private.security.clear-library-validation`
 
-この権限は、**`com.apple.security.cs.disable-library-validation`**と非常に似ていますが、**ライブラリの検証を直接無効にする**代わりに、プロセスがそれを無効にするために`csops`システムコールを呼び出すことを許可します。詳細については[**こちらを参照**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)してください。
+この権限は、**`com.apple.security.cs.disable-library-validation`**と非常に似ていますが、**ライブラリの検証を直接無効にする**代わりに、プロセスが**`csops`システムコールを呼び出して無効にする**ことができます。詳細については[**こちらを参照してください**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)。
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-この権限は、ライブラリやコードをインジェクトするために使用される可能性のある**DYLD環境変数**の使用を許可します。詳細については[**こちらを参照**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)してください。
+この権限は、ライブラリやコードを注入するために使用される可能性のある**DYLD環境変数**を使用することができます。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)。
 
 ### `com.apple.private.tcc.manager`および`com.apple.rootless.storage`.`TCC`
 
 [**このブログによると**](https://objective-see.org/blog/blog\_0x4C.html)、これらの権限は**TCC**データベースを**変更**することを許可します。
 
-### com.apple.private.security.kext-management
+### **`system.install.apple-software`**および**`system.install.apple-software.standar-user`**
 
-カーネルに**カーネル拡張をロードするように要求**するための権限が必要です。
+これらの権限は、ユーザーの許可を求めることなくソフトウェアを**インストール**することができます。これは特権エスカレーションに役立ちます。
+
+### `com.apple.private.security.kext-management`
+
+カーネル拡張をロードするために必要な権限です。
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -64,11 +68,11 @@ TODO: これが何を許可するかわかりません
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)には、再起動後にSSVで保護されたコンテンツを更新するために使用できると記載されています。詳細がわかる場合は、PRを送信してください！
-
+TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **には、再起動後にSSVで保護されたコンテンツを更新するために使用できる可能性があると記載されています。詳細がわかる場合は、PRを送信してください！
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)には、再起動後にSSVで保護されたコンテンツを更新するために使用できると記載されています。詳細がわかる場合は、PRを送信してください！
+TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **には、再起動後にSSVで保護されたコンテンツを更新するために使用できる可能性があると述べられています。PRを送信する方法を知っている場合は、お知らせください！**
+
 ### `keychain-access-groups`
 
 このエンタイトルメントは、アプリケーションがアクセスできる**キーチェーン**グループのリストです：
@@ -88,7 +92,7 @@ TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-O
 
 ### **`kTCCServiceAppleEvents`**
 
-アプリが他のアプリケーションにイベントを送信することを許可します。これは一般的にタスクの自動化に使用されるアプリケーションに対して行われます。他のアプリケーションを制御することで、これらの他のアプリケーションに付与された権限を悪用することができます。
+アプリが他のアプリケーションにイベントを送信することを許可します。これは一般的にタスクの自動化に使用されるアプリケーションに対して行われます。他のアプリを制御することで、これらの他のアプリに付与された権限を悪用することができます。
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
@@ -116,10 +120,10 @@ TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-O
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-このエンタイトルメントは、自身の実行可能ファイルのセクションを変更して強制的に終了することを許可します。詳細については、[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection)。
+このエンタイトルメントは、ディスク上の自身の実行可能ファイルのセクションを変更して強制的に終了することを許可します。詳細については、[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection)。
 
 {% hint style="danger" %}
-Disable Executable Memory Protectionエンタイトルメントは、アプリから基本的なセキュリティ保護を削除し、攻撃者が検出されずにアプリの実行可能コードを書き換えることが可能になる極端なエンタイトルメントです。可能な限り狭いエンタイトルメントを使用してください。
+Disable Executable Memory Protectionエンタイトルメントは、アプリから基本的なセキュリティ保護を削除し、攻撃者が検出されずにアプリの実行可能コードを書き換えることが可能になる極端なエンタイトルメントです。可能な場合は、より狭いエンタイトルメントを選択してください。
 {% endhint %}
 
 ### `com.apple.security.cs.allow-relative-library-loads`
@@ -132,7 +136,7 @@ TODO
 
 * **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！**
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
