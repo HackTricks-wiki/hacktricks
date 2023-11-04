@@ -55,7 +55,11 @@ This entitlement allows to **use DYLD environment variables** that could be used
 
 [**According to this blog**](https://objective-see.org/blog/blog\_0x4C.html), these entitlements allows to **modify** the **TCC** database.
 
-### com.apple.private.security.kext-management
+### **`system.install.apple-software`** and **`system.install.apple-software.standar-user`**
+
+These entitlements allows to **install software without asking for permissions** to the user, which can be helpful for a **privilege escalation**.
+
+### `com.apple.private.security.kext-management`
 
 Entitlement needed to ask the **kernel to load a kernel extension**.
 

@@ -194,6 +194,14 @@ However, there are some files whose signature won't be checked, these have the k
 </dict>
 ```
 
+It's possible to claculate the signature of a resource from the cli with:
+
+{% code overflow="wrap" %}
+```bash
+openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
+```
+{% endcode %}
+
 ## Mount dmgs
 
 A user can mount a custom dmg created even on top of some existing folders. This is how you could create a custom dmg package with custom content:
