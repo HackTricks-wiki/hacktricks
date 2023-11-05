@@ -140,11 +140,11 @@ Existen varias bibliotecas adicionales que permiten evaluar código Python en un
 
 - **`execnet`**: Esta biblioteca permite ejecutar código Python en diferentes intérpretes y entornos, lo que puede ayudar a evitar las restricciones impuestas por los entornos de ejecución.
 
-- **`pypyjs`**: Es una implementación de Python en JavaScript que permite ejecutar código Python en un navegador web. Esto puede ser útil para evadir las restricciones de un entorno de ejecución específico.
+- **`pypy-sandbox`**: Esta biblioteca proporciona un entorno de ejecución seguro para ejecutar código Python utilizando el intérprete PyPy. Permite restringir el acceso a ciertas funciones y recursos del sistema.
 
-- **`pyjail`**: Esta biblioteca proporciona un entorno de ejecución seguro para evaluar código Python. Permite definir políticas de seguridad personalizadas para restringir las operaciones permitidas.
+- **`RestrictedPython`**: Esta biblioteca permite ejecutar código Python restringido en un entorno controlado. Proporciona un conjunto de reglas y restricciones para limitar las operaciones permitidas.
 
-Estas bibliotecas pueden ser útiles para evadir las restricciones impuestas por los entornos de ejecución y evaluar código Python de forma segura. Sin embargo, es importante tener en cuenta que el uso de estas bibliotecas debe realizarse de manera ética y legal, y solo con el propósito de pruebas de seguridad autorizadas.
+Es importante tener en cuenta que el uso de estas bibliotecas no garantiza una seguridad absoluta. Siempre es recomendable evaluar cuidadosamente el código que se ejecutará y aplicar otras medidas de seguridad adicionales según sea necesario.
 ```python
 #Pandas
 import pandas as pd
@@ -162,25 +162,15 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 
 ### Operadores lógicos
 
-Los operadores lógicos son herramientas útiles para realizar comparaciones y evaluar condiciones en Python. Aquí hay algunos operadores lógicos comunes:
+Los operadores lógicos son utilizados para evaluar expresiones lógicas y devolver un valor booleano. Los operadores lógicos más comunes son:
 
-- `and`: devuelve `True` si ambas condiciones son verdaderas.
-- `or`: devuelve `True` si al menos una de las condiciones es verdadera.
-- `not`: invierte el valor de la condición.
-
-### Operadores de asignación
-
-Los operadores de asignación se utilizan para asignar valores a variables. Aquí hay algunos operadores de asignación comunes:
-
-- `=`: asigna el valor de la expresión a la variable.
-- `+=`: suma el valor de la expresión a la variable y asigna el resultado.
-- `-=`: resta el valor de la expresión a la variable y asigna el resultado.
-- `*=`: multiplica el valor de la expresión por la variable y asigna el resultado.
-- `/=`: divide el valor de la variable por la expresión y asigna el resultado.
+- `and`: devuelve `True` si ambas expresiones son verdaderas.
+- `or`: devuelve `True` si al menos una de las expresiones es verdadera.
+- `not`: devuelve el valor opuesto de la expresión.
 
 ### Operadores de comparación
 
-Los operadores de comparación se utilizan para comparar dos valores. Aquí hay algunos operadores de comparación comunes:
+Los operadores de comparación se utilizan para comparar dos valores y devolver un valor booleano. Los operadores de comparación más comunes son:
 
 - `==`: devuelve `True` si los valores son iguales.
 - `!=`: devuelve `True` si los valores son diferentes.
@@ -191,19 +181,18 @@ Los operadores de comparación se utilizan para comparar dos valores. Aquí hay 
 
 ### Trucos rápidos
 
-Aquí hay algunos trucos rápidos que pueden ser útiles al programar en Python:
+Aquí hay algunos trucos rápidos que pueden ser útiles al escribir código en Python:
 
-- Usar el operador ternario para asignar valores condicionalmente.
-- Utilizar la función `zip()` para combinar dos listas en un solo objeto iterable.
-- Utilizar la función `enumerate()` para obtener el índice y el valor de cada elemento en una lista.
-- Utilizar la función `sorted()` para ordenar una lista en orden ascendente.
-- Utilizar la función `reversed()` para invertir el orden de una lista.
-- Utilizar la función `len()` para obtener la longitud de una lista o cadena de texto.
-- Utilizar la función `range()` para generar una secuencia de números.
-- Utilizar la función `map()` para aplicar una función a cada elemento de una lista.
-- Utilizar la función `filter()` para filtrar elementos de una lista según una condición.
+- `x if condition else y`: devuelve `x` si la condición es verdadera, de lo contrario devuelve `y`.
+- `a, b = b, a`: intercambia los valores de `a` y `b` sin necesidad de una variable temporal.
+- `x = 1 if condition else 0`: asigna `1` a `x` si la condición es verdadera, de lo contrario asigna `0`.
+- `x = y = z = 0`: asigna el valor `0` a las variables `x`, `y` y `z` en una sola línea.
+- `x += 1`: incrementa el valor de `x` en `1`.
+- `x -= 1`: decrementa el valor de `x` en `1`.
+- `x *= 2`: multiplica el valor de `x` por `2`.
+- `x /= 2`: divide el valor de `x` por `2`.
 
-Estos son solo algunos ejemplos de los operadores y trucos rápidos que puedes utilizar en Python. ¡Experimenta y descubre más formas de optimizar tu código!
+Estos son solo algunos ejemplos de operadores y trucos rápidos en Python. ¡Experimenta y descubre más!
 ```python
 # walrus operator allows generating variable inside a list
 ## everything will be executed in order
@@ -354,49 +343,57 @@ k + 'import os; os.system("sh")' #RCE abusing __add__
 
 #### Saltando las Sandboxes de Python
 
-Python sandboxes are security mechanisms that restrict the execution of certain operations or limit access to sensitive resources within a Python environment. These sandboxes are commonly used to prevent untrusted code from executing malicious actions or accessing unauthorized data.
+Python sandboxes are commonly used to execute untrusted code in a controlled environment. However, these sandboxes can be bypassed using various techniques. In this section, we will explore some of the common methods to bypass Python sandboxes.
 
-Las sandboxes de Python son mecanismos de seguridad que restringen la ejecución de ciertas operaciones o limitan el acceso a recursos sensibles dentro de un entorno de Python. Estas sandboxes se utilizan comúnmente para evitar que el código no confiable ejecute acciones maliciosas o acceda a datos no autorizados.
+Las sandboxes de Python se utilizan comúnmente para ejecutar código no confiable en un entorno controlado. Sin embargo, estas sandboxes pueden ser eludidas utilizando diversas técnicas. En esta sección, exploraremos algunos de los métodos comunes para saltar las sandboxes de Python.
 
-However, as a hacker, it is important to understand how to bypass these sandboxes in order to exploit vulnerabilities and gain unauthorized access to the system.
+#### Method 1: Using Restricted Built-ins
 
-Sin embargo, como hacker, es importante entender cómo saltar estas sandboxes para explotar vulnerabilidades y obtener acceso no autorizado al sistema.
+#### Método 1: Utilizando Funciones Restringidas
 
-In this section, we will explore various techniques to bypass Python sandboxes and achieve Remote Code Execution (RCE).
+Python provides a set of built-in functions that are restricted in a sandboxed environment. These functions, such as `eval()`, `exec()`, and `compile()`, can be used to execute arbitrary code. By leveraging these restricted built-ins, an attacker can bypass the sandbox and achieve remote code execution (RCE).
 
-En esta sección, exploraremos diversas técnicas para saltar las sandboxes de Python y lograr la Ejecución Remota de Código (RCE).
+Python proporciona un conjunto de funciones integradas que están restringidas en un entorno sandbox. Estas funciones, como `eval()`, `exec()` y `compile()`, se pueden utilizar para ejecutar código arbitrario. Al aprovechar estas funciones restringidas, un atacante puede eludir la sandbox y lograr la ejecución remota de código (RCE).
 
-#### Methodologies and Resources
+#### Method 2: Exploiting Module Imports
 
-#### Metodologías y Recursos
+#### Método 2: Explotando las Importaciones de Módulos
 
-- **Sandbox Detection**: Techniques to detect the presence of a sandbox environment.
+Python sandboxes often restrict the modules that can be imported. However, some modules may still be allowed, which can be exploited to achieve RCE. By importing a module that provides a way to execute arbitrary code, an attacker can bypass the sandbox and gain control over the system.
 
-- **Detección de Sandboxes**: Técnicas para detectar la presencia de un entorno de sandbox.
+Las sandboxes de Python a menudo restringen los módulos que se pueden importar. Sin embargo, es posible que algunos módulos aún estén permitidos, lo que se puede explotar para lograr RCE. Al importar un módulo que proporciona una forma de ejecutar código arbitrario, un atacante puede eludir la sandbox y obtener el control sobre el sistema.
 
-- **Sandbox Evasion**: Methods to evade sandbox restrictions and execute arbitrary code.
+#### Method 3: Leveraging Dynamic Code Execution
 
-- **Evasión de Sandboxes**: Métodos para evadir las restricciones de la sandbox y ejecutar código arbitrario.
+#### Método 3: Aprovechando la Ejecución de Código Dinámico
 
-- **Sandbox Escape**: Techniques to escape the sandbox and gain full control of the system.
+Python allows dynamic code execution through the use of `eval()` and `exec()` functions. By crafting malicious code as a string and then executing it using these functions, an attacker can bypass the sandbox and execute arbitrary code.
 
-- **Escape de Sandboxes**: Técnicas para escapar de la sandbox y obtener control total del sistema.
+Python permite la ejecución de código dinámico mediante el uso de las funciones `eval()` y `exec()`. Al crear código malicioso como una cadena y luego ejecutarlo utilizando estas funciones, un atacante puede eludir la sandbox y ejecutar código arbitrario.
 
-- **Sandbox Bypass**: Strategies to bypass sandbox protections and execute malicious actions.
+#### Method 4: Abusing Python's Magic Methods
 
-- **Bypass de Sandboxes**: Estrategias para evadir las protecciones de la sandbox y ejecutar acciones maliciosas.
+#### Método 4: Abusando de los Métodos Mágicos de Python
 
-- **Exploiting Sandbox Vulnerabilities**: Techniques to exploit vulnerabilities in the sandbox implementation.
+Python has a set of magic methods that are automatically called in certain situations. These methods can be abused to bypass the sandbox and achieve RCE. By overriding or implementing specific magic methods, an attacker can execute arbitrary code and gain control over the system.
 
-- **Explotación de Vulnerabilidades de Sandboxes**: Técnicas para explotar vulnerabilidades en la implementación de la sandbox.
+Python tiene un conjunto de métodos mágicos que se llaman automáticamente en ciertas situaciones. Estos métodos se pueden abusar para eludir la sandbox y lograr RCE. Al anular o implementar métodos mágicos específicos, un atacante puede ejecutar código arbitrario y obtener el control sobre el sistema.
 
-- **Sandbox Mitigation**: Countermeasures to mitigate sandbox bypass techniques.
+#### Method 5: Exploiting Vulnerabilities in the Sandbox Implementation
 
-- **Mitigación de Sandboxes**: Contramedidas para mitigar las técnicas de bypass de sandbox.
+#### Método 5: Explotando Vulnerabilidades en la Implementación de la Sandbox
 
-By understanding these methodologies and utilizing the available resources, you will be able to effectively bypass Python sandboxes and achieve your hacking objectives.
+Python sandboxes are implemented using various techniques, such as code analysis and bytecode manipulation. These implementations may have vulnerabilities that can be exploited to bypass the sandbox. By identifying and exploiting these vulnerabilities, an attacker can achieve RCE.
 
-Al comprender estas metodologías y utilizar los recursos disponibles, podrás saltar las sandboxes de Python de manera efectiva y lograr tus objetivos de hacking.
+Las sandboxes de Python se implementan utilizando diversas técnicas, como el análisis de código y la manipulación de bytecode. Estas implementaciones pueden tener vulnerabilidades que se pueden explotar para eludir la sandbox. Al identificar y explotar estas vulnerabilidades, un atacante puede lograr RCE.
+
+#### Method 6: Using Third-Party Libraries
+
+#### Método 6: Utilizando Bibliotecas de Terceros
+
+Python allows the use of third-party libraries, which may not be restricted by the sandbox. By leveraging these libraries, an attacker can bypass the sandbox and execute arbitrary code. It is important to carefully review and audit the third-party libraries used in a sandboxed environment to prevent such bypasses.
+
+Python permite el uso de bibliotecas de terceros, que pueden no estar restringidas por la sandbox. Al aprovechar estas bibliotecas, un atacante puede eludir la sandbox y ejecutar código arbitrario. Es importante revisar y auditar cuidadosamente las bibliotecas de terceros utilizadas en un entorno sandbox para evitar dichos saltos.
 ```python
 # From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
 # If sys is imported, you can sys.excepthook and trigger it by triggering an error
@@ -418,33 +415,29 @@ __iadd__ = eval
 __builtins__.__import__ = X
 {}[1337]
 ```
-### Leer archivo con la ayuda de builtins y licencia
+### Leer archivo con la ayuda de builtins y la licencia
 
-A veces, al intentar leer un archivo en un entorno de sandboxing de Python, es posible que se restrinja el acceso a ciertos módulos o funciones incorporadas. Sin embargo, hay una forma de eludir estas restricciones utilizando las funciones `help()` y `license()` proporcionadas por el módulo `builtins`.
+A veces, al intentar leer un archivo en un entorno restringido de Python, como un sandbox, podemos encontrarnos con limitaciones que nos impiden acceder al contenido del archivo. Sin embargo, podemos utilizar las funciones `help()` y `license()` de `builtins` para sortear estas restricciones y leer el archivo.
 
-Aquí hay un ejemplo de cómo se puede lograr esto:
+Aquí hay un ejemplo de cómo hacerlo:
 
 ```python
 import builtins
 
-# Obtener el objeto de archivo
-file_obj = builtins.open("archivo.txt", "r")
+# Leer el contenido del archivo utilizando la función help()
+with open('archivo.txt', 'r') as file:
+    content = file.read()
+    builtins.help(content)
 
-# Leer el contenido del archivo
-file_content = file_obj.read()
-
-# Imprimir el contenido del archivo
-print(file_content)
-
-# Cerrar el archivo
-file_obj.close()
+# Leer el contenido del archivo utilizando la función license()
+with open('archivo.txt', 'r') as file:
+    content = file.read()
+    builtins.license(content)
 ```
 
-En este ejemplo, utilizamos la función `open()` del módulo `builtins` para abrir el archivo "archivo.txt" en modo de lectura. Luego, leemos el contenido del archivo utilizando el método `read()` del objeto de archivo. Finalmente, imprimimos el contenido del archivo y cerramos el archivo utilizando el método `close()`.
+Al utilizar `help()` o `license()` con el contenido del archivo, podemos imprimir su contenido en la salida estándar y, de esta manera, leer su contenido sin restricciones.
 
-Al utilizar las funciones `help()` y `license()` proporcionadas por `builtins`, podemos acceder a las funciones incorporadas necesarias para leer el archivo, incluso si se restringe el acceso directo a ellas en un entorno de sandboxing de Python.
-
-Es importante tener en cuenta que eludir las restricciones de un entorno de sandboxing puede ser una violación de las políticas de seguridad y puede tener consecuencias legales. Siempre asegúrese de tener permiso explícito para realizar estas acciones y siga las mejores prácticas de seguridad al realizar pruebas de penetración o hacking ético.
+Es importante tener en cuenta que esta técnica puede no funcionar en todos los entornos y configuraciones, ya que algunos sandbox pueden bloquear el acceso a las funciones `help()` y `license()`. Sin embargo, en muchos casos, esta metodología puede ser útil para sortear las restricciones y acceder al contenido de un archivo en un entorno restringido de Python.
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
 a = __builtins__.help
@@ -473,7 +466,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### Sin Builtins
 
-Cuando no tienes `__builtins__`, no podrás importar nada ni siquiera leer o escribir archivos, ya que **no se cargan** todas las funciones globales (como `open`, `import`, `print`...).\
+Cuando no tienes `__builtins__`, no podrás importar nada ni siquiera leer o escribir archivos, ya que **no se cargan todas las funciones globales** (como `open`, `import`, `print`...).\
 Sin embargo, **por defecto, Python importa muchos módulos en memoria**. Estos módulos pueden parecer inofensivos, pero algunos de ellos también importan funcionalidades peligrosas que se pueden acceder para lograr **ejecución de código arbitrario**.
 
 En los siguientes ejemplos, puedes observar cómo **abusar** de algunos de estos módulos "**inofensivos**" cargados para **acceder** a **funcionalidades peligrosas** dentro de ellos.
@@ -503,22 +496,26 @@ get_flag.__globals__['__builtins__']['__import__']("os").system("ls")
 
 Python3 is a powerful and versatile programming language that is widely used in various domains, including web development, data analysis, and automation. It provides a rich set of libraries and frameworks that make it easy to develop complex applications.
 
-Python3 is also commonly used in the field of cybersecurity, particularly in the context of penetration testing and vulnerability assessment. Its simplicity and readability make it an ideal choice for writing scripts and tools that can be used to identify and exploit security weaknesses in computer systems.
+Python3 is also commonly used in the field of cybersecurity, particularly in the context of penetration testing and vulnerability assessment. Its simplicity and readability make it an ideal choice for writing scripts and tools that can be used to identify and exploit security weaknesses in target systems.
 
-However, Python3 scripts can be subject to various security measures, such as sandboxes, that are designed to restrict their capabilities and prevent malicious activities. Sandboxes are often used in cloud/SaaS platforms to isolate and control the execution of untrusted code.
+However, Python3 scripts can be subject to various security measures, such as sandboxes, that are designed to restrict their capabilities and prevent unauthorized access to sensitive resources. Sandboxing is a technique used to isolate and control the execution of untrusted code, thereby reducing the risk of malicious activities.
 
-In this guide, we will explore different techniques to bypass Python3 sandboxes and execute arbitrary code with elevated privileges. These techniques can be useful for penetration testers and security researchers to assess the effectiveness of sandboxes and identify potential vulnerabilities.
+In this guide, we will explore different techniques to bypass Python3 sandboxes and execute arbitrary code with elevated privileges. These techniques can be useful for penetration testers and security researchers who want to assess the effectiveness of sandboxing mechanisms and identify potential vulnerabilities.
 
 It is important to note that bypassing sandboxes without proper authorization is illegal and unethical. The techniques described in this guide should only be used in controlled environments with the explicit permission of the system owner.
 
-Let's dive into the world of Python3 sandbox bypass techniques and learn how to effectively test the security of computer systems.
+Let's dive into the world of Python3 sandbox bypass techniques and learn how to effectively bypass security measures to gain unauthorized access to target systems.
 ```python
 # Obtain builtins from a globally defined function
 # https://docs.python.org/3/library/functions.html
+help.__call__.__builtins__ # or __globals__
+license.__call__.__builtins__ # or __globals__
+credits.__call__.__builtins__ # or __globals__
 print.__self__
 dir.__self__
 globals.__self__
 len.__self__
+__build_class__.__self__
 
 # Obtain the builtins from a defined function
 get_flag.__globals__['__builtins__']
@@ -536,23 +533,13 @@ __builtins__["__import__"]('os').system('ls')
 ```
 ### Cargas útiles de Builtins
 
-Las cargas útiles de `builtins` son una técnica comúnmente utilizada para eludir las cajas de arena de Python. Estas cajas de arena son entornos aislados que restringen el acceso a ciertas funciones y módulos de Python para evitar comportamientos maliciosos.
+Las cargas útiles de `builtins` son una técnica comúnmente utilizada para eludir las cajas de arena de Python. Estas cajas de arena son entornos de ejecución restringidos que limitan las acciones que un programa puede realizar.
 
-La idea detrás de las cargas útiles de `builtins` es aprovechar las funciones y módulos permitidos en la caja de arena para ejecutar código malicioso. Esto se logra utilizando funciones y módulos de `builtins` que no están restringidos y que permiten la ejecución de código arbitrario.
+La idea detrás de las cargas útiles de `builtins` es aprovechar las funciones y clases incorporadas en Python para ejecutar código malicioso. Al utilizar estas funciones y clases, es posible evadir las restricciones impuestas por la caja de arena y ejecutar comandos no autorizados.
 
-Algunas de las cargas útiles de `builtins` más comunes incluyen:
+Existen varias formas de utilizar las cargas útiles de `builtins`, dependiendo de la configuración específica de la caja de arena y de las funciones y clases disponibles. Algunas técnicas comunes incluyen la manipulación de objetos `__builtins__`, la importación de módulos maliciosos y la ejecución de código a través de funciones incorporadas como `eval()` y `exec()`.
 
-- `__import__`: Esta función permite importar módulos de Python dinámicamente. Puede ser utilizada para importar módulos maliciosos y ejecutar código arbitrario.
-
-- `eval`: Esta función evalúa una cadena de texto como código Python. Puede ser utilizada para ejecutar código malicioso contenido en una cadena.
-
-- `exec`: Esta función ejecuta código Python contenido en una cadena o archivo. Al igual que `eval`, puede ser utilizada para ejecutar código malicioso.
-
-- `getattr` y `setattr`: Estas funciones permiten acceder y modificar atributos de objetos en Python. Pueden ser utilizadas para ejecutar código malicioso al acceder a atributos sensibles o modificar su comportamiento.
-
-Es importante tener en cuenta que el uso de cargas útiles de `builtins` puede ser detectado por algunas cajas de arena o sistemas de seguridad. Por lo tanto, es recomendable utilizar técnicas adicionales para evadir la detección, como ofuscación de código o el uso de cargas útiles personalizadas.
-
-En resumen, las cargas útiles de `builtins` son una técnica efectiva para eludir las cajas de arena de Python al aprovechar las funciones y módulos permitidos. Sin embargo, se debe tener precaución al utilizar esta técnica y tomar medidas adicionales para evitar la detección.
+Es importante tener en cuenta que el uso de cargas útiles de `builtins` para eludir las cajas de arena de Python es una actividad ilegal y éticamente cuestionable. Este libro se proporciona con fines educativos y no promueve ni respalda ninguna actividad ilegal.
 ```python
 # Possible payloads once you have found the builtins
 __builtins__["open"]("/etc/passwd").read()
@@ -898,17 +885,17 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Más ejemplos** sobre **formato** de **cadenas** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
+**Más ejemplos** sobre ejemplos de **formato** **string** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
 
 {% hint style="danger" %}
-Consulte también la siguiente página para obtener gadgets que **leerán información sensible de los objetos internos de Python**:
+Consulte también la siguiente página para obtener gadgets que **leerán información confidencial de los objetos internos de Python**:
 {% endhint %}
 
 {% content-ref url="../python-internal-read-gadgets.md" %}
 [python-internal-read-gadgets.md](../python-internal-read-gadgets.md)
 {% endcontent-ref %}
 
-### Cargas útiles de divulgación de información sensible
+### Cargas útiles de divulgación de información confidencial
 ```python
 {whoami.__class__.__dict__}
 {whoami.__globals__[os].__dict__}
@@ -1014,17 +1001,17 @@ Identifying the security measures implemented in the code is essential for bypas
 
 #### Understanding Input Validation
 
-Understanding how the code validates and processes user input is crucial for finding potential vulnerabilities. This includes analyzing input validation techniques, sanitization methods, and any potential weaknesses in the validation logic.
+Understanding how the code validates and processes user input is crucial for finding potential vulnerabilities. This includes analyzing input sanitization, validation checks, and any potential input manipulation.
 
-#### Examining Error Handling
+#### Analyzing Error Handling
 
-Examining how the code handles errors can provide valuable information. It can help identify any error messages or stack traces that may leak sensitive information or provide clues for bypassing the sandbox.
+Analyzing how the code handles errors can provide valuable information. It can help identify any error messages or stack traces that may leak sensitive information or provide clues for bypassing the sandbox.
 
 #### Reverse Engineering
 
-If the code is obfuscated or protected, reverse engineering techniques can be used to understand its inner workings. This may involve decompiling the code, analyzing the assembly instructions, or using debugging tools to step through the code.
+If the code is obfuscated or protected, reverse engineering techniques can be used to understand its functionality. This includes techniques like decompiling, disassembling, or debugging the code.
 
-By gathering and analyzing code information, you can gain a deeper understanding of the code's functionality and security measures. This knowledge is crucial for successfully bypassing Python sandboxes and finding potential vulnerabilities.
+By gathering and analyzing code information, you can gain a better understanding of the code's structure, security measures, and potential vulnerabilities. This knowledge is crucial for successfully bypassing Python sandboxes.
 ```python
 # Another example
 s = '''
@@ -1072,9 +1059,9 @@ get_flag.__code__.co_code
 ```
 ### **Desensamblar una función**
 
-Cuando se intenta eludir las técnicas de sandboxing de Python, a menudo es útil desensamblar una función para comprender su funcionamiento interno. El desensamblaje implica convertir el código de bytes de una función en su representación legible por humanos.
+Cuando se intenta eludir las técnicas de sandboxing de Python, a menudo es útil desensamblar una función para comprender su funcionamiento interno. El desensamblaje implica convertir el código de bytes de una función en su representación legible por humanos, lo que permite analizar el flujo de ejecución y identificar posibles vulnerabilidades.
 
-Python proporciona la biblioteca `dis` que se puede utilizar para desensamblar una función. A continuación se muestra un ejemplo de cómo desensamblar una función en Python:
+Python proporciona la biblioteca `dis` que permite desensamblar funciones. A continuación se muestra un ejemplo de cómo desensamblar una función en Python:
 
 ```python
 import dis
@@ -1088,11 +1075,9 @@ def my_function():
 dis.dis(my_function)
 ```
 
-El resultado del desensamblaje mostrará la secuencia de instrucciones en código de bytes que representa la función. Esto puede ayudar a identificar cualquier comportamiento sospechoso o técnicas de sandboxing que se estén utilizando.
+El resultado del desensamblaje mostrará la secuencia de instrucciones en código de bytes y su correspondiente representación en lenguaje ensamblador. Esto puede ayudar a identificar cualquier comportamiento sospechoso o instrucciones que podrían ser modificadas para eludir las técnicas de sandboxing.
 
-Desensamblar una función puede ser útil para comprender cómo se implementan las técnicas de sandboxing y encontrar posibles vulnerabilidades o formas de eludirlas. Sin embargo, es importante tener en cuenta que el desensamblaje solo proporciona una visión limitada del código y no revelará todos los detalles de implementación.
-
-Es importante utilizar esta técnica con responsabilidad y solo con fines legales y éticos, como parte de pruebas de penetración autorizadas o actividades de investigación.
+Es importante tener en cuenta que el desensamblaje de una función no siempre es necesario o útil, y puede depender del contexto y los objetivos específicos del análisis. Sin embargo, cuando se utiliza correctamente, puede ser una herramienta valiosa para comprender el funcionamiento interno de una función y encontrar posibles vulnerabilidades.
 ```python
 import dis
 dis.dis(get_flag)
@@ -1145,7 +1130,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ## Compilando Python
 
 Ahora, imaginemos que de alguna manera puedes **obtener la información sobre una función que no puedes ejecutar** pero que **necesitas** ejecutar.\
-Como en el siguiente ejemplo, **puedes acceder al objeto de código** de esa función, pero al leer el desensamblado **no sabes cómo calcular la bandera** (_imagina una función `calc_flag` más compleja_).
+Como en el siguiente ejemplo, **puedes acceder al objeto de código** de esa función, pero solo leyendo el desensamblado **no sabes cómo calcular la bandera** (_imagina una función `calc_flag` más compleja_).
 ```python
 def get_flag(some_input):
 var1=1
@@ -1191,7 +1176,7 @@ types.CodeType.__doc__
 ### Recreando una función filtrada
 
 {% hint style="warning" %}
-En el siguiente ejemplo, vamos a tomar todos los datos necesarios para recrear la función directamente desde el objeto de código de la función. En un **ejemplo real**, todos los **valores** para ejecutar la función **`code_type`** es lo que **necesitarás filtrar**.
+En el siguiente ejemplo, vamos a tomar todos los datos necesarios para recrear la función directamente del objeto de código de la función. En un **ejemplo real**, todos los **valores** para ejecutar la función **`code_type`** es lo que **necesitarás filtrar**.
 {% endhint %}
 ```python
 fc = get_flag.__code__
