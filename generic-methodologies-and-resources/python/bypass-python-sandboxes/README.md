@@ -403,10 +403,14 @@ get_flag.__globals__['__builtins__']['__import__']("os").system("ls")
 ```python
 # Obtain builtins from a globally defined function
 # https://docs.python.org/3/library/functions.html
+help.__call__.__builtins__ # or __globals__
+license.__call__.__builtins__ # or __globals__
+credits.__call__.__builtins__ # or __globals__
 print.__self__
 dir.__self__
 globals.__self__
 len.__self__
+__build_class__.__self__
 
 # Obtain the builtins from a defined function
 get_flag.__globals__['__builtins__']
