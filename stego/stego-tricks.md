@@ -112,7 +112,7 @@ Se puede instalar con `apt`, y el [código fuente](https://github.com/StefanoDeV
 `steghide info archivo` : muestra información sobre si un archivo tiene datos incrustados o no.\
 `steghide extract -sf archivo [--passphrase contraseña]` : extrae datos incrustados de un archivo \[usando una contraseña]
 
-También se puede extraer contenido de steghide utilizando la web: [https://futureboy.us/stegano/decinput.html](https://futureboy.us/stegano/decinput.html)
+También puedes extraer contenido de steghide usando la web: [https://futureboy.us/stegano/decinput.html](https://futureboy.us/stegano/decinput.html)
 
 **Bruteforcing** Steghide: [stegcracker](https://github.com/Paradoxis/StegCracker.git) `stegcracker <archivo> [<lista de palabras>]`
 
@@ -130,13 +130,13 @@ Capaz de una amplia variedad de trucos simples y avanzados, esta herramienta pue
 
 ### Stegsolve
 
-A veces hay un mensaje o un texto oculto en la propia imagen que, para verlo, debe tener aplicados filtros de color o cambiar algunos niveles de color. Aunque se puede hacer eso con algo como GIMP o Photoshop, Stegsolve lo hace más fácil. Es una pequeña herramienta de Java que aplica muchos filtros de color útiles en imágenes; en los desafíos de CTF, Stegsolve a menudo es un verdadero ahorro de tiempo.\
+A veces hay un mensaje o un texto oculto en la propia imagen que, para verlo, debe tener aplicados filtros de color o cambiar algunos niveles de color. Aunque puedes hacer eso con algo como GIMP o Photoshop, Stegsolve lo hace más fácil. Es una pequeña herramienta de Java que aplica muchos filtros de color útiles en imágenes; en los desafíos de CTF, Stegsolve a menudo es un verdadero ahorro de tiempo.\
 Puedes obtenerlo desde [Github](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)\
 Para usarlo, simplemente abre la imagen y haz clic en los botones `<` `>`.
 
 ### FFT
 
-Para encontrar contenido oculto utilizando la Transformada Rápida de Fourier:
+Para encontrar contenido oculto usando Fast Fourier T:
 
 * [http://bigwww.epfl.ch/demo/ip/demos/FFT/](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 * [https://www.ejectamenta.com/Fourifier-fullscreen/](https://www.ejectamenta.com/Fourifier-fullscreen/)
@@ -158,6 +158,9 @@ Obtén detalles sobre un archivo PNG (¡o incluso descubre que en realidad es al
 
 * [http://magiceye.ecksdee.co.uk/](http://magiceye.ecksdee.co.uk/)
 * [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
+* [https://github.com/resurrecting-open-source-projects/outguess](https://github.com/resurrecting-open-source-projects/outguess)
+* [https://www.openstego.com/](https://www.openstego.com/)
+* [https://diit.sourceforge.net/](https://diit.sourceforge.net/)
 
 ## Extracción de datos de audios
 
@@ -172,26 +175,26 @@ ffmpeg se puede utilizar para verificar la integridad de los archivos de audio, 
 
 ### Wavsteg \[WAV] <a href="#wavsteg" id="wavsteg"></a>
 
-WavSteg es una herramienta en Python3 que puede ocultar datos, utilizando el bit menos significativo, en archivos wav. También puede buscar y extraer datos de archivos wav.\
+WavSteg es una herramienta de Python3 que puede ocultar datos, utilizando el bit menos significativo, en archivos wav. También puede buscar y extraer datos de archivos wav.\
 Puedes obtenerlo desde [Github](https://github.com/ragibson/Steganography#WavSteg)\
 Comandos útiles:\
-`python3 WavSteg.py -r -b 1 -s archivo_de_sonido -o archivo_de_salida` : Extrae a un archivo de salida (tomando solo 1 bit menos significativo)\
-`python3 WavSteg.py -r -b 2 -s archivo_de_sonido -o archivo_de_salida` : Extrae a un archivo de salida (tomando solo 2 bits menos significativos)
+`python3 WavSteg.py -r -b 1 -s archivo_de_sonido -o archivo_de_salida` : Extrae a un archivo de salida (tomando solo 1 lsb)\
+`python3 WavSteg.py -r -b 2 -s archivo_de_sonido -o archivo_de_salida` : Extrae a un archivo de salida (tomando solo 2 lsb)
 
 ### Deepsound
 
-Oculta y verifica información encriptada con AES-265 en archivos de sonido. Descárgalo desde [la página oficial](http://jpinsoft.net/deepsound/download.aspx).\
+Oculta y busca información encriptada con AES-265 en archivos de sonido. Descárgalo desde [la página oficial](http://jpinsoft.net/deepsound/download.aspx).\
 Para buscar información oculta, simplemente ejecuta el programa y abre el archivo de sonido. Si DeepSound encuentra datos ocultos, deberás proporcionar la contraseña para desbloquearlos.
 
 ### Sonic visualizer <a href="#sonic-visualizer" id="sonic-visualizer"></a>
 
 Sonic visualizer es una herramienta para ver y analizar el contenido de archivos de audio. Puede ser muy útil cuando te enfrentas a desafíos de esteganografía de audio; puedes revelar formas ocultas en archivos de audio que muchas otras herramientas no detectarán.\
 Si estás atascado, siempre verifica el espectrograma del audio. [Sitio web oficial](https://www.sonicvisualiser.org/)
-
-### Tono DTMF - Tonos de marcación
+### Tonos DTMF - Tonos de marcación
 
 * [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 * [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+
 ## Otros trucos
 
 ### Longitud binaria SQRT - Código QR
