@@ -69,7 +69,7 @@ If you fear that it will disappear, just fork it in Github or download it, as I 
 * **Why do you have sponsors? Are HackTricks books for commercial purposes?**
 {% endhint %}
 
-The first **HacTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
+The first **HackTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
 
 If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
 
