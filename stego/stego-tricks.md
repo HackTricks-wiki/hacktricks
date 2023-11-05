@@ -164,6 +164,9 @@ Get details on a PNG file (or even find out it's actually something else!).\
 
 * [http://magiceye.ecksdee.co.uk/](http://magiceye.ecksdee.co.uk/)
 * [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
+* [https://github.com/resurrecting-open-source-projects/outguess](https://github.com/resurrecting-open-source-projects/outguess)
+* [https://www.openstego.com/](https://www.openstego.com/)
+* [https://diit.sourceforge.net/](https://diit.sourceforge.net/)
 
 ## Extracting data from audios
 
