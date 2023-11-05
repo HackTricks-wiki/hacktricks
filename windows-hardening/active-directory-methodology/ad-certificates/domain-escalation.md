@@ -43,16 +43,16 @@ certipy find -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 Para **abusar de esta vulnerabilidad y hacerse pasar por un administrador**, se podría ejecutar:
 ```bash
 Certify.exe request /ca:dc.theshire.local-DC-CA /template:VulnTemplate /altname:localadmin
-certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'ESC1' -alt 'administrator@corp.local'
+certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
 ```
 Luego puedes transformar el **certificado generado a formato `.pfx`** y utilizarlo para **autenticarte usando Rubeus o certipy** nuevamente:
 ```bash
 Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:password123! /ptt
 certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.local' -dc-ip 172.16.19.100
 ```
-Los binarios de Windows "Certreq.exe" y "Certutil.exe" pueden ser abusados para generar el archivo PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
+Los binarios de Windows "Certreq.exe" y "Certutil.exe" pueden ser abusados para generar el PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-Además, la siguiente consulta LDAP, cuando se ejecuta contra el esquema de configuración del bosque de AD, se puede utilizar para **enumerar** las **plantillas de certificados** que no requieren aprobación/firmas, que tienen una EKU de **Autenticación del cliente o Inicio de sesión con tarjeta inteligente**, y que tienen habilitada la bandera **`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`**.
+Además, la siguiente consulta LDAP, cuando se ejecuta contra el esquema de configuración del bosque de AD, se puede utilizar para **enumerar** las **plantillas de certificados** que no requieren aprobación/firmas, que tienen una EKU de **Autenticación de Cliente o Inicio de Sesión con Tarjeta Inteligente**, y tienen habilitada la bandera **`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`**:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
@@ -84,9 +84,9 @@ La siguiente consulta LDAP, cuando se ejecuta contra el esquema de configuració
 
 Este escenario es similar al primero y al segundo, pero **abusando** de un **EKU diferente** (Agente de Solicitud de Certificado) y **2 plantillas diferentes** (por lo tanto, tiene 2 conjuntos de requisitos).
 
-El EKU del Agente de Solicitud de Certificado (OID 1.3.6.1.4.1.311.20.2.1), conocido como **Agente de Inscripción** en la documentación de Microsoft, permite a un principal **inscribirse** para obtener un **certificado en nombre de otro usuario**.
+El EKU del Agente de Solicitud de Certificado (OID 1.3.6.1.4.1.311.20.2.1), conocido como **Agente de Inscripción** en la documentación de Microsoft, permite a un principal **inscribirse** para obtener un **certificado** en **nombre de otro usuario**.
 
-El **"agente de inscripción"** se inscribe en una **plantilla** y utiliza el certificado resultante para **cofirmar una CSR en nombre del otro usuario**. Luego **envía** la **CSR co-firmada** a la CA, inscribiéndose en una **plantilla** que **permite "inscribir en nombre de"**, y la CA responde con un **certificado perteneciente al "otro" usuario**.
+El **"agente de inscripción"** se inscribe en una **plantilla** y utiliza el **certificado resultante para co-firmar una CSR en nombre del otro usuario**. Luego **envía** la **CSR co-firmada** a la CA, inscribiéndose en una **plantilla** que **permite "inscribir en nombre de"**, y la CA responde con un **certificado perteneciente al "otro" usuario**.
 
 **Requisitos 1:**
 
@@ -148,7 +148,7 @@ Un ejemplo de escalada de privilegios como el anterior:
 
 ESC4 es cuando un usuario tiene privilegios de escritura sobre una plantilla de certificado. Esto se puede abusar, por ejemplo, para sobrescribir la configuración de la plantilla de certificado y hacer que la plantilla sea vulnerable a ESC1.
 
-Como podemos ver en la ruta anterior, solo `JOHNPC` tiene estos privilegios, pero nuestro usuario `JOHN` tiene el nuevo enlace `AddKeyCredentialLink` a `JOHNPC`. Dado que esta técnica está relacionada con los certificados, también he implementado este ataque, que se conoce como [Credenciales en sombra](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Aquí hay un pequeño adelanto del comando `shadow auto` de Certipy para recuperar el hash NT de la víctima.
+Como podemos ver en la ruta anterior, solo `JOHNPC` tiene estos privilegios, pero nuestro usuario `JOHN` tiene el nuevo enlace `AddKeyCredentialLink` a `JOHNPC`. Dado que esta técnica está relacionada con los certificados, también he implementado este ataque, conocido como [Credenciales en sombra](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Aquí hay un pequeño adelanto del comando `shadow auto` de Certipy para recuperar el hash NT de la víctima.
 
 <figure><img src="../../../.gitbook/assets/image (1) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -179,10 +179,10 @@ Si un atacante con privilegios bajos puede obtener **control sobre alguno de est
 
 ### Explicación
 
-Hay otro problema similar, descrito en la [publicación de **CQure Academy**](https://cqureacademy.com/blog/enhanced-key-usage), que involucra la bandera **`EDITF_ATTRIBUTESUBJECTALTNAME2`**. Según lo describe Microsoft, "**si** esta bandera está **activada** en el CA, **cualquier solicitud** (incluyendo cuando el sujeto se construye a partir de Active Directory®) puede tener **valores definidos por el usuario** en el **nombre alternativo del sujeto**".\
+Hay otro problema similar, descrito en la [**publicación de CQure Academy**](https://cqureacademy.com/blog/enhanced-key-usage), que involucra la bandera **`EDITF_ATTRIBUTESUBJECTALTNAME2`**. Según lo describe Microsoft, "**si** esta bandera está **activada** en el CA, **cualquier solicitud** (incluyendo cuando el sujeto se construye a partir de Active Directory®) puede tener **valores definidos por el usuario** en el **nombre alternativo del sujeto**".\
 Esto significa que un **atacante** puede inscribirse en **CUALQUIER plantilla** configurada para la **autenticación** de dominio que también **permite a usuarios sin privilegios** inscribirse (por ejemplo, la plantilla de usuario predeterminada) y **obtener un certificado** que nos permita **autenticarnos** como un administrador de dominio (o **cualquier otro usuario/máquina activo**).
 
-**Nota**: los **nombres alternativos** aquí se **incluyen** en una CSR a través del argumento `-attrib "SAN:"` en `certreq.exe` (es decir, "Pares de nombre y valor"). Esto es **diferente** al método para **abusar de los SAN** en ESC1, ya que **almacena información de cuenta en un atributo del certificado en lugar de una extensión del certificado**.
+**Nota**: los **nombres alternativos** aquí se **incluyen** en una CSR a través del argumento `-attrib "SAN:"` en `certreq.exe` (es decir, "Pares de nombre y valor"). Esto es **diferente** al método para **abusar de los SAN** en ESC1, ya que **almacena información de cuenta en un atributo de certificado en lugar de una extensión de certificado**.
 
 ### Abuso
 
@@ -212,7 +212,7 @@ Si encuentras esta configuración en tu entorno, puedes **eliminar esta bandera*
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
 {% hint style="warning" %}
-Después de las actualizaciones de seguridad de mayo de 2022, los nuevos **certificados** tendrán una **extensión de seguridad** que **incorpora** la **propiedad `objectSid` del solicitante**. Para ESC1, esta propiedad se reflejará desde el SAN especificado, pero con **ESC6**, esta propiedad refleja el **`objectSid` del solicitante**, y no desde el SAN.\
+Después de las actualizaciones de seguridad de mayo de 2022, los nuevos **certificados** tendrán una **extensión de seguridad** que **incorpora** la **propiedad `objectSid` del solicitante**. Para ESC1, esta propiedad se reflejará desde el SAN especificado, pero con **ESC6**, esta propiedad refleja el **`objectSid` del solicitante**, y no del SAN.\
 Por lo tanto, **para abusar de ESC6**, el entorno debe ser **vulnerable a ESC10** (Mapeos de Certificados Débiles), donde se prefiere el SAN sobre la nueva extensión de seguridad.
 {% endhint %}
 
@@ -347,7 +347,7 @@ AD CS admite varios **métodos de inscripción basados en HTTP** a través de ro
 
 Los **problemas** comunes con los ataques de relay NTLM son que las **sesiones NTLM suelen ser cortas** y que el atacante **no puede** interactuar con servicios que **imponen la firma NTLM**.
 
-Sin embargo, abusar de un ataque de relay NTLM para obtener un certificado del usuario resuelve estas limitaciones, ya que la sesión durará mientras el certificado sea válido y el certificado se puede utilizar para utilizar servicios que **imponen la firma NTLM**. Para saber cómo usar un certificado robado, consulta:
+Sin embargo, abusar de un ataque de relay NTLM para obtener un certificado del usuario resuelve estas limitaciones, ya que la sesión durará mientras el certificado sea válido y el certificado se puede utilizar para utilizar servicios que **imponen la firma NTLM**. Para saber cómo usar un certificado robado, consulte:
 
 {% content-ref url="account-persistence.md" %}
 [account-persistence.md](account-persistence.md)
@@ -367,7 +367,7 @@ Certify.exe cas
 ```
 <figure><img src="../../../.gitbook/assets/image (6) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
-Las CAs empresariales también **almacenan los puntos finales CES** en su objeto AD en la propiedad `msPKI-Enrollment-Servers`. **Certutil.exe** y **PSPKI** pueden analizar y listar estos puntos finales:
+Las CAs empresariales también **almacenan los puntos finales de CES** en su objeto AD en la propiedad `msPKI-Enrollment-Servers`. **Certutil.exe** y **PSPKI** pueden analizar y listar estos puntos finales:
 ```
 certutil.exe -enrollmentServerURL -config CORPDC01.CORP.LOCAL\CORP-CORPDC01-CA
 ```
@@ -571,7 +571,7 @@ En última instancia, ambos escenarios **aumentan la superficie de ataque** de u
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
