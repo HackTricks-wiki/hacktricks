@@ -24,7 +24,7 @@
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-Binwalkは、画像や音声ファイルなどのバイナリファイルを検索し、埋め込まれた隠しファイルやデータを見つけるためのツールです。\
+Binwalkは、画像や音声ファイルなどのバイナリファイルを検索して、埋め込まれた隠しファイルやデータを見つけるためのツールです。\
 `apt`を使用してインストールでき、[ソース](https://github.com/ReFirmLabs/binwalk)はGithubで見つけることができます。\
 **便利なコマンド**:\
 `binwalk file`：指定したファイルに埋め込まれたデータを表示します。\
@@ -64,12 +64,12 @@ exiftoolに似たツールです。\
 `strings -n 6 file`：最小長さ6の文字列を抽出します。\
 `strings -n 6 file | head -n 20`：最初の20個の最小長さ6の文字列を抽出します。\
 `strings -n 6 file | tail -n 20`：最後の20個の最小長さ6の文字列を抽出します。\
-`strings -e s -n 6 file`：7ビット文字列を抽出します。\
-`strings -e S -n 6 file`：8ビット文字列を抽出します。\
-`strings -e l -n 6 file`：16ビット文字列（リトルエンディアン）を抽出します。\
-`strings -e b -n 6 file`：16ビット文字列（ビッグエンディアン）を抽出します。\
-`strings -e L -n 6 file`：32ビット文字列（リトルエンディアン）を抽出します。\
-`strings -e B -n 6 file`：32ビット文字列（ビッグエンディアン）を抽出します。
+`strings -e s -n 6 file`：7ビットの文字列を抽出します。\
+`strings -e S -n 6 file`：8ビットの文字列を抽出します。\
+`strings -e l -n 6 file`：16ビットの文字列（リトルエンディアン）を抽出します。\
+`strings -e b -n 6 file`：16ビットの文字列（ビッグエンディアン）を抽出します。\
+`strings -e L -n 6 file`：32ビットの文字列（リトルエンディアン）を抽出します。\
+`strings -e B -n 6 file`：32ビットの文字列（ビッグエンディアン）を抽出します。
 
 ### cmp - 比較
 
@@ -96,7 +96,7 @@ cmp original.jpg stego.jpg -b -l
 
 ### identify
 
-[GraphicMagick](https://imagemagick.org/script/download.php)ツールを使用して、ファイルがどの種類の画像であるかを確認します。また、画像が破損しているかどうかも確認します。
+[GraphicMagick](https://imagemagick.org/script/download.php)ツールを使用して、ファイルがどの種類の画像であるかを確認します。また、画像が破損しているかどうかもチェックします。
 ```
 ./magick identify -verbose stego.jpg
 ```
@@ -106,7 +106,7 @@ cmp original.jpg stego.jpg -b -l
 ```
 ### Steghide \[JPEG, BMP, WAV, AU] <a href="#steghide" id="steghide"></a>
 
-Steghideは、さまざまな種類の画像や音声ファイルにデータを隠すステガノグラフィープログラムです。サポートされているファイル形式は、`JPEG、BMP、WAV、AU`です。また、他のファイルから埋め込まれた暗号化されたデータを抽出するのにも役立ちます。\
+Steghideは、さまざまな種類の画像や音声ファイルにデータを隠すステガノグラフィープログラムです。サポートされているファイル形式は、`JPEG、BMP、WAV、AU`です。他のファイルから埋め込まれた暗号化されたデータを抽出するのにも便利です。\
 `apt`を使用してインストールでき、[ソース](https://github.com/StefanoDeVuono/steghide)はGithubで見つけることができます。\
 **便利なコマンド:**\
 `steghide info file`：ファイルに埋め込まれたデータの有無についての情報を表示します。\
@@ -114,19 +114,19 @@ Steghideは、さまざまな種類の画像や音声ファイルにデータを
 
 また、ウェブを使用してsteghideからコンテンツを抽出することもできます：[https://futureboy.us/stegano/decinput.html](https://futureboy.us/stegano/decinput.html)
 
-**Steghideのブルートフォース攻撃**: [stegcracker](https://github.com/Paradoxis/StegCracker.git) `stegcracker <file> [<wordlist>]`
+**Bruteforcing** Steghide: [stegcracker](https://github.com/Paradoxis/StegCracker.git) `stegcracker <file> [<wordlist>]`
 
 ### Zsteg \[PNG, BMP] <a href="#zsteg" id="zsteg"></a>
 
 zstegは、pngおよびbmpファイルに隠されたデータを検出するツールです。\
 インストール方法：`gem install zsteg`。ソースは[Github](https://github.com/zed-0xff/zsteg)でも見つけることができます。\
 **便利なコマンド:**\
-`zsteg -a file`：指定したファイルに対してすべての検出方法を実行します。\
+`zsteg -a file`：指定したファイルに対してすべての検出メソッドを実行します。\
 `zsteg -E file`：指定したペイロードでデータを抽出します（例：zsteg -E b4,bgr,msb,xy name.png）
 
 ### stegoVeritas JPG、PNG、GIF、TIFF、BMP
 
-このツールは、ファイルのメタデータをチェックしたり、変換された画像を作成したり、LSBをブルートフォースしたりするなど、さまざまなシンプルで高度なトリックを実行することができます。完全な機能については、`stegoveritas.py -h`を参照してください。すべてのチェックを実行するには、`stegoveritas.py stego.jpg`を実行します。
+このツールは、ファイルのメタデータをチェックしたり、変換された画像を作成したり、LSBをブルートフォースしたりするなど、さまざまなシンプルで高度なトリックを実行できます。完全な機能については、`stegoveritas.py -h`を参照してください。すべてのチェックを実行するには、`stegoveritas.py stego.jpg`を実行します。
 
 ### Stegsolve
 
@@ -145,8 +145,8 @@ Fast Fourier Tを使用して隠されたコンテンツを検出するには：
 
 ### Stegpy \[PNG, BMP, GIF, WebP, WAV]
 
-ステガノグラフィを使用して画像や音声ファイルに情報をエンコードするためのプログラムです。データは平文または暗号化として保存することができます。\
-[GitHub](https://github.com/dhsdshdhk/stegpy)で見つけることができます。
+ステガノグラフィを使用して画像や音声ファイルに情報をエンコードするためのプログラムです。データは平文または暗号化として保存できます。\
+[GitHub](https://github.com/dhsdshdhk/stegpy)で入手できます。
 
 ### Pngcheck
 
@@ -158,6 +158,9 @@ PNGファイルの詳細を取得します（または実際には別のファ�
 
 * [http://magiceye.ecksdee.co.uk/](http://magiceye.ecksdee.co.uk/)
 * [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
+* [https://github.com/resurrecting-open-source-projects/outguess](https://github.com/resurrecting-open-source-projects/outguess)
+* [https://www.openstego.com/](https://www.openstego.com/)
+* [https://diit.sourceforge.net/](https://diit.sourceforge.net/)
 
 ## オーディオからデータを抽出する
 
@@ -175,28 +178,28 @@ ffmpegは、オーディオファイルの整合性をチェックし、ファ�
 WavStegは、wavファイルに最下位ビットを使用してデータを隠すことができるPython3ツールです。また、wavファイルからデータを検索および抽出することもできます。\
 [GitHub](https://github.com/ragibson/Steganography#WavSteg)から入手できます。\
 便利なコマンド：\
-`python3 WavSteg.py -r -b 1 -s soundfile -o outputfile`：出力ファイルに抽出します（最下位ビットのみを取得）\
-`python3 WavSteg.py -r -b 2 -s soundfile -o outputfile`：出力ファイルに抽出します（最下位2ビットのみを取得）
+`python3 WavSteg.py -r -b 1 -s soundfile -o outputfile`：出力ファイルに抽出します（最下位ビットのみを使用）\
+`python3 WavSteg.py -r -b 2 -s soundfile -o outputfile`：出力ファイルに抽出します（最下位2ビットのみを使用）
 
 ### Deepsound
 
 音声ファイルにAES-265で暗号化された情報を隠したり、検索したりすることができます。[公式ページ](http://jpinsoft.net/deepsound/download.aspx)からダウンロードしてください。\
-隠された情報を検索するには、プログラムを実行して音声ファイルを開きます。DeepSoundが隠されたデータを見つけた場合、解除するためのパスワードが必要です。
+隠された情報を検索するには、プログラムを実行し、音声ファイルを開きます。DeepSoundが隠されたデータを見つけた場合、解除するためにパスワードを提供する必要があります。
 
 ### Sonic visualizer <a href="#sonic-visualizer" id="sonic-visualizer"></a>
 
-Sonic visualizerは、オーディオファイルの内容を表示および分析するためのツールです。オーディオステガノグラフィの課題に直面した場合、他の多くのツールでは検出できないオーディオファイルの隠れた形状を明らかにすることができます。\
+Sonic visualizerは、オーディオファイルの内容を表示および分析するためのツールです。オーディオステガノグラフィの課題に直面した場合、他の多くのツールでは検出できないオーディオファイルの隠れた形状を明らかにするのに非常に役立ちます。\
 行き詰まった場合は、常にオーディオのスペクトログラムをチェックしてください。[公式ウェブサイト](https://www.sonicvisualiser.org/)
-
-### DTMF Tones - ダイヤル音
+### DTMFトーン - ダイヤル音
 
 * [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 * [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+
 ## その他のトリック
 
-### 2進数の長さSQRT - QRコード
+### 二進数の長さSQRT - QRコード
 
-もし、整数の平方根の長さを持つ2進数データを受け取った場合、それはQRコードの一種かもしれません。
+もし、受け取ったバイナリデータの長さが整数の平方根である場合、それはQRコードの一種かもしれません。
 ```
 import math
 math.sqrt(2500) #50
