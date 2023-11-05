@@ -317,7 +317,7 @@ Telegram had the entitlements `com.apple.security.cs.allow-dyld-environment-vari
 
 ## By open invocations
 
-It's possible to invoke open in sandboxed&#x20;
+It's possible to invoke `open` even while sandboxed&#x20;
 
 ### Terminal Scripts
 
@@ -436,6 +436,16 @@ The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was
 In several occasions files will store sensitive information like emails, phone numbers, messages... in non protected locations (which count as a vulnerability in Apple).
 
 <figure><img src="../../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
+
+## Synthetic Clicks
+
+This doesn't work anymore, but it [**did in the past**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+
+<figure><img src="../../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS\_v2\_Wardle.pdf):
+
+<figure><img src="../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Reference
 

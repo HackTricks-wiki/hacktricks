@@ -33,16 +33,26 @@ In the function **`processRestricted`** the reason of the restriction is set. Ch
 
 * The binary is `setuid/setgid`
 * Existence of `__RESTRICT/__restrict` section in the macho binary.
-* The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) entitlement or [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
+* The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) entitlement
   * Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
-* If the lib is signed with a different certificate as the binary
-  * If the lib & the bin are signed with the same cert, this will bypass the previous restrictions
-* Programs with the entitlements **`system.install.apple-software`** and **`system.install.apple-software.standar-user`** can **install software** signed by Apple without asking the user for a password (privesc)
 
 In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
 {% endhint %}
 
-You can check if a binary has **hardenend runtime** with `codesign --display --verbose <bin>` checking the flag runtime in **`CodeDirectory`** like: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+### Library Validation
+
+Even if the binary allows to use the **`DYLD_INSERT_LIBRARIES`** env variable, if the binary checks the signature of the library to load it won't load a custom what.
+
+In order to load a custom library, the binary needs to have **one of the following entitlements**:
+
+* &#x20;[`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
+* [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
+
+or the binary **shouldn't** have the **hardened runtime flag** or the **library validation flag**.
+
+You can check if a binary has **hardened runtime** with `codesign --display --verbose <bin>` checking the flag runtime in **`CodeDirectory`** like: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+
+You can also load a library if it's **signed with the same certificate as the binary**.
 
 Find a example on how to (ab)use this and check the restrictions in:
 
@@ -53,7 +63,7 @@ Find a example on how to (ab)use this and check the restrictions in:
 ## Dylib Hijacking
 
 {% hint style="danger" %}
-Remember that **previous restrictions also apply** to perform Dylib hijacking attacks.
+Remember that **previous Library Validation restrictions also apply** to perform Dylib hijacking attacks.
 {% endhint %}
 
 As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code**.\
@@ -75,7 +85,7 @@ However, there are **2 types of dylib hijacking**:
 * **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC\_LOAD\_WEAK\_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
   * The fact that the link is "weak" means that the application will continue running even if the library isn't found.
   * The **code related** to this is in the function `ImageLoaderMachO::doGetDependentLibraries` of `ImageLoaderMachO.cpp` where `lib->required` is only `false` when `LC_LOAD_WEAK_DYLIB` is true.
-  * **Find weak liked libraries** in binaries with (you have later an example on how to create hijacking libraries):
+  * **Find weak linked libraries** in binaries with (you have later an example on how to create hijacking libraries):
     * ```bash
       otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
       cmdsize 56
@@ -113,6 +123,10 @@ A nice **report with technical details** about this technique can be found [**he
 {% endcontent-ref %}
 
 ## Dlopen Hijacking
+
+{% hint style="danger" %}
+Remember that **previous Library Validation restrictions also apply** to perform Dlopen hijacking attacks.
+{% endhint %}
 
 From **`man dlopen`**:
 
