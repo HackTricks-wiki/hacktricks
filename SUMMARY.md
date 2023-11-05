@@ -474,6 +474,7 @@
 * [1026 - Pentesting Rusersd](network-services-pentesting/1026-pentesting-rusersd.md)
 * [1080 - Pentesting Socks](network-services-pentesting/1080-pentesting-socks.md)
 * [1098/1099/1050 - Pentesting Java RMI - RMI-IIOP](network-services-pentesting/1099-pentesting-java-rmi.md)
+* [1414 - Pentesting IBM MQ](network-services-pentesting/1414-pentesting-ibmmq.md)
 * [1433 - Pentesting MSSQL - Microsoft SQL Server](network-services-pentesting/pentesting-mssql-microsoft-sql-server/README.md)
   * [Types of MSSQL Users](network-services-pentesting/pentesting-mssql-microsoft-sql-server/types-of-mssql-users.md)
 * [1521,1522-1529 - Pentesting Oracle TNS Listener](network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/README.md)
