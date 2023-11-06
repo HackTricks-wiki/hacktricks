@@ -63,6 +63,14 @@ These entitlements allows to **install software without asking for permissions**
 
 Entitlement needed to ask the **kernel to load a kernel extension**.
 
+### **`com.apple.private.icloud-account-access`**
+
+The entitlement **`com.apple.private.icloud-account-access`** it's possible to communicate with **`com.apple.iCloudHelper`** XPC service which will **provide iCloud tokens**.
+
+**iMovie** and **Garageband** had this entitlement.
+
+For more **information** about the exploit to **get icloud tokens** from that entitlement check the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)
+
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
 TODO: I don't know what this allows to do
@@ -133,6 +141,19 @@ The Disable Executable Memory Protection Entitlement is an extreme entitlement t
 ### `com.apple.security.cs.allow-relative-library-loads`
 
 TODO
+
+### `kTCCServiceAll`
+
+According to this blogpost, this TCC permission usually found in the form:
+
+```
+[Key] com.apple.private.tcc.allow-prompting
+	[Value]
+		[Array]
+			[String] kTCCServiceAll
+```
+
+Allow the process to **ask for all the TCC permissions**.
 
 <details>
 

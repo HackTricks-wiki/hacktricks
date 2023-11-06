@@ -111,7 +111,7 @@ xpcspy -U -r -W <bundle-id>
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
 
-## C Code Example
+## XPC Communication C Code Example
 
 {% tabs %}
 {% tab title="xpc_server.c" %}
@@ -245,7 +245,7 @@ sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
 
-## Objective-C Code Example
+## XPC Communication Objective-C Code Example
 
 {% tabs %}
 {% tab title="oc_xpc_server.m" %}

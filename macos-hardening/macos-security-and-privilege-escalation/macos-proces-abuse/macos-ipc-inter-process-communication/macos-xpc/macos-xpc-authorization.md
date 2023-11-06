@@ -274,7 +274,7 @@ You can find **all the permissions configurations** [**in here**](https://www.ds
 
 1. **'authenticate-user': 'false'**
    * This is the most direct key. If set to `false`, it specifies that a user does not need to provide authentication to gain this right.
-   * Ths is used in **combination with one of the 2 below or indicating a group** the user must belongs to.
+   * This is used in **combination with one of the 2 below or indicating a group** the user must belong to.
 2. **'allow-root': 'true'**
    * If a user is operating as the root user (which has elevated permissions), and this key is set to `true`, the root user could potentially gain this right without further authentication. However, typically, getting to a root user status already requires authentication, so this isn't a "no authentication" scenario for most users.
 3. **'session-owner': 'true'**
@@ -290,7 +290,6 @@ is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-develo
 
 Rights with 'allow-root': 'true':
 com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek, com-apple-openscripting-additions-send, com-apple-reportpanic-fixright, com-apple-servicemanagement-blesshelper, com-apple-xtype-fontmover-install, com-apple-xtype-fontmover-remove, com-apple-dt-instruments-process-analysis, com-apple-dt-instruments-process-kill, com-apple-pcastagentconfigd-wildcard, com-apple-trust-settings-admin, com-apple-wifivelocity, com-apple-wireless-diagnostics, is-root, system-install-iap-software, system-install-software, system-install-software-iap, system-preferences, system-preferences-accounts, system-preferences-datetime, system-preferences-energysaver, system-preferences-network, system-preferences-printing, system-preferences-security, system-preferences-sharing, system-preferences-softwareupdate, system-preferences-startupdisk, system-preferences-timemachine, system-print-operator, system-privilege-admin, system-services-networkextension-filtering, system-services-networkextension-vpn, system-services-systemconfiguration-network, system-sharepoints-wildcard
-
 
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
@@ -362,7 +361,7 @@ In this example is created:
 * The definition of the protocol with the functions
 * An empty auth to use to to ask for access
 * A connection to the XPC service
-* A call to the function if the connection was successfull
+* A call to the function if the connection was successful
 
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl

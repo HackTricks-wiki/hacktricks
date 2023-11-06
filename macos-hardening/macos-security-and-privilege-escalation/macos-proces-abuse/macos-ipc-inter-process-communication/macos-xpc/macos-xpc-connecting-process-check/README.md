@@ -17,7 +17,7 @@
 When a connection is stablished to an XPC service, the server will check if the connection is allowed. These are the checks it would usually perform:
 
 1. Check if the connecting **process is signed with an Apple-signed** certificate (only given out by Apple).
-   * If this **isn't verified**, an attacker could can create a **fake certificate** to match any other check.
+   * If this **isn't verified**, an attacker could create a **fake certificate** to match any other check.
 2. Check if the connecting process is signed with the **organization’s certificate**, (team ID verification).
    * If this **isn't verified**, **any developer certificate** from Apple can be used for signing, and connect to the service.
 3. Check if the connecting process **contains a proper bundle ID**.

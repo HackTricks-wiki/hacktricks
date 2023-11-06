@@ -18,8 +18,6 @@
 
 NIB files are used in Apple's development ecosystem to **define user interface (UI) elements** and their interactions within an application. Created with the Interface Builder tool, they contain **serialized objects** like windows, buttons, and text fields, which are loaded at runtime to present the designed UI. Although still in use, Apple has transitioned towards recommending Storyboards for a more visual representation of an application's UI flow.
 
-
-
 {% hint style="danger" %}
 Moreover, **NIB files** can also be used to **run arbitrary commands** and if NIB file is modified in an App, **Gatekeeper will still allow to execute the app**, so they can be used to r**un arbitrary commands inside applications**.
 {% endhint %}
@@ -95,7 +93,7 @@ grabbed's writeToFile:"/Users/xpn/Library/Containers/com.apple.iWork.Pages/Data/
 [**Malicious .xib file that executes arbitrary code example.**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4)
 {% endhint %}
 
-## Launch Constrains
+## Launch Constraints
 
 They basically **prevent executing applications outside of their expected locations**, so if you copy an application protected by Launch Constrains to `/tmp` you won't be able to execute it.\
 [**Find more information in this post**](../macos-security-protections/#launch-constraints)**.**

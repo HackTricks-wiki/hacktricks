@@ -81,6 +81,18 @@ Making this attack path more complicated (or impossible).
 
 Note that it's possible to bypass the requirement of **`kTCCServiceSystemPolicyAppBundles`** by copying the application to another directory (like **`/tmp`**), renaming the folder **`app.app/Contents`** to **`app.app/NotCon`**, **modifying** the **asar** file with your **malicious** code, renaming it back to **`app.app/Contents`** and executing it.
 
+You can unpack the code from the asar file with:
+
+```bash
+npx asar extract app.asar app-decomp
+```
+
+And pack it back after having modified it with:
+
+```bash
+npx asar pack app-decomp app-new.asar
+```
+
 ## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
 According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), if this env variable is set, it will start the process as a normal Node.js process.
@@ -133,7 +145,7 @@ You can store the payload in a different file and execute it:
 {% code overflow="wrap" %}
 ```bash
 # Content of /tmp/payload.js
-require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
+require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator');
 
 # Execute
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -216,7 +228,7 @@ You could abuse this env variable in a plist to maintain persistence adding thes
 ## TCC Bypass abusing Older Versions
 
 {% hint style="success" %}
-The TCC daemon from macOS doesn't check the executed version of the application. So if you **cannot inject code in an Electron application** with any of the previous techniques you could download a previous version of the APP and inject code on it as it will still get the TCC privileges.
+The TCC daemon from macOS doesn't check the executed version of the application. So if you **cannot inject code in an Electron application** with any of the previous techniques you could download a previous version of the APP and inject code on it as it will still get the TCC privileges (unless Trust Cache prevents it).
 {% endhint %}
 
 ## Automatic Injection

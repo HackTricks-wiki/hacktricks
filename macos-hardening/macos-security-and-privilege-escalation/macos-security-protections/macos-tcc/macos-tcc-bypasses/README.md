@@ -56,7 +56,7 @@ The entitlement **`com.apple.private.icloud-account-access`** it's possible to c
 
 **iMovie** and **Garageband** had this entitlement and others that allowed.
 
-For more **information** about the exploit to **get icloud tokens** from that entitlement chec the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)
+For more **information** about the exploit to **get icloud tokens** from that entitlement check the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automation
 
@@ -317,7 +317,7 @@ Telegram had the entitlements `com.apple.security.cs.allow-dyld-environment-vari
 
 ## By open invocations
 
-It's possible to invoke `open` even while sandboxed&#x20;
+It's possible to invoke **`open`** even while sandboxed&#x20;
 
 ### Terminal Scripts
 
