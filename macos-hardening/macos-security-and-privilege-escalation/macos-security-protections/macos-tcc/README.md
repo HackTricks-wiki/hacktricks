@@ -65,6 +65,7 @@ However, users can **delete or query rules** with the **`tccutil`** command line
 
 {% tabs %}
 {% tab title="user DB" %}
+{% code overflow="wrap" %}
 ```bash
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -81,9 +82,11 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=2;
 # Check user denied permissions for telegram
 sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
+{% endcode %}
 {% endtab %}
 
 {% tab title="system DB" %}
+{% code overflow="wrap" %}
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -95,11 +98,15 @@ kTCCServiceSystemPolicyDownloadsFolder|com.tinyspeck.slackmacgap|2|2
 kTCCServiceMicrophone|us.zoom.xos|2|2
 [...]
 
+# Get all FDA
+sqlite> select service, client, auth_value, auth_reason from access where service = "kTCCServiceSystemPolicyAllFiles" and auth_value=2;
+
 # Check user approved permissions for telegram
 sqlite> select * from access where client LIKE "%telegram%" and auth_value=2;
 # Check user denied permissions for telegram
 sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
+{% endcode %}
 {% endtab %}
 {% endtabs %}
 
