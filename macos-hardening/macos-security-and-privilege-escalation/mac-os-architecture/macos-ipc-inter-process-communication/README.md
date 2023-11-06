@@ -31,9 +31,9 @@ Los derechos de puerto, que definen las operaciones que una tarea puede realizar
 * **Derecho de Recepción**, que permite recibir mensajes enviados al puerto. Los puertos Mach son colas MPSC (multiple-producer, single-consumer), lo que significa que solo puede haber **un derecho de recepción para cada puerto** en todo el sistema (a diferencia de las tuberías, donde varios procesos pueden tener descriptores de archivo para el extremo de lectura de una tubería).
 * Una **tarea con el derecho de Recepción** puede recibir mensajes y **crear derechos de Envío**, lo que le permite enviar mensajes. Originalmente, solo la **propia tarea tiene el derecho de Recepción sobre su puerto**.
 * **Derecho de Envío**, que permite enviar mensajes al puerto.
-* El derecho de Envío se puede **clonar** para que una tarea que posee un derecho de Envío pueda clonar el derecho y **concedérselo a una tercera tarea**.
+* El derecho de Envío se puede **clonar**, por lo que una tarea que posee un derecho de Envío puede clonar el derecho y **concedérselo a una tercera tarea**.
 * **Derecho de Envío-una-vez**, que permite enviar un mensaje al puerto y luego desaparece.
-* **Derecho de conjunto de puertos**, que denota un _conjunto de puertos_ en lugar de un solo puerto. Desencolar un mensaje de un conjunto de puertos desencola un mensaje de uno de los puertos que contiene. Los conjuntos de puertos se pueden utilizar para escuchar varios puertos simultáneamente, de manera similar a `select`/`poll`/`epoll`/`kqueue` en Unix.
+* **Derecho de conjunto de puertos**, que denota un _conjunto de puertos_ en lugar de un solo puerto. Desencolar un mensaje de un conjunto de puertos desencola un mensaje de uno de los puertos que contiene. Los conjuntos de puertos se pueden utilizar para escuchar en varios puertos simultáneamente, de manera similar a `select`/`poll`/`epoll`/`kqueue` en Unix.
 * **Nombre muerto**, que no es un derecho de puerto real, sino simplemente un marcador de posición. Cuando se destruye un puerto, todos los derechos de puerto existentes para el puerto se convierten en nombres muertos.
 
 **Las tareas pueden transferir derechos de ENVÍO a otros**, lo que les permite enviar mensajes de vuelta. **Los derechos de ENVÍO también se pueden clonar**, por lo que una tarea puede duplicar y dar el derecho a una tercera tarea. Esto, combinado con un proceso intermediario conocido como el **servidor de arranque**, permite una comunicación efectiva entre tareas.
@@ -49,7 +49,7 @@ Como se mencionó, para establecer el canal de comunicación, está involucrado 
 3. La tarea **A** establece una **conexión** con el **servidor de arranque**, proporcionando el **nombre del servicio del puerto** y el **derecho de ENVÍO** a través de un procedimiento conocido como registro de arranque.
 4. La tarea **B** interactúa con el **servidor de arranque** para ejecutar una **búsqueda de arranque para el servicio**. Si tiene éxito, el **servidor duplica el derecho de ENVÍO** recibido de la tarea A y **lo transmite a la tarea B**.
 5. Al adquirir un derecho de ENVÍO, la tarea **B** es capaz de **formular** un **mensaje** y enviarlo **a la tarea A**.
-6. Para una comunicación bidireccional, por lo general, la tarea **B** genera un nuevo puerto con un derecho de **RECEPCIÓN** y un derecho de **ENVÍO**, y le da el **derecho de ENVÍO a la tarea A** para que pueda enviar mensajes a la tarea B (comunicación bidireccional).
+6. Para una comunicación bidireccional, por lo general la tarea **B** genera un nuevo puerto con un derecho de **RECEPCIÓN** y un derecho de **ENVÍO**, y le da el **derecho de ENVÍO a la tarea A** para que pueda enviar mensajes a la tarea B (comunicación bidireccional).
 
 El servidor de arranque **no puede autenticar** el nombre de servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como reclamar falsamente un nombre de servicio de autorización y luego aprobar cada solicitud.
 
@@ -63,7 +63,7 @@ Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente
 * launchd duplica el **derecho de ENVÍO y lo envía a la tarea B**.
 * La tarea **B** genera un nuevo puerto con un derecho de **RECEPCIÓN** y un derecho de **ENVÍO**, y le da el **derecho de ENVÍO a la tarea A** (el servicio) para que pueda enviar mensajes a la tarea B (comunicación bidireccional).
 
-Sin embargo, este proceso solo se aplica a las tareas predefinidas del sistema. Las tareas que no son del sistema aún operan como se describe originalmente, lo que podría permitir la suplantación.
+Sin embargo, este proceso solo se aplica a las tareas predefinidas del sistema. Las tareas no del sistema aún operan como se describe originalmente, lo que podría permitir la suplantación.
 ### Un Mensaje Mach
 
 Los mensajes Mach se envían o reciben utilizando la función **`mach_msg`** (que es esencialmente una llamada al sistema). Al enviar, el primer argumento de esta llamada debe ser el **mensaje**, que debe comenzar con un **`mach_msg_header_t`** seguido de la carga útil real:
@@ -277,15 +277,15 @@ printf("Sent a message\n");
 * Además, para llamar a la API **`kext_request`**, es necesario tener otros permisos **`com.apple.private.kext*`**, que solo se otorgan a los binarios de Apple.
 * **Puerto del nombre de la tarea**: Una versión no privilegiada del _puerto de la tarea_. Hace referencia a la tarea, pero no permite controlarla. Lo único que parece estar disponible a través de él es `task_info()`.
 * **Puerto de la tarea** (también conocido como puerto del kernel)**:** Con el permiso de enviar a través de este puerto, es posible controlar la tarea (leer/escribir memoria, crear hilos...).
-* Llama a `mach_task_self()` para **obtener el nombre** de este puerto para la tarea del llamador. Este puerto solo se **hereda** a través de **`exec()`**; una nueva tarea creada con `fork()` obtiene un nuevo puerto de tarea (como caso especial, una tarea también obtiene un nuevo puerto de tarea después de `exec()` en un binario suid). La única forma de generar una tarea y obtener su puerto es realizar el ["baile de intercambio de puertos"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) mientras se realiza un `fork()`.
+* Llama a `mach_task_self()` para **obtener el nombre** de este puerto para la tarea del llamador. Este puerto solo se **hereda** a través de **`exec()`**; una nueva tarea creada con `fork()` obtiene un nuevo puerto de tarea (como caso especial, una tarea también obtiene un nuevo puerto de tarea después de `exec()` en un binario suid). La única forma de generar una tarea y obtener su puerto es realizar el ["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) mientras se realiza un `fork()`.
 * Estas son las restricciones para acceder al puerto (desde `macos_task_policy` del binario `AppleMobileFileIntegrity`):
 * Si la aplicación tiene el permiso de **`com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de la tarea** (comúnmente agregado por Xcode para depurar). El proceso de **notarización** no lo permitirá en las versiones de producción.
-* Las aplicaciones con el permiso **`com.apple.system-task-ports`** pueden obtener el **puerto de la tarea para cualquier** proceso, excepto el kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se otorga a las aplicaciones de Apple.
+* Las aplicaciones con el permiso de **`com.apple.system-task-ports`** pueden obtener el **puerto de la tarea para cualquier** proceso, excepto el kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se otorga a las aplicaciones de Apple.
 * **Root puede acceder a los puertos de tarea** de aplicaciones **no** compiladas con un tiempo de ejecución **reforzado** (y no de Apple).
 
 ### Inyección de shellcode en un hilo a través del puerto de la tarea&#x20;
 
-Puedes obtener un shellcode desde:
+Puedes obtener un shellcode de:
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -543,9 +543,9 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ```
 ### Inyección de Dylib en un hilo a través del puerto de tarea
 
-En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la API **posix `pthread`**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
+En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la API de **pthread** de tipo **posix**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
 
-Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no era necesario trabajar con APIs compatibles con posix, solo con Mach. Las inyecciones **más complejas** requerirían que el hilo también sea **compatible con posix**.
+Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no era necesario trabajar con APIs compatibles con posix, solo con Mach. Inyecciones **más complejas** requerirían que el hilo también sea **compatible con posix**.
 
 Por lo tanto, para **mejorar el hilo**, se debe llamar a **`pthread_create_from_mach_thread`**, que creará un pthread válido. Luego, este nuevo pthread podría **llamar a dlopen** para **cargar una dylib** del sistema, por lo que en lugar de escribir nuevo shellcode para realizar diferentes acciones, es posible cargar bibliotecas personalizadas.
 
@@ -847,7 +847,7 @@ Para obtener más información sobre cómo funciona esta **comunicación** y có
 [macos-xpc](../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/)
 {% endcontent-ref %}
 
-## MIG - Generador de Interfaz Mach
+## MIG - Generador de interfaz Mach
 
 MIG fue creado para **simplificar el proceso de creación de código de IPC de Mach**. Básicamente, **genera el código necesario** para que el servidor y el cliente se comuniquen con una definición dada. Aunque el código generado puede ser feo, un desarrollador solo necesitará importarlo y su código será mucho más simple que antes.
 
@@ -870,7 +870,7 @@ Para obtener más información, consulta:
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).

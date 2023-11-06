@@ -20,7 +20,7 @@ El código de **dyld es de código abierto** y se puede encontrar en [https://op
 
 > Esta es una lista separada por dos puntos de **bibliotecas dinámicas** para cargar antes de las especificadas en el programa. Esto te permite probar nuevos módulos de bibliotecas compartidas dinámicas existentes que se utilizan en imágenes de espacio de nombres plano cargando una biblioteca compartida dinámica temporal con solo los nuevos módulos. Ten en cuenta que esto no tiene efecto en imágenes construidas con un espacio de nombres de dos niveles utilizando una biblioteca compartida dinámica a menos que también se utilice DYLD\_FORCE\_FLAT\_NAMESPACE.
 
-Esto es similar a **LD\_PRELOAD en Linux**.
+Esto es similar a [**LD\_PRELOAD en Linux**](../../../../linux-hardening/privilege-escalation#ld\_preload).
 
 Esta técnica también se puede **utilizar como una técnica ASEP** ya que cada aplicación instalada tiene un archivo plist llamado "Info.plist" que permite la **asignación de variables de entorno** utilizando una clave llamada `LSEnvironmental`.
 
@@ -126,7 +126,7 @@ Un buen **informe con detalles técnicos** sobre esta técnica se puede encontra
 Recuerda que también se aplican las restricciones de **Validación de Bibliotecas anteriores** para realizar ataques de secuestro de Dlopen.
 {% endhint %}
 
-De **`man dlopen`**:
+Desde **`man dlopen`**:
 
 * Cuando la ruta **no contiene el carácter de barra diagonal** (es decir, es solo un nombre de archivo), **dlopen() buscará**. Si **`$DYLD_LIBRARY_PATH`** se estableció al inicio, dyld buscará primero en ese directorio. A continuación, si el archivo mach-o que llama o el ejecutable principal especifican un **`LC_RPATH`**, entonces dyld buscará en esos directorios. A continuación, si el proceso no tiene restricciones, dyld buscará en el **directorio de trabajo actual**. Por último, para los binarios antiguos, dyld intentará algunas alternativas. Si **`$DYLD_FALLBACK_LIBRARY_PATH`** se estableció al inicio, dyld buscará en **esos directorios**, de lo contrario, dyld buscará en **`/usr/local/lib/`** (si el proceso no tiene restricciones), y luego en **`/usr/lib/`** (esta información se obtuvo de **`man dlopen`**).
 1. `$DYLD_LIBRARY_PATH`
@@ -227,13 +227,17 @@ Si lo compilas y ejecutas, podrás ver **dónde se buscó sin éxito cada biblio
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
-## Podar variables de entorno `DYLD_*` y `LD_LIBRARY_PATH`
+## Secuestro de Ruta Relativa
 
-En el archivo `dyld-dyld-832.7.1/src/dyld2.cpp` es posible encontrar la función **`pruneEnvironmentVariables`**, la cual eliminará cualquier variable de entorno que **comience con `DYLD_`** y **`LD_LIBRARY_PATH=`**.
+Si un **binario/aplicación privilegiada** (como un SUID o algún binario con permisos poderosos) está **cargando una biblioteca de ruta relativa** (por ejemplo, usando `@executable_path` o `@loader_path`) y tiene la **Validación de Biblioteca desactivada**, podría ser posible mover el binario a una ubicación donde el atacante pueda **modificar la biblioteca cargada de ruta relativa** y abusar de ella para inyectar código en el proceso.
 
-También establecerá específicamente a **null** las variables de entorno **`DYLD_FALLBACK_FRAMEWORK_PATH`** y **`DYLD_FALLBACK_LIBRARY_PATH`** para binarios **suid** y **sgid**.
+## Eliminar las variables de entorno `DYLD_*` y `LD_LIBRARY_PATH`
 
-Esta función es llamada desde la función **`_main`** del mismo archivo si se está apuntando a OSX de la siguiente manera:
+En el archivo `dyld-dyld-832.7.1/src/dyld2.cpp`, es posible encontrar la función **`pruneEnvironmentVariables`**, que eliminará cualquier variable de entorno que **comience con `DYLD_`** y **`LD_LIBRARY_PATH=`**.
+
+También establecerá específicamente las variables de entorno **`DYLD_FALLBACK_FRAMEWORK_PATH`** y **`DYLD_FALLBACK_LIBRARY_PATH`** en **nulo** para los binarios **suid** y **sgid**.
+
+Esta función se llama desde la función **`_main`** del mismo archivo si se apunta a OSX de la siguiente manera:
 ```cpp
 #if TARGET_OS_OSX
 if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
@@ -295,13 +299,13 @@ When a process is placed in the `__RESTRICT` section, it is restricted from exec
 
 By leveraging the `__RESTRICT` section, an attacker can bypass these restrictions and inject malicious code into a process. This technique is known as library injection and can be used to escalate privileges and gain unauthorized access to sensitive information.
 
-To perform library injection, the attacker needs to identify a vulnerable process and find a way to inject their malicious code into it. This can be done by exploiting vulnerabilities in the target process or by using techniques such as code injection or DLL hijacking.
+To perform library injection, the attacker needs to identify a vulnerable process and find a way to inject their malicious code into it. This can be done by exploiting vulnerabilities in the target process or by tricking the user into executing a malicious file.
 
 Once the malicious code is injected into the target process, the attacker can execute arbitrary commands, access sensitive data, or perform other malicious activities. This can lead to a complete compromise of the system and the leakage of sensitive information.
 
-To protect against library injection attacks, it is important to implement proper security measures, such as keeping the system and applications up to date with the latest patches, using strong authentication mechanisms, and implementing access controls to limit the privileges of processes.
+To protect against library injection attacks, it is important to implement proper security measures, such as keeping the system and applications up to date, using strong authentication mechanisms, and regularly monitoring for suspicious activities. Additionally, developers should follow secure coding practices and perform regular security audits to identify and fix any vulnerabilities in their code.
 
-By understanding the `__RESTRICT` section and the risks associated with library injection, system administrators and security professionals can take proactive steps to secure their macOS systems and prevent unauthorized access and privilege escalation.
+By understanding the risks associated with library injection and implementing appropriate security measures, users and organizations can better protect their systems and data from unauthorized access and privilege escalation.
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
