@@ -234,6 +234,10 @@ If you compile and execute it you can see **where each library was unsuccessfull
 sudo fs_usage | grep "dlopentest"
 ```
 
+## Relative Path Hijacking
+
+If a **privileged binary/app** (like a SUID or some binary with powerful entitlements) is **loading a relative path** library (for example using `@executable_path` or `@loader_path`) and has **Library Validation disabled**, it could be possible to move the binary to a location where the attacker could **modify the relative path loaded library**, and abuse it to inject code on the process.
+
 ## Prune `DYLD_*` and `LD_LIBRARY_PATH` env variables
 
 In the file `dyld-dyld-832.7.1/src/dyld2.cpp` it's possible to fund the function **`pruneEnvironmentVariables`**, which will remove any env variable that **starts with `DYLD_`** and **`LD_LIBRARY_PATH=`**.
