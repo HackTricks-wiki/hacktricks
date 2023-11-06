@@ -59,9 +59,9 @@ codesign -s <cert-name-keychain> toolsdemo
 
 El proceso de notarización de Apple sirve como una salvaguarda adicional para proteger a los usuarios de software potencialmente dañino. Implica que el **desarrollador envíe su aplicación para su examen** por parte del **Servicio de Notarización de Apple**, que no debe confundirse con la Revisión de la Aplicación. Este servicio es un **sistema automatizado** que examina el software enviado en busca de **contenido malicioso** y posibles problemas con la firma del código.
 
-Si el software **supera** esta inspección sin plantear ninguna preocupación, el Servicio de Notarización genera un ticket de notarización. Luego, se requiere que el desarrollador **adjunte este ticket a su software**, un proceso conocido como "grapado". Además, el ticket de notarización también se publica en línea, donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
+Si el software **supera** esta inspección sin plantear ninguna preocupación, el Servicio de Notarización genera un ticket de notarización. Luego, se requiere que el desarrollador **adjunte este ticket a su software**, un proceso conocido como 'engrapado'. Además, el ticket de notarización también se publica en línea, donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
 
-En la primera instalación o ejecución del software por parte del usuario, la existencia del ticket de notarización, ya sea grapado al ejecutable o encontrado en línea, **informa a Gatekeeper que el software ha sido notarizado por Apple**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el diálogo de inicio inicial, indicando que el software ha sido sometido a verificaciones de contenido malicioso por parte de Apple. Este proceso mejora la confianza del usuario en la seguridad del software que instalan o ejecutan en sus sistemas.
+En la primera instalación o ejecución del software por parte del usuario, la existencia del ticket de notarización, ya sea adjunto al ejecutable o encontrado en línea, **informa a Gatekeeper que el software ha sido notarizado por Apple**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el diálogo de inicio inicial, indicando que el software ha sido sometido a verificaciones de contenido malicioso por parte de Apple. Este proceso mejora la confianza del usuario en la seguridad del software que instalan o ejecutan en sus sistemas.
 
 ### Enumeración de GateKeeper
 
@@ -144,7 +144,7 @@ spctl --assess -v /Applications/App.app
 
 Al descargar una aplicación o archivo, ciertas aplicaciones de macOS, como navegadores web o clientes de correo electrónico, adjuntan un atributo de archivo extendido, comúnmente conocido como "bandera de cuarentena", al archivo descargado. Este atributo actúa como una medida de seguridad para marcar el archivo como proveniente de una fuente no confiable (Internet) y potencialmente portador de riesgos. Sin embargo, no todas las aplicaciones adjuntan este atributo, por ejemplo, los programas comunes de cliente BitTorrent suelen omitir este proceso.
 
-La presencia de una bandera de cuarentena señala la función de seguridad Gatekeeper de macOS cuando un usuario intenta ejecutar el archivo.
+La presencia de una bandera de cuarentena indica a la función de seguridad Gatekeeper de macOS cuando un usuario intenta ejecutar el archivo.
 
 En el caso de que la bandera de cuarentena no esté presente (como en archivos descargados a través de algunos clientes BitTorrent), es posible que no se realicen las verificaciones de Gatekeeper. Por lo tanto, los usuarios deben tener precaución al abrir archivos descargados de fuentes menos seguras o desconocidas.
 
@@ -157,7 +157,7 @@ Por lo tanto, estas verificaciones solo se ejecutan al ejecutar aplicaciones con
 {% hint style="warning" %}
 Este atributo debe ser establecido por la aplicación que crea/descarga el archivo.
 
-Sin embargo, los archivos que están en un sandbox tendrán este atributo establecido en cada archivo que creen. Y las aplicaciones que no están en un sandbox pueden establecerlo por sí mismas o especificar la clave [LSFileQuarantineEnabled](https://developer.apple.com/documentation/bundleresources/information\_property\_list/lsfilequarantineenabled?language=objc) en el archivo **Info.plist**, lo que hará que el sistema establezca el atributo extendido `com.apple.quarantine` en los archivos creados.
+Sin embargo, los archivos que están en un entorno de sandbox tendrán este atributo establecido en cada archivo que creen. Y las aplicaciones que no están en un entorno de sandbox pueden establecerlo por sí mismas o especificar la clave [LSFileQuarantineEnabled](https://developer.apple.com/documentation/bundleresources/information\_property\_list/lsfilequarantineenabled?language=objc) en el archivo **Info.plist**, lo que hará que el sistema establezca el atributo extendido `com.apple.quarantine` en los archivos creados.
 {% endhint %}
 
 Es posible verificar su estado y habilitar/deshabilitar (se requiere acceso de root) con:
@@ -171,7 +171,7 @@ spctl --disable
 ```
 También puedes **verificar si un archivo tiene el atributo de cuarentena extendido** con:
 ```bash
-xattr portada.png
+xattr file.png
 com.apple.macl
 com.apple.quarantine
 ```
@@ -205,7 +205,7 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 {% endcode %}
 
-La información de cuarentena también se almacena en una base de datos central administrada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
+La información de cuarentena también se almacena en una base de datos central gestionada por LaunchServices en **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
 
 ### XProtect
 
@@ -262,7 +262,7 @@ Consulta el [**informe original**](https://www.jamf.com/blog/jamf-threat-labs-sa
 
 ### [CVE-2022-32910](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32910)
 
-Aunque los componentes son diferentes, la explotación de esta vulnerabilidad es muy similar a la anterior. En este caso, generaremos un archivo de Apple Archive desde **`application.app/Contents`** para que **`application.app` no obtenga el atributo de cuarentena** al descomprimirse con **Archive Utility**.
+Aunque los componentes son diferentes, la explotación de esta vulnerabilidad es muy similar a la anterior. En este caso, generaremos un archivo de Apple Archive desde **`application.app/Contents`** para que **`application.app` no obtenga el atributo de cuarentena** al ser descomprimido por **Archive Utility**.
 ```bash
 aa archive -d test.app/Contents -o test.app.aar
 ```

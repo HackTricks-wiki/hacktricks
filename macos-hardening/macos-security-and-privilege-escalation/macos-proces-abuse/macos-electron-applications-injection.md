@@ -23,7 +23,7 @@ Estas técnicas se discutirán a continuación, pero recientemente Electron ha a
 
 * **`RunAsNode`**: Si está deshabilitado, evita el uso de la variable de entorno **`ELECTRON_RUN_AS_NODE`** para inyectar código.
 * **`EnableNodeCliInspectArguments`**: Si está deshabilitado, los parámetros como `--inspect`, `--inspect-brk` no se respetarán. Evitando así la inyección de código de esta manera.
-* **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será validado por macOS. **Evitando** de esta manera la **inyección de código** al modificar el contenido de este archivo.
+* **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será validado por macOS. **Previniendo** de esta manera la **inyección de código** al modificar el contenido de este archivo.
 * **`OnlyLoadAppFromAsar`**: Si está habilitado, en lugar de buscar para cargar en el siguiente orden: **`app.asar`**, **`app`** y finalmente **`default_app.asar`**. Solo verificará y usará app.asar, asegurando así que cuando se **combine** con el fusible **`embeddedAsarIntegrityValidation`**, sea **imposible** cargar código no validado.
 * **`LoadBrowserProcessSpecificV8Snapshot`**: Si está habilitado, el proceso del navegador utiliza el archivo llamado `browser_v8_context_snapshot.bin` para su instantánea de V8.
 
@@ -75,11 +75,19 @@ Sin embargo, en este momento hay 2 limitaciones:
 Esto hace que esta ruta de ataque sea más complicada (o imposible).
 {% endhint %}
 
-Ten en cuenta que es posible evitar el requisito de **`kTCCServiceSystemPolicyAppBundles`** copiando la aplicación a otro directorio (como **`/tmp`**), renombrando la carpeta **`app.app/Contents`** a **`app.app/NotCon`**, **modificando** el archivo **asar** con tu código **malicioso**, volviendo a renombrarlo a **`app.app/Contents`** y ejecutándolo.
+Ten en cuenta que es posible evadir el requisito de **`kTCCServiceSystemPolicyAppBundles`** copiando la aplicación a otro directorio (como **`/tmp`**), renombrando la carpeta **`app.app/Contents`** a **`app.app/NotCon`**, **modificando** el archivo **asar** con tu código **malicioso**, renombrándolo de nuevo a **`app.app/Contents`** y ejecutándolo.
 
+Puedes desempaquetar el código del archivo asar con:
+```bash
+npx asar extract app.asar app-decomp
+```
+Y vuelve a empaquetarlo después de haberlo modificado con:
+```bash
+npx asar pack app-decomp app-new.asar
+```
 ## RCE con `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si esta variable de entorno está configurada, iniciará el proceso como un proceso Node.js normal.
+Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si esta variable de entorno está configurada, iniciará el proceso como un proceso normal de Node.js.
 
 {% code overflow="wrap" %}
 ```bash
@@ -127,7 +135,7 @@ Puedes almacenar la carga útil en un archivo diferente y ejecutarlo:
 {% code overflow="wrap" %}
 ```bash
 # Content of /tmp/payload.js
-require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
+require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator');
 
 # Execute
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -187,7 +195,7 @@ print(ws.recv()
 ```
 ### Inyección desde el archivo Plist de la aplicación
 
-Podrías abusar de esta variable de entorno en un archivo plist para mantener la persistencia agregando estas claves:
+Podrías abusar de esta variable de entorno en un plist para mantener la persistencia agregando estas claves:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -204,7 +212,7 @@ Podrías abusar de esta variable de entorno en un archivo plist para mantener la
 ## Bypass de TCC abusando de versiones antiguas
 
 {% hint style="success" %}
-El demonio TCC de macOS no verifica la versión ejecutada de la aplicación. Por lo tanto, si **no puedes inyectar código en una aplicación Electron** con ninguna de las técnicas anteriores, puedes descargar una versión anterior de la aplicación e inyectar código en ella, ya que aún obtendrá los privilegios de TCC.
+El demonio TCC de macOS no verifica la versión ejecutada de la aplicación. Por lo tanto, si **no puedes inyectar código en una aplicación Electron** con ninguna de las técnicas anteriores, puedes descargar una versión anterior de la aplicación e inyectar código en ella, ya que aún obtendrá los privilegios de TCC (a menos que Trust Cache lo impida).
 {% endhint %}
 
 ## Inyección automática

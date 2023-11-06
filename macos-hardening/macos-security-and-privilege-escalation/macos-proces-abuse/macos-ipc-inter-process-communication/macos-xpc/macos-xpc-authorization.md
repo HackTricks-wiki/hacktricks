@@ -262,11 +262,11 @@ Puedes encontrar **todas las configuraciones de permisos** [**aquí**](https://w
 * Esta es la clave más directa. Si se establece en `false`, especifica que un usuario no necesita proporcionar autenticación para obtener este derecho.
 * Se utiliza en **combinación con una de las 2 opciones a continuación o indicando un grupo** al que el usuario debe pertenecer.
 2. **'allow-root': 'true'**
-* Si un usuario está operando como el usuario root (que tiene permisos elevados) y esta clave se establece en `true`, el usuario root podría potencialmente obtener este derecho sin necesidad de una autenticación adicional. Sin embargo, normalmente, llegar a un estado de usuario root ya requiere autenticación, por lo que esto no es un escenario de "sin autenticación" para la mayoría de los usuarios.
+* Si un usuario está operando como el usuario root (que tiene permisos elevados) y esta clave se establece en `true`, el usuario root podría potencialmente obtener este derecho sin necesidad de una autenticación adicional. Sin embargo, normalmente, llegar a un estado de usuario root ya requiere autenticación, por lo que no es un escenario de "sin autenticación" para la mayoría de los usuarios.
 3. **'session-owner': 'true'**
 * Si se establece en `true`, el propietario de la sesión (el usuario que ha iniciado sesión actualmente) obtendría automáticamente este derecho. Esto podría evitar la autenticación adicional si el usuario ya ha iniciado sesión.
 4. **'shared': 'true'**
-* Esta clave no otorga derechos sin autenticación. En cambio, si se establece en `true`, significa que una vez que se haya autenticado el derecho, se puede compartir entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del derecho aún requeriría autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
+* Esta clave no otorga derechos sin autenticación. En cambio, si se establece en `true`, significa que una vez que el derecho se haya autenticado, se puede compartir entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del derecho aún requeriría autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
 
 Puedes [**utilizar este script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) para obtener los derechos interesantes:
 ```bash
@@ -276,7 +276,6 @@ is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-develo
 Rights with 'allow-root': 'true':
 com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek, com-apple-openscripting-additions-send, com-apple-reportpanic-fixright, com-apple-servicemanagement-blesshelper, com-apple-xtype-fontmover-install, com-apple-xtype-fontmover-remove, com-apple-dt-instruments-process-analysis, com-apple-dt-instruments-process-kill, com-apple-pcastagentconfigd-wildcard, com-apple-trust-settings-admin, com-apple-wifivelocity, com-apple-wireless-diagnostics, is-root, system-install-iap-software, system-install-software, system-install-software-iap, system-preferences, system-preferences-accounts, system-preferences-datetime, system-preferences-energysaver, system-preferences-network, system-preferences-printing, system-preferences-security, system-preferences-sharing, system-preferences-softwareupdate, system-preferences-startupdisk, system-preferences-timemachine, system-print-operator, system-privilege-admin, system-services-networkextension-filtering, system-services-networkextension-vpn, system-services-systemconfiguration-network, system-sharepoints-wildcard
 
-
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
@@ -284,7 +283,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### Verificando si se utiliza EvenBetterAuthorization
 
-Si encuentras la función: **`[HelperTool checkAuthorization:command:]`**, es probable que el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
+Si encuentras la función: **`[HelperTool checkAuthorization:command:]`** es probable que el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
 
 <figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 

@@ -14,7 +14,7 @@
 
 ## Reutilización de PID
 
-Cuando un servicio **XPC de macOS** verifica el proceso llamado basándose en el **PID** y no en el **token de auditoría**, es vulnerable a un ataque de reutilización de PID. Este ataque se basa en una **condición de carrera** donde un **exploit** va a **enviar mensajes al servicio XPC** abusando de la funcionalidad y justo **después** ejecutar **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** con el binario **permitido**.
+Cuando un servicio **XPC** de macOS verifica el proceso llamado basándose en el **PID** y no en el **token de auditoría**, es vulnerable a un ataque de reutilización de PID. Este ataque se basa en una **condición de carrera** donde un **exploit** va a **enviar mensajes al servicio XPC** abusando de la funcionalidad y justo **después** ejecutar **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** con el binario **permitido**.
 
 Esta función hará que el binario **permitido sea dueño del PID**, pero el **mensaje XPC malicioso ya habrá sido enviado** justo antes. Por lo tanto, si el servicio **XPC** utiliza el **PID** para **autenticar** al remitente y lo verifica **DESPUÉS** de la ejecución de **`posix_spawn`**, pensará que proviene de un proceso **autorizado**.
 
@@ -31,7 +31,7 @@ Comprueba este ejemplo de exploit (de nuevo, tomado de la referencia) para ver l
 * **Cada fork** enviará el **payload** al servicio XPC mientras ejecuta **`posix_spawn`** justo después de enviar el mensaje.
 
 {% hint style="danger" %}
-Para que el exploit funcione, es importante exportar **`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** o ponerlo en el exploit:
+Para que el exploit funcione, es importante `exportar` **`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** o poner dentro del exploit:
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
 "empty:\n"

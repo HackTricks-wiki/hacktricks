@@ -44,7 +44,7 @@ Este entitlement permite **cargar frameworks, complementos o bibliotecas sin est
 
 ### `com.apple.private.security.clear-library-validation`
 
-Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`** pero en lugar de **desactivar directamente** la validación de la biblioteca, permite al proceso **llamar a una llamada de sistema `csops` para desactivarla**.\
+Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`** pero en lugar de **desactivar directamente** la validación de la biblioteca, permite que el proceso **llame a una llamada de sistema `csops` para desactivarla**.\
 Consulta [**esto para más información**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -63,20 +63,28 @@ Estos entitlements permiten **instalar software sin solicitar permisos** al usua
 
 Entitlement necesario para solicitar al **kernel que cargue una extensión de kernel**.
 
+### **`com.apple.private.icloud-account-access`**
+
+El entitlement **`com.apple.private.icloud-account-access`** permite comunicarse con el servicio XPC **`com.apple.iCloudHelper`** que **proporcionará tokens de iCloud**.
+
+**iMovie** y **Garageband** tenían este entitlement.
+
+Para obtener más **información** sobre la explotación para **obtener tokens de iCloud** a partir de ese entitlement, consulta la charla: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: No sé qué permite hacer esto
+TODO: No sé qué permite hacer esto.
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. ¡Si sabes cómo hacerlo, envía un PR por favor!
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, por favor envía un PR.
+
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría ser utilizado para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, por favor envía un PR.
+TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar el contenido protegido por SSV después de un reinicio. Si sabes cómo hacerlo, por favor envía un PR.
 
 ### `keychain-access-groups`
 
-Esta lista de permisos **keychain** agrupa a las aplicaciones que tienen acceso a:
+Esta lista de permisos **keychain** agrupa los grupos a los que la aplicación tiene acceso:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -101,7 +109,7 @@ Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia 
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Permite modificar archivos dentro del paquete de aplicaciones (dentro de app.app), lo cual está **desactivado de forma predeterminada**.
+Permite modificar archivos dentro del paquete de aplicaciones (dentro de app.app), lo cual está **desactivado por defecto**.
 
 <figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -109,11 +117,11 @@ Permite modificar archivos dentro del paquete de aplicaciones (dentro de app.app
 
 ### `com.apple.security.cs.allow-jit`
 
-Este permiso permite **crear memoria que es escribible y ejecutable** al pasar la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
+Este permiso permite **crear memoria que se puede escribir y ejecutar** pasando la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Este permiso permite **anular o parchear código C**, utilizar el marco **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro) o utilizar el marco **DVDPlayback**. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
+Este permiso permite **anular o parchear código C**, utilizar el marco de **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro) o utilizar el marco **DVDPlayback**. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
 
 {% hint style="danger" %}
 Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguajes de código no seguro en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
@@ -131,14 +139,25 @@ El permiso de Deshabilitar la Protección de Memoria Ejecutable es un permiso ex
 
 TODO
 
+### `kTCCServiceAll`
+
+Según esta publicación de blog, este permiso de TCC generalmente se encuentra en la forma:
+```
+[Key] com.apple.private.tcc.allow-prompting
+[Value]
+[Array]
+[String] kTCCServiceAll
+```
+Permitir que el proceso **solicite todos los permisos de TCC**.
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

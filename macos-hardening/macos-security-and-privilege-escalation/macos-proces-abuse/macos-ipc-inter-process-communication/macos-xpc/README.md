@@ -107,7 +107,7 @@ xpcspy -U -r -W <bundle-id>
 ## Using filters (i: for input, o: for output)
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
-## Ejemplo de código en C
+## Ejemplo de código en C para la comunicación XPC
 
 {% tabs %}
 {% tab title="xpc_server.c" %}
@@ -235,7 +235,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-## Ejemplo de código Objective-C
+## Ejemplo de código de comunicación XPC en Objective-C
 
 {% tabs %}
 {% tab title="oc_xpc_server.m" %}
@@ -315,56 +315,18 @@ return 0;
 
 # xyz.hacktricks.svcoc.plist
 
-Este archivo de propiedad de la lista de servicios de macOS (plist) se utiliza para definir los servicios que se ejecutan en segundo plano en un proceso separado. Los servicios se comunican entre sí utilizando el marco XPC (Interfaz de comunicación entre procesos).
+Este archivo de propiedad de la lista de servicios de macOS (plist) se utiliza para definir los servicios que se ejecutan en segundo plano en un sistema macOS. Los servicios se definen utilizando el formato XPC (Interfaz de Comunicación entre Procesos) y se pueden utilizar para la comunicación entre procesos en macOS.
 
-## Ubicación del archivo
+El archivo plist contiene una serie de claves y valores que definen el servicio y su comportamiento. Algunas de las claves comunes incluyen:
 
-El archivo `xyz.hacktricks.svcoc.plist` se encuentra en la siguiente ubicación en macOS:
+- `Label`: El nombre único del servicio.
+- `ProgramArguments`: Los argumentos del programa que se ejecutará como parte del servicio.
+- `MachServices`: Los servicios Mach que el servicio puede utilizar para la comunicación entre procesos.
+- `Sockets`: Los sockets que el servicio puede utilizar para la comunicación entre procesos.
 
-```
-/Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
-```
+Para aprovecharse de un archivo plist de servicio, un atacante puede modificar el archivo para ejecutar su propio código malicioso en el contexto del servicio. Esto puede permitir al atacante obtener privilegios elevados en el sistema o realizar otras acciones maliciosas.
 
-## Contenido del archivo
-
-El archivo plist contiene información sobre el servicio, incluyendo su nombre, ruta de ejecución, argumentos y más. Aquí hay un ejemplo de cómo se ve el contenido del archivo:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>xyz.hacktricks.svcoc</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/usr/bin/python</string>
-        <string>/path/to/script.py</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-</dict>
-</plist>
-```
-
-## Modificación del archivo
-
-Para modificar el archivo `xyz.hacktricks.svcoc.plist`, se puede utilizar un editor de texto o la utilidad `plutil` en la línea de comandos. Asegúrese de tener privilegios de administrador para realizar cambios en el archivo.
-
-## Reinicio del servicio
-
-Después de realizar cambios en el archivo plist, es necesario reiniciar el servicio para que los cambios surtan efecto. Esto se puede hacer utilizando el comando `launchctl` en la línea de comandos:
-
-```
-sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
-sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
-```
-
-## Seguridad y consideraciones
-
-Es importante tener en cuenta que los servicios que se ejecutan en segundo plano pueden representar un riesgo de seguridad si no se configuran correctamente. Asegúrese de revisar y auditar regularmente los archivos plist para detectar posibles vulnerabilidades y abusos.
+Es importante asegurarse de que los archivos plist de servicio estén correctamente configurados y protegidos para evitar posibles abusos y ataques. Se recomienda seguir las mejores prácticas de seguridad y realizar auditorías regulares de los archivos plist de servicio en un sistema macOS.
 
 {% endtab %}
 ```xml
@@ -422,8 +384,8 @@ To create a client inside a Dylb code, follow these steps:
 
 2. Define the XPC connection and event handler:
 ```objective-c
-static xpc_connection_t connection;
-static dispatch_queue_t queue;
+static xpc_connection_t _connection;
+static dispatch_queue_t _queue;
 
 void eventHandler(xpc_object_t event) {
     // Handle incoming events from the server
@@ -436,20 +398,18 @@ void eventHandler(xpc_object_t event) {
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         // Create the XPC connection
-        connection = xpc_connection_create_mach_service("com.example.server", queue, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
+        _connection = xpc_connection_create_mach_service("com.example.server", _queue, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
         
         // Set the event handler
-        xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
+        xpc_connection_set_event_handler(_connection, ^(xpc_object_t event) {
             eventHandler(event);
         });
         
         // Resume the connection
-        xpc_connection_resume(connection);
+        xpc_connection_resume(_connection);
         
-        // Send a message to the server
-        xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-        xpc_dictionary_set_string(message, "key", "value");
-        xpc_connection_send_message(connection, message);
+        // Send messages to the server
+        // ...
         
         // Run the main loop
         dispatch_main();
@@ -458,11 +418,13 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-4. Customize the code according to your requirements, such as handling incoming events and sending messages to the server.
+4. Replace `"com.example.server"` with the Mach service name of the server you want to communicate with.
 
-Remember to replace `"com.example.server"` with the Mach service name of the server you want to communicate with.
+5. Customize the event handler to handle incoming events from the server.
 
-By embedding this client code within your application, you can establish IPC with a server using the XPC framework in macOS.
+6. Send messages to the server using the XPC connection.
+
+By embedding this client code within your application, you can establish communication with the server and exchange messages using the XPC framework in macOS.
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
 // gcc injection example:

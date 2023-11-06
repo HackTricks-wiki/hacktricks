@@ -12,19 +12,19 @@
 
 </details>
 
-**Esta técnica fue tomada del artículo** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/)
+**Esta técnica fue tomada del post** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/)
 
 ## Información básica
 
 Los archivos NIB se utilizan en el ecosistema de desarrollo de Apple para **definir elementos de interfaz de usuario (UI)** y sus interacciones dentro de una aplicación. Creados con la herramienta Interface Builder, contienen **objetos serializados** como ventanas, botones y campos de texto, que se cargan en tiempo de ejecución para presentar la interfaz de usuario diseñada. Aunque aún se utilizan, Apple ha pasado a recomendar Storyboards para una representación más visual del flujo de la interfaz de usuario de una aplicación.
 
 {% hint style="danger" %}
-Además, los **archivos NIB** también se pueden utilizar para **ejecutar comandos arbitrarios** y si se modifica un archivo NIB en una aplicación, **Gatekeeper seguirá permitiendo ejecutar la aplicación**, por lo que se pueden utilizar para **ejecutar comandos arbitrarios dentro de las aplicaciones**.
+Además, los **archivos NIB** también se pueden utilizar para **ejecutar comandos arbitrarios** y si se modifica el archivo NIB en una aplicación, **Gatekeeper seguirá permitiendo ejecutar la aplicación**, por lo que se pueden utilizar para **ejecutar comandos arbitrarios dentro de aplicaciones**.
 {% endhint %}
 
 ## Inyección de Dirty NIB <a href="#dirtynib" id="dirtynib"></a>
 
-Primero, necesitamos crear un nuevo archivo NIB, utilizaremos XCode para la mayor parte de la construcción. Comenzamos agregando un objeto a la interfaz y establecemos la clase en NSAppleScript:
+Primero necesitamos crear un nuevo archivo NIB, utilizaremos XCode para la mayor parte de la construcción. Comenzamos agregando un objeto a la interfaz y establecemos la clase en NSAppleScript:
 
 <figure><img src="../../../.gitbook/assets/image (681).png" alt="" width="380"><figcaption></figcaption></figure>
 
@@ -51,7 +51,7 @@ Primero haremos una copia de la aplicación en `/tmp/`:
 ```bash
 cp -a -X /Applications/Pages.app /tmp/
 ```
-Luego lanzaremos la aplicación para evitar problemas con Gatekeeper y permitir que las cosas se almacenen en caché:
+Luego, lanzaremos la aplicación para evitar problemas con Gatekeeper y permitir que las cosas se almacenen en caché:
 ```bash
 open -W -g -j /Applications/Pages.app
 ```
@@ -86,18 +86,18 @@ grabbed's writeToFile:"/Users/xpn/Library/Containers/com.apple.iWork.Pages/Data/
 
 ## Restricciones de lanzamiento
 
-Básicamente, **impiden la ejecución de aplicaciones fuera de sus ubicaciones esperadas**, por lo que si copias una aplicación protegida por Restricciones de lanzamiento a `/tmp`, no podrás ejecutarla.\
+Básicamente, **impiden la ejecución de aplicaciones fuera de sus ubicaciones esperadas**, por lo que si copias una aplicación protegida por Restricciones de Lanzamiento a `/tmp`, no podrás ejecutarla.\
 [**Encuentra más información en esta publicación**](../macos-security-protections/#launch-constraints)**.**
 
-Sin embargo, al analizar el archivo **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**, aún puedes encontrar **aplicaciones que no están protegidas por Restricciones de lanzamiento**, por lo que aún puedes **inyectar** archivos **NIB** en ubicaciones arbitrarias en **esas aplicaciones** (consulta el enlace anterior para aprender cómo encontrar estas aplicaciones).
+Sin embargo, al analizar el archivo **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**, aún puedes encontrar **aplicaciones que no están protegidas por Restricciones de Lanzamiento**, por lo que aún puedes **inyectar** archivos **NIB** en ubicaciones arbitrarias en **esas aplicaciones** (consulta el enlace anterior para aprender cómo encontrar estas aplicaciones).
 
 ## Protecciones adicionales
 
-A partir de macOS Somona, existen algunas protecciones que **impiden escribir dentro de las aplicaciones**. Sin embargo, aún es posible eludir esta protección si, antes de ejecutar tu copia del binario, cambias el nombre de la carpeta Contents:
+A partir de macOS Somona, existen algunas protecciones **que impiden escribir dentro de las aplicaciones**. Sin embargo, aún es posible eludir esta protección si, antes de ejecutar tu copia del binario, cambias el nombre de la carpeta Contents:
 
 1. Haz una copia de `CarPlay Simulator.app` en `/tmp/`
 2. Cambia el nombre de `/tmp/Carplay Simulator.app/Contents` a `/tmp/CarPlay Simulator.app/NotCon`
-3. Ejecuta el binario `/tmp/CarPlay Simulator.app/NotCon/MacOS/CarPlay Simulator` para almacenarlo en la memoria caché de Gatekeeper
+3. Ejecuta el binario `/tmp/CarPlay Simulator.app/NotCon/MacOS/CarPlay Simulator` para almacenar en caché dentro de Gatekeeper
 4. Sobrescribe `NotCon/Resources/Base.lproj/MainMenu.nib` con nuestro archivo `Dirty.nib`
 5. Cambia el nombre a `/tmp/CarPlay Simulator.app/Contents`
 6. Vuelve a ejecutar `CarPlay Simulator.app`

@@ -19,7 +19,7 @@ Cuando se establece una conexión a un servicio XPC, el servidor verificará si 
 1. Comprobar si el **proceso de conexión está firmado con un certificado firmado por Apple** (solo otorgado por Apple).
 * Si esto **no se verifica**, un atacante podría crear un **certificado falso** para coincidir con cualquier otra comprobación.
 2. Comprobar si el proceso de conexión está firmado con el **certificado de la organización** (verificación del ID del equipo).
-* Si esto **no se verifica**, se puede utilizar cualquier **certificado de desarrollador** de Apple para firmar y conectarse al servicio.
+* Si esto **no se verifica**, se puede utilizar cualquier certificado de desarrollador de Apple para firmar y conectarse al servicio.
 3. Comprobar si el proceso de conexión **contiene un ID de paquete adecuado**.
 * Si esto **no se verifica**, cualquier herramienta **firmada por la misma organización** podría utilizarse para interactuar con el servicio XPC.
 4. (4 o 5) Comprobar si el proceso de conexión tiene un **número de versión de software adecuado**.

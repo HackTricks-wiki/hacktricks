@@ -27,7 +27,7 @@ Algunos componentes importantes del Sandbox son:
 * Un **daemon** que se ejecuta en el espacio de usuario `/usr/libexec/sandboxd`
 * Los **contenedores** `~/Library/Containers`
 
-Dentro de la carpeta de contenedores, puedes encontrar **una carpeta para cada aplicación ejecutada en modo sandbox** con el nombre del identificador del paquete:
+Dentro de la carpeta de contenedores, puedes encontrar **una carpeta para cada aplicación ejecutada en el sandbox** con el nombre del identificador del paquete:
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -38,7 +38,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-Dentro de cada carpeta de identificación del paquete, puedes encontrar el **plist** y el **directorio de datos** de la aplicación:
+Dentro de cada carpeta de identificación del paquete se pueden encontrar el archivo **plist** y el directorio **Data** de la aplicación:
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -111,9 +111,13 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 <array/>
 [...]
 ```
+{% hint style="warning" %}
+Todo lo creado/modificado por una aplicación en Sandbox obtendrá el atributo de **cuarentena**. Esto evitará que un espacio en Sandbox se active al ejecutar algo con **`open`**.
+{% endhint %}
+
 ### Perfiles de Sandbox
 
-Los perfiles de Sandbox son archivos de configuración que indican qué está permitido/prohibido en esa Sandbox. Utiliza el Lenguaje de Perfil de Sandbox (SBPL), que utiliza el lenguaje de programación [Scheme](https://es.wikipedia.org/wiki/Scheme).
+Los perfiles de Sandbox son archivos de configuración que indican qué está **permitido/prohibido** en ese **Sandbox**. Utiliza el lenguaje de perfil de Sandbox (SBPL), que utiliza el lenguaje de programación [Scheme](https://es.wikipedia.org/wiki/Scheme).
 
 Aquí puedes encontrar un ejemplo:
 ```scheme
@@ -159,16 +163,299 @@ La política de sandboxing establece las siguientes restricciones:
 
 - Acceso solo lectura a los archivos en el directorio `/usr/share/doc`.
 - Acceso de escritura solo a los archivos en el directorio `/tmp`.
-- Acceso solo lectura a los archivos en el directorio `/usr/share/man`.
-- Acceso solo lectura a los archivos en el directorio `/usr/share/locale`.
-- Acceso solo lectura a los archivos en el directorio `/usr/share/terminfo`.
-- Acceso solo lectura a los archivos en el directorio `/usr/share/misc`.
-- Acceso solo lectura a los archivos en el directorio `/usr/share/zoneinfo`.
-- Acceso solo lectura a los archivos en el directorio `/usr/share/ssl`.
-- Acceso solo lectura a los archivos en el directorio `/usr/share/curl`.
-- Acceso solo lectura a los archivos en el directorio `/usr/share/zsh`.
-
-Estas restricciones garantizan que la aplicación `touch` solo pueda leer y escribir en los directorios y archivos especificados, limitando su capacidad para acceder a otros recursos del sistema operativo. Esto ayuda a prevenir posibles ataques y protege la integridad y seguridad del sistema.
+- Acceso a la red solo a través de conexiones salientes.
+- Sin acceso a la cámara, el micrófono o la ubicación del dispositivo.
+- Sin acceso a los servicios de notificación del sistema.
+- Sin acceso a los servicios de impresión del sistema.
+- Sin acceso a los servicios de calendario del sistema.
+- Sin acceso a los servicios de libreta de direcciones del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de fotos del sistema.
+- Sin acceso a los servicios de música del sistema.
+- Sin acceso a los servicios de correo del sistema.
+- Sin acceso a los servicios de mensajes del sistema.
+- Sin acceso a los servicios de llamadas del sistema.
+- Sin acceso a los servicios de contactos del sistema.
+- Sin acceso a los servicios de notas del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de recordatorios del sistema.
+- Sin acceso a los servicios de
 ```scheme
 (version 1)
 (deny default)
@@ -233,7 +520,7 @@ Y si una aplicación de terceros tiene la autorización _**com.apple.security.ap
 
 El perfil predeterminado se llama **container** y no tenemos la representación de texto SBPL. En memoria, este sandbox se representa como un árbol binario de Permitir/Denegar para cada permiso del sandbox.
 
-### Depurar y Bypass del Sandbox
+### Depurar y Bypass Sandbox
 
 **Los procesos no nacen aislados en macOS: a diferencia de iOS**, donde el sandbox se aplica por el kernel antes de que se ejecute la primera instrucción de un programa, en macOS **un proceso debe elegir colocarse en el sandbox.**
 
@@ -245,7 +532,7 @@ Los procesos se aíslan automáticamente desde el espacio de usuario cuando se i
 
 ### **Verificar los Privilegios del PID**
 
-[Según esto](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s), la función **`sandbox_check`** (es una `__mac_syscall`), puede verificar **si una operación está permitida o no** por el sandbox en un PID específico.
+[Según esto](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s), el **`sandbox_check`** (es una `__mac_syscall`), puede verificar **si una operación está permitida o no** por el sandbox en un PID específico.
 
 La [**herramienta sbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c) puede verificar si un PID puede realizar una determinada acción:
 ```bash
