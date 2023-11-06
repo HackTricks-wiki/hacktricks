@@ -33,10 +33,10 @@
 
 * バイナリが`setuid/setgid`である
 * machoバイナリに`__RESTRICT/__restrict`セクションが存在する
-* ソフトウェアには、[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)エンタイトルメントがある（ハード化されたランタイム）
-* バイナリのエンタイトルメントを確認するには：`codesign -dv --entitlements :- </path/to/bin>`
+* ソフトウェアには、[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)エンタイトルメントがないハードランタイムのエンタイトルメントがある
+* バイナリのエンタイトルメントを次のコマンドで確認する：`codesign -dv --entitlements :- </path/to/bin>`
 
-より最新のバージョンでは、このロジックを関数**`configureProcessRestrictions`**の後半で見つけることができます。ただし、新しいバージョンでは、関数の**最初のチェックが実行**されます（iOSやシミュレーションに関連するif文は削除してもかまいません）。
+より最新のバージョンでは、このロジックは関数**`configureProcessRestrictions`**の2番目の部分で見つけることができます。ただし、新しいバージョンでは、関数の**最初のチェックが実行**されます（iOSやシミュレーションに関連するif文はmacOSでは使用されないため、それらを削除できます）。
 {% endhint %}
 
 ### ライブラリの検証
@@ -48,13 +48,13 @@
 * &#x20;[`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 * [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-または、バイナリには**ハード化されたランタイムフラグ**または**ライブラリの検証フラグ**がない必要があります。
+または、バイナリには**ハードランタイムフラグ**または**ライブラリ検証フラグ**がない必要があります。
 
-`codesign --display --verbose <bin>`を使用してバイナリが**ハード化されたランタイム**を持っているかどうかを確認し、**`CodeDirectory`**のランタイムフラグをチェックします。例：**`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+`codesign --display --verbose <bin>`を使用してバイナリが**ハードランタイム**を持っているかどうかを確認し、**`CodeDirectory`**のランタイムフラグをチェックします。例：**`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-また、バイナリが**バイナリと同じ証明書で署名されている場合**も、ライブラリをロードすることができます。
+また、バイナリが**バイナリと同じ証明書で署名**されている場合も、ライブラリをロードすることができます。
 
-これを悪用する方法の例と制限を確認するには、次を参照してください：
+これを悪用する方法の例と制限を確認するには、次の場所を参照してください。
 
 {% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
 [macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
@@ -153,9 +153,9 @@ compatibility version 1.0.0
 5. `/usr/lib/`
 
 {% hint style="danger" %}
-スラッシュが含まれていてフレームワークではない場合、乗っ取りの方法は次のとおりです：
+名前にスラッシュが含まれておりフレームワークではない場合、乗っ取りの方法は次のとおりです：
 
-* バイナリが**制限されていない**場合、CWDまたは`/usr/local/lib`から何かをロードすることが可能です（または、上記の環境変数のいずれかを悪用する）
+* バイナリが**制限されていない**場合、CWDまたは`/usr/local/lib`から何かをロードすることが可能です（または、言及された環境変数のいずれかを悪用する）
 {% endhint %}
 
 {% hint style="info" %}
@@ -168,7 +168,7 @@ compatibility version 1.0.0
 注意：Appleのプラットフォームでは、ほとんどのOS dylibは**dyldキャッシュに統合**されており、ディスク上に存在しません。したがって、OS dylibが存在するかどうかを事前に確認するために**`stat()`**を呼び出すことはできません。ただし、**`dlopen_preflight()`**は、互換性のあるmach-oファイルを見つけるために**`dlopen()`**と同じ手順を使用します。
 {% endhint %}
 
-**パスをチェックする**
+**パスのチェック**
 
 以下のコードですべてのオプションをチェックしましょう：
 ```c
@@ -217,13 +217,17 @@ return 0;
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
-## `DYLD_*`および`LD_LIBRARY_PATH`環境変数の削除
+## 相対パスの乗っ取り
 
-ファイル`dyld-dyld-832.7.1/src/dyld2.cpp`には、**`DYLD_`**で始まる環境変数と**`LD_LIBRARY_PATH=`**を削除する関数**`pruneEnvironmentVariables`**が存在します。
+もし特権のあるバイナリ/アプリ（SUIDや強力な権限を持つバイナリなど）が相対パスのライブラリ（例えば`@executable_path`や`@loader_path`を使用して）をロードしており、かつライブラリの検証が無効になっている場合、攻撃者はバイナリを変更可能な場所に移動させ、その相対パスのライブラリを悪用してプロセスにコードを注入することができるかもしれません。
 
-また、この関数は、**suid**および**sgid**バイナリの場合に、特に環境変数**`DYLD_FALLBACK_FRAMEWORK_PATH`**および**`DYLD_FALLBACK_LIBRARY_PATH`**を**null**に設定します。
+## `DYLD_*`と`LD_LIBRARY_PATH`環境変数の削除
 
-この関数は、同じファイルの**`_main`**関数から、OSXをターゲットにして呼び出されます。
+ファイル`dyld-dyld-832.7.1/src/dyld2.cpp`には、**`pruneEnvironmentVariables`**という関数があります。この関数は、**`DYLD_`**で始まる環境変数と**`LD_LIBRARY_PATH=`**を削除します。
+
+また、**suid**および**sgid**バイナリに対しては、この関数は明示的に環境変数**`DYLD_FALLBACK_FRAMEWORK_PATH`**と**`DYLD_FALLBACK_LIBRARY_PATH`**を**null**に設定します。
+
+この関数は、同じファイルの**`_main`**関数からOSXをターゲットにして呼び出されます。
 ```cpp
 #if TARGET_OS_OSX
 if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
@@ -279,13 +283,9 @@ sudo chmod -s hello
 ```
 ### セクション `__RESTRICT` とセグメント `__restrict`
 
-The `__RESTRICT` section is a special section in macOS that is used for library injection and privilege escalation techniques. It is located within the `__restrict` segment, which is a protected segment of memory.
+The `__RESTRICT` section is a special section in macOS that is used for library injection and privilege escalation techniques. It is located within the `__restrict` segment.
 
-The purpose of the `__RESTRICT` section is to restrict the execution of certain code or functions within a process. By injecting malicious code into this section, an attacker can gain unauthorized access and escalate their privileges within the system.
-
-It is important to note that manipulating the `__RESTRICT` section requires advanced knowledge of macOS internals and memory manipulation techniques. This technique is commonly used by hackers to bypass security measures and gain control over a compromised system.
-
-To protect against library injection and privilege escalation attacks, it is recommended to implement strong security measures, such as regular software updates, code signing, and strict access controls. Additionally, monitoring for any suspicious activity or unauthorized modifications to the `__RESTRICT` section can help detect and mitigate potential attacks.
+セクション `__RESTRICT` は、macOS においてライブラリインジェクションや特権エスカレーションの技術に使用される特別なセクションです。これは `__restrict` セグメント内に位置しています。
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
@@ -317,9 +317,9 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 {% endcode %}
 
 {% hint style="danger" %}
-注意してください、バイナリにはフラグ**`0x0(none)`**で署名されているものがあっても、実行時に**`CS_RESTRICT`**フラグを動的に取得することができるため、このテクニックはそれらでは機能しません。
+注意してください、バイナリにはフラグ**`0x0(none)`**で署名されているものがあるかもしれませんが、実行時に**`CS_RESTRICT`**フラグが動的に付与される可能性がありますので、このテクニックはそれらのバイナリでは機能しません。
 
-(procにこのフラグがあるかどうかを確認するには、[**ここでcsopsを取得**](https://github.com/axelexic/CSOps)してください):&#x20;
+(procにこのフラグがあるかどうかを確認するには、[**ここからcsopsを取得してください**](https://github.com/axelexic/CSOps)。)
 ```bash
 csops -status <pid>
 ```
@@ -332,8 +332,8 @@ csops -status <pid>
 
 * あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
