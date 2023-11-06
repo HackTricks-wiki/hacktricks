@@ -56,7 +56,14 @@ codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/S
 com.apple.private.tcc.manager
 com.apple.rootless.storage.TCC
 ```
-{% tab title="Base de datos de usuario" %}
+{% endcode %}
+
+Sin embargo, los usuarios pueden **eliminar o consultar reglas** con la utilidad de línea de comandos **`tccutil`**.
+{% endhint %}
+
+{% tabs %}
+{% tab title="user DB" %}
+{% code overflow="wrap" %}
 ```bash
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -73,7 +80,11 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=2;
 # Check user denied permissions for telegram
 sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
+{% endcode %}
+{% endtab %}
+
 {% tab title="base de datos del sistema" %}
+{% code overflow="wrap" %}
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -85,11 +96,15 @@ kTCCServiceSystemPolicyDownloadsFolder|com.tinyspeck.slackmacgap|2|2
 kTCCServiceMicrophone|us.zoom.xos|2|2
 [...]
 
+# Get all FDA
+sqlite> select service, client, auth_value, auth_reason from access where service = "kTCCServiceSystemPolicyAllFiles" and auth_value=2;
+
 # Check user approved permissions for telegram
 sqlite> select * from access where client LIKE "%telegram%" and auth_value=2;
 # Check user denied permissions for telegram
 sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
+{% endcode %}
 {% endtab %}
 {% endtabs %}
 
@@ -104,10 +119,10 @@ Al verificar ambas bases de datos, puedes verificar los permisos que una aplicac
 {% hint style="info" %}
 Algunos permisos de TCC son: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... No hay una lista pública que defina todos ellos, pero puedes consultar esta [**lista de los conocidos**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 
-El acceso completo al disco se llama **`kTCCServiceSystemPolicyAllFiles`** y **`kTCCServiceAppleEvents`** permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Además, **`kTCCServiceSystemPolicySysAdminFiles`** permite cambiar el atributo **`NFSHomeDirectory`** de un usuario, lo que cambia su carpeta de inicio y, por lo tanto, permite **burlar TCC**.
+El nombre completo de **Full Disk Access** es **`kTCCServiceSystemPolicyAllFiles`** y **`kTCCServiceAppleEvents`** permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Además, **`kTCCServiceSystemPolicySysAdminFiles`** permite cambiar el atributo **`NFSHomeDirectory`** de un usuario que cambia su carpeta de inicio y, por lo tanto, permite **burlar TCC**.
 {% endhint %}
 
-También puedes verificar los **permisos ya otorgados** a las aplicaciones en `Preferencias del Sistema --> Seguridad y Privacidad --> Privacidad --> Archivos y Carpetas`.
+También puedes verificar los **permisos ya otorgados** a las aplicaciones en `Preferencias del Sistema --> Seguridad y privacidad --> Privacidad --> Archivos y carpetas`.
 
 {% hint style="success" %}
 Ten en cuenta que aunque una de las bases de datos esté dentro del directorio del usuario, **los usuarios no pueden modificar directamente estas bases de datos debido a SIP** (incluso si eres root). La única forma de configurar o modificar una nueva regla es a través del panel de Preferencias del Sistema o de las solicitudes en las que la aplicación pide permiso al usuario.
@@ -141,27 +156,13 @@ codesign -d -r- /System/Applications/Utilities/Terminal.app
 ```
 AllowApplicationsList.plist:
 
-Este archivo es utilizado por el Mecanismo de Control de Transparencia (TCC) en macOS para determinar qué aplicaciones tienen permiso para acceder a ciertos recursos protegidos, como la cámara, el micrófono o los datos de ubicación. El archivo AllowApplicationsList.plist contiene una lista de las aplicaciones permitidas y sus identificadores de paquete.
+Este archivo es utilizado por el sistema operativo macOS para gestionar la lista de aplicaciones permitidas para acceder a ciertos recursos protegidos por el TCC (Transparency, Consent, and Control). El TCC es un mecanismo de seguridad que protege la privacidad del usuario al controlar el acceso de las aplicaciones a datos sensibles, como la ubicación, los contactos y los eventos del calendario.
 
-Para agregar una aplicación a la lista de permitidas, debes editar este archivo y agregar una entrada con el identificador de paquete de la aplicación. Asegúrate de que el identificador de paquete sea correcto, ya que de lo contrario la aplicación no será reconocida.
+En este archivo, puedes especificar las aplicaciones que se les permite acceder a estos recursos protegidos sin solicitar el consentimiento del usuario. Esto puede ser útil en casos en los que una aplicación de confianza necesita acceder a estos datos de forma automática.
 
-Es importante tener en cuenta que modificar este archivo requiere privilegios de administrador y puede afectar la seguridad del sistema si se realizan cambios incorrectos. Se recomienda tener precaución al editar este archivo y realizar copias de seguridad regulares del mismo.
+El archivo AllowApplicationsList.plist se encuentra en la ruta `/Library/Application Support/com.apple.TCC/`. Puedes editar este archivo para agregar o eliminar aplicaciones de la lista de permitidas.
 
-Aquí hay un ejemplo de cómo se ve el archivo AllowApplicationsList.plist:
-
-```xml
-<dict>
-    <key>AllowedApplications</key>
-    <array>
-        <string>com.example.app1</string>
-        <string>com.example.app2</string>
-    </array>
-</dict>
-```
-
-En este ejemplo, las aplicaciones "com.example.app1" y "com.example.app2" tienen permiso para acceder a los recursos protegidos por el TCC.
-
-Recuerda que es importante mantener actualizado este archivo y revisar regularmente las aplicaciones permitidas para garantizar la seguridad de tu sistema.
+Es importante tener en cuenta que modificar este archivo requiere privilegios de administrador y puede afectar la seguridad y privacidad del sistema. Se recomienda tener precaución al realizar cambios en este archivo y solo hacerlo si se comprenden completamente las implicaciones.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -210,7 +211,7 @@ Por lo tanto, otras aplicaciones que utilicen el mismo nombre y ID de paquete no
 
 Las aplicaciones no solo necesitan solicitar y obtener acceso a algunos recursos, sino que también necesitan tener los permisos relevantes. Por ejemplo, Telegram tiene el permiso `com.apple.security.device.camera` para solicitar acceso a la cámara. Una aplicación que no tenga este permiso no podrá acceder a la cámara (y ni siquiera se le pedirá permiso al usuario).
 
-Sin embargo, para que las aplicaciones accedan a ciertas carpetas del usuario, como `~/Desktop`, `~/Downloads` y `~/Documents`, no necesitan tener ningún permiso específico. El sistema manejará el acceso de forma transparente y solicitará permiso al usuario según sea necesario.
+Sin embargo, para que las aplicaciones puedan acceder a ciertas carpetas del usuario, como `~/Desktop`, `~/Downloads` y `~/Documents`, no necesitan tener ningún permiso específico. El sistema manejará el acceso de forma transparente y solicitará permiso al usuario según sea necesario.
 
 Las aplicaciones de Apple no generarán solicitudes. Contienen derechos preconcedidos en su lista de permisos, lo que significa que nunca generarán una ventana emergente ni aparecerán en ninguna de las bases de datos de TCC. Por ejemplo:
 ```bash
