@@ -4,9 +4,9 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -14,11 +14,11 @@
 
 ## 基本情報
 
-MacOS Sandbox（最初はSeatbeltと呼ばれていました）は、**サンドボックスプロファイルで指定された許可されたアクションに制限**されたサンドボックス内で実行されるアプリケーションを制限します。これにより、**アプリケーションが予期されたリソースにのみアクセスすることが保証**されます。
+MacOS Sandbox（最初はSeatbeltと呼ばれていました）は、**サンドボックスプロファイルで指定された許可されたアクションに制限**をかけ、サンドボックス内で実行されるアプリケーションが**予期されたリソースにのみアクセスすることを保証**します。
 
 **`com.apple.security.app-sandbox`**という**エンタイトルメント**を持つアプリは、サンドボックス内で実行されます。**Appleのバイナリ**は通常、サンドボックス内で実行され、**App Store**に公開するためには、**このエンタイトルメントが必須**です。したがって、ほとんどのアプリケーションはサンドボックス内で実行されます。
 
-プロセスが何を行えるか、行えないかを制御するために、**サンドボックスにはカーネル全体のすべてのシスコールにフックがあります**。アプリの**エンタイトルメント**に応じて、サンドボックスは特定のアクションを**許可**します。
+プロセスが何を行えるか、行えないかを制御するために、**サンドボックスにはカーネル全体のすべてのシスコールにフックがあります**。アプリのエンタイトルメントに応じて、サンドボックスは特定のアクションを許可します。
 
 サンドボックスの重要なコンポーネントには次のものがあります：
 
@@ -111,11 +111,15 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 <array/>
 [...]
 ```
-### サンドボックスプロファイル
+{% hint style="warning" %}
+すべてのSandboxアプリケーションによって作成/変更されたものは、**quarantine属性**を持ちます。これにより、Sandboxアプリが**`open`**を使用して何かを実行しようとすると、GatekeeperがトリガーされてSandboxスペースが防止されます。
+{% endhint %}
 
-サンドボックスプロファイルは、そのサンドボックスで何が**許可/禁止**されるかを示す設定ファイルです。これは、**サンドボックスプロファイル言語（SBPL）**を使用しており、[**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\))プログラミング言語を使用しています。
+### Sandboxプロファイル
 
-以下に例を示します：
+Sandboxプロファイルは、そのSandboxで**許可/禁止**されるものを示す設定ファイルです。これは、**Sandboxプロファイル言語（SBPL）**を使用し、[**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\))プログラミング言語を使用します。
+
+ここには例があります：
 ```scheme
 (version 1) ; First you get the version
 
@@ -603,35 +607,48 @@ macOSのサンドボックスには、以下のような機能があります。
 - ハードウェアリソースへのアクセス制限
 - システム設定の制限
 
-これらの機能により、アプリケーションは自身の環境内で動作し、システムの他の部分に影響を与えることができません。
+これらの機能により、アプリケーションは自身の環境内で動作し、システムへの悪意のあるアクセスを制限することができます。
 
 ## サンドボックスの設定
 
-macOSのサンドボックスは、アプリケーションごとに設定されます。アプリケーションは、サンドボックスプロファイルと呼ばれる設定ファイルを持ち、このファイルによってサンドボックスの動作が制御されます。
+macOSのサンドボックスは、アプリケーションごとに設定することができます。アプリケーションの設定ファイルには、サンドボックスのルールや制限を記述します。
 
-サンドボックスプロファイルには、アプリケーションが許可される操作やリソースへのアクセス制限が記述されています。アプリケーションは、このプロファイルに基づいて実行され、サンドボックスの制約に従って動作します。
+以下は、`touch2.sb`という名前のサンドボックス設定ファイルの例です。
 
-## サンドボックスの回避
+```plaintext
+(version 1)
+(deny default)
 
-サンドボックスは、アプリケーションのセキュリティを強化するための重要な機能ですが、攻撃者はサンドボックスを回避する方法を見つけることがあります。これにより、攻撃者は制限された環境から脱出し、システムに悪影響を与えることができます。
+(allow file-write-data
+    (literal "/private/var/tmp/file.txt")
+)
 
-サンドボックスの回避方法は、攻撃者の技術力や知識に依存します。攻撃者は、サンドボックスの制約を回避するための脆弱性やバグを見つけることができます。また、サンドボックスの制約を回避するための特殊な技術やツールも存在します。
+(allow file-read-metadata
+    (regex #"^/private/var/tmp/.*")
+)
+
+(allow file-read-data
+    (literal "/private/var/tmp/file.txt")
+)
+```
+
+この例では、`/private/var/tmp/file.txt`への書き込みと読み取りが許可されています。
 
 ## サンドボックスのテスト
 
-アプリケーションのセキュリティを確保するためには、サンドボックスのテストが重要です。サンドボックスのテストでは、アプリケーションが制約に従って動作し、攻撃者がサンドボックスを回避することができないかどうかを確認します。
+サンドボックスの設定が正しく行われているかをテストするためには、`sandbox-exec`コマンドを使用します。
 
-サンドボックスのテストには、以下のような手法があります。
+以下のコマンドを実行すると、`touch2.sb`のサンドボックス設定に基づいて、`/private/var/tmp/file.txt`に対して書き込みが行われます。
 
-- サンドボックスの制約を回避するための攻撃を試みる
-- サンドボックスの制約をテストするためのツールを使用する
-- サンドボックスの設定を検証するための静的解析を行う
+```plaintext
+sandbox-exec -f touch2.sb touch /private/var/tmp/file.txt
+```
 
-これらの手法を組み合わせて、アプリケーションのサンドボックスのセキュリティを確保することができます。
+正常に書き込みが行われた場合、エラーメッセージは表示されません。
 
 ## まとめ
 
-macOSのサンドボックスは、アプリケーションのセキュリティを強化するための重要な機能です。サンドボックスは、制限された環境でアプリケーションを実行し、システムを悪意のあるコードや攻撃から保護します。サンドボックスのテストを行い、セキュリティを確保することが重要です。
+macOSのサンドボックスは、アプリケーションのセキュリティを強化するための重要な機能です。適切な設定とテストを行うことで、システムへの悪意のあるアクセスを防ぐことができます。
 
 {% endcode %}
 ```scheme
@@ -661,7 +678,7 @@ macOSのサンドボックスは、アプリケーションのセキュリティ
 {% endtabs %}
 
 {% hint style="info" %}
-注意：**Windows上で動作するApple製のソフトウェア**は、アプリケーションのサンドボックス化などの追加のセキュリティ対策はありません。
+注意：**Windows上で実行されるApple製のソフトウェア**は、アプリケーションのサンドボックス化などの追加のセキュリティ対策はありません。
 {% endhint %}
 
 バイパスの例：
@@ -673,27 +690,27 @@ macOSのサンドボックスは、アプリケーションのセキュリティ
 
 macOSは、システムのサンドボックスプロファイルを2つの場所に保存します：**/usr/share/sandbox/** と **/System/Library/Sandbox/Profiles**。
 
-また、サードパーティのアプリケーションが _**com.apple.security.app-sandbox**_ の権限を持っている場合、システムはそのプロセスに **/System/Library/Sandbox/Profiles/application.sb** プロファイルを適用します。
+また、サードパーティのアプリケーションが _**com.apple.security.app-sandbox**_ エンタイトルメントを持っている場合、システムはそのプロセスに **/System/Library/Sandbox/Profiles/application.sb** プロファイルを適用します。
 
 ### **iOSサンドボックスプロファイル**
 
-デフォルトのプロファイルは **container** と呼ばれ、SBPLテキスト表現はありません。メモリ上では、このサンドボックスは、asndboxからの各権限に対してAllow/Denyバイナリツリーとして表されます。
+デフォルトのプロファイルは **container** と呼ばれ、SBPLテキスト表現はありません。メモリ上では、このサンドボックスは、サンドボックスの各権限に対してAllow/Denyバイナリツリーとして表されます。
 
 ### サンドボックスのデバッグとバイパス
 
-**macOSでは、プロセスはサンドボックス化された状態で生まれません：iOSとは異なり、サンドボックスはプログラムの最初の命令が実行される前にカーネルによって適用されますが、macOSではプロセス自体がサンドボックスに入ることを選択する必要があります。**
+**プロセスはmacOSではサンドボックス化されて生まれません：iOSとは異なり、サンドボックスはプログラムの最初の命令が実行される前にカーネルによって適用されますが、macOSではプロセス自体がサンドボックスに配置することを選択する必要があります。**
 
-プロセスは、`com.apple.security.app-sandbox` の権限を持っている場合、ユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を参照してください：
+プロセスは、`com.apple.security.app-sandbox` エンタイトルメントを持っている場合、ユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を参照してください：
 
 {% content-ref url="macos-sandbox-debug-and-bypass/" %}
 [macos-sandbox-debug-and-bypass](macos-sandbox-debug-and-bypass/)
 {% endcontent-ref %}
 
-### **PIDの特権をチェックする**
+### **PIDの特権を確認する**
 
-[これによると](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s)、**`sandbox_check`**（`__mac_syscall`です）は、特定のPIDでサンドボックスによって操作が許可されているかどうかをチェックできます。
+[これによると](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s)、**`sandbox_check`**（`__mac_syscall`です）は、特定のPIDでサンドボックスによって操作が許可されているかどうかを確認できます。
 
-[**ツールsbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c)は、PIDが特定のアクションを実行できるかどうかをチェックできます：
+[**ツールsbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c)は、PIDが特定のアクションを実行できるかどうかを確認できます：
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access

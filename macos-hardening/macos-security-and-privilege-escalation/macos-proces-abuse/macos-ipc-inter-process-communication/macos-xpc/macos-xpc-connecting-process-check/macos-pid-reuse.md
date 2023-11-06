@@ -6,7 +6,7 @@
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -14,14 +14,14 @@
 
 ## PID再利用
 
-macOSの**XPCサービス**が**PID**ではなく**監査トークン**に基づいて呼び出されたプロセスをチェックしている場合、PID再利用攻撃の脆弱性があります。この攻撃は、**エクスプロイト**が機能を悪用して**XPCサービスにメッセージを送信**し、その後で**`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**を実行することによって行われます。
+macOSの**XPCサービス**が**PID**ではなく**監査トークン**に基づいて呼び出されたプロセスをチェックしている場合、PID再利用攻撃の脆弱性があります。この攻撃は、**エクスプロイト**が機能を悪用して**XPCサービスにメッセージを送信**し、その後で**`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**を実行することで行われます。
 
 この関数により、**許可されたバイナリがPIDを所有**しますが、**悪意のあるXPCメッセージは**それよりも**前に送信されている**可能性があります。したがって、**XPC**サービスが**PID**を使用して送信元を**認証**し、**`posix_spawn`**の実行**後**にチェックする場合、それは**認証済み**のプロセスから来たと思うでしょう。
 
 ### エクスプロイトの例
 
 関数**`shouldAcceptNewConnection`**またはそれを呼び出す関数が**`processIdentifier`**を呼び出しており、**`auditToken`**を呼び出していない場合、それはおそらくプロセスのPIDを検証していることを意味します。\
-たとえば、この画像（参照から取得）のように：
+たとえば、この参照から取得した画像のように：
 
 <figure><img src="../../../../../../.gitbook/assets/image (4) (1) (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -31,7 +31,7 @@ macOSの**XPCサービス**が**PID**ではなく**監査トークン**に基づ
 * 各フォークは、メッセージをXPCサービスに**送信**しながら、メッセージを送信した直後に**`posix_spawn`**を実行します。
 
 {% hint style="danger" %}
-エクスプロイトが機能するためには、**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`**をエクスポートするか、エクスプロイトに追加することが重要です。
+エクスプロイトが機能するためには、`export`` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`**を設定するか、エクスプロイト内に以下を記述することが重要です。
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
 "empty:\n"
@@ -41,7 +41,7 @@ asm(".section __DATA,__objc_fork_ok\n"
 
 {% tabs %}
 {% tab title="NSTasks" %}
-最初のオプションは、**`NSTasks`**と引数を使用して子プロセスを起動し、RCを悪用する方法です。
+最初のオプションは、**`NSTasks`** を使用して子プロセスを起動し、RCを悪用する方法です。
 ```objectivec
 // from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -293,10 +293,10 @@ return 0;
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセス**したいですか？または、**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* あなたは**サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>
