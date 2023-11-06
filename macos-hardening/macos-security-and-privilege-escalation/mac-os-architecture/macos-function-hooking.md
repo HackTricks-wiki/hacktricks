@@ -215,7 +215,7 @@ int main(int argc, const char * argv[]) {
     method_exchangeImplementations(originalMethod, swizzledMethod);
 
     // We changed the address of one method for the other
-    // Now when the method substringFromIndex is called, what is really coode is swizzledSubstringFromIndex
+    // Now when the method substringFromIndex is called, what is really called is swizzledSubstringFromIndex
     // And when swizzledSubstringFromIndex is called, substringFromIndex is really colled
     
     // Example usage
