@@ -39,6 +39,10 @@ Therefore, at the moment, if you are just capable of creating a folder with a na
 
 In the [**last examples of Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) can be appreciated how the **`open`** cli functionality could be abused to bypass the sandbox.
 
+{% content-ref url="macos-office-sandbox-bypasses.md" %}
+[macos-office-sandbox-bypasses.md](macos-office-sandbox-bypasses.md)
+{% endcontent-ref %}
+
 ### Abusing Auto Start Locations
 
 If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
