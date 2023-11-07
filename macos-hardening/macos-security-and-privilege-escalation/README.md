@@ -167,8 +167,6 @@ First of all, please note that **most of the tricks about privilege escalation a
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
 {% endcontent-ref %}
 
-## MacOS Defensive Apps
-
 ## References
 
 * [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)

@@ -172,7 +172,7 @@ Therefore, these checks are **only run when executing apps with the quarantined 
 {% hint style="warning" %}
 This attribute must be **set by the application creating/downloading** the file.
 
-However, files that are sandboxed will have this attribute set to every file they create. And non sandboxed apps can set it theirselves, or specify the [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/lsfilequarantineenabled?language=objc) key in the **Info.plist** which will make the system set the `com.apple.quarantine` extended attribute on the files created,
+However, files that are sandboxed will have this attribute set to every file they create. And non sandboxed apps can set it themselves, or specify the [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/lsfilequarantineenabled?language=objc) key in the **Info.plist** which will make the system set the `com.apple.quarantine` extended attribute on the files created,
 {% endhint %}
 
 It's possible to **check it's status and enable/disable** (root required) with:
@@ -229,6 +229,10 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 {% endcode %}
 
 Quarantine information is also stored in a central database managed by LaunchServices in **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
+
+#### **Quarantine.kext**
+
+The kernel extension is only available through the **kernel cache on the system**; however, you _can_ download the **Kernel Debug Kit from https://developer.apple.com/**, which will contain a symbolicated version of the extension.
 
 ### XProtect
 

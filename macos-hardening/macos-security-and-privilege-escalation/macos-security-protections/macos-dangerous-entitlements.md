@@ -51,9 +51,9 @@ Check [**this for more info**](https://theevilbit.github.io/posts/com.apple.priv
 
 This entitlement allows to **use DYLD environment variables** that could be used to inject libraries and code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
 
-### `com.apple.private.tcc.manager` and `com.apple.rootless.storage`.`TCC`
+### `com.apple.private.tcc.manager` or `com.apple.rootless.storage`.`TCC`
 
-[**According to this blog**](https://objective-see.org/blog/blog\_0x4C.html), these entitlements allows to **modify** the **TCC** database.
+[**According to this blog**](https://objective-see.org/blog/blog\_0x4C.html) **and** [**this blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), these entitlements allows to **modify** the **TCC** database.
 
 ### **`system.install.apple-software`** and **`system.install.apple-software.standar-user`**
 
@@ -108,7 +108,7 @@ Allows the app to send events to other applications that are commonly used for *
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.
+Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder path and therefore allows to **bypass TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
@@ -141,6 +141,10 @@ The Disable Executable Memory Protection Entitlement is an extreme entitlement t
 ### `com.apple.security.cs.allow-relative-library-loads`
 
 TODO
+
+### `com.apple.private.nullfs_allow`
+
+This entitlement allows to mount a nullfs file system (forbidden by default). Tool: [**mount\_nullfs**](https://github.com/JamaicanMoose/mount\_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 

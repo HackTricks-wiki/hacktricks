@@ -148,9 +148,13 @@ Obtaining **write permissions** over the **user TCC** database you **can'**t gra
 
 But you can **can** give yourself **`Automation rights to Finder`, and since `Finder` has `FDA`, so do you.**
 
+### **Privesc from FDA to TCC permissions**
+
+This is straight forward, if you controls a program with FDA you can **modify the users TCC database and give yourself any access**.
+
 ### **From SIP Bypass to TCC Bypass**
 
-The **TCC databases** are protected by **SIP**, thats why only processes with the **indicated entitlements  are going to be able to modify** the databases. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able **remove the protection** of a TCC database, and give himself all TCC permissions.
+The system **TCC database** is protected by **SIP**, thats why only processes with the **indicated entitlements  are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able **remove the protection** of a TCC database, and give himself all TCC permissions.
 
 However, there is another option to abuse this **SIP bypass to bypass TCC**, the file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is an allow list of applications that require a TCC exception. Therefore, if an attacker can **remove the SIP protection** from this file and add his **own application** the application ill be able to bypass TCC.\
 For example to add terminal:

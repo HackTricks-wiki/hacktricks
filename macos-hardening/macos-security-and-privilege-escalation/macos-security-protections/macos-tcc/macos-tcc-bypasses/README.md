@@ -192,7 +192,7 @@ TCC uses a database in the user's HOME folder to control access to resources spe
 Therefore, if the user manages to restart TCC with a $HOME env variable pointing to a **different folder**, the user could create a new TCC database in **/Library/Application Support/com.apple.TCC/TCC.db** and trick TCC to grant any TCC permission to any app.
 
 {% hint style="success" %}
-Note that Apple uses the setting stored within the user's profile in the **`NFSHomeDirectory`** attribute for the **value of `$HOME`**, so if you compromise an application with permissions to modify this value (`kTCCServiceSystemPolicySysAdminFiles`), you can **weaponize** this option with a TCC bypass.
+Note that Apple uses the setting stored within the user's profile in the **`NFSHomeDirectory`** attribute for the **value of `$HOME`**, so if you compromise an application with permissions to modify this value (**`kTCCServiceSystemPolicySysAdminFiles`**), you can **weaponize** this option with a TCC bypass.
 {% endhint %}
 
 ### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
@@ -210,7 +210,7 @@ The **first POC** uses [**dsexport**](https://www.unix.com/man-page/osx/1/dsexpo
 5. Import the modified Directory Services entry with [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
 6. Stop the user’s _tccd_ and reboot the process.
 
-The second POC used **`/usr/libexec/configd`** which had `com.apple.private.tcc.allow` with the value **`kTCCServiceSystemPolicySysAdminFiles`**.\
+The second POC used **`/usr/libexec/configd`** which had `com.apple.private.tcc.allow` with the value `kTCCServiceSystemPolicySysAdminFiles`.\
 It was possible to run **`configd`** with the **`-t`** option, an attacker could specify a **custom Bundle to load**. Therefore, the exploit **replaces** the **`dsexport`** and **`dsimport`** method of changing the user’s home directory with a **`configd` code injection**.
 
 For more info check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
@@ -313,7 +313,39 @@ The binary `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` had the en
 
 ### CVE-2023-26818 - Telegram
 
-Telegram had the entitlements `com.apple.security.cs.allow-dyld-environment-variables` and c`om.apple.security.cs.disable-library-validation`, so it was possible to abuse it to **get access to its permissions** such recording with the camera. You can [**find the payload in the writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+Telegram had the entitlements **`com.apple.security.cs.allow-dyld-environment-variables`** and **`com.apple.security.cs.disable-library-validation`**, so it was possible to abuse it to **get access to its permissions** such recording with the camera. You can [**find the payload in the writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+
+Note how to use the env variable to load a library a **custom plist** was created to inject this library and **`launchctl`** was used to launch it:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+       <key>Label</key>
+        <string>com.telegram.launcher</string>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>EnvironmentVariables</key>
+        <dict>
+          <key>DYLD_INSERT_LIBRARIES</key>
+          <string>/tmp/telegram.dylib</string>
+        </dict>
+        <key>ProgramArguments</key>
+        <array>
+  <string>/Applications/Telegram.app/Contents/MacOS/Telegram</string>
+        </array>
+        <key>StandardOutPath</key>
+        <string>/tmp/telegram.log</string>
+        <key>StandardErrorPath</key>
+        <string>/tmp/telegram.log</string>
+</dict>
+</plist>
+```
+
+```bash
+launchctl load com.telegram.launcher.plist
+```
 
 ## By open invocations
 
