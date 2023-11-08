@@ -111,6 +111,12 @@ From macOS Somona, there are some protections **preventing to write inside Apps*
 5. Rename to `/tmp/CarPlay Simulator.app/Contents`
 6. Launch `CarPlay Simulator.app` again
 
+{% hint style="success" %}
+It looks like this is no longer possible because macOS **prevents modifying files** inside applications bundles.\
+So, after executing the app to cache it with Gatekeeper, you won't be able to modify the bundle.\
+And if you change for example the name of the Contents directory to **NotCon** (as indicated in the exploit), and then execute the main binary of the app to cache it with Gatekeeper, it will **trigger an error and won't execute**.
+{% endhint %}
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>

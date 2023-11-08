@@ -331,7 +331,17 @@ XProtect is located on. SIP protected location at **/Library/Apple/System/Librar
 * **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Yara rules to detect malware.
 * **`XProtect.bundle/Contents/Resources/gk.db`**: SQLite3 database with hashes of blocked applications and TeamIDs.
 
-Note that there is another App in **`/Library/Apple/System/Library/CoreServices/XProtect.app`** related to XProtect that isn't involved with the Gatekeeper process..
+Note that there is another App in **`/Library/Apple/System/Library/CoreServices/XProtect.app`** related to XProtect that isn't involved with the Gatekeeper process.
+
+### Not Gatekeeper
+
+{% hint style="danger" %}
+Note that Gatekeeper **isn't executed every time** you execute an application, just _**AppleMobileFileIntegrity**_ (AMFI) will only **verify executable code signatures** when you execute an app that has been already executed and verified by Gatekeeper.
+{% endhint %}
+
+Therefore, previously it was possible to execute an app to cache it with Gatekeeper, then **modify not executables files of the application** (like Electron asar or NIB files) and if no other protections were in place, the application was **executed** with the **malicious** additions.
+
+However, now this is not possible because macOS **prevents modifying files** inside applications bundles. So, if you try the [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md) attack, you will find that it's not longer possible to abuse it because after executing the app to cache it with Gatekeeper, you won't be able to modify the bundle. And if you change for example the name of the Contents directory to NotCon (as indicated in the exploit), and then execute the main binary of the app to cache it with Gatekeeper, it will trigger an error and won't execute.
 
 ## Gatekeeper Bypasses
 

@@ -231,6 +231,11 @@ You could abuse this env variable in a plist to maintain persistence adding thes
 The TCC daemon from macOS doesn't check the executed version of the application. So if you **cannot inject code in an Electron application** with any of the previous techniques you could download a previous version of the APP and inject code on it as it will still get the TCC privileges (unless Trust Cache prevents it).
 {% endhint %}
 
+## Run non JS Code
+
+The previous techniques will allow you to run **JS code inside the process of the electron application**. However, remember that the **child processes run under the same sandbox profile** as the parent application and **inherit their TCC permissions**.\
+Therefore, if you want to abuse entitlements to access the camera or microphone for example, you could just **run another binary from the process**.
+
 ## Automatic Injection
 
 The tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) can be easily used to **find vulnerable electron applications** installed and inject code on them. This tool will try to use the **`--inspect`** technique:
