@@ -97,7 +97,7 @@ mig_external mig_routine_t myipc_server_routine
 }
 ```
 
-In this example we only defined 1 function in the definitions, but if we would have defined more, the would have been inside the array of **`SERVERPREFmyipc_subsystem`** and the first one will be assigned to the ID **500**, the second one to the ID **501**...
+In this example we have only defined 1 function in the definitions, but if we would have defined more functions, they would have been inside the array of **`SERVERPREFmyipc_subsystem`** and the first one would have been assigned to the ID **500**, the second one to the ID **501**...
 
 Actually it's possible to identify this relation in the struct **`subsystem_to_name_map_myipc`** from **`myipcServer.h`**:
 
@@ -142,7 +142,9 @@ Finally, another important function to make the server work will be **`myipc_ser
 }
 </code></pre>
 
-Check the following code to use the generated code to create a simple server and client where the client can call the functions Subtract from the server:
+Check the previously highlighted lines accessing the function to call by ID.
+
+In the following is the code to create a simple **server** and **client** where the client can call the functions Subtract from the server:
 
 {% tabs %}
 {% tab title="myipc_server.c" %}
@@ -337,7 +339,7 @@ This is the same function decompiled in a difefrent Hopper free version:
 {% endtab %}
 {% endtabs %}
 
-Actually if you go to the function **`0x100004000`** you will find the array of **`routine_descriptor`** structs, the first element of the struct is the address where the function is implemented and the **struct takes 0x28 bytes**, so each 0x28 bytes (starting from byte 0) you can get 8 bytes and that be the **address of the function** that will be called:
+Actually if you go to the function **`0x100004000`** you will find the array of **`routine_descriptor`** structs. The first element of the struct is the **address** where the **function** is implemented, and the **struct takes 0x28 bytes**, so each 0x28 bytes (starting from byte 0) you can get 8 bytes and that will be the **address of the function** that will be called:
 
 <figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
