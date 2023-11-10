@@ -29,6 +29,7 @@ When a connection is stablished to an XPC service, the server will check if the 
 6. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
 7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents **PID reuse attacks**.
    * Developers **rarely use the audit token** API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
+     * If the method **`processIdentifier`** is used, it might be vulnerable
      * **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 
 ### Communication Attacks
