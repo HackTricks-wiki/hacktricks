@@ -46,7 +46,7 @@ The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
 
 There is a **third** TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.
 
-Moreover, a process with **full disk access** can **edit the user-mode** database. Now an app also needs **FDA** to **read** the database.
+Moreover, a process with **full disk access** can **edit the user-mode** database. Now an app also needs **FDA** or **`kTCCServiceEndpointSecurityClient`** to **read** the database (and to modify the users DB).
 
 {% hint style="info" %}
 The **notification center UI** can make **changes in the system TCC database**:
@@ -121,7 +121,11 @@ Checking both databases you can check the permissions an app has allowed, has fo
 {% hint style="info" %}
 Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... There is no public list that defines all of them but you can check this [**list of known ones**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 
-**Full Disk Access** is name is **`kTCCServiceSystemPolicyAllFiles`** and **`kTCCServiceAppleEvents`** allows the app to send events to other applications that are commonly used for **automating tasks**. Moreover, **`kTCCServiceSystemPolicySysAdminFiles`** allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.
+**Full Disk Access** is name is **`kTCCServiceSystemPolicyAllFiles`** and **`kTCCServiceAppleEvents`** allows the app to send events to other applications that are commonly used for **automating tasks**.
+
+**kTCCServiceEndpointSecurityClient** is a TCC permission that also grant high privileges, among them the option to write the users database.
+
+Moreover, **`kTCCServiceSystemPolicySysAdminFiles`** allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.
 {% endhint %}
 
 You could also check **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.

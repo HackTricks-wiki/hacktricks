@@ -106,6 +106,10 @@ Gives **Full Disk Access** permissions, one of the TCC highest permissions you c
 
 Allows the app to send events to other applications that are commonly used for **automating tasks**. Controlling other apps, it can abuse the permissions granted to these other apps.
 
+### **`kTCCServiceEndpointSecurityClient`**
+
+Allows, among other permissions, to **write the users TCC database**.
+
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
 Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder path and therefore allows to **bypass TCC**.
