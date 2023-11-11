@@ -120,6 +120,8 @@ Allow to modify files inside apps bundle (inside app.app), which is **disallowed
 
 <figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
+It's possible to check who has this access in _System Settings_ > _Privacy & Security_ > _App Management._
+
 ## Medium
 
 ### `com.apple.security.cs.allow-jit`

@@ -1,4 +1,4 @@
-# macOS Launch/Environment Constraints
+# macOS Launch/Environment Constraints & Trust Cache
 
 <details>
 
@@ -63,7 +63,7 @@ Category 1:
 
 * `(on-authorized-authapfs-volume || on-system-volume)`: Must be in System or Cryptexes volume.
 * `launch-type == 1`: Must be a system service (plist in LaunchDaemons).
-* &#x20; `validation-category == 1`: An operating system executable.
+* `validation-category == 1`: An operating system executable.
 * `is-init-proc`: Launchd
 
 ### Reversing LC Categories
@@ -89,6 +89,10 @@ In **macOS** there are a few trust caches:
 * **`/System/Library/Security/OSLaunchPolicyData`**
 
 And in iOS it looks like it's in **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
+
+{% hint style="warning" %}
+On macOS running on Apple Silicon devices, if an Apple signed binary is not in the trust cache, AMFI will refuse to load it.
+{% endhint %}
 
 ### Enumerating Trust Caches
 

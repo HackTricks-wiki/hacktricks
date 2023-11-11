@@ -179,7 +179,7 @@
     * [macOS .Net Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-.net-applications-injection.md)
   * [macOS Security Protections](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/README.md)
     * [macOS Gatekeeper / Quarantine / XProtect](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-gatekeeper.md)
-    * [macOS Launch/Environment Constraints](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-launch-environment-constraints.md)
+    * [macOS Launch/Environment Constraints & Trust Cache](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-launch-environment-constraints.md)
     * [macOS Sandbox](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/README.md)
       * [macOS Default Sandbox Debug](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/macos-default-sandbox-debug.md)
       * [macOS Sandbox Debug & Bypass](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/macos-sandbox-debug-and-bypass/README.md)
