@@ -33,7 +33,7 @@ One of the columns of that screen indicates if **any authentication was found in
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
 
-For example it will retrieve the WPA passphrase protecting a PSK (pre shared-key), that will be required to decrypt the trraffic later.
+For example it will retrieve the WPA passphrase protecting a PSK (pre shared-key), that will be required to decrypt the trafic later.
 
 # Data in Beacons / Side Channel
 
