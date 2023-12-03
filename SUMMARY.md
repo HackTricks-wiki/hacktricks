@@ -174,6 +174,7 @@
           * [macOS PID Reuse](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-connecting-process-check/macos-pid-reuse.md)
           * [macOS xpc\_connection\_get\_audit\_token Attack](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-connecting-process-check/macos-xpc\_connection\_get\_audit\_token-attack.md)
       * [macOS Thread Injection via Task port](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md)
+    * [macOS Java apps Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-java-apps-injection.md)
     * [macOS Library Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/README.md)
       * [macOS Dyld Hijacking & DYLD\_INSERT\_LIBRARIES](macos-hardening/macos-security-and-privilege-escalation/macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
     * [macOS .Net Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-.net-applications-injection.md)
