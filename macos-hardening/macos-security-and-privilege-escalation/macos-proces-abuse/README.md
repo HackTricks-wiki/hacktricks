@@ -56,6 +56,14 @@ NIB files **define user interface (UI) elements** and their interactions within 
 [macos-dirty-nib.md](macos-dirty-nib.md)
 {% endcontent-ref %}
 
+### Java Applications Injection
+
+It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
+
+{% content-ref url="macos-java-apps-injection.md" %}
+[macos-java-apps-injection.md](macos-java-apps-injection.md)
+{% endcontent-ref %}
+
 ### .Net Applications Injection
 
 It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
