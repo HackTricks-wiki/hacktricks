@@ -33,6 +33,8 @@ One of the columns of that screen indicates if **any authentication was found in
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
 
+For example it will retrieve the WPA passphrase protecting a PSK (pre shared-key), that will be required to decrypt the trraffic later.
+
 # Data in Beacons / Side Channel
 
 If you suspect that **data is being leaked inside beacons of a Wifi network** you can check the beacons of the network using a filter like the following one: `wlan contains <NAMEofNETWORK>`, or `wlan.ssid == "NAMEofNETWORK"` search inside the filtered packets for suspicious strings.
