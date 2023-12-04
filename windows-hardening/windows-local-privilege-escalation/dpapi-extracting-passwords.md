@@ -32,7 +32,7 @@ This makes very easy to developer to **save encrypted data** in the computer **w
 DPAPI is utilized to protect the following personal data:
 
 * Passwords and form auto-completion data in Internet Explorer, Google \*Chrome
-* E-mail account passwords in Outlook, Windows Mail, Windows Mail, etc.
+* E-mail account passwords in Outlook, Windows Mail, etc.
 * Internal FTP manager account passwords
 * Shared folders and resources access passwords
 * Wireless network account keys and passwords
@@ -69,7 +69,7 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
 
-Get credentials info using mimikatz `dpapi::cred`, in the response you can find interesting info such as the encrypted data and he guidMasterKey.
+Get credentials info using mimikatz `dpapi::cred`, in the response you can find interesting info such as the encrypted data and the guidMasterKey.
 
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
@@ -114,7 +114,7 @@ In the previous section we found the guidMasterKey which looked like `3e90dd9e-f
 C:\Users\<username>\AppData\Roaming\Microsoft\Protect\<SID>
 ```
 
-For where you can extract the master key with mimikatz:
+You can extract the master key with mimikatz:
 
 ```bash
 # If you know the users password
