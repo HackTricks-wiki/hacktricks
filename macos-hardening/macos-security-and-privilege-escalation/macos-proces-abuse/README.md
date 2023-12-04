@@ -72,6 +72,14 @@ It's possible to inject code into .Net applications by **abusing the .Net debugg
 [macos-.net-applications-injection.md](macos-.net-applications-injection.md)
 {% endcontent-ref %}
 
+### Perl Injection
+
+Check different options to make a Perl script execute arbitrary code in:
+
+{% content-ref url="macos-perl-applications-injection.md" %}
+[macos-perl-applications-injection.md](macos-perl-applications-injection.md)
+{% endcontent-ref %}
+
 ### Python Injection
 
 If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished.

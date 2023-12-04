@@ -52,6 +52,19 @@ drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 
 Here, the **`restricted`** flag indicates that the `/usr/libexec` directory is protected by SIP. In a SIP-protected directory, files cannot be created, modified, or deleted.
 
+Moreover, if a file contains the attribute **`com.apple.rootless`** extended **attribute**, that file will also be **protected by SIP**.
+
+**SIP also limits other root actions** like:
+
+* Loading untrusted kernel extensions
+* Getting task-ports for Apple-signed processes
+* Modifying NVRAM variables
+* Allowing kernel debugging
+
+Options are maintained in nvram variable as a bitflag (`csr-active-config` on Intel and `lp-sip0` is read from the booted Device Tree for ARM). You can find the flags in the XNU source code in `csr.sh`:
+
+<figure><img src="../../../.gitbook/assets/image (720).png" alt=""><figcaption></figcaption></figure>
+
 ### SIP Status
 
 You can check if SIP is enabled on your system with the following command:
