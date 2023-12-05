@@ -148,7 +148,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 
 ### アプリの Plist からのインジェクション
 
-この環境変数を plist に悪用することで、以下のキーを追加して持続性を確保することができます：
+この環境変数を plist に悪用することで、以下のキーを追加して持続性を維持することができます：
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -193,9 +193,11 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
+[**このブログポスト**](https://hackerone.com/reports/1274695)では、このデバッグ機能を悪用して、ヘッドレスChromeが**任意の場所に任意のファイルをダウンロード**するようになっています。
+
 ### アプリのPlistからのインジェクション
 
-これらのキーを追加して永続性を維持するために、この環境変数をPlistで悪用することができます：
+次のキーを追加して永続性を維持するために、この環境変数をplistで悪用することができます：
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -212,12 +214,17 @@ print(ws.recv()
 ## TCCバイパスによる古いバージョンの悪用
 
 {% hint style="success" %}
-macOSのTCCデーモンは、実行されるアプリケーションのバージョンをチェックしません。したがって、前述のいずれの技術でもElectronアプリケーションにコードをインジェクトできない場合は、以前のバージョンのアプリをダウンロードしてコードをインジェクトすることができます。これにより、TCCの特権を取得できます（ただし、Trust Cacheが防止する場合を除く）。
+macOSのTCCデーモンは、実行されるアプリケーションのバージョンをチェックしません。したがって、前述のいずれの技術でもElectronアプリケーションにコードをインジェクトできない場合は、以前のバージョンのアプリをダウンロードし、それにコードをインジェクトすることができます。これにより、TCCの特権を取得できます（ただし、Trust Cacheが防止する場合を除く）。
 {% endhint %}
+
+## JSコードの実行
+
+前述の技術により、**Electronアプリケーションのプロセス内でJSコードを実行**することができます。ただし、**子プロセスは親アプリケーションと同じサンドボックスプロファイル**で実行され、**そのTCC権限を継承**します。\
+したがって、例えばカメラやマイクへのアクセス権を悪用するために、**プロセスから別のバイナリを実行**することができます。
 
 ## 自動インジェクション
 
-ツール[**electroniz3r**](https://github.com/r3ggi/electroniz3r)を使用すると、インストールされている脆弱なElectronアプリケーションを簡単に見つけて、コードをインジェクトすることができます。このツールは、**`--inspect`** 技術を使用しようとします。
+ツール[**electroniz3r**](https://github.com/r3ggi/electroniz3r)は、インストールされている脆弱なElectronアプリケーションを簡単に見つけて、コードをインジェクトするために使用できます。このツールは、**`--inspect`** 技術を使用しようとします。
 
 自分でコンパイルする必要があり、次のように使用できます：
 ```bash
@@ -268,7 +275,7 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
