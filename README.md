@@ -42,9 +42,9 @@ Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** es la plataforma de caza de bugs y hacking ético **número 1 de Europa**.
+**Intigriti** es la plataforma de ethical hacking y **bug bounty número 1 de Europa.**
 
-Consejo de caza de bugs: **regístrate** en **Intigriti**, una plataforma premium de caza de bugs creada por hackers, ¡para hackers! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comienza a ganar recompensas de hasta **$100,000**.
+Consejo de bug bounty: **regístrate** en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**. ¡Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comienza a ganar recompensas de hasta **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -53,7 +53,7 @@ Consejo de caza de bugs: **regístrate** en **Intigriti**, una plataforma premiu
 <figure><img src=".gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.
 
 Obtén acceso hoy mismo:
 
@@ -77,30 +77,30 @@ Intruder nunca descansa. La protección las 24 horas del día, los 7 días de la
 
 <figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
-**HackenProof es el hogar de todas las recompensas por errores de criptografía.**
+¡Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de recompensas por errores!
 
-**Obtén recompensas sin demoras**\
-Las recompensas de HackenProof se lanzan solo cuando sus clientes depositan el presupuesto de recompensa. Obtendrás la recompensa después de que se verifique el error.
+**Hacking Insights**\
+Participa en contenido que explora la emoción y los desafíos del hacking.
 
-**Obtén experiencia en pruebas de penetración web3**\
-¡Los protocolos de blockchain y los contratos inteligentes son el nuevo Internet! Domina la seguridad web3 en sus días de crecimiento.
+**Noticias de Hacking en Tiempo Real**\
+Mantente actualizado con el mundo del hacking a ritmo acelerado a través de noticias e información en tiempo real.
 
-**Conviértete en la leyenda del hacker web3**\
-Gana puntos de reputación con cada error verificado y conquista la cima de la clasificación semanal.
+**Últimos Anuncios**\
+Mantente informado sobre los últimos lanzamientos de recompensas por errores y actualizaciones importantes de la plataforma.
 
-[**Regístrate en HackenProof**](https://hackenproof.com/register) ¡y comienza a ganar con tus hacks!
+**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo!
 
-{% embed url="https://hackenproof.com/register" %}
+***
 
 ### [WebSec](https://websec.nl/)
 
 <figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de seguridad ofensiva con un enfoque **moderno**.
+[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad mediante la prestación de servicios de **seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad **todo en uno**, lo que significa que hacen de todo; Pruebas de penetración, Auditorías de seguridad, Entrenamientos de concienciación, Campañas de phishing, Revisión de código, Desarrollo de exploits, Externalización de expertos en seguridad y mucho más.
+WebSec es una **empresa de seguridad integral**, lo que significa que hacen de todo: pruebas de penetración, auditorías de seguridad, capacitaciones de concienciación, campañas de phishing, revisión de código, desarrollo de exploits, externalización de expertos en seguridad y mucho más.
 
-Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, como se indica en su sitio web "**Si no podemos hackearlo, ¡no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
+Otra cosa genial de WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, como se indica en su sitio web "**Si no podemos hackearlo, ¡no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
 Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks**.
 

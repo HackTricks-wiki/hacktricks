@@ -60,7 +60,7 @@ Puedes cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la
 
 <figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-Ten en cuenta que si intentas **sobrescribir** el binario del **`Electron Framework`** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
+Ten en cuenta que si intentas **sobrescribir** el binario del **`Framework Electron`** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
 
 ## RCE añadiendo código a Aplicaciones Electron
 
@@ -75,7 +75,7 @@ Sin embargo, en este momento hay 2 limitaciones:
 Esto hace que esta ruta de ataque sea más complicada (o imposible).
 {% endhint %}
 
-Ten en cuenta que es posible evadir el requisito de **`kTCCServiceSystemPolicyAppBundles`** copiando la aplicación a otro directorio (como **`/tmp`**), renombrando la carpeta **`app.app/Contents`** a **`app.app/NotCon`**, **modificando** el archivo **asar** con tu código **malicioso**, renombrándolo de nuevo a **`app.app/Contents`** y ejecutándolo.
+Ten en cuenta que es posible evitar el requisito de **`kTCCServiceSystemPolicyAppBundles`** copiando la aplicación a otro directorio (como **`/tmp`**), renombrando la carpeta **`app.app/Contents`** a **`app.app/NotCon`**, **modificando** el archivo **asar** con tu código **malicioso**, renombrándolo de nuevo a **`app.app/Contents`** y ejecutándolo.
 
 Puedes desempaquetar el código del archivo asar con:
 ```bash
@@ -193,9 +193,11 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
+En [**este blogpost**](https://hackerone.com/reports/1274695), se abusa de esta depuración para hacer que el chrome sin cabeza **descargue archivos arbitrarios en ubicaciones arbitrarias**.
+
 ### Inyección desde el archivo Plist de la aplicación
 
-Podrías abusar de esta variable de entorno en un plist para mantener la persistencia agregando estas claves:
+Se puede abusar de esta variable de entorno en un plist para mantener la persistencia agregando estas claves:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -212,8 +214,13 @@ Podrías abusar de esta variable de entorno en un plist para mantener la persist
 ## Bypass de TCC abusando de versiones antiguas
 
 {% hint style="success" %}
-El demonio TCC de macOS no verifica la versión ejecutada de la aplicación. Por lo tanto, si **no puedes inyectar código en una aplicación Electron** con ninguna de las técnicas anteriores, puedes descargar una versión anterior de la aplicación e inyectar código en ella, ya que aún obtendrá los privilegios de TCC (a menos que Trust Cache lo impida).
+El demonio TCC de macOS no verifica la versión ejecutada de la aplicación. Por lo tanto, si **no puedes inyectar código en una aplicación Electron** con ninguna de las técnicas anteriores, puedes descargar una versión anterior de la APP e inyectar código en ella, ya que aún obtendrá los privilegios de TCC (a menos que el Trust Cache lo impida).
 {% endhint %}
+
+## Ejecutar código no JS
+
+Las técnicas anteriores te permitirán ejecutar **código JS dentro del proceso de la aplicación Electron**. Sin embargo, recuerda que los **procesos secundarios se ejecutan bajo el mismo perfil de sandbox** que la aplicación principal y **heredan sus permisos de TCC**.\
+Por lo tanto, si deseas abusar de los permisos para acceder a la cámara o al micrófono, por ejemplo, simplemente puedes **ejecutar otro binario desde el proceso**.
 
 ## Inyección automática
 
