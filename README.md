@@ -77,8 +77,6 @@ Intruder never rests. Round-the-clock protection monitors your systems 24/7. Wan
 
 <figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
-
 Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
 
 **Hacking Insights**\
@@ -91,6 +89,8 @@ Keep up-to-date with fast-paced hacking world through real-time news and insight
 Stay informed with the newest bug bounties launching and crucial platform updates
 
 **Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+
+***
 
 ### [WebSec](https://websec.nl/)
 

@@ -207,6 +207,8 @@ ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
 
+In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is abused to make a headless chrome **download arbitrary files in arbitrary locations**.
+
 ### Injection from the App Plist
 
 You could abuse this env variable in a plist to maintain persistence adding these keys:
