@@ -57,7 +57,7 @@ You should **analyze** the memory **using volatility**.
 ### [INCEPTION](https://github.com/carmaa/inception)
 
 Inception is a **physical memory manipulation** and hacking tool exploiting PCI-based DMA. The tool can attack over **FireWire**, **Thunderbolt**, **ExpressCard**, PC Card and any other PCI/PCIe HW interfaces.\
-**Connect** your computer to the victim computer over one of those **interfaces** and **INCEPTION** will try to **patch** the **pyshical memory** to give you **access**.
+**Connect** your computer to the victim computer over one of those **interfaces** and **INCEPTION** will try to **patch** the **physical memory** to give you **access**.
 
 **If INCEPTION succeeds, any password introduced will be valid.**
 
