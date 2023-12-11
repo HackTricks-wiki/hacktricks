@@ -18,7 +18,7 @@
 
 * **読み取り** - ディレクトリのエントリを**列挙**できます。
 * **書き込み** - ディレクトリに**ファイルを削除/書き込み**できます。
-* **実行** - ディレクトリを**トラバース**することができます。この権限がない場合、そのディレクトリ内または任意のサブディレクトリ内のファイルにアクセスできません。
+* **実行** - ディレクトリを**トラバース**することができます。この権限がない場合、そのディレクトリ内またはサブディレクトリ内のファイルにアクセスできません。
 
 ### 危険な組み合わせ
 
@@ -32,15 +32,15 @@
 
 ### フォルダのルートR+X特殊ケース
 
-**rootのみがR+Xアクセス権限を持つディレクトリ**にファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、ユーザーが読み取り可能なファイルを移動する脆弱性がある場合、その制限のために読み取ることができないこのフォルダから**別のフォルダ**に移動することで、これらのファイルを読み取るために悪用することができます。
+**rootだけがR+Xアクセス権限を持つディレクトリ**にファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、ユーザーが読み取り可能なファイルを持つが、その**制限**のために読み取ることができないフォルダから、別のフォルダにファイルを**移動**する脆弱性がある場合、これらのファイルを読み取るために悪用される可能性があります。
 
 例：[https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
 
 ## シンボリックリンク/ハードリンク
 
-特権プロセスが**制御可能なファイル**にデータを書き込んでいる場合、それを**低特権ユーザー**が**別のファイル**に向けるだけで、シンボリックリンクまたはハードリンクを介して、特権プロセスはそのファイルに書き込みます。
+特権プロセスが**制御可能なファイル**にデータを書き込んでいる場合、それを**低特権ユーザー**が**制御できる**か、または**以前に作成された**ものである場合、ユーザーはシンボリックリンクまたはハードリンクを介して別のファイルに**ポイント**し、特権プロセスはそのファイルに書き込みます。
 
-特権の任意の書き込みを悪用して特権をエスカレーションする方法については、他のセクションを確認してください。
+攻撃者が特権の任意の書き込みを悪用する可能性がある他のセクションをチェックしてください。
 
 ## 任意のFD
 
@@ -48,7 +48,7 @@
 
 例：[https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## クォレンティンxattrsトリックの回避
+## クォレンティンxattrsトリックを回避する
 
 ### 削除する
 ```bash
@@ -56,7 +56,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable フラグ
 
-ファイル/フォルダにこの immutable 属性がある場合、それに xattr を設定することはできません。
+ファイル/フォルダにこの不変属性がある場合、それに xattr を設定することはできません。
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -138,7 +138,7 @@ ls -le test
 
 バンドルには、**`_CodeSignature/CodeResources`**というファイルが含まれており、バンドル内のすべての**ファイル**の**ハッシュ**が含まれています。ただし、CodeResourcesのハッシュは**実行可能ファイルに埋め込まれている**ため、それには手を出せません。
 
-ただし、いくつかのファイルの署名はチェックされないため、これらのファイルにはplist内のomitというキーがあります。
+ただし、いくつかのファイルの署名はチェックされないため、これらのファイルにはplist内のomitキーがあります。
 ```xml
 <dict>
 ...
@@ -243,9 +243,19 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 </dict>
 </plist>
 ```
-### Sudoersファイル
+### スクリプトの生成
 
-**任意の書き込み**権限がある場合、**`/etc/sudoers.d/`**フォルダ内に自分自身に**sudo**権限を付与するファイルを作成できます。
+以下のコマンドをルートとして実行したい場合、スクリプト `/Applications/Scripts/privesc.sh` を生成してください。
+
+### Sudoers ファイル
+
+**任意の書き込み権限**がある場合、**`/etc/sudoers.d/`** フォルダ内に自分自身に **sudo** 権限を付与するファイルを作成することができます。
+
+### PATH ファイル
+
+**`/etc/paths`** ファイルは、PATH 環境変数を設定する主要な場所の1つです。これを上書きするにはルート権限が必要ですが、**特権プロセス**から **フルパスなしでコマンドを実行**しているスクリプトを **乗っ取る** ことができるかもしれません。
+
+また、**`/etc/paths.d`** にファイルを書き込んで、新しいフォルダを `PATH` 環境変数に読み込むこともできます。
 
 ## 参考文献
 
@@ -255,10 +265,10 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの**企業を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASS の最新バージョンや HackTricks の PDF をダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションです。
+* [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)** をフォローしてください。**
+* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に PR を提出してください。**
 
 </details>

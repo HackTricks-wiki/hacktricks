@@ -6,7 +6,7 @@
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -14,38 +14,44 @@
 
 ## サンドボックスの読み込みプロセス
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>画像は<a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a>から</p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 前の画像では、**`com.apple.security.app-sandbox`**の権限を持つアプリケーションが実行されると、**サンドボックスがどのように読み込まれるか**がわかります。
 
 コンパイラは`/usr/lib/libSystem.B.dylib`をバイナリにリンクします。
 
-その後、**`libSystem.B`**は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`**がアプリの権限を**`securityd`**に送信します。Securitydはプロセスがサンドボックス内に隔離される必要があるかどうかをチェックし、必要な場合は隔離されます。\
+その後、**`libSystem.B`**は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`**がアプリの権限を**`securityd`**に送信します。 Securitydはプロセスがサンドボックス内に隔離される必要があるかどうかをチェックし、必要な場合は隔離されます。\
 最後に、サンドボックスは**`__sandbox_ms`**を呼び出して、**`__mac_syscall`**を呼び出します。
 
 ## バイパスの可能性
 
 ### 隔離属性のバイパス
 
-**サンドボックス化されたプロセスが作成するファイル**は、サンドボックスからの脱出を防ぐために**隔離属性**が付加されます。ただし、サンドボックス化されたアプリケーション内に**隔離属性のない`.app`フォルダ**を作成できれば、アプリバンドルのバイナリを**`/bin/bash`**に指定し、**plist**にいくつかの環境変数を追加して**`open`**を悪用して**新しいアプリをサンドボックスから外して起動**することができます。
+**サンドボックス化されたプロセスが作成するファイル**は、サンドボックスからの脱出を防ぐために**隔離属性**が付加されます。ただし、サンドボックス化されたアプリケーション内に**隔離属性のない`.app`フォルダ**を作成できれば、アプリバンドルのバイナリを**`/bin/bash`**に指定し、**plist**にいくつかの環境変数を追加して**`open`**を悪用して**新しいアプリをサンドボックスから脱出させる**ことができます。
 
-これは[**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**で行われたことです**。
+これは、[**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**で行われたことです。**
 
 {% hint style="danger" %}
-したがって、現時点では、隔離属性のない名前で終わるフォルダを作成できるだけであれば、macOSは**隔離**属性を**`.app`フォルダ**と**メインの実行可能ファイル**でのみ**チェック**します（そして、メインの実行可能ファイルを**`/bin/bash`**に指定します）。
+したがって、現時点では、隔離属性のない名前で終わるフォルダを作成できるだけであれば、macOSは**隔離**属性を**`.app`フォルダ**と**メインの実行可能ファイル**でのみ**チェック**します（メインの実行可能ファイルを**`/bin/bash`**に指定します）。
+
+なお、.appバンドルが既に実行を許可されている場合（許可されて実行フラグがある隔離xttrを持っている）、それも悪用することができます...ただし、今では**特権のあるTCC権限**がない限り、**`.app`**バンドル内に書き込むことはできません（サンドボックス内では特権がありません）。
 {% endhint %}
 
 ### Open機能の悪用
 
-[**Wordサンドボックス回避の最後の例**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)では、**`open`**のCLI機能がサンドボックスを回避するために悪用されることが示されています。
+[**Wordサンドボックスのバイパスの最後の例**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)では、**`open`**のCLI機能がサンドボックスをバイパスするために悪用されることがわかります。
 
-### Auto Startの場所の悪用
+{% content-ref url="macos-office-sandbox-bypasses.md" %}
+[macos-office-sandbox-bypasses.md](macos-office-sandbox-bypasses.md)
+{% endcontent-ref %}
 
-サンドボックス化されたプロセスが、**後でサンドボックス化されていないアプリケーションがバイナリを実行する場所に書き込む**ことができれば、バイナリをそこに配置することで**脱出**することができます。この種の場所の良い例は、`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
+### Auto Start Locationsの悪用
 
-これには**2つのステップ**が必要な場合もあります：より**許可のあるサンドボックス**（`file-read*`、`file-write*`）を持つプロセスが、実際には**サンドボックスから外されて実行される場所**に書き込むコードを実行することです。
+サンドボックス化されたプロセスが、**後でサンドボックス化されていないアプリケーションがバイナリを実行する場所に書き込む**ことができる場合、バイナリをそこに配置することで**簡単に脱出**することができます。この種の場所の良い例は、`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
 
-**Auto Startの場所**については、次のページを参照してください：
+これには**2つのステップ**が必要な場合もあります：より**許可のあるサンドボックス**（`file-read*`、`file-write*`）を持つプロセスが、実際には**サンドボックスから脱出する場所**に書き込むコードを実行することです。
+
+**Auto Start locations**については、次のページを参照してください：
 
 {% content-ref url="../../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
@@ -53,21 +59,21 @@
 
 ### 他のプロセスの悪用
 
-サンドボックスプロセスから、より制限の少ないサンドボックス（またはサンドボックスがない）で実行されている他のプロセスを**侵害**することができれば、それらのサンドボックスから脱出することができます。
+サンドボックスプロセスから、より制限の少ないサンドボックス（またはサンドボックスなし）で実行されている他のプロセスを**侵害**することができれば、それらのサンドボックスから脱出することができます。
 
 {% content-ref url="../../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../../macos-proces-abuse/)
 {% endcontent-ref %}
-
 ### 静的コンパイルと動的リンク
 
-[**この研究**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)では、サンドボックスをバイパスする2つの方法が発見されました。サンドボックスは、**libSystem**ライブラリがロードされるときにユーザーランドから適用されます。バイナリがそれをロードするのを回避できれば、サンドボックスは適用されません。
+[**この研究**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)では、Sandboxを回避するための2つの方法が発見されました。Sandboxは、**libSystem**ライブラリがロードされるときにユーザーランドから適用されます。バイナリがそれをロードするのを回避できれば、Sandboxは適用されません。
 
-* バイナリが**完全に静的にコンパイル**されている場合、そのライブラリをロードする必要はありません。
+* バイナリが**完全に静的にコンパイル**されている場合、そのライブラリをロードする必要がありません。
 * バイナリがライブラリをロードする必要がない場合（リンカもlibSystemに含まれているため）、libSystemをロードする必要はありません。
+
 ### シェルコード
 
-ARM64の場合でも、シェルコードは`libSystem.dylib`にリンクする必要があることに注意してください。
+ARM64の場合でも、**シェルコードでさえ**`libSystem.dylib`にリンクする必要があります。
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
@@ -180,7 +186,9 @@ system("cat ~/Desktop/del.txt");
 
 エンタイトルメントは、アプリケーションがmacOSのセキュリティ保護機能をバイパスするために使用されることがあります。攻撃者は、特定のエンタイトルメントを要求することで、アプリケーションのセキュリティ制約を回避し、特権の昇格を行うことができます。
 
-このファイルを悪意のある目的で使用することは、違法行為であり、厳しく禁止されています。
+このファイルを悪意のある目的で使用することは違法です。この情報は、セキュリティ専門家やアプリケーション開発者がセキュリティ保護機能を理解し、強化するために提供されています。
+
+{% endtab %}
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -195,11 +203,7 @@ Info.plistファイルは、macOSアプリケーションの設定情報を含�
 
 Sandboxをバイパスするために、Info.plistファイルを編集することができます。例えば、`com.apple.security.app-sandbox`キーを`false`に設定することで、アプリケーションをサンドボックスから外すことができます。
 
-ただし、この方法は推奨されません。サンドボックスはセキュリティの重要な要素であり、アプリケーションを保護するために使用されます。サンドボックスをバイパスすることは、セキュリティ上の脆弱性を引き起こす可能性があります。
-
-Info.plistファイルを編集する場合は、慎重に行い、セキュリティのリスクを理解した上で行ってください。
-
-{% endtab %}
+ただし、この方法は推奨されません。サンドボックスはセキュリティの重要な要素であり、アプリケーションがサンドボックスをバイパスすることは、悪意のある活動や特権のエスカレーションにつながる可能性があります。
 ```xml
 <plist version="1.0">
 <dict>

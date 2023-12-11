@@ -58,7 +58,7 @@ SSHを有効にするには、現在は**フルディスクアクセス**が必�
 
 ### kTCCServiceAppleEvents / Automation
 
-**`kTCCServiceAppleEvents`**権限を持つアプリは、他のアプリを**制御**することができます。これは、他のアプリに付与された権限を**悪用**することができる可能性があります。
+**`kTCCServiceAppleEvents`**権限を持つアプリは、他のアプリを**制御**することができます。これは、他のアプリに付与された権限を**悪用**する可能性があることを意味します。
 
 Appleスクリプトについての詳細は次を参照してください：
 
@@ -156,16 +156,16 @@ $> ls ~/Documents
 * `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
 * `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
 
-この**`rename(a, b);`**の動作は**競合状態**に対して脆弱です。`Automatically Add to Music.localized`フォルダに偽の**TCC.db**ファイルを配置し、新しいフォルダ(b)が作成されてファイルがコピーされると、ファイルを削除し、**`~/Library/Application Support/com.apple.TCC`**にポイントすることができます。
+この**`rename(a, b);`**の動作は**競合状態**に対して脆弱であり、`Automatically Add to Music.localized`フォルダに偽の**TCC.db**ファイルを配置し、新しいフォルダ(b)が作成されてファイルがコピーされると、ファイルを削除し、**`~/Library/Application Support/com.apple.TCC`**にポイントすることができました。
 
 ### SQLITE\_SQLLOG\_DIR - CVE-2023-32422
 
-**`SQLITE_SQLLOG_DIR="path/folder"`**とすると、**すべてのオープンされたdbがそのパスにコピー**されます。このCVEでは、この制御を悪用して、**TCCデータベースを持つプロセスによって開かれるSQLiteデータベース**内に**書き込む**ことができました。そして、**`SQLITE_SQLLOG_DIR`**を**ファイル名のシンボリックリンク**として悪用し、そのデータベースが**開かれる**と、ユーザーの**TCC.dbが上書き**されます。\
+**`SQLITE_SQLLOG_DIR="path/folder"`**とすると、**すべてのオープンされたdbがそのパスにコピー**されます。このCVEでは、この制御を悪用して、**TCCデータベースを持つプロセスによって開かれるSQLiteデータベース**内に**書き込む**ことができました。そして、**`SQLITE_SQLLOG_DIR`**を**ファイル名のシンボリックリンク**として悪用し、そのデータベースが**開かれる**と、ユーザーの**TCC.dbが上書き**されました。\
 [**詳細はこちら**](https://youtu.be/f1HA5QhLQ7Y?t=20548)。
 
 ### **SQLITE\_AUTO\_TRACE**
 
-環境変数**`SQLITE_AUTO_TRACE`**が設定されている場合、ライブラリ**`libsqlite3.dylib`**はすべてのSQLクエリを**ログに記録**します。多くのアプリケーションがこのライブラリを使用しているため、すべてのSQLiteクエリを記録することが可能でした。
+環境変数**`SQLITE_AUTO_TRACE`**が設定されている場合、ライブラリ**`libsqlite3.dylib`**はすべてのSQLクエリを**ログに記録**します。多くのアプリケーションがこのライブラリを使用していたため、すべてのSQLiteクエリを記録することができました。
 
 いくつかのAppleのアプリケーションは、TCCで保護された情報にアクセスするためにこのライブラリを使用していました。
 ```bash
@@ -182,7 +182,7 @@ TCCは、ユーザーのHOMEフォルダ内のデータベースを使用して�
 したがって、ユーザーが$HOME環境変数を**異なるフォルダ**を指すように設定してTCCを再起動できれば、ユーザーは**/Library/Application Support/com.apple.TCC/TCC.db**に新しいTCCデータベースを作成し、TCCに任意のTCC許可を任意のアプリに与えるようにトリックをかけることができます。
 
 {% hint style="success" %}
-Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に格納された設定を**`$HOME`の値**として使用しているため、この値（`kTCCServiceSystemPolicySysAdminFiles`を変更する権限を持つアプリケーションを侵害する場合、このオプションをTCCバイパスとして**武器化**することができます。
+Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に格納された設定を**`$HOME`の値**として使用しているため、この値を変更する権限（**`kTCCServiceSystemPolicySysAdminFiles`**）を持つアプリケーションを侵害すると、このオプションをTCCバイパスとして**武器化**することができます。
 {% endhint %}
 
 ### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
@@ -195,12 +195,12 @@ Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に�
 
 1. ターゲットアプリケーションの_csreq_ blobを取得します。
 2. 必要なアクセスと_csreq_ blobを持つ偽の_TCC.db_ファイルを配置します。
-3. [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/)を使用して、ユーザーのディレクトリサービスエントリをエクスポートします。
+3. [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/)を使用してユーザーのディレクトリサービスエントリをエクスポートします。
 4. ユーザーのホームディレクトリを変更するためにディレクトリサービスエントリを変更します。
 5. [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/)を使用して変更されたディレクトリサービスエントリをインポートします。
 6. ユーザーの_tccd_を停止し、プロセスを再起動します。
 
-2番目のPOCでは、**`/usr/libexec/configd`**を使用しました。このファイルには`com.apple.private.tcc.allow`という値があり、**`kTCCServiceSystemPolicySysAdminFiles`**が設定されています。\
+**2番目のPOC**では、**`/usr/libexec/configd`**を使用しました。このファイルには`com.apple.private.tcc.allow`という値があり、`kTCCServiceSystemPolicySysAdminFiles`が設定されています。\
 **`configd`**を**`-t`**オプションで実行することで、攻撃者は**カスタムバンドルをロード**することができます。したがって、このエクスプロイトでは、ユーザーのホームディレクトリを変更する**`dsexport`**と**`dsimport`**の方法を**`configd`のコードインジェクション**で置き換えます。
 
 詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)を参照してください。
@@ -218,17 +218,17 @@ Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に�
 
 ### CVE-2020-27937 - Directory Utility
 
-アプリケーション`/System/Library/CoreServices/Applications/Directory Utility.app`には、エンタイトルメント**`kTCCServiceSystemPolicySysAdminFiles`**があり、**`.daplug`**拡張子のプラグインがロードされ、**ハードニングされていない**ランタイムがありました。
+アプリケーション`/System/Library/CoreServices/Applications/Directory Utility.app`には、**`kTCCServiceSystemPolicySysAdminFiles`**というエンタイトルメントがあり、**`.daplug`**拡張子のプラグインをロードし、**ハード化されていない**ランタイムを持っていました。
 
-このCVEを武器化するために、**`NFSHomeDirectory`**が**変更**されます（前述のエンタイトルメントを悪用）。これにより、ユーザーのTCCデータベースを**乗っ取る**ことができ、TCCをバイパスすることができます。
+このCVEを武器化するために、**`NFSHomeDirectory`**が変更されます（前述のエンタイトルメントを悪用して）、TCCをバイパスするためにユーザーのTCCデータベースを**乗っ取る**ことができます。
 
 詳細については、[**元のレポート**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)を参照してください。
 
 ### CVE-2020-29621 - Coreaudiod
 
-バイナリ**`/usr/sbin/coreaudiod`**には、エンタイトルメント`com.apple.security.cs.disable-library-validation`と`com.apple.private.tcc.manager`があります。最初のエンタイトルメントは**コードインジェクションを許可**し、2番目のエンタイトルメントは**TCCの管理権限**を与えます。
+バイナリ**`/usr/sbin/coreaudiod`**には、`com.apple.security.cs.disable-library-validation`と`com.apple.private.tcc.manager`というエンタイトルメントがあります。最初のエンタイトルメントは**コードインジェクションを許可**し、2番目のエンタイトルメントは**TCCの管理権限**を与えます。
 
-このバイナリは、フォルダー`/Library/Audio/Plug-Ins/HAL`から**サードパーティのプラグイン**をロードすることができます。したがって、このPoCでは、**プラグインをロードし、TCCの許可を悪用**することができました。
+このバイナリは、フォルダー`/Library/Audio/Plug-Ins/HAL`から**サードパーティのプラグイン**をロードすることができました。したがって、このPoCでは、**プラグインをロードし、TCCの許可を悪用**することができました。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -263,11 +263,11 @@ Core Media I/Oを介してカメラストリームを開くシステムアプリ
 
 そこに一般的な**コンストラクタ**を持つライブラリを保存するだけで、コードを**インジェクト**することができます。
 
-これに対していくつかのAppleのアプリケーションは脆弱でした。
+これにより、いくつかのAppleのアプリケーションが脆弱になりました。
 
 ### Firefox
 
-Firefoxアプリケーションは、`com.apple.security.cs.disable-library-validation`の権限を持っているため、まだ脆弱です。
+Firefoxアプリケーションには、`com.apple.security.cs.disable-library-validation`と`com.apple.security.cs.allow-dyld-environment-variables`の権限がありました：
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
 Executable=/Applications/Firefox.app/Contents/MacOS/firefox
@@ -280,6 +280,8 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 <true/>
 <key>com.apple.security.cs.disable-library-validation</key>
 <true/>
+<key>com.apple.security.cs.allow-dyld-environment-variables</key><true/>
+<true/>
 <key>com.apple.security.device.audio-input</key>
 <true/>
 <key>com.apple.security.device.camera</key>
@@ -291,25 +293,55 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-詳細な情報については、[**元のレポートをチェックしてください**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)。
+詳細な情報については、[**元のレポート**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)をチェックしてください。
 
 ### CVE-2020-10006
 
-バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、プロセス内にコードを注入し、TCC の特権を使用することができました。
+バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、これによりプロセス内にコードを注入し、TCCの特権を使用することができました。
 
 ### CVE-2023-26818 - Telegram
 
-Telegram には、`com.apple.security.cs.allow-dyld-environment-variables` と `com.apple.security.cs.disable-library-validation` の権限があり、カメラでの録画などのパーミッションにアクセスすることができました。[**writeup でペイロードを見つけることができます**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)。
+Telegramには、**`com.apple.security.cs.allow-dyld-environment-variables`** と **`com.apple.security.cs.disable-library-validation`** の権限があり、これを悪用してカメラでの録画などの権限にアクセスすることができました。[**解説記事でペイロードを見つけることができます**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)。
 
-## オープンな呼び出しによる方法
+環境変数を使用してカスタムのプリストを読み込む方法に注目してください。このライブラリを注入するためには、**`launchctl`** を使用しました。
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>Label</key>
+<string>com.telegram.launcher</string>
+<key>RunAtLoad</key>
+<true/>
+<key>EnvironmentVariables</key>
+<dict>
+<key>DYLD_INSERT_LIBRARIES</key>
+<string>/tmp/telegram.dylib</string>
+</dict>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Telegram.app/Contents/MacOS/Telegram</string>
+</array>
+<key>StandardOutPath</key>
+<string>/tmp/telegram.log</string>
+<key>StandardErrorPath</key>
+<string>/tmp/telegram.log</string>
+</dict>
+</plist>
+```
 
-サンドボックス化された状態でも **`open`** を呼び出すことができます。
+```bash
+launchctl load com.telegram.launcher.plist
+```
+## オープン呼び出しによるバイパス
+
+サンドボックス化された状態でも、**`open`** を呼び出すことが可能です。
 
 ### ターミナルスクリプト
 
-テック系の人々が使用するコンピュータでは、ターミナルに **Full Disk Access (FDA)** を与えることが一般的です。そして、それを使用して **`.terminal`** スクリプトを呼び出すことができます。
+テック系の人々が使用するコンピュータでは、ターミナルに**フルディスクアクセス（FDA）**を許可することが一般的です。そして、それを使用して**`.terminal`**スクリプトを呼び出すことが可能です。
 
-**`.terminal`** スクリプトは、次のようなコマンドを **`CommandString`** キーで実行する plist ファイルです：
+**`.terminal`**スクリプトは、次のようなコマンドを**`CommandString`**キーで実行するためのplistファイルです：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
