@@ -33,17 +33,23 @@ Esto es lo que se hizo en [**CVE-2023-32364**](https://gergelykalman.com/CVE-202
 
 {% hint style="danger" %}
 Por lo tanto, en este momento, si eres capaz de crear una carpeta con un nombre que termine en **`.app`** sin el atributo de cuarentena, puedes escapar del sandbox porque macOS solo **verifica** el atributo de **cuarentena** en la **carpeta `.app`** y en el **ejecutable principal** (y apuntaremos el ejecutable principal a **`/bin/bash`**).
+
+Ten en cuenta que si un paquete .app ya ha sido autorizado para ejecutarse (tiene un xttr de cuarentena con la bandera de autorización para ejecutar activada), también podrías abusar de él... excepto que ahora no puedes escribir dentro de los paquetes **`.app`** a menos que tengas algunos permisos privilegiados de TCC (que no tendrás dentro de un sandbox alto).
 {% endhint %}
 
-### Abuso de la funcionalidad de Open
+### Abuso de la funcionalidad Open
 
-En los [**últimos ejemplos de bypass del sandbox de Word**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) se puede apreciar cómo se puede abusar de la funcionalidad de la línea de comandos de **`open`** para evadir el sandbox.
+En los [**últimos ejemplos de bypass del sandbox de Word**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) se puede apreciar cómo se puede abusar de la funcionalidad **`open`** de la línea de comandos para evadir el sandbox.
+
+{% content-ref url="macos-office-sandbox-bypasses.md" %}
+[macos-office-sandbox-bypasses.md](macos-office-sandbox-bypasses.md)
+{% endcontent-ref %}
 
 ### Abuso de ubicaciones de inicio automático
 
 Si un proceso en el sandbox puede **escribir** en un lugar donde **más tarde se ejecutará el binario de una aplicación sin sandbox**, podrá **escapar simplemente colocando** allí el binario. Un buen ejemplo de este tipo de ubicaciones son `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
 
-Para esto, es posible que incluso necesites **2 pasos**: hacer que un proceso con un sandbox **más permisivo** (`file-read*`, `file-write*`) ejecute tu código, que en realidad escribirá en un lugar donde se ejecutará **sin sandbox**.
+Para esto, es posible que incluso necesites **2 pasos**: hacer que un proceso con un sandbox **más permisivo** (`file-read*`, `file-write*`) ejecute tu código, que en realidad escribirá en un lugar donde se ejecutará sin sandbox.
 
 Consulta esta página sobre **ubicaciones de inicio automático**:
 
@@ -53,21 +59,21 @@ Consulta esta página sobre **ubicaciones de inicio automático**:
 
 ### Abuso de otros procesos
 
-Si desde el proceso en el sandbox eres capaz de **comprometer otros procesos** que se ejecutan en sandboxes menos restrictivos (o sin sandbox), podrás escapar a sus sandboxes:
+Si desde el proceso en el sandbox eres capaz de **comprometer otros procesos** que se ejecutan en sandbox menos restrictivos (o sin sandbox), podrás escapar a sus sandboxes:
 
 {% content-ref url="../../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../../macos-proces-abuse/)
 {% endcontent-ref %}
-
 ### Compilación estática y enlace dinámico
 
-[**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de evadir el Sandbox. Debido a que el sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca se sandboxearía:
+[**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de evadir el Sandbox. Debido a que el sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca sería sandboxeado:
 
-* Si el binario se **compila completamente de forma estática**, podría evitar cargar esa biblioteca.
-* Si el binario **no necesitara cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitaría cargar libSystem.&#x20;
+* Si el binario se compila **completamente de forma estática**, puede evitar cargar esa biblioteca.
+* Si el **binario no necesita cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitará cargar libSystem.&#x20;
+
 ### Shellcodes
 
-Ten en cuenta que **incluso los shellcodes** en ARM64 deben estar vinculados en `libSystem.dylib`:
+Tenga en cuenta que **incluso los shellcodes** en ARM64 deben estar enlazados en `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
@@ -189,7 +195,9 @@ Aquí hay un ejemplo de cómo se ve el archivo `entitlements.xml`:
     <true/>
     <key>com.apple.security.files.user-selected.read-write</key>
     <true/>
-    <key>com.apple.security.print</key>
+    <key>com.apple.security.files.downloads.read-write</key>
+    <true/>
+    <key>com.apple.security.files.all</key>
     <true/>
 </dict>
 </plist>
@@ -197,13 +205,12 @@ Aquí hay un ejemplo de cómo se ve el archivo `entitlements.xml`:
 
 En este ejemplo, la aplicación tiene los siguientes permisos:
 
-- `com.apple.security.network.client`: Permite a la aplicación realizar solicitudes de red salientes.
-- `com.apple.security.files.user-selected.read-write`: Permite a la aplicación leer y escribir en archivos seleccionados por el usuario.
-- `com.apple.security.print`: Permite a la aplicación imprimir documentos.
+- `com.apple.security.network.client`: Permite a la aplicación realizar conexiones de red salientes.
+- `com.apple.security.files.user-selected.read-write`: Permite a la aplicación leer y escribir en los archivos seleccionados por el usuario.
+- `com.apple.security.files.downloads.read-write`: Permite a la aplicación leer y escribir en la carpeta de descargas.
+- `com.apple.security.files.all`: Permite a la aplicación leer y escribir en todos los archivos del sistema.
 
-Estos permisos se definen utilizando claves y valores en el archivo `entitlements.xml`. Las claves representan los permisos y los valores indican si el permiso está habilitado (`true`) o deshabilitado (`false`).
-
-Es importante tener en cuenta que modificar el archivo `entitlements.xml` puede tener implicaciones de seguridad y puede violar las políticas de sandbox de macOS. Se recomienda tener cuidado al realizar cambios en este archivo y seguir las mejores prácticas de seguridad.
+Estos permisos se definen en el archivo `entitlements.xml` y se utilizan para limitar las acciones de la aplicación en el entorno de sandbox de macOS.
 
 {% endtab %}
 ```xml
@@ -336,7 +343,7 @@ libsystem_kernel.dylib`:
 (lldb) c
 Proceso 2517 reanudado
 ¡Bypass de Sandbox realizado!
-El proceso 2517 salió con estado = 0 (0x00000000)
+El proceso 2517 salió con el estado = 0 (0x00000000)
 ```
 {% hint style="warning" %}
 **Incluso si se ha eludido el Sandbox, TCC** le preguntará al usuario si desea permitir que el proceso lea archivos desde el escritorio.

