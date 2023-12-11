@@ -1,4 +1,4 @@
-# Entitlements Peligrosos de macOS y Permisos de TCC
+# macOS Entitlements Peligrosos y Permisos de TCC
 
 <details>
 
@@ -51,9 +51,9 @@ Consulta [**esto para más información**](https://theevilbit.github.io/posts/co
 
 Este entitlement permite **usar variables de entorno DYLD** que podrían usarse para inyectar bibliotecas y código. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables).
 
-### `com.apple.private.tcc.manager` y `com.apple.rootless.storage`.`TCC`
+### `com.apple.private.tcc.manager` o `com.apple.rootless.storage`.`TCC`
 
-[**Según este blog**](https://objective-see.org/blog/blog\_0x4C.html), estos entitlements permiten **modificar** la **base de datos TCC**.
+[**Según este blog**](https://objective-see.org/blog/blog\_0x4C.html) **y** [**este blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), estos entitlements permiten **modificar** la **base de datos TCC**.
 
 ### **`system.install.apple-software`** y **`system.install.apple-software.standar-user`**
 
@@ -103,9 +103,23 @@ Otorga permisos de **Acceso completo al disco**, uno de los permisos más altos 
 
 Permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Al controlar otras aplicaciones, puede abusar de los permisos otorgados a estas otras aplicaciones.
 
+Por ejemplo, hacer que soliciten al usuario su contraseña:
+
+{% code overflow="wrap" %}
+```bash
+osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
+```
+{% endcode %}
+
+O hacer que realicen **acciones arbitrarias**.
+
+### **`kTCCServiceEndpointSecurityClient`**
+
+Permite, entre otros permisos, **escribir en la base de datos TCC del usuario**.
+
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia su carpeta de inicio y, por lo tanto, permite **burlar TCC**.
+Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia la ruta de su carpeta de inicio y, por lo tanto, permite **burlar TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
@@ -113,11 +127,13 @@ Permite modificar archivos dentro del paquete de aplicaciones (dentro de app.app
 
 <figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
+Es posible verificar quién tiene este acceso en _Configuración del sistema_ > _Privacidad y seguridad_ > _Gestión de aplicaciones._
+
 ## Medio
 
 ### `com.apple.security.cs.allow-jit`
 
-Este permiso permite **crear memoria que se puede escribir y ejecutar** pasando la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
+Este permiso permite **crear memoria que es escribible y ejecutable** pasando la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
@@ -132,16 +148,20 @@ Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguaj
 Este permiso permite **modificar secciones de sus propios archivos ejecutables** en disco para salir forzosamente. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection).
 
 {% hint style="danger" %}
-El permiso de Deshabilitar la Protección de Memoria Ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
+El permiso de Deshabilitar Protección de Memoria Ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
 {% endhint %}
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
 TODO
 
+### `com.apple.private.nullfs_allow`
+
+Este permiso permite montar un sistema de archivos nullfs (prohibido por defecto). Herramienta: [**mount\_nullfs**](https://github.com/JamaicanMoose/mount\_nullfs/tree/master).
+
 ### `kTCCServiceAll`
 
-Según esta publicación de blog, este permiso de TCC generalmente se encuentra en la forma:
+Según este artículo de blog, este permiso de TCC se encuentra generalmente en la forma:
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
