@@ -279,7 +279,7 @@ Several Apple applications were vulnerable to this.
 
 ### Firefox
 
-The Firefox application is still vulnerable having the `com.apple.security.cs.disable-library-validation` entitlement:
+The Firefox application had the `com.apple.security.cs.disable-library-validation` and `com.apple.security.cs.allow-dyld-environment-variables` entitlements:
 
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
@@ -292,6 +292,8 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
     <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
     <true/>
     <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key><true/>
     <true/>
     <key>com.apple.security.device.audio-input</key>
     <true/>

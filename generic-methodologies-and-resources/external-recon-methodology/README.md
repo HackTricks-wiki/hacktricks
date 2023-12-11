@@ -365,10 +365,16 @@ shodan search "http.html:help.domain.com"
 
 * [**Censys subdomain finder**](https://github.com/christophetd/censys-subdomain-finder)
 
-```
+```bash
 export CENSYS_API_ID=...
 export CENSYS_API_SECRET=...
 python3 censys-subdomain-finder.py tesla.com
+```
+
+* [**DomainTrail.py**](https://github.com/gatete/DomainTrail)
+
+```bash
+python3 DomainTrail.py -d example.com
 ```
 
 * [**securitytrails.com**](https://securitytrails.com/) has a free API to search for subdomains and IP history

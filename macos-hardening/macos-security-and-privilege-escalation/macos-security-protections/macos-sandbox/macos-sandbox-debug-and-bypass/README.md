@@ -33,6 +33,8 @@ This is what was done in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023
 
 {% hint style="danger" %}
 Therefore, at the moment, if you are just capable of creating a folder with a name ending in **`.app`** without a quarantine attribute, you can scape the sandbox because macOS only **checks** the **quarantine** attribute in the **`.app` folder** and in the **main executable** (and we will point the main executable to **`/bin/bash`**).
+
+Note that if an .app bundle has already been authorized to run (it has a quarantine xttr with the authorized to run flag on), you could also abuse it... except that now you cannot write inside **`.app`** bundles unless you have some privileged TCC perms (which you won't have inside a sandbox high).
 {% endhint %}
 
 ### Abusing Open functionality

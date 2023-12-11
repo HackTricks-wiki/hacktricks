@@ -264,6 +264,12 @@ Just generate the script `/Applications/Scripts/privesc.sh` with the **commands*
 
 If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
 
+### PATH files
+
+The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
+
+&#x20;You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
+
 ## References
 
 * [https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/)
