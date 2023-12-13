@@ -154,6 +154,8 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 
 {% hint style="danger" %}
 If the fuse **`EnableNodeOptionsEnvironmentVariable`** is **disabled**, the app will **ignore**  the env var **NODE\_OPTIONS** when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+
+If you don't set **`ELECTRON_RUN_AS_NODE`** , you will find the **error**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 {% endhint %}
 
 ### Injection from the App Plist

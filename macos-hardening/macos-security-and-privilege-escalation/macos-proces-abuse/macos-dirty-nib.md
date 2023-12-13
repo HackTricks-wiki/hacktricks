@@ -93,6 +93,10 @@ grabbed's writeToFile:"/Users/xpn/Library/Containers/com.apple.iWork.Pages/Data/
 [**Malicious .xib file that executes arbitrary code example.**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4)
 {% endhint %}
 
+## Create your own DirtyNIB
+
+
+
 ## Launch Constraints
 
 They basically **prevent executing applications outside of their expected locations**, so if you copy an application protected by Launch Constrains to `/tmp` you won't be able to execute it.\
