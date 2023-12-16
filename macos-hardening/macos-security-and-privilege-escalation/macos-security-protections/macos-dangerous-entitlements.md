@@ -118,25 +118,25 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-ユーザーがホームフォルダのパスを変更するために**`NFSHomeDirectory`**属性を**変更**することができ、それによりTCCを**バイパス**することができます。
+ユーザーがホームフォルダのパスを変更するために**`NFSHomeDirectory`**属性を**変更**することができ、それによって**TCCをバイパス**することができます。
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
 デフォルトでは**許可されていない**アプリ内のファイル（app.app内のアプリ内バンドル内のファイル）を変更することができます。
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-このアクセス権を持っているユーザーは、_システム環境設定_ > _プライバシーとセキュリティ_ > _アプリの管理_で確認することができます。
+このアクセス権を持っているユーザーは、_システム設定_ > _プライバシーとセキュリティ_ > _アプリの管理_で確認することができます。
 
 ## 中程度
 
 ### `com.apple.security.cs.allow-jit`
 
-この権限により、`mmap()`システム関数に`MAP_JIT`フラグを渡すことで、**書き込みと実行が可能なメモリ**を作成することができます。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit)。
+この権限を持つと、`mmap()`システム関数に`MAP_JIT`フラグを渡すことで、**書き込みと実行が可能なメモリ**を作成することができます。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit)。
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-この権限により、Cコードを**オーバーライドまたはパッチ**することができ、長期間非推奨とされている**`NSCreateObjectFileImageFromMemory`**（基本的には安全ではない）や**DVDPlayback**フレームワークを使用することができます。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory)。
+この権限を持つと、Cコードを**オーバーライドまたはパッチ**することができ、長期間非推奨とされている**`NSCreateObjectFileImageFromMemory`**（基本的には安全ではない）を使用することができます。また、**DVDPlayback**フレームワークも使用できます。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory)。
 
 {% hint style="danger" %}
 この権限を含めると、アプリはメモリの安全でないコード言語における一般的な脆弱性にさらされる可能性があります。この例外が必要かどうかを慎重に考慮してください。
@@ -144,7 +144,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-この権限により、**自身の実行可能ファイルのセクションを変更**して強制的に終了することができます。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection)。
+この権限を持つと、自身の実行可能ファイルのディスク上のセクションを**強制的に変更**して終了することができます。詳細については[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection)。
 
 {% hint style="danger" %}
 Disable Executable Memory Protection Entitlementは、アプリの基本的なセキュリティ保護を削除する極端な権限であり、攻撃者が検出されずにアプリの実行可能コードを書き換えることが可能になります。可能な限り狭い範囲の権限を使用してください。
@@ -156,7 +156,7 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-この権限により、通常は禁止されているnullfsファイルシステムをマウントすることができます。ツール：[**mount\_nullfs**](https://github.com/JamaicanMoose/mount\_nullfs/tree/master)。
+この権限を持つと、通常は禁止されているnullfsファイルシステムをマウントすることができます。ツール：[**mount\_nullfs**](https://github.com/JamaicanMoose/mount\_nullfs/tree/master)。
 
 ### `kTCCServiceAll`
 

@@ -49,16 +49,16 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Electronフューズの変更
 
-[**ドキュメントによると**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)、**Electronフューズ**の設定は、**Electronバイナリ**内に設定されており、その中には文字列**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**が含まれています。
+[**ドキュメントによると**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)、**Electronフューズ**の設定は、**Electronバイナリ**内に設定されており、どこかに文字列**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**が含まれています。
 
-macOSアプリケーションでは、通常、`application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`に配置されています。
+macOSアプリケーションでは、通常、`application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`にあります。
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
 [https://hexed.it/](https://hexed.it/)でこのファイルをロードし、前の文字列を検索することができます。この文字列の後には、各フューズが無効または有効であることを示すASCIIの数字「0」または「1」が表示されます。ヘックスコード（`0x30`は`0`であり、`0x31`は`1`です）を変更して、**フューズの値を変更**します。
 
-<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ただし、これらのバイトが変更された状態でアプリケーション内の**`Electron Framework`バイナリ**を上書きしようとすると、アプリが実行されなくなります。
 
@@ -75,7 +75,7 @@ Electronアプリが使用している**外部のJS/HTMLファイル**が存在�
 これにより、この攻撃経路はより複雑になります（または不可能になります）。
 {% endhint %}
 
-**`kTCCServiceSystemPolicyAppBundles`**の要件をバイパスすることも可能であり、アプリケーションを別のディレクトリ（たとえば**`/tmp`**）にコピーし、フォルダ**`app.app/Contents`**を**`app.app/NotCon`**に名前を変更し、**悪意のある**コードで**asar**ファイルを変更し、それを**`app.app/Contents`**に戻し、実行することができます。
+**`kTCCServiceSystemPolicyAppBundles`**の要件をバイパスすることも可能であり、アプリケーションを別のディレクトリ（たとえば**`/tmp`**）にコピーし、フォルダの名前を**`app.app/Contents`**から**`app.app/NotCon`**に変更し、**悪意のある**コードで**asar**ファイルを変更し、それを**`app.app/Contents`**に戻し、実行することができます。
 
 asarファイルからコードを展開するには、次のコマンドを使用できます：
 ```bash
@@ -143,12 +143,14 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 {% endcode %}
 
 {% hint style="danger" %}
-もし、fuse **`EnableNodeOptionsEnvironmentVariable`** が **無効** になっている場合、アプリは起動時に環境変数 **NODE\_OPTIONS** を **無視** します。ただし、環境変数 **`ELECTRON_RUN_AS_NODE`** が設定されている場合は、それも **無視** されます。なお、fuse **`RunAsNode`** も無効になっている場合は、同様に **無視** されます。
+もし、fuse **`EnableNodeOptionsEnvironmentVariable`** が **無効** になっている場合、アプリは起動時に環境変数 **NODE\_OPTIONS** を **無視** します。ただし、fuse **`RunAsNode`** も無効になっている場合、環境変数 **`ELECTRON_RUN_AS_NODE`** も **無視** されます。
+
+もし、**`ELECTRON_RUN_AS_NODE`** を設定しない場合、以下のエラーが表示されます: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 {% endhint %}
 
 ### アプリの Plist からのインジェクション
 
-この環境変数を plist に悪用することで、以下のキーを追加して持続性を維持することができます：
+以下のキーを追加することで、この環境変数を plist で乱用し、持続性を維持することができます:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -219,7 +221,7 @@ macOSのTCCデーモンは、実行されるアプリケーションのバージ
 
 ## JSコードの実行
 
-前述の技術により、**Electronアプリケーションのプロセス内でJSコードを実行**することができます。ただし、**子プロセスは親アプリケーションと同じサンドボックスプロファイル**で実行され、**そのTCC権限を継承**します。\
+前述の技術により、**Electronアプリケーションのプロセス内でJSコードを実行**することができます。ただし、**子プロセスは親アプリケーションと同じサンドボックスプロファイル**で実行され、**TCCの許可を継承**します。\
 したがって、例えばカメラやマイクへのアクセス権を悪用するために、**プロセスから別のバイナリを実行**することができます。
 
 ## 自動インジェクション
@@ -275,7 +277,7 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

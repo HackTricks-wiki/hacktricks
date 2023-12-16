@@ -16,9 +16,9 @@
 
 **ディレクトリ**のパーミッション：
 
-* **読み取り** - ディレクトリのエントリを**列挙**できます。
-* **書き込み** - ディレクトリに**ファイルを削除/書き込み**できます。
-* **実行** - ディレクトリを**トラバース**することができます。この権限がない場合、そのディレクトリ内またはサブディレクトリ内のファイルにアクセスできません。
+* **読み取り** - ディレクトリのエントリを**列挙**できます
+* **書き込み** - ディレクトリにファイルを**削除/書き込み**できます
+* **実行** - ディレクトリを**トラバース**することができます - この権限がない場合、そのディレクトリ内またはサブディレクトリ内のファイルにアクセスできません。
 
 ### 危険な組み合わせ
 
@@ -32,23 +32,39 @@
 
 ### フォルダのルートR+X特殊ケース
 
-**rootだけがR+Xアクセス権限を持つディレクトリ**にファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、ユーザーが読み取り可能なファイルを持つが、その**制限**のために読み取ることができないフォルダから、別のフォルダにファイルを**移動**する脆弱性がある場合、これらのファイルを読み取るために悪用される可能性があります。
+**rootのみがR+Xアクセス権限を持つディレクトリ**にファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、ユーザーが読み取ることができない**制限**のために読み取ることができないファイルを、このフォルダから**別のフォルダ**に移動する脆弱性がある場合、これらのファイルを読み取るために悪用することができます。
 
 例：[https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
 
 ## シンボリックリンク/ハードリンク
 
-特権プロセスが**制御可能なファイル**にデータを書き込んでいる場合、それを**低特権ユーザー**が**制御できる**か、または**以前に作成された**ものである場合、ユーザーはシンボリックリンクまたはハードリンクを介して別のファイルに**ポイント**し、特権プロセスはそのファイルに書き込みます。
+特権プロセスが**制御可能なファイル**にデータを書き込んでいる場合、または**低特権ユーザー**によって**事前に作成**されたファイルにデータを書き込んでいる場合、ユーザーはシンボリックリンクまたはハードリンクを介してそれを別のファイルに**ポイント**するだけで、特権プロセスはそのファイルに書き込みます。
 
-攻撃者が特権の任意の書き込みを悪用する可能性がある他のセクションをチェックしてください。
+特権の任意の書き込みを悪用して特権をエスカレーションする方法については、他のセクションを確認してください。
 
+## .fileloc
+
+**`.fileloc`** 拡張子のファイルは、他のアプリケーションやバイナリを指すことができるため、それらが開かれると、アプリケーション/バイナリが実行されます。\
+例：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>URL</key>
+<string>file:///System/Applications/Calculator.app</string>
+<key>URLPrefix</key>
+<integer>0</integer>
+</dict>
+</plist>
+```
 ## 任意のFD
 
-**プロセスが高特権でファイルまたはフォルダを開く**ことができる場合、**`crontab`**を悪用して、`/etc/sudoers.d`内のファイルを**`EDITOR=exploit.py`**で開くことができます。そのため、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用します。
+もし、**プロセスに高い特権でファイルまたはフォルダを開かせる**ことができれば、**`crontab`**を悪用して、**`EDITOR=exploit.py`**で`/etc/sudoers.d`内のファイルを開くことができます。そのため、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用することができます。
 
-例：[https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+例: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## クォレンティンxattrsトリックを回避する
+## クォレンティンxattrsトリックの回避
 
 ### 削除する
 ```bash
@@ -138,7 +154,7 @@ ls -le test
 
 バンドルには、**`_CodeSignature/CodeResources`**というファイルが含まれており、バンドル内のすべての**ファイル**の**ハッシュ**が含まれています。ただし、CodeResourcesのハッシュは**実行可能ファイルに埋め込まれている**ため、それには手を出せません。
 
-ただし、いくつかのファイルの署名はチェックされないため、これらのファイルにはplist内のomitキーがあります。
+ただし、いくつかのファイルの署名はチェックされないため、これらのファイルにはplist内のomitというキーがあります。
 ```xml
 <dict>
 ...
@@ -243,19 +259,20 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 </dict>
 </plist>
 ```
-### スクリプトの生成
+以下は、ハッキング技術に関する本の内容です。次の内容は、ファイルmacos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/README.mdからのものです。関連する英語のテキストを日本語に翻訳し、翻訳を返し、マークダウンとHTMLの構文を完全に保持してください。コード、ハッキング技術の名前、ハッキングの言葉、クラウド/SaaSプラットフォームの名前（Workspace、aws、gcpなど）、'leak'という単語、ペンテスト、およびマークダウンタグなどのものは翻訳しないでください。また、翻訳とマークダウンの構文以外の追加のものは追加しないでください。
 
-以下のコマンドをルートとして実行したい場合、スクリプト `/Applications/Scripts/privesc.sh` を生成してください。
+```markdown
+スクリプト `/Applications/Scripts/privesc.sh` を生成し、ルートとして実行したい **コマンド** を記述してください。
 
 ### Sudoers ファイル
 
-**任意の書き込み権限**がある場合、**`/etc/sudoers.d/`** フォルダ内に自分自身に **sudo** 権限を付与するファイルを作成することができます。
+**任意の書き込み権限**がある場合、**`/etc/sudoers.d/`** フォルダ内に自分自身に **sudo** 特権を付与するファイルを作成できます。
 
 ### PATH ファイル
 
-**`/etc/paths`** ファイルは、PATH 環境変数を設定する主要な場所の1つです。これを上書きするにはルート権限が必要ですが、**特権プロセス**から **フルパスなしでコマンドを実行**しているスクリプトを **乗っ取る** ことができるかもしれません。
+ファイル **`/etc/paths`** は、PATH 環境変数を設定する主要な場所の1つです。これを上書きするには、ルートである必要がありますが、**特権プロセス** から **フルパスなしでコマンドを実行** しているスクリプトを **乗っ取る** ことで、このファイルを変更することができるかもしれません。
 
-また、**`/etc/paths.d`** にファイルを書き込んで、新しいフォルダを `PATH` 環境変数に読み込むこともできます。
+また、新しいフォルダを `PATH` 環境変数に読み込むために、**`/etc/paths.d`** にファイルを書き込むこともできます。
 
 ## 参考文献
 
@@ -265,10 +282,11 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASS の最新バージョンや HackTricks の PDF をダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションです。
-* [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)** をフォローしてください。**
-* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に PR を提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
+```

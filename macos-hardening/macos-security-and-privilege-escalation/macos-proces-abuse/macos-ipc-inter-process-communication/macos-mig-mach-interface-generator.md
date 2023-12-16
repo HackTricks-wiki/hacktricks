@@ -110,16 +110,16 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-この例では、定義で関数を1つだけ定義しましたが、もし複数の関数を定義した場合、それらは**`SERVERPREFmyipc_subsystem`**の配列内に含まれ、最初の関数はID **500**に割り当てられ、2番目の関数はID **501**に割り当てられます...
+この例では、定義で関数を1つだけ定義していますが、もし他の関数を定義していた場合、それらは**`SERVERPREFmyipc_subsystem`**の配列内にあり、最初の関数はID **500**に割り当てられ、2番目の関数はID **501**に割り当てられるでしょう...
 
-実際には、この関係を**`myipcServer.h`**の**`subsystem_to_name_map_myipc`**構造体で特定することができます。
+実際には、**`myipcServer.h`**の**`subsystem_to_name_map_myipc`**構造体でこの関係を特定することが可能です。
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-最後に、サーバーを動作させるための重要な関数である**`myipc_server`**があります。これは、受信したidに関連する関数を実際に呼び出すものです。
+最後に、サーバーを動作させるための重要な関数である**`myipc_server`**があります。これは、受信したIDに関連する関数を実際に呼び出すものです。
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -153,7 +153,9 @@ return FALSE;
 }
 </code></pre>
 
-以下のコードを確認して、生成されたコードを使用してサーバーとクライアントを作成し、クライアントがサーバーの関数Subtractを呼び出せるようにします。
+以前に強調された行をチェックして、IDによって呼び出す関数にアクセスします。
+
+以下は、クライアントがサーバーから関数Subtractを呼び出すことができる単純な**サーバー**と**クライアント**のコードです：
 
 {% tabs %}
 {% tab title="myipc_server.c" %}
@@ -255,7 +257,7 @@ USERPREFSubtract(port, 40, 2);
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-以前に、受信したメッセージIDに応じて正しい関数を呼び出すための関数は `myipc_server` であると述べられました。しかし、通常はバイナリのシンボル（関数名）を持っていないため、それがどのように逆コンパイルされるかを確認することは興味深いです（この関数のコードは公開された関数から独立しています）：
+以前に、受信したメッセージIDに応じて正しい関数を呼び出すための関数は `myipc_server` であると述べられました。しかし、通常はバイナリのシンボル（関数名）を持っていないため、それがどのように逆コンパイルされるかを確認することは興味深いです（この関数のコードは公開された関数とは独立しています）：
 
 {% tabs %}
 {% tab title="myipc_server decompiled 1" %}
@@ -301,7 +303,7 @@ return rax;
 {% endtab %}
 
 {% tab title="myipc_server decompiled 2" %}
-これは、異なる Hopper free バージョンで逆コンパイルされた同じ関数です：
+これは異なる Hopper free バージョンで逆コンパイルされた同じ関数です：
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -352,7 +354,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// 計算されたアドレスに対して呼び出しを行う
+// 計算されたアドレスに関数を呼び出す
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -376,13 +378,13 @@ return r0;
 {% endtab %}
 {% endtabs %}
 
-実際には、関数 **`0x100004000`** に移動すると、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は関数が実装されているアドレスであり、**構造体は0x28バイトを取ります**。したがって、0バイトから始まる各0x28バイトで8バイトを取得し、それが呼び出される**関数のアドレス**になります。
-
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+実際には、関数 **`0x100004000`** に移動すると、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は関数が実装されている**アドレス**であり、**構造体は0x28バイト**を占めます。したがって、0バイトから始まる各0x28バイトで8バイトを取得し、それが呼び出される**関数のアドレス**になります：
 
 <figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-このデータは、[**この Hopper スクリプトを使用して**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py)抽出できます。
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+このデータは、[**この Hopper スクリプト**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py)を使用して抽出できます。
 
 <details>
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>

@@ -14,16 +14,16 @@
 
 ZIPファイルに関するいくつかのコマンドラインツールがあります。これらは役立つ情報を提供します。
 
-* `unzip`は、ZIPファイルの解凍ができない理由についての情報を表示することがよくあります。
+* `unzip`は、ZIPファイルの解凍ができない理由についての情報を表示することがあります。
 * `zipdetails -v`は、フォーマットのさまざまなフィールドに存在する値に関する詳細な情報を提供します。
-* `zipinfo`は、ZIPファイルの内容についての情報をリストアップしますが、解凍はしません。
+* `zipinfo`は、ZIPファイルの内容についての情報を抽出せずにリストします。
 * `zip -F input.zip --out output.zip`と`zip -FF input.zip --out output.zip`は、破損したZIPファイルを修復しようとします。
 * [fcrackzip](https://github.com/hyc/fcrackzip)は、ZIPのパスワードをブルートフォースで推測します（パスワードが7文字以下の場合など）。
 
 [ZIPファイル形式の仕様](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
 
-パスワードで保護されたZIPファイルに関する重要なセキュリティ上の注意点は、それらが含まれる圧縮ファイルのファイル名と元のファイルサイズを暗号化しないことです。これは、パスワードで保護されたRARや7zファイルとは異なります。
+パスワードで保護されたZIPファイルに関する重要なセキュリティに関する注意点は、パスワードで保護されたRARや7zファイルとは異なり、それらが含む圧縮ファイルのファイル名と元のファイルサイズを暗号化しないことです。
 
-また、ZIPのクラッキングに関する注意点として、暗号化されたZIPに圧縮されているファイルの中で、暗号化されていない/非圧縮のコピーが1つでもある場合、"平文攻撃"を実行してZIPをクラッキングすることができます。詳細は[こちら](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files)および[この論文](https://www.cs.auckland.ac.nz/\~mike/zipattacks.pdf)に説明されています。AES-256を使用したZIPファイルのパスワード保護の新しいスキーム（"ZipCrypto"ではなく）には、この弱点はありません。
+また、ZIPのクラッキングに関する注意点として、暗号化されたZIPに圧縮されているファイルの中で暗号化されていない/非圧縮のコピーがある場合、[ここで詳しく説明されているように](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files)、「平文攻撃」を実行してZIPをクラッキングすることができます。新しいZIPファイルのパスワード保護スキーム（"ZipCrypto"ではなくAES-256を使用）には、この弱点はありません。
 
-From: [https://app.gitbook.com/@cpol/s/hacktricks/\~/edit/drafts/-LlM5mCby8ex5pOeV4pJ/forensics/basic-forensics-esp/zips-tricks](http://127.0.0.1:5000/o/Iwnw24TnSs9D9I2OtTKX/s/-L\_2uGJGU7AVNRcqRvEi/)
+From: [https://app.gitbook.com/@cpol/s/hacktricks/\~/edit/drafts/-LlM5mCby8ex5pOeV4pJ/forensics/basic-forensics-esp/zips-tricks](https://app.gitbook.com/o/Iwnw24TnSs9D9I2OtTKX/s/-L\_2uGJGU7AVNRcqRvEi/)

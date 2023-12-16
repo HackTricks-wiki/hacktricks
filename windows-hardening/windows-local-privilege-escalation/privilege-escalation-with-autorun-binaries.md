@@ -12,22 +12,22 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-もしあなたが**ハッキングのキャリア**に興味があり、アンハッカブルをハックしたいのであれば、**採用しています！**（流暢なポーランド語の読み書きが必要です）。
+もしあなたが**ハッキングのキャリア**に興味があり、アンハッカブルをハックしたい場合 - **採用中です！**（流暢なポーランド語の読み書きが必要です）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## WMIC
 
-**Wmic**は、**起動時**にプログラムを実行するために使用することができます。次のコマンドで、起動時にプログラムが設定されているバイナリを確認できます。
+**Wmic**は、**起動時**にプログラムを実行するために使用できます。次のコマンドで、起動時にプログラムが設定されているバイナリを確認できます。
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## スケジュールされたタスク
 
-**タスク**は、**特定の頻度**で実行されるようにスケジュールできます。次のコマンドでスケジュールされたバイナリを確認します。
+**タスク**は、**特定の頻度**で実行されるようにスケジュールすることができます。次のコマンドでスケジュールされたバイナリを確認します。
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -310,7 +310,7 @@ IFEOを悪用すると、特権昇格攻撃を実行することができます�
 
 IFEOを使用した特権昇格攻撃を実行するためには、攻撃者は管理者権限を持つ必要があります。攻撃者は、IFEOの設定を変更するためにレジストリエディタやコマンドラインツールを使用することができます。
 
-IFEOを悪用する攻撃の一例として、システム上で実行されるプロセスの代わりに、特権を持つプロセスを実行するためのバイナリを指定することがあります。これにより、攻撃者は特権レベルのアクセスを取得し、システム上で様々な操作を行うことができます。
+IFEOを悪用する攻撃の一例として、システム上で実行されるプロセスの代わりに、特権を持つプロセスを実行するためにデバッガを指定することがあります。攻撃者は、デバッガとして自身のプログラムを指定し、特権レベルのコードを実行することができます。
 
 IFEOを悪用されないようにするためには、以下の対策を実施することが重要です。
 
@@ -339,7 +339,7 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 もし興味があるなら、**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したい場合は、**採用中です**（流暢なポーランド語の読み書きが必要です）。
 
@@ -353,6 +353,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

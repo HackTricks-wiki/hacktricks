@@ -16,7 +16,7 @@
 
 Appleは、接続するプロセスが**公開されたXPCメソッドを呼び出す権限**を持っているかどうかを認証する別の方法も提案しています。
 
-アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてのHelperToolをrootとしてインストールします。ただし、サービスを呼び出すアプリは十分な認証を持っている必要があります。
+アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてHelperToolをrootとしてインストールします。ただし、サービスを呼び出すアプリは十分な認証を持っている必要があります。
 
 ### ShouldAcceptNewConnection は常に YES
 
@@ -37,7 +37,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-詳しい設定方法については、次のチェックを適切に設定する方法に関する情報を参照してください：
+詳しい設定方法については、次のチェックを適切に構成する方法に関する情報を参照してください：
 
 {% content-ref url="macos-xpc-connecting-process-check/" %}
 [macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
@@ -45,7 +45,7 @@ return YES;
 
 ### アプリケーションの権限
 
-ただし、HelperToolからメソッドが呼び出される際には、**認可が行われています**。
+ただし、**HelperToolからメソッドが呼び出される際には、いくつかの認可が行われます**。
 
 `App/AppDelegate.m`の`applicationDidFinishLaunching`関数は、アプリが起動した後に空の認可参照を作成します。これは常に機能するはずです。\
 その後、`setupAuthorizationRights`を呼び出して、その認可参照にいくつかの権限を追加しようとします。
@@ -182,15 +182,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-このプロセスの最後には、`commandInfo`内で宣言された権限が`/var/db/auth.db`に保存されます。各メソッドごとに、**認証が必要な**権限名と**`kCommandKeyAuthRightDefault`**が含まれていることに注目してください。後者は、**この権限を取得できるユーザー**を示しています。
+このプロセスの最後には、`commandInfo`内で宣言された権限が`/var/db/auth.db`に保存されます。各メソッドごとに、**認証が必要な** **権限名**と**`kCommandKeyAuthRightDefault`**が含まれていることに注意してください。後者は、**この権限を取得できるユーザー**を示しています。
 
-権限にアクセスできるユーザーを示すために、さまざまなスコープがあります。それらの一部は[AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h)で定義されています（[ここですべてを見つけることができます](https://www.dssw.co.uk/reference/authorization-rights/)）。要約すると：
+権限にアクセスできるユーザーを示すためのさまざまなスコープがあります。それらの一部は[AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h)で定義されています（[ここですべてを見つけることができます](https://www.dssw.co.uk/reference/authorization-rights/)）。要約すると：
 
 <table><thead><tr><th width="284.3333333333333">名前</th><th width="165">値</th><th>説明</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>誰でも</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>誰も</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>現在のユーザーは管理者である必要があります（管理者グループ内）</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>ユーザーに認証を求めます。</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>ユーザーに認証を求めます。彼は管理者である必要があります（管理者グループ内）</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>ルールを指定します</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>権限に関する追加のコメントを指定します</td></tr></tbody></table>
 
 ### 権限の検証
 
-`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのメソッドを実行する権限を持っているかどうか**を確認するために、関数**`checkAuthorization`**を呼び出します。この関数は、呼び出し元プロセスが送信した**authData**が**正しい形式**であるかをチェックし、その後、特定のメソッドを呼び出すために**どの権限が必要か**をチェックします。すべてがうまくいけば、**返される`error`は`nil`**になります。
+`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのメソッドを実行する権限を持っているかどうか**を確認するために、**`checkAuthorization`**関数を呼び出します。この関数は、呼び出し元プロセスが送信した**authData**が**正しい形式**であるかをチェックし、その後、特定のメソッドを呼び出すために**どの権限が必要か**をチェックします。すべてがうまくいけば、**返される`error`は`nil`**になります。
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -244,7 +244,7 @@ return error;
 
 ### DB情報
 
-この情報は`/var/db/auth.db`に保存されていると述べられています。次のコマンドで保存されているすべてのルールをリストアップすることができます。
+この情報は`/var/db/auth.db`に保存されていると述べられています。次のコマンドで保存されているすべてのルールをリストアップできます。
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
@@ -266,12 +266,12 @@ security authorizationdb read com.apple.safaridriver.allow
 * ユーザーがルートユーザーとして操作している場合（昇格された権限を持つユーザー）、このキーが`true`に設定されている場合、ルートユーザーは追加の認証なしでこの権限を取得する可能性があります。ただし、通常、ルートユーザーの状態に到達するにはすでに認証が必要なため、ほとんどのユーザーにとってこれは「認証なし」のシナリオではありません。
 
 3. **'session-owner': 'true'**
-* `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権限を取得します。ユーザーがすでにログインしている場合、これにより追加の認証がバイパスされる場合があります。
+* `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権限を取得します。これにより、ユーザーがすでにログインしている場合、追加の認証がバイパスされる場合があります。
 
 4. **'shared': 'true'**
-* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です（'authenticate-user': 'false'などの他のキーと組み合わせている場合を除く）。
+* このキーは認証なしで権限を付与するものではありません。代わりに、`true`に設定されている場合、権限が認証された後、複数のプロセス間で共有することができます。ただし、権限の最初の付与には認証が必要です。ただし、'authenticate-user': 'false'などの他のキーと組み合わせる場合は、認証が必要ありません。
 
-興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます：
+興味深い権限を取得するためには、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます。
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -286,9 +286,9 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### EvenBetterAuthorization の使用を確認する
 
-もし、関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは以前に言及した認証のスキーマを使用しています:
+もし、関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは以前に言及した認証スキーマを使用しています:
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 この関数が `AuthorizationCreateFromExternalForm`、`authorizationRightForCommand`、`AuthorizationCopyRights`、`AuhtorizationFree` などの関数を呼び出している場合、[**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) を使用しています。
 
