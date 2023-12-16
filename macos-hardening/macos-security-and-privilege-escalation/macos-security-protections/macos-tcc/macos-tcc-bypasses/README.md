@@ -44,7 +44,7 @@ Ten en cuenta que ahora, para poder habilitar SSH, necesitas "Acceso completo al
 
 ### Manejar extensiones - CVE-2022-26767
 
-El atributo `com.apple.macl` se otorga a los archivos para darle a una aplicación específica permisos para leerlo. Este atributo se establece cuando se arrastra y se suelta un archivo sobre una aplicación, o cuando un usuario hace doble clic en un archivo para abrirlo con la aplicación predeterminada.
+El atributo `com.apple.macl` se otorga a los archivos para darle a una determinada aplicación permisos para leerlo. Este atributo se establece cuando se arrastra y suelta un archivo sobre una aplicación, o cuando un usuario hace doble clic en un archivo para abrirlo con la aplicación predeterminada.
 
 Por lo tanto, un usuario podría registrar una aplicación maliciosa para manejar todas las extensiones y llamar a Launch Services para abrir cualquier archivo (de modo que el archivo malicioso obtendrá acceso para leerlo).
 
@@ -66,7 +66,7 @@ Para obtener más información sobre los Apple Scripts, consulta:
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por ejemplo, si una aplicación tiene permiso de Automatización sobre `iTerm`, por ejemplo en este caso **`Terminal`** tiene acceso a iTerm:
+Por ejemplo, si una aplicación tiene permiso de Automatización sobre `iTerm`, por ejemplo en este ejemplo **`Terminal`** tiene acceso a iTerm:
 
 <figure><img src="../../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -174,7 +174,7 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 ### Apple Remote Desktop
 
-Como root, puedes habilitar este servicio y el agente **ARD tendrá acceso completo al disco**, lo cual podría ser abusado por un usuario para hacer que copie una nueva base de datos de usuario de TCC.
+Como root, podrías habilitar este servicio y el agente **ARD tendrá acceso completo al disco**, lo cual podría ser abusado por un usuario para hacer que copie una nueva base de datos de usuario de TCC.
 
 ## Mediante **NFSHomeDirectory**
 
@@ -201,7 +201,7 @@ El **primer POC** utiliza [**dsexport**](https://www.unix.com/man-page/osx/1/dse
 6. Detén el proceso _tccd_ del usuario y reinicia el proceso.
 
 El segundo POC utilizó **`/usr/libexec/configd`** que tenía `com.apple.private.tcc.allow` con el valor `kTCCServiceSystemPolicySysAdminFiles`.\
-Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga de paquete personalizada**. Por lo tanto, el exploit **reemplaza** el método **`dsexport`** y **`dsimport`** para cambiar el directorio de inicio del usuario con una **inyección de código en `configd`**.
+Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga personalizada de paquete**. Por lo tanto, el exploit **reemplaza** el método **`dsexport`** y **`dsimport`** para cambiar el directorio de inicio del usuario con una **inyección de código en `configd`**.
 
 Para obtener más información, consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 
@@ -214,7 +214,7 @@ Existen diferentes técnicas para inyectar código dentro de un proceso y abusar
 {% endcontent-ref %}
 
 Además, la inyección de proceso más común para eludir TCC se realiza a través de **plugins (carga de bibliotecas)**.\
-Los plugins son código adicional generalmente en forma de bibliotecas o plist, que se **cargan por la aplicación principal** y se ejecutan bajo su contexto. Por lo tanto, si la aplicación principal tenía acceso a archivos restringidos por TCC (mediante permisos otorgados o entitlements), el **código personalizado también lo tendrá**.
+Los plugins son código adicional generalmente en forma de bibliotecas o plist, que serán **cargados por la aplicación principal** y se ejecutarán bajo su contexto. Por lo tanto, si la aplicación principal tenía acceso a archivos restringidos por TCC (mediante permisos otorgados o entitlements), el **código personalizado también lo tendrá**.
 
 ### CVE-2020-27937 - Directory Utility
 
@@ -435,15 +435,15 @@ La herramienta **`/usr/sbin/asr`** permitía copiar todo el disco y montarlo en 
 ### Servicios de ubicación
 
 Hay una tercera base de datos de TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes autorizados a **acceder a los servicios de ubicación**.\
-La carpeta **`/var/db/locationd/` no estaba protegida del montaje de DMG**, por lo que era posible montar nuestro propio plist.
+La carpeta **`/var/db/locationd/` no estaba protegida de la montura de DMG**, por lo que era posible montar nuestro propio plist.
 
-## A través de aplicaciones de inicio
+## Por aplicaciones de inicio
 
 {% content-ref url="../../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
 {% endcontent-ref %}
 
-## A través de grep
+## Por grep
 
 En varias ocasiones, los archivos almacenarán información sensible como correos electrónicos, números de teléfono, mensajes... en ubicaciones no protegidas (lo cual se considera una vulnerabilidad en Apple).
 
@@ -453,11 +453,11 @@ En varias ocasiones, los archivos almacenarán información sensible como correo
 
 Esto ya no funciona, pero [**sí funcionó en el pasado**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
-<figure><img src="../../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 Otra forma utilizando [**eventos de CoreGraphics**](https://objectivebythesea.org/v2/talks/OBTS\_v2\_Wardle.pdf):
 
-<figure><img src="../../../../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Referencia
 
@@ -472,8 +472,8 @@ Otra forma utilizando [**eventos de CoreGraphics**](https://objectivebythesea.or
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

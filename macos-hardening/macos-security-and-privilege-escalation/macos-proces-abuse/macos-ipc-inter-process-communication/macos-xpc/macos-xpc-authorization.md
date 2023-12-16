@@ -1,4 +1,4 @@
-# Autorización XPC en macOS
+# Autorización XPC de macOS
 
 <details>
 
@@ -104,7 +104,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-La función `enumerateRightsUsingBlock` es la que se utiliza para obtener los permisos de las aplicaciones, los cuales están definidos en `commandInfo`:
+La función `enumerateRightsUsingBlock` es la que se utiliza para obtener los permisos de las aplicaciones, que están definidos en `commandInfo`:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -254,21 +254,21 @@ Entonces, puedes leer quién puede acceder a los derechos con:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Derechos permisivos
+### Permisos permisivos
 
 Puedes encontrar **todas las configuraciones de permisos** [**aquí**](https://www.dssw.co.uk/reference/authorization-rights/), pero las combinaciones que no requerirían interacción del usuario serían:
 
 1. **'authenticate-user': 'false'**
-* Esta es la clave más directa. Si se establece en `false`, especifica que un usuario no necesita proporcionar autenticación para obtener este derecho.
+* Esta es la clave más directa. Si se establece en `false`, especifica que un usuario no necesita proporcionar autenticación para obtener este permiso.
 * Se utiliza en **combinación con una de las 2 opciones a continuación o indicando un grupo** al que el usuario debe pertenecer.
 2. **'allow-root': 'true'**
-* Si un usuario está operando como el usuario root (que tiene permisos elevados) y esta clave se establece en `true`, el usuario root podría potencialmente obtener este derecho sin necesidad de una autenticación adicional. Sin embargo, normalmente, llegar a un estado de usuario root ya requiere autenticación, por lo que no es un escenario de "sin autenticación" para la mayoría de los usuarios.
+* Si un usuario está operando como el usuario root (que tiene permisos elevados) y esta clave se establece en `true`, el usuario root podría obtener este permiso sin necesidad de una autenticación adicional. Sin embargo, normalmente, alcanzar el estado de usuario root ya requiere autenticación, por lo que no es un escenario de "sin autenticación" para la mayoría de los usuarios.
 3. **'session-owner': 'true'**
-* Si se establece en `true`, el propietario de la sesión (el usuario que ha iniciado sesión actualmente) obtendría automáticamente este derecho. Esto podría evitar la autenticación adicional si el usuario ya ha iniciado sesión.
+* Si se establece en `true`, el propietario de la sesión (el usuario que ha iniciado sesión actualmente) obtendría automáticamente este permiso. Esto podría evitar la autenticación adicional si el usuario ya ha iniciado sesión.
 4. **'shared': 'true'**
-* Esta clave no otorga derechos sin autenticación. En cambio, si se establece en `true`, significa que una vez que el derecho se haya autenticado, se puede compartir entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del derecho aún requeriría autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
+* Esta clave no otorga permisos sin autenticación. En cambio, si se establece en `true`, significa que una vez que el permiso se haya autenticado, se puede compartir entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del permiso aún requeriría autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
 
-Puedes [**utilizar este script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) para obtener los derechos interesantes:
+Puedes [**utilizar este script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) para obtener los permisos interesantes:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -283,9 +283,9 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### Verificando si se utiliza EvenBetterAuthorization
 
-Si encuentras la función: **`[HelperTool checkAuthorization:command:]`** es probable que el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
+Si encuentras la función: **`[HelperTool checkAuthorization:command:]`**, es probable que el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Entonces, si esta función llama a funciones como `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, está utilizando [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
@@ -293,7 +293,7 @@ Verifica el archivo **`/var/db/auth.db`** para ver si es posible obtener permiso
 
 ### Comunicación de Protocolo
 
-Luego, necesitas encontrar el esquema del protocolo para poder establecer una comunicación con el servicio XPC.
+Luego, necesitas encontrar el esquema de protocolo para poder establecer una comunicación con el servicio XPC.
 
 La función **`shouldAcceptNewConnection`** indica el protocolo que se está exportando:
 

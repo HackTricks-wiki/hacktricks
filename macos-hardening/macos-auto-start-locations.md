@@ -43,7 +43,7 @@ Aquí puedes encontrar ubicaciones de inicio útiles para **bypass de sandbox** 
 * **`~/Library/LaunchDemons`**
 * **Disparador**: Volver a iniciar sesión
 
-#### Descripción y explotación
+#### Descripción y Explotación
 
 **`launchd`** es el **primer** **proceso** ejecutado por el kernel de OX S al iniciar y el último en finalizar al apagar. Siempre debe tener el **PID 1**. Este proceso **lee y ejecuta** las configuraciones indicadas en los **plists** de **ASEP** en:
 
@@ -91,10 +91,10 @@ Enumera todos los agentes y demonios cargados por el usuario actual:
 launchctl list
 ```
 {% hint style="warning" %}
-Si un plist es propiedad de un usuario, incluso si está en carpetas de demonios de todo el sistema, la **tarea se ejecutará como el usuario** y no como root. Esto puede prevenir algunos ataques de escalada de privilegios.
+Si un plist es propiedad de un usuario, incluso si está en carpetas de sistema de demonios, la **tarea se ejecutará como el usuario** y no como root. Esto puede prevenir algunos ataques de escalada de privilegios.
 {% endhint %}
 
-### archivos de inicio de shell
+### Archivos de inicio de shell
 
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0001/](https://theevilbit.github.io/beyond/beyond\_0001/)\
 Descripción (xterm): [https://theevilbit.github.io/beyond/beyond\_0018/](https://theevilbit.github.io/beyond/beyond\_0018/)
@@ -119,13 +119,13 @@ Descripción (xterm): [https://theevilbit.github.io/beyond/beyond\_0018/](https:
 * `/etc/profile` (no funcionó)
 * `~/.profile` (no funcionó)
 * `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-* **Disparador**: Se espera que se active con xterm, pero **no está instalado** y incluso después de instalarlo se produce este error: xterm: `DISPLAY is not set`
+* **Disparador**: Se espera que se active con xterm, pero **no está instalado** e incluso después de instalarlo se produce este error: xterm: `DISPLAY is not set`
 
 #### Descripción y explotación
 
-Los archivos de inicio de shell se ejecutan cuando nuestro entorno de shell como `zsh` o `bash` se está **iniciando**. En macOS, el valor predeterminado es `/bin/zsh`, y cada vez que abrimos `Terminal` o nos conectamos por SSH al dispositivo, este es el entorno de shell en el que nos encontramos. `bash` y `sh` todavía están disponibles, pero deben iniciarse específicamente.
+Los archivos de inicio de shell se ejecutan cuando nuestro entorno de shell como `zsh` o `bash` se está **iniciando**. En macOS, el valor predeterminado es `/bin/zsh`, y **cada vez que abrimos `Terminal` o nos conectamos por SSH** al dispositivo, este es el entorno de shell en el que nos encontramos. `bash` y `sh` todavía están disponibles, pero deben iniciarse específicamente.
 
-La página de manual de zsh, que podemos leer con **`man zsh`**, tiene una descripción larga de los archivos de inicio.
+La página de manual de zsh, que podemos leer con **`man zsh`**, tiene una descripción detallada de los archivos de inicio.
 ```bash
 # Example executino via ~/.zshrc
 echo "touch /tmp/hacktricks" >> ~/.zshrc
@@ -423,31 +423,25 @@ A continuación se muestra una lista de las ubicaciones comunes de inicio autom�
 
 ## Carpeta de inicio
 
-La carpeta de inicio personal del usuario es una ubicación común para agregar elementos de inicio automático. Los archivos y carpetas ubicados en `~/Library/LaunchAgents` y `~/Library/LaunchDaemons` se ejecutarán automáticamente al iniciar sesión en el sistema.
+La carpeta de inicio personal del usuario es una ubicación común para agregar elementos de inicio automático. Puede acceder a esta carpeta navegando a `~/Library/LaunchAgents`. Aquí, puede encontrar archivos de tipo `.plist` que contienen información sobre las aplicaciones y scripts que se iniciarán automáticamente.
+
+## Carpeta de inicio global
+
+La carpeta de inicio global es una ubicación donde se pueden agregar elementos de inicio automático para todos los usuarios del sistema. Puede acceder a esta carpeta navegando a `/Library/LaunchAgents`. Al igual que en la carpeta de inicio personal, aquí encontrará archivos `.plist` que especifican las aplicaciones y scripts que se iniciarán automáticamente.
 
 ## Carpetas de inicio del sistema
 
-Además de la carpeta de inicio personal, macOS también tiene carpetas de inicio del sistema donde se pueden agregar elementos de inicio automático para todos los usuarios del sistema. Estas carpetas se encuentran en `/Library/LaunchAgents` y `/Library/LaunchDaemons`.
+Además de las carpetas de inicio personal y global, también hay carpetas de inicio del sistema que contienen elementos de inicio automático. Estas carpetas se encuentran en `/Library/LaunchDaemons` y `/System/Library/LaunchDaemons`. Los archivos `.plist` en estas carpetas especifican los servicios y demonios del sistema que se iniciarán automáticamente.
 
 ## Preferencias del sistema
 
-Las Preferencias del sistema también ofrecen una forma de configurar aplicaciones para que se inicien automáticamente. En la pestaña "Usuarios y grupos", en la sección "Elementos de inicio", se pueden agregar aplicaciones y scripts para que se ejecuten al iniciar sesión en el sistema.
+Las Preferencias del sistema también ofrecen una forma de configurar elementos de inicio automático en macOS. Puede acceder a esta configuración yendo a `Preferencias del sistema -> Usuarios y grupos -> Elementos de inicio`. Aquí, puede agregar o eliminar elementos de inicio automático utilizando la interfaz gráfica de usuario.
 
-## Cron
+## Programación de tareas
 
-El cron es una utilidad de línea de comandos que permite a los usuarios programar tareas para que se ejecuten automáticamente en momentos específicos. Los comandos cron se pueden configurar utilizando el comando `crontab -e` y se ejecutarán según la programación especificada.
+Además de las ubicaciones anteriores, también puede utilizar la programación de tareas para configurar elementos de inicio automático en macOS. Puede utilizar la utilidad `cron` o `launchd` para programar la ejecución de scripts o comandos en momentos específicos.
 
-## Agentes de lanzamiento
-
-Los agentes de lanzamiento son archivos de propiedad de la aplicación que se utilizan para configurar la ejecución automática de aplicaciones en macOS. Estos archivos se encuentran en `/Library/LaunchAgents` y `/System/Library/LaunchAgents`. Los agentes de lanzamiento pueden ser utilizados por aplicaciones de terceros para iniciar automáticamente sus servicios al arrancar el sistema.
-
-## Daemons de lanzamiento
-
-Los daemons de lanzamiento son similares a los agentes de lanzamiento, pero se ejecutan en segundo plano y no están asociados a un usuario específico. Estos archivos se encuentran en `/Library/LaunchDaemons` y `/System/Library/LaunchDaemons`. Los daemons de lanzamiento se utilizan para iniciar y administrar servicios del sistema.
-
-## Conclusión
-
-Conocer las ubicaciones de inicio automático en macOS es importante para comprender qué aplicaciones y scripts se ejecutan automáticamente al iniciar sesión en el sistema. Esto puede ser útil para optimizar el rendimiento del sistema y garantizar la seguridad al evitar la ejecución no autorizada de programas.
+Es importante tener en cuenta que, si bien estas ubicaciones son útiles para configurar el inicio automático de aplicaciones y scripts, también pueden ser utilizadas por malware o software malicioso para iniciar procesos no deseados. Por lo tanto, es importante revisar regularmente estas ubicaciones y eliminar cualquier elemento no deseado o desconocido.
 ```bash
 cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.py" << EOF
 #!/usr/bin/env python3
@@ -472,7 +466,7 @@ Las preferencias de iTerm2 se encuentran en **`~/Library/Preferences/com.googlec
 
 Esta configuración se puede ajustar en la configuración de iTerm2:
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Y el comando se refleja en las preferencias:
 ```bash
@@ -541,15 +535,15 @@ EOF
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
 
 * Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-* Pero se necesita tener habilitado y usar ssh
+* Pero se necesita tener habilitado y usar SSH
 
 #### Ubicación
 
 * **`~/.ssh/rc`**
-* **Disparador**: Inicio de sesión a través de ssh
+* **Disparador**: Inicio de sesión a través de SSH
 * **`/etc/ssh/sshrc`**
 * Se requieren privilegios de root
-* **Disparador**: Inicio de sesión a través de ssh
+* **Disparador**: Inicio de sesión a través de SSH
 
 #### Descripción y Explotación
 
@@ -692,19 +686,19 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0024/](https://theevi
 Descripción: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 
 * Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-* Pero necesitas poder llamar a osascript con argumentos y poder configurar las Acciones de carpeta
+* Pero necesitas poder llamar a osascript con argumentos y poder configurar las acciones de carpeta
 
 #### Ubicación
 
 * **`/Library/Scripts/Folder Action Scripts`**
-* Se requiere acceso de root
+* Se requieren permisos de root
 * **Desencadenador**: Acceso a la carpeta especificada
 * **`~/Library/Scripts/Folder Action Scripts`**
 * **Desencadenador**: Acceso a la carpeta especificada
 
 #### Descripción y explotación
 
-Un script de Acción de carpeta se ejecuta cuando se agregan o eliminan elementos en la carpeta a la que está adjunto, o cuando su ventana se abre, cierra, mueve o cambia de tamaño:
+Un script de Acción de Carpeta se ejecuta cuando se agregan o eliminan elementos en la carpeta a la que está adjunto, o cuando su ventana se abre, cierra, mueve o cambia de tamaño:
 
 * Abrir la carpeta a través de la interfaz de usuario del Finder
 * Agregar un archivo a la carpeta (se puede hacer arrastrando y soltando o incluso desde un símbolo del sistema en un terminal)
@@ -713,11 +707,11 @@ Un script de Acción de carpeta se ejecuta cuando se agregan o eliminan elemento
 
 Hay un par de formas de implementar esto:
 
-1. Usar el programa [Automator](https://support.apple.com/guide/automator/welcome/mac) para crear un archivo de flujo de trabajo de Acción de carpeta (.workflow) e instalarlo como un servicio.
-2. Hacer clic derecho en una carpeta, seleccionar `Configuración de Acciones de carpeta...`, `Ejecutar servicio` y adjuntar manualmente un script.
-3. Usar OSAScript para enviar mensajes de Apple Event a la aplicación `System Events.app` para consultar y registrar programáticamente una nueva `Acción de carpeta`.
+1. Usar el programa [Automator](https://support.apple.com/guide/automator/welcome/mac) para crear un archivo de flujo de trabajo de Acción de Carpeta (.workflow) e instalarlo como un servicio.
+2. Hacer clic derecho en una carpeta, seleccionar `Configuración de Acciones de Carpeta...`, `Ejecutar servicio` y adjuntar manualmente un script.
+3. Usar OSAScript para enviar mensajes de Evento Apple a la aplicación `System Events.app` para consultar y registrar programáticamente una nueva `Acción de Carpeta`.
 
-* Esta es la forma de implementar la persistencia utilizando un script OSAScript para enviar mensajes de Apple Event a `System Events.app`
+* Esta es la forma de implementar la persistencia utilizando un OSAScript para enviar mensajes de Evento Apple a `System Events.app`
 
 Este es el script que se ejecutará:
 
@@ -771,7 +765,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
 Luego, abre la aplicación `Folder Actions Setup`, selecciona la **carpeta que deseas vigilar** y selecciona en tu caso **`folder.scpt`** (en mi caso lo llamé output2.scp):
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1) (1).png" alt="" width="297"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt="" width="297"><figcaption></figcaption></figure>
 
 Ahora, si abres esa carpeta con **Finder**, tu script se ejecutará.
 
@@ -965,11 +959,11 @@ Descripción: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](http
 * `~/Library/Screen Savers`
 * **Disparador**: Seleccionar el protector de pantalla
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Descripción y Exploit
 
-Crea un nuevo proyecto en Xcode y selecciona la plantilla para generar un nuevo **protector de pantalla**. Luego, agrega tu código, por ejemplo, el siguiente código para generar registros.
+Crea un nuevo proyecto en Xcode y selecciona la plantilla para generar un nuevo **protector de pantalla**. Luego, agrega tu código a él, por ejemplo, el siguiente código para generar registros.
 
 **Compílalo** y copia el paquete `.saver` a **`~/Library/Screen Savers`**. Luego, abre la interfaz gráfica del protector de pantalla y si haces clic en él, debería generar muchos registros:
 
@@ -1229,7 +1223,7 @@ monthly_local="/etc/monthly.local"			# Local scripts
 Si logras escribir alguno de los archivos `/etc/daily.local`, `/etc/weekly.local` o `/etc/monthly.local`, se ejecutará **tarde o temprano**.
 
 {% hint style="warning" %}
-Ten en cuenta que el script periódico se ejecutará como el propietario del script. Por lo tanto, si un usuario regular es el propietario del script, se ejecutará como ese usuario (esto podría prevenir ataques de escalada de privilegios).
+Ten en cuenta que el script periódico se ejecutará **como el propietario del script**. Por lo tanto, si un usuario regular es el propietario del script, se ejecutará como ese usuario (esto podría prevenir ataques de escalada de privilegios).
 {% endhint %}
 
 ### PAM
@@ -1246,7 +1240,7 @@ Descripción: [https://theevilbit.github.io/beyond/beyond\_0005/](https://theevi
 
 #### Descripción y explotación
 
-Dado que PAM se centra más en la **persistencia** y en el malware que en la ejecución fácil dentro de macOS, este blog no proporcionará una explicación detallada. **Lee las descripciones para entender mejor esta técnica**.
+Dado que PAM se centra más en la **persistencia** y en el malware que en la ejecución fácil dentro de macOS, este blog no proporcionará una explicación detallada, **lee las descripciones para entender mejor esta técnica**.
 
 Verifica los módulos de PAM con:&#x20;
 ```bash
@@ -1327,6 +1321,8 @@ EOF
 
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
+El **`evaluate-mechanisms`** le indicará al marco de autorización que necesitará **llamar a un mecanismo externo para la autorización**. Además, **`privileged`** hará que se ejecute como root.
+
 Actívalo con:
 ```bash
 security authorize com.asdf.asdf

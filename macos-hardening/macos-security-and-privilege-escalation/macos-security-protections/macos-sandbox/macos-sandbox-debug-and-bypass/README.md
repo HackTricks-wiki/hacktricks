@@ -20,21 +20,21 @@ En la imagen anterior se puede observar **cómo se cargará el sandbox** cuando 
 
 El compilador vinculará `/usr/lib/libSystem.B.dylib` al binario.
 
-Luego, **`libSystem.B`** llamará a otras varias funciones hasta que **`xpc_pipe_routine`** envíe los permisos de la aplicación a **`securityd`**. Securityd verifica si el proceso debe estar en cuarentena dentro del Sandbox, y si es así, se pondrá en cuarentena.\
-Finalmente, se activará el sandbox con una llamada a **`__sandbox_ms`** que llamará a **`__mac_syscall`**.
+Luego, **`libSystem.B`** llamará a otras varias funciones hasta que **`xpc_pipe_routine`** envíe los permisos de la aplicación a **`securityd`**. Securityd verifica si el proceso debe estar en cuarentena dentro del sandbox, y si es así, se pondrá en cuarentena.\
+Finalmente, se activará el sandbox con una llamada a **`__sandbox_ms`**, que llamará a **`__mac_syscall`**.
 
 ## Posibles Bypasses
 
 ### Bypass del atributo de cuarentena
 
-Los **archivos creados por procesos en el sandbox** se les añade el **atributo de cuarentena** para evitar que escapen del sandbox. Sin embargo, si logras **crear una carpeta `.app` sin el atributo de cuarentena** dentro de una aplicación en el sandbox, podrías hacer que el binario del paquete de la aplicación apunte a **`/bin/bash`** y agregar algunas variables de entorno en el **plist** para abusar de **`open`** y **ejecutar la nueva aplicación sin sandbox**.
+Los **archivos creados por procesos en el sandbox** se les añade el **atributo de cuarentena** para evitar que escapen del sandbox. Sin embargo, si logras **crear una carpeta `.app` sin el atributo de cuarentena** dentro de una aplicación en el sandbox, podrías hacer que el binario del paquete de la aplicación apunte a **`/bin/bash`** y agregar algunas variables de entorno en el **plist** para abusar de **`open`** y **lanzar la nueva aplicación sin sandbox**.
 
 Esto es lo que se hizo en [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 {% hint style="danger" %}
 Por lo tanto, en este momento, si eres capaz de crear una carpeta con un nombre que termine en **`.app`** sin el atributo de cuarentena, puedes escapar del sandbox porque macOS solo **verifica** el atributo de **cuarentena** en la **carpeta `.app`** y en el **ejecutable principal** (y apuntaremos el ejecutable principal a **`/bin/bash`**).
 
-Ten en cuenta que si un paquete .app ya ha sido autorizado para ejecutarse (tiene un xttr de cuarentena con la bandera de autorización para ejecutar activada), también podrías abusar de él... excepto que ahora no puedes escribir dentro de los paquetes **`.app`** a menos que tengas algunos permisos privilegiados de TCC (que no tendrás dentro de un sandbox alto).
+Ten en cuenta que si un paquete .app ya ha sido autorizado para ejecutarse (tiene un xttr de cuarentena con la bandera de autorización para ejecutar), también podrías abusar de ello... excepto que ahora no puedes escribir dentro de los paquetes **`.app`** a menos que tengas algunos permisos privilegiados de TCC (que no tendrás dentro de un sandbox alto).
 {% endhint %}
 
 ### Abuso de la funcionalidad Open
@@ -45,9 +45,14 @@ En los [**últimos ejemplos de bypass del sandbox de Word**](macos-office-sandbo
 [macos-office-sandbox-bypasses.md](macos-office-sandbox-bypasses.md)
 {% endcontent-ref %}
 
+### Agentes/Demonios de inicio
+
+Incluso si una aplicación está **destinada a estar en el sandbox** (`com.apple.security.app-sandbox`), es posible evadir el sandbox si se ejecuta desde un Agente de inicio (`~/Library/LaunchAgents`), por ejemplo.\
+Como se explica en [**esta publicación**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), si quieres obtener persistencia con una aplicación que está en el sandbox, puedes hacer que se ejecute automáticamente como un Agente de inicio y tal vez inyectar código malicioso a través de variables de entorno DyLib.
+
 ### Abuso de ubicaciones de inicio automático
 
-Si un proceso en el sandbox puede **escribir** en un lugar donde **más tarde se ejecutará el binario de una aplicación sin sandbox**, podrá **escapar simplemente colocando** allí el binario. Un buen ejemplo de este tipo de ubicaciones son `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
+Si un proceso en el sandbox puede **escribir** en un lugar donde **más tarde se ejecutará una aplicación sin sandbox**, podrá **escapar simplemente colocando** allí el binario. Un buen ejemplo de este tipo de ubicaciones son `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
 
 Para esto, es posible que incluso necesites **2 pasos**: hacer que un proceso con un sandbox **más permisivo** (`file-read*`, `file-write*`) ejecute tu código, que en realidad escribirá en un lugar donde se ejecutará sin sandbox.
 
@@ -56,24 +61,24 @@ Consulta esta página sobre **ubicaciones de inicio automático**:
 {% content-ref url="../../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
 {% endcontent-ref %}
-
 ### Abuso de otros procesos
 
-Si desde el proceso en el sandbox eres capaz de **comprometer otros procesos** que se ejecutan en sandbox menos restrictivos (o sin sandbox), podrás escapar a sus sandboxes:
+Si desde el proceso de la sandbox eres capaz de comprometer otros procesos que se ejecutan en sandbox menos restrictivas (o ninguna), podrás escapar a sus sandboxes:
 
 {% content-ref url="../../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../../macos-proces-abuse/)
 {% endcontent-ref %}
+
 ### Compilación estática y enlace dinámico
 
-[**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de evadir el Sandbox. Debido a que el sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca sería sandboxeado:
+[**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de eludir la sandbox. Debido a que la sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca sería sandboxeado:
 
-* Si el binario se compila **completamente de forma estática**, puede evitar cargar esa biblioteca.
-* Si el **binario no necesita cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitará cargar libSystem.&#x20;
+* Si el binario se compila **completamente de forma estática**, podría evitar cargar esa biblioteca.
+* Si el binario **no necesita cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitará cargar libSystem.&#x20;
 
 ### Shellcodes
 
-Tenga en cuenta que **incluso los shellcodes** en ARM64 deben estar enlazados en `libSystem.dylib`:
+Ten en cuenta que **incluso los shellcodes** en ARM64 necesitan estar enlazados en `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
@@ -343,7 +348,7 @@ libsystem_kernel.dylib`:
 (lldb) c
 Proceso 2517 reanudado
 ¡Bypass de Sandbox realizado!
-El proceso 2517 salió con el estado = 0 (0x00000000)
+El proceso 2517 salió con estado = 0 (0x00000000)
 ```
 {% hint style="warning" %}
 **Incluso si se ha eludido el Sandbox, TCC** le preguntará al usuario si desea permitir que el proceso lea archivos desde el escritorio.

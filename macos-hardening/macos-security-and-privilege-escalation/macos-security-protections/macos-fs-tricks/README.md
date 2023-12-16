@@ -42,13 +42,29 @@ Si un proceso privilegiado está escribiendo datos en un **archivo** que podría
 
 Verificar en las otras secciones donde un atacante podría **abusar de una escritura arbitraria para escalar privilegios**.
 
-## FD arbitrario
+## .fileloc
 
-Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privilegios**, puedes abusar de **`crontab`** para abrir un archivo en `/etc/sudoers.d` con **`EDITOR=exploit.py`**, de modo que `exploit.py` obtendrá el FD al archivo dentro de `/etc/sudoers` y lo abusará.
+Los archivos con extensión **`.fileloc`** pueden apuntar a otras aplicaciones o binarios, por lo que cuando se abren, la aplicación/binario será el que se ejecute.\
+Ejemplo:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>URL</key>
+<string>file:///System/Applications/Calculator.app</string>
+<key>URLPrefix</key>
+<integer>0</integer>
+</dict>
+</plist>
+```
+## FD Arbitrario
+
+Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privilegios**, puedes abusar de **`crontab`** para abrir un archivo en `/etc/sudoers.d` con **`EDITOR=exploit.py`**, de esta manera `exploit.py` obtendrá el FD al archivo dentro de `/etc/sudoers` y lo abusará.
 
 Por ejemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## Trucos para evitar atributos extendidos de cuarentena
+## Trucos para Evitar las Atribuciones de Cuarentena
 
 ### Eliminarlo
 ```bash

@@ -5,7 +5,7 @@
 _Logos y diseño de movimiento de Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="success" %}
-**Bienvenido a la wiki donde encontrarás cada truco/técnica de hacking/aprendizaje que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.**
+**Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.**
 {% endhint %}
 
 Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **debes seguir al realizar pruebas de penetración** en una o más **máquinas:**
@@ -34,13 +34,13 @@ Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src=".gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro en ebullición para profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
+[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro efervescente para profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
 
 ### [Intigriti](https://www.intigriti.com)
 
-<figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 **Intigriti** es la plataforma de ethical hacking y **bug bounty número 1 de Europa.**
 
@@ -65,11 +65,11 @@ Obtén acceso hoy mismo:
 
 Mantente un paso adelante en el juego de la ciberseguridad.
 
-[**Intruder**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) facilita la gestión de vulnerabilidades. Realiza un seguimiento de tu superficie de ataque, ve dónde tu empresa es vulnerable y prioriza los problemas que dejan tus sistemas más expuestos para que puedas centrarte en lo que más importa.
+[**Intruder**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) facilita la gestión de vulnerabilidades. Realiza un seguimiento de tu superficie de ataque, identifica las vulnerabilidades de tu empresa y prioriza los problemas que dejan tus sistemas más expuestos para que puedas centrarte en lo que más importa.
 
-Ejecuta miles de comprobaciones con una sola plataforma que cubre toda tu infraestructura tecnológica, desde la infraestructura interna hasta las aplicaciones web, las API y los sistemas en la nube. Intégrate perfectamente con [AWS, GCP, Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure) y agiliza DevOps para que tu equipo pueda implementar correcciones más rápido.
+Realiza miles de comprobaciones con una sola plataforma que cubre toda tu infraestructura tecnológica, desde la infraestructura interna hasta las aplicaciones web, las API y los sistemas en la nube. Intégrate perfectamente con [AWS, GCP, Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure) y agiliza DevOps para que tu equipo pueda implementar correcciones más rápido.
 
-Intruder nunca descansa. La protección las 24 horas del día, los 7 días de la semana, monitorea tus sistemas constantemente. ¿Quieres saber más? Visita su sitio web y pruébalo con [**una prueba gratuita**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks).
+Intruder nunca descansa. La protección las 24 horas del día, los 7 días de la semana, monitorea tus sistemas constantemente. ¿Quieres obtener más información? Visita su sitio web y pruébalo con [**una prueba gratuita**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks).
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 

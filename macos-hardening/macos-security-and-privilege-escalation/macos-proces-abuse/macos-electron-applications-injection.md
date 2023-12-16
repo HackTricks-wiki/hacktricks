@@ -58,13 +58,13 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 ```
 Puedes cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la cadena anterior. Después de esta cadena, puedes ver en ASCII un número "0" o "1" que indica si cada fusible está desactivado o activado. Simplemente modifica el código hexadecimal (`0x30` es `0` y `0x31` es `1`) para **modificar los valores de los fusibles**.
 
-<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-Ten en cuenta que si intentas **sobrescribir** el binario del **`Framework Electron`** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
+Ten en cuenta que si intentas **sobrescribir** el **binario del Marco de Electron** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
 
-## RCE añadiendo código a Aplicaciones Electron
+## RCE añadiendo código a Aplicaciones de Electron
 
-Puede haber **archivos JS/HTML externos** que una Aplicación Electron esté utilizando, por lo que un atacante podría inyectar código en estos archivos cuya firma no será verificada y ejecutar código arbitrario en el contexto de la aplicación.
+Puede haber **archivos JS/HTML externos** que una Aplicación de Electron esté utilizando, por lo que un atacante podría inyectar código en estos archivos cuya firma no será verificada y ejecutar código arbitrario en el contexto de la aplicación.
 
 {% hint style="danger" %}
 Sin embargo, en este momento hay 2 limitaciones:
@@ -144,11 +144,13 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 
 {% hint style="danger" %}
 Si el fusible **`EnableNodeOptionsEnvironmentVariable`** está **desactivado**, la aplicación **ignorará** la variable de entorno **NODE\_OPTIONS** al iniciarse a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté configurada, la cual también será **ignorada** si el fusible **`RunAsNode`** está desactivado.
+
+Si no configuras **`ELECTRON_RUN_AS_NODE`**, encontrarás el **error**: `La mayoría de las NODE_OPTIONs no son compatibles en aplicaciones empaquetadas. Consulta la documentación para obtener más detalles.`
 {% endhint %}
 
 ### Inyección desde el archivo Plist de la aplicación
 
-Podrías abusar de esta variable de entorno en un plist para mantener la persistencia agregando estas claves:
+Puedes abusar de esta variable de entorno en un archivo plist para mantener la persistencia agregando estas claves:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -183,7 +185,7 @@ Si el fusible **`EnableNodeCliInspectArguments`** está desactivado, la aplicaci
 Sin embargo, aún puedes usar el parámetro de electron `--remote-debugging-port=9229`, pero la carga útil anterior no funcionará para ejecutar otros procesos.
 {% endhint %}
 
-Usando el parámetro **`--remote-debugging-port=9222`** es posible robar información de la aplicación Electron, como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **descifradas** dentro del navegador y hay un **endpoint json** que las proporcionará).
+Usando el parámetro **`--remote-debugging-port=9222`**, es posible robar información de la aplicación Electron, como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **descifradas** dentro del navegador y hay un **endpoint json** que las proporcionará).
 
 Puedes aprender cómo hacerlo [**aquí**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) y [**aquí**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) y utilizar la herramienta automática [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) o un simple script como:
 ```python

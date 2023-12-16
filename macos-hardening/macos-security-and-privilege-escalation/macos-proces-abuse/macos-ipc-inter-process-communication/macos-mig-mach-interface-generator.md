@@ -12,7 +12,7 @@
 
 </details>
 
-MIG fue creado para **simplificar el proceso de creación de código de IPC de Mach**. Básicamente, **genera el código necesario** para que el servidor y el cliente se comuniquen con una definición dada. Aunque el código generado puede ser feo, un desarrollador solo necesitará importarlo y su código será mucho más simple que antes.
+MIG fue creado para **simplificar el proceso de creación de código de IPC de Mach**. Básicamente, **genera el código necesario** para que el servidor y el cliente se comuniquen con una definición dada. Aunque el código generado sea feo, un desarrollador solo necesitará importarlo y su código será mucho más simple que antes.
 
 ### Ejemplo
 
@@ -75,6 +75,7 @@ myipc_server_routine,
 extern mach_port_t myipc_server_port;
 
 kern_return_t myipc_server(mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP);
+boolean_t myipc_server_demux(mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP);
 
 #endif /* myipcServer_h */
 ```
@@ -95,7 +96,7 @@ routine[1];
 {% endtab %}
 {% endtabs %}
 
-Basándonos en la estructura anterior, la función **`myipc_server_routine`** obtendrá el **ID del mensaje** y devolverá la función adecuada para llamar:
+Basándose en la estructura anterior, la función **`myipc_server_routine`** obtendrá el **ID del mensaje** y devolverá la función adecuada para llamar:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -110,9 +111,9 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-En este ejemplo solo hemos definido 1 función en las definiciones, pero si hubiéramos definido más, estarían dentro del array de **`SERVERPREFmyipc_subsystem`** y la primera se asignaría al ID **500**, la segunda al ID **501**...
+En este ejemplo solo hemos definido 1 función en las definiciones, pero si hubiéramos definido más funciones, estarían dentro del array de **`SERVERPREFmyipc_subsystem`** y la primera se asignaría al ID **500**, la segunda al ID **501**...
 
-De hecho, es posible identificar esta relación en la estructura **`subsystem_to_name_map_myipc`** de **`myipcServer.h`**:
+En realidad, es posible identificar esta relación en la estructura **`subsystem_to_name_map_myipc`** de **`myipcServer.h`**:
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -153,7 +154,9 @@ return FALSE;
 }
 </code></pre>
 
-Verifica el siguiente código para usar el código generado y crear un servidor y un cliente simples donde el cliente puede llamar a las funciones Restar del servidor:
+Verifique las líneas previamente resaltadas que acceden a la función a llamar por ID.
+
+A continuación se muestra el código para crear un **servidor** y un **cliente** simples donde el cliente puede llamar a la función Restar del servidor:
 
 {% tabs %}
 {% tab title="myipc_server.c" %}
@@ -187,42 +190,41 @@ return 1;
 mach_msg_server(myipc_server, sizeof(union __RequestUnion__SERVERPREFmyipc_subsystem), port, MACH_MSG_TIMEOUT_NONE);
 }
 ```
+{% tab title="myipc_client.c" %}
+
 ```c
 #include <stdio.h>
 #include <stdlib.h>
-#include <mach/mach.h>
+#include <servers/bootstrap.h>
 #include "myipc.h"
 
 int main(int argc, char *argv[]) {
     mach_port_t server_port;
     kern_return_t kr;
-    int val = 0;
+    char *message = "Hello, server!";
+    char reply[256];
 
-    if (argc != 2) {
-        printf("Usage: %s <value>\n", argv[0]);
-        return 1;
-    }
-
-    val = atoi(argv[1]);
-
+    // Look up the server port
     kr = bootstrap_look_up(bootstrap_port, "com.example.myipc_server", &server_port);
     if (kr != KERN_SUCCESS) {
-        printf("Failed to look up server port: %s\n", mach_error_string(kr));
-        return 1;
+        fprintf(stderr, "Failed to look up server port: %s\n", mach_error_string(kr));
+        exit(1);
     }
 
-    kr = myipc_send_value(server_port, val);
+    // Send a message to the server
+    kr = myipc_send_message(server_port, message, reply, sizeof(reply));
     if (kr != KERN_SUCCESS) {
-        printf("Failed to send value: %s\n", mach_error_string(kr));
-        return 1;
+        fprintf(stderr, "Failed to send message: %s\n", mach_error_string(kr));
+        exit(1);
     }
+
+    printf("Received reply: %s\n", reply);
 
     return 0;
 }
 ```
-{% endtab %}
 
-{% tab title="myipc_server.c" %}
+{% endtab %}
 ```c
 // gcc myipc_client.c myipcUser.c -o myipc_client
 
@@ -272,7 +274,7 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Llamada a sign_extend_64 que puede ayudar a identificar esta función
-// Esto almacena en rax el puntero a la llamada que debe ser llamada
+// Esto almacena en rax el puntero a la llamada que debe ser realizada
 // Verificar el uso de la dirección 0x100004040 (array de direcciones de funciones)
 // 0x1f4 = 500 (el ID de inicio)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
@@ -376,11 +378,11 @@ return r0;
 {% endtab %}
 {% endtabs %}
 
-En realidad, si vas a la función **`0x100004000`**, encontrarás el array de estructuras **`routine_descriptor`**, el primer elemento de la estructura es la dirección donde se implementa la función y la **estructura ocupa 0x28 bytes**, por lo que cada 0x28 bytes (a partir del byte 0) puedes obtener 8 bytes y esa será la **dirección de la función** que se llamará:
-
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+En realidad, si vas a la función **`0x100004000`**, encontrarás el array de estructuras **`routine_descriptor`**. El primer elemento de la estructura es la **dirección** donde se implementa la **función**, y la **estructura ocupa 0x28 bytes**, por lo que cada 0x28 bytes (a partir del byte 0) puedes obtener 8 bytes y esa será la **dirección de la función** que se llamará:
 
 <figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Estos datos se pueden extraer [**usando este script de Hopper**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 
