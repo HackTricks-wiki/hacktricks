@@ -12,7 +12,7 @@
 
 </details>
 
-## Via `PERL5OPT` env variable
+## Via `PERL5OPT` & `PERL5LIB` env variable
 
 Using the env variable PERL5OPT it's possible to make perl execute arbitrary commands.\
 For example, create this script:
@@ -29,6 +29,23 @@ Now **export the env variable** and execute the **perl** script:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
+```
+
+Another option is to create a Perl module (e.g. `/tmp/pmod.pm`):
+
+{% code title="/tmp/pmod.pm" %}
+```perl
+#!/usr/bin/perl
+package pmod;
+system('whoami');
+1; # Modules must return a true value
+```
+{% endcode %}
+
+And then use the env variables:
+
+```bash
+PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
 
 ## Via dependencies
@@ -55,7 +72,11 @@ Which will return something like:
 
 Some of the returned folders doesn't even exist, however, **`/Library/Perl/5.30`** does **exist**, it's **not** **protected** by **SIP** and it's **before** the folders **protected by SIP**. Therefore, someone could abuse that folder to add script dependencies in there so a high privilege Perl script will load it.
 
-However, note that you **need to be root to write in that folder**.
+{% hint style="warning" %}
+However, note that you **need to be root to write in that folder** and nowadays you will get this **TCC prompt**:
+{% endhint %}
+
+<figure><img src="../../../.gitbook/assets/image (1).png" alt="" width="244"><figcaption></figcaption></figure>
 
 For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` to make it execute arbitrary code.
 

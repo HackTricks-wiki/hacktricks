@@ -42,6 +42,24 @@ If a privileged process is writing data in **file** that could be **controlled**
 
 Check in the other sections where an attacker could **abuse an arbitrary write to escalate privileges**.
 
+## .fileloc
+
+Files with **`.fileloc`** extension can point to other applications or binaries so when they are open, the application/binary will be the one executed.\
+Example:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>URL</key>
+    <string>file:///System/Applications/Calculator.app</string>
+    <key>URLPrefix</key>
+    <integer>0</integer>
+</dict>
+</plist>
+```
+
 ## Arbitrary FD
 
 If you can make a **process open a file or a folder with high privileges**, you can abuse **`crontab`** to open a file in `/etc/sudoers.d` with **`EDITOR=exploit.py`**, so the `exploit.py` will get the FD to the file inside `/etc/sudoers` and abuse it.

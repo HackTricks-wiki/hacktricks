@@ -128,7 +128,7 @@ Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes
 
 Allow to modify files inside apps bundle (inside app.app), which is **disallowed by default**.
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 It's possible to check who has this access in _System Settings_ > _Privacy & Security_ > _App Management._
 

@@ -82,11 +82,29 @@ Check different options to make a Perl script execute arbitrary code in:
 
 ### Python Injection
 
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished.
+If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\
+However, note that **`PYTHONSTARTUP`** script won't be executed when **`PYTHONINSPECT`** creates the interactive session.
 
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary scode.
+Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary code.
 
 Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
+
+{% hint style="danger" %}
+Overall I couldn't find a way to make python execute arbitrary code abusing environment variables.\
+However, most of the people install pyhton using **Hombrew**, which will install pyhton in a **writable location** for the default admin user. You can hijack it with something like:
+
+```bash
+mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
+cat > /opt/homebrew/bin/python3 <<EOF
+#!/bin/bash
+# Extra hijack code
+/opt/homebrew/bin/python3.old "$@"
+EOF
+chmod +x /opt/homebrew/bin/python3
+```
+
+Even **root** will run this code when running python.
+{% endhint %}
 
 ## Detection
 

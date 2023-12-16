@@ -45,6 +45,11 @@ In the [**last examples of Word sandbox bypass**](macos-office-sandbox-bypasses.
 [macos-office-sandbox-bypasses.md](macos-office-sandbox-bypasses.md)
 {% endcontent-ref %}
 
+### Launch Agents/Daemons
+
+Even if an application is **meant to be sandboxed** (`com.apple.security.app-sandbox`), it's possible to make bypass the sandbox if it's **executed from a LaunchAgent** (`~/Library/LaunchAgents`) for example.\
+As explained in [**this post**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), if you want to gain persistence with an application that is sandboxed you could make be automatically executed as a LaunchAgent and maybe inject malicious code via DyLib environment variables.
+
 ### Abusing Auto Start Locations
 
 If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
