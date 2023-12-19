@@ -18,15 +18,15 @@
 
 ユーザーの視点からは、TCCが動作しているのは、**TCCによって保護された機能へのアクセスをアプリケーションが要求したとき**です。これが発生すると、**ユーザーにはアクセスを許可するかどうかを尋ねるダイアログが表示**されます。
 
-また、ユーザーが**ファイルに明示的な意図を持ってアクセスを許可する**ことも可能です。たとえば、ユーザーがファイルをプログラムに**ドラッグ＆ドロップする**場合（もちろん、プログラムはそれにアクセスできる必要があります）。
+また、ユーザーが**ファイルにアクセスを許可する**こともできます。たとえば、ユーザーが**ファイルをプログラムにドラッグ＆ドロップする**場合などです（もちろん、プログラムはそれにアクセスできる必要があります）。
 
 ![TCCプロンプトの例](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
-**TCC**は、`/System/Library/PrivateFrameworks/TCC.framework/Support/tccd`にある**デーモン**によって処理され、`/System/Library/LaunchDaemons/com.apple.tccd.system.plist`で構成されています（`com.apple.tccd.system`というマッハサービスを登録）。
+**TCC**は、`/System/Library/PrivateFrameworks/TCC.framework/Support/tccd`にある**デーモン**によって処理され、`/System/Library/LaunchDaemons/com.apple.tccd.system.plist`で構成されています（`com.apple.tccd.system`というマッハサービスを登録します）。
 
-ログインしているユーザーごとに定義された**ユーザーモードのtccd**が`/System/Library/LaunchAgents/com.apple.tccd.plist`に実行され、マッハサービス`com.apple.tccd`と`com.apple.usernotifications.delegate.com.apple.tccd`を登録しています。
+ログインしているユーザーごとに定義された**ユーザーモードのtccd**が`/System/Library/LaunchAgents/com.apple.tccd.plist`に実行され、マッハサービス`com.apple.tccd`と`com.apple.usernotifications.delegate.com.apple.tccd`を登録します。
 
-ここでは、システムとユーザーごとに実行されているtccdを確認できます。
+ここでは、システムとユーザーとして実行されているtccdを確認できます。
 ```bash
 ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
@@ -47,7 +47,7 @@ ps -ef | grep tcc
 さらに、**フルディスクアクセス**を持つプロセスは、**ユーザモード**のデータベースを編集できます。現在、アプリはデータベースを**読み取るためにFDA**または**`kTCCServiceEndpointSecurityClient`**が必要です（ユーザDBを変更するためにも必要です）。
 
 {% hint style="info" %}
-**通知センターUI**は、**システムのTCCデータベース**を変更することができます。
+**通知センターUI**は、**システムのTCCデータベース**を変更できます。
 
 {% code overflow="wrap" %}
 ```bash
@@ -135,19 +135,19 @@ echo "X'$REQ_HEX'"
 {% hint style="info" %}
 いくつかのTCCの許可は、kTCCServiceAppleEvents、kTCCServiceCalendar、kTCCServicePhotosなどです... すべてを定義する公開リストはありませんが、[既知のリスト](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service)をチェックできます。
 
-**Full Disk Access**の名前は**`kTCCServiceSystemPolicyAllFiles`**であり、**`kTCCServiceAppleEvents`**は他のアプリケーションにイベントを送信することを許可し、一般的には**タスクの自動化**に使用されます。
+**Full Disk Access**の名前は**`kTCCServiceSystemPolicyAllFiles`**であり、**`kTCCServiceAppleEvents`**は、タスクの自動化に一般的に使用される他のアプリケーションにイベントを送信するためのアプリケーションに許可を与えます。
 
-**kTCCServiceEndpointSecurityClient**は、ユーザーデータベースの書き込みオプションを含む高い特権を付与するTCCの許可です。
+**kTCCServiceEndpointSecurityClient**は、ユーザーデータベースの書き込みオプションを含む高い特権を与えるTCCの許可です。
 
-さらに、**`kTCCServiceSystemPolicySysAdminFiles`**は、ユーザーのホームフォルダを変更する**`NFSHomeDirectory`**属性を変更することができ、それによりTCCを**バイパス**することができます。
+さらに、**`kTCCServiceSystemPolicySysAdminFiles`**は、ユーザーのホームフォルダを変更するユーザーの**`NFSHomeDirectory`**属性を変更することができ、それによりTCCをバイパスすることができます。
 {% endhint %}
 
-`システム環境設定 --> セキュリティとプライバシー --> プライバシー --> ファイルとフォルダー`で、アプリに与えられた許可を**すでに確認**することもできます。
+`システム環境設定 --> セキュリティとプライバシー --> プライバシー --> ファイルとフォルダ`で、アプリに与えられた許可をすでに確認することもできます。
 
 {% hint style="success" %}
-ユーザーのホーム内にデータベースがある場合でも、**SIPのためにユーザーはこれらのデータベースを直接変更することはできません**（rootであっても）。新しいルールを設定または変更する唯一の方法は、システム環境設定パネルまたはアプリがユーザーに要求するプロンプトです。
+ユーザーのホーム内にデータベースがある場合でも、SIPのために（rootであっても）ユーザーはこれらのデータベースを直接変更することはできません。新しいルールを設定または変更する唯一の方法は、システム環境設定パネルまたはアプリがユーザーに要求するプロンプトです。
 
-ただし、ユーザーは**`tccutil`**を使用してルールを削除またはクエリすることができます。&#x20;
+ただし、ユーザーは`tccutil`を使用してルールを削除またはクエリすることができます。&#x20;
 {% endhint %}
 
 #### リセット
@@ -165,7 +165,7 @@ TCCの**データベース**は、アプリケーションの**バンドルID**�
 {% code overflow="wrap" %}
 ```bash
 # From sqlite
-sqlite> select hex(csreq) from access where client="ru.keepcoder.Telegram";
+sqlite> select service, client, hex(csreq) from access where auth_value=2;
 #Get csreq
 
 # From bash
@@ -187,7 +187,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ただし、アプリが`~/Desktop`、`~/Downloads`、`~/Documents`などの特定のユーザーフォルダにアクセスするためには、特定のエンタイトルメントは必要ありません。システムはアクセスを透過的に処理し、必要に応じてユーザーにプロンプトを表示します。
 
-Appleのアプリはプロンプトを生成しません。それらはエンタイトルメントリストに事前に付与された権限を含んでいるため、ポップアップは表示されず、TCCデータベースにも表示されません。例えば：
+Appleのアプリはプロンプトを生成しません。それらはエンタイトルメントリストに事前に付与された権限を含んでいるため、ポップアップを生成することはありませんし、TCCデータベースにも表示されません。例えば：
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -201,13 +201,13 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 これにより、カレンダーがユーザーにリマインダー、カレンダー、アドレス帳へのアクセスを求めることを防ぎます。
 
 {% hint style="success" %}
-権限に関する公式ドキュメント以外にも、[https://newosxbook.com/ent.jl](https://newosxbook.com/ent.jl) には非公式ながら興味深い権限に関する情報が見つかることがあります。
+権限に関する公式ドキュメント以外にも、[https://newosxbook.com/ent.jl](https://newosxbook.com/ent.jl)で非公式な権限に関する興味深い情報を見つけることができます。
 {% endhint %}
 
-### 機密情報が保護されていない場所
+### 機密情報の保護されていない場所
 
 * $HOME (自体)
-* $HOME/.ssh, $HOME/.aws, など
+* $HOME/.ssh, $HOME/.awsなど
 * /tmp
 
 ### ユーザーの意図 / com.apple.macl
@@ -230,16 +230,58 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 {% hint style="info" %}
 興味深いことに、**`com.apple.macl`**属性はtccdではなく**Sandbox**によって管理されています。
 
-また、コンピュータ内のアプリのUUIDを許可するファイルを別のコンピュータに移動すると、同じアプリでも異なるUIDを持つため、そのアプリにアクセス権限を付与することはできません。
+また、コンピュータ内のアプリのUUIDを許可するファイルを別のコンピュータに移動すると、同じアプリでも異なるUIDを持つため、そのアプリにアクセス権が付与されません。
 {% endhint %}
 
-拡張属性`com.apple.macl`は、他の拡張属性とは異なり、**SIPによって保護されているため、クリアすることはできません**。ただし、[**この投稿で説明されているように**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)、ファイルを**圧縮**し、**削除**してから**解凍**することで無効にすることが可能です。
+拡張属性`com.apple.macl`は他の拡張属性とは異なり、**SIPによって保護**されているため、クリアすることはできません。ただし、[**この投稿で説明されているように**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)、ファイルを**圧縮**して、**削除**して、**解凍**することで無効にすることが可能です。
 
-## TCC特権昇格とバイパス
+## TCCの特権昇格とバイパス
 
-### AutomationからFDAへの特権昇格
+### TCCに挿入
 
-**Finder**は常にFDAを持っているアプリケーションです（UIに表示されない場合でも）、そのため、**Automation**権限を持っている場合、その特権を悪用していくつかのアクションを実行することができます。
+ある時点でTCCデータベースに対して書き込みアクセス権を取得できた場合、以下のようなエントリを追加することができます（コメントを削除してください）：
+```
+INSERT INTO access (
+service,
+client,
+client_type,
+auth_value,
+auth_reason,
+auth_version,
+csreq,
+policy_id,
+indirect_object_identifier_type,
+indirect_object_identifier,
+indirect_object_code_identity,
+flags,
+last_modified,
+pid,
+pid_version,
+boot_uuid,
+last_reminded
+) VALUES (
+'kTCCServiceSystemPolicyDesktopFolder', -- service
+'com.googlecode.iterm2', -- client
+0, -- client_type (0 - bundle id)
+2, -- auth_value  (2 - allowed)
+3, -- auth_reason (3 - "User Set")
+1, -- auth_version (always 1)
+X'FADE0C00000000C40000000100000006000000060000000F0000000200000015636F6D2E676F6F676C65636F64652E697465726D32000000000000070000000E000000000000000A2A864886F7636406010900000000000000000006000000060000000E000000010000000A2A864886F763640602060000000000000000000E000000000000000A2A864886F7636406010D0000000000000000000B000000000000000A7375626A6563742E4F550000000000010000000A483756375859565137440000', -- csreq is a BLOB, set to NULL for now
+NULL, -- policy_id
+NULL, -- indirect_object_identifier_type
+'UNUSED', -- indirect_object_identifier - default value
+NULL, -- indirect_object_code_identity
+0, -- flags
+strftime('%s', 'now'), -- last_modified with default current timestamp
+NULL, -- assuming pid is an integer and optional
+NULL, -- assuming pid_version is an integer and optional
+'UNUSED', -- default value for boot_uuid
+strftime('%s', 'now') -- last_reminded with default current timestamp
+);
+```
+### 自動化からFDAへの特権昇格
+
+**Finder**は、常にFDAを持っているアプリケーションです（UIに表示されない場合でも）。そのため、**Automation**の特権を持っている場合、その特権を悪用していくつかのアクションを実行することができます。
 
 {% tabs %}
 {% tab title="ユーザーのTCC.dbを盗む" %}
@@ -291,14 +333,14 @@ EOD
 
 ### **FDAからTCC権限への特権昇格**
 
-これは本当の特権昇格ではないと思いますが、念のため役立つかもしれません。FDAを制御できるプログラムがある場合、ユーザーのTCCデータベースを**変更して任意のアクセス権限を与える**ことができます。これは、FDA権限を失った場合の持続性テクニックとして役立つ場合があります。
+これは本当の特権昇格ではないと思いますが、念のため役立つかもしれません。FDAを制御できるプログラムがある場合、ユーザーのTCCデータベースを**変更して任意のアクセス権限を与える**ことができます。これは、FDA権限を失った場合の持続性手法として役立つ場合があります。
 
 ### **SIPバイパスからTCCバイパスへ**
 
-システムの**TCCデータベース**は**SIP**によって保護されているため、**指定された権限を持つプロセスのみが変更**できます。したがって、攻撃者がSIPに制限された**ファイル**を変更できる**SIPバイパス**を見つけると、TCCデータベースの保護を**解除**し、自身にすべてのTCC権限を与えることができます。
+システムの**TCCデータベース**は**SIP**によって保護されているため、**指定された権限を持つプロセスのみが変更**できます。したがって、攻撃者がSIPに制限された**ファイル**を**変更**できる**SIPバイパス**を見つけると、TCCデータベースの保護を**解除**し、自身にすべてのTCC権限を与えることができます。
 
-ただし、この**SIPバイパスをTCCバイパスに悪用**する別の方法があります。`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`というファイルは、TCC例外を必要とするアプリケーションの許可リストです。したがって、攻撃者がこのファイルからSIP保護を**解除**し、**独自のアプリケーション**を追加できれば、そのアプリケーションはTCCをバイパスできます。\
-例えば、ターミナルを追加する場合は：
+ただし、この**SIPバイパスをTCCバイパスに悪用**する別の方法があります。`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`というファイルは、TCC例外を必要とするアプリケーションの許可リストです。したがって、攻撃者がこのファイルからSIP保護を**解除**し、**独自のアプリケーション**を追加することができれば、そのアプリケーションはTCCをバイパスできます。\
+例えば、ターミナルを追加する場合は以下のようにします：
 ```bash
 # Get needed info
 codesign -d -r- /System/Applications/Utilities/Terminal.app
@@ -311,9 +353,9 @@ AllowApplicationsList.plist:
 
 このファイルを編集することで、特定のアプリケーションに対してTCCフレームワークの制限を追加または削除することができます。ただし、注意が必要であり、誤った編集はシステムのセキュリティに悪影響を及ぼす可能性があります。
 
-このファイルは、セキュリティの向上とプライバシーの保護を目的として、適切な権限で保護されるべきです。不正なアクセスや変更から保護するために、適切なファイルパーミッションとアクセス制御を確保することが重要です。
+このファイルは、セキュリティの向上とプライバシーの保護を目的として、適切な権限で保護されるべきです。不正なアクセスや変更から保護するために、適切なファイルパーミッションとアクセス制御を設定することが重要です。
 
-このファイルの場所は、`/Library/Application Support/com.apple.TCC`または`~/Library/Application Support/com.apple.TCC`です。
+このファイルの場所は次のとおりです：`/Library/Application Support/com.apple.TCC/AllowApplicationsList.plist`
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
