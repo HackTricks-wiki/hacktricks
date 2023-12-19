@@ -26,11 +26,124 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-**新しいファイル**には、**拡張属性`com.apple.macl`**が追加され、**作成者のアプリ**が読み取りアクセスを持つようになります。
+新しいファイルには、**拡張属性`com.apple.macl`**が追加され、**作成者のアプリ**が読み取りアクセスを持つようになります。
+
+### TCCの絶対パス
+
+TCCの許可をアプリケーションに与える最も一般的な方法は、バンドルを使用することです。ただし、**絶対パスを示すバイナリにアクセスを与える**ことも可能です。\
+興味深いのは、バイナリを上書きできれば、**アクセスを盗む**ことができるということです。
+
+次のコードを使用してバイナリを呼び出すことができます：
+
+{% tabs %}
+{% tab title="invoker.m" %}
+```
+#import <Foundation/Foundation.h>
+
+// clang -fobjc-arc -framework Foundation invoker.m -o invoker
+
+int main(int argc, const char * argv[]) {
+@autoreleasepool {
+// Check if the argument is provided
+if (argc != 2) {
+NSLog(@"Usage: %s <path_to_executable>", argv[0]);
+return 1;
+}
+
+// Create a new task
+NSTask *task = [[NSTask alloc] init];
+
+// Set the task's launch path to the provided argument
+[task setLaunchPath:@(argv[1])];
+
+// Launch the task
+[task launch];
+
+// Wait for the task to complete
+[task waitUntilExit];
+}
+return 0;
+}
+```
+{% tab title="shell.c" %}
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("Usage: %s <command>\n", argv[0]);
+        return 1;
+    }
+
+    // Set the TCC database path
+    setenv("TCC_DB_PATH", "/dev/null", 1);
+
+    // Execute the command
+    execvp(argv[1], &argv[1]);
+
+    // If execvp fails, print an error message
+    perror("Error");
+    return 1;
+}
+```
+
+このプログラムは、TCCデータベースパスを設定し、指定されたコマンドを実行します。引数が不足している場合は、使用法を表示します。execvpが失敗した場合は、エラーメッセージを表示します。
+
+```shell
+$ gcc -o shell shell.c
+$ ./shell ls
+```
+
+このプログラムを使用すると、TCCデータベースのバイパスが可能になります。
+
+{% endtab %}
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>  // For execl and fork
+
+// gcc shell.c -o shell
+// mv shell </path/bin/with/TCC>
+
+int main() {
+pid_t pid = fork();
+
+if (pid == -1) {
+// Fork failed
+perror("fork");
+return 1;
+} else if (pid == 0) {
+// Child process
+execl("/Applications/iTerm.app/Contents/MacOS/iTerm2", "iTerm2", (char *) NULL);
+
+// execl only returns if there's an error
+perror("execl");
+exit(EXIT_FAILURE);
+} else {
+// Parent process
+int status;
+waitpid(pid, &status, 0);  // Wait for the child process to finish
+
+if (WIFEXITED(status)) {
+// Return the exit status of iTerm2
+return WEXITSTATUS(status);
+}
+}
+
+return 0;
+}
+```
+{% endtab %}
+{% endtabs %}
+
+
 
 ### SSHバイパス
 
-デフォルトでは、**SSH経由でのアクセスは「フルディスクアクセス」**を持っていました。これを無効にするには、リストに表示されているが無効になっている状態にする必要があります（リストから削除してもこれらの特権は削除されません）：
+デフォルトでは、**SSH経由でのアクセスは「フルディスクアクセス」を持っていました**。これを無効にするには、リストに表示されているが無効になっている状態にする必要があります（リストから削除してもこれらの特権は削除されません）：
 
 ![](<../../../../../.gitbook/assets/image (569).png>)
 
@@ -44,21 +157,21 @@ SSHを有効にするには、現在は**フルディスクアクセス**が必�
 
 ### 拡張子の処理 - CVE-2022-26767
 
-ファイルには、**特定のアプリケーションが読み取り権限を持つための`com.apple.macl`**属性が付与されます。この属性は、ファイルをアプリに**ドラッグ＆ドロップ**するか、ユーザがファイルを**ダブルクリック**してデフォルトのアプリで開くときに設定されます。
+ファイルには、**特定のアプリケーションが読み取るための権限を与えるために`com.apple.macl`**属性が付与されます。この属性は、ファイルをアプリに**ドラッグ＆ドロップ**するか、ユーザがファイルを**ダブルクリック**してデフォルトのアプリで開くときに設定されます。
 
 したがって、ユーザは**悪意のあるアプリ**を登録して、すべての拡張子を処理し、Launch Servicesを呼び出して任意のファイルを**開く**ことができます（そのため、悪意のあるファイルは読み取りアクセスが許可されます）。
 
 ### iCloud
 
-権限**`com.apple.private.icloud-account-access`**を持つことで、**`com.apple.iCloudHelper`** XPCサービスと通信することができ、iCloudトークンを**提供**することができます。
+権限**`com.apple.private.icloud-account-access`**を持つことで、**`com.apple.iCloudHelper`** XPCサービスと通信することができ、iCloudトークンを提供します。
 
-**iMovie**と**Garageband**にはこの権限と他の権限がありました。
+**iMovie**と**Garageband**はこの権限と他の権限を持っていました。
 
-この権限からiCloudトークンを取得するためのエクスプロイトについての詳細については、次のトークを参照してください：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+この権限からiCloudトークンを取得するためのエクスプロイトについての詳細は、次のトークを参照してください：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automation
 
-**`kTCCServiceAppleEvents`**権限を持つアプリは、他のアプリを**制御**することができます。これは、他のアプリに付与された権限を**悪用**する可能性があることを意味します。
+**`kTCCServiceAppleEvents`**権限を持つアプリは、他のアプリを**制御することができます**。これは、他のアプリに付与された権限を**悪用することができる可能性**があることを意味します。
 
 Appleスクリプトについての詳細は次を参照してください：
 
@@ -66,13 +179,13 @@ Appleスクリプトについての詳細は次を参照してください：
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-たとえば、アプリが**`iTerm`に対してAutomation権限**を持っている場合、この例では**`Terminal`**がiTermにアクセス権を持っています：
+例えば、アプリが**`iTerm`に対してAutomation権限**を持っている場合、この例では**`Terminal`**がiTermにアクセス権を持っています：
 
 <figure><img src="../../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-#### iTerm上で
+#### iTermを介して
 
-FDAを持たないTerminalは、FDAを持つiTermを呼び出して、それを使用してアクションを実行することができます：
+FDAを持たないTerminalは、それを持つiTermを呼び出して、アクションを実行するために使用することができます：
 
 {% code title="iterm.script" %}
 ```applescript
@@ -147,20 +260,20 @@ $> ls ~/Documents
 
 ライブラリ`libsecurity_translocate`を使用したバイナリ`/usr/libexec/lsd`は、`com.apple.private.nullfs_allow`という権限を持っていました。これにより、**nullfs**マウントを作成し、`com.apple.private.tcc.allow`という権限を持っていました。**`kTCCServiceSystemPolicyAllFiles`**を使用してすべてのファイルにアクセスできました。
 
-"Library"に検疫属性を追加し、**`com.apple.security.translocation`** XPCサービスを呼び出すことができ、それによりLibraryが**`$TMPDIR/AppTranslocation/d/d/Library`**にマップされ、Library内のすべてのドキュメントに**アクセス**できるようになりました。
+"Library"に検疫属性を追加し、**`com.apple.security.translocation`** XPCサービスを呼び出すことで、Libraryを**`$TMPDIR/AppTranslocation/d/d/Library`**にマッピングし、Library内のすべてのドキュメントに**アクセス**することができました。
 
 ### CVE-2023-38571 - Music & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
-**`Music`**には興味深い機能があります。実行中に、ユーザーの「メディアライブラリ」に**`~/Music/Music/Media.localized/Automatically Add to Music.localized`**にドロップされたファイルが**インポート**されます。さらに、次のようなものを呼び出します：**`rename(a, b);`** ここで、`a`と`b`は次のようになります：
+**`Music`**には興味深い機能があります。実行中に、ユーザーの「メディアライブラリ」に**`~/Music/Music/Media.localized/Automatically Add to Music.localized`**にドロップされたファイルを**インポート**します。さらに、次のようなものを呼び出します：**`rename(a, b);`** ここで、`a`と`b`は次のようになります：
 
 * `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
 * `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
 
-この**`rename(a, b);`**の動作は**競合状態**に対して脆弱です。`Automatically Add to Music.localized`フォルダに偽の**TCC.db**ファイルを配置し、新しいフォルダ(b)が作成されてファイルがコピーされると、ファイルを削除し、**`~/Library/Application Support/com.apple.TCC`**にポイントすることができます。
+この**`rename(a, b);`**の動作は**競合状態**に対して脆弱であり、`Automatically Add to Music.localized`フォルダに偽の**TCC.db**ファイルを配置し、新しいフォルダ(b)が作成されてファイルがコピーされると、ファイルを削除し、**`~/Library/Application Support/com.apple.TCC`**にポイントすることができました。
 
 ### SQLITE\_SQLLOG\_DIR - CVE-2023-32422
 
-**`SQLITE_SQLLOG_DIR="path/folder"`**とすると、**任意のオープンされたdbがそのパスにコピー**されます。このCVEでは、この制御を悪用して、**TCCデータベースを持つプロセスによって開かれるSQLiteデータベース**内に**書き込む**ことができました。そして、**`SQLITE_SQLLOG_DIR`**を**ファイル名のシンボリックリンク**として悪用し、そのデータベースが**開かれる**と、ユーザーの**TCC.dbが上書き**されます。\
+**`SQLITE_SQLLOG_DIR="path/folder"`**とすると、**任意のオープンされたdbがそのパスにコピー**されます。このCVEでは、この制御を悪用して、**TCCデータベースを持つプロセスによって開かれるSQLiteデータベース**内に**書き込む**ことができました。そして、**`SQLITE_SQLLOG_DIR`**に**ファイル名のシンボリックリンク**を使用して、そのデータベースが**開かれる**と、ユーザーの**TCC.dbが上書き**されました。\
 [**詳細はこちら**](https://youtu.be/f1HA5QhLQ7Y?t=20548)。
 
 ### **SQLITE\_AUTO\_TRACE**
@@ -179,10 +292,10 @@ rootとしてこのサービスを有効にすると、**ARDエージェント�
 ## **NFSHomeDirectory**による
 
 TCCは、ユーザーのHOMEフォルダ内のデータベースを使用して、ユーザー固有のリソースへのアクセスを制御します。データベースの場所は**$HOME/Library/Application Support/com.apple.TCC/TCC.db**です。\
-したがって、ユーザーが$HOME環境変数を**異なるフォルダ**を指すように設定してTCCを再起動できれば、ユーザーは**/Library/Application Support/com.apple.TCC/TCC.db**に新しいTCCデータベースを作成し、TCCに任意のTCC許可を与えることができます。
+したがって、ユーザーが$HOME環境変数を**異なるフォルダ**を指すように設定してTCCを再起動できれば、ユーザーは**/Library/Application Support/com.apple.TCC/TCC.db**に新しいTCCデータベースを作成し、TCCに任意のTCC許可を任意のアプリに与えるようにトリックをかけることができます。
 
 {% hint style="success" %}
-Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に格納された設定を**`$HOME`の値**として使用しているため、この値を変更する権限（**`kTCCServiceSystemPolicySysAdminFiles`**）を持つアプリケーションを侵害すると、このオプションをTCCバイパスとして**利用**することができます。
+Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に格納された設定を**`$HOME`の値**として使用しているため、この値を変更する権限（**`kTCCServiceSystemPolicySysAdminFiles`**）を持つアプリケーションを侵害すると、このオプションをTCCバイパスとして**武器化**することができます。
 {% endhint %}
 
 ### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
@@ -194,20 +307,20 @@ Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に�
 **最初のPOC**では、[**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/)と[**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/)を使用して、ユーザーの**HOME**フォルダを変更します。
 
 1. ターゲットアプリケーションの_csreq_ blobを取得します。
-2. 必要なアクセス権と_csreq_ blobを持つ偽の_TCC.db_ファイルを配置します。
+2. 必要なアクセスと_csreq_ blobを持つ偽の_TCC.db_ファイルを配置します。
 3. [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/)を使用してユーザーのディレクトリサービスエントリをエクスポートします。
 4. ユーザーのホームディレクトリを変更するためにディレクトリサービスエントリを変更します。
 5. [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/)を使用して変更されたディレクトリサービスエントリをインポートします。
 6. ユーザーの_tccd_を停止し、プロセスを再起動します。
 
 **2番目のPOC**では、**`/usr/libexec/configd`**を使用しました。このファイルには`com.apple.private.tcc.allow`という値があり、`kTCCServiceSystemPolicySysAdminFiles`が設定されています。\
-**`configd`**を**`-t`**オプションで実行することで、攻撃者は**カスタムバンドルをロード**することができます。したがって、このエクスプロイトでは、ユーザーのホームディレクトリを変更する**`dsexport`**と**`dsimport`**の方法を**`configd`のコードインジェクション**で置き換えます。
+**`configd`**を**`-t`**オプションで実行することができれば、攻撃者は**カスタムバンドルをロード**することができます。したがって、このエクスプロイトでは、ユーザーのホームディレクトリを変更する**`dsexport`**と**`dsimport`**の方法を**`configd`のコードインジェクション**で置き換えます。
 
 詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)を参照してください。
 
 ## プロセスインジェクションによる
 
-プロセス内にコードをインジェクトし、そのTCC特権を悪用するためのさまざまな技術があります。
+プロセス内にコードをインジェクトし、そのTCC特権を悪用するためのさまざまなテクニックがあります。
 
 {% content-ref url="../../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../../macos-proces-abuse/)
@@ -218,17 +331,17 @@ Appleは、ユーザープロファイル内の**`NFSHomeDirectory`**属性に�
 
 ### CVE-2020-27937 - Directory Utility
 
-アプリケーション`/System/Library/CoreServices/Applications/Directory Utility.app`には、**`kTCCServiceSystemPolicySysAdminFiles`**というエンタイトルメントがあり、**`.daplug`**拡張子のプラグインがロードされ、**ハードニングされていない**ランタイムがありました。
+アプリケーション`/System/Library/CoreServices/Applications/Directory Utility.app`には、**`kTCCServiceSystemPolicySysAdminFiles`**というエンタイトルメントがあり、**`.daplug`**拡張子のプラグインをロードし、**ハードニングされていない**ランタイムを持っていました。
 
-このCVEを利用するために、**`NFSHomeDirectory`**が**変更**されます（前述のエンタイトルメントを悪用）。これにより、ユーザーのTCCデータベースを**乗っ取る**ことができ、TCCをバイパスすることができます。
+このCVEを武器化するために、**`NFSHomeDirectory`**が**変更**されます（前述のエンタイトルメントを悪用）。これにより、ユーザーのTCCデータベースを**乗っ取る**ことができ、TCCをバイパスすることができます。
 
 詳細については、[**元のレポート**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)を参照してください。
 
 ### CVE-2020-29621 - Coreaudiod
 
-バイナリ**`/usr/sbin/coreaudiod`**には、`com.apple.security.cs.disable-library-validation`と`com.apple.private.tcc.manager`というエンタイトルメントがあります。最初のエンタイトルメントは**コードインジェクションを許可**し、2番目のエンタイトルメントは**TCCの管理権限**を与えます。
+バイナリ**`/usr/sbin/coreaudiod`**には、`com.apple.security.cs.disable-library-validation`と`com.apple.private.tcc.manager`というエンタイトルメントがありました。最初のエンタイトルメントは**コードインジェクションを許可**し、2番目のエンタイトルメントは**TCCの管理権限**を与えます。
 
-このバイナリは、フォルダー`/Library/Audio/Plug-Ins/HAL`から**サードパーティのプラグイン**をロードすることができます。したがって、このPoCでは、**プラグインをロードし、TCCの許可を悪用**することができます。
+このバイナリは、フォルダー`/Library/Audio/Plug-Ins/HAL`から**サードパーティのプラグイン**をロードすることができました。したがって、このPoCでは、**プラグインをロードし、TCCの許可を悪用**することができました。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -434,8 +547,8 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 
 ### 位置情報サービス
 
-**`/var/db/locationd/clients.plist`**には、**位置情報サービスにアクセスを許可されたクライアント**を示す、第3のTCCデータベースがあります。\
-フォルダ**`/var/db/locationd/`はDMGのマウントから保護されていなかった**ため、独自のplistをマウントすることが可能でした。
+**`/var/db/locationd/clients.plist`**には、**位置情報サービスにアクセスを許可されたクライアント**を示す第3のTCCデータベースがあります。\
+フォルダ**`/var/db/locationd/`はDMGのマウントから保護されていなかったため、独自のplistをマウントすることが可能でした。
 
 ## スタートアップアプリによる方法
 
