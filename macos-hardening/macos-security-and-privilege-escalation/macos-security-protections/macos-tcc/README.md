@@ -32,22 +32,22 @@ ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-Los permisos se heredan de la aplicación principal y se rastrean en función del ID de paquete y el ID de desarrollador.
+Los permisos se heredan de la aplicación padre y se rastrean en función del ID de paquete y el ID de desarrollador.
 
 ### Bases de datos de TCC
 
 Las selecciones se almacenan en la base de datos de TCC en todo el sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`** o en **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para las preferencias por usuario. Las bases de datos están protegidas contra la edición con SIP (Protección de Integridad del Sistema), pero se pueden leer.
 
 {% hint style="danger" %}
-La base de datos de TCC en **iOS** se encuentra en **`/private/var/mobile/Library/TCC/TCC.db`**
+La base de datos de TCC en iOS se encuentra en **`/private/var/mobile/Library/TCC/TCC.db`**
 {% endhint %}
 
 Hay una tercera base de datos de TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para acceder a los servicios de ubicación.
 
-Además, un proceso con **acceso completo al disco** puede editar la base de datos en modo de usuario. Ahora, una aplicación también necesita **FDA** o **`kTCCServiceEndpointSecurityClient`** para leer la base de datos (y modificar la base de datos de usuarios).
+Además, un proceso con acceso completo al disco puede editar la base de datos en modo de usuario. Ahora, una aplicación también necesita FDA o `kTCCServiceEndpointSecurityClient` para leer la base de datos (y modificar la base de datos de usuarios).
 
 {% hint style="info" %}
-La interfaz de usuario del **centro de notificaciones** puede realizar cambios en la base de datos de TCC del sistema:
+La interfaz de usuario del centro de notificaciones puede realizar cambios en la base de datos de TCC del sistema:
 
 {% code overflow="wrap" %}
 ```bash
@@ -115,7 +115,7 @@ Al verificar ambas bases de datos, puedes verificar los permisos que una aplicac
 * El campo **`auth_value`** puede tener diferentes valores: denied(0), unknown(1), allowed(2) o limited(3).
 * El campo **`auth_reason`** puede tener los siguientes valores: Error(1), Consentimiento del usuario(2), Configuración del usuario(3), Configuración del sistema(4), Política de servicio(5), Política de MDM(6), Política de anulación(7), Cadena de uso faltante(8), Tiempo de espera de la solicitud(9), Preflight desconocido(10), Con derecho(11), Política de tipo de aplicación(12).
 * El campo **csreq** está ahí para indicar cómo verificar el binario a ejecutar y otorgar los permisos de TCC:
-```
+```bash
 # Query to get cserq in printable hex
 select service, client, hex(csreq) from access where auth_value=2;
 
@@ -229,17 +229,21 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 {% hint style="info" %}
 Es curioso que el atributo **`com.apple.macl`** sea gestionado por el **Sandbox**, no por tccd.
 
-También ten en cuenta que si mueves un archivo que permite el UUID de una aplicación en tu computadora a una computadora diferente, debido a que la misma aplicación tendrá diferentes UIDs, no otorgará acceso a esa aplicación.
+También hay que tener en cuenta que si mueves un archivo que permite el UUID de una aplicación en tu computadora a una computadora diferente, debido a que la misma aplicación tendrá diferentes UIDs, no otorgará acceso a esa aplicación.
 {% endhint %}
 
 El atributo extendido `com.apple.macl` **no se puede borrar** como otros atributos extendidos porque está **protegido por SIP**. Sin embargo, como se explica en [**esta publicación**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), es posible desactivarlo **comprimiendo** el archivo, **borrándolo** y **descomprimiéndolo**.
 
-## Privilegios elevados y bypasses de TCC
+## Privilegios de TCC y Bypasses
 
 ### Insertar en TCC
 
 Si en algún momento logras obtener acceso de escritura sobre una base de datos de TCC, puedes usar algo como lo siguiente para agregar una entrada (eliminar los comentarios):
-```
+
+<details>
+
+<summary>Ejemplo de inserción en TCC</summary>
+```sql
 INSERT INTO access (
 service,
 client,
@@ -278,9 +282,11 @@ NULL, -- assuming pid_version is an integer and optional
 strftime('%s', 'now') -- last_reminded with default current timestamp
 );
 ```
-### Escalación de privilegios desde Automatización a FDA
+</details>
 
-**Finder** es una aplicación que **siempre tiene FDA** (aunque no aparezca en la interfaz de usuario), por lo que si tienes privilegios de **Automatización** sobre ella, puedes abusar de sus privilegios para **realizar algunas acciones**.
+### Escalada de privilegios desde Automatización a FDA
+
+**Finder** es una aplicación que **siempre tiene FDA** (incluso si no aparece en la interfaz de usuario), por lo que si tienes privilegios de **Automatización** sobre ella, puedes abusar de sus privilegios para **hacer que realice algunas acciones**.
 
 {% tabs %}
 {% tab title="Robar la base de datos TCC.db de los usuarios" %}
@@ -326,7 +332,7 @@ Esta es la solicitud de TCC para obtener privilegios de automatización sobre Fi
 
 ### Escalada de privilegios desde la base de datos de TCC de usuario a FDA
 
-Obteniendo **permisos de escritura** sobre la **base de datos de TCC de usuario**, no puedes otorgarte a ti mismo permisos de **`FDA`**, solo el que se encuentra en la base de datos del sistema puede otorgar eso.
+Obtener **permisos de escritura** sobre la **base de datos de TCC de usuario** no te permite otorgarte permisos de **`FDA`**, solo el que se encuentra en la base de datos del sistema puede otorgar eso.
 
 Pero puedes otorgarte a ti mismo **derechos de automatización para Finder**, y abusar de la técnica anterior para escalar a FDA.
 
@@ -350,20 +356,21 @@ Este archivo es utilizado por el Mecanismo de Control de Transparencia (TCC) en 
 
 Para agregar una aplicación a la lista de permitidas, debes editar este archivo y agregar una entrada con el identificador de paquete de la aplicación. Asegúrate de que el identificador de paquete sea correcto, ya que de lo contrario la aplicación no será reconocida.
 
-Es importante tener en cuenta que modificar este archivo requiere privilegios de administrador y puede afectar la seguridad de tu sistema. Solo debes realizar cambios si estás seguro de lo que estás haciendo y si confías en la aplicación que deseas permitir.
+Es importante tener en cuenta que modificar este archivo requiere privilegios de administrador y puede afectar la seguridad del sistema si se realizan cambios incorrectos. Se recomienda tener precaución al editar este archivo y realizar copias de seguridad regulares del mismo.
 
-Aquí tienes un ejemplo de cómo se ve el archivo AllowApplicationsList.plist:
+Aquí hay un ejemplo de cómo se ve el archivo AllowApplicationsList.plist:
 
 ```xml
 <dict>
-    <key>com.example.app1</key>
-    <true/>
-    <key>com.example.app2</key>
-    <true/>
+    <key>AllowedApplications</key>
+    <array>
+        <string>com.example.app1</string>
+        <string>com.example.app2</string>
+    </array>
 </dict>
 ```
 
-En este ejemplo, las aplicaciones "com.example.app1" y "com.example.app2" tienen permiso para acceder a los recursos protegidos.
+En este ejemplo, las aplicaciones "com.example.app1" y "com.example.app2" tienen permiso para acceder a los recursos protegidos por el TCC.
 
 Recuerda que es importante mantener actualizado este archivo y revisar regularmente las aplicaciones permitidas para garantizar la seguridad de tu sistema.
 ```xml

@@ -162,6 +162,7 @@
     * [macOS Sensitive Locations](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-sensitive-locations.md)
     * [macOS Universal binaries & Mach-O Format](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
   * [macOS Objective-C](macos-hardening/macos-security-and-privilege-escalation/macos-basic-objective-c.md)
+  * [macOS Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/macos-privilege-escalation.md)
   * [macOS Proces Abuse](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/README.md)
     * [macOS Dirty NIB](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-dirty-nib.md)
     * [macOS Electron Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-electron-applications-injection.md)

