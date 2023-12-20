@@ -104,13 +104,7 @@ For this kind of vulnerabilities don't forget to **check vulnerable `.pkg` insta
 [macos-installers-abuse.md](macos-files-folders-and-binaries/macos-installers-abuse.md)
 {% endcontent-ref %}
 
-### Entitlements and Privileges abuse via process abuse
 
-If a process can **inject code in another process with better privileges or entitlements** or contact it to perform privileges actions, he could escalate privileges and bypass defensive meassures such as [Sandbox](macos-security-protections/macos-sandbox/) or [TCC](macos-security-protections/macos-tcc/).
-
-{% content-ref url="macos-proces-abuse/" %}
-[macos-proces-abuse](macos-proces-abuse/)
-{% endcontent-ref %}
 
 ### File Extension & URL scheme app handlers
 
@@ -120,49 +114,22 @@ Weird apps registered by file extensions could be abused and different applicati
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
 
-## MacOS Privilege Escalation
+## macOS TCC / SIP Privilege Escalation
 
-### CVE-2020-9771 - mount\_apfs TCC bypass and privilege escalation
+In macOS **applications and binaries can have permissions** to access folders or settings that make them more privileged than others.
 
-**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
-The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.
+Therefore, an attacker that wants to successfully compromise a macOS machine will need to **escalate its TCC privileges** (or even **bypass SIP**, depending on his needs).
 
-{% code overflow="wrap" %}
-```bash
-# Create snapshot
-tmutil localsnapshot
+These privileges are usually given in the form of **entitlements** the application is signed with, or the application might requested some accesses and after the **user approving them** they can be found in the **TCC databases**. Another way a process can obtain these privileges is by being a **child of a process** with those **privileges** as they are usually **inherited**.
 
-# List snapshots
-tmutil listlocalsnapshots /
-Snapshots for disk /:
-com.apple.TimeMachine.2023-05-29-001751.local
+Follow these links to find different was to [**escalate privileges in TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), to [**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) and how in the past [**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-# Generate folder to mount it
-cd /tmp # I didn it from this folder
-mkdir /tmp/snap
+## macOS Traditional Privilege Escalation
 
-# Mount it, "noowners" will mount the folder so the current user can access everything
-/sbin/mount_apfs -o noowners -s com.apple.TimeMachine.2023-05-29-001751.local /System/Volumes/Data /tmp/snap
+Of course from a red teams perspective you should be also interested in escalating to root. Check the following post for some hints:
 
-# Access it
-ls /tmp/snap/Users/admin_user # This will work
-```
-{% endcode %}
-
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve\_2020\_9771/)**.**
-
-### Sensitive Information
-
-{% content-ref url="macos-files-folders-and-binaries/macos-sensitive-locations.md" %}
-[macos-sensitive-locations.md](macos-files-folders-and-binaries/macos-sensitive-locations.md)
-{% endcontent-ref %}
-
-### Linux Privesc
-
-First of all, please note that **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. So see:
-
-{% content-ref url="../../linux-hardening/privilege-escalation/" %}
-[privilege-escalation](../../linux-hardening/privilege-escalation/)
+{% content-ref url="macos-privilege-escalation.md" %}
+[macos-privilege-escalation.md](macos-privilege-escalation.md)
 {% endcontent-ref %}
 
 ## References

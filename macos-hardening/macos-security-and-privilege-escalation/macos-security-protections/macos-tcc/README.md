@@ -118,7 +118,7 @@ Checking both databases you can check the permissions an app has allowed, has fo
 * The **`auth_reason`** can take the following values: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
 * The **csreq** field is there to indicate how to verify the binary to execute and grant the TCC permissions:
 
-```
+```bash
 # Query to get cserq in printable hex
 select service, client, hex(csreq) from access where auth_value=2;
 
@@ -251,7 +251,11 @@ The extended attribute `com.apple.macl` **can’t be cleared** like other extend
 
 If at some point you manage to get write access over a TCC database you can use something like the following to add an entry (remove the comments):
 
-```
+<details>
+
+<summary>Insert into TCC example</summary>
+
+```sql
 INSERT INTO access (
     service, 
     client, 
@@ -290,6 +294,8 @@ INSERT INTO access (
     strftime('%s', 'now') -- last_reminded with default current timestamp
 );
 ```
+
+</details>
 
 ### Privesc from Automation to FDA
 
