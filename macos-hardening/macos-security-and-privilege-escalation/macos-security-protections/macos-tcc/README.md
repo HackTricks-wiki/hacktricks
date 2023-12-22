@@ -38,15 +38,27 @@ Permissions are **inherited from the parent** application and the **permissions*
 
 ### TCC Databases
 
-The selections is then stored in the TCC system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** or in **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences. The databases are **protected from editing with SIP**(System Integrity Protection), but you can read them.
+The allowances/denies then stored in some TCC databases:
 
-{% hint style="danger" %}
-The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
+* The system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`**  .
+  * This database is **SIP protected**, so only a SIP bypass can write into it.
+* The user TCC database **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences.
+  * This database is protected so only processes with high TCC privileges like Full Disk Access can write to it (but i't not protected by SIP).
+
+{% hint style="warning" %}
+The previous databases are also **TCC protected for read access**. So you **won't be able to read** your regular user TCC database unless it's from a TCC privileged process.
+
+However, remember that a process with these high privileges (like **FDA** or **`kTCCServiceEndpointSecurityClient`**) will be able to write the users TCC database
 {% endhint %}
 
-There is a **third** TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.
+* There is a **third** TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.
+* The SIP protected file **`/Users/carlospolop/Downloads/REG.db`** (also protected from read access with TCC), contains the **location** of all the **valid TCC databases**.
+* The SIP protected file **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (also protected from read access with TCC), contains more TCC granted permissions.
+* The SIP protected file **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (bu readable by anyone) is an allow list of applications that require a TCC exception.&#x20;
 
-Moreover, a process with **full disk access** can **edit the user-mode** database. Now an app also needs **FDA** or **`kTCCServiceEndpointSecurityClient`** to **read** the database (and to modify the users DB).
+{% hint style="success" %}
+The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
+{% endhint %}
 
 {% hint style="info" %}
 The **notification center UI** can make **changes in the system TCC database**:
@@ -62,6 +74,8 @@ com.apple.rootless.storage.TCC
 
 However, users can **delete or query rules** with the **`tccutil`** command line utility.
 {% endhint %}
+
+#### Query the databases
 
 {% tabs %}
 {% tab title="user DB" %}
@@ -114,6 +128,55 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 Checking both databases you can check the permissions an app has allowed, has forbidden, or doesn't have (it will ask for it).
 {% endhint %}
 
+* The **`service`** is the TCC **permission** string representation
+* The **`client`** is the **bundle ID** or **path to binary** with the permissions
+* The **`client_type`** indicates whether it’s a Bundle Identifier(0) or an absolute path(1)
+
+<details>
+
+<summary>How to execute if it's an absolute path</summary>
+
+Just do **`launctl load you_bin.plist`**, with a plist like:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Label for the job -->
+    <key>Label</key>
+    <string>com.example.yourbinary</string>
+
+    <!-- The path to the executable -->
+    <key>Program</key>
+    <string>/path/to/binary</string>
+
+    <!-- Arguments to pass to the executable (if any) -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>arg1</string>
+        <string>arg2</string>
+    </array>
+
+    <!-- Run at load -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Keep the job alive, restart if necessary -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- Standard output and error paths (optional) -->
+    <key>StandardOutPath</key>
+    <string>/tmp/YourBinary.stdout</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/YourBinary.stderr</string>
+</dict>
+</plist>
+```
+
+</details>
+
 * The **`auth_value`** can have different values: denied(0), unknown(1), allowed(2), or limited(3).
 * The **`auth_reason`** can take the following values: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
 * The **csreq** field is there to indicate how to verify the binary to execute and grant the TCC permissions:
@@ -136,25 +199,13 @@ echo "X'$REQ_HEX'"
 
 * For more information about the **other fields** of the table [**check this blog post**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
 
-{% hint style="info" %}
-Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... There is no public list that defines all of them but you can check this [**list of known ones**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
-
-**Full Disk Access** is name is **`kTCCServiceSystemPolicyAllFiles`** and **`kTCCServiceAppleEvents`** allows the app to send events to other applications that are commonly used for **automating tasks**.
-
-**kTCCServiceEndpointSecurityClient** is a TCC permission that also grant high privileges, among them the option to write the users database.
-
-Moreover, **`kTCCServiceSystemPolicySysAdminFiles`** allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.
-{% endhint %}
-
 You could also check **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
 {% hint style="success" %}
-Nota that even if one of the databases are inside the users home, **users cannot directly modify these databases because of SIP** (even if you are root). The only way a new rule can be configured or modified is via System Preferences pane or prompts where the app asks the user.
-
-However, remember that users _can_ **delete or query rules** using **`tccutil`** .&#x20;
+Users _can_ **delete or query rules** using **`tccutil`** .&#x20;
 {% endhint %}
 
-#### Reset
+#### Reset TCC permissions
 
 ```bash
 # You can reset all the permissions given to an application with
@@ -186,7 +237,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 Therefore, other applications using the same name and bundle ID won't be able to access granted permissions given to other apps.
 {% endhint %}
 
-### Entitlements
+### Entitlements & TCC Permissions
 
 Apps **don't only need** to **request** and have been **granted access** to some resources, they also need to **have the relevant entitlements**.\
 For example **Telegram** has the entitlement `com.apple.security.device.camera` to request **access to the camera**. An **app** that **doesn't** have this **entitlement won't be able** to access the camera (and the user won't be be even asked for the permissions).
@@ -211,6 +262,8 @@ This will avoid Calendar ask the user to access reminders, calendar and the addr
 {% hint style="success" %}
 Apart from some official documentation about entitlements it's also possible to find unofficial **interesting information about entitlements in** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
 {% endhint %}
+
+Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... There is no public list that defines all of them but you can check this [**list of known ones**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 
 ### Sensitive unprotected places
 
@@ -297,9 +350,13 @@ INSERT INTO access (
 
 </details>
 
-### Privesc from Automation to FDA
+### Automation to FDA\*
 
-**Finder** is an application that **always has FDA** (even if it doesn't appear in the UI), so if you have **Automation** privileges over it, you can abuse its privileges to **make it do some actions**.
+The TCC name of the Automation permission is: **`kTCCServiceAppleEvents`**\
+This specific TCC permission also indicates the **application that can be managed** inside the TCC database (so the permissions doesn't allow just to manage everything).
+
+**Finder** is an application that **always has FDA** (even if it doesn't appear in the UI), so if you have **Automation** privileges over it, you can abuse its privileges to **make it do some actions**.\
+In this case your app would need the permission **`kTCCServiceAppleEvents`** over **`com.apple.Finder`**.
 
 {% tabs %}
 {% tab title="Steal users TCC.db" %}
@@ -341,23 +398,76 @@ EOD
 
 You could abuse this to **write your own user TCC database**.
 
+{% hint style="warning" %}
+With this permission you will be able to **ask finder to access TCC restricted folders** and give you the files, but afaik you **won't be able to make Finder execute arbitrary code** to fully abuse his FDA access.
+
+Therefore, you won't be able to abuse the full FDA habilities.
+{% endhint %}
+
 This is the TCC prompt to get Automation privileges over Finder:
 
 <figure><img src="../../../../.gitbook/assets/image.png" alt="" width="244"><figcaption></figcaption></figure>
 
-### Privesc from User TCC DB to FDA
+{% hint style="danger" %}
+Note that because the **Automator** app has the TCC permission **`kTCCServiceAppleEvents`**, it can **control any app**, like Finder. So having the permission to control Automator you could also control the **Finder** with a code like the one below:
+{% endhint %}
+
+<details>
+
+<summary>Get a shell inside Automator</summary>
+
+```applescript
+osascript<<EOD
+set theScript to "touch /tmp/something"
+
+tell application "Automator"
+   set actionID to Automator action id "com.apple.RunShellScript"
+   tell (make new workflow)
+      add actionID to it
+      tell last Automator action
+         set value of setting "inputMethod" to 1
+         set value of setting "COMMAND_STRING" to theScript
+      end tell
+      execute it
+   end tell
+   activate
+end tell
+EOD
+# Once inside the shell you can use the previous code to make Finder copy the TCC databases for example and not TCC prompt will appear
+```
+
+</details>
+
+Same happens with **Script Editor app,** it can control Finder, but using an AppleScript you cannot force it to execute a script.
+
+### **Endpoint Security Client to FDA**
+
+If you have **`kTCCServiceEndpointSecurityClient`**, you have FDA. End.
+
+### System Policy SysAdmin File to FDA
+
+**`kTCCServiceSystemPolicySysAdminFiles`** allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder and therefore allows to **bypass TCC**.
+
+### User TCC DB to FDA
 
 Obtaining **write permissions** over the **user TCC** database you **can'**t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
 
-But you can **can** give yourself **`Automation rights to Finder`**, and abouse the previous technique to escalate to FDA.
+But you can **can** give yourself **`Automation rights to Finder`**, and abuse the previous technique to escalate to FDA\*.
 
-### **Privesc from FDA to TCC permissions**
+### **FDA to TCC permissions**
+
+**Full Disk Access** is TCC name is **`kTCCServiceSystemPolicyAllFiles`**
 
 I don't thing this is a real privesc, but just in case you find it useful: If you controls a program with FDA you can **modify the users TCC database and give yourself any access**. This can be useful as a persistence technique in case you might lose your FDA permissions.
 
-### **From SIP Bypass to TCC Bypass**
+### **SIP Bypass to TCC Bypass**
 
-The system **TCC database** is protected by **SIP**, thats why only processes with the **indicated entitlements  are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able **remove the protection** of a TCC database, and give himself all TCC permissions.
+The system **TCC database** is protected by **SIP**, thats why only processes with the **indicated entitlements  are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able to:
+
+* **Remove the protection** of a TCC database, and give himself all TCC permissions. He could abuse any of these files for example:
+  * The TCC systems database
+  * REG.db
+  * MDMOverrides.plist
 
 However, there is another option to abuse this **SIP bypass to bypass TCC**, the file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is an allow list of applications that require a TCC exception. Therefore, if an attacker can **remove the SIP protection** from this file and add his **own application** the application ill be able to bypass TCC.\
 For example to add terminal:
