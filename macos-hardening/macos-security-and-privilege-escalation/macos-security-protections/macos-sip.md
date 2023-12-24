@@ -89,12 +89,14 @@ csrutil enable --without debug
 
 SIP also imposes several other restrictions. For instance, it disallows the **loading of unsigned kernel extensions** (kexts) and prevents the **debugging** of macOS system processes. It also inhibits tools like dtrace from inspecting system processes.
 
+[More SIP info in this talk](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship).
+
 ## SIP Bypasses
 
 If an attacker manages to bypass SIP this is what he will be able to do:
 
 * Read mail, messages, Safari history... of all users
-* Grant permissions for webcam, microphone or anything (by directly writing over the SIP protected TCC database)
+* Grant permissions for webcam, microphone or anything (by directly writing over the SIP protected TCC database) - TCC bypass
 * Persistence: He could save a malware in a SIP protected location and not even toot will be able to delete it. Also he could tamper with MRT.
 * Easiness to load kernel extensions (still other hardcore protections in place for this).
 
@@ -112,15 +114,72 @@ One potential loophole is that if a file is specified in **`rootless.conf` but d
 The entitlement **`com.apple.rootless.install.heritable`** allows to bypass SIP
 {% endhint %}
 
+#### Shrootless
+
 [**Researchers from this blog post**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) discovered a vulnerability in macOS's System Integrity Protection (SIP) mechanism, dubbed the 'Shrootless' vulnerability. This vulnerability centers around the **`system_installd`** daemon, which has an entitlement, **`com.apple.rootless.install.heritable`**, that allows any of its child processes to bypass SIP's file system restrictions.
 
 **`system_installd`** daemon will install packages that have been signed by **Apple**.
 
-Researchers found that during the installation of an Apple-signed package (.pkg file), **`system_installd`** **runs** any **post-install** scripts included in the package. These scripts are executed by the default shell, **`zsh`**, which automatically **runs** commands from the **`/etc/zshenv`** file, if it exists, even in non-interactive mode. This behavior could be exploited by attackers: by creating a malicious `/etc/zshenv` file and waiting for **`system_installd` to invoke `zsh`**, they could perform arbitrary operations on the device.
+Researchers found that during the installation of an Apple-signed package (.pkg file), **`system_installd`** **runs** any **post-install** scripts included in the package. These scripts are executed by the default shell, **`zsh`**, which automatically **runs** commands from the **`/etc/zshenv`** file, if it exists, even in non-interactive mode. This behaviour could be exploited by attackers: by creating a malicious `/etc/zshenv` file and waiting for **`system_installd` to invoke `zsh`**, they could perform arbitrary operations on the device.
 
 Moreover, it was discovered that **`/etc/zshenv` could be used as a general attack technique**, not just for a SIP bypass. Each user profile has a `~/.zshenv` file, which behaves the same way as `/etc/zshenv` but doesn't require root permissions. This file could be used as a persistence mechanism, triggering every time `zsh` starts, or as an elevation of privilege mechanism. If an admin user elevates to root using `sudo -s` or `sudo <command>`, the `~/.zshenv` file would be triggered, effectively elevating to root.
 
+#### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
+
 In [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) it was discovered that the same **`system_installd`** process could still be abused because it was putting the **post-install script inside a random named folder protected by SIP inside `/tmp`**. The thing is that **`/tmp` itself isn't protected by SIP**, so it was possible to **mount** a **virtual image on it**, then the **installer** would put in there the **post-install script**, **unmount** the virtual image, **recreate** all the **folders** and **add** the **post installation** script with the **payload** to execute.
+
+#### [fsck\_cs utility](https://www.theregister.com/2016/03/30/apple\_os\_x\_rootless/)
+
+The bypass exploited the fact that **`fsck_cs`** would follow **symbolic links** and attempt to fix the filesystem presented to it.
+
+Therefore, an attacker could create a symbolic link pointing from _`/dev/diskX`_ to `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist` and invoke **`fsck_cs`** on the former. As the `Info.plist` file gets corrupted, the operating system could **no longer control kernel extension exclusions**, therefore bypassing SIP.
+
+{% code overflow="wrap" %}
+```bash
+ln -s /System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist /dev/diskX
+fsck_cs /dev/diskX 1>&-
+touch /Library/Extensions/
+reboot
+```
+{% endcode %}
+
+The aforementioned Info.plist file, now destroyed, is used by **SIP to whitelist some kernel extensions** and specifically **block** **others** from being loaded. It normally blacklists Apple's own kernel extension **`AppleHWAccess.kext`**, but with the configuration file destroyed, we can now load it and use it to read and write as we please from and to system RAM.
+
+#### [Mount over SIP protected folders](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
+
+It was possible to mount a new file system over **SIP protected folders to bypass the protection**.
+
+```bash
+mkdir evil
+# Add contento to the folder
+hdiutil create -srcfolder evil evil.dmg
+hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
+```
+
+#### [Upgrader bypass (2016)](https://objective-see.org/blog/blog\_0x14.html)
+
+When executed, the upgrade/installer application (i.e. `Install macOS Sierra.app`) sets up the system to boot off an installer disk image (that is embedded within the downloaded application). This installer disk image contains the logic to upgrade the OS, for example from OS X El Capitan, to macOS Sierra.
+
+In order to boot the system off the upgrade/installer image (`InstallESD.dmg`), the `Install macOS Sierra.app` utilizes the **`bless`** utility (which inherits the entitlement `com.apple.rootless.install.heritable`):
+
+{% code overflow="wrap" %}
+```bash
+/usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
+```
+{% endcode %}
+
+Therefore, if an attacker can modify the upgrade image (`InstallESD.dmg`) before the system boots off it, he can bypass SIP.
+
+The way to modify the image to infect it was to replace a dynamic loader (dyld) which will naively load and execute the malicious dylib in the context of the application. Like **`libBaseIA`** dylib. Therefore, whenever the installer application is started by the user (i.e. to upgrade the system) our malicious dylib (named libBaseIA.dylib) will also be loaded and executed in the installer as well.
+
+Now 'inside' the installer application, we can control the this phase of the upgrade process. Since the installer will 'bless' the image, all we have to do is subvert the image, **`InstallESD.dmg`**, before it's used. It was possible to do this hooking the **`extractBootBits`** method with a method swizzling.\
+Having the malicious code executed right before the disk image is used, it's time to infect it.
+
+Inside `InstallESD.dmg` there is another embedded disk image `BaseSystem.dmg` which is the 'root file-system' of the upgrade code. It was posible to inject a dynamic library into the `BaseSystem.dmg` so the malicious code will be running within the context of a process that can modify OS-level files.
+
+#### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
+
+In this talk from [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), it's shown how **`systemmigrationd`** (which can bypass SIP) executes a **bash** and a **perl** script, which can be abused via env variables **`BASH_ENV`** and **`PERL5OPT`**.
 
 ### **com.apple.rootless.install**
 
@@ -136,7 +195,7 @@ Sealed System Snapshots are a feature introduced by Apple in **macOS Big Sur (ma
 
 Here's a more detailed look:
 
-1. **Immutable System**: Sealed System Snapshots make the macOS system volume "immutable", meaning that it cannot be modified. This prevents any unauthorized or accidental changes to the system that could compromise security or system stability.
+1. **Immutable System**: Sealed System Snapshots make the macOS system volume "immutable", meaning that it cannot be modified. This prevents any unauthorised or accidental changes to the system that could compromise security or system stability.
 2. **System Software Updates**: When you install macOS updates or upgrades, macOS creates a new system snapshot. The macOS startup volume then uses **APFS (Apple File System)** to switch to this new snapshot. The entire process of applying updates becomes safer and more reliable as the system can always revert to the previous snapshot if something goes wrong during the update.
 3. **Data Separation**: In conjunction with the concept of Data and System volume separation introduced in macOS Catalina, the Sealed System Snapshot feature makes sure that all your data and settings are stored on a separate "**Data**" volume. This separation makes your data independent from the system, which simplifies the process of system updates and enhances system security.
 
