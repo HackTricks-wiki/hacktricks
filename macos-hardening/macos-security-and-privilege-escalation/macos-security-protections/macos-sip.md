@@ -91,9 +91,7 @@ SIP also imposes several other restrictions. For instance, it disallows the **lo
 
 ## SIP Bypasses
 
-### Prices
-
-If an attacker manages to bypass SIP this is what he will earn:
+If an attacker manages to bypass SIP this is what he will be able to do:
 
 * Read mail, messages, Safari history... of all users
 * Grant permissions for webcam, microphone or anything (by directly writing over the SIP protected TCC database)
@@ -104,7 +102,7 @@ If an attacker manages to bypass SIP this is what he will earn:
 
 **Installer packages signed with Apple's certificate** can bypass its protections. This means that even packages signed by standard developers will be blocked if they attempt to modify SIP-protected directories.
 
-### Unexistent SIP file
+### Inexistent SIP file
 
 One potential loophole is that if a file is specified in **`rootless.conf` but does not currently exist**, it can be created. Malware could exploit this to **establish persistence** on the system. For example, a malicious program could create a .plist file in `/System/Library/LaunchDaemons` if it is listed in `rootless.conf` but not present.
 
