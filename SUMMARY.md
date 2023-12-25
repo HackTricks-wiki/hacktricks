@@ -665,6 +665,7 @@
   * [DOM Invader](pentesting-web/xss-cross-site-scripting/dom-invader.md)
   * [DOM XSS](pentesting-web/xss-cross-site-scripting/dom-xss.md)
   * [Iframes in XSS, CSP and SOP](pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md)
+  * [JS Hoisting](pentesting-web/xss-cross-site-scripting/js-hoisting.md)
   * [Misc JS Tricks & Relevant Info](pentesting-web/xss-cross-site-scripting/other-js-tricks.md)
   * [PDF Injection](pentesting-web/xss-cross-site-scripting/pdf-injection.md)
   * [Server Side XSS (Dynamic PDF)](pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.md)
