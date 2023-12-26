@@ -345,17 +345,22 @@ his is also another great talk from [@mariuszbit](https://twitter.com/mariuszbit
 
 ## **Old Techniques**
 
+### **Check which parts Defender finds as malicious**
+
+You can use [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) which will **remove parts of the binary** until it **finds out which part Defender** is finding as malicious and split it to you.\
+Another tool doing the **same thing is** [**avred**](https://github.com/dobin/avred) with an open web offering the service in [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
+
 ### **Telnet Server**
 
 Until Windows10, all Windows came with a **Telnet server** that you could install (as administrator) doing:
 
-```
+```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
 
 Make it **start** when the system is started and **run** it now:
 
-```
+```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
 

