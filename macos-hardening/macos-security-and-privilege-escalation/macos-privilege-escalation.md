@@ -57,8 +57,6 @@ Note that a user that uses the terminal will highly probable have **Homebrew ins
 
 Using some **social engineering** you could **impersonate for example Google Chrome** inside the dock and actually execute your own script:
 
-
-
 {% tabs %}
 {% tab title="Chrome Impersonation" %}
 Some suggestions:
@@ -141,6 +139,9 @@ Some suggestions:
 
 * You **cannot remove Finder from the Dock**, so if you are going to add it to the Dock, you could put the fake Finder just next to the real one. For this you need to **add the fake Finder entry at the beginning of the Dock array**.
 * Another option is to not place it in the Dock and just open it, "Finder asking to control Finder" is not that weird.
+* Another options to **escalate to root without asking** the password with a horrible box, is make Finder really ask for the password to perform a privileged action:
+  * Ask Finder to copy to **`/etc/pam.d`** a new **`sudo`** file (The prompt asking for the password will indicate that "Finder wants to copy sudo")
+  * Ask Finder to copy a new **Authorization Plugin** (You could control the file name so the prompt asking for the password will indicate that "Finder wants to copy Finder.bundle")
 
 ```bash
 #!/bin/sh
@@ -252,10 +253,6 @@ This can be useful to escalate privileges:
 {% content-ref url="macos-files-folders-and-binaries/macos-sensitive-locations.md" %}
 [macos-sensitive-locations.md](macos-files-folders-and-binaries/macos-sensitive-locations.md)
 {% endcontent-ref %}
-
-###
-
-
 
 <details>
 

@@ -169,7 +169,7 @@ This **`rename(a, b);`** bevabiour is vulnerable to a **Race Condition**, as it'
 ### SQLITE\_SQLLOG\_DIR - CVE-2023-32422
 
 If **`SQLITE_SQLLOG_DIR="path/folder"`** basically means that **any open db is copied to that path**. In this CVE this control was abused to **write** inside a **SQLite database** that is going to be **open by a process with FDA the TCC database**, and then abuse **`SQLITE_SQLLOG_DIR`** with a **symlink in the filename** so when that database is **open**, the user **TCC.db is overwritten** with the opened one.\
-[**More info here**](https://youtu.be/f1HA5QhLQ7Y?t=20548).
+**More info** [**in the writeup**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **and**[ **in the talk**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y\&t=20548s).
 
 ### **SQLITE\_AUTO\_TRACE**
 
@@ -181,6 +181,46 @@ Several Apple applications used this library to access TCC protected information
 # Set this env variable everywhere
 launchctl setenv SQLITE_AUTO_TRACE 1
 ```
+
+### MTL\_DUMP\_PIPELINES\_TO\_JSON\_FILE - CVE-2023-32407
+
+This **env variable is used by the  `Metal` framework** which is a dependency to various programs, most notably `Music`, which has FDA.
+
+Setting the following: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. If `path` is a valid directory, the bug will trigger and we can use `fs_usage` to see what is going on in the program:
+
+* a file will be `open()`ed, called `path/.dat.nosyncXXXX.XXXXXX` (X is random)
+* one or more `write()`s will write the contents to the file (we do not control this)
+* `path/.dat.nosyncXXXX.XXXXXX` will be `renamed()`d to `path/name`
+
+It's a temporary file write, followed by a **`rename(old, new)`** **which is not secure.**
+
+It's not secure because it has to **resolve the old and new paths separately**, which can take some time and can be vulenrable to a Race Condition. For more information you can check out the `xnu` function `renameat_internal()`.
+
+{% hint style="danger" %}
+So, basically, if a privileged process is renaming from a folder you control, you could win a RCE and make it access a different file or, like in this CVE, open the file the privileged app created and store a FD.
+
+If the rename access a folder you control, while you have modified the source file or has a FD to it, you change the destination file (or folder) to point a symlink, so you can write whenever you want.
+{% endhint %}
+
+This was the attack in the CVE: For example, to overwrite the user's `TCC.db`, we can:
+
+* create `/Users/hacker/ourlink` to point to `/Users/hacker/Library/Application Support/com.apple.TCC/`
+* create the directory `/Users/hacker/tmp/`
+* set `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db`
+* trigger the bug by running `Music` with this env var
+* catch the `open()` of `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X is random)
+  * here we also `open()` this file for writing, and hold on to the file descriptor
+* atomically switch `/Users/hacker/tmp` with `/Users/hacker/ourlink` **in a loop**
+  * we do this to maximize our chances of succeeding as the race window is pretty slim, but losing the race has negligible downside
+* wait a bit
+* test if we got lucky
+  * if not, run again from the top
+
+More info in [https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html](https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html)
+
+{% hint style="danger" %}
+Now, if you try to use the env variable `MTL_DUMP_PIPELINES_TO_JSON_FILE` apps won't launch
+{% endhint %}
 
 ### Apple Remote Desktop
 
@@ -479,7 +519,7 @@ This doesn't work anymore, but it [**did in the past**](https://twitter.com/noar
 
 Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS\_v2\_Wardle.pdf):
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Reference
 

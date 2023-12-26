@@ -400,6 +400,7 @@
   * [NodeJS Express](network-services-pentesting/pentesting-web/nodejs-express.md)
   * [Git](network-services-pentesting/pentesting-web/git.md)
   * [Golang](network-services-pentesting/pentesting-web/golang.md)
+  * [GWT - Google Web Toolkit](network-services-pentesting/pentesting-web/gwt-google-web-toolkit.md)
   * [Grafana](network-services-pentesting/pentesting-web/grafana.md)
   * [GraphQL](network-services-pentesting/pentesting-web/graphql.md)
   * [H2 - Java SQL database](network-services-pentesting/pentesting-web/h2-java-sql-database.md)
