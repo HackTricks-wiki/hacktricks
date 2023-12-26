@@ -227,6 +227,8 @@ Please read [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamo
 
 There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/#amsi-bypass) and [this repo](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
 
+Or this script taht via memory patching will patch each new Powersh
+
 ## Obfuscation
 
 There are several tools that can be used to **obfuscate C# clear-text code**, generate **metaprogramming templates** to compile binaries or **obfuscate compiled binaries** such as:

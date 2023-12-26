@@ -485,6 +485,8 @@ It's highly recommended to turn off the suspicious PC by **unplugging it** to ma
 
 ## Identifying Common Attacks with Windows Events
 
+* [https://redteamrecipe.com/event-codes/](https://redteamrecipe.com/event-codes/)
+
 ### Brute Force Attack
 
 A brute force attack can be easily identifiable because **several EventIDs 4625 will appear**. If the attack was **successful**, after the EventIDs 4625, **an EventID 4624 will appear**.
