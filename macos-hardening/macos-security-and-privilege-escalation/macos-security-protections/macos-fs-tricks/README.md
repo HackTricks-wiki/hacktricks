@@ -17,7 +17,9 @@
 Permissions in a **directory**:
 
 * **read** - you can **enumerate** the directory entries
-* **write** - you can **delete/write** files to the directory
+* **write** - you can **delete/write** **files** in the directory and you can **delete empty folders**.&#x20;
+  * But you **cannot delete/modify non-empty folders** unless you have write permissions over it.
+  * You **cannot modify the name of a folder** unless you own it.
 * **execute** - you are **allowed to traverse** the directory - if you don’t have this right, you can’t access any files inside it, or in any subdirectories.
 
 ### Dangerous Combinations
