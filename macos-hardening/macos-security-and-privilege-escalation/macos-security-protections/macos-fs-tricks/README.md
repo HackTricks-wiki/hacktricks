@@ -1,12 +1,12 @@
-# Trucos de macOS FS
+# Trucos del sistema de archivos de macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver a tu **empresa anunciada en HackTricks**? o ¿quieres acceder a la **última versión de PEASS o descargar HackTricks en PDF**? Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -16,31 +16,33 @@
 
 Permisos en un **directorio**:
 
-* **lectura** - puedes **enumerar** las entradas del directorio
-* **escritura** - puedes **eliminar/escribir** archivos en el directorio
-* **ejecución** - se te permite **atravesar** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él ni a ningún subdirectorio.
+* **read** - puedes **enumerar** las entradas del directorio
+* **write** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.&#x20;
+* Pero **no puedes eliminar/modificar carpetas no vacías** a menos que tengas permisos de escritura sobre ellas.
+* **No puedes modificar el nombre de una carpeta** a menos que seas el propietario.
+* **execute** - se te **permite atravesar** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él, ni en ningún subdirectorio.
 
-### Combinaciones peligrosas
+### Combinaciones Peligrosas
 
 **Cómo sobrescribir un archivo/carpeta propiedad de root**, pero:
 
-* Uno de los **directorio padre propietario** en la ruta es el usuario
-* Uno de los **directorio padre propietario** en la ruta es un **grupo de usuarios** con **acceso de escritura**
+* Un **propietario de directorio** en la ruta es el usuario
+* Un **propietario de directorio** en la ruta es un **grupo de usuarios** con **acceso de escritura**
 * Un **grupo de usuarios** tiene **acceso de escritura** al **archivo**
 
 Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar** un **enlace simbólico/duro** en la ruta esperada para obtener una escritura arbitraria privilegiada.
 
-### Caso especial de la carpeta raíz R+X
+### Caso Especial de Carpeta root R+X
 
-Si hay archivos en un **directorio** donde **solo root tiene acceso R+X**, estos **no son accesibles para nadie más**. Por lo tanto, una vulnerabilidad que permita **mover un archivo legible por un usuario**, que no se puede leer debido a esa **restricción**, desde esta carpeta **a otra diferente**, podría ser abusada para leer estos archivos.
+Si hay archivos en un **directorio** donde **solo root tiene acceso R+X**, estos **no son accesibles para nadie más**. Por lo tanto, una vulnerabilidad que permita **mover un archivo legible por un usuario**, que no se puede leer debido a esa **restricción**, de esta carpeta **a otra diferente**, podría ser abusada para leer estos archivos.
 
 Ejemplo en: [https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
 
-## Enlace simbólico / Enlace duro
+## Enlace Simbólico / Enlace Duro
 
-Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un **usuario con menos privilegios**, o que podría ser **previamente creado** por un usuario con menos privilegios. El usuario simplemente podría **apuntarlo a otro archivo** a través de un enlace simbólico o enlace duro, y el proceso privilegiado escribirá en ese archivo.
+Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un **usuario de menor privilegio**, o que podría ser **previamente creado** por un usuario de menor privilegio. El usuario podría simplemente **apuntarlo a otro archivo** a través de un Enlace Simbólico o Duro, y el proceso privilegiado escribirá en ese archivo.
 
-Verificar en las otras secciones donde un atacante podría **abusar de una escritura arbitraria para escalar privilegios**.
+Consulta en las otras secciones donde un atacante podría **abusar de una escritura arbitraria para escalar privilegios**.
 
 ## .fileloc
 
@@ -60,19 +62,19 @@ Ejemplo:
 ```
 ## FD Arbitrario
 
-Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privilegios**, puedes abusar de **`crontab`** para abrir un archivo en `/etc/sudoers.d` con **`EDITOR=exploit.py`**, de esta manera `exploit.py` obtendrá el FD al archivo dentro de `/etc/sudoers` y lo abusará.
+Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privilegios**, puedes abusar de **`crontab`** para abrir un archivo en `/etc/sudoers.d` con **`EDITOR=exploit.py`**, de modo que `exploit.py` obtendrá el FD al archivo dentro de `/etc/sudoers` y lo aprovechará.
 
 Por ejemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## Trucos para Evitar las Atribuciones de Cuarentena
+## Trucos para evitar atributos x de cuarentena
 
 ### Eliminarlo
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
-### Bandera uchg / uchange / uimmutable
+### uchg / uchange / uimmutable flag
 
-Si un archivo/carpeta tiene este atributo inmutable, no será posible poner un xattr en él.
+Si un archivo/carpeta tiene este atributo inmutable, no será posible ponerle un xattr.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -82,9 +84,9 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-### Montaje de defvfs
+### montaje devfs
 
-Un montaje de **devfs** **no admite xattr**, más información en [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Un montaje **devfs** **no soporta xattr**, más información en [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -95,7 +97,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
 ### ACL de writeextattr
 
-Este ACL evita agregar `xattrs` al archivo.
+Esta ACL impide añadir `xattrs` al archivo.
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -120,11 +122,11 @@ ls -le /tmp/test
 
 El formato de archivo **AppleDouble** copia un archivo incluyendo sus ACEs.
 
-En el [**código fuente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) es posible ver que la representación de texto de ACL almacenada dentro del xattr llamado **`com.apple.acl.text`** se establecerá como ACL en el archivo descomprimido. Por lo tanto, si comprimiste una aplicación en un archivo zip con el formato de archivo **AppleDouble** con una ACL que impide que otros xattrs se escriban en él... el xattr de cuarentena no se estableció en la aplicación:
+En el [**código fuente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) es posible ver que la representación de texto de ACL almacenada dentro del xattr llamado **`com.apple.acl.text`** se establecerá como ACL en el archivo descomprimido. Entonces, si comprimiste una aplicación en un archivo zip con el formato de archivo **AppleDouble** con un ACL que impide que otros xattrs sean escritos en él... el xattr de cuarentena no se estableció en la aplicación:
 
-Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para obtener más información.
+Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para más información.
 
-Para replicar esto, primero necesitamos obtener la cadena de acl correcta:
+Para replicar esto primero necesitamos obtener la cadena de acl correcta:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -142,17 +144,17 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Nota que incluso si esto funciona, la sandbox escribe el atributo de cuarentena antes)
+(Tenga en cuenta que incluso si esto funciona, el sandbox escribe el xattr de cuarentena antes)
 
-No es realmente necesario, pero lo dejo aquí por si acaso:
+No es realmente necesario, pero lo dejo ahí por si acaso:
 
 {% content-ref url="macos-xattr-acls-extra-stuff.md" %}
 [macos-xattr-acls-extra-stuff.md](macos-xattr-acls-extra-stuff.md)
 {% endcontent-ref %}
 
-## Bypass de Firmas de Código
+## Evadir Firmas de Código
 
-Los paquetes contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **paquete**. Ten en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que no podemos modificarlo.
+Los paquetes contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **paquete**. Tenga en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que tampoco podemos alterar eso.
 
 Sin embargo, hay algunos archivos cuya firma no se verificará, estos tienen la clave omit en el plist, como:
 ```xml
@@ -204,9 +206,11 @@ Es posible calcular la firma de un recurso desde la línea de comandos con:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-## Montar archivos DMG
+{% endcode %}
 
-Un usuario puede montar un archivo DMG personalizado incluso encima de algunas carpetas existentes. Así es como puedes crear un paquete DMG personalizado con contenido personalizado:
+## Montar dmgs
+
+Un usuario puede montar un dmg personalizado incluso sobre algunas carpetas existentes. Así es como podrías crear un paquete dmg personalizado con contenido personalizado:
 
 {% code overflow="wrap" %}
 ```bash
@@ -233,11 +237,11 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 ## Escrituras Arbitrarias
 
-### Scripts sh periódicos
+### Scripts periódicos sh
 
-Si tu script puede ser interpretado como un **script de shell**, puedes sobrescribir el script de shell **`/etc/periodic/daily/999.local`** que se ejecutará todos los días.
+Si tu script puede ser interpretado como un **script de shell**, podrías sobrescribir el script de shell **`/etc/periodic/daily/999.local`** que se activará todos los días.
 
-Puedes **simular** la ejecución de este script con: **`sudo periodic daily`**
+Puedes **simular** una ejecución de este script con: **`sudo periodic daily`**
 
 ### Daemons
 
@@ -258,17 +262,18 @@ Escribe un **LaunchDaemon** arbitrario como **`/Library/LaunchDaemons/xyz.hacktr
 </dict>
 </plist>
 ```
-Simplemente genera el script `/Applications/Scripts/privesc.sh` con los **comandos** que te gustaría ejecutar como root.
+```markdown
+Genere el script `/Applications/Scripts/privesc.sh` con los **comandos** que le gustaría ejecutar como root.
 
 ### Archivo Sudoers
 
-Si tienes **permisos de escritura arbitrarios**, puedes crear un archivo dentro de la carpeta **`/etc/sudoers.d/`** otorgándote privilegios de **sudo**.
+Si tiene **escritura arbitraria**, podría crear un archivo dentro de la carpeta **`/etc/sudoers.d/`** otorgándose privilegios de **sudo**.
 
 ### Archivos PATH
 
-El archivo **`/etc/paths`** es uno de los lugares principales que populan la variable de entorno PATH. Debes ser root para sobrescribirlo, pero si un script de un **proceso privilegiado** está ejecutando algún **comando sin la ruta completa**, es posible que puedas **secuestrarlo** modificando este archivo.
+El archivo **`/etc/paths`** es uno de los principales lugares que llena la variable de entorno PATH. Debe ser root para sobrescribirlo, pero si un script de un **proceso privilegiado** está ejecutando algún **comando sin la ruta completa**, podría ser capaz de **secuestrar** la ejecución modificando este archivo.
 
-&#x20;También puedes escribir archivos en **`/etc/paths.d`** para cargar nuevas carpetas en la variable de entorno `PATH`.
+&#x20;También puede escribir archivos en **`/etc/paths.d`** para cargar nuevas carpetas en la variable de entorno `PATH`.
 
 ## Referencias
 
@@ -278,10 +283,11 @@ El archivo **`/etc/paths`** es uno de los lugares principales que populan la var
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabaja en una **empresa de ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? o ¿quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Obtenga el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparta sus trucos de hacking enviando PRs al** [**repositorio hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
+```
