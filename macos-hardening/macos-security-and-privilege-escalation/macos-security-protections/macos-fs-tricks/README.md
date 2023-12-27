@@ -1,50 +1,52 @@
-# macOS FSのトリック
+# macOS FS Tricks
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* **サイバーセキュリティ会社**で働いていますか？**HackTricksに会社の広告を掲載**したいですか？または、**PEASSの最新バージョンにアクセス**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。**
 
 </details>
 
-## POSIXパーミッションの組み合わせ
+## POSIX権限の組み合わせ
 
-**ディレクトリ**のパーミッション：
+**ディレクトリ**内の権限：
 
-* **読み取り** - ディレクトリのエントリを**列挙**できます
-* **書き込み** - ディレクトリにファイルを**削除/書き込み**できます
-* **実行** - ディレクトリを**トラバース**することができます - この権限がない場合、そのディレクトリ内またはサブディレクトリ内のファイルにアクセスできません。
+* **読み取り** - ディレクトリエントリを**列挙**できます。
+* **書き込み** - ディレクトリ内で**ファイルを削除/書き込み**でき、**空のフォルダを削除**できます。
+* ただし、その上に書き込み権限がない限り、**空でないフォルダを削除/変更することはできません**。
+* 所有していない限り、**フォルダの名前を変更することはできません**。
+* **実行** - ディレクトリを**通過することが許可**されています - この権利がない場合、その中のファイルやサブディレクトリのファイルにアクセスすることはできません。
 
 ### 危険な組み合わせ
 
-**rootが所有するファイル/フォルダを上書き**する方法：
+**rootが所有するファイル/フォルダを上書きする方法**ですが：
 
-* パスの**1つの親ディレクトリの所有者**がユーザーである
-* パスの**1つの親ディレクトリの所有者**が**ユーザーグループ**であり、**書き込みアクセス**がある
-* ユーザーグループがファイルに**書き込み**アクセス権限を持っている
+* パス内の1つの親**ディレクトリの所有者**がユーザーです。
+* パス内の1つの親**ディレクトリの所有者**が**書き込みアクセス**を持つ**ユーザーグループ**です。
+* ユーザー**グループ**が**ファイル**に**書き込み**アクセス権を持っています。
 
-前述のいずれかの組み合わせで、攻撃者は特権の任意の書き込みを取得するために、予想されるパスに**シンボリックリンク/ハードリンク**を注入することができます。
+これらの組み合わせのいずれかで、攻撃者は特権的な任意の書き込みを得るために、予想されるパスに**シム/ハードリンク**を**注入**することができます。
 
-### フォルダのルートR+X特殊ケース
+### フォルダroot R+Xの特別なケース
 
-**rootのみがR+Xアクセス権限を持つディレクトリ**にファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、ユーザーが読み取ることができない**制限**のために読み取ることができないファイルを、このフォルダから**別のフォルダ**に移動する脆弱性がある場合、これらのファイルを読み取るために悪用することができます。
+**rootのみがR+Xアクセス**を持つ**ディレクトリ**内のファイルは、他の誰にも**アクセスできません**。そのため、ユーザーが読むことができるが、その**制限**のために読むことができないファイルを、このフォルダから**別のフォルダに移動**することを可能にする脆弱性を悪用すると、これらのファイルを読むことができます。
 
 例：[https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
 
-## シンボリックリンク/ハードリンク
+## シンボリックリンク / ハードリンク
 
-特権プロセスが**制御可能なファイル**にデータを書き込んでいる場合、または**低特権ユーザー**によって**事前に作成**されたファイルにデータを書き込んでいる場合、ユーザーはシンボリックリンクまたはハードリンクを介してそれを別のファイルに**ポイント**するだけで、特権プロセスはそのファイルに書き込みます。
+特権プロセスが、**低権限のユーザー**によって**制御**される可能性のある**ファイル**にデータを書き込んでいる場合、または低権限のユーザーによって**事前に作成**された可能性がある場合。ユーザーは、シンボリックリンクまたはハードリンクを介して別のファイルを**指す**ことができ、特権プロセスはそのファイルに書き込むことになります。
 
-特権の任意の書き込みを悪用して特権をエスカレーションする方法については、他のセクションを確認してください。
+他のセクションで、攻撃者が**特権昇格のために任意の書き込みを悪用する**方法を確認してください。
 
 ## .fileloc
 
-**`.fileloc`** 拡張子のファイルは、他のアプリケーションやバイナリを指すことができるため、それらが開かれると、アプリケーション/バイナリが実行されます。\
+**`.fileloc`** 拡張子を持つファイルは、他のアプリケーションやバイナリを指すことができるため、開かれたときに実行されるのはそのアプリケーション/バイナリになります。
 例：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -60,19 +62,19 @@
 ```
 ## 任意のFD
 
-もし、**プロセスに高い特権でファイルまたはフォルダを開かせる**ことができれば、**`crontab`**を悪用して、**`EDITOR=exploit.py`**で`/etc/sudoers.d`内のファイルを開くことができます。そのため、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用することができます。
+**高い権限を持つファイルやフォルダをプロセスが開くことができれば**、**`crontab`** を悪用して **`EDITOR=exploit.py`** として `/etc/sudoers.d` 内のファイルを開くことができます。そうすると `exploit.py` は `/etc/sudoers` 内のファイルへのFDを取得し、それを悪用することができます。
 
-例: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+例えば: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## クォレンティンxattrsトリックの回避
+## カルテンタイン xattrs トリックを避ける
 
-### 削除する
+### それを削除する
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable フラグ
 
-ファイル/フォルダにこの不変属性がある場合、それに xattr を設定することはできません。
+ファイル/フォルダにこのイミュータブル属性がある場合、xattrを設定することはできません
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -84,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs マウント
 
-**devfs** マウントは **xattr をサポートしていません**。詳細は [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html) を参照してください。
+**devfs** マウントは **xattrをサポートしていません**。詳細は [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html) を参照してください。
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -95,7 +97,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
 ### writeextattr ACL
 
-このACLは、ファイルに`xattrs`を追加することを防止します。
+このACLはファイルに`xattrs`を追加することを防ぎます。
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -118,13 +120,13 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble**ファイル形式は、ACE（アクセス制御エントリ）を含むファイルをコピーします。
+**AppleDouble** ファイル形式は、ファイルとそのACEを含むコピーを作成します。
 
-[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)では、**`com.apple.acl.text`**という名前のxattrに格納されたACLテキスト表現が、展開されたファイルにACLとして設定されることがわかります。したがって、ACLが他のxattrの書き込みを防止するACLを持つアプリケーションをAppleDoubleファイル形式でzipファイルに圧縮した場合、quarantine xattrはアプリケーションに設定されませんでした。
+[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) によると、**`com.apple.acl.text`** と呼ばれるxattr内に保存されているACLのテキスト表現が、解凍されたファイルのACLとして設定されることがわかります。したがって、他のxattrsが書き込まれることを防ぐACLを持つアプリケーションを **AppleDouble** ファイル形式でzipファイルに圧縮した場合... アプリケーションに検疫xattrが設定されていませんでした：
 
-詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)を参照してください。
+詳細については、[**オリジナルのレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) を確認してください。
 
-これを再現するには、まず正しいACL文字列を取得する必要があります：
+これを再現するにはまず、正しいacl文字列を取得する必要があります：
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -142,9 +144,9 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-（注意：これが機能する場合でも、サンドボックスはquarantine xattrを書き込みます）
+(Note that even if this works the sandbox write the quarantine xattr before)
 
-本当に必要ではありませんが、念のために残しておきます：
+特に必要ではありませんが、念のために残しておきます：
 
 {% content-ref url="macos-xattr-acls-extra-stuff.md" %}
 [macos-xattr-acls-extra-stuff.md](macos-xattr-acls-extra-stuff.md)
@@ -152,9 +154,9 @@ ls -le test
 
 ## コード署名のバイパス
 
-バンドルには、**`_CodeSignature/CodeResources`**というファイルが含まれており、バンドル内のすべての**ファイル**の**ハッシュ**が含まれています。ただし、CodeResourcesのハッシュは**実行可能ファイルに埋め込まれている**ため、それには手を出せません。
+バンドルには、バンドル内のすべての**ファイル**の**ハッシュ**を含むファイル **`_CodeSignature/CodeResources`** が含まれています。CodeResourcesのハッシュも**実行可能ファイル**に**埋め込まれている**ので、それをいじることはできません。
 
-ただし、いくつかのファイルの署名はチェックされないため、これらのファイルにはplist内のomitというキーがあります。
+しかし、署名がチェックされないファイルもあります。これらはplist内でomitキーを持っています。例えば：
 ```xml
 <dict>
 ...
@@ -198,18 +200,19 @@ ls -le test
 ...
 </dict>
 ```
-CLIからリソースの署名を計算することが可能です。以下のコマンドを使用します：
+リソースのシグネチャをCLIから計算することが可能です:
 
 {% code overflow="wrap" %}
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-## DMGのマウント
+{% endcode %}
 
-ユーザーは、既存のフォルダの上にカスタムDMGを作成してマウントすることができます。以下は、カスタムコンテンツを含むカスタムDMGパッケージを作成する方法です：
+## DMGをマウントする
 
-```overflow="wrap"
-```
+ユーザーは、既存のフォルダの上にカスタムDMGを作成してマウントすることができます。以下はカスタムコンテンツを含むカスタムDMGパッケージを作成する方法です：
+
+{% code overflow="wrap" %}
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -236,13 +239,13 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 ### 定期的なshスクリプト
 
-もしスクリプトが**シェルスクリプト**として解釈される可能性がある場合、毎日トリガーされる**`/etc/periodic/daily/999.local`**シェルスクリプトを上書きすることができます。
+スクリプトが**シェルスクリプト**として解釈される場合、毎日実行される**`/etc/periodic/daily/999.local`** シェルスクリプトを上書きできます。
 
-次のコマンドでこのスクリプトの実行を**偽装**することができます: **`sudo periodic daily`**
+このスクリプトの実行を**偽装**するには、次のコマンドを使用します: **`sudo periodic daily`**
 
 ### デーモン
 
-任意のスクリプトを実行するplistを使用して、**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**のような任意の**LaunchDaemon**を書き込みます。
+任意のスクリプトを実行するplistとして、**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** のような任意の**LaunchDaemon**を書き込みます。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -259,20 +262,18 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 </dict>
 </plist>
 ```
-以下は、ハッキング技術に関する本の内容です。次の内容は、ファイルmacos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/README.mdからのものです。関連する英語のテキストを日本語に翻訳し、翻訳を返し、マークダウンとHTMLの構文を完全に保持してください。コード、ハッキング技術の名前、ハッキングの言葉、クラウド/SaaSプラットフォームの名前（Workspace、aws、gcpなど）、'leak'という単語、ペンテスト、およびマークダウンタグなどのものは翻訳しないでください。また、翻訳とマークダウンの構文以外の追加のものは追加しないでください。
+```
+スクリプト `/Applications/Scripts/privesc.sh` を生成し、rootとして実行したい**コマンド**を記述します。
 
-```markdown
-スクリプト `/Applications/Scripts/privesc.sh` を生成し、ルートとして実行したい **コマンド** を記述してください。
+### Sudoersファイル
 
-### Sudoers ファイル
+**任意の書き込み**権限がある場合、**`/etc/sudoers.d/`** フォルダ内にファイルを作成し、自分自身に**sudo**権限を付与することができます。
 
-**任意の書き込み権限**がある場合、**`/etc/sudoers.d/`** フォルダ内に自分自身に **sudo** 特権を付与するファイルを作成できます。
+### PATHファイル
 
-### PATH ファイル
+**`/etc/paths`** ファイルは、PATH環境変数を設定する主要な場所の一つです。これを上書きするにはroot権限が必要ですが、**特権プロセス**のスクリプトが**完全なパスなしでコマンドを実行している**場合、このファイルを変更することで**ハイジャック**することができるかもしれません。
 
-ファイル **`/etc/paths`** は、PATH 環境変数を設定する主要な場所の1つです。これを上書きするには、ルートである必要がありますが、**特権プロセス** から **フルパスなしでコマンドを実行** しているスクリプトを **乗っ取る** ことで、このファイルを変更することができるかもしれません。
-
-また、新しいフォルダを `PATH` 環境変数に読み込むために、**`/etc/paths.d`** にファイルを書き込むこともできます。
+&#x20;また、**`/etc/paths.d`** にファイルを書き込むことで、新しいフォルダを`PATH`環境変数に読み込ませることができます。
 
 ## 参考文献
 
@@ -282,11 +283,11 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、HackTricksをPDFで**ダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
+* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**に**フォローしてください。
+* **ハッキングのコツを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
 ```
