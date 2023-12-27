@@ -76,7 +76,7 @@ Some of the returned folders doesn't even exist, however, **`/Library/Perl/5.30`
 However, note that you **need to be root to write in that folder** and nowadays you will get this **TCC prompt**:
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
 
 For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` to make it execute arbitrary code.
 
