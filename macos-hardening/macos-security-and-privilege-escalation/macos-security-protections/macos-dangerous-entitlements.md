@@ -132,6 +132,10 @@ Allow to modify files inside apps bundle (inside app.app), which is **disallowed
 
 It's possible to check who has this access in _System Settings_ > _Privacy & Security_ > _App Management._
 
+### `kTCCServiceAccessibility`
+
+The process will be able to **abuse the macOS accessibility features**, Which means that for example he will be able to press keystrokes. SO he could request access to control an app like Finder and approve the dialog with this permission.
+
 ## Medium
 
 ### `com.apple.security.cs.allow-jit`
@@ -174,6 +178,8 @@ According to this blogpost, this TCC permission usually found in the form:
 ```
 
 Allow the process to **ask for all the TCC permissions**.
+
+### **`kTCCServicePostEvent`**
 
 <details>
 

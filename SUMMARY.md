@@ -191,6 +191,7 @@
     * [macOS TCC](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/README.md)
       * [macOS TCC Bypasses](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md)
         * [macOS Apple Scripts](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/macos-apple-scripts.md)
+      * [macOS TCC Payloads](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-payloads.md)
     * [macOS Dangerous Entitlements & TCC perms](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-dangerous-entitlements.md)
     * [macOS FS Tricks](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/README.md)
       * [macOS xattr-acls extra stuff](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-fs-tricks/macos-xattr-acls-extra-stuff.md)

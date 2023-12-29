@@ -519,6 +519,18 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0007/](https://theevilbit.
 * **`~/Library/Application\ Support/xbar/plugins/`**
   * **Trigger**: Once xbar is executed
 
+#### Description
+
+If the popular program [**xbar**](https://github.com/matryer/xbar) is installed, it's possible to write a shell script in **`~/Library/Application\ Support/xbar/plugins/`** which will be executed when xbar is started:
+
+```bash
+cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
+#!/bin/bash
+touch /tmp/xbar
+EOF
+chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
+```
+
 ### Hammerspoon
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond\_0008/](https://theevilbit.github.io/beyond/beyond\_0008/)
@@ -539,8 +551,9 @@ Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 The app looks for a single file, `~/.hammerspoon/init.lua`, and when started the script will be executed.
 
 ```bash
+mkdir -p "$HOME/.hammerspoon"
 cat > "$HOME/.hammerspoon/init.lua" << EOF
-hs.execute("id > /tmp/hs.txt")
+hs.execute("/Applications/iTerm.app/Contents/MacOS/iTerm2")
 EOF
 ```
 
@@ -559,21 +572,17 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.
   * Root required
   * **Trigger**: Login via ssh
 
+{% hint style="danger" %}
+To turn ssh on requres Full Disk Access:&#x20;
+
+```bash
+sudo systemsetup -setremotelogin on
+```
+{% endhint %}
+
 #### Description & Exploitation
 
 By default, unless `PermitUserRC no` in `/etc/ssh/sshd_config`, when a user **logins via SSH** the scripts **`/etc/ssh/sshrc`** and **`~/.ssh/rc`** will be executed.
-
-#### Description
-
-If the popular program [**xbar**](https://github.com/matryer/xbar) is installed, it's possible to write a shell script in **`~/Library/Application\ Support/xbar/plugins/`** which will be executed when xbar is started:
-
-```bash
-cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
-#!/bin/bash
-touch /tmp/xbar
-EOF
-chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
-```
 
 ### **Login Items**
 
@@ -738,10 +747,7 @@ There are a couple ways to implement this:
 1. Use the [Automator](https://support.apple.com/guide/automator/welcome/mac) program to create a Folder Action workflow file (.workflow) and install it as a service.
 2. Right-click on a folder, select `Folder Actions Setup...`, `Run Service`, and manually attach a script.
 3. Use OSAScript to send Apple Event messages to the `System Events.app` to programmatically query and register a new `Folder Action.`
-
-
-
-* This is the way to implement persistence using an OSAScript to send Apple Event messages to `System Events.app`
+   * [ ] This is the way to implement persistence using an OSAScript to send Apple Event messages to `System Events.app`
 
 This is the script that will be executed:
 
@@ -770,8 +776,6 @@ fa.scripts.push(myScript);
 ```
 
 Execute script with: `osascript -l JavaScript /Users/username/attach.scpt`
-
-
 
 * This is the way yo implement this persistence via GUI:
 

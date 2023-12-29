@@ -42,6 +42,25 @@ To execute it as a new process and not as a child of the current terminal you ca
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
+        // Specify the file path and content
+        NSString *filePath = @"/tmp/payload.sh";
+        NSString *content = @"#!/bin/bash\n/Applications/iTerm.app/Contents/MacOS/iTerm2";
+
+        NSError *error = nil;
+
+        // Write content to the file
+        BOOL success = [content writeToFile:filePath 
+                                 atomically:YES 
+                                   encoding:NSUTF8StringEncoding 
+                                      error:&error];
+
+        if (!success) {
+            NSLog(@"Error writing file at %@\n%@", filePath, [error localizedDescription]);
+            return 1;
+        }
+
+        NSLog(@"File written successfully to %@", filePath);
+        
         // Create a new task
         NSTask *task = [[NSTask alloc] init];
 
