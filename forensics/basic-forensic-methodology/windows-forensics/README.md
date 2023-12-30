@@ -4,13 +4,15 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver a tu **empresa anunciada en HackTricks**? o ¿quieres acceder a la **última versión de PEASS o descargar HackTricks en PDF**? Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -44,13 +46,10 @@ Cuando se elimina un archivo en esta carpeta se crean 2 archivos específicos:
 
 ![](<../../../.gitbook/assets/image (486).png>)
 
-Teniendo estos archivos puedes usar la herramienta [**Rifiuti**](https://github.com/abelcheung/rifiuti2) para obtener la dirección original de los archivos eliminados y la fecha en que fueron eliminados (usa `rifiuti-vista.exe` para Vista – Win10).
+Teniendo estos archivos puedes usar la herramienta [**Rifiuti**](https://github.com/abelcheung/rifiuti2) para obtener la dirección original de los archivos eliminados y la fecha en que se eliminaron (usa `rifiuti-vista.exe` para Vista – Win10).
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-```markdown
-![](<../../../.gitbook/assets/image (495) (1) (1) (1).png>)
-
 ### Copias de sombra de volumen
 
 Shadow Copy es una tecnología incluida en Microsoft Windows que puede crear **copias de seguridad** o instantáneas de archivos de computadora o volúmenes, incluso cuando están en uso.
@@ -59,7 +58,7 @@ Estas copias de seguridad generalmente se encuentran en `\System Volume Informat
 
 ![](<../../../.gitbook/assets/image (520).png>)
 
-Montando la imagen forense con **ArsenalImageMounter**, la herramienta [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) se puede utilizar para inspeccionar una copia de sombra e incluso **extraer los archivos** de las copias de seguridad de la copia de sombra.
+Montando la imagen forense con **ArsenalImageMounter**, la herramienta [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow\_copy\_view.html) se puede utilizar para inspeccionar una copia de sombra e incluso **extraer los archivos** de las copias de seguridad de la copia de sombra.
 
 ![](<../../../.gitbook/assets/image (521).png>)
 
@@ -84,11 +83,11 @@ Windows **crea automáticamente** estos **accesos directos** cuando el usuario *
 * Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 * Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-Cuando se crea una carpeta, también se crea un enlace a la carpeta, a la carpeta padre y a la carpeta abuelo.
+Cuando se crea una carpeta, también se crea un enlace a la carpeta, a la carpeta padre y a la carpeta abuela.
 
 Estos archivos de enlace creados automáticamente **contienen información sobre el origen** como si es un **archivo** **o** una **carpeta**, **tiempos MAC** de ese archivo, **información del volumen** de dónde está almacenado el archivo y **carpeta del archivo objetivo**. Esta información puede ser útil para recuperar esos archivos en caso de que se hayan eliminado.
 
-Además, la **fecha de creación del archivo de enlace** es la primera **vez** que el archivo original fue **usado** y la **fecha de modificación** del archivo de enlace es la **última vez** que se usó el archivo de origen.
+Además, la **fecha de creación del archivo de enlace** es la primera **vez** que el archivo original fue **utilizado** y la **fecha de modificación** del archivo de enlace es la **última vez** que se utilizó el archivo de origen.
 
 Para inspeccionar estos archivos puedes usar [**LinkParser**](http://4discovery.com/our-tools/).
 
@@ -107,7 +106,6 @@ El primer conjunto de marcas de tiempo hace referencia a las **marcas de tiempo 
 
 Puedes obtener la misma información ejecutando la herramienta CLI de Windows: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
 ```
-```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
 En este caso, la información se guardará dentro de un archivo CSV.
@@ -116,13 +114,13 @@ En este caso, la información se guardará dentro de un archivo CSV.
 
 Estas son los archivos recientes que se indican por aplicación. Es la lista de **archivos recientes utilizados por una aplicación** a la que puedes acceder en cada aplicación. Pueden ser creados **automáticamente o ser personalizados**.
 
-Los **jumplists** creados automáticamente se almacenan en `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Los jumplists se nombran siguiendo el formato `{id}.autmaticDestinations-ms` donde el ID inicial es el ID de la aplicación.
+Las **jumplists** creadas automáticamente se almacenan en `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Las jumplists se nombran siguiendo el formato `{id}.autmaticDestinations-ms` donde el ID inicial es el ID de la aplicación.
 
-Los jumplists personalizados se almacenan en `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` y son creados por la aplicación generalmente porque algo **importante** ha sucedido con el archivo (quizás marcado como favorito)
+Las jumplists personalizadas se almacenan en `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` y son creadas por la aplicación generalmente porque algo **importante** ha sucedido con el archivo (quizás marcado como favorito)
 
 El **tiempo de creación** de cualquier jumplist indica **la primera vez que se accedió al archivo** y el **tiempo modificado la última vez**.
 
-Puedes inspeccionar los jumplists usando [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
+Puedes inspeccionar las jumplists usando [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
 ![](<../../../.gitbook/assets/image (474).png>)
 
@@ -144,7 +142,7 @@ Nota que algunos archivos LNK en lugar de apuntar a la ruta original, apuntan a 
 
 ![](<../../../.gitbook/assets/image (476).png>)
 
-Los archivos en la carpeta WPDNSE son una copia de los originales, entonces no sobrevivirán un reinicio del PC y el GUID se toma de un shellbag.
+Los archivos en la carpeta WPDNSE son una copia de los originales, entonces no sobrevivirán un reinicio de la PC y el GUID se toma de un shellbag.
 
 ### Información del Registro
 
@@ -154,7 +152,7 @@ Los archivos en la carpeta WPDNSE son una copia de los originales, entonces no s
 
 Revisa el archivo `C:\Windows\inf\setupapi.dev.log` para obtener las marcas de tiempo sobre cuándo se produjo la conexión USB (busca `Section start`).
 
-![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (14).png>)
+![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (14).png>)
 
 ### USB Detective
 
@@ -164,19 +162,19 @@ Revisa el archivo `C:\Windows\inf\setupapi.dev.log` para obtener las marcas de t
 
 ### Limpieza de Plug and Play
 
-La tarea programada 'Limpieza de Plug and Play' es responsable de **limpiar** versiones antiguas de controladores. Parece (basado en informes en línea) que también recoge **controladores que no se han utilizado en 30 días**, a pesar de que su descripción indica que "se mantendrá la versión más actual de cada paquete de controladores". Como tal, **los dispositivos extraíbles que no se han conectado durante 30 días pueden tener sus controladores eliminados**.
+La tarea programada 'Limpieza de Plug and Play' es responsable de **limpiar** versiones antiguas de controladores. Parece (según informes en línea) que también recoge **controladores que no se han utilizado en 30 días**, a pesar de que su descripción indica que "se mantendrá la versión más actual de cada paquete de controladores". Como tal, **los dispositivos extraíbles que no se han conectado durante 30 días pueden tener sus controladores eliminados**.
 
 La tarea programada en sí se encuentra en 'C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup', y su contenido se muestra a continuación:
 
 ![](https://2.bp.blogspot.com/-wqYubtuR\_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-La tarea hace referencia a 'pnpclean.dll' que es responsable de realizar la actividad de limpieza y además vemos que el campo ‘UseUnifiedSchedulingEngine’ está configurado como ‘TRUE’ lo que especifica que se utiliza el motor de programación de tareas genérico para gestionar la tarea. Los valores ‘Period’ y ‘Deadline’ de 'P1M' y 'P2M' dentro de ‘MaintenanceSettings’ instruyen al Programador de Tareas para ejecutar la tarea una vez al mes durante el mantenimiento Automático regular y si falla durante 2 meses consecutivos, para comenzar a intentar la tarea durante el mantenimiento Automático de emergencia. **Esta sección fue copiada de** [**aquí**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)**.**
+La tarea hace referencia a 'pnpclean.dll' que es responsable de realizar la actividad de limpieza, además vemos que el campo ‘UseUnifiedSchedulingEngine’ está configurado como ‘TRUE’, lo que especifica que se utiliza el motor de programación de tareas genérico para gestionar la tarea. Los valores ‘Period’ y ‘Deadline’ de 'P1M' y 'P2M' dentro de ‘MaintenanceSettings’ instruyen al Programador de Tareas para ejecutar la tarea una vez al mes durante el mantenimiento Automático regular y si falla durante 2 meses consecutivos, para comenzar a intentar la tarea durante el mantenimiento Automático de emergencia. **Esta sección fue copiada de** [**aquí**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)**.**
 
 ## Correos Electrónicos
 
 Los correos electrónicos contienen **2 partes interesantes: Los encabezados y el contenido** del correo electrónico. En los **encabezados** puedes encontrar información como:
 
-* **Quién** envió los correos (dirección de correo electrónico, IP, servidores de correo que han redirigido el correo electrónico)
+* **Quién** envió los correos (dirección de correo electrónico, IP, servidores de correo que han redirigido el correo)
 * **Cuándo** se envió el correo electrónico
 
 Además, dentro de los encabezados `References` y `In-Reply-To` puedes encontrar el ID de los mensajes:
@@ -185,22 +183,22 @@ Además, dentro de los encabezados `References` y `In-Reply-To` puedes encontrar
 
 ### Aplicación de Correo de Windows
 
-Esta aplicación guarda correos electrónicos en HTML o texto. Puedes encontrar los correos electrónicos dentro de subcarpetas en `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Los correos electrónicos se guardan con la extensión `.dat`.
+Esta aplicación guarda correos electrónicos en HTML o texto. Puedes encontrar los correos dentro de subcarpetas en `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Los correos se guardan con la extensión `.dat`.
 
-La **metadatos** de los correos electrónicos y los **contactos** se pueden encontrar dentro de la **base de datos EDB**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+La **metadatos** de los correos y los **contactos** se pueden encontrar dentro de la **base de datos EDB**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
-**Cambia la extensión** del archivo de `.vol` a `.edb` y puedes usar la herramienta [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) para abrirlo. Dentro de la tabla `Message` puedes ver los correos electrónicos.
+**Cambia la extensión** del archivo de `.vol` a `.edb` y puedes usar la herramienta [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) para abrirlo. Dentro de la tabla `Message` puedes ver los correos.
 
 ### Microsoft Outlook
 
-Cuando se utilizan servidores Exchange o clientes de Outlook, van a haber algunos encabezados MAPI:
+Cuando se utilizan servidores Exchange o clientes Outlook, van a haber algunos encabezados MAPI:
 
 * `Mapi-Client-Submit-Time`: Hora del sistema cuando se envió el correo electrónico
 * `Mapi-Conversation-Index`: Número de mensajes hijos del hilo y marca de tiempo de cada mensaje del hilo
 * `Mapi-Entry-ID`: Identificador del mensaje.
 * `Mappi-Message-Flags` y `Pr_last_Verb-Executed`: Información sobre el cliente MAPI (mensaje leído? no leído? respondido? redirigido? fuera de la oficina?)
 
-En el cliente de Microsoft Outlook, todos los mensajes enviados/recibidos, datos de contactos y datos del calendario se almacenan en un archivo PST en:
+En el cliente Microsoft Outlook, todos los mensajes enviados/recibidos, datos de contactos y datos del calendario se almacenan en un archivo PST en:
 
 * `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 * `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
@@ -213,7 +211,7 @@ Puedes abrir el archivo PST usando la herramienta [**Kernel PST Viewer**](https:
 
 ### Outlook OST
 
-Cuando Microsoft Outlook está configurado **usando** **IMAP** o utilizando un servidor **Exchange**, genera un archivo **OST** que almacena casi la misma información que el archivo PST. Mantiene el archivo sincronizado con el servidor durante los **últimos 12 meses**, con un **tamaño máximo de archivo de 50GB** y en la **misma carpeta donde se guarda el archivo PST**. Puedes inspeccionar este archivo usando [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
+Cuando Microsoft Outlook está configurado **usando** **IMAP** o utilizando un servidor **Exchange**, genera un archivo **OST** que almacena casi la misma información que el archivo PST. Mantiene el archivo sincronizado con el servidor durante **los últimos 12 meses**, con un **tamaño máximo de archivo de 50GB** y en la **misma carpeta donde se guarda el archivo PST**. Puedes inspeccionar este archivo usando [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
 
 ### Recuperación de Adjuntos
 
@@ -258,7 +256,7 @@ Los archivos que contienen el registro se encuentran en:
 
 Desde Windows Vista y Windows 2008 Server en adelante hay algunas copias de seguridad de los archivos del registro `HKEY_LOCAL_MACHINE` en **`%Windir%\System32\Config\RegBack\`**.
 
-También desde estas versiones, se crea el archivo del registro **`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`** guardando información sobre ejecuciones de programas.
+También desde estas versiones, se crea el archivo de registro **`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`** guardando información sobre ejecuciones de programas.
 
 ### Herramientas
 
@@ -329,7 +327,7 @@ Para inspeccionar estos archivos puedes usar la herramienta [**PEcmd.exe**](http
 **Superprefetch** tiene el mismo objetivo que prefetch, **cargar programas más rápido** al predecir lo que se cargará a continuación. Sin embargo, no sustituye al servicio de prefetch.
 Este servicio generará archivos de base de datos en `C:\Windows\Prefetch\Ag*.db`.
 
-En estas bases de datos puedes encontrar el **nombre** del **programa**, **número** de **ejecuciones**, **archivos** **abiertos**, **volumen** **accedido**, **ruta** **completa**, **intervalos** de **tiempo** y **marcas** de **tiempo**.
+En estas bases de datos puedes encontrar el **nombre** del **programa**, **número** de **ejecuciones**, **archivos** **abiertos**, **volumen** **accedido**, **ruta** **completa**, **intervalos de tiempo** y **marcas de tiempo**.
 
 Puedes acceder a esta información utilizando la herramienta [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/).
 
@@ -382,7 +380,7 @@ Puedes utilizar la herramienta [**AppCompatCacheParser**](https://github.com/Eri
 
 El archivo **Amcache.hve** es un archivo de registro que almacena la información de las aplicaciones ejecutadas. Se encuentra en `C:\Windows\AppCompat\Programas\Amcache.hve`
 
-**Amcache.hve** registra los procesos recientes que se han ejecutado y lista la ruta de los archivos que se ejecutan, lo cual puede utilizarse para encontrar el programa ejecutado. También registra el SHA1 del programa.
+**Amcache.hve** registra los procesos recientes que se han ejecutado y lista la ruta de los archivos que se ejecutan, lo cual puede ser utilizado para encontrar el programa ejecutado. También registra el SHA1 del programa.
 
 Puedes analizar esta información con la herramienta [**Amcacheparser**](https://github.com/EricZimmerman/AmcacheParser)
 ```bash
@@ -416,7 +414,7 @@ Y **aplicaciones desinstaladas** en: `Software\Microsoft\Windows\CurrentVersion\
 
 ## Eventos de Windows
 
-La información que aparece dentro de los eventos de Windows incluye:
+La información que aparece dentro de los eventos de Windows es:
 
 * Qué sucedió
 * Marca de tiempo (UTC + 0)
@@ -458,12 +456,12 @@ Dentro del EventID 4634/4647 hay subtipos interesantes:
 * **3 (red)**: Conexión a una carpeta compartida
 * **4 (Batch)**: Proceso ejecutado
 * **5 (servicio)**: Servicio iniciado por el Administrador de Control de Servicios
-* **6 (proxy):** Inicio de sesión de proxy
+* **6 (proxy):** Inicio de sesión Proxy
 * **7 (Desbloqueo)**: Pantalla desbloqueada usando contraseña
 * **8 (texto claro de red)**: Usuario autenticado enviando contraseñas en texto claro. Este evento solía provenir del IIS
 * **9 (nuevas credenciales)**: Se genera cuando se usa el comando `RunAs` o el usuario accede a un servicio de red con diferentes credenciales.
 * **10 (interactivo remoto)**: Autenticación a través de Servicios de Terminal o RDP
-* **11 (interactivo de caché)**: Acceso utilizando las últimas credenciales en caché porque no fue posible contactar al controlador de dominio
+* **11 (interactivo de caché)**: Acceso usando las últimas credenciales en caché porque no fue posible contactar al controlador de dominio
 * **12 (interactivo remoto de caché)**: Inicio de sesión remoto con credenciales en caché (una combinación de 10 y 11).
 * **13 (desbloqueo de caché)**: Desbloqueo de una máquina bloqueada con credenciales en caché.
 
@@ -494,7 +492,7 @@ Esto es terrible para el equipo de forenses ya que se modificarán todas las mar
 Los siguientes EventIDs del Sistema son útiles:
 
 * 20001 / 20003 / 10000: Primera vez que se usó
-* 10100: Actualización del controlador
+* 10100: Actualización de controlador
 
 El EventID 112 de DeviceSetupManager contiene la marca de tiempo de cada dispositivo USB insertado.
 
@@ -508,12 +506,14 @@ El EventID 1102 de Seguridad indica que los registros fueron eliminados.
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? o ¿quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

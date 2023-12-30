@@ -2,19 +2,19 @@
 
 <figure><img src=".gitbook/assets/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logos y diseño de movimiento de Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Logos y diseño de movimiento de HackTricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="success" %}
-**Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.**
+**Bienvenido a la wiki donde encontrarás cada truco/técnica de hacking/lo que sea que he aprendido de CTFs, aplicaciones reales, leyendo investigaciones y noticias.**
 {% endhint %}
 
-Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **debes seguir al realizar pruebas de penetración** en una o más **máquinas:**
+Para comenzar sigue esta página donde encontrarás el **flujo típico** que **deberías seguir al realizar pentesting** en una o más **máquinas:**
 
 {% content-ref url="generic-methodologies-and-resources/pentesting-methodology.md" %}
 [pentesting-methodology.md](generic-methodologies-and-resources/pentesting-methodology.md)
 {% endcontent-ref %}
 
-## Patrocinadores Platinum
+## Patrocinadores Platino
 
 _Tu empresa podría estar aquí._
 
@@ -24,15 +24,15 @@ _Tu empresa podría estar aquí._
 
 <figure><img src=".gitbook/assets/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) es una excelente empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pruebas de penetración, equipos Red y capacitación.
+[**STM Cyber**](https://www.stmcyber.com) es una excelente empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, equipos rojos y formación.
 
-Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
 **STM Cyber** también apoya proyectos de código abierto de ciberseguridad como HackTricks :)
 
 ### [RootedCON](https://www.rootedcon.com/)
 
-<figure><img src=".gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 [**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro efervescente para profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
 
@@ -40,22 +40,22 @@ Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Intigriti](https://www.intigriti.com)
 
-<figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** es la plataforma de ethical hacking y **bug bounty número 1 de Europa.**
+**Intigriti** es la **plataforma número 1 en Europa** de hacking ético y **bug bounty.**
 
-Consejo de bug bounty: **regístrate** en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**. ¡Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comienza a ganar recompensas de hasta **$100,000**!
+**Consejo de bug bounty**: **regístrate** en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**. Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comienza a ganar recompensas de hasta **$100,000**.
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 ### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
 
-<figure><img src=".gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas** del mundo.
 
-Obtén acceso hoy mismo:
+Obtén Acceso Hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -65,30 +65,30 @@ Obtén acceso hoy mismo:
 
 Mantente un paso adelante en el juego de la ciberseguridad.
 
-[**Intruder**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) facilita la gestión de vulnerabilidades. Realiza un seguimiento de tu superficie de ataque, identifica las vulnerabilidades de tu empresa y prioriza los problemas que dejan tus sistemas más expuestos para que puedas centrarte en lo que más importa.
+[**Intruder**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) facilita la gestión de vulnerabilidades. Mantén un seguimiento de tu superficie de ataque, ve dónde es vulnerable tu empresa y prioriza los problemas que dejan tus sistemas más expuestos para que puedas concentrarte en lo más importante.
 
-Realiza miles de comprobaciones con una sola plataforma que cubre toda tu infraestructura tecnológica, desde la infraestructura interna hasta las aplicaciones web, las API y los sistemas en la nube. Intégrate perfectamente con [AWS, GCP, Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure) y agiliza DevOps para que tu equipo pueda implementar correcciones más rápido.
+Realiza miles de comprobaciones con una sola plataforma que cubre toda tu pila tecnológica, desde la infraestructura interna hasta aplicaciones web, APIs y sistemas en la nube. Intégrate sin problemas con [AWS, GCP, Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure) y agiliza DevOps para que tu equipo pueda implementar soluciones más rápido.
 
-Intruder nunca descansa. La protección las 24 horas del día, los 7 días de la semana, monitorea tus sistemas constantemente. ¿Quieres obtener más información? Visita su sitio web y pruébalo con [**una prueba gratuita**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks).
+Intruder nunca descansa. Protección las 24 horas del día, los 7 días de la semana, monitorea tus sistemas. ¿Quieres saber más? Visita su sitio y pruébalo con [**una prueba gratuita**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks).
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
-¡Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de recompensas por errores!
+Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de recompensas por errores.
 
-**Hacking Insights**\
-Participa en contenido que explora la emoción y los desafíos del hacking.
+**Perspectivas de Hacking**\
+Interactúa con contenido que profundiza en la emoción y los desafíos del hacking
 
 **Noticias de Hacking en Tiempo Real**\
-Mantente actualizado con el mundo del hacking a ritmo acelerado a través de noticias e información en tiempo real.
+Mantente al día con el mundo del hacking de ritmo rápido a través de noticias e información en tiempo real
 
 **Últimos Anuncios**\
-Mantente informado sobre los últimos lanzamientos de recompensas por errores y actualizaciones importantes de la plataforma.
+Mantente informado con los lanzamientos de nuevas recompensas por errores y actualizaciones cruciales de la plataforma
 
-**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo!
+**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo.
 
 ***
 
@@ -96,48 +96,45 @@ Mantente informado sobre los últimos lanzamientos de recompensas por errores y 
 
 <figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad mediante la prestación de servicios de **seguridad ofensiva** con un enfoque **moderno**.
+[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar **servicios de seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una **empresa de seguridad integral**, lo que significa que hacen de todo: pruebas de penetración, auditorías de seguridad, capacitaciones de concienciación, campañas de phishing, revisión de código, desarrollo de exploits, externalización de expertos en seguridad y mucho más.
+WebSec es una **empresa de seguridad todo en uno**, lo que significa que lo hacen todo; Pentesting, Auditorías de **Seguridad**, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Outsourcing de Expertos en Seguridad y mucho más.
 
-Otra cosa genial de WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, como se indica en su sitio web "**Si no podemos hackearlo, ¡no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
+Otra cosa interesante sobre WebSec es que, a diferencia del promedio de la industria, WebSec está **muy segura de sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, se afirma en su sitio web "**Si no podemos hackearlo, ¡No lo pagas!**". Para más información echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/).
 
-Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks**.
+Además de lo anterior, WebSec también es un **firme partidario de HackTricks.**
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
-### [DragonJAR](https://www.dragonjar.org/)
-
-<figure><img src=".gitbook/assets/image (1) (1) (2) (4) (1).png" alt=""><figcaption></figcaption></figure>
-
-[**DragonJAR es una empresa líder en ciberseguridad ofensiva**](https://www.dragonjar.org/) **ubicada en Colombia**. DragonJAR ofrece [servicios integrales de seguridad informática ofensiva, como **pentesting**](https://www.dragonjar.org/servicios-de-seguridad-informatica) en diversas áreas y prácticamente **cualquier tecnología**, simulaciones de ataque **Red Team**, pruebas de seguridad **física**, **pruebas de estrés**, ingeniería social, revisión de seguridad en **código fuente** y capacitación en seguridad informática. Además, organizan la **DragonJAR Security Conference**, [un congreso internacional de seguridad informática](https://www.dragonjarcon.org/) que se ha realizado durante más de una década, convirtiéndose en el escaparate para las últimas investigaciones de seguridad en español y de gran relevancia en la región.
 
 ## Licencia
 
-**Copyright © Carlos Polop 2023. Excepto donde se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto de** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **de Carlos Polop está bajo licencia** [**Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
-**Si deseas utilizarlo con fines comerciales, contáctame.**
+**Copyright © Carlos Polop 2023. Excepto donde se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto en** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **de Carlos Polop está licenciado bajo la**[ **Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
+**Si quieres usarlo con fines comerciales, contáctame.**
 
 ## **Descargo de responsabilidad**
 
 {% hint style="danger" %}
-Este libro, 'HackTricks', tiene fines educativos e informativos únicamente. El contenido de este libro se proporciona tal cual, y los autores y editores no hacen ninguna representación o garantía de ningún tipo, expresa o implícita, sobre la integridad, exactitud, confiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos en este libro. Cualquier confianza que deposites en dicha información es estrictamente bajo tu propio riesgo.
+Este libro, 'HackTricks', está destinado únicamente a fines educativos e informativos. El contenido de este libro se proporciona tal cual, y los autores y editores no hacen declaraciones ni garantías de ningún tipo, expresas o implícitas, sobre la integridad, precisión, fiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos en este libro. Cualquier confianza que deposites en dicha información es estrictamente bajo tu propio riesgo.
 
-Los autores y editores no serán responsables en ningún caso de ninguna pérdida o daño, incluyendo, entre otros, pérdida o daño indirecto o consecuente, o cualquier pérdida o daño que surja de la pérdida de datos o beneficios derivados del uso de este libro.
+Los autores y editores no serán responsables en ningún caso de ninguna pérdida o daño, incluyendo sin limitación, pérdida o daño indirecto o consecuente, o cualquier pérdida o daño que surja de la pérdida de datos o beneficios que surjan de, o en conexión con, el uso de este libro.
 
-Además, las técnicas y consejos descritos en este libro se proporcionan únicamente con fines educativos e informativos, y no deben utilizarse para actividades ilegales o maliciosas. Los autores y editores no aprueban ni respaldan ninguna actividad ilegal o éticamente incorrecta, y cualquier uso de la información contenida en este libro es bajo tu propio riesgo y discreción.
+Además, las técnicas y consejos descritos en este libro se proporcionan únicamente con fines educativos e informativos, y no deben utilizarse para actividades ilegales o maliciosas. Los autores y editores no aprueban ni apoyan ninguna actividad ilegal o poco ética, y cualquier uso de la información contenida en este libro es bajo el propio riesgo y discreción del usuario.
 
-El usuario es el único responsable de cualquier acción tomada basada en la información contenida en este libro, y siempre debe buscar asesoramiento y asistencia profesional al intentar implementar cualquiera de las técnicas o consejos descritos en él.
+El usuario es el único responsable de cualquier acción tomada en base a la información contenida en este libro, y siempre debe buscar asesoramiento y asistencia profesional al intentar implementar cualquiera de las técnicas o consejos descritos aquí.
 
-Al utilizar este libro, el usuario acepta liberar a los autores y editores de cualquier responsabilidad y responsabilidad por cualquier daño, pérdida o daño que pueda resultar del uso de este libro o de cualquiera de la información contenida en él.
+Al usar este libro, el usuario acepta liberar a los autores y editores de toda responsabilidad y responsabilidad por cualquier daño, pérdida o daño que pueda resultar del uso de este libro o de cualquier información contenida en él.
 {% endhint %}
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
