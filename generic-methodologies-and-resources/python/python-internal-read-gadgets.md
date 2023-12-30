@@ -1,33 +1,35 @@
-# Python内部の読み取りガジェット
+# Python Internal Read Gadgets
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 ## 基本情報
 
-[**Pythonフォーマット文字列**](bypass-python-sandboxes/#python-format-string)や[**クラスの汚染**](class-pollution-pythons-prototype-pollution.md)などのさまざまな脆弱性は、**Pythonの内部データを読み取ることはできますが、コードの実行は許可されません**。したがって、ペンテスターはこれらの読み取り権限を最大限に活用して、**機密特権を取得し、脆弱性をエスカレーション**させる必要があります。
+[**Python Format Strings**](bypass-python-sandboxes/#python-format-string)や[**Class Pollution**](class-pollution-pythons-prototype-pollution.md)などのさまざまな脆弱性により、**Pythonの内部データを読み取ることができるが、コードを実行することはできない**場合があります。したがって、ペネトレーションテスターは、これらの読み取り権限を最大限に活用して、**機密特権を取得し、脆弱性をエスカレートする**必要があります。
 
 ### Flask - シークレットキーの読み取り
 
-Flaskアプリケーションのメインページにはおそらく**`app`**というグローバルオブジェクトがあり、この**シークレットが設定**されています。
+Flaskアプリケーションのメインページには、この**シークレットが設定されている** **`app`** グローバルオブジェクトがおそらく存在します。
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-この場合、[**Pythonサンドボックス回避ページ**](bypass-python-sandboxes/)から**グローバルオブジェクトにアクセスする**ためのガジェットを使用して、このオブジェクトにアクセスすることが可能です。
+この場合、[**Bypass Python sandboxes page**](bypass-python-sandboxes/)から**グローバルオブジェクトにアクセスする**ための任意のガジェットを使用して、このオブジェクトにアクセスすることが可能です。
 
-もし**脆弱性が別のPythonファイルにある場合**、メインのファイルにたどり着くためのガジェットが必要です。これにより、Flaskのシークレットキーを変更して、[**このキーを知ることで特権を昇格**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)することができます。
+**異なるPythonファイルに脆弱性がある場合**は、メインのファイルにたどり着き**グローバルオブジェクト`app.secret_key`にアクセスして**Flaskのシークレットキーを変更し、このキーを知ることで[**権限昇格を図る**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)ことができるようにするためのガジェットが必要です。
 
-このようなペイロードは、[この解説記事](https://ctftime.org/writeup/36082)から取得できます：
+以下のようなペイロード[このライトアップから](https://ctftime.org/writeup/36082)：
 
 {% code overflow="wrap" %}
 ```python
@@ -35,29 +37,31 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 ```
 {% endcode %}
 
-このペイロードを使用して、`app.secret_key`（アプリ内の名前は異なる場合があります）を変更し、新しい特権を持つflaskクッキーに署名できるようにします。
+このペイロードを使用して、`app.secret_key`を変更します（アプリ内の名前は異なる場合があります）。これにより、新しく、より多くの権限を持つflaskクッキーを署名することができます。
 
 ### Werkzeug - machine\_id と node uuid
 
-[**この解説からのペイロードを使用すると**](https://vozec.fr/writeups/tweedle-dum-dee/)、**machine\_id** と **uuid** ノードにアクセスできるようになります。これらは、[**Werkzeugピンを生成するために必要な主要な秘密**](../../network-services-pentesting/pentesting-web/werkzeug.md)です。デバッグモードが有効な場合、`/console` でPythonコンソールにアクセスするために使用できます。
+[**このライトアップからのペイロードを使用することで**](https://vozec.fr/writeups/tweedle-dum-dee/)、**machine\_id** と **uuid** ノードにアクセスできます。これらは、[**Werkzeugピンを生成する**](../../network-services-pentesting/pentesting-web/werkzeug.md)ために必要な**主要なシークレット**です。**デバッグモードが有効になっている場合**、`/console`でpythonコンソールにアクセスするために使用できます。
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
 {% hint style="warning" %}
-`app.py`への**サーバーのローカルパス**を取得するには、ウェブページでいくつかの**エラー**を生成し、それによって**パスを取得**することができます。
+**`app.py`のサーバーローカルパス**を取得するには、ウェブページで**エラー**を発生させ、それによって**パスを教えてもらう**ことができます。
 {% endhint %}
 
-もし脆弱性が別のPythonファイルにある場合は、メインのPythonファイルからオブジェクトにアクセスするための前のFlaskのトリックをチェックしてください。
+異なるPythonファイルに脆弱性がある場合は、メインPythonファイルからオブジェクトにアクセスするための前述のFlaskのトリックを確認してください。
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法：
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

@@ -1,48 +1,50 @@
-# フィッシングの手法
+# フィッシング手法
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有する**ために、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 ## 手法
 
-1. ターゲットの情報収集
-1. **ターゲットドメイン**を選択します。
-2. ターゲットが使用している**ログインポータル**を検索し、**なりすます**ポータルを**決定**します。
-3. いくつかの**OSINT**を使用して**メールアドレスを見つけます**。
+1. 被害者の情報収集
+1. **被害者ドメイン**を選択する。
+2. 被害者が使用している**ログインポータルを検索**して基本的なWeb列挙を行い、どれを**偽装する**か**決定**する。
+3. **OSINT**を使用して**メールアドレスを見つける**。
 2. 環境の準備
-1. フィッシング評価に使用するドメインを**購入**します。
-2. 関連するレコード（SPF、DMARC、DKIM、rDNS）に関連する**メールサービスを設定**します。
-3. **gophish**を使用してVPSを設定します。
+1. フィッシング評価に使用するドメインを**購入する**
+2. 関連するメールサービスのレコード（SPF、DMARC、DKIM、rDNS）を**設定する**
+3. **gophish**を使ってVPSを設定する
 3. キャンペーンの準備
-1. **メールテンプレート**を準備します。
-2. 認証情報を盗むための**ウェブページ**を準備します。
-4. キャンペーンを開始します！
+1. **メールテンプレート**を準備する
+2. 資格情報を盗むための**ウェブページ**を準備する
+4. キャンペーンを開始する！
 
 ## 類似のドメイン名を生成するか、信頼できるドメインを購入する
 
-### ドメイン名の変更手法
+### ドメイン名変更技術
 
-* **キーワード**: オリジナルドメインの重要な**キーワード**が含まれているドメイン名（例：zelster.com-management.com）。
-* **ハイフン付きサブドメイン**: サブドメインの**ドットをハイフンに変更**します（例：www-zelster.com）。
-* **新しいTLD**: 同じドメインを**新しいTLD**を使用して表現します（例：zelster.org）。
-* **ホモグリフ**: ドメイン名の一部の文字を、似たような文字で**置き換えます**（例：zelfser.com）。
-* **転置**: ドメイン名内の2つの文字を**入れ替えます**（例：zelster.com）。
-* **単数形/複数形**: ドメイン名の末尾に「s」を追加または削除します（例：zeltsers.com）。
-* **省略**: ドメイン名から1つの文字を**削除します**（例：zelser.com）。
-* **繰り返し**: ドメイン名の一部の文字を**繰り返します**（例：zeltsser.com）。
-* **置換**: ホモグリフと同様ですが、より目立たないです。ドメイン名の一部の文字を、元の文字に近い位置にあるキーボード上の文字で置き換えます（例：zektser.com）。
-* **サブドメイン**: ドメイン名内に**ドット**を挿入します（例：ze.lster.com）。
-* **挿入**: ドメイン名に1つの文字を**挿入します**（例：zerltser.com）。
-* **ドットの欠落**: ドメイン名にTLDを追加します（例：zelstercom.com）。
+* **キーワード**: ドメイン名には元のドメインの重要な**キーワード**が**含まれている**（例：zelster.com-management.com）。
+* **ハイフン付きサブドメイン**: サブドメインの**ドットをハイフンに変更する**（例：www-zelster.com）。
+* **新しいTLD**: 新しいTLDを使用した同じドメイン（例：zelster.org）
+* **ホモグリフ**: ドメイン名の文字を**似ている文字に置き換える**（例：zelfser.com）。
+* **転置**: ドメイン名内の二つの文字を**入れ替える**（例：zelster.com）。
+* **単数化/複数化**: ドメイン名の最後に「s」を追加または削除する（例：zeltsers.com）。
+* **省略**: ドメイン名から文字を**一つ取り除く**（例：zelser.com）。
+* **繰り返し**: ドメイン名の文字を**繰り返す**（例：zeltsser.com）。
+* **置換**: ホモグリフと似ているが、あまり隠れていない。ドメイン名の文字を置き換える、キーボード上で元の文字の近くにある文字にすることがある（例：zektser.com）。
+* **サブドメイン化**: ドメイン名内に**ドットを挿入する**（例：ze.lster.com）。
+* **挿入**: ドメイン名に文字を**挿入する**（例：zerltser.com）。
+* **ドットの欠落**: TLDをドメイン名に追加する。（例：zelstercom.com）
 
 **自動ツール**
 
@@ -57,42 +59,43 @@
 
 ### ビットフリッピング
 
-コンピューティングの世界では、メモリ内にはビット（0と1）ですべてが格納されています。\
-ドメインにもこれが当てはまります。例えば、_windows.com_は、コンピューティングデバイスの揮発性メモリ内では_01110111..._となります。\
-しかし、もしソーラーフレアや宇宙線、ハードウェアエラーによってビットの一つが自動的に反転した場合はどうでしょうか？つまり、0が1に、1が0になることです。\
-このコンセプトをDNSリクエストに適用すると、**DNSサーバーに到着するドメインリクエストが最初に要求されたドメインとは異なる可能性があります**。
+コンピューティングの世界では、すべてが裏でメモリのビット（ゼロとワン）に格納されています。\
+これはドメインにも適用されます。例えば、_windows.com_ はあなたのコンピューティングデバイスの揮発性メモリで _01110111..._ になります。\
+しかし、太陽フレア、宇宙線、ハードウェアエラーなどによってこれらのビットの一つが自動的に反転したらどうでしょうか。つまり、0の一つが1になり、その逆も同様です。\
+この概念をDNSリクエストに適用すると、DNSサーバーに到着する**要求されたドメイン**が、最初に要求されたドメインと**同じではない可能性があります。**
 
-例えば、ドメインwindows.comの1ビットの変更により、_windnws.com_に変換される可能性があります。\
-**攻撃者は、被害者に関連するビットフリッピングドメインを可能な限り登録し、正規のユーザーを自身のインフラストラクチャにリダイレクトすることができます**。
+例えば、windows.comのドメインで1ビットの変更が行われると、それは_windnws.com_に変わるかもしれません。\
+**攻撃者は、正当なユーザーを自分たちのインフラストラクチャにリダイレクトするために、被害者に関連するできるだけ多くのビットフリッピングドメインを登録するかもしれません。**
 
-詳細については、[https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)を参照してください。
+詳細については、[https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)を読んでください。
+
 ### 信頼できるドメインを購入する
 
-[https://www.expireddomains.net/](https://www.expireddomains.net)で使用できる期限切れのドメインを検索することができます。\
-購入する前に、購入する期限切れのドメインが**既に良いSEOを持っているかどうか**を確認するために、以下のサイトでカテゴリ分けされているかどうかを調べることができます：
+[https://www.expireddomains.net/](https://www.expireddomains.net)で使用できる期限切れのドメインを検索できます。\
+購入する期限切れのドメインが**すでに良いSEOを持っていることを確認する**ために、以下でどのように分類されているかを検索できます：
 
-- [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
-- [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
+* [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
+* [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
 ## メールアドレスの発見
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester)（100％無料）
-- [https://phonebook.cz/](https://phonebook.cz)（100％無料）
-- [https://maildb.io/](https://maildb.io)
-- [https://hunter.io/](https://hunter.io)
-- [https://anymailfinder.com/](https://anymailfinder.com)
+* [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% 無料)
+* [https://phonebook.cz/](https://phonebook.cz) (100% 無料)
+* [https://maildb.io/](https://maildb.io)
+* [https://hunter.io/](https://hunter.io)
+* [https://anymailfinder.com/](https://anymailfinder.com)
 
-さらに、有効なメールアドレスを**さらに発見**するか、すでに発見したメールアドレスを**検証**するために、被害者のSMTPサーバーのユーザー名をブルートフォースできるかどうかを確認することができます。[ここでメールアドレスの検証/発見方法を学ぶ](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration)。\
-さらに、ユーザーが**メールにアクセスするためのウェブポータル**を使用している場合、**ユーザー名のブルートフォース**に対して脆弱性があるかどうかを確認し、可能であればその脆弱性を悪用することができます。
+**より多くの**有効なメールアドレスを**発見する**ため、またはすでに発見したメールアドレスを**検証する**ために、被害者のsmtpサーバーをブルートフォースできるかどうかを確認できます。[メールアドレスの検証/発見方法はこちら](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration)。\
+さらに、ユーザーが**メールにアクセスするためのウェブポータルを使用している場合**、それが**ユーザー名ブルートフォース**に対して脆弱であるかどうかを確認し、可能であればその脆弱性を利用することを忘れないでください。
 
 ## GoPhishの設定
 
 ### インストール
 
-[https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)からダウンロードすることができます。
+[https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)からダウンロードできます。
 
-ダウンロードして`/opt/gophish`に解凍し、`/opt/gophish/gophish`を実行します。\
-出力には、ポート3333の管理者ユーザーのパスワードが表示されます。したがって、そのポートにアクセスし、これらの資格情報を使用して管理者パスワードを変更します。そのポートをローカルにトンネリングする必要がある場合があります。
+`/opt/gophish`内にダウンロードして解凍し、`/opt/gophish/gophish`を実行します。\
+出力でadminユーザーのパスワードが与えられるので、そのポートにアクセスしてその資格情報を使用してadminパスワードを変更します。そのポートをローカルにトンネリングする必要があるかもしれません。
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -100,7 +103,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **TLS証明書の設定**
 
-この手順の前に、使用するドメインを**すでに購入している**必要があり、それが**gophish**を設定している**VPSのIPに向けられている**必要があります。
+このステップの前に、使用する**ドメインを既に購入**しており、それが設定している**gophish**の**VPSのIP**を**指している**必要があります。
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -116,34 +119,34 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**メールの設定**
+**メール設定**
 
-インストールを開始します：`apt-get install postfix`
+インストールを開始します: `apt-get install postfix`
 
-次に、以下のファイルにドメインを追加します：
+次に、以下のファイルにドメインを追加します:
 
 * **/etc/postfix/virtual\_domains**
 * **/etc/postfix/transport**
 * **/etc/postfix/virtual\_regexp**
 
-**また、/etc/postfix/main.cf内の以下の変数の値も変更します**
+**また、/etc/postfix/main.cf内の以下の変数の値を変更します**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-最後に、ファイル**`/etc/hostname`**と**`/etc/mailname`**をドメイン名に変更し、**VPSを再起動します。**
+最後に、ファイル **`/etc/hostname`** と **`/etc/mailname`** をあなたのドメイン名に変更し、**VPSを再起動します。**
 
-次に、`mail.<domain>`の**IPアドレス**を指す**DNS Aレコード**と、`mail.<domain>`を指す**DNS MXレコード**を作成します。
+次に、**DNS A レコード**を `mail.<domain>` に作成し、VPSの**IPアドレス**を指定し、`mail.<domain>` を指す **DNS MX** レコードを作成します。
 
-さて、メールを送信するテストを行いましょう：
+さて、メールの送信をテストしましょう:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
 **Gophishの設定**
 
-Gophishの実行を停止し、設定を行いましょう。\
-`/opt/gophish/config.json`を以下のように変更してください（httpsの使用に注意してください）:
+gophishの実行を停止し、設定しましょう。\
+以下のように`/opt/gophish/config.json`を変更してください（httpsの使用に注意）：
 ```bash
 {
 "admin_server": {
@@ -170,7 +173,7 @@ Gophishの実行を停止し、設定を行いましょう。\
 ```
 **gophishサービスの設定**
 
-gophishサービスを自動的に起動し、サービスとして管理するために、以下の内容で`/etc/init.d/gophish`というファイルを作成します。
+gophishサービスを自動的に開始し、管理するサービスとして機能させるために、以下の内容で`/etc/init.d/gophish`ファイルを作成できます：
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -217,7 +220,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-サービスの設定を完了し、次の操作を行って確認します:
+サービスの設定を完了し、以下を実行して確認します:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -232,38 +235,38 @@ service gophish stop
 
 ### 待つ
 
-ドメインが古ければ古いほど、スパムとして検知される可能性は低くなります。そのため、フィッシング評価を行う前にできるだけ長い時間（少なくとも1週間）待つ必要があります。\
-ただし、1週間待つ必要がある場合でも、すべての設定を完了させることができます。
+ドメインが古いほどスパムとして捉えられる可能性が低くなります。そのため、フィッシング評価を行う前にできるだけ長く（少なくとも1週間）待つべきです。\
+ただし、1週間待つ必要があるとしても、今すべての設定を完了することができます。
 
-### 逆引きDNS（rDNS）レコードの設定
+### 逆引きDNS (rDNS) レコードの設定
 
-VPSのIPアドレスをドメイン名に解決するrDNS（PTR）レコードを設定します。
+VPSのIPアドレスがドメイン名に解決されるように、rDNS（PTR）レコードを設定します。
 
-### Sender Policy Framework（SPF）レコード
+### Sender Policy Framework (SPF) レコード
 
-新しいドメインには、**SPFレコードを設定する必要があります**。SPFレコードが何かわからない場合は、[**このページ**](../../network-services-pentesting/pentesting-smtp/#spf)を読んでください。
+新しいドメインに対して**SPFレコードを設定する必要があります**。SPFレコードが何かわからない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/#spf)。
 
-[https://www.spfwizard.net/](https://www.spfwizard.net)を使用して、SPFポリシーを生成することができます（VPSマシンのIPを使用してください）。
+[https://www.spfwizard.net/](https://www.spfwizard.net) を使用して、SPFポリシーを生成します（VPSマシンのIPを使用してください）
 
 ![](<../../.gitbook/assets/image (388).png>)
 
-この内容をドメイン内のTXTレコードに設定する必要があります。
+これはドメイン内のTXTレコードに設定する必要がある内容です：
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### ドメインベースのメッセージ認証、レポート、および適合性（DMARC）レコード
+### Domain-based Message Authentication, Reporting & Conformance (DMARC) レコード
 
-新しいドメインには、**DMARCレコードを設定する必要があります**。DMARCレコードが何かわからない場合は、[**このページ**](../../network-services-pentesting/pentesting-smtp/#dmarc)を読んでください。
+新しいドメインに対して**DMARC レコードを設定する必要があります**。DMARC レコードが何かわからない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/#dmarc)。
 
-次の内容で、ホスト名 `_dmarc.<ドメイン>` を指す新しいDNS TXTレコードを作成する必要があります：
+ホスト名 `_dmarc.<domain>` を指す新しい DNS TXT レコードを以下の内容で作成する必要があります：
 ```bash
 v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-新しいドメインにDKIMを設定する必要があります。DMARCレコードが何かわからない場合は、[このページ](../../network-services-pentesting/pentesting-smtp/#dkim)を読んでください。
+新しいドメインには**DKIMを設定する必要があります**。DMARCレコードが何かわからない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/#dkim)。
 
-このチュートリアルは次のものに基づいています：[https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+このチュートリアルは次に基づいています: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 {% hint style="info" %}
 DKIMキーが生成する両方のB64値を連結する必要があります：
@@ -272,15 +275,15 @@ v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqP
 ```
 {% endhint %}
 
-### メール設定のスコアをテストする
+### メール設定スコアをテストする
 
-[https://www.mail-tester.com/](https://www.mail-tester.com)を使用してそれを行うことができます。\
-単にページにアクセスし、彼らが提供するアドレスにメールを送信してください。
+[https://www.mail-tester.com/](https://www.mail-tester.com) を使用してこれを行うことができます。\
+ページにアクセスし、彼らが提供するアドレスにメールを送信してください：
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-あなたのメール設定を確認するために、`check-auth@verifier.port25.com` にメールを送信し、レスポンスを読むこともできます（これにはポート25を開いて、メールをrootとして送信した場合は `/var/mail/root` ファイルでレスポンスを確認する必要があります）。
-すべてのテストに合格していることを確認してください。
+メール設定を確認するには、`check-auth@verifier.port25.com` にメールを送信し、応答を読む必要があります（これにはポート **25** を開き、rootとしてメールを送信した場合、ファイル _/var/mail/root_ で応答を確認する必要があります）。\
+すべてのテストに合格していることを確認してください：
 ```bash
 ==========================================================
 Summary of Results
@@ -291,41 +294,41 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-代わりに、**自分が制御しているGmailアドレスにメッセージを送信**することができます。Gmailの受信トレイで受け取った**メールのヘッダー**を**表示**し、`Authentication-Results`ヘッダーフィールドに`dkim=pass`が存在するはずです。
+代わりに、**自分で管理しているGmailアドレスにメッセージを送信し**、Gmailの受信トレイで受信した**メールのヘッダーを表示**します。`Authentication-Results` ヘッダーフィールドに `dkim=pass` が存在している必要があります。
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### スパムハウスのブラックリストからの削除
+### Spamhouseブラックリストからの削除
 
-ウェブサイトwww.mail-tester.comは、あなたのドメインがスパムハウスによってブロックされているかどうかを示すことができます。ドメイン/IPの削除をリクエストするには、[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)にアクセスしてください。
+www.mail-tester.comのページは、ドメインがSpamhouseによってブロックされているかどうかを示すことができます。ドメイン/IPの削除をリクエストするには、次のURLにアクセスしてください: [https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### マイクロソフトのブラックリストからの削除
+### Microsoftブラックリストからの削除
 
-ドメイン/IPの削除をリクエストするには、[https://sender.office.com/](https://sender.office.com)にアクセスしてください。
+ドメイン/IPの削除をリクエストするには、次のURLにアクセスしてください: [https://sender.office.com/](https://sender.office.com).
 
-## GoPhishキャンペーンの作成と実行
+## GoPhishキャンペーンの作成と開始
 
 ### 送信プロファイル
 
-* 送信者プロファイルを識別するための**名前を設定**します。
-* フィッシングメールを送信するアカウントを選択します。提案：_noreply、support、servicedesk、salesforce..._
-* ユーザー名とパスワードは空白のままにしておくこともできますが、証明書エラーを無視するオプションをチェックすることを確認してください。
+* 送信者プロファイルを識別するための**名前を設定**します
+* フィッシングメールを送信するアカウントを決定します。提案: _noreply, support, servicedesk, salesforce..._
+* ユーザー名とパスワードは空白のままにすることができますが、証明書エラーを無視することを確認してください
 
 ![](<../../.gitbook/assets/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (17).png>)
 
 {% hint style="info" %}
-すべてが正常に動作しているかをテストするために、「**テストメールの送信**」機能を使用することをお勧めします。\
-テストを行う際にブラックリストに登録されないように、**テストメールを10分メールアドレスに送信することをお勧めします**。
+"**テストメールを送信**"機能を使用して、すべてが正常に動作しているかテストすることをお勧めします。\
+テストメールを10分メールアドレスに送信することをお勧めします。これにより、テストを行っている間にブラックリストに載るのを避けることができます。
 {% endhint %}
 
 ### メールテンプレート
 
-* テンプレートを識別するための**名前を設定**します。
-* 次に、**件名**を書きます（普通のメールで読むことができるもので、特別なものではありません）。
-* 「**トラッキングイメージを追加**」をチェックしていることを確認してください。
-* **メールテンプレート**を作成します（以下の例のように変数を使用することができます）：
+* テンプレートを識別するための**名前を設定**します
+* **件名**を書きます（変わったものではなく、通常のメールで期待されるようなもの）
+* "**トラッキング画像を追加**"がチェックされていることを確認します
+* **メールテンプレート**を書きます（以下の例のように変数を使用できます）：
 ```markup
 <html>
 <head>
@@ -346,108 +349,110 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-注意：**メールの信頼性を高めるために**、クライアントのメールからいくつかの署名を使用することをお勧めします。提案：
+```markdown
+**メールの信頼性を高めるために**、クライアントのメールから何らかの署名を使用することをお勧めします。以下の提案を参考にしてください：
 
-- **存在しないアドレス**にメールを送信し、応答に署名があるかどうかを確認します。
-- info@ex.comやpress@ex.com、public@ex.comなどの**公開メール**を検索し、メールを送信して応答を待ちます。
-- **いくつかの有効な発見済み**のメールに連絡を取り、応答を待ちます。
+* **存在しないアドレス**にメールを送信し、返信に署名が含まれているか確認します。
+* info@ex.com や press@ex.com、public@ex.com などの**公開メール**を検索し、メールを送信して返信を待ちます。
+* **有効な発見された**メールアドレスに連絡を試み、返信を待ちます。
 
 ![](<../../.gitbook/assets/image (393).png>)
 
 {% hint style="info" %}
-メールテンプレートでは、**送信するためにファイルを添付**することもできます。特別に作成されたファイル/ドキュメントを使用してNTLMチャレンジを盗む場合は、[このページ](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)を参照してください。
+Email Template では、**送信するファイルを添付**することもできます。特別に作成されたファイル/ドキュメントを使用して NTLM チャレンジを盗みたい場合は、[このページを読んでください](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)。
 {% endhint %}
 
 ### ランディングページ
 
-- 名前を**書く**
-- ウェブページのHTMLコードを**書く**。ウェブページを**インポート**することもできます。
-- **送信されたデータをキャプチャ**し、**パスワードをキャプチャ**する
-- リダイレクトを設定する
+* **名前**を書く
+* ウェブページの**HTMLコードを記述**します。ウェブページを**インポート**できることに注意してください。
+* **送信されたデータのキャプチャ**と**パスワードのキャプチャ**にチェックを入れます。
+* **リダイレクション**を設定します。
 
 ![](<../../.gitbook/assets/image (394).png>)
 
 {% hint style="info" %}
-通常、ページのHTMLコードを変更し、ローカルでテストを行う必要があります（おそらくApacheサーバーを使用して）。**結果が気に入るまで**、ローカルでテストを行ってください。その後、そのHTMLコードをボックスに書き込んでください。\
-HTMLに**静的リソース**（CSSやJSページなど）を使用する必要がある場合は、それらを_**/opt/gophish/static/endpoint**_に保存し、_**/static/\<filename>**_からアクセスできます。
+通常、ページの HTML コードを変更し、ローカルでテスト（Apache サーバーを使用することもあります）を行い、**結果に満足するまで**行います。その後、その HTML コードをボックスに書き込みます。\
+HTML に**静的リソースを使用する**必要がある場合（CSS や JS ページなど）、それらを _**/opt/gophish/static/endpoint**_ に保存し、_**/static/\<filename>**_ からアクセスできることに注意してください。
 {% endhint %}
 
 {% hint style="info" %}
-リダイレクトでは、ユーザーを被害者の正規のメインウェブページに**リダイレクトする**か、例えば_static/migration.html_にリダイレクトし、**5秒間スピニングホイール**（[**https://loading.io/**](https://loading.io)**）を表示し、その後処理が成功したことを示します**。
+リダイレクションについては、ユーザーを被害者の正規のメインウェブページに**リダイレクトする**か、例えば _/static/migration.html_ にリダイレクトし、5秒間**スピニングホイール**（[**https://loading.io/**](https://loading.io)）を表示した後、プロセスが成功したことを示すことができます。
 {% endhint %}
 
-### ユーザーとグループ
+### ユーザー & グループ
 
-- 名前を設定する
-- データを**インポートする**（テンプレートを使用するためには、各ユーザーの名前、姓、メールアドレスが必要です）
+* 名前を設定する
+* **データをインポート**します（例のテンプレートを使用するには、各ユーザーの名、姓、メールアドレスが必要です）
 
 ![](<../../.gitbook/assets/image (395).png>)
 
 ### キャンペーン
 
-最後に、キャンペーンを作成し、名前、メールテンプレート、ランディングページ、URL、送信プロファイル、グループを選択します。URLは被害者に送信されるリンクになります。
+最後に、名前、メールテンプレート、ランディングページ、URL、送信プロファイル、グループを選択してキャンペーンを作成します。URL は被害者に送信されるリンクになります。
 
-**送信プロファイルでは、最終的なフィッシングメールの見た目を確認するためにテストメールを送信**することができます：
+**送信プロファイルでは、最終的なフィッシングメールの見た目を確認するためのテストメールを送信できる**ことに注意してください：
 
 ![](<../../.gitbook/assets/image (396).png>)
 
 {% hint style="info" %}
-テストメールを10分メールアドレスに送信することをお勧めします。これにより、テストを行うことでブラックリストに登録されるのを避けることができます。
+テストメールは、テストを行ってブラックリストに載るのを避けるために、10分メールアドレスに**送信することをお勧めします**。
 {% endhint %}
 
-準備ができたら、キャンペーンを開始するだけです！
+準備が整ったら、キャンペーンを開始しましょう！
 
 ## ウェブサイトのクローニング
 
-何らかの理由でウェブサイトをクローンしたい場合は、次のページを確認してください：
+何らかの理由でウェブサイトをクローンしたい場合は、以下のページを確認してください：
 
 {% content-ref url="clone-a-website.md" %}
 [clone-a-website.md](clone-a-website.md)
 {% endcontent-ref %}
 
-## バックドア付きのドキュメントとファイル
+## バックドア付きドキュメント & ファイル
 
-一部のフィッシング評価（主にレッドチーム向け）では、**バックドアを含むファイルを送信**することも必要になる場合があります（C2を含むか、認証をトリガするものなど）。\
-いくつかの例については、次のページを参照してください：
+フィッシング評価（主にレッドチーム向け）では、何らかのバックドア（C2 または認証をトリガーするもの）を含むファイルを送信することもあります。\
+例については、以下のページを確認してください：
 
 {% content-ref url="phishing-documents.md" %}
 [phishing-documents.md](phishing-documents.md)
 {% endcontent-ref %}
 
-## フィッシングMFA
+## MFA のフィッシング
 
-### プロキシMitM経由
+### プロキシ MitM 経由
 
-前の攻撃は非常に巧妙であり、実際のウェブサイトを偽装し、ユーザーが設定した情報を収集しています。ただし、ユーザーが正しいパスワードを入力しなかった場合や、偽装したアプリケーションが2FAで構成されている場合、**この情報では詐欺被害者をなりすますことはできません**。
+前述の攻撃は、本物のウェブサイトを偽装し、ユーザーが設定した情報を収集するという賢い方法です。残念ながら、ユーザーが正しいパスワードを入力していない場合や、偽装したアプリケーションに 2FA が設定されている場合、**この情報ではだまされたユーザーになりすますことはできません**。
 
-これは、[**evilginx2**](https://github.com/kgretzky/evilginx2)**、**[**CredSniper**](https://github.com/ustayready/CredSniper)**、**[**muraena**](https://github.com/muraenateam/muraena)**などのツールが役立ちます。このツールを使用すると、MitMのような攻撃を生成できます。基本的に、攻撃は次のように機能します。
+このような場合に役立つのが、[**evilginx2**](https://github.com/kgretzky/evilginx2)、[**CredSniper**](https://github.com/ustayready/CredSniper)、[**muraena**](https://github.com/muraenateam/muraena) などのツールです。このツールを使用すると、MitM のような攻撃を生成できます。基本的に、攻撃は以下のように機能します：
 
-1. 実際のウェブページの**ログインフォームをなりすます**。
-2. ユーザーは自分の資格情報を偽のページに送信し、ツールはそれらを実際のウェブページに送信して、**資格情報が有効かどうかを確認**します。
-3. アカウントが**2FAで構成**されている場合、MitMページはそれを要求し、ユーザーがそれを入力すると、ツールは実際のウェブページにそれを送信します。
-4. ユーザーが認証されると、攻撃者として、ツールがMitMを実行している間に、**資格情報、2FA、クッキー、およびすべてのインタラクションの情報**をキャプチャすることができます。
+1. 本物のウェブページの**ログインフォームを偽装**します。
+2. ユーザーが自分の**認証情報を偽のページに送信**し、ツールがそれらを本物のウェブページに送信して、**認証情報が機能するかどうかを確認**します。
+3. アカウントに**2FA が設定されている場合**、MitM ページはそれを要求し、**ユーザーが入力すると**、ツールはそれを本物のウェブページに送信します。
+4. ユーザーが認証されると、攻撃者は**認証情報、2FA、クッキー、および MitM を実行している間のすべてのインタラクションの情報をキャプチャ**します。
 
-### VNC経由
+### VNC 経由
 
-もし、被害者を**元のウェブページに接続されたブラウザを持つVNCセッションに送信**する場合はどうでしょうか？彼が何をするかを見ることができ、パスワード、使用されたMFA、クッキーを盗むことができます...\
-これは[**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)で行うことができます。
+**被害者を悪意のあるページに送る代わりに**、本物と同じ外観のページに送るのではなく、実際のウェブページに接続されたブラウザがある**VNC セッションに送る**とどうでしょうか？ ユーザーが何をしているかを見ることができ、パスワード、使用された MFA、クッキーなどを盗むことができます...\
+これは [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) で行うことができます。
 
 ## 検出の検出
 
-明らかに、バスターされたかどうかを知るための最良の方法の1つは、**ドメインをブラックリストで検索**することです。リストに表示される場合、どうやらあなたのドメインが疑わしいと検出されたようです。\
-ドメインがブラックリストに表示されているかどうかを確認する簡単な方法は、[https://malwareworld.com/](https://malwareworld.com)を使用することです。
+当然ながら、バレたかどうかを知る最善の方法の1つは、**ドメインをブラックリスト内で検索する**ことです。リストに載っていれば、何らかの方法でドメインが疑わしいと検出されたということです。\
+ドメインがブラックリストに載っているかどうかを簡単にチェックする方法の1つは、[https://malwareworld.com/](https://malwareworld.com) を使用することです。
 
-ただし、次のページで説明されているように、被害者が**野生の中で疑わしいフィッシング活動を積極的に探している**かどうかを知るための他の方法もあります。
+しかし、被害者が**野生で疑わしいフィッシング活動を積極的に探しているかどうか**を知る他の方法もあります。以下で説明されています：
 
 {% content-ref url="detecting-phising.md" %}
 [detecting-phising.md](detecting-phising.md)
 {% endcontent-ref %}
 
-被害者のドメインと**非常に似た名前のドメインを購入**するか、被害者のドメインの**キーワード**を含む、あなたが制御しているドメインの**サブドメイン**の証明書を生成することができます。被害者がそれらと**DNSまたはHTTPのやり取り**を行うと、彼が積極的に疑わしいドメインを探していることがわかり、非常に慎重にする必要があります。
+被害者のドメインに非常に似た名前の**ドメインを購入する**か、被害者のドメインの**キーワードを含む**ドメインの**サブドメイン**に対して**証明書を生成**することができます。**被害者**がそれらと**DNS または HTTP のやり取り**を行った場合、**積極的に疑わしいドメインを探している**ことがわかり、非常に慎重である必要があります。
 
 ### フィッシングの評価
 
-[**Phishious**](https://github.com/Rices/Phishious)を使用して、メールがスパムフォルダに入るか、ブロックされるか、成功するかを評価してください。
+[**Phishious**](https://github.com/Rices/Phishious) を使用して、メールがスパムフォルダに入るか、ブロックされるか、成功するかを評価します。
+
 ## 参考文献
 
 * [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
@@ -456,12 +461,15 @@ HTMLに**静的リソース**（CSSやJSページなど）を使用する必要�
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWS ハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法：
+
+* **HackTricks に広告を掲載したい**場合や**HackTricks を PDF でダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFT**](https://opensea.io/collection/the-peass-family) コレクションをチェックする
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、Twitter 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を**フォロー**してください。
+* **HackTricks** の [**GitHub リポジトリ**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) に PR を提出して、ハッキングのコツを共有してください。
 
 </details>
+```
