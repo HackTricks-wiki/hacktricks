@@ -17,12 +17,13 @@ This section is heavily based on the blog series [**Beyond the good ol' LaunchAg
 ## Sandbox Bypass
 
 {% hint style="success" %}
-Here you can find start locations useful for **sandbox bypass** that allows you to simply execute something by **writing it into a file** and **waiting** for a very **common** **action**, a determined **amount of time** or an **action you can usually perform** from inside a snadbox without needing root permissions.
+Here you can find start locations useful for **sandbox bypass** that allows you to simply execute something by **writing it into a file** and **waiting** for a very **common** **action**, a determined **amount of time** or an **action you can usually perform** from inside a sandbox without needing root permissions.
 {% endhint %}
 
 ### Launchd
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC Bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Locations
 
@@ -104,10 +105,12 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0001/](https://theevilbit.
 Writeup (xterm): [https://theevilbit.github.io/beyond/beyond\_0018/](https://theevilbit.github.io/beyond/beyond\_0018/)
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC Bypass: [✅](https://emojipedia.org/check-mark-button)
+  * But you need to find an app with a TCC bypass that executes a shell that loads these files
 
 #### Locations
 
-* **`~/.zshrc`, `~/.zlogin`, `~/.zshenv`, `~/.zprofile`**
+* **`~/.zshrc`, `~/.zlogin`, `~/.zshenv.zwc`**, **`~/.zshenv`, `~/.zprofile`**
   * **Trigger**: Open a terminal with zsh
 * **`/etc/zshenv`, `/etc/zprofile`, `/etc/zshrc`, `/etc/zlogin`**
   * **Trigger**: Open a terminal with zsh
@@ -145,6 +148,7 @@ Configuring the indicated exploitation and loging-out and loging-in or even rebo
 **Writeup**: [https://theevilbit.github.io/beyond/beyond\_0021/](https://theevilbit.github.io/beyond/beyond\_0021/)
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -182,6 +186,8 @@ To **add an application to this list** you can use:
 ### Terminal Preferences
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  * Terminal use to have FDA permissions of the user use it
 
 #### Location
 
@@ -232,6 +238,8 @@ You can add this from the cli with:
 ### Terminal Scripts / Other file extensions
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  * Terminal use to have FDA permissions of the user use it
 
 #### Location
 
@@ -283,6 +291,10 @@ If terminal has **Full Disk Access** it will be able to complete that action (no
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0013/](https://theevilbit.github.io/beyond/beyond\_0013/)\
 Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
 
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
+  * You might get some extra TCC access
+
 #### Location
 
 * **`/Library/Audio/Plug-Ins/HAL`**
@@ -306,6 +318,8 @@ According to the previous writeups it's possible to **compile some audio plugins
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0028/](https://theevilbit.github.io/beyond/beyond\_0028/)
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
+  * You might get some extra TCC access
 
 #### Location
 
@@ -329,7 +343,8 @@ This didn't work for me, neither with the user LoginHook nor with the root Logou
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond\_0022/](https://theevilbit.github.io/beyond/beyond\_0022/)
 
-Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -384,6 +399,7 @@ Here you can find start locations useful for **sandbox bypass** that allows you 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   * However, you need to be able to execute `crontab` binary
   * Or be root
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -422,6 +438,8 @@ crontab /tmp/cron
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0002/](https://theevilbit.github.io/beyond/beyond\_0002/)
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+* TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  * iTerm2 use to have granted TCC permissions
 
 #### Locations
 
@@ -513,6 +531,8 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0007/](https://theevilbit.
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   * But xbar must be installed
+* TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  * It requests Accessibility permissions
 
 #### Location
 
@@ -535,9 +555,10 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond\_0008/](https://theevilbit.github.io/beyond/beyond\_0008/)
 
-Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-
-* But Hammerspoon must be installed
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But Hammerspoon must be installed
+* TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  * It requests Accessibility permissions
 
 #### Location
 
@@ -563,6 +584,8 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   * But ssh needs to be enabled and used
+* TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  * SSH use to have FDA access
 
 #### Location
 
@@ -590,6 +613,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0003/](https://theevilbit.
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   * But you need to execute `osascript` with args
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Locations
 
@@ -631,6 +655,10 @@ Another options would be to create the files **`.bash_profile`** and **`.zshenv`
 ### At
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0014/](https://theevilbit.github.io/beyond/beyond\_0014/)
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But you need to **execute** **`at`** and it must be **enabled**
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -723,7 +751,9 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0024/](https://theevilbit.
 Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
-  * But you need to be able to call osascript with arguments and be able to configure Folder Actions
+  * But you need to be able to call `osascript` with arguments to contact **`System Events`** to be able to configure Folder Actions
+* TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
+  * It has some basic TCC permissions like Desktop, Documents and Downloads
 
 #### Location
 
@@ -826,28 +856,13 @@ Now that we have an empty environment
 And this didn't work for me, but those are the instructions from the writeup:(
 {% endhint %}
 
-### Spotlight Importers
-
-Writeup: [https://theevilbit.github.io/beyond/beyond\_0011/](https://theevilbit.github.io/beyond/beyond\_0011/)
-
-* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-  * But you will end in a new one
-
-#### Location
-
-* **`/Library/Spotlight`**&#x20;
-* **`~/Library/Spotlight`**
-
-#### Description
-
-You will end up in a **heavy sandbox**, so you probably don't want to use this technique.
-
 ### Dock shortcuts
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0027/](https://theevilbit.github.io/beyond/beyond\_0027/)
 
 * Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
   * But you need to have installed a malicious application inside the system
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -932,6 +947,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0017](https://theevilbit.g
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * A very specific action needs to happen
   * You will end in another sandbox
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -966,6 +982,7 @@ Note that the binary loading your library has a **very restrictive sandbox**: `/
 **Writeup**: [https://objective-see.org/blog/blog\_0x11.html](https://objective-see.org/blog/blog\_0x11.html)
 
 * Useful to bypass sandbox: **No, because you need to execute your own app**
+* TCC bypass: ???
 
 #### Location
 
@@ -989,6 +1006,7 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * But you will end in a common application sandbox
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -1094,9 +1112,12 @@ void custom(int argc, const char **argv) {
 
 ### Spotlight Plugins
 
-Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+writeup: [https://theevilbit.github.io/beyond/beyond\_0011/](https://theevilbit.github.io/beyond/beyond\_0011/)
 
-* But you will end in an application sandbox
+* Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+  * But you will end in an application sandbox
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  * The sandbox looks very limited
 
 #### Location
 
@@ -1191,6 +1212,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0009/](https://theevilbit.
 
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * It needs a specific user action
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -1214,6 +1236,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0019/](https://theevilbit.
 
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * But you need to be root
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -1283,6 +1306,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0005/](https://theevilbit.
 
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * But you need to be root
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -1320,7 +1344,7 @@ session    required       pam_permit.so
 And therefore any attempt to use **`sudo` will work**.
 
 {% hint style="danger" %}
-Note that this directory is protected by TCC so it's higly probably that the user will get a prompt asking for access.
+Note that this directory is protected by TCC so it's highly probably that the user will get a prompt asking for access.
 {% endhint %}
 
 ### Authorization Plugins
@@ -1330,6 +1354,7 @@ Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authoriza
 
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * But you need to be root and make extra configs
+* TCC bypass: ???
 
 #### Location
 
@@ -1399,6 +1424,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0030/](https://theevilbit.
 
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * But you need to be root and the user must use man
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
@@ -1432,6 +1458,8 @@ touch /tmp/manconf
 
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * But you need to be root and apache needs to be running
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+  * Httpd doesn't have entitlements
 
 #### Location
 
@@ -1441,7 +1469,7 @@ touch /tmp/manconf
 
 #### Description & Exploit
 
-You can indicate in /etc/apache2/httpd.conf to load a module adding a line such as:
+You can indicate in `/etc/apache2/httpd.conf` to load a module adding a line such as:
 
 {% code overflow="wrap" %}
 ```bash
@@ -1477,6 +1505,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0031/](https://theevilbit.
 
 * Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
   * But you need to be root, auditd be running and cause a warning
+* TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
