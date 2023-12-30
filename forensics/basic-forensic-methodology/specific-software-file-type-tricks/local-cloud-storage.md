@@ -2,130 +2,135 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有する**には、[**hacktricks repo**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
-今すぐアクセスを取得：
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で**最も先進的な**コミュニティツールを搭載したワークフローを簡単に**自動化**する。\
+今すぐアクセス：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## OneDrive
 
-Windowsでは、OneDriveフォルダは`\Users\<username>\AppData\Local\Microsoft\OneDrive`にあります。そして、`logs\Personal`の中には、同期されたファイルに関するいくつかの興味深いデータが含まれている`SyncDiagnostics.log`というファイルがあります。
+Windowsでは、OneDriveフォルダは`\Users\<username>\AppData\Local\Microsoft\OneDrive`にあります。そして、`logs\Personal`内にある`SyncDiagnostics.log`ファイルには、同期されたファイルに関する興味深いデータが含まれています：
 
 * バイト単位のサイズ
 * 作成日
 * 変更日
 * クラウド内のファイル数
 * フォルダ内のファイル数
-* **CID**: OneDriveユーザーの一意のID
+* **CID**: OneDriveユーザーのユニークID
 * レポート生成時間
 * OSのHDのサイズ
 
-CIDを見つけたら、**このIDを含むファイルを検索**することをお勧めします。OneDriveと同期されたファイルの名前が含まれている可能性がある_**\<CID>.ini**_と_**\<CID>.dat**_という名前のファイルには、興味深い情報が含まれているかもしれません。
+CIDを見つけたら、このIDを含むファイルを**検索する**ことをお勧めします。_**\<CID>.ini**_ と _**\<CID>.dat**_ という名前のファイルを見つけることができるかもしれません。これらのファイルには、OneDriveと同期されたファイルの名前などの興味深い情報が含まれている可能性があります。
 
 ## Google Drive
 
 Windowsでは、メインのGoogle Driveフォルダは`\Users\<username>\AppData\Local\Google\Drive\user_default`にあります。\
-このフォルダには、アカウントのメールアドレス、ファイル名、タイムスタンプ、ファイルのMD5ハッシュなどの情報が含まれるSync\_log.logというファイルがあります。削除されたファイルも、対応するMD5とともにそのログファイルに表示されます。
+このフォルダにはSync\_log.logというファイルが含まれており、アカウントのメールアドレス、ファイル名、タイムスタンプ、ファイルのMD5ハッシュなどの情報が含まれています。削除されたファイルもその対応するMD5と共にログファイルに表示されます。
 
-ファイル**`Cloud_graph\Cloud_graph.db`**は、テーブル**`cloud_graph_entry`**を含むsqliteデータベースです。このテーブルには、**同期されたファイル**の**名前**、変更時間、サイズ、およびファイルのMD5チェックサムが含まれています。
+ファイル**`Cloud_graph\Cloud_graph.db`**はsqliteデータベースであり、このデータベースには**`cloud_graph_entry`**というテーブルが含まれています。このテーブルでは、**同期された** **ファイル**の**名前**、変更時間、サイズ、ファイルのMD5チェックサムを見つけることができます。
 
-データベース**`Sync_config.db`**のテーブルデータには、アカウントのメールアドレス、共有フォルダのパス、およびGoogle Driveのバージョンが含まれています。
+データベース**`Sync_config.db`**のテーブルデータには、アカウントのメールアドレス、共有フォルダのパス、Google Driveのバージョンが含まれています。
 
 ## Dropbox
 
-Dropboxは**SQLiteデータベース**を使用してファイルを管理します。これには、次のフォルダにデータベースがあります。
+Dropboxは**SQLiteデータベース**を使用してファイルを管理します。この\
+データベースは以下のフォルダにあります：
 
 * `\Users\<username>\AppData\Local\Dropbox`
 * `\Users\<username>\AppData\Local\Dropbox\Instance1`
 * `\Users\<username>\AppData\Roaming\Dropbox`
 
-そして、メインのデータベースは次のとおりです。
+そして、主なデータベースは以下の通りです：
 
 * Sigstore.dbx
 * Filecache.dbx
 * Deleted.dbx
 * Config.dbx
 
-".dbx"拡張子は、データベースが**暗号化**されていることを意味します。Dropboxは**DPAPI**を使用しています（[https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/previous-versions/ms995355\(v=msdn.10\)?redirectedfrom=MSDN)）。
+".dbx"拡張子は、**データベース**が**暗号化されている**ことを意味します。Dropboxは**DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/previous-versions/ms995355\(v=msdn.10\)?redirectedfrom=MSDN))を使用しています。
 
-Dropboxが使用する暗号化をよりよく理解するために、[https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)を読んでください。
+Dropboxが使用している暗号化についてよりよく理解するためには、[https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)を読むことができます。
 
-ただし、主な情報は次のとおりです。
+しかし、主な情報は以下の通りです：
 
 * **エントロピー**: d114a55212655f74bd772e37e64aee9b
 * **ソルト**: 0D638C092E8B82FC452883F95F355B8E
 * **アルゴリズム**: PBKDF2
-* **イテレーション**: 1066
+* **反復回数**: 1066
 
-その情報に加えて、データベースを復号化するには、次のものが必要です。
+それらの情報に加えて、データベースを復号化するにはまだ必要です：
 
-* **暗号化されたDPAPIキー**: レジストリ内の`NTUSER.DAT\Software\Dropbox\ks\client`に見つけることができます（このデータをバイナリとしてエクスポートします）
-* **`SYSTEM`**および**`SECURITY`**ハイブ
-* **DPAPIマスターキー**: `\Users\<username>\AppData\Roaming\Microsoft\Protect`に見つけることができます
+* **暗号化されたDPAPIキー**: `NTUSER.DAT\Software\Dropbox\ks\client`のレジストリ内で見つけることができます（このデータをバイナリとしてエクスポートします）
+* **`SYSTEM`** と **`SECURITY`** ハイブ
+* **DPAPIマスターキー**: `\Users\<username>\AppData\Roaming\Microsoft\Protect`で見つけることができます
 * Windowsユーザーの**ユーザー名**と**パスワード**
 
-その後、[**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi\_data\_decryptor.html)****ツールを使用できます。
+その後、[**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**を使用できます：
 
 ![](<../../../.gitbook/assets/image (448).png>)
 
-すべてが予想どおりに進むと、ツールは**元のキーを回復するために使用する主キー**を示します。元のキーを回復するには、この[cyber\_chef receipt](https://gchq.github.io/CyberChef/#recipe=Derive\_PBKDF2\_key\(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D\))を使用し、主キーをレシート内の「パスフレーズ」として入力します。
+すべてが期待通りに進むと、ツールは元のものを回復するために使用する必要がある**プライマリキー**を示します。元のものを回復するには、この[cyber_chef receipt](https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D))を使用し、レシート内の"passphrase"としてプライマリキーを入れます。
 
-結果の16進数が、データベースを復号化するために使用される最終キーです。
+結果として得られる16進数は、データベースを暗号化するために使用される最終キーであり、以下で復号化できます：
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
-**`config.dbx`** データベースには以下の情報が含まれています：
+**`config.dbx`** データベースには以下が含まれます:
 
 * **Email**: ユーザーのメールアドレス
 * **usernamedisplayname**: ユーザーの名前
-* **dropbox\_path**: Dropboxフォルダの場所
-* **Host\_id: Hash**: クラウドへの認証に使用されるハッシュ。これはウェブからのみ取り消すことができます。
+* **dropbox\_path**: Dropboxフォルダのパス
+* **Host\_id: Hash**: クラウドへの認証に使用される。これはウェブからのみ無効にできる。
 * **Root\_ns**: ユーザー識別子
 
-**`filecache.db`** データベースには、Dropboxと同期されたすべてのファイルとフォルダに関する情報が含まれています。`File_journal` テーブルには、より多くの有用な情報があります：
+**`filecache.db`** データベースにはDropboxと同期された全てのファイルとフォルダに関する情報が含まれます。`File_journal` テーブルには特に有用な情報があります:
 
-* **Server\_path**: サーバー内のファイルの場所（このパスはクライアントの `host_id` で先行します）。
+* **Server\_path**: サーバー内のファイルのパス（このパスはクライアントの `host_id` によって先行される）。
 * **local\_sjid**: ファイルのバージョン
-* **local\_mtime**: 変更日時
-* **local\_ctime**: 作成日時
+* **local\_mtime**: 変更日
+* **local\_ctime**: 作成日
 
-このデータベース内の他のテーブルには、より興味深い情報が含まれています：
+このデータベース内の他のテーブルにはさらに興味深い情報が含まれます:
 
-* **block\_cache**: Dropboxのすべてのファイルとフォルダのハッシュ
-* **block\_ref**: `block_cache` テーブルのハッシュIDを `file_journal` テーブルのファイルIDに関連付ける
+* **block\_cache**: Dropboxの全ファイルとフォルダのハッシュ
+* **block\_ref**: `block_cache` テーブルのハッシュIDを `file_journal` テーブルのファイルIDと関連付ける
 * **mount\_table**: Dropboxの共有フォルダ
 * **deleted\_fields**: Dropboxの削除されたファイル
 * **date\_added**
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) を使用して、世界で最も高度なコミュニティツールによって強化された **ワークフローを簡単に構築** および **自動化** します。\
-今すぐアクセスを取得：
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) を使用して、世界で最も先進的なコミュニティツールを駆使した **ワークフローを簡単に構築し自動化** します。\
+今すぐアクセス:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) で</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>!</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで **会社を宣伝** したいですか？または、**最新バージョンのPEASSを入手** したいですか？または、HackTricksを **PDFでダウンロード** したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見しましょう、私たちの独占的な [**NFT**](https://opensea.io/collection/the-peass-family) のコレクションを！
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com) を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)** をフォローしてください。**
-* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksに広告を掲載したい**、または **HackTricksをPDFでダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com) を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に **参加する** か、[**テレグラムグループ**](https://t.me/peass) に参加する、または **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォローする**。
+* **HackTricks** のGitHubリポジトリ [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) にPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>

