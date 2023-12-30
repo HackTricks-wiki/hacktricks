@@ -1,78 +1,80 @@
-# Número de serie de macOS
+# Número de Serie de macOS
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-Los dispositivos Apple fabricados después de 2010 generalmente tienen números de serie alfanuméricos de **12 caracteres**, con los **primeros tres dígitos que representan la ubicación de fabricación**, los siguientes **dos** que indican el **año** y la **semana** de fabricación, los siguientes **tres** dígitos proporcionan un **identificador único**, y los **últimos cuatro** dígitos representan el **número de modelo**.
+Los dispositivos Apple fabricados después de 2010 generalmente tienen números de serie **alfanuméricos de 12 caracteres**, con los **primeros tres dígitos representando el lugar de fabricación**, los siguientes **dos** indicando el **año** y **semana** de fabricación, los siguientes **tres** dígitos proporcionando un **identificador único**, y los **últimos** **cuatro dígitos representando el número de modelo**.
 
 Ejemplo de número de serie: **C02L13ECF8J2**
 
-### **3 - Ubicaciones de fabricación**
+### **3 - Lugares de fabricación**
 
-| Código | Fábrica                                      |
-| ------ | -------------------------------------------- |
-| FC     | Fountain Colorado, EE. UU.                   |
-| F      | Fremont, California, EE. UU.                 |
-| XA, XB, QP, G8 | EE. UU.                                          |
-| RN     | México                                       |
-| CK     | Cork, Irlanda                                 |
-| VM     | Foxconn, Pardubice, República Checa           |
-| SG, E  | Singapur                                     |
-| MB     | Malasia                                      |
-| PT, CY | Corea                                        |
-| EE, QT, UV | Taiwán                                       |
-| FK, F1, F2 | Foxconn - Zhengzhou, China                   |
-| W8     | Shanghai, China                              |
-| DL, DM | Foxconn - China                              |
-| DN     | Foxconn, Chengdu, China                      |
-| YM, 7J | Hon Hai/Foxconn, China                       |
+| Código         | Fábrica                                      |
+| -------------- | -------------------------------------------- |
+| FC             | Fountain Colorado, EE.UU.                    |
+| F              | Fremont, California, EE.UU.                  |
+| XA, XB, QP, G8 | EE.UU.                                       |
+| RN             | México                                       |
+| CK             | Cork, Irlanda                                |
+| VM             | Foxconn, Pardubice, República Checa          |
+| SG, E          | Singapur                                     |
+| MB             | Malasia                                      |
+| PT, CY         | Corea                                        |
+| EE, QT, UV     | Taiwán                                       |
+| FK, F1, F2     | Foxconn – Zhengzhou, China                   |
+| W8             | Shanghai China                               |
+| DL, DM         | Foxconn – China                              |
+| DN             | Foxconn, Chengdu, China                      |
+| YM, 7J         | Hon Hai/Foxconn, China                       |
 | 1C, 4H, WQ, F7 | China                                        |
-| C0     | Tech Com - Subsidiaria de Quanta Computer, China |
-| C3     | Foxxcon, Shenzhen, China                     |
-| C7     | Pentragon, Changhai, China                   |
-| RM     | Remanufacturado                               |
+| C0             | Tech Com – Filial de Quanta Computer, China  |
+| C3             | Foxxcon, Shenzhen, China                     |
+| C7             | Pentragon, Changhai, China                   |
+| RM             | Reacondicionado/remodelado                   |
 
 ### 1 - Año de fabricación
 
-| Código | Lanzamiento              |
-| ------ | ------------------------ |
-| C      | 2010/2020 (1er semestre) |
-| D      | 2010/2020 (2do semestre) |
-| F      | 2011/2021 (1er semestre) |
-| G      | 2011/2021 (2do semestre) |
-| H      | 2012/... (1er semestre)  |
-| J      | 2012 (2do semestre)      |
-| K      | 2013 (1er semestre)      |
-| L      | 2013 (2do semestre)      |
-| M      | 2014 (1er semestre)      |
-| N      | 2014 (2do semestre)      |
-| P      | 2015 (1er semestre)      |
-| Q      | 2015 (2do semestre)      |
-| R      | 2016 (1er semestre)      |
-| S      | 2016 (2do semestre)      |
-| T      | 2017 (1er semestre)      |
-| V      | 2017 (2do semestre)      |
-| W      | 2018 (1er semestre)      |
-| X      | 2018 (2do semestre)      |
-| Y      | 2019 (1er semestre)      |
-| Z      | 2019 (2do semestre)      |
+| Código | Lanzamiento           |
+| ------ | --------------------- |
+| C      | 2010/2020 (1.ª mitad) |
+| D      | 2010/2020 (2.ª mitad) |
+| F      | 2011/2021 (1.ª mitad) |
+| G      | 2011/2021 (2.ª mitad) |
+| H      | 2012/... (1.ª mitad)  |
+| J      | 2012 (2.ª mitad)      |
+| K      | 2013 (1.ª mitad)      |
+| L      | 2013 (2.ª mitad)      |
+| M      | 2014 (1.ª mitad)      |
+| N      | 2014 (2.ª mitad)      |
+| P      | 2015 (1.ª mitad)      |
+| Q      | 2015 (2.ª mitad)      |
+| R      | 2016 (1.ª mitad)      |
+| S      | 2016 (2.ª mitad)      |
+| T      | 2017 (1.ª mitad)      |
+| V      | 2017 (2.ª mitad)      |
+| W      | 2018 (1.ª mitad)      |
+| X      | 2018 (2.ª mitad)      |
+| Y      | 2019 (1.ª mitad)      |
+| Z      | 2019 (2.ª mitad)      |
 
 ### 1 - Semana de fabricación
 
-El quinto carácter representa la semana en que se fabricó el dispositivo. Hay 28 caracteres posibles en este lugar: **los dígitos del 1 al 9 se utilizan para representar las primeras nueve semanas**, y las **letras C a Y**, **excluyendo** las vocales A, E, I, O y U, y la letra S, representan las **semanas diez a veintisiete**. Para los dispositivos fabricados en la **segunda mitad del año, se agrega 26** al número representado por el quinto carácter del número de serie. Por ejemplo, un producto con un número de serie cuyos cuarto y quinto dígitos son "JH" fue fabricado en la semana 40 de 2012.
+El quinto carácter representa la semana en la que se fabricó el dispositivo. Hay 28 caracteres posibles en este lugar: **los dígitos del 1 al 9 se utilizan para representar desde la primera hasta la novena semana**, y los **caracteres de la C a la Y**, **excluyendo** las vocales A, E, I, O y U, y la letra S, representan **desde la décima hasta la vigésimo séptima semana**. Para dispositivos fabricados en la **segunda mitad del año, se añaden 26** al número representado por el quinto carácter del número de serie. Por ejemplo, un producto con un número de serie cuyos cuarto y quinto dígitos son “JH” fue fabricado en la 40.ª semana de 2012.
 
-### 3 - Código único
+### 3 - Código Único
 
-Los siguientes tres dígitos son un código identificador que **sirve para diferenciar cada dispositivo Apple del mismo modelo** que se fabrica en la misma ubicación y durante la misma semana del mismo año, asegurando que cada dispositivo tenga un número de serie diferente.
+Los siguientes tres dígitos son un código identificador que **sirve para diferenciar cada dispositivo Apple del mismo modelo** que se fabrica en el mismo lugar y durante la misma semana del mismo año, asegurando que cada dispositivo tenga un número de serie diferente.
 
 ### 4 - Número de serie
 
@@ -84,9 +86,14 @@ Los últimos cuatro dígitos del número de serie representan el **modelo del pr
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/c
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>
