@@ -2,50 +2,54 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) で AWS ハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローしてください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法:
+
+* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に **参加する** か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォローする**。
+* **HackTricks** の GitHub リポジトリ [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) に PR を提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 ## ファイアウォール
 
-* [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): 各プロセスが行うすべての接続を監視します。モードによって（接続を許可する、接続を拒否する、アラート）、新しい接続が確立されるたびに**アラートを表示**します。また、この情報を表示するための非常に素敵なGUIも備えています。
-* [**LuLu**](https://objective-see.org/products/lulu.html): Objective-Seeファイアウォール。これは基本的なファイアウォールで、**疑わしい接続に対してアラートを表示**します（GUIはLittle Snitchのものほど洗練されていません）。
+* [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): 各プロセスによって行われるすべての接続を監視します。モードに応じて（接続を黙って許可、接続を黙って拒否、アラート）、新しい接続が確立されるたびに **アラートを表示** します。この情報をすべて見るための非常に素敵な GUI もあります。
+* [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See のファイアウォール。これは、怪しい接続について警告する基本的なファイアウォールです（GUI はありますが、Little Snitch のものほど洗練されていません）。
 
-## 持続性の検出
+## 永続性検出
 
-* [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-Seeアプリケーションで、**マルウェアが持続する可能性のある**複数の場所を検索します（ワンショットツールであり、監視サービスではありません）。
-* [**BlockBlock**](https://objective-see.org/products/blockblock.html): KnockKnockと同様に、持続性を生成するプロセスを監視します。
+* [**KnockKnock**](https://objective-see.org/products/knockknock.html): **マルウェアが永続化している可能性のある** 複数の場所を検索する Objective-See のアプリケーションです（モニタリングサービスではなくワンショットツールです）。
+* [**BlockBlock**](https://objective-see.org/products/blockblock.html): 永続性を生成するプロセスを監視することで KnockKnock と同様です。
 
-## キーロガーの検出
+## キーロガー検出
 
-* [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-Seeアプリケーションで、キーボードの「イベントタップ」をインストールする**キーロガー**を検出します。
+* [**ReiKey**](https://objective-see.org/products/reikey.html): キーボードの "イベントタップ" をインストールする **キーロガー** を見つける Objective-See のアプリケーション。
 
-## ランサムウェアの検出
+## ランサムウェア検出
 
-* [**RansomWhere**](https://objective-see.org/products/ransomwhere.html): Objective-Seeアプリケーションで、**ファイルの暗号化**アクションを検出します。
+* [**RansomWhere**](https://objective-see.org/products/ransomwhere.html): **ファイル暗号化** アクションを検出する Objective-See のアプリケーション。
 
-## マイクとウェブカメラの検出
+## マイク & ウェブカメラ検出
 
-* [**OverSight**](https://objective-see.org/products/oversight.html): Objective-Seeアプリケーションで、**ウェブカメラとマイクを使用し始めるアプリケーション**を検出します。
+* [**OverSight**](https://objective-see.org/products/oversight.html): ウェブカメラとマイクを使用し始める **アプリケーションを検出する** Objective-See のアプリケーション。
 
-## プロセスインジェクションの検出
+## プロセスインジェクション検出
 
-* [**Shield**](https://theevilbit.github.io/shield/): 異なるプロセスインジェクションの**検出**技術を備えたアプリケーション。
+* [**Shield**](https://theevilbit.github.io/shield/): 異なるプロセスインジェクション技術を **検出する** アプリケーション。
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) で AWS ハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローしてください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法:
+
+* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に **参加する** か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォローする**。
+* **HackTricks** の GitHub リポジトリ [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) に PR を提出して、あなたのハッキングのコツを共有する。
 
 </details>

