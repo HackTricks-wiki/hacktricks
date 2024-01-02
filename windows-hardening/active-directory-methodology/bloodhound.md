@@ -38,15 +38,15 @@ To take a snapshot of AD, go to `File` --> `Create Snapshot` and enter a name fo
 
 ## BloodHound
 
-> BloodHound is a single page Javascript web application, built on top of [Linkurious](http://linkurio.us), compiled with [Electron](http://electron.atom.io), with a [Neo4j](https://neo4j.com)database fed by a PowerShell ingestor.
+> BloodHound is a monolithic web application composed of an embedded React frontend with [Sigma.js](https://www.sigmajs.org/) and a [Go](https://go.dev/) based REST API backend. It is deployed with a [Postgresql](https://www.postgresql.org/) application database and a [Neo4j](https://neo4j.com) graph database, and is fed by the [SharpHound](https://github.com/BloodHoundAD/SharpHound) and [AzureHound](https://github.com/BloodHoundAD/AzureHound) data collectors.
 >
-> BloodHound uses graph theory to reveal the hidden and often unintended relationships within an Active Directory environment. Attackers can use BloodHound to easily identify highly complex attack paths that would otherwise be impossible to quickly identify. Defenders can use BloodHound to identify and eliminate those same attack paths. Both blue and red teams can use BloodHound to easily gain a deeper understanding of privilege relationships in an Active Directory environment.
+>BloodHound uses graph theory to reveal the hidden and often unintended relationships within an Active Directory or Azure environment. Attackers can use BloodHound to easily identify highly complex attack paths that would otherwise be impossible to quickly identify. Defenders can use BloodHound to identify and eliminate those same attack paths. Both blue and red teams can use BloodHound to easily gain a deeper understanding of privilege relationships in an Active Directory or Azure environment.
 >
-> BloodHound is developed by [@\_wald0](https://www.twitter.com/\_wald0), [@CptJesus](https://twitter.com/CptJesus), and [@harmj0y](https://twitter.com/harmj0y).
+>BloodHound CE is created and maintained by the [BloodHound Enterprise Team](https://bloodhoundenterprise.io). The original BloodHound was created by [@\_wald0](https://www.twitter.com/\_wald0), [@CptJesus](https://twitter.com/CptJesus), and [@harmj0y](https://twitter.com/harmj0y).
 >
-> From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+>From [https://github.com/SpecterOps/BloodHound](https://github.com/SpecterOps/BloodHound)
 
-So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
+So, [Bloodhound ](https://github.com/SpecterOps/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
 
 Booldhound is composed of 2 main parts: **ingestors** and the **visualisation application**.
 
@@ -54,6 +54,39 @@ The **ingestors** are used to **enumerate the domain and extract all the informa
 
 The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
 
+### Installation
+After the creation of BloodHound CE, the entire project was updated for ease of use with Docker. The easiest way to get started is to use its pre-configured Docker Compose configuration.
+
+1. Install Docker Compose. This should be included with the [Docker Desktop](https://www.docker.com/products/docker-desktop/) installation.
+2. Run:
+```
+curl -L https://ghst.ly/getbhce | docker compose -f - up
+```
+3. Locate the randomly generated password in the terminal output of Docker Compose.
+4. In a browser, navigate to http://localhost:8080/ui/login. Login with a username of admin and the randomly generated password from the logs.
+
+After this you will need to change the randomly generated password and you will have the new interface ready, from which you can directly download the ingestors.
+
+### SharpHound
+
+They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
+
+```
+./SharpHound.exe --CollectionMethods All
+Invoke-BloodHound -CollectionMethod All
+```
+
+> You can read more about **CollectionMethod** and loop session [here](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
+
+If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
+
+```
+runas /netonly /user:domain\user "powershell.exe -exec bypass"
+```
+
+[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+
+## Legacy Bloodhound
 ### Installation
 
 1. Bloodhound
@@ -114,26 +147,6 @@ And bloodhound will be ready to ingest data.
 
 ![](<../../.gitbook/assets/image (171) (1).png>)
 
-### SharpHound
-
-They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
-
-```
-./SharpHound.exe --CollectionMethods All
-Invoke-BloodHound -CollectionMethod All
-```
-
-> You can read more about **CollectionMethod** and loop session [here](https://bloodhound.readthedocs.io/en/latest/data-collection/sharphound-all-flags.html)
-
-If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
-
-```
-runas /netonly /user:domain\user "powershell.exe -exec bypass"
-```
-
-[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
-
-**Windows Silent**
 
 ### **Python bloodhound**
 
