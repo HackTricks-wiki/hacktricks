@@ -2,13 +2,15 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksにあなたの会社を広告したい**ですか？または、**PEASSの最新バージョンにアクセスしたい**、または**HackTricksをPDFでダウンロードしたい**ですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**にフォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**PEASSファミリー**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
 
 </details>
 
@@ -16,47 +18,47 @@
 
 Active Directoryは、ネットワーク管理者がドメイン、ユーザー、およびネットワーク内のオブジェクトを作成および管理することを可能にします。例えば、管理者はユーザーグループを作成し、サーバー上の特定のディレクトリへの特定のアクセス権を与えることができます。ネットワークが成長するにつれて、Active Directoryは多数のユーザーを論理的なグループとサブグループに編成し、各レベルでアクセス制御を提供する方法を提供します。
 
-Active Directoryの構造には、主に3つの階層が含まれます：1) ドメイン、2) ツリー、3) フォレスト。同じデータベースを使用する複数のオブジェクト（ユーザーまたはデバイス）は、単一のドメインにグループ化することができます。複数のドメインは、ツリーと呼ばれる単一のグループに組み合わせることができます。複数のツリーは、フォレストと呼ばれるコレクションにグループ化することができます。これらの各レベルは、特定のアクセス権と通信権限を割り当てることができます。
+Active Directoryの構造には、1) ドメイン、2) ツリー、3) フォレストの3つの主要な階層が含まれています。同じデータベースを使用する複数のオブジェクト（ユーザーまたはデバイス）は、単一のドメインにグループ化されることがあります。複数のドメインは、ツリーと呼ばれる単一のグループに組み合わせることができます。複数のツリーは、フォレストと呼ばれるコレクションにグループ化されることがあります。これらの各レベルには、特定のアクセス権と通信権限が割り当てられることがあります。
 
-Active Directoryの主な概念：
+Active Directoryの主要な概念:
 
 1. **ディレクトリ** – Active Directoryのオブジェクトに関するすべての情報を含む
-2. **オブジェクト** – ディレクトリ内のほぼすべてのものを参照する（ユーザー、グループ、共有フォルダーなど）
-3. **ドメイン** – ディレクトリのオブジェクトはドメイン内に含まれる。"フォレスト"内には複数のドメインが存在し、それぞれが独自のオブジェクトコレクションを持つことができる。
-4. **ツリー** – 同じルートを持つドメインのグループ。例：_dom.local, email.dom.local, www.dom.local_
+2. **オブジェクト** – ディレクトリ内のほぼすべてのもの（ユーザー、グループ、共有フォルダーなど）を参照する
+3. **ドメイン** – ディレクトリのオブジェクトはドメイン内に含まれる。"フォレスト"内には複数のドメインが存在し、それぞれに独自のオブジェクトコレクションがある。
+4. **ツリー** – 同じルートを持つドメインのグループ。例: _dom.local, email.dom.local, www.dom.local_
 5. **フォレスト** – フォレストは組織階層の最上位レベルであり、ツリーのグループで構成される。ツリーは信頼関係によって接続される。
 
-Active Directoryはいくつかの異なるサービスを提供し、これらは"Active Directory Domain Services"、またはAD DSの傘下にあります。これらのサービスには以下が含まれます：
+Active Directoryはいくつかの異なるサービスを提供し、これらは"Active Directory Domain Services"、またはAD DSの傘下にあります。これらのサービスには以下が含まれます:
 
-1. **ドメインサービス** – 中央集権的なデータを保存し、ユーザーとドメイン間の通信を管理する；ログイン認証と検索機能を含む
+1. **ドメインサービス** – 中央集権的なデータを保存し、ユーザーとドメイン間の通信を管理する; ログイン認証と検索機能を含む
 2. **証明書サービス** – 安全な証明書を作成、配布、および管理する
-3. **軽量ディレクトリサービス** – 開かれた（LDAP）プロトコルを使用するディレクトリ対応アプリケーションをサポートする
-4. **ディレクトリ連合サービス** – 単一セッションで複数のWebアプリケーションにユーザーを認証するシングルサインオン（SSO）を提供する
+3. **軽量ディレクトリサービス** – 開放的な(LDAP)プロトコルを使用するディレクトリ対応アプリケーションをサポートする
+4. **ディレクトリ連携サービス** – 単一セッションで複数のWebアプリケーションにユーザーを認証するシングルサインオン(SSO)を提供する
 5. **権利管理** – 著作権情報を保護し、デジタルコンテンツの不正使用と流通を防ぐ
 6. **DNSサービス** – ドメイン名を解決するために使用される。
 
-AD DSはWindows Server（Windows Server 10を含む）に含まれており、クライアントシステムを管理するように設計されています。通常のバージョンのWindowsを実行しているシステムは、AD DSの管理機能を持っていませんが、Active Directoryをサポートしています。これは、ユーザーが正しいログイン資格情報を持っていれば、任意のWindowsコンピューターがWindowsワークグループに接続できることを意味します。\
+AD DSはWindows Server（Windows Server 10を含む）に含まれており、クライアントシステムを管理するように設計されています。通常のバージョンのWindowsを実行しているシステムはAD DSの管理機能を持っていませんが、Active Directoryをサポートしています。これは、正しいログイン資格情報を持っているユーザーであれば、任意のWindowsコンピューターがWindowsワークグループに接続できることを意味します。\
 **出典:** [**https://techterms.com/definition/active\_directory**](https://techterms.com/definition/active\_directory)
 
 ### **Kerberos認証**
 
-**ADを攻撃する**方法を学ぶには、**Kerberos認証プロセス**を非常によく**理解する**必要があります。\
+ADを**攻撃する**方法を学ぶには、**Kerberos認証プロセス**を非常によく**理解する**必要があります。\
 [**まだその仕組みを知らない場合は、このページを読んでください。**](kerberos-authentication.md)
 
 ## チートシート
 
-[https://wadcoms.github.io/](https://wadcoms.github.io)を見ると、ADを列挙/悪用するために実行できるコマンドのクイックビューが得られます。
+[https://wadcoms.github.io/](https://wadcoms.github.io)にアクセスして、ADを列挙/悪用するために実行できるコマンドのクイックビューを確認できます。
 
 ## Recon Active Directory (No creds/sessions)
 
-AD環境にアクセスできるが、資格情報/セッションがない場合は以下のことができます：
+資格情報/セッションがない場合でも、AD環境にアクセスできる場合があります:
 
-* **ネットワークのペネトレーションテスト：**
+* **ネットワークのペネトレーションテスト:**
 * ネットワークをスキャンし、マシンとオープンポートを見つけて、**脆弱性を悪用する**か、それらから**資格情報を抽出する**（例えば、[プリンターは非常に興味深いターゲットになる可能性があります](ad-information-in-printers.md)。
-* DNSの列挙は、ドメイン内の重要なサーバー（Web、プリンター、共有、VPN、メディアなど）に関する情報を提供する可能性があります。
+* DNSを列挙すると、ドメイン内の重要なサーバー（Web、プリンター、共有、VPN、メディアなど）に関する情報が得られる可能性があります。
 * `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
 * これを行う方法についての詳細は、一般的な[**ペネトレーションテスト方法論**](../../generic-methodologies-and-resources/pentesting-methodology.md)を参照してください。
-* **smbサービスでnullおよびGuestアクセスをチェックする**（これは現代のWindowsバージョンでは機能しません）：
+* **smbサービスでnullおよびGuestアクセスをチェックする**（これは現代のWindowsバージョンでは機能しません）:
 * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
 * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
@@ -77,18 +79,18 @@ AD環境にアクセスできるが、資格情報/セッションがない場�
 * **ネットワークをポイズニングする**
 * [**Responderを使用してサービスを偽装し、資格情報を収集する**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
 * [**リレーアタックを悪用してホストにアクセスする**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
-* [**evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)を使用して偽のUPnPサービスを公開し、資格情報を収集する
-* [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology)：
-* 内部文書、ソーシャルメディア、サービス（主にWeb）からユーザー名/名前を抽出し、ドメイン環境内および公開されている情報から抽出します。
-* 会社の従業員のフルネームを見つけた場合、異なるAD **ユーザー名の規則**（[**これを読んでください**](https://activedirectorypro.com/active-directory-user-naming-convention/))を試すことができます。最も一般的な規則は：_NameSurname_, _Name.Surname_, _NamSur_（各3文字）、_Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _ランダムな文字と3つのランダムな数字_（abc123）。
-* ツール：
+* [**evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDPを使用して偽のUPnPサービスを公開し、資格情報を収集する**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+* [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
+* 内部文書、ソーシャルメディア、ドメイン環境内のサービス（主にWeb）、および公開されている情報からユーザー名/名前を抽出する。
+* 会社の従業員のフルネームが見つかった場合、異なるAD **ユーザー名の規則**（[**これを読む**](https://activedirectorypro.com/active-directory-user-naming-convention/)）を試すことができます。最も一般的な規則は: _NameSurname_, _Name.Surname_, _NamSur_（それぞれの3文字）, _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _ランダムな文字と3つのランダムな数字_ (abc123)。
+* ツール:
 * [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 * [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
 
 ### ユーザー列挙
 
-* **匿名SMB/LDAP enum:** [**ペネトレーションテスト SMB**](../../network-services-pentesting/pentesting-smb.md) と [**ペネトレーションテスト LDAP**](../../network-services-pentesting/pentesting-ldap.md) のページを確認してください。
-* **Kerbrute enum**: **無効なユーザー名が要求された**場合、サーバーは **Kerberosエラー** コード _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_ を使用して応答し、ユーザー名が無効であることを判断することができます。**有効なユーザー名**は、**TGT in a AS-REP** 応答またはエラー _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_ を引き出し、ユーザーが事前認証を行う必要があることを示します。
+* **匿名SMB/LDAP enum:** [**ペネトレーションテスト SMB**](../../network-services-pentesting/pentesting-smb.md) と [**ペネトレーションテスト LDAP**](../../network-services-pentesting/pentesting-ldap.md) のページをチェックしてください。
+* **Kerbrute enum**: **無効なユーザー名が要求された**場合、サーバーは **Kerberosエラー** コード _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_ を使用して応答し、ユーザー名が無効であることを判断できます。**有効なユーザー名**は、**TGT in a AS-REP** 応答またはエラー _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_ を引き出し、ユーザーが事前認証を行う必要があることを示します。
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -116,16 +118,16 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 {% hint style="warning" %}
 このGitHubリポジトリでユーザー名のリストを見つけることができます。[**このgithubリポジトリ**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) とこのリポジトリ ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames))。
 
-しかし、この段階までに行ったリコンステップから**企業で働いている人々の名前**を持っているべきです。名前と姓を使って、スクリプト [**namemash.py**](https://gist.github.com/superkojiman/11076951) を使用して、有効な可能性のあるユーザー名を生成できます。
+しかし、このステップの前に実施したはずのリコンステップから、**会社で働いている人々の名前**を持っているべきです。名前と姓を使って、スクリプト [**namemash.py**](https://gist.github.com/superkojiman/11076951) を使用して、有効な可能性のあるユーザー名を生成できます。
 {% endhint %}
 
 ### 一つまたは複数のユーザー名を知っている
 
-有効なユーザー名をすでに知っているが、パスワードはない場合、次の方法を試してみてください：
+有効なユーザー名をすでに知っているが、パスワードはない場合は以下を試してみてください。
 
-* [**ASREPRoast**](asreproast.md): ユーザーが _DONT\_REQ\_PREAUTH_ 属性を**持っていない**場合、そのユーザーのために AS\_REP メッセージを**要求**でき、それにはユーザーのパスワードの派生によって暗号化されたデータが含まれます。
-* [**Password Spraying**](password-spraying.md): 発見された各ユーザーで最も**一般的なパスワード**を試してみましょう。もしかすると、何人かのユーザーが悪いパスワードを使用しているかもしれません（パスワードポリシーを念頭に置いてください！）。
-* OWAサーバーに対しても**スプレー**を行い、ユーザーのメールサーバーへのアクセスを試みることができます。
+* [**ASREPRoast**](asreproast.md): ユーザーが _DONT\_REQ\_PREAUTH_ 属性を **持っていない** 場合、そのユーザーの **AS\_REPメッセージを要求** でき、それにはユーザーのパスワードの派生によって暗号化されたデータが含まれます。
+* [**Password Spraying**](password-spraying.md): 発見された各ユーザーで最も **一般的なパスワード** を試してみましょう。もしかすると、何人かのユーザーが悪いパスワードを使用しているかもしれません（パスワードポリシーを念頭に置いてください！）。
+* OWAサーバーに対しても **スプレー** を行い、ユーザーのメールサーバーへのアクセスを試みることができます。
 
 {% content-ref url="password-spraying.md" %}
 [password-spraying.md](password-spraying.md)
@@ -133,7 +135,7 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 
 ### LLMNR/NBT-NSポイズニング
 
-**ネットワーク**のプロトコルを**ポイズニング**することで、クラックするためのチャレンジ**ハッシュ**を**取得**できるかもしれません：
+ネットワークのプロトコルを **ポイズニング** することで、クラックするためのチャレンジ **ハッシュ** を **取得** することができるかもしれません。
 
 {% content-ref url="../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md" %}
 [spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
@@ -141,21 +143,21 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 
 ### NTMLリレー
 
-アクティブディレクトリを列挙することができれば、**より多くのメールアドレスとネットワークのより良い理解**を得ることができます。NTML [**リレー攻撃**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) を強制して、AD環境へのアクセスを得ることができるかもしれません。
+アクティブディレクトリを列挙することができれば、**より多くのメールアドレスとネットワークのより良い理解** を得ることができます。NTML [**リレー攻撃**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) を強制して、AD環境へのアクセスを得ることができるかもしれません。
 
 ### NTLMクレデンシャルの盗難
 
-**nullまたはゲストユーザー**で他のPCや共有に**アクセス**できる場合、SCFファイルのような**ファイルを配置**できます。これが何らかの方法でアクセスされると、NTML認証があなたに対して**トリガー**され、**NTLMチャレンジ**を**盗む**ことができます：
+**nullまたはゲストユーザー** で他のPCや共有に **アクセス** できる場合、SCFファイルのような **ファイルを配置** して、何らかの方法でアクセスされた場合に **NTML認証をトリガー** し、クラックするための **NTLMチャレンジ** を **盗む** ことができます。
 
 {% content-ref url="../ntlm/places-to-steal-ntlm-creds.md" %}
 [places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
 {% endcontent-ref %}
 
-## クレデンシャル/セッションを持ってアクティブディレクトリを列挙する
+## クレデンシャル/セッションを持つアクティブディレクトリの列挙
 
-このフェーズでは、有効なドメインアカウントのクレデンシャルまたはセッションを**侵害**している必要があります。有効なクレデンシャルを持っているか、ドメインユーザーとしてシェルを持っている場合、**以前に提供されたオプションが他のユーザーを侵害するためのオプションであることを覚えておくべきです**。
+このフェーズでは、有効なドメインアカウントのクレデンシャルまたはセッションを **侵害している必要があります**。有効なクレデンシャルを持っているか、ドメインユーザーとしてシェルを持っている場合、**以前に提供されたオプションが他のユーザーを侵害するためのオプションであることを覚えておくべきです**。
 
-認証された列挙を開始する前に、**Kerberosダブルホップ問題**について知っておくべきです。
+認証された列挙を開始する前に、**Kerberosダブルホップ問題** について知っておくべきです。
 
 {% content-ref url="kerberos-double-hop-problem.md" %}
 [kerberos-double-hop-problem.md](kerberos-double-hop-problem.md)
@@ -163,50 +165,50 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 
 ### 列挙
 
-アカウントを侵害することは、**ドメイン全体を侵害するための大きなステップ**です。なぜなら、**アクティブディレクトリの列挙**を開始できるからです：
+アカウントを侵害することは、**ドメイン全体を侵害するための大きなステップ** です。なぜなら、**アクティブディレクトリの列挙** を開始することができるからです。
 
-[**ASREPRoast**](asreproast.md) に関しては、今ではすべての可能性のある脆弱なユーザーを見つけることができ、[**Password Spraying**](password-spraying.md) に関しては、すべてのユーザー名の**リストを取得**し、侵害されたアカウントのパスワード、空のパスワード、そして新しい有望なパスワードを試すことができます。
+[**ASREPRoast**](asreproast.md) に関しては、すべての可能性のある脆弱なユーザーを見つけることができ、[**Password Spraying**](password-spraying.md) に関しては、すべてのユーザー名のリストを取得し、侵害されたアカウントのパスワード、空のパスワード、新しい有望なパスワードを試すことができます。
 
-* [**CMDを使用して基本的なリコンを実行**](../basic-cmd-for-pentesters.md#domain-info) することができます。
-* より慎重に行うために [**powershellを使用してリコン**](../basic-powershell-for-pentesters/) を行うこともできます。
+* 基本的なリコンを実行するために [**CMDを使用**](../basic-cmd-for-pentesters.md#domain-info) することができます。
+* よりステルス性の高い [**powershellをリコンに使用**](../basic-powershell-for-pentesters/) することもできます。
 * より詳細な情報を抽出するために [**powerviewを使用**](../basic-powershell-for-pentesters/powerview.md) することもできます。
-* アクティブディレクトリでのリコンには [**BloodHound**](bloodhound.md) という素晴らしいツールがあります。それは（使用する収集方法によっては）**あまり慎重ではありません**が、気にしないのであれば、絶対に試してみるべきです。RDPできるユーザーを見つけたり、他のグループへのパスを見つけたりすることができます。
-* **他の自動化されたAD列挙ツールには**：[**AD Explorer**](bloodhound.md#ad-explorer)**、** [**ADRecon**](bloodhound.md#adrecon)**、** [**Group3r**](bloodhound.md#group3r)**、** [**PingCastle**](bloodhound.md#pingcastle)**があります。**
-* [**ADのDNSレコード**](ad-dns-records.md) には興味深い情報が含まれている可能性があります。
-* ディレクトリを列挙するために使用できる**GUIを備えたツール**は、**SysInternal**スイートの**AdExplorer.exe**です。
-* **ldapsearch** を使用してLDAPデータベースを検索し、_userPassword_ および _unixUserPassword_ フィールド、または _Description_ でクレデンシャルを探すこともできます。他の方法については、[PayloadsAllTheThingsのADユーザーコメントのパスワード](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) を参照してください。
-* **Linux**を使用している場合は、[**pywerview**](https://github.com/the-useless-one/pywerview) を使用してドメインを列挙することもできます。
-* 自動化されたツールとして次のものも試してみることができます：
+* アクティブディレクトリでのリコンには [**BloodHound**](bloodhound.md) という素晴らしいツールがあります。それは **あまりステルス性がありません**（使用する収集方法によりますが）、しかし、それが気にならない場合は、ぜひ試してみるべきです。RDPできるユーザーを見つけたり、他のグループへのパスを見つけたりすることができます。
+* **他の自動化されたAD列挙ツールには:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)** があります。**
+* ADの [**DNSレコード**](ad-dns-records.md) には興味深い情報が含まれている可能性があります。
+* ディレクトリを列挙するために使用できる **GUIツール** には、**SysInternal** スイートの **AdExplorer.exe** があります。
+* **ldapsearch** を使用してLDAPデータベースを検索し、_userPassword_ および _unixUserPassword_、または _Description_ のフィールドでクレデンシャルを探すこともできます。他の方法については、[PayloadsAllTheThingsのADユーザーコメントのパスワード](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) を参照してください。
+* **Linuxを使用している場合**、[**pywerview**](https://github.com/the-useless-one/pywerview) を使用してドメインを列挙することもできます。
+* 自動化されたツールとして以下も試してみることができます:
 * [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
 * [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
-*   **すべてのドメインユーザーを抽出する**
+*   **すべてのドメインユーザーの抽出**
 
-Windowsからすべてのドメインユーザー名を取得するのは非常に簡単です（`net user /domain`、`Get-DomainUser`、または `wmic useraccount get name,sid`）。Linuxでは、次のように使用できます：`GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` または `enum4linux -a -u "user" -p "password" <DC IP>`
+Windowsからすべてのドメインユーザー名を取得するのは非常に簡単です（`net user /domain` ,`Get-DomainUser` または `wmic useraccount get name,sid`）。Linuxでは、以下を使用できます: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` または `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> この列挙セクションが小さく見えるかもしれませんが、これが全ての中で最も重要な部分です。リンク（特にcmd、powershell、powerview、BloodHoundのリンク）にアクセスし、ドメインを列挙する方法を学び、快適に感じるまで練習してください。評価中には、DAへの道を見つけるか、何もできないと判断するための鍵となる瞬間です。
+> この列挙セクションが小さく見えるかもしれませんが、これがすべての中で最も重要な部分です。リンク（特にcmd、powershell、powerview、BloodHoundのリンク）にアクセスし、ドメインを列挙する方法を学び、快適に感じるまで練習してください。評価中には、DAへの道を見つけるか、何もできないと判断するための鍵となる瞬間です。
 
 ### Kerberoast
 
-Kerberoastingの目的は、ドメインユーザーアカウントを代表して実行されるサービスの**TGSチケットを収穫する**ことです。これらのTGSチケットの一部は、ユーザーパスワードから派生したキーで**暗号化されています**。その結果、そのクレデンシャルを**オフラインでクラック**することができます。\
-詳細はこちらで：
+Kerberoastingの目的は、**ドメインユーザーアカウントを代表して実行されるサービスのTGSチケットを収穫することです**。これらのTGSチケットの一部は、ユーザーパスワードから派生したキーで **暗号化されています**。その結果、そのクレデンシャルは **オフラインでクラックされる可能性があります**。\
+詳細は以下で:
 
 {% content-ref url="kerberoast.md" %}
 [kerberoast.md](kerberoast.md)
 {% endcontent-ref %}
 
-### リモート接続（RDP、SSH、FTP、Win-RMなど）
+### リモート接続 (RDP, SSH, FTP, Win-RMなど)
 
-いくつかのクレデンシャルを取得したら、**マシン**へのアクセスがあるかどうかを確認できます。そのためには、**CrackMapExec** を使用して、ポートスキャンに応じて、さまざまなサーバーで異なるプロトコルで接続を試みることができます。
+いくつかのクレデンシャルを取得したら、任意の **マシン** にアクセスできるかどうかを確認できます。そのためには、ポートスキャンに応じて、**CrackMapExec** を使用して、さまざまなサーバーで異なるプロトコルで接続を試みることができます。
 
 ### ローカル特権昇格
 
-通常のドメインユーザーとしてクレデンシャルまたはセッションを侵害し、このユーザーで**ドメイン内の任意のマシン**に**アクセス**できる場合、ローカルで特権を昇格させ、クレデンシャルを探す方法を見つけるべきです。これは、他のユーザーのハッシュをメモリ（LSASS）およびローカル（SAM）から**ダンプ**することができるのは、ローカル管理者権限を持っている場合のみだからです。
+通常のドメインユーザーとしてのクレデンシャルまたはセッションを侵害し、このユーザーで **ドメイン内の任意のマシンにアクセス** できる場合は、**ローカルで特権を昇格させ、クレデンシャルを略奪する方法を見つける** べきです。これは、他のユーザーのハッシュをメモリ（LSASS）およびローカル（SAM）から **ダンプするには、ローカル管理者権限が必要** だからです。
 
-この本には[**Windowsでのローカル特権昇格**](../windows-local-privilege-escalation/)についての完全なページと[**チェックリスト**](../checklist-windows-privilege-escalation.md)があります。また、[**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) の使用も忘れないでください。
+この本には [**Windowsでのローカル特権昇格**](../windows-local-privilege-escalation/) についての完全なページと [**チェックリスト**](../checklist-windows-privilege-escalation.md) があります。また、[**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) の使用を忘れないでください。
 
 ### 現在のセッションチケット
 
-現在のユーザーに**アクセス許可を与えるチケット**が見つかる可能性は非常に**低い**ですが、確認することができます：
+現在のユーザーに **アクセス許可を与えるチケット** が見つかることは非常に **まれ** ですが、確認することができます：
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -216,17 +218,17 @@ Kerberoastingの目的は、ドメインユーザーアカウントを代表し�
 ```
 ### NTMLリレー
 
-アクティブディレクトリを列挙することができれば、**より多くのメールアドレスとネットワークの理解が深まります**。NTMLの[**リレー攻撃**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)を強制することができるかもしれません。
+アクティブディレクトリを列挙することに成功した場合、**より多くのメールアドレスとネットワークの理解が深まります**。NTMLの[**リレー攻撃**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)を強制することができるかもしれません。
 
 ### **コンピュータ共有で資格情報を探す**
 
 基本的な資格情報を手に入れたら、AD内で共有されている**興味深いファイルを探す**べきです。手動で行うこともできますが、それは非常に退屈で繰り返しの作業です（特に、確認する必要がある数百のドキュメントが見つかった場合）。
 
-[**使用できるツールについて学ぶには、このリンクをたどってください。**](../../network-services-pentesting/pentesting-smb.md#domain-shared-folders-search)
+[**このリンクをフォローして、使用できるツールについて学びましょう。**](../../network-services-pentesting/pentesting-smb.md#domain-shared-folders-search)
 
 ### NTLM資格情報を盗む
 
-他のPCや共有に**アクセスできる**場合、SCFファイルのような**ファイルを配置**することができます。これが何らかの形でアクセスされると、**あなたに対してNTML認証をトリガー**し、**NTLMチャレンジを盗む**ことができます。
+他のPCや共有に**アクセスできる場合**、SCFファイルのような**ファイルを配置**して、何らかの方法でアクセスされた場合に**あなたに対してNTML認証をトリガー**し、**NTLMチャレンジを盗む**ことができます：
 
 {% content-ref url="../ntlm/places-to-steal-ntlm-creds.md" %}
 [places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
@@ -240,30 +242,31 @@ Kerberoastingの目的は、ドメインユーザーアカウントを代表し�
 [printnightmare.md](printnightmare.md)
 {% endcontent-ref %}
 
-## 特権資格情報/セッションを持つActive Directoryの権限昇格
+## 特権資格情報/セッションを持つActive Directoryでの権限昇格
 
 **以下の技術には、通常のドメインユーザーでは不十分で、これらの攻撃を実行するために特別な権限/資格情報が必要です。**
 
 ### ハッシュ抽出
 
-[AsRepRoast](asreproast.md)、[Password Spraying](password-spraying.md)、[Kerberoast](kerberoast.md)、[Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)（リレーを含む）、[EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)、[ローカルでの権限昇格](../windows-local-privilege-escalation/)を使用して、いくつかのローカル管理者アカウントを侵害することができたら、メモリとローカルにあるすべてのハッシュをダンプする時です。\
+[AsRepRoast](asreproast.md)、[Password Spraying](password-spraying.md)、[Kerberoast](kerberoast.md)、[Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)（リレーを含む）、[EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)、[ローカルでの権限昇格](../windows-local-privilege-escalation/)を使用して、何らかのローカル管理者アカウントを侵害することに成功したことを願います。\
+次に、メモリとローカルにあるすべてのハッシュをダンプする時です。\
 [**ハッシュを取得するさまざまな方法については、このページを読んでください。**](broken-reference/)
 
-### ハッシュを渡す
+### パス・ザ・ハッシュ
 
 **ユーザーのハッシュを手に入れたら**、それを使用して**なりすまし**を行うことができます。\
-**NTLM認証をそのハッシュを使用して実行する**ツールを使用するか、新しい**sessionlogonを作成**してそのハッシュを**LSASS内に注入**し、**NTLM認証が実行されるときにそのハッシュが使用される**ようにする必要があります。最後のオプションはmimikatzが行うことです。\
+**NTLM認証をそのハッシュを使用して実行する**何らかの**ツール**を使用するか、新しい**sessionlogon**を作成してその**ハッシュをLSASSに注入**し、**NTLM認証が実行されるときにそのハッシュが使用される**ようにする必要があります。最後のオプションはmimikatzが行うことです。\
 [**詳細については、このページを読んでください。**](../ntlm/#pass-the-hash)
 
-### ハッシュ/キーを渡す
+### Over Pass the Hash/Pass the Key
 
-この攻撃は、ユーザーのNTLMハッシュを使用してKerberosチケットを要求することを目的としており、NTLMプロトコルの一般的なハッシュを渡す代わりになります。したがって、NTLMプロトコルが無効になっており、認証プロトコルとして**Kerberosのみが許可されているネットワークでは特に有用**です。
+この攻撃は、**ユーザーのNTLMハッシュを使用してKerberosチケットを要求する**ことを目的としています。したがって、これは特に**NTLMプロトコルが無効になっているネットワークで有用**であり、認証プロトコルとして**Kerberosのみが許可されている場合**に特に有用です。
 
 {% content-ref url="over-pass-the-hash-pass-the-key.md" %}
 [over-pass-the-hash-pass-the-key.md](over-pass-the-hash-pass-the-key.md)
 {% endcontent-ref %}
 
-### チケットを渡す
+### パス・ザ・チケット
 
 この攻撃はPass the Keyに似ていますが、ハッシュを使用してチケットを要求する代わりに、**チケット自体が盗まれ**、その所有者として認証に使用されます。
 
@@ -273,7 +276,7 @@ Kerberoastingの目的は、ドメインユーザーアカウントを代表し�
 
 ### 資格情報の再利用
 
-**ローカル管理者**の**ハッシュ**または**パスワード**を持っている場合、他の**PC**に**ローカルでログイン**を試みるべきです。
+**ローカル管理者**の**ハッシュ**または**パスワード**を持っている場合、それを使用して他の**PC**に**ローカルでログイン**することを試みるべきです。
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
@@ -285,9 +288,9 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### MSSQL Abuse & Trusted Links
 
-ユーザーが**MSSQLインスタンスにアクセスする権限**を持っている場合、MSSQLホストで**コマンドを実行**したり（SAとして実行されている場合）、NetNTLMの**ハッシュを盗む**、または**リレー攻撃**を実行することができるかもしれません。\
-また、異なるMSSQLインスタンスによって信頼されている（データベースリンクされている）MSSQLインスタンスがある場合、ユーザーが信頼されたデータベースに対する権限を持っていれば、**信頼関係を利用して他のインスタンスでもクエリを実行することができます**。これらの信頼は連鎖的になり、ユーザーはコマンドを実行できる誤設定されたデータベースを見つけるかもしれません。\
-**データベース間のリンクは、フォレストの信頼を越えても機能します。**
+ユーザーが**MSSQLインスタンスにアクセスする権限**を持っている場合、MSSQLホストで**コマンドを実行**したり、NetNTLMの**ハッシュを盗んだり**、さらには**リレー攻撃**を行うことができるかもしれません。\
+また、異なるMSSQLインスタンスに信頼されている（データベースリンクされている）MSSQLインスタンスがある場合、ユーザーが信頼されたデータベースに対する権限を持っていれば、**信頼関係を利用して他のインスタンスでもクエリを実行することができます**。これらの信頼は連鎖的になり、ユーザーはコマンドを実行できる誤設定されたデータベースを見つけるかもしれません。\
+**データベース間のリンクは、フォレストトラストを越えても機能します。**
 
 {% content-ref url="abusing-ad-mssql.md" %}
 [abusing-ad-mssql.md](abusing-ad-mssql.md)
@@ -322,7 +325,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### ACLs Abuse
 
-侵害されたユーザーは、ドメインオブジェクトに対していくつかの**興味深い権限**を持っている可能性があり、それによって横方向に**移動**したり権限を**エスカレート**することができます。
+侵害されたユーザーは、横移動や権限昇格を可能にするドメインオブジェクトに対する**興味深い権限**を持っているかもしれません。
 
 {% content-ref url="acl-persistence-abuse/" %}
 [acl-persistence-abuse](acl-persistence-abuse/)
@@ -330,7 +333,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### Printer Spooler service abuse
 
-ドメイン内で**Spoolサービスがリスニングしている**のを見つけることができれば、それを**悪用して新しい資格情報を取得**し、権限を**エスカレート**することができます。\
+ドメイン内で**Spoolサービスがリスニングしている**のを見つけることができれば、それを**悪用して新しい資格情報を取得し、権限を昇格**することができます。\
 [**Spoolerサービスの悪用方法についての詳細はこちら。**](printers-spooler-service-abuse.md)
 
 ### Third party sessions abuse
@@ -344,7 +347,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### LAPS
 
-**LAPS**は、ドメインに参加しているコンピュータのローカル管理者パスワード（**ランダム化**され、ユニークで、**定期的に変更**される）を**管理する**ことを可能にします。これらのパスワードはActive Directoryに中央集中的に保存され、ACLを使用して承認されたユーザーに制限されています。これらのパスワードを**読む十分な権限を持っていれば、他のコンピュータに移動することができます**。
+**LAPS**は、ドメインに参加しているコンピュータのローカル管理者パスワード（**ランダム化**され、ユニークで、**定期的に変更**される）を**管理する**ことを可能にします。これらのパスワードはActive Directoryに中央集中的に保存され、ACLを使用して承認されたユーザーに制限されます。これらのパスワードを**読む十分な権限を持っていれば、他のコンピュータに移動することができます**。
 
 {% content-ref url="laps.md" %}
 [laps.md](laps.md)
@@ -352,7 +355,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### Certificate Theft
 
-侵害されたマシンから証明書を収集することは、環境内で権限をエスカレートする方法になる可能性があります：
+侵害されたマシンから証明書を収集することは、環境内で権限を昇格する方法の一つです：
 
 {% content-ref url="ad-certificates/certificate-theft.md" %}
 [certificate-theft.md](ad-certificates/certificate-theft.md)
@@ -360,7 +363,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### Certificate Templates Abuse
 
-脆弱なテンプレートが設定されている場合、それらを悪用して権限をエスカレートすることが可能です：
+脆弱なテンプレートが設定されている場合、それらを悪用して権限を昇格することが可能です：
 
 {% content-ref url="ad-certificates/domain-escalation.md" %}
 [domain-escalation.md](ad-certificates/domain-escalation.md)
@@ -378,7 +381,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### Privesc as Persistence
 
-前に議論したいくつかの技術は、永続性のために使用することができます。\
+以前に議論した技術のいくつかは、永続性のために使用することができます。\
 例えば、以下のようにすることができます：
 
 *   [**Kerberoast**](kerberoast.md)に対してユーザーを脆弱にする
@@ -399,7 +402,7 @@ Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdenti
 
 ### Silver Ticket
 
-Silver ticket攻撃は、サービスのNTLMハッシュ（例えば**PCアカウントハッシュ**）を所有している場合に、そのサービスに対する有効なTGSを**作成する**ことに基づいています。したがって、カスタムTGSを偽造して**任意のユーザー**としてそのサービスに**アクセスする**ことが可能です（例えば、コンピュータへの特権アクセス）。
+Silver ticket攻撃は、サービスのNTLMハッシュ（例えば**PCアカウントハッシュ**）を所有している場合に、そのサービスの有効なTGSを**作成する**ことに基づいています。これにより、カスタムTGSを偽造して**任意のユーザー**としてそのサービスに**アクセスする**ことが可能です（特権アクセスをコンピュータに）。
 
 {% content-ref url="silver-ticket.md" %}
 [silver-ticket.md](silver-ticket.md)
@@ -415,7 +418,7 @@ krbtgt ADアカウントのNTLMハッシュを使用して、**任意のユー�
 
 ### Diamond Ticket
 
-これらは、一般的なゴールデンチケットの検出メカニズムを**回避する**方法で偽造されたゴールデンチケットのようなものです。
+これらは、一般的なgolden tickets検出メカニズムを**回避する**方法で偽造されたgolden ticketsです。
 
 {% content-ref url="diamond-ticket.md" %}
 [diamond-ticket.md](diamond-ticket.md)
@@ -423,7 +426,7 @@ krbtgt ADアカウントのNTLMハッシュを使用して、**任意のユー�
 
 ### **Certificates Account Persistence**
 
-アカウントの証明書を持っているか、それらを要求することができると、ユーザーアカウントに永続的に留まることができます（たとえ彼がパスワードを変更したとしても）：
+アカウントの証明書を持っているか、それらをリクエストすることができると、ユーザーアカウントに永続的に留まることができます（たとえパスワードが変更されたとしても）：
 
 {% content-ref url="ad-certificates/account-persistence.md" %}
 [account-persistence.md](ad-certificates/account-persistence.md)
@@ -431,7 +434,7 @@ krbtgt ADアカウントのNTLMハッシュを使用して、**任意のユー�
 
 ### **Certificates Domain Persistence**
 
-証明書を使用して、ドメイン内で高権限を持つ永続性を維持することも可能です：
+証明書を使用して、ドメイン内で高権限で永続的に留まることも可能です：
 
 {% content-ref url="ad-certificates/domain-persistence.md" %}
 [domain-persistence.md](ad-certificates/domain-persistence.md)
@@ -440,13 +443,13 @@ krbtgt ADアカウントのNTLMハッシュを使用して、**任意のユー�
 ### AdminSDHolder Group
 
 **AdminSDHolder**オブジェクトのアクセス制御リスト（ACL）は、Active Directory内のすべての「保護されたグループ」とそのメンバーに**権限をコピーする**ためのテンプレートとして使用されます。保護されたグループには、ドメイン管理者、管理者、エンタープライズ管理者、スキーマ管理者、バックアップオペレーター、krbtgtなどの特権グループが含まれます。\
-デフォルトでは、このグループのACLはすべての「保護されたグループ」内にコピーされます。これは、これらの重要なグループに意図的または偶発的な変更が加えられるのを防ぐためです。しかし、攻撃者が例えば、通常のユーザーに完全な権限を与えることで**AdminSDHolder**グループのACLを**変更する**と、このユーザーは保護されたグループ内のすべてのグループに対して完全な権限を持つことになります（1時間以内に）。\
-そして、もし誰かがこのユーザーをドメイン管理者（例えば）から削除しようとしても、1時間以内にそのユーザーはグループに戻ります。\
+デフォルトでは、このグループのACLはすべての「保護されたグループ」内にコピーされます。これは、これらの重要なグループに意図的または偶発的な変更が加えられるのを防ぐためです。しかし、攻撃者がたとえば、通常のユーザーに完全な権限を与えることでグループ**AdminSDHolder**のACLを**変更**すると、このユーザーは保護されたグループ内のすべてのグループに完全な権限を持つことになります（1時間以内に）。\
+そして、誰かがこのユーザーをドメイン管理者（例えば）から削除しようとしても、1時間以内にユーザーはグループに戻ります。\
 [**AdminDSHolder Groupに関する詳細情報はこちら。**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM Credentials
 
-各**DC**内には**ローカル管理者**アカウントがあります。このマシンで管理者権限を持っている場合、mimikatzを使用して**ローカル管理者のハッシュをダンプ**することができます。その後、レジストリを変更してこのパスワードを**アクティブにし**、リモートからこのローカル管理者ユーザーにアクセスできるようにします。
+各**DC**内には**ローカル管理者**アカウントがあります。このマシンで管理者権限を持っている場合、mimikatzを使用して**ローカル管理者のハッシュをダンプ**することができます。その後、レジストリを変更してこのパスワードを**アクティブにし**、このローカル管理者ユーザーにリモートアクセスできるようにします。
 
 {% content-ref url="dsrm-credentials.md" %}
 [dsrm-credentials.md](dsrm-credentials.md)
@@ -454,7 +457,7 @@ krbtgt ADアカウントのNTLMハッシュを使用して、**任意のユー�
 
 ### ACL Persistence
 
-特定のドメインオブジェクトに対して**ユーザー**にいくつかの**特別な権限**を**与える**ことができ、将来的にユーザーが権限を**エスカレート**することを可能にします。
+特定のドメインオブジェクトに対して**ユーザー**に**特別な権限**を**与える**ことで、将来的に権限を昇格することができます。
 
 {% content-ref url="acl-persistence-abuse/" %}
 [acl-persistence-abuse](acl-persistence-abuse/)
@@ -462,7 +465,7 @@ krbtgt ADアカウントのNTLMハッシュを使用して、**任意のユー�
 
 ### Security Descriptors
 
-**セキュリティディスクリプタ**は、オブジェクトが他のオブジェクトに対して持つ**権限**を**保存**するために使用されます。オブジェクトのセキュリティディスクリプタに**わずかな変更**を**加える**ことができれば、特権グループのメンバーでなくてもそのオブジェクトに対して非常に興味深い権限を得ることができます。
+**セキュリティディスクリプター**は、オブジェクトが他のオブジェクトに対して持つ**権限を保存する**ために使用されます。オブジェクトのセキュリティディスクリプターを**わずかに変更する**ことができれば、特権グループのメンバーでなくてもそのオブジェクトに対して非常に興味深い権限を得ることができます。
 
 {% content-ref url="security-descriptors.md" %}
 [security-descriptors.md](security-descriptors.md)
@@ -479,7 +482,7 @@ krbtgt ADアカウントのNTLMハッシュを使用して、**任意のユー�
 ### Custom SSP
 
 SSP（セキュリティサポートプロバイダ）については[こちらで学ぶ](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)。\
-自分**自身のSSP**を作成して、マシンにアクセスするために使用される**資格情報**を**クリアテキスト**で**キャプチャ**することができます。\\
+自分**自身のSSP**を作成して、マシンにアクセスするために使用される**資格情報をクリアテキストでキャプチャ**することができます。\\
 
 {% content-ref url="custom-ssp.md" %}
 [custom-ssp.md](custom-ssp.md)
@@ -487,7 +490,16 @@ SSP（セキュリティサポートプロバイダ）については[こちら�
 
 ### DCShadow
 
-ADに**新しいドメインコントローラー**を登録し、それを使用して指定されたオブジェクトに対して属性（SIDHistory、SPNsなど）を**プッシュ**し、**変更に関するログ**を残さずに**行います**。これを行うには**DA**権限が必要で、**ルート
+ADに**新しいドメインコントローラー**を登録し、それを使用して指定されたオブジェクトに対して属性（SIDHistory、SPNなど）を**ログを残さずにプッシュ**します。これを行うには**DA**権限が必要で、**ルートドメイン**内にいる必要があります。\
+間違ったデータを使用すると、非常に醜いログが表示されることに注意してください。
+
+{% content-ref url="dcshadow.md" %}
+[dcshadow.md](dcshadow.md)
+{% endcontent-ref %}
+
+### LAPS Persistence
+
+以前に、LAPSパスワードを**読む十分な権限**を持っている場合に権限を昇格する方法について
 ```
 Get-DomainTrust
 
@@ -501,20 +513,20 @@ WhenChanged     : 2/19/2021 1:28:00 PM
 ```
 {% hint style="warning" %}
 **2つの信頼されたキー**があります。一つは _Child --> Parent_ 用、もう一つは _Parent_ --> _Child_ 用です。\
-現在のドメインで使用されているキーは次のコマンドで確認できます:
+現在のドメインで使用されているキーを確認するには：
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\mcorp$"'
 ```
 #### SID-History インジェクション
 
-SID-History インジェクションを悪用して、信頼関係を利用して子/親ドメインのエンタープライズ管理者に昇格します：
+SID-History インジェクションを悪用して、信頼関係を乱用し、子/親ドメインのエンタープライズ管理者として権限を昇格させます：
 
 {% content-ref url="sid-history-injection.md" %}
 [sid-history-injection.md](sid-history-injection.md)
 {% endcontent-ref %}
 
-#### 書き込み可能な Configuration NC を悪用する
+#### 書き込み可能な Configuration NC の悪用
 
 Configuration NC はフォレストの設定情報の主要なリポジトリであり、フォレスト内のすべての DC にレプリケートされます。さらに、フォレスト内のすべての書き込み可能な DC（読み取り専用の DC は除く）は、書き込み可能な Configuration NC のコピーを保持しています。これを悪用するには、（子）DC 上で SYSTEM として実行する必要があります。
 
@@ -530,7 +542,7 @@ Configuration NC の Sites コンテナには、AD フォレストに参加し�
 
 攻撃は、対象ドメイン内の特権を持つ gMSA に依存しています。
 
-フォレスト内の gMSA のパスワードを計算するために使用される KDS Root キーは、Configuration NC に保存されています。フォレスト内の任意の DC 上で SYSTEM として実行することにより、KDS Root キーを読み取り、フォレスト内の任意の gMSA のパスワードを計算することができます。
+フォレスト内の gMSA のパスワードを計算するために使用される KDS Root キーは、Configuration NC に格納されています。フォレスト内の任意の DC 上で SYSTEM として実行することにより、KDS Root キーを読み取り、フォレスト内の任意の gMSA のパスワードを計算することができます。
 
 詳細はこちらで読むことができます：[Golden gMSA trust attack from child to parent](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)。
 
@@ -542,13 +554,13 @@ Configuration NC の Sites コンテナには、AD フォレストに参加し�
 
 詳細はこちらで読むことができます：[Schema change trust attack from child to parent](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)。
 
-**DA から EA へ ADCS ESC5 を使って**
+**ADCS ESC5 を使用して DA から EA へ**
 
-ADCS ESC5（Vulnerable PKI Object Access Control）攻撃は、PKI オブジェクトの制御を悪用して、フォレスト内の任意のユーザーとして認証するために悪用できる脆弱な証明書テンプレートを作成します。PKI オブジェクトはすべて Configuration NC に保存されているため、フォレスト内の任意の書き込み可能な（子）DC を侵害した場合、ESC5 を実行することができます。
+ADCS ESC5（Vulnerable PKI Object Access Control）攻撃は、PKI オブジェクトの制御を悪用して、フォレスト内の任意のユーザーとして認証するために悪用できる脆弱な証明書テンプレートを作成します。PKI オブジェクトはすべて Configuration NC に格納されているため、フォレスト内の任意の書き込み可能な（子）DC を侵害した場合、ESC5 を実行することができます。
 
 詳細はこちらで読むことができます：[From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)
 
-AD フォレストに ADCS がない場合、攻撃者はこちらに記載されているように必要なコンポーネントを作成することができます：[Escalating from child domain’s admins to enterprise admins in 5 minutes by abusing AD CS, a follow up](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)。
+AD フォレストに ADCS がない場合、攻撃者はこちらに記載されているように必要なコンポーネントを作成することができます：[Escalating from child domain’s admins to enterprise admins in 5 minutes by abusing AD CS, a follow up](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
 ### 外部フォレストドメイン - 片方向（インバウンド）または双方向
 ```powershell
@@ -580,9 +592,9 @@ WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
 ```markdown
-このシナリオでは、**あなたのドメイン**が**異なるドメイン**のプリンシパルに対していくつかの**権限**を**信頼**しています。
+このシナリオでは、**あなたのドメイン**が**異なるドメイン**からのプリンシパルにいくつかの**権限**を**信頼**しています。
 
-しかし、**ドメインが信頼される**と、信頼しているドメインによって、予測可能な名前を持つユーザーが**作成され**、**信頼されたパスワードをパスワードとして使用します**。つまり、信頼しているドメインのユーザーが信頼されたドメインに**アクセスして列挙し、さらに権限をエスカレートしようとすることが可能です**：
+しかし、**ドメインが信頼される**と、信頼しているドメインは**予測可能な名前**を持つユーザーを**作成**し、**信頼されたパスワードをパスワードとして使用**します。つまり、信頼しているドメインのユーザーが信頼されたドメインに**アクセス**して列挙し、さらに権限をエスカレートしようとすることが可能です：
 
 {% content-ref url="external-forest-domain-one-way-outbound.md" %}
 [external-forest-domain-one-way-outbound.md](external-forest-domain-one-way-outbound.md)
@@ -591,7 +603,7 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 信頼されたドメインを侵害する別の方法は、ドメインの信頼の**逆方向**に作成された[**SQL信頼リンク**](abusing-ad-mssql.md#mssql-trusted-links)を見つけることです（これはあまり一般的ではありません）。
 
 信頼されたドメインを侵害するもう一つの方法は、信頼されたドメインの**ユーザーがアクセスできる**マシンで待ち、**RDP**経由でログインするのを待つことです。その後、攻撃者はRDPセッションプロセスにコードを注入し、そこから**被害者の元のドメインにアクセス**することができます。\
-さらに、**被害者がハードドライブをマウントした**場合、**RDPセッション**プロセスから攻撃者は**ハードドライブのスタートアップフォルダーにバックドア**を保存することができます。この技術は**RDPInception**と呼ばれています。
+さらに、**被害者がハードドライブをマウントした**場合、**RDPセッション**プロセスから攻撃者は**ハードドライブのスタートアップフォルダー**に**バックドア**を保存することができます。この技術は**RDPInception**と呼ばれています。
 
 {% content-ref url="rdp-sessions-abuse.md" %}
 [rdp-sessions-abuse.md](rdp-sessions-abuse.md)
@@ -601,9 +613,9 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 
 **SIDフィルタリング：**
 
-* フォレスト信頼を越えたSID履歴属性の悪用を防ぎます。
+* フォレスト信頼を越えたSID履歴属性の悪用を防ぐ。
 * すべてのインターフォレスト信頼でデフォルトで有効になっています。インターフォレスト信頼はデフォルトで安全と見なされています（MSはドメインではなくフォレストをセキュリティ境界と見なしています）。
-* しかし、SIDフィルタリングはアプリケーションやユーザーアクセスを中断する可能性があるため、しばしば無効にされます。
+* しかし、SIDフィルタリングはアプリケーションとユーザーアクセスを壊す可能性があるため、しばしば無効にされます。
 * 選択的認証
 * インターフォレスト信頼で選択的認証が設定されている場合、信頼間のユーザーは自動的に認証されません。信頼しているドメイン/フォレスト内のドメインとサーバーへの個別のアクセスを与えるべきです。
 * 書き込み可能なConfigration NCの悪用と信頼アカウント攻撃を防ぐことはできません。
@@ -617,7 +629,7 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 ## いくつかの一般的な防御
 
 [**ここで資格情報を保護する方法についてもっと学ぶ。**](../stealing-credentials/credentials-protections.md)\
-**技術の説明で各技術に対するいくつかの移行について見つけてください。**
+**技術の説明で各技術に対するいくつかの移行を見つけてください。**
 
 * ドメイン管理者がドメインコントローラー以外のホストにログインすることを許可しない
 * DA権限でサービスを実行しない
@@ -625,7 +637,7 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 
 ### 欺瞞
 
-* パスワードの有効期限が切れない
+* パスワードが期限切れにならない
 * 委任のために信頼されている
 * SPNを持つユーザー
 * 説明の中のパスワード
@@ -638,7 +650,7 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 
 ## 欺瞞の特定方法
 
-**ユーザーオブジェクトについて：**
+**ユーザーオブジェクトの場合：**
 
 * ObjectSID（ドメインと異なる）
 * lastLogon, lastlogontimestamp
@@ -646,10 +658,10 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 * whenCreated
 * Badpwdcount（非常に低い数は怪しい）
 
-**一般的に：**
+**一般的な方法：**
 
-* いくつかのソリューションは、可能なすべての属性に情報を記入します。例えば、コンピューターオブジェクトの属性とDCのような100%実際のコンピューターオブジェクトの属性を比較します。または、RID 500（デフォルトの管理者）に対するユーザー。
-* 何かがあまりにも良すぎる場合は確認してください
+* いくつかのソリューションは、可能なすべての属性に情報を記入します。例えば、DCのような100%実際のコンピューターオブジェクトの属性とコンピューターオブジェクトの属性を比較します。または、RID 500（デフォルトの管理者）に対するユーザー。
+* 何かがあまりにも良すぎる場合は確認する
 * [https://github.com/JavelinNetworks/HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster)
 
 ### Microsoft ATA検出のバイパス
@@ -678,13 +690,15 @@ ATAはDCでセッションを列挙しようとするときにのみ文句を言
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksであなたの会社を広告したいですか？** または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたいですか？** [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加するか**、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**に**フォローしてください。**
-* **ハッキングのトリックを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法：
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* **HackTricks**の[**githubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してハッキングのコツを共有してください。
 
 </details>
 ```

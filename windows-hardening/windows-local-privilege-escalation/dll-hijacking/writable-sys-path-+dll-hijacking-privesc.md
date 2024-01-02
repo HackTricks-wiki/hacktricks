@@ -1,39 +1,40 @@
-# 書き込み可能なSys Path + Dll Hijacking Privesc
+# 書き込み可能なSys Path +Dll Hijacking Privesc
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 ## はじめに
 
-もし、**システムパスフォルダに書き込みができる**ことがわかった場合（ユーザーパスフォルダに書き込みができる場合はこれは機能しません）、システム内で特権を昇格させることができる可能性があります。
+システムパスフォルダに**書き込みができる**ことがわかった場合（ユーザーパスフォルダに書き込みができる場合は機能しません）、システムで**権限を昇格**できる可能性があります。
 
-それを行うためには、**特権があるサービスやプロセスがロードしているライブラリを乗っ取る**ことができる**Dll Hijacking**を悪用することができます。そして、そのサービスがシステム全体に存在しない可能性のあるDllをロードしようとするため、それを書き込み可能なシステムパスからロードしようとします。
+それを行うために、サービスまたはプロセスが**より高い権限**でロードしているライブラリを**ハイジャックするDll Hijacking**を悪用できます。そのサービスは、システム全体に存在しない可能性のあるDllをロードしようとしており、書き込み可能なシステムパスからロードしようとします。
 
-**Dll Hijacking**についての詳細は、以下を参照してください：
+**Dll Hijackingとは何か**についての詳細は、以下をチェックしてください:
 
 {% content-ref url="../dll-hijacking.md" %}
 [dll-hijacking.md](../dll-hijacking.md)
 {% endcontent-ref %}
 
-## Dll Hijackingによる特権昇格
+## Dll HijackingによるPrivesc
 
-### 不足しているDllの検出
+### 不足しているDllの探索
 
-まず、**自分よりも特権のあるプロセス**を特定し、**書き込み可能なシステムパス**から**Dllをロードしようとしているかどうか**を確認する必要があります。
+最初に必要なのは、あなたよりも**高い権限**で実行されているプロセスを**特定する**ことであり、そのプロセスは書き込み可能なシステムパスからDllを**ロードしようとしています**。
 
-この場合の問題は、おそらくこれらのプロセスが既に実行されていることです。必要なサービスが欠けているDllを見つけるためには、プロセスがロードされる前にできるだけ早くprocmonを起動する必要があります。したがって、欠けている.dllを見つけるためには、次の手順を実行します：
+この場合の問題は、おそらくそれらのプロセスはすでに実行されていることです。サービスに不足しているDllを見つけるには、できるだけ早くprocmonを起動する必要があります（プロセスがロードされる前に）。不足している.dllを見つけるには:
 
-
-* `C:\privesc_hijacking`フォルダを**作成**し、**システムパス環境変数**にパス`C:\privesc_hijacking`を追加します。これは**手動**で行うことも、**PS**で行うこともできます：
+* **フォルダ** `C:\privesc_hijacking` を作成し、パス `C:\privesc_hijacking` を**システムパス環境変数**に追加します。これは**手動**で行うか、**PS**を使用して行うことができます:
 ```powershell
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -50,55 +51,56 @@ $newPath = "$envPath;$folderPath"
 [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-* **`procmon`**を起動し、**`Options`** --> **`Enable boot logging`**に移動し、プロンプトで**`OK`**を押します。
-* 次に、**再起動**します。コンピュータが再起動されると、**`procmon`**ができるだけ早くイベントを記録し始めます。
-* **Windows**が**起動したら、`procmon`**を再度実行します。実行されていたことを通知し、イベントをファイルに保存するかどうかを尋ねます。**はい**と答え、**イベントをファイルに保存**します。
-* **ファイル**が**生成**されたら、開いている**`procmon`**ウィンドウを**閉じ**、イベントファイルを**開きます**。
-* 以下の**フィルタ**を追加すると、書き込み可能なシステムパスフォルダからロードを試みたすべてのDLLを見つけることができます：
+* **`procmon`** を起動し、**`Options`** --> **`Enable boot logging`** に進んで、プロンプトで **`OK`** を押します。
+* その後、**再起動**します。コンピュータが再起動されると、**`procmon`** はできるだけ早くイベントの**記録**を開始します。
+* **Windows** が**起動したら `procmon`** を再度実行します。実行すると、既に実行中であったことを通知し、イベントをファイルに**保存するかどうか尋ねます**。**はい**と答えて、イベントをファイルに**保存します**。
+* **ファイル**が**生成された後**、開いている**`procmon`** ウィンドウを**閉じ**、**イベントファイルを開きます**。
+* 以下の**フィルター**を追加すると、書き込み可能なSystem Pathフォルダからいくつかの**プロセスがロードしようとしたDll**を全て見つけることができます：
 
 <figure><img src="../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
-### ミスしたDLL
+### 見逃されたDll
 
-私は無料の**仮想（VMware）Windows 11マシン**でこれらの結果を得ました：
+無料の**仮想 (vmware) Windows 11マシン**でこれを実行した結果、以下のようになりました：
 
 <figure><img src="../../../.gitbook/assets/image (253).png" alt=""><figcaption></figcaption></figure>
 
-この場合、.exeは無効なので無視し、ミスしたDLLは次のとおりです：
+この場合、.exeは役に立たないので無視してください。見逃されたDLLは以下のものでした：
 
-| サービス                         | DLL                | CMDライン                                                             |
+| サービス                         | Dll                | CMD line                                                             |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| タスクスケジューラ（スケジュール）       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
-| 診断ポリシーサービス（DPS） | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
+| タスクスケジューラ (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
+| 診断ポリシーサービス (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-これを見つけた後、この興味深いブログ記事を見つけました。[**WptsExtensions.dllを悪用して特権をエスカレーションする方法**](https://juggernaut-sec.com/dll-hijacking/#Windows\_10\_Phantom\_DLL\_Hijacking\_-\_WptsExtensionsdll)。これが今**行うこと**です。
+これを見つけた後、[**WptsExtensions.dllを悪用してprivescする方法**](https://juggernaut-sec.com/dll-hijacking/#Windows\_10\_Phantom\_DLL\_Hijacking\_-\_WptsExtensionsdll)を説明する興味深いブログ投稿を見つけました。これが**今から行うこと**です。
 
-### 攻撃
+### 悪用
 
-したがって、特権を**エスカレーション**するためには、ライブラリ**WptsExtensions.dll**を乗っ取る必要があります。**パス**と**名前**がわかっているので、単に**悪意のあるdllを生成**する必要があります。
+権限を**昇格させる**ために、**WptsExtensions.dll** ライブラリをハイジャックします。**パス**と**名前**がわかっていれば、**悪意のあるdllを生成する**だけです。
 
-[**これらの例のいずれかを使用してみてください**](../dll-hijacking.md#creating-and-compiling-dlls)。リバースシェルを取得したり、ユーザーを追加したり、ビーコンを実行したりすることができます。
+[**これらの例を試してみることができます**](../dll-hijacking.md#creating-and-compiling-dlls)。実行できるペイロードには、リバースシェルを取得する、ユーザーを追加する、ビーコンを実行するなどがあります...
 
 {% hint style="warning" %}
-すべてのサービスが**`NT AUTHORITY\SYSTEM`**で実行されているわけではないことに注意してください。一部は**`NT AUTHORITY\LOCAL SERVICE`**で実行され、権限が制限されているため、新しいユーザーを作成することはできません。\
-ただし、そのユーザーには**`seImpersonate`**特権があり、[**potato suiteを使用して特権をエスカレーション**](../roguepotato-and-printspoofer.md)することができます。したがって、この場合はリバースシェルがユーザーを作成しようとするよりも良いオプションです。
+**すべてのサービスが `NT AUTHORITY\SYSTEM`** で実行されているわけではないことに注意してください。一部は **`NT AUTHORITY\LOCAL SERVICE`** で実行されており、**権限が少ない**ため、新しいユーザーを作成することはできません。ただし、そのユーザーには **`seImpersonate`** 権限があるため、[**ポテトスイートを使用して権限を昇格させる**](../roguepotato-and-printspoofer.md)ことができます。したがって、この場合はユーザーを作成しようとするよりもリバースシェルを取得する方が良い選択です。
 {% endhint %}
 
-執筆時点では、**タスクスケジューラ**サービスは**Nt AUTHORITY\SYSTEM**で実行されています。
+執筆時点で**タスクスケジューラ**サービスは**Nt AUTHORITY\SYSTEM**で実行されています。
 
-**悪意のあるDLLを生成**したら（私の場合はx64リバースシェルを使用し、シェルを取得しましたが、ディフェンダーによって殺されました）、それを書き込み可能なシステムパスに**WptsExtensions.dll**という名前で保存し、コンピュータを**再起動**します（またはサービスを再起動するか、影響を受けるサービス/プログラムを再実行するために必要な操作を行います）。
+**悪意のあるDllを生成**したら（私の場合はx64リバースシェルを使用しましたが、msfvenomからだったためディフェンダーによって殺されました）、書き込み可能なSystem Pathに**WptsExtensions.dll**という名前で保存し、コンピュータを**再起動**します（またはサービスを再起動するか、影響を受けるサービス/プログラムを再実行するために必要なことを何でもします）。
 
-サービスが再起動されると、**dllがロードされ実行される**はずです（ライブラリが予想どおりにロードされたかどうかを確認するために**procmon**のトリックを再利用できます）。
+サービスが再開されると、**dllはロードされ実行される**はずです（**ライブラリが期待通りにロードされたかどうかを確認するために**、**procmon** のトリックを**再利用**することができます）。
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>!</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+HackTricksをサポートする他の方法：
+
+* **HackTricksに広告を掲載したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有してください**。
 
 </details>
