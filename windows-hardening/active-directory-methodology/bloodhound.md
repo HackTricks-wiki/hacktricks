@@ -44,7 +44,7 @@ Para tomar un snapshot de AD, ve a `File` --> `Create Snapshot` e ingresa un nom
 >
 >De [https://github.com/SpecterOps/BloodHound](https://github.com/SpecterOps/BloodHound)
 
-Así que, [Bloodhound](https://github.com/SpecterOps/BloodHound) es una herramienta increíble que puede enumerar un dominio automáticamente, guardar toda la información, encontrar posibles caminos de escalada de privilegios y mostrar toda la información utilizando gráficos.
+Así, [Bloodhound](https://github.com/SpecterOps/BloodHound) es una herramienta increíble que puede enumerar un dominio automáticamente, guardar toda la información, encontrar posibles caminos de escalada de privilegios y mostrar toda la información utilizando gráficos.
 
 Bloodhound se compone de 2 partes principales: **ingestores** y la **aplicación de visualización**.
 
@@ -72,9 +72,9 @@ Tienen varias opciones, pero si desea ejecutar SharpHound desde una PC unida al 
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
-> Puede leer más sobre **CollectionMethod** y la sesión de bucle [aquí](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
+> Puedes leer más sobre **CollectionMethod** y la sesión de bucle [aquí](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
 
-Si desea ejecutar SharpHound con diferentes credenciales, puede crear una sesión CMD netonly y ejecutar SharpHound desde allí:
+Si deseas ejecutar SharpHound con diferentes credenciales, puedes crear una sesión CMD netonly y ejecutar SharpHound desde allí:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
@@ -102,7 +102,7 @@ Puedes descargar los Ingestores desde:
 
 1. Aprende el camino desde el gráfico
 
-Bloodhound viene con varias consultas para resaltar caminos de compromiso sensibles. ¡Es posible agregar consultas personalizadas para mejorar la búsqueda y correlación entre objetos y más!
+Bloodhound viene con varias consultas para resaltar caminos de compromiso sensibles. ¡Es posible añadir consultas personalizadas para mejorar la búsqueda y correlación entre objetos y más!
 
 Este repositorio tiene una buena colección de consultas: https://github.com/CompassSecurity/BloodHoundQueries
 
@@ -129,7 +129,7 @@ bloodhound
 ```
 Se le solicitarán las credenciales de la base de datos: **neo4j:<Su nueva contraseña>**
 
-Y bloodhound estará listo para procesar datos.
+Y bloodhound estará listo para ingerir datos.
 
 ![](<../../.gitbook/assets/image (171) (1).png>)
 
@@ -140,7 +140,7 @@ Descárguelo desde [https://github.com/fox-it/BloodHound.py](https://github.com/
 ```bash
 bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all
 ```
-Si lo ejecutas a través de proxychains, añade `--dns-tcp` para que la resolución DNS funcione a través del proxy.
+Si lo ejecutas a través de proxychains, añade `--dns-tcp` para que la resolución de DNS funcione a través del proxy.
 ```bash
 proxychains bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all --dns-tcp
 ```
@@ -165,9 +165,9 @@ group3r.exe -f <filepath-name.log>
 ```
 ## PingCastle
 
-**[**PingCastle**](https://www.pingcastle.com/documentation/)** evalúa la postura de seguridad de un entorno AD y proporciona un buen **informe** con gráficos.
+**[**PingCastle**](https://www.pingcastle.com/documentation/)** evalúa la postura de seguridad de un entorno AD y proporciona un **informe** detallado con gráficos.
 
-Para ejecutarlo, puedes ejecutar el binario `PingCastle.exe` y comenzará una **sesión interactiva** presentando un menú de opciones. La opción predeterminada a utilizar es **`healthcheck`**, que establecerá una visión general básica del **dominio**, y encontrará **configuraciones incorrectas** y **vulnerabilidades**.
+Para ejecutarlo, puede ejecutar el binario `PingCastle.exe` y comenzará una **sesión interactiva** presentando un menú de opciones. La opción predeterminada a utilizar es **`healthcheck`**, que establecerá una visión general básica del **dominio**, y encontrará **configuraciones incorrectas** y **vulnerabilidades**.
 
 <details>
 
