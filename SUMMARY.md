@@ -597,7 +597,7 @@
 * [File Upload](pentesting-web/file-upload/README.md)
   * [PDF Upload - XXE and CORS bypass](pentesting-web/file-upload/pdf-upload-xxe-and-cors-bypass.md)
 * [Formula/CSV/Doc/LaTeX/GhostScript Injection](pentesting-web/formula-csv-doc-latex-ghostscript-injection.md)
-* [gRPC Pentest](pentesting-web/grpc-web-pentest.md)
+* [gRPC-Web Pentest](pentesting-web/grpc-web-pentest.md)
 * [HTTP Connection Contamination](pentesting-web/http-connection-contamination.md)
 * [HTTP Connection Request Smuggling](pentesting-web/http-connection-request-smuggling.md)
 * [HTTP Request Smuggling / HTTP Desync Attack](pentesting-web/http-request-smuggling/README.md)
