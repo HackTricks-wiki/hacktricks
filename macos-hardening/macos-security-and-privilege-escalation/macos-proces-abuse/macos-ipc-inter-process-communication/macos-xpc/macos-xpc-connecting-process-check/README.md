@@ -1,57 +1,60 @@
-# macOS XPC 接続プロセスのチェック
+# macOS XPC 接続プロセスチェック
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASS の最新バージョンにアクセスしたり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な [**NFT**](https://opensea.io/collection/the-peass-family) のコレクションです。
-* [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)** をフォローしてください。**
-* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に PR を提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-## XPC 接続プロセスのチェック
+## XPC 接続プロセスチェック
 
-XPC サービスへの接続が確立されると、サーバーは接続が許可されているかどうかをチェックします。通常、以下のチェックが行われます。
+XPCサービスへの接続が確立されると、サーバーは接続が許可されているかどうかをチェックします。通常、以下のチェックを行います：
 
-1. 接続する**プロセスが Apple によって署名された**証明書を持っているかどうかをチェックします（Apple によってのみ提供されます）。
-* これが**検証されていない**場合、攻撃者は他のチェックに合わせるために**偽の証明書**を作成することができます。
-2. 接続するプロセスが**組織の証明書**で署名されているかどうかをチェックします（チーム ID の検証）。
-* これが**検証されていない**場合、Apple の**どの開発者証明書**でも使用してサービスに接続することができます。
-3. 接続するプロセスが**適切なバンドル ID**を持っているかどうかをチェックします。
-* これが**検証されていない**場合、同じ組織によって署名された**任意のツール**を使用して XPC サービスとやり取りすることができます。
-4. (4 または 5) 接続するプロセスが**適切なソフトウェアバージョン番号**を持っているかどうかをチェックします。
-* これが**検証されていない**場合、他のチェックが行われていても、古いセキュリティの脆弱性を持つクライアントがプロセスインジェクションに対して脆弱である可能性があります。
-5. (4 または 5) 接続するプロセスが危険な権限（任意のライブラリを読み込むことや DYLD 環境変数を使用することを許可する権限など）を持たない、強化されたランタイムを持っているかどうかをチェックします。
-* これが**検証されていない**場合、クライアントは**コードインジェクションの脆弱性**に対して脆弱である可能性があります。
-6. 接続するプロセスがサービスに接続するための**エンタイトルメント**を持っているかどうかをチェックします。これは Apple のバイナリに適用されます。
-7. **検証**は、接続する**クライアントの監査トークン**に基づいて行われる必要があります。プロセス ID（PID）ではなく、監査トークンを使用することで、PID の再利用攻撃を防ぐことができます。
-* 開発者は監査トークン API 呼び出しを**ほとんど使用しない**ため、Apple はいつでも変更できます。また、Mac App Store アプリではプライベート API の使用は許可されていません。
-* **`xpc_dictionary_get_audit_token`** は **`xpc_connection_get_audit_token`** の代わりに使用するべきです。後者は特定の状況で [脆弱性がある場合があります](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。
+1. 接続している**プロセスがAppleによって署名された証明書で署名されているか**をチェックします（Appleからのみ発行されます）。
+   * これが**検証されない場合**、攻撃者は他のチェックに合わせて**偽の証明書**を作成する可能性があります。
+2. 接続しているプロセスが**組織の証明書で署名されているか**をチェックします（チームIDの検証）。
+   * これが**検証されない場合**、Appleの**任意の開発者証明書**を使用して署名し、サービスに接続することができます。
+3. 接続しているプロセスに**適切なバンドルIDが含まれているか**をチェックします。
+   * これが**検証されない場合**、同じ組織によって署名された任意のツールを使用してXPCサービスと対話することができます。
+4. (4または5) 接続しているプロセスに**適切なソフトウェアバージョン番号があるか**をチェックします。
+   * これが**検証されない場合**、古い、安全でないクライアントがプロセスインジェクションに対して脆弱であり、他のチェックがあってもXPCサービスに接続するために使用される可能性があります。
+5. (4または5) 接続しているプロセスが危険な権限（任意のライブラリをロードしたりDYLD環境変数を使用するなど）なしにハード化されたランタイムを持っているかをチェックします。
+   * これが**検証されない場合**、クライアントは**コードインジェクションに対して脆弱**である可能性があります。
+6. 接続しているプロセスにサービスに接続することを許可する**権限**があるかをチェックします。これはAppleのバイナリに適用されます。
+7. **検証**は接続している**クライアントの監査トークン**に**基づいて**行われるべきであり、プロセスID（**PID**）ではないため、前者は**PID再利用攻撃**を防ぐことができます。
+   * 開発者は**監査トークン**のAPIコールを**ほとんど使用しません**。なぜならそれは**プライベート**であり、Appleはいつでも**変更**する可能性があるからです。さらに、プライベートAPIの使用はMac App Storeのアプリでは許可されていません。
+   * **`processIdentifier`**メソッドが使用されている場合、それは脆弱である可能性があります
+   * **`xpc_dictionary_get_audit_token`**は**`xpc_connection_get_audit_token`**の代わりに使用されるべきです。後者は[特定の状況で脆弱](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)である可能性があります。
 
 ### 通信攻撃
 
-PID の再利用攻撃についての詳細は次を参照してください：
+PID再利用攻撃についての詳細は以下をチェックしてください：
 
 {% content-ref url="macos-pid-reuse.md" %}
 [macos-pid-reuse.md](macos-pid-reuse.md)
 {% endcontent-ref %}
 
-**`xpc_connection_get_audit_token`** の攻撃についての詳細は次を参照してください：
+**`xpc_connection_get_audit_token`**攻撃についての詳細は以下をチェックしてください：
 
 {% content-ref url="macos-xpc_connection_get_audit_token-attack.md" %}
 [macos-xpc\_connection\_get\_audit\_token-attack.md](macos-xpc\_connection\_get\_audit\_token-attack.md)
 {% endcontent-ref %}
 
-### Trustcache - ダウングレード攻撃の防止
+### Trustcache - ダウングレード攻撃防止
 
-Trustcache は、Apple Silicon マシンに導入された防御手法であり、Apple のバイナリの CDHSAH のデータベースを格納し、変更されていない許可されたバイナリのみが実行されるようにします。これにより、ダウングレードバージョンの実行が防止されます。
+TrustcacheはApple Siliconマシンで導入された防御方法で、AppleのバイナリのCDHSAHのデータベースを保存し、許可された変更されていないバイナリのみが実行されるようにします。これにより、ダウングレードバージョンの実行が防止されます。
 
 ### コード例
 
-サーバーは、この**検証**を **`shouldAcceptNewConnection`** という関数で実装します。
+サーバーは**`shouldAcceptNewConnection`**と呼ばれる関数でこの**検証**を実装します。
 
 {% code overflow="wrap" %}
 ```objectivec
@@ -62,9 +65,9 @@ return YES;
 ```
 {% endcode %}
 
-オブジェクトNSXPCConnectionには、**`auditToken`**という**非公開**プロパティ（使用すべきですが変更される可能性があります）と、**`processIdentifier`**という**公開**プロパティ（使用すべきではありません）があります。
+オブジェクト NSXPCConnection には、**プライベート**プロパティ **`auditToken`**（使用されるべきだが変更される可能性がある）と、**パブリック**プロパティ **`processIdentifier`**（使用されるべきではない）があります。
 
-接続プロセスは、次のような方法で確認できます：
+接続プロセスは以下のように検証できます：
 
 {% code overflow="wrap" %}
 ```objectivec
@@ -88,7 +91,7 @@ SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString)
 ```
 {% endcode %}
 
-開発者がクライアントのバージョンをチェックしたくない場合、少なくともクライアントがプロセスインジェクションの脆弱性を持っていないことをチェックすることができます。
+開発者がクライアントのバージョンをチェックしたくない場合、少なくともクライアントがプロセスインジェクションに対して脆弱でないことを確認することができます：
 
 {% code overflow="wrap" %}
 ```objectivec
@@ -105,16 +108,16 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 return Yes; // Accept connection
 }
 ```
-{% endcode %}
-
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

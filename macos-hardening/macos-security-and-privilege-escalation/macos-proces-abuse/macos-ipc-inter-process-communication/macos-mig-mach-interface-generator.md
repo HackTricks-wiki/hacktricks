@@ -2,21 +2,23 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのコツを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを**共有する**。
 
 </details>
 
-MIGは、**Mach IPCコード作成のプロセスを簡素化するために作成されました**。基本的には、与えられた定義でサーバーとクライアントが通信するために必要なコードを**生成します**。生成されたコードが見にくい場合でも、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードになります。
+MIGは**Mach IPCコード作成のプロセスを簡素化するために作られました**。基本的には、与えられた定義でサーバーとクライアントが通信するために必要なコードを**生成します**。生成されたコードが見づらい場合でも、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードを持つことができます。
 
 ### 例
 
-定義ファイルを作成します。この場合は非常にシンプルな関数で：
+定義ファイルを作成します。この場合は非常にシンプルな関数です：
 
 {% code title="myipc.defs" %}
 ```cpp
@@ -34,14 +36,16 @@ n1          :  uint32_t;
 n2          :  uint32_t);
 ```
 ```
-migでサーバーとクライアントのコードを生成し、Subtract関数を呼び出すために相互に通信できるようにします:
+{% endcode %}
+
+migを使用して、Subtract関数を呼び出すために相互に通信できるサーバーとクライアントのコードを生成します：
 ```
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
 現在のディレクトリにいくつかの新しいファイルが作成されます。
 
-ファイル **`myipcServer.c`** と **`myipcServer.h`** には、構造体 **`SERVERPREFmyipc_subsystem`** の宣言と定義が含まれており、これは基本的に受信したメッセージIDに基づいて呼び出す関数を定義します（開始番号として500を指定しました）：
+ファイル **`myipcServer.c`** と **`myipcServer.h`** には、構造体 **`SERVERPREFmyipc_subsystem`** の宣言と定義が含まれており、これは基本的に受信したメッセージIDに基づいて呼び出す関数を定義しています（開始番号として500を指定しました）：
 
 {% tabs %}
 {% tab title="myipcServer.c" %}
@@ -95,7 +99,7 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 ```
 この例では定義ファイルに1つの関数のみを定義しましたが、もし複数の関数を定義していた場合、それらは**`SERVERPREFmyipc_subsystem`** の配列内に存在し、最初の関数がID **500** に、次の関数がID **501** に割り当てられていたでしょう...
 
-実際には、この関連性は **`myipcServer.h`** の **`subsystem_to_name_map_myipc`** 構造体で識別することが可能です：
+実際には、この関連性は **`myipcServer.h`** の構造体 **`subsystem_to_name_map_myipc`** で識別することが可能です：
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -104,8 +108,7 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 ```
 サーバーを動作させるために重要な別の関数は、受信したIDに関連する**関数を実際に呼び出す** **`myipc_server`** です：
 
-```c
-mig_external boolean_t myipc_server
+<pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
 {
 /*
@@ -126,16 +129,16 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
-	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
-		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+<strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
+</strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
 return FALSE;
 }
-	(*routine) (InHeadP, OutHeadP);
-	return TRUE;
+<strong>	(*routine) (InHeadP, OutHeadP);
+</strong>	return TRUE;
 }
-```
+</code></pre>
 
 IDによって関数を呼び出すためにアクセスする前に強調表示された行を確認してください。
 
@@ -205,16 +208,14 @@ USERPREFSubtract(port, 40, 2);
 
 ### バイナリ分析
 
-多くのバイナリがmachポートを公開するためにMIGを使用しているため、**MIGが使用されたことを識別する**方法と、各メッセージIDに対して**MIGが実行する関数**を知ることが重要です。
+多くのバイナリがmachポートを公開するためにMIGを使用しているため、**MIGが使用されたことを特定する**方法と、各メッセージIDに対して**MIGが実行する関数を特定する**ことが重要です。
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)は、Mach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定することができます：
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)はMach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定することができます：
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-以下は、受信したメッセージIDに応じて**正しい関数を呼び出す**機能を担当する`myipc_server`であると以前に述べられました。しかし、通常はバイナリのシンボル（関数名など）を持っていないため、デコンパイルされた状態で**どのように見えるかを確認する**ことが興味深いです。なぜなら、この関数のコードは公開されている関数から独立しているため、常に非常に似ているからです：
-
 {% tabs %}
-{% tab title="myipc_server デコンパイル 1" %}
+{% tab title="myipc_server decompiled 1" %}
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
@@ -227,13 +228,13 @@ var_18 = arg1;
 *(int32_t *)(var_18 + 0x10) = 0x0;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
-// この関数を識別するのに役立つ sign_extend_64 への呼び出し
+// この関数を識別するのに役立つ sign_extend_64 の呼び出し
 // rax には呼び出す必要がある関数へのポインタが格納される
 // 関数アドレス配列のアドレス 0x100004040 の使用をチェック
 // 0x1f4 = 500 (開始ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// if-else、if は false を返し、else は正しい関数を呼び出して true を返す
+// if-else で、if は false を返し、else は適切な関数を呼び出して true を返す
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -256,8 +257,8 @@ return rax;
 </code></pre>
 {% endtab %}
 
-{% tab title="myipc_server デコンパイル 2" %}
-これは Hopper の無料バージョンでデコンパイルされた同じ関数です：
+{% tab title="myipc_server decompiled 2" %}
+これは、異なる Hopper 無料版で逆コンパイルされた同じ関数です:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -332,22 +333,24 @@ return r0;
 {% endtab %}
 {% endtabs %}
 
-実際には、関数**`0x100004000`**に行くと、**`routine_descriptor`**構造体の配列が見つかります。構造体の最初の要素は、**関数**が実装されている**アドレス**であり、構造体は0x28バイトを取ります。したがって、0x28バイトごとに（バイト0から始まる）8バイトを取得すると、それが呼び出される**関数のアドレス**になります：
-
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+実際には、関数 **`0x100004000`** に行くと、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は実装されている **関数** の **アドレス** であり、構造体は 0x28 バイトを取ります。したがって、0x28 バイトごとに（バイト 0 から始まる）8 バイトを取得すると、それが呼び出される **関数のアドレス** になります:
 
 <figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-このデータは[**このHopperスクリプトを使用して**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py)抽出できます。
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+このデータは [**この Hopper スクリプトを使用して**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) 抽出できます。
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) で AWS ハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksにあなたの会社を広告したい**ですか？ または、**最新バージョンのPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。これは私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加するか**、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**に**フォローしてください。
-* **ハッキングのトリックを共有するために** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricks をサポートする他の方法:
+
+* HackTricks に **あなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFT**](https://opensea.io/collection/the-peass-family) コレクション
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に **参加する** か、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) で **フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを共有する。
 
 </details>

@@ -2,13 +2,15 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksにあなたの会社を広告したいですか？** または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたいですか？** [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加するか**、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのコツを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
@@ -16,11 +18,11 @@
 
 Appleは、接続しているプロセスが**公開されたXPCメソッドを呼び出す権限**を持っているかどうかを認証する別の方法を提案しています。
 
-アプリケーションが**特権ユーザーとしてアクションを実行する**必要がある場合、アプリを特権ユーザーとして実行する代わりに、アプリからそれらのアクションを実行するために呼び出すことができるXPCサービスとしてHelperToolをrootとしてインストールすることが一般的です。しかし、サービスを呼び出すアプリは十分な認証を持っている必要があります。
+アプリケーションが**特権ユーザーとしてアクションを実行する必要がある場合**、アプリを特権ユーザーとして実行する代わりに、アプリからそれらのアクションを実行するために呼び出すことができるXPCサービスとしてHelperToolをrootとしてインストールすることが一般的です。しかし、サービスを呼び出すアプリは十分な認証を持っている必要があります。
 
 ### ShouldAcceptNewConnection が常に YES の場合
 
-例として、[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)で見つけることができます。`App/AppDelegate.m`では**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`の関数**`shouldAcceptNewConnection`**は、以前に示された要件のいずれも**チェックしません**。常にYESを返します：
+例としては、[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)で見つけることができます。`App/AppDelegate.m`では**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`の関数**`shouldAcceptNewConnection`**は、以前に示された要件のいずれも**チェックせず**、常にYESを返します：
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -37,7 +39,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-このチェックを適切に設定する方法についての詳細は、以下を参照してください：
+このチェックを適切に設定する方法についての詳細は：
 
 {% content-ref url="macos-xpc-connecting-process-check/" %}
 [macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
@@ -73,7 +75,7 @@ if (self->_authRef) {
 }
 ```
 ```markdown
-`Common/Common.m`の`setupAuthorizationRights`関数は、アプリケーションの権限を認証データベース`/var/db/auth.db`に保存します。データベースにまだ存在しない権限のみを追加する点に注意してください：
+関数 `setupAuthorizationRights` は `Common/Common.m` から、アプリケーションの権限を認証データベース `/var/db/auth.db` に保存します。データベースにまだ存在しない権限のみを追加する点に注意してください:
 ```
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
@@ -106,7 +108,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-関数 `enumerateRightsUsingBlock` は、`commandInfo` で定義されているアプリケーションの権限を取得するために使用されます。
+関数 `enumerateRightsUsingBlock` は、`commandInfo` で定義されているアプリケーションの権限を取得するために使用されます：
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -192,7 +194,7 @@ block(authRightName, authRightDefault, authRightDesc);
 
 ### 権限の検証
 
-`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのようなメソッドを実行する**権限があるかどうかを、関数**`checkAuthorization`**を呼び出して確認します。この関数は、呼び出しプロセスによって送信された**authData**が**正しい形式**であるかをチェックし、次に特定のメソッドを呼び出す権利を得るために**必要なものが何か**をチェックします。全てがうまくいけば、**返される`error`は`nil`になります**：
+`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのようなメソッドを実行する**権限があるかどうかを、関数**`checkAuthorization`**を呼び出して確認します。この関数は、呼び出しプロセスによって送信された**authData**が**正しい形式**であるかをチェックし、次に特定のメソッドを呼び出す権利を得るために**必要なものが何か**をチェックします。すべてがうまくいけば、**返される`error`は`nil`になります**：
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -240,16 +242,24 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
+以下は、macOSのセキュリティ強化と特権昇格に関するハッキング技術についての書籍の内容です。関連する英語テキストを日本語に翻訳し、同じマークダウンおよびHTML構文を保持してください。コード、ハッキング技術名、ハッキング用語、クラウド/SaaSプラットフォーム名（Workspace、aws、gcpなど）、'leak'という単語、ペネトレーションテスト、およびマークダウンタグなどは翻訳しないでください。また、翻訳とマークダウン構文以外の余計なものは追加しないでください。
+
+---
+
+そのメソッドを呼び出す**権利を得るための要件を確認する**ために、`authorizationRightForCommand` 関数は先にコメントされたオブジェクト **`commandInfo`** をチェックします。その後、関数を呼び出す**権利があるかどうか**を確認するために **`AuthorizationCopyRights`** を呼び出します（フラグはユーザーとの対話を許可します）。
+
+この場合、`readLicenseKeyAuthorization` 関数を呼び出すために、`kCommandKeyAuthRightDefault` は `@kAuthorizationRuleClassAllow` に設定されています。したがって、**誰でもそれを呼び出すことができます**。
+
 ### DB情報
 
-この情報は`/var/db/auth.db`に保存されていると述べられました。保存されているすべてのルールをリストするには：
+この情報は `/var/db/auth.db` に保存されていると言及されました。保存されているすべてのルールをリストするには：
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-```markdown
-次に、以下の方法でアクセス権を持つユーザーを確認できます:
+```
+security authorizationdb read <right-name>
 ```
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
@@ -259,8 +269,8 @@ security authorizationdb read com.apple.safaridriver.allow
 **すべての権限設定**は[**こちらで確認できます**](https://www.dssw.co.uk/reference/authorization-rights/)が、ユーザーの操作を必要としない組み合わせは以下の通りです：
 
 1. **'authenticate-user': 'false'**
-* これは最も直接的なキーです。`false`に設定されている場合、ユーザーはこの権限を得るために認証を提供する必要がありません。
-* これは、以下の2つのいずれかと**組み合わせて使用されるか、ユーザーが属している必要があるグループを指定する**ために使用されます。
+* これは最も直接的なキーです。`false`に設定されている場合、ユーザーはこの権限を得るために認証を提供する必要がないことを指定します。
+* これは、以下の2つのうちの1つと**組み合わせて使用されるか、ユーザーが属している必要があるグループを指定する**ために使用されます。
 2. **'allow-root': 'true'**
 * ユーザーがrootユーザー（権限が拡大されたユーザー）として操作しており、このキーが`true`に設定されている場合、rootユーザーは追加の認証なしでこの権限を得る可能性があります。ただし、通常、rootユーザーのステータスに到達するには認証が必要なので、ほとんどのユーザーにとっては「認証なし」のシナリオではありません。
 3. **'session-owner': 'true'**
@@ -283,9 +293,9 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### EvenBetterAuthorizationの使用を確認する
 
-関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは前述の認証スキーマを使用しています：
+関数: **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくプロセスは前述の認証スキーマを使用しています：
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 この関数が `AuthorizationCreateFromExternalForm`、`authorizationRightForCommand`、`AuthorizationCopyRights`、`AuhtorizationFree` などの関数を呼び出している場合、[**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) を使用しています。
 
@@ -293,15 +303,15 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### プロトコル通信
 
-次に、XPCサービスと通信を確立するためにプロトコルスキーマを見つける必要があります。
+次に、XPCサービスと通信を確立するために、プロトコルスキーマを見つける必要があります。
 
-関数 **`shouldAcceptNewConnection`** はエクスポートされているプロトコルを示しています：
+関数 **`shouldAcceptNewConnection`** はエクスポートされるプロトコルを示しています：
 
-<figure><img src="../../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 この場合、EvenBetterAuthorizationSampleと同じです。[**この行を確認してください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
 
-使用されているプロトコルの名前がわかれば、次のコマンドで**ヘッダー定義をダンプ**することができます：
+使用されているプロトコルの名前を知っていれば、その**ヘッダー定義をダンプ**することが可能です：
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -315,11 +325,11 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-最後に、それと通信を確立するために**公開されているMachサービスの名前**を知る必要があります。これを見つける方法はいくつかあります：
+最後に、通信を確立するために**公開されているMachサービスの名前**を知る必要があります。これを見つける方法はいくつかあります：
 
 * **`[HelperTool init]`** で、使用されているMachサービスを確認できます：
 
-<figure><img src="../../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 * launchdのplistで：
 ```xml
@@ -425,12 +435,14 @@ NSLog(@"Finished!");
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**に**フォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

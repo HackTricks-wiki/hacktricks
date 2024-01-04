@@ -2,37 +2,39 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**に**フォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 ## **基本情報**
 
-**System Integrity Protection (SIP)** は、macOSのセキュリティ技術で、rootユーザーであっても、特定のシステムディレクトリへの不正アクセスを防ぎます。これにより、これらのディレクトリへの変更、ファイルの作成、変更、削除が防止されます。SIPが保護する主なディレクトリは以下の通りです：
+**System Integrity Protection (SIP)** はmacOSのセキュリティ技術で、rootユーザーであっても、特定のシステムディレクトリへの不正アクセスから保護します。これにより、ファイルの作成、変更、削除を含むこれらのディレクトリへの変更が防止されます。SIPが保護する主なディレクトリは以下の通りです:
 
 * **/System**
 * **/bin**
 * **/sbin**
 * **/usr**
 
-これらのディレクトリとそのサブディレクトリの保護ルールは、**`/System/Library/Sandbox/rootless.conf`** ファイルで指定されています。このファイル内で、アスタリスク（\*）で始まるパスは、SIPの制限の例外を表しています。
+これらのディレクトリとそのサブディレクトリの保護ルールは、**`/System/Library/Sandbox/rootless.conf`** ファイルで指定されています。このファイル内で、アスタリスク(\*)で始まるパスはSIPの制限からの例外を表します。
 
-例えば、以下の設定：
+例えば、以下の設定:
 ```javascript
 /usr
 * /usr/libexec/cups
 * /usr/local
 * /usr/share/man
 ```
-**`/usr`** ディレクトリは一般的にSIPによって保護されています。ただし、リストに先行するアスタリスク (\*) が付いている三つのサブディレクトリ（`/usr/libexec/cups`、`/usr/local`、`/usr/share/man`）については変更が許可されています。
+**`/usr`** ディレクトリは一般的にSIPによって保護されています。ただし、指定された3つのサブディレクトリ（`/usr/libexec/cups`、`/usr/local`、`/usr/share/man`）については、先頭にアスタリスク(\*)が付いているため、変更が許可されています。
 
-ディレクトリやファイルがSIPによって保護されているかどうかを確認するには、**`ls -lOd`** コマンドを使用して **`restricted`** や **`sunlnk`** フラグの存在をチェックします。例えば：
+ディレクトリやファイルがSIPによって保護されているかどうかを確認するには、**`ls -lOd`** コマンドを使用して、**`restricted`** または **`sunlnk`** フラグの存在をチェックできます。例えば：
 ```bash
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
@@ -51,7 +53,7 @@ drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 **SIPは他のrootアクションも制限します** 例えば：
 
 * 信頼されていないカーネル拡張のロード
-* Appleによって署名されたプロセスのタスクポートの取得
+* Appleに署名されたプロセスのタスクポートの取得
 * NVRAM変数の変更
 * カーネルデバッグの許可
 
@@ -71,13 +73,15 @@ csrutil disable
 ```bash
 csrutil disable
 ```
-SIPを有効にしたままデバッグ保護を解除するには、次の操作を行います:
+```markdown
+SIPを有効にしたままデバッグ保護を解除するには、次のようにします:
+```
 ```bash
 csrutil enable --without debug
 ```
 ### その他の制限
 
-SIPは、**未署名のカーネル拡張**（kexts）のロードを禁止し、macOSシステムプロセスの**デバッグ**を防ぎます。また、dtraceなどのツールがシステムプロセスを検査するのを妨げます。
+SIPは、**未署名のカーネル拡張**（kexts）の読み込みを禁止し、macOSシステムプロセスの**デバッグ**を防ぎます。また、dtraceなどのツールがシステムプロセスを検査することも妨げます。
 
 [このトークでのSIPの詳細情報](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)。
 
@@ -88,7 +92,7 @@ SIPは、**未署名のカーネル拡張**（kexts）のロードを禁止し�
 * すべてのユーザーのメール、メッセージ、Safariの履歴などを読む
 * ウェブカメラ、マイクなどの権限を付与する（SIP保護されたTCCデータベースに直接書き込むことで） - TCCバイパス
 * 永続性：マルウェアをSIP保護された場所に保存し、rootでさえ削除できない。また、MRTを改ざんすることもできる。
-* カーネル拡張をロードする容易さ（それでもこのための他のハードコアな保護が存在します）。
+* カーネル拡張を読み込む容易さ（それでもこのための他のハードコアな保護が存在します）。
 
 ### インストーラーパッケージ
 
@@ -96,27 +100,27 @@ SIPは、**未署名のカーネル拡張**（kexts）のロードを禁止し�
 
 ### 存在しないSIPファイル
 
-潜在的な抜け穴の一つは、**`rootless.conf`に指定されているが現在存在しない**ファイルを作成することができるということです。マルウェアはこれを利用してシステム上で**永続性を確立**することができます。例えば、悪意のあるプログラムが`/System/Library/LaunchDaemons`に.plistファイルを作成することができる場合、それが`rootless.conf`にリストされているが存在しない場合です。
+潜在的な抜け穴の一つは、**`rootless.conf`に指定されているが現在存在しない**ファイルを作成できることです。マルウェアはこれを利用してシステム上に**永続性**を確立することができます。例えば、悪意のあるプログラムが`rootless.conf`にリストされているが存在しない場合、`/System/Library/LaunchDaemons`に.plistファイルを作成することができます。
 
 ### com.apple.rootless.install.heritable
 
 {% hint style="danger" %}
-エンタイトルメント**`com.apple.rootless.install.heritable`**はSIPをバイパスすることを許可します
+エンタイトルメント**`com.apple.rootless.install.heritable`**はSIPをバイパスすることを可能にします
 {% endhint %}
 
 #### Shrootless
 
-[**このブログ投稿の研究者たち**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)は、macOSのシステムインテグリティプロテクション（SIP）メカニズムにおける脆弱性を発見しました。この脆弱性は'Shrootless'と名付けられ、**`system_installd`**デーモンを中心にしています。このデーモンは、エンタイトルメント**`com.apple.rootless.install.heritable`**を持っており、これにより子プロセスがSIPのファイルシステム制限をバイパスできます。
+[**このブログ投稿の研究者たち**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)は、macOSのシステムインテグリティプロテクション（SIP）メカニズムにおける脆弱性を発見しました。この脆弱性は'Shrootless'と名付けられ、**`system_installd`**デーモンを中心にしています。このデーモンには、**`com.apple.rootless.install.heritable`**というエンタイトルメントがあり、その子プロセスがSIPのファイルシステム制限をバイパスすることを可能にします。
 
 **`system_installd`**デーモンは、**Apple**によって署名されたパッケージをインストールします。
 
-研究者たちは、Appleに署名されたパッケージ（.pkgファイル）のインストール中に、**`system_installd`**がパッケージに含まれる**ポストインストール**スクリプトを**実行**することを発見しました。これらのスクリプトはデフォルトのシェルである**`zsh`**によって実行され、**`zsh`**は非対話モードでも存在する場合、自動的に**`/etc/zshenv`**ファイルからコマンドを**実行**します。攻撃者はこの挙動を悪用する可能性があります：悪意のある`/etc/zshenv`ファイルを作成し、**`system_installd`が`zsh`を呼び出すのを待つ**ことで、デバイス上で任意の操作を実行できます。
+研究者たちは、Appleに署名されたパッケージ（.pkgファイル）のインストール中に、**`system_installd`**がパッケージに含まれる**ポストインストール**スクリプトを**実行**することを発見しました。これらのスクリプトはデフォルトのシェルである**`zsh`**によって実行され、**`zsh`**は非対話モードでも存在する場合は**`/etc/zshenv`**ファイルからコマンドを自動的に**実行**します。攻撃者はこの挙動を悪用することができます：悪意のある`/etc/zshenv`ファイルを作成し、**`system_installd`が`zsh`を起動するのを待つ**ことで、デバイス上で任意の操作を実行することができます。
 
-さらに、**`/etc/zshenv`はSIPバイパスだけでなく、一般的な攻撃手法として使用できる**ことが発見されました。各ユーザープロファイルには`~/.zshenv`ファイルがあり、これは`/etc/zshenv`と同じように動作しますが、root権限は必要ありません。このファイルは、`zsh`が起動するたびにトリガーされる永続性メカニズムとして、または権限昇格メカニズムとして使用できます。管理ユーザーが`sudo -s`または`sudo <command>`を使用してrootに昇格する場合、`~/.zshenv`ファイルがトリガーされ、効果的にrootに昇格します。
+さらに、**`/etc/zshenv`はSIPバイパスだけでなく、一般的な攻撃手法として使用できる**ことが発見されました。各ユーザープロファイルには`~/.zshenv`ファイルがあり、`/etc/zshenv`と同じように動作しますが、root権限は必要ありません。このファイルは、`zsh`が起動するたびにトリガーされる永続性メカニズムとして、または権限昇格メカニズムとして使用できます。管理ユーザーが`sudo -s`または`sudo <command>`を使用してrootに昇格する場合、`~/.zshenv`ファイルがトリガーされ、効果的にrootに昇格します。
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-[**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)では、**`system_installd`**プロセスが依然として悪用される可能性があることが発見されました。それは、**ポストインストールスクリプトをSIPによって保護されたランダムな名前のフォルダ内の`/tmp`に配置**していました。問題は、**`/tmp`自体はSIPによって保護されていない**ため、**仮想イメージをそれにマウント**することが可能であり、その後**インストーラー**がそこに**ポストインストールスクリプト**を配置し、仮想イメージを**アンマウント**し、すべての**フォルダ**を**再作成**し、**実行**する**ペイロード**を含む**ポストインストール**スクリプトを**追加**することができました。
+[**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)では、**`system_installd`**プロセスが依然として悪用される可能性があることが発見されました。それは、**ポストインストールスクリプトをSIPによって保護されたランダムな名前のフォルダ内の`/tmp`に配置**していました。問題は、**`/tmp`自体はSIPによって保護されていない**ため、**仮想イメージをそれにマウント**することが可能であり、その後**インストーラー**がそこに**ポストインストールスクリプト**を配置し、仮想イメージを**アンマウント**し、すべての**フォルダ**を**再作成**し、**ポストインストール**スクリプトに**ペイロード**を**追加**して実行することができました。
 
 #### [fsck\_csユーティリティ](https://www.theregister.com/2016/03/30/apple\_os\_x\_rootless/)
 
@@ -133,7 +137,7 @@ reboot
 ```
 {% endcode %}
 
-前述のInfo.plistファイルは、**SIPによって一部のカーネル拡張をホワイトリストに登録し、特定の他の拡張をロードから** **ブロック**するために使用されます。通常、Apple自身のカーネル拡張**`AppleHWAccess.kext`**をブラックリストに登録しますが、設定ファイルが破壊されたことで、システムRAMへの読み書きを自由に行うためにロードして使用することができます。
+前述のInfo.plistファイルは、**SIPによって一部のカーネル拡張をホワイトリストに登録し、特定の他の拡張をロードから** **ブロック**するために使用されます。通常、Apple自身のカーネル拡張**`AppleHWAccess.kext`**をブラックリストに登録しますが、設定ファイルが破壊されたことで、システムRAMに対して読み書きを自由に行うためにロードして使用することができます。
 
 #### [SIP保護フォルダ上にマウントする](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
@@ -146,7 +150,7 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 ```
 #### [アップグレーダーのバイパス (2016)](https://objective-see.org/blog/blog\_0x14.html)
 
-実行されると、アップグレード/インストーラーアプリケーション（例：`Install macOS Sierra.app`）は、ダウンロードされたアプリケーション内に埋め込まれたインストーラーディスクイメージからシステムをブートするように設定します。このインストーラーディスクイメージには、例えばOS X El CapitanからmacOS SierraへのOSをアップグレードするためのロジックが含まれています。
+実行されると、アップグレード/インストーラーアプリケーション（例：`Install macOS Sierra.app`）は、ダウンロードされたアプリケーション内に埋め込まれたインストーラーディスクイメージを使ってシステムがブートするように設定します。このインストーラーディスクイメージには、例えばOS X El CapitanからmacOS SierraへのOSをアップグレードするためのロジックが含まれています。
 
 アップグレード/インストーラーイメージ（`InstallESD.dmg`）からシステムをブートするために、`Install macOS Sierra.app`は**`bless`**ユーティリティ（エンタイトルメント`com.apple.rootless.install.heritable`を継承）を利用します：
 
@@ -158,9 +162,9 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 
 したがって、攻撃者がシステムがそれから起動する前にアップグレードイメージ（`InstallESD.dmg`）を変更できれば、SIPをバイパスできます。
 
-イメージを感染させる方法は、アプリケーションのコンテキストで悪意のあるdylibを素朴にロードして実行する動的ローダー（dyld）を置き換えることでした。例えば**`libBaseIA`** dylibのように。したがって、ユーザーがインストーラーアプリケーションを起動するたびに（例えばシステムをアップグレードするために）、私たちの悪意のあるdylib（libBaseIA.dylibと名付けられた）もインストーラーでロードされ、実行されます。
+イメージを変更して感染させる方法は、アプリケーションのコンテキストで悪意のあるdylibを素朴にロードして実行する動的ローダー（dyld）を置き換えることでした。例えば、**`libBaseIA`** dylibのように。したがって、ユーザーがインストーラーアプリケーションを起動するたびに（例えば、システムをアップグレードするために）、私たちの悪意のあるdylib（libBaseIA.dylibと名付けられた）もインストーラー内でロードされ、実行されます。
 
-今やインストーラーアプリケーションの'内部'で、私たちはこのアップグレードプロセスのフェーズを制御できます。インストーラーがイメージを'祝福'するので、私たちがしなければならないのは、それが使用される前にイメージ、**`InstallESD.dmg`**、を乗っ取ることです。これは、**`extractBootBits`** メソッドをメソッドスウィズリングでフックすることで可能でした。
+今、インストーラーアプリケーションの'内部'で、私たちはこのアップグレードプロセスのフェーズを制御できます。インストーラーがイメージを'祝福'するので、使用される前にイメージ、**`InstallESD.dmg`**を乗っ取るだけです。これは、**`extractBootBits`**メソッドをメソッドスウィズリングでフックすることで可能でした。\
 悪意のあるコードがディスクイメージが使用される直前に実行されるので、それを感染させる時が来ました。
 
 `InstallESD.dmg`の中には、アップグレードコードの'ルートファイルシステム'である別の埋め込みディスクイメージ`BaseSystem.dmg`があります。`BaseSystem.dmg`に動的ライブラリを注入することで、OSレベルのファイルを変更できるプロセスのコンテキスト内で悪意のあるコードが実行されます。
@@ -172,26 +176,26 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 ### **com.apple.rootless.install**
 
 {% hint style="danger" %}
-権限**`com.apple.rootless.install`**はSIPをバイパスすることを許可します
+エンタイトルメント**`com.apple.rootless.install`**はSIPをバイパスすることを許可します
 {% endhint %}
 
-[**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)から、システムXPCサービス`/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc`は権限**`com.apple.rootless.install`**を持っており、プロセスがSIP制限をバイパスする許可を与えます。また、**セキュリティチェックなしにファイルを移動するメソッドを公開しています。**
+[**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)から、システムXPCサービス`/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc`は、プロセスにSIP制限をバイパスする許可を与えるエンタイトルメント**`com.apple.rootless.install`**を持っています。また、**セキュリティチェックなしでファイルを移動するメソッドを公開しています。**
 
 ## Sealed System Snapshots
 
-Sealed System Snapshotsは、Appleが**macOS Big Sur (macOS 11)**で導入した機能で、**System Integrity Protection (SIP)**メカニズムの一部として追加のセキュリティとシステム安定性を提供するためです。これらは、システムボリュームの読み取り専用バージョンです。
+Sealed System Snapshotsは、Appleが**macOS Big Sur (macOS 11)**で導入した機能で、**System Integrity Protection (SIP)**メカニズムの一部として追加のセキュリティとシステムの安定性を提供するためです。これらは、システムボリュームの読み取り専用バージョンです。
 
 詳細については以下の通りです：
 
-1. **不変のシステム**: Sealed System SnapshotsはmacOSシステムボリュームを「不変」とし、変更できないようにします。これにより、セキュリティやシステム安定性を損なう可能性のある不正な変更や偶発的な変更を防ぎます。
-2. **システムソフトウェアアップデート**: macOSのアップデートやアップグレードをインストールすると、macOSは新しいシステムスナップショットを作成します。その後、macOSスタートアップボリュームは**APFS (Apple File System)**を使用してこの新しいスナップショットに切り替えます。アップデートの適用プロセス全体がより安全で信頼性が高くなり、アップデート中に何か問題が発生した場合、システムは常に前のスナップショットに戻ることができます。
+1. **不変のシステム**: Sealed System SnapshotsはmacOSシステムボリュームを「不変」とし、変更できないようにします。これにより、セキュリティやシステムの安定性を損なう可能性のある不正な変更や偶発的な変更を防ぎます。
+2. **システムソフトウェアのアップデート**: macOSのアップデートやアップグレードをインストールすると、macOSは新しいシステムスナップショットを作成します。その後、macOSスタートアップボリュームは**APFS (Apple File System)**を使用してこの新しいスナップショットに切り替えます。アップデートの適用プロセス全体がより安全で信頼性が高くなり、アップデート中に何か問題が発生した場合、システムは常に前のスナップショットに戻ることができます。
 3. **データの分離**: macOS Catalinaで導入されたデータとシステムボリュームの分離の概念と連動して、Sealed System Snapshot機能は、すべてのデータと設定が別の「**Data**」ボリュームに保存されることを確実にします。この分離により、データはシステムから独立し、システムアップデートのプロセスが簡素化され、システムのセキュリティが向上します。
 
-これらのスナップショットはmacOSによって自動的に管理され、APFSのスペース共有機能のおかげでディスク上に追加のスペースを取らないことを覚えておいてください。また、これらのスナップショットは**Time Machineスナップショット**とは異なることに注意してください。これらはユーザーがアクセス可能なシステム全体のバックアップです。
+これらのスナップショットはmacOSによって自動的に管理され、APFSのスペース共有機能のおかげでディスク上に追加のスペースを取らないことを覚えておいてください。また、これらのスナップショットは、システム全体のバックアップである**Time Machineスナップショット**とは異なることに注意が必要です。
 
 ### スナップショットの確認
 
-コマンド**`diskutil apfs list`**は**APFSボリュームの詳細**とそのレイアウトをリストします：
+コマンド**`diskutil apfs list`**は、**APFSボリュームの詳細**とそのレイアウトをリストします：
 
 <pre><code>+-- Container disk3 966B902E-EDBA-4775-B743-CF97A0556A13
 |   ====================================================
@@ -239,19 +243,21 @@ Sealed System Snapshotsは、Appleが**macOS Big Sur (macOS 11)**で導入した
 csrutil authenticated-root status
 Authenticated Root status: enabled
 ```
-さらに、スナップショットディスクも**読み取り専用**としてマウントされています：
+さらに、スナップショットディスクは**読み取り専用**としてマウントされています：
 ```
 mount
 /dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**にフォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

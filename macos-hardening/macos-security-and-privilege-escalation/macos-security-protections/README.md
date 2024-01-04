@@ -1,22 +1,24 @@
-# macOSセキュリティ保護
+# macOS セキュリティ保護
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWS ハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか、またはHackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。これは、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法:
+
+* **HackTricks にあなたの会社を広告掲載したい場合**や**HackTricks を PDF でダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをチェックする
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f)や [**telegram グループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
 ## Gatekeeper
 
-Gatekeeperは通常、**Quarantine + Gatekeeper + XProtect**の組み合わせを指すことが多く、これらの3つのmacOSセキュリティモジュールは、**ユーザーが潜在的に悪意のあるソフトウェアを実行するのを防ぐ**ために使用されます。
+Gatekeeper は通常、**Quarantine + Gatekeeper + XProtect** の組み合わせを指し、これら 3 つの macOS セキュリティモジュールが**ダウンロードされた潜在的に悪意のあるソフトウェアの実行を防ぐ**ことを試みます。
 
-詳細は次の場所で確認できます：
+詳細情報:
 
 {% content-ref url="macos-gatekeeper.md" %}
 [macos-gatekeeper.md](macos-gatekeeper.md)
@@ -32,52 +34,52 @@ Gatekeeperは通常、**Quarantine + Gatekeeper + XProtect**の組み合わせ�
 
 ### サンドボックス
 
-MacOSサンドボックスは、サンドボックスプロファイルで指定された**許可されたアクションに制限されたアプリケーション**の実行を制限します。これにより、**アプリケーションが予期されたリソースにのみアクセスする**ことが保証されます。
+macOS サンドボックスは、アプリケーションが使用するサンドボックスプロファイルで指定された**許可されたアクションに制限**することで、**アプリケーションが予想されるリソースのみにアクセスする**ことを保証するのに役立ちます。
 
 {% content-ref url="macos-sandbox/" %}
 [macos-sandbox](macos-sandbox/)
 {% endcontent-ref %}
 
-### TCC - 透明性、同意、および制御
+### TCC - **透明性、同意、および制御**
 
-**TCC（透明性、同意、および制御）**は、macOSの機構であり、一般的にはプライバシーの観点から**アプリケーションの特定の機能へのアクセスを制限および制御**します。これには、位置情報サービス、連絡先、写真、マイクロフォン、カメラ、アクセシビリティ、フルディスクアクセスなどが含まれる場合があります。
+**TCC (透明性、同意、および制御)** は macOS のメカニズムで、通常はプライバシーの観点から、特定の機能へのアプリケーションアクセスを**制限および制御する**ものです。これには、位置情報サービス、連絡先、写真、マイク、カメラ、アクセシビリティ、フルディスクアクセスなどが含まれます。
 
 {% content-ref url="macos-tcc/" %}
 [macos-tcc](macos-tcc/)
 {% endcontent-ref %}
 
-### 起動/環境制約と信頼キャッシュ
+### 起動/環境制約 & 信頼キャッシュ
 
-macOSの起動制約は、プロセスの起動を**調整するセキュリティ機能**であり、プロセスの起動を**誰が**、**どのように**、**どこから**行えるかを定義します。macOS Venturaで導入されたこれらは、システムバイナリを**信頼キャッシュ**内の制約カテゴリに分類します。各実行可能バイナリには、**自己**、**親**、**責任**の制約を含む**起動**のための**ルール**が設定されています。macOS Sonomaでは、サードパーティのアプリケーションにも拡張され、これらの機能はプロセスの起動条件を制御することで、潜在的なシステムの脆弱性を緩和するのに役立ちます。
+macOS の起動制約は、**誰が**プロセスを起動できるか、**どのように**、**どこから**起動できるかを定義することで、プロセスの開始を**規制する**セキュリティ機能です。macOS Ventura で導入され、システムバイナリを**信頼キャッシュ**内の制約カテゴリに分類します。すべての実行可能バイナリには、**自身**、**親**、および**責任者**の制約を含む**起動ルール**が設定されています。macOS Sonoma でサードパーティアプリにも**環境**制約として拡張され、プロセスの起動条件を管理することで、潜在的なシステムの悪用を軽減するのに役立ちます。
 
 {% content-ref url="macos-launch-environment-constraints.md" %}
 [macos-launch-environment-constraints.md](macos-launch-environment-constraints.md)
 {% endcontent-ref %}
 
-## MRT - マルウェア除去ツール
+## MRT - マルウェア削除ツール
 
-マルウェア除去ツール（MRT）は、macOSのセキュリティインフラの一部です。その名前からもわかるように、MRTの主な機能は、感染したシステムから既知のマルウェアを**削除すること**です。
+マルウェア削除ツール (MRT) も macOS のセキュリティインフラの一部です。名前が示すように、MRT の主な機能は、**感染したシステムから既知のマルウェアを削除する**ことです。
 
-Macでマルウェアが検出されると（XProtectまたは他の手段によって）、MRTを使用してマルウェアを自動的に**削除**することができます。MRTはバックグラウンドで静かに動作し、通常はシステムが更新されるときや新しいマルウェア定義がダウンロードされるときに実行されます（マルウェアを検出するためのMRTのルールはバイナリ内にあるようです）。
+Mac でマルウェアが検出されると（XProtect または他の手段によって）、MRT は自動的に**マルウェアを削除する**ために使用できます。MRT はバックグラウンドで静かに動作し、通常はシステムが更新されるたび、または新しいマルウェア定義がダウンロードされるたびに実行されます（マルウェアを検出するための MRT のルールはバイナリ内にあるようです）。
 
-XProtectとMRTは、どちらもmacOSのセキュリティ対策の一部ですが、異なる機能を果たしています：
+XProtect と MRT はどちらも macOS のセキュリティ対策の一部ですが、異なる機能を果たします：
 
-* **XProtect**は予防ツールです。ファイルが（特定のアプリケーションを介して）ダウンロードされるときに**ファイルをチェック**し、既知のマルウェアの種類を検出した場合は、ファイルを**開かないように**して、マルウェアが最初にシステムに感染するのを防ぎます。
-* 一方、**MRT**は**反応型のツール**です。マルウェアがシステムで検出された後、問題のあるソフトウェアを**削除**してシステムをクリーンアップすることを目的としています。
+* **XProtect** は予防ツールです。特定のアプリケーションを介して**ダウンロードされるファイルをチェックし**、既知のマルウェアタイプを検出すると、ファイルが開かれるのを**防ぎ**、そもそもシステムが感染するのを防ぎます。
+* **MRT** は、反応的なツールです。システムでマルウェアが検出された後に動作し、不正なソフトウェアを削除してシステムをクリーンアップすることが目的です。
 
-MRTアプリケーションは、**`/Library/Apple/System/Library/CoreServices/MRT.app`**にあります。
+MRT アプリケーションは **`/Library/Apple/System/Library/CoreServices/MRT.app`** にあります。
 
-## バックグラウンドタスクの管理
+## バックグラウンドタスク管理
 
-**macOS**は、ツールがコードの実行を継続するためのよく知られた**手法を使用するたびにアラート**を表示するようになりました。これにより、ユーザーは**どのソフトウェアが持続しているか**をよりよく把握することができます。
+**macOS** は、ツールがよく知られた**コード実行の永続化技術**（ログインアイテム、デーモンなど）を使用するたびに**警告**を発し、ユーザーが**どのソフトウェアが永続化しているか**をよりよく理解できるようにします。
 
 <figure><img src="../../../.gitbook/assets/image (711).png" alt=""><figcaption></figcaption></figure>
 
-これは、`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd`にある**デーモン**と、`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`にある**エージェント**で実行されます。
+これは、`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` にある**デーモン**と、`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app` にある**エージェント**で動作します。
 
-**`backgroundtaskmanagementd`**が永続フォルダに何かがインストールされていることを知る方法は、**FSEventsを取得**し、それに対していくつかの**ハンドラ**を作成することです。
+**`backgroundtaskmanagementd`** が永続的なフォルダに何かがインストールされていることを知る方法は、**FSEvents を取得し**、それらのための**ハンドラー**を作成することです。
 
-さらに、Appleが管理している**よく知られたアプリケーション**のリストが含まれているplistファイルがあります。場所は次のとおりです：`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+さらに、Apple が維持している頻繁に永続化する**よく知られたアプリケーション**を含む plist ファイルがあり、その場所は次のとおりです：`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -95,31 +97,31 @@ MRTアプリケーションは、**`/Library/Apple/System/Library/CoreServices/M
 ```
 ### 列挙
 
-AppleのCLIツールを使用して、設定されているすべてのバックグラウンドアイテムを列挙することができます。
+AppleのCLIツールを実行して、設定されているすべてのバックグラウンド項目を**列挙する**ことが可能です：
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-さらに、[**DumpBTM**](https://github.com/objective-see/DumpBTM)を使用してこの情報をリストすることも可能です。
+さらに、この情報は[**DumpBTM**](https://github.com/objective-see/DumpBTM)を使用してリストすることも可能です。
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-この情報は**`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`**に保存されており、TerminalにはFDAが必要です。
+この情報は **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** に保存されており、ターミナルはFDAが必要です。
 
-### BTMの操作
+### BTMをいじる
 
-新しい永続性が見つかると、**`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**というタイプのイベントが発生します。したがって、このイベントが送信されないようにするか、エージェントがユーザーに警告しないようにする方法は、攻撃者がBTMを**バイパス**するのに役立ちます。
+新しい永続性が見つかると、**`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** のタイプのイベントが発生します。したがって、この**イベント**の送信を**防ぐ**方法や、**エージェントがユーザーに警告するのを阻止する**方法は、攻撃者がBTMを_**バイパス**_するのに役立ちます。
 
-* **データベースのリセット**: 以下のコマンドを実行すると、データベースがリセットされます（基盤から再構築されるはずです）。ただし、何らかの理由で、これを実行した後、**システムが再起動されるまで新しい永続性は警告されません**。
-* **root**が必要です。
+* **データベースのリセット**: 以下のコマンドを実行するとデータベースがリセットされます（基本から再構築されるはずですが）、何らかの理由で、これを実行した後は、**システムが再起動されるまで新しい永続性に対する警告は出ません**。
+* **root** 権限が必要です。
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-* **エージェントの停止**: エージェントに停止シグナルを送信することで、新しい検出が見つかった際にユーザーに通知されないようにすることが可能です。
+* **エージェントを停止する**: エージェントに停止信号を送ることで、新しい検出が見つかったときに**ユーザーに警告しない**ようにすることが可能です。
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -132,9 +134,9 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-* **バグ**: もし**永続性を作成したプロセスがすぐに終了する**場合、デーモンはそれに関する情報を取得しようと試み、失敗し、新しい永続性が存在することを示すイベントを送信することができません。
+* **バグ**: **永続性を作成したプロセスが直後にすぐに終了した場合**、デーモンはそのプロセスについての**情報を取得**しようとしますが、**失敗し**、新しいものが永続していることを示すイベントを**送信できなくなります**。
 
-BTMに関する参考文献と**詳細情報**:
+BTMについての**詳細情報**:
 
 * [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 * [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
@@ -142,12 +144,14 @@ BTMに関する参考文献と**詳細情報**:
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか**？ HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセス**したいですか、またはHackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有**するには、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

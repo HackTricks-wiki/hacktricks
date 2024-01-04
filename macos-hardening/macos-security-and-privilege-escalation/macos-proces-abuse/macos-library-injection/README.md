@@ -1,90 +1,94 @@
+```markdown
 # macOSライブラリインジェクション
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 {% hint style="danger" %}
-**dyldのコードはオープンソース**であり、[https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/)で見つけることができ、**URL**（例：[https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)）を使用してtarをダウンロードすることができます。
+**dyldのコードはオープンソース**であり、[https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/)で見つけることができ、**URLを使用してtarをダウンロードすることができます**。例えば、[https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)です。
 {% endhint %}
 
 ## **DYLD\_INSERT\_LIBRARIES**
 
-> これは、プログラムで指定されたライブラリの前に**ロードする動的ライブラリのリスト**です。これにより、フラットネームスペースイメージで使用される既存の動的共有ライブラリの新しいモジュールをテストすることができます。新しいモジュールだけを持つ一時的な動的共有ライブラリをロードすることで実現します。ただし、これは、DYLD\_FORCE\_FLAT\_NAMESPACEも使用されていない限り、2レベルの名前空間イメージを使用してビルドされたイメージには影響しません。
+> これは、**プログラムで指定されたものよりも前にロードする動的ライブラリのコロン区切りのリスト**です。これにより、フラット名前空間イメージで使用される既存の動的共有ライブラリの新しいモジュールをテストするために、新しいモジュールだけを持つ一時的な動的共有ライブラリをロードすることができます。これは、DYLD\_FORCE\_FLAT\_NAMESPACEも使用されていない限り、動的共有ライブラリを使用して二レベル名前空間イメージをビルドしたイメージには影響しません。
 
-これは、[**LinuxのLD\_PRELOAD**](../../../../linux-hardening/privilege-escalation#ld\_preload)と似ています。
+これはLinuxの[**LD\_PRELOAD**](../../../../linux-hardening/privilege-escalation#ld\_preload)と似ています。
 
-このテクニックは、**ASEPテクニック**としても使用できます。インストールされているすべてのアプリケーションには、"Info.plist"というplistがあり、`LSEnvironmental`というキーを使用して環境変数を割り当てることができます。
+このテクニックは、インストールされたすべてのアプリケーションが`LSEnvironmental`というキーを使用して環境変数を割り当てることを許可する"Info.plist"というplistを持っているため、ASEPテクニックとしても**使用される可能性があります**。
 
 {% hint style="info" %}
-2012年以降、**Appleは`DYLD_INSERT_LIBRARIES`の権限を大幅に制限**しています。
+2012年以降、**Appleは`DYLD_INSERT_LIBRARIES`の力を大幅に削減しました**。
 
-コードに移動して、**`src/dyld.cpp`**を確認してください。関数**`pruneEnvironmentVariables`**では、**`DYLD_*`**変数が削除されていることがわかります。
+コードに行って**`src/dyld.cpp`をチェック**してください。**`pruneEnvironmentVariables`**関数では、**`DYLD_*`**変数が削除されていることがわかります。
 
-関数**`processRestricted`**では、制限の理由が設定されています。そのコードをチェックすると、理由は次のとおりです。
+**`processRestricted`**関数では、制限の理由が設定されています。そのコードをチェックすると、理由は以下の通りです：
 
-* バイナリが`setuid/setgid`である
-* machoバイナリに`__RESTRICT/__restrict`セクションが存在する
-* ソフトウェアには、[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)エンタイトルメントがないハードランタイムのエンタイトルメントがある
-* バイナリのエンタイトルメントを次のコマンドで確認する：`codesign -dv --entitlements :- </path/to/bin>`
+* バイナリが`setuid/setgid`です
+* machoバイナリに`__RESTRICT/__restrict`セクションが存在します。
+* ソフトウェアに[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)エンタイトルメントなしで権限があります（ハード化されたランタイム）
+* バイナリの**エンタイトルメント**をチェックするには：`codesign -dv --entitlements :- </path/to/bin>`
 
-より最新のバージョンでは、このロジックは関数**`configureProcessRestrictions`**の2番目の部分で見つけることができます。ただし、新しいバージョンでは、関数の**最初のチェックが実行**されます（iOSやシミュレーションに関連するif文はmacOSでは使用されないため、それらを削除できます）。
+より更新されたバージョンでは、このロジックは**`configureProcessRestrictions`**関数の第二部分で見つけることができます。ただし、新しいバージョンで実行されるのは、関数の**最初のチェック**です（macOSでは使用されないiOSまたはシミュレーションに関連するifを削除できます）。
 {% endhint %}
 
-### ライブラリの検証
+### ライブラリ検証
 
-バイナリが**`DYLD_INSERT_LIBRARIES`**環境変数を使用することを許可していても、バイナリはライブラリの署名をチェックしてカスタムライブラリをロードしません。
+バイナリが**`DYLD_INSERT_LIBRARIES`**環境変数の使用を許可していても、バイナリがロードするライブラリの署名をチェックする場合、カスタムライブラリはロードされません。
 
-カスタムライブラリをロードするためには、バイナリに次のいずれかのエンタイトルメントが必要です。
+カスタムライブラリをロードするためには、バイナリに以下のいずれかのエンタイトルメントが必要です：
 
-* &#x20;[`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
+* [`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 * [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-または、バイナリには**ハードランタイムフラグ**または**ライブラリ検証フラグ**がない必要があります。
+または、バイナリに**ハード化されたランタイムフラグ**や**ライブラリ検証フラグ**が**ない**べきです。
 
-`codesign --display --verbose <bin>`を使用してバイナリが**ハードランタイム**を持っているかどうかを確認し、**`CodeDirectory`**のランタイムフラグをチェックします。例：**`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+バイナリに**ハード化されたランタイム**があるかどうかは、`codesign --display --verbose <bin>`でフラグランタイムを**`CodeDirectory`**でチェックして、次のようにします：**`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-また、バイナリが**バイナリと同じ証明書で署名**されている場合も、ライブラリをロードすることができます。
+また、ライブラリがバイナリと同じ証明書で署名されている場合にもロードできます。
 
-これを悪用する方法の例と制限を確認するには、次の場所を参照してください。
+この機能の（悪用）方法と制限のチェック方法の例を以下で見つけることができます：
 
 {% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
 [macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
 {% endcontent-ref %}
-## Dylibハイジャッキング
+
+## Dylibハイジャック
 
 {% hint style="danger" %}
-**以前のライブラリ検証の制限も適用**されることを忘れないでください。Dylibハイジャッキング攻撃を実行するために。
+前述のライブラリ検証の制限もDylibハイジャック攻撃を行うために**適用されることを覚えておいてください**。
 {% endhint %}
 
-Windowsと同様に、MacOSでも**dylibをハイジャック**して、**アプリケーション**が**任意のコードを実行**することができます。\
-ただし、MacOSアプリケーションがライブラリをロードする方法は、Windowsよりも**制限が厳しい**です。これは、**マルウェア**開発者がこの技術を**ステルス**に使用することはできますが、特権をエスカレートするためにこれを悪用する可能性はずっと低いということを意味します。
+Windowsと同様に、MacOSでは**アプリケーションが任意のコードを実行するようにdylibsをハイジャックすることもできます**。\
+しかし、**MacOS**アプリケーションがライブラリをロードする方法はWindowsよりも**制限されています**。これは、**マルウェア**開発者がまだこのテクニックを**ステルス**に使用できることを意味しますが、特権をエスカレートするためにこれを悪用する可能性ははるかに低いです。
 
-まず、**MacOSバイナリがロードするライブラリの完全なパスを示す**ことが**より一般的**です。そして、**MacOSは決して**`$PATH`のフォルダを検索しません。
+まず、**MacOSバイナリがロードするライブラリの完全なパスを示すことがより一般的**です。そして二つ目に、**MacOSは$PATHのフォルダーをライブラリの検索には決して使用しません**。
 
-この機能に関連する**コード**の**主な**部分は、`ImageLoader.cpp`の**`ImageLoader::recursiveLoadLibraries`**にあります。
+この機能に関連する**コードの主要部分**は、`ImageLoader.cpp`の**`ImageLoader::recursiveLoadLibraries`**にあります。
 
-machoバイナリがライブラリをロードするために使用できる**4つの異なるヘッダコマンド**があります。
+machoバイナリがライブラリをロードするために使用できる**4つの異なるヘッダーコマンド**があります：
 
 * **`LC_LOAD_DYLIB`**コマンドは、dylibをロードするための一般的なコマンドです。
-* **`LC_LOAD_WEAK_DYLIB`**コマンドは、前のコマンドと同様に機能しますが、dylibが見つからない場合でもエラーなしで実行が続行されます。
-* **`LC_REEXPORT_DYLIB`**コマンドは、別のライブラリからシンボルをプロキシ（または再エクスポート）します。
-* **`LC_LOAD_UPWARD_DYLIB`**コマンドは、2つのライブラリが互いに依存している場合に使用されます（これは_上向きの依存性_と呼ばれます）。
+* **`LC_LOAD_WEAK_DYLIB`**コマンドは前述のものと同様に機能しますが、dylibが見つからない場合は、エラーなしで実行が続行されます。
+* **`LC_REEXPORT_DYLIB`**コマンドは、異なるライブラリからシンボルをプロキシ（または再エクスポート）します。
+* **`LC_LOAD_UPWARD_DYLIB`**コマンドは、2つのライブラリが互いに依存している場合（これを_上向きの依存関係_と呼びます）に使用されます。
 
-ただし、**2種類のdylibハイジャッキング**があります。
+しかし、**dylibハイジャックの2つのタイプ**があります：
 
-* **弱リンクされたライブラリが見つからない場合**：これは、アプリケーションが**`LC_LOAD_WEAK_DYLIB`**で構成された存在しないライブラリをロードしようとすることを意味します。その後、**攻撃者が期待される場所にdylibを配置すると、ロードされます**。
-* リンクが「弱い」という事実は、ライブラリが見つからなくてもアプリケーションが実行を続けることを意味します。
-* これに関連する**コード**は、`ImageLoaderMachO.cpp`の`ImageLoaderMachO::doGetDependentLibraries`関数にあります。ここでは、`lib->required`が`LC_LOAD_WEAK_DYLIB`がtrueの場合にのみ`false`です。
-* バイナリ内の**弱リンクされたライブラリを見つける**：（ハイジャッキングライブラリを作成する方法の後で例があります）
+* **欠落している弱いリンクされたライブラリ**：これは、アプリケーションが存在しないライブラリを**LC\_LOAD\_WEAK\_DYLIB**で設定されたライブラリをロードしようとすることを意味します。そして、**攻撃者が期待される場所にdylibを配置すると、それがロードされます**。
+* リンクが"弱い"という事実は、ライブラリが見つからなくてもアプリケーションが実行を続けることを意味します。
+* これに関連する**コード**は、`ImageLoaderMachO.cpp`の関数`ImageLoaderMachO::doGetDependentLibraries`にあり、`lib->required`は`LC_LOAD_WEAK_DYLIB`が真の場合にのみ`false`です。
+* バイナリで**弱いリンクされたライブラリを見つける**には（後でハイジャックライブラリを作成する方法の例があります）：
 * ```bash
 otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
 cmdsize 56
@@ -93,26 +97,26 @@ time stamp 2 Wed Jun 21 12:23:31 1969
 current version 1.0.0
 compatibility version 1.0.0
 ```
-* **`@rpath`で構成**された：Mach-Oバイナリには、**`LC_RPATH`**と**`LC_LOAD_DYLIB`**というコマンドがあります。これらのコマンドの**値**に基づいて、**ライブラリ**が**異なるディレクトリ**から**ロード**されます。
-* **`LC_RPATH`**には、バイナリでライブラリをロードするために使用されるいくつかのフォルダのパスが含まれています。
-* **`LC_LOAD_DYLIB`**には、ロードする特定のライブラリのパスが含まれています。これらのパスには**`@rpath`**が含まれる場合、**`LC_RPATH`**の値で置き換えられます。**`LC_RPATH`**に複数のパスがある場合、すべてのパスが使用されてライブラリを検索します。例：
-* **`LC_LOAD_DYLIB`**に`@rpath/library.dylib`が含まれ、**`LC_RPATH`**に`/application/app.app/Contents/Framework/v1/`と`/application/app.app/Contents/Framework/v2/`が含まれている場合。両方のフォルダが`library.dylib`をロードするために使用されます。**`LC_LOAD_DYLIB`**のパスの順序に従って、ライブラリが`[...]/v1/`に存在しない場合、攻撃者は`[...]/v2/`に配置してライブラリのロードをハイジャックすることができます。
-* バイナリ内の**rpathパスとライブラリ**を検索するには：`otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
+* **@rpathで設定されている**：Mach-Oバイナリは、**`LC_RPATH`**と**`LC_LOAD_DYLIB`**というコマンドを持つことができます。これらのコマンドの**値**に基づいて、**ライブラリ**は**異なるディレクトリ**から**ロードされます**。
+* **`LC_RPATH`**には、バイナリがライブラリをロードするために使用するいくつかのフォルダーのパスが含まれています。
+* **`LC_LOAD_DYLIB`**には特定のライブラリをロードするためのパスが含まれています。これらのパスには**`@rpath`**が含まれていることがあり、これは**`LC_RPATH`**の値に置き換えられます。**`LC_RPATH`**に複数のパスがある場合、それぞれがライブラリのロードを検索するために使用されます。例：
+* **`LC_LOAD_DYLIB`**に`@rpath/library.dylib`が含まれ、**`LC_RPATH`**に`/application/app.app/Contents/Framework/v1/`と`/application/app.app/Contents/Framework/v2/`が含まれている場合。両方のフォルダーが`library.dylib`のロードに使用されます**。**ライブラリが`[...]/v1/`に存在しない場合、攻撃者はそこに配置して、`[...]/v2/`のライブラリのロードをハイジャックすることができます。なぜなら、**`LC_LOAD_DYLIB`**のパスの順序に従っているからです。
+* バイナリで**rpathパスとライブラリを見つける**には：`otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
 {% hint style="info" %}
-**`@executable_path`**：**メイン実行ファイル**を含むディレクトリへの**パス**です。
+**`@executable_path`**：メイン実行可能ファイルを含むディレクトリへの**パス**です。
 
-**`@loader_path`**：**ロードコマンド**を含む**Mach-Oバイナリ**を含む**ディレクトリ**への**パス**です。
+**`@loader_path`**：ロードコマンドを含む**Mach-Oバイナリ**を含む**ディレクトリ**への**パス**です。
 
-* 実行可能ファイルで使用される場合、**`@loader_path`**は**`@executable_path`**と**同じ**です。
-* **dylib**で使用される場合、**`@loader_path`**は**dylib**への**パス**を与えます。
+* 実行可能ファイルで使用される場合、**`@loader_path`**は実質的に**`@executable_path`**と**同じ**です。
+* **dylib**で使用される場合、**`@loader_path`**は**dylib**への**パス**を提供します。
 {% endhint %}
 
-この機能を悪用して**特権をエスカレート**する方法は、**root**によって実行される**アプリケーション**が**攻撃者が書き込み権限を持つフォルダ**で**ライブラリを検索**している**珍しいケース**です。
+この機能を悪用して**特権をエスカレートする方法**は、**rootによって実行されているアプリケーション**が攻撃者が書き込み権限を持っているフォルダーで何か**ライブラリを探している**場合に、まれに発生します。
 
 {% hint style="success" %}
-アプリケーション内の**欠落しているライブラリ**を見つけるための素晴らしい**スキャナ**は、[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)または[**CLIバージョン**](https://github.com/pandazheng/DylibHijack)です。\
-この技術に関する技術的な詳細を含む素晴らしい**レポート**は[**こちら**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)で見つけることができます。
+アプリケーションで**欠落しているライブラリを見つける**ための素晴らしい**スキャナー**は[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)または[**CLIバージョン**](https://github.com/pandazheng/DylibHijack)です。\
+このテクニックに関する**技術的詳細を含む素晴らしいレポート**は[**こちら**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)で見つけることができます。
 {% endhint %}
 
 **例**
@@ -121,56 +125,15 @@ compatibility version 1.0.0
 [macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
 {% endcontent-ref %}
 
-## Dlopenハイジャッキング
+## Dlopenハイジャック
 
 {% hint style="danger" %}
-**以前のライブラリ検証の制限も適用**されることを忘れないでください。Dlopenハイジャッキング攻撃を実行するために。
+前述のライブラリ検証の制限もDlopenハイジャック攻撃を行うために**適用されることを覚えておいてください**。
 {% endhint %}
 
 **`man dlopen`**から：
 
-* パスに**スラッシュ文字が含まれていない**場合（つまり、単なるリーフ名である場合）、**dlopen()は検索**を行います。**`$DYLD_LIBRARY_PATH`**が起動時に
-* パスがフレームワークのパスのように見える場合（例：`/stuff/foo.framework/foo`）、もし起動時に`$DYLD_FRAMEWORK_PATH`が設定されていた場合、dyldはまずそのディレクトリ内でフレームワークの部分パス（例：`foo.framework/foo`）を探します。次に、dyldは指定されたパスをそのまま試します（相対パスの場合は現在の作業ディレクトリを使用します）。最後に、古いバイナリの場合、dyldはいくつかのフォールバックを試みます。もし起動時に`$DYLD_FALLBACK_FRAMEWORK_PATH`が設定されていた場合、dyldはそれらのディレクトリを検索します。そうでなければ、dyldは`/Library/Frameworks`（プロセスが制限されていない場合はmacOS上）を検索し、次に`/System/Library/Frameworks`を検索します。
-
-1. `$DYLD_FRAMEWORK_PATH`
-2. 指定されたパス（制限がない場合は現在の作業ディレクトリを使用した相対パス）
-3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
-4. `/Library/Frameworks`（制限がない場合）
-5. `/System/Library/Frameworks`
-
-{% hint style="danger" %}
-フレームワークのパスの場合、乗っ取りの方法は次のとおりです：
-
-* プロセスが**制限されていない**場合、CWDからの**相対パス**を悪用する（ドキュメントには明記されていませんが、プロセスが制限されている場合、DYLD\_\*環境変数は削除されます）
-{% endhint %}
-
-* パスにスラッシュが含まれているがフレームワークのパスではない場合（つまり、完全なパスまたはdylibへの部分パス）、dlopen（）はまず（設定されている場合）**`$DYLD_LIBRARY_PATH`**（パスの末尾部分を使用）を検索します。次に、dyldは指定されたパスを試します（制限されているプロセスの場合は現在の作業ディレクトリを使用しますが、相対パスの場合は制限されていないプロセスのみ）。最後に、古いバイナリの場合、dyldはフォールバックを試みます。もし起動時に`$DYLD_FALLBACK_LIBRARY_PATH`が設定されていた場合、dyldはそれらのディレクトリを検索します。そうでなければ、dyldは`/usr/local/lib/`（制限がない場合）を検索し、次に`/usr/lib/`を検索します。
-
-1. `$DYLD_LIBRARY_PATH`
-2. 指定されたパス（制限がない場合は現在の作業ディレクトリを使用した相対パス）
-3. `$DYLD_FALLBACK_LIBRARY_PATH`
-4. `/usr/local/lib/`（制限がない場合）
-5. `/usr/lib/`
-
-{% hint style="danger" %}
-名前にスラッシュが含まれておりフレームワークではない場合、乗っ取りの方法は次のとおりです：
-
-* バイナリが**制限されていない**場合、CWDまたは`/usr/local/lib`から何かをロードすることが可能です（または、言及された環境変数のいずれかを悪用する）
-{% endhint %}
-
-{% hint style="info" %}
-注意：**dlopenの検索を制御する**設定ファイルはありません。
-
-注意：メインの実行可能ファイルが**set\[ug]idバイナリまたはエンタイトルメントで署名**されている場合、**すべての環境変数は無視**され、フルパスのみ使用できます（詳細な情報については、[DYLD\_INSERT\_LIBRARIESの制限を確認](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md#check-dyld\_insert\_librery-restrictions)してください）。
-
-注意：Appleのプラットフォームでは、32ビットと64ビットのライブラリを組み合わせるために「ユニバーサル」ファイルが使用されます。これは、**別々の32ビットと64ビットの検索パスは存在しない**ことを意味します。
-
-注意：Appleのプラットフォームでは、ほとんどのOS dylibは**dyldキャッシュに統合**されており、ディスク上に存在しません。したがって、OS dylibが存在するかどうかを事前に確認するために**`stat()`**を呼び出すことはできません。ただし、**`dlopen_preflight()`**は、互換性のあるmach-oファイルを見つけるために**`dlopen()`**と同じ手順を使用します。
-{% endhint %}
-
-**パスのチェック**
-
-以下のコードですべてのオプションをチェックしましょう：
+* パスに**スラッシュ文字が含まれていない場合**（つまり、単なるリーフ名の場合）、**dlopen()は検索を行います**。**`$DYLD_LIBRARY_PATH`**が起動
 ```c
 // gcc dlopentest.c -o dlopentest -Wl,-rpath,/tmp/test
 #include <dlfcn.h>
@@ -213,27 +176,29 @@ fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
 return 0;
 }
 ```
-もしコンパイルして実行すると、**各ライブラリが検索に失敗した場所**がわかります。また、**FSログをフィルタリングする**こともできます。
+コンパイルして実行すると、**各ライブラリがどこで見つからなかったか**がわかります。また、**FSログをフィルタリング**することもできます：
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
-## 相対パスの乗っ取り
+## 相対パスハイジャック
 
-もし特権のあるバイナリ/アプリ（SUIDや強力な権限を持つバイナリなど）が相対パスのライブラリ（例えば`@executable_path`や`@loader_path`を使用して）をロードしており、かつライブラリの検証が無効になっている場合、攻撃者はバイナリを変更可能な場所に移動させ、その相対パスのライブラリを悪用してプロセスにコードを注入することができるかもしれません。
+**特権バイナリ/アプリ**（例えばSUIDや強力な権限を持つバイナリなど）が相対パスライブラリをロードしている場合（`@executable_path` や `@loader_path` を使用している例）、かつ**ライブラリ検証が無効**になっている場合、攻撃者はバイナリを移動して相対パスでロードされるライブラリを変更し、プロセスにコードを注入することが可能になるかもしれません。
 
-## `DYLD_*`と`LD_LIBRARY_PATH`環境変数の削除
+## `DYLD_*` と `LD_LIBRARY_PATH` 環境変数の削除
 
-ファイル`dyld-dyld-832.7.1/src/dyld2.cpp`には、**`pruneEnvironmentVariables`**という関数があります。この関数は、**`DYLD_`**で始まる環境変数と**`LD_LIBRARY_PATH=`**を削除します。
+ファイル `dyld-dyld-832.7.1/src/dyld2.cpp` には、**`pruneEnvironmentVariables`** という関数があり、**`DYLD_`** で始まるすべての環境変数と **`LD_LIBRARY_PATH=`** を削除します。
 
-また、**suid**および**sgid**バイナリに対しては、この関数は明示的に環境変数**`DYLD_FALLBACK_FRAMEWORK_PATH`**と**`DYLD_FALLBACK_LIBRARY_PATH`**を**null**に設定します。
+また、**suid** と **sgid** バイナリに対して、特に環境変数 **`DYLD_FALLBACK_FRAMEWORK_PATH`** と **`DYLD_FALLBACK_LIBRARY_PATH`** を**null**に設定します。
 
-この関数は、同じファイルの**`_main`**関数からOSXをターゲットにして呼び出されます。
+この関数は、OSXをターゲットにした場合、同じファイルの **`_main`** 関数から呼び出されます。
 ```cpp
 #if TARGET_OS_OSX
 if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
 pruneEnvironmentVariables(envp, &apple);
 ```
-そして、これらのブールフラグはコード内の同じファイルで設定されます：
+```markdown
+そして、それらのブール値フラグはコード内の同じファイルで設定されています：
+```
 ```cpp
 #if TARGET_OS_OSX
 // support chrooting from old kernel
@@ -264,11 +229,11 @@ gLinkContext.allowClassicFallbackPaths   = !isRestricted;
 gLinkContext.allowInsertFailures         = false;
 gLinkContext.allowInterposing         	 = true;
 ```
-これは、バイナリが**suid**または**sgid**であるか、ヘッダーに**RESTRICT**セグメントがあるか、**CS\_RESTRICT**フラグで署名されている場合、**`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`**がtrueであり、環境変数が削除されることを意味します。
+バイナリが**suid**または**sgid**である場合、ヘッダーに**RESTRICT**セグメントがある場合、または**CS\_RESTRICT**フラグで署名されている場合、**`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** が真であり、環境変数は削除されます。
 
-なお、CS\_REQUIRE\_LVがtrueの場合、変数は削除されませんが、ライブラリの検証では元のバイナリと同じ証明書を使用しているかどうかがチェックされます。
+CS\_REQUIRE\_LVが真の場合、変数は削除されませんが、ライブラリ検証は元のバイナリと同じ証明書を使用していることを確認します。
 
-## 制限のチェック
+## 制限の確認
 
 ### SUID & SGID
 ```bash
@@ -282,17 +247,13 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 sudo chmod -s hello
 ```
 ### セクション `__RESTRICT` とセグメント `__restrict`
-
-The `__RESTRICT` section is a special section in macOS that is used for library injection and privilege escalation techniques. It is located within the `__restrict` segment.
-
-セクション `__RESTRICT` は、macOS においてライブラリインジェクションや特権エスカレーションの技術に使用される特別なセクションです。これは `__restrict` セグメント内に位置しています。
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
 ```
-### ハードニングされたランタイム
+### ハード化されたランタイム
 
-キーチェーンに新しい証明書を作成し、それを使用してバイナリに署名します：
+キーチェーンで新しい証明書を作成し、それを使用してバイナリに署名します：
 
 {% code overflow="wrap" %}
 ```bash
@@ -317,23 +278,25 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 {% endcode %}
 
 {% hint style="danger" %}
-注意してください、バイナリにはフラグ**`0x0(none)`**で署名されているものがあるかもしれませんが、実行時に**`CS_RESTRICT`**フラグが動的に付与される可能性がありますので、このテクニックはそれらのバイナリでは機能しません。
+**`0x0(なし)`** のフラグで署名されたバイナリがあっても、実行時に動的に **`CS_RESTRICT`** フラグを取得することがあり、その場合この技術は機能しません。
 
-(procにこのフラグがあるかどうかを確認するには、[**ここからcsopsを取得してください**](https://github.com/axelexic/CSOps)。)
+プロセスがこのフラグを持っているかどうかは、(こちらの [**csops**](https://github.com/axelexic/CSOps) を参照して)確認できます：
 ```bash
 csops -status <pid>
 ```
-そして、フラグ0x800が有効になっているかどうかを確認します。
+フラグ0x800が有効になっているかどうかを確認してください。
 {% endhint %}
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには、</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい場合**、または**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) githubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
