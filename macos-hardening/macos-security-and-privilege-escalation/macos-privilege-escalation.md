@@ -2,19 +2,21 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**PEASSの最新バージョンにアクセス**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのコツを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 ## TCC 権限昇格
 
-TCC権限昇格を探している場合は、以下をご覧ください：
+TCC権限昇格を探している場合は、以下をご覧ください:
 
 {% content-ref url="macos-security-protections/macos-tcc/" %}
 [macos-tcc](macos-security-protections/macos-tcc/)
@@ -22,7 +24,7 @@ TCC権限昇格を探している場合は、以下をご覧ください：
 
 ## Linux Privesc
 
-**Linux/Unixに影響を与える権限昇格に関するほとんどのコツは、MacOSマシンにも影響を与える**ことに注意してください。したがって、以下を参照してください：
+**Linux/Unixに影響を与える権限昇格に関するほとんどのトリックは、MacOSマシンにも影響を与える**ことに注意してください。したがって、以下を参照してください:
 
 {% content-ref url="../../linux-hardening/privilege-escalation/" %}
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
@@ -32,9 +34,9 @@ TCC権限昇格を探している場合は、以下をご覧ください：
 
 ### Sudo Hijacking
 
-元の[Sudo Hijacking技術はLinux権限昇格の投稿の中にあります](../../linux-hardening/privilege-escalation/#sudo-hijacking)。
+元の[Sudo HijackingテクニックはLinux権限昇格の投稿の中にあります](../../linux-hardening/privilege-escalation/#sudo-hijacking)。
 
-しかし、macOSはユーザーが**`sudo`**を実行するときに**`PATH`**を**維持**します。これは、被害者が**sudoを実行するときに**他のバイナリを**ハイジャックする**という別の方法でこの攻撃を達成できることを意味します：
+しかし、macOSはユーザーが**`sudo`**を実行するときに**`PATH`**を**維持**します。つまり、この攻撃を達成する別の方法は、被害者が**sudoを実行するときに実行する他のバイナリをハイジャックする**ことです。
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -53,13 +55,13 @@ sudo ls
 
 ### Dock のなりすまし
 
-**ソーシャルエンジニアリング**を使用して、たとえばドック内のGoogle Chromeを**なりすまし**、実際には自分のスクリプトを実行することができます：
+**ソーシャルエンジニアリング**を使用して、たとえばドック内の Google Chrome を**なりすまし**、実際には自分のスクリプトを実行することができます：
 
 {% tabs %}
 {% tab title="Chrome のなりすまし" %}
 いくつかの提案：
 
-* DockでChromeがあるかを確認し、その場合はそのエントリを**削除**し、Dockの配列の同じ位置に**偽の** **Chromeエントリを追加**します。
+* Dock で Chrome があるかを確認し、その場合はそのエントリを**削除**し、Dock 配列の同じ位置に**偽の** **Chrome エントリを追加**します。
 ```bash
 #!/bin/sh
 
@@ -131,14 +133,14 @@ killall Dock
 ```
 {% endtab %}
 
-{% tab title="Finderの偽装" %}
+{% tab title="Finderのなりすまし" %}
 いくつかの提案:
 
 * **DockからFinderを削除することはできません**ので、Dockに追加する場合は、偽のFinderを本物の隣に置くことができます。これには、**Dock配列の始めに偽のFinderエントリを追加する必要があります**。
 * 別の選択肢として、Dockに置かずに開くだけでも、「FinderがFinderの制御を求めている」はそれほど奇妙ではありません。
-* パスワードを聞かずにrootに**昇格する**別の方法は、Finderに本当にパスワードを求めて特権アクションを実行させることです:
-* Finderに**`/etc/pam.d`** に新しい **`sudo`** ファイルをコピーさせるように依頼します（パスワードを求めるプロンプトは「Finderがsudoのコピーを望んでいる」と表示されます）
-* Finderに新しい**Authorization Plugin**をコピーさせるように依頼します（ファイル名を制御できるので、パスワードを求めるプロンプトは「FinderがFinder.bundleのコピーを望んでいる」と表示されます）
+* パスワードを聞かずにrootに**昇格する**別の方法は、Finderに実際にパスワードを求めて特権アクションを実行させることです:
+* Finderに**`/etc/pam.d`** に新しい **`sudo`** ファイルをコピーさせる（パスワードを求めるプロンプトは「Finderがsudoのコピーを望んでいる」と表示されます）
+* Finderに新しい**Authorization Plugin**をコピーさせる（ファイル名を制御できるので、パスワードを求めるプロンプトは「FinderがFinder.bundleのコピーを望んでいる」と表示されます）
 ```bash
 #!/bin/sh
 
@@ -216,7 +218,7 @@ killall Dock
 ### CVE-2020-9771 - mount\_apfs TCCバイパスと権限昇格
 
 **任意のユーザー**（権限のないユーザーも含む）は、タイムマシンのスナップショットを作成し、マウントして、そのスナップショットの**すべてのファイルにアクセス**することができます。
-**唯一必要な権限**は、使用されるアプリケーション（`Terminal`など）が**フルディスクアクセス**（FDA）権限（`kTCCServiceSystemPolicyAllfiles`）を持っていることで、これは管理者によって付与される必要があります。
+**唯一必要な権限**は、使用されるアプリケーション（例えば`Terminal`）が**フルディスクアクセス**（FDA）権限（`kTCCServiceSystemPolicyAllfiles`）を持っていることで、これは管理者によって付与される必要があります。
 
 {% code overflow="wrap" %}
 ```bash
@@ -253,13 +255,15 @@ ls /tmp/snap/Users/admin_user # This will work
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローに学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksにあなたの会社を広告したいですか？** または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**にフォローしてください。**
-* **ハッキングのコツを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) と [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+HackTricksをサポートする他の方法：
+
+* **HackTricksにあなたの**会社を広告したい**、または**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローしてください。**
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有してください。**
 
 </details>
 ```

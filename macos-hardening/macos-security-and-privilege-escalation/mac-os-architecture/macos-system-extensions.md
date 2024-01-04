@@ -1,82 +1,89 @@
-# macOSシステム拡張
+# macOS システム拡張
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-## システム拡張/エンドポイントセキュリティフレームワーク
+## システム拡張 / エンドポイントセキュリティフレームワーク
 
-カーネル拡張とは異なり、**システム拡張はカーネルスペースではなくユーザースペースで実行**されるため、拡張機能の不具合によるシステムクラッシュのリスクが低減されます。
+カーネル拡張とは異なり、**システム拡張はユーザースペースで実行されます**。これにより、拡張の不具合によるシステムクラッシュのリスクが低減されます。
 
 <figure><img src="../../../.gitbook/assets/image (1) (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-システム拡張には、**DriverKit**拡張、**Network**拡張、および**Endpoint Security**拡張の3つのタイプがあります。
+システム拡張には3種類あります：**DriverKit** 拡張、**ネットワーク** 拡張、および **エンドポイントセキュリティ** 拡張。
 
-### **DriverKit拡張**
+### **DriverKit 拡張**
 
-DriverKitは、**ハードウェアサポートを提供する**カーネル拡張の代替です。これにより、デバイスドライバ（USB、シリアル、NIC、HIDドライバなど）がカーネルスペースではなくユーザースペースで実行されるようになります。DriverKitフレームワークには、特定のI/O Kitクラスのユーザースペースバージョンが含まれており、カーネルは通常のI/O Kitイベントをユーザースペースに転送することで、これらのドライバが実行される安全な環境を提供します。
+DriverKitは、**ハードウェアサポートを提供する**カーネル拡張の代替品です。これにより、デバイスドライバー（USB、シリアル、NIC、HIDドライバーなど）がカーネルスペースではなくユーザースペースで実行できます。DriverKitフレームワークには、特定のI/O Kitクラスの**ユーザースペースバージョン**が含まれており、カーネルは通常のI/O Kitイベントをユーザースペースに転送し、これらのドライバーがより安全な環境で実行されるようにします。
 
-### **Network拡張**
+### **ネットワーク拡張**
 
-Network拡張は、ネットワークの動作をカスタマイズする機能を提供します。いくつかのタイプのNetwork拡張があります。
+ネットワーク拡張は、ネットワークの動作をカスタマイズする機能を提供します。ネットワーク拡張にはいくつかのタイプがあります：
 
-* **App Proxy**: これは、接続（またはフロー）単位ではなく個々のパケットに基づいてネットワークトラフィックを処理する、フロー指向のカスタムVPNプロトコルを実装するVPNクライアントの作成に使用されます。
-* **Packet Tunnel**: これは、個々のパケットに基づいてネットワークトラフィックを処理するパケット指向のカスタムVPNプロトコルを実装するVPNクライアントの作成に使用されます。
-* **Filter Data**: これは、ネットワークデータをフローレベルで監視または変更するために使用されます。
-* **Filter Packet**: これは、個々のネットワークパケットをフィルタリングするために使用されます。ネットワークデータをパケットレベルで監視または変更することができます。
-* **DNS Proxy**: これは、カスタムDNSプロバイダを作成するために使用されます。DNSリクエストとレスポンスを監視または変更するために使用できます。
+* **アプリプロキシ**: これは、フロー指向のカスタムVPNプロトコルを実装するVPNクライアントを作成するために使用されます。つまり、個々のパケットではなく接続（またはフロー）に基づいてネットワークトラフィックを処理します。
+* **パケットトンネル**: これは、パケット指向のカスタムVPNプロトコルを実装するVPNクライアントを作成するために使用されます。つまり、個々のパケットに基づいてネットワークトラフィックを処理します。
+* **フィルタデータ**: これは、ネットワーク「フロー」をフィルタリングするために使用されます。フローレベルでネットワークデータを監視または変更することができます。
+* **フィルタパケット**: これは、個々のネットワークパケットをフィルタリングするために使用されます。パケットレベルでネットワークデータを監視または変更することができます。
+* **DNSプロキシ**: これは、カスタムDNSプロバイダーを作成するために使用されます。DNSリクエストとレスポンスを監視または変更するために使用できます。
 
 ## エンドポイントセキュリティフレームワーク
 
-エンドポイントセキュリティは、AppleがmacOSで提供するフレームワークで、システムセキュリティのための一連のAPIを提供します。これは、悪意のある活動を特定し、防御するために、**セキュリティベンダーや開発者がシステムの活動を監視および制御するための製品を構築するために使用されます**。
+エンドポイントセキュリティは、macOSでAppleが提供するフレームワークであり、システムセキュリティのためのAPIセットを提供します。これは、**セキュリティベンダーや開発者がシステム活動を監視および制御し、悪意のある活動を特定して防御する製品を構築するために使用されることを意図しています**。
 
-このフレームワークは、プロセスの実行、ファイルシステムイベント、ネットワークおよびカーネルイベントなど、**システムの活動を監視および制御するためのAPIのコレクション**を提供します。
+このフレームワークは、プロセスの実行、ファイルシステムイベント、ネットワークおよびカーネルイベントなどの**システム活動を監視および制御するAPIのコレクションを提供します**。
 
-このフレームワークのコアは、カーネル内に実装されたカーネル拡張（KEXT）である**`/System/Library/Extensions/EndpointSecurity.kext`**によって実現されています。このKEXTは、いくつかの主要なコンポーネントで構成されています。
+このフレームワークのコアはカーネルに実装されており、**`/System/Library/Extensions/EndpointSecurity.kext`** にあるカーネル拡張（KEXT）です。このKEXTはいくつかの重要なコンポーネントで構成されています：
 
-* **EndpointSecurityDriver**: これはカーネル拡張の「エントリーポイント」として機能します。これはOSとEndpoint Securityフレームワークの間の主な相互作用ポイントです。
+* **EndpointSecurityDriver**: これはカーネル拡張の「エントリポイント」として機能します。OSとエンドポイントセキュリティフレームワークとの間の主要な相互作用ポイントです。
 * **EndpointSecurityEventManager**: このコンポーネントはカーネルフックの実装を担当します。カーネルフックにより、フレームワークはシステムコールを傍受することでシステムイベントを監視できます。
-* **EndpointSecurityClientManager**: これはユーザースペースクライアントとの通信を管理し、接続してイベント通知を受け取る必要があるクライアントを追跡します。
-* **EndpointSecurityMessageManager**: これはユーザースペースクライアントにメッセージとイベント通知を送信します。
+* **EndpointSecurityClientManager**: これはユーザースペースクライアントとの通信を管理し、イベント通知を受け取る必要がある接続されているクライアントを追跡します。
+* **EndpointSecurityMessageManager**: これはメッセージとイベント通知をユーザースペースクライアントに送信します。
 
-Endpoint Securityフレームワークが監視できるイベントは、次のカテゴリに分類されます。
+エンドポイントセキュリティフレームワークが監視できるイベントは以下のカテゴリに分類されます：
 
 * ファイルイベント
 * プロセスイベント
 * ソケットイベント
-* カーネルイベント（カーネル拡張の読み込み/アンロードやI/O Kitデバイスのオープンなど）
+* カーネルイベント（カーネル拡張のロード/アンロードやI/O Kitデバイスのオープンなど）
 
-### エンドポイントセキュリティフレームワークのアーキテクチャ
+### エンドポイントセキュリティフレームワークアーキテクチャ
 
 <figure><img src="../../../.gitbook/assets/image (3) (8).png" alt=""><figcaption></figcaption></figure>
 
-エンドポイントセキュリティフレームワークとの**ユーザースペース間の通信**は、IOUserClientクラスを介して行われます。呼び出し元のタイプに応じて、2つの異なるサブクラスが使用されます。
+エンドポイントセキュリティフレームワークとの**ユーザースペース通信**はIOUserClientクラスを通じて行われます。呼び出し元のタイプに応じて、2つの異なるサブクラスが使用されます：
 
-* **EndpointSecurityDriverClient**: これには`com.apple.private.endpoint-security.manager`の権限が必要で、これはシステムプロセス`endpointsecurityd`のみが保持しています。
-* **EndpointSecurityExternalClient**: これには`com.apple.developer.endpoint-security.client`の権限が必要です。これは通常、Endpoint Securityフレームワークと対話する必要があるサードパーティのセキュリティソフトウェアによって使用されます。
+* **EndpointSecurityDriverClient**: これには`com.apple.private.endpoint-security.manager`権限が必要で、これはシステムプロセス`endpointsecurityd`のみが保持しています。
+* **EndpointSecurityExternalClient**: これには`com.apple.developer.endpoint-security.client`権限が必要です。これは通常、エンドポイントセキュリティフレームワークと対話する必要があるサードパーティのセキュリティソフトウェアによって使用されます。
 
-エンドポイントセキュリティ拡張機能で使用される**`libEndpointSecurity.dylib`**は、システム拡張機能がカーネルと通信するために使用する
-## ESFのバイパス
+エンドポイントセキュリティ拡張：**`libEndpointSecurity.dylib`** は、システム拡張がカーネルと通信するために使用するCライブラリです。このライブラリはI/O Kit（`IOKit`）を使用してエンドポイントセキュリティKEXTと通信します。
 
-ESFは、レッドチームメンバーを検出しようとするセキュリティツールによって使用されるため、これを回避する方法に関する情報は興味深いです。
+**`endpointsecurityd`** は、特にブートプロセスの初期段階でエンドポイントセキュリティシステム拡張の管理と起動に関与する重要なシステムデーモンです。**システム拡張**のみが、その`Info.plist`ファイルに**`NSEndpointSecurityEarlyBoot`** とマークされている場合、この初期ブート処理を受けます。
+
+別のシステムデーモンである**`sysextd`**は、システム拡張を検証し、適切なシステムロケーションに移動します。その後、関連するデーモンに拡張機能のロードを依頼します。**`SystemExtensions.framework`** は、システム拡張のアクティベーションと非アクティベーションを担当します。
+
+## ESFをバイパスする
+
+ESFは、レッドチームを検出しようとするセキュリティツールによって使用されます。したがって、これを回避する方法に関する情報は興味深いものです。
 
 ### CVE-2021-30965
 
-問題は、セキュリティアプリケーションが**フルディスクアクセス権限**を持っている必要があることです。したがって、攻撃者がそれを削除できれば、ソフトウェアの実行を防ぐことができます。
+セキュリティアプリケーションは**フルディスクアクセス権限**を持っている必要があります。したがって、攻撃者がそれを削除できれば、ソフトウェアの実行を防ぐことができます。
 ```bash
 tccutil reset All
 ```
-**詳細情報**については、トーク[#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)を参照してください。
+このバイパスと関連する情報については、[#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)のトークをご覧ください。
 
-最終的には、新しい権限**`kTCCServiceEndpointSecurityClient`**を**`tccd`**が管理するセキュリティアプリに与えることで、`tccutil`がアプリの権限をクリアすることを防ぎ、実行を妨げるように修正されました。
+最終的には、新しい権限**`kTCCServiceEndpointSecurityClient`**をセキュリティアプリに与え、**`tccd`**によって管理されることで、`tccutil`がその権限をクリアして実行を防ぐことがないように修正されました。
 
 ## 参考文献
 
@@ -85,12 +92,14 @@ tccutil reset All
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSのハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの**会社を広告したい、または**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

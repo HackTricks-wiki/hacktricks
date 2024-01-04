@@ -1,28 +1,30 @@
-# macOSネットワークサービスとプロトコル
+# macOS ネットワークサービスとプロトコル
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 ## リモートアクセスサービス
 
-これらはmacOSのリモートアクセスに使用される一般的なサービスです。\
-これらのサービスは「システム環境設定」→「共有」で有効/無効にできます。
+これらはmacOSをリモートでアクセスするための一般的なサービスです。\
+これらのサービスは `システム設定` --> `共有` で有効/無効にできます。
 
-* **VNC**（tcp:5900）として知られる「スクリーン共有」
-* **SSH**（tcp:22）として呼ばれる「リモートログイン」
-* **Apple Remote Desktop**（ARD）または「リモート管理」（tcp:3283、tcp:5900）
-* **AppleEvent**（tcp:3031）として知られる「リモートAppleイベント」
+* **VNC**、「スクリーン共有」として知られています (tcp:5900)
+* **SSH**、「リモートログイン」と呼ばれます (tcp:22)
+* **Apple Remote Desktop** (ARD)、または「リモート管理」として知られています (tcp:3283, tcp:5900)
+* **AppleEvent**、「リモートAppleイベント」として知られています (tcp:3031)
 
-有効になっているかどうかを確認するには、次を実行してください：
+以下のコマンドを実行して、有効になっているかどうかを確認します：
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -32,17 +34,17 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-### Pentesting ARD
+### ARDのペネトレーションテスト
 
-（この部分は[**このブログ記事**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)から引用されました）
+（この部分は[**このブログ投稿から取られました**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)）
 
-ARDは、いくつかの**追加のmacOS固有の機能**を備えた、実質的には改変された[VNC](https://en.wikipedia.org/wiki/Virtual\_Network\_Computing)です。\
-ただし、**Screen Sharingオプション**は単なる**基本的なVNCサーバー**です。また、高度なARDまたはリモート管理オプションもあり、ARDを**VNCクライアントと互換性のあるものにするために制御画面のパスワードを設定**することができます。ただし、この認証方法には弱点があり、この**パスワード**は**8文字の認証バッファ**に制限されているため、[Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html)や[GoRedShell](https://github.com/ahhh/GoRedShell/)などのツールを使用して非常に簡単に**ブルートフォース攻撃**を行うことができます（デフォルトでは**レート制限はありません**）。\
-**Screen Sharing**またはリモート管理の**脆弱なインスタンス**を特定するには、`vnc-info`スクリプトを使用して**nmap**を実行し、サービスが`VNC Authentication (2)`をサポートしている場合、おそらく**ブルートフォース攻撃の脆弱性**があります。サービスは、ワイヤ上で送信されるすべてのパスワードを8文字に切り詰めるため、VNC認証を「password」と設定した場合、「passwords」と「password123」の両方が認証されます。
+基本的には、**macOS固有の機能**をいくつか追加した[VNC](https://en.wikipedia.org/wiki/Virtual\_Network\_Computing)の変形版です。\
+しかし、**スクリーン共有オプション**は、ただの**基本的なVNC**サーバーです。また、ARDまたはリモート管理オプションには、**コントロールスクリーンのパスワードを設定する**高度な機能があり、これによりARDは**VNCクライアントとの互換性**を持ちます。ただし、この認証方法には、**パスワード**を**8文字の認証バッファ**に**制限する**弱点があり、[Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html)や[GoRedShell](https://github.com/ahhh/GoRedShell/)のようなツールを使用して非常に簡単に**ブルートフォース**することができます（デフォルトでは**レート制限もありません**）。\
+**nmap**を使用して**脆弱なスクリーン共有**またはリモート管理のインスタンスを特定できます。スクリプト`vnc-info`を使用し、サービスが`VNC Authentication (2)`をサポートしている場合、彼らは**ブルートフォースに対して脆弱**である可能性が高いです。サービスは、ワイヤー上で送信されるすべてのパスワードを8文字に切り詰めるため、VNC認証を「password」と設定した場合、「passwords」と「password123」の両方が認証されます。
 
-<figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (9) (3).png" alt=""><figcaption></figcaption></figure>
 
-特権のエスカレーション（TCCプロンプトの受け入れ）、GUIでのアクセス、ユーザーの監視を有効にするには、次のコマンドを使用して有効にすることができます：
+特権を昇格させる（TCCプロンプトを受け入れる）、GUIでアクセスする、またはユーザーを監視するために有効にしたい場合は、以下の方法で可能です：
 
 {% code overflow="wrap" %}
 ```bash
@@ -50,29 +52,29 @@ sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resourc
 ```
 {% endcode %}
 
-ユーザーの監視からデスクトップの完全な制御まで、**観察モード**、**共有制御**、**フル制御**の間を切り替えることができます。さらに、ARDセッションにアクセスできた場合、そのセッションはセッションが終了するまで開いたままになります。セッション中にユーザーのパスワードが変更されても同様です。
+**観察**モード、**共有コントロール**、**フルコントロール**の間を切り替えることができ、ユーザーを監視することから、ボタン一つでデスクトップを乗っ取ることまで可能です。さらに、ARDセッションにアクセスできた場合、そのセッションは終了するまで開いたままであり、セッション中にユーザーのパスワードが変更されたとしても継続します。
 
-また、ARDを介して**直接UNIXコマンドを送信**することもできます。管理者ユーザーの場合、rootユーザーを指定してrootとして実行することもできます。さらに、このUNIXコマンドの方法を使用して、特定の時間にリモートタスクをスケジュールすることもできますが、これは指定された時間にネットワーク接続として発生します（対象サーバーに保存され、実行されるのではなく）。最後に、リモートスポットライトは私のお気に入りの機能の1つです。これは本当に素晴らしいもので、低負荷でインデックス付けされた検索を迅速かつリモートで実行できます。これは、クイックで、複数のマシンで同時に検索を実行できるため、機密ファイルの検索には最適であり、CPUの使用率が急上昇することはありません。
+また、ARDを介して**直接Unixコマンドを送信**することもでき、管理ユーザーであればrootユーザーとして実行するための指定も可能です。このUnixコマンドメソッドを使用して、特定の時間にリモートタスクを実行するようスケジュールすることもできますが、これは指定された時間にネットワーク接続として発生します（ターゲットサーバーに保存されて実行されるのではありません）。最後に、リモートSpotlightは私のお気に入りの機能の一つです。インデックス付きの検索を迅速かつリモートで実行できるため、非常に便利です。これは、検索を複数のマシンで同時に実行でき、CPUの使用率を上げることなく、機密ファイルを素早く検索するのに最適です。
 
 ## Bonjourプロトコル
 
-**Bonjour**は、同じネットワークにあるコンピュータやデバイスが他のコンピュータやデバイスが提供するサービスについて学ぶことができるようにする、Appleが設計した技術です。Bonjour対応のデバイスは、TCP/IPネットワークに接続されると、IPアドレスを選択し、そのネットワーク上の他のコンピュータに提供するサービスを知らせることができます。Bonjourは、Rendezvous、Zero Configuration、またはZeroconfとも呼ばれることがあります。\
-BonjourなどのZero Configuration Networkingは、次の機能を提供します。
+**Bonjour**は、同じネットワーク上にあるコンピューターや**デバイスが他のコンピューターやデバイスが提供するサービスを認識する**ことを可能にするAppleが設計した技術です。Bonjour対応デバイスはTCP/IPネットワークに接続するだけで**IPアドレスを取得**し、そのネットワーク上の他のコンピューターに**提供するサービスを認識させる**ように設計されています。Bonjourは、Rendezvous、**ゼロコンフィギュレーション**、またはZeroconfとしても知られています。\
+ゼロコンフィギュレーションネットワーキング、Bonjourが提供するものは以下の通りです：
 
-* DHCPサーバーがなくても**IPアドレスを取得**できる必要があります。
-* DNSサーバーがなくても**名前からアドレスへの変換**を行う必要があります。
-* ネットワーク上のサービスを**検出**できる必要があります。
+* DHCPサーバーがなくても**IPアドレスを取得**できる必要があります
+* DNSサーバーがなくても**名前からアドレスへの変換**ができる必要があります
+* ネットワーク上の**サービスを発見**できる必要があります
 
-デバイスは、**169.254/16の範囲のIPアドレス**を取得し、他のデバイスがそのIPアドレスを使用していないかどうかを確認します。使用されていない場合、IPアドレスを保持します。Macは、このサブネットのルーティングテーブルにエントリを保持します：`netstat -rn | grep 169`
+デバイスは**169.254/16の範囲でIPアドレスを取得**し、他のデバイスがそのIPアドレスを使用していないかを確認します。使用されていなければ、そのIPアドレスを保持します。Macはこのサブネットのためにルーティングテーブルにエントリを保持しています：`netstat -rn | grep 169`
 
-DNSでは、**マルチキャストDNS（mDNS）プロトコル**が使用されます。[**mDNS** **services**はポート**5353/UDP**でリッスンします](../../network-services-pentesting/5353-udp-multicast-dns-mdns.md)。通常のDNSクエリを使用し、リクエストを単一のIPアドレスに送信する代わりに、マルチキャストアドレス224.0.0.251に送信します。これらのリクエストを受信する任意のマシンは応答し、通常はマルチキャストアドレスに応答するため、すべてのデバイスがテーブルを更新できます。\
-各デバイスは、ネットワークにアクセスする際に独自の名前を選択します。デバイスは、ホスト名または完全にランダムな名前に基づく名前を**.localで終わる名前**を選択します。
+DNSには**マルチキャストDNS（mDNS）プロトコルが使用されます**。[**mDNS** **サービス**はポート**5353/UDP**でリッスン](../../network-services-pentesting/5353-udp-multicast-dns-mdns.md)し、**通常のDNSクエリ**を使用し、リクエストを単一のIPアドレスに送信する代わりに**マルチキャストアドレス224.0.0.251**を使用します。これらのリクエストをリッスンしているマシンは通常、マルチキャストアドレスに応答するため、すべてのデバイスがテーブルを更新できます。\
+各デバイスはネットワークにアクセスする際に**自分の名前を選択**します。デバイスは、ホスト名に基づいているか完全にランダムなものかもしれませんが、**.localで終わる名前**を選びます。
 
-**サービスの検出にはDNS Service Discovery（DNS-SD）**が使用されます。
+**サービスの発見にはDNSサービスディスカバリー（DNS-SD）**が使用されます。
 
-Zero Configuration Networkingの最後の要件は、**DNS Service Discovery（DNS-SD）**によって満たされます。DNS Service Discoveryは、DNS SRVレコードの構文を使用しますが、特定のサービスを提供する複数のホストがある場合に複数の結果を返すためにDNS PTRレコードを使用します。クライアントは、`<Service>.<Domain>`の名前のPTRルックアップを要求し、`<Instance>.<Service>.<Domain>`の形式のゼロ個以上のPTRレコードのリストを**受け取ります**。
+ゼロコンフィギュレーションネットワーキングの最終要件は、**DNSサービスディスカバリー（DNS-SD）**によって満たされます。DNSサービスディスカバリーはDNS SRVレコードの構文を使用しますが、複数の結果を返すことができるように**DNS PTRレコードを使用します**。クライアントは`<Service>.<Domain>`の名前に対するPTRルックアップを要求し、0個以上のPTRレコードの形式`<Instance>.<Service>.<Domain>`の**リストを受け取ります**。
 
-`dns-sd`バイナリを使用して、サービスの**広告を表示**し、サービスの**検索を実行**できます。
+`dns-sd`バイナリは、**サービスの広告とサービスのルックアップの実行**に使用できます：
 ```bash
 #Search ssh services
 dns-sd -B _ssh._tcp
@@ -93,10 +95,10 @@ dns-sd -R "Index" _http._tcp . 80 path=/index.html
 #Search HTTP services
 dns-sd -B _http._tcp
 ```
-新しいサービスが開始されると、**新しいサービスはサブネット上のすべての人にその存在をマルチキャストします**。リスナーは尋ねる必要はありませんでした。ただリスニングするだけでした。
+新しいサービスが開始されると、**新しいサービスはその存在をサブネット上の全員にマルチキャストします**。リスナーは尋ねる必要はありませんでした。ただ聞いているだけでした。
 
-[**このツール**](https://apps.apple.com/us/app/discovery-dns-sd-browser/id1381004916?mt=12)を使用して、現在のローカルネットワークで**提供されているサービス**を確認できます。\
-または、[**python-zeroconf**](https://github.com/jstasiak/python-zeroconf)を使用して、Pythonで独自のスクリプトを作成することもできます。
+現在のローカルネットワークで**提供されているサービス**を見るには、[**このツール**](https://apps.apple.com/us/app/discovery-dns-sd-browser/id1381004916?mt=12)を使用できます。\
+または、[**python-zeroconf**](https://github.com/jstasiak/python-zeroconf)を使って自分のpythonスクリプトを書くこともできます：
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
@@ -119,7 +121,7 @@ input("Press enter to exit...\n\n")
 finally:
 zeroconf.close()
 ```
-もしBonjourがより安全であると感じるなら、**無効化**することもできます。以下の手順で行います:
+Bonjourが**無効**になっている方がより安全だと感じる場合は、次の操作で無効にできます:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
@@ -131,12 +133,14 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

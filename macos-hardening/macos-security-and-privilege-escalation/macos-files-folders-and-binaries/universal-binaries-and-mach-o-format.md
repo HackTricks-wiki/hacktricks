@@ -1,22 +1,24 @@
-# macOSのユニバーサルバイナリとMach-Oフォーマット
+# macOS ユニバーサルバイナリ & Mach-O フォーマット
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWS ハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または **HackTricksをPDFでダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や [**テレグラムグループ**](https://t.me/peass)に**参加する**、または **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
 ## 基本情報
 
-Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコンパイルされます。**ユニバーサルバイナリ**は、**同じファイル内で複数のアーキテクチャをサポート**することができます。
+Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコンパイルされます。**ユニバーサルバイナリ**は、同じファイルで**複数のアーキテクチャをサポート**できます。
 
-これらのバイナリは、基本的には**Mach-O構造**に従います。
+これらのバイナリは、基本的に以下の構成要素からなる**Mach-O構造**に従います：
 
 * ヘッダー
 * ロードコマンド
@@ -24,38 +26,38 @@ Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコ�
 
 ![](<../../../.gitbook/assets/image (559).png>)
 
-## Fatヘッダー
+## Fat ヘッダー
 
-次のコマンドでファイルを検索します：`mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+ファイルを検索するには：`mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
 <pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
 </strong>
 struct fat_header {
-<strong>	uint32_t	magic;		/* FAT_MAGIC or FAT_MAGIC_64 */
-</strong><strong>	uint32_t	nfat_arch;	/* 後に続く構造体の数 */
+<strong>	uint32_t	magic;		/* FAT_MAGIC または FAT_MAGIC_64 */
+</strong><strong>	uint32_t	nfat_arch;	/* 続く構造体の数 */
 </strong>};
 
 struct fat_arch {
-cpu_type_t	cputype;	/* CPUの指定子（int） */
-cpu_subtype_t	cpusubtype;	/* マシンの指定子（int） */
+cpu_type_t	cputype;	/* CPUの指定子 (int) */
+cpu_subtype_t	cpusubtype;	/* マシンの指定子 (int) */
 uint32_t	offset;		/* このオブジェクトファイルへのファイルオフセット */
 uint32_t	size;		/* このオブジェクトファイルのサイズ */
-uint32_t	align;		/* 2の累乗としてのアライメント */
+uint32_t	align;		/* 2のべき乗としてのアライメント */
 };
 </code></pre>
 
-ヘッダーには**マジック**バイトが続き、ファイルが含む**アーキテクチャ**の数（`nfat_arch`）と、各アーキテクチャには`fat_arch`構造体があります。
+ヘッダーには**マジックバイト**が続き、ファイルが**含むアーキテクチャの数**(`nfat_arch`)があり、各アーキテクチャには`fat_arch`構造体があります。
 
-次のコマンドで確認します：
+以下で確認できます：
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
-/bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
-/bin/ls (for architecture x86_64):	Mach-O 64-bit executable x86_64
-/bin/ls (for architecture arm64e):	Mach-O 64-bit executable arm64e
+/bin/ls: Mach-O ユニバーサルバイナリで、2つのアーキテクチャがあります: [x86_64:Mach-O 64ビット実行可能ファイル x86_64] [arm64e:Mach-O 64ビット実行可能ファイル arm64e]
+/bin/ls (for architecture x86_64):	Mach-O 64ビット実行可能ファイル x86_64
+/bin/ls (for architecture arm64e):	Mach-O 64ビット実行可能ファイル arm64e
 
 % otool -f -v /bin/ls
-Fat headers
+Fat ヘッダー
 fat_magic FAT_MAGIC
 <strong>nfat_arch 2
 </strong><strong>architecture x86_64
@@ -74,15 +76,15 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 </strong>    align 2^14 (16384)
 </code></pre>
 
-または[Mach-O View](https://sourceforge.net/projects/machoview/)ツールを使用することもできます：
+または [Mach-O View](https://sourceforge.net/projects/machoview/) ツールを使用して：
 
 <figure><img src="../../../.gitbook/assets/image (5) (1) (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-通常、2つのアーキテクチャ用にコンパイルされたユニバーサルバイナリは、1つのアーキテクチャ用にコンパイルされたものの**サイズが2倍**になります。
+お考えの通り、通常、2つのアーキテクチャ用にコンパイルされたユニバーサルバイナリは、1つのアーキテクチャ用にコンパイルされたものの**サイズが2倍**になります。
 
-## **Mach-Oヘッダー**
+## **Mach-O ヘッダー**
 
-ヘッダーには、ファイルを識別するためのマジックバイトや、ターゲットアーキテクチャに関する情報など、ファイルに関する基本情報が含まれています。次のコマンドで確認できます：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+ヘッダーには、ファイルをMach-Oファイルとして識別するためのマジックバイトや、ターゲットアーキテクチャに関する情報など、ファイルに関する基本情報が含まれています。ここで見つけることができます：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -111,9 +113,9 @@ uint32_t	reserved;	/* reserved */
 ```
 **ファイルタイプ**:
 
-* MH\_EXECUTE (0x2): 標準のMach-O実行可能ファイル
-* MH\_DYLIB (0x6): Mach-Oダイナミックリンクライブラリ（.dylib）
-* MH\_BUNDLE (0x8): Mach-Oバンドル（.bundle）
+* MH\_EXECUTE (0x2): 標準のMach-O実行ファイル
+* MH\_DYLIB (0x6): Mach-O動的リンクライブラリ（例：.dylib）
+* MH\_BUNDLE (0x8): Mach-Oバンドル（例：.bundle）
 ```bash
 # Checking the mac header of a binary
 otool -arch arm64e -hv /bin/ls
@@ -121,50 +123,50 @@ Mach header
 magic  cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
 MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DYLDLINK TWOLEVEL PIE
 ```
-または、[Mach-O View](https://sourceforge.net/projects/machoview/)を使用する方法もあります：
+または、[Mach-O View](https://sourceforge.net/projects/machoview/)を使用してください：
 
 <figure><img src="../../../.gitbook/assets/image (4) (1) (4).png" alt=""><figcaption></figcaption></figure>
 
 ## **Mach-O ロードコマンド**
 
-これは、ファイルのメモリ内の**レイアウト**を指定します。これには、シンボルテーブルの場所、実行の開始時のメインスレッドのコンテキスト、および必要な**共有ライブラリ**が含まれています。\
-これらのコマンドは基本的に、動的ローダー**(dyld)がバイナリをメモリにロードする方法を指示します。**
+これは**メモリ内のファイルのレイアウト**を指定します。**シンボルテーブルの位置**、実行開始時のメインスレッドコンテキスト、必要な**共有ライブラリ**が含まれています。
+コマンドは基本的に動的ローダー**（dyld）にバイナリをメモリにロードする方法を指示します。**
 
-ロードコマンドはすべて、以前に言及した**`loader.h`**で定義された**load\_command**構造体で始まります。
+ロードコマンドはすべて、前述の**`loader.h`**で定義されている**load\_command**構造体から始まります：
 ```objectivec
 struct load_command {
 uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-約50種類のロードコマンドがあり、システムはそれらを異なる方法で処理します。最も一般的なものは、`LC_SEGMENT_64`、`LC_LOAD_DYLINKER`、`LC_MAIN`、`LC_LOAD_DYLIB`、および`LC_CODE_SIGNATURE`です。
+システムが異なって扱う**約50種類のロードコマンド**があります。最も一般的なものには、`LC_SEGMENT_64`、`LC_LOAD_DYLINKER`、`LC_MAIN`、`LC_LOAD_DYLIB`、および`LC_CODE_SIGNATURE`があります。
 
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-基本的に、このタイプのロードコマンドは、バイナリが実行されるときに、データセクションで示されるオフセットに従って、**\_\_TEXT**（実行可能コード）と**\_\_DATA**（プロセス用のデータ）セグメントをどのようにロードするかを定義します。
+基本的に、このタイプのロードコマンドは、バイナリが実行されたときに**データセクションに示されたオフセットに従って、\_\_TEXT**（実行可能コード）**および\_\_DATA**（プロセスのデータ）**セグメントをロードする方法を定義します**。
 {% endhint %}
 
-これらのコマンドは、プロセスが実行されるときに、仮想メモリ空間にマップされるセグメントを定義します。
+これらのコマンドは、実行されるプロセスの**仮想メモリ空間**に**マップされるセグメントを定義します**。
 
-**\_\_TEXT**セグメントは、プログラムの実行可能コードを保持し、**\_\_DATA**セグメントはプロセスによって使用されるデータを含んでいます。これらのセグメントは、Mach-Oファイルのデータセクションに配置されています。
+**\_\_TEXT** セグメント（プログラムの実行可能コードを保持する）や **\_\_DATA** セグメント（プロセスが使用するデータを含む）など、**異なるタイプのセグメント**があります。これらの**セグメントはMach-Oファイルのデータセクションに位置しています**。
 
-**各セグメント**は、さらに**複数のセクション**に分割することができます。ロードコマンドの構造には、各セグメント内のこれらのセクションに関する情報が含まれています。
+**各セグメント**は、複数の**セクション**にさらに**分割**されることがあります。**ロードコマンド構造**には、それぞれのセグメント内の**これらのセクションに関する情報**が含まれています。
 
-ヘッダーの最初には、**セグメントヘッダー**があります：
+ヘッダーの最初には**セグメントヘッダー**があります：
 
-<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
+<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* 64ビットアーキテクチャ用 */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
-uint32_t	cmdsize;	/* includes sizeof section_64 structs */
-char		segname[16];	/* segment name */
-uint64_t	vmaddr;		/* memory address of this segment */
-uint64_t	vmsize;		/* memory size of this segment */
-uint64_t	fileoff;	/* file offset of this segment */
-uint64_t	filesize;	/* amount to map from the file */
-int32_t		maxprot;	/* maximum VM protection */
-int32_t		initprot;	/* initial VM protection */
-<strong>	uint32_t	nsects;		/* number of sections in segment */
-</strong>	uint32_t	flags;		/* flags */
+uint32_t	cmdsize;	/* section_64構造体のサイズを含む */
+char		segname[16];	/* セグメント名 */
+uint64_t	vmaddr;		/* このセグメントのメモリアドレス */
+uint64_t	vmsize;		/* このセグメントのメモリサイズ */
+uint64_t	fileoff;	/* このセグメントのファイルオフセット */
+uint64_t	filesize;	/* ファイルからマップする量 */
+int32_t		maxprot;	/* 最大VM保護 */
+int32_t		initprot;	/* 初期VM保護 */
+<strong>	uint32_t	nsects;		/* セグメント内のセクション数 */
+</strong>	uint32_t	flags;		/* フラグ */
 };
 </code></pre>
 
@@ -172,7 +174,7 @@ int32_t		initprot;	/* initial VM protection */
 
 <figure><img src="../../../.gitbook/assets/image (2) (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-このヘッダーは、その後に表示されるセクションヘッダーの数を定義しています：
+このヘッダーは、その後に表示される**セクションの数を定義します**：
 ```c
 struct section_64 { /* for 64-bit architectures */
 char		sectname[16];	/* name of this section */
@@ -189,52 +191,52 @@ uint32_t	reserved2;	/* reserved (for count or sizeof) */
 uint32_t	reserved3;	/* reserved */
 };
 ```
-例えば、**セクションヘッダ**の例：
+**セクションヘッダー**の例：
 
 <figure><img src="../../../.gitbook/assets/image (6) (2).png" alt=""><figcaption></figcaption></figure>
 
-もし、**セクションオフセット**（0x37DC）に**アーキテクチャが始まるオフセット**（この場合は`0x18000`）を**追加**すると、`0x37DC + 0x18000 = 0x1B7DC`となります。
+もし**セクションオフセット**（0x37DC）に、この場合は`0x18000`で始まる**アーキテクチャの開始地点**の**オフセット**を**加える**と、`0x37DC + 0x18000 = 0x1B7DC`になります。
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-また、**コマンドライン**からも**ヘッダ情報**を取得することができます。
+また、**コマンドライン**から**ヘッダー情報**を取得することも可能です：
 ```bash
 otool -lv /bin/ls
 ```
-このコマンドによって読み込まれる一般的なセグメントは次のとおりです：
+このcmdによってロードされる一般的なセグメント:
 
-* **`__PAGEZERO`**：カーネルに対して、**アドレスゼロをマップ**するよう指示します。このページは**読み取り、書き込み、実行ができない**ようになっています。構造体内のmaxprotとminprot変数はゼロに設定され、このページには**読み書き実行の権限がない**ことを示しています。
-* この割り当ては、**NULLポインタの逆参照の脆弱性を軽減**するために重要です。
-* **`__TEXT`**：**実行可能なコード**を含み、**読み取り**と**実行**の権限があります（書き込みはありません）。このセグメントの一般的なセクションは次のとおりです：
-* `__text`：コンパイルされたバイナリコード
-* `__const`：定数データ
-* `__cstring`：文字列定数
-* `__stubs`と`__stubs_helper`：ダイナミックライブラリの読み込みプロセス中に関与します。
-* **`__DATA`**：**読み書き可能**なデータを含みます（実行はできません）。
-* `__data`：初期化されたグローバル変数
-* `__bss`：初期化されていない静的変数
-* `__objc_*`（\_\_objc\_classlist、\_\_objc\_protolistなど）：Objective-Cランタイムで使用される情報
-* **`__LINKEDIT`**：リンカ（dyld）のための情報を含みます。「シンボル、文字列、および再配置テーブルエントリ」などです。
-* **`__OBJC`**：Objective-Cランタイムで使用される情報を含みます。ただし、この情報は\_\_DATAセグメント内のさまざまな\_\_objc\_\*セクションにも見つかる場合があります。
+* **`__PAGEZERO`:** カーネルに**アドレスゼロ**を**マップ**するよう指示し、そこからは**読み取り、書き込み、実行ができない**ようにします。構造体内のmaxprotおよびminprot変数は、このページに**読み書き実行権限がない**ことを示すためにゼロに設定されています。
+* この割り当ては、**NULLポインタ参照の脆弱性を軽減する**ために重要です。
+* **`__TEXT`**: **実行可能な** **コード**を含み、**読み取り**と**実行**の権限があります（書き込み不可）。このセグメントの一般的なセクション:
+* `__text`: コンパイルされたバイナリコード
+* `__const`: 定数データ
+* `__cstring`: 文字列定数
+* `__stubs` と `__stubs_helper`: 動的ライブラリのロードプロセスに関与
+* **`__DATA`**: **読み取り可能**かつ**書き込み可能**なデータを含みます（実行不可）。
+* `__data`: 初期化されたグローバル変数
+* `__bss`: 初期化されていない静的変数
+* `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, など): Objective-Cランタイムによって使用される情報
+* **`__LINKEDIT`**: リンカー(dyld)によって使用される情報、例えば "シンボル、文字列、および再配置テーブルエントリ" を含みます。
+* **`__OBJC`**: Objective-Cランタイムによって使用される情報を含みます。この情報は\_\_DATAセグメント内の\_\_objc\_\*セクションにも見られることがあります。
 
 ### **`LC_MAIN`**
 
-**entryoff属性**にエントリーポイントが含まれています。ロード時に、**dyld**はこの値を（メモリ内の）**バイナリのベースに追加**し、バイナリのコードの実行を開始するためにこの命令にジャンプします。
+**entryoff属性**にエントリポイントを含みます。ロード時に、**dyld**はこの値をバイナリの（メモリ内の）**ベースに単純に加算**し、バイナリのコードの実行を開始するためにこの命令に**ジャンプ**します。
 
 ### **LC\_CODE\_SIGNATURE**
 
-Macho-Oファイルの**コード署名に関する情報**が含まれています。これには、**署名ブロブ**を指す**オフセット**のみが含まれます。通常、これはファイルの最後にあります。\
-ただし、このセクションに関する情報は、[**このブログ記事**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)とこの[**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)で見つけることができます。
+Mach-Oファイルの**コード署名**に関する情報を含みます。これには、**署名ブロブ**を**指し示す** **オフセット**のみが含まれています。これは通常、ファイルの最後にあります。
+しかし、このセクションに関する情報は[**このブログ投稿**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)とこの[**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)で見つけることができます。
 
 ### **LC\_LOAD\_DYLINKER**
 
-プロセスのアドレス空間に共有ライブラリをマップする**動的リンカの実行可能ファイルへのパス**が含まれています。**値は常に`/usr/lib/dyld`**に設定されます。重要な点として、macOSではdylibのマッピングは**カーネルモードではなくユーザーモード**で行われることに注意してください。
+プロセスのアドレス空間に共有ライブラリをマップする動的リンカー実行可能ファイルへの**パス**を含みます。**値は常に`/usr/lib/dyld`に設定されています**。macOSでは、dylibのマッピングは**カーネルモードではなくユーザーモード**で行われることに注意が必要です。
 
 ### **`LC_LOAD_DYLIB`**
 
-このロードコマンドは、Mach-Oバイナリが必要とする**動的ライブラリの依存関係**を記述します。Mach-Oバイナリが必要とする**各ライブラリ**に対してLC\_LOAD\_DYLIBロードコマンドがあります。
+このロードコマンドは、**動的** **ライブラリ**の依存関係を記述し、ローダー(dyld)にそのライブラリを**ロードしてリンクする**よう**指示**します。Mach-Oバイナリが必要とするライブラリごとにLC\_LOAD\_DYLIBロードコマンドがあります。
 
-* このロードコマンドは、**`dylib_command`**型の構造体（実際の依存する動的ライブラリを記述するstruct dylibを含む）です。
+* このロードコマンドは、実際の依存する動的ライブラリを記述する構造体dylibを含む**`dylib_command`**型の構造体です。
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -249,9 +251,9 @@ uint32_t current_version;           /* library's current version number */
 uint32_t compatibility_version;     /* library's compatibility vers number*/
 };
 ```
-![](<../../../.gitbook/assets/image (558).png>)
-
-また、次のコマンドラインからもこの情報を取得できます。
+```plaintext
+cliでこの情報を取得することもできます:
+```
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -259,20 +261,20 @@ otool -L /bin/ls
 /usr/lib/libncurses.5.4.dylib (compatibility version 5.4.0, current version 5.4.0)
 /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
-いくつかの潜在的なマルウェア関連のライブラリは次のとおりです：
+潜在的なマルウェア関連ライブラリには以下があります：
 
-* **DiskArbitration**: USBドライブの監視
-* **AVFoundation:** 音声とビデオのキャプチャ
-* **CoreWLAN**: Wifiスキャン。
+* **DiskArbitration**：USBドライブの監視
+* **AVFoundation**：オーディオとビデオのキャプチャ
+* **CoreWLAN**：Wifiスキャン。
 
 {% hint style="info" %}
-Mach-Oバイナリには、**1つ以上のコンストラクタ**が含まれており、これらは**LC\_MAIN**で指定されたアドレスの**前に実行**されます。\
-コンストラクタのオフセットは、**\_\_DATA\_CONST**セグメントの**\_\_mod\_init\_func**セクションに保持されます。
+Mach-Oバイナリには、**LC\_MAIN**で指定されたアドレスの**前に** **実行される**1つまたは**複数の** **コンストラクタ**を含むことができます。
+コンストラクタのオフセットは、**\_\_DATA\_CONST**セグメントの**\_\_mod\_init\_func**セクションに保持されています。
 {% endhint %}
 
 ## **Mach-Oデータ**
 
-ファイルの中心部は、データであり、ロードコマンド領域に配置されたセグメントの数で構成されています。**各セグメントには複数のデータセクションが含まれる**ことがあります。これらのセクションは、特定のタイプのコードまたはデータを含んでいます。
+ファイルの核心は、最終領域であるデータで、ロードコマンド領域にレイアウトされたいくつかのセグメントで構成されています。**各セグメントには複数のデータセクションが含まれる可能性があります**。これらのセクションはそれぞれ、特定のタイプの**コードまたはデータを含んでいます**。
 
 {% hint style="success" %}
 データは基本的に、ロードコマンド**LC\_SEGMENTS\_64**によってロードされるすべての**情報**を含む部分です。
@@ -282,26 +284,28 @@ Mach-Oバイナリには、**1つ以上のコンストラクタ**が含まれて
 
 これには以下が含まれます：
 
-* **関数テーブル**：プログラム関数に関する情報を保持します。
-* **シンボルテーブル**：バイナリで使用される外部関数に関する情報を含みます。
-* 内部関数、変数名なども含まれる場合があります。
+* **関数テーブル**：プログラム関数に関する情報を保持しています。
+* **シンボルテーブル**：バイナリによって使用される外部関数に関する情報を含んでいます。
+* 内部関数や変数名なども含まれる可能性があります。
 
-[Mach-O View](https://sourceforge.net/projects/machoview/)ツールを使用して確認できます：
+これを確認するには、[**Mach-O View**](https://sourceforge.net/projects/machoview/)ツールを使用できます：
 
 <figure><img src="../../../.gitbook/assets/image (2) (1) (4).png" alt=""><figcaption></figcaption></figure>
 
-またはCLIからも確認できます：
+またはCLIから：
 ```bash
 size -m /bin/ls
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

