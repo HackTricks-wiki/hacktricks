@@ -2,43 +2,45 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Información básica
+## Información Básica
 
-XPC, que significa Comunicación entre Procesos de XNU (el kernel utilizado por macOS), es un marco de trabajo para la **comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas de método seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, que permite la **creación de aplicaciones con privilegios separados** donde cada **componente** se ejecuta con **solo los permisos necesarios** para realizar su trabajo, limitando así el daño potencial de un proceso comprometido.
+XPC, que significa XNU (el kernel utilizado por macOS) inter-Process Communication, es un marco de trabajo para la **comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas a métodos seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, permitiendo la **creación de aplicaciones con separación de privilegios** donde cada **componente** funciona con **solo los permisos que necesita** para realizar su trabajo, limitando así el daño potencial de un proceso comprometido.
 
-XPC utiliza una forma de Comunicación entre Procesos (IPC), que es un conjunto de métodos para que los programas diferentes que se ejecutan en el mismo sistema envíen datos de ida y vuelta.
+XPC utiliza una forma de Comunicación Inter-Procesos (IPC), que es un conjunto de métodos para que diferentes programas que se ejecutan en el mismo sistema envíen y reciban datos.
 
-Los principales beneficios de XPC incluyen:
+Los beneficios principales de XPC incluyen:
 
-1. **Seguridad**: Al separar el trabajo en diferentes procesos, cada proceso puede recibir solo los permisos que necesita. Esto significa que incluso si un proceso está comprometido, tiene una capacidad limitada para causar daño.
-2. **Estabilidad**: XPC ayuda a aislar los bloqueos en el componente donde ocurren. Si un proceso se bloquea, se puede reiniciar sin afectar al resto del sistema.
-3. **Rendimiento**: XPC permite una fácil concurrencia, ya que diferentes tareas se pueden ejecutar simultáneamente en diferentes procesos.
+1. **Seguridad**: Al separar el trabajo en diferentes procesos, a cada proceso se le pueden otorgar solo los permisos que necesita. Esto significa que incluso si un proceso está comprometido, tiene una capacidad limitada para causar daño.
+2. **Estabilidad**: XPC ayuda a aislar los fallos al componente donde ocurren. Si un proceso se bloquea, puede reiniciarse sin afectar al resto del sistema.
+3. **Rendimiento**: XPC permite una fácil concurrencia, ya que diferentes tareas pueden ejecutarse simultáneamente en diferentes procesos.
 
-La única **desventaja** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto apenas se nota y los beneficios son mayores.
+El único **inconveniente** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto casi no se nota y los beneficios son mejores.
 
-## Servicios XPC específicos de la aplicación
+## Servicios XPC Específicos de Aplicaciones
 
-Los componentes XPC de una aplicación están **dentro de la propia aplicación**. Por ejemplo, en Safari se pueden encontrar en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y también son **paquetes** con el binario principal dentro de él: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` y un `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+Los componentes XPC de una aplicación están **dentro de la propia aplicación.** Por ejemplo, en Safari puedes encontrarlos en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y son **también paquetes** con el binario principal dentro de él: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` y un `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Como podrás pensar, un **componente XPC tendrá diferentes derechos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) establecido en "True" en su archivo **Info.plist**. En este caso, el servicio XPC se ejecutará en la **misma sesión de seguridad que la aplicación** que lo llamó.
+Como podrías estar pensando, un **componente XPC tendrá diferentes derechos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) establecido en "True" en su archivo **Info.plist**. En este caso, el servicio XPC se ejecutará en la **misma sesión de seguridad que la aplicación** que lo llamó.
 
-Los servicios XPC se **inician** mediante **launchd** cuando es necesario y se **cierran** una vez que todas las tareas están **completas** para liberar recursos del sistema. Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación, lo que reduce el riesgo asociado con posibles vulnerabilidades.
+Los servicios XPC son **iniciados** por **launchd** cuando se requieren y se **cierran** una vez que todas las tareas están **completas** para liberar recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, reduciendo así el riesgo asociado con posibles vulnerabilidades.
 
-## Servicios XPC de todo el sistema
+## Servicios XPC de Ámbito del Sistema
 
-Los servicios XPC de todo el sistema son accesibles para todos los usuarios. Estos servicios, ya sean de tipo launchd o Mach, deben estar **definidos en archivos plist** ubicados en directorios especificados como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** o **`/Library/LaunchAgents`**.
+Los servicios XPC de ámbito del sistema están accesibles para todos los usuarios. Estos servicios, ya sean de tipo launchd o Mach, necesitan estar **definidos en archivos plist** ubicados en directorios especificados como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, o **`/Library/LaunchAgents`**.
 
-Estos archivos plist tendrán una clave llamada **`MachServices`** con el nombre del servicio y una clave llamada **`Program`** con la ruta al binario:
+Estos archivos plist tendrán una clave llamada **`MachServices`** con el nombre del servicio, y una clave llamada **`Program`** con la ruta al binario:
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
@@ -72,15 +74,15 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-Los que están en **`LaunchDameons`** son ejecutados por root. Por lo tanto, si un proceso sin privilegios puede comunicarse con uno de ellos, podría ser capaz de escalar privilegios.
+Los que están en **`LaunchDameons`** son ejecutados por root. Por lo tanto, si un proceso no privilegiado puede comunicarse con uno de estos, podría ser capaz de escalar privilegios.
 
-## Mensajes de eventos XPC
+## Mensajes de Eventos XPC
 
-Las aplicaciones pueden **suscribirse** a diferentes **mensajes de eventos**, lo que les permite ser **iniciadas a pedido** cuando ocurren dichos eventos. La **configuración** de estos servicios se realiza en archivos **plist de launchd**, ubicados en los **mismos directorios que los anteriores** y que contienen una clave adicional **`LaunchEvent`**.
+Las aplicaciones pueden **suscribirse** a diferentes **mensajes** de eventos, lo que les permite ser **iniciadas bajo demanda** cuando ocurren dichos eventos. La **configuración** de estos servicios se realiza en archivos **plist de launchd**, ubicados en **los mismos directorios que los anteriores** y contienen una clave extra **`LaunchEvent`**.
 
-### Verificación del proceso de conexión XPC
+### Verificación del Proceso de Conexión XPC
 
-Cuando un proceso intenta llamar a un método a través de una conexión XPC, el **servicio XPC debe verificar si ese proceso tiene permitido conectarse**. Aquí se muestran las formas comunes de verificar eso y las trampas comunes:
+Cuando un proceso intenta llamar a un método a través de una conexión XPC, el **servicio XPC debería verificar si ese proceso tiene permiso para conectarse**. Aquí están las formas comunes de verificarlo y las trampas comunes:
 
 {% content-ref url="macos-xpc-connecting-process-check/" %}
 [macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
@@ -88,15 +90,15 @@ Cuando un proceso intenta llamar a un método a través de una conexión XPC, el
 
 ## Autorización XPC
 
-Apple también permite que las aplicaciones **configuren algunos derechos y cómo obtenerlos**, por lo que si el proceso que llama los tiene, se le permitiría **llamar a un método** del servicio XPC:
+Apple también permite que las aplicaciones **configuren algunos derechos y cómo obtenerlos** para que, si el proceso que llama los tiene, se le **permita llamar a un método** del servicio XPC:
 
 {% content-ref url="macos-xpc-authorization.md" %}
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
 {% endcontent-ref %}
 
-## Espía XPC
+## Sniffer XPC
 
-Para espiar los mensajes XPC, puedes usar [**xpcspy**](https://github.com/hot3eed/xpcspy) que utiliza **Frida**.
+Para espiar los mensajes XPC podrías usar [**xpcspy**](https://github.com/hot3eed/xpcspy) que utiliza **Frida**.
 ```bash
 # Install
 pip3 install xpcspy
@@ -107,7 +109,7 @@ xpcspy -U -r -W <bundle-id>
 ## Using filters (i: for input, o: for output)
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
-## Ejemplo de código en C para la comunicación XPC
+## Ejemplo de Código C para Comunicación XPC
 
 {% tabs %}
 {% tab title="xpc_server.c" %}
@@ -164,6 +166,8 @@ dispatch_main();
 return 0;
 }
 ```
+{% endtab %}
+
 {% tab title="xpc_client.c" %}
 ```c
 // gcc xpc_client.c -o xpc_client
@@ -193,6 +197,8 @@ dispatch_main();
 return 0;
 }
 ```
+{% endtab %}
+
 {% tab title="xyz.hacktricks.service.plist" %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -214,8 +220,7 @@ return 0;
 </dict>
 </plist>
 ```
-{% endtab %}
-{% endtabs %}
+No hay contenido en inglés proporcionado para traducir al español. Por favor, proporcione el texto en inglés que necesita ser traducido.
 ```bash
 # Compile the server & client
 gcc xpc_server.c -o xpc_server
@@ -235,7 +240,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-## Ejemplo de código de comunicación XPC en Objective-C
+## Ejemplo de Código en Objective-C para Comunicación XPC
 
 {% tabs %}
 {% tab title="oc_xpc_server.m" %}
@@ -288,6 +293,8 @@ listener.delegate = delegate;
 sleep(10); // Fake something is done and then it ends
 }
 ```
+{% endtab %}
+
 {% tab title="oc_xpc_client.m" %}
 ```objectivec
 // gcc -framework Foundation oc_xpc_client.m -o oc_xpc_client
@@ -311,24 +318,9 @@ NSLog(@"Received response: %@", response);
 return 0;
 }
 ```
-{% tab title="xyz.hacktricks.svcoc.plist" %}
-
-# xyz.hacktricks.svcoc.plist
-
-Este archivo de propiedad de la lista de servicios de macOS (plist) se utiliza para definir los servicios que se ejecutan en segundo plano en un sistema macOS. Los servicios se definen utilizando el formato XPC (Interfaz de Comunicación entre Procesos) y se pueden utilizar para la comunicación entre procesos en macOS.
-
-El archivo plist contiene una serie de claves y valores que definen el servicio y su comportamiento. Algunas de las claves comunes incluyen:
-
-- `Label`: El nombre único del servicio.
-- `ProgramArguments`: Los argumentos del programa que se ejecutará como parte del servicio.
-- `MachServices`: Los servicios Mach que el servicio puede utilizar para la comunicación entre procesos.
-- `Sockets`: Los sockets que el servicio puede utilizar para la comunicación entre procesos.
-
-Para aprovecharse de un archivo plist de servicio, un atacante puede modificar el archivo para ejecutar su propio código malicioso en el contexto del servicio. Esto puede permitir al atacante obtener privilegios elevados en el sistema o realizar otras acciones maliciosas.
-
-Es importante asegurarse de que los archivos plist de servicio estén correctamente configurados y protegidos para evitar posibles abusos y ataques. Se recomienda seguir las mejores prácticas de seguridad y realizar auditorías regulares de los archivos plist de servicio en un sistema macOS.
-
 {% endtab %}
+
+{% tab title="xyz.hacktricks.svcoc.plist" %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -371,60 +363,6 @@ sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
 ## Cliente dentro de un código Dylb
-
-The Dylb code allows the creation of a client that can communicate with a server using the XPC framework in macOS. This client code can be embedded within an application to establish inter-process communication (IPC) with the server.
-
-To create a client inside a Dylb code, follow these steps:
-
-1. Import the necessary frameworks:
-```objective-c
-#import <Foundation/Foundation.h>
-#import <xpc/xpc.h>
-```
-
-2. Define the XPC connection and event handler:
-```objective-c
-static xpc_connection_t _connection;
-static dispatch_queue_t _queue;
-
-void eventHandler(xpc_object_t event) {
-    // Handle incoming events from the server
-    // ...
-}
-```
-
-3. Implement the client code:
-```objective-c
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        // Create the XPC connection
-        _connection = xpc_connection_create_mach_service("com.example.server", _queue, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
-        
-        // Set the event handler
-        xpc_connection_set_event_handler(_connection, ^(xpc_object_t event) {
-            eventHandler(event);
-        });
-        
-        // Resume the connection
-        xpc_connection_resume(_connection);
-        
-        // Send messages to the server
-        // ...
-        
-        // Run the main loop
-        dispatch_main();
-    }
-    return 0;
-}
-```
-
-4. Replace `"com.example.server"` with the Mach service name of the server you want to communicate with.
-
-5. Customize the event handler to handle incoming events from the server.
-
-6. Send messages to the server using the XPC connection.
-
-By embedding this client code within your application, you can establish communication with the server and exchange messages using the XPC framework in macOS.
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
 // gcc injection example:
@@ -460,12 +398,14 @@ return;
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
