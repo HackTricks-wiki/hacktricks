@@ -2,41 +2,43 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 **Esta técnica fue tomada del post** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/)
 
-## Información básica
+## Información Básica
 
-Los archivos NIB se utilizan en el ecosistema de desarrollo de Apple para **definir elementos de interfaz de usuario (UI)** y sus interacciones dentro de una aplicación. Creados con la herramienta Interface Builder, contienen **objetos serializados** como ventanas, botones y campos de texto, que se cargan en tiempo de ejecución para presentar la interfaz de usuario diseñada. Aunque aún se utilizan, Apple ha pasado a recomendar Storyboards para una representación más visual del flujo de la interfaz de usuario de una aplicación.
+Los archivos NIB se utilizan en el ecosistema de desarrollo de Apple para **definir elementos de la interfaz de usuario (UI)** y sus interacciones dentro de una aplicación. Creados con la herramienta Interface Builder, contienen **objetos serializados** como ventanas, botones y campos de texto, que se cargan en tiempo de ejecución para presentar la UI diseñada. Aunque todavía se utilizan, Apple ha pasado a recomendar Storyboards para una representación más visual del flujo de UI de una aplicación.
 
 {% hint style="danger" %}
-Además, los **archivos NIB** también se pueden utilizar para **ejecutar comandos arbitrarios** y si se modifica el archivo NIB en una aplicación, **Gatekeeper seguirá permitiendo ejecutar la aplicación**, por lo que se pueden utilizar para **ejecutar comandos arbitrarios dentro de aplicaciones**.
+Además, los **archivos NIB** también pueden usarse para **ejecutar comandos arbitrarios** y si se modifica un archivo NIB en una App, **Gatekeeper aún permitirá ejecutar la app**, por lo que pueden usarse para **ejecutar comandos arbitrarios dentro de aplicaciones**.
 {% endhint %}
 
-## Inyección de Dirty NIB <a href="#dirtynib" id="dirtynib"></a>
+## Inyección Dirty NIB <a href="#dirtynib" id="dirtynib"></a>
 
-Primero necesitamos crear un nuevo archivo NIB, utilizaremos XCode para la mayor parte de la construcción. Comenzamos agregando un objeto a la interfaz y establecemos la clase en NSAppleScript:
+Primero necesitamos crear un nuevo archivo NIB, usaremos XCode para la mayor parte de la construcción. Comenzamos agregando un Objeto a la interfaz y establecemos la clase en NSAppleScript:
 
 <figure><img src="../../../.gitbook/assets/image (681).png" alt="" width="380"><figcaption></figcaption></figure>
 
-Para el objeto, necesitamos establecer la propiedad inicial `source`, lo cual podemos hacer utilizando Atributos de Tiempo de Ejecución Definidos por el Usuario:
+Para el objeto necesitamos establecer la propiedad inicial `source`, lo que podemos hacer usando Atributos de Tiempo de Ejecución Definidos por el Usuario:
 
 <figure><img src="../../../.gitbook/assets/image (682).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Esto configura nuestro gadget de ejecución de código, que simplemente va a **ejecutar AppleScript a pedido**. Para activar la ejecución del AppleScript, simplemente agregaremos un botón por ahora (por supuesto, puedes ser creativo con esto ;). El botón se vinculará al objeto `Apple Script` que acabamos de crear y **invocará el selector `executeAndReturnError:`**:
+Esto configura nuestro gadget de ejecución de código, que simplemente va a **ejecutar AppleScript a petición**. Para activar realmente la ejecución del AppleScript, por ahora solo agregaremos un botón (por supuesto, puedes ser creativo con esto ;). El botón se vinculará al objeto `Apple Script` que acabamos de crear, e **invocará el selector `executeAndReturnError:`**:
 
 <figure><img src="../../../.gitbook/assets/image (683).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Para las pruebas, simplemente utilizaremos el Apple Script de:
+Para las pruebas, simplemente usaremos el Apple Script de:
 ```bash
 set theDialogText to "PWND"
 display dialog theDialogText
@@ -45,29 +47,29 @@ Y si ejecutamos esto en el depurador de XCode y presionamos el botón:
 
 <figure><img src="../../../.gitbook/assets/image (684).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Con nuestra capacidad para ejecutar código AppleScript arbitrario desde un NIB, a continuación necesitamos un objetivo. Elegiremos Pages para nuestra demostración inicial, que es, por supuesto, una aplicación de Apple y ciertamente no debería ser modificable por nosotros.
+Con nuestra capacidad para ejecutar código AppleScript arbitrario desde un NIB, a continuación necesitamos un objetivo. Elijamos Pages para nuestra demostración inicial, que por supuesto es una aplicación de Apple y ciertamente no debería ser modificable por nosotros.
 
 Primero haremos una copia de la aplicación en `/tmp/`:
 ```bash
 cp -a -X /Applications/Pages.app /tmp/
 ```
-Luego, lanzaremos la aplicación para evitar problemas con Gatekeeper y permitir que las cosas se almacenen en caché:
+Luego lanzaremos la aplicación para evitar cualquier problema con Gatekeeper y permitir que las cosas se almacenen en caché:
 ```bash
 open -W -g -j /Applications/Pages.app
 ```
-Después de lanzar (y cerrar) la aplicación por primera vez, necesitaremos sobrescribir un archivo NIB existente con nuestro archivo DirtyNIB. Para fines de demostración, simplemente vamos a sobrescribir el archivo NIB del Panel Acerca de para poder controlar la ejecución:
+Después de lanzar (y matar) la aplicación por primera vez, necesitaremos sobrescribir un archivo NIB existente con nuestro archivo DirtyNIB. Para fines de demostración, vamos a sobrescribir el NIB del Panel de Acerca de para poder controlar la ejecución:
 ```bash
 cp /tmp/Dirty.nib /tmp/Pages.app/Contents/Resources/Base.lproj/TMAAboutPanel.nib
 ```
-Una vez que hayamos sobrescrito el nib, podemos activar la ejecución seleccionando el elemento de menú `Acerca de`:
+Una vez que hayamos sobrescrito el nib, podemos desencadenar la ejecución seleccionando el elemento del menú `About`:
 
 <figure><img src="../../../.gitbook/assets/image (685).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Si observamos Pages más de cerca, veremos que tiene un privilegio privado que permite acceder a las fotos de los usuarios:
+Si observamos Pages más de cerca, vemos que tiene un privilegio privado que permite el acceso a las Fotos de un usuario:
 
 <figure><img src="../../../.gitbook/assets/image (686).png" alt="" width="479"><figcaption></figcaption></figure>
 
-Por lo tanto, podemos poner a prueba nuestra prueba de concepto modificando nuestro AppleScript para robar fotos del usuario sin solicitar permiso:
+Así que podemos poner a prueba nuestro POC **modificando nuestro AppleScript para robar fotos** del usuario sin solicitar permiso:
 
 {% code overflow="wrap" %}
 ```applescript
@@ -84,32 +86,44 @@ grabbed's writeToFile:"/Users/xpn/Library/Containers/com.apple.iWork.Pages/Data/
 [**Ejemplo de archivo .xib malicioso que ejecuta código arbitrario.**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4)
 {% endhint %}
 
-## Restricciones de lanzamiento
+## Crea tu propio DirtyNIB
 
-Básicamente, **impiden la ejecución de aplicaciones fuera de sus ubicaciones esperadas**, por lo que si copias una aplicación protegida por Restricciones de Lanzamiento a `/tmp`, no podrás ejecutarla.\
-[**Encuentra más información en esta publicación**](../macos-security-protections/#launch-constraints)**.**
 
-Sin embargo, al analizar el archivo **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**, aún puedes encontrar **aplicaciones que no están protegidas por Restricciones de Lanzamiento**, por lo que aún puedes **inyectar** archivos **NIB** en ubicaciones arbitrarias en **esas aplicaciones** (consulta el enlace anterior para aprender cómo encontrar estas aplicaciones).
 
-## Protecciones adicionales
+## Restricciones de Lanzamiento
 
-A partir de macOS Somona, existen algunas protecciones **que impiden escribir dentro de las aplicaciones**. Sin embargo, aún es posible eludir esta protección si, antes de ejecutar tu copia del binario, cambias el nombre de la carpeta Contents:
+Básicamente **impiden ejecutar aplicaciones fuera de sus ubicaciones esperadas**, así que si copias una aplicación protegida por Restricciones de Lanzamiento a `/tmp` no podrás ejecutarla.\
+[**Encuentra más información en este post**](../macos-security-protections/#launch-constraints)**.**
 
-1. Haz una copia de `CarPlay Simulator.app` en `/tmp/`
-2. Cambia el nombre de `/tmp/Carplay Simulator.app/Contents` a `/tmp/CarPlay Simulator.app/NotCon`
-3. Ejecuta el binario `/tmp/CarPlay Simulator.app/NotCon/MacOS/CarPlay Simulator` para almacenar en caché dentro de Gatekeeper
+Sin embargo, al analizar el archivo **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`** aún puedes encontrar **aplicaciones que no están protegidas por Restricciones de Lanzamiento** por lo que aún podrías **inyectar** archivos **NIB** en ubicaciones arbitrarias en **esas** (consulta el enlace anterior para aprender cómo encontrar estas aplicaciones).
+
+## Protecciones Extra
+
+Desde macOS Somona, hay algunas protecciones que **impiden escribir dentro de las Apps**. Sin embargo, aún es posible eludir esta protección si, antes de ejecutar tu copia del binario, cambias el nombre de la carpeta Contents:
+
+1. Toma una copia de `CarPlay Simulator.app` a `/tmp/`
+2. Renombra `/tmp/Carplay Simulator.app/Contents` a `/tmp/CarPlay Simulator.app/NotCon`
+3. Lanza el binario `/tmp/CarPlay Simulator.app/NotCon/MacOS/CarPlay Simulator` para cachear dentro de Gatekeeper
 4. Sobrescribe `NotCon/Resources/Base.lproj/MainMenu.nib` con nuestro archivo `Dirty.nib`
-5. Cambia el nombre a `/tmp/CarPlay Simulator.app/Contents`
-6. Vuelve a ejecutar `CarPlay Simulator.app`
+5. Renombra a `/tmp/CarPlay Simulator.app/Contents`
+6. Lanza `CarPlay Simulator.app` de nuevo
+
+{% hint style="success" %}
+Parece que esto ya no es posible porque macOS **impide modificar archivos** dentro de los paquetes de aplicaciones.\
+Por lo tanto, después de ejecutar la app para cachearla con Gatekeeper, no podrás modificar el paquete.\
+Y si cambias, por ejemplo, el nombre del directorio Contents a **NotCon** (como se indica en el exploit), y luego ejecutas el binario principal de la app para cachearlo con Gatekeeper, **se activará un error y no se ejecutará**.
+{% endhint %}
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

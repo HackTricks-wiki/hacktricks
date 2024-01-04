@@ -2,40 +2,42 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Información básica
+## Información Básica
 
-**Grand Central Dispatch (GCD)**, también conocido como **libdispatch**, está disponible tanto en macOS como en iOS. Es una tecnología desarrollada por Apple para optimizar el soporte de aplicaciones para la ejecución concurrente (multihilo) en hardware multinúcleo.
+**Grand Central Dispatch (GCD),** también conocido como **libdispatch**, está disponible tanto en macOS como en iOS. Es una tecnología desarrollada por Apple para optimizar el soporte de aplicaciones para la ejecución concurrente (multihilo) en hardware multicore.
 
-**GCD** proporciona y gestiona **colas FIFO** a las que tu aplicación puede **enviar tareas** en forma de **bloques de código**. Los bloques enviados a las colas de despacho se ejecutan en un conjunto de hilos totalmente gestionados por el sistema. GCD crea automáticamente hilos para ejecutar las tareas en las colas de despacho y programa esas tareas para que se ejecuten en los núcleos disponibles.
+**GCD** proporciona y gestiona **colas FIFO** a las que tu aplicación puede **enviar tareas** en forma de **objetos de bloque**. Los bloques enviados a las colas de despacho son **ejecutados en un grupo de hilos** completamente gestionado por el sistema. GCD crea automáticamente hilos para ejecutar las tareas en las colas de despacho y programa esas tareas para que se ejecuten en los núcleos disponibles.
 
 {% hint style="success" %}
-En resumen, para ejecutar código en **paralelo**, los procesos pueden enviar **bloques de código a GCD**, que se encargará de su ejecución. Por lo tanto, los procesos no crean nuevos hilos; **GCD ejecuta el código dado con su propio conjunto de hilos**.
+En resumen, para ejecutar código en **paralelo**, los procesos pueden enviar **bloques de código a GCD**, que se encargará de su ejecución. Por lo tanto, los procesos no crean nuevos hilos; **GCD ejecuta el código dado con su propio grupo de hilos**.
 {% endhint %}
 
-Esto es muy útil para gestionar la ejecución en paralelo de manera exitosa, reduciendo en gran medida el número de hilos que los procesos crean y optimizando la ejecución en paralelo. Esto es ideal para tareas que requieren **gran paralelismo** (¿fuerza bruta?) o para tareas que no deben bloquear el hilo principal: por ejemplo, el hilo principal en iOS maneja las interacciones de la interfaz de usuario, por lo que cualquier otra funcionalidad que pueda hacer que la aplicación se bloquee (búsqueda, acceso a una web, lectura de un archivo...) se gestiona de esta manera.
+Esto es muy útil para gestionar la ejecución paralela con éxito, reduciendo en gran medida el número de hilos que crean los procesos y optimizando la ejecución paralela. Esto es ideal para tareas que requieren **gran paralelismo** (¿fuerza bruta?) o para tareas que no deberían bloquear el hilo principal: Por ejemplo, el hilo principal en iOS maneja las interacciones de la UI, así que cualquier otra funcionalidad que pudiera hacer que la aplicación se cuelgue (buscar, acceder a una web, leer un archivo...) se gestiona de esta manera.
 
 ## Objective-C
 
-En Objective-C, existen diferentes funciones para enviar un bloque de código para que se ejecute en paralelo:
+En Objective-C hay diferentes funciones para enviar un bloque para ser ejecutado en paralelo:
 
-* [**dispatch\_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch\_async): Envía un bloque para su ejecución asíncrona en una cola de despacho y devuelve inmediatamente.
-* [**dispatch\_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch\_sync): Envía un objeto de bloque para su ejecución y devuelve después de que ese bloque termine de ejecutarse.
-* [**dispatch\_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch\_once): Ejecuta un objeto de bloque solo una vez durante la vida útil de una aplicación.
-* [**dispatch\_async\_and\_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch\_async\_and\_wait): Envía un elemento de trabajo para su ejecución y devuelve solo después de que termine de ejecutarse. A diferencia de [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch\_sync), esta función respeta todos los atributos de la cola cuando ejecuta el bloque.
+* [**dispatch\_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch\_async): Envía un bloque para ejecución asincrónica en una cola de despacho y retorna inmediatamente.
+* [**dispatch\_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch\_sync): Envía un objeto de bloque para ejecución y retorna después de que ese bloque termine de ejecutarse.
+* [**dispatch\_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch\_once): Ejecuta un objeto de bloque solo una vez durante la vida de una aplicación.
+* [**dispatch\_async\_and\_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch\_async\_and\_wait): Envía un elemento de trabajo para ejecución y retorna solo después de que termine de ejecutarse. A diferencia de [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch\_sync), esta función respeta todos los atributos de la cola cuando ejecuta el bloque.
 
 Estas funciones esperan estos parámetros: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch\_queue\_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch\_block\_t) **`block`**
 
-Esta es la **estructura de un bloque**:
+Esta es la **estructura de un Bloque**:
 ```c
 struct Block {
 void *isa; // NSConcreteStackBlock,...
@@ -46,7 +48,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Y este es un ejemplo de cómo usar **paralelismo** con **`dispatch_async`**:
+Y este es un ejemplo de uso de **paralelismo** con **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -78,8 +80,8 @@ return 0;
 ```
 ## Swift
 
-La biblioteca **`libswiftDispatch`** proporciona **enlaces Swift** al framework Grand Central Dispatch (GCD), que originalmente está escrito en C.\
-La biblioteca **`libswiftDispatch`** envuelve las APIs de GCD en una interfaz más amigable para Swift, lo que facilita y hace más intuitivo el trabajo con GCD para los desarrolladores de Swift.
+**`libswiftDispatch`** es una biblioteca que proporciona **enlaces Swift** al framework Grand Central Dispatch (GCD), que originalmente está escrito en C.
+La biblioteca **`libswiftDispatch`** envuelve las APIs de GCD en C en una interfaz más amigable para Swift, facilitando y haciéndolo más intuitivo para los desarrolladores de Swift trabajar con GCD.
 
 * **`DispatchQueue.global().sync{ ... }`**
 * **`DispatchQueue.global().async{ ... }`**
@@ -116,7 +118,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-El siguiente script de Frida se puede utilizar para **interceptar varias funciones `dispatch`** y extraer el nombre de la cola, la traza de llamadas y el bloque: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+El siguiente script de Frida puede ser utilizado para **engancharse a varias funciones de `dispatch`** y extraer el nombre de la cola, el backtrace y el bloque: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -131,9 +133,9 @@ Backtrace:
 ```
 ## Ghidra
 
-Actualmente, Ghidra no comprende ni la estructura **`dispatch_block_t`** de ObjectiveC ni la estructura **`swift_dispatch_block`**.
+Actualmente Ghidra no entiende ni la estructura **`dispatch_block_t`** de ObjectiveC, ni la **`swift_dispatch_block`**.
 
-Si deseas que las comprenda, simplemente puedes **declararlas**:
+Así que si quieres que las entienda, podrías simplemente **declararlas**:
 
 <figure><img src="../../.gitbook/assets/image (688).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -144,12 +146,12 @@ Si deseas que las comprenda, simplemente puedes **declararlas**:
 Luego, encuentra un lugar en el código donde se **utilicen**:
 
 {% hint style="success" %}
-Ten en cuenta todas las referencias hechas a "block" para entender cómo puedes determinar que se está utilizando la estructura.
+Toma nota de todas las referencias hechas a "block" para entender cómo podrías descubrir que la estructura se está utilizando.
 {% endhint %}
 
 <figure><img src="../../.gitbook/assets/image (692).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Haz clic derecho en la variable -> Cambiar tipo de variable y selecciona en este caso **`swift_dispatch_block`**:
+Haz clic derecho en la variable -> Retype Variable y selecciona en este caso **`swift_dispatch_block`**:
 
 <figure><img src="../../.gitbook/assets/image (693).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -159,12 +161,14 @@ Ghidra reescribirá automáticamente todo:
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

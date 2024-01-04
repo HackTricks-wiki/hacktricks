@@ -2,13 +2,15 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? o ¿quieres acceder a la **última versión de PEASS o descargar HackTricks en PDF**? Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop).
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -17,15 +19,15 @@
 ### **Establecer una sesión de depuración** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
 [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) es responsable de manejar la **comunicación** entre el depurador y el depurado.\
-Crea 2 tuberías con nombre por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (una terminará en **`-in`** y la otra en **`-out`**, y el resto del nombre será el mismo).
+Crea 2 pipes con nombre por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (uno terminará en **`-in`** y el otro en **`-out`**, y el resto del nombre será el mismo).
 
 Por lo tanto, si vas al **`$TMPDIR`** del usuario, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 La función [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) manejará la comunicación desde un depurador.
 
-Lo primero que se requiere que haga un depurador es **crear una nueva sesión de depuración**. Esto se hace **enviando un mensaje a través de la tubería `out`** que comienza con una estructura `MessageHeader`, la cual podemos obtener del código fuente de .NET:
+Lo primero que se requiere que haga un depurador es **crear una nueva sesión de depuración**. Esto se hace **enviando un mensaje a través del pipe `out`** que comienza con una estructura `MessageHeader`, la cual podemos obtener del código fuente de .NET:
 ```c
 struct MessageHeader
 {
@@ -47,7 +49,7 @@ DWORD         m_dwMinorVersion;
 BYTE                    m_sMustBeZero[8];
 }
 ```
-En el caso de una solicitud de nueva sesión, esta estructura se completa de la siguiente manera:
+En el caso de una solicitud de nueva sesión, esta estructura se llena de la siguiente manera:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
@@ -66,7 +68,7 @@ Una vez construido, **enviamos esto al objetivo** utilizando la llamada al siste
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 ```
-Siguiendo nuestro encabezado, necesitamos enviar una estructura `sessionRequestData`, que contiene un GUID para identificar nuestra sesión:
+Siguiendo nuestro encabezado, necesitamos enviar una estructura `sessionRequestData`, la cual contiene un GUID para identificar nuestra sesión:
 ```c
 // All '9' is a GUID.. right??
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
@@ -169,15 +171,15 @@ Lo primero es identificar, por ejemplo, una región de memoria con **`rwx`** en 
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Entonces, para desencadenar la ejecución, sería necesario conocer algún lugar donde se almacene un puntero de función para sobrescribirlo. Es posible sobrescribir un puntero dentro de la **Tabla de Funciones Dinámicas (DFT)**, que es utilizada por el tiempo de ejecución de .NET Core para proporcionar funciones auxiliares para la compilación JIT. Una lista de punteros de función compatibles se puede encontrar dentro de [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
+Entonces, para desencadenar la ejecución sería necesario conocer algún lugar donde se almacene un puntero de función para sobrescribirlo. Es posible sobrescribir un puntero dentro de la **Tabla de Funciones Dinámicas (DFT)**, que es utilizada por el entorno de ejecución de .NET Core para proporcionar funciones auxiliares para la compilación JIT. Una lista de punteros de función compatibles se puede encontrar dentro de [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
 
-En versiones x64 esto es directo usando la técnica de **búsqueda de firmas** al estilo mimikatz para buscar en **`libcorclr.dll`** una referencia al símbolo **`_hlpDynamicFuncTable`**, al cual podemos desreferenciar:
+En versiones x64 esto es directo utilizando la técnica de **búsqueda de firmas** al estilo de mimikatz para buscar en **`libcorclr.dll`** una referencia al símbolo **`_hlpDynamicFuncTable`**, al cual podemos desreferenciar:
 
 <figure><img src="../../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 Todo lo que queda por hacer es encontrar una dirección desde la cual comenzar nuestra búsqueda de firmas. Para hacer esto, aprovechamos otra función de depuración expuesta, **`MT_GetDCB`**. Esto devuelve una serie de bits de información útiles sobre el proceso objetivo, pero para nuestro caso, estamos interesados en un campo devuelto que contiene la **dirección de una función auxiliar**, **`m_helperRemoteStartAddr`**. Usando esta dirección, sabemos justo **dónde se encuentra `libcorclr.dll`** dentro de la memoria del proceso objetivo y podemos comenzar nuestra búsqueda de la DFT.
 
-Conociendo esta dirección es posible sobrescribir el puntero de función con el de nuestro shellcode.
+Conociendo esta dirección es posible sobrescribir el puntero de la función con el de nuestro shellcode.
 
 El código POC completo utilizado para inyectar en PowerShell se puede encontrar [aquí](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
@@ -187,12 +189,14 @@ El código POC completo utilizado para inyectar en PowerShell se puede encontrar
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver a tu **empresa anunciada en HackTricks**? o ¿quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
