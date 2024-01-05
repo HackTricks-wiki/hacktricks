@@ -2,13 +2,15 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver a tu **empresa anunciada en HackTricks**? o ¿quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop).
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -32,21 +34,21 @@ ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-Los permisos se **heredan de la aplicación padre** y los **permisos** se **rastrean** basados en el **ID del Paquete** y el **ID del Desarrollador**.
+Los permisos se **heredan de la aplicación padre** y los **permisos** se **rastrean** basados en el **Bundle ID** y el **Developer ID**.
 
 ### Bases de Datos TCC
 
-Las concesiones/negaciones luego se almacenan en algunas bases de datos TCC:
+Las concesiones/negaciones se almacenan en algunas bases de datos TCC:
 
 * La base de datos del sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 * Esta base de datos está **protegida por SIP**, por lo que solo un bypass de SIP puede escribir en ella.
 * La base de datos TCC del usuario **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para preferencias por usuario.
-* Esta base de datos está protegida, por lo que solo procesos con altos privilegios TCC como Acceso Completo al Disco pueden escribir en ella (pero no está protegida por SIP).
+* Esta base de datos está protegida para que solo procesos con altos privilegios TCC como Acceso Completo al Disco puedan escribir en ella (pero no está protegida por SIP).
 
 {% hint style="warning" %}
 Las bases de datos anteriores también están **protegidas por TCC para acceso de lectura**. Por lo tanto, **no podrás leer** tu base de datos TCC de usuario regular a menos que sea desde un proceso con privilegios TCC.
 
-Sin embargo, recuerda que un proceso con estos altos privilegios (como **FDA** o **`kTCCServiceEndpointSecurityClient`**) podrá escribir en la base de datos TCC del usuario.
+Sin embargo, recuerda que un proceso con estos altos privilegios (como **FDA** o **`kTCCServiceEndpointSecurityClient`**) podrá escribir en la base de datos TCC de los usuarios.
 {% endhint %}
 
 * Hay una **tercera** base de datos TCC en **`/var/db/locationd/clients.plist`** para indicar clientes autorizados a **acceder a los servicios de ubicación**.
@@ -173,8 +175,8 @@ Simplemente haz **`launctl load you_bin.plist`**, con un plist como:
 ```
 <details>
 
-* El **`auth_value`** puede tener diferentes valores: denied(0), unknown(1), allowed(2), o limited(3).
-* El **`auth_reason`** puede tomar los siguientes valores: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
+* El **`auth_value`** puede tener diferentes valores: denegado(0), desconocido(1), permitido(2) o limitado(3).
+* El **`auth_reason`** puede tomar los siguientes valores: Error(1), Consentimiento del Usuario(2), Establecido por el Usuario(3), Establecido por el Sistema(4), Política del Servicio(5), Política de MDM(6), Política de Sobrescritura(7), Falta la cadena de uso(8), Tiempo de espera de la solicitud(9), Preflight Desconocido(10), Autorizado(11), Política de Tipo de Aplicación(12)
 * El campo **csreq** está ahí para indicar cómo verificar el binario a ejecutar y otorgar los permisos TCC:
 ```bash
 # Query to get cserq in printable hex
@@ -226,17 +228,17 @@ csreq -t -r /tmp/telegram_csreq.bin
 {% endcode %}
 
 {% hint style="warning" %}
-Por lo tanto, otras aplicaciones que usen el mismo nombre y ID de paquete no podrán acceder a los permisos otorgados a otras aplicaciones.
+Por lo tanto, otras aplicaciones que usen el mismo nombre y ID de paquete no podrán acceder a los permisos otorgados a otras apps.
 {% endhint %}
 
-### Derechos y Permisos de TCC
+### Entitlements y Permisos TCC
 
-Las aplicaciones **no solo necesitan** **solicitar** y haber **obtenido acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
-Por ejemplo, **Telegram** tiene el derecho `com.apple.security.device.camera` para solicitar **acceso a la cámara**. Una **aplicación** que **no** tenga este **derecho no podrá** acceder a la cámara (y ni siquiera se le pedirá permiso al usuario).
+Las apps **no solo necesitan** **solicitar** y haber **obtenido acceso** a algunos recursos, también necesitan **tener los entitlements relevantes**.\
+Por ejemplo, **Telegram** tiene el entitlement `com.apple.security.device.camera` para solicitar **acceso a la cámara**. Una **app** que **no** tenga este **entitlement no podrá** acceder a la cámara (y ni siquiera se le pedirá permiso al usuario).
 
-Sin embargo, para que las aplicaciones **accedan** a **ciertas carpetas de usuario**, como `~/Desktop`, `~/Downloads` y `~/Documents`, **no necesitan** tener ningún **derecho específico**. El sistema manejará el acceso de manera transparente y **solicitará al usuario** según sea necesario.
+Sin embargo, para que las apps **accedan** a **ciertas carpetas de usuario**, como `~/Desktop`, `~/Downloads` y `~/Documents`, **no necesitan** tener ningún **entitlement específico**. El sistema manejará el acceso de manera transparente y **solicitará al usuario** según sea necesario.
 
-Las aplicaciones de Apple **no generarán avisos**. Contienen **derechos preconcedidos** en su lista de **derechos**, lo que significa que **nunca generarán una ventana emergente**, **ni** aparecerán en ninguna de las bases de datos de **TCC**. Por ejemplo:
+Las apps de Apple **no generarán solicitudes**. Contienen **derechos preconcedidos** en su lista de **entitlements**, lo que significa que **nunca generarán un popup**, **ni** aparecerán en ninguna de las **bases de datos TCC**. Por ejemplo:
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -263,7 +265,7 @@ Algunos permisos de TCC son: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCSe
 
 ### Intención del usuario / com.apple.macl
 
-Como se mencionó anteriormente, es posible **conceder acceso a una App a un archivo arrastrándolo y soltándolo en ella**. Este acceso no se especificará en ninguna base de datos TCC, sino como un **atributo extendido del archivo**. Este atributo **almacenará el UUID** de la app permitida:
+Como se mencionó anteriormente, es posible **otorgar acceso a una App a un archivo arrastrándolo y soltándolo en ella**. Este acceso no se especificará en ninguna base de datos de TCC, sino como un **atributo extendido del archivo**. Este atributo **almacenará el UUID** de la app permitida:
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -281,12 +283,12 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 {% hint style="info" %}
 Es curioso que el atributo **`com.apple.macl`** sea gestionado por **Sandbox**, no por tccd.
 
-También ten en cuenta que si mueves un archivo que permite el UUID de una app en tu computadora a otra computadora diferente, debido a que la misma app tendrá diferentes UIDs, no concederá acceso a esa app.
+También ten en cuenta que si mueves un archivo que permite el UUID de una aplicación en tu computadora a otra computadora diferente, debido a que la misma aplicación tendrá diferentes UIDs, no concederá acceso a esa aplicación.
 {% endhint %}
 
 El atributo extendido `com.apple.macl` **no puede ser borrado** como otros atributos extendidos porque está **protegido por SIP**. Sin embargo, como [**se explica en esta publicación**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), es posible desactivarlo **comprimiendo** el archivo, **eliminándolo** y **descomprimiéndolo**.
 
-## TCC Privesc & Bypasses
+## Escalación de Privilegios y Evasiones de TCC
 
 ### Insertar en TCC
 
@@ -385,7 +387,7 @@ Podrías abusar de esto para **escribir tu propia base de datos TCC de usuario**
 {% hint style="warning" %}
 Con este permiso podrás **pedirle a Finder que acceda a carpetas restringidas por TCC** y te entregue los archivos, pero hasta donde sé, **no podrás hacer que Finder ejecute código arbitrario** para abusar completamente de su acceso FDA.
 
-Por lo tanto, no podrás abusar de todas las capacidades FDA.
+Por lo tanto, no podrás abusar de las capacidades completas de FDA.
 {% endhint %}
 
 Este es el aviso de TCC para obtener privilegios de Automatización sobre Finder:
@@ -468,9 +470,9 @@ rm "$HOME/Desktop/file"
 ```
 ### Automatización (SE) + Accesibilidad (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** a FDA\*
 
-La automatización en **`System Events`** + Accesibilidad (**`kTCCServicePostEvent`**) permite enviar **pulsaciones de teclas a procesos**. De esta manera, podrías abusar de Finder para cambiar el TCC.db del usuario o para dar FDA a una aplicación arbitraria (aunque podría solicitarse una contraseña para esto).
+La Automatización en **`System Events`** + Accesibilidad (**`kTCCServicePostEvent`**) permite enviar **pulsaciones de teclas a procesos**. De esta manera, podrías abusar de Finder para cambiar el TCC.db del usuario o para dar FDA a una aplicación arbitraria (aunque podría solicitarse contraseña para esto).
 
-Ejemplo de sobrescritura del TCC.db del usuario por Finder:
+Ejemplo de Finder sobrescribiendo el TCC.db del usuario:
 ```applescript
 -- store the TCC.db file to copy in /tmp
 osascript <<EOF
@@ -524,15 +526,15 @@ Consulta esta página para ver algunos [**payloads para abusar de los permisos d
 
 Si tienes **`kTCCServiceEndpointSecurityClient`**, tienes FDA. Fin.
 
-### Política del Sistema Archivo SysAdmin a FDA
+### Política del Sistema Archivo de Administrador del Sistema a FDA
 
 **`kTCCServiceSystemPolicySysAdminFiles`** permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia su carpeta de inicio y, por lo tanto, permite **evitar TCC**.
 
 ### Base de Datos TCC del Usuario a FDA
 
-Obtener **permisos de escritura** sobre la base de datos TCC del **usuario** no te permite otorgarte permisos de **`FDA`**, solo la que vive en la base de datos del sistema puede otorgar eso.
+Obtener **permisos de escritura** sobre la base de datos TCC del **usuario no te permite** otorgarte permisos de **`FDA`**, solo la que vive en la base de datos del sistema puede otorgar eso.
 
-Pero puedes **darte** **`derechos de Automatización al Finder`**, y abusar de la técnica anterior para escalar a FDA\*.
+Pero puedes **darte** **`Derechos de Automatización al Finder`**, y abusar de la técnica anterior para escalar a FDA\*.
 
 ### **FDA a permisos TCC**
 
@@ -542,14 +544,14 @@ No creo que esto sea un verdadero escalamiento de privilegios, pero por si acaso
 
 ### **Bypass de SIP a Bypass de TCC**
 
-La base de datos **TCC del sistema** está protegida por **SIP**, por eso solo los procesos con los **entitlements indicados van a poder modificarla**. Por lo tanto, si un atacante encuentra un **bypass de SIP** sobre un **archivo** (poder modificar un archivo restringido por SIP), podrá:
+La base de datos **TCC del sistema** está protegida por **SIP**, por eso solo los procesos con los **entitlements indicados van a poder modificarla**. Por lo tanto, si un atacante encuentra un **bypass de SIP** sobre un **archivo** (ser capaz de modificar un archivo restringido por SIP), podrá:
 
 * **Eliminar la protección** de una base de datos TCC, y darse todos los permisos de TCC. Podría abusar de cualquiera de estos archivos, por ejemplo:
 * La base de datos del sistema TCC
 * REG.db
 * MDMOverrides.plist
 
-Sin embargo, hay otra opción para abusar de este **bypass de SIP para evitar TCC**, el archivo `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` es una lista de permitidos de aplicaciones que requieren una excepción de TCC. Por lo tanto, si un atacante puede **eliminar la protección de SIP** de este archivo y agregar su **propia aplicación**, la aplicación podrá evitar TCC.\
+Sin embargo, hay otra opción para abusar de este **bypass de SIP para evitar TCC**, el archivo `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` es una lista de permitidos de aplicaciones que requieren una excepción de TCC. Por lo tanto, si un atacante puede **eliminar la protección SIP** de este archivo y agregar su **propia aplicación**, la aplicación podrá evitar TCC.\
 Por ejemplo, para agregar terminal:
 ```bash
 # Get needed info
@@ -578,7 +580,7 @@ AllowApplicationsList.plist:
 </dict>
 </plist>
 ```
-### Bypasses de TCC
+### Omisiones de TCC
 
 {% content-ref url="macos-tcc-bypasses/" %}
 [macos-tcc-bypasses](macos-tcc-bypasses/)
@@ -595,12 +597,14 @@ AllowApplicationsList.plist:
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver a tu **empresa anunciada en HackTricks**? o ¿quieres acceder a la **última versión de PEASS o descargar HackTricks en PDF**? Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al repositorio de** [**hacktricks**](https://github.com/carlospolop/hacktricks) **y al repositorio de** [**hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
