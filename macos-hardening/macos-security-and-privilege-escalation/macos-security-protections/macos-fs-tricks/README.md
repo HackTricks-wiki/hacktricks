@@ -2,52 +2,54 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでAWSハッキングを学ぶ</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksに会社の広告を掲載**したいですか？または、**PEASSの最新バージョンにアクセス**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 ## POSIX権限の組み合わせ
 
-**ディレクトリ**内の権限：
+**ディレクトリ**の権限:
 
-* **読み取り** - ディレクトリエントリを**列挙**できます。
-* **書き込み** - ディレクトリ内で**ファイルを削除/書き込み**でき、**空のフォルダを削除**できます。
-* ただし、その上に書き込み権限がない限り、**空でないフォルダを削除/変更することはできません**。
-* 所有していない限り、**フォルダの名前を変更することはできません**。
-* **実行** - ディレクトリを**通過することが許可**されています - この権利がない場合、その中のファイルやサブディレクトリのファイルにアクセスすることはできません。
+* **read** - ディレクトリエントリを**列挙**できます
+* **write** - ディレクトリ内の**ファイルを削除/書き込み**ができ、**空のフォルダを削除**できます。&#x20;
+* しかし、そのフォルダに対する書き込み権限がない限り、**空でないフォルダを削除/変更することはできません**。
+* フォルダの所有者でない限り、**フォルダの名前を変更することはできません**。
+* **execute** - ディレクトリを**通過することが許可**されています - この権利がない場合、その中のファイルやサブディレクトリのファイルにアクセスすることはできません。
 
 ### 危険な組み合わせ
 
-**rootが所有するファイル/フォルダを上書きする方法**ですが：
+**rootが所有するファイル/フォルダを上書きする方法**、しかし:
 
-* パス内の1つの親**ディレクトリの所有者**がユーザーです。
-* パス内の1つの親**ディレクトリの所有者**が**書き込みアクセス**を持つ**ユーザーグループ**です。
-* ユーザー**グループ**が**ファイル**に**書き込み**アクセス権を持っています。
+* パス内の一つの親**ディレクトリの所有者**がユーザーである
+* パス内の一つの親**ディレクトリの所有者**が**書き込みアクセス**を持つ**ユーザーグループ**である
+* ユーザーの**グループ**が**ファイル**に対して**書き込み**アクセスを持っている
 
-これらの組み合わせのいずれかで、攻撃者は特権的な任意の書き込みを得るために、予想されるパスに**シム/ハードリンク**を**注入**することができます。
+これらの組み合わせのいずれかがある場合、攻撃者は特権的な任意の書き込みを得るために、予想されるパスに**シンボリック/ハードリンク**を**注入**することができます。
 
-### フォルダroot R+Xの特別なケース
+### フォルダroot R+X 特別なケース
 
-**rootのみがR+Xアクセス**を持つ**ディレクトリ**内のファイルは、他の誰にも**アクセスできません**。そのため、ユーザーが読むことができるが、その**制限**のために読むことができないファイルを、このフォルダから**別のフォルダに移動**することを可能にする脆弱性を悪用すると、これらのファイルを読むことができます。
+**rootのみがR+Xアクセス**を持つ**ディレクトリ**内のファイルは、他の誰にも**アクセスできません**。そのため、ユーザーが読むことができるが、その**制限**のために読むことができないファイルを、このフォルダから**別のフォルダに移動**することを許可する脆弱性を悪用することができます。
 
-例：[https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
+例: [https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
 
 ## シンボリックリンク / ハードリンク
 
-特権プロセスが、**低権限のユーザー**によって**制御**される可能性のある**ファイル**にデータを書き込んでいる場合、または低権限のユーザーによって**事前に作成**された可能性がある場合。ユーザーは、シンボリックリンクまたはハードリンクを介して別のファイルを**指す**ことができ、特権プロセスはそのファイルに書き込むことになります。
+特権プロセスが、**低権限のユーザー**によって**制御**される可能性のある**ファイル**にデータを書き込んでいる場合、または低権限のユーザーによって**事前に作成**された可能性のある場合。ユーザーは、シンボリックリンクまたはハードリンクを介して別のファイルを**指す**ことができ、特権プロセスはそのファイルに書き込むことになります。
 
-他のセクションで、攻撃者が**特権昇格のために任意の書き込みを悪用する**方法を確認してください。
+他のセクションで、攻撃者が権限昇格のために任意の書き込みを**悪用する方法**を確認してください。
 
 ## .fileloc
 
-**`.fileloc`** 拡張子を持つファイルは、他のアプリケーションやバイナリを指すことができるため、開かれたときに実行されるのはそのアプリケーション/バイナリになります。
-例：
+**`.fileloc`** 拡張子を持つファイルは、他のアプリケーションやバイナリを指すことができるので、開かれたときにそのアプリケーション/バイナリが実行されます。\
+例:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -62,11 +64,11 @@
 ```
 ## 任意のFD
 
-**高い権限を持つファイルやフォルダをプロセスが開くことができれば**、**`crontab`** を悪用して **`EDITOR=exploit.py`** として `/etc/sudoers.d` 内のファイルを開くことができます。そうすると `exploit.py` は `/etc/sudoers` 内のファイルへのFDを取得し、それを悪用することができます。
+**高い権限を持つファイルやフォルダをプロセスが開く**ことができれば、**`crontab`** を悪用して `/etc/sudoers.d` 内のファイルを **`EDITOR=exploit.py`** で開くことができます。そうすると `exploit.py` は `/etc/sudoers` 内のファイルへのFDを取得し、それを悪用することができます。
 
 例えば: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## カルテンタイン xattrs トリックを避ける
+## 隔離 xattrs トリックを避ける
 
 ### それを削除する
 ```bash
@@ -122,7 +124,7 @@ ls -le /tmp/test
 
 **AppleDouble** ファイル形式は、ファイルとそのACEを含むコピーを作成します。
 
-[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) によると、**`com.apple.acl.text`** と呼ばれるxattr内に保存されているACLのテキスト表現が、解凍されたファイルのACLとして設定されることがわかります。したがって、他のxattrsが書き込まれることを防ぐACLを持つアプリケーションを **AppleDouble** ファイル形式でzipファイルに圧縮した場合... アプリケーションに検疫xattrが設定されていませんでした：
+[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) で、xattr **`com.apple.acl.text`** に格納されているACLのテキスト表現が解凍されたファイルのACLとして設定されることがわかります。したがって、他のxattrsが書き込まれないようにACLを設定した状態でアプリケーションを **AppleDouble** ファイル形式でzipファイルに圧縮した場合... アプリケーションに検疫xattrが設定されていませんでした：
 
 詳細については、[**オリジナルのレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) を確認してください。
 
@@ -154,9 +156,9 @@ ls -le test
 
 ## コード署名のバイパス
 
-バンドルには、バンドル内のすべての**ファイル**の**ハッシュ**を含むファイル **`_CodeSignature/CodeResources`** が含まれています。CodeResourcesのハッシュも**実行可能ファイル**に**埋め込まれている**ので、それをいじることはできません。
+バンドルには、バンドル内の**すべてのファイル**の**ハッシュ**を含むファイル **`_CodeSignature/CodeResources`** が含まれています。CodeResourcesのハッシュも**実行可能ファイルに埋め込まれている**ので、それをいじることもできません。
 
-しかし、署名がチェックされないファイルもあります。これらはplist内でomitキーを持っています。例えば：
+しかし、署名がチェックされないファイルもあります。これらはplist内にomitというキーで示されています。例えば：
 ```xml
 <dict>
 ...
@@ -200,7 +202,7 @@ ls -le test
 ...
 </dict>
 ```
-リソースのシグネチャをCLIから計算することが可能です:
+リソースの署名をCLIで計算することが可能です:
 
 {% code overflow="wrap" %}
 ```bash
@@ -210,7 +212,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 
 ## DMGをマウントする
 
-ユーザーは、既存のフォルダの上にカスタムDMGを作成してマウントすることができます。以下はカスタムコンテンツを含むカスタムDMGパッケージを作成する方法です：
+ユーザーは、既存のフォルダの上にカスタムDMGを作成してマウントすることができます。以下はカスタムコンテンツを含むDMGパッケージを作成する方法です：
 
 {% code overflow="wrap" %}
 ```bash
@@ -237,15 +239,15 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 ## 任意の書き込み
 
-### 定期的なshスクリプト
+### Periodic sh スクリプト
 
-スクリプトが**シェルスクリプト**として解釈される場合、毎日実行される**`/etc/periodic/daily/999.local`** シェルスクリプトを上書きできます。
+あなたのスクリプトが**シェルスクリプト**として解釈される場合、毎日トリガーされる **`/etc/periodic/daily/999.local`** シェルスクリプトを上書きすることができます。
 
 このスクリプトの実行を**偽装**するには、次のコマンドを使用します: **`sudo periodic daily`**
 
 ### デーモン
 
-任意のスクリプトを実行するplistとして、**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** のような任意の**LaunchDaemon**を書き込みます。
+任意のスクリプトを実行する plist として、**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** のような任意の **LaunchDaemon** を書き込みます。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -271,9 +273,9 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 ### PATHファイル
 
-**`/etc/paths`** ファイルは、PATH環境変数を設定する主要な場所の一つです。これを上書きするにはroot権限が必要ですが、**特権プロセス**のスクリプトが**完全なパスなしでコマンドを実行している**場合、このファイルを変更することで**ハイジャック**することができるかもしれません。
+ファイル **`/etc/paths`** は、PATH環境変数を設定する主要な場所の一つです。これを上書きするにはroot権限が必要ですが、**特権プロセス**のスクリプトが**完全なパスなしでコマンドを実行している**場合、このファイルを変更することで**ハイジャック**することができるかもしれません。
 
-&#x20;また、**`/etc/paths.d`** にファイルを書き込むことで、新しいフォルダを`PATH`環境変数に読み込ませることができます。
+&#x20;また、**`/etc/paths.d`** にファイルを書き込むことで、新しいフォルダを`PATH`環境変数に読み込むことができます。
 
 ## 参考文献
 
@@ -281,13 +283,15 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローになる方法を学びましょう</strong></a><strong>!</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、HackTricksをPDFで**ダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**に**フォローしてください。
-* **ハッキングのコツを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告掲載したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手しましょう。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしましょう。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングテクニックを共有しましょう。
 
 </details>
 ```

@@ -2,29 +2,31 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を見たい**ですか？または、**PEASSの最新バージョンにアクセス**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**に**フォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 ## **基本情報**
 
-**TCC (Transparency, Consent, and Control)** はmacOSのメカニズムで、主にプライバシーの観点から、特定の機能へのアプリケーションアクセスを**制限し制御する**ためのものです。これには、位置情報サービス、連絡先、写真、マイク、カメラ、アクセシビリティ、フルディスクアクセスなどが含まれます。
+**TCC (透明性、同意、および制御)** は、macOSのメカニズムで、通常はプライバシーの観点から、特定の機能へのアプリケーションアクセスを**制限および制御する**ためのものです。これには、位置情報サービス、連絡先、写真、マイク、カメラ、アクセシビリティ、フルディスクアクセスなどが含まれます。
 
 ユーザーの視点からは、アプリケーションがTCCによって保護されている機能へのアクセスを求めるときに、**TCCが動作しているのを見ることができます**。このとき、**ユーザーにはダイアログが表示され**、アクセスを許可するかどうかを尋ねられます。
 
-また、ユーザーがプログラムにファイルを**ドラッグ＆ドロップする**など、ユーザーの**明示的な意図**によってアプリにファイルへのアクセスを**許可する**ことも可能です（明らかにプログラムはそれにアクセスできるべきです）。
+また、ユーザーがプログラムにファイルを**ドラッグ＆ドロップする**など、ユーザーの**明示的な意図**によってアプリにファイルへのアクセスを**許可する**ことも可能です（もちろん、プログラムはそれにアクセスできるべきです）。
 
 ![TCCプロンプトの例](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
 **TCC**は、`/System/Library/PrivateFrameworks/TCC.framework/Support/tccd`にある**デーモン**によって処理され、`/System/Library/LaunchDaemons/com.apple.tccd.system.plist`で設定されています（machサービス`com.apple.tccd.system`を登録）。
 
-ログインしている各ユーザーごとに実行される**ユーザーモードのtccd**が`/System/Library/LaunchAgents/com.apple.tccd.plist`に定義されており、machサービス`com.apple.tccd`と`com.apple.usernotifications.delegate.com.apple.tccd`を登録しています。
+ログインしている各ユーザーごとに実行される**ユーザーモードのtccd**は、`/System/Library/LaunchAgents/com.apple.tccd.plist`で定義されており、machサービス`com.apple.tccd`と`com.apple.usernotifications.delegate.com.apple.tccd`を登録しています。
 
 ここでは、システムとして、またユーザーとして実行されているtccdを見ることができます：
 ```bash
@@ -41,25 +43,25 @@ ps -ef | grep tcc
 * システム全体のデータベースは **`/Library/Application Support/com.apple.TCC/TCC.db`** にあります。
 * このデータベースは **SIP 保護されている**ため、SIP バイパスでのみ書き込むことができます。
 * ユーザーごとの設定用のユーザー TCC データベース **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** 。
-* このデータベースは保護されているため、フルディスクアクセスのような高い TCC 権限を持つプロセスのみが書き込むことができます（しかし、SIP によって保護されていません）。
+* このデータベースは保護されているため、フルディスクアクセスのような高い TCC 権限を持つプロセスのみが書き込むことができます（ただし、SIP によって保護されていません）。
 
 {% hint style="warning" %}
-前述のデータベースは読み取りアクセスに対しても **TCC で保護されています**。そのため、TCC 権限を持つプロセスからでない限り、通常のユーザー TCC データベースを読むことは**できません**。
+前述のデータベースは読み取りアクセスに対しても **TCC で保護されています**。そのため、TCC 権限を持つプロセスからでない限り、通常のユーザー TCC データベースを**読むことはできません**。
 
 ただし、これらの高い権限を持つプロセス（**FDA** や **`kTCCServiceEndpointSecurityClient`** など）は、ユーザーの TCC データベースに書き込むことができることを覚えておいてください。
 {% endhint %}
 
-* **位置情報サービス**へのアクセスを許可するクライアントを示す **3番目** の TCC データベースが **`/var/db/locationd/clients.plist`** にあります。
-* SIP 保護されたファイル **`/Users/carlospolop/Downloads/REG.db`**（TCC によって読み取りアクセスも保護されています）には、すべての**有効な TCC データベース**の**位置情報**が含まれています。
+* **第三の** TCC データベースは **`/var/db/locationd/clients.plist`** にあり、**位置情報サービス**へのアクセスを許可されたクライアントを示します。
+* SIP 保護されたファイル **`/Users/carlospolop/Downloads/REG.db`**（TCC によって読み取りアクセスも保護されています）には、すべての**有効な TCC データベース**の**位置**が含まれています。
 * SIP 保護されたファイル **`/Users/carlospolop/Downloads/MDMOverrides.plist`**（TCC によって読み取りアクセスも保護されています）には、さらに多くの TCC 付与権限が含まれています。
-* SIP 保護されたファイル **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`**（しかし誰でも読める）は、TCC 例外が必要なアプリケーションの許可リストです。
+* SIP 保護されたファイル **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`**（しかし誰でも読める）は、TCC 例外が必要なアプリケーションの許可リストです。&#x20;
 
 {% hint style="success" %}
 **iOS** の TCC データベースは **`/private/var/mobile/Library/TCC/TCC.db`** にあります。
 {% endhint %}
 
 {% hint style="info" %}
-**通知センター UI** はシステム TCC データベースに**変更を加える**ことができます：
+**通知センター UI** は、システム TCC データベースに**変更を加える**ことができます：
 
 {% code overflow="wrap" %}
 ```bash
@@ -70,7 +72,7 @@ com.apple.rootless.storage.TCC
 ```
 {% endcode %}
 
-しかし、ユーザーは**`tccutil`** コマンドラインユーティリティを使用して、**ルールを削除または照会**することができます。
+しかし、ユーザーは**`tccutil`** コマンドラインユーティリティを使用して**ルールを削除または照会**することができます。
 {% endhint %}
 
 #### データベースの照会
@@ -123,12 +125,12 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {% endtabs %}
 
 {% hint style="success" %}
-両方のデータベースをチェックすることで、アプリが許可している権限、禁止している権限、または持っていない権限（要求される）を確認できます。
+アプリが許可している権限、禁止している権限、または持っていない権限（要求される）を両方のデータベースをチェックすることで確認できます。
 {% endhint %}
 
 * **`service`** はTCC **権限**の文字列表現です
 * **`client`** は権限を持つ**バンドルID**または**バイナリへのパス**です
-* **`client_type`** はそれがバンドル識別子(0)か絶対パス(1)かを示します
+* **`client_type`** はバンドル識別子(0)か絶対パス(1)かを示します
 
 <details>
 
@@ -171,13 +173,11 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 </dict>
 </plist>
 ```
-<details>
-
-* **`auth_value`** は、異なる値を取ることができます：denied(0)、unknown(1)、allowed(2)、または limited(3)。
-* **`auth_reason`** は、次の値を取ることができます：Error(1)、User Consent(2)、User Set(3)、System Set(4)、Service Policy(5)、MDM Policy(6)、Override Policy(7)、Missing usage string(8)、Prompt Timeout(9)、Preflight Unknown(10)、Entitled(11)、App Type Policy(12)
-* **csreq** フィールドは、実行するバイナリを検証し、TCC権限を付与する方法を示すために存在します：
-
 </details>
+
+* **`auth_value`** には異なる値があります: denied(0), unknown(1), allowed(2), limited(3)。
+* **`auth_reason`** は以下の値を取ることができます: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
+* **csreq** フィールドは、バイナリを検証してTCC権限を付与する方法を示しています：
 ```bash
 # Query to get cserq in printable hex
 select service, client, hex(csreq) from access where auth_value=2;
@@ -198,7 +198,7 @@ echo "X'$REQ_HEX'"
 アプリに**既に与えられている権限**を `システム環境設定 --> セキュリティとプライバシー --> プライバシー --> ファイルとフォルダ` で確認することもできます。
 
 {% hint style="success" %}
-ユーザーは **`tccutil`** を使用してルールを**削除または照会** _できます_ 。&#x20;
+ユーザーは **`tccutil`** を使用してルールを**削除または照会**_できます_。&#x20;
 {% endhint %}
 
 #### TCC権限のリセット
@@ -211,7 +211,7 @@ tccutil reset All
 ```
 ### TCC 署名チェック
 
-TCC **データベース**はアプリケーションの**Bundle ID**を保存しますが、許可を求めるアプリが正しいものであることを**確認する**ために、**署名**に関する**情報**も**保存**しています。
+TCC **データベース**はアプリケーションの**Bundle ID**を保存しますが、許可を求めるアプリが正しいものであることを**確認する**ために、**署名**に関する**情報**も**保存**します。
 
 {% code overflow="wrap" %}
 ```bash
@@ -228,17 +228,17 @@ csreq -t -r /tmp/telegram_csreq.bin
 {% endcode %}
 
 {% hint style="warning" %}
-したがって、同じ名前とバンドルIDを使用する他のアプリケーションは、他のアプリに与えられた許可された権限にアクセスすることができません。
+したがって、同じ名前とバンドルIDを使用する他のアプリケーションは、他のアプリに付与された権限にアクセスすることができません。
 {% endhint %}
 
 ### エンタイトルメントとTCC権限
 
-アプリはリソースへの**アクセスを要求し、許可を得るだけでなく**、**関連するエンタイトルメントを持っている必要があります**。\
+アプリはリソースへの**アクセスを要求し、アクセスが許可されるだけでなく**、**関連するエンタイトルメントを持っている必要があります**。\
 例えば**Telegram**は、**カメラへのアクセスを要求する**ために`com.apple.security.device.camera`というエンタイトルメントを持っています。この**エンタイトルメントを持っていないアプリ**はカメラにアクセスすることが**できず**、ユーザーに権限を求めることもありません。
 
-しかし、`~/Desktop`、`~/Downloads`、`~/Documents`などの**特定のユーザーフォルダにアクセスする**ためには、アプリは特定の**エンタイトルメントを持っている必要はありません**。システムはアクセスを透過的に処理し、必要に応じて**ユーザーにプロンプトを表示します**。
+しかし、`~/Desktop`、`~/Downloads`、`~/Documents`などの**特定のユーザーフォルダへのアクセス**には、特定の**エンタイトルメントは必要ありません**。システムはアクセスを透過的に処理し、必要に応じて**ユーザーにプロンプトを表示します**。
 
-Appleのアプリは**プロンプトを生成しません**。それらは**エンタイトルメントリストに事前に付与された権利を含んでおり**、決して**ポップアップを生成することはなく**、**TCCデータベースにも表示されません**。例えば：
+Appleのアプリは**プロンプトを生成しません**。それらには**事前に付与された権利**が**エンタイトルメントリスト**に含まれており、**ポップアップを生成することはなく**、**TCCデータベースにも表示されません**。例えば：
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -252,10 +252,10 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 この操作により、カレンダーがリマインダー、カレンダー、およびアドレス帳へのアクセスをユーザーに求めることを避けることができます。
 
 {% hint style="success" %}
-エンタイトルメントに関する公式ドキュメントに加えて、[**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl) でエンタイトルメントに関する**興味深い非公式情報**も見つけることができます。
+エンタイトルメントに関する公式ドキュメントの他に、[**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl) でエンタイトルメントについての**興味深い非公式情報**も見つけることができます。
 {% endhint %}
 
-いくつかのTCC権限には、kTCCServiceAppleEvents、kTCCServiceCalendar、kTCCServicePhotosなどがあります。これらをすべて定義する公開リストはありませんが、[**既知のリスト**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service)を確認することができます。
+いくつかのTCC権限には、kTCCServiceAppleEvents、kTCCServiceCalendar、kTCCServicePhotosなどがあります。これらを定義する公開リストはありませんが、[**既知のリスト**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service)を確認することができます。
 
 ### センシティブで保護されていない場所
 
@@ -265,7 +265,7 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 
 ### ユーザーの意図 / com.apple.macl
 
-以前に述べたように、アプリにファイルをドラッグ＆ドロップすることで**そのアプリにファイルへのアクセスを許可する**ことが可能です。このアクセスはTCCデータベースには指定されませんが、ファイルの**拡張属性**として保存されます。この属性は許可されたアプリの**UUIDを保存**します。
+以前に述べたように、アプリにファイルをドラッグ＆ドロップすることで**そのアプリにファイルへのアクセスを許可する**ことが可能です。このアクセスはTCCデータベースには記載されませんが、ファイルの**拡張属性**として保存されます。この属性は許可されたアプリの**UUIDを保存**します。
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -283,7 +283,7 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 {% hint style="info" %}
 **`com.apple.macl`** 属性は、tccdではなく**Sandbox**によって管理されていることが興味深いです。
 
-また、あなたのコンピューターのアプリのUUIDを許可するファイルを別のコンピューターに移動した場合、同じアプリが異なるUIDを持つため、そのアプリにアクセスを許可しないことに注意してください。
+また、あなたのコンピューターのアプリのUUIDを許可するファイルを別のコンピューターに移動した場合、同じアプリでも異なるUIDを持つため、そのアプリにアクセスを許可しないことに注意してください。
 {% endhint %}
 
 拡張属性 `com.apple.macl` は、**SIPによって保護されている**ため、他の拡張属性のように**クリアすることはできません**。しかし、[**この投稿で説明されているように**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)、ファイルを**圧縮**して、**削除**してから**解凍**することで無効にすることが可能です。
@@ -340,7 +340,7 @@ strftime('%s', 'now') -- last_reminded with default current timestamp
 
 ### TCCペイロード
 
-TCCの権限を持つアプリ内に侵入した場合、それらを悪用する以下のページにあるTCCペイロードを確認してください：
+TCCの権限を持つアプリ内に侵入できた場合、それらを悪用するための以下のページにあるTCCペイロードを確認してください：
 
 {% content-ref url="macos-tcc-payloads.md" %}
 [macos-tcc-payloads.md](macos-tcc-payloads.md)
@@ -385,7 +385,7 @@ EOD
 これを悪用して**独自のユーザーTCCデータベースを書く**ことができます。
 
 {% hint style="warning" %}
-この権限を持っていると、**FinderにTCC制限フォルダへのアクセスを要求**してファイルを取得させることができますが、知る限りではFinderに任意のコードを実行させてFDAアクセスを完全に悪用することは**できない**でしょう。
+この権限を持っていると、**FinderにTCC制限フォルダへのアクセスを要求**してファイルを取得することができますが、知る限り**Finderに任意のコードを実行させて**そのFDAアクセスを完全に悪用することはできません。
 
 したがって、FDAの能力を完全に悪用することはできません。
 {% endhint %}
@@ -422,7 +422,7 @@ EOD
 ```
 </details>
 
-**Script Editor アプリ**では、Finder を制御できますが、AppleScript を使用してスクリプトを強制的に実行することはできません。
+**Script Editor アプリ**では、Finderを制御できますが、AppleScriptを使用してスクリプトの実行を強制することはできません。
 
 ### オートメーション (SE) から一部の TCC へ
 
@@ -468,9 +468,9 @@ EOD
 touch "$HOME/Desktop/file"
 rm "$HOME/Desktop/file"
 ```
-### 自動化 (SE) + アクセシビリティ (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** を FDA\* に
+### オートメーション (SE) + アクセシビリティ (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** から FDA\* へ
 
-**`System Events`** 上の自動化 + アクセシビリティ (**`kTCCServicePostEvent`**) は、**プロセスへのキーストロークを送信**することを可能にします。この方法を利用して、Finderを悪用してユーザーの TCC.db を変更したり、任意のアプリに FDA を与えることができます（ただし、これを行うにはパスワードの入力が求められる可能性があります）。
+**`System Events`** 上のオートメーション + アクセシビリティ (**`kTCCServicePostEvent`**) は、**プロセスへのキーストロークを送信**することを可能にします。この方法を利用して、Finderを悪用してユーザーの TCC.db を変更したり、任意のアプリに FDA を与えることができます（ただし、これにはパスワードの入力が求められる可能性があります）。
 
 Finder がユーザーの TCC.db を上書きする例：
 ```applescript
@@ -520,7 +520,7 @@ EOF
 ```
 ### `kTCCServiceAccessibility` から FDA\* への昇格
 
-[**アクセシビリティ権限を悪用するペイロード**](macos-tcc-payloads.md#accessibility)については、このページを確認してください。これを使ってFDA\*に昇格したり、例えばキーロガーを実行することができます。
+[**アクセシビリティ権限を悪用するペイロード**](macos-tcc-payloads.md#accessibility)については、このページを確認してください。例えば、FDA\* への権限昇格やキーロガーの実行が可能です。
 
 ### **エンドポイントセキュリティクライアントから FDA へ**
 
@@ -532,26 +532,26 @@ EOF
 
 ### ユーザー TCC DB から FDA へ
 
-ユーザー TCC データベースに対する **書き込み権限** を取得しても、**`FDA`** 権限を自分自身に付与することは **できません**。それはシステムデータベースに存在するものだけが付与できます。
+ユーザー TCC データベースに対する **書き込み権限** を取得しても、自分自身に **`FDA`** 権限を付与することは **できません**。システムデータベースに存在するものだけがその権限を付与できます。
 
-しかし、**`Finderへの自動化権限`** を自分自身に付与し、前述の技術を悪用してFDA\*に昇格することは **できます**。
+しかし、**`Finder への自動化権限`** を自分自身に付与し、前述のテクニックを悪用して FDA\* に昇格することは **可能です**。
 
 ### **FDA から TCC 権限へ**
 
 **フルディスクアクセス** の TCC 名は **`kTCCServiceSystemPolicyAllFiles`** です。
 
-これが実際の権限昇格であるとは思いませんが、役立つかもしれないので念のために記載します：FDA を制御するプログラムを持っている場合、ユーザーの TCC データベースを **変更し、任意のアクセス権を自分自身に付与することができます**。これは、FDA 権限を失う可能性がある場合の持続性技術として役立つかもしれません。
+これが実際に権限昇格になるとは思いませんが、役立つかもしれないので念のために記載します：FDA を制御するプログラムを持っている場合、ユーザーの TCC データベースを **変更し、任意のアクセス権を自分自身に付与することができます**。これは、FDA 権限を失う可能性がある場合の持続性テクニックとして有用かもしれません。
 
 ### **SIP バイパスから TCC バイパスへ**
 
-システムの **TCC データベース** は **SIP** によって保護されており、そのため **指定された権限を持つプロセスのみが** それを変更することができます。したがって、攻撃者が **ファイル** に対する **SIP バイパス**（SIP によって制限されたファイルを変更できる）を見つけた場合、以下のようなことができるようになります：
+システムの **TCC データベース** は **SIP** によって保護されているため、指定された権限を持つプロセスのみがそれを **変更することができます**。したがって、攻撃者が **ファイル** に対する **SIP バイパス**（SIP によって制限されたファイルを変更できる）を見つけた場合、以下のようにすることができます：
 
-* TCC データベースの保護を **解除し**、自分自身にすべての TCC 権限を付与する。例えば、これらのファイルを悪用できます：
+* TCC データベースの保護を **解除し**、自分自身にすべての TCC 権限を付与します。例えば、これらのファイルを悪用できます：
 * TCC システムデータベース
 * REG.db
 * MDMOverrides.plist
 
-しかし、**SIP バイパスを悪用して TCC をバイパスする** 別の方法があります。ファイル `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` は、TCC 例外が必要なアプリケーションの許可リストです。したがって、攻撃者がこのファイルから **SIP 保護を解除** し、自分の **アプリケーションを追加** することができれば、そのアプリケーションは TCC をバイパスできるようになります。\
+しかし、**SIP バイパスを悪用して TCC をバイパスする** 別の方法があります。ファイル `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` は、TCC 例外が必要なアプリケーションの許可リストです。したがって、攻撃者がこのファイルの **SIP 保護を解除** し、自分の **アプリケーションを追加** することができれば、そのアプリケーションは TCC をバイパスできるようになります。\
 例えば、ターミナルを追加するには：
 ```bash
 # Get needed info
@@ -597,12 +597,14 @@ AllowApplicationsList.plist:
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) で AWS ハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？**HackTricksで会社の広告を掲載**したいですか？または、**最新版のPEASSを入手**したり、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加するか**、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのコツを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+HackTricks をサポートする他の方法:
+
+* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFT**](https://opensea.io/collection/the-peass-family) コレクションをチェックする
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に**参加する**か、[**テレグラム グループ**](https://t.me/peass) に参加する、または Twitter 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出して、あなたのハッキングのコツを **共有する**。
 
 </details>

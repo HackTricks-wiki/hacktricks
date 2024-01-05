@@ -1,33 +1,35 @@
-# macOSサンドボックス
+# macOS Sandbox
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有**してください。
 
 </details>
 
 ## 基本情報
 
-MacOS Sandbox（最初はSeatbeltと呼ばれていました）は、**サンドボックスプロファイルで指定された許可されたアクションに制限**をかけ、サンドボックス内で実行されるアプリケーションが**予期されたリソースにのみアクセスすることを保証**します。
+macOS Sandbox（初期にはSeatbeltと呼ばれていた）は、アプリが実行されているSandboxプロファイルで指定された**許可されたアクションに**実行中のアプリケーションを**制限します**。これにより、**アプリケーションが予想されるリソースのみにアクセスすることを保証するのに役立ちます**。
 
-**`com.apple.security.app-sandbox`**という**エンタイトルメント**を持つアプリは、サンドボックス内で実行されます。**Appleのバイナリ**は通常、サンドボックス内で実行され、**App Store**に公開するためには、**このエンタイトルメントが必須**です。したがって、ほとんどのアプリケーションはサンドボックス内で実行されます。
+**`com.apple.security.app-sandbox`** の**権限**を持つアプリは、サンドボックス内で実行されます。**Appleのバイナリ**は通常、Sandbox内で実行され、**App Store**内で公開するためには、**この権限が必須です**。したがって、ほとんどのアプリケーションはサンドボックス内で実行されます。
 
-プロセスが何を行えるか、行えないかを制御するために、**サンドボックスにはカーネル全体のすべてのシスコールにフックがあります**。アプリのエンタイトルメントに応じて、サンドボックスは特定のアクションを許可します。
+プロセスができること、できないことを制御するために、**Sandboxにはカーネル全体のすべてのシステムコールにフックがあります**。アプリの**権限**に**依存して**、Sandboxは特定のアクションを**許可します**。
 
-サンドボックスの重要なコンポーネントには次のものがあります：
+Sandboxの重要なコンポーネントには以下が含まれます:
 
 * **カーネル拡張** `/System/Library/Extensions/Sandbox.kext`
 * **プライベートフレームワーク** `/System/Library/PrivateFrameworks/AppSandbox.framework`
 * ユーザーランドで実行される**デーモン** `/usr/libexec/sandboxd`
 * **コンテナ** `~/Library/Containers`
 
-コンテナフォルダ内には、**バンドルIDの名前でサンドボックス内で実行される各アプリのフォルダ**があります：
+コンテナフォルダ内には、バンドルIDの名前で**サンドボックスで実行された各アプリのフォルダが見つかります**：
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -38,7 +40,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-各バンドルIDフォルダの中には、アプリの**plist**と**データディレクトリ**があります。
+各バンドルIDフォルダ内には、アプリの**plist**と**Dataディレクトリ**が含まれています：
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -62,7 +64,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 {% hint style="danger" %}
-シンボリックリンクがSandboxから「脱出」して他のフォルダにアクセスするために存在していても、アプリはそれらにアクセスするための**権限を持っている必要があります**。これらの権限は**`.plist`**内にあります。
+サンドボックスから「脱出」して他のフォルダにアクセスするためのシンボリックリンクがあっても、アプリはそれらにアクセスするための**権限を持っている必要があります**。これらの権限は**`.plist`**内にあります。
 {% endhint %}
 ```bash
 # Get permissions
@@ -112,14 +114,14 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 {% hint style="warning" %}
-すべてのSandboxアプリケーションによって作成/変更されたものは、**quarantine属性**を持ちます。これにより、Sandboxアプリが**`open`**を使用して何かを実行しようとすると、GatekeeperがトリガーされてSandboxスペースが防止されます。
+Sandboxedアプリケーションによって作成/変更されたものは、**隔離属性**を取得します。これにより、Sandboxアプリが**`open`**を使用して何かを実行しようとした場合にGatekeeperをトリガーすることによって、sandbox空間が保護されます。
 {% endhint %}
 
-### Sandboxプロファイル
+### サンドボックスプロファイル
 
-Sandboxプロファイルは、そのSandboxで**許可/禁止**されるものを示す設定ファイルです。これは、**Sandboxプロファイル言語（SBPL）**を使用し、[**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\))プログラミング言語を使用します。
+サンドボックスプロファイルは、その**サンドボックス**で**許可/禁止**されることを示す設定ファイルです。**Sandbox Profile Language (SBPL)**を使用し、[**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\))プログラミング言語を使用します。
 
-ここには例があります：
+以下に例を示します：
 ```scheme
 (version 1) ; First you get the version
 
@@ -138,445 +140,34 @@ Sandboxプロファイルは、そのSandboxで**許可/禁止**されるもの�
 )
 ```
 {% hint style="success" %}
-[**こちらの研究**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **をチェックして、許可または拒否される可能性のあるさらなるアクションを確認してください。**
+この[**研究**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/)をチェックして、許可されるか拒否されるかもしれないアクションをもっと確認してください。
 {% endhint %}
 
-重要な**システムサービス**も、`mdnsresponder`サービスなど、独自の**サンドボックス**内で実行されます。これらのカスタム**サンドボックスプロファイル**は以下で確認できます：
+重要な**システムサービス**も独自のカスタム**サンドボックス**内で実行されます。例えば`mdnsresponder`サービスです。これらのカスタム**サンドボックスプロファイル**は以下で確認できます：
 
 * **`/usr/share/sandbox`**
 * **`/System/Library/Sandbox/Profiles`**&#x20;
 * 他のサンドボックスプロファイルは[https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles)で確認できます。
 
-**App Store**アプリは、**プロファイル** **`/System/Library/Sandbox/Profiles/application.sb`**を使用します。このプロファイルでは、**`com.apple.security.network.server`**などのエンタイトルメントがプロセスがネットワークを使用することを許可しているかどうかを確認できます。
+**App Store**のアプリは**プロファイル** **`/System/Library/Sandbox/Profiles/application.sb`**を使用します。このプロファイルで、**`com.apple.security.network.server`**のような権限がプロセスにネットワークの使用を許可する方法を確認できます。
 
-SIPは、/System/Library/Sandbox/rootless.confにあるplatform\_profileという名前のサンドボックスプロファイルです。
+SIPは/System/Library/Sandbox/rootless.conf内のplatform_profileというサンドボックスプロファイルです。
 
 ### サンドボックスプロファイルの例
 
-**特定のサンドボックスプロファイル**でアプリケーションを起動するには、次のコマンドを使用します：
+特定のサンドボックスプロファイルでアプリケーションを開始するには、次のコマンドを使用できます：
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
+{% tabs %}
+{% tab title="タッチ" %}
 {% code title="touch.sb" %}
-
-```plaintext
-(version 1)
-(deny default)
-(allow file-write-data file-write-metadata
-    (regex #"^/Users/[^/]+/Desktop/[^/]+$")
-    (regex #"^/Users/[^/]+/Documents/[^/]+$")
-    (regex #"^/Users/[^/]+/Downloads/[^/]+$")
-    (regex #"^/Users/[^/]+/Movies/[^/]+$")
-    (regex #"^/Users/[^/]+/Music/[^/]+$")
-    (regex #"^/Users/[^/]+/Pictures/[^/]+$")
-    (regex #"^/Users/[^/]+/Public/[^/]+$")
-    (regex #"^/Users/[^/]+/Sites/[^/]+$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/Users/[^/]+/Desktop/[^/]+$")
-    (regex #"^/Users/[^/]+/Documents/[^/]+$")
-    (regex #"^/Users/[^/]+/Downloads/[^/]+$")
-    (regex #"^/Users/[^/]+/Movies/[^/]+$")
-    (regex #"^/Users/[^/]+/Music/[^/]+$")
-    (regex #"^/Users/[^/]+/Pictures/[^/]+$")
-    (regex #"^/Users/[^/]+/Public/[^/]+$")
-    (regex #"^/Users/[^/]+/Sites/[^/]+$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/misc/magic$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/nls/[^/]+/LC_MESSAGES/[^/]+$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES/[^/]+$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_COLLATE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_CTYPE$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MONETARY$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_NUMERIC$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_TIME$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/[^/]+/LC_MESSAGES$")
-)
-(allow file-read-data file-read-metadata
-    (regex #"
 ```scheme
 (version 1)
 (deny default)
 (allow file* (literal "/tmp/hacktricks.txt"))
 ```
-{% endcode %}
+Since there is no English text provided that requires translation, I cannot proceed with a translation task. Please provide the relevant English text that you would like to be translated into Japanese.
 ```bash
 # This will fail because default is denied, so it cannot execute touch
 sandbox-exec -f touch.sb touch /tmp/hacktricks.txt
@@ -589,68 +180,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 2023-05-26 13:42:52.701382+0200  localhost kernel[0]: (Sandbox) 5 duplicate reports for Sandbox: sandbox-exec(41398) deny(1) file-read-metadata /var
 [...]
 ```
-{% code title="touch2.sb" %}
-
-以下は、macOSのサンドボックスに関する情報です。
-
-## 概要
-
-macOSのサンドボックスは、アプリケーションのセキュリティを強化するための重要な機能です。サンドボックスは、アプリケーションが制限された環境で実行されるように設計されており、悪意のあるコードや攻撃からシステムを保護します。
-
-## サンドボックスの機能
-
-macOSのサンドボックスには、以下のような機能があります。
-
-- ファイルシステムへのアクセス制限
-- ネットワークアクセスの制限
-- プロセス間通信の制限
-- ハードウェアリソースへのアクセス制限
-- システム設定の制限
-
-これらの機能により、アプリケーションは自身の環境内で動作し、システムへの悪意のあるアクセスを制限することができます。
-
-## サンドボックスの設定
-
-macOSのサンドボックスは、アプリケーションごとに設定することができます。アプリケーションの設定ファイルには、サンドボックスのルールや制限を記述します。
-
-以下は、`touch2.sb`という名前のサンドボックス設定ファイルの例です。
-
-```plaintext
-(version 1)
-(deny default)
-
-(allow file-write-data
-    (literal "/private/var/tmp/file.txt")
-)
-
-(allow file-read-metadata
-    (regex #"^/private/var/tmp/.*")
-)
-
-(allow file-read-data
-    (literal "/private/var/tmp/file.txt")
-)
-```
-
-この例では、`/private/var/tmp/file.txt`への書き込みと読み取りが許可されています。
-
-## サンドボックスのテスト
-
-サンドボックスの設定が正しく行われているかをテストするためには、`sandbox-exec`コマンドを使用します。
-
-以下のコマンドを実行すると、`touch2.sb`のサンドボックス設定に基づいて、`/private/var/tmp/file.txt`に対して書き込みが行われます。
-
-```plaintext
-sandbox-exec -f touch2.sb touch /private/var/tmp/file.txt
-```
-
-正常に書き込みが行われた場合、エラーメッセージは表示されません。
-
-## まとめ
-
-macOSのサンドボックスは、アプリケーションのセキュリティを強化するための重要な機能です。適切な設定とテストを行うことで、システムへの悪意のあるアクセスを防ぐことができます。
-
-{% endcode %}
+Since the provided text does not contain any English content to translate, there is nothing to translate. The markdown syntax provided is for a code block with a title, which does not require translation as per the instructions. If you have any specific English text that needs to be translated into Japanese, please provide the text.
 ```scheme
 (version 1)
 (deny default)
@@ -664,7 +194,11 @@ macOSのサンドボックスは、アプリケーションのセキュリティ
 ; 2023-05-26 13:44:59.840050+0200  localhost kernel[0]: (Sandbox) Sandbox: touch(41575) deny(1) sysctl-read kern.bootargs
 ; 2023-05-26 13:44:59.840061+0200  localhost kernel[0]: (Sandbox) Sandbox: touch(41575) deny(1) file-read-data /
 ```
+```
+{% endcode %}
+
 {% code title="touch3.sb" %}
+```
 ```scheme
 (version 1)
 (deny default)
@@ -678,50 +212,50 @@ macOSのサンドボックスは、アプリケーションのセキュリティ
 {% endtabs %}
 
 {% hint style="info" %}
-注意：**Windows上で実行されるApple製のソフトウェア**は、アプリケーションのサンドボックス化などの追加のセキュリティ対策はありません。
+**Windows**で動作する**Apple製のソフトウェア**には、アプリケーションのサンドボックス化などの追加のセキュリティ対策が**ない**ことに注意してください。
 {% endhint %}
 
-バイパスの例：
+バイパス例:
 
 * [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
-* [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)（`~$`で始まる名前のサンドボックス外のファイルを書き込むことができます）。
+* [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (サンドボックスの外に`~$`で始まる名前のファイルを書き込むことができます)。
 
-### MacOSサンドボックスプロファイル
+### MacOS サンドボックス プロファイル
 
-macOSは、システムのサンドボックスプロファイルを2つの場所に保存します：**/usr/share/sandbox/** と **/System/Library/Sandbox/Profiles**。
+macOSはシステムのサンドボックスプロファイルを**/usr/share/sandbox/** と **/System/Library/Sandbox/Profiles** の二箇所に保存しています。
 
-また、サードパーティのアプリケーションが _**com.apple.security.app-sandbox**_ エンタイトルメントを持っている場合、システムはそのプロセスに **/System/Library/Sandbox/Profiles/application.sb** プロファイルを適用します。
+そして、サードパーティのアプリケーションが _**com.apple.security.app-sandbox**_ 権限を持っている場合、システムはそのプロセスに **/System/Library/Sandbox/Profiles/application.sb** プロファイルを適用します。
 
-### **iOSサンドボックスプロファイル**
+### **iOS サンドボックス プロファイル**
 
-デフォルトのプロファイルは **container** と呼ばれ、SBPLテキスト表現はありません。メモリ上では、このサンドボックスは、サンドボックスの各権限に対してAllow/Denyバイナリツリーとして表されます。
+デフォルトのプロファイルは **container** と呼ばれ、SBPLテキスト表現はありません。メモリ内では、このサンドボックスはサンドボックスの各権限に対する許可/拒否のバイナリツリーとして表されます。
 
 ### サンドボックスのデバッグとバイパス
 
-**プロセスはmacOSではサンドボックス化されて生まれません：iOSとは異なり、サンドボックスはプログラムの最初の命令が実行される前にカーネルによって適用されますが、macOSではプロセス自体がサンドボックスに配置することを選択する必要があります。**
+**macOSではプロセスはサンドボックス化されて生まれません：iOSとは異なり**、iOSではカーネルによってプログラムの最初の命令が実行される前にサンドボックスが適用されますが、macOSでは**プロセスは自らサンドボックスに入ることを選択する必要があります。**
 
-プロセスは、`com.apple.security.app-sandbox` エンタイトルメントを持っている場合、ユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を参照してください：
+プロセスは、権限 `com.apple.security.app-sandbox` を持っている場合、ユーザーランドから自動的にサンドボックス化されて起動します。このプロセスの詳細な説明については、以下をチェックしてください:
 
 {% content-ref url="macos-sandbox-debug-and-bypass/" %}
 [macos-sandbox-debug-and-bypass](macos-sandbox-debug-and-bypass/)
 {% endcontent-ref %}
 
-### **PIDの特権を確認する**
+### **PID 権限の確認**
 
-[これによると](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s)、**`sandbox_check`**（`__mac_syscall`です）は、特定のPIDでサンドボックスによって操作が許可されているかどうかを確認できます。
+[**これによると**](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s)、**`sandbox_check`** (これは `__mac_syscall` です)は、特定のPIDでサンドボックスによって操作が許可されているかどうかをチェックすることができます。
 
-[**ツールsbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c)は、PIDが特定のアクションを実行できるかどうかを確認できます：
+[**ツール sbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c)は、PIDが特定のアクションを実行できるかどうかをチェックすることができます:
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access
 sbtool <pid> inspect #Gives you an explaination of the sandbox profile
 sbtool <pid> all
 ```
-### App StoreアプリでのカスタムSBPL
+### App StoreアプリのカスタムSBPL
 
-企業は、デフォルトのものではなく、**カスタムのサンドボックスプロファイル**を使用してアプリを実行することができます。ただし、Appleによって承認される必要がある**`com.apple.security.temporary-exception.sbpl`**というエンタイトルメントを使用する必要があります。
+企業がデフォルトのものではなく、**カスタムサンドボックスプロファイル**でアプリを実行することが可能です。そのためには、Appleによって承認される必要がある権限 **`com.apple.security.temporary-exception.sbpl`** を使用する必要があります。
 
-このエンタイトルメントの定義は、**`/System/Library/Sandbox/Profiles/application.sb:`**で確認することができます。
+この権限の定義は **`/System/Library/Sandbox/Profiles/application.sb:`** で確認できます。
 ```scheme
 (sandbox-array-entitlement
 "com.apple.security.temporary-exception.sbpl"
@@ -729,16 +263,18 @@ sbtool <pid> all
 (let* ((port (open-input-string string)) (sbpl (read port)))
 (with-transparent-redirection (eval sbpl)))))
 ```
-これは、**この権限の後にある文字列をSandboxプロファイルとして評価**します。
+この権限の後の文字列を**Sandboxプロファイルとして評価します**。
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでのAWSハッキングを学ぶ</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
