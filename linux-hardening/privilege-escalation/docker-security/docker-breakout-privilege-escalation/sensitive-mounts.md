@@ -1,35 +1,33 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
 
-(_**この情報は**_ [_**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**_](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts) **から取得されました**_)
+(_**この情報は**_ [_**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**_](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts) _**から取得されました**_)
 
-ネームスペースのサポートがないため、`/proc`と`/sys`の公開は、重要な攻撃面と情報漏洩の源となります。`procfs`と`sysfs`内の多くのファイルは、コンテナの脱出、ホストの変更、または基本的な情報漏洩のリスクを提供し、他の攻撃を容易にする可能性があります。
+名前空間のサポートが不足しているため、`/proc`と`/sys`の露出は、大きな攻撃面と情報漏洩の源泉を提供します。`procfs`と`sysfs`内の多数のファイルは、コンテナ脱出、ホストの変更、または他の攻撃を容易にする基本的な情報漏洩のリスクを提供します。
 
-これらのテクニックを悪用するためには、単に`-v /proc:/host/proc`のように何かを**誤って設定するだけで十分**です。なぜなら、**AppArmorはパスベースであるため、/host/procを保護しない**からです。
+これらのテクニックを悪用するためには、**AppArmorはパスベースであるため、`-v /proc:/host/proc`のようなものを誤って設定するだけで十分かもしれません**。
 
 # procfs
 
 ## /proc/sys
 
-`/proc/sys`は通常、`sysctl(2)`を介して制御されるカーネル変数の変更を許可します。
+`/proc/sys`は通常、`sysctl(2)`を通じて制御されるカーネル変数を変更するアクセスを許可します。
 
 ### /proc/sys/kernel/core\_pattern
 
-[/proc/sys/kernel/core\_pattern](https://man7.org/linux/man-pages/man5/core.5.html)は、コアファイルの生成時（通常はプログラムのクラッシュ時）に実行されるプログラムを定義し、このファイルの最初の文字がパイプ記号`|`である場合、コアファイルが標準入力として渡されます。このプログラムはrootユーザーによって実行され、最大128バイトのコマンドライン引数を許可します。これにより、コンテナホスト内での簡単なコード実行が可能になります。これは、クラッシュとコアファイルの生成（悪意のある行動の多くで簡単に破棄できる）があれば、コンテナホスト内でのトリビアルなコード実行が可能になるためです。
+[/proc/sys/kernel/core\_pattern](https://man7.org/linux/man-pages/man5/core.5.html)は、コアファイル生成時（通常はプログラムクラッシュ時）に実行されるプログラムを定義し、このファイルの最初の文字がパイプ記号`|`である場合、標準入力としてコアファイルが渡されます。このプログラムはrootユーザーによって実行され、コマンドライン引数として最大128バイトまで許可されます。これにより、クラッシュとコアファイル生成（悪意のある行動の中で単に破棄される可能性がある）があれば、コンテナホスト内で簡単にコード実行が可能になります。
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] && echo Yes #For testing
 cd /proc/sys/kernel
@@ -38,82 +36,82 @@ sleep 5 && ./crash &
 ```
 ### /proc/sys/kernel/modprobe
 
-[/proc/sys/kernel/modprobe](https://man7.org/linux/man-pages/man5/proc.5.html)は、カーネルモジュールローダーのパスを含んでいます。このパスは、[modprobe](https://man7.org/linux/man-pages/man8/modprobe.8.html)コマンドを使用してカーネルモジュールをロードする際に呼び出されます。カーネルがカーネルモジュールのロードを試みるアクション（例えば、現在ロードされていない暗号モジュールをcrypto-APIを使用してロードする、または現在使用されていないデバイスのネットワーキングモジュールをifconfigを使用してロードする）を実行することで、コードの実行が可能になります。
+[/proc/sys/kernel/modprobe](https://man7.org/linux/man-pages/man5/proc.5.html) には、[modprobe](https://man7.org/linux/man-pages/man8/modprobe.8.html) コマンドなどを介してカーネルモジュールをロードする際に呼び出されるカーネルモジュールローダーへのパスが含まれています。現在ロードされていない暗号モジュールをロードするためにcrypto-APIを使用するか、現在使用されていないデバイスのネットワーキングモジュールをロードするためにifconfigを使用するなど、カーネルがカーネルモジュールのロードを試みるアクションをトリガーすることにより、コード実行が可能になります。
 ```bash
 # Check if you can directly access modprobe
 ls -l `cat /proc/sys/kernel/modprobe`
 ```
 ### /proc/sys/vm/panic\_on\_oom
 
-[/proc/sys/vm/panic\_on\_oom](https://man7.org/linux/man-pages/man5/proc.5.html)は、カーネルがメモリ不足（OOM）の状態に達した場合にパニックするかどうかを決定するグローバルフラグです（OOMキラーを呼び出す代わりに）。これはコンテナの脱出ではなく、よりむしろホストにのみ利用可能であるべき機能を公開するもので、サービス拒否（DoS）攻撃と言えます。
+[/proc/sys/vm/panic\_on\_oom](https://man7.org/linux/man-pages/man5/proc.5.html) は、メモリ不足（OOM）の状態が発生したときに、カーネルがパニックするか（OOMキラーを呼び出すのではなく）、どうかを決定するグローバルフラグです。これはコンテナ脱出よりもサービス拒否（DoS）攻撃に近いですが、ホストのみが持つべき能力を露呈しています。
 
 ### /proc/sys/fs
 
-[/proc/sys/fs](https://man7.org/linux/man-pages/man5/proc.5.html)ディレクトリには、クォータ、ファイルハンドル、inode、およびdentry情報など、ファイルシステムのさまざまな側面に関するオプションと情報の配列が含まれています。このディレクトリへの書き込みアクセスは、ホストに対してさまざまなサービス拒否攻撃を可能にします。
+[/proc/sys/fs](https://man7.org/linux/man-pages/man5/proc.5.html) ディレクトリには、クォータ、ファイルハンドル、inode、dentry情報を含むファイルシステムのさまざまな側面に関するオプションと情報が含まれています。このディレクトリへの書き込みアクセスを許可すると、ホストに対するさまざまなサービス拒否攻撃を可能にします。
 
 ### /proc/sys/fs/binfmt\_misc
 
-[/proc/sys/fs/binfmt\_misc](https://man7.org/linux/man-pages/man5/proc.5.html)は、さまざまな**インタプリタが非ネイティブバイナリ**形式（Javaなど）に基づいて登録されることが通常のさまざまなバイナリ形式を実行することを許可します。カーネルにバイナリを登録してハンドラとして実行させることができます。\
-[https://github.com/toffan/binfmt\_misc](https://github.com/toffan/binfmt\_misc)にエクスプロイトがあります: _Poor man's rootkit, leverage_ [_binfmt\_misc_](https://github.com/torvalds/linux/raw/master/Documentation/admin-guide/binfmt-misc.rst)_'s_ [_credentials_](https://github.com/torvalds/linux/blame/3bdb5971ffc6e87362787c770353eb3e54b7af30/Documentation/binfmt\_misc.txt#L62) _option to escalate privilege through any suid binary (and to get a root shell) if `/proc/sys/fs/binfmt_misc/register` is writeable._
+[/proc/sys/fs/binfmt\_misc](https://man7.org/linux/man-pages/man5/proc.5.html) は、さまざまな**非ネイティブバイナリ**形式（Javaなど）に対して、そのマジックナンバーに基づいてさまざまな**インタープリタを登録することを可能にします。カーネルにバイナリをハンドラとして登録することで実行させることができます。\
+[https://github.com/toffan/binfmt\_misc](https://github.com/toffan/binfmt\_misc) でエクスプロイトを見つけることができます：_貧乏人のルートキット、_ [_binfmt\_misc_](https://github.com/torvalds/linux/raw/master/Documentation/admin-guide/binfmt-misc.rst) _の_ [_credentials_](https://github.com/torvalds/linux/blame/3bdb5971ffc6e87362787c770353eb3e54b7af30/Documentation/binfmt\_misc.txt#L62) _オプションを利用して、`/proc/sys/fs/binfmt_misc/register`が書き込み可能であれば、任意のsuidバイナリを通じて権限を昇格させ（そしてrootシェルを取得）します。_
 
-このテクニックの詳細な説明については、[https://www.youtube.com/watch?v=WBC7hhgMvQQ](https://www.youtube.com/watch?v=WBC7hhgMvQQ)を参照してください。
+このテクニックの詳細な説明については、[https://www.youtube.com/watch?v=WBC7hhgMvQQ](https://www.youtube.com/watch?v=WBC7hhgMvQQ) を確認してください。
 
 ## /proc/config.gz
 
-[/proc/config.gz](https://man7.org/linux/man-pages/man5/proc.5.html)は、`CONFIG_IKCONFIG_PROC`の設定に応じて、実行中のカーネルの設定オプションの圧縮バージョンを公開します。これにより、侵害されたまたは悪意のあるコンテナが、カーネルで有効になっている脆弱な領域を簡単に特定して攻撃することができる場合があります。
+[/proc/config.gz](https://man7.org/linux/man-pages/man5/proc.5.html) は `CONFIG_IKCONFIG_PROC` の設定に依存し、実行中のカーネルのカーネル設定オプションの圧縮バージョンを公開します。これにより、侵害されたり悪意のあるコンテナが、カーネルで有効にされている脆弱な領域を簡単に発見してターゲットにすることができます。
 
 ## /proc/sysrq-trigger
 
-`Sysrq`は、特別な`SysRq`キーボードの組み合わせを介して呼び出すことができる古いメカニズムです。これにより、システムの即時再起動、`sync(2)`の発行、すべてのファイルシステムの読み取り専用での再マウント、カーネルデバッガの呼び出し、その他の操作が可能になります。
+`Sysrq` は、特別な `SysRq` キーボードの組み合わせを介して呼び出すことができる古いメカニズムです。これにより、システムの即時再起動、`sync(2)` の発行、すべてのファイルシステムの読み取り専用としての再マウント、カーネルデバッガの呼び出し、その他の操作が可能になります。
 
-ゲストが適切に分離されていない場合、`/proc/sysrq-trigger`ファイルに文字を書き込むことで、[sysrq](https://www.kernel.org/doc/html/v4.11/admin-guide/sysrq.html)コマンドをトリガーすることができます。
+ゲストが適切に隔離されていない場合、`/proc/sysrq-trigger` ファイルに文字を書き込むことで [sysrq](https://www.kernel.org/doc/html/v4.11/admin-guide/sysrq.html) コマンドをトリガーすることができます。
 ```bash
 # Reboot the host
 echo b > /proc/sysrq-trigger
 ```
 ## /proc/kmsg
 
-[/proc/kmsg](https://man7.org/linux/man-pages/man5/proc.5.html)は通常`dmesg`を介してアクセスされるカーネルリングバッファメッセージを公開することができます。この情報の公開は、カーネルのエクスプロイトを支援し、カーネルアドレスの漏洩（カーネルアドレススペース配置ランダム化（KASLR）の防御に役立つ可能性があります）、およびカーネル、ハードウェア、ブロックされたパケット、その他のシステムの詳細に関する一般的な情報開示の源となります。
+[/proc/kmsg](https://man7.org/linux/man-pages/man5/proc.5.html) は、通常 `dmesg` 経由でアクセスされるカーネルリングバッファメッセージを公開します。この情報の露出は、カーネルのexploit開発を助け、カーネルアドレスのリークを引き起こす可能性があります（これはカーネルアドレス空間レイアウトランダマイゼーション（KASLR）を打ち負かすのに役立つかもしれません）、またカーネル、ハードウェア、ブロックされたパケット、その他のシステムの詳細に関する一般的な情報開示の源となります。
 
 ## /proc/kallsyms
 
-[/proc/kallsyms](https://man7.org/linux/man-pages/man5/proc.5.html)には、動的およびロード可能なモジュールのためのカーネルエクスポートされたシンボルとそのアドレスのリストが含まれています。これには、カーネルのイメージの物理メモリ内の位置も含まれており、カーネルエクスプロイトの開発に役立ちます。これらの場所から、カーネルのベースアドレスまたはオフセットを見つけることができ、これを使用してカーネルアドレススペース配置ランダム化（KASLR）を克服することができます。
+[/proc/kallsyms](https://man7.org/linux/man-pages/man5/proc.5.html) には、動的およびロード可能なモジュールのカーネルエクスポートシンボルとそのアドレスの場所が含まれています。これには、物理メモリ内のカーネルのイメージの位置も含まれており、カーネルexploitの開発に役立ちます。これらの位置から、カーネルのベースアドレスまたはオフセットを見つけることができ、カーネルアドレス空間レイアウトランダマイゼーション（KASLR）を克服するために使用できます。
 
-`kptr_restrict`が`1`または`2`に設定されているシステムでは、このファイルは存在しますが、アドレス情報は提供されません（ただし、シンボルのリストの順序はメモリ内の順序と同じです）。
+`kptr_restrict` が `1` または `2` に設定されているシステムでは、このファイルは存在しますが、アドレス情報は提供されません（ただし、シンボルがリストされている順序はメモリ内の順序と同一です）。
 
 ## /proc/\[pid]/mem
 
-[/proc/\[pid\]/mem](https://man7.org/linux/man-pages/man5/proc.5.html)は、カーネルメモリデバイス`/dev/mem`へのインターフェースを公開します。PID Namespaceは、この`procfs`ベクターを介した一部の攻撃から保護するかもしれませんが、この領域は歴史的に脆弱であり、安全と考えられていましたが、特権昇格のために再び脆弱性が見つかりました。
+[/proc/\[pid\]/mem](https://man7.org/linux/man-pages/man5/proc.5.html) は、カーネルメモリデバイス `/dev/mem` へのインターフェースを公開します。PID Namespaceはこの `procfs` ベクターを介したいくつかの攻撃から保護するかもしれませんが、この領域は歴史的に脆弱であり、安全だと考えられていた後、再び権限昇格に[vulnerable](https://git.zx2c4.com/CVE-2012-0056/about/)であることが見つかりました。
 
 ## /proc/kcore
 
-[/proc/kcore](https://man7.org/linux/man-pages/man5/proc.5.html)はシステムの物理メモリを表し、ELFコア形式（通常はコアダンプファイルで見つかります）です。これには、そのメモリへの書き込みは許可されていません。このファイルを読むことができる（特権ユーザーに制限されています）と、ホストシステムおよび他のコンテナからメモリの内容が漏洩する可能性があります。
+[/proc/kcore](https://man7.org/linux/man-pages/man5/proc.5.html) は、システムの物理メモリを表し、通常コアダンプファイルで見られるELFコアフォーマットです。このファイルの読み取りは特権ユーザーに制限されており、ホストシステムと他のコンテナからのメモリ内容をリークする可能性があります。
 
-大きな報告されたファイルサイズは、アーキテクチャの物理的にアドレス指定可能なメモリの最大量を表しており、それを読むことで問題が発生することがあります（またはソフトウェアの脆弱性に応じてクラッシュすることがあります）。
+報告された大きなファイルサイズは、アーキテクチャの物理的にアドレス可能なメモリの最大量を表しており、それを読む際に問題を引き起こす可能性があります（ソフトウェアの脆弱性によってはクラッシュすることもあります）。
 
-[2019年に/proc/kcoreをダンプする](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)
+[Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)
 
 ## /proc/kmem
 
-`/proc/kmem`は[/dev/kmem](https://man7.org/linux/man-pages/man4/kmem.4.html)の代替インターフェースです（cgroupデバイスホワイトリストによって直接アクセスがブロックされています）。これはカーネル仮想メモリを表すキャラクタデバイスファイルで、読み書きの両方が可能であり、カーネルメモリを直接変更することができます。
+`/proc/kmem` は、[/dev/kmem](https://man7.org/linux/man-pages/man4/kmem.4.html)（cgroupデバイスホワイトリストによって直接アクセスがブロックされている）の代替インターフェースであり、カーネル仮想メモリを表すキャラクタデバイスファイルです。読み書きが可能で、カーネルメモリの直接変更を許可します。
 
 ## /proc/mem
 
-`/proc/mem`は[/dev/mem](https://man7.org/linux/man-pages/man4/kmem.4.html)の代替インターフェースです（cgroupデバイスホワイトリストによって直接アクセスがブロックされています）。これはシステムの物理メモリを表すキャラクタデバイスファイルで、読み書きの両方が可能であり、すべてのメモリの変更が可能です（ただし、`kmem`よりも少し洗練された操作が必要です。仮想アドレスを物理アドレスに変換する必要があります）。
+`/proc/mem` は、[/dev/mem](https://man7.org/linux/man-pages/man4/kmem.4.html)（cgroupデバイスホワイトリストによって直接アクセスがブロックされている）の代替インターフェースであり、システムの物理メモリを表すキャラクタデバイスファイルです。読み書きが可能で、すべてのメモリの変更を許可します。（`kmem`よりもわずかに繊細さが必要ですが、仮想アドレスを物理アドレスに解決する必要があります）。
 
 ## /proc/sched\_debug
 
-`/proc/sched_debug`は、システム全体のプロセススケジューリング情報を返す特別なファイルです。この情報には、プロセスの名前とプロセスIDだけでなく、プロセスのcgroup識別子も含まれます。これにより、PID名前空間の保護をバイパスすることができ、他のユーザー/ワールドから読み取り可能なので、特権のないコンテナでも悪用される可能性があります。
+`/proc/sched_debug` は、システム全体のプロセススケジューリング情報を返す特別なファイルです。この情報には、すべての名前空間からのプロセス名とプロセスIDに加えて、プロセスcgroup識別子が含まれています。これはPID名前空間の保護を効果的にバイパスし、他の/世界から読み取り可能なので、特権のないコンテナでも悪用される可能性があります。
 
 ## /proc/\[pid]/mountinfo
 
-[/proc/\[pid\]/mountinfo](https://man7.org/linux/man-pages/man5/proc.5.html)には、プロセスのマウント名前空間のマウントポイントに関する情報が含まれています。これにより、コンテナの`rootfs`またはイメージの場所が公開されます。
+[/proc/\[pid\]/mountinfo](https://man7.org/linux/man-pages/man5/proc.5.html) には、プロセスのマウント名前空間内のマウントポイントに関する情報が含まれています。コンテナの `rootfs` またはイメージの位置を公開します。
 
 # sysfs
 
 ## /sys/kernel/uevent\_helper
 
-`uevent`は、デバイスが追加または削除されたときにカーネルによってトリガーされるイベントです。特に、`uevent_helper`のパスは、`/sys/kernel/uevent_helper`に書き込むことで変更できます。その後、`uevent`がトリガーされると（これは`/sys/class/mem/null/uevent`などのファイルに書き込むことによってユーザーランドからも行うことができます）、悪意のある`uevent_helper`が実行されます。
+`uevents` は、デバイスが追加または削除されたときにカーネルによってトリガーされるイベントです。特に、`uevent_helper` のパスは `/sys/kernel/uevent_helper` に書き込むことで変更できます。その後、`uevent` がトリガーされると（これは `/sys/class/mem/null/uevent` などのファイルに書き込むことでユーザーランドからも行うことができます）、悪意のある `uevent_helper` が実行されます。
 ```bash
 # Creates a payload
 cat "#!/bin/sh" > /evil-helper
@@ -134,27 +132,27 @@ cat /output
 ```
 ## /sys/class/thermal
 
-ACPIおよびさまざまなハードウェア設定にアクセスできます。これは通常、ノートパソコンやゲーミングマザーボードに見られます。これにより、コンテナホストに対するDoS攻撃が可能になり、物理的な損害を引き起こす可能性もあります。
+ACPIおよび温度制御のための様々なハードウェア設定へのアクセスを提供します。通常、ラップトップやゲーミングマザーボードで見られます。これにより、コンテナホストに対するDoS攻撃が可能となり、物理的な損傷に至る可能性もあります。
 
 ## /sys/kernel/vmcoreinfo
 
-このファイルは、KASLRを打破するために使用できるカーネルアドレスを漏洩する可能性があります。
+このファイルはカーネルアドレスを漏洩する可能性があり、KASLRを回避するために使用されることがあります。
 
 ## /sys/kernel/security
 
-`/sys/kernel/security`には、Linuxセキュリティモジュールの設定を可能にする`securityfs`インターフェースがマウントされています。これにより、[AppArmorポリシー](https://gitlab.com/apparmor/apparmor/-/wikis/Kernel\_interfaces#securityfs-syskernelsecurityapparmor)の設定が可能になり、コンテナがMACシステムを無効にすることができます。
+`/sys/kernel/security`には`securityfs`インターフェースがマウントされており、Linux Security Modulesの設定を可能にします。これにより[AppArmorポリシー](https://gitlab.com/apparmor/apparmor/-/wikis/Kernel\_interfaces#securityfs-syskernelsecurityapparmor)の設定が可能となり、コンテナがMACシステムを無効にすることができるかもしれません。
 
 ## /sys/firmware/efi/vars
 
-`/sys/firmware/efi/vars`は、NVRAM内のEFI変数とのやり取りのためのインターフェースを公開します。これは通常、ほとんどのサーバーには関係ありませんが、EFIはますます人気が高まっています。許可の弱点により、一部のノートパソコンが壊れることさえあります。
+`/sys/firmware/efi/vars`はNVRAM内のEFI変数と対話するインターフェースを公開しています。これは通常のサーバーにはあまり関係ありませんが、EFIはますます人気が高まっています。権限の弱さが原因で、いくつかのラップトップが故障したこともあります。
 
 ## /sys/firmware/efi/efivars
 
-`/sys/firmware/efi/efivars`は、UEFIブート引数用のNVRAMに書き込むためのインターフェースを提供します。これらを変更すると、ホストマシンが起動不能になる可能性があります。
+`/sys/firmware/efi/efivars`はUEFIブート引数用のNVRAMに書き込むためのインターフェースを提供します。これを変更すると、ホストマシンが起動不能になる可能性があります。
 
 ## /sys/kernel/debug
 
-`debugfs`は、カーネル（またはカーネルモジュール）がユーザーランドからアクセス可能なデバッグインターフェースを作成できる「ルールのない」インターフェースを提供します。過去にいくつかのセキュリティの問題があり、ファイルシステムの「ルールのない」ガイドラインはしばしばセキュリティの制約と衝突してきました。
+`debugfs`は、カーネル（またはカーネルモジュール）がユーザーランドにアクセス可能なデバッグインターフェースを作成できる「ルールなし」のインターフェースを提供します。過去にはいくつかのセキュリティ問題があり、ファイルシステムの背後にある「ルールなし」のガイドラインはしばしばセキュリティ制約と衝突しています。
 
 # 参考文献
 
@@ -164,16 +162,14 @@ ACPIおよびさまざまなハードウェア設定にアクセスできます�
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-- **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！**
+他のHackTricksをサポートする方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)または[telegramグループ](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
-
-- **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **HackTricksに広告を掲載したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**の[**githubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>

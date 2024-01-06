@@ -1,27 +1,25 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したい**ですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
 
 # 基本情報
 
-Logstashはログの収集、変換、出力に使用されます。これは、入力、フィルタ、出力モジュールを含む**パイプライン**を使用して実現されます。Logstashをサービスとして実行しているマシンを侵害した場合、このサービスは興味深くなります。
+Logstashは、ログの収集、変換、出力に使用されます。これは、入力、フィルター、出力モジュールを含む**パイプライン**を使用して実現されます。サービスは、Logstashをサービスとして実行しているマシンが侵害された場合に興味深くなります。
 
 ## パイプライン
 
-パイプラインの設定ファイルである**/etc/logstash/pipelines.yml**は、アクティブなパイプラインの場所を指定します：
+パイプライン設定ファイル **/etc/logstash/pipelines.yml** は、アクティブなパイプラインの場所を指定します：
 ```bash
 # This file is where you define your pipelines. You can define multiple.
 # For more information on multiple pipelines, see the documentation:
@@ -33,23 +31,23 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-ここでは、設定されたパイプラインを含む**.conf**ファイルのパスを見つけることができます。**Elasticsearch出力モジュール**が使用されている場合、**パイプライン**にはElasticsearchインスタンスの有効な**資格情報**が含まれる可能性があります。これらの資格情報は、LogstashがElasticsearchにデータを書き込む必要があるため、通常はより高い特権を持っています。ワイルドカードが使用されている場合、Logstashはワイルドカードに一致するそのフォルダにあるすべてのパイプラインを実行しようとします。
+以下には、設定されたパイプラインを含む **.conf** ファイルへのパスが記載されています。**Elasticsearch 出力モジュール**が使用されている場合、**パイプライン**にはElasticsearchインスタンスの有効な**資格情報**が含まれる可能性が高いです。LogstashはElasticsearchにデータを書き込む必要があるため、これらの資格情報はしばしばより多くの権限を持っています。ワイルドカードが使用されている場合、Logstashはそのフォルダ内のワイルドカードに一致するすべてのパイプラインを実行しようとします。
 
-## 書き込み可能なパイプラインによる特権昇格
+## 書き込み可能なパイプラインを使った権限昇格
 
-自分の特権を昇格させる前に、logstashサービスを実行しているユーザーを確認する必要があります。なぜなら、それがあなたが後で所有するユーザーになるからです。デフォルトでは、logstashサービスは**logstash**ユーザーの特権で実行されます。
+自分の権限を昇格させる前に、logstashサービスを実行しているユーザーを確認する必要があります。なぜなら、その後そのユーザーを所有することになるからです。デフォルトでは、logstashサービスは**logstash**ユーザーの権限で実行されます。
 
-次のいずれかの権限を持っているかどうかを確認してください：
+以下のいずれかの必要な権限を持っているか確認してください：
 
-* パイプラインの**.conf**ファイルに**書き込み権限**があるか、
-* **/etc/logstash/pipelines.yml**にワイルドカードが含まれており、指定されたフォルダに書き込みが許可されているか
+* パイプラインの **.conf** ファイルに**書き込み権限**がある **または**
+* **/etc/logstash/pipelines.yml** にワイルドカードが含まれており、指定されたフォルダに書き込む権限がある
 
-さらに、次のいずれかの要件を満たす必要があります：
+さらに、以下の要件の**いずれか**を満たす必要があります：
 
-* logstashサービスを再起動できるか、
-* **/etc/logstash/logstash.yml**にエントリ**config.reload.automatic: true**が含まれているか
+* logstashサービスを再起動できる **または**
+* **/etc/logstash/logstash.yml** に **config.reload.automatic: true** のエントリが含まれている
 
-ワイルドカードが指定されている場合は、そのワイルドカードに一致するファイルを作成してみてください。以下の内容をファイルに書き込むと、コマンドを実行できます：
+ワイルドカードが指定されている場合、そのワイルドカードに一致するファイルを作成してみてください。以下の内容をファイルに書き込むことでコマンドを実行できます：
 ```bash
 input {
 exec {
@@ -65,11 +63,11 @@ codec => rubydebug
 }
 }
 ```
-**interval**は秒単位の時間を指定します。この例では、**whoami**コマンドが120秒ごとに実行されます。コマンドの出力は**/tmp/output.log**に保存されます。
+**インターバル**は秒単位で指定します。この例では、**whoami** コマンドが120秒ごとに実行されます。コマンドの出力は **/tmp/output.log** に保存されます。
 
-**/etc/logstash/logstash.yml**にエントリ**config.reload.automatic: true**が含まれている場合、コマンドが実行されるまで待つだけで十分です。Logstashは自動的に新しいパイプライン構成ファイルや既存のパイプライン構成の変更を認識します。それ以外の場合は、logstashサービスを再起動してください。
+もし **/etc/logstash/logstash.yml** に **config.reload.automatic: true** のエントリが含まれている場合、Logstashは新しいパイプライン設定ファイルや既存のパイプライン設定の変更を自動的に認識するので、コマンドが実行されるまで待つだけです。そうでない場合は、logstashサービスを再起動してトリガーしてください。
 
-ワイルドカードを使用しない場合、既存のパイプライン構成にこれらの変更を適用することができます。**何かを壊さないように注意してください！**
+ワイルドカードが使用されていない場合、既存のパイプライン設定にこれらの変更を適用することができます。**物事を壊さないように注意してください！**
 
 # 参考文献
 
@@ -78,16 +76,14 @@ codec => rubydebug
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには、</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法：
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
+* **HackTricksにあなたの**会社を広告したい、または**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTコレクション**](https://opensea.io/collection/the-peass-family)をチェックしてください。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
+* **HackTricks**のGitHubリポジトリ[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを**共有してください。**
 
 </details>

