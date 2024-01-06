@@ -1,34 +1,32 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
+* **HackTricksに広告を掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 
 # 基本情報
 
-**Seccomp**またはセキュアコンピューティングモードは、要約すると、**シスコールフィルタ**として機能するLinuxカーネルの機能です。\
+**Seccomp**（セキュアコンピューティングモードの略）は、要約すると、**システムコールフィルター**として機能するLinuxカーネルの機能です。
 Seccompには2つのモードがあります。
 
-**seccomp**（セキュアコンピューティングモードの略）は、**Linuxカーネル**のコンピュータセキュリティ機能です。seccompを使用すると、プロセスは「セキュア」な状態に一方向で移行し、**既に開かれている**ファイルディスクリプタに対して`exit()`、`sigreturn()`、`read()`、`write()`以外の**システムコールを行うことはできません**。他のシステムコールを試みると、**カーネル**はSIGKILLまたはSIGSYSで**プロセスを終了**します。この意味では、システムのリソースを仮想化するのではなく、プロセスをそれらから完全に分離します。
+**seccomp**は**Linux** **カーネル**のコンピュータセキュリティ機能です。seccompを使用すると、プロセスは"セキュア"な状態に一方向の遷移を行い、**既に開かれた**ファイルディスクリプタに対して`exit()`、`sigreturn()`、`read()`、`write()`以外の**システムコールを行うことができなくなります**。他のシステムコールを試みた場合、**カーネル**はSIGKILLまたはSIGSYSで**プロセスを終了**します。この意味で、システムのリソースを仮想化するのではなく、プロセスを完全に隔離します。
 
-seccompモードは、`prctl(2)`システムコールを使用して`PR_SET_SECCOMP`引数を介して有効にされます。または（Linuxカーネル3.17以降）`seccomp(2)`システムコールを介して有効にされます。seccompモードは、一部のカーネルバージョンでは、高精度タイミングに使用される、電源オンからの経過したプロセッササイクル数を返す`RDTSC` x86命令を無効にします。
+seccompモードは、`PR_SET_SECCOMP`引数を使用して`prctl(2)`システムコールを介して**有効にされます**、または（Linuxカーネル3.17以降）`seccomp(2)`システムコールを介して有効にされます。seccompモードは以前は`/proc/self/seccomp`というファイルに書き込むことで有効にされていましたが、`prctl()`を優先するためにこの方法は削除されました。一部のカーネルバージョンでは、電源オン以降の経過プロセッササイクル数を返すx86命令`RDTSC`が無効になります。これは高精度タイミングに使用されます。
 
-**seccomp-bpf**は、Berkeley Packet Filterルールを使用して実装された設定可能なポリシーを使用してシステムコールをフィルタリングするseccompの拡張機能です。これは、OpenSSHやvsftpd、Chrome OSおよびLinux上のGoogle Chrome/Chromiumウェブブラウザなどで使用されています。（この点で、seccomp-bpfは、Linuxではもはやサポートされていないようですが、より柔軟性と高いパフォーマンスを持つ古いsystraceと同様の機能を実現します。）
+**seccomp-bpf**は、Berkeley Packet Filterルールを使用して実装された設定可能なポリシーを使用してシステムコールをフィルタリングすることを可能にするseccompの拡張です。これは、Chrome OSとLinuxのGoogle Chrome/Chromiumウェブブラウザだけでなく、OpenSSHやvsftpdによって使用されています。（この点で、seccomp-bpfは古いsystraceと同様の機能を達成しますが、より柔軟性があり、パフォーマンスが高いです。Linuxではもはやサポートされていないようです。）
 
-## **オリジナル/厳格モード**
+## **オリジナル/ストリクトモード**
 
-このモードでは、**Seccompは`exit()`、`sigreturn()`、`read()`、`write()`のシスコールのみを許可**します。他のシスコールが行われると、プロセスはSIGKILLを使用して終了します。
+このモードでは、**Seccomp**はシステムコール`exit()`、`sigreturn()`、`read()`、`write()`のみを既に開かれたファイルディスクリプタに対して許可します。他のシステムコールが行われた場合、プロセスはSIGKILLを使用して終了されます。
 
 {% code title="seccomp_strict.c" %}
 ```c
@@ -62,9 +60,11 @@ int input = open("output.txt", O_RDONLY);
 printf("You will not see this message--the process will be killed first\n");
 }
 ```
+{% endcode %}
+
 ## Seccomp-bpf
 
-このモードでは、Berkeley Packet Filter ルールを使用して設定可能なポリシーを実装することで、システムコールのフィルタリングが可能です。
+このモードでは、Berkeley Packet Filterルールを使用して実装された設定可能なポリシーを使用してシステムコールのフィルタリングが可能です。
 
 {% code title="seccomp_bpf.c" %}
 ```c
@@ -116,43 +116,41 @@ printf("this process is %d\n", getpid());
 ```
 {% endcode %}
 
-# DockerにおけるSeccomp
+# Docker内のSeccomp
 
-**Seccomp-bpf**は、**Docker**でサポートされており、コンテナからの**syscalls**を制限することで、効果的に表面積を減らすことができます。デフォルトで**ブロックされるsyscalls**は、[https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/)で見つけることができ、デフォルトのseccompプロファイルは[https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)で見つけることができます。\
-異なるseccompポリシーを持つdockerコンテナを実行するには、次のコマンドを使用します：
+**Seccomp-bpf**は、コンテナからの**syscalls**を効果的に制限し、攻撃対象領域を減少させるために**Docker**によってサポートされています。**デフォルトでブロックされているsyscalls**は[https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/)で確認でき、**デフォルトのseccompプロファイル**はこちらで見つけることができます[https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)。\
+異なる**seccomp**ポリシーを使用してdockerコンテナを実行するには：
 ```bash
 docker run --rm \
 -it \
 --security-opt seccomp=/path/to/seccomp/profile.json \
 hello-world
 ```
-たとえば、`uname`のような特定のシステムコールを実行できないようにする場合、[https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)からデフォルトのプロファイルをダウンロードし、リストから`uname`の文字列を削除するだけです。\
-あるバイナリがDockerコンテナ内で動作しないようにするには、straceを使用してバイナリが使用しているシステムコールをリストアップし、それらを禁止します。\
-次の例では、`uname`のシステムコールが発見されます。
+例えば、あるコンテナが`uname`のような**syscall**を実行するのを**禁止**したい場合は、[https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) からデフォルトプロファイルをダウンロードし、リストから`uname`文字列を**削除する**だけです。\
+あるバイナリが**dockerコンテナ内で動作しないことを確認したい**場合は、straceを使用してバイナリが使用しているsyscallsをリストアップし、それらを禁止することができます。\
+次の例では、`uname`の**syscalls**が発見されます：
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
 {% hint style="info" %}
-**アプリケーションを起動するためにDockerを使用している場合**は、**`strace`**を使用してそれを**プロファイル**し、必要なシスコールのみを**許可**することができます。
+**アプリケーションを起動するためだけにDockerを使用している場合**、**`strace`** でプロファイリングし、必要なシステムコールのみを許可することができます。
 {% endhint %}
 
 ## Dockerで無効にする
 
-フラグ**`--security-opt seccomp=unconfined`**を使用してコンテナを起動します。
+フラグを使用してコンテナを起動します: **`--security-opt seccomp=unconfined`**
 
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-
-- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
+* **HackTricksにあなたの会社を広告したい場合**、または**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* **HackTricks**のGitHubリポジトリ[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>

