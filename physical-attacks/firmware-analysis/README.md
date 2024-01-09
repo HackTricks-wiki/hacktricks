@@ -1,73 +1,71 @@
-# ファームウェア分析
+# ファームウェア解析
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 ## はじめに
 
-ファームウェアは、デバイスのハードウェアコンポーネントに対する通信と制御を提供するソフトウェアの一種です。デバイスが実行する最初のコードです。通常、**オペレーティングシステムを起動**し、**さまざまなハードウェアコンポーネントとの通信**によってプログラムのための非常に特定のランタイムサービスを提供します。ほとんどの電子デバイスにはファームウェアがあります。
+ファームウェアは、デバイスのハードウェアコンポーネントを制御し、通信するためのソフトウェアの一種です。デバイスが実行する最初のコードです。通常、**オペレーティングシステムを起動**し、**様々なハードウェアコンポーネントと通信**することでプログラムのための非常に特定のランタイムサービスを提供します。ほとんどの電子デバイスにはファームウェアがあります。
 
-デバイスは、ROM、EPROM、またはフラッシュメモリなどの**不揮発性メモリ**にファームウェアを格納します。
+デバイスはファームウェアを**不揮発性メモリ**に保存します。例えば、ROM、EPROM、フラッシュメモリなどです。
 
-セキュリティの問題を多く発見できるため、ファームウェアを**調査**し、それを**変更**しようとすることが重要です。
+ファームウェアを**調査**し、それを**変更**しようとすることは重要です。なぜなら、このプロセス中に多くのセキュリティ問題を発見することができるからです。
 
 ## **情報収集と偵察**
 
-この段階では、ターゲットに関するできるだけ多くの情報を収集し、その全体的な構成と基礎となる技術を理解するために必要な情報を収集しようとします。次の情報を収集しようとしてください。
+この段階では、ターゲットに関する可能な限り多くの情報を収集し、その全体的な構成と基盤となる技術を理解します。以下を収集しようと試みます：
 
-* サポートされているCPUアーキテクチャ
+* サポートされるCPUアーキテクチャ
 * オペレーティングシステムプラットフォーム
-* ブートローダの設定
+* ブートローダーの設定
 * ハードウェアの回路図
 * データシート
-* コード行数（LoC）の推定
+* コード行数（LoC）の見積もり
 * ソースコードリポジトリの場所
-* サードパーティのコンポーネント
+* サードパーティコンポーネント
 * オープンソースライセンス（例：GPL）
 * 変更履歴
 * FCC ID
-* 設計およびデータフローダイアグラム
+* 設計とデータフロー図
 * 脅威モデル
-* 以前の侵入テストレポート
-* バグトラッキングチケット（例：Jira、BugCrowd、HackerOneなどのバグバウンティプラットフォーム）
+* 以前のペネトレーションテストレポート
+* バグ追跡チケット（例：Jira、バグバウンティプラットフォームのBugCrowdやHackerOne）
 
-可能な限り、オープンソースインテリジェンス（OSINT）ツールと技術を使用してデータを取得します。オープンソースソフトウェアが使用されている場合は、リポジトリをダウンロードし、コードベースに対して手動および自動の静的解析を実行します。オープンソースソフトウェアプロジェクトでは、ベンダーが提供する無料の静的解析ツール（[Coverity Scan](https://scan.coverity.com)や[Semmle’s LGTM](https://lgtm.com/#explore)など）を既に使用している場合があります。
+可能であれば、オープンソースインテリジェンス（OSINT）ツールと技術を使用してデータを取得します。オープンソースソフトウェアが使用されている場合は、リポジトリをダウンロードし、コードベースに対して手動および自動の静的解析を実行します。時々、オープンソースソフトウェアプロジェクトは、[Coverity Scan](https://scan.coverity.com)や[Semmle’s LGTM](https://lgtm.com/#explore)などのベンダーが提供する無料の静的解析ツールを既に使用しており、スキャン結果を提供しています。
 
 ## ファームウェアの取得
 
-ファームウェアをダウンロードするためには、異なる難易度の方法があります。
+ファームウェアをダウンロードする方法は異なり、難易度も異なります
 
-* 開発チーム、メーカー/ベンダー、またはクライアントから**直接**ダウンロードする
-* メーカーが提供する手順に従って**ゼロからビルド**する
-* ベンダーのサポートサイトから**ダウンロード**する
-* バイナリファイルの拡張子やDropbox、Box、Googleドライブなどのファイル共有プラットフォームに対して**Googleドーク**クエリを使用する
-* フォーラムやブログにコンテンツをアップロードする顧客からファームウェアイメージに出くわすことがよくあります。また、問題のトラブルシューティングのためにメーカーに問い合わせ、zipファイルやフラッシュドライブを送ってもらったことがある場合もあります。
+* 開発チーム、メーカー/ベンダー、またはクライアントから**直接**
+* メーカーが提供する手順に従って**ゼロからビルド**
+* ベンダーの**サポートサイト**から
+* Dropbox、Box、Googleドライブなどのファイル共有プラットフォームやバイナリファイル拡張子を対象とした**Googleドーク**クエリ
+* フォーラム、ブログ、またはメーカーに問題を解決するために連絡したサイトでコメントする顧客がコンテンツをアップロードすることで、ファームウェアイメージに遭遇することがよくあります。zipやフラッシュドライブで提供されます。
 * 例：`intitle:"Netgear" intext:"Firmware Download"`
-* [https://github.com/sa7mon/S3Scanner](https://github.com/sa7mon/S3Scanner)などのツールを使用して、Amazon Web Services（AWS）のS3バケットなどの公開されたクラウドプロバイダのストレージ場所からビルドをダウンロードする
-* **アップデート**時のデバイス間通信の**中間者攻撃**（MITM）
-* **UART**、**JTAG**、**PICit**などを介してハードウェアから直接抽出する
-* アップデートサーバリクエストのためのハードウェアコンポーネント内の**シリアル通信**をスニフィングする
-* モバイルアプリケーションや厚いアプリケーション内の**ハードコードされたエンドポイント**を介して
-* ブートローダ（例：U-boot）からフラッシュストレージまたは**tftp**を介してネットワーク経由でファームウェアを**ダンプ**する
-* オフライン分析とデータ抽出のために、ボードから**フラッシュチップ**（例：SPI）またはMCUを取り外す（最終手段）。
-* フラッシュストレージと/またはMCUのサポートされているチッププログラマが必要です。
+* Amazon Web Services（AWS）S3バケットなどの露出したクラウドプロバイダーのストレージ場所からビルドをダウンロードする（ツール例：[https://github.com/sa7mon/S3Scanner](https://github.com/sa7mon/S3Scanner)）
+* **アップデート中の**デバイス通信を**中間者攻撃**（MITM）
+* **UART**、**JTAG**、**PICit**などを介して**ハードウェアから直接**抽出
+* ハードウェアコンポーネント内の**シリアル通信**をスニッフして**アップデートサーバーのリクエスト**を探る
+* モバイルまたは厚いアプリケーション内の**ハードコードされたエンドポイント**経由
+* **ブートローダー**（例：U-boot）からフラッシュストレージまたは**ネットワーク**経由で**tftp**を使用してファームウェアを**ダンプ**
+* オフライン分析とデータ抽出のために**フラッシュチップ**（例：SPI）またはMCUをボードから取り外す（最終手段）。
+* フラッシュストレージおよび/またはMCU用のサポートされているチッププログラマが必要です。
 
 ## ファームウェアの分析
 
-これで、**ファームウェアを取得**したので、それに関する情報を抽出して、どのように扱うかを知る必要があります。そのために使用できるさまざまなツール:
+ファームウェアを**入手した**ので、それについての情報を抽出して、どのように扱うかを知る必要があります。それに使用できる異なるツール：
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -76,24 +74,24 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-もしもそれらのツールであまり情報を見つけられない場合は、`binwalk -E <bin>`コマンドで画像の**エントロピー**をチェックしてください。エントロピーが低い場合、暗号化されていない可能性が高いです。エントロピーが高い場合、暗号化されている可能性があります（または何らかの方法で圧縮されています）。
+以下のツールであまり情報が見つからない場合は、`binwalk -E <bin>`でイメージの**エントロピー**をチェックしてください。エントロピーが低ければ、暗号化されている可能性は低いです。エントロピーが高ければ、暗号化されている可能性が高いです（または何らかの方法で圧縮されています）。
 
-さらに、次のツールを使用して**ファームウェアに埋め込まれたファイル**を抽出することができます：
+さらに、これらのツールを使用して**ファームウェア内に埋め込まれたファイル**を抽出することができます：
 
 {% content-ref url="../../forensics/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md" %}
 [file-data-carving-recovery-tools.md](../../forensics/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md)
 {% endcontent-ref %}
 
-または、[**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/))を使用してファイルを検査することができます。
+または、ファイルを検査するために[**binvis.io**](https://binvis.io/#/)（[コード](https://code.google.com/archive/p/binvis/)）を使用できます。
 
 ### ファイルシステムの取得
 
-以前にコメントされた`binwalk -ev <bin>`のようなツールを使用すると、**ファイルシステムを抽出**することができます。\
-通常、Binwalkは**ファイルシステムの種類と同じ名前のフォルダ**に抽出します。ファイルシステムの種類は通常、以下のいずれかです：squashfs、ubifs、romfs、rootfs、jffs2、yaffs2、cramfs、initramfs。
+先にコメントされたツール`binwalk -ev <bin>`を使用して、**ファイルシステムを抽出**できるはずです。\
+Binwalkは通常、squashfs、ubifs、romfs、rootfs、jffs2、yaffs2、cramfs、initramfsなど、**ファイルシステムのタイプと同じ名前のフォルダ**内に抽出します。
 
-#### 手動でのファイルシステムの抽出
+#### 手動でのファイルシステム抽出
 
-場合によっては、binwalkには**ファイルシステムのマジックバイトがシグネチャに含まれていない**ことがあります。この場合、binwalkを使用して**ファイルシステムのオフセットを見つけ、バイナリから圧縮されたファイルシステムを切り出し**、以下の手順に従ってファイルシステムを手動で抽出してください。
+時には、binwalkがそのシグネチャにファイルシステムの**マジックバイトを持っていない**ことがあります。そのような場合は、binwalkを使用してファイルシステムのオフセットを見つけ、バイナリから圧縮されたファイルシステムを**カービング**し、以下の手順に従ってファイルシステムのタイプに応じて**手動で抽出**します。
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -105,7 +103,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-次の**ddコマンド**を実行して、Squashfsファイルシステムを切り出します。
+以下の**ddコマンド**を実行して、Squashfsファイルシステムを切り出します。
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -115,25 +113,25 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-Alternatively, you can run the following command.
+以下のコマンドも実行可能です。
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-* For squashfs (used in the example above)
+* squashfsの場合（上記の例で使用）
 
 `$ unsquashfs dir.squashfs`
 
-Files will be in the "`squashfs-root`" directory afterwards.
+その後、ファイルは"`squashfs-root`"ディレクトリにあります。
 
-* CPIO archive files
+* CPIOアーカイブファイル
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-* For jffs2 filesystems
+* jffs2ファイルシステムの場合
 
 `$ jefferson rootfsfile.jffs2`
 
-* For ubifs filesystems with NAND flash
+* NANDフラッシュを使用するubifsファイルシステムの場合
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
@@ -141,133 +139,85 @@ Files will be in the "`squashfs-root`" directory afterwards.
 
 ### ファイルシステムの分析
 
-ファイルシステムを取得したら、以下のような悪いプラクティスを探すことができます。
+ファイルシステムを取得したら、以下のような悪い実践を探し始める時です：
 
-* telnetdなどの**セキュリティの脆弱性のあるネットワークデーモン**（メーカーがバイナリの名前を変更して隠すこともあります）
-* **ハードコードされた認証情報**（ユーザー名、パスワード、APIキー、SSHキー、バックドアのバリエーションなど）
+* 古い**セキュリティが不十分なネットワークデーモン**（例えばtelnetd。時には製造業者がバイナリを変更して偽装することがあります）
+* **ハードコードされた認証情報**（ユーザー名、パスワード、APIキー、SSHキー、バックドアのバリエーション）
 * **ハードコードされたAPI**エンドポイントとバックエンドサーバーの詳細
-* エントリーポイントとして使用できる**アップデートサーバーの機能**
-* リモートコード実行のための**コンパイルされていないコードと起動スクリプトの確認**
-* **オフライン分析**のためにコンパイルされたバイナリの抽出
+* 攻撃の入り口として使用される可能性のある**アップデートサーバー機能**
+* リモートコード実行のための**未コンパイルのコードとスタートアップスクリプトのレビュー**
+* 今後のステップでディスアセンブラを使用してオフライン分析のために**コンパイルされたバイナリを抽出**
 
-ファームウェア内で探すべき興味深いもの：
+ファームウェア内で探すべき**興味深いもの**：
 
-* etc/shadowとetc/passwd
-* etc/sslディレクトリの一覧
+* etc/shadow と etc/passwd
+* etc/sslディレクトリのリストアップ
 * .pem、.crtなどのSSL関連ファイルの検索
 * 設定ファイルの検索
 * スクリプトファイルの検索
 * 他の.binファイルの検索
 * admin、password、remote、AWSキーなどのキーワードの検索
-* IoTデバイスで使用される一般的なWebサーバーの検索
+* IoTデバイスで使用される一般的なウェブサーバーの検索
 * ssh、tftp、dropbearなどの一般的なバイナリの検索
 * 禁止されたC関数の検索
-* 一般的なコマンドインジェクションの脆弱な関数の検索
+* コマンドインジェクションに弱い関数の検索
 * URL、メールアドレス、IPアドレスの検索
-* その他...
+* その他…
 
-この種の情報を検索するツール（常に手動でファイルシステムの構造を確認し、ツールを使用して**隠されたもの**を見つけることができます）：
+この種の情報を検索するツール（ファイルシステムの構造に慣れ、手動でチェックすることが常に重要ですが、ツールは**隠されたもの**を見つけるのに役立ちます）：
 
-* [**LinPEAS**](https://github.com/carlospolop/PEASS-ng)**:** ファイルシステム内の**機密情報**を検索するために便利な素晴らしいbashスクリプトです。ファームウェアファイルシステムに**chroot**して実行します。
-* [**Firmwalker**](https://github.com/craigz28/firmwalker)**:** 潜在的な機密情報を検索するためのbashスクリプト
-* [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT\_core):
-* オペレーティングシステム、CPUアーキテクチャ、サードパーティのコンポーネントなどのソフトウェアコンポーネントの識別と関連するバージョン情報
-* イメージからのファームウェアファイルシステム（s）の抽出
-* 証明書と秘密鍵の検出
-* Common Weakness Enumeration（CWE）にマッピングされる弱い実装の検出
-* 脆弱性のフィードと署名に基づく検出
-* 基本的な静的行動分析
+* [**LinPEAS**](https://github.com/carlospolop/PEASS-ng)**:** ファイルシステム内の**機密情報**を検索するのに役立つ素晴らしいbashスクリプト。ファームウェアのファイルシステム内で**chrootして実行します**。
+* [**Firmwalker**](https://github.com/craigz28/firmwalker)**:** 潜在的に機密情報を検索するためのBashスクリプト
+* [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core):
+* オペレーティングシステム、CPUアーキテクチャ、およびそれらの関連するバージョン情報などのソフトウェアコンポーネントの識別
+* イメージからのファームウェアファイルシステムの抽出
+* 証明書とプライベートキーの検出
+* Common Weakness Enumeration (CWE)にマッピングする弱い実装の検出
+* 脆弱性のフィード＆シグネチャベースの検出
+* 基本的な静的な行動分析
 * ファームウェアバージョンとファイルの比較（diff）
 * QEMUを使用したファイルシステムバイナリのユーザーモードエミュレーション
-* NX、DEP、ASLR、スタックキャナリー、RELRO、FORTIFY\_SOURCEなどのバイナリの防御機能の検出
+* NX、DEP、ASLR、スタックカナリー、RELRO、FORTIFY_SOURCEなどのバイナリ軽減の検出
 * REST API
 * その他...
-* [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer): FwAnalyzerは、設定可能なルールセットを使用して、（ext2/3/4）、FAT/VFat、SquashFS、UBIFSファイルシステムイメージ、cpioアーカイブ、およびディレクトリコンテンツを分析するツールです。
-* [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep): 無料のIoTファームウェアセキュリティ分析ツール
+* [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer): FwAnalyzerは、設定可能なルールを使用して(ext2/3/4)、FAT/VFat、SquashFS、UBIFSファイルシステムイメージ、cpioアーカイブ、およびディレクトリコンテンツを分析するツールです。
+* [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep): 無料のソフトウェアIoTファームウェアセキュリティ分析ツール
 * [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go): これは、元のByteSweepプロジェクトをGoで完全に書き直したものです。
-* [**EMBA**](https://github.com/e-m-b-a/emba): _EMBA_は、ペネトレーションテスター向けの中央ファームウェア分析ツールとして設計されています。_EMBA_は、ファームウェアの抽出プロセスから始まり、静的分析、エミュレーションを介した動的分析、最終的にはレポートの生成まで、セキュリティ分析プロセス全体をサポートします。_EMBA_は、ファームウェア内の可能な脆弱性や弱点を自動的に検出します。例としては、セキュリティの脆弱性のあるバイナリ、古くて非推奨のソフトウェアコンポーネント、潜在的に脆弱なスクリプトやハードコードされたパスワードなどがあります。
+* [**EMBA**](https://github.com/e-m-b-a/emba): _EMBA_は、ペネトレーションテスターのための中心的なファームウェア分析ツールとして設計されています。_ファームウェア抽出_プロセスから始まり、_静的分析_およびエミュレーションを介した_動的分析_を行い、最終的にレポートを生成します。_EMBA_は自動的にファームウェアの潜在的な弱点や脆弱性を発見します。例えば、セキュリティが不十分なバイナリ、古くて時代遅れのソフトウェアコンポーネント、潜在的に脆弱なスクリプト、ハードコードされたパスワードなどです。
 
 {% hint style="warning" %}
-ファイルシステム内にはプログラムの**ソースコード**（常に**確認**する必要があります）だけでなく、**コンパイルされたバイナリ**も含まれている場合があります。これらのプログラムは何らかの形で公開されている可能性があり、潜在的な脆弱性を**逆コンパイル**して**確認**する必要があります。
+ファイルシステム内には、常に**チェック**すべきプログラムの**ソースコード**も見つかりますが、**コンパイルされたバイナリ**もあります。これらのプログラムは何らかの形で露出している可能性があり、潜在的な脆弱性をチェックするために**デコンパイル**して**チェック**する必要があります。
 
 [**checksec.sh**](https://github.com/slimm609/checksec.sh)のようなツールは、保護されていないバイナリを見つけるのに役立ちます。Windowsバイナリの場合は、[**PESecurity**](https://github.com/NetSPI/PESecurity)を使用できます。
 {% endhint %}
 
 ## ファームウェアのエミュレーション
 
-ファームウェアをエミュレートすることで、デバイスの**実行中**または**単一のプログラム**の**動的分析**を実行できます。
+ファームウェアをエミュレートするアイデアは、デバイス**実行中**または**単一プログラム**の**動的分析**を実行できるようにすることです。
 
 {% hint style="info" %}
-ハードウェアやアーキテクチャの依存関係により、一部または完全なエミュレーションが**動作しない場合**があります。アーキテクチャとエンディアンが一致する場合、ラズベリーパイなどの所有しているデバイスにファームウェアのルートファイルシステムまたは特定のバイナリを転送してさらなるテストを行うことができます。この方法は、ターゲットと同じアーキテクチャとエンディアンを使用する事前にビルドされた仮想マシンにも適用されます。
+時には、ハードウェアやアーキテクチャの依存関係のために、部分的または完全なエミュレーションが**機能しないことがあります**。アーキテクチャとエンディアンがラズベリーパイなどの所有デバイスと一致する場合、ルートファイルシステムまたは特定のバイナリをデバイスに転送してさらにテストを行うことができます。この方法は、ターゲットと同じアーキテクチャとエンディアンを使用する事前に構築された仮想マシンにも適用されます。
 {% endhint %}
 
-### バイナリのエミュレーション
+### バイナリエミュレーション
 
-脆弱性を検索するために単一のプログラムをエミュレートしたい場合は、まずそのエンディアンとコンパイルされたCPUアーキテクチャを特定する必要があります。
+脆弱性を探すために単一のプログラムをエミュレートしたい場合、まずそのエンディアンとコンパイルされたCPUアーキテクチャを特定する必要があります。
 
 #### MIPSの例
 ```bash
 file ./squashfs-root/bin/busybox
 ./squashfs-root/bin/busybox: ELF 32-bit MSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped
 ```
-今、**QEMU**を使用してbusybox実行ファイルを**エミュレート**することができます。
+Now you can **QEMU** を使用して busybox 実行ファイルを**エミュレート**することができます。
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-実行可能ファイルは**MIPS**向けにコンパイルされており、**ビッグエンディアン**のバイト順序に従っているため、**`qemu-mips`**エミュレータを使用します。**リトルエンディアン**の実行可能ファイルをエミュレートする場合は、`el`サフィックスを持つエミュレータを選択する必要があります（`qemu-mipsel`）。
+実行ファイルが**MIPS**用にコンパイルされており、**big-endian**バイト順を採用しているため、QEMUの**`qemu-mips`**エミュレータを使用します。**little-endian**実行ファイルをエミュレートする場合は、`el`サフィックスが付いたエミュレータ(`qemu-mipsel`)を選択する必要があります：
 ```bash
 qemu-mips -L ./squashfs-root/ ./squashfs-root/bin/ls
 100              100.7z           15A6D2.squashfs  squashfs-root    squashfs-root-0
 ```
 #### ARMの例
-
-```html
-<details>
-<summary>Click to expand!</summary>
-
-##### Firmware Analysis
-
-- **Firmware Extraction**: The first step in firmware analysis is to extract the firmware from the target device. This can be done by using tools like `binwalk`, `firmware-mod-kit`, or by directly accessing the device's memory.
-
-- **Firmware Reverse Engineering**: Once the firmware is extracted, it can be reverse engineered to understand its inner workings. Tools like `IDA Pro`, `Ghidra`, or `Radare2` can be used for this purpose.
-
-- **Firmware Vulnerability Analysis**: After reverse engineering, the firmware can be analyzed for vulnerabilities. This involves identifying potential security flaws, such as buffer overflows, format string vulnerabilities, or hardcoded credentials.
-
-- **Firmware Patching**: If vulnerabilities are found, patches can be developed to fix them. These patches can be applied to the firmware to enhance its security.
-
-- **Firmware Emulation**: Emulating the firmware can help in understanding its behavior without running it on the actual device. Tools like `QEMU` or `Unicorn` can be used for firmware emulation.
-
-- **Firmware Debugging**: Debugging the firmware can provide insights into its execution flow and help in identifying vulnerabilities. Tools like `GDB` or `OllyDbg` can be used for firmware debugging.
-
-- **Firmware Exploitation**: Exploiting vulnerabilities in the firmware can lead to unauthorized access or control over the target device. Techniques like stack smashing, return-oriented programming (ROP), or code injection can be used for firmware exploitation.
-
-</details>
-```
-
-#### ARMの例
-
-```html
-<details>
-<summary>クリックして展開する！</summary>
-
-##### ファームウェア解析
-
-- **ファームウェアの抽出**: ファームウェア解析の最初のステップは、対象デバイスからファームウェアを抽出することです。これは、`binwalk`、`firmware-mod-kit`などのツールを使用するか、デバイスのメモリに直接アクセスすることで行うことができます。
-
-- **ファームウェアの逆アセンブリ**: ファームウェアが抽出されたら、その内部動作を理解するために逆アセンブリすることができます。この目的のために、`IDA Pro`、`Ghidra`、`Radare2`などのツールを使用することができます。
-
-- **ファームウェアの脆弱性分析**: 逆アセンブリ後、ファームウェアは脆弱性の分析のために調査されます。これには、バッファオーバーフロー、フォーマット文字列の脆弱性、ハードコードされた認証情報などの潜在的なセキュリティ上の問題の特定が含まれます。
-
-- **ファームウェアのパッチ適用**: 脆弱性が見つかった場合、それらを修正するためのパッチを開発することができます。これらのパッチは、ファームウェアに適用してセキュリティを強化することができます。
-
-- **ファームウェアのエミュレーション**: ファームウェアのエミュレーションは、実際のデバイス上で実行せずにその動作を理解するのに役立ちます。`QEMU`や`Unicorn`などのツールを使用してファームウェアのエミュレーションを行うことができます。
-
-- **ファームウェアのデバッグ**: ファームウェアのデバッグは、実行フローを分析し、脆弱性の特定に役立ちます。`GDB`や`OllyDbg`などのツールを使用してファームウェアのデバッグを行うことができます。
-
-- **ファームウェアの攻撃**: ファームウェアの脆弱性を悪用することで、対象デバイスへの不正アクセスや制御を行うことができます。スタックスマッシング、リターンオリエンテッドプログラミング（ROP）、コードインジェクションなどの技術を使用してファームウェアの攻撃を行うことができます。
-
-</details>
-```
 ```bash
 file bin/busybox
 bin/busybox: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-armhf.so.1, no section header
@@ -279,53 +229,53 @@ qemu-arm -L ./squashfs-root/ ./squashfs-root/bin/ls
 ```
 ### フルシステムエミュレーション
 
-一部のツールは、一般的に**qemu**をベースにしており、完全なファームウェアをエミュレートすることができます。
+以下のツールは、一般的に**qemu**に基づいており、完全なファームウェアをエミュレートすることができます：
 
 * [**https://github.com/firmadyne/firmadyne**](https://github.com/firmadyne/firmadyne)**:**
-* ファームウェアを抽出するためにextractor.pyスクリプトを実行し、getArch.shスクリプトを使用してアーキテクチャを取得するために、いくつかのものをインストールし、postgresを設定する必要があります。次に、tar2db.pyおよびmakeImage.shスクリプトを使用して、抽出したイメージからの情報をデータベースに保存し、エミュレートできるQEMUイメージを生成します。次に、ネットワークインターフェースを取得するためにinferNetwork.shスクリプトを使用し、最後に./scratch/1/folderに自動的に作成されるrun.shスクリプトを使用します。
+* 複数のインストールが必要で、postgresを設定した後、extractor.pyスクリプトを実行してファームウェアを抽出し、getArch.shスクリプトを使用してアーキテクチャを取得します。次に、tar2db.pyとmakeImage.shスクリプトを使用して、抽出されたイメージからデータベースに情報を格納し、エミュレートできるQEMUイメージを生成します。その後、inferNetwork.shスクリプトを使用してネットワークインターフェースを取得し、最後に./scratch/1/folderに自動的に作成されるrun.shスクリプトを使用します。
 * [**https://github.com/attify/firmware-analysis-toolkit**](https://github.com/attify/firmware-analysis-toolkit)**:**
-* このツールはfirmadyneに依存しており、firmadyneを使用してファームウェアをエミュレートするプロセスを自動化します。使用する前に`fat.config`を設定する必要があります：`sudo python3 ./fat.py IoTGoat-rpi-2.img --qemu 2.5.0`
+* このツールはfirmadyneに依存しており、firmadyneeを使用してファームウェアのエミュレーションプロセスを自動化します。使用する前に`fat.config`を設定する必要があります：`sudo python3 ./fat.py IoTGoat-rpi-2.img --qemu 2.5.0`
 * [**https://github.com/therealsaumil/emux**](https://github.com/therealsaumil/emux)
 * [**https://github.com/getCUJO/MIPS-X**](https://github.com/getCUJO/MIPS-X)
 * [**https://github.com/qilingframework/qiling#qltool**](https://github.com/qilingframework/qiling#qltool)
 
-## **動的解析**
+## **動的分析**
 
-この段階では、攻撃対象のファームウェアを実行しているデバイスまたはエミュレートされたファームウェアを攻撃するために、**実行中のOSとファイルシステムにシェルがあることが強く推奨されます**。
+この段階では、攻撃するファームウェアを実行しているデバイスか、エミュレートされているファームウェアがあるべきです。いずれの場合も、**OSとファイルシステムにシェルがあることが強く推奨されます**。
 
-ファームウェアをエミュレートしている場合、**エミュレーション内の一部のアクティビティが失敗する**ことがあり、エミュレーションを再起動する必要があるかもしれません。たとえば、ウェブアプリケーションは、元のデバイスが統合されているデバイスから情報を取得する必要があるかもしれませんが、エミュレーションではそれをエミュレートしていません。
+エミュレーション内での**一部の活動が失敗する**ことがあり、エミュレーションを再起動する必要があるかもしれません。例えば、ウェブアプリケーションがオリジナルのデバイスと統合されているデバイスから情報を取得する必要があるが、エミュレーションではそれをエミュレートしていない場合です。
 
-実行環境では、新しい情報にアクセスできる可能性があるため、**ファイルシステムを再確認する必要があります**。
+**ファイルシステムを再確認する**べきです。**以前のステップで行ったように、実行環境では新しい情報がアクセス可能になるかもしれません。**
 
-**ウェブページ**が公開されている場合、コードを読み、アクセスできるようになったら、それらを**テスト**する必要があります。hacktricksでは、さまざまなウェブハッキングテクニックに関する多くの情報を見つけることができます。
+**ウェブページ**が公開されている場合、コードを読んでアクセスできるようになったら、**テストする**べきです。HackTricksでは、さまざまなウェブハッキング技術に関する多くの情報を見つけることができます。
 
-**ネットワークサービス**が公開されている場合、それらを攻撃しようとする必要があります。hacktricksでは、さまざまなネットワークサービスのハッキングテクニックに関する多くの情報を見つけることができます。また、[Mutiny](https://github.com/Cisco-Talos/mutiny-fuzzer)、[boofuzz](https://github.com/jtpereyda/boofuzz)、および[kitty](https://github.com/cisco-sas/kitty)などのネットワークおよびプロトコルのファジングツールを使用して、それらをファズすることもできます。
+**ネットワークサービス**が公開されている場合、攻撃を試みるべきです。HackTricksでは、さまざまなネットワークサービスのハッキング技術に関する多くの情報を見つけることができます。また、[Mutiny](https://github.com/Cisco-Talos/mutiny-fuzzer)、[boofuzz](https://github.com/jtpereyda/boofuzz)、[kitty](https://github.com/cisco-sas/kitty)などのネットワークおよびプロトコル**ファジャー**を使用してファズテストを試みることもできます。
 
-ブートローダを攻撃してルートシェルを取得できるかどうかを確認する必要があります：
+**ブートローダーを攻撃**してrootシェルを取得できるかどうかを確認するべきです：
 
 {% content-ref url="bootloader-testing.md" %}
 [bootloader-testing.md](bootloader-testing.md)
 {% endcontent-ref %}
 
-デバイスがいかなる種類の**ファームウェア整合性テスト**を行っているかをテストする必要があります。そうでない場合、攻撃者はバックドア付きのファームウェアを提供したり、他の人が所有するデバイスにそれをインストールしたり、ファームウェアの更新に脆弱性がある場合はリモートで展開したりすることができます：
+デバイスが**ファームウェアの整合性テスト**を行っているかどうかをテストするべきです。そうでない場合、攻撃者はバックドア付きのファームウェアを提供し、他人が所有するデバイスにインストールしたり、ファームウェアのアップデートの脆弱性がある場合はリモートで展開することができます：
 
 {% content-ref url="firmware-integrity.md" %}
 [firmware-integrity.md](firmware-integrity.md)
 {% endcontent-ref %}
 
-ファームウェアの更新の脆弱性は、ファームウェアの**整合性**が**検証されない**、**暗号化されていない** **ネットワーク**プロトコルの使用、**ハードコードされた** **資格情報**の使用、クラウドコンポーネントへの**安全でない認証**、および過剰で安全でない**ロギング**（機密データ）などが原因です。また、検証なしで**物理的な更新**を許可します。
+ファームウェアのアップデートの脆弱性は通常、**ファームウェア**の**整合性**が**検証されていない**、**暗号化されていない** **ネットワーク**プロトコルを使用している、**ハードコードされた** **クレデンシャル**の使用、ファームウェアをホストするクラウドコンポーネントへの**不安全な認証**、過度で不安全な**ログ記録**（機密データ）、検証なしに**物理的なアップデート**を許可することなどが原因で発生します。
 
-## **ランタイム解析**
+## **ランタイム分析**
 
-ランタイム解析では、デバイスが通常の環境またはエミュレートされた環境で実行されている間に、実行中のプロセスまたはバイナリにアタッチします。基本的なランタイム解析の手順は以下の通りです：
+ランタイム分析には、デバイスが通常の環境またはエミュレートされた環境で実行中のときに、実行中のプロセスまたはバイナリにアタッチすることが含まれます。基本的なランタイム分析手順は以下の通りです：
 
 1. `sudo chroot . ./qemu-arch -L <optionalLibPath> -g <gdb_port> <binary>`
-2. gdb-multiarchをアタッチするか、IDAを使用してバイナリをエミュレートします
-3. memcpy、strncpy、strcmpなどのステップ4で特定された関数にブレークポイントを設定します。
-4. ファズツールを使用して、オーバーフローやプロセスのクラッシュを特定するために、大きなペイロード文字列を実行します。
-5. 脆弱性が特定された場合は、ステップ8に進んでください。
+2. gdb-multiarchにアタッチするか、IDAを使用してバイナリをエミュレートする
+3. memcpy、strncpy、strcmpなど、ステップ4で特定された関数にブレークポイントを設定する
+4. ファジャーを使用してオーバーフローやプロセスクラッシュを特定するために大きなペイロード文字列を実行する
+5. 脆弱性が特定された場合はステップ8に進む
 
-役立つツール（非網羅的）は次のとおりです：
+役立つツールは以下の通りです（網羅的ではありません）：
 
 * gdb-multiarch
 * [Peda](https://github.com/longld/peda)
@@ -337,18 +287,25 @@ qemu-arm -L ./squashfs-root/ ./squashfs-root/bin/ls
 * Binary Ninja
 * Hopper
 
-## **バイナリの攻撃**
+## **バイナリエクスプロイト**
 
-前の手順でバイナリ内の脆弱性を特定した後、実世界の影響とリスクを示すために適切な概念実証（PoC）が必要です。エクスプロイトコードの開発には、低レベルの言語（ASM、C/C++、シェルコードなど）でのプログラミング経験と、特定のターゲットアーキテクチャ（MIPS、ARM、x86など）の背景が必要です。PoCコードは、メモリ内の命令を制御することによって、デバイスまたはアプリケーションで任意の実行を取得することを目的としています。
+前のステップでバイナリ内の脆弱性を特定した後、実際の影響とリスクを示すために適切な実証コンセプト（PoC）が必要です。エクスプロイトコードの開発には、低レベル言語（例：ASM、C/C++、シェルコードなど）でのプログラミング経験と、特定のターゲットアーキテクチャ（例：MIPS、ARM、x86など）に関する知識が必要です。PoCコードには、メモリ内の命令を制御することでデバイスやアプリケーション上で任意の実行を得ることが含まれます。
 
-組み込みシステムでは、バイナリのランタイム保護（NX、DEP、ASLRなど）が一般的には行われないことが一般的ですが、これが発生する場合、ROP（Return Oriented Programming）などの追加のテクニックが必要になる場合があります。ROPは、既存のコードを連鎖させることによって、ターゲットプロセス/バイナリのコード内に任意の悪意のある機能を実装することを攻撃者に可能にします。バッファオーバーフローなどの特定された脆弱性を悪用するためには、ROPチェーンを形成するための手順を踏む必要があります。このような状況に役立つツールとしては、CapstoneのガジェットファインダーやROPGadget- [https://github.com/JonathanSalwan/ROPgadget](https://github.com/JonathanSalwan/ROPgadget)があります。
+組み込みシステム内でバイナリランタイム保護（例：NX、DEP、ASLRなど）が存在することは一般的ではありませんが、発生した場合、リターン指向プログラミング（ROP）などの追加技術が必要になることがあります。ROPを使用すると、攻撃者はターゲットプロセス/バイナリのコード内に既存のコードをチェーンして、ガジェットとして知られる任意の悪意のある機能を実装することができます。バッファオーバーフローなどの特定された脆弱性を利用するためにROPチェーンを形成する手順が必要になります。このような状況に役立つツールは、CapstoneのガジェットファインダーやROPGadget- [https://github.com/JonathanSalwan/ROPgadget](https://github.com/JonathanSalwan/ROPgadget)です。
 
-詳しいガイダンスについては、以下の参考文献を利用してください：
+さらなるガイダンスには以下の参考文献を利用してください：
 
-* [https://azeria-labs.com/writing-arm-shellcode/](https://azeria-labs.com/writing-arm
-## 脆弱なファームウェアの練習
+* [https://azeria-labs.com/writing-arm-shellcode/](https://azeria-labs.com/writing-arm-shellcode/)
+* [https://www.corelan.be/index.php/category/security/exploit-writing-tutorials/](https://www.corelan.be/index.php/category/security/exploit-writing-tutorials/)
 
-ファームウェアの脆弱性を発見するための練習として、以下の脆弱なファームウェアプロジェクトを利用してください。
+## ファームウェア分析用に準備されたOS
+
+* [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOSは、IoTデバイスのセキュリティ評価とペネトレーションテストを行うために設計されたディストリビューションです。必要なツールがすべてロードされた事前設定された環境を提供することで、多くの時間を節約できます。
+* [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Ubuntu 18.04に基づいた組み込みセキュリティテスト用オペレーティングシステムで、ファームウェアセキュリティテストツールがプリロードされています。
+
+## 練習用の脆弱なファームウェア
+
+ファームウェアの脆弱性を発見する練習をするために、以下の脆弱なファームウェアプロジェクトを出発点として使用してください。
 
 * OWASP IoTGoat
 * [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -374,16 +331,14 @@ qemu-arm -L ./squashfs-root/ ./squashfs-root/bin/ls
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
 
-- **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法：
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**または**[telegramグループ](https://t.me/peass)**に参加するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの**会社を広告したい、または**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有してください。
 
 </details>

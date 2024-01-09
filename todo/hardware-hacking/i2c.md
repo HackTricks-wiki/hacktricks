@@ -1,27 +1,20 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
-
-
-
-
-
 # Bus Pirate
 
-Bus Pirateが動作しているかをテストするには、+5VをVPUに接続し、3.3VをADCに接続し、バスパイレートにアクセスします（例えば、Tera Termを使用）そして、コマンド`~`を使用します：
+Bus Pirateが動作しているかをテストするには、+5VをVPUに、3.3VをADCに接続し、Bus Pirateにアクセスします（例えばTera Termを使用）し、コマンド`~`を使用します：
 ```bash
 # Use command
 HiZ>~
@@ -60,18 +53,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-前のコマンドラインで、エラーが0個見つかったと表示されました。これは、購入後やファームウェアのフラッシュ後に動作していることを確認するために非常に役立ちます。
+前のコマンドラインで0エラーが見つかったと表示されたことがわかります。これは、購入後やファームウェアをフラッシュした後に動作していることを知るのに非常に役立ちます。
 
-バスパイレートに接続するには、以下のドキュメントに従ってください：
+バスパイレートに接続するには、ドキュメントに従ってください：
 
 ![](<../../.gitbook/assets/image (307) (2).png>)
 
-この場合、私はEPROMに接続する予定です：ATMEL901 24C256 PU27：
+この場合、EPROMに接続します：ATMEL901 24C256 PU27：
 
 ![](<../../.gitbook/assets/image (465) (2) (1).png>)
 
-バスパイレートと通信するために、Tera Termを使用し、パイレートバスのCOMポートに接続し、Setup --> Serial Port --> Speedを115200に設定しました。\
-以下の通信では、I2Cでバスパイレートを準備し、メモリから書き込みと読み取りを行う方法が示されています（コメントは"#"を使用して表示されますが、通信の一部ではありません）。
+バスパイレートと通信するには、Tera Termを使用してバスパイレートのCOMポートに接続し、セットアップ --> シリアルポート --> 速度は115200に設定しました。\
+以下の通信では、バスパイレートをI2Cで話す準備と、メモリからの書き込みと読み取り方法を見つけることができます（コメントは"#"を使用して表示されますが、通信にその部分が表示されることはありません）：
 ```bash
 # Check communication with buspirate
 i
@@ -172,7 +165,7 @@ NACK
 ```
 ## スニファー
 
-このシナリオでは、Arduinoと前のEPROM間のI2C通信をスニフすることになります。両方のデバイスを接続し、その後、バスパイレートをSCL、SDA、およびGNDピンに接続するだけです。
+このシナリオでは、Arduinoと前述のEPROM間のI2C通信をスニッフします。両デバイスを接続し、次にBus PirateをSCL、SDA、GNDピンに接続するだけです：
 
 ![](<../../.gitbook/assets/image (201) (2) (1).png>)
 ```bash
@@ -222,16 +215,14 @@ Any key to exit
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
