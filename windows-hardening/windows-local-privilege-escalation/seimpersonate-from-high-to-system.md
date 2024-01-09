@@ -1,28 +1,28 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
 
 ## コード
 
-以下のコードは[ここ](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)からコピーされました。**引数としてプロセスIDを指定**し、指定したプロセスのユーザーとして実行されるCMDを実行できます。\
-High Integrityプロセスで実行している場合、**Systemとして実行されるプロセスのPIDを指定**でき、cmd.exeをシステムとして実行できます。
+以下のコードは[こちら](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)からコピーされました。**引数としてプロセスIDを指定する**ことができ、指定されたプロセスのユーザーとして実行されるCMDが実行されます。\
+High Integrityプロセスで実行すると、Systemとして実行されているプロセス（winlogon、wininitなど）のPIDを指定し、systemとしてcmd.exeを実行することができます。
 ```cpp
 impersonateuser.exe 1234
 ```
-{% code title="impersonateuser.cpp" %}
+```cpp
+// impersonateuser.cpp のコードは翻訳対象外です。
+```
 ```cpp
 #include <windows.h>
 #include <iostream>
@@ -151,9 +151,11 @@ printf("[-] CreateProcessWithTokenW Error: %i\n", GetLastError());
 return 0;
 }
 ```
+{% endcode %}
+
 ## エラー
 
-場合によっては、システムのなりすましを試みてもうまくいかず、次のような出力が表示されることがあります：
+場合によってはSystemを偽装しようとしてもうまくいかず、次のような出力が表示されることがあります：
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -164,22 +166,38 @@ return 0;
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-これは、High Integrityレベルで実行していても、十分な権限がないことを意味します。\
-**プロセスエクスプローラ**（またはプロセスハッカーを使用することもできます）を使用して、現在の`svchost.exe`プロセスに対する管理者権限を確認しましょう。
+これは、**高い整合性レベルで実行していても十分な権限がない**ことを意味します。
+現在の管理者権限を**プロセスエクスプローラー**を使って`svchost.exe`プロセスに対して確認しましょう（プロセスハッカーを使用することもできます）：
 
-1. `svchost.exe`のプロセスを選択します。
-2. 右クリック→プロパティ
-3. 「セキュリティ」タブ内で、右下の「権限」ボタンをクリックします。
-4. 「詳細」をクリックします。
-5. 「Administrators」を選択し、「編集」をクリックします。
-6. 「詳細な権限を表示」をクリックします。
+1. `svchost.exe`のプロセスを選択します
+2. 右クリック --> プロパティ
+3. "セキュリティ"タブ内で、右下の"権限"ボタンをクリックします
+4. "詳細"をクリックします
+5. "管理者"を選択し、"編集"をクリックします
+6. "詳細な権限を表示"をクリックします
 
 ![](<../../.gitbook/assets/image (322).png>)
 
-前の画像には、「Administrators」が選択したプロセスに対して持っている特権がすべて表示されています（`svchost.exe`の場合、クエリ特権のみ持っていることがわかります）。
+上の画像には、選択したプロセスに対する"管理者"の全ての権限が含まれています（`svchost.exe`の場合は"クエリ"権限のみを持っていることがわかります）
 
-次に、「Administrators」が`winlogon.exe`に対して持っている特権を確認します。
+`winlogon.exe`に対する"管理者"の権限を見てみましょう：
 
 ![](<../../.gitbook/assets/image (323).png>)
 
-このプロセス内では、「Administrators」は「メモリの読み取り」と「権限の読み取り」ができるため、おそらくAdministratorsはこのプロセスで使用されているトークンを偽装することができます。
+そのプロセス内で"管理者"は"メモリを読む"と"権限を読む"ができ、これにより管理者はこのプロセスが使用しているトークンを偽装することができる可能性があります。
+
+
+
+<details>
+
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
+
+HackTricksをサポートする他の方法：
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有**してください。
+
+</details>

