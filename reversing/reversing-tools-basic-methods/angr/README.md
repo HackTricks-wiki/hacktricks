@@ -1,3 +1,18 @@
+<details>
+
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>
+
+
 # Instalación
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
@@ -7,98 +22,6 @@ source ang/bin/activate
 pip install angr
 ```
 # Acciones Básicas
-
-## Load a binary
-
-## Cargar un binario
-
-To load a binary into an angr project, you can use the `angr.Project` constructor. This constructor takes a path to the binary as its first argument.
-
-Para cargar un binario en un proyecto de angr, puedes usar el constructor `angr.Project`. Este constructor toma como primer argumento la ruta al binario.
-
-```python
-import angr
-
-project = angr.Project("/path/to/binary")
-```
-
-## Find a function address
-
-## Encontrar la dirección de una función
-
-To find the address of a function in the binary, you can use the `angr.Project.loader.find_symbol` method. This method takes the name of the function as its argument and returns the address of the function.
-
-Para encontrar la dirección de una función en el binario, puedes usar el método `angr.Project.loader.find_symbol`. Este método toma como argumento el nombre de la función y devuelve la dirección de la función.
-
-```python
-import angr
-
-project = angr.Project("/path/to/binary")
-function_address = project.loader.find_symbol("function_name").rebased_addr
-```
-
-## Create a state
-
-## Crear un estado
-
-To create a state, you can use the `angr.Project.factory.entry_state` method. This method creates a state at the entry point of the binary.
-
-Para crear un estado, puedes usar el método `angr.Project.factory.entry_state`. Este método crea un estado en el punto de entrada del binario.
-
-```python
-import angr
-
-project = angr.Project("/path/to/binary")
-state = project.factory.entry_state()
-```
-
-## Explore the binary
-
-## Explorar el binario
-
-To explore the binary, you can use the `angr.Explorer` class. This class takes a starting state as its argument and allows you to explore the binary using various methods.
-
-Para explorar el binario, puedes usar la clase `angr.Explorer`. Esta clase toma como argumento un estado inicial y te permite explorar el binario usando varios métodos.
-
-```python
-import angr
-
-project = angr.Project("/path/to/binary")
-state = project.factory.entry_state()
-explorer = angr.Explorer(project, start=state)
-```
-
-## Solve constraints
-
-## Resolver restricciones
-
-To solve constraints, you can use the `state.solver` object. This object allows you to add constraints and solve them.
-
-Para resolver restricciones, puedes usar el objeto `state.solver`. Este objeto te permite agregar restricciones y resolverlas.
-
-```python
-import angr
-
-project = angr.Project("/path/to/binary")
-state = project.factory.entry_state()
-solver = state.solver
-```
-
-## Execute the binary
-
-## Ejecutar el binario
-
-To execute the binary, you can use the `state` object's `step` method. This method takes a number of steps to execute as its argument.
-
-Para ejecutar el binario, puedes usar el método `step` del objeto `state`. Este método toma como argumento el número de pasos a ejecutar.
-
-```python
-import angr
-
-project = angr.Project("/path/to/binary")
-state = project.factory.entry_state()
-state.step()
-```
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -116,9 +39,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-# Información de objetos cargados y principales
+# Información del objeto Loaded y Main
 
-## Datos cargados
+## Datos Cargados
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -128,20 +51,20 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-             ('libc.so.6',
-              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-             ('ld-linux-x86-64.so.2',
-              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-             ('extern-address space',
-              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-             ('cle##tls',
-              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+('libc.so.6',
+<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+('ld-linux-x86-64.so.2',
+<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+('extern-address space',
+<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+('cle##tls',
+<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-## Objetivo principal
+## Objeto Principal
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -155,7 +78,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-## Símbolos y reubicaciones
+## Símbolos y Reubicaciones
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -182,7 +105,7 @@ block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x4016
 ```
 # Análisis Dinámico
 
-## Simulación Manager, Estados
+## Gestor de Simulación, Estados
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -205,11 +128,11 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
-## Llamando funciones
+## Llamando a funciones
 
-* Puedes pasar una lista de argumentos a través de `args` y un diccionario de variables de entorno a través de `env` en `entry_state` y `full_init_state`. Los valores en estas estructuras pueden ser cadenas de texto o bitvectors, y se serializarán en el estado como los argumentos y el entorno para la ejecución simulada. El valor predeterminado de `args` es una lista vacía, por lo que si el programa que estás analizando espera encontrar al menos un `argv[0]`, ¡siempre debes proporcionarlo!
-* Si deseas que `argc` sea simbólico, puedes pasar un bitvector simbólico como `argc` a los constructores `entry_state` y `full_init_state`. Sin embargo, ten cuidado: si haces esto, también debes agregar una restricción al estado resultante de que tu valor para `argc` no puede ser mayor que el número de argumentos que pasaste a `args`.
-* Para usar el estado de llamada, debes llamarlo con `.call_state(addr, arg1, arg2, ...)`, donde `addr` es la dirección de la función que deseas llamar y `argN` es el N-ésimo argumento de esa función, ya sea como un entero, cadena de texto, array o bitvector de Python. Si deseas que se asigne memoria y realmente pasar un puntero a un objeto, debes envolverlo en un PointerWrapper, es decir, `angr.PointerWrapper("¡apúntame!")`. Los resultados de esta API pueden ser un poco impredecibles, pero estamos trabajando en ello.
+* Puedes pasar una lista de argumentos a través de `args` y un diccionario de variables de entorno a través de `env` en `entry_state` y `full_init_state`. Los valores en estas estructuras pueden ser cadenas de texto o bitvectors, y serán serializados en el estado como los argumentos y el entorno para la ejecución simulada. El valor por defecto de `args` es una lista vacía, así que si el programa que estás analizando espera encontrar al menos un `argv[0]`, ¡deberías proporcionarlo siempre!
+* Si te gustaría que `argc` sea simbólico, puedes pasar un bitvector simbólico como `argc` a los constructores de `entry_state` y `full_init_state`. Sin embargo, ten cuidado: si haces esto, también deberías añadir una restricción al estado resultante de que tu valor para argc no puede ser mayor que el número de argumentos que pasaste a `args`.
+* Para usar el estado de llamada, debes llamarlo con `.call_state(addr, arg1, arg2, ...)`, donde `addr` es la dirección de la función que quieres llamar y `argN` es el N-ésimo argumento para esa función, ya sea como un entero de python, una cadena de texto, un array, o un bitvector. Si quieres tener memoria asignada y realmente pasar un puntero a un objeto, deberías envolverlo en un PointerWrapper, es decir, `angr.PointerWrapper("point to me!")`. Los resultados de esta API pueden ser un poco impredecibles, pero estamos trabajando en ello.
 
 ## BitVectors
 ```python
@@ -221,8 +144,6 @@ bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
 ## BitVectors Simbólicos y Restricciones
-
-Los BitVectors Simbólicos son una herramienta poderosa en el análisis de binarios. Permiten representar valores desconocidos o no determinados en el análisis de un programa. Las restricciones son condiciones que se imponen a los valores de los BitVectors Simbólicos. Estas restricciones pueden ser utilizadas para encontrar soluciones a problemas específicos, como por ejemplo, encontrar entradas que satisfagan una determinada condición en un programa.
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -256,9 +177,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-## Hooking
-
-El hooking es una técnica utilizada en ingeniería inversa para interceptar y modificar el comportamiento de una aplicación. En el contexto de angr, el hooking se utiliza para modificar el comportamiento de una función específica en un binario. Esto se logra mediante la inserción de código personalizado en la función objetivo. El hooking puede ser útil para evitar la ejecución de ciertas funciones, para modificar los argumentos de entrada o para cambiar el valor de retorno de una función.
+## Enganche
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -276,22 +195,24 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Además, puedes usar `proj.hook_symbol(name, hook)` proporcionando el nombre de un símbolo como primer argumento, para enganchar la dirección donde vive el símbolo.
+Además, puedes utilizar `proj.hook_symbol(name, hook)`, proporcionando el nombre de un símbolo como primer argumento, para enganchar la dirección donde vive el símbolo
 
 # Ejemplos
 
+
+
+
+
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+Otras formas de apoyar a HackTricks:
 
-- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-
-- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
