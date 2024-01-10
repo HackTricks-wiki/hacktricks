@@ -1,21 +1,21 @@
 # ACLs - DACLs/SACLs/ACEs
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas** del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas** del mundo.\
 Obtén Acceso Hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS desde cero hasta héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
@@ -35,11 +35,11 @@ Cuando un usuario intenta acceder a un archivo, el sistema Windows ejecuta un Ac
 
 ### **Lista de Control de Acceso Discrecional (DACL)**
 
-Un DACL (a menudo mencionado como ACL) identifica a los usuarios y grupos que tienen asignados o se les niegan los permisos de acceso a un objeto. Contiene una lista de ACEs emparejados (Cuenta + Derecho de Acceso) al objeto asegurable.
+Un DACL (a menudo mencionado como ACL) identifica a los usuarios y grupos que tienen asignados o se les niegan los permisos de acceso en un objeto. Contiene una lista de ACEs emparejados (Cuenta + Derecho de Acceso) al objeto asegurable.
 
 ### **Lista de Control de Acceso del Sistema (SACL)**
 
-Los SACLs permiten monitorear el acceso a objetos asegurados. Los ACEs en un SACL determinan **qué tipos de acceso se registran en el Registro de Eventos de Seguridad**. Con herramientas de monitoreo esto podría activar una alarma para las personas adecuadas si usuarios maliciosos intentan acceder al objeto asegurado, y en un escenario de incidente podemos usar los registros para rastrear los pasos hacia atrás en el tiempo. Y por último, puedes habilitar el registro para solucionar problemas de acceso.
+Los SACLs hacen posible monitorear el acceso a objetos asegurados. Los ACEs en un SACL determinan **qué tipos de acceso se registran en el Registro de Eventos de Seguridad**. Con herramientas de monitoreo, esto podría activar una alarma para las personas adecuadas si usuarios maliciosos intentan acceder al objeto asegurado, y en un escenario de incidente podemos usar los registros para rastrear los pasos hacia atrás en el tiempo. Y por último, puedes habilitar el registro para solucionar problemas de acceso.
 
 ## Cómo el Sistema Utiliza las ACLs
 
@@ -71,8 +71,8 @@ Cada ACE está compuesto por los siguientes `cuatro` componentes:
 El sistema examina cada ACE en secuencia hasta que ocurre uno de los siguientes eventos:
 
 * **Un ACE de acceso denegado explícitamente niega** cualquiera de los derechos de acceso solicitados a uno de los fideicomisarios listados en el token de acceso del hilo.
-* **Uno o más ACEs de acceso permitido** para fideicomisarios listados en el token de acceso del hilo conceden explícitamente todos los derechos de acceso solicitados.
-* Todos los ACEs han sido revisados y todavía hay al menos **un derecho de acceso solicitado** que **no ha sido explícitamente permitido**, en cuyo caso, el acceso es implícitamente **denegado**.
+* **Uno o más ACEs de acceso permitido** para los fideicomisarios listados en el token de acceso del hilo conceden explícitamente todos los derechos de acceso solicitados.
+* Todos los ACEs han sido revisados y todavía hay al menos **un derecho de acceso solicitado** que **no ha sido explícitamente permitido**, en cuyo caso, el acceso se niega **implícitamente**.
 
 ### Orden de los ACEs
 
@@ -92,13 +92,13 @@ La siguiente figura muestra el orden canónico de los ACEs:
 
 El orden canónico asegura que ocurra lo siguiente:
 
-* Un ACE de **acceso denegado explícito se hace cumplir independientemente de cualquier ACE de acceso permitido explícito**. Esto significa que el propietario del objeto puede definir permisos que permitan el acceso a un grupo de usuarios y denegar el acceso a un subconjunto de ese grupo.
-* Todos los ACEs **explícitos se procesan antes de cualquier ACE heredado**. Esto es consistente con el concepto de control de acceso discrecional: el acceso a un objeto hijo (por ejemplo, un archivo) está a discreción del propietario del hijo, no del propietario del objeto padre (por ejemplo, una carpeta). El propietario de un objeto hijo puede definir permisos directamente en el hijo. El resultado es que los efectos de los permisos heredados se modifican.
+* Un ACE de **acceso denegado explícito se hace cumplir independientemente de cualquier ACE de acceso permitido explícito**. Esto significa que el propietario del objeto puede definir permisos que permitan el acceso a un grupo de usuarios y denieguen el acceso a un subconjunto de ese grupo.
+* Todos los **ACEs explícitos se procesan antes de cualquier ACE heredado**. Esto es consistente con el concepto de control de acceso discrecional: el acceso a un objeto hijo (por ejemplo, un archivo) está a discreción del propietario del hijo, no del propietario del objeto padre (por ejemplo, una carpeta). El propietario de un objeto hijo puede definir permisos directamente en el hijo. El resultado es que los efectos de los permisos heredados se modifican.
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas** del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas** del mundo.\
 Obtén Acceso Hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -155,9 +155,9 @@ Los ACEs son fundamentalmente similares. Lo que los distingue es el grado de con
 
 Un ACE genérico ofrece un control limitado sobre los tipos de objetos hijos que pueden heredarlos. Esencialmente, solo pueden distinguir entre contenedores y no contenedores.
 
-Por ejemplo, el DACL (Lista de Control de Acceso Discrecional) en un objeto Carpeta en NTFS puede incluir un ACE genérico que permite a un grupo de usuarios listar el contenido de la carpeta. Debido a que listar el contenido de una carpeta es una operación que solo se puede realizar en un objeto Contenedor, el ACE que permite la operación puede marcarse como CONTAINER_INHERIT_ACE. Solo los objetos Contenedor en la carpeta (es decir, solo otros objetos Carpeta) heredan el ACE. Los objetos no contenedores (es decir, objetos Archivo) no heredan el ACE del objeto padre.
+Por ejemplo, el DACL (Lista de Control de Acceso Discrecional) en un objeto Carpeta en NTFS puede incluir un ACE genérico que permite a un grupo de usuarios listar el contenido de la carpeta. Debido a que listar el contenido de una carpeta es una operación que solo se puede realizar en un objeto Contenedor, el ACE que permite la operación puede marcarse como CONTAINER_INHERIT_ACE. Solo los objetos Contenedor en la carpeta (es decir, otros objetos Carpeta) heredan el ACE. Los objetos no contenedores (es decir, objetos Archivo) no heredan el ACE del objeto padre.
 
-Un ACE genérico se aplica a un objeto completo. Si un ACE genérico otorga a un usuario en particular acceso de lectura, el usuario puede leer toda la información asociada con el objeto, tanto datos como propiedades. Esto no es una limitación seria para la mayoría de los tipos de objetos. Por ejemplo, los objetos Archivo tienen pocas propiedades, que se utilizan todas para describir características del objeto en lugar de para almacenar información. La mayor parte de la información en un objeto Archivo se almacena como datos del objeto; por lo tanto, hay poca necesidad de controles separados en las propiedades de un archivo.
+Un ACE genérico se aplica a un objeto completo. Si un ACE genérico otorga a un usuario en particular acceso de lectura, el usuario puede leer toda la información asociada con el objeto, tanto datos como propiedades. Esto no es una limitación grave para la mayoría de los tipos de objetos. Los objetos Archivo, por ejemplo, tienen pocas propiedades, que se utilizan todas para describir características del objeto en lugar de para almacenar información. La mayor parte de la información en un objeto Archivo se almacena como datos del objeto; por lo tanto, hay poca necesidad de controles separados en las propiedades de un archivo.
 
 ### ACE Específico de Objeto
 
@@ -165,7 +165,7 @@ Un ACE específico de objeto ofrece un mayor grado de control sobre los tipos de
 
 Por ejemplo, el ACL de un objeto OU (Unidad Organizativa) puede tener un ACE específico de objeto que está marcado para herencia solo por objetos Usuario. Otros tipos de objetos, como los objetos Computadora, no heredarán el ACE.
 
-Esta capacidad es la razón por la cual los ACEs específicos de objeto se llaman específicos de objeto. Su herencia puede limitarse a tipos específicos de objetos hijos.
+Esta capacidad es la razón por la que los ACEs específicos de objeto se llaman específicos de objeto. Su herencia puede limitarse a tipos específicos de objetos hijos.
 
 Hay diferencias similares en cómo las dos categorías de tipos de ACE controlan el acceso a objetos.
 
@@ -182,4 +182,4 @@ La tabla a continuación muestra la disposición de cada ACE.
 | Tipo        | Bandera que indica el tipo de ACE. Windows 2000 y Windows Server 2003 admiten seis tipos de ACE: Tres tipos de ACE genéricos que se adjuntan a todos los objetos asegurables. Tres tipos de ACE específicos de objeto que pueden ocurrir para objetos de Active Directory.                                                                                                                                                                                                                                                            |
 | Banderas       | Conjunto de bits de banderas que controlan la herencia y la auditoría.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Tamaño        | Número de bytes de memoria que se asignan para el ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Máscara de acceso | Valor de 32
+| Máscara de acceso | Valor de

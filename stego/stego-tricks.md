@@ -10,7 +10,7 @@ Otras formas de apoyar a HackTricks:
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repos de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de Github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -29,23 +29,23 @@ Encuentra vulnerabilidades que importan más para poder arreglarlas más rápido
 Binwalk es una herramienta para buscar en archivos binarios, como imágenes y archivos de audio, archivos y datos ocultos incrustados.\
 Se puede instalar con `apt`, y el [código fuente](https://github.com/ReFirmLabs/binwalk) se puede encontrar en Github.\
 **Comandos útiles**:\
-`binwalk file` : Muestra los datos incrustados en el archivo dado\
-`binwalk -e file` : Muestra y extrae los datos del archivo dado\
-`binwalk --dd ".*" file` : Muestra y extrae los datos del archivo dado
+`binwalk archivo` : Muestra los datos incrustados en el archivo dado\
+`binwalk -e archivo` : Muestra y extrae los datos del archivo dado\
+`binwalk --dd ".*" archivo` : Muestra y extrae los datos del archivo dado
 
 ### Foremost <a href="#foremost" id="foremost"></a>
 
 Foremost es un programa que recupera archivos basándose en sus cabeceras, pies de página y estructuras de datos internas. Lo encuentro especialmente útil al tratar con imágenes png. Puedes seleccionar los archivos que Foremost extraerá cambiando el archivo de configuración en **/etc/foremost.conf.**\
 Se puede instalar con `apt`, y el [código fuente](https://github.com/korczis/foremost) se puede encontrar en Github.\
 **Comandos útiles:**\
-`foremost -i file` : extrae datos del archivo dado.
+`foremost -i archivo` : extrae datos del archivo dado.
 
 ### Exiftool <a href="#exiftool" id="exiftool"></a>
 
 A veces, cosas importantes están ocultas en los metadatos de una imagen o archivo; exiftool puede ser muy útil para ver los metadatos de un archivo.\
 Puedes obtenerlo [aquí](https://www.sno.phy.queensu.ca/\~phil/exiftool/)\
 **Comandos útiles:**\
-`exiftool file` : muestra los metadatos del archivo dado
+`exiftool archivo` : muestra los metadatos del archivo dado
 
 ### Exiv2 <a href="#exiv2" id="exiv2"></a>
 
@@ -53,25 +53,25 @@ Una herramienta similar a exiftool.\
 Se puede instalar con `apt`, y el [código fuente](https://github.com/Exiv2/exiv2) se puede encontrar en Github.\
 [Sitio web oficial](http://www.exiv2.org/)\
 **Comandos útiles:**\
-`exiv2 file` : muestra los metadatos del archivo dado
+`exiv2 archivo` : muestra los metadatos del archivo dado
 
 ### File
 
-Comprueba qué tipo de archivo tienes
+Revisa qué tipo de archivo tienes
 
 ### Strings
 
 Extrae cadenas del archivo.\
 Comandos útiles:\
-`strings -n 6 file`: Extrae las cadenas con una longitud mínima de 6\
-`strings -n 6 file | head -n 20`: Extrae las primeras 20 cadenas con una longitud mínima de 6\
-`strings -n 6 file | tail -n 20`: Extrae las últimas 20 cadenas con una longitud mínima de 6\
-`strings -e s -n 6 file`: Extrae cadenas de 7 bits\
-`strings -e S -n 6 file`: Extrae cadenas de 8 bits\
-`strings -e l -n 6 file`: Extrae cadenas de 16 bits (little-endian)\
-`strings -e b -n 6 file`: Extrae cadenas de 16 bits (big-endian)\
-`strings -e L -n 6 file`: Extrae cadenas de 32 bits (little-endian)\
-`strings -e B -n 6 file`: Extrae cadenas de 32 bits (big-endian)
+`strings -n 6 archivo`: Extrae las cadenas con una longitud mínima de 6\
+`strings -n 6 archivo | head -n 20`: Extrae las primeras 20 cadenas con una longitud mínima de 6\
+`strings -n 6 archivo | tail -n 20`: Extrae las últimas 20 cadenas con una longitud mínima de 6\
+`strings -e s -n 6 archivo`: Extrae cadenas de 7 bits\
+`strings -e S -n 6 archivo`: Extrae cadenas de 8 bits\
+`strings -e l -n 6 archivo`: Extrae cadenas de 16 bits (little-endian)\
+`strings -e b -n 6 archivo`: Extrae cadenas de 16 bits (big-endian)\
+`strings -e L -n 6 archivo`: Extrae cadenas de 32 bits (little-endian)\
+`strings -e B -n 6 archivo`: Extrae cadenas de 32 bits (big-endian)
 
 ### cmp - Comparación
 
@@ -83,12 +83,12 @@ cmp original.jpg stego.jpg -b -l
 
 ### Datos ocultos en espacios
 
-Si encuentras que una **línea de texto** es **más grande** de lo que debería ser, entonces podría haber **información oculta** dentro de los **espacios** usando caracteres invisibles. Para **extraer** los **datos**, puedes usar: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+Si encuentras que una **línea de texto** es **más grande** de lo que debería ser, entonces podría haber **información oculta** dentro de los **espacios** utilizando caracteres invisibles. Para **extraer** los **datos**, puedes usar: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas**.\
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas** del mundo.\
 Obtén Acceso Hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -97,7 +97,7 @@ Obtén Acceso Hoy:
 
 ### identify
 
-Herramienta [GraphicMagick](https://imagemagick.org/script/download.php) para verificar qué tipo de imagen es un archivo. También comprueba si la imagen está corrupta.
+Herramienta [GraphicMagick](https://imagemagick.org/script/download.php) para verificar qué tipo de imagen es un archivo. También verifica si la imagen está corrupta.
 ```
 ./magick identify -verbose stego.jpg
 ```
@@ -131,7 +131,7 @@ Capaz de una amplia variedad de trucos simples y avanzados, esta herramienta pue
 
 ### Stegsolve
 
-A veces hay un mensaje o un texto oculto en la imagen misma que, para verlo, debe tener aplicados filtros de color o algunos niveles de color cambiados. Aunque puedes hacer eso con algo como GIMP o Photoshop, Stegsolve lo facilita. Es una pequeña herramienta Java que aplica muchos filtros de color útiles en imágenes; en desafíos CTF, Stegsolve a menudo ahorra mucho tiempo.\
+A veces hay un mensaje o un texto oculto en la propia imagen que, para verlo, debe tener aplicados filtros de color o algunos niveles de color cambiados. Aunque puedes hacer eso con algo como GIMP o Photoshop, Stegsolve lo facilita. Es una pequeña herramienta Java que aplica muchos filtros de color útiles en imágenes; en desafíos CTF, Stegsolve a menudo ahorra mucho tiempo.\
 Puedes obtenerlo de [Github](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)\
 Para usarlo, simplemente abre la imagen y haz clic en los botones `<` `>`.
 
@@ -190,7 +190,7 @@ Para buscar información oculta, simplemente ejecuta el programa y abre el archi
 ### Sonic visualizer <a href="#sonic-visualizer" id="sonic-visualizer"></a>
 
 Sonic visualizer es una herramienta para ver y analizar los contenidos de archivos de audio. Puede ser muy útil cuando te enfrentas a desafíos de esteganografía de audio; puedes revelar formas ocultas en archivos de audio que muchas otras herramientas no detectarán.\
-Si estás atascado, siempre verifica el espectrograma del audio. [Sitio Web Oficial](https://www.sonicvisualiser.org/)
+Si estás atascado, siempre verifica el espectrograma del audio. [Sitio Oficial](https://www.sonicvisualiser.org/)
 
 ### Tonos DTMF - Tonos de marcado
 
@@ -220,20 +220,20 @@ Para leer un código QR: [https://online-barcode-reader.inliteresearch.com/](htt
 
 <figure><img src="../.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-Encuentra vulnerabilidades que importan más para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, realiza escaneos proactivos de amenazas, encuentra problemas en todo tu stack tecnológico, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
+Encuentra vulnerabilidades que importan más para poder solucionarlas más rápido. Intruder rastrea tu superficie de ataque, realiza escaneos proactivos de amenazas, encuentra problemas en todo tu stack tecnológico, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende AWS hacking de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

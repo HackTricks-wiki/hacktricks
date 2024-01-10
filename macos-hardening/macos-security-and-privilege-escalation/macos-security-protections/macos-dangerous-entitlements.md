@@ -59,7 +59,7 @@ Este permiso permite **usar variables de entorno DYLD** que podrían usarse para
 
 ### **`system.install.apple-software`** y **`system.install.apple-software.standar-user`**
 
-Estos permisos permiten **instalar software sin pedir permiso** al usuario, lo cual puede ser útil para una **escalada de privilegios**.
+Estos permisos permiten **instalar software sin pedir permiso** al usuario, lo que puede ser útil para una **escalada de privilegios**.
 
 ### `com.apple.private.security.kext-management`
 
@@ -87,7 +87,7 @@ TODO: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-
 
 ### `keychain-access-groups`
 
-Este permiso enumera los grupos de **keychain** a los que la aplicación tiene acceso:
+Este permiso enumera los **grupos de llaveros** a los que la aplicación tiene acceso:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -114,7 +114,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 ```
 {% endcode %}
 
-O permitirles realizar **acciones arbitrarias**.
+O haciendo que realicen **acciones arbitrarias**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
@@ -128,9 +128,9 @@ Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia 
 
 Permite modificar archivos dentro del paquete de aplicaciones (dentro de app.app), lo cual está **prohibido por defecto**.
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-Es posible verificar quién tiene este acceso en _Configuración del sistema_ > _Privacidad y seguridad_ > _Gestión de aplicaciones._
+Es posible verificar quién tiene este acceso en _Configuración del Sistema_ > _Privacidad y Seguridad_ > _Gestión de Aplicaciones._
 
 ### `kTCCServiceAccessibility`
 
@@ -140,11 +140,11 @@ El proceso podrá **abusar de las funciones de accesibilidad de macOS**, lo que 
 
 ### `com.apple.security.cs.allow-jit`
 
-Este permiso permite **crear memoria que es escribible y ejecutable** pasando la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
+Este permiso permite **crear memoria que es escribible y ejecutable** pasando la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Este permiso permite **sobrescribir o parchear código C**, usar el **`NSCreateObjectFileImageFromMemory`** muy anticuado (que es fundamentalmente inseguro), o usar el marco de trabajo **DVDPlayback**. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
+Este permiso permite **sobrescribir o parchear código C**, usar el obsoleto **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro), o usar el framework **DVDPlayback**. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 {% hint style="danger" %}
 Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguajes de código inseguros en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
@@ -152,7 +152,7 @@ Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguaj
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Este permiso permite **modificar secciones de sus propios archivos ejecutables** en disco para salir forzosamente. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection).
+Este permiso permite **modificar secciones de sus propios archivos ejecutables** en disco para salir forzosamente. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 {% hint style="danger" %}
 El permiso de Desactivación de Protección de Páginas Ejecutables es un permiso extremo que elimina una protección de seguridad fundamental de tu aplicación, lo que permite que un atacante reescriba el código ejecutable de tu aplicación sin detección. Prefiere permisos más específicos si es posible.
@@ -164,7 +164,7 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Este permiso permite montar un sistema de archivos nullfs (prohibido por defecto). Herramienta: [**mount\_nullfs**](https://github.com/JamaicanMoose/mount\_nullfs/tree/master).
+Este permiso permite montar un sistema de archivos nullfs (prohibido por defecto). Herramienta: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
@@ -185,10 +185,10 @@ Permite al proceso **solicitar todos los permisos de TCC**.
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

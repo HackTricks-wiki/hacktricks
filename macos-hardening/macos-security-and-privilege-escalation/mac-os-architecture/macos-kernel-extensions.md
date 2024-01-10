@@ -12,35 +12,35 @@
 
 </details>
 
-## Información básica
+## Información Básica
 
-Las extensiones del kernel (Kexts) son **paquetes** con una extensión **`.kext`** que se **cargan directamente en el espacio del kernel de macOS**, proporcionando funcionalidad adicional al sistema operativo principal.
+Las extensiones del kernel (Kexts) son **paquetes** con una extensión **`.kext`** que se **cargan directamente en el espacio del kernel de macOS**, proporcionando funcionalidades adicionales al sistema operativo principal.
 
 ### Requisitos
 
-Obviamente, esto es tan poderoso que es **complicado cargar una extensión del kernel**. Estos son los **requisitos** que debe cumplir una extensión del kernel para poder cargarse:
+Obviamente, esto es tan poderoso que es **complicado cargar una extensión del kernel**. Estos son los **requisitos** que una extensión del kernel debe cumplir para ser cargada:
 
-* Cuando se **ingresa al modo de recuperación**, las **extensiones del kernel deben estar permitidas** para cargarse:
+* Al **entrar en modo de recuperación**, las extensiones del kernel deben ser **permitidas** para su carga:
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-* La extensión del kernel debe estar **firmada con un certificado de firma de código del kernel**, que solo puede ser **concedido por Apple**. Quien revisará en detalle la empresa y las razones por las que se necesita.
-* La extensión del kernel también debe estar **notarizada**, Apple podrá verificarla en busca de malware.
-* Luego, el usuario **root** es el que puede **cargar la extensión del kernel** y los archivos dentro del paquete deben **pertenecer a root**.
-* Durante el proceso de carga, el paquete debe prepararse en una ubicación **protegida y no root**: `/Library/StagedExtensions` (requiere el permiso `com.apple.rootless.storage.KernelExtensionManagement`).
-* Finalmente, al intentar cargarla, el usuario recibirá una [**solicitud de confirmación**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html) y, si se acepta, se debe **reiniciar** la computadora para cargarla.
+* La extensión del kernel debe estar **firmada con un certificado de firma de código del kernel**, que solo puede ser **otorgado por Apple**. Quien revisará en detalle la empresa y las razones por las que se necesita.
+* La extensión del kernel también debe ser **notarizada**, Apple podrá revisarla en busca de malware.
+* Luego, el usuario **root** es quien puede **cargar la extensión del kernel** y los archivos dentro del paquete deben **pertenecer a root**.
+* Durante el proceso de carga, el paquete debe ser preparado en una **ubicación protegida no root**: `/Library/StagedExtensions` (requiere el permiso `com.apple.rootless.storage.KernelExtensionManagement`).
+* Finalmente, al intentar cargarla, el usuario recibirá [**una solicitud de confirmación**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html) y, si es aceptada, el ordenador debe ser **reiniciado** para cargarla.
 
-### Proceso de carga
+### Proceso de Carga
 
-En Catalina era así: Es interesante destacar que el proceso de **verificación** ocurre en **userland**. Sin embargo, solo las aplicaciones con el permiso **`com.apple.private.security.kext-management`** pueden **solicitar al kernel que cargue una extensión**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+En Catalina era así: Es interesante notar que el proceso de **verificación** ocurre en **userland**. Sin embargo, solo las aplicaciones con el permiso **`com.apple.private.security.kext-management`** pueden **solicitar al kernel que cargue una extensión**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** inicia el proceso de **verificación** para cargar una extensión
-* Se comunicará con **`kextd`** enviando un **servicio Mach**.
+1. La CLI **`kextutil`** **inicia** el proceso de **verificación** para cargar una extensión
+   * Se comunicará con **`kextd`** enviando un **servicio Mach**.
 2. **`kextd`** verificará varias cosas, como la **firma**
-* Se comunicará con **`syspolicyd`** para **verificar** si se puede **cargar** la extensión.
-3. **`syspolicyd`** **solicitará** al **usuario** si la extensión no se ha cargado previamente.
-* **`syspolicyd`** informará el resultado a **`kextd`**
-4. **`kextd`** finalmente podrá **indicarle al kernel que cargue** la extensión
+   * Se comunicará con **`syspolicyd`** para **verificar** si la extensión puede ser **cargada**.
+3. **`syspolicyd`** **solicitará** al **usuario** si la extensión no ha sido cargada previamente.
+   * **`syspolicyd`** informará el resultado a **`kextd`**.
+4. **`kextd`** finalmente podrá **indicar al kernel que cargue** la extensión.
 
 Si **`kextd`** no está disponible, **`kextutil`** puede realizar las mismas verificaciones.
 

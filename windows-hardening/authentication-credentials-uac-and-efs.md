@@ -6,24 +6,24 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas**.\
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics\&utm_medium=banner\&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas**.\
 Obtén Acceso Hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## Política de AppLocker
 
-Una lista blanca de aplicaciones es una lista de aplicaciones de software o ejecutables aprobados que se permite que estén presentes y se ejecuten en un sistema. El objetivo es proteger el entorno de malware dañino y software no aprobado que no se alinea con las necesidades comerciales específicas de una organización.
+Una lista blanca de aplicaciones es una lista de aplicaciones de software o ejecutables aprobados que están permitidos para estar presentes y ejecutarse en un sistema. El objetivo es proteger el entorno de malware dañino y software no aprobado que no se alinea con las necesidades comerciales específicas de una organización.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) es la **solución de lista blanca de aplicaciones** de Microsoft y otorga a los administradores del sistema control sobre **qué aplicaciones y archivos pueden ejecutar los usuarios**. Proporciona un control **granular** sobre ejecutables, scripts, archivos de instalación de Windows, DLLs, aplicaciones empaquetadas y instaladores de aplicaciones empaquetadas.\
 Es común que las organizaciones **bloqueen cmd.exe y PowerShell.exe** y el acceso de escritura a ciertos directorios, **pero todo esto puede ser eludido**.
@@ -41,9 +41,9 @@ $a.rulecollections
 ```
 Las reglas de AppLocker aplicadas a un host también pueden ser **leídas desde el registro local** en **`HKLM\Software\Policies\Microsoft\Windows\SrpV2`**.
 
-### Evasión
+### Bypass
 
-* **Carpetas escribibles** útiles para evadir la Política de AppLocker: Si AppLocker permite ejecutar cualquier cosa dentro de `C:\Windows\System32` o `C:\Windows`, hay **carpetas escribibles** que puedes usar para **evadir esto**.
+* **Carpetas escribibles** útiles para eludir la Política de AppLocker: Si AppLocker permite ejecutar cualquier cosa dentro de `C:\Windows\System32` o `C:\Windows`, hay **carpetas escribibles** que puedes usar para **eludir esto**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -67,7 +67,7 @@ Las credenciales locales están presentes en este archivo, las contraseñas est�
 
 Las **credenciales** (hasheadas) se **guardan** en la **memoria** de este subsistema por razones de Single Sign-On.\
 **LSA** administra la **política de seguridad local** (política de contraseñas, permisos de usuarios...), **autenticación**, **tokens de acceso**...\
-LSA será quien **verifique** las credenciales proporcionadas dentro del archivo **SAM** (para un inicio de sesión local) y **hable** con el **controlador de dominio** para autenticar a un usuario de dominio.
+LSA será quien **verifique** las credenciales proporcionadas dentro del archivo **SAM** (para un inicio de sesión local) y **comunique** con el **controlador de dominio** para autenticar a un usuario de dominio.
 
 Las **credenciales** se **guardan** dentro del **proceso LSASS**: tickets de Kerberos, hashes NT y LM, contraseñas fácilmente descifrables.
 
@@ -120,14 +120,14 @@ sc query windefend
 ```
 ## EFS (Sistema de Archivos Encriptados)
 
-EFS funciona encriptando un archivo con una **clave simétrica** masiva, también conocida como Clave de Encriptación de Archivo, o **FEK**. La FEK es entonces **encriptada** con una **clave pública** asociada al usuario que encriptó el archivo, y esta FEK encriptada se almacena en el **flujo de datos alternativo** $EFS del archivo encriptado. Para desencriptar el archivo, el controlador de componente EFS utiliza la **clave privada** que coincide con el certificado digital EFS (usado para encriptar el archivo) para desencriptar la clave simétrica almacenada en el flujo $EFS. Desde [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS funciona encriptando un archivo con una **clave simétrica** masiva, también conocida como la Clave de Encriptación de Archivo, o **FEK**. La FEK es entonces **encriptada** con una **clave pública** que está asociada con el usuario que encriptó el archivo, y esta FEK encriptada se almacena en el **flujo de datos alternativo** $EFS del archivo encriptado. Para desencriptar el archivo, el controlador de componente EFS utiliza la **clave privada** que coincide con el certificado digital EFS (usado para encriptar el archivo) para desencriptar la clave simétrica que está almacenada en el flujo $EFS. Desde [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 Ejemplos de archivos siendo desencriptados sin que el usuario lo solicite:
 
 * Archivos y carpetas son desencriptados antes de ser copiados a un volumen formateado con otro sistema de archivos, como [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table).
 * Archivos encriptados son copiados a través de la red usando el protocolo SMB/CIFS, los archivos son desencriptados antes de ser enviados por la red.
 
-Los archivos encriptados usando este método pueden ser **accedidos de manera transparente por el usuario propietario** (el que los ha encriptado), así que si puedes **convertirte en ese usuario** puedes desencriptar los archivos (cambiar la contraseña del usuario e iniciar sesión como él no funcionará).
+Los archivos encriptados usando este método pueden ser **accesados de manera transparente por el usuario propietario** (el que los ha encriptado), así que si puedes **convertirte en ese usuario** puedes desencriptar los archivos (cambiar la contraseña del usuario e iniciar sesión como él no funcionará).
 
 ### Verificar información de EFS
 
@@ -152,10 +152,10 @@ En la mayoría de las infraestructuras, las cuentas de servicio son cuentas de u
 
 * No más gestión de contraseñas. Utiliza una contraseña compleja y aleatoria de 240 caracteres y la cambia automáticamente cuando alcanza la fecha de expiración de la contraseña del dominio o del ordenador.
 * Utiliza el Servicio de Distribución de Claves de Microsoft (KDC) para crear y gestionar las contraseñas para la gMSA.
-* No puede ser bloqueada ni utilizada para inicio de sesión interactivo
-* Soporta compartirse entre múltiples hosts
-* Puede usarse para ejecutar tareas programadas (las cuentas de servicio administradas no soportan ejecutar tareas programadas)
-* Gestión simplificada de SPN – El sistema cambiará automáticamente el valor de SPN si los detalles de **sAMaccount** del ordenador cambian o la propiedad del nombre DNS cambia.
+* No puede ser bloqueada ni utilizada para inicio de sesión interactivo.
+* Soporta compartirse entre múltiples hosts.
+* Puede usarse para ejecutar tareas programadas (las cuentas de servicio administradas no soportan ejecutar tareas programadas).
+* Gestión simplificada de SPN – El sistema cambiará automáticamente el valor de SPN si los detalles de **sAMaccount** del ordenador cambian o si cambia la propiedad del nombre DNS.
 
 Las cuentas gMSA tienen sus contraseñas almacenadas en una propiedad LDAP llamada _**msDS-ManagedPassword**_ que se **restablece automáticamente** por los DC cada 30 días, son **recuperables** por **administradores autorizados** y por los **servidores** en los que están instalados. _**msDS-ManagedPassword**_ es un blob de datos encriptados llamado [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) y solo es recuperable cuando la conexión está asegurada, **LDAPS** o cuando el tipo de autenticación es 'Sealing & Secure' por ejemplo.
 
@@ -206,7 +206,7 @@ Puede utilizar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerToo
 
 ## Política de Ejecución de PS
 
-Por defecto está configurada en **restringido**. Principales formas de evitar esta política:
+Por defecto está configurada en **restringido.** Principales formas de eludir esta política:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -257,10 +257,10 @@ El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que 
 [uac-user-account-control.md](windows-security-controls/uac-user-account-control.md)
 {% endcontent-ref %}
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas**.\
+Usa [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las herramientas comunitarias **más avanzadas**.\
 Obtén Acceso Hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -275,6 +275,6 @@ Otras formas de apoyar a HackTricks:
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

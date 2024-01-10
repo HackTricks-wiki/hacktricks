@@ -6,15 +6,15 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, potenciados por las herramientas comunitarias **más avanzadas**.\
@@ -22,7 +22,7 @@ Obtén Acceso Hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Artefactos de Navegadores <a href="#3def" id="3def"></a>
+## Artefactos de Navegadores <a href="#id-3def" id="id-3def"></a>
 
 Cuando hablamos de artefactos de navegadores nos referimos a, historial de navegación, marcadores, lista de archivos descargados, datos de caché, etc.
 
@@ -53,7 +53,7 @@ Cada perfil tiene una variable "**Path**" con el nombre de la carpeta donde se a
 
 Dentro de la carpeta **de cada perfil** (_\~/.mozilla/firefox/\<ProfileName>/_) podrás encontrar los siguientes archivos interesantes:
 
-* _**places.sqlite**_ : Historial (moz\_\_places), marcadores (moz\_bookmarks), y descargas (moz\_\_annos). En Windows la herramienta [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) puede ser utilizada para leer el historial dentro de _**places.sqlite**_.
+* _**places.sqlite**_ : Historial (moz_places), marcadores (moz_bookmarks) y descargas (moz_annos). En Windows, la herramienta [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) puede ser utilizada para leer el historial dentro de _**places.sqlite**_.
 * Consulta para volcar el historial: `select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`
 * Nota que un tipo de enlace es un número que indica:
 * 1: El usuario siguió un enlace
@@ -70,7 +70,7 @@ Dentro de la carpeta **de cada perfil** (_\~/.mozilla/firefox/\<ProfileName>/_) 
 * _**formhistory.sqlite**_ : **Datos de formularios web** (como correos electrónicos)
 * _**handlers.json**_ : Manejadores de protocolo (como, qué aplicación va a manejar el protocolo _mailto://_)
 * _**persdict.dat**_ : Palabras añadidas al diccionario
-* _**addons.json**_ y \_**extensions.sqlite** \_ : Complementos y extensiones instalados
+* _**addons.json**_ y _**extensions.sqlite**_ : Complementos y extensiones instalados
 * _**cookies.sqlite**_ : Contiene **cookies.** [**MZCookiesView**](https://www.nirsoft.net/utils/mzcv.html) puede ser utilizado en Windows para inspeccionar este archivo.
 *   _**cache2/entries**_ o _**startupCache**_ : Datos de caché (\~350MB). Técnicas como **data carving** también pueden ser utilizadas para obtener los archivos guardados en la caché. [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html) puede ser utilizado para ver los **archivos guardados en la caché**.
 
@@ -83,7 +83,7 @@ Información que se puede obtener:
 * _**thumbnails/**_ : Miniaturas
 * _**logins.json**_ : Nombres de usuario y contraseñas encriptados
 * **Protección anti-phishing integrada en el navegador:** `grep 'browser.safebrowsing' ~/Library/Application Support/Firefox/Profiles/*/prefs.js`
-* Devolverá “safebrowsing.malware.enabled” y “phishing.enabled” como falso si la configuración de búsqueda segura ha sido desactivada
+* Devolverá "safebrowsing.malware.enabled" y "phishing.enabled" como falso si la configuración de búsqueda segura ha sido desactivada
 * _**key4.db**_ o _**key3.db**_ : ¿Clave maestra?
 
 Para intentar descifrar la contraseña maestra, puedes usar [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
@@ -130,7 +130,7 @@ La mayoría de la información se guardará dentro de las carpetas _**Default/**
 * **Thumbnails** : Miniaturas
 * **Preferences**: Este archivo contiene una gran cantidad de buena información como plugins, extensiones, sitios que usan geolocalización, popups, notificaciones, prefetching de DNS, excepciones de certificados y mucho más. Si estás tratando de investigar si una configuración específica de Chrome estaba habilitada, probablemente encontrarás esa configuración aquí.
 * **Protección anti-phishing integrada en el navegador:** `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`
-* Puedes simplemente buscar "safebrowsing" y buscar `{"enabled: true,"}` en el resultado para indicar que la protección contra phishing y malware está activada.
+* Puedes simplemente buscar por "**safebrowsing**" y buscar `{"enabled: true,"}` en el resultado para indicar que la protección contra phishing y malware está activada.
 
 ## **Recuperación de Datos de Bases de Datos SQLite**
 
@@ -140,10 +140,10 @@ Como puedes observar en las secciones anteriores, tanto Chrome como Firefox usan
 
 Internet Explorer almacena **datos** y **metadatos** en diferentes ubicaciones. Los metadatos permitirán encontrar los datos.
 
-Los **metadatos** se pueden encontrar en la carpeta `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` donde VX puede ser V01, V16 o V24.
+Los **metadatos** se pueden encontrar en la carpeta `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` donde VX puede ser V01, V16 o V24.\
 En la carpeta anterior, también puedes encontrar el archivo V01.log. En caso de que el **tiempo modificado** de este archivo y el archivo WebcacheVX.data **sean diferentes**, es posible que necesites ejecutar el comando `esentutl /r V01 /d` para **corregir** posibles **incompatibilidades**.
 
-Una vez **recuperado** este artefacto (Es una base de datos ESE, photorec puede recuperarla con las opciones Exchange Database o EDB) puedes usar el programa [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) para abrirlo. Una vez **abierto**, ve a la tabla llamada "**Containers**".
+Una vez **recuperado** este artefacto (Es una base de datos ESE, photorec puede recuperarlo con las opciones Exchange Database o EDB) puedes usar el programa [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) para abrirlo. Una vez **abierto**, ve a la tabla llamada "**Containers**".
 
 ![](<../../../.gitbook/assets/image (446).png>)
 
@@ -260,18 +260,18 @@ Las bases de datos se pueden encontrar en `/Users/$User/Library/Safari`
 * **LastSession.plist**: Pestañas que estaban abiertas la última vez que el usuario salió de Safari.
 * `plutil -p ~/Library/Safari/LastSession.plist | grep -iv sessionstate`
 * **Protección anti-phishing integrada en el navegador:** `defaults read com.apple.Safari WarnAboutFraudulentWebsites`
-* La respuesta debería ser 1 para indicar que la configuración está activa
+* La respuesta debe ser 1 para indicar que la configuración está activa
 
 ## Opera
 
 Las bases de datos se pueden encontrar en `/Users/$USER/Library/Application Support/com.operasoftware.Opera`
 
-Opera **almacena el historial del navegador y los datos de descargas en el mismo formato exacto que Google Chrome**. Esto aplica a los nombres de archivos así como a los nombres de las tablas.
+Opera **almacena el historial del navegador y los datos de descargas en el mismo formato exacto que Google Chrome**. Esto aplica tanto a los nombres de archivos como a los nombres de las tablas.
 
 * **Protección anti-phishing integrada en el navegador:** `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
-* **fraud_protection_enabled** debería ser **true**
+* **fraud_protection_enabled** debe ser **true**
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas** del mundo.\
@@ -285,7 +285,7 @@ Obtén Acceso Hoy:
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**

@@ -10,13 +10,13 @@ Otras formas de apoyar a HackTricks:
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Información Básica
 
-Si no sabes qué es Electron, puedes encontrar [**mucha información aquí**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). Pero por ahora solo debes saber que Electron ejecuta **node**.\
+Si no sabes qué es Electron, puedes encontrar [**mucha información aquí**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). Pero por ahora, solo debes saber que Electron ejecuta **node**.\
 Y node tiene algunos **parámetros** y **variables de entorno** que se pueden usar para **hacer que ejecute otro código** aparte del archivo indicado.
 
 ### Fusibles de Electron
@@ -24,14 +24,14 @@ Y node tiene algunos **parámetros** y **variables de entorno** que se pueden us
 Estas técnicas se discutirán a continuación, pero recientemente Electron ha agregado varias **banderas de seguridad para prevenirlas**. Estos son los [**Fusibles de Electron**](https://www.electronjs.org/docs/latest/tutorial/fuses) y estos son los que se utilizan para **prevenir** que las aplicaciones Electron en macOS **carguen código arbitrario**:
 
 * **`RunAsNode`**: Si está deshabilitado, previene el uso de la variable de entorno **`ELECTRON_RUN_AS_NODE`** para inyectar código.
-* **`EnableNodeCliInspectArguments`**: Si está deshabilitado, parámetros como `--inspect`, `--inspect-brk` no serán respetados. Evitando de esta manera la inyección de código.
+* **`EnableNodeCliInspectArguments`**: Si está deshabilitado, parámetros como `--inspect`, `--inspect-brk` no serán respetados. Evitando así la inyección de código.
 * **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será **validado** por macOS. **Previniendo** de esta manera la **inyección de código** al modificar el contenido de este archivo.
 * **`OnlyLoadAppFromAsar`**: Si esto está habilitado, en lugar de buscar cargar en el siguiente orden: **`app.asar`**, **`app`** y finalmente **`default_app.asar`**. Solo verificará y usará app.asar, asegurando así que cuando se **combine** con el fusible **`embeddedAsarIntegrityValidation`** sea **imposible** **cargar código no validado**.
 * **`LoadBrowserProcessSpecificV8Snapshot`**: Si está habilitado, el proceso del navegador utiliza el archivo llamado `browser_v8_context_snapshot.bin` para su instantánea V8.
 
 Otro fusible interesante que no evitará la inyección de código es:
 
-* **EnableCookieEncryption**: Si está habilitado, el almacén de cookies en disco está cifrado utilizando claves de criptografía a nivel de sistema operativo.
+* **EnableCookieEncryption**: Si está habilitado, la tienda de cookies en disco está cifrada utilizando claves de criptografía a nivel de sistema operativo.
 
 ### Verificando los Fusibles de Electron
 
@@ -49,9 +49,9 @@ EnableEmbeddedAsarIntegrityValidation is Enabled
 OnlyLoadAppFromAsar is Enabled
 LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
-### Modificación de los Electron Fuses
+### Modificación de los Fusibles de Electron
 
-Como mencionan los [**documentos**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), la configuración de los **Electron Fuses** está configurada dentro del **binario de Electron** que contiene en algún lugar la cadena **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Como mencionan los [**documentos**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), la configuración de los **Fusibles de Electron** está configurada dentro del **binario de Electron** que contiene en algún lugar la cadena **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
 En aplicaciones de macOS esto es típicamente en `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
@@ -60,7 +60,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 ```
 Puedes cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la cadena anterior. Después de esta cadena, puedes ver en ASCII un número "0" o "1" que indica si cada fusible está desactivado o activado. Solo modifica el código hexadecimal (`0x30` es `0` y `0x31` es `1`) para **modificar los valores del fusible**.
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Ten en cuenta que si intentas **sobrescribir** el **binario `Electron Framework`** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
 
@@ -71,7 +71,7 @@ Podría haber **archivos JS/HTML externos** que una aplicación Electron esté u
 {% hint style="danger" %}
 Sin embargo, actualmente hay 2 limitaciones:
 
-* Se necesita el permiso **`kTCCServiceSystemPolicyAppBundles`** para modificar una App, por lo que por defecto esto ya no es posible.
+* Se **necesita** el permiso **`kTCCServiceSystemPolicyAppBundles`** para modificar una App, por lo que por defecto esto ya no es posible.
 * El archivo **`asap`** compilado suele tener los fusibles **`embeddedAsarIntegrityValidation`** `y` **`onlyLoadAppFromAsar`** `activados`
 
 Haciendo este camino de ataque más complicado (o imposible).
@@ -87,7 +87,7 @@ Y vuelva a empaquetarlo después de haberlo modificado con:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
-## Ejecución de Código Remoto (RCE) con `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
+## RCE con `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
 Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si esta variable de entorno está establecida, iniciará el proceso como un proceso normal de Node.js.
 
@@ -147,7 +147,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 {% hint style="danger" %}
 Si el fusible **`EnableNodeOptionsEnvironmentVariable`** está **deshabilitado**, la aplicación **ignorará** la variable de entorno **NODE\_OPTIONS** al iniciarse a menos que se establezca la variable de entorno **`ELECTRON_RUN_AS_NODE`**, la cual también será **ignorada** si el fusible **`RunAsNode`** está deshabilitado.
 
-Si no configuras **`ELECTRON_RUN_AS_NODE`**, encontrarás el **error**: `La mayoría de las NODE_OPTION no son compatibles con aplicaciones empaquetadas. Consulta la documentación para más detalles.`
+Si no configuras **`ELECTRON_RUN_AS_NODE`**, encontrarás el **error**: `La mayoría de las NODE_OPTION no son compatibles en aplicaciones empaquetadas. Consulta la documentación para más detalles.`
 {% endhint %}
 
 ### Inyección desde el Plist de la Aplicación
@@ -168,7 +168,7 @@ Podrías abusar de esta variable de entorno en un plist para mantener persistenc
 <true/>
 </dict>
 ```
-## RCE inspeccionando
+## RCE mediante inspección
 
 Según [**esto**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), si ejecutas una aplicación Electron con banderas como **`--inspect`**, **`--inspect-brk`** y **`--remote-debugging-port`**, se abrirá un **puerto de depuración** al cual puedes conectarte (por ejemplo, desde Chrome en `chrome://inspect`) y podrás **inyectar código en él** o incluso lanzar nuevos procesos.\
 Por ejemplo:
@@ -182,9 +182,9 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Si el fusible **`EnableNodeCliInspectArguments`** está desactivado, la aplicación **ignorará los parámetros de node** (como `--inspect`) al iniciarse a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté establecida, la cual también será **ignorada** si el fusible **`RunAsNode`** está desactivado.
+Si el fusible\*\*`EnableNodeCliInspectArguments`\*\* está desactivado, la aplicación **ignorará los parámetros de node** (como `--inspect`) al iniciarse a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté establecida, la cual también será **ignorada** si el fusible **`RunAsNode`** está desactivado.
 
-Sin embargo, todavía podrías usar el parámetro de electron **`--remote-debugging-port=9229`** pero el payload anterior no funcionará para ejecutar otros procesos.
+Sin embargo, todavía podrías usar el parámetro de electron **`--remote-debugging-port=9229`** pero la carga útil anterior no funcionará para ejecutar otros procesos.
 {% endhint %}
 
 Usando el parámetro **`--remote-debugging-port=9222`** es posible robar información de la aplicación Electron como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **descifradas** dentro del navegador y hay un **punto final json** que las proporcionará).
@@ -228,7 +228,7 @@ Por lo tanto, si quieres abusar de los permisos para acceder a la cámara o al m
 
 ## Inyección Automática
 
-La herramienta [**electroniz3r**](https://github.com/r3ggi/electroniz3r) se puede usar fácilmente para **encontrar aplicaciones Electron vulnerables** instaladas e inyectar código en ellas. Esta herramienta intentará usar la técnica **`--inspect`**:
+La herramienta [**electroniz3r**](https://github.com/r3ggi/electroniz3r) se puede utilizar fácilmente para **encontrar aplicaciones Electron vulnerables** instaladas e inyectar código en ellas. Esta herramienta intentará usar la técnica **`--inspect`**:
 
 Necesitas compilarla tú mismo y puedes usarla así:
 ```bash
@@ -278,10 +278,10 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

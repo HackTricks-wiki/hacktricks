@@ -1,4 +1,4 @@
-# Escalación de Privilegios con Autoruns
+# Escalada de Privilegios con Autoruns
 
 <details>
 
@@ -6,15 +6,15 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere polaco fluido escrito y hablado_).
 
@@ -22,7 +22,7 @@ Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **
 
 ## WMIC
 
-**Wmic** se puede utilizar para ejecutar programas en el **inicio**. Ve qué binarios están programados para ejecutarse en el inicio con:
+**Wmic** puede ser utilizado para ejecutar programas en el **inicio**. Ve qué binarios están programados para ejecutarse en el inicio con:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -42,7 +42,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Carpetas
 
-Todos los binarios ubicados en las **carpetas de inicio se ejecutarán al iniciar**. Las carpetas de inicio comunes son las que se enumeran a continuación, pero la carpeta de inicio se indica en el registro. [Lee esto para aprender dónde.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Todos los binarios ubicados en las **carpetas de inicio se ejecutarán al iniciar**. Las carpetas de inicio comunes son las que se enumeran a continuación, pero la carpeta de inicio está indicada en el registro. [Lee esto para aprender dónde.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -73,7 +73,7 @@ Registro de AutoRun **comúnmente conocido**:
 * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Las claves de registro Run y RunOnce hacen que los programas se ejecuten cada vez que un usuario inicia sesión. El valor de los datos para una clave es una línea de comandos que no supera los 260 caracteres.
+Las claves Run y RunOnce hacen que los programas se ejecuten cada vez que un usuario inicia sesión. El valor de los datos para una clave es una línea de comandos que no supera los 260 caracteres.
 
 **Ejecuciones de servicios** (pueden controlar el inicio automático de servicios durante el arranque):
 
@@ -91,7 +91,7 @@ Las claves de registro Run y RunOnce hacen que los programas se ejecuten cada ve
 * `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 * `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-No se crea por defecto en Windows Vista y versiones más recientes. Las entradas de clave de ejecución del registro pueden hacer referencia directamente a programas o listarlos como una dependencia. Por ejemplo, es posible cargar una DLL en el inicio de sesión usando una clave "Depend" con RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
+No se crea por defecto en Windows Vista y versiones más recientes. Las entradas de clave de ejecución del registro pueden hacer referencia directamente a programas o listarlos como una dependencia. Por ejemplo, es posible cargar una DLL en el inicio de sesión utilizando una clave "Depend" con RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
 
 {% hint style="info" %}
 **Explotación 1**: Si puedes escribir dentro de cualquier registro mencionado dentro de **HKLM**, puedes escalar privilegios cuando un usuario diferente inicie sesión.
@@ -162,10 +162,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Cualquier acceso directo creado en la ubicación señalada por la subclave Startup iniciará el servicio durante el inicio de sesión/reinicio. La ubicación de inicio se especifica tanto en Local Machine como en Current User.
+Cualquier acceso directo creado en la ubicación señalada por la subclave Startup iniciará el servicio durante el inicio de sesión/reinicio. La ubicación de inicio se especifica tanto en la Máquina Local como en el Usuario Actual.
 
 {% hint style="info" %}
-Si puedes sobrescribir cualquier \[User] Shell Folder bajo **HKLM**, podrás dirigirlo a una carpeta controlada por ti y colocar un backdoor que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
+Si puedes sobrescribir cualquier \[User] Shell Folder bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar una puerta trasera que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
 {% endhint %}
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -199,7 +199,7 @@ Si puedes sobrescribir el valor del registro o el binario, podrás escalar privi
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-Verifica la clave **Run**.
+Revisa la clave **Run**.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -222,15 +222,15 @@ Sin embargo, puedes crear una opción de arranque para que no tengas que presion
 Información de [aquí](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell).
 
 {% hint style="info" %}
-**Exploit 1:** Si puedes modificar esta clave de registro, puedes apuntar tu backdoor.
+**Explotación 1:** Si puedes modificar esta clave de registro, puedes apuntar a tu puerta trasera.
 {% endhint %}
 
 {% hint style="info" %}
-**Exploit 2 (permisos de escritura en PATH)**: Si tienes permiso de escritura en cualquier carpeta del **PATH** del sistema antes de _C:\Windows\system32_ (o si puedes cambiarlo), puedes crear un archivo cmd.exe y si alguien inicia la máquina en Modo Seguro, tu backdoor será ejecutado.
+**Explotación 2 (permisos de escritura en PATH)**: Si tienes permiso de escritura en cualquier carpeta del **PATH** del sistema antes de _C:\Windows\system32_ (o si puedes cambiarlo), puedes crear un archivo cmd.exe y si alguien inicia la máquina en Modo Seguro, tu puerta trasera será ejecutada.
 {% endhint %}
 
 {% hint style="info" %}
-**Exploit 3 (permisos de escritura en PATH y permisos de escritura en boot.ini)**: Si puedes escribir en boot.ini, puedes automatizar el inicio en modo seguro para el próximo reinicio.
+**Explotación 3 (permisos de escritura en PATH y permisos de escritura en boot.ini)**: Si puedes escribir en boot.ini, puedes automatizar el inicio en modo seguro para el próximo reinicio.
 {% endhint %}
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
@@ -268,7 +268,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Un **Objeto de Ayuda del Navegador** (**BHO**, por sus siglas en inglés) es un módulo DLL diseñado como un complemento para el navegador web Internet Explorer de Microsoft, con el fin de proporcionar funcionalidad adicional. Estos módulos se ejecutan para cada nueva instancia de Internet Explorer y para cada nueva instancia de Windows Explorer. Sin embargo, se puede evitar que un BHO se ejecute en cada instancia de Explorer estableciendo la clave **NoExplorer** en 1.
+Un **Objeto de Ayuda del Navegador** (**BHO**, por sus siglas en inglés) es un módulo DLL diseñado como un complemento para el navegador web Internet Explorer de Microsoft para proporcionar funcionalidad adicional. Estos módulos se ejecutan para cada nueva instancia de Internet Explorer y para cada nueva instancia de Windows Explorer. Sin embargo, se puede evitar que un BHO se ejecute en cada instancia de Explorer estableciendo la clave **NoExplorer** en 1.
 
 Los BHO todavía son compatibles en Windows 10, a través de Internet Explorer 11, mientras que los BHO no son compatibles en el navegador web predeterminado Microsoft Edge.
 ```bash
@@ -323,7 +323,7 @@ Encuentra más Autoruns como registros en [https://www.microsoftpressstore.com/a
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera en hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere polaco fluido escrito y hablado_).
 
@@ -339,6 +339,6 @@ Otras formas de apoyar a HackTricks:
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repos de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

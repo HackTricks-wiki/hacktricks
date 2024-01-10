@@ -10,7 +10,7 @@ Otras formas de apoyar a HackTricks:
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -49,20 +49,20 @@ Ve a una página como `https://<nombre-de-la-empresa>.jamfcloud.com/enroll/` par
 
 Podrías usar el script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) para realizar un ataque de rociado de contraseñas.
 
-Además, después de encontrar las credenciales adecuadas, podrías ser capaz de forzar bruscamente otros nombres de usuario con el siguiente formulario:
+Además, después de encontrar credenciales adecuadas podrías ser capaz de forzar bruscamente otros nombres de usuario con el siguiente formulario:
 
 ![](<../../.gitbook/assets/image (7) (1) (1).png>)
 
 #### Autenticación de dispositivo JAMF
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 El binario **`jamf`** contenía el secreto para abrir el llavero que en el momento del descubrimiento era **compartido** entre todos y era: **`jk23ucnq91jfu9aj`**.\
 Además, jamf **persiste** como un **LaunchDaemon** en **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### Toma de control de dispositivo JAMF
 
-La **URL de JSS** (Jamf Software Server) que **`jamf`** usará se encuentra en **`/Library/Preferences/com.jamfsoftware.jamf.plist`**. \
+La **URL de JSS** (Jamf Software Server) que **`jamf`** usará se encuentra en **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
 Este archivo básicamente contiene la URL:
 
 {% code overflow="wrap" %}
@@ -96,7 +96,7 @@ Para **suplantar la comunicación** entre un dispositivo y JMF necesitas:
 * El **UUID** del dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 * El **llavero de JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contiene el certificado del dispositivo
 
-Con esta información, **crea una VM** con el **UUID de Hardware robado** y con **SIP desactivado**, suelta el **llavero de JAMF,** **intercepta** al agente de Jamf y roba su información.
+Con esta información, **crea una VM** con el **UUID de Hardware robado** y con **SIP desactivado**, suelta el **llavero de JAMF,** **intercepta** el agente de Jamf y roba su información.
 
 #### Robo de secretos
 
@@ -118,7 +118,7 @@ Y también sobre los **protocolos de red** "especiales" de **MacOS**:
 
 ## Active Directory
 
-En algunas ocasiones encontrarás que el **ordenador MacOS está conectado a un AD**. En este escenario, deberías intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra **ayuda** en las siguientes páginas:
+En algunas ocasiones encontrarás que el **ordenador MacOS está conectado a un AD**. En este escenario deberías intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra **ayuda** en las siguientes páginas:
 
 {% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
 [pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
@@ -150,7 +150,7 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 
 Los tres tipos de usuarios de MacOS son:
 
-* **Usuarios Locales** — Gestionados por el servicio OpenDirectory local, no están conectados de ninguna manera con el Active Directory.
+* **Usuarios Locales** — Gestionados por el servicio local OpenDirectory, no están conectados de ninguna manera con el Active Directory.
 * **Usuarios de Red** — Usuarios volátiles de Active Directory que requieren una conexión con el servidor DC para autenticarse.
 * **Usuarios Móviles** — Usuarios de Active Directory con una copia de seguridad local para sus credenciales y archivos.
 

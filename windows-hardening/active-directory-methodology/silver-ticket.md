@@ -14,7 +14,7 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere polaco fluido escrito y hablado_).
 
@@ -26,7 +26,7 @@ El ataque Silver ticket se basa en **crear un TGS válido para un servicio una v
 
 En este caso, se **posee** el **hash NTLM de una cuenta de computadora** (que es una especie de cuenta de usuario en AD). Por lo tanto, es posible **crear** un **ticket** para **entrar en esa máquina** con privilegios de **administrador** a través del servicio SMB. Las cuentas de computadora restablecen sus contraseñas cada 30 días por defecto.
 
-También se debe tener en cuenta que es posible Y **PREFERIBLE** (opsec) **forjar tickets usando las claves Kerberos AES (AES128 y AES256)**. Para saber cómo generar una clave AES lee: [sección 4.4 de MS-KILE](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-kile/936a4878-9462-4753-aac8-087cd3ca4625) o [Get-KerberosAESKey.ps1](https://gist.github.com/Kevin-Robertson/9e0f8bfdbf4c1e694e6ff4197f0a4372).
+También se debe tener en cuenta que es posible Y **PREFERIBLE** (opsec) **forjar tickets usando las claves AES de Kerberos (AES128 y AES256)**. Para saber cómo generar una clave AES lee: [sección 4.4 de MS-KILE](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-kile/936a4878-9462-4753-aac8-087cd3ca4625) o [Get-KerberosAESKey.ps1](https://gist.github.com/Kevin-Robertson/9e0f8bfdbf4c1e694e6ff4197f0a4372).
 
 {% code title="Linux" %}
 ```bash
@@ -53,7 +53,7 @@ kerberos::golden /user:Administrator /domain:jurassic.park /sid:S-1-5-21-1339291
 ```
 {% endcode %}
 
-El servicio **CIFS** es el que te permite **acceder al sistema de archivos de la víctima**. Puedes encontrar otros servicios aquí: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page\_id=183)**.** Por ejemplo, puedes usar el servicio **HOST** para crear una _**schtask**_ en un ordenador. Luego puedes comprobar si ha funcionado intentando listar las tareas de la víctima: `schtasks /S <nombre_del_host>` o puedes usar el servicio **HOST y RPCSS** para ejecutar consultas **WMI** en un ordenador, pruébalo haciendo: `Get-WmiObject -Class win32_operatingsystem -ComputerName <nombre_del_host>`
+El servicio **CIFS** es el que te permite **acceder al sistema de archivos de la víctima**. Puedes encontrar otros servicios aquí: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page\_id=183)**.** Por ejemplo, puedes usar el servicio **HOST** para crear una _**schtask**_ en un ordenador. Luego puedes comprobar si esto ha funcionado intentando listar las tareas de la víctima: `schtasks /S <hostname>` o puedes usar el servicio **HOST y RPCSS** para ejecutar consultas **WMI** en un ordenador, pruébalo haciendo: `Get-WmiObject -Class win32_operatingsystem -ComputerName <hostname>`
 
 ### Mitigación
 
@@ -82,13 +82,13 @@ Usando **Rubeus** puedes **pedir todos** estos tickets usando el parámetro:
 
 * `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-## Abusando de los tickets de servicio
+## Abusando de los Service tickets
 
 En los siguientes ejemplos imaginemos que el ticket se obtiene suplantando la cuenta del administrador.
 
 ### CIFS
 
-Con este ticket podrás acceder a las carpetas `C$` y `ADMIN$` vía **SMB** (si están expuestas) y copiar archivos a una parte del sistema de archivos remoto simplemente haciendo algo como:
+Con este ticket podrás acceder a las carpetas `C$` y `ADMIN$` a través de **SMB** (si están expuestas) y copiar archivos a una parte del sistema de archivos remoto simplemente haciendo algo como:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -134,7 +134,7 @@ Encuentra **más información sobre wmiexec** en la siguiente página:
 
 ### HOST + WSMAN (WINRM)
 
-Con acceso winrm a un ordenador puedes **acceder a él** e incluso obtener un PowerShell:
+Con acceso winrm sobre un ordenador puedes **acceder a él** e incluso obtener un PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
@@ -160,7 +160,7 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 [dcsync.md](dcsync.md)
 {% endcontent-ref %}
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera en hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere polaco fluido escrito y hablado_).
 
@@ -176,6 +176,6 @@ Otras formas de apoyar a HackTricks:
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repos de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

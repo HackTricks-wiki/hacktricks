@@ -6,11 +6,11 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -115,7 +115,7 @@ uint32_t	reserved;	/* reserved */
 
 * MH\_EXECUTE (0x2): Ejecutable Mach-O estándar
 * MH\_DYLIB (0x6): Biblioteca vinculada dinámicamente Mach-O (p. ej. .dylib)
-* MH\_BUNDLE (0x8): Un paquete Mach-O (p. ej. .bundle)
+* MH\_BUNDLE (0x8): Paquete Mach-O (p. ej. .bundle)
 ```bash
 # Checking the mac header of a binary
 otool -arch arm64e -hv /bin/ls
@@ -129,7 +129,7 @@ O utilizando [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 ## **Comandos de carga Mach-O**
 
-Esto especifica el **diseño del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al inicio de la ejecución y qué **bibliotecas compartidas** se requieren.\
+Esto especifica el **diseño del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al inicio de la ejecución y qué **bibliotecas compartidas** se requieren.
 Los comandos básicamente instruyen al cargador dinámico **(dyld) cómo cargar el binario en memoria.**
 
 Todos los comandos de carga comienzan con una estructura **load\_command**, definida en el anteriormente mencionado **`loader.h`**:
@@ -197,7 +197,7 @@ Ejemplo de **encabezado de sección**:
 
 Si **añades** el **desplazamiento de la sección** (0x37DC) + el **desplazamiento** donde **comienza la arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener **información de los encabezados** desde la **línea de comandos** con:
 ```bash
@@ -207,25 +207,25 @@ Segmentos comunes cargados por este cmd:
 
 * **`__PAGEZERO`:** Instruye al kernel para **mapear** la **dirección cero** de modo que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que **no hay derechos de lectura-escritura-ejecución en esta página**.
 * Esta asignación es importante para **mitigar vulnerabilidades de desreferenciación de punteros NULL**.
-* **`__TEXT`**: Contiene **código ejecutable** con permisos de **lectura** y **ejecución** (no escribible). Secciones comunes de este segmento:
+* **`__TEXT`**: Contiene **código ejecutable** con permisos de **lectura** y **ejecución** (no escribible)**.** Secciones comunes de este segmento:
 * `__text`: Código binario compilado
 * `__const`: Datos constantes
 * `__cstring`: Constantes de cadena
-* `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
-* **`__DATA`**: Contiene datos que son **legibles** y **escribibles** (no ejecutables).
+* `__stubs` y `__stubs_helper`: Intervienen durante el proceso de carga de bibliotecas dinámicas
+* **`__DATA`**: Contiene datos que son **legibles** y **escribibles** (no ejecutables)**.**
 * `__data`: Variables globales (que han sido inicializadas)
 * `__bss`: Variables estáticas (que no han sido inicializadas)
 * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C
-* **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como, "entradas de tabla de símbolos, cadenas y reubicación."
+* **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como, "entradas de tabla de símbolos, cadenas y reubicaciones."
 * **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también puede encontrarse en el segmento \_\_DATA, dentro de varias secciones en \_\_objc\_\*.
 
 ### **`LC_MAIN`**
 
-Contiene el punto de entrada en el **atributo entryoff.** En el momento de la carga, **dyld** simplemente **suma** este valor a la **base (en memoria) del binario**, y luego **salta** a esta instrucción para comenzar la ejecución del código del binario.
+Contiene el punto de entrada en el **atributo entryoff.** En el momento de la carga, **dyld** simplemente **suma** este valor a la **base (en memoria) del binario**, luego **salta** a esta instrucción para comenzar la ejecución del código del binario.
 
 ### **LC\_CODE\_SIGNATURE**
 
-Contiene información sobre la **firma de código del archivo Mach-O**. Solo contiene un **desplazamiento** que **apunta** al **blob de firma**. Esto está típicamente al final del archivo.\
+Contiene información sobre la **firma de código del archivo Macho-O**. Solo contiene un **desplazamiento** que **apunta** al **blob de firma**. Esto está típicamente al final del archivo.\
 Sin embargo, puedes encontrar información sobre esta sección en [**este post del blog**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) y en estos [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
 
 ### **LC\_LOAD\_DYLINKER**
@@ -251,7 +251,9 @@ uint32_t current_version;           /* library's current version number */
 uint32_t compatibility_version;     /* library's compatibility vers number*/
 };
 ```
-También puedes obtener esta información desde la CLI con:
+![](<../../../.gitbook/assets/image (558).png>)
+
+También puedes obtener esta información desde la cli con:
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -280,11 +282,11 @@ Los datos son básicamente la parte que contiene toda la **información** que es
 
 ![](<../../../.gitbook/assets/image (507) (3).png>)
 
-Esto incluye:&#x20;
+Esto incluye:
 
 * **Tabla de funciones:** Que contiene información sobre las funciones del programa.
 * **Tabla de símbolos**: Que contiene información sobre la función externa utilizada por el binario
-* También podría contener nombres de funciones internas, variables y más.
+* También podría contener nombres de funciones internas, nombres de variables y más.
 
 Para verificarlo, podrías usar la herramienta [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
@@ -300,10 +302,10 @@ size -m /bin/ls
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue**me en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
