@@ -42,7 +42,7 @@ Permissions are **inherited from the parent** application and the **permissions*
 
 The allowances/denies then stored in some TCC databases:
 
-* The system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`**  .
+* The system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** .
   * This database is **SIP protected**, so only a SIP bypass can write into it.
 * The user TCC database **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences.
   * This database is protected so only processes with high TCC privileges like Full Disk Access can write to it (but i't not protected by SIP).
@@ -56,7 +56,7 @@ However, remember that a process with these high privileges (like **FDA** or **`
 * There is a **third** TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.
 * The SIP protected file **`/Users/carlospolop/Downloads/REG.db`** (also protected from read access with TCC), contains the **location** of all the **valid TCC databases**.
 * The SIP protected file **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (also protected from read access with TCC), contains more TCC granted permissions.
-* The SIP protected file **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (bu readable by anyone) is an allow list of applications that require a TCC exception.&#x20;
+* The SIP protected file **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (bu readable by anyone) is an allow list of applications that require a TCC exception.
 
 {% hint style="success" %}
 The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
@@ -204,7 +204,7 @@ echo "X'$REQ_HEX'"
 You could also check **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
 {% hint style="success" %}
-Users _can_ **delete or query rules** using **`tccutil`** .&#x20;
+Users _can_ **delete or query rules** using **`tccutil`** .
 {% endhint %}
 
 #### Reset TCC permissions
@@ -406,7 +406,7 @@ Therefore, you won't be able to abuse the full FDA habilities.
 
 This is the TCC prompt to get Automation privileges over Finder:
 
-<figure><img src="../../../../.gitbook/assets/image (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
 
 {% hint style="danger" %}
 Note that because the **Automator** app has the TCC permission **`kTCCServiceAppleEvents`**, it can **control any app**, like Finder. So having the permission to control Automator you could also control the **Finder** with a code like the one below:
@@ -552,7 +552,7 @@ If you have **`kTCCServiceEndpointSecurityClient`**, you have FDA. End.
 
 ### User TCC DB to FDA
 
-Obtaining **write permissions** over the **user TCC** database you **can'**t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
+Obtaining **write permissions** over the **user TCC** database you \*\*can'\*\*t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
 
 But you can **can** give yourself **`Automation rights to Finder`**, and abuse the previous technique to escalate to FDA\*.
 
@@ -564,7 +564,7 @@ I don't thing this is a real privesc, but just in case you find it useful: If yo
 
 ### **SIP Bypass to TCC Bypass**
 
-The system **TCC database** is protected by **SIP**, thats why only processes with the **indicated entitlements  are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able to:
+The system **TCC database** is protected by **SIP**, thats why only processes with the **indicated entitlements are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able to:
 
 * **Remove the protection** of a TCC database, and give himself all TCC permissions. He could abuse any of these files for example:
   * The TCC systems database
@@ -615,9 +615,7 @@ AllowApplicationsList.plist:
 * [**https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
 * [**https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command**](https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command)
 * [**https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
-*   [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
-
-
+* [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 
 <details>
 

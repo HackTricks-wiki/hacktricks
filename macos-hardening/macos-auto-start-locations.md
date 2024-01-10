@@ -313,7 +313,7 @@ Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://
 
 #### Description
 
-According to the previous writeups it's possible to **compile some audio plugins** and get them loaded.&#x20;
+According to the previous writeups it's possible to **compile some audio plugins** and get them loaded.
 
 ### QuickLook Plugins
 
@@ -494,7 +494,7 @@ The iTerm2 preferences located in **`~/Library/Preferences/com.googlecode.iterm2
 
 This setting can be configured in the iTerm2 settings:
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 And the command is reflected in the preferences:
 
@@ -598,7 +598,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.
   * **Trigger**: Login via ssh
 
 {% hint style="danger" %}
-To turn ssh on requres Full Disk Access:&#x20;
+To turn ssh on requres Full Disk Access:
 
 ```bash
 sudo systemsetup -setremotelogin on
@@ -835,7 +835,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 
 Then, open the `Folder Actions Setup` app, select the **folder you would like to watch** and select in your case **`folder.scpt`** (in my case I called it output2.scp):
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt="" width="297"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1).png" alt="" width="297"><figcaption></figcaption></figure>
 
 Now, if you open that folder with **Finder**, your script will be executed.
 
@@ -847,7 +847,7 @@ Now, lets try to prepare this persistence without GUI access:
    * `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
 2. **Remove** the Folder Actions you just set:
 
-<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Now that we have an empty environment
 
@@ -953,7 +953,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0017](https://theevilbit.g
 
 #### Location
 
-* `/Library/ColorPickers`&#x20;
+* `/Library/ColorPickers`
   * Root required
   * Trigger: Use the color picker
 * `~/Library/ColorPickers`
@@ -1012,7 +1012,7 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 
 #### Location
 
-* `/System/Library/Screen Savers`&#x20;
+* `/System/Library/Screen Savers`
   * Root required
   * **Trigger**: Select the screen saver
 * `/Library/Screen Savers`
@@ -1021,7 +1021,7 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 * `~/Library/Screen Savers`
   * **Trigger**: Select the screen saver
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Description & Exploit
 
@@ -1318,7 +1318,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond\_0005/](https://theevilbit.
 
 As PAM is more focused in **persistence** and malware that on easy execution inside macOS, this blog won't give a detailed explanation, **read the writeups to understand this technique better**.
 
-Check PAM modules with:&#x20;
+Check PAM modules with:
 
 ```bash
 ls -l /etc/pam.d
@@ -1632,7 +1632,7 @@ kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
 
-For more information about [**kernel extensions check this section**](macos-security-and-privilege-escalation/mac-os-architecture#i-o-kit-drivers).
+For more information about [**kernel extensions check this section**](macos-security-and-privilege-escalation/mac-os-architecture/#i-o-kit-drivers).
 
 ### ~~amstoold~~
 
