@@ -32,7 +32,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [RootedCON](https://www.rootedcon.com/)
 
-<figure><img src=".gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (4) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 [**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
 
@@ -40,7 +40,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Intigriti](https://www.intigriti.com)
 
-<figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 **Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
 
@@ -50,7 +50,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
 
-<figure><img src=".gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.
@@ -92,6 +92,14 @@ Stay informed with the newest bug bounties launching and crucial platform update
 
 ***
 
+### [Pentest-Tools.com](https://pentest-tools.com/) - The essential penetration testing toolkit
+
+<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+
+**Instantly available setup for vulnerability assessment & penetration testing**. Run a full pentest from anywhere with 20+ tools & features that go from recon to reporting. We don't replace pentesters - we develop custom tools, detection & exploitation modules to give them back some time to dig deeper, pop shells, and have fun.
+
+{% embed url="https://pentest-tools.com/" %}
+
 ### [WebSec](https://websec.nl/)
 
 <figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
@@ -105,14 +113,6 @@ Another cool thing about WebSec is that unlike the industry average WebSec is **
 In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
-
-### [DragonJAR](https://www.dragonjar.org/)
-
-<figure><img src=".gitbook/assets/image (1) (1) (2) (4) (1).png" alt=""><figcaption></figcaption></figure>
-
-[**DragonJAR is a leading offensive cybersecurity company**](https://www.dragonjar.org/) **located in Colombia**. DragonJAR offers [comprehensive offensive cybersecurity services, such as **pentesting**](https://www.dragonjar.org/servicios-de-seguridad-informatica) in various areas and practically **any technology**, **Red Team** attack simulations, **physical** security testing, **stress testing**, social engineering, source **code security review**, and cybersecurity training. Additionally, they organize the **DragonJAR Security Conference**, [an international cybersecurity congress](https://www.dragonjarcon.org/) that has been held for over a decade, becoming a showcase for the latest security research in Spanish and of great relevance in the region.
-
-[**DragonJAR es una empresa líder en ciberseguridad ofensiva**](https://www.dragonjar.org/) **ubicada en Colombia**, DragonJAR ofrece [servicios integrales de seguridad informática ofensiva, como **pentesting**](https://www.dragonjar.org/servicios-de-seguridad-informatica) en diversas áreas y prácticamente **cualquier tecnología**, simulaciones de ataque **Red Team**, pruebas de seguridad **física**, **pruebas de estrés**, ingeniería social, revisión de seguridad en **código fuente** y capacitación en seguridad informática. Asimismo, organiza la **DragonJAR Security Conference**, [un congreso internacional de seguridad informática](https://www.dragonjarcon.org/) que se ha realizado durante más de una década, convirtiéndose en el escaparate para las últimas investigaciones de seguridad en español y de gran relevancia en la región.
 
 ## License
 

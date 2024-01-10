@@ -82,7 +82,7 @@ or using the [Mach-O View](https://sourceforge.net/projects/machoview/) tool:
 
 As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
 
-## **Mach-O  Header**
+## **Mach-O Header**
 
 The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 
@@ -131,7 +131,7 @@ Or using [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../.gitbook/assets/image (4) (1) (4).png" alt=""><figcaption></figcaption></figure>
 
-## **Mach-O  Load commands**
+## **Mach-O Load commands**
 
 This specifies the **layout of the file in memory**. It contains the **location of the symbol table**, the main thread context at the beginning of execution, and which **shared libraries** are required.\
 The commands basically instruct the dynamic loader **(dyld) how to load the binary in memory.**
@@ -205,7 +205,7 @@ Example of **section header**:
 
 If you **add** the **section offset** (0x37DC) + the **offset** where the **arch starts**, in this case `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 It's also possible to get **headers information** from the **command line** with:
 
@@ -215,7 +215,7 @@ otool -lv /bin/ls
 
 Common segments loaded by this cmd:
 
-* **`__PAGEZERO`:** It instructs the kernel to **map** the **address zero** so it **cannot be read from, written to, or executed**. The maxprot and minprot variables in the structure are set to zero to indicate there are **no read-write-execute rights on this page**.&#x20;
+* **`__PAGEZERO`:** It instructs the kernel to **map** the **address zero** so it **cannot be read from, written to, or executed**. The maxprot and minprot variables in the structure are set to zero to indicate there are **no read-write-execute rights on this page**.
   * This allocation is important to **mitigate NULL pointer dereference vulnerabilities**.
 * **`__TEXT`**: Contains **executable** **code** with **read** and **execute** permissions (no writable)**.** Common sections of this segment:
   * `__text`: Compiled binary code
@@ -296,7 +296,7 @@ The data is basically the part containing all the **information** that is loaded
 
 ![](<../../../.gitbook/assets/image (507) (3).png>)
 
-This includes:&#x20;
+This includes:
 
 * **Function table:** Which holds information about the program functions.
 * **Symbol table**: Which contains information about the external function used by the binary

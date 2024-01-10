@@ -186,7 +186,7 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 
 ### MTL\_DUMP\_PIPELINES\_TO\_JSON\_FILE - CVE-2023-32407
 
-This **env variable is used by the  `Metal` framework** which is a dependency to various programs, most notably `Music`, which has FDA.
+This **env variable is used by the `Metal` framework** which is a dependency to various programs, most notably `Music`, which has FDA.
 
 Setting the following: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. If `path` is a valid directory, the bug will trigger and we can use `fs_usage` to see what is going on in the program:
 
@@ -393,7 +393,7 @@ launchctl load com.telegram.launcher.plist
 
 ## By open invocations
 
-It's possible to invoke **`open`** even while sandboxed&#x20;
+It's possible to invoke **`open`** even while sandboxed
 
 ### Terminal Scripts
 
@@ -517,11 +517,11 @@ In several occasions files will store sensitive information like emails, phone n
 
 This doesn't work anymore, but it [**did in the past**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS\_v2\_Wardle.pdf):
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Reference
 

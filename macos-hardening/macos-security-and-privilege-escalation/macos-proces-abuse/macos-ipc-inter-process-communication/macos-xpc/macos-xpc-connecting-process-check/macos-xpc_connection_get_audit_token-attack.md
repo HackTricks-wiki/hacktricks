@@ -68,16 +68,16 @@ This gave us the idea for two different methods this may be possible:
 
 Scenario:
 
-* Two mach **services **_**A**_** and **_**B**_** that we can both connect to** (based on the sandbox profile and the authorization checks before accepting the connection).
-* _**A**_ must have an **authorization check** for a specific **action that **_**B**_** can pass** (but our app can’t).
+* Two mach **services \_A**_\*\* and \*\*_**B**\_\*\* that we can both connect to\*\* (based on the sandbox profile and the authorization checks before accepting the connection).
+* _**A**_ must have an **authorization check** for a specific **action that \_B**\_\*\* can pass\*\* (but our app can’t).
   * For example, if B has some **entitlements** or is running as **root**, it might allow him to ask A to perform a privileged action.
-* For this authorization check, _**A**_** obtains the audit token asynchronously**, for example by calling `xpc_connection_get_audit_token` from **`dispatch_async`**.
+* For this authorization check, _**A**_\*\* obtains the audit token asynchronously\*\*, for example by calling `xpc_connection_get_audit_token` from **`dispatch_async`**.
 
 {% hint style="danger" %}
 In this case an attacker could trigger a **Race Condition** making a **exploit** that **asks A to perform an action** several times while making **B send messages to A**. When the RC is **successful**, the **audit token** of **B** will be copied in memory **while** the request of our **exploit** is being **handled** by A, giving it **access to the privilege action only B could request**.
 {% endhint %}
 
-This happened with _**A**_** as `smd`** and _**B**_** as `diagnosticd`**. The function [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) from smb an be used to install a new privileged helper toot (as **root**). If a **process running as root contact** **smd**, no other checks will be performed.
+This happened with _**A**_\*\* as `smd`\*\* and _**B**_\*\* as `diagnosticd`\*\*. The function [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) from smb an be used to install a new privileged helper toot (as **root**). If a **process running as root contact** **smd**, no other checks will be performed.
 
 Therefore, the service **B** is **`diagnosticd`** because it runs as **root** and can be used to **monitor** a process, so once monitoring has started, it will **send multiple messages per second.**
 
@@ -85,17 +85,17 @@ To perform the attack:
 
 1. We establish our **connection** to **`smd`** by following the normal XPC protocol.
 2. Then, we establish a **connection** to **`diagnosticd`**, but instead of generating two new mach ports and sending those, we replace the client port send right with a copy of the **send right we have for the connection to `smd`**.
-3. What this means is that we can send XPC messages to `diagnosticd`, but any **messages `diagnosticd` sends go to `smd`**.&#x20;
+3. What this means is that we can send XPC messages to `diagnosticd`, but any **messages `diagnosticd` sends go to `smd`**.
    * For `smd`, both our and `diagnosticd`’s messages appear arrive on the same connection.
 
-<figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 4. We ask **`diagnosticd`** to **start monitoring** our (or any active) process and we **spam routine 1004 messages to `smd`** (to install a privileged tool).
 5. This creates a race condition that needs to hit a very specific window in `handle_bless`. We need the call to `xpc_connection_get_pid` to return the PID of our own process, as the privileged helper tool is in our app bundle. However, the call to `xpc_connection_get_audit_token` inside the `connection_is_authorized` function must use the audit token of `diganosticd`.
 
 ## Variant 2: reply forwarding
 
-As mentioned before, the handler for events on an XPC connection is never executed multiple times concurrently. However, **XPC **_**reply**_** messages are handled differently**. Two functions exist for sending a message that expects a reply:
+As mentioned before, the handler for events on an XPC connection is never executed multiple times concurrently. However, **XPC \_reply**\_\*\* messages are handled differently\*\*. Two functions exist for sending a message that expects a reply:
 
 * `void xpc_connection_send_message_with_reply(xpc_connection_t connection, xpc_object_t message, dispatch_queue_t replyq, xpc_handler_t handler)`, in which case the XPC message is received and parsed on the specified queue.
 * `xpc_object_t xpc_connection_send_message_with_reply_sync(xpc_connection_t connection, xpc_object_t message)`, in which case the XPC message is received and parsed on the current dispatch queue.
@@ -111,7 +111,7 @@ For this scenario we would need:
 
 We wait for _A_ to send us a message that expects a reply (1), instead of replying we take the reply port and use it for a message we send to _B_ (2). Then, we send a message that uses the forbidden action and we hope that it arrives concurrently with the reply from _B_ (3).
 
-<figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Discovery Problems
 

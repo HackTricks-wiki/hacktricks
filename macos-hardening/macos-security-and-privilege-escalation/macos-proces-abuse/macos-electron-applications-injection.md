@@ -64,7 +64,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 
 You could load this file in [https://hexed.it/](https://hexed.it/) and search for the previous string. After this string you can see in ASCII a number "0" or "1" indicating if each fuse is disabled or enabled. Just modify the hex code (`0x30` is `0` and `0x31` is `1`) to **modify the fuse values**.
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Note that if you try to **overwrite** the **`Electron Framework` binary** inside an application with these bytes modified, the app won't run.
 
@@ -155,7 +155,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 {% endcode %}
 
 {% hint style="danger" %}
-If the fuse **`EnableNodeOptionsEnvironmentVariable`** is **disabled**, the app will **ignore**  the env var **NODE\_OPTIONS** when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+If the fuse **`EnableNodeOptionsEnvironmentVariable`** is **disabled**, the app will **ignore** the env var **NODE\_OPTIONS** when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
 
 If you don't set **`ELECTRON_RUN_AS_NODE`** , you will find the **error**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 {% endhint %}
@@ -194,7 +194,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-If the fuse**`EnableNodeCliInspectArguments`** is disabled, the app will **ignore node parameters** (such as `--inspect`) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+If the fuse\*\*`EnableNodeCliInspectArguments`\*\* is disabled, the app will **ignore node parameters** (such as `--inspect`) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
 
 However, you could still use the **electron param `--remote-debugging-port=9229`** but the previous payload won't work to execute other processes.
 {% endhint %}
