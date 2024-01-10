@@ -1,16 +1,14 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) を使ってゼロからヒーローになる AWS ハッキングを学ぶ</strong></a><strong>!</strong></summary>
 
-- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricks をサポートする他の方法:
 
-- 独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションである[**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**フォロー**する[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
+* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に**参加する**か、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
@@ -19,52 +17,62 @@
 
 # JTAG
 
-JTAGはバウンダリスキャンを実行することができます。バウンダリスキャンは、各ピンの埋め込みバウンダリスキャンセルとレジスタを含む特定の回路を分析します。
+JTAG はバウンダリスキャンを実行することができます。バウンダリスキャンは、各ピンの組み込みバウンダリスキャンセルとレジスタを含む特定の回路を分析します。
 
-JTAG標準では、次のような**バウンダリスキャンを実行するための特定のコマンド**が定義されています。
+JTAG 標準は、バウンダリスキャンを実施するための**特定のコマンド**を定義しています。以下を含みます:
 
-* **BYPASS**は、他のチップを経由せずに特定のチップをテストすることができます。
-* **SAMPLE/PRELOAD**は、デバイスが通常の動作モードにあるときにデータのサンプルを取得します。
-* **EXTEST**は、ピンの状態を設定および読み取ります。
+* **BYPASS** は他のチップを通過するオーバーヘッドなしで特定のチップをテストすることができます。
+* **SAMPLE/PRELOAD** は、デバイスが通常の機能モードにあるときに入出力されるデータのサンプルを取ります。
+* **EXTEST** はピンの状態を設定し読み取ります。
 
-また、次のような他のコマンドもサポートできます。
+また、以下のような他のコマンドもサポートすることができます:
 
-* デバイスを識別するための**IDCODE**
-* デバイスの内部テストのための**INTEST**
+* デバイスを識別するための **IDCODE**
+* デバイスの内部テストのための **INTEST**
 
-JTAGulatorのようなツールを使用すると、これらの命令に遭遇することがあります。
+これらの命令は、JTAGulator のようなツールを使用するときに遭遇するかもしれません。
 
 ## テストアクセスポート
 
-バウンダリスキャンには、コンポーネントに組み込まれたJTAGテストサポート機能にアクセスするための汎用ポートである**4本のワイヤテストアクセスポート（TAP）**のテストが含まれます。TAPは次の5つの信号を使用します。
+バウンダリスキャンには、コンポーネントに組み込まれた JTAG テストサポート機能への**アクセスを提供する**一般的なポートである四線式の**テストアクセスポート (TAP)** のテストが含まれます。TAP は以下の五つのシグナルを使用します:
 
-* テストクロック入力（**TCK**）TCKは、TAPコントローラが単一のアクションを実行する頻度（つまり、ステートマシンで次の状態にジャンプする頻度）を定義する**クロック**です。
-* テストモード選択（**TMS**）入力TMSは**有限状態マシン**を制御します。クロックのビートごとに、デバイスのJTAG TAPコントローラはTMSピンの電圧をチェックします。電圧が一定の閾値以下の場合、信号は低いと見なされ、0と解釈されます。一方、電圧が一定の閾値を超える場合、信号は高いと見なされ、1と解釈されます。
-* テストデータ入力（**TDI**）TDIは、スキャンセルを介してチップにデータを送信するピンです。各ベンダーは、このピンを介した通信プロトコルを定義する責任があります。なぜなら、JTAGはこれを定義していないからです。
-* テストデータ出力（**TDO**）TDOは、チップからデータを送信するピンです。
-* テストリセット（**TRST**）入力オプションのTRSTは、有限状態マシンを**既知の正常な状態**にリセットします。または、TMSが5回の連続したクロックサイクルで1に保持されている場合、リセットが呼び出され、TRSTピンと同じ方法でリセットされます。これがTRSTがオプションである理由です。
+* テストクロック入力 (**TCK**) TCK は、TAP コントローラが単一のアクションを取る頻度（言い換えると、状態マシンの次の状態に移動する）を定義する**クロック**です。
+* テストモード選択 (**TMS**) 入力 TMS は**有限状態マシン**を制御します。クロックの各ビートで、デバイスの JTAG TAP コントローラは TMS ピンの電圧をチェックします。電圧が一定の閾値以下の場合、信号は低いと見なされ 0 と解釈され、電圧が一定の閾値を超えると、信号は高いと見なされ 1 と解釈されます。
+* テストデータ入力 (**TDI**) TDI は、スキャンセルを通じてチップに**データを送る**ピンです。JTAG はこのピン上の通信プロトコルを定義していないため、各ベンダーがこのピン上の通信プロトコルを定義する責任があります。
+* テストデータ出力 (**TDO**) TDO は、チップから**データを送る**ピンです。
+* テストリセット (**TRST**) 入力 オプションの TRST は、有限状態マシンを**既知の良い状態にリセット**します。または、TMS を 5 連続クロックサイクルで 1 に保持すると、TRST ピンがそうであるかのようにリセットを呼び出すため、TRST はオプションです。
 
-場合によっては、これらのピンがPCBにマークされていることがあります。他の場合は、それらを**見つける必要がある**かもしれません。
+時には、これらのピンが PCB にマークされているのを見つけることができます。他の場合では、**見つける**必要があるかもしれません。
 
-## JTAGピンの特定
+## JTAG ピンの特定
 
-JTAGポートを検出する最も高速で最も高価な方法は、特にこの目的のために作成されたデバイスである**JTAGulator**を使用することです（UARTピン配置も**検出できます**）。
+JTAG ポートを検出する最も速いが最も高価な方法は、この目的のために特に作られたデバイスである **JTAGulator** を使用することです（ただし、**UART ピンアウトも検出する**ことができます）。
 
-24のチャネルをボードのピンに接続できます。次に、**IDCODE**および**BYPASS**バウンダリスキャンコマンドを送信するすべての可能な組み合わせに対して**BF攻撃**を実行します。応答を受信すると、各JTAG信号に対応するチャネルが表示されます。
+それにはボードのピンに接続できる**24チャンネル**があります。次に、**IDCODE** と **BYPASS** バウンダリスキャンコマンドを送信するすべての可能な組み合わせの**BF攻撃**を実行します。応答を受け取ると、各 JTAG シグナルに対応するチャンネルを表示します。
 
-JTAGピン配置を特定するための安価で遅い方法は、Arduino互換のマイクロコントローラにロードされた[**JTAGenum**](https://github.com/cyphunk/JTAGenum/)を使用することです。
+JTAG ピンアウトを特定する安価だがはるかに遅い方法は、Arduino 互換のマイクロコントローラにロードされた [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) を使用することです。
 
-**JTAGenum**を使用する場合、まず列挙のために使用するプローブデバイスのピンを**定義**する必要があります。デバイスのピン配置図を参照し、これらのピンをターゲットデバイスのテストポイントに接続する必要があります。
+**JTAGenum** を使用する場合、まず列挙に使用するプロービングデバイスの**ピンを定義**します。デバイスのピンアウト図を参照し、これらのピンをターゲットデバイスのテストポイントに接続する必要があります。
 
-JTAGピンを特定するための**3番目の方法**は、PCBを**検査**してピン配置の1つを見つけることです。場合によっては、PCBが便利に**Tag-Connectインターフェース**を提供していることがあります。これは、ボードにJTAGコネクタがあることを明示的に示しています。このインターフェースの外観は[https://www.tag-connect.com/info/](https://www.tag-connect.com/info/)で確認できます。さらに、PCB上のチップセットの**データシート**を調べると、JTAGインタフェースを指すピン配置図が明らかになる場合があります。
+JTAG ピンを特定する**第三の方法**は、PCB を検査してピンアウトの一つを探すことです。場合によっては、PCB が便利にも**Tag-Connect インターフェース**を提供していることがあり、これはボードに JTAG コネクタもある明確な兆候です。そのインターフェースがどのようなものかは [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) で見ることができます。さらに、PCB 上のチップセットの**データシート**を検査すると、JTAG インターフェースを指し示すピンアウト図が明らかになることがあります。
 
 # SDW
 
-SWDは、デバッグ用に設計されたARM固有のプロトコルです。
+SWD はデバッグ用に設計された ARM 固有のプロトコルです。
 
-SWDインタフェースには、次の2つのピンが必要です：双方向の**SWDIO**信号（JTAGの**TDI**および**TDO**ピ
-- **[💬](https://emojipedia.org/speech-balloon/)Discordグループ**に参加するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+SWD インターフェースには**二つのピン**が必要です: 双方向の**SWDIO**信号で、これは JTAG の**TDI と TDO ピンとクロック**に相当し、**SWCLK** は JTAG の **TCK** に相当します。多くのデバイスは、**シリアルワイヤまたは JTAG デバッグポート (SWJ-DP)** をサポートしており、これは JTAG と SWD インターフェースを組み合わせたもので、SWD または JTAG プローブをターゲットに接続することができます。
 
-- **あなたのハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
+
+<details>
+
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) を使ってゼロからヒーローになる AWS ハッキングを学ぶ</strong></a><strong>!</strong></summary>
+
+HackTricks をサポートする他の方法:
+
+* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に**参加する**か、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを共有する。
 
 </details>

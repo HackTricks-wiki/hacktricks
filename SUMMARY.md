@@ -720,6 +720,7 @@
 * [Common API used in Malware](reversing/common-api-used-in-malware.md)
 * [Word Macros](reversing/word-macros.md)
 * [Linux Exploiting (Basic) (SPA)](exploiting/linux-exploiting-basic-esp/README.md)
+  * [ELF Tricks](reversing-and-exploiting/linux-exploiting-basic-esp/elf-tricks.md)
   * [Format Strings Template](exploiting/linux-exploiting-basic-esp/format-strings-template.md)
   * [ROP - call sys\_execve](exploiting/linux-exploiting-basic-esp/rop-syscall-execv.md)
   * [ROP - Leaking LIBC address](exploiting/linux-exploiting-basic-esp/rop-leaking-libc-address/README.md)
