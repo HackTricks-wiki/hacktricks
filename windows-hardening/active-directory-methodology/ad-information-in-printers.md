@@ -1,65 +1,65 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
 
 
-**LDAPのデフォルト/弱い**ログオン資格情報で構成されたプリンタを残す危険性を強調する**いくつかのブログ**がインターネット上にあります。\
-これは、攻撃者がプリンタを**偽のLDAPサーバに認証**させる（通常は`nc -vv -l -p 444`で十分）ことができ、プリンタの**資格情報を平文でキャプチャ**する可能性があるためです。
+インターネット上には、LDAPをデフォルト/弱いログオン資格情報で設定したプリンターの危険性を**強調するブログがいくつかあります**。\
+これは、攻撃者がプリンターをだまして悪質なLDAPサーバーに対して認証させる（通常は`nc -vv -l -p 444`で十分です）ことで、プリンターの**クリアテキストの資格情報をキャプチャする**可能性があるためです。
 
-また、いくつかのプリンタには**ユーザ名のログ**が含まれているか、ドメインコントローラから**すべてのユーザ名をダウンロード**することができる場合もあります。
+また、いくつかのプリンターには**ユーザー名のログが含まれている**ことがあり、ドメインコントローラーから**すべてのユーザー名をダウンロードする**こともできるかもしれません。
 
-これらの**機密情報**と一般的な**セキュリティの欠如**により、プリンタは攻撃者にとって非常に興味深いものとなります。
+このような**機密情報**と一般的な**セキュリティの欠如**は、攻撃者にとってプリンターを非常に興味深いものにします。
 
-このトピックに関するいくつかのブログ：
+このトピックに関するいくつかのブログ:
 
 * [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 * [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-**以下の情報は**[**https://grimhacker.com/2018/03/09/just-a-printer/**](https://grimhacker.com/2018/03/09/just-a-printer/)からコピーされました。
+**以下の情報は** [**https://grimhacker.com/2018/03/09/just-a-printer/**](https://grimhacker.com/2018/03/09/just-a-printer/) **からコピーされました**
 
-# LDAPの設定
+# LDAP設定
 
-Konica Minoltaプリンタでは、LDAPサーバと認証に使用する資格情報を設定することができます。これらのデバイスのファームウェアの以前のバージョンでは、単にページのHTMLソースを読むことで資格情報を回復することができると聞いています。しかし、現在はインターフェースに資格情報は返されないため、少し手間がかかります。
+Konica Minoltaのプリンターでは、LDAPサーバーに接続するための設定と資格情報を設定することができます。これらのデバイスの以前のファームウェアバージョンでは、ページのhtmlソースを読むだけで資格情報を回復できると聞いています。しかし、現在では資格情報はインターフェースで返されないため、もう少し努力が必要です。
 
-LDAPサーバのリストは次の場所にあります：ネットワーク> LDAP設定> LDAPの設定
+LDAPサーバーのリストは、Network > LDAP Setting > Setting Up LDAPの下にあります。
 
-インターフェースでは、接続に使用される資格情報を再入力することなくLDAPサーバを変更することができます。これは、よりシンプルなユーザーエクスペリエンスのためのものだと思われますが、プリンタのマスターからドメイン上の足場にエスカレーションする機会を提供します。
+インターフェースでは、接続に使用される資格情報を再入力せずにLDAPサーバーを変更することができます。これはよりシンプルなユーザーエクスペリエンスのためだと思われますが、攻撃者がプリンターのマスターからドメインへの足がかりを得る機会を与えています。
 
-LDAPサーバアドレス設定を制御するマシンに再構成し、便利な「テスト接続」機能をトリガーすることができます。
+「Test Connection」機能を使って、LDAPサーバーのアドレス設定を自分たちがコントロールするマシンに再設定し、接続をトリガーすることができます。
 
-# グッズを聞く
+# 情報を待ち受ける
 
 ## netcat
 
-私よりも運が良ければ、単純なnetcatリスナーで済むかもしれません：
+私よりも運が良ければ、シンプルなnetcatリスナーで済むかもしれません:
 ```
 sudo nc -k -v -l -p 386
 ```
-私は、[@\_castleinthesky](https://twitter.com/\_castleinthesky) によってこれがほとんどの場合機能すると保証されていますが、私はまだそれほど簡単には解決されていません。
+以下は、ハッキング技術に関するハッキングの本の内容です。ファイル windows-hardening/active-directory-methodology/ad-information-in-printers.md の関連する英語テキストを日本語に翻訳し、まったく同じマークダウンおよびhtml構文を保持して翻訳を返してください。コード、ハッキング技術名、ハッキング用語、クラウド/SaaSプラットフォーム名（Workspace、aws、gcpなど）、'leak'という単語、ペネトレーションテスト、およびマークダウンタグなどの翻訳は行わないでください。また、翻訳とマークダウン構文以外の余分なものは追加しないでください。
+
+[\@_castleinthesky](https://twitter.com/_castleinthesky)によると、これはほとんどの場合に機能すると確信していますが、私はまだそのように簡単には解放されたことがありません。
 
 ## Slapd
 
-プリンターは最初にヌルバインドを試み、その後利用可能な情報をクエリし、これらの操作が成功した場合にのみ資格情報でバインドします。したがって、完全なLDAPサーバーが必要です。
+プリンターは最初にnull bindを試み、その後利用可能な情報を照会します。これらの操作が成功した場合にのみ、資格情報を使用してbindを試みます。そのため、完全なLDAPサーバーが必要であることがわかりました。
 
-要件を満たすシンプルなLDAPサーバーを探しましたが、選択肢は限られているようでした。最終的に、OpenLDAPサーバーをセットアップし、slapdデバッグサーバーサービスを使用して接続を受け入れ、プリンターからのメッセージを出力することにしました。（もし簡単な代替案をご存知の場合は、教えていただけると嬉しいです）
+要件を満たすシンプルなldapサーバーを探しましたが、選択肢は限られているようでした。結局、open ldapサーバーを設定し、slapdデバッグサーバーサービスを使用して接続を受け入れ、プリンターからのメッセージを出力することにしました。（もしもっと簡単な代替案をご存知であれば、教えていただけると嬉しいです）
 
 ### インストール
 
-（このセクションは、こちらのガイドの軽く適応されたバージョンです：[https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap](https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap)）
+（このセクションは、こちらのガイド [https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap](https://www.server-world.info/en/note?os=Fedora_26&p=openldap) を若干修正したバージョンです）
 
-rootターミナルから：
+root端末から：
 
 **OpenLDAPをインストールします。**
 ```
@@ -69,7 +69,7 @@ rootターミナルから：
 
 #> chown ldap. /var/lib/ldap/DB_CONFIG
 ```
-**OpenLDAPの管理者パスワードを設定します（後で再度必要になります）**
+**OpenLDAPの管理者パスワードを設定する（間もなく再度必要になります）**
 ```
 #> slappasswd
 New password:
@@ -94,49 +94,6 @@ SASL SSF: 0
 modifying entry "olcDatabase={0}config,cn=config"
 ```
 **基本スキーマのインポート**
-
-```plaintext
-To import basic Schemas, you can use the following command:
-
-```powershell
-regsvr32 /s schmmgmt.dll
-```
-
-This command will register the Active Directory Schema Management Snap-in, which allows you to manage the Active Directory schema.
-
-Once the snap-in is registered, you can open the Active Directory Schema Management console by running the following command:
-
-```powershell
-mmc.exe
-```
-
-Then, go to `File -> Add/Remove Snap-in` and select `Active Directory Schema`. Click on `Add` and then `OK` to add the snap-in to the console.
-
-Now, you can view and modify the Active Directory schema by expanding the `Active Directory Schema` node in the console.
-
-Note: Importing basic Schemas requires administrative privileges.
-```
-```plaintext
-基本スキーマをインポートするには、次のコマンドを使用します。
-
-```powershell
-regsvr32 /s schmmgmt.dll
-```
-
-このコマンドは、Active Directoryスキーマ管理スナップインを登録します。これにより、Active Directoryスキーマを管理することができます。
-
-スナップインが登録されたら、次のコマンドを実行してActive Directoryスキーマ管理コンソールを開きます。
-
-```powershell
-mmc.exe
-```
-
-次に、`ファイル -> スナップインの追加/削除`に移動し、`Active Directoryスキーマ`を選択します。`追加`をクリックし、スナップインをコンソールに追加するために`OK`をクリックします。
-
-これで、コンソール内の`Active Directoryスキーマ`ノードを展開して、Active Directoryスキーマを表示および変更することができます。
-
-注意：基本スキーマのインポートには管理者権限が必要です。
-```
 ```
 #> ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
 SASL/EXTERNAL authentication started
@@ -156,7 +113,7 @@ SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
 SASL SSF: 0
 adding new entry "cn=inetorgperson,cn=schema,cn=config"
 ```
-**LDAP DB にドメイン名を設定します。**
+**LDAP DBにドメイン名を設定します。**
 ```
 # generate directory manager's password
 #> slappasswd
@@ -287,39 +244,7 @@ Signature ok
 subject=/C=/ST=/L=/O=/OU=Foo Bar/CN=dlp.foo.bar/emailAddress=xxx@roo.bar
 Getting Private key
 ```
-**SSL / TLS のために Slapd を設定する**
-
-To configure Slapd for SSL/TLS, follow the steps below:
-
-1. Generate a self-signed certificate or obtain a certificate from a trusted Certificate Authority (CA).
-
-2. Copy the certificate and private key files to the appropriate directory on the server. The default directory is usually `/etc/ldap/ssl/`.
-
-3. Set the correct permissions for the certificate and private key files. The files should only be readable by the owner (root) and the LDAP server process.
-
-4. Edit the Slapd configuration file, usually located at `/etc/ldap/slapd.conf` or `/etc/ldap/slapd.d/cn=config.ldif`.
-
-5. Add the following lines to the configuration file:
-
-   ```
-   TLSCACertificateFile /etc/ldap/ssl/ca.crt
-   TLSCertificateFile /etc/ldap/ssl/server.crt
-   TLSCertificateKeyFile /etc/ldap/ssl/server.key
-   ```
-
-   Replace the file paths with the actual paths to your certificate and key files.
-
-6. Save the configuration file and restart the Slapd service for the changes to take effect.
-
-7. Test the SSL/TLS connection by using the `ldapsearch` command with the `-ZZ` option:
-
-   ```
-   ldapsearch -H ldap://localhost -ZZ -x -b "dc=example,dc=com" -D "cn=admin,dc=example,dc=com" -W
-   ```
-
-   Replace the LDAP server URL, base DN, and admin credentials with your own.
-
-If the SSL/TLS configuration is successful, the `ldapsearch` command should return the LDAP entries without any errors.
+**SlapdのSSL/TLS設定**
 ```
 #> cp /etc/pki/tls/certs/server.key \
 /etc/pki/tls/certs/server.crt \
@@ -349,57 +274,43 @@ SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
 SASL SSF: 0
 modifying entry "cn=config"
 ```
-**ローカルファイアウォールを介してLDAPを許可する**
-
-To allow LDAP through your local firewall, follow these steps:
-
-1. Open the Windows Firewall settings on your local machine.
-2. Click on "Advanced settings" to access the advanced configuration options.
-3. In the left pane, select "Inbound Rules" and then click on "New Rule" in the right pane.
-4. Choose the rule type as "Port" and click "Next".
-5. Select "TCP" as the protocol and enter the specific port number for LDAP (default is 389). Click "Next".
-6. Select "Allow the connection" and click "Next".
-7. Choose the network location where this rule should apply (e.g., Domain, Private, Public). Click "Next".
-8. Provide a name and description for the rule, and click "Finish" to complete the process.
-
-By allowing LDAP through your local firewall, you will be able to establish connections to LDAP servers and access Active Directory information from printers and other devices on your network.
+**ローカルファイアウォールを通じてLDAPを許可する**
 ```
 firewall-cmd --add-service={ldap,ldaps}
 ```
-## ペイオフ
+## 報酬
 
-LDAPサービスをインストールして設定した後、次のコマンドで実行できます：
+LDAPサービスをインストールして設定した後、以下のコマンドで実行できます：
 
 > ```
 > slapd -d 2
 > ```
 
-以下のスクリーンショットは、プリンターで接続テストを実行した際の出力の例を示しています。LDAPクライアントからサーバーにユーザー名とパスワードが渡されていることがわかります。
+以下のスクリーンショットは、プリンターで接続テストを実行したときの出力の例を示しています。LDAPクライアントからサーバーへユーザー名とパスワードが渡されていることがわかります。
 
-![ユーザー名「MyUser」とパスワード「MyPassword」を含むslapdのターミナル出力](https://i1.wp.com/grimhacker.com/wp-content/uploads/2018/03/slapd\_output.png?resize=474%2C163\&ssl=1)
+![slapd terminal output containing the username "MyUser" and password "MyPassword"](https://i1.wp.com/grimhacker.com/wp-content/uploads/2018/03/slapd\_output.png?resize=474%2C163\&ssl=1)
 
-# どれくらい悪いことが起こる可能性があるのか？
+# どれほど悪いことが起こり得るのか？
 
-これは設定された資格情報に大きく依存します。
+これは設定されているクレデンシャルに大きく依存します。
 
-最小特権の原則が守られている場合、Active Directoryの特定の要素に対して読み取りアクセスのみを取得することができるかもしれません。これは、さらに正確な攻撃を計画するための情報として依然として価値があります。
+最小権限の原則が守られている場合、アクティブディレクトリの特定の要素に対して読み取りアクセスのみを得るかもしれません。これはしばしば価値があり、その情報を使用してさらに正確な攻撃を策定することができます。
 
-通常、Domain Usersグループのアカウントを取得することができ、これにより機密情報へのアクセスが可能になったり、他の攻撃の前提となる認証が可能になったりします。
+通常、ドメインユーザーグループのアカウントを取得する可能性が高く、これにより機密情報へのアクセスが可能になったり、他の攻撃のための事前認証が形成されることがあります。
 
-また、私のようにLDAPサーバーを設定することで、Domain Adminアカウントが手渡されるかもしれません。
+あるいは、私のように、LDAPサーバーを設定する報酬として、ドメイン管理者アカウントを銀の盆に乗せて手渡されるかもしれません。
+
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法：
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **HackTricksにあなたの**会社を広告したい、または**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する。
+* **HackTricks**の[**githubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
 
 </details>
