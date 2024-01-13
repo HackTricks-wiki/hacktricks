@@ -156,7 +156,7 @@ For instance, you can directly access the Domain Controller file system:
 
 You can abuse this access to **steal** the active directory database **`NTDS.dit`** to get all the **NTLM hashes** for all user and computer objects in the domain.
 
-#### Using diskshadow.exe to dumo NTDS.dit
+#### Using diskshadow.exe to dump NTDS.dit
 
 Using [**diskshadow**](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/diskshadow) you can **create a shadow copy** of the **`C` drive** and in the `F` drive for example. The, you can steal the `NTDS.dit` file from this shadow copy as it won't be in use by the system:
 
@@ -204,7 +204,7 @@ Finally you can **get all the hashes** from the **`NTDS.dit`**:
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 
-#### Using wbadmin.exe to dumo NTDS.dit
+#### Using wbadmin.exe to dump NTDS.dit
 
 Using wbadmin.exe is very similar to diskshadow.exe, the wbadmin.exe utility is a command line utility built into Windows, since Windows Vista/Server 2008. 
 
