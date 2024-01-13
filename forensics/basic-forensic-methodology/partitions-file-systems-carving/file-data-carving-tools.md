@@ -1,31 +1,29 @@
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法:
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有してください。
 
 </details>
 
 
-# データの抽出ツール
+# Carvingツール
 
 ## Autopsy
 
-画像からファイルを抽出するために最も一般的に使用されるツールは[**Autopsy**](https://www.autopsy.com/download/)です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけるように設定します。ただし、Autopsyはディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルには対応していません。
+フォレンジックで画像からファイルを抽出するために最も一般的に使用されるツールは[**Autopsy**](https://www.autopsy.com/download/)です。ダウンロードしてインストールし、"隠された"ファイルを見つけるためにファイルを取り込んでください。Autopsyはディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルはサポートしていません。
 
 ## Binwalk <a id="binwalk"></a>
 
-**Binwalk**は、埋め込まれたファイルやデータを含むバイナリファイル（画像や音声ファイルなど）を検索するためのツールです。
-`apt`を使用してインストールすることができますが、[ソース](https://github.com/ReFirmLabs/binwalk)はgithubで見つけることができます。
-**便利なコマンド**:
+**Binwalk**は、埋め込まれたファイルやデータを検索するためのバイナリファイル（画像やオーディオファイルなど）用のツールです。
+`apt`でインストールできますが、[ソース](https://github.com/ReFirmLabs/binwalk)はGitHubで見つけることができます。
+**役立つコマンド**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
@@ -34,7 +32,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ## Foremost
 
-別の隠れたファイルを見つけるための一般的なツールは**foremost**です。`/etc/foremost.conf`にforemostの設定ファイルがあります。特定のファイルを検索したい場合は、それらのコメントを外してください。何もコメントを外さない場合、foremostはデフォルトで設定されたファイルタイプを検索します。
+隠されたファイルを見つけるための一般的なツールは**foremost**です。foremostの設定ファイルは`/etc/foremost.conf`にあります。特定のファイルだけを検索したい場合は、それらのコメントを外してください。何もコメントを外さない場合、foremostはデフォルトで設定されているファイルタイプを検索します。
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -42,26 +40,26 @@ foremost -v -i file.img -o output
 ```
 ## **Scalpel**
 
-**Scalpel**は、**ファイルに埋め込まれたファイル**を見つけて抽出するために使用できる別のツールです。この場合、抽出したいファイルの種類を設定ファイル（_/etc/scalpel/scalpel.conf_）からコメントアウトする必要があります。
+**Scalpel** は、**ファイルに埋め込まれたファイル**を見つけて抽出するために使用できる別のツールです。この場合、抽出したいファイルタイプに応じて、設定ファイル（_/etc/scalpel/scalpel.conf_）からコメントを外す必要があります。
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
 ## Bulk Extractor
 
-このツールはKaliに含まれていますが、ここで見つけることもできます：[https://github.com/simsong/bulk\_extractor](https://github.com/simsong/bulk_extractor)
+このツールはKaliに含まれていますが、こちらで見つけることができます: [https://github.com/simsong/bulk\_extractor](https://github.com/simsong/bulk_extractor)
 
-このツールはイメージをスキャンし、**pcapファイル**、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**、およびその他の**ファイル**を抽出します。以下の手順を実行するだけです：
+このツールはイメージをスキャンし、内部の**pcapsを抽出**し、**ネットワーク情報\(URL、ドメイン、IP、MAC、メール\)** などの**ファイル**を抽出します。次の操作をするだけです:
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-**すべての情報**を調査ツールが収集したものを参照し（パスワードなど）、**パケット**を分析し（[**Pcaps分析**](../pcap-inspection/)を参照）、**異常なドメイン**（マルウェアや存在しないドメインに関連するもの）を検索します。
+ツールが収集した**すべての情報**をナビゲートし（パスワード？）、**パケット**を**分析**します（[**Pcaps分析**](../pcap-inspection/)を読む）、**奇妙なドメイン**を探します（**マルウェア**に関連するドメインや**存在しない**ドメイン）。
 
 ## PhotoRec
 
-[https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)で入手できます。
+[https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)で見つけることができます。
 
-GUIとCLIのバージョンがあります。PhotoRecが検索する**ファイルタイプ**を選択できます。
+GUIとCLIバージョンがあります。PhotoRecに検索させたい**ファイルタイプ**を選択できます。
 
 ![](../../../.gitbook/assets/image%20%28524%29.png)
 
@@ -69,29 +67,27 @@ GUIとCLIのバージョンがあります。PhotoRecが検索する**ファイ�
 
 ## FindAES
 
-キースケジュールを検索してAESキーを検索します。TrueCryptやBitLockerで使用される128、192、256ビットのキーなどを見つけることができます。
+AESキーをそのキースケジュールを検索することで探します。TrueCryptやBitLockerなどに使用される128、192、256ビットキーを見つけることができます。
 
-[こちら](https://sourceforge.net/projects/findaes/)からダウンロードできます。
+[こちら](https://sourceforge.net/projects/findaes/)からダウンロードしてください。
 
-# 補完ツール
+# 補助ツール
 
-ターミナルで画像を表示するために[**viu** ](https://github.com/atanunq/viu)を使用できます。
-Linuxのコマンドラインツール**pdftotext**を使用して、PDFをテキストに変換して読むことができます。
+[**viu**](https://github.com/atanunq/viu)を使用して、ターミナルから画像を表示することができます。
+Linuxコマンドラインツールの**pdftotext**を使用して、PDFをテキストに変換し、読むことができます。
 
 
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-- **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+HackTricksをサポートする他の方法：
 
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-
-- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-
-- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-
-- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **HackTricksに広告を掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをチェックしてください。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
 
 </details>
