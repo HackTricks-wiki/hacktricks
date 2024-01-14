@@ -503,6 +503,7 @@
 * [3702/UDP - Pentesting WS-Discovery](network-services-pentesting/3702-udp-pentesting-ws-discovery.md)
 * [4369 - Pentesting Erlang Port Mapper Daemon (epmd)](network-services-pentesting/4369-pentesting-erlang-port-mapper-daemon-epmd.md)
 * [4786 - Cisco Smart Install](network-services-pentesting/4786-cisco-smart-install.md)
+* [4840 - OPC Unified Architecture](network-services-pentesting/4840-pentesting-opc-ua.md)
 * [5000 - Pentesting Docker Registry](network-services-pentesting/5000-pentesting-docker-registry.md)
 * [5353/UDP Multicast DNS (mDNS) and DNS-SD](network-services-pentesting/5353-udp-multicast-dns-mdns.md)
 * [5432,5433 - Pentesting Postgresql](network-services-pentesting/pentesting-postgresql.md)
