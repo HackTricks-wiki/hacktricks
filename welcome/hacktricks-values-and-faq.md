@@ -46,7 +46,7 @@ And don't forget to **give a star in the Github projects!** (Find the links belo
 * **How can I contribute to the project?**
 {% endhint %}
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:&#x20;
+You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:
 
 * [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 * [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
@@ -58,6 +58,22 @@ Don't forget to **give a star in the Github projects!**
 {% endhint %}
 
 Yes, you can, but **don't forget to mention the specific link(s)** where the content was taken from.
+
+{% hint style="success" %}
+* **How can I cite a page of HackTricks?**
+{% endhint %}
+
+As long as the link **of** the page(s) were you took the information from appears it's enough.\
+If you need a bibtex you can use something like:
+
+```latex
+@misc{hacktricks-bibtexing,
+  author = {"HackTricks Team" or the Authors name of the specific page/trick},
+  title = {Title of the Specific Page},
+  year = {Year of Last Update (check it at the end of the page)},
+  url = {\url{https://book.hacktricks.xyz/specific-page}},
+}
+```
 
 {% hint style="warning" %}
 * **Can I copy all HackTricks in my blog?**

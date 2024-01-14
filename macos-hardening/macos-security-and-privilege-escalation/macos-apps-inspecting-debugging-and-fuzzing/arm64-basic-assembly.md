@@ -1,4 +1,4 @@
-# Introduction to ARM64
+# Introduction to ARM64v8
 
 <details>
 
@@ -14,11 +14,26 @@ Other ways to support HackTricks:
 
 </details>
 
-## **Introduction to ARM64**
+## **Exception Levels - EL (ARM64v8)**
 
-ARM64, also known as ARMv8-A, is a 64-bit processor architecture used in various types of devices including smartphones, tablets, servers, and even some high-end personal computers (macOS). It's a product of ARM Holdings, a company known for its energy-efficient processor designs.
+In ARMv8 architecture, execution levels, known as Exception Levels (ELs), define the privilege level and capabilities of the execution environment. There are four exception levels, ranging from EL0 to EL3, each serving a different purpose:
 
-### **Registers**
+1. **EL0 - User Mode**:
+   * This is the least-privileged level and is used for executing regular application code.
+   * Applications running at EL0 are isolated from each other and from the system software, enhancing security and stability.
+2. **EL1 - Operating System Kernel Mode**:
+   * Most operating system kernels run at this level.
+   * EL1 has more privileges than EL0 and can access system resources, but with some restrictions to ensure system integrity.
+3. **EL2 - Hypervisor Mode**:
+   * This level is used for virtualization. A hypervisor running at EL2 can manage multiple operating systems (each in its own EL1) running on the same physical hardware.
+   * EL2 provides features for isolation and control of the virtualized environments.
+4. **EL3 - Secure Monitor Mode**:
+   * This is the most privileged level and is often used for secure booting and trusted execution environments.
+   * EL3 can manage and control accesses between secure and non-secure states (such as secure boot, trusted OS, etc.).
+
+The use of these levels allows for a structured and secure way to manage different aspects of the system, from user applications to the most privileged system software. ARMv8's approach to privilege levels helps in effectively isolating different system components, thereby enhancing the security and robustness of the system.
+
+## **Registers (ARM64v8)**
 
 ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can store a **64-bit** (8-byte) value. For operations that require only 32-bit values, the same registers can be accessed in a 32-bit mode using the names w0 through w30.
 
@@ -26,16 +41,58 @@ ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can
    * **`x0`** also carries the return data of a function
 2. **`x8`** - In the Linux kernel, `x8` is used as the system call number for the `svc` instruction. **In macOS the x16 is the one used!**
 3. **`x9`** to **`x15`** - More temporary registers, often used for local variables.
-4. **`x16`** and **`x17`** - Temporary registers, also used for indirect function calls and PLT (Procedure Linkage Table) stubs.
-   * **`x16`** is used as the **system call number** for the **`svc`** instruction.
-5. **`x18`** - Platform register. On some platforms, this register is reserved for platform-specific uses.
-6. **`x19`** to **`x28`** - These are callee-saved registers. A function must preserve these registers' values for its caller.
-7. **`x29`** - **Frame pointer**.
-8. **`x30`** - Link register. It holds the return address when a `BL` (Branch with Link) or `BLR` (Branch with Link to Register) instruction is executed.
+4. **`x16`** and **`x17`** - **Intraprocedural Call Registers**. Temporary registers for immediate values. They are also used for indirect function calls and PLT (Procedure Linkage Table) stubs.
+   * **`x16`** is used as the **system call number** for the **`svc`** instruction in **macOS**.
+5. **`x18`** - **Platform register**. It can be used as a general-purpose register, but on some platforms, this register is reserved for platform-specific uses: Pointer to current thread environment block in Windows, or to point to the currently **executing task structure in linux kernel**.
+6. **`x19`** to **`x28`** - These are callee-saved registers. A function must preserve these registers' values for its caller, so they are stored in the stack and recovered before going back to the caller.
+7. **`x29`** - **Frame pointer** to keep track of the stack frame. When a new stack frame is created because a function is called, the **`x29`** register is **stored in the stack** and the **new** frame pointer address is (**`sp`** address) is **stored in this registry**.
+   * This register can also be used as a **general-purpose registry** although it's usually used as reference to **local variables**.
+8. **`x30`** or **`lr`**- **Link register** . It holds the **return address** when a `BL` (Branch with Link) or `BLR` (Branch with Link to Register) instruction is executed by storing the **`pc`** value in this register.
+   * It could also be used like any other register.
 9. **`sp`** - **Stack pointer**, used to keep track of the top of the stack.
-10. **`pc`** - **Program counter**, which points to the next instruction to be executed.
+   * the **`sp`** value should always be kept to at least a **quadword** **alignment** or a alignment exception may occur.
+10. **`pc`** - **Program counter**, which points to the current instruction. This register can only be updates through exception generations, exception returns, and branches. The only ordinary instructions that can read this register are branch with link instructions (BL, BLR) to store the **`pc`** address in **`lr`** (Link Register).
+11. **`xzr`** - **Zero register**. Also called **`wzr`** in it **32**-bit register form. Can be used to get the zero value easily (common operation) or to perform comparisons using **`subs`** like **`subs XZR, Xn, #10`** storing the resulting data nowhere (in **`xzr`**).
 
-### **Calling Convention**
+The **`Wn`** registers are the **32bit** version of the **`Xn`** register.
+
+### SIMD and Floating-Point Registers
+
+Moreover, there are another **32 registers of 128bit length** that can be used in optimized single instruction multiple data (SIMD) operations and for performing floating-point arithmetic. These are called the Vn registers although they can also operate in **64**-bit, **32**-bit, **16**-bit and **8**-bit and then they are called **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** and **`Bn`**.
+
+### System Registers
+
+**there are hundreds of system registers**, also called special-purpose registers (SPRs), are used for **monitoring** and **controlling** **processors** behaviour.\
+They can only be read or set using the dedicated special instruction **`mrs`** and **`msr`**.
+
+The special registers **`TPIDR_EL0`** and **`TPIDDR_EL0`** are commonly when reversing engineering. The `EL0` suffix indicates the **minimal exception** from which the register can be accessed (in this case EL0 is the regular exception (privilege) level regular programs runs with).\
+They are often used to store the b**ase address of the thread-local storage** region of memory. Usually the first one is readable and writable for programs running in EL0, but the second can be read from EL0 and written from EL1 (like kernel).
+
+* `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
+* `msr TPIDR_EL0, X0 ; Write TPIDR_EL0 into x1`
+
+### **PSTATE**
+
+**PSTATE** is several components serialized into the operating-system-visible **`SPSR_ELx`** special register. These are the accessible fields:
+
+* The **`N`**, **`Z`**, **`C`** and **`V`** condition flags:
+  * **`N`** means the operation yielded a negative result
+  * **`Z`** means the operation yielded zero
+  * **`C`** means the operation carried
+  * **`V`** means the operation yielded a signed overflow:
+    * The sum of two positive numbers yields a negative result.
+    * The sum of two negative numbers yields a positive result.
+    * In subtraction, when a large negative number is subtracted from a smaller positive number (or vice versa), and the result cannot be represented within the range of the given bit size.
+* The current **register width (`nRW`) flag**: If the flag holds the value 0, the program will run in the AArch64 execution state once resumed.
+* The current **Exception Level** (**`EL`**): A regular program running in EL0 will have the value 0
+* The **single stepping** flag (**`SS`**): Used by debuggers to single step by setting the SS flag to 1 inside **`SPSR_ELx`** through an exception. The program will run a step and issue a single step exception.
+* The **illegal exception** state flag (**`IL`**): It's used to mark when a privileged software performs an invalid exception level transfer, this flag is set to 1 and the processor triggers an illegal state exception.
+* The **`DAIF`** flags: These flags allow a privileged program to selectively mask certain external exceptions.
+* The **stack pointer select** flags (**`SPS`**): Privileged programs running in EL1 and above can swap between using their own stack pointer register and the user-model one (e.g. between `SP_EL1` and `EL0`). This switching is performed by writing to the **`SPSel`** special register. This cannot be done from EL0.
+
+<figure><img src="../../../.gitbook/assets/image (724).png" alt=""><figcaption></figcaption></figure>
+
+## **Calling Convention (ARM64v8)**
 
 The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if it's 128 bits**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
 
@@ -45,7 +102,7 @@ When reading a function in assembly, look for the **function prologue and epilog
 
 Swift have its own **calling convention** that can be found in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
 
-### **Common Instructions**
+## **Common Instructions (ARM64v8)**
 
 ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where **`opcode`** is the **operation** to be performed (such as `add`, `sub`, `mov`, etc.), **`dst`** is the **destination** register where the result will be stored, and **`src1`** and **`src2`** are the **source** registers. Immediate values can also be used in place of source registers.
 
@@ -89,8 +146,8 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   * Example: `ldrsw x0, [x1]` — This loads a signed 32-bit value from the memory location pointed to by `x1`, sign-extends it to 64 bits, and stores it in `x0`.
 * **`stur`**: **Store a register value to a memory location**, using an offset from another register.
   * Example: `stur x0, [x1, #4]` — This stores the value in `x0` into the memory ddress that is 4 bytes greater than the address currently in `x1`.
-* &#x20;**`svc`** : Make a **system call**. It stands for "Supervisor Call". When the processor executes this instruction, it **switches from user mode to kernel mode** and jumps to a specific location in memory where the **kernel's system call handling** code is located.
-  *   Example:&#x20;
+* **`svc`** : Make a **system call**. It stands for "Supervisor Call". When the processor executes this instruction, it **switches from user mode to kernel mode** and jumps to a specific location in memory where the **kernel's system call handling** code is located.
+  *   Example:
 
       ```armasm
       mov x8, 93  ; Load the system call number for exit (93) into register x8.
@@ -113,14 +170,21 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
 ### **Function Epilogue**
 
 1. **Deallocate local variables (if any were allocated)**: `add sp, sp, <size>`
-2.  **Restore the link register and frame pointer**:
+2. **Restore the link register and frame pointer**:
 
-    {% code overflow="wrap" %}
-    ```armasm
-    ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
-    ```
-    {% endcode %}
+{% code overflow="wrap" %}
+```armasm
+ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
+```
+{% endcode %}
+
 3. **Return**: `ret` (returns control to the caller using the address in the link register)
+
+## AARCH32 Execution State
+
+Armv8-A support the execution of 32-bit programs. **AArch32** can run in one of **two instruction sets**: **`A32`** and **`T32`** and can switch between them via **`interworking`**.\
+**Privileged** 64-bit programs can schedule the **execution of 32-bit** programs by executing a exception level transfer to the lower privileged 32-bit.\
+Note that the transition from 64-bit to 32-bit occurs with a lower of the exception level (for example a 64-bit program in EL1 triggering a program in EL0). This is done by setting the **bit 4 of** **`SPSR_ELx`** special register **to 1** when the `AArch32` process thread is ready to be executed and the rest of `SPSR_ELx` stores the **`AArch32`** programs CPSR. Then, the privileged process calls the **`ERET`** instruction so the processor transitions to **`AArch32`** entering in A32 or T32 depending on CPSR**.**
 
 ## macOS
 
