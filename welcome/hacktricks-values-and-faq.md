@@ -22,7 +22,7 @@ Estos son los **valores del Proyecto HackTricks**:
 * Proporcionar acceso **GRATUITO** a recursos de hacking **EDUCATIVOS** para **TODOS** en Internet.
 * El hacking es sobre aprender, y aprender debería ser lo más gratuito posible.
 * El propósito de este libro es servir como un recurso **educativo integral**.
-* **ALMACENAR** técnicas de hacking increíbles que la comunidad publica dando todos los **CRÉDITOS** a los **AUTORES ORIGINALES**.
+* **ALMACENAR** técnicas de hacking **impresionantes** que la comunidad publica dando todos los **CRÉDITOS** a los **AUTORES ORIGINALES**.
 * **No queremos el crédito de otras personas**, solo queremos almacenar trucos geniales para todos.
 * También escribimos **nuestras propias investigaciones** en HackTricks.
 * En varios casos, solo escribiremos **en HackTricks un resumen de las partes importantes** de la técnica y **alentaremos al lector a visitar la publicación original** para más detalles.
@@ -97,7 +97,7 @@ No encontrarás HackTricks lleno de anuncios molestos como otros blogs con mucho
 * **¿Qué debo hacer si alguna página de HackTricks está basada en mi publicación de blog pero no está referenciada?**
 {% endhint %}
 
-**Lo sentimos mucho. Esto no debería haber sucedido**. Por favor, háznoslo saber a través de problemas de Github, Twitter, Discord... el enlace de la página de HackTricks con el contenido y el enlace de tu blog y **lo revisaremos y añadiremos lo antes posible**.
+**Lo sentimos mucho. Esto no debería haber ocurrido**. Por favor, háznoslo saber a través de problemas de Github, Twitter, Discord... el enlace de la página de HackTricks con el contenido y el enlace de tu blog y **lo revisaremos y añadiremos lo antes posible**.
 
 {% hint style="danger" %}
 * **¿Qué debo hacer si hay contenido de mi blog en HackTricks y no quiero que esté allí?**
@@ -115,9 +115,9 @@ Ten en cuenta que al pedir esto definitivamente **eliminaremos todos los enlaces
 ## **Descargo de responsabilidad**
 
 {% hint style="danger" %}
-Este libro, 'HackTricks', está destinado únicamente para fines educativos e informativos. El contenido de este libro se proporciona tal cual, y los autores y editores no hacen declaraciones ni garantías de ningún tipo, expresas o implícitas, sobre la integridad, precisión, fiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos en este libro. Cualquier confianza que deposites en dicha información es estrictamente bajo tu propio riesgo.
+Este libro, 'HackTricks', está destinado únicamente para fines educativos e informativos. El contenido de este libro se proporciona tal cual, y los autores y editores no hacen representaciones ni garantías de ningún tipo, expresas o implícitas, sobre la integridad, precisión, fiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos en este libro. Cualquier confianza que deposites en dicha información es estrictamente bajo tu propio riesgo.
 
-Los autores y editores no serán responsables en ningún caso de ninguna pérdida o daño, incluyendo sin limitación, pérdidas o daños indirectos o consecuentes, o cualquier pérdida o daño que surja de la pérdida de datos o beneficios que surjan de, o en conexión con, el uso de este libro.
+Los autores y editores no serán responsables en ningún caso de ninguna pérdida o daño, incluyendo sin limitación, pérdidas o daños indirectos o consecuentes, o cualquier pérdida o daño de cualquier tipo que surja de la pérdida de datos o beneficios que surjan de, o en conexión con, el uso de este libro.
 
 Además, las técnicas y consejos descritos en este libro se proporcionan únicamente con fines educativos e informativos, y no deben utilizarse para actividades ilegales o maliciosas. Los autores y editores no aprueban ni apoyan ninguna actividad ilegal o poco ética, y cualquier uso de la información contenida en este libro es bajo el propio riesgo y discreción del usuario.
 
@@ -135,7 +135,7 @@ Otras formas de apoyar a HackTricks:
 * Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al grupo de** 💬 [**Discord**](https://discord.gg/hRep4RUj7f) o al grupo de [**telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de Github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
