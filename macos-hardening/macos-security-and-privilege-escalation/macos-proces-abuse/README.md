@@ -8,8 +8,8 @@ Otras formas de apoyar a HackTricks:
 
 * Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs exclusivos**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -60,7 +60,7 @@ Los archivos NIB **definen elementos de la interfaz de usuario (UI)** y sus inte
 
 ### Inyección en Aplicaciones Java
 
-Es posible abusar de ciertas capacidades de Java (como la variable de entorno **`_JAVA_OPTS`**) para hacer que una aplicación Java ejecute **código/comandos arbitrarios**.
+Es posible abusar de ciertas capacidades de java (como la variable de entorno **`_JAVA_OPTS`**) para hacer que una aplicación java ejecute **código/comandos arbitrarios**.
 
 {% content-ref url="macos-java-apps-injection.md" %}
 [macos-java-apps-injection.md](macos-java-apps-injection.md)
@@ -80,6 +80,14 @@ Consulta diferentes opciones para hacer que un script de Perl ejecute código ar
 
 {% content-ref url="macos-perl-applications-injection.md" %}
 [macos-perl-applications-injection.md](macos-perl-applications-injection.md)
+{% endcontent-ref %}
+
+### Inyección en Ruby
+
+También es posible abusar de las variables de entorno de ruby para hacer que scripts arbitrarios ejecuten código arbitrario:
+
+{% content-ref url="macos-ruby-applications-injection.md" %}
+[macos-ruby-applications-injection.md](macos-ruby-applications-injection.md)
 {% endcontent-ref %}
 
 ### Inyección en Python
@@ -137,7 +145,7 @@ Otras formas de apoyar a HackTricks:
 * Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de Github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de Github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
