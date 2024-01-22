@@ -62,19 +62,21 @@ Moreover, there are another **32 registers of 128bit length** that can be used i
 
 ### System Registers
 
-**there are hundreds of system registers**, also called special-purpose registers (SPRs), are used for **monitoring** and **controlling** **processors** behaviour.\
+**There are hundreds of system registers**, also called special-purpose registers (SPRs), are used for **monitoring** and **controlling** **processors** behaviour.\
 They can only be read or set using the dedicated special instruction **`mrs`** and **`msr`**.
 
-The special registers **`TPIDR_EL0`** and **`TPIDDR_EL0`** are commonly when reversing engineering. The `EL0` suffix indicates the **minimal exception** from which the register can be accessed (in this case EL0 is the regular exception (privilege) level regular programs runs with).\
-They are often used to store the b**ase address of the thread-local storage** region of memory. Usually the first one is readable and writable for programs running in EL0, but the second can be read from EL0 and written from EL1 (like kernel).
+The special registers **`TPIDR_EL0`** and **`TPIDDR_EL0`** are commonly found when reversing engineering. The `EL0` suffix indicates the **minimal exception** from which the register can be accessed (in this case EL0 is the regular exception (privilege) level regular programs runs with).\
+They are often used to store the **base address of the thread-local storage** region of memory. Usually the first one is readable and writable for programs running in EL0, but the second can be read from EL0 and written from EL1 (like kernel).
 
 * `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
-* `msr TPIDR_EL0, X0 ; Write TPIDR_EL0 into x1`
+* `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
 
 ### **PSTATE**
 
 **PSTATE** contains several process components serialized into the operating-system-visible **`SPSR_ELx`** special register, being X the **permission** **level of the triggered** exception (this allows to recover the process state when the exception ends).\
 These are the accessible fields:
+
+<figure><img src="../../../.gitbook/assets/image (724).png" alt=""><figcaption></figcaption></figure>
 
 * The **`N`**, **`Z`**, **`C`** and **`V`** condition flags:
   * **`N`** means the operation yielded a negative result
@@ -84,6 +86,11 @@ These are the accessible fields:
     * The sum of two positive numbers yields a negative result.
     * The sum of two negative numbers yields a positive result.
     * In subtraction, when a large negative number is subtracted from a smaller positive number (or vice versa), and the result cannot be represented within the range of the given bit size.
+
+{% hint style="warning" %}
+Not all the instructions update these flags. Some like **`CMP`** or **`TST`** do, and others that have an s suffix like **`ADDS`** also do it.
+{% endhint %}
+
 * The current **register width (`nRW`) flag**: If the flag holds the value 0, the program will run in the AArch64 execution state once resumed.
 * The current **Exception Level** (**`EL`**): A regular program running in EL0 will have the value 0
 * The **single stepping** flag (**`SS`**): Used by debuggers to single step by setting the SS flag to 1 inside **`SPSR_ELx`** through an exception. The program will run a step and issue a single step exception.
@@ -92,11 +99,9 @@ These are the accessible fields:
   * If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
 * The **stack pointer select** flags (**`SPS`**): Privileged programs running in EL1 and above can swap between using their own stack pointer register and the user-model one (e.g. between `SP_EL1` and `EL0`). This switching is performed by writing to the **`SPSel`** special register. This cannot be done from EL0.
 
-<figure><img src="../../../.gitbook/assets/image (724).png" alt=""><figcaption></figcaption></figure>
-
 ## **Calling Convention (ARM64v8)**
 
-The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if it's 128 bits**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
+The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if its 128 bits long**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
 
 When reading a function in assembly, look for the **function prologue and epilogue**. The **prologue** usually involves **saving the frame pointer (`x29`)**, **setting** up a **new frame pointer**, and a**llocating stack space**. The **epilogue** usually involves **restoring the saved frame pointer** and **returning** from the function.
 
@@ -120,12 +125,18 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   * Example: `stp x0, x1, [x2]` — This stores `x0` and `x1` to the memory locations at `x2` and `x2 + 8`, respectively.
 * **`add`**: **Add** the values of two registers and store the result in a register.
   * Example: `add x0, x1, x2` — This adds the values in `x1` and `x2` together and stores the result in `x0`.
+  * `add x5, x5, #1, lsl #12` — This equals to 4096 (a 1 shifter 12 times) -> 1 0000 0000 0000 0000&#x20;
 * **`sub`**: **Subtract** the values of two registers and store the result in a register.
   * Example: `sub x0, x1, x2` — This subtracts the value in `x2` from `x1` and stores the result in `x0`.
 * **`mul`**: **Multiply** the values of **two registers** and store the result in a register.
   * Example: `mul x0, x1, x2` — This multiplies the values in `x1` and `x2` and stores the result in `x0`.
 * **`div`**: **Divide** the value of one register by another and store the result in a register.
   * Example: `div x0, x1, x2` — This divides the value in `x1` by `x2` and stores the result in `x0`.
+* **`lsl`**, **`lsr`**, **`asr`**, **`ror`**:&#x20;
+  * **Logical shift left**: Add 0s from the end moving the other bits forward (multiply by ntimes 2)
+  * **Logical shift right**: Add 1s at the beginning moving the other bits backward (divide by ntimes 2 in unsigned)
+  * **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, **1s are added (**divide by ntimes 2 in signed)
+  * **Rotate right**: Like **`lsr`** but whatever is removed from the right it's appended to the left
 * **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
   * Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
 * **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`.
