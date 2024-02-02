@@ -10,7 +10,7 @@ Otras formas de apoyar a HackTricks:
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -35,7 +35,9 @@ Crea en cualquier lugar un script de ruby como:
 puts 'Hello, World!'
 ```
 ```markdown
-Luego, haz que un script de ruby arbitrario lo cargue con:
+{% endcode %}
+
+Luego haz que un script de ruby arbitrario lo cargue con:
 ```
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb

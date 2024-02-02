@@ -9,7 +9,7 @@ Otras formas de apoyar a HackTricks:
 * Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -60,7 +60,7 @@ Los archivos NIB **definen elementos de la interfaz de usuario (UI)** y sus inte
 
 ### Inyección en Aplicaciones Java
 
-Es posible abusar de ciertas capacidades de java (como la variable de entorno **`_JAVA_OPTS`**) para hacer que una aplicación java ejecute **código/comandos arbitrarios**.
+Es posible abusar de ciertas capacidades de Java (como la variable de entorno **`_JAVA_OPTS`**) para hacer que una aplicación Java ejecute **código/comandos arbitrarios**.
 
 {% content-ref url="macos-java-apps-injection.md" %}
 [macos-java-apps-injection.md](macos-java-apps-injection.md)
@@ -84,7 +84,7 @@ Consulta diferentes opciones para hacer que un script de Perl ejecute código ar
 
 ### Inyección en Ruby
 
-También es posible abusar de las variables de entorno de ruby para hacer que scripts arbitrarios ejecuten código arbitrario:
+También es posible abusar de las variables de entorno de Ruby para hacer que scripts arbitrarios ejecuten código arbitrario:
 
 {% content-ref url="macos-ruby-applications-injection.md" %}
 [macos-ruby-applications-injection.md](macos-ruby-applications-injection.md)
@@ -92,16 +92,16 @@ También es posible abusar de las variables de entorno de ruby para hacer que sc
 
 ### Inyección en Python
 
-Si la variable de entorno **`PYTHONINSPECT`** está establecida, el proceso de python pasará a una CLI de python una vez que haya terminado. También es posible usar **`PYTHONSTARTUP`** para indicar un script de python que se ejecute al inicio de una sesión interactiva.\
+Si la variable de entorno **`PYTHONINSPECT`** está establecida, el proceso de Python pasará a una CLI de Python una vez que haya terminado. También es posible usar **`PYTHONSTARTUP`** para indicar un script de Python que se ejecute al inicio de una sesión interactiva.\
 Sin embargo, ten en cuenta que el script **`PYTHONSTARTUP`** no se ejecutará cuando **`PYTHONINSPECT`** cree la sesión interactiva.
 
-Otras variables de entorno como **`PYTHONPATH`** y **`PYTHONHOME`** también podrían ser útiles para hacer que un comando de python ejecute código arbitrario.
+Otras variables de entorno como **`PYTHONPATH`** y **`PYTHONHOME`** también podrían ser útiles para hacer que un comando de Python ejecute código arbitrario.
 
-Ten en cuenta que los ejecutables compilados con **`pyinstaller`** no utilizarán estas variables de entorno incluso si se están ejecutando usando un python embebido.
+Ten en cuenta que los ejecutables compilados con **`pyinstaller`** no utilizarán estas variables de entorno incluso si se están ejecutando usando un Python embebido.
 
 {% hint style="danger" %}
-En general, no encontré una manera de hacer que python ejecute código arbitrario abusando de las variables de entorno.\
-Sin embargo, la mayoría de las personas instalan python usando **Homebrew**, que instalará python en una **ubicación escribible** para el usuario administrador predeterminado. Puedes secuestrarlo con algo como:
+En general, no encontré una manera de hacer que Python ejecute código arbitrario abusando de las variables de entorno.\
+Sin embargo, la mayoría de las personas instalan Python usando **Homebrew**, que instalará Python en una **ubicación con permisos de escritura** para el usuario administrador predeterminado. Puedes secuestrarlo con algo como:
 ```bash
 mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
 cat > /opt/homebrew/bin/python3 <<EOF
@@ -122,7 +122,7 @@ Incluso **root** ejecutará este código al correr python.
 
 * Usando **Variables Ambientales**: Monitorea la presencia de cualquiera de las siguientes variables ambientales: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** y **`ELECTRON_RUN_AS_NODE`**
 * Usando llamadas a **`task_for_pid`**: Para encontrar cuándo un proceso quiere obtener el **puerto de tarea de otro**, lo que permite inyectar código en el proceso.
-* **Parámetros de aplicaciones Electron**: Alguien puede usar los argumentos de línea de comandos **`--inspect`**, **`--inspect-brk`** y **`--remote-debugging-port`** para iniciar una aplicación Electron en modo de depuración, y así inyectar código en ella.
+* **Parámetros de aplicaciones Electron**: Alguien puede usar los argumentos de línea de comando **`--inspect`**, **`--inspect-brk`** y **`--remote-debugging-port`** para iniciar una aplicación Electron en modo de depuración, y así inyectar código en ella.
 * Usando **symlinks** o **hardlinks**: Típicamente, el abuso más común es **colocar un enlace con nuestros privilegios de usuario**, y **apuntarlo a una ubicación de mayor privilegio**. La detección es muy simple tanto para hardlinks como para symlinks. Si el proceso que crea el enlace tiene un **nivel de privilegio diferente** al del archivo objetivo, creamos una **alerta**. Desafortunadamente, en el caso de symlinks, el bloqueo no es posible, ya que no tenemos información sobre el destino del enlace antes de su creación. Esta es una limitación del marco de EndpointSecuriy de Apple.
 
 ### Llamadas realizadas por otros procesos
@@ -145,7 +145,7 @@ Otras formas de apoyar a HackTricks:
 * Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de Github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
