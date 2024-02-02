@@ -1,80 +1,74 @@
-# ネットワークの名前空間
+# ネットワークネームスペース
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
 ## 基本情報
 
-ネットワークの名前空間は、Linuxカーネルの機能であり、ネットワークスタックの分離を提供します。これにより、**各ネットワークの名前空間は独立したネットワーク構成**、インターフェース、IPアドレス、ルーティングテーブル、およびファイアウォールルールを持つことができます。この分離は、コンテナ化などのさまざまなシナリオで有用であり、各コンテナは他のコンテナやホストシステムとは独立したネットワーク構成を持つ必要があります。
+ネットワークネームスペースは、ネットワークスタックの隔離を提供するLinuxカーネルの機能であり、**各ネットワークネームスペースが独自の独立したネットワーク構成を持つことができます**。インターフェース、IPアドレス、ルーティングテーブル、ファイアウォールルールが独立しています。この隔離は、コンテナ化などのさまざまなシナリオで役立ちます。ここでは、各コンテナが他のコンテナやホストシステムとは独立したネットワーク構成を持つべきです。
 
-### 動作原理：
+### 動作原理:
 
-1. 新しいネットワークの名前空間が作成されると、**完全に分離されたネットワークスタック**が開始されます。ループバックインターフェース（lo）以外には**ネットワークインターフェースが存在しない**ことを意味します。これにより、新しいネットワークの名前空間で実行されているプロセスは、デフォルトでは他の名前空間やホストシステムのプロセスと通信することはできません。
-2. vethペアなどの**仮想ネットワークインターフェース**は、ネットワークの名前空間間または名前空間とホストシステム間のネットワーク接続を確立するために作成および移動できます。たとえば、vethペアの一方のエンドをコンテナのネットワークの名前空間に配置し、もう一方のエンドをホストの名前空間の**ブリッジ**または他のネットワークインターフェースに接続することで、コンテナにネットワーク接続を提供できます。
-3. 名前空間内のネットワークインターフェースは、他の名前空間とは独立して、**独自のIPアドレス、ルーティングテーブル、およびファイアウォールルール**を持つことができます。これにより、異なるネットワークの名前空間内のプロセスは、異なるネットワーク構成を持ち、別々のネットワークシステム上で実行されているかのように動作することができます。
-4. プロセスは、`setns()`システムコールを使用して名前空間間を移動したり、`unshare()`または`clone()`システムコールを使用して`CLONE_NEWNET`フラグとともに新しい名前空間を作成したりすることができます。プロセスが新しい名前空間に移動するか、新しい名前空間を作成すると、その名前空間に関連付けられたネットワーク構成とインターフェースを使用し始めます。
+1. 新しいネットワークネームスペースが作成されると、ループバックインターフェース(lo)を除いて**ネットワークインターフェースがない完全に隔離されたネットワークスタック**から始まります。これは、新しいネットワークネームスペースで実行されているプロセスが、デフォルトでは他のネームスペースやホストシステムのプロセスと通信できないことを意味します。
+2. **仮想ネットワークインターフェース**（例えばvethペア）は作成され、ネットワークネームスペース間で移動することができます。これにより、ネームスペース間またはネームスペースとホストシステム間のネットワーク接続を確立することができます。例えば、vethペアの一方の端をコンテナのネットワークネームスペースに配置し、他方の端をホストネームスペースの**ブリッジ**または別のネットワークインターフェースに接続することで、コンテナにネットワーク接続を提供できます。
+3. ネームスペース内のネットワークインターフェースは、他のネームスペースとは独立して、**独自のIPアドレス、ルーティングテーブル、ファイアウォールルール**を持つことができます。これにより、異なるネットワークネームスペースのプロセスは異なるネットワーク構成を持ち、別々のネットワークシステムで実行されているかのように操作することができます。
+4. プロセスは`setns()`システムコールを使用してネームスペース間を移動するか、`CLONE_NEWNET`フラグを使用して`unshare()`または`clone()`システムコールで新しいネームスペースを作成することができます。プロセスが新しいネームスペースに移動するか、新しいものを作成すると、そのネームスペースに関連付けられたネットワーク構成とインターフェースを使用し始めます。
 
-## ラボ：
+## 実験室:
 
-### 異なる名前空間の作成
+### 異なるネームスペースを作成する
 
 #### CLI
 ```bash
 sudo unshare -n [--mount-proc] /bin/bash
 # Run ifconfig or ip -a
 ```
-`--mount-proc`パラメータを使用して`/proc`ファイルシステムの新しいインスタンスをマウントすることで、新しいマウント名前空間がその名前空間固有のプロセス情報の正確で隔離されたビューを持つことが保証されます。
+`--mount-proc` パラメータを使用して新しい `/proc` ファイルシステムのインスタンスをマウントすることで、新しいマウント名前空間が**その名前空間に特有のプロセス情報の正確で隔離されたビューを持つことを保証します**。
 
 <details>
 
-<summary>エラー：bash: fork: Cannot allocate memory</summary>
+<summary>エラー: bash: fork: メモリを割り当てることができません</summary>
 
-`-f`を指定せずに前の行を実行すると、このエラーが発生します。\
-このエラーは、新しい名前空間でPID 1プロセスが終了することによって引き起こされます。
+上記の行を `-f` なしで実行すると、そのエラーが発生します。\
+このエラーは、新しい名前空間で PID 1 のプロセスが終了することによって引き起こされます。
 
-bashが実行されると、bashはいくつかの新しいサブプロセスをフォークして何かを行います。-fを指定せずにunshareを実行すると、bashは現在の「unshare」プロセスと同じPIDを持ちます。現在の「unshare」プロセスはunshareシステムコールを呼び出し、新しいPID名前空間を作成しますが、現在の「unshare」プロセス自体は新しいPID名前空間にありません。これはLinuxカーネルの望ましい動作です：プロセスAが新しい名前空間を作成すると、プロセスA自体は新しい名前空間に配置されず、プロセスAのサブプロセスのみが新しい名前空間に配置されます。したがって、次のコマンドを実行すると：
+bashが実行を開始した後、bashはいくつかの新しいサブプロセスをフォークして何かを行います。`unshare` を `-f` なしで実行すると、bashは現在の "unshare" プロセスと同じ pid を持つことになります。現在の "unshare" プロセスは unshare システムコールを呼び出し、新しい pid 名前空間を作成しますが、現在の "unshare" プロセスは新しい pid 名前空間には含まれません。これは Linux カーネルの望ましい動作です：プロセス A が新しい名前空間を作成すると、プロセス A 自体は新しい名前空間には入れられず、プロセス A のサブプロセスのみが新しい名前空間に入れられます。したがって、次のように実行するとき：
 ```
 unshare -p /bin/bash
 ```
-unshareプロセスは/bin/bashを実行し、/bin/bashはいくつかのサブプロセスをフォークします。bashの最初のサブプロセスは新しい名前空間のPID 1になり、ジョブが完了するとサブプロセスは終了します。したがって、新しい名前空間のPID 1が終了します。
+unshareプロセスは`/bin/bash`を実行し、`/bin/bash`はいくつかのサブプロセスをフォークします。bashの最初のサブプロセスは新しいネームスペースのPID 1になり、サブプロセスはその仕事を完了した後に終了します。そのため、新しいネームスペースのPID 1が終了します。
 
-PID 1プロセスには特別な機能があります。孤児プロセスの親プロセスになる必要があります。ルート名前空間のPID 1プロセスが終了すると、カーネルはパニックになります。サブ名前空間のPID 1プロセスが終了すると、Linuxカーネルはdisable\_pid\_allocation関数を呼び出し、その名前空間のPIDNS\_HASH\_ADDINGフラグをクリアします。Linuxカーネルが新しいプロセスを作成するとき、カーネルはalloc\_pid関数を呼び出して名前空間内でPIDを割り当てます。PIDNS\_HASH\_ADDINGフラグが設定されていない場合、alloc\_pid関数は-ENOMEMエラーを返します。これが「Cannot allocate memory」エラーが発生する理由です。
+PID 1プロセスには特別な機能があります：それはすべての孤立したプロセスの親プロセスになるべきです。ルートネームスペースのPID 1プロセスが終了すると、カーネルはパニックになります。サブネームスペースのPID 1プロセスが終了すると、Linuxカーネルは`disable_pid_allocation`関数を呼び出し、そのネームスペースで`PIDNS_HASH_ADDING`フラグをクリーンします。Linuxカーネルが新しいプロセスを作成するとき、カーネルは`alloc_pid`関数を呼び出してネームスペース内でPIDを割り当てますが、`PIDNS_HASH_ADDING`フラグが設定されていない場合、`alloc_pid`関数は-ENOMEMエラーを返します。これが「Cannot allocate memory」エラーの原因です。
 
-この問題は、'-f'オプションを使用することで解決できます：
+この問題は`-f`オプションを使用して解決できます：
 ```
 unshare -fp /bin/bash
 ```
-もし'unshare'を'-f'オプションと共に実行すると、'unshare'は新しいpid名前空間を作成した後に新しいプロセスをフォークします。そして、新しいプロセスで'/bin/bash'を実行します。新しいプロセスは新しいpid名前空間のpid 1となります。その後、bashはいくつかのサブプロセスをフォークしてジョブを実行します。bash自体が新しいpid名前空間のpid 1であるため、そのサブプロセスは問題なく終了することができます。
+```
+`unshare` を `-f` オプションで実行すると、新しい pid ネームスペースを作成した後に新しいプロセスをフォークします。そして新しいプロセスで `/bin/bash` を実行します。新しいプロセスは新しい pid ネームスペースの pid 1 になります。その後、bash はいくつかのジョブを行うためにいくつかのサブプロセスをフォークします。bash 自体が新しい pid ネームスペースの pid 1 であるため、そのサブプロセスは問題なく終了できます。
 
-[https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)から転載
+[https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory) からコピーされました
+
+</details>
 
 #### Docker
+```
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
-### &#x20;自分のプロセスがどの名前空間にあるかを確認する
-
-To check which namespace your process is in, you can use the following command:
-
-プロセスがどの名前空間にあるかを確認するには、次のコマンドを使用します。
-
-```bash
-$ ls -l /proc/$$/ns/net
-```
-
-This command will display the network namespace associated with your process. The `$$` represents the process ID of the current shell.
-
-このコマンドは、プロセスに関連付けられたネットワーク名前空間を表示します。`$$`は現在のシェルのプロセスIDを表します。
+### プロセスがどのネームスペースにあるかを確認する
 ```bash
 ls -l /proc/self/ns/net
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/net -> 'net:[4026531840]'
@@ -87,24 +81,26 @@ sudo find /proc -maxdepth 3 -type l -name net -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name net -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-{% code %}
+{% endcode %}
 
 ### ネットワーク名前空間に入る
-
-{% endcode %}
 ```bash
 nsenter -n TARGET_PID --pid /bin/bash
 ```
-また、**rootユーザーでなければ他のプロセスの名前空間に入ることはできません**。また、他の名前空間に入るためには（`/proc/self/ns/net`のような）ディスクリプタが必要です。
+```
+また、**rootである場合に限り、他のプロセスのネームスペースに** **入ることができます**。そして、それを指すディスクリプタ（`/proc/self/ns/net`のような）**がなければ**、他のネームスペースに**入ることは** **できません**。
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricksをサポートする他の方法:
+
+* **HackTricksにあなたの会社を広告したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
+```
