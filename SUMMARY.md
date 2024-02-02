@@ -179,6 +179,7 @@
     * [macOS Library Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/README.md)
       * [macOS Dyld Hijacking & DYLD\_INSERT\_LIBRARIES](macos-hardening/macos-security-and-privilege-escalation/macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
     * [macOS Perl Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-perl-applications-injection.md)
+    * [macOS Ruby Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ruby-applications-injection.md)
     * [macOS .Net Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-.net-applications-injection.md)
   * [macOS Security Protections](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/README.md)
     * [macOS Gatekeeper / Quarantine / XProtect](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-gatekeeper.md)

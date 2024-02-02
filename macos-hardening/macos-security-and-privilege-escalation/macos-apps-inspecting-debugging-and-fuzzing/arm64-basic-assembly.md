@@ -62,19 +62,21 @@ Moreover, there are another **32 registers of 128bit length** that can be used i
 
 ### System Registers
 
-**there are hundreds of system registers**, also called special-purpose registers (SPRs), are used for **monitoring** and **controlling** **processors** behaviour.\
+**There are hundreds of system registers**, also called special-purpose registers (SPRs), are used for **monitoring** and **controlling** **processors** behaviour.\
 They can only be read or set using the dedicated special instruction **`mrs`** and **`msr`**.
 
-The special registers **`TPIDR_EL0`** and **`TPIDDR_EL0`** are commonly when reversing engineering. The `EL0` suffix indicates the **minimal exception** from which the register can be accessed (in this case EL0 is the regular exception (privilege) level regular programs runs with).\
-They are often used to store the b**ase address of the thread-local storage** region of memory. Usually the first one is readable and writable for programs running in EL0, but the second can be read from EL0 and written from EL1 (like kernel).
+The special registers **`TPIDR_EL0`** and **`TPIDDR_EL0`** are commonly found when reversing engineering. The `EL0` suffix indicates the **minimal exception** from which the register can be accessed (in this case EL0 is the regular exception (privilege) level regular programs runs with).\
+They are often used to store the **base address of the thread-local storage** region of memory. Usually the first one is readable and writable for programs running in EL0, but the second can be read from EL0 and written from EL1 (like kernel).
 
 * `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
-* `msr TPIDR_EL0, X0 ; Write TPIDR_EL0 into x1`
+* `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
 
 ### **PSTATE**
 
 **PSTATE** contains several process components serialized into the operating-system-visible **`SPSR_ELx`** special register, being X the **permission** **level of the triggered** exception (this allows to recover the process state when the exception ends).\
 These are the accessible fields:
+
+<figure><img src="../../../.gitbook/assets/image (724).png" alt=""><figcaption></figcaption></figure>
 
 * The **`N`**, **`Z`**, **`C`** and **`V`** condition flags:
   * **`N`** means the operation yielded a negative result
@@ -84,6 +86,11 @@ These are the accessible fields:
     * The sum of two positive numbers yields a negative result.
     * The sum of two negative numbers yields a positive result.
     * In subtraction, when a large negative number is subtracted from a smaller positive number (or vice versa), and the result cannot be represented within the range of the given bit size.
+
+{% hint style="warning" %}
+Not all the instructions update these flags. Some like **`CMP`** or **`TST`** do, and others that have an s suffix like **`ADDS`** also do it.
+{% endhint %}
+
 * The current **register width (`nRW`) flag**: If the flag holds the value 0, the program will run in the AArch64 execution state once resumed.
 * The current **Exception Level** (**`EL`**): A regular program running in EL0 will have the value 0
 * The **single stepping** flag (**`SS`**): Used by debuggers to single step by setting the SS flag to 1 inside **`SPSR_ELx`** through an exception. The program will run a step and issue a single step exception.
@@ -92,11 +99,9 @@ These are the accessible fields:
   * If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
 * The **stack pointer select** flags (**`SPS`**): Privileged programs running in EL1 and above can swap between using their own stack pointer register and the user-model one (e.g. between `SP_EL1` and `EL0`). This switching is performed by writing to the **`SPSel`** special register. This cannot be done from EL0.
 
-<figure><img src="../../../.gitbook/assets/image (724).png" alt=""><figcaption></figcaption></figure>
-
 ## **Calling Convention (ARM64v8)**
 
-The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if it's 128 bits**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
+The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if its 128 bits long**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
 
 When reading a function in assembly, look for the **function prologue and epilogue**. The **prologue** usually involves **saving the frame pointer (`x29`)**, **setting** up a **new frame pointer**, and a**llocating stack space**. The **epilogue** usually involves **restoring the saved frame pointer** and **returning** from the function.
 
@@ -119,21 +124,58 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
 * **`stp`**: **Store Pair of Registers**. This instruction **stores two registers** to **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
   * Example: `stp x0, x1, [x2]` — This stores `x0` and `x1` to the memory locations at `x2` and `x2 + 8`, respectively.
 * **`add`**: **Add** the values of two registers and store the result in a register.
+  * Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
+    * Xn1 -> Destination
+    * Xn2 -> Operand 1
+    * Xn3 | #imm -> Operando 2 (register or immediate)
+    * \[shift #N | RRX] -> Performa shift or call RRX
   * Example: `add x0, x1, x2` — This adds the values in `x1` and `x2` together and stores the result in `x0`.
+  * `add x5, x5, #1, lsl #12` — This equals to 4096 (a 1 shifter 12 times) -> 1 0000 0000 0000 0000 &#x20;
+  * **`adds`** This perform an `add` and updates the flags
 * **`sub`**: **Subtract** the values of two registers and store the result in a register.
+  * Check **`add`** **syntax**.
   * Example: `sub x0, x1, x2` — This subtracts the value in `x2` from `x1` and stores the result in `x0`.
+  * **`subs`** This is like sub but updating the flag
 * **`mul`**: **Multiply** the values of **two registers** and store the result in a register.
   * Example: `mul x0, x1, x2` — This multiplies the values in `x1` and `x2` and stores the result in `x0`.
 * **`div`**: **Divide** the value of one register by another and store the result in a register.
   * Example: `div x0, x1, x2` — This divides the value in `x1` by `x2` and stores the result in `x0`.
+* **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:&#x20;
+  * **Logical shift left**: Add 0s from the end moving the other bits forward (multiply by n-times 2)
+  * **Logical shift right**: Add 1s at the beginning moving the other bits backward (divide by n-times 2 in unsigned)
+  * **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, **1s are added (**divide by ntimes 2 in signed)
+  * **Rotate right**: Like **`lsr`** but whatever is removed from the right it's appended to the left
+  * **Rotate Right with Extend**: Like **`ror`**, but with the carry flag as the "most significant bit". So the carry flag is moved to the bit 31 and the removed bit to the carry flag.
+* **`bfm`**: **Bit Filed Move**, these operations **copy bits `0...n`** from a value an place them in positions **`m..m+n`**. The **`#s`** specifies the **leftmost bit** position and **`#r`** the **rotate right amount**.
+  * Bitfiled move: `BFM Xd, Xn, #r`
+  * Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
+  * Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
+* **Bitfield Extract and Insert:** Copy a bitfield from a register and copies it to another register.
+  * **`BFI X1, X2, #3, #4`** Insert 4 bits from X2 from the 3rd bit of X1
+  * **`BFXIL X1, X2, #3, #4`** Extract from the 3rd bit of X2 four bits and copy them to X1
+  * **`SBFIZ X1, X2, #3, #4`** Sign-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
+  * **`SBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2, sign extends them, and places the result in X1
+  * **`UBFIZ X1, X2, #3, #4`** Zero-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
+  * **`UBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2 and places the zero-extended result in X1.
+* **Sign Extend To X:** Extends the sign (or adds just 0s in the unsigned version) of a value to be able to perform operations with it:
+  * **`SXTB X1, W2`** Extends the sign of a byte **from W2 to X1** (`W2` is half of `X2`) to fill the 64bits
+  * **`SXTH X1, W2`** Extends the sign of a 16bit number **from W2 to X1** to fill the 64bits
+  * **`SXTW X1, W2`** Extends the sign of a byte **from W2 to X1** to fill the 64bits
+  * **`UXTB X1, W2`** Adds 0s (unsigned) to a byte **from W2 to X1** to fill the 64bits
+* **`extr`:** Extracts bits from a specified **pair of registers concatenated**.
+  * Example: `EXTR W3, W2, W1, #3` This will **concat W1+W2** and get **from bit 3 of W2 up to bit 3 of W1** and store it in W3.
 * **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
   * Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
 * **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`.
   * Example: `blr x1` — This calls the function whose address is contained in `x1` and stores the return address in `x30`.
 * **`ret`**: **Return** from **subroutine**, typically using the address in **`x30`**.
   * Example: `ret` — This returns from the current subroutine using the return address in `x30`.
-* **`cmp`**: **Compare** two registers and set condition flags.
+* **`cmp`**: **Compare** two registers and set condition flags. It's an **alias of `subs`** setting the destination register to the zero register. Useful to know if `m == n`.
+  * It supports the **same syntax as `subs`**
   * Example: `cmp x0, x1` — This compares the values in `x0` and `x1` and sets the condition flags accordingly.
+* **`cmn`**: **Compare negative** operand. In this case it's an **alias of `adds`** and supports the same syntax. Useful to know if `m == -n`.
+* **tst**: It checks if any of the values of a reg is 1 (it works like and ANDS without storing the result anywhere)
+  * Example: `tst X1, #7` Check if any of the last 3 bits of X1 is 1&#x20;
 * **`b.eq`**: **Branch if equal**, based on the previous `cmp` instruction.
   * Example: `b.eq label` — If the previous `cmp` instruction found two equal values, this jumps to `label`.
 * **`b.ne`**: **Branch if Not Equal**. This instruction checks the condition flags (which were set by a previous comparison instruction), and if the compared values were not equal, it branches to a label or address.
