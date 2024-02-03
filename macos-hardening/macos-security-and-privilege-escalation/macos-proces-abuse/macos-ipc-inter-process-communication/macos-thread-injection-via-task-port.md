@@ -14,105 +14,172 @@ Other ways to support HackTricks:
 
 </details>
 
-This post was copied from [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/) (which contains more information)
-
-### Code
+## Code
 
 * [https://github.com/bazad/threadexec](https://github.com/bazad/threadexec)
 * [https://gist.github.com/knightsc/bd6dfeccb02b77eb6409db5601dcef36](https://gist.github.com/knightsc/bd6dfeccb02b77eb6409db5601dcef36)
 
-### 1. Thread Hijacking
 
-The first thing we do is call **`task_threads()`** on the task port to get a list of threads in the remote task and then choose one of them to hijack. Unlike traditional code injection frameworks, we **can’t create a new remote thread** because `thread_create_running()` will be blocked by the new mitigation.
+## 1. Thread Hijacking
 
-Then, we can call **`thread_suspend()`** to stop the thread from running.
+Initially, the **`task_threads()`** function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code injection methods as creating a new remote thread is prohibited due to the new mitigation blocking `thread_create_running()`.
 
-At this point, the only useful control we have over the remote thread is **stopping** it, **starting** it, **getting** its **register** values, and **setting** its register **values**. Thus, we can **initiate a remote function** call by setting **registers** `x0` through `x7` in the remote thread to the **arguments**, **setting** **`pc`** to the function we want to execute, and starting the thread. At this point, we need to detect the return and make sure that the thread doesn’t crash.
+To control the thread, **`thread_suspend()`** is called, halting its execution.
 
-There are a few ways to go about this. One way would be to **register an exception handler** for the remote thread using `thread_set_exception_ports()` and to set the return address register, `lr`, to an invalid address before calling the function; that way, after the function runs an exception would be generated and a message would be sent to our exception port, at which point we can inspect the thread’s state to retrieve the return value. However, for simplicity I copied the strategy used in Ian Beer’s triple\_fetch exploit, which was to **set `lr` to the address of an instruction that would infinite loop** and then poll the thread’s registers repeatedly until **`pc` pointed to that instruction**.
+The only operations permitted on the remote thread involve **stopping** and **starting** it, **retrieving** and **modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring **`pc`** to target the desired function, and activating the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
 
-### 2. Mach ports for communication
+One strategy involves **registering an exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s triple\_fetch exploit, `lr` is set to loop infinitely. The thread's registers are then continuously monitored until **`pc` points to that instruction**.
 
-The next step is to **create Mach ports over which we can communicate with the remote thread**. These Mach ports will be useful later in helping transfer arbitrary send and receive rights between the tasks.
+## 2. Mach ports for communication
 
-In order to establish bidirectional communication, we will need to create two Mach receive rights: one in the **local task and one in the remote task**. Then, we will need to **transfer a send right** to each port **to the other task**. This will give each task a way to send a message that can be received by the other.
+The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send and receive rights between tasks.
 
-Let’s first focus on setting up the local port, that is, the port to which the local task holds the receive right. We can create the Mach port just like any other, by calling `mach_port_allocate()`. The trick is to get a send right to that port into the remote task.
+For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
 
-A convenient trick we can use to copy a send right from the current task into a remote task using only a basic execute primitive is to stash a **send right to our local port in the remote thread’**s `THREAD_KERNEL_PORT` special port using `thread_set_special_port()`; then, we can make the remote thread call `mach_thread_self()` to retrieve the send right.
+Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
 
-Next we will set up the remote port, which is pretty much the inverse of what we just did. We can make the **remote thread allocate a Mach port by calling `mach_reply_port()`**; we can’t use `mach_port_allocate()` because the latter returns the allocated port name in memory and we don’t yet have a read primitive. Once we have a port, we can create a send right by calling `mach_port_insert_right()` in the remote thread. Then, we can stash the port in the kernel by calling `thread_set_special_port()`. Finally, back in the local task, we can retrieve the port by calling `thread_get_special_port()` on the remote thread, **giving us a send right to the Mach port just allocated in the remote task**.
+A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
 
-At this point, we have created the Mach ports we will use for bidirectional communication.
+For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
 
-### 3. Basic memory read/write <a href="#step-3-basic-memory-readwrite" id="step-3-basic-memory-readwrite"></a>
+Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
 
-Now we will use the execute primitive to create basic memory read and write primitives. These primives won’t be used for much (we will soon upgrade to much more powerful primitives), but they are a key step in helping us to expand our control of the remote process.
+## 3. Basic Memory Read/Write Primitives
 
-In order to read and write memory using our execute primitive, we will be looking for functions like these:
+In this section, the focus is on utilizing the execute primitive to establish basic memory read and write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+
+### Memory Reading and Writing Using Execute Primitive
+
+The goal is to perform memory reading and writing using specific functions. For reading memory, functions resembling the following structure are used:
 
 ```c
 uint64_t read_func(uint64_t *address) {
     return *address;
 }
+```
+
+And for writing to memory, functions similar to this structure are used:
+
+```c
 void write_func(uint64_t *address, uint64_t value) {
     *address = value;
 }
 ```
 
-They might correspond to the following assembly:
+These functions correspond to the given assembly instructions:
 
 ```
 _read_func:
-    ldr     x0, [x0]
+    ldr x0, [x0]
     ret
 _write_func:
-    str     x1, [x0]
+    str x1, [x0]
     ret
 ```
 
-A quick scan of some common libraries revealed some good candidates. To read memory, we can use the `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html):
+### Identifying Suitable Functions
 
-```c
-const char *property_getName(objc_property_t prop)
-{
-    return prop->name;
-}
-```
+A scan of common libraries revealed appropriate candidates for these operations:
 
-As it turns out, `prop` is the first field of `objc_property_t`, so this corresponds directly to the hypothetical `read_func` above. We just need to perform a remote function call with the first argument being the address we want to read, and the return value will be the data at that address.
+1. **Reading Memory:**
+   The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
 
-Finding a pre-made function to write memory is slightly harder, but there are still great options without undesired side effects. In libxpc, the `_xpc_int64_set_value()` function has the following disassembly:
+   ```c
+   const char *property_getName(objc_property_t prop) {
+       return prop->name;
+   }
+   ```
+   
+   This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
+
+2. **Writing Memory:**
+   Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
 
 ```
 __xpc_int64_set_value:
-    str     x1, [x0, #0x18]
+    str x1, [x0, #0x18]
     ret
 ```
 
-Thus, to perform a 64-bit write at address `address`, we can perform the remote call:
+
+To perform a 64-bit write at a specific address, the remote call is structured as:
 
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
 
-With these primitives in hand, we are ready to create shared memory.
+With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
 
-### 4. Shared memory
+## 4. Shared Memory Setup
 
-Our next step is to create shared memory between the remote and local task. This will allow us to more easily transfer data between the processes: with a shared memory region, arbitrary memory read and write is as simple as a remote call to `memcpy()`. Additionally, having a shared memory region will allow us to easily set up a stack so that we can call functions with more than 8 arguments.
+The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach involves leveraging `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
 
-To make things easier, we can reuse the shared memory features of libxpc. Libxpc provides an XPC object type, `OS_xpc_shmem`, which allows establishing shared memory regions over XPC. By reversing libxpc, we determine that `OS_xpc_shmem` is based on Mach memory entries, which are Mach ports that represent a region of virtual memory. And since we already have shown how to send Mach ports to the remote task, we can use this to easily set up our own shared memory.
+### Process Overview:
 
-First things first, we need to allocate the memory we will share using `mach_vm_allocate()`. We need to use `mach_vm_allocate()` so that we can use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the region. `xpc_shmem_create()` will take care of creating the Mach memory entry for us and will store the Mach send right to the memory entry in the opaque `OS_xpc_shmem` object at offset `0x18`.
+1. **Memory Allocation**:
+   - Allocate the memory for sharing using `mach_vm_allocate()`.
+   - Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated memory region. This function will manage the creation of the Mach memory entry and store the Mach send right at offset `0x18` of the `OS_xpc_shmem` object.
 
-Once we have the memory entry port, we will create an `OS_xpc_shmem` object in the remote process representing the same memory region, allowing us to call `xpc_shmem_map()` to establish the shared memory mapping. First, we perform a remote call to `malloc()` to allocate memory for the `OS_xpc_shmem` and use our basic write primitive to copy in the contents of the local `OS_xpc_shmem` object. Unfortunately, the resulting object isn’t quite correct: its Mach memory entry field at offset `0x18` contains the local task’s name for the memory entry, not the remote task’s name. To fix this, we use the `thread_set_special_port()` trick to insert a send right to the Mach memory entry into the remote task and then overwrite field `0x18` with the remote memory entry’s name. At this point, the remote `OS_xpc_shmem` object is valid and the memory mapping can be established with a remote call to `xpc_shmem_remote()`.
+2. **Creating Shared Memory in Remote Process**:
+   - Allocate memory for the `OS_xpc_shmem` object in the remote process with a remote call to `malloc()`.
+   - Copy the contents of the local `OS_xpc_shmem` object to the remote process. However, this initial copy will have incorrect Mach memory entry names at offset `0x18`.
 
-### 5. Full control <a href="#step-5-full-control" id="step-5-full-control"></a>
+3. **Correcting the Mach Memory Entry**:
+   - Utilize the `thread_set_special_port()` method to insert a send right for the Mach memory entry into the remote task.
+   - Correct the Mach memory entry field at offset `0x18` by overwriting it with the remote memory entry's name.
 
-With shared memory at a known address and an arbitrary execution primitive, we are basically done. Arbitrary memory reads and writes are implemented by calling `memcpy()` to and from the shared region, respectively. Function calls with more than 8 arguments are performed by laying out additional arguments beyond the first 8 on the stack according to the calling convention. Transferring arbitrary Mach ports between the tasks can be done by sending Mach messages over the ports established earlier. We can even transfer file descriptors between the processes by using fileports (special thanks to Ian Beer for demonstrating this technique in triple\_fetch!).
+4. **Finalizing Shared Memory Setup**:
+   - Validate the remote `OS_xpc_shmem` object.
+   - Establish the shared memory mapping with a remote call to `xpc_shmem_remote()`.
 
-In short, we now have full and easy control over the victim process. You can see the full implementation and the exposed API in the [threadexec](https://github.com/bazad/threadexec) library.
+By following these steps, shared memory between the local and remote tasks will be efficiently set up, allowing for straightforward data transfers and the execution of functions requiring multiple arguments.
+
+## Additional Code Snippets
+
+For memory allocation and shared memory object creation:
+```c
+mach_vm_allocate();
+xpc_shmem_create();
+```
+
+For creating and correcting the shared memory object in the remote process:
+
+```c
+malloc(); // for allocating memory remotely
+thread_set_special_port(); // for inserting send right
+```
+
+Remember to handle the details of Mach ports and memory entry names correctly to ensure that the shared memory setup functions properly.
+
+
+## 5. Achieving Full Control
+
+Upon successfully establishing shared memory and gaining arbitrary execution capabilities, we have essentially gained full control over the target process. The key functionalities enabling this control are:
+
+1. **Arbitrary Memory Operations**:
+   - Perform arbitrary memory reads by invoking `memcpy()` to copy data from the shared region.
+   - Execute arbitrary memory writes by using `memcpy()` to transfer data to the shared region.
+
+2. **Handling Function Calls with Multiple Arguments**:
+   - For functions requiring more than 8 arguments, arrange the additional arguments on the stack in compliance with the calling convention.
+
+3. **Mach Port Transfer**:
+   - Transfer Mach ports between tasks through Mach messages via previously established ports.
+
+4. **File Descriptor Transfer**:
+   - Transfer file descriptors between processes using fileports, a technique highlighted by Ian Beer in `triple_fetch`.
+
+This comprehensive control is encapsulated within the [threadexec](https://github.com/bazad/threadexec) library, providing a detailed implementation and a user-friendly API for interaction with the victim process.
+
+## Important Considerations:
+
+- Ensure proper use of `memcpy()` for memory read/write operations to maintain system stability and data integrity.
+- When transferring Mach ports or file descriptors, follow proper protocols and handle resources responsibly to prevent leaks or unintended access.
+
+By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
+
+# References
+* https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/
 
 <details>
 

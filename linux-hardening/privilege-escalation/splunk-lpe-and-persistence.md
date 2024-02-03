@@ -20,7 +20,7 @@ Also if you are **already root and the Splunk service is not listening only on l
 
 In the first image below you can see how a Splunkd web page looks like.
 
-**The following information was copied from** [**https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/**](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
+**The following information was ** [**https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/**](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
 
 ## Abusing Splunk Forwarders For Shells and Persistence
 

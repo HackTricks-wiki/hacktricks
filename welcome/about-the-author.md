@@ -14,22 +14,11 @@
 
 ### Hello!!
 
-This is **Carlos Polop**.
+First of all, it's needed to indicate that all **credits of techniques on reasearch from other sites belongs to the original authors** (there are references in the pages). Kudos to every research that shares knowledge to improme the security of the internet.
 
-First of all, I want to indicate that **I don't own this entire book**, a lot of **information was copy/pasted from other websites and that content belongs to them** (this is indicated on the pages).
+HackTricks is a educational Wiki that compiles knowledge about **cyber-security** lead by Carlos with hundreds of collaborators! It's a **huge collection of hacking tricks** that is updated by the community much as possible to keep it up to date. If you find something is missing or outdated, please, send a **Pull Request** to [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
 
-I also want to say **thanks to all the people that share cyber-security related information for free** on the Internet. Thanks to them I learn new hacking techniques that then I add to Hacktricks.\
-Moreover, I also **write the results of my own researches** here in HackTricks.
-
-Therefore, I expect that in **HackTricks** you will find **all** the **security tricks** available on the internet about a **topic** + potentially something **extra**. If you find something is **missing**, please, send a **Pull Request** to Hacktricks Github!
-
-### BIO
-
-Just check my **linkedin**: [https://www.linkedin.com/in/carlos-polop-martin/](https://www.linkedin.com/in/carlos-polop-martin/)
-
-{% hint style="warning" %}
-If you find that HackTricks is very useful for you, please consider **supporting it!**
-{% endhint %}
+HackTricks is also a wiki were **a lot of researches also share their latest findings**, so it's a great place to keep up to date with the latest hacking techniques.
 
 <details>
 
