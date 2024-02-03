@@ -1,28 +1,29 @@
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
 * [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
+* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 
 ## コード
 
-以下のコードは[こちら](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)からコピーされました。**引数としてプロセスIDを指定する**ことができ、指定されたプロセスのユーザーとして実行されるCMDが実行されます。\
-High Integrityプロセスで実行すると、Systemとして実行されているプロセス（winlogon、wininitなど）のPIDを指定し、systemとしてcmd.exeを実行することができます。
+以下のコードは[こちら](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)からのものです。**引数としてプロセスIDを指定する**ことができ、指定されたプロセスのユーザーとして実行されるCMDが実行されます。\
+High Integrityプロセスで実行すると、Systemとして実行されているプロセス（例えばwinlogon、wininit）のPIDを指定し、systemとしてcmd.exeを実行することができます。
 ```cpp
 impersonateuser.exe 1234
 ```
 ```cpp
-// impersonateuser.cpp のコードは翻訳対象外です。
+// impersonateuser.cpp のコードはここに表示されます
 ```
+{% endcode %}
 ```cpp
 #include <windows.h>
 #include <iostream>
@@ -166,15 +167,15 @@ return 0;
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-これは、**高い整合性レベルで実行していても十分な権限がない**ことを意味します。
-現在の管理者権限を**プロセスエクスプローラー**を使って`svchost.exe`プロセスに対して確認しましょう（プロセスハッカーを使用することもできます）：
+これは、**高整合性レベルで実行していても十分な権限がない**ことを意味します。\
+現在の管理者の権限を**プロセスエクスプローラー**を使って`svchost.exe`プロセスについて確認しましょう（プロセスハッカーを使用することもできます）：
 
 1. `svchost.exe`のプロセスを選択します
 2. 右クリック --> プロパティ
-3. "セキュリティ"タブ内で、右下の"権限"ボタンをクリックします
-4. "詳細"をクリックします
-5. "管理者"を選択し、"編集"をクリックします
-6. "詳細な権限を表示"をクリックします
+3. "セキュリティ" タブの右下にある "権限" ボタンをクリックします
+4. "詳細" をクリックします
+5. "管理者" を選択し、"編集" をクリックします
+6. "詳細な権限を表示" をクリックします
 
 ![](<../../.gitbook/assets/image (322).png>)
 
@@ -190,14 +191,14 @@ return 0;
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
 * **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有**してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをチェックしてください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加するか**、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
 
 </details>
