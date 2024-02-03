@@ -8,15 +8,15 @@ HackTricksをサポートする他の方法:
 
 * **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
 
 ## 基本情報
 
-IPC（Inter-Process Communication）ネームスペースは、Linuxカーネルの機能で、メッセージキュー、共有メモリセグメント、セマフォなどのSystem V IPCオブジェクトの**分離**を提供します。この分離により、**異なるIPCネームスペースのプロセスは、お互いのIPCオブジェクトに直接アクセスしたり、変更したりすることができなくなり**、プロセスグループ間のセキュリティとプライバシーの追加層を提供します。
+IPC（Inter-Process Communication）ネームスペースは、Linuxカーネルの機能で、メッセージキュー、共有メモリセグメント、セマフォなどのSystem V IPCオブジェクトの**分離**を提供します。この分離により、**異なるIPCネームスペースのプロセスは、互いのIPCオブジェクトに直接アクセスしたり、変更したりすることができません**。これにより、プロセスグループ間のセキュリティとプライバシーの追加層が提供されます。
 
 ### 動作方法:
 
@@ -32,36 +32,31 @@ IPC（Inter-Process Communication）ネームスペースは、Linuxカーネル
 ```bash
 sudo unshare -i [--mount-proc] /bin/bash
 ```
-`--mount-proc` パラメータを使用して新しい `/proc` ファイルシステムのインスタンスをマウントすることで、新しいマウント名前空間が**その名前空間に特有のプロセス情報の正確で隔離されたビューを持つことを保証します**。
+`/proc` ファイルシステムの新しいインスタンスをマウントすることで、`--mount-proc` パラメータを使用すると、新しいマウント名前空間が**その名前空間に特有のプロセス情報の正確で隔離されたビューを持つ**ことを保証します。
 
 <details>
 
 <summary>エラー: bash: fork: メモリを割り当てることができません</summary>
 
-前述の行を `-f` なしで実行すると、そのエラーが発生します。\
-このエラーは、新しい名前空間で PID 1 のプロセスが終了することによって引き起こされます。
+`unshare` を `-f` オプションなしで実行すると、Linuxが新しい PID (プロセス ID) 名前空間を扱う方法により、エラーが発生します。重要な詳細と解決策は以下の通りです:
 
-bashが実行を開始した後、bashはいくつかの新しいサブプロセスをフォークして何かを行います。`unshare` を `-f` なしで実行すると、bashは現在の "unshare" プロセスと同じ pid を持つことになります。現在の "unshare" プロセスは unshare システムコールを呼び出し、新しい pid 名前空間を作成しますが、現在の "unshare" プロセスは新しい pid 名前空間には含まれません。これは Linux カーネルの望ましい動作です：プロセス A が新しい名前空間を作成すると、プロセス A 自体は新しい名前空間には入れられず、プロセス A のサブプロセスのみが新しい名前空間に入れられます。したがって、次のように実行するとき：
-```
-unshare -p /bin/bash
-```
-unshareプロセスは`/bin/bash`を実行し、`/bin/bash`はいくつかのサブプロセスをフォークします。bashの最初のサブプロセスは新しいネームスペースのPID 1になり、サブプロセスはその仕事を完了した後に終了します。したがって、新しいネームスペースのPID 1が終了します。
+1. **問題の説明**:
+- Linuxカーネルは、`unshare` システムコールを使用してプロセスが新しい名前空間を作成することを許可します。しかし、新しい PID 名前空間の作成を開始するプロセス（"unshare" プロセスと呼ばれる）は、新しい名前空間に入らず、その子プロセスのみが入ります。
+- `%unshare -p /bin/bash%` を実行すると、`/bin/bash` は `unshare` と同じプロセスで開始されます。その結果、`/bin/bash` とその子プロセスは元の PID 名前空間にあります。
+- 新しい名前空間での `/bin/bash` の最初の子プロセスが PID 1 になります。このプロセスが終了すると、他のプロセスがない場合、名前空間のクリーンアップがトリガーされます。PID 1 は孤立したプロセスを引き継ぐ特別な役割を持っているため、Linuxカーネルはその名前空間での PID 割り当てを無効にします。
 
-PID 1プロセスには特別な機能があります：それはすべての孤児プロセスの親プロセスになるべきです。ルートネームスペースのPID 1プロセスが終了すると、カーネルはパニックになります。サブネームスペースのPID 1プロセスが終了すると、Linuxカーネルは`disable_pid_allocation`関数を呼び出し、そのネームスペースで`PIDNS_HASH_ADDING`フラグをクリーンします。Linuxカーネルが新しいプロセスを作成するとき、カーネルは`alloc_pid`関数を呼び出してネームスペース内でPIDを割り当てますが、`PIDNS_HASH_ADDING`フラグが設定されていない場合、`alloc_pid`関数は-ENOMEMエラーを返します。それが「Cannot allocate memory」エラーの原因です。
+2. **結果**:
+- 新しい名前空間での PID 1 の終了は、`PIDNS_HASH_ADDING` フラグのクリーニングにつながります。これにより、新しいプロセスを作成する際に `alloc_pid` 関数が新しい PID を割り当てることができず、「メモリを割り当てることができません」というエラーが発生します。
 
-この問題は'-f'オプションを使用して解決できます：
-```
-unshare -fp /bin/bash
-```
+3. **解決策**:
+- この問題は、`unshare` と `-f` オプションを使用することで解決できます。このオプションは、新しい PID 名前空間を作成した後に `unshare` が新しいプロセスをフォークするようにします。
+- `%unshare -fp /bin/bash%` を実行すると、`unshare` コマンド自体が新しい名前空間で PID 1 になります。`/bin/bash` とその子プロセスは、この新しい名前空間内で安全に保持され、PID 1 の早期終了を防ぎ、通常の PID 割り当てを可能にします。
+
+`unshare` が `-f` フラグで実行されることを確認することで、新しい PID 名前空間が正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく操作できるようになります。
+
 </details>
 
 #### Docker
-
-Dockerを使用すると、IPCネームスペースを簡単に扱うことができます。Dockerコンテナはデフォルトで独自のIPCネームスペースを持っています。これにより、ホストOSとは独立したプロセス間通信が可能になります。しかし、`--ipc`フラグを使用することで、コンテナがホストのIPCネームスペースまたは他のコンテナのIPCネームスペースを使用するように設定することもできます。
-
-コンテナがホストのIPCネームスペースを共有する場合、プロセス間通信に関連する脆弱性がホストに影響を与える可能性があります。また、悪意のあるコンテナが他のコンテナのIPCリソースにアクセスし、情報漏洩を引き起こすリスクもあります。
-
-DockerコンテナでのIPCネームスペースの使用を適切に管理することは、システムのセキュリティを強化する上で重要です。
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
@@ -84,7 +79,7 @@ sudo find /proc -maxdepth 3 -type l -name ipc -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 nsenter -i TARGET_PID --pid /bin/bash
 ```
-また、**rootである場合に限り、他のプロセスのネームスペースに** **入ることができます**。そして、それを指すディスクリプタ（`/proc/self/ns/net`のような）**がなければ**、他のネームスペースに**入ることはできません**。
+また、**rootである場合に限り、他のプロセスのネームスペースに** **入ることができます**。そして、それを指し示すディスクリプタ（`/proc/self/ns/net`のような）**がなければ**、他のネームスペースに**入ることはできません**。
 
 ### IPCオブジェクトの作成
 ```bash
@@ -101,16 +96,21 @@ key        shmid      owner      perms      bytes      nattch     status
 # From the host
 ipcs -m # Nothing is seen
 ```
+# 参考文献
+* [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
+
+
+
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキング</strong>をゼロからヒーローまで学ぶ</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをチェックする
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
 
 </details>
