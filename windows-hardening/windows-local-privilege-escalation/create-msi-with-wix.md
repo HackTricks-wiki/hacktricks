@@ -14,11 +14,13 @@ Other ways to support HackTricks:
 
 </details>
 
+# Creating Malicious MSI and Getting Root
 
-**Tutorial copied from** [**https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root**](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)\
-In order to create the msi we will use [wixtools](http://wixtoolset.org) , you can use other msi builders but they didn’t work for me.\
-Check [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) for some wix msi usage examples.\
-We will create an msi that executes our lnk file :
+The creation of the MSI installer will be done using wixtools, specifically [wixtools](http://wixtoolset.org) will be utilized. It is worth mentioning that alternative MSI builders were attempted, but they were not successful in this particular case.
+
+For a comprehensive understanding of wix MSI usage examples, it is advisable to consult [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Here, you can find various examples that demonstrate the usage of wix MSI.
+
+The aim is to generate an MSI that will execute the lnk file. In order to achieve this, the following XML code could be employed ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
 
 ```markup
 <?xml version="1.0"?>
@@ -52,21 +54,30 @@ fail_here
 </Wix>
 ```
 
-We will use `candle.exe` from wixtools to create a wixobject from `msi.xml`
+It is important to note that the Package element contains attributes such as InstallerVersion and Compressed, specifying the version of the installer and indicating whether the package is compressed or not, respectively.
 
-```markup
+The creation process involves utilizing candle.exe, a tool from wixtools, to generate a wixobject from msi.xml. The following command should be executed:
+
+```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
 
-![](https://0xrick.github.io/images/hackthebox/ethereal/65.png)
+Additionally, it is worth mentioning that an image is provided in the post, which depicts the command and its output. You can refer to it for visual guidance.
 
-Then we will use `light.exe` to create the msi file from the wixobject:
+Furthermore, light.exe, another tool from wixtools, will be employed to create the MSI file from the wixobject. The command to be executed is as follows:
 
-```markup
+```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
 
-![](https://0xrick.github.io/images/hackthebox/ethereal/66.png)
+Similar to the previous command, an image is included in the post illustrating the command and its output.
+
+Please note that while this summary aims to provide valuable information, it is recommended to refer to the original post for more comprehensive details and accurate instructions.
+
+# References
+* [https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+* [https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)
+[wixtools](http://wixtoolset.org)
 
 
 <details>

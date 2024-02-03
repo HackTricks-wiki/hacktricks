@@ -14,8 +14,6 @@ Other ways to support HackTricks:
 
 </details>
 
-**This technique was copied from** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-
 ## Mach Messages Basic Info
 
 If you don't know what Mach Messages are start checking this page:
@@ -39,8 +37,8 @@ If you don't know how a XPC connection is established check:
 
 What is interesting for you to know is that **XPC’s abstraction is a one-to-one connection**, but it is based on top of a technology which **can have multiple senders, so:**
 
-* Mach ports are single receiver, _**multiple sender**_.
-* An XPC connection’s audit token is the audit token of _**copied from the most recently received message**_.
+* Mach ports are single receiver, **multiple sender**.
+* An XPC connection’s audit token is the audit token of **copied from the most recently received message**.
 * Obtaining the **audit token** of an XPC connection is critical to many **security checks**.
 
 Although the previous situation sounds promising there are some scenarios where this is not going to cause problems:
@@ -68,16 +66,16 @@ This gave us the idea for two different methods this may be possible:
 
 Scenario:
 
-* Two mach **services \_A**_\*\* and \*\*_**B**\_\*\* that we can both connect to\*\* (based on the sandbox profile and the authorization checks before accepting the connection).
-* _**A**_ must have an **authorization check** for a specific **action that \_B**\_\*\* can pass\*\* (but our app can’t).
+* Two mach **services **`A`** and **`B`** that we can both connect to (based on the sandbox profile and the authorization checks before accepting the connection).
+* _**A**_ must have an **authorization check** for a specific action that **`B`** can pass (but our app can’t).
   * For example, if B has some **entitlements** or is running as **root**, it might allow him to ask A to perform a privileged action.
-* For this authorization check, _**A**_\*\* obtains the audit token asynchronously\*\*, for example by calling `xpc_connection_get_audit_token` from **`dispatch_async`**.
+* For this authorization check, **`A`** obtains the audit token asynchronously, for example by calling `xpc_connection_get_audit_token` from **`dispatch_async`**.
 
 {% hint style="danger" %}
-In this case an attacker could trigger a **Race Condition** making a **exploit** that **asks A to perform an action** several times while making **B send messages to A**. When the RC is **successful**, the **audit token** of **B** will be copied in memory **while** the request of our **exploit** is being **handled** by A, giving it **access to the privilege action only B could request**.
+In this case an attacker could trigger a **Race Condition** making a **exploit** that **asks A to perform an action** several times while making **B send messages to `A`**. When the RC is **successful**, the **audit token** of **B** will be copied in memory **while** the request of our **exploit** is being **handled** by A, giving it **access to the privilege action only B could request**.
 {% endhint %}
 
-This happened with _**A**_\*\* as `smd`\*\* and _**B**_\*\* as `diagnosticd`\*\*. The function [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) from smb an be used to install a new privileged helper toot (as **root**). If a **process running as root contact** **smd**, no other checks will be performed.
+This happened with **`A`** as `smd` and **`B`** as `diagnosticd`. The function [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) from smb an be used to install a new privileged helper toot (as **root**). If a **process running as root contact** **smd**, no other checks will be performed.
 
 Therefore, the service **B** is **`diagnosticd`** because it runs as **root** and can be used to **monitor** a process, so once monitoring has started, it will **send multiple messages per second.**
 
@@ -95,7 +93,7 @@ To perform the attack:
 
 ## Variant 2: reply forwarding
 
-As mentioned before, the handler for events on an XPC connection is never executed multiple times concurrently. However, **XPC \_reply**\_\*\* messages are handled differently\*\*. Two functions exist for sending a message that expects a reply:
+As mentioned before, the handler for events on an XPC connection is never executed multiple times concurrently. However, **XPC reply**** messages are handled differently. Two functions exist for sending a message that expects a reply:
 
 * `void xpc_connection_send_message_with_reply(xpc_connection_t connection, xpc_object_t message, dispatch_queue_t replyq, xpc_handler_t handler)`, in which case the XPC message is received and parsed on the specified queue.
 * `xpc_object_t xpc_connection_send_message_with_reply_sync(xpc_connection_t connection, xpc_object_t message)`, in which case the XPC message is received and parsed on the current dispatch queue.
@@ -104,12 +102,12 @@ Therefore, **XPC reply packets may be parsed while an XPC event handler is execu
 
 For this scenario we would need:
 
-* As before, two mach services _A_ and _B_ that we can both connect to.
-* Again, _A_ must have an authorization check for a specific action that _B_ can pass (but our app can’t).
-* _A_ sends us a message that expects a reply.
-* We can send a message to _B_ that it will reply to.
+* As before, two mach services **`A`** and **`B`** that we can both connect to.
+* Again, **`A`** must have an authorization check for a specific action that **`B`** can pass (but our app can’t).
+* **`A`** sends us a message that expects a reply.
+* We can send a message to **`B`** that it will reply to.
 
-We wait for _A_ to send us a message that expects a reply (1), instead of replying we take the reply port and use it for a message we send to _B_ (2). Then, we send a message that uses the forbidden action and we hope that it arrives concurrently with the reply from _B_ (3).
+We wait for **`A`** to send us a message that expects a reply (1), instead of replying we take the reply port and use it for a message we send to **`B`** (2). Then, we send a message that uses the forbidden action and we hope that it arrives concurrently with the reply from **`B`** (3).
 
 <figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -126,6 +124,9 @@ The function `xpc_dictionary_get_audit_token` copies the audit token from the ma
 It is unclear to us why Apple didn’t apply a more general fix, for example dropping messages that don’t match the saved audit token of the connection. There may be scenarios where the audit token of a process legitimately changes but the connection should stay open (for example, calling `setuid` changes the UID field), but changes like a different PID or PID version are unlikely to be intended.
 
 In any case, this issue still remains with iOS 17 and macOS 14, so if you want to go and look for it, good luck!
+
+# References
+* For further information check the original post: [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 <details>
 

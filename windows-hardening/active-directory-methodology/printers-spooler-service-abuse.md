@@ -69,11 +69,9 @@ If an attacker has already compromised a computer with [Unconstrained Delegation
 
 ## PrivExchange
 
-The `PrivExchange` attack results from a flaw in the Exchange Server `PushSubscription` feature, which allows **any domain user with a mailbox to force the Exchange server to authenticate** to any host provided by the client over HTTP.
+The `PrivExchange` attack is a result of a flaw found in the **Exchange Server `PushSubscription` feature**. This feature allows the Exchange server to be forced by any domain user with a mailbox to authenticate to any client-provided host over HTTP.
 
-The Exchange service runs as **SYSTEM** and is **over-privileged** by default (i.e., has WriteDacl privileges on the domain pre-2019 Cumulative Update). This flaw can be leveraged to r**elay to LDAP and dump the domain NTDS database**. If we cannot relay to LDAP, this can be leveraged to relay and authenticate to **other hosts** within the domain. This attack will take you directly to Domain Admin with any authenticated domain user account.
-
-****[**This technique was copied from here.**](https://academy.hackthebox.com/module/143/section/1276)****
+By default, the **Exchange service runs as SYSTEM** and is given excessive privileges (specifically, it has **WriteDacl privileges on the domain pre-2019 Cumulative Update**). This flaw can be exploited to enable the **relaying of information to LDAP and subsequently extract the domain NTDS database**. In cases where relaying to LDAP is not possible, this flaw can still be used to relay and authenticate to other hosts within the domain. The successful exploitation of this attack grants immediate access to the Domain Admin with any authenticated domain user account.
 
 ## Inside Windows
 
