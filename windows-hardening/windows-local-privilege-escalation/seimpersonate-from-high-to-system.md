@@ -4,10 +4,10 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al grupo de** 💬 [**Discord**](https://discord.gg/hRep4RUj7f) o al grupo de [**telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -15,14 +15,15 @@ Otras formas de apoyar a HackTricks:
 
 ## Código
 
-El siguiente código fue copiado de [aquí](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Permite **indicar un ID de Proceso como argumento** y un CMD **ejecutándose como el usuario** del proceso indicado se ejecutará.\
-Ejecutándolo en un proceso de Alta Integridad puedes **indicar el PID de un proceso ejecutándose como Sistema** (como winlogon, wininit) y ejecutar un cmd.exe como sistema.
+El siguiente código de [aquí](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Permite **indicar un ID de Proceso como argumento** y un CMD **ejecutándose como el usuario** del proceso indicado se ejecutará.\
+Ejecutándose en un proceso de Alta Integridad puedes **indicar el PID de un proceso ejecutándose como Sistema** (como winlogon, wininit) y ejecutar un cmd.exe como sistema.
 ```cpp
 impersonateuser.exe 1234
 ```
 ```cpp
 // impersonateuser.cpp
 ```
+{% endcode %}
 ```cpp
 #include <windows.h>
 #include <iostream>
@@ -155,7 +156,7 @@ return 0;
 
 ## Error
 
-En algunas ocasiones, al intentar suplantar a System, puede que no funcione y se muestre un resultado como el siguiente:
+En algunas ocasiones, puedes intentar suplantar a System y no funcionará, mostrando un resultado como el siguiente:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -170,7 +171,7 @@ Esto significa que incluso si estás ejecutando en un nivel de Integridad Alto *
 Vamos a verificar los permisos actuales del Administrador sobre los procesos de `svchost.exe` con **processes explorer** (o también puedes usar process hacker):
 
 1. Selecciona un proceso de `svchost.exe`
-2. Clic derecho --> Propiedades
+2. Haz clic derecho --> Propiedades
 3. Dentro de la pestaña "Seguridad" haz clic en el botón "Permisos" que está en la parte inferior derecha
 4. Haz clic en "Avanzado"
 5. Selecciona "Administradores" y haz clic en "Editar"
@@ -194,10 +195,10 @@ Dentro de ese proceso "Administradores" pueden "Leer Memoria" y "Leer Permisos" 
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en github.
 
 </details>

