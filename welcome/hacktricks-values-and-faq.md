@@ -105,13 +105,21 @@ You won't find HackTricks filled with annoying ads like other blogs with much le
 * **What should I do if there is content from my blog in HackTricks and I don't want it there?**
 {% endhint %}
 
-In any case know that HackTricks in this case would be improving your **SEO** and **encouraging** people to **check your page**. If you still want the content of your blog to be removed from HackTricks let us know.
+In any case know that HackTricks in this case would be improving your **SEO** and **encouraging** people to **check your page** (people has mentioned us that since some page of them is in HackTricks they receive more visits). If you still want the content of your blog to be removed from HackTricks let us know.
 
-Note that asking this we will definitely **remove every link to your blog**, but if the same technique can be found in other web pages we will just change the source of the information and the explanation, so the real content won't probably leave HackTricks (in cybersecurity, in general, there are always several post talking about the same technique).
+Note that asking this we will definitely **remove every link to your blog**, and any content based on it.
+
+{% hint style="danger" %}
+* **What should I do if I find copy-pasted content in HackTricks?**
+{% endhint %}
+
+**Unfortunatelly yhis practice came from the beginning of the project**. We have always tried to **give the original authors all the credits**. If you find a page with copy-pasted content (even with the original source referenced), let us know and we will either **remove it**, **leave the link**, or **rewrite it**.
+
+{% hint style="danger" %}
 
 ## License
 
-**Copyright © Carlos Polop 2023. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop is licensed under the**[ **Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
+**Copyright © Carlos Polop 2024. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop is licensed under the**[ **Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
 **If you want to use it with commercial purposes, contact me.**
 
 ## **Disclaimer**

