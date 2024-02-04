@@ -2,69 +2,65 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Cómo funcionan
+## ¿Cómo funcionan?
 
-1. Copiar un binario de servicio en el recurso compartido ADMIN$ a través de SMB
-2. Crear un servicio en la máquina remota que apunte al binario
-3. Iniciar el servicio de forma remota
-4. Al salir, detener el servicio y eliminar el binario
+El proceso se describe en los siguientes pasos, ilustrando cómo se manipulan los binarios de servicio para lograr la ejecución remota en una máquina objetivo a través de SMB:
 
-## **PsExec manual**
+1. **Copia de un binario de servicio en la carpeta ADMIN$ a través de SMB**.
+2. **Creación de un servicio en la máquina remota** apuntando al binario.
+3. El servicio se **inicia de forma remota**.
+4. Al salir, el servicio se **detiene y el binario se elimina**.
 
-Primero supongamos que tenemos un ejecutable de carga útil que generamos con msfvenom y ofuscamos con Veil (para que el AV no lo detecte). En este caso, creé una carga útil de meterpreter reverse_http y la llamé 'met8888.exe'
+### **Proceso de Ejecución Manual de PsExec**
 
-**Copiar el binario**. Desde nuestra línea de comandos "jarrieta", simplemente copiamos el binario al ADMIN$. Realmente, podría copiarse y ocultarse en cualquier lugar del sistema de archivos.
+Suponiendo que hay un payload ejecutable (creado con msfvenom y obfuscado con Veil para evadir la detección de antivirus), llamado 'met8888.exe', que representa un payload meterpreter reverse_http, se siguen los siguientes pasos:
 
-![](../../.gitbook/assets/copy\_binary\_admin.png)
+- **Copia del binario**: El ejecutable se copia a la carpeta ADMIN$ desde un símbolo del sistema, aunque también se puede colocar en cualquier lugar del sistema de archivos para permanecer oculto.
 
-**Crear un servicio**. El comando `sc` de Windows se utiliza para consultar, crear, eliminar, etc. servicios de Windows y se puede usar de forma remota. Lee más sobre esto [aquí](https://technet.microsoft.com/en-us/library/bb490995.aspx). Desde nuestra línea de comandos, crearemos de forma remota un servicio llamado "meterpreter" que apunte a nuestro binario subido:
+- **Creación de un servicio**: Utilizando el comando `sc` de Windows, que permite consultar, crear y eliminar servicios de Windows de forma remota, se crea un servicio llamado "meterpreter" que apunta al binario cargado.
 
-![](../../.gitbook/assets/sc\_create.png)
+- **Inicio del servicio**: El paso final implica iniciar el servicio, lo que probablemente resultará en un error de "tiempo de espera" debido a que el binario no es un binario de servicio genuino y no devuelve el código de respuesta esperado. Este error es inconsecuente ya que el objetivo principal es la ejecución del binario.
 
-**Iniciar el servicio**. El último paso es iniciar el servicio y ejecutar el binario. _Nota:_ cuando el servicio se inicie, "se agotará el tiempo" y generará un error. Eso es porque nuestro binario de meterpreter no es un binario de servicio real y no devolverá el código de respuesta esperado. Eso está bien porque solo necesitamos que se ejecute una vez para activarse:
+La observación del listener de Metasploit revelará que la sesión se ha iniciado con éxito.
 
-![](../../.gitbook/assets/sc\_start\_error.png)
+[Aprende más sobre el comando `sc`](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
-Si miramos nuestro oyente de Metasploit, veremos que la sesión se ha abierto.
+Encuentra pasos más detallados en: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**Limpiar el servicio.**
-
-![](../../.gitbook/assets/sc\_delete.png)
-
-Extraído de aquí: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
-**También podrías usar el binario PsExec.exe de Windows Sysinternals:**
+**También puedes usar el binario de Windows Sysinternals PsExec.exe:**
 
 ![](<../../.gitbook/assets/image (165).png>)
 
-También podrías usar [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+También puedes usar [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 
 {% code overflow="wrap" %}
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
+{% endcode %}
+
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
