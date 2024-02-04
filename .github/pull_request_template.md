@@ -1,3 +1,4 @@
-Gracias por contribuir a HackTricks!
+## Atribución
+Valoramos tu conocimiento y te animamos a compartir contenido. Por favor, asegúrate de subir solo contenido que poseas o del que tengas permiso explícito del autor original. Tu respeto por los derechos de propiedad intelectual fomenta un entorno de intercambio confiable y legal para todos.
 
-Valoramos tu conocimiento y te animamos a compartir contenido. Por favor, asegúrate de solo subir contenido que poseas o para el cual tengas permiso explícito de uso por parte del autor original. Tu respeto por los derechos de propiedad intelectual promueve un entorno de compartición legal y confiable para todos.
+¡Gracias por contribuir a HackTricks!
