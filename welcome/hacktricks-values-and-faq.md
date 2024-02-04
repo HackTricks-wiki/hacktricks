@@ -2,32 +2,32 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見る
+- **Discordグループ**に参加する💬（https://discord.gg/hRep4RUj7f）または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
+- **HackTricks**（https://github.com/carlospolop/hacktricks）と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
 ## HackTricksの価値観
 
 {% hint style="success" %}
-これらは**HackTricksプロジェクトの価値観**です:
+これが**HackTricksプロジェクトの価値観**です:
 
-* インターネット上の**全員**に**教育的なハッキング**リソースへの**無料**アクセスを提供する。
-* ハッキングは学びについてであり、学びは可能な限り無料であるべきです。
-* この本の目的は、包括的な**教育リソース**として機能することです。
-* コミュニティが公開する素晴らしい**ハッキング**技術を**保存**し、**オリジナルの著者**に全ての**クレジット**を与える。
-* **他人のクレジットは望まない**、私たちは単に皆のためにクールなコツを保存したいだけです。
-* HackTricksには**独自の研究**も書いています。
-* いくつかのケースでは、HackTricksに技術の重要な部分の**要約を書き**、**詳細については元の投稿を訪れることを奨励します**。
-* 本の中の全てのハッキング技術を**よりアクセスしやすく**するために**整理する**。
-* HackTricksチームは、人々が**より速く学べるように**コンテンツを整理するためだけに何千時間も無料で費やしています。
+- **すべてのインターネットユーザーに教育用ハッキングリソースへの無料アクセス**を提供する。
+- ハッキングは学びの過程であり、学ぶことはできる限り無料であるべきです。
+- この本の目的は包括的な**教育リソース**として機能することです。
+- **コミュニティが公開した素晴らしいハッキングテクニックを**保存し、**オリジナルの著者にすべてのクレジットを**与える。
+- **他の人々からのクレジットを求めているわけではありません**、単にクールなトリックをみんなに提供したいだけです。
+- HackTricksでは**独自の研究**も行っています。
+- いくつかの場合、テクニックの重要な部分の要約をHackTricksに記載し、詳細については**元の投稿を訪れるように**読者に促します。
+- 本の中のすべてのハッキングテクニックを**よりアクセスしやすくするために整理**します。
+- HackTricksチームは、人々が**より速く学べるようにコンテンツを無料で整理する**ために何千時間も費やしています。
 {% endhint %}
 
 <figure><img src="../.gitbook/assets/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
@@ -35,36 +35,36 @@ HackTricksをサポートする他の方法:
 ## HackTricksのFAQ
 
 {% hint style="success" %}
-* **これらのリソースをありがとうございます。どのように感謝すればいいですか？**
+- **これらのリソースに感謝します、どのように感謝すればよいですか？**
 {% endhint %}
 
-[**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をメンションしてツイートでHackTricksチームに公に感謝することができます。\
-特に感謝している場合は、[**こちらでプロジェクトをスポンサーすることもできます**](https://github.com/sponsors/carlospolop)。\
-そして、Githubプロジェクトに**スターを付けることを忘れないでください！** (リンクは下にあります)。
+HackTricksチームに公に感謝するために、[**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をツイートで言及して、これらのリソースを公に提供してくれたことに感謝することができます。\
+特に感謝している場合は、[**こちらでプロジェクトをスポンサー**](https://github.com/sponsors/carlospolop)することもできます。\
+そして、Githubプロジェクトに**スターを付けることを忘れないでください**！（以下のリンクを見つけてください）。
 
 {% hint style="success" %}
-* **プロジェクトにどのように貢献できますか？**
+- **プロジェクトにどのように貢献できますか？**
 {% endhint %}
 
-コミュニティと新しいヒントやコツを**共有する**、または本で見つけたバグを**修正する**ことで貢献できます。それには、以下のGithubページに**プルリクエスト**を送信してください:
+コミュニティと新しいヒントやトリックを共有したり、本で見つけたバグを修正するために、それぞれのGithubページに**Pull Requestを送信**することができます:
 
-* [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
-* [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
+- [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
+- [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Githubプロジェクトに**スターを付けることを忘れないでください！**
+Githubプロジェクトに**スターを付けることを忘れないでください**！
 
 {% hint style="success" %}
-* **HackTricksのコンテンツをコピーして私のブログに載せてもいいですか？**
+- **HackTricksからコンテンツをコピーしてブログに掲載してもよいですか？**
 {% endhint %}
 
-はい、できますが、コンテンツを取得した**特定のリンクを必ず記載してください**。
+はい、可能ですが、コンテンツの出典となる**特定のリンクを必ず記載**してください。
 
 {% hint style="success" %}
-* **HackTricksのページを引用するにはどうすればいいですか？**
+- **HackTricksのページを引用する方法は？**
 {% endhint %}
 
 情報を取得したページのリンクが表示されていれば十分です。\
-bibtexが必要な場合は、以下のようなものを使用できます:
+Bibtexが必要な場合は、次のようなものを使用できます:
 ```latex
 @misc{hacktricks-bibtexing,
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
@@ -74,68 +74,76 @@ url = {\url{https://book.hacktricks.xyz/specific-page}},
 }
 ```
 {% hint style="warning" %}
-* **自分のブログにHackTricksの全てをコピーしてもいいですか？**
+* **HackTricksのすべてをブログにコピーしてもいいですか？**
 {% endhint %}
 
-**できれば避けてください**。それは**誰にとっても利益になりません**。なぜなら、全ての**コンテンツは公式のHackTricksの本で既に無料で公開されている**からです。
+**むしろやめておいたほうがいいです**。すべての**コンテンツはすでに公開されて**おり、公式のHackTricks書籍で無料で入手できます。
 
-もし消えることを心配しているなら、Githubでフォークするかダウンロードしてください。無料で提供されていると言った通りです。
+消える可能性を恐れるなら、Githubでフォークするかダウンロードしてください。私たちが言ったように、すでに無料です。
 
 {% hint style="warning" %}
-* **なぜスポンサーがいるのですか？HackTricksの本は商業目的ですか？**
+* **スポンサーを持っているのはなぜですか？HackTricksの書籍は商業目的ですか？**
 {% endhint %}
 
-最初の**HackTricksの価値**は、世界中の**全ての人々**に**無料**でハッキング教育リソースを提供することです。HackTricksチームは、このコンテンツを提供するために**何千時間も費やしてきました**。再び言いますが、**無料**でです。
+最初の**HackTricksの価値**は、**世界中のすべての人に無料**のハッキング教育リソースを提供することです。HackTricksチームは**何千時間も**かけてこのコンテンツを無料で提供するために取り組んでいます。
 
-もしHackTricksの本が**商業目的**で作られていると思っているなら、それは**完全に間違っています**。
+HackTricksの書籍が**商業目的**で作成されたものだと考えているなら、**完全に誤解**しています。
 
-スポンサーがいるのは、全てのコンテンツが無料であっても、コミュニティが私たちの仕事を評価する機会を**提供したい**からです。そのため、[**Githubスポンサー**](https://github.com/sponsors/carlospolop)を通じてHackTricksに寄付するオプションを提供し、**関連するサイバーセキュリティ企業**にHackTricksをスポンサーしてもらい、本に**広告を掲載**することを可能にしています。広告は常に、それらを**目立たせる**が、コンテンツに集中している人の学習プロセスを**妨げない**場所に配置されます。
+私たちにはスポンサーがいますが、すべてのコンテンツが無料であるにもかかわらず、**コミュニティに私たちの仕事を評価してもらう機会**を提供したいからです。したがって、HackTricksに寄付するオプションを提供するために、人々にHackTricksへの寄付を可能にする[**Github sponsors**](https://github.com/sponsors/carlospolop)を通じて、**関連するサイバーセキュリティ企業**にHackTricksのスポンサーとして広告を掲載することがあります。**広告**は常に**目立つ場所**に配置されますが、学習プロセスを妨げることはありません。
 
-HackTricksには、HackTricksよりもはるかに少ないコンテンツを持つ他のブログのような迷惑な広告はありません。なぜなら、HackTricksは商業目的で作られていないからです。
+HackTricksは商業目的で作成されたわけではないため、他のブログのように迷惑な広告で満たされていることはありません。
 
 {% hint style="danger" %}
-* **もしHackTricksのページが私のブログ投稿に基づいていて、参照されていない場合はどうすればいいですか？**
+* **HackTricksのページが私のブログ投稿に基づいているが、参照されていない場合はどうすればよいですか？**
 {% endhint %}
 
-**大変申し訳ありません。これは起こるべきではありませんでした**。Githubのイシュー、Twitter、Discordなどでお知らせください。HackTricksのページのリンクとあなたのブログのリンクを教えていただければ、**確認してできるだけ早く追加します**。
+**申し訳ありません。これは起こってはいけないことです**。HackTricksのページとあなたのブログのリンクをGithubの問題、Twitter、Discordなどで教えてください。**すぐに確認して追加します**。
 
 {% hint style="danger" %}
-* **もしHackTricksに私のブログのコンテンツがあって、そこに載せたくない場合はどうすればいいですか？**
+* **HackTricksに私のブログのコンテンツが含まれていて、そこに掲載したくない場合はどうすればよいですか？**
 {% endhint %}
 
-いずれにせよ、この場合HackTricksはあなたの**SEO**を向上させ、人々に**あなたのページをチェックするよう促している**ことを知ってください。それでもあなたのブログのコンテンツをHackTricksから削除してほしい場合はお知らせください。
+いずれにせよ、この場合、HackTricksはあなたの**SEOを向上**させ、人々にあなたのページを**チェックすることを奨励**しています（私たちには、彼らのページの一部がHackTricksに掲載されて以来、より多くの訪問を受けると言われています）。あなたのブログのコンテンツをHackTricksから削除してほしい場合はお知らせください。
 
-この要求をすると、私たちは確実に**あなたのブログへの全てのリンクを削除します**が、もし同じ技術が他のウェブページで見つかる場合は、情報源と説明を変更するだけで、実際のコンテンツはHackTricksからおそらく削除されないでしょう（サイバーセキュリティでは、一般的に、同じ技術について話している複数の投稿が常にあります）。
+この要求を受けると、確実にあなたのブログへの**すべてのリンク**とそれに基づくすべてのコンテンツを削除します。
+
+{% hint style="danger" %}
+* **HackTricksにコピペされたコンテンツを見つけた場合はどうすればよいですか？**
+{% endhint %}
+
+**残念ながら、この慣行はプロジェクトの始まりから**続いています。常に**元の著者にすべてのクレジットを与える**よう努めてきました。コピペされたコンテンツが含まれているページを見つけた場合（元のソースが参照されていても）、お知らせいただければ、それを**削除**したり、**リンクを残したり**、**書き直したり**します。
+
+{% hint style="danger" %}
 
 ## ライセンス
 
-**著作権 © Carlos Polop 2023. 他に指定がある場合を除き（本にコピーされた外部情報は元の著者に帰属します）、**[**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **上のCarlos Polopによるテキストは**[**Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**ライセンスの下にあります。**\
-**商業目的で使用したい場合は、私に連絡してください。**
+**Copyright © Carlos Polop 2024. 他に指定されていない限り（書籍にコピーされた外部情報は元の著者に帰属します）、Carlos Polopによる** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **のテキストは**[ **Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/) **の下でライセンスされています。**\
+**商業目的で使用したい場合は、連絡してください。**
 
 ## **免責事項**
 
 {% hint style="danger" %}
-この本「HackTricks」は、教育および情報提供の目的のみを目的としています。この本の内容は「現状のまま」で提供され、著者および出版者は、この本に含まれる情報、製品、サービス、関連するグラフィックの完全性、正確性、信頼性、適合性、または利用可能性について、明示的または暗黙的ないかなる表明または保証も行いません。したがって、そのような情報に依存することは、厳密にあなた自身のリスクになります。
+この書籍『HackTricks』は教育および情報提供を目的としています。この書籍内のコンテンツは「そのまま」提供され、著者および出版者は、この書籍に含まれる情報、製品、サービス、または関連するグラフィックの完全性、正確性、信頼性、適合性、または利用可能性について、明示または黙示を問わず、いかなる表明や保証も行いません。この情報に依存することは、あくまで自己の責任で行ってください。
 
-著者および出版者は、この本の使用、またはこの本に含まれる情報の使用に起因する、データまたは利益の損失を含むがこれに限定されない、いかなる損失または損害についても、いかなる場合においても責任を負いません。
+著者および出版者は、この書籍の使用に起因する、または関連する、データの損失や利益の損失を含む、間接的または結果的な損害、またはいかなる損害も、いかなる場合においても責任を負いません。
 
-さらに、この本に記述されている技術やヒントは、教育および情報提供の目的のみのために提供されており、違法または悪意のある活動には使用されるべきではありません。著者および出版者は、違法または不道徳な活動を支持または支援しません。この本に含まれる情報の使用は、ユーザー自身のリスクと裁量において行われます。
+さらに、この書籍で説明されているテクニックやヒントは、教育および情報提供を目的として提供されており、違法または悪意のある活動に使用してはなりません。著者および出版者は、違法または倫理に反する活動を是認または支持するものではなく、この書籍に含まれる情報の使用はユーザー自身のリスクと裁量によるものです。
 
-ユーザーは、この本に含まれる情報に基づいて行われるいかなる行動についても、単独で責任を負い、ここに記述されている技術やヒントを実装しようとする際には、常に専門家のアドバイスと支援を求めるべきです。
+ユーザーは、この書籍に含まれる情報に基づいて行われるすべての行動について、自己の責任であり、ここに記載されているテクニックやヒントを実装しようとする際には常に専門家の助言と支援を求めるべきです。
 
-この本を使用することにより、ユーザーは、この本の使用、またはこの本に含まれる情報の使用から生じる可能性のあるいかなる損害、損失、または害について、著者および出版者を一切の責任および責任から解放することに同意します。
+この書籍を使用することで、ユーザーは、この書籍またはそれに含まれる情報の使用によって生じる可能性のあるいかなる損害、損失、または害から著者および出版者を一切免責し、責任を負わないことに同意します。
 {% endhint %}
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでAWSハッキングを学びましょう</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>!</strong></a></summary>
+<summary><strong>**[htARTE（HackTricks AWS Red Team Expert）**](https://training.hacktricks.xyz/courses/arte)**を通じてAWSハッキングをゼロからヒーローまで学ぶ！**</summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、Twitterで私を**フォロー**してください 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのスウェグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**をフォローする。**
+* **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリにPRを提出してください。**
 
 </details>
