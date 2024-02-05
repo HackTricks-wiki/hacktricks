@@ -2,88 +2,73 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告掲載したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
+* **💬 [Discord グループ](https://discord.gg/hRep4RUj7f)** または [telegram グループ](https://t.me/peass) に **参加** または **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) **をフォロー** してください。
+* **ハッキングテクニックを共有するために PR を送信して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに貢献する。
 
 </details>
 
-## 盗まれたCA証明書での証明書偽造 - DPERSIST1
+**これは [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)** で共有されている永続性テクニックの要約です。詳細についてはそちらをご確認ください。
 
-証明書がCA証明書であることをどうやって判断できますか？
+## 盗まれた CA 証明書を使用した証明書の偽造 - DPERSIST1
 
-* CA証明書は**CAサーバー自体**に存在し、その**秘密鍵はマシンDPAPIによって保護されています**（OSがTPM/HSM/その他のハードウェアを保護に使用していない限り）。
-* 証明書の**Issuer**と**Subject**は、両方とも**CAの識別名**に設定されています。
-* CA証明書（そしてCA証明書のみ）には**「CAバージョン」拡張機能**があります。
-* EKUは**ありません**
+証明書が CA 証明書であるかどうかをどのように判断できますか？
 
-この証明書の秘密鍵を**抽出する**ためのビルトインGUIサポートされた方法は、CAサーバー上の`certsrv.msc`を使用します。\
-しかし、この証明書はシステムに保存されている他の証明書と**違いはありません**ので、例えば[**THEFT2テクニック**](certificate-theft.md#user-certificate-theft-via-dpapi-theft2)をチェックして、それらを**抽出する**方法を確認してください。
+証明書が CA 証明書であることが確認される条件は次のとおりです：
 
-また、[**certipy**](https://github.com/ly4k/Certipy)を使用して証明書と秘密鍵を取得することもできます：
+- 証明書は CA サーバーに保存されており、そのプライベートキーはマシンの DPAPI によって保護されているか、オペレーティングシステムがサポートしている場合は TPM/HSM のようなハードウェアによって保護されています。
+- 証明書の発行者とサブジェクトのフィールドが CA の識別名と一致しています。
+- "CA Version" 拡張子が CA 証明書にのみ存在します。
+- 証明書には拡張キー使用（EKU）フィールドがありません。
+
+この証明書のプライベートキーを抽出するには、CA サーバー上の `certsrv.msc` ツールが組み込み GUI を介してサポートされています。ただし、この証明書はシステム内に保存されている他の証明書と変わりません。そのため、[THEFT2 技術](certificate-theft.md#user-certificate-theft-via-dpapi-theft2)のような手法を抽出に適用することができます。
+
+次のコマンドを使用して Certipy を使用して証明書とプライベートキーを取得することもできます：
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-一度 **CA証明書** とプライベートキーを `.pfx` 形式で取得したら、有効な証明書を作成するために [**ForgeCert**](https://github.com/GhostPack/ForgeCert) を使用できます：
+CA証明書とその秘密鍵を`.pfx`形式で取得した後、[ForgeCert](https://github.com/GhostPack/ForgeCert)のようなツールを使用して有効な証明書を生成できます：
 ```bash
-# Create new certificate with ForgeCert
+# Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
 
-# Create new certificate with certipy
+# Generating a new certificate with certipy
 certipy forge -ca-pfx CORP-DC-CA.pfx -upn administrator@corp.local -subject 'CN=Administrator,CN=Users,DC=CORP,DC=LOCAL'
 
-# Use new certificate with Rubeus to authenticate
+# Authenticating using the new certificate with Rubeus
 Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /password:Password123!
 
-# User new certi with certipy to authenticate
+# Authenticating using the new certificate with certipy
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
 {% hint style="warning" %}
-**注記**: 証明書を偽造する際に指定する**ユーザー**は、AD内で**アクティブ/有効**であり、認証交換がそのユーザーとして行われるため、**認証が可能**である必要があります。例えば、krbtgtアカウントの証明書を偽造しようとしても機能しません。
+証明書偽造の対象ユーザーは、プロセスが成功するためにはActive Directoryで認証できるアクティブなユーザーである必要があります。krbtgtなどの特別なアカウントのための証明書偽造は効果がありません。
 {% endhint %}
 
-この偽造された証明書は、指定された終了日まで**有効**であり、ルートCA証明書が有効である限り（通常は5年から**10年以上**）有効です。また、**マシン**に対しても有効なので、**S4U2Self**と組み合わせることで、攻撃者はCA証明書が有効である限り、任意のドメインマシンに対する**持続性を維持**することができます。
-さらに、この方法で**生成された証明書**は、CAがそれらを認識していないため、**取り消すことができません**。
+この偽造された証明書は、指定された終了日まで**有効**であり、ルートCA証明書が有効である限り（通常は5年から**10年以上**）、**マシン**に対しても有効です。これに**S4U2Self**を組み合わせることで、攻撃者はCA証明書が有効である限り、**任意のドメインマシンで持続性を維持**できます。\
+さらに、この方法で生成された**証明書は取り消すことができません**。なぜなら、CAがそれらを認識していないからです。
 
-## Rogue CA証明書の信頼 - DPERSIST2
+## ローグCA証明書を信頼する - DPERSIST2
 
-オブジェクト`NTAuthCertificates`は、その`cacertificate`**属性**に一つ以上の**CA証明書**を定義し、ADはそれを使用します：認証中、**ドメインコントローラー**は**`NTAuthCertificates`**オブジェクトが認証中の**証明書**のIssuerフィールドに指定された**CA**のエントリを**含んでいるかどうかをチェックします。もし**含まれていれば、認証が進行します**。
+`NTAuthCertificates`オブジェクトは、その`cacertificate`属性内に1つ以上の**CA証明書**を含むように定義されており、Active Directory（AD）が利用しています。**ドメインコントローラー**による検証プロセスは、認証中の証明書の発行者フィールドに指定された**CA**に一致するエントリを`NTAuthCertificates`オブジェクトで確認します。一致が見つかれば、認証が進行します。
 
-攻撃者は、**自己署名されたCA証明書**を生成し、それを**`NTAuthCertificates`**オブジェクトに**追加**することができます。攻撃者が**`NTAuthCertificates`** ADオブジェクトを**制御**している場合（デフォルトの設定では、**エンタープライズ管理者**グループのメンバーや、**フォレストルートのドメイン**内の**ドメイン管理者**または**管理者**のメンバーのみがこの権限を持っています）、この操作が可能です。権限を持っていれば、`certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`を使用して、または[**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool)を使用して、任意のシステムから**`NTAuthCertificates`**オブジェクトを**編集**することができます。
+攻撃者は、自己署名のCA証明書を`NTAuthCertificates`オブジェクトに追加できますが、このADオブジェクトを制御している必要があります。通常、**Enterprise Admin**グループのメンバーと、**フォレストルートのドメイン**における**Domain Admins**または**Administrators**だけがこのオブジェクトを変更する権限を与えられます。彼らは`certutil.exe`を使用して`NTAuthCertificates`オブジェクトを編集することができます。コマンドは`certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`です。または[**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool)を使用することもできます。
 
-指定された証明書は、以前に詳細に説明されたForgeCertを使用した偽造方法と**連携して動作**するはずです。
+この機能は、以前にForgeCertを使用して証明書を動的に生成する方法と組み合わせて使用される場合に特に関連があります。
 
-## 悪意のある誤設定 - DPERSIST3
+## 悪意のある構成ミス - DPERSIST3
 
-AD CSコンポーネントの**セキュリティ記述子の変更**を通じて、**持続性**を確保する機会は無数にあります。"[ドメインエスカレーション](domain-escalation.md)"セクションで説明されているシナリオは、権限を持つ攻撃者によって悪意を持って実装される可能性があります。これには、"制御権"（つまり、WriteOwner/WriteDACLなど）を以下のような敏感なコンポーネントに追加することが含まれます：
+**AD CS**コンポーネントの**セキュリティ記述子の変更**を通じて**持続性**を確保する機会は豊富です。"[Domain Escalation](domain-escalation.md)"セクションで説明されている変更は、権限の昇格を持つ攻撃者によって悪意を持って実装される可能性があります。これには、以下のような**「制御権限」**（例：WriteOwner/WriteDACLなど）の追加が含まれます：
 
-* **CAサーバーのADコンピューター**オブジェクト
-* **CAサーバーのRPC/DCOMサーバー**
-* コンテナ**`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`**内の任意の**子孫ADオブジェクトまたはコンテナー**（例：証明書テンプレートコンテナ、認証局コンテナ、NTAuthCertificatesオブジェクトなど）
-* **デフォルトまたは現在の組織によってAD CSの制御権を委任されたADグループ**（例：組み込みのCert Publishersグループとそのメンバー）
+- **CAサーバーのADコンピューター**オブジェクト
+- **CAサーバーのRPC/DCOMサーバー**
+- **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`**内の**子孫ADオブジェクトまたはコンテナ**（たとえば、証明書テンプレートコンテナ、認証局コンテナ、NTAuthCertificatesオブジェクトなど）
+- デフォルトでまたは組織によって**AD CSを制御する権限を委任されたADグループ**（たとえば、組み込みのCert Publishersグループとそのメンバー）
 
-例えば、ドメイン内で**権限を持つ攻撃者**は、攻撃者が権利の主体であるデフォルトの**`User`**証明書テンプレートに**`WriteOwner`**権限を追加することができます。これを後で悪用するために、攻撃者はまず**`User`**テンプレートの所有権を自分自身に変更し、次にテンプレート上で**`mspki-certificate-name-flag`**を**1**に設定して**`ENROLLEE_SUPPLIES_SUBJECT`**を有効にします（つまり、ユーザーがリクエストにSubject Alternative Nameを指定できるようにします）。その後、攻撃者は**テンプレート**に**登録**し、代替名として**ドメイン管理者**の名前を指定し、DAとして認証に使用するための証明書を使用することができます。
-
-## 参考文献
-
-* このページの情報はすべて[https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)から取得しました
-
-<details>
-
-<summary><strong>AWSのハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
-
-HackTricksをサポートする他の方法：
-
-* **HackTricksに広告を掲載したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加するか**、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)および[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングのコツを**共有**してください。
-
-</details>
+悪意のある実装の例として、ドメイン内で**昇格権限**を持つ攻撃者が、**デフォルトの「User」証明書テンプレート**に**`WriteOwner`**権限を追加し、その権限の主体として自分自身を設定することが考えられます。これを悪用するために、攻撃者はまず**「User」**テンプレートの所有権を自分自身に変更します。その後、**`mspki-certificate-name-flag`**を**1**に設定して**`ENROLLEE_SUPPLIES_SUBJECT`**を有効にし、ユーザーがリクエストでサブジェクト代替名を提供できるようにします。その後、攻撃者は**テンプレート**を使用して**登録**し、代替名として**ドメイン管理者**名を選択し、取得した証明書をDAとして認証に使用できます。

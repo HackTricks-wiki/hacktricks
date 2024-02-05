@@ -1,75 +1,89 @@
-```markdown
+<details>
+
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+
+HackTricksをサポートする他の方法：
+
+* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを入手
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦で**フォロー**する：[**@hacktricks_live**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するためにPRを提出**して、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリに貢献する。
+
+</details>
+
+
 # タイムスタンプ
 
-攻撃者は、検出を避けるために**ファイルのタイムスタンプを変更する**ことに興味を持つかもしれません。
-タイムスタンプは、MFT内の`$STANDARD_INFORMATION`と`$FILE_NAME`の属性で見つけることができます。
+攻撃者は**ファイルのタイムスタンプを変更**して検出を回避する可能性があります。\
+MFT内の属性`$STANDARD_INFORMATION`と`$FILE_NAME`にタイムスタンプが含まれている可能性があります。
 
-両方の属性には4つのタイムスタンプがあります：**変更**、**アクセス**、**作成**、そして**MFTレジストリの変更**（MACEまたはMACB）。
+両方の属性には4つのタイムスタンプがあります：**変更**、**アクセス**、**作成**、**MFTレジストリの変更**（MACEまたはMACB）。
 
-**Windowsエクスプローラー**や他のツールは、**`$STANDARD_INFORMATION`**からの情報を表示します。
+**Windowsエクスプローラ**や他のツールは**`$STANDARD_INFORMATION`**から情報を表示します。
 
 ## TimeStomp - アンチフォレンジックツール
 
-このツールは**`$STANDARD_INFORMATION`**内のタイムスタンプ情報を**変更しますが**、**`$FILE_NAME`**内の情報は**変更しません**。したがって、**疑わしい**活動を**特定**することが可能です。
+このツールは**`$STANDARD_INFORMATION`**内のタイムスタンプ情報を**変更**しますが、**`$FILE_NAME`**内の情報は**変更しません**。そのため、**不審な活動を特定**することが可能です。
 
 ## Usnjrnl
 
-**USNジャーナル**（Update Sequence Number Journal）、またはチェンジジャーナルは、Windows NTファイルシステム（NTFS）の機能で、ボリュームに加えられた変更の記録を**保持します**。
-この記録の変更を検索するために、ツール[**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv)を使用することができます。
+**USNジャーナル**（Update Sequence Number Journal）または変更ジャーナルは、Windows NTファイルシステム（NTFS）の機能であり、**ボリュームに加えられた変更の記録を維持**します。\
+この記録の変更を検索するために、[**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv)ツールを使用できます。
 
 ![](<../../.gitbook/assets/image (449).png>)
 
-前の画像は、**ツール**によって表示される**出力**で、ファイルに対していくつかの**変更が行われた**ことが観察できます。
+前述の画像は、ツールによって表示される**出力**であり、ファイルに**いくつかの変更が加えられた**ことが観察されます。
 
 ## $LogFile
 
-ファイルシステムのメタデータの変更はすべてログされ、システムクラッシュ後に重要なファイルシステム構造の一貫した回復を保証するためです。これは[write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging)と呼ばれます。
-ログされたメタデータは、“**$LogFile**”と呼ばれるファイルに保存され、NTFSファイルシステムのルートディレクトリで見つけることができます。
-このファイルを解析し、変更を見つけるために、ツール[LogFileParser](https://github.com/jschicht/LogFileParser)などを使用することができます。
+ファイルシステムへのすべてのメタデータ変更は、システムクラッシュ後の重要なファイルシステム構造の一貫した回復を確保するために記録されます。これを**先行ログ記録**と呼びます。\
+記録されたメタデータは、「**$LogFile**」と呼ばれるファイルに保存され、これはNTFSファイルシステムのルートディレクトリにあります。\
+このファイルを解析し、変更を見つけるために[LogFileParser](https://github.com/jschicht/LogFileParser)などのツールを使用できます。
 
 ![](<../../.gitbook/assets/image (450).png>)
 
-再び、ツールの出力で**いくつかの変更が行われた**ことが見られます。
+再び、ツールの出力では**いくつかの変更が行われた**ことが観察できます。
 
-同じツールを使用して、タイムスタンプが**いつに変更されたかを特定**することも可能です：
+同じツールを使用して、**タイムスタンプがいつ変更されたか**を特定することが可能です：
 
 ![](<../../.gitbook/assets/image (451).png>)
 
-* CTIME: ファイルの作成時間
-* ATIME: ファイルの変更時間
-* MTIME: ファイルのMFTレジストリ変更
-* RTIME: ファイルのアクセス時間
+* CTIME：ファイルの作成時刻
+* ATIME：ファイルの変更時刻
+* MTIME：ファイルのMFTレジストリの変更
+* RTIME：ファイルのアクセス時刻
 
 ## `$STANDARD_INFORMATION`と`$FILE_NAME`の比較
 
-疑わしい変更されたファイルを特定する別の方法は、両方の属性の時間を比較して**不一致**を探すことです。
+変更された疑わしいファイルを特定する別の方法は、両方の属性の時間を比較し、**不一致**を探すことです。
 
 ## ナノ秒
 
-**NTFS**のタイムスタンプは**100ナノ秒**の**精度**を持っています。したがって、2010-10-10 10:10:**00.000:0000のようなタイムスタンプを持つファイルを見つけることは非常に疑わしいです。
+**NTFS**のタイムスタンプは**100ナノ秒の精度**を持ちます。そのため、2010-10-10 10:10:**00.000:0000のようなタイムスタンプを持つファイルは非常に疑わしいです**。
 
 ## SetMace - アンチフォレンジックツール
 
-このツールは、`$STARNDAR_INFORMATION`と`$FILE_NAME`の両方の属性を変更することができます。しかし、Windows Vistaからは、この情報を変更するためにはライブOSが必要です。
+このツールは、`$STARNDAR_INFORMATION`と`$FILE_NAME`の両方の属性を変更できます。ただし、Windows Vista以降では、この情報を変更するにはライブOSが必要です。
 
-# データ隠蔽
+# データの隠蔽
 
-NFTSはクラスタを使用し、最小情報サイズを使用します。つまり、ファイルがクラスタと半分を使用している場合、**残りの半分はファイルが削除されるまで決して使用されません**。したがって、このスラックスペースにデータを**隠すことが可能**です。
+NFTSはクラスタと最小情報サイズを使用します。つまり、ファイルが1つのクラスタと半分を占有している場合、**残りの半分はファイルが削除されるまで使用されません**。そのため、このスラックスペースにデータを**隠すことが可能**です。
 
-slackerのようなツールがあり、この「隠された」スペースにデータを隠すことを可能にします。しかし、`$logfile`と`$usnjrnl`の分析は、いくつかのデータが追加されたことを示すかもしれません：
+この「隠された」スペースにデータを隠すことができるslackerなどのツールがあります。ただし、`$logfile`および`$usnjrnl`の分析により、データが追加されたことが示される可能性があります：
 
 ![](<../../.gitbook/assets/image (452).png>)
 
-その後、FTK Imagerのようなツールを使用してスラックスペースを取得することが可能です。この種のツールは、内容を難読化または暗号化して保存することができます。
+その後、FTK Imagerのようなツールを使用してスラックスペースを回復することが可能です。この種のツールは、コンテンツを難読化したり、暗号化したりすることができますので注意してください。
 
 # UsbKill
 
-これは、USBポートに変更が検出された場合に**コンピュータをオフにする**ツールです。
-これを発見する方法は、実行中のプロセスを検査し、**実行中の各pythonスクリプトをレビューする**ことです。
+これは、USBポートに変更が検出された場合にコンピューターを**シャットダウン**するツールです。\
+これを発見する方法は、実行中のプロセスを検査し、**実行中の各Pythonスクリプトを確認**することです。
 
 # ライブLinuxディストリビューション
 
-これらのディストリは**RAMメモリ内で実行されます**。NTFSファイルシステムが書き込み権限でマウントされた場合にのみ検出することができます。読み取り権限のみでマウントされた場合は、侵入を検出することはできません。
+これらのディストリビューションは**RAMメモリ内で実行**されます。NTFSファイルシステムが書き込み権限でマウントされている場合にのみ、侵入を検出することが可能です。読み取り権限でマウントされている場合は、侵入を検出することはできません。
 
 # 安全な削除
 
@@ -77,92 +91,78 @@ slackerのようなツールがあり、この「隠された」スペースに�
 
 # Windowsの設定
 
-いくつかのWindowsログ方法を無効にして、フォレンジック調査をはるかに困難にすることが可能です。
+フォレンジック調査を困難にするために、Windowsの複数のログ記録方法を無効にすることが可能です。
 
-## タイムスタンプを無効にする - UserAssist
+## タイムスタンプの無効化 - UserAssist
 
-これは、ユーザーによって実行された各実行可能ファイルの日付と時間を保持するレジストリキーです。
+これは、ユーザーが実行した各実行可能ファイルの日付と時刻を維持するレジストリキーです。
 
-UserAssistを無効にするには2つのステップが必要です：
+UserAssistを無効にするには、2つの手順が必要です：
 
-1. UserAssistを無効にしたいことを示すために、`HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs`と`HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`の両方のレジストリキーをゼロに設定します。
-2. `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`のように見えるレジストリサブツリーをクリアします。
+1. `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs`と`HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`の2つのレジストリキーをゼロに設定して、UserAssistを無効にしたいことを示します。
+2. `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`のようなレジストリサブツリーをクリアします。
 
-## タイムスタンプを無効にする - Prefetch
+## タイムスタンプの無効化 - Prefetch
 
-これは、Windowsシステムのパフォーマンスを向上させる目的で実行されたアプリケーションに関する情報を保存します。しかし、これはフォレンジック実践にも役立つ可能性があります。
+これは、Windowsシステムのパフォーマンスを向上させることを目的として実行されたアプリケーションに関する情報を保存します。ただし、これはフォレンジックの実践にも役立ちます。
 
-* `regedit`を実行します
-* ファイルパス`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`を選択します
-* `EnablePrefetcher`と`EnableSuperfetch`の両方を右クリックします
-* それぞれの値を1（または3）から0に変更するために、Modifyを選択します
-* 再起動します
+* `regedit`を実行
+* ファイルパス`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`を選択
+* `EnablePrefetcher`と`EnableSuperfetch`の両方を右クリックし、値を1（または3）から0に変更するためにそれぞれを選択
+* 再起動
 
-## タイムスタンプを無効にする - 最終アクセス時間
+## タイムスタンプの無効化 - 最終アクセス時刻
 
-Windows NTサーバー上のNTFSボリュームからフォルダが開かれるたびに、システムは最終アクセス時間と呼ばれる各リストされたフォルダのタイムスタンプフィールドを**更新する時間を取ります**。頻繁に使用されるNTFSボリュームでは、これはパフォーマンスに影響を与える可能性があります。
+Windows NTサーバーのNTFSボリュームからフォルダーが開かれるたびに、システムは**リストされた各フォルダーのタイムスタンプフィールド**である最終アクセス時刻を更新します。使用頻度の高いNTFSボリュームでは、これがパフォーマンスに影響する可能性があります。
 
 1. レジストリエディタ（Regedit.exe）を開きます。
 2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`に移動します。
-3. `NtfsDisableLastAccessUpdate`を探します。存在しない場合は、このDWORDを追加し、その値を1に設定します。これにより、プロセスが無効になります。
+3. `NtfsDisableLastAccessUpdate`を探します。存在しない場合は、このDWORDを追加し、その値を1に設定してプロセスを無効にします。
 4. レジストリエディタを閉じ、サーバーを再起動します。
 
-## USB履歴を削除する
+## USB履歴の削除
 
-すべての**USBデバイスエントリ**は、PCまたはラップトップにUSBデバイスを接続するたびに作成されるサブキーを含むWindowsレジストリの**USBSTOR**レジストリキーの下に保存されます。このキーは`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`で見つけることができます。**これを削除する**と、USBの履歴が削除されます。
-また、削除されたことを確認するために（そして削除するために）ツール[**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html)を使用することもできます。
+すべての**USBデバイスエントリ**は、PCまたはラップトップにUSBデバイスを接続するたびに作成されるサブキーを含む**USBSTOR**レジストリキーの下にWindowsレジストリに保存されます。このキーはここにあります：`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。これを削除すると、USBの履歴が削除されます。\
+これらを削除したことを確認するために、[**USBDeview**](https://www.nirsoft.net/utils/usb\_devices\_view.html)などのツールを使用することもできます（および削除することもできます）。
 
-USBに関する情報を保存する別のファイルは、`C:\Windows\INF`内の`setupapi.dev.log`です。これも削除する必要があります。
+USBに関する情報を保存する別のファイルは、`C:\Windows\INF`内の`setupapi.dev.log`ファイルです。これも削除する必要があります。
 
-## シャドウコピーを無効にする
+## シャドウコピーの無効化
 
-**リスト**シャドウコピーは`vssadmin list shadowstorage`で行います\
-**削除**は`vssadmin delete shadow`を実行して行います
+`vssadmin list shadowstorage`で**シャドウコピーをリスト**します\
+`vssadmin delete shadow`を実行して**削除**します
 
-GUIを介して削除することもできます。[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)で提案されている手順に従ってください。
+または、[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)で提案された手順に従ってGUIから削除することもできます。
 
 シャドウコピーを無効にするには：
 
-1. Windowsのスタートボタンに移動し、「services」と入力してテキスト検索ボックスに入力し、Servicesプログラムを開きます。
-2. リストから「Volume Shadow Copy」を見つけ、ハイライトし、右クリック>プロパティを選択します。
-3. 「スタートアップタイプ」ドロップダウンメニューから、無効を選択し、適用してOKをクリックします。
+1. Windowsのスタートボタンに移動し、「services」と入力してテキスト検索ボックスに入力します。Servicesプログラムを開きます。
+2. リストから「Volume Shadow Copy」を見つけ、それを強調表示して、右クリックして > プロパティを選択します。
+3. 「起動の種類」ドロップダウンメニューから「無効」を選択し、適用してOKをクリックします。
 
 ![](<../../.gitbook/assets/image (453).png>)
 
-また、レジストリ`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`の設定を変更して、シャドウコピーにコピーされるファイルを変更することも可能です。
+レジストリ`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`でコピーされるファイルの構成を変更することも可能です。
 
-## 削除されたファイルを上書きする
+## 削除されたファイルの上書き
 
-* **Windowsツール**を使用できます：`cipher /w:C` これは、Cドライブ内の利用可能な未使用のディスクスペースからデータを削除するようにcipherに指示します。
-* [**Eraser**](https://eraser.heidi.ie)のようなツールも使用できます
+* **Windowsツール**を使用できます：`cipher /w:C` これにより、使用可能な未使用ディスクスペース内のデータが削除されるようにcipherに指示されます。
+* [**Eraser**](https://eraser.heidi.ie)などのツールも使用できます
 
-## Windowsイベントログを削除する
+## Windowsイベントログの削除
 
-* Windows + R --> eventvwr.msc --> 「Windowsログ」を展開 --> 各カテゴリを右クリックして「ログのクリア」を選択
+* Windows + R --> eventvwr.msc --> "Windows Logs"を展開 --> 各カテゴリを右クリックして「ログをクリア」を選択
 * `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 * `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-## Windowsイベントログを無効にする
+## Windowsイベントログの無効化
 
 * `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-* サービスセクション内で「Windowsイベントログ」サービスを無効にします
+* サービスセクション内でサービス「Windows Event Log」を無効にします
 * `WEvtUtil.exec clear-log`または`WEvtUtil.exe cl`
 
-## $UsnJrnlを無効にする
+## $UsnJrnlの無効化
 
 * `fsutil usn deletejournal /d c:`
 
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでAWSハッキングを学ぶ</strong></summary>
-
-HackTricksをサポートする他の方法：
-
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。これは私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
-
 </details>
-```
