@@ -1,29 +1,29 @@
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有してください。
+* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする
+* **ハッキングトリックを共有するためにPRを提出して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリに
 
 </details>
 
 
-# Carvingツール
+# Carving tools
 
 ## Autopsy
 
-フォレンジックで画像からファイルを抽出するために最も一般的に使用されるツールは[**Autopsy**](https://www.autopsy.com/download/)です。ダウンロードしてインストールし、"隠された"ファイルを見つけるためにファイルを取り込んでください。Autopsyはディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルはサポートしていません。
+ファイルを抽出するためにフォレンジックで最も一般的に使用されるツールは[**Autopsy**](https://www.autopsy.com/download/)です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけるようにします。Autopsy はディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルには対応していません。
 
 ## Binwalk <a id="binwalk"></a>
 
-**Binwalk**は、埋め込まれたファイルやデータを検索するためのバイナリファイル（画像やオーディオファイルなど）用のツールです。
-`apt`でインストールできますが、[ソース](https://github.com/ReFirmLabs/binwalk)はGitHubで見つけることができます。
-**役立つコマンド**:
+**Binwalk** は画像や音声ファイルなどのバイナリファイルを検索して埋め込まれたファイルやデータを見つけるためのツールです。
+`apt` を使用してインストールできますが、[ソース](https://github.com/ReFirmLabs/binwalk)はgithubで見つけることができます。
+**便利なコマンド**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
@@ -32,7 +32,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ## Foremost
 
-隠されたファイルを見つけるための一般的なツールは**foremost**です。foremostの設定ファイルは`/etc/foremost.conf`にあります。特定のファイルだけを検索したい場合は、それらのコメントを外してください。何もコメントを外さない場合、foremostはデフォルトで設定されているファイルタイプを検索します。
+もう1つの一般的な隠しファイルを見つけるためのツールは**foremost**です。 foremostの設定ファイルは`/etc/foremost.conf`にあります。特定のファイルを検索したい場合は、それらのコメントを外してください。何もコメントアウトしない場合、foremostはデフォルトで構成されたファイルタイプを検索します。
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -40,7 +40,7 @@ foremost -v -i file.img -o output
 ```
 ## **Scalpel**
 
-**Scalpel** は、**ファイルに埋め込まれたファイル**を見つけて抽出するために使用できる別のツールです。この場合、抽出したいファイルタイプに応じて、設定ファイル（_/etc/scalpel/scalpel.conf_）からコメントを外す必要があります。
+**Scalpel**は、ファイルに埋め込まれたファイルを見つけて抽出するために使用できる別のツールです。この場合、抽出したいファイルタイプを設定ファイル（_/etc/scalpel/scalpel.conf_）からコメントアウトする必要があります。
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
@@ -49,17 +49,17 @@ scalpel file.img -o output
 
 このツールはKaliに含まれていますが、こちらで見つけることができます: [https://github.com/simsong/bulk\_extractor](https://github.com/simsong/bulk_extractor)
 
-このツールはイメージをスキャンし、内部の**pcapsを抽出**し、**ネットワーク情報\(URL、ドメイン、IP、MAC、メール\)** などの**ファイル**を抽出します。次の操作をするだけです:
+このツールは画像をスキャンし、その中から**pcapsを抽出**し、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**や他の**ファイル**を抽出することができます。行う必要があるのは以下の通りです:
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-ツールが収集した**すべての情報**をナビゲートし（パスワード？）、**パケット**を**分析**します（[**Pcaps分析**](../pcap-inspection/)を読む）、**奇妙なドメイン**を探します（**マルウェア**に関連するドメインや**存在しない**ドメイン）。
+**すべての情報**をツールが収集したものをナビゲートし（パスワード？）、**パケット**を**分析**し（[**Pcaps分析**](../pcap-inspection/)を参照）、**異常なドメイン**（**マルウェア**や**存在しない**ドメインに関連するドメイン）を検索します。
 
 ## PhotoRec
 
-[https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)で見つけることができます。
+[https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk_Download) で見つけることができます。
 
-GUIとCLIバージョンがあります。PhotoRecに検索させたい**ファイルタイプ**を選択できます。
+GUIバージョンとCLIバージョンが付属しています。PhotoRecが検索する**ファイルタイプ**を選択できます。
 
 ![](../../../.gitbook/assets/image%20%28524%29.png)
 
@@ -67,27 +67,11 @@ GUIとCLIバージョンがあります。PhotoRecに検索させたい**ファ�
 
 ## FindAES
 
-AESキーをそのキースケジュールを検索することで探します。TrueCryptやBitLockerなどに使用される128、192、256ビットキーを見つけることができます。
+キースケジュールを検索してAESキーを検索します。TrueCryptやBitLockerで使用される128、192、256ビットのキーなどを見つけることができます。
 
-[こちら](https://sourceforge.net/projects/findaes/)からダウンロードしてください。
+[こちら](https://sourceforge.net/projects/findaes/)からダウンロードできます。
 
-# 補助ツール
+# 補足ツール
 
-[**viu**](https://github.com/atanunq/viu)を使用して、ターミナルから画像を表示することができます。
-Linuxコマンドラインツールの**pdftotext**を使用して、PDFをテキストに変換し、読むことができます。
-
-
-
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
-
-HackTricksをサポートする他の方法：
-
-* **HackTricksに広告を掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをチェックしてください。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
-
-</details>
+[**viu** ](https://github.com/atanunq/viu)を使用してターミナルから画像を表示できます。
+Linuxコマンドラインツール**pdftotext**を使用して、pdfをテキストに変換して読むことができます。

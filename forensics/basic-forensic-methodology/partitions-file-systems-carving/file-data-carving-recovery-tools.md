@@ -1,20 +1,20 @@
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
+* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする
+* **ハッキングトリックを共有するためにPRを提出して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリに
 
 </details>
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて、より早く修正しましょう。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからウェブアプリ、クラウドシステムまで、テックスタック全体にわたる問題を見つけます。今日[**無料でお試し**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)ください。
+最も重要な脆弱性を見つけて修正を迅速化します。Intruder は攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -22,17 +22,17 @@ HackTricksをサポートする他の方法:
 
 # Carving & Recovery tools
 
-より多くのツールは[https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)で見つけることができます。
+[https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery) にさらに多くのツールがあります
 
 ## Autopsy
 
-フォレンジックで画像からファイルを抽出するために最も一般的に使用されるツールは[**Autopsy**](https://www.autopsy.com/download/)です。ダウンロードしてインストールし、"隠された"ファイルを見つけるためにファイルを取り込ませます。Autopsyはディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルはサポートしていないことに注意してください。
+イメージからファイルを抽出するために最も一般的に使用されるツールは [**Autopsy**](https://www.autopsy.com/download/) です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけます。Autopsy はディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルはサポートしていません。
 
 ## Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk**は、埋め込まれたファイルやデータを検索するためのバイナリファイル（画像やオーディオファイルなど）用のツールです。
-`apt`でインストールすることができますが、[ソース](https://github.com/ReFirmLabs/binwalk)はgithubで見つけることができます。
-**便利なコマンド**：
+**Binwalk** は画像や音声ファイルなどのバイナリファイルを検索するためのツールです。\
+`apt` でインストールできますが、[ソース](https://github.com/ReFirmLabs/binwalk) は github で見つけることができます。\
+**便利なコマンド**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
@@ -41,7 +41,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ## Foremost
 
-隠されたファイルを見つけるための一般的なツールは**foremost**です。foremostの設定ファイルは`/etc/foremost.conf`にあります。特定のファイルだけを検索したい場合は、それらのコメントを外してください。何もコメントを外さない場合、foremostはデフォルトで設定されたファイルタイプを検索します。
+もう1つの一般的な隠しファイルを見つけるためのツールは **foremost** です。Foremost の設定ファイルは `/etc/foremost.conf` にあります。特定のファイルを検索したい場合は、それらのコメントを外してください。何もコメントを外さない場合、foremost はデフォルトで設定されたファイルタイプを検索します。
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -49,7 +49,7 @@ foremost -v -i file.img -o output
 ```
 ## **Scalpel**
 
-**Scalpel** は、**ファイルに埋め込まれたファイル**を見つけて抽出するために使用できる別のツールです。この場合、抽出したいファイルタイプに応じて、設定ファイル (_/etc/scalpel/scalpel.conf_) からコメントアウトを解除する必要があります。
+**Scalpel**は、ファイルに埋め込まれたファイルを見つけて抽出するために使用できる別のツールです。この場合、抽出したいファイルタイプを設定ファイル（_/etc/scalpel/scalpel.conf_）からコメントアウトする必要があります。
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
@@ -58,66 +58,64 @@ scalpel file.img -o output
 
 このツールはKaliに含まれていますが、こちらで見つけることができます: [https://github.com/simsong/bulk\_extractor](https://github.com/simsong/bulk\_extractor)
 
-このツールはイメージをスキャンし、内部の**pcapsを抽出**し、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**などの**ファイル**を抽出します。次の操作をするだけです:
+このツールは画像をスキャンし、その中に含まれる**pcapsを抽出**し、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**や他の**ファイル**を抽出することができます。行う必要があるのは以下の通りです:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-ツールが収集した**すべての情報**をナビゲートし（パスワード？）、**パケット**を**分析**します（[**Pcaps分析**](../pcap-inspection/)を読む）、**奇妙なドメイン**を探します（**マルウェア**に関連するドメインや**存在しない**ドメイン）。
-
 ## PhotoRec
 
-[https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk\_Download)で見つけることができます。
+[https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk\_Download) で見つけることができます。
 
-GUIとCLIのバージョンがあります。PhotoRecに検索してほしい**ファイルタイプ**を選択できます。
+GUI と CLI バージョンが付属しています。PhotoRec が検索する**ファイルタイプ**を選択できます。
 
 ![](<../../../.gitbook/assets/image (524).png>)
 
 ## binvis
 
-[コード](https://code.google.com/archive/p/binvis/)と[ウェブページツール](https://binvis.io/#/)をチェックしてください。
+[コード](https://code.google.com/archive/p/binvis/) と [web ページツール](https://binvis.io/#/)
 
-### BinVisの特徴
+### BinVis の特徴
 
-* 視覚的でアクティブな**構造ビューア**
-* 異なる焦点に対する複数のプロット
-* サンプルの一部に焦点を当てる
-* PEやELF実行ファイルなどでの**文字列やリソースの表示**
-* ファイルに対する暗号解析のための**パターン**の取得
-* パッカーやエンコーダーアルゴリズムの**特定**
-* パターンによるステガノグラフィーの**識別**
-* **視覚的**なバイナリ差分
+- ビジュアルでアクティブな**構造ビューア**
+- 異なる焦点点のための複数のプロット
+- サンプルの一部に焦点を当てる
+- PE や ELF 実行可能ファイル内の**文字列やリソース**を見る
+- ファイルの暗号解析のための**パターン**を取得
+- パッカーやエンコーダーアルゴリズムを**見つける**
+- パターンによるステガノグラフィの**識別**
+- **ビジュアル**バイナリ差分
 
-BinVisは、ブラックボックスシナリオで未知のターゲットに慣れるための素晴らしい**出発点**です。
+BinVis は、ブラックボックスシナリオで未知のターゲットに慣れるための素晴らしい**スタートポイント**です。
 
 # 特定のデータカービングツール
 
 ## FindAES
 
-AESキーをそのキースケジュールを検索することで探します。TrueCryptやBitLockerで使用される128、192、256ビットキーを見つけることができます。
+TrueCrypt や BitLocker で使用されるような 128、192、256 ビットのキーを見つけるために、キースケジュールを検索することで AES キーを検索します。
 
-[こちら](https://sourceforge.net/projects/findaes/)からダウンロードしてください。
+[こちらからダウンロード](https://sourceforge.net/projects/findaes/)
 
-# 補完ツール
+# 付随するツール
 
-ターミナルから画像を見るために[**viu**](https://github.com/atanunq/viu)を使用できます。
-Linuxコマンドラインツール**pdftotext**を使用して、PDFをテキストに変換し、読むことができます。
+ターミナルから画像を表示するために [**viu** ](https://github.com/atanunq/viu)を使用できます。\
+PDF をテキストに変換して読むために、Linux コマンドラインツール **pdftotext** を使用できます。
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて、より早く修正できるようにします。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからウェブアプリ、クラウドシステムまで、テックスタック全体にわたる問題を見つけます。今日[**無料でお試し**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)ください。
+最も重要な脆弱性を見つけて修正を迅速化します。Intruder は攻撃面を追跡し、積極的な脅威スキャンを実行し、API から Web アプリケーション、クラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今日。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-HackTricksをサポートする他の方法：
+HackTricks をサポートする他の方法:
 
-* **HackTricksに広告を掲載したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをチェックしてください。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有**してください。
+* **HackTricks が広告されているのを見たい**または**HackTricks を PDF でダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live) をフォローする
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks) の GitHub リポジトリに PR を提出して、あなたのハッキングトリックを共有してください。
 
 </details>
