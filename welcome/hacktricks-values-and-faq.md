@@ -113,7 +113,7 @@ Note that asking this we will definitely **remove every link to your blog**, and
 * **What should I do if I find copy-pasted content in HackTricks?**
 {% endhint %}
 
-**Unfortunatelly yhis practice came from the beginning of the project**. We have always tried to **give the original authors all the credits**. If you find a page with copy-pasted content (even with the original source referenced), let us know and we will either **remove it**, **leave the link**, or **rewrite it**.
+**Unfortunatelly this practice might have happened in the beginning of the project when this page was just the notes of a pentester**. We always try to **give the original authors all the credits**. If you find a page with copy-pasted content (even with the original source referenced), let us know and we will either **remove it**, **leave the link**, or **rewrite it**.
 
 {% hint style="danger" %}
 

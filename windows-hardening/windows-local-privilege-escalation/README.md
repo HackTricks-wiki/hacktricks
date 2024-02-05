@@ -946,7 +946,7 @@ People often use the StickyNotes app on Windows workstations to **save passwords
 **AppCmd.exe** is located in the `%systemroot%\system32\inetsrv\` directory.\
 If this file exists then it is possible that some **credentials** have been configured and can be **recovered**.
 
-This code was extracted from _**PowerUP**_:
+This code was extracted from [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1):
 
 ```bash
 function Get-ApplicationHost {
