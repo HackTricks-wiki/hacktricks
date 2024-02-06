@@ -1,16 +1,15 @@
-# チェックリスト - Linux権限昇格
+# チェックリスト - Linux 特権昇格
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>で**ゼロからヒーローまでのAWSハッキングを学ぶ**！</summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**のPRを提出して、あなたのハッキングのコツを共有する。
+- **HackTricks で企業を宣伝**したい場合や **HackTricks をPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェック！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+- **Discordグループ**💬 に参加するか、[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 で **@hacktricks_live** をフォローする。
 
 </details>
 
@@ -18,163 +17,176 @@ HackTricksをサポートする他の方法:
 
 <figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy)サーバーに参加しましょう！
+[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取ろう！
 
 **ハッキングの洞察**\
-ハッキングのスリルと挑戦に焦点を当てたコンテンツに参加する
+ハッキングのスリルと挑戦に深く入り込むコンテンツに参加
 
 **リアルタイムハックニュース**\
-リアルタイムのニュースと洞察を通じて、速いペースのハッキングの世界に最新の情報を保つ
+リアルタイムのニュースと洞察を通じて、ハッキングの世界を最新の状態に保つ
 
-**最新の発表**\
-最新のバグバウンティの開始と重要なプラットフォームの更新情報を入手する
+**最新のアナウンス**\
+最新のバグバウンティの開始や重要なプラットフォームの更新情報を把握
 
-**[**Discord**](https://discord.com/invite/N3FrSbmwdy)に参加して、今日からトップハッカーと協力しましょう！
+**Discord** で [**参加**](https://discord.com/invite/N3FrSbmwdy) し、今日からトップハッカーと協力し始めよう！
 
-### **Linuxローカル権限昇格ベクトルを探すための最良のツール:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Linux ローカル特権昇格ベクターを探すための最適なツール:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
 ### [システム情報](privilege-escalation/#system-information)
 
-* [ ] **OS情報**を取得する
-* [ ] [**PATH**](privilege-escalation/#path)をチェックする、**書き込み可能なフォルダー**はあるか？
-* [ ] [**環境変数**](privilege-escalation/#env-info)をチェックする、機密情報はあるか？
-* [ ] スクリプトを使用して[**カーネルの脆弱性**](privilege-escalation/#kernel-exploits)を探す（DirtyCow？）
-* [ ] [**sudoバージョン**が脆弱かどうかを**チェック**する](privilege-escalation/#sudo-version)
-* [ ] [**Dmesg**署名検証に失敗](privilege-escalation/#dmesg-signature-verification-failed)
-* [ ] より多くのシステム列挙（[日付、システム統計、CPU情報、プリンター](privilege-escalation/#more-system-enumeration)）
-* [ ] [より多くの防御を列挙する](privilege-escalation/#enumerate-possible-defenses)
+- [ ] **OS情報**を取得する
+- [ ] [**PATH**](privilege-escalation/#path)をチェックし、**書き込み可能なフォルダ**はあるか？
+- [ ] [**環境変数**](privilege-escalation/#env-info)をチェックし、機密情報はあるか？
+- [ ] スクリプトを使用して [**カーネルの脆弱性**](privilege-escalation/#kernel-exploits) を検索する（DirtyCowなど）
+- [ ] [**sudoのバージョン**が脆弱かどうかをチェック](privilege-escalation/#sudo-version)する
+- [ ] [**Dmesg** 署名検証に失敗](privilege-escalation/#dmesg-signature-verification-failed)
+- [ ] その他のシステム列挙（日付、システム統計、CPU情報、プリンタ）を行う（[**詳細はこちら**](privilege-escalation/#more-system-enumeration)）
+- [ ] [さらなる防御策を列挙](privilege-escalation/#enumerate-possible-defenses)
 
 ### [ドライブ](privilege-escalation/#drives)
 
-* [ ] **マウントされた**ドライブをリストする
-* [ ] **マウントされていないドライブはあるか？**
-* [ ] **fstabにクレデンシャルはあるか？**
+- [ ] マウントされたドライブをリストアップする
+- [ ] マウントされていないドライブはあるか？
+- [ ] fstab に資格情報はあるか？
 
 ### [**インストールされたソフトウェア**](privilege-escalation/#installed-software)
 
-* [ ] **インストールされた**[ **便利なソフトウェア**](privilege-escalation/#useful-software)を**チェックする**
-* [ ] **インストールされた** [**脆弱なソフトウェア**](privilege-escalation/#vulnerable-software-installed)を**チェックする**
+- [ ] **インストールされた便利なソフトウェア**をチェックする（[**詳細はこちら**](privilege-escalation/#useful-software)）
+- [ ] **インストールされた脆弱なソフトウェア**をチェックする（[**詳細はこちら**](privilege-escalation/#vulnerable-software-installed)）
 
 ### [プロセス](privilege-escalation/#processes)
 
-* [ ] **不明なソフトウェアが実行されているか？**
-* [ ] 何かのソフトウェアが**本来よりも多くの権限で実行されているか？**
-* [ ] 実行中のプロセスの**脆弱性を探す**（特に実行中のバージョン）。
-* [ ] 実行中のプロセスの**バイナリを変更**できるか？
-* [ ] **プロセスを監視**し、頻繁に実行されている興味深いプロセスがないかチェックする。
-* [ ] 興味深い**プロセスのメモリを読む**ことができるか？（パスワードが保存されている可能性がある）
+- [ ] **不明なソフトウェアが実行中**か？
+- [ ] **必要以上の権限で実行されているソフトウェア**があるか？
+- [ ] 実行中のプロセスの **脆弱性を検索**する（特に実行中のバージョン）
+- [ ] 実行中のプロセスのバイナリを **変更**できるか？
+- [ ] プロセスを **監視**し、頻繁に実行されている興味深いプロセスがあるかどうかを確認する
+- [ ] 興味深い **プロセスメモリ**（パスワードが保存されている可能性のある場所）を **読み取る**ことができるか？
 
-### [スケジュールされた/クロンジョブは？](privilege-escalation/#scheduled-jobs)
+### [スケジュールされた/Cronジョブ？](privilege-escalation/#scheduled-jobs)
 
-* [ ] クロンによって[**PATH** ](privilege-escalation/#cron-path)が変更されていて、あなたが**書き込み**ができるか？
-* [ ] クロンジョブに[**ワイルドカード** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)はあるか？
-* [ ] 何か[**変更可能なスクリプト** ](privilege-escalation/#cron-script-overwriting-and-symlink)が**実行されている**、または**変更可能なフォルダー**の中にあるか？
-* [ ] 何かの**スクリプト**が[**非常に頻繁に**実行されている](privilege-escalation/#frequent-cron-jobs)ことを検出したか？（1、2、5分ごと）
+- [ ] いくつかの cron によって **PATH** が変更され、書き込み可能になっているか？
+- [ ] cron ジョブに **ワイルドカード** があるか？
+- [ ] 実行されている **変更可能なスクリプト** があるか、または **変更可能なフォルダ** の中にあるか？
+- [ ] いくつかの **スクリプト** が非常に **頻繁に実行**されていることが検出されたか？（1分、2分、5分ごと）
 
 ### [サービス](privilege-escalation/#services)
 
-* [ ] どんな**書き込み可能な.service**ファイルはあるか？
-* [ ] サービスによって実行される**書き込み可能なバイナリ**はあるか？
-* [ ] systemd PATH内の**書き込み可能なフォルダー**はあるか？
+- [ ] **書き込み可能な .service** ファイルはあるか？
+- [ ] **サービス** によって実行される **書き込み可能なバイナリ** はあるか？
+- [ ] systemd PATH に **書き込み可能なフォルダ** はあるか？
 
 ### [タイマー](privilege-escalation/#timers)
 
-* [ ] どんな**書き込み可能なタイマー**はあるか？
+- [ ] **書き込み可能なタイマー** はあるか？
 
 ### [ソケット](privilege-escalation/#sockets)
 
-* [ ] どんな**書き込み可能な.socket**ファイルはあるか？
-* [ ] どんなソケットとも**通信できるか**？
-* [ ] 興味深い情報を持つ**HTTPソケット**はあるか？
+- [ ] **書き込み可能な .socket** ファイルはあるか？
+- [ ] 任意のソケットと **通信**できるか？
+- [ ] 興味深い情報を持つ **HTTPソケット** はあるか？
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
-* [ ] どんなD-Busとも**通信できるか**？
+- [ ] 任意の **D-Bus** と **通信**できるか？
 
 ### [ネットワーク](privilege-escalation/#network)
 
-* [ ] ネットワークを列挙して、自分がどこにいるかを知る
-* [ ] マシン内にシェルを取得する前にアクセスできなかった**オープンポート**はあるか？
-* [ ] `tcpdump`を使用して**トラフィックを嗅ぐ**ことができるか？
+- ネットワークを列挙して、自分がどこにいるかを知る
+- シェルを取得する前にアクセスできなかった **オープンポート** はあるか？
+- `tcpdump` を使用して **トラフィックをスニッフ** できるか？
 
 ### [ユーザー](privilege-escalation/#users)
 
-* [ ] 一般的なユーザー/グループの**列挙**
-* [ ] **非常に大きなUID**を持っているか？**マシン**は**脆弱**か？
-* [ ] 所属しているグループのおかげで[**権限を昇格させることができるか**](privilege-escalation/interesting-groups-linux-pe/)？
-* [ ] **クリップボード**のデータは？
-* [ ] パスワードポリシーは？
-* [ ] 以前に発見したすべての**既知のパスワード**を使用して、可能な**各ユーザー**でログインを**試みる**。パスワードなしでのログインも試みる。
+- 一般的なユーザー/グループを **列挙** する
+- **非常に大きなUID** を持っているか？ **マシン** は **脆弱** か？
+- 所属しているグループを通じて特権を昇格できるか？
+- **クリップボード** データは？
+- パスワードポリシーは？
+- 以前に発見した **すべての既知のパスワード** を使用して、各 **可能なユーザー** でログインしてみる。パスワードなしでもログインできるかも試してみる。
 
 ### [書き込み可能なPATH](privilege-escalation/#writable-path-abuses)
 
-* [ ] PATHの中のいくつかのフォルダーに**書き込み権限がある**場合、権限を昇格させることができるかもしれない
+- **PATH内のいくつかのフォルダに書き込み権限** がある場合、特権を昇格できるかもしれない
 
 ### [SUDOとSUIDコマンド](privilege-escalation/#sudo-and-suid)
 
-* [ ] **任意のコマンドをsudoで実行**できるか？rootとしてREAD、WRITE、またはEXECUTEを使用できるか？([**GTFOBins**](https://gtfobins.github.io))
-* [ ] どんな**利用可能なSUIDバイナリ**はあるか？([**GTFOBins**](https://gtfobins.github.io))
-* [ ] [**sudo**コマンドは**パス**によって**制限されている**か？制限を**バイパス**できるか](privilege-escalation/#sudo-execution-bypassing-paths)？
-* [ ] [**パスが指定されていないSudo/SUIDバイナリ**](privilege-escalation/#sudo-command-suid-binary-without-command-path)？
-* [ ] [**パスを指定するSUIDバイナリ**](privilege-escalation/#suid-binary-with-command-path)？バイパス
-* [ ] [**LD\_PRELOADの脆弱性**](privilege-escalation/#ld\_preload)
-* [ ] [**SUIDバイナリで.soライブラリが不足している**](privilege-escalation/#suid-binary-so-injection) 書き込み可能なフォルダーから？
-* [ ] [**SUDOトークンが利用可能**](privilege-escalation/#reusing-sudo-tokens)か？[**SUDOトークンを作成できるか**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)？
-* [ ] [**sudoersファイルを読み取りまたは変更できるか**](privilege-escalation/#etc-sudoers-etc-sudoers-d)？
-* [ ] [**/etc/ld.so.conf.d/を変更できるか**](privilege-escalation/#etc-ld-so-conf-d)？
-* [ ] [**OpenBSD DOAS**](privilege-escalation/#doas)コマンド
+- **sudoで任意のコマンドを実行**できるか？それを使用して何かをルートとして **読み取り、書き込み、実行** できるか？（[**GTFOBins**](https://gtfobins.github.io)）
+- **悪用可能なSUIDバイナリ** はあるか？（[**GTFOBins**](https://gtfobins.github.io)）
+- **sudoコマンドがパスによって制限**されているか？ 制限を **バイパス** できるか？
+- **パスが指定されていないSudo/SUIDバイナリ** はあるか？（[**詳細はこちら**](privilege-escalation/#sudo-command-suid-binary-without-command-path)）
+- **パスが指定されたSUIDバイナリ** はあるか？ バイパスできるか？
+- **LD\_PRELOAD脆弱性** はあるか？（[**詳細はこちら**](privilege-escalation/#ld\_preload)）
+- 書き込み可能なフォルダからの **SUIDバイナリにおける.soライブラリの不足** はあるか？（[**詳細はこちら**](privilege-escalation/#suid-binary-so-injection)）
+- **SUDOトークンが利用可能** か？ [**SUDOトークンを作成**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)できるか？
+- **sudoersファイルを読み取るか変更** できるか？（[**詳細はこちら**](privilege-escalation/#etc-sudoers-etc-sudoers-d)）
+- **/etc/ld.so.conf.d/** を **変更** できるか？（[**詳細はこちら**](privilege-escalation/#etc-ld-so-conf-d)）
+- **OpenBSD DOAS** コマンド
 
 ### [機能](privilege-escalation/#capabilities)
 
-* [ ] どんなバイナリにも**予期しない機能**はあるか？
+- 任意のバイナリに **予期しない機能** があるか？
 
 ### [ACL](privilege-escalation/#acls)
 
-* [ ] どんなファイルにも**予期しないACL**はあるか？
+- 任意のファイルに **予期しないACL** があるか？
 
 ### [オープンシェルセッション](privilege-escalation/#open-shell-sessions)
 
-* [ ] **screen**
-* [ ] **tmux**
+- **screen**
+- **tmux**
 
 ### [SSH](privilege-escalation/#ssh)
 
-* [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
-* [ ] [**SSHの興味深い設定値**](privilege-escalation/#ssh-interesting-configuration-values)
+- **Debian** の [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
+- [**SSHの興味深い構成値**](privilege-escalation/#ssh-interesting-configuration-values)
 
 ### [興味深いファイル](privilege-escalation/#interesting-files)
 
-* [ ] **プロファイルファイル** - 機密データを読む？privescに書き込む？
-* [ ] **passwd/shadowファイル** - 機密データを読む？privescに書き込む？
-* [ ] 機密データのために**一般的に興味深いフォルダー**をチェックする
-* [ ] **変わった場所/所有されたファイル**、実行可能なファイルにアクセスしたり変更したりできるかもしれない
-* [ ] 最後の数分で**変更された**
-* [ ] **Sqlite DBファイル**
-* [ ] **隠しファイル**
-* [ ] **PATH内のスクリプト/バイナリ**
-* [ ] **Webファイル**（パスワード？）
-* [ ] **バックアップ**は？
-* [ ] **パスワードが含まれている既知のファイル**: **Linpeas**と**LaZagne**を使用する
-* [ ] **一般的な検索**
+- **プロファイルファイル** - 機密データを読み取る？ 特権昇格に書き込む？
+- **passwd/shadowファイル** - 機密データを読み取る？ 特権昇格に書き込む？
+- 機密データが含まれる可能性のある **一般的に興味深いフォルダ** をチェックする
+- **奇妙な場所/所有ファイル**、アクセス権があるか、実行可能ファイルを変更できるか
+- **最後の数分で変更**されたファイル
+- **Sqlite DBファイル**
+- **隠しファイル**
+- **PATH内のスクリプト/バイナリ**
+- **Webファイル**（パスワード？）
+- **バックアップ**？
+- **パスワードを含む既知のファイル**：**Linpeas** と **LaZagne** を使用
+- **一般的な検索**
 
 ### [**書き込み可能なファイル**](privilege-escalation/#writable-files)
 
-* [ ] **pythonライブラリを変更**して任意のコマンドを実行できるか？
-* [ ] **ログファイルを変更**できるか？**Logtotten**の脆弱性
-* [ ] **/etc/sysconfig/network-scripts/**を変更できるか？Centos/Redhatの脆弱性
-* [ ] [**ini、int.d、systemd、またはrc.dファイルに書き込む**](privilege-escalation/#init-init-d-systemd-and-rc-d)ことができるか？
+- **Pythonライブラリを変更**して任意のコマンドを実行できるか？
+- **ログファイルを変更**できるか？ **Logtotten** exploit
+- **/etc/sysconfig/network-scripts/** を変更できるか？ Centos/Redhat exploit
+- **ini、int.d、systemd、rc.dファイルに書き込む**ことができるか？（[**詳細はこちら**](privilege-escalation/#init-init-d-systemd-and-rc-d)）
 
 ### [**その他のトリック**](privilege-escalation/#other-tricks)
 
-* [ ] [**NFSを悪用して権限を昇格させることができるか**](privilege-escalation/#nfs-privilege-escalation)？
-* [ ] [**制限されたシェルから脱出する必要があるか**](privilege-escalation/#escaping-from-restricted-shells)？
+- 特権昇格するために **NFSを悪用** できるか？
+- **制限的なシェルから脱出**する必要があるか？（[**詳細はこちら**](privilege-escalation/#escaping-from-restricted-shells)）
 
 <figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy)サーバーに参加しましょう！
+[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取ろう！
 
 **ハッキングの洞察**\
-ハッキングのスリルと挑戦に焦点を当てたコンテンツに参加する
+ハッキングのスリルと挑戦に深く入り込むコンテンツに参加
 
 **リアルタイムハックニュース**\
-リアルタイムのニュースと洞察を通じて、速い
+リアルタイムのニュースと洞察を通じて、ハッキングの世界を最新の状態に保つ
+
+**最新のアナウンス**\
+最新のバグバウンティの開始や重要なプラットフォームの更新情報を把握
+
+**Discord** で [**参加**](https://discord.com/invite/N3FrSbmwdy) し、今日からトップハッカーと協力し始めよう！
+
+<details>
+
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>で**ゼロからヒーローまでのAWSハッキングを学ぶ**！</summary>
+
+HackTricks をサポートする他の方法:
+
+- **HackTricks で企業を宣
