@@ -1,45 +1,45 @@
-# Github Dorks & Leaks
+# Github ドークス＆リーク
 
 <details>
 
-<summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+- **HackTricks で企業を宣伝**したい場合や **HackTricks をPDFでダウンロード**したい場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェック！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見る
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live) をフォローする
+- **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks) の github リポジトリに PR を提出して、あなたのハッキングテクニックを共有する
 
 </details>
 
 <img src="../../.gitbook/assets/i3.png" alt="" data-size="original">\
-**Bug bounty tip**: **Intigriti**に**登録する**、ハッカーによって作られたプレミアムな**bug bountyプラットフォーム**！今日[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**の報酬を獲得し始めましょう！
+**バグバウンティのヒント**: **Intigriti** に **サインアップ**して、ハッカーによって作成されたプレミアム **バグバウンティプラットフォーム**を利用しましょう！今すぐ [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) に参加して、最大 **$100,000** のバウンティを獲得し始めましょう！
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
-スコープの資産リストを作成したので、いくつかのOSINT低吊り果実を探す時が来ました。
+スコープのアセットリストを作成したので、いくつかのOSINTの低ハンギングフルーツを検索する時が来ました。
 
-### すでにリークを検索したプラットフォーム
+### 既にリークを検索したプラットフォーム
 
-* [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
+- [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
 
-### GithubでのApiキーのリーク
+### Github での API キーのリーク
 
-* [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
-* [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
-* [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
-* [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-* [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
-* [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-* [https://github.com/michenriksen/gitrob](https://github.com/michenriksen/gitrob)
-* [https://github.com/anshumanbh/git-all-secrets](https://github.com/anshumanbh/git-all-secrets)
-* [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
-* [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
-* [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
+- [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
+- [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+- [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
+- [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
+- [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
+- [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
+- [https://github.com/michenriksen/gitrob](https://github.com/michenriksen/gitrob)
+- [https://github.com/anshumanbh/git-all-secrets](https://github.com/anshumanbh/git-all-secrets)
+- [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
+- [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
+- [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-### **Dorks**
+### **ドークス**
 ```bash
 ".mlab.com password"
 "access_key"
@@ -323,14 +323,14 @@ AWS SECRET
 ```
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい場合**、または**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**してください**。**
+* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
