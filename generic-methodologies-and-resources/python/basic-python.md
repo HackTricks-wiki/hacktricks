@@ -2,28 +2,26 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+Otras formas de apoyar a HackTricks:
 
-- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-
-- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Conceptos básicos de Python
+## Conceptos Básicos de Python
 
-### Información útil
+### Información Útil
 
 list(xrange()) == range() --> En python3 range es el xrange de python2 (no es una lista sino un generador)\
-La diferencia entre una tupla y una lista es que la posición de un valor en una tupla le da significado, mientras que las listas son solo valores ordenados. Las tuplas tienen estructuras pero las listas tienen un orden.
+La diferencia entre una Tupla y una Lista es que la posición de un valor en una tupla le da significado, mientras que las listas son solo valores ordenados. Las tuplas tienen estructuras pero las listas tienen un orden.
 
-### Operaciones principales
+### Operaciones Principales
 
 Para elevar un número se utiliza: 3\*\*2 (no 3^2)\
 Si haces 2/3 devuelve 1 porque estás dividiendo dos enteros (integers). Si quieres decimales debes dividir floats (2.0/3.0).\
@@ -65,7 +63,7 @@ sorted(\[1,43,5,3,21,4])
 **Partes de una lista**\
 ‘abc’\[0] = ‘a’\
 'abc’\[-1] = ‘c’\
-'abc’\[1:3] = ‘bc’ desde \[1] hasta \[2]\
+'abc’\[1:3] = ‘bc’ de \[1] a \[2]\
 "qwertyuiop"\[:-1] = 'qwertyuio'
 
 **Comentarios**\
@@ -78,113 +76,113 @@ Otro\
 **Bucles**
 ```
 if a:
-    #somethig
+#somethig
 elif b:
-    #something
+#something
 else:
-    #something
+#something
 
 while(a):
-    #comething
+#comething
 
 for i in range(0,100):
-    #something from 0 to 99
+#something from 0 to 99
 
 for letter in "hola":
-    #something with a letter in "hola"
+#something with a letter in "hola"
 ```
 ### Tuplas
 
-t1 = (1,'2,'tres')\
-t2 = (5,6)\
+t1 = (1, '2', 'tres')\
+t2 = (5, 6)\
 t3 = t1 + t2 = (1, '2', 'tres', 5, 6)\
-(4,) = Singelton\
+(4,) = Singleton\
 d = () tupla vacía\
-d += (4,) --> Añadir a una tupla\
-NO SE PUEDE! --> t1\[1] == 'Nuevo valor'\
-list(t2) = \[5,6] --> De tupla a lista
+d += (4,) --> Agregando a una tupla\
+¡NO SE PUEDE! --> t1\[1] == 'Nuevo valor'\
+list(t2) = \[5, 6] --> De tupla a lista
 
 ### Lista (array)
 
 d = \[] vacía\
-a = \[1,2,3]\
-b = \[4,5]\
-a + b = \[1,2,3,4,5]\
-b.append(6) = \[4,5,6]\
-tuple(a) = (1,2,3) --> De lista a tupla
+a = \[1, 2, 3]\
+b = \[4, 5]\
+a + b = \[1, 2, 3, 4, 5]\
+b.append(6) = \[4, 5, 6]\
+tuple(a) = (1, 2, 3) --> De lista a tupla
 
 ### Diccionario
 
 d = {} vacío\
-monthNumbers={1:’Ene’, 2: ‘feb’,’feb’:2}—> monthNumbers ->{1:’Ene’, 2: ‘feb’,’feb’:2}\
-monthNumbers\[1] = ‘Ene’\
-monthNumbers\[‘feb’] = 2\
-list(monthNumbers) = \[1,2,’feb’]\
-monthNumbers.values() = \[‘Ene’,’feb’,2]\
+monthNumbers={1:'Ene', 2: 'feb','feb':2}--> monthNumbers ->{1:'Ene', 2: 'feb','feb':2}\
+monthNumbers\[1] = 'Ene'\
+monthNumbers\['feb'] = 2\
+list(monthNumbers) = \[1, 2, 'feb']\
+monthNumbers.values() = \['Ene', 'feb', 2]\
 keys = \[k for k in monthNumbers]\
 a={'9':9}\
-monthNumbers.update(a) = {'9':9, 1:’Ene’, 2: ‘feb’,’feb’:2}\
+monthNumbers.update(a) = {'9':9, 1:'Ene', 2: 'feb','feb':2}\
 mN = monthNumbers.copy() #Copia independiente\
-monthNumbers.get('key',0) #Comprueba si la clave existe, devuelve el valor de monthNumbers\["key"] o 0 si no existe
+monthNumbers.get('key',0) #Verifica si la clave existe, devuelve el valor de monthNumbers\["key"] o 0 si no existe
 
 ### Conjunto
 
 En los conjuntos no hay repeticiones\
 myset = set(\['a', 'b']) = {'a', 'b'}\
 myset.add('c') = {'a', 'b', 'c'}\
-myset.add('a') = {'a', 'b', 'c'} #No hay repeticiones\
-myset.update(\[1,2,3]) = set(\['a', 1, 2, 'b', 'c', 3])\
-myset.discard(10) #Si está presente, lo elimina, si no, no hace nada\
-myset.remove(10) #Si está presente, lo elimina, si no, lanza una excepción\
+myset.add('a') = {'a', 'b', 'c'} #Sin repeticiones\
+myset.update(\[1, 2, 3]) = set(\['a', 1, 2, 'b', 'c', 3])\
+myset.discard(10) #Si está presente, elimínalo, si no, no hace nada\
+myset.remove(10) #Si está presente, elimínalo, si no, genera una excepción\
 myset2 = set(\[1, 2, 3, 4])\
-myset.union(myset2) #Valores de myset O myset2\
+myset.union(myset2) #Valores en myset O myset2\
 myset.intersection(myset2) #Valores en myset Y myset2\
 myset.difference(myset2) #Valores en myset pero no en myset2\
 myset.symmetric\_difference(myset2) #Valores que no están en myset Y myset2 (no en ambos)\
-myset.pop() #Obtiene el primer elemento del conjunto y lo elimina\
+myset.pop() #Obtener el primer elemento del conjunto y eliminarlo\
 myset.intersection\_update(myset2) #myset = Elementos en ambos myset y myset2\
 myset.difference\_update(myset2) #myset = Elementos en myset pero no en myset2\
 myset.symmetric\_difference\_update(myset2) #myset = Elementos que no están en ambos
 
 ### Clases
 
-El método en \_\_It\_\_ será el utilizado por sort para comparar si un objeto de esta clase es mayor que otro.
+El método en \_\_It\_\_ será el utilizado por sort para comparar si un objeto de esta clase es mayor que otro
 ```python
 class Person(name):
-	def __init__(self,name):
-		self.name= name
-		self.lastName = name.split(‘ ‘)[-1]
-		self.birthday = None
- 	def __It__(self, other):
-		if self.lastName == other.lastName:
-			return self.name < other.name
-		return self.lastName < other.lastName #Return True if the lastname is smaller
+def __init__(self,name):
+self.name= name
+self.lastName = name.split(‘ ‘)[-1]
+self.birthday = None
+def __It__(self, other):
+if self.lastName == other.lastName:
+return self.name < other.name
+return self.lastName < other.lastName #Return True if the lastname is smaller
 
-	def setBirthday(self, month, day. year):
-		self.birthday = date tame.date(year,month,day)
-	def getAge(self):
-		return (date time.date.today() - self.birthday).days
+def setBirthday(self, month, day. year):
+self.birthday = date tame.date(year,month,day)
+def getAge(self):
+return (date time.date.today() - self.birthday).days
 
 
 class MITPerson(Person):
-	nextIdNum = 0	# Attribute of the Class
-	def __init__(self, name):
-		Person.__init__(self,name)
-		self.idNum = MITPerson.nextIdNum  —> Accedemos al atributo de la clase
-		MITPerson.nextIdNum += 1 #Attribute of the class +1
+nextIdNum = 0	# Attribute of the Class
+def __init__(self, name):
+Person.__init__(self,name)
+self.idNum = MITPerson.nextIdNum  —> Accedemos al atributo de la clase
+MITPerson.nextIdNum += 1 #Attribute of the class +1
 
-	def __it__(self, other):
-		return self.idNum < other.idNum
+def __it__(self, other):
+return self.idNum < other.idNum
 ```
 ### map, zip, filter, lambda, sorted y one-liners
 
-**Map** es como: \[f(x) para x en iterable] --> map(tupla,\[a,b]) = \[(1,2,3),(4,5)]\
+**Map** es como: \[f(x) for x in iterable] --> map(tutple,\[a,b]) = \[(1,2,3),(4,5)]\
 m = map(lambda x: x % 3 == 0, \[1, 2, 3, 4, 5, 6, 7, 8, 9]) --> \[False, False, True, False, False, True, False, False, True]
 
-**zip** se detiene cuando el más corto de foo o bar se detiene:
+**zip** se detiene cuando el más corto entre foo o bar se detiene:
 ```
 for f, b in zip(foo, bar):
-    print(f, b)
+print(f, b)
 ```
 **Lambda** se utiliza para definir una función\
 (lambda x,y: x+y)(5,3) = 8 --> Usa lambda como una **función** simple\
@@ -193,46 +191,49 @@ m = **filter**(lambda x: x % 3 == 0, \[1, 2, 3, 4, 5, 6, 7, 8, 9]) = \[3, 6, 9] 
 **reduce** (lambda x,y: x\*y, \[1,2,3,4]) = 24
 ```
 def make_adder(n):
-	return lambda x: x+n
+return lambda x: x+n
 plus3 = make_adder(3)
 plus3(4) = 7 # 3 + 4 = 7
 
 class Car:
-	crash = lambda self: print('Boom!')
+crash = lambda self: print('Boom!')
 my_car = Car(); my_car.crash() = 'Boom!'
 ```
-mult1 = \[x for x in \[1, 2, 3, 4, 5, 6, 7, 8, 9] if x%3 == 0 ]
+```python
+mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x%3 == 0 ]
+```
 
 ### Excepciones
 ```
-def divide(x,y):	
-	try:
-		result = x/y
-	except ZeroDivisionError, e:
-		print “division by zero!” + str(e)
-	except TypeError:
-		divide(int(x),int(y))
-	else:
-		print “result i”, result
-	finally
-		print “executing finally clause in any case”
+def divide(x,y):
+try:
+result = x/y
+except ZeroDivisionError, e:
+print “division by zero!” + str(e)
+except TypeError:
+divide(int(x),int(y))
+else:
+print “result i”, result
+finally
+print “executing finally clause in any case”
 ```
 ### Assert()
 
-Si la condición es falsa, la cadena se imprimirá en la pantalla.
+Si la condición es falsa, la cadena se imprimirá en la pantalla
 ```
 def avg(grades, weights):
-	assert not len(grades) == 0, 'no grades data'
-	assert len(grades) == 'wrong number grades'
+assert not len(grades) == 0, 'no grades data'
+assert len(grades) == 'wrong number grades'
 ```
 ### Generadores, yield
 
-Un generador, en lugar de devolver algo, "produce" algo. Cuando se accede a él, "devuelve" el primer valor generado, luego, se puede acceder de nuevo y devolverá el siguiente valor generado. Por lo tanto, no se generan todos los valores al mismo tiempo y se puede ahorrar mucha memoria utilizando esto en lugar de una lista con todos los valores.
+Un generador, en lugar de devolver algo, "cede" algo. Cuando accedes a él, "devolverá" el primer valor generado, luego, puedes acceder a él nuevamente y devolverá el siguiente valor generado. Por lo tanto, no todos los valores se generan al mismo tiempo y se puede ahorrar mucha memoria utilizando esto en lugar de una lista con todos los valores.
 ```
 def myGen(n):
-	yield n
-	yield n + 1
+yield n
+yield n + 1
 ```
+```markdown
 g = myGen(6) --> 6\
 next(g) --> 7\
 next(g) --> Error
@@ -250,7 +251,7 @@ re.findall("\w+(la)","hola caracola") = \['la', 'la']
 \d --> Número\
 \s --> Carácter de espacio en blanco\[ \n\r\t\f]\
 \S --> Carácter que no es espacio en blanco\
-^ --> Empieza con\
+^ --> Comienza con\
 $ --> Termina con\
 \+ --> Uno o más\
 \* --> 0 o más\
@@ -277,32 +278,33 @@ print list(permutations(\['1','2','3'])) = \[('1', '2', '3'), ('1', '3', '2'), (
 print(list(permutations('123',2))) = \[('1', '2'), ('1', '3'), ('2', '1'), ('2', '3'), ('3', '1'), ('3', '2')] Cada combinación posible de longitud 2
 
 **combinations**\
-from itertools import **combinations** --> Genera todas las combinaciones posibles sin caracteres repetidos (si existe "ab", no genera "ba")\
+from itertools import **combinations** --> Genera todas las combinaciones posibles sin repetir caracteres (si existe "ab", no genera "ba")\
 print(list(**combinations**('123',2))) --> \[('1', '2'), ('1', '3'), ('2', '3')]
 
 **combinations\_with\_replacement**\
-from itertools import **combinations\_with\_replacement** --> Genera todas las combinaciones posibles desde el carácter en adelante (por ejemplo, el tercero se mezcla a partir del tercero en adelante pero no con el segundo o el primero)\
+from itertools import **combinations\_with\_replacement** --> Genera todas las combinaciones posibles desde el carácter en adelante (por ejemplo, el 3ro se mezcla desde el 3ro en adelante pero no con el 2do o primero)\
 print(list(**combinations\_with\_replacement**('1133',2))) = \[('1', '1'), ('1', '1'), ('1', '3'), ('1', '3'), ('1', '1'), ('1', '3'), ('1', '3'), ('3', '3'), ('3', '3'), ('3', '3')]
 
 ### Decoradores
 
 Decorador que mide el tiempo que necesita una función para ejecutarse (de [aquí](https://towardsdatascience.com/decorating-functions-in-python-619cbbe82c74)):
+```
 ```python
 from functools import wraps
 import time
 def timeme(func):
-  @wraps(func)
-  def wrapper(*args, **kwargs):
-    print("Let's call our decorated function")
-    start = time.time()
-    result = func(*args, **kwargs)
-    print('Execution time: {} seconds'.format(time.time() - start))
-    return result
-  return wrapper
+@wraps(func)
+def wrapper(*args, **kwargs):
+print("Let's call our decorated function")
+start = time.time()
+result = func(*args, **kwargs)
+print('Execution time: {} seconds'.format(time.time() - start))
+return result
+return wrapper
 
 @timeme
 def decorated_func():
-  print("Decorated func!")
+print("Decorated func!")
 ```
 Si lo ejecutas, verás algo como lo siguiente:
 ```
@@ -312,16 +314,14 @@ Execution time: 4.792213439941406e-05 seconds
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
-- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+Otras formas de apoyar a HackTricks:
 
-- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Obtén la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
