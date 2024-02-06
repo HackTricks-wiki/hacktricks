@@ -1,88 +1,104 @@
+<details>
+
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks AWS)</strong></a><strong>!</strong></summary>
+
+Otras formas de apoyar a HackTricks:
+
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+
+</details>
+
+
 ## smss.exe
 
-**Administrador de sesión**.\
-La sesión 0 inicia **csrss.exe** y **wininit.exe** (**servicios** **del** **SO**) mientras que la sesión 1 inicia **csrss.exe** y **winlogon.exe** (**sesión** **de** **usuario**). Sin embargo, solo debería haber **un proceso** de ese **binario** sin hijos en el árbol de procesos.
+**Administrador de Sesiones**.\
+La Sesión 0 inicia **csrss.exe** y **wininit.exe** (**servicios del SO**) mientras que la Sesión 1 inicia **csrss.exe** y **winlogon.exe** (**sesión de usuario**). Sin embargo, solo deberías ver **un proceso** de ese **binario** sin hijos en el árbol de procesos.
 
-Además, sesiones aparte de 0 y 1 pueden significar que están ocurriendo sesiones de RDP.
+Además, sesiones aparte de 0 y 1 pueden indicar que están ocurriendo sesiones de RDP.
 
 
 ## csrss.exe
 
-**Proceso de subsistema de ejecución cliente/servidor**.\
-Administra **procesos** y **hilos**, hace que la **API** de **Windows** esté disponible para otros procesos y también **mapea letras de unidad**, crea **archivos temporales** y maneja el **proceso** de **apagado**.
+**Proceso de Subsistema de Ejecución Cliente/Servidor**.\
+Administra **procesos** y **hilos**, hace que la **API de Windows** esté disponible para otros procesos y también **asigna letras de unidad**, crea **archivos temporales** y maneja el **proceso de apagado**.
 
-Hay uno **ejecutándose en la sesión 0 y otro en la sesión 1** (por lo que hay **2 procesos** en el árbol de procesos). Otro se crea **por cada nueva sesión**.
+Hay uno **ejecutándose en la Sesión 0 y otro en la Sesión 1** (por lo tanto, **2 procesos** en el árbol de procesos). Se crea otro por cada nueva Sesión.
 
 
 ## winlogon.exe
 
-**Proceso de inicio de sesión de Windows**.\
-Es responsable de los **inicios**/**cierres** de sesión de usuario. Lanza **logonui.exe** para solicitar nombre de usuario y contraseña y luego llama a **lsass.exe** para verificarlos.
+**Proceso de Inicio de Sesión de Windows**.\
+Es responsable de los **inicios**/**cierres de sesión** de usuario. Inicia **logonui.exe** para solicitar nombre de usuario y contraseña y luego llama a **lsass.exe** para verificarlos.
 
-Luego lanza **userinit.exe**, que se especifica en **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** con la clave **Userinit**.
+Luego inicia **userinit.exe** que está especificado en **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** con la clave **Userinit**.
 
-Además, el registro anterior debería tener **explorer.exe** en la clave **Shell** o podría ser utilizado como un **método de persistencia de malware**.
+Además, el registro anterior debería tener **explorer.exe** en la clave **Shell** o podría ser abusado como un **método de persistencia de malware**.
+
 
 ## wininit.exe
 
-**Proceso de inicialización de Windows**.\
-Lanza **services.exe**, **lsass.exe** y **lsm.exe** en la sesión 0. Solo debería haber 1 proceso.
+**Proceso de Inicialización de Windows**. \
+Inicia **services.exe**, **lsass.exe** y **lsm.exe** en la Sesión 0. Debería haber solo 1 proceso.
 
 
 ## userinit.exe
 
-**Aplicación de inicio de sesión de Userinit**.\
-Carga **ntduser.dat en HKCU** e inicializa el **entorno** del **usuario** y ejecuta **scripts** de **inicio de sesión** y **GPO**.
+**Aplicación de Inicio de Sesión de Usuario**.\
+Carga el **ntduser.dat en HKCU** e inicializa el **entorno de usuario** y ejecuta **scripts de inicio de sesión** y **GPO**.
 
-Lanza **explorer.exe**.
+Inicia **explorer.exe**.
 
 
 ## lsm.exe
 
-**Administrador de sesión local**.\
-Trabaja con smss.exe para manipular las sesiones de usuario: inicio/cierre de sesión, inicio de shell, bloqueo/desbloqueo de escritorio, etc.
+**Administrador de Sesión Local**.\
+Trabaja con smss.exe para manipular sesiones de usuario: inicio/cierre de sesión, inicio de shell, bloqueo/desbloqueo de escritorio, etc.
 
 Después de W7, lsm.exe se transformó en un servicio (lsm.dll).
 
-Solo debería haber 1 proceso en W7 y de ellos un servicio que ejecuta la DLL.
+Debería haber solo 1 proceso en W7 y de ellos un servicio ejecutando el DLL.
 
 
 ## services.exe
 
-**Administrador de control de servicios**.\
-Carga los **servicios** configurados como **inicio automático** y los **controladores**.
+**Administrador de Control de Servicios**.\
+**Carga** **servicios** configurados como **inicio automático** y **controladores**.
 
-Es el proceso principal de **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** y muchos más.
+Es el proceso padre de **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** y muchos más.
 
-Los servicios se definen en `HKLM\SYSTEM\CurrentControlSet\Services` y este proceso mantiene una base de datos en memoria de información de servicios que puede ser consultada por sc.exe.
+Los servicios están definidos en `HKLM\SYSTEM\CurrentControlSet\Services` y este proceso mantiene una base de datos en memoria de información de servicio que puede ser consultada por sc.exe.
 
-Tenga en cuenta que **algunos** **servicios** se ejecutarán en un **proceso propio** y otros se **compartirán en un proceso svchost.exe**.
+Observa cómo **algunos** **servicios** se ejecutarán en un **proceso propio** y otros estarán **compartiendo un proceso svchost.exe**.
 
-Solo debería haber 1 proceso.
+Debería haber solo 1 proceso.
 
 
 ## lsass.exe
 
-**Subsistema de autoridad de seguridad local**.\
-Es responsable de la **autenticación** del usuario y crea los **tokens** de **seguridad**. Utiliza paquetes de autenticación ubicados en `HKLM\System\CurrentControlSet\Control\Lsa`.
+**Subsistema de Autoridad de Seguridad Local**.\
+Es responsable de la autenticación de usuario y crea los **tokens de seguridad**. Utiliza paquetes de autenticación ubicados en `HKLM\System\CurrentControlSet\Control\Lsa`.
 
-Escribe en el **registro de eventos de seguridad** y solo debería haber 1 proceso.
+Escribe en el **registro de eventos de seguridad** y debería haber solo 1 proceso.
 
-Tenga en cuenta que este proceso es altamente atacado para extraer contraseñas.
+Ten en cuenta que este proceso es altamente atacado para extraer contraseñas.
 
 
 ## svchost.exe
 
-**Proceso de host de servicio genérico**.\
-Hospeda múltiples servicios DLL en un solo proceso compartido.
+**Proceso de Host de Servicio Genérico**.\
+Hospeda múltiples servicios DLL en un proceso compartido.
 
-Por lo general, encontrará que **svchost.exe** se lanza con la bandera `-k`. Esto lanzará una consulta al registro **HKEY\_LOCAL\_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** donde habrá una clave con el argumento mencionado en -k que contendrá los servicios para lanzar en el mismo proceso.
+Por lo general, encontrarás que **svchost.exe** se inicia con la bandera `-k`. Esto lanzará una consulta al registro **HKEY\_LOCAL\_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** donde habrá una clave con el argumento mencionado en -k que contendrá los servicios a iniciar en el mismo proceso.
 
 Por ejemplo: `-k UnistackSvcGroup` lanzará: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-Si también se usa la **bandera `-s`** con un argumento, entonces se le pide a svchost que **solo lance el servicio especificado** en este argumento.
+Si también se usa la **bandera `-s`** con un argumento, entonces se le pide a svchost que **solo inicie el servicio especificado** en este argumento.
 
-Habrá varios procesos de `svchost.exe`. Si alguno de ellos **no está usando la bandera `-k`**, eso es muy sospechoso. Si encuentra que **services.exe no es el padre**, eso también es muy sospechoso.
+Habrá varios procesos de `svchost.exe`. Si alguno de ellos **no está utilizando la bandera `-k`**, eso es muy sospechoso. Si encuentras que **services.exe no es el proceso padre**, eso también es muy sospechoso.
 
 
 ## taskhost.exe
@@ -96,17 +112,19 @@ En W8 se llama taskhostex.exe y en W10 taskhostw.exe.
 
 Este es el proceso responsable del **escritorio del usuario** y de lanzar archivos a través de extensiones de archivo.
 
-Solo debería haber **1 proceso** generado **por usuario conectado**.
+Debería generarse solo **1** proceso por **usuario conectado**.
 
-Se ejecuta desde **userinit.exe**, que debería terminarse, por lo que **no debería aparecer ningún proceso padre** para este proceso.
+Este se ejecuta desde **userinit.exe** que debería terminarse, por lo que **no debería aparecer ningún proceso padre** para este proceso.
 
 
-# Detectando procesos maliciosos
+# Detectando Procesos Maliciosos
 
 * ¿Se está ejecutando desde la ruta esperada? (Ningún binario de Windows se ejecuta desde una ubicación temporal)
 * ¿Se está comunicando con IPs extrañas?
-* Verifique las firmas digitales (los artefactos de Microsoft deberían estar firmados)
+* Verificar firmas digitales (los artefactos de Microsoft deberían estar firmados)
 * ¿Está escrito correctamente?
 * ¿Se está ejecutando bajo el SID esperado?
-* ¿Es el proceso padre el esperado (si lo hay)?
-* ¿Son los procesos secundarios los esperados? (¿no hay cmd.exe, wscript.exe, powershell.exe..?)
+* ¿El proceso padre es el esperado (si lo hay)?
+* ¿Los procesos hijos son los esperados? (¿no cmd.exe, wscript.exe, powershell.exe..?)
+
+</details>
