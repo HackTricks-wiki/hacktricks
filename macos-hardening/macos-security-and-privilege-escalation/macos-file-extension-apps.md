@@ -14,11 +14,11 @@ Other ways to support HackTricks:
 
 </details>
 
-File Extension & URL scheme app handlers
+## File Extension & URL scheme app handlers
 
 The following line can be useful to find the applications that can open files depending on the extension:
 
-```
+```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
 

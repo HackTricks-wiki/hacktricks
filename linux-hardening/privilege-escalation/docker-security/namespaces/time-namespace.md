@@ -16,7 +16,7 @@ Other ways to support HackTricks:
 
 ## Basic Information
 
-The time namespace allows for per-namespace offsets to the system monotonic and boot-time clocks. The time namespace is suited for Linux containers usage for allowing the date/time to be changed within a container and for adjusting clocks within a container following restoration from a checkpoint/snapshot.
+The time namespace in Linux allows for per-namespace offsets to the system monotonic and boot-time clocks. It is commonly used in Linux containers to change the date/time within a container and adjust clocks after restoring from a checkpoint or snapshot.
 
 ## Lab:
 
@@ -86,6 +86,7 @@ Also, you can only **enter in another process namespace if you are root**. And y
 
 # References
 * [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
+* [https://www.phoronix.com/news/Linux-Time-Namespace-Coming](https://www.phoronix.com/news/Linux-Time-Namespace-Coming)
 
 <details>
 

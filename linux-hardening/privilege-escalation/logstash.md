@@ -15,17 +15,17 @@ Other ways to support HackTricks:
 </details>
 
 
-# Basic Information
+## Logstash
 
-Logstash  is used for collecting, transforming and outputting logs. This is realized by using **pipelines**, which contain input, filter and output modules. The service gets interesting when having compromised a machine which is running Logstash as a service.
+Logstash is used to **gather, transform, and dispatch logs** through a system known as **pipelines**. These pipelines are made up of **input**, **filter**, and **output** stages. An interesting aspect arises when Logstash operates on a compromised machine.
 
-## Pipelines
+### Pipeline Configuration
 
-The pipeline configuration file **/etc/logstash/pipelines.yml** specifies the locations of active pipelines:
+Pipelines are configured in the file **/etc/logstash/pipelines.yml**, which lists the locations of the pipeline configurations:
 
-```bash
-# This file is where you define your pipelines. You can define multiple.
-# For more information on multiple pipelines, see the documentation:
+```yaml
+# Define your pipelines here. Multiple pipelines can be defined.
+# For details on multiple pipelines, refer to the documentation:
 # https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
 
 - pipeline.id: main
@@ -35,23 +35,21 @@ The pipeline configuration file **/etc/logstash/pipelines.yml** specifies the lo
   pipeline.workers: 6
 ```
 
-In here you can find the paths to the **.conf** files, which contain the configured pipelines. If the **Elasticsearch output module** is used, **pipelines** are likely to **contain** valid **credentials** for an Elasticsearch instance. Those credentials have often more privileges, since Logstash has to write data to Elasticsearch. If wildcards are used, Logstash tries to run all pipelines located in that folder matching the wildcard.
+This file reveals where the **.conf** files, containing pipeline configurations, are located. When employing an **Elasticsearch output module**, it's common for **pipelines** to include **Elasticsearch credentials**, which often possess extensive privileges due to Logstash's need to write data to Elasticsearch. Wildcards in configuration paths allow Logstash to execute all matching pipelines in the designated directory.
 
-## Privesc with writable pipelines
+### Privilege Escalation via Writable Pipelines
 
-Before trying to elevate your own privileges you should check which user is running the logstash service, since this will be the user, you will be owning afterwards. Per default the logstash service runs with the privileges of the **logstash** user.
+To attempt privilege escalation, first identify the user under which the Logstash service is running, typically the **logstash** user. Ensure you meet **one** of these criteria:
 
-Check whether you have **one** of the required rights:
+- Possess **write access** to a pipeline **.conf** file **or**
+- The **/etc/logstash/pipelines.yml** file uses a wildcard, and you can write to the target folder
 
-* You have **write permissions** on a pipeline **.conf** file **or**
-* **/etc/logstash/pipelines.yml** contains a wildcard and you are allowed to write into the specified folder
+Additionally, **one** of these conditions must be fulfilled:
 
-Further **one** of the requirements must be met:
+- Capability to restart the Logstash service **or**
+- The **/etc/logstash/logstash.yml** file has **config.reload.automatic: true** set
 
-* You are able to restart the logstash service **or**
-* **/etc/logstash/logstash.yml** contains the entry **config.reload.automatic: true**
-
-If a wildcard is specified, try to create a file matching that wildcard. Following content can be written into the file to execute commands:
+Given a wildcard in the configuration, creating a file that matches this wildcard allows for command execution. For instance:
 
 ```bash
 input {
@@ -69,11 +67,10 @@ output {
 }
 ```
 
-The **interval** specifies the time in seconds. In this example the **whoami** command is executed every 120 seconds. The output of the command is saved into **/tmp/output.log**.
+Here, **interval** determines the execution frequency in seconds. In the given example, the **whoami** command runs every 120 seconds, with its output directed to **/tmp/output.log**.
 
-If **/etc/logstash/logstash.yml** contains the entry **config.reload.automatic: true** you only have to wait until the command gets executed, since Logstash will automatically recognize new pipeline configuration files or any changes in existing pipeline configurations. Otherwise trigger a restart of the logstash service.
+With **config.reload.automatic: true** in **/etc/logstash/logstash.yml**, Logstash will automatically detect and apply new or modified pipeline configurations without needing a restart. If there's no wildcard, modifications can still be made to existing configurations, but caution is advised to avoid disruptions.
 
-If no wildcard is used, you can apply those changes to an existing pipeline configuration. **Make sure you do not break things!**
 
 # References
 

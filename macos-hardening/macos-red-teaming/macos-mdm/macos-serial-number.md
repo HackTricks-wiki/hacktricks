@@ -14,75 +14,47 @@ Other ways to support HackTricks:
 
 </details>
 
-Apple devices manufactured after 2010 generally have **12-character alphanumeric** serial numbers, with the **first three digits representing the manufacturing location**, the following **two** indicating the **year** and **week** of manufacture, the next **three** digits providing a **unique** **identifier**, and the **last** **four** digits representing the **model number**.
 
-Serial number example: **C02L13ECF8J2**
+## Basic Information
 
-### **3 - Manufacturing locations**
+Apple devices post-2010 have serial numbers consisting of **12 alphanumeric characters**, each segment conveying specific information:
 
-| Code           | Factory                                      |
-| -------------- | -------------------------------------------- |
-| FC             | Fountain Colorado, USA                       |
-| F              | Fremont, California, USA                     |
-| XA, XB, QP, G8 | USA                                          |
-| RN             | Mexico                                       |
-| CK             | Cork, Ireland                                |
-| VM             | Foxconn, Pardubice, Czech Republic           |
-| SG, E          | Singapore                                    |
-| MB             | Malaysia                                     |
-| PT, CY         | Korea                                        |
-| EE, QT, UV     | Taiwan                                       |
-| FK, F1, F2     | Foxconn – Zhengzhou, China                   |
-| W8             | Shanghai China                               |
-| DL, DM         | Foxconn – China                              |
-| DN             | Foxconn, Chengdu, China                      |
-| YM, 7J         | Hon Hai/Foxconn, China                       |
-| 1C, 4H, WQ, F7 | China                                        |
-| C0             | Tech Com – Quanta Computer Subsidiary, China |
-| C3             | Foxxcon, Shenzhen, China                     |
-| C7             | Pentragon, Changhai, China                   |
-| RM             | Refurbished/remanufactured                   |
+- **First 3 Characters**: Indicate the **manufacturing location**.
+- **Characters 4 & 5**: Denote the **year and week of manufacture**.
+- **Characters 6 to 8**: Serve as a **unique identifier** for each device.
+- **Last 4 Characters**: Specify the **model number**.
 
-### 1 - Year of manufacturing
+For instance, the serial number **C02L13ECF8J2** follows this structure.
 
-| Code | Release              |
-| ---- | -------------------- |
-| C    | 2010/2020 (1st half) |
-| D    | 2010/2020 (2nd half) |
-| F    | 2011/2021 (1st half) |
-| G    | 2011/2021 (2nd half) |
-| H    | 2012/... (1st half)  |
-| J    | 2012 (2nd half)      |
-| K    | 2013 (1st half)      |
-| L    | 2013 (2nd half)      |
-| M    | 2014 (1st half)      |
-| N    | 2014 (2nd half)      |
-| P    | 2015 (1st half)      |
-| Q    | 2015 (2nd half)      |
-| R    | 2016 (1st half)      |
-| S    | 2016 (2nd half)      |
-| T    | 2017 (1st half)      |
-| V    | 2017 (2nd half)      |
-| W    | 2018 (1st half)      |
-| X    | 2018 (2nd half)      |
-| Y    | 2019 (1st half)      |
-| Z    | 2019 (2nd half)      |
+### **Manufacturing Locations (First 3 Characters)**
+Certain codes represent specific factories:
+- **FC, F, XA/XB/QP/G8**: Various locations in the USA.
+- **RN**: Mexico.
+- **CK**: Cork, Ireland.
+- **VM**: Foxconn, Czech Republic.
+- **SG/E**: Singapore.
+- **MB**: Malaysia.
+- **PT/CY**: Korea.
+- **EE/QT/UV**: Taiwan.
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Different locations in China.
+- **C0, C3, C7**: Specific cities in China.
+- **RM**: Refurbished devices.
 
-### 1 - Week of manufacturing
+### **Year of Manufacturing (4th Character)**
+This character varies from 'C' (representing the first half of 2010) to 'Z' (second half of 2019), with different letters indicating different half-year periods.
 
-The fifth character represent the week in which the device was manufactured. There are 28 possible characters in this spot: **the digits 1-9 are used to represent the first through ninth weeks**, and the **characters C through Y**, **excluding** the vowels A, E, I, O, and U, and the letter S, represent the **tenth through twenty-seventh weeks**. For devices manufactured in the **second half of the year, add 26** to the number represented by the fifth character of the serial number. For example, a product with a serial number whose fourth and fifth digits are “JH” was manufactured in the 40th week of 2012.
+### **Week of Manufacturing (5th Character)**
+Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
 
-### 3 - Uniq Code
+### **Unique Identifier (Characters 6 to 8)**
+These three digits ensure each device, even of the same model and batch, has a distinct serial number.
 
-The next three digits are an identifier code which **serves to differentiate each Apple device of the same model** which is manufactured in the same location and during the same week of the same year, ensuring that each device has a different serial number.
-
-### 4 - Serial number
-
-The last four digits of the serial number represent the **product’s model**.
+### **Model Number (Last 4 Characters)**
+These digits identify the specific model of the device.
 
 ### Reference
 
-{% embed url="https://beetstech.com/blog/decode-meaning-behind-apple-serial-number" %}
+* [https://beetstech.com/blog/decode-meaning-behind-apple-serial-number](https://beetstech.com/blog/decode-meaning-behind-apple-serial-number)
 
 <details>
 

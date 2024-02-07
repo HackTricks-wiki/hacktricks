@@ -20,9 +20,7 @@ The code of **dyld is open source** and can be found in [https://opensource.appl
 
 ## **DYLD\_INSERT\_LIBRARIES**
 
-> This is a colon separated **list of dynamic libraries** to l**oad before the ones specified in the program**. This lets you test new modules of existing dynamic shared libraries that are used in flat-namespace images by loading a temporary dynamic shared library with just the new modules. Note that this has no effect on images built a two-level namespace images using a dynamic shared library unless DYLD\_FORCE\_FLAT\_NAMESPACE is also used.
-
-This is like the [**LD\_PRELOAD on Linux**](../../../../linux-hardening/privilege-escalation#ld\_preload).
+This is like the [**LD\_PRELOAD on Linux**](../../../../linux-hardening/privilege-escalation#ld\_preload). It allows to indicate a process that is going to be run to load a specific library from a path (if the env var is enabled)
 
 This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
 
@@ -68,7 +66,7 @@ Find a example on how to (ab)use this and check the restrictions in:
 Remember that **previous Library Validation restrictions also apply** to perform Dylib hijacking attacks.
 {% endhint %}
 
-As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code**.\
+As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code** (well, actually froma regular user this coul not be possible as you might need a TCC permission towrite inside an `.app` bundle and hijack a library).\
 However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
 
 First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
@@ -350,6 +348,9 @@ csops -status <pid>
 
 and then check if the flag 0x800 is enabled.
 {% endhint %}
+
+# References
+* [https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/](https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/)
 
 <details>
 

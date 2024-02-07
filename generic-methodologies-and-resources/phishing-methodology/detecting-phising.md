@@ -34,15 +34,12 @@ For this purpose, you can use any of the following tools. Note that these tolls 
 
 ### Bitflipping
 
-In the world of computing, everything is stored in bits (zeros and ones) in memory behind the scenes.\
-This applies to domains too. For example, _windows.com_ becomes _01110111..._ in the volatile memory of your computing device.\
-However, what if one of these bits got automatically flipped due to a solar flare, cosmic rays, or a hardware error? That is one of the 0's becomes a 1 and vice versa.\
-Applying this concept to DNS requests, it's possible that the **domain requested** that arrives at the DNS server **isn't the same as the domain initially requested.**
+**You can find a short the explanation of this technique in the parent page. Or read the original research in [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)**
+
 
 For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
 **Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
 
-For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 **All possible bit-flipping domain names should be also monitored.**
 
@@ -69,7 +66,7 @@ It's not possible to take the previous "Brute-Force" approach but it's actually 
 
 The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
 
-![](<../../.gitbook/assets/image (390).png>)
+![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../.gitbook/assets/image (390).png>)
 
 However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
 

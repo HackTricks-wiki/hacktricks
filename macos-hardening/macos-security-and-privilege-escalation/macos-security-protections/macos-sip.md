@@ -16,16 +16,16 @@ Other ways to support HackTricks:
 
 ## **Basic Information**
 
-**System Integrity Protection (SIP)** is a security technology in macOS that safeguards certain system directories from unauthorized access, even for the root user. It prevents modifications to these directories, including creation, alteration, or deletion of files. The main directories that SIP protects are:
+**System Integrity Protection (SIP)** in macOS is a mechanism designed to prevent even the most privileged users from making unauthorized changes to key system folders. This feature plays a crucial role in maintaining the integrity of the system by restricting actions like adding, modifying, or deleting files in protected areas. The primary folders shielded by SIP include:
 
 * **/System**
 * **/bin**
 * **/sbin**
 * **/usr**
 
-The protection rules for these directories and their subdirectories are specified in the **`/System/Library/Sandbox/rootless.conf`** file. In this file, paths starting with an asterisk (\*) represent exceptions to SIP's restrictions.
+The rules that govern SIP's behavior are defined in the configuration file located at **`/System/Library/Sandbox/rootless.conf`**. Within this file, paths that are prefixed with an asterisk (*) are denoted as exceptions to the otherwise stringent SIP restrictions.
 
-For instance, the following configuration:
+Consider the example below:
 
 ```javascript
 /usr
@@ -34,7 +34,7 @@ For instance, the following configuration:
 * /usr/share/man
 ```
 
-indicates that the **`/usr`** directory is generally protected by SIP. However, modifications are allowed in the three subdirectories specified (`/usr/libexec/cups`, `/usr/local`, and `/usr/share/man`), as they are listed with a leading asterisk (\*).
+This snippet implies that while SIP generally secures the **`/usr`** directory, there are specific subdirectories (`/usr/libexec/cups`, `/usr/local`, and `/usr/share/man`) where modifications are permissible, as indicated by the asterisk (*) preceding their paths.
 
 To verify whether a directory or file is protected by SIP, you can use the **`ls -lOd`** command to check for the presence of the **`restricted`** or **`sunlnk`** flag. For example:
 
@@ -89,18 +89,20 @@ csrutil enable --without debug
 
 ### Other Restrictions
 
-SIP also imposes several other restrictions. For instance, it disallows the **loading of unsigned kernel extensions** (kexts) and prevents the **debugging** of macOS system processes. It also inhibits tools like dtrace from inspecting system processes.
+- **Disallows loading of unsigned kernel extensions** (kexts), ensuring only verified extensions interact with the system kernel.
+- **Prevents the debugging** of macOS system processes, safeguarding core system components from unauthorized access and modification.
+- **Inhibits tools** like dtrace from inspecting system processes, further protecting the integrity of the system's operation.
 
-[More SIP info in this talk](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship).
+**[Learn more about SIP info in this talk](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship).**
 
 ## SIP Bypasses
 
-If an attacker manages to bypass SIP this is what he will be able to do:
+Bypassing SIP enables an attacker to:
 
-* Read mail, messages, Safari history... of all users
-* Grant permissions for webcam, microphone or anything (by directly writing over the SIP protected TCC database) - TCC bypass
-* Persistence: He could save a malware in a SIP protected location and not even toot will be able to delete it. Also he could tamper with MRT.
-* Easiness to load kernel extensions (still other hardcore protections in place for this).
+- **Access User Data**: Read sensitive user data like mail, messages, and Safari history from all user accounts.
+- **TCC Bypass**: Directly manipulate the TCC (Transparency, Consent, and Control) database to grant unauthorized access to the webcam, microphone, and other resources.
+- **Establish Persistence**: Place malware in SIP-protected locations, making it resistant to removal, even by root privileges. This also includes the potential to tamper with the Malware Removal Tool (MRT).
+- **Load Kernel Extensions**: Although there are additional safeguards, bypassing SIP simplifies the process of loading unsigned kernel extensions.
 
 ### Installer Packages
 
@@ -132,20 +134,19 @@ In [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-
 
 #### [fsck\_cs utility](https://www.theregister.com/2016/03/30/apple\_os\_x\_rootless/)
 
-The bypass exploited the fact that **`fsck_cs`** would follow **symbolic links** and attempt to fix the filesystem presented to it.
+A vulnerability was identified where **`fsck_cs`** was misled into corrupting a crucial file, due to its ability to follow **symbolic links**. Specifically, attackers crafted a link from _`/dev/diskX`_ to the file `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Executing **`fsck_cs`** on _`/dev/diskX`_ led to the corruption of `Info.plist`. This file's integrity is vital for the operating system's SIP (System Integrity Protection), which controls the loading of kernel extensions. Once corrupted, SIP's ability to manage kernel exclusions is compromised.
 
-Therefore, an attacker could create a symbolic link pointing from _`/dev/diskX`_ to `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist` and invoke **`fsck_cs`** on the former. As the `Info.plist` file gets corrupted, the operating system could **no longer control kernel extension exclusions**, therefore bypassing SIP.
+The commands to exploit this vulnerability are:
 
-{% code overflow="wrap" %}
 ```bash
 ln -s /System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist /dev/diskX
 fsck_cs /dev/diskX 1>&-
 touch /Library/Extensions/
 reboot
 ```
-{% endcode %}
 
-The aforementioned Info.plist file, now destroyed, is used by **SIP to whitelist some kernel extensions** and specifically **block** **others** from being loaded. It normally blacklists Apple's own kernel extension **`AppleHWAccess.kext`**, but with the configuration file destroyed, we can now load it and use it to read and write as we please from and to system RAM.
+The exploitation of this vulnerability has severe implications. The `Info.plist` file, normally responsible for managing permissions for kernel extensions, becomes ineffective. This includes the inability to blacklist certain extensions, such as `AppleHWAccess.kext`. Consequently, with the SIP's control mechanism out of order, this extension can be loaded, granting unauthorized read and write access to the system's RAM.
+
 
 #### [Mount over SIP protected folders](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
@@ -160,24 +161,18 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 
 #### [Upgrader bypass (2016)](https://objective-see.org/blog/blog\_0x14.html)
 
-When executed, the upgrade/installer application (i.e. `Install macOS Sierra.app`) sets up the system to boot off an installer disk image (that is embedded within the downloaded application). This installer disk image contains the logic to upgrade the OS, for example from OS X El Capitan, to macOS Sierra.
+The system is set to boot from an embedded installer disk image within the `Install macOS Sierra.app` to upgrade the OS, utilizing the `bless` utility. The command used is as follows:
 
-In order to boot the system off the upgrade/installer image (`InstallESD.dmg`), the `Install macOS Sierra.app` utilizes the **`bless`** utility (which inherits the entitlement `com.apple.rootless.install.heritable`):
-
-{% code overflow="wrap" %}
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
-{% endcode %}
 
-Therefore, if an attacker can modify the upgrade image (`InstallESD.dmg`) before the system boots off it, he can bypass SIP.
+The security of this process can be compromised if an attacker alters the upgrade image (`InstallESD.dmg`) before booting. The strategy involves substituting a dynamic loader (dyld) with a malicious version (`libBaseIA.dylib`). This replacement results in the execution of the attacker's code when the installer is initiated.
 
-The way to modify the image to infect it was to replace a dynamic loader (dyld) which will naively load and execute the malicious dylib in the context of the application. Like **`libBaseIA`** dylib. Therefore, whenever the installer application is started by the user (i.e. to upgrade the system) our malicious dylib (named libBaseIA.dylib) will also be loaded and executed in the installer as well.
+The attacker's code gains control during the upgrade process, exploiting the system's trust in the installer. The attack proceeds by altering the `InstallESD.dmg` image via method swizzling, particularly targeting the `extractBootBits` method. This allows the injection of malicious code before the disk image is employed.
 
-Now 'inside' the installer application, we can control the this phase of the upgrade process. Since the installer will 'bless' the image, all we have to do is subvert the image, **`InstallESD.dmg`**, before it's used. It was possible to do this hooking the **`extractBootBits`** method with a method swizzling.\
-Having the malicious code executed right before the disk image is used, it's time to infect it.
+Moreover, within the `InstallESD.dmg`, there's a `BaseSystem.dmg`, which serves as the upgrade code's root file system. Injecting a dynamic library into this allows the malicious code to operate within a process capable of altering OS-level files, significantly increasing the potential for system compromise.
 
-Inside `InstallESD.dmg` there is another embedded disk image `BaseSystem.dmg` which is the 'root file-system' of the upgrade code. It was posible to inject a dynamic library into the `BaseSystem.dmg` so the malicious code will be running within the context of a process that can modify OS-level files.
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
@@ -189,7 +184,10 @@ In this talk from [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk),
 The entitlement **`com.apple.rootless.install`** allows to bypass SIP
 {% endhint %}
 
-From [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/) The system XPC service `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` has the entitlement **`com.apple.rootless.install`**, which grants the process permission to bypass SIP restrictions. It also **exposes a method to move files without any security check.**
+The entitlement `com.apple.rootless.install` is known to bypass System Integrity Protection (SIP) on macOS. This was notably mentioned in relation to [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).
+
+In this specific case, the system XPC service located at `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` possesses this entitlement. This allows the related process to circumvent SIP constraints. Furthermore, this service notably presents a method that permits the movement of files without enforcing any security measures.
+
 
 ## Sealed System Snapshots
 

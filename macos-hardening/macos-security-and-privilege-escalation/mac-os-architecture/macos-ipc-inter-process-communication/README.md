@@ -28,7 +28,7 @@ A process can also send a port name with some rights **to a different task** and
 
 ### Port Rights
 
-Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are:
+Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
 * **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
   * A **task with the Receive** right can receive messages and **create Send rights**, allowing it to send messages. Originally only the **own task has Receive right over its por**t.
@@ -69,7 +69,9 @@ However, this process only applies to predefined system tasks. Non-system tasks 
 
 ### A Mach Message
 
-Mach messages are sent or received using the **`mach_msg` function** (which is essentially a syscall). When sending, the first argument for this call must be the **message**, which has to start with a **`mach_msg_header_t`** followed by the actual payload:
+[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+
+The `mach_msg` function, essentially a system call, is utilized for sending and receiving Mach messages. The function requires the message to be sent as the initial argument. This message must commence with a `mach_msg_header_t` structure, succeeded by the actual message content. The structure is defined as follows:
 
 ```c
 typedef struct {
@@ -82,7 +84,7 @@ typedef struct {
 } mach_msg_header_t;
 ```
 
-The process that can **receive** messages on a mach port is said to hold the _**receive right**_, while the **senders** hold a _**send**_ or a _**send-once**_** right**. Send-once, as the name implies, can only be used to send a single message and then is invalidated.
+Processes possessing a _**receive right**_ can receive messages on a Mach port. Conversely, the **senders** are granted a _**send**_ or a _**send-once right**_. The send-once right is exclusively for sending a single message, after which it becomes invalid.
 
 In order to achieve an easy **bi-directional communication** a process can specify a **mach port** in the mach **message header** called the _reply port_ (**`msgh_local_port`**) where the **receiver** of the message can **send a reply** to this message. The bitflags in **`msgh_bits`** can be used to **indicate** that a **send-once** **right** should be derived and transferred for this port (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 

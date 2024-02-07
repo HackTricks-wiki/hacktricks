@@ -203,9 +203,7 @@ The Keychain highly probably contains sensitive information that if accessed wit
 
 ## External Services
 
-MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin:
-
-![](<../../.gitbook/assets/image (563).png>)
+MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin.
 
 ## Misc Red Team techniques
 

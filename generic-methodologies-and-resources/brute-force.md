@@ -498,7 +498,7 @@ Some systems have known flaws in the random seed used to generate cryptographic 
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-The STOMP text protocol allows interaction with message queueing services like ActiveMQ, RabbitMQ, HornetQ and OpenMQ.
+The STOMP text protocol is a widely used messaging protocol that **allows seamless communication and interaction with popular message queueing services** such as RabbitMQ, ActiveMQ, HornetQ, and OpenMQ. It provides a standardized and efficient approach to exchange messages and perform various messaging operations.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt

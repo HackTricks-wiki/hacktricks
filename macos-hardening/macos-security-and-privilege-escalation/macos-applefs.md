@@ -16,7 +16,7 @@ Other ways to support HackTricks:
 
 ## Apple Propietary File System (APFS)
 
-APFS, or Apple File System, is a modern file system developed by Apple Inc. that was designed to replace the older Hierarchical File System Plus (HFS+) with an emphasis on **improved performance, security, and efficiency**.
+**Apple File System (APFS)** is a modern file system designed to supersede the Hierarchical File System Plus (HFS+). Its development was driven by the need for **improved performance, security, and efficiency**.
 
 Some notable features of APFS include:
 

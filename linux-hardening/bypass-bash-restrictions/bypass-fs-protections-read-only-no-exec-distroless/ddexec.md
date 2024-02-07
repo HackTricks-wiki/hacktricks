@@ -77,7 +77,7 @@ The steps are relatively easy and do not require any kind of expertise to unders
 
 ## EverythingExec
 
-As of 12/12/2022 I have found a number of alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:
+There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:
 
 ```bash
 tail
@@ -99,6 +99,9 @@ SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls
 ```
 
 Block this, EDRs.
+
+# References
+* [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 
 <details>
 

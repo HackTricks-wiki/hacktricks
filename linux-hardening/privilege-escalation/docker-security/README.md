@@ -24,34 +24,34 @@ Get Access Today:
 
 ## **Basic Docker Engine Security**
 
-Docker engine does the heavy lifting of running and managing Containers. Docker engine uses Linux kernel features like **Namespaces** and **Cgroups** to provide basic **isolation** across Containers. It also uses features like **Capabilities dropping**, **Seccomp**, **SELinux/AppArmor to achieve a better isolation**.
+The **Docker engine** employs the Linux kernel's **Namespaces** and **Cgroups** to isolate containers, offering a basic layer of security. Additional protection is provided through **Capabilities dropping**, **Seccomp**, and **SELinux/AppArmor**, enhancing container isolation. An **auth plugin** can further restrict user actions.
 
-Finally, an **auth plugin** can be used to **limit the actions** users can perform.
+![Docker Security](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
-![](<../../../.gitbook/assets/image (625) (1) (1).png>)
+### Secure Access to Docker Engine
 
-### **Docker engine secure access**
+The Docker engine can be accessed either locally via a Unix socket or remotely using HTTP. For remote access, it's essential to employ HTTPS and **TLS** to ensure confidentiality, integrity, and authentication.
 
-Docker client can access Docker engine **locally using Unix socket or remotely using http** mechanism. To use it remotely, it is needed to use https and **TLS** so that confidentiality, integrity and authentication can be ensured.
-
-By default listens on the Unix socket `unix:///var/`\
-`run/docker.sock` and in Ubuntu distributions, Docker start options are specified in `/etc/default/docker`. To allow Docker API and client to access Docker engine remotely, we need to **expose Docker daemon using http socket**. This can be done by:
+The Docker engine, by default, listens on the Unix socket at `unix:///var/run/docker.sock`. On Ubuntu systems, Docker's startup options are defined in `/etc/default/docker`. To enable remote access to the Docker API and client, expose the Docker daemon over an HTTP socket by adding the following settings:
 
 ```bash
-DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H
-tcp://192.168.56.101:2376" -> add this to /etc/default/docker
-Sudo service docker restart -> Restart Docker daemon
+DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
+sudo service docker restart
 ```
 
-Exposing Docker daemon using http is not a good practice and it is needed to secure the connection using https. There are two options: first option is for **client to verify server identity** and in second option **both client and server verify each other’s identity**. Certificates establish the identity of a server. For an example of both options [**check this page**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
+However, exposing the Docker daemon over HTTP is not recommended due to security concerns. It's advisable to secure connections using HTTPS. There are two main approaches to securing the connection:
+1. The client verifies the server's identity.
+2. Both the client and server mutually authenticate each other's identity.
 
-### **Container image security**
+Certificates are utilized to confirm a server's identity. For detailed examples of both methods, refer to [**this guide**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
 
-Container images are stored either in private repository or public repository. Following are the options that Docker provides for storing Container images:
+### Security of Container Images
 
-* [Docker hub](https://hub.docker.com) – This is a public registry service provided by Docker
-* [Docker registry](https://github.com/%20docker/distribution) – This is an open source project that users can use to host their own registry.
-* [Docker trusted registry](https://www.docker.com/docker-trusted-registry) – This is Docker’s commercial implementation of Docker registry and it provides role based user authentication along with LDAP directory service integration.
+Container images can be stored in either private or public repositories. Docker offers several storage options for container images:
+
+* **[Docker Hub](https://hub.docker.com)**: A public registry service from Docker.
+* **[Docker Registry](https://github.com/docker/distribution)**: An open-source project allowing users to host their own registry.
+* **[Docker Trusted Registry](https://www.docker.com/docker-trusted-registry)**: Docker's commercial registry offering, featuring role-based user authentication and integration with LDAP directory services.
 
 ### Image Scanning
 
@@ -99,43 +99,22 @@ clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 
 ### Docker Image Signing
 
-Docker Container images can be stored either in public or private registry. It is needed to **sign** **Container** images to be able to confirm images haven't being tampered. Content **publisher** takes care of **signing** Container image and pushing it into the registry.\
-Following are some details on Docker content trust:
+Docker image signing ensures the security and integrity of images used in containers. Here's a condensed explanation:
 
-* The Docker content trust is an implementation of the [Notary open source project](https://github.com/docker/notary). The Notary open source project is based on [The Update Framework (TUF) project](https://theupdateframework.github.io).
-* Docker content **trust is enabled** with `export DOCKER_CONTENT_TRUST=1`. As of Docker version 1.10, content trust is **not enabled by default**.
-* **When** content trust is **enabled**, we can **pull only signed images**. When image is pushed, we need to enter tagging key.
-* When the publisher **pushes** the image for the **first** **time** using docker push, there is a need to enter a **passphrase** for the **root key and tagging key**. Other keys are generated automatically.
-* Docker has also added support for hardware keys using Yubikey and details are available [here](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- **Docker Content Trust** utilizes the Notary project, based on The Update Framework (TUF), to manage image signing. For more info, see [Notary](https://github.com/docker/notary) and [TUF](https://theupdateframework.github.io).
+- To activate Docker content trust, set `export DOCKER_CONTENT_TRUST=1`. This feature is off by default in Docker version 1.10 and later.
+- With this feature enabled, only signed images can be downloaded. Initial image push requires setting passphrases for the root and tagging keys, with Docker also supporting Yubikey for enhanced security. More details can be found [here](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Attempting to pull an unsigned image with content trust enabled results in a "No trust data for latest" error.
+- For image pushes after the first, Docker asks for the repository key's passphrase to sign the image.
 
-Following is the **error** we get when **content trust is enabled and image is not signed**.
-
-```shell-session
-$ docker pull smakam/mybusybox
-Using default tag: latest
-No trust data for latest
-```
-
-Following output shows Container **image being pushed to Docker hub with signing** enabled. Since this is not the first time, user is requested to enter only the passphrase for repository key.
-
-```shell-session
-$ docker push smakam/mybusybox:v2
-The push refers to a repository [docker.io/smakam/mybusybox]
-a7022f99b0cc: Layer already exists 
-5f70bf18a086: Layer already exists 
-9508eff2c687: Layer already exists 
-v2: digest: sha256:8509fa814029e1c1baf7696b36f0b273492b87f59554a33589e1bd6283557fc9 size: 2205
-Signing and pushing trust metadata
-Enter passphrase for repository key with ID 001986b (docker.io/smakam/mybusybox): 
-```
-
-It is needed to store root key, repository key as well as passphrase in a safe place. Following command can be used to take backup of private keys:
+To back up your private keys, use the command:
 
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
 
-When I changed Docker host, I had to move the root keys and repository keys to operate from the new host.
+When switching Docker hosts, it's necessary to move the root and repository keys to maintain operations.
+
 
 ***
 
@@ -153,20 +132,22 @@ Get Access Today:
 
 <summary>Summary of Container Security Features</summary>
 
-**Namespaces**
+### Main Process Isolation Features
 
-Namespaces are useful to isolate a project from the other ones, isolating process communications, network, mounts... It's useful to isolate the docker process from other processes (and even the /proc folder) so it cannot escape abusing other processes.
+In containerized environments, isolating projects and their processes is paramount for security and resource management. Here's a simplified explanation of key concepts:
 
-It could be possible "escape" or more exactly **create new namespaces** using the binary **`unshare`** (that uses the **`unshare`** syscall). Docker by default prevents it, but kubernetes doesn't (at the time of this writtiing).\
-Ayway, this is helpful to create new namespaces, but **not to get back to the host defaults namespaces** (unless you have access to some `/proc` inside the host namespaces, where you could use **`nsenter`** to enter in the host namespaces.).
+#### **Namespaces**
+- **Purpose**: Ensure isolation of resources like processes, network, and filesystems. Particularly in Docker, namespaces keep a container's processes separate from the host and other containers.
+- **Usage of `unshare`**: The `unshare` command (or the underlying syscall) is utilized to create new namespaces, providing an added layer of isolation. However, while Kubernetes doesn't inherently block this, Docker does.
+- **Limitation**: Creating new namespaces doesn't allow a process to revert to the host's default namespaces. To penetrate the host namespaces, one would typically require access to the host's `/proc` directory, using `nsenter` for entry.
 
-**CGroups**
+#### **Control Groups (CGroups)**
+- **Function**: Primarily used for allocating resources among processes.
+- **Security Aspect**: CGroups themselves don't offer isolation security, except for the `release_agent` feature, which, if misconfigured, could potentially be exploited for unauthorized access.
 
-This allows to limit resources and doesn't affect the security of the isolation of the process (except for the `release_agent` that could be used to escape).
-
-**Capabilities Drop**
-
-I find this to be one of the **most important** features regarding the process isolation security. This is because without the capabilities, even if the process is running as root **you won't be able to do some privileged actions** (because the called **`syscall`** will return permission error because the process doesn't have the needed capabilities).
+#### **Capability Drop**
+- **Importance**: It's a crucial security feature for process isolation.
+- **Functionality**: It restricts the actions a root process can perform by dropping certain capabilities. Even if a process runs with root privileges, lacking the necessary capabilities prevents it from executing privileged actions, as the syscalls will fail due to insufficient permissions.
 
 These are the **remaining capabilities** after the process drop the others:
 
@@ -258,9 +239,13 @@ This is a security feature that allows Docker to **limit the syscalls** that can
 
 ### SELinux in Docker
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
+- **Labeling System**: SELinux assigns a unique label to every process and filesystem object.
+- **Policy Enforcement**: It enforces security policies that define what actions a process label can perform on other labels within the system.
+- **Container Process Labels**: When container engines initiate container processes, they are typically assigned a confined SELinux label, commonly `container_t`.
+- **File Labeling within Containers**: Files within the container are usually labeled as `container_file_t`.
+- **Policy Rules**: The SELinux policy primarily ensures that processes with the `container_t` label can only interact (read, write, execute) with files labeled as `container_file_t`.
 
-Container engines launch **container processes with a single confined SELinux label**, usually `container_t`, and then set the container inside of the container to be labeled `container_file_t`. The SELinux policy rules basically say that the **`container_t` processes can only read/write/execute files labeled `container_file_t`**.
+This mechanism ensures that even if a process within a container is compromised, it's confined to interacting only with objects that have the corresponding labels, significantly limiting the potential damage from such compromises.
 
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
@@ -268,7 +253,12 @@ Container engines launch **container processes with a single confined SELinux la
 
 ### AuthZ & AuthN
 
-An authorization plugin **approves** or **denies** **requests** to the Docker **daemon** based on both the current **authentication** context and the **command** **context**. The **authentication** **context** contains all **user details** and the **authentication** **method**. The **command context** contains all the **relevant** **request** data.
+In Docker, an authorization plugin plays a crucial role in security by deciding whether to allow or block requests to the Docker daemon. This decision is made by examining two key contexts:
+
+- **Authentication Context**: This includes comprehensive information about the user, such as who they are and how they've authenticated themselves.
+- **Command Context**: This comprises all pertinent data related to the request being made.
+
+These contexts help ensure that only legitimate requests from authenticated users are processed, enhancing the security of Docker operations.
 
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
@@ -337,58 +327,44 @@ For more **`--security-opt`** options check: [https://docs.docker.com/engine/ref
 
 ## Other Security Considerations
 
-### Managing Secrets
+### Managing Secrets: Best Practices
 
-First of all, **do not put them inside your image!**
+It's crucial to avoid embedding secrets directly in Docker images or using environment variables, as these methods expose your sensitive information to anyone with access to the container through commands like `docker inspect` or `exec`.
 
-Also, **don’t use environment variables** for your sensitive info, either. Anyone w**ho can run `docker inspect` or `exec` into the container can find your secret**.
+**Docker volumes** are a safer alternative, recommended for accessing sensitive information. They can be utilized as a temporary filesystem in memory, mitigating the risks associated with `docker inspect` and logging. However, root users and those with `exec` access to the container might still access the secrets.
 
-Docker volumes are better. They are the recommended way to access your sensitive info in the Docker docs. You can **use a volume as temporary file system held in memory**. Volumes remove the `docker inspect` and the logging risk. However, **root users could still see the secret, as could anyone who can `exec` into the container**.
+**Docker secrets** offer an even more secure method for handling sensitive information. For instances requiring secrets during the image build phase, **BuildKit** presents an efficient solution with support for build-time secrets, enhancing build speed and providing additional features.
 
-Even **better than volumes, use Docker secrets**.
+To leverage BuildKit, it can be activated in three ways:
 
-If you just need the **secret in your image**, you can use **BuildKit**. BuildKit cuts build time significantly and has other nice features, including **build-time secrets support**.
+1. Through an environment variable: `export DOCKER_BUILDKIT=1`
+2. By prefixing commands: `DOCKER_BUILDKIT=1 docker build .`
+3. By enabling it by default in the Docker configuration: `{ "features": { "buildkit": true } }`, followed by a Docker restart.
 
-There are three ways to specify the BuildKit backend so you can use its features now.:
-
-1. Set it as an environment variable with `export DOCKER_BUILDKIT=1`.
-2. Start your `build` or `run` command with `DOCKER_BUILDKIT=1`.
-3. Enable BuildKit by default. Set the configuration in /_etc/docker/daemon.json_ to _true_ with: `{ "features": { "buildkit": true } }`. Then restart Docker.
-4. Then you can use secrets at build time with the `--secret` flag like this:
+BuildKit allows for the use of build-time secrets with the `--secret` option, ensuring these secrets are not included in the image build cache or the final image, using a command like:
 
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
 
-Where your file specifies your secrets as key-value pair.
-
-These secrets are excluded from the image build cache. and from the final image.
-
-If you need your **secret in your running container**, and not just when building your image, use **Docker Compose or Kubernetes**.
-
-With Docker Compose, add the secrets key-value pair to a service and specify the secret file. Hat tip to [Stack Exchange answer](https://serverfault.com/a/936262/535325) for the Docker Compose secrets tip that the example below is adapted from.
-
-Example `docker-compose.yml` with secrets:
+For secrets needed in a running container, **Docker Compose and Kubernetes** offer robust solutions. Docker Compose utilizes a `secrets` key in the service definition for specifying secret files, as shown in a `docker-compose.yml` example:
 
 ```yaml
 version: "3.7"
-
 services:
-
   my_service:
     image: centos:7
     entrypoint: "cat /run/secrets/my_secret"
     secrets:
       - my_secret
-
 secrets:
   my_secret:
     file: ./my_secret_file.txt
 ```
 
-Then start Compose as usual with `docker-compose up --build my_service`.
+This configuration allows for the use of secrets when starting services with Docker Compose.
 
-If you’re using [Kubernetes](https://kubernetes.io/docs/concepts/configuration/secret/), it has support for secrets. [Helm-Secrets](https://github.com/futuresimple/helm-secrets) can help make secrets management in K8s easier. Additionally, K8s has Role Based Access Controls (RBAC) — as does Docker Enterprise. RBAC makes access Secrets management more manageable and more secure for teams.
+In Kubernetes environments, secrets are natively supported and can be further managed with tools like [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Kubernetes' Role Based Access Controls (RBAC) enhances secret management security, similar to Docker Enterprise.
 
 ### gVisor
 
@@ -451,6 +427,10 @@ If you have access to the docker socket or have access to a user in the **docker
 * [https://sreeninet.wordpress.com/2016/03/06/docker-security-part-4container-image/](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-4container-image/)
 * [https://en.wikipedia.org/wiki/Linux\_namespaces](https://en.wikipedia.org/wiki/Linux\_namespaces)
 * [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
+* [https://www.redhat.com/sysadmin/privileged-flag-container-engines](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
+* [https://docs.docker.com/engine/extend/plugins_authorization](https://docs.docker.com/engine/extend/plugins_authorization)
+* [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
+* [https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/](https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/)
 
 <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 

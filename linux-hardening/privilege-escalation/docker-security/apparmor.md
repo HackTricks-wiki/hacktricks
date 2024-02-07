@@ -16,23 +16,19 @@ Other ways to support HackTricks:
 
 ## Basic Information
 
-**AppArmor** is a kernel enhancement to confine **programs** to a **limited** set of **resources** with **per-program profiles**. Profiles can **allow** **capabilities** like network access, raw socket access, and the permission to read, write, or execute files on matching paths.
+AppArmor is a **kernel enhancement designed to restrict the resources available to programs through per-program profiles**, effectively implementing Mandatory Access Control (MAC) by tying access control attributes directly to programs instead of users. This system operates by **loading profiles into the kernel**, usually during boot, and these profiles dictate what resources a program can access, such as network connections, raw socket access, and file permissions.
 
-It's a Mandatory Access Control or **MAC** that binds **access control** attributes **to programs rather than to users**.\
-AppArmor confinement is provided via **profiles loaded into the kernel**, typically on boot.\
-AppArmor profiles can be in one of **two modes**:
+There are two operational modes for AppArmor profiles:
 
-* **Enforcement**: Profiles loaded in enforcement mode will result in **enforcement of the policy** defined in the profile **as well as reporting** policy violation attempts (either via syslog or auditd).
-* **Complain**: Profiles in complain mode **will not enforce policy** but instead **report** policy **violation** attempts.
+- **Enforcement Mode**: This mode actively enforces the policies defined within the profile, blocking actions that violate these policies and logging any attempts to breach them through systems like syslog or auditd.
+- **Complain Mode**: Unlike enforcement mode, complain mode does not block actions that go against the profile's policies. Instead, it logs these attempts as policy violations without enforcing restrictions.
 
-AppArmor differs from some other MAC systems on Linux: it is **path-based**, it allows mixing of enforcement and complain mode profiles, it uses include files to ease development, and it has a far lower barrier to entry than other popular MAC systems.
+### Components of AppArmor
 
-### Parts of AppArmor
-
-* **Kernel module**: Does the actual work
-* **Policies**: Defines the behaviour and containment
-* **Parser**: Loads the policies into kernel
-* **Utilities**: Usermode programs to interact with apparmor
+- **Kernel Module**: Responsible for the enforcement of policies.
+- **Policies**: Specify the rules and restrictions for program behavior and resource access.
+- **Parser**: Loads policies into the kernel for enforcement or reporting.
+- **Utilities**: These are user-mode programs that provide an interface for interacting with and managing AppArmor.
 
 ### Profiles path
 

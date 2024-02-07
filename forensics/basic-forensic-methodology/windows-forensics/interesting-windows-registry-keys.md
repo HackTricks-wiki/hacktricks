@@ -1,6 +1,6 @@
 # Interesting Windows Registry Keys
 
-## Interesting Windows Registry Keys
+### Interesting Windows Registry Keys
 
 <details>
 
@@ -16,180 +16,80 @@ Other ways to support HackTricks:
 
 </details>
 
-## **Windows system info**
 
-### Version
+### **Windows Version and Owner Info**
+- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you'll find the Windows version, Service Pack, installation time, and the registered owner's name in a straightforward manner.
 
-* **`Software\Microsoft\Windows NT\CurrentVersion`**: Windows version, Service Pack, Installation time and the registered owner
+### **Computer Name**
+- The hostname is found under **`System\ControlSet001\Control\ComputerName\ComputerName`**.
 
-### Hostname
+### **Time Zone Setting**
+- The system's time zone is stored in **`System\ControlSet001\Control\TimeZoneInformation`**.
 
-* **`System\ControlSet001\Control\ComputerName\ComputerName`**: Hostname
+### **Access Time Tracking**
+- By default, the last access time tracking is turned off (**`NtfsDisableLastAccessUpdate=1`**). To enable it, use:
+  `fsutil behavior set disablelastaccess 0`
 
-### Timezone
+### Windows Versions and Service Packs
+- The **Windows version** indicates the edition (e.g., Home, Pro) and its release (e.g., Windows 10, Windows 11), while **Service Packs** are updates that include fixes and, sometimes, new features.
 
-* **`System\ControlSet001\Control\TimeZoneInformation`**: TimeZone
+### Enabling Last Access Time
+- Enabling last access time tracking allows you to see when files were last opened, which can be critical for forensic analysis or system monitoring.
 
-### Last Access Time
+### Network Information Details
+- The registry holds extensive data on network configurations, including **types of networks (wireless, cable, 3G)** and **network categories (Public, Private/Home, Domain/Work)**, which are vital for understanding network security settings and permissions.
 
-* **`System\ControlSet001\Control\Filesystem`**: Last time access (by default it's disabled with `NtfsDisableLastAccessUpdate=1`, if `0`, then, it's enabled).
-  * To enable it: `fsutil behavior set disablelastaccess 0`
+### Client Side Caching (CSC)
+- **CSC** enhances offline file access by caching copies of shared files. Different **CSCFlags** settings control how and what files are cached, affecting performance and user experience, especially in environments with intermittent connectivity.
 
-### Shutdown Time
+### AutoStart Programs
+- Programs listed in various `Run` and `RunOnce` registry keys are automatically launched at startup, affecting system boot time and potentially being points of interest for identifying malware or unwanted software.
 
-* `System\ControlSet001\Control\Windows`: Shutdown time
-* `System\ControlSet001\Control\Watchdog\Display`: Shutdown count (only XP)
+### Shellbags
+- **Shellbags** not only store preferences for folder views but also provide forensic evidence of folder access even if the folder no longer exists. They are invaluable for investigations, revealing user activity that isn't obvious through other means.
 
-### Network Information
-
-* **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**: Network interfaces
-* **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Unmanaged` & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed` & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Nla\Cache`**: First and last time a network connection was performed and connections through VPN
-* **`Software\Microsoft\WZCSVC\Parameters\Interfaces{GUID}` (for XP) & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles`**: Network type (0x47-wireless, 0x06-cable, 0x17-3G) an category (0-Public, 1-Private/Home, 2-Domain/Work) and last connections
-
-### Shared Folders
-
-* **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** (CSCFLAGS) is enabled, then, a copy of the shared files will be saved in the clients and server in `C:\Windows\CSC`
-  * CSCFlag=0 -> By default the user needs to indicate the files that he wants to cache
-  * CSCFlag=16 -> Automatic caching documents. “All files and programs that users open from the shared folder are automatically available offline” with the “optimize for performance" unticked.
-  * CSCFlag=32 -> Like the previous options by “optimize for performance” is ticked
-  * CSCFlag=48 -> Cache is disabled.
-  * CSCFlag=2048: This setting is only on Win 7 & 8 and is the default setting until you disable “Simple file sharing” or use the “advanced” sharing option. It also appears to be the default setting for the “Homegroup”
-  * CSCFlag=768 -> This setting was only seen on shared Print devices.
-
-### AutoStart programs
-
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
-* `Software\Microsoft\Windows\CurrentVersion\Runonce`
-* `Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run`
-* `Software\Microsoft\Windows\CurrentVersion\Run`
-
-### Explorer Searches
-
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordwheelQuery`: What the user searched for using explorer/helper. The item with `MRU=0` is the last one.
-
-### Typed Paths
-
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: Paths types in the explorer (only W10)
-
-### Recent Docs
-
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: Recent documents opened by the user
-* `NTUSER.DAT\Software\Microsoft\Office{Version}{Excel|Word}\FileMRU`:Recent office docs. Versions:
-  * 14.0 Office 2010
-  * 12.0 Office 2007
-  * 11.0 Office 2003
-  * 10.0 Office X
-* `NTUSER.DAT\Software\Microsoft\Office{Version}{Excel|Word} UserMRU\LiveID_###\FileMRU`: Recent office docs. Versions:
-  * 15.0 office 2013
-  * 16.0 Office 2016
-
-### MRUs
-
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedMRU`
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LasVisitedPidlMRU`
-
-Indicates the path from where the executable was executed
-
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\Op enSaveMRU` (XP)
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\Op enSavePidlMRU`
-
-Indicates files opened inside an opened Window
-
-### Last Run Commands
-
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Policies\RunMR`
-
-### User AssistKey
-
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`
-
-The GUID is the id of the application. Data saved:
-
-* Last Run Time
-* Run Count
-* GUI application name (this contains the abs path and more information)
-* Focus time and Focus name
-
-## Shellbags
-
-When you open a directory Windows saves data about how to visualize the directory in the registry. These entries are known as Shellbags.
-
-Explorer Access:
-
-* `USRCLASS.DAT\Local Settings\Software\Microsoft\Windows\Shell\Bags`
-* `USRCLASS.DAT\Local Settings\Software\Microsoft\Windows\Shell\BagMRU`
-
-Desktop Access:
-
-* `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU`
-* `NTUSER.DAT\Software\Microsoft\Windows\Shell\Bags`
-
-To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) and you will be able to find the\*\* MAC time of the folder **and also the** creation date and modified date of the shellbag which are related to the\*\* first time and the last time\*\* the folder was accessed.
-
-Note 2 things from the following image:
-
-1. We know the **name of the folders of the USB** that was inserted in **E:**
-2. We know when the **shellbag was created and modified** and when the folder was created and accessed
-
-![](<../../../.gitbook/assets/image (475).png>)
-
-## USB information
-
-### Device Info
-
-The registry `HKLM\SYSTEM\ControlSet001\Enum\USBSTOR` monitors each USB device that has been connected to the PC.\
-Within this registry it's possible to find:
-
-* The manufacturer's name
-* The product name and version
-* The Device Class ID
-* The volume name (in the following images the volume name is the highlighted subkey)
-
-![](<../../../.gitbook/assets/image (477).png>)
-
-![](<../../../.gitbook/assets/image (479) (1).png>)
-
-Moreover, by checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB` and comparing the values of the sub-keys it's possible to find the VID value.
-
-![](<../../../.gitbook/assets/image (478).png>)
-
-With the previous information the registry `SOFTWARE\Microsoft\Windows Portable Devices\Devices` can be used to obtain the **`{GUID}`**:
-
-![](<../../../.gitbook/assets/image (480).png>)
-
-### User that used the device
-
-Having the **{GUID}** of the device it's now possible to **check all the NTUDER.DAT hives of all the users**, searching for the GUID until you find it in one of them (`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Mountpoints2`).
-
-![](<../../../.gitbook/assets/image (481).png>)
-
-### Last mounted
-
-Checking the registry `System\MoutedDevices` it's possible to find out **which device was the last one mounted**. In the following image check how the last device mounted in `E:` is the Toshiba one (using the tool Registry Explorer).
-
-![](<../../../.gitbook/assets/image (483) (1) (1).png>)
+### USB Information and Forensics
+- The details stored in the registry about USB devices can help trace which devices were connected to a computer, potentially linking a device to sensitive file transfers or unauthorized access incidents.
 
 ### Volume Serial Number
+- The **Volume Serial Number** can be crucial for tracking the specific instance of a file system, useful in forensic scenarios where file origin needs to be established across different devices.
 
-In `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt` you can find the volume serial number. **Knowing the volume name and the volume serial number you can correlate the information** from LNK files that uses that information.
+### **Shutdown Details**
+- Shutdown time and count (the latter only for XP) are kept in **`System\ControlSet001\Control\Windows`** and **`System\ControlSet001\Control\Watchdog\Display`**.
 
-Note that when a USB device is formatted:
+### **Network Configuration**
+- For detailed network interface info, refer to **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
+- First and last network connection times, including VPN connections, are logged under various paths in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
-* A new volume name is created
-* A new volume serial number is created
-* The physical serial number is kept
+### **Shared Folders**
+- Shared folders and settings are under **`System\ControlSet001\Services\lanmanserver\Shares`**. The Client Side Caching (CSC) settings dictate offline file availability.
 
-### Timestamps
+### **Programs that Start Automatically**
+- Paths like **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** and similar entries under `Software\Microsoft\Windows\CurrentVersion` detail programs set to run at startup.
 
-In `System\ControlSet001\Enum\USBSTOR{VEN_PROD_VERSION}{USB serial}\Properties{83da6326-97a6-4088-9453-a1923f573b29}\` you can find the first and last time the device was connected:
+### **Searches and Typed Paths**
+- Explorer searches and typed paths are tracked in the registry under **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** for WordwheelQuery and TypedPaths, respectively.
 
-* 0064 -- First connection
-* 0066 -- Last connection
-* 0067 -- Disconnection
+### **Recent Documents and Office Files**
+- Recent documents and Office files accessed are noted in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` and specific Office version paths.
 
-![](<../../../.gitbook/assets/image (482).png>)
+### **Most Recently Used (MRU) Items**
+- MRU lists, indicating recent file paths and commands, are stored in various `ComDlg32` and `Explorer` subkeys under `NTUSER.DAT`.
+
+### **User Activity Tracking**
+- The User Assist feature logs detailed application usage stats, including run count and last run time, at **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+
+### **Shellbags Analysis**
+- Shellbags, revealing folder access details, are stored in `USRCLASS.DAT` and `NTUSER.DAT` under `Software\Microsoft\Windows\Shell`. Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** for analysis.
+
+### **USB Device History**
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** and **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contain rich details on connected USB devices, including manufacturer, product name, and connection timestamps.
+- The user associated with a specific USB device can be pinpointed by searching `NTUSER.DAT` hives for the device's **{GUID}**.
+- The last mounted device and its volume serial number can be traced through `System\MountedDevices` and `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectively.
+
+This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
+
+
 
 <details>
 

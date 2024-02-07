@@ -98,7 +98,7 @@ dns-sd -B _http._tcp
 
 When a service starts, it announces its availability to all devices on the subnet by multicasting its presence. Devices interested in these services don't need to send requests but simply listen for these announcements.
 
-For a more user-friendly interface, the ****Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
+For a more user-friendly interface, the **Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
 
 Alternatively, custom scripts can be written to browse and discover services using the `python-zeroconf` library. The [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script demonstrates creating a service browser for `_http._tcp.local.` services, printing added or removed services:
 

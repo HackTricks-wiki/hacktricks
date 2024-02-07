@@ -53,22 +53,6 @@ cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
 
-## Persistent Environment variables
-
-#### **Files that affect behavior of every user:**
-
-* _**/etc/bash.bashrc**_: This file is read whenever an interactive shell is started (normal terminal) and all the commands specified in here are executed.
-* _**/etc/profile and /etc/profile.d/\***_**:** This file is read every time a user logs in. Thus all the commands executed in here will execute only once at the time of user logging in.
-  *   \*\*Example: \*\*
-
-      `/etc/profile.d/somescript.sh`
-
-      ```bash
-      #!/bin/bash
-      TEST=$(cat /var/somefile)
-      export $TEST
-      ```
-
 ## Common variables
 
 From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
