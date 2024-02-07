@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションです。
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
 
 </details>
 
 {% hint style="info" %}
-プログラムが\*\*`scanf` \*\*を使用して**stdinから一度に複数の値を取得**している場合、**`scanf`**の後から開始する状態を生成する必要があります。
+プログラムが**`scanf`**を使用して**stdinから一度に複数の値を取得**している場合、**`scanf`**の後から開始する状態を生成する必要があります。
 {% endhint %}
 
-### アドレスを指定して到達するための入力
+### アドレスに到達するための入力（アドレスを示す）
 ```python
 import angr
 import sys
@@ -49,7 +49,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### アドレスに到達するための入力（プリントを示す）
+### アドレスに到達する入力（プリントを示す）
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -85,22 +85,6 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 ### レジストリの値
-
-Registry values are key-value pairs stored in the Windows Registry. They are used to store configuration settings and other important information for the operating system and installed applications. Understanding how to work with registry values is essential for various tasks, including troubleshooting, system optimization, and malware analysis.
-
-レジストリの値は、Windowsレジストリに格納されるキーと値のペアです。これらは、オペレーティングシステムやインストールされたアプリケーションの設定やその他の重要な情報を格納するために使用されます。レジストリの値を操作する方法を理解することは、トラブルシューティング、システムの最適化、マルウェアの分析など、さまざまなタスクにおいて重要です。
-
-When analyzing malware or performing system forensics, examining registry values can provide valuable insights into the behavior of the malicious software or the system's configuration. It can help identify persistence mechanisms, command and control (C2) communication channels, and other indicators of compromise.
-
-マルウェアの分析やシステムのフォレンジックを行う際には、レジストリの値を調査することで、悪意のあるソフトウェアやシステムの構成に関する貴重な情報を得ることができます。これにより、持続性のメカニズム、コマンドアンドコントロール（C2）の通信チャネル、およびその他の侵害の指標を特定するのに役立ちます。
-
-There are various tools and techniques available for working with registry values. These include manual inspection using the Windows Registry Editor (regedit), command-line tools like reg.exe, and automated analysis using tools like volatility and Registry Explorer.
-
-レジストリの値を操作するためには、さまざまなツールや技術が利用できます。これには、Windows Registry Editor（regedit）を使用した手動の検査、reg.exeなどのコマンドラインツール、およびvolatilityやRegistry Explorerなどのツールを使用した自動化された分析が含まれます。
-
-When examining registry values, it is important to be cautious and take appropriate precautions to avoid accidentally modifying or deleting critical system settings. Creating backups and using virtualized environments for analysis can help mitigate the risk of unintended consequences.
-
-レジストリの値を調査する際には、誤って重要なシステム設定を変更または削除することを防ぐために、注意を払い、適切な予防措置を取ることが重要です。バックアップの作成や仮想化環境の使用は、意図しない結果のリスクを軽減するのに役立ちます。
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -165,22 +149,6 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 ### スタックの値
-
-The stack is a data structure used in computer programming to store and manage variables and function calls. It operates on a "last in, first out" (LIFO) principle, meaning that the last item added to the stack is the first one to be removed.
-
-スタックは、コンピュータプログラミングで変数や関数呼び出しを格納および管理するために使用されるデータ構造です。スタックは「後入れ先出し」（LIFO）の原則に基づいて動作し、スタックに追加された最後のアイテムが最初に削除されます。
-
-In the context of reverse engineering and binary analysis, understanding the values stored in the stack can be crucial for understanding the behavior of a program. By analyzing the stack, you can gain insights into how variables are manipulated and how function calls are made.
-
-逆アセンブリやバイナリ解析の文脈において、スタックに格納された値を理解することは、プログラムの動作を理解する上で重要です。スタックを分析することで、変数の操作方法や関数呼び出しの仕組みについて洞察を得ることができます。
-
-To examine the values stored in the stack during the execution of a program, you can use various debugging and analysis tools. These tools allow you to inspect the memory addresses and contents of the stack, helping you understand how the program manipulates and uses the stack.
-
-プログラムの実行中にスタックに格納された値を調べるためには、さまざまなデバッグおよび解析ツールを使用することができます。これらのツールを使用すると、スタックのメモリアドレスや内容を調査することができ、プログラムがスタックをどのように操作し利用しているかを理解するのに役立ちます。
-
-By analyzing the stack values, you can identify important variables, function arguments, return values, and other critical information that can aid in understanding the program's logic and behavior.
-
-スタックの値を分析することで、重要な変数、関数の引数、戻り値、および他の重要な情報を特定することができます。これらの情報は、プログラムのロジックと動作を理解するのに役立ちます。
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -242,7 +210,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-このシナリオでは、入力は `scanf("%u %u")` で受け取られ、値 `"1 1"` が与えられたため、スタックの値 **`0x00000001`** は **ユーザーの入力** から来ています。これらの値は `$ebp - 8` から始まることがわかります。したがって、コードでは **`$esp` から 8 バイトを引いて（その時点で `$ebp` と `$esp` は同じ値を持っていたため）** BVS をプッシュしました。
+このシナリオでは、入力は `scanf("%u %u")` で受け取られ、値 `"1 1"` が与えられたため、スタックの値 **`0x00000001`** は **ユーザー入力** から来ています。これらの値が `$ebp - 8` で始まるのがわかります。したがって、コードでは **`$ebp` と `$esp` が同じ値を持っていた時点で、`$esp` から 8 バイトを減算** し、その後 BVS をプッシュしました。
 
 ![](<../../../.gitbook/assets/image (614).png>)
 
@@ -307,48 +275,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 動的メモリの値（Malloc）
-
-In this example, we will use angr to analyze a binary that dynamically allocates memory using the `malloc` function. The goal is to find the values stored in the dynamically allocated memory.
-
-```python
-import angr
-
-# Load the binary
-project = angr.Project("/path/to/binary")
-
-# Set up the initial state
-state = project.factory.entry_state()
-
-# Create a simulation manager
-simgr = project.factory.simulation_manager(state)
-
-# Explore the program's execution
-simgr.explore()
-
-# Get the final states
-final_states = simgr.deadended
-
-# Iterate over the final states
-for state in final_states:
-    # Get the memory address of the dynamically allocated memory
-    malloc_address = state.solver.eval(state.regs.rax)
-
-    # Get the value stored in the dynamically allocated memory
-    malloc_value = state.mem[malloc_address].int.concrete
-
-    # Print the memory address and value
-    print(f"Memory Address: {malloc_address}")
-    print(f"Value: {malloc_value}")
-```
-
-In this example, we first load the binary using `angr.Project` and set up the initial state using `project.factory.entry_state()`. We then create a simulation manager using `project.factory.simulation_manager(state)`.
-
-We explore the program's execution using `simgr.explore()`, which will automatically explore all possible paths in the binary. The final states are obtained using `simgr.deadended`.
-
-We iterate over the final states and use `state.solver.eval(state.regs.rax)` to get the memory address of the dynamically allocated memory. We then use `state.mem[malloc_address].int.concrete` to get the value stored in that memory address.
-
-Finally, we print the memory address and value using `print(f"Memory Address: {malloc_address}")` and `print(f"Value: {malloc_value}")`, respectively.
+### 動的メモリ値（Malloc）
 ```python
 import angr
 import claripy
@@ -408,18 +335,6 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 ### ファイルシミュレーション
-
-The `angr` framework provides a powerful feature called file simulation, which allows you to analyze the behavior of a program when interacting with files. This feature is particularly useful when reverse engineering binary files or when analyzing the impact of file operations on program execution.
-
-To perform file simulation with `angr`, you need to create a `SimFile` object that represents the file you want to simulate. You can specify the file's name, size, and other attributes. Once you have created the `SimFile` object, you can use it to interact with the program being analyzed.
-
-For example, you can use the `write` method of the `SimFile` object to simulate writing data to the file. This can be useful to understand how the program handles user input or to analyze the impact of specific data on program execution.
-
-Similarly, you can use the `read` method of the `SimFile` object to simulate reading data from the file. This can help you understand how the program processes input from files or how it reacts to specific file contents.
-
-By combining file simulation with other features of `angr`, such as symbolic execution or taint analysis, you can gain a deeper understanding of the program's behavior and identify potential vulnerabilities or interesting code paths.
-
-Overall, file simulation is a powerful technique provided by the `angr` framework that allows you to analyze the behavior of a program when interacting with files. It can be used for reverse engineering, vulnerability analysis, or any other task that involves understanding the impact of file operations on program execution.
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -475,7 +390,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 {% hint style="info" %}
-シンボリックファイルには、シンボリックデータと結合された定数データも含まれる場合があることに注意してください。
+シンボリックファイルには、シンボリックデータと結合された定数データが含まれている可能性もあることに注意してください：
 ```python
 # Hello world, my name is John.
 # ^                       ^
@@ -501,8 +416,8 @@ main(sys.argv)
 ### 制約の適用
 
 {% hint style="info" %}
-時には、16文字の単語を1文字ずつ比較するような単純な人間の操作は、**angr**にとって非常にコストがかかります。なぜなら、それは1つのifごとに1つの分岐を生成するため、指数的に分岐を生成する必要があるからです: `2^16`\
-そのため、**angrに以前のポイントに到達してもらい**（実際の難しい部分がすでに完了している場所）、**手動で制約を設定する**方が簡単です。
+時には、16文字の単語を1文字ずつ比較するような単純な人間の操作は、**angr**にとってコストがかかります。なぜなら、それは1つのifごとに分岐を生成するため、指数関数的に分岐を生成する必要があるからです：`2^16`\
+そのため、**angrに前のポイントに戻ってもらい**（実際に難しい部分がすでに完了している場所）**その制約を手動で設定する**方が簡単です。
 {% endhint %}
 ```python
 # After perform some complex poperations to the input the program checks
@@ -575,17 +490,17 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 {% hint style="danger" %}
-いくつかのシナリオでは、似たような状態をマージして不要なブランチを省略し、解決策を見つけるために**veritesting**を有効にすることができます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
+いくつかのシナリオでは、**veritesting**をアクティブにすることができます。これにより、類似した状態がマージされ、無駄なブランチを保存して解決策を見つけることができます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 {% endhint %}
 
 {% hint style="info" %}
-これらのシナリオでは、angrにより理解しやすいものを提供するために、関数を**フックする**こともできます。
+これらのシナリオでは、**angrが理解しやすいように関数をフックする**こともできます。
 {% endhint %}
 
-### シミュレーションマネージャー
+### シミュレーションマネージャ
 
-一部のシミュレーションマネージャーは、他のものよりも便利です。前の例では、多くの有用なブランチが作成されるという問題がありました。ここでは、**veritesting**のテクニックを使用してそれらをマージし、解決策を見つけます。\
-このシミュレーションマネージャーは、次のようにも有効にできます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
+一部のシミュレーションマネージャは、他のものよりも有用な場合があります。前述の例では、多くの有用なブランチが作成された問題がありました。ここでは、**veritesting**テクニックを使用してこれらをマージし、解決策を見つけます。\
+このシミュレーションマネージャは、次のようにしてアクティブ化することもできます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -623,72 +538,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 関数への1つの呼び出しのフック/バイパス
-
-In this example, we will use angr to hook or bypass a specific call to a function in a binary. 
-
-この例では、angrを使用して、バイナリ内の特定の関数への呼び出しをフックまたはバイパスします。
-
-First, we need to create an angr project and load the binary:
-
-まず、angrプロジェクトを作成し、バイナリをロードする必要があります。
-
-```python
-import angr
-
-project = angr.Project("/path/to/binary")
-```
-
-Next, we need to find the address of the call instruction we want to hook or bypass. We can use the `find` method to search for the address:
-
-次に、フックまたはバイパスしたい呼び出し命令のアドレスを見つける必要があります。`find`メソッドを使用してアドレスを検索できます。
-
-```python
-call_address = project.loader.find_symbol("function_to_hook").rebased_addr
-```
-
-Now, we can create a hook for the call instruction using the `SimProcedure` class:
-
-これで、`SimProcedure`クラスを使用して、呼び出し命令のフックを作成できます。
-
-```python
-class Hook(angr.SimProcedure):
-    def run(self):
-        # Perform custom actions here
-        # Custom code to execute instead of the original function call
-        # You can modify registers, memory, etc.
-        # Return a value if necessary
-        return 0
-
-# Hook the call instruction
-project.hook(call_address, Hook())
-```
-
-Alternatively, if we want to bypass the call instruction completely, we can use the `SimProcedure` class to create a custom procedure that does nothing:
-
-または、呼び出し命令を完全にバイパスしたい場合は、`SimProcedure`クラスを使用して何もしないカスタム手続きを作成できます。
-
-```python
-class Bypass(angr.SimProcedure):
-    def run(self):
-        # Do nothing
-        pass
-
-# Bypass the call instruction
-project.hook(call_address, Bypass())
-```
-
-Finally, we can execute the binary with angr and observe the effects of the hook or bypass:
-
-最後に、angrでバイナリを実行し、フックまたはバイパスの効果を観察できます。
-
-```python
-state = project.factory.entry_state()
-simulation = project.factory.simgr(state)
-simulation.run()
-```
-
-By hooking or bypassing a specific call to a function, we can modify the behavior of the binary and potentially achieve desired outcomes.
+### 関数への1つの呼び出しをフック/バイパスする
 ```python
 # This level performs the following computations:
 #
@@ -757,22 +607,6 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 ### 関数のフック / シムプロシージャ
-
-In some cases, you may want to modify the behavior of a specific function during the execution of a binary. This can be achieved using a technique called function hooking or simprocedure.
-
-関数の実行中に特定の関数の動作を変更したい場合、関数フックまたはシムプロシージャと呼ばれる技術を使用することができます。
-
-Function hooking involves replacing the original function with a custom implementation that you define. This allows you to intercept the function call and modify its behavior according to your needs. By hooking a function, you can control its input, output, or even completely change its functionality.
-
-関数フックでは、元の関数を定義したカスタム実装で置き換えます。これにより、関数呼び出しを傍受し、必要に応じて動作を変更することができます。関数をフックすることで、入力や出力を制御したり、機能を完全に変更したりすることができます。
-
-Simprocedure is a similar concept, but it is specific to the angr framework. It allows you to replace a function with a custom implementation using the `SimProcedure` class provided by angr. This class provides a set of methods that you can override to define the behavior of the simprocedure.
-
-シムプロシージャは、angrフレームワーク固有の概念ですが、似たような概念です。angrが提供する`SimProcedure`クラスを使用して、関数をカスタム実装で置き換えることができます。このクラスは、シムプロシージャの動作を定義するためにオーバーライドできる一連のメソッドを提供します。
-
-By hooking a function or using a simprocedure, you can gain control over the execution flow of a binary and modify its behavior to suit your needs. This can be particularly useful in scenarios where you want to bypass certain checks or modify the output of a function.
-
-関数をフックするか、シムプロシージャを使用することで、バイナリの実行フローを制御し、動作を変更することができます。これは、特定のチェックをバイパスしたり、関数の出力を変更したりする必要がある場合に特に役立ちます。
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -857,47 +691,6 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 ### 複数のパラメータを持つscanfのシミュレーション
-
-To simulate `scanf` with several parameters, you can use the `angr` framework. `angr` is a powerful binary analysis tool that allows you to perform symbolic execution and solve complex constraints.
-
-Here is an example of how you can simulate `scanf` with multiple parameters using `angr`:
-
-```python
-import angr
-
-# Create an angr project
-project = angr.Project("/path/to/binary")
-
-# Define the symbolic input variables
-input1 = angr.claripy.BVS("input1", 8 * 4)  # 4-byte input
-input2 = angr.claripy.BVS("input2", 8 * 4)  # 4-byte input
-
-# Create a state with symbolic input
-state = project.factory.entry_state(stdin=angr.SimFile(fd=0, content=input1+input2))
-
-# Simulate the execution until the scanf function
-simulation = project.factory.simgr(state)
-simulation.explore(find=0xaddress_of_scanf)
-
-# Get the state after the scanf function
-state_after_scanf = simulation.found[0]
-
-# Get the concrete values of the symbolic input
-concrete_input1 = state_after_scanf.solver.eval(input1)
-concrete_input2 = state_after_scanf.solver.eval(input2)
-
-# Print the concrete values
-print("Input 1:", concrete_input1)
-print("Input 2:", concrete_input2)
-```
-
-In this example, we first create an `angr` project by providing the path to the binary we want to analyze. Then, we define symbolic input variables using `angr.claripy.BVS`. We create a state with symbolic input by passing the symbolic input variables to `angr.SimFile` and setting it as the `stdin` of the state.
-
-Next, we use the `project.factory.simgr` function to create a simulation manager and explore the program's execution until the `scanf` function is reached. We specify the address of the `scanf` function as the `find` parameter.
-
-After the simulation, we retrieve the state after the `scanf` function using `simulation.found[0]`. We can then use the `state.solver.eval` function to get the concrete values of the symbolic input variables.
-
-Finally, we print the concrete values of the inputs.
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -960,14 +753,6 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 ### 静的バイナリ
-
-静的バイナリは、実行可能なプログラムの形式であり、実行時に外部のライブラリや依存関係を必要とせず、単独で動作することができます。静的バイナリは、バイナリ解析やリバースエンジニアリングのコンテキストで非常に重要です。静的バイナリを解析することで、プログラムの内部構造や機能、セキュリティ上の脆弱性を理解することができます。
-
-静的バイナリの解析には、さまざまなツールが利用されます。これらのツールは、バイナリのヘッダやセクション、シンボル、関数、命令などの情報を取得し、解析者に有用な情報を提供します。静的バイナリの解析には、バイナリエディタ、ディスアセンブラ、デバッガ、リバースエンジニアリングフレームワークなどが使用されます。
-
-静的バイナリの解析は、セキュリティ評価や脆弱性診断、マルウェア解析、逆コンパイルなどの目的で使用されます。解析者は、静的バイナリの構造や動作を理解することで、セキュリティ上の問題を特定し、改善策を提案することができます。
-
-静的バイナリの解析は、リバースエンジニアリングの基本的な手法の一つであり、セキュリティ専門家やハッカーにとって重要なスキルです。静的バイナリの解析には、知識と経験が必要ですが、適切なツールと手法を使用することで、効果的な解析が可能となります。
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -1036,12 +821,12 @@ main(sys.argv)
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**したいですか？または**最新版のPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションです。
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう。
+* **[💬 Discordグループ](https://emojipedia.org/speech-balloon/)**に参加するか、[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

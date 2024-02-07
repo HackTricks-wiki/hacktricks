@@ -4,11 +4,11 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新版のPEASSにアクセス**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセス**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけてください
 * [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローするか、[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください**
-* **ハッキングトリックを共有するために、PRを**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と**[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください**
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有するために**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>
 
@@ -20,17 +20,17 @@
 
 ## DPAPIとは
 
-Data Protection API（DPAPI）は、主にWindowsオペレーティングシステム内で**非対称プライベートキーの対称暗号化**に使用され、ユーザーまたはシステムの秘密をエントロピーの重要なソースとして活用します。このアプローチにより、開発者はユーザーのログオン秘密から派生したキーを使用してデータを暗号化できるため、開発者が暗号化キーの保護を管理する必要がなくなります。
+Data Protection API（DPAPI）は、Windowsオペレーティングシステム内で**非対称プライベートキーの対称暗号化**に主に使用され、ユーザーまたはシステムの秘密をエントロピーの重要なソースとして活用します。このアプローチにより、開発者は、ユーザーのログオン秘密から派生したキーを使用してデータを暗号化できるため、開発者が暗号化キーの保護を自分で管理する必要がなくなります。
 
 ### DPAPIによって保護されるデータ
 
 DPAPIによって保護される個人データには、次のものがあります：
 
-- Internet ExplorerおよびGoogle Chromeのパスワードおよび自動入力データ
-- OutlookやWindows Mailなどのアプリケーションの電子メールおよび内部FTPアカウントのパスワード
-- 共有フォルダ、リソース、無線ネットワーク、Windows Vaultのパスワード（暗号化キーを含む）
+- Internet ExplorerとGoogle Chromeのパスワードおよび自動入力データ
+- OutlookやWindows Mailなどのアプリケーションの電子メールや内部FTPアカウントのパスワード
+- 共有フォルダ、リソース、ワイヤレスネットワーク、Windows Vaultのパスワード（暗号化キーを含む）
 - リモートデスクトップ接続、.NET Passport、およびさまざまな暗号化および認証目的のプライベートキーのパスワード
-- Credential Managerによって管理されるネットワークパスワード、Skype、MSNメッセンジャーなどのCryptProtectDataを使用するアプリケーションの個人データ
+- Credential Managerで管理されるネットワークパスワード、およびSkype、MSNメッセンジャーなどのCryptProtectDataを使用するアプリケーションでの個人データ
 
 ## Vaultのリスト
 ```bash
@@ -49,7 +49,9 @@ dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-Mimikatzの`dpapi::cred`を使用して資格情報情報を取得します。応答には、暗号化されたデータとguidMasterKeyなどの興味深い情報が含まれています。
+```
+mimikatzを使用して資格情報情報を取得するには、`dpapi::cred`を使用します。応答には、暗号化されたデータとguidMasterKeyなどの興味深い情報が含まれています。
+```
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -59,13 +61,13 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-あなたは適切な `/masterkey` と一緒に **mimikatz module** `dpapi::cred` を使用して復号化することができます。
+次のように、適切な `/masterkey` を使用して **mimikatz module** `dpapi::cred` を使って復号化することができます：
 ```
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 ```
 ## マスターキー
 
-ユーザーのRSAキーを暗号化するために使用されるDPAPIキーは、`%APPDATA%\Microsoft\Protect\{SID}`ディレクトリに格納されています。ここで、{SID}はそのユーザーの[**セキュリティ識別子**](https://en.wikipedia.org/wiki/Security_Identifier)です。**DPAPIキーは、ユーザーのプライベートキーを保護するマスターキーと同じファイルに格納されています**。通常、これはランダムな64バイトのデータです。（このディレクトリは保護されているため、cmdから`dir`を使用してリストすることはできませんが、PowerShellからリストできます）。
+ユーザーのRSAキーを暗号化するために使用されるDPAPIキーは、`%APPDATA%\Microsoft\Protect\{SID}`ディレクトリに格納されています。ここで、{SID}はそのユーザーの[**セキュリティ識別子**](https://en.wikipedia.org/wiki/Security_Identifier)です。**DPAPIキーは、ユーザーのプライベートキーを保護するマスターキーと同じファイルに格納されています**。通常、これはランダムな64バイトのデータです。（このディレクトリは保護されているため、cmdから`dir`を使用してリストすることはできませんが、PSからはリストできます）。
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -74,7 +76,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-以下はユーザーの一連のマスターキーの例です：
+これはユーザーの一連のマスターキーが見えるようになります：
 
 ![](<../../.gitbook/assets/image (324).png>)
 
@@ -94,9 +96,9 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-LDAPから抽出されたコンピュータリストを使用すると、それらを事前に知らなくてもすべてのサブネットワークを見つけることができます！
+LDAPから抽出されたコンピュータリストを使用すると、それらを事前に知らなくてもすべてのサブネットを見つけることができます！
 
-"ドメイン管理者権限だけでは不十分。すべてをハックしよう。"
+"ドメイン管理者権限だけでは不十分です。すべてをハックしましょう。"
 
 ## DonPAPI
 
@@ -109,7 +111,7 @@ LDAPから抽出されたコンピュータリストを使用すると、それ�
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com/)は、**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの1つです。**技術知識の促進を使命**とするこの会議は、あらゆる分野の技術とサイバーセキュリティ専門家の熱い出会いの場です。
+[**RootedCON**](https://www.rootedcon.com/)は、**スペイン**で最も関連性の高いサイバーセキュリティイベントの1つであり、**ヨーロッパ**でも最も重要なイベントの1つです。**技術知識の促進を使命**とするこの会議は、あらゆる分野の技術とサイバーセキュリティ専門家にとっての熱い出会いの場です。
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -117,10 +119,10 @@ LDAPから抽出されたコンピュータリストを使用すると、それ�
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または**最新バージョンのPEASSにアクセス**したいですか、または**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけましょう
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
-* **ハッキングトリックを共有するために**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と**[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセス**したいですか、または**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけてください
+* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください
+* **ハッキングトリックを共有するために**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と**[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください
 
 </details>
