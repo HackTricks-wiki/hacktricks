@@ -20,15 +20,15 @@ Algunas cosas que podrían ser útiles para depurar/desofuscar un archivo VBS ma
 Wscript.Echo "Like this?"
 ```
 ## Comentarios
-```text
+```bas
 ' this is a comment
 ```
 ## Prueba
-```text
+```bas
 cscript.exe file.vbs
 ```
 ## Escribir datos en un archivo
-```aspnet
+```js
 Function writeBinary(strBinary, strPath)
 
 Dim oFSO: Set oFSO = CreateObject("Scripting.FileSystemObject")

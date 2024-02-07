@@ -14,26 +14,26 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-**Para más detalles sobre la técnica, consulta la publicación original en: [https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/)**. Aquí tienes un resumen:
+**Para más detalles sobre la técnica, consulta la publicación original en: [https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/).** Aquí tienes un resumen:
 
 Los archivos NIB, parte del ecosistema de desarrollo de Apple, están destinados a definir **elementos de interfaz de usuario** y sus interacciones en aplicaciones. Incluyen objetos serializados como ventanas y botones, y se cargan en tiempo de ejecución. A pesar de su uso continuo, Apple ahora recomienda Storyboards para una visualización más completa del flujo de la interfaz de usuario.
 
-### Preocupaciones de seguridad con los archivos NIB
+### Preocupaciones de Seguridad con Archivos NIB
 Es crítico tener en cuenta que los **archivos NIB pueden ser un riesgo de seguridad**. Tienen el potencial de **ejecutar comandos arbitrarios**, y las alteraciones a los archivos NIB dentro de una aplicación no impiden que Gatekeeper ejecute la aplicación, lo que representa una amenaza significativa.
 
 ### Proceso de Inyección de Dirty NIB
 #### Creación y Configuración de un Archivo NIB
-1. **Configuración inicial**:
+1. **Configuración Inicial**:
 - Crea un nuevo archivo NIB usando XCode.
 - Agrega un objeto a la interfaz, configurando su clase como `NSAppleScript`.
 - Configura la propiedad inicial `source` a través de Atributos de Tiempo de Ejecución Definidos por el Usuario.
 
 2. **Gadget de Ejecución de Código**:
-- La configuración facilita la ejecución de AppleScript a pedido.
+- La configuración facilita la ejecución de AppleScript a demanda.
 - Integra un botón para activar el objeto `Apple Script`, activando específicamente el selector `executeAndReturnError:`.
 
 3. **Pruebas**:
-- Un Apple Script simple con fines de prueba:
+- Un simple Apple Script para propósitos de prueba:
 ```bash
 set theDialogText to "PWND"
 display dialog theDialogText
@@ -46,7 +46,7 @@ display dialog theDialogText
 - Inicia la aplicación para evitar problemas con Gatekeeper y cachéala.
 
 2. **Sobrescribiendo el Archivo NIB**:
-- Reemplaza un archivo NIB existente (por ejemplo, About Panel NIB) con el archivo DirtyNIB creado.
+- Reemplaza un archivo NIB existente (por ejemplo, Panel Acerca de NIB) con el archivo DirtyNIB creado.
 
 3. **Ejecución**:
 - Desencadena la ejecución interactuando con la aplicación (por ejemplo, seleccionando el elemento de menú `Acerca de`).
@@ -62,10 +62,10 @@ display dialog theDialogText
 - Es posible identificar aplicaciones no protegidas por Restricciones de Inicio y apuntarlas para la inyección de archivos NIB.
 
 ### Protecciones Adicionales de macOS
-Desde macOS Sonoma en adelante, las modificaciones dentro de los paquetes de aplicaciones están restringidas. Sin embargo, los métodos anteriores involucraban:
+Desde macOS Sonoma en adelante, las modificaciones dentro de los paquetes de aplicaciones están restringidas. Sin embargo, métodos anteriores involucraban:
 1. Copiar la aplicación a una ubicación diferente (por ejemplo, `/tmp/`).
-2. Renombrar directorios dentro del paquete de la aplicación para evitar las protecciones iniciales.
+2. Renombrar directorios dentro del paquete de la aplicación para evitar protecciones iniciales.
 3. Después de ejecutar la aplicación para registrarse con Gatekeeper, modificar el paquete de la aplicación (por ejemplo, reemplazando MainMenu.nib con Dirty.nib).
 4. Renombrar los directorios nuevamente y volver a ejecutar la aplicación para ejecutar el archivo NIB inyectado.
 
-**Nota**: Las actualizaciones recientes de macOS han mitigado este exploit al evitar modificaciones de archivos dentro de los paquetes de aplicaciones después de la caché de Gatekeeper, lo que hace que el exploit sea ineficaz.
+**Nota**: Actualizaciones recientes de macOS han mitigado esta vulnerabilidad al evitar modificaciones de archivos dentro de los paquetes de aplicaciones después de la caché de Gatekeeper, volviendo la vulnerabilidad ineficaz.

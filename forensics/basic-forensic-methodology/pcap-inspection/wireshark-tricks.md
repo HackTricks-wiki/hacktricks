@@ -87,7 +87,9 @@ Otros filtros interesantes:
 
 Si deseas **buscar** **contenido** dentro de los **paquetes** de las sesiones, presiona _CTRL+f_. Puedes agregar nuevas capas a la barra de información principal (N.º, Hora, Origen, etc.) presionando el botón derecho y luego editar columna.
 
-Práctica: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
+### Laboratorios pcap gratuitos
+
+**Practica con los desafíos gratuitos de: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)**
 
 ## Identificación de Dominios
 
@@ -103,7 +105,7 @@ Y una columna que agregue el nombre del servidor desde una conexión HTTPS inici
 
 ### Desde DHCP
 
-En el Wireshark actual en lugar de `bootp` debes buscar `DHCP`
+En el Wireshark actual, en lugar de `bootp`, debes buscar `DHCP`
 
 ![](<../../../.gitbook/assets/image (404).png>)
 
@@ -115,7 +117,7 @@ En el Wireshark actual en lugar de `bootp` debes buscar `DHCP`
 
 ### Descifrar tráfico https con la clave privada del servidor
 
-_editar>preferencias>protocolo>ssl>_
+_editar>preferencia>protocolo>ssl>_
 
 ![](<../../../.gitbook/assets/image (98).png>)
 
@@ -123,20 +125,21 @@ Presiona _Editar_ y agrega todos los datos del servidor y la clave privada (_IP,
 
 ### Descifrar tráfico https con claves de sesión simétricas
 
-Resulta que tanto Firefox como Chrome admiten registrar la clave de sesión simétrica utilizada para cifrar el tráfico TLS en un archivo. Luego puedes apuntar Wireshark a dicho archivo y ¡listo! tráfico TLS descifrado. Más en: [https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
+Tanto Firefox como Chrome tienen la capacidad de registrar claves de sesión TLS, que pueden ser utilizadas con Wireshark para descifrar el tráfico TLS. Esto permite un análisis detallado de las comunicaciones seguras. Se puede encontrar más detalles sobre cómo realizar este descifrado en una guía en [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
+
 Para detectar esto, busca dentro del entorno la variable `SSLKEYLOGFILE`
 
 Un archivo de claves compartidas se verá así:
 
 ![](<../../../.gitbook/assets/image (99).png>)
 
-Para importar esto en Wireshark ve a \_editar > preferencias > protocolo > ssl > e impórtalo en (Pre)-Master-Secret log filename:
+Para importar esto en Wireshark ve a \_editar > preferencia > protocolo > ssl > e impórtalo en (Pre)-Master-Secret log filename:
 
 ![](<../../../.gitbook/assets/image (100).png>)
 
 ## Comunicación ADB
 
-Extraer un APK de una comunicación ADB donde se envió el APK:
+Extrae un APK de una comunicación ADB donde se envió el APK:
 ```python
 from scapy.all import *
 

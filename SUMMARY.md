@@ -5,8 +5,6 @@
 * [HackTricks](README.md)
 * [HackTricks Values & faq](welcome/hacktricks-values-and-faq.md)
 * [About the author](welcome/about-the-author.md)
-* [Getting Started in Hacking](welcome/getting-started-in-hacking.md)
-
 ## 🤩 Generic Methodologies & Resources
 
 * [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
@@ -40,9 +38,7 @@
   * [Memory dump analysis](forensics/basic-forensic-methodology/memory-dump-analysis/README.md)
     * [Volatility - CheatSheet](generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)
   * [Partitions/File Systems/Carving](forensics/basic-forensic-methodology/partitions-file-systems-carving/README.md)
-    * [EXT](forensics/basic-forensic-methodology/partitions-file-systems-carving/ext.md)
     * [File/Data Carving & Recovery Tools](forensics/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md)
-    * [NTFS](forensics/basic-forensic-methodology/partitions-file-systems-carving/ntfs.md)
   * [Pcap Inspection](forensics/basic-forensic-methodology/pcap-inspection/README.md)
     * [DNSCat pcap analysis](forensics/basic-forensic-methodology/pcap-inspection/dnscat-exfiltration.md)
     * [Suricata & Iptables cheatsheet](generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/suricata-and-iptables-cheatsheet.md)
@@ -60,7 +56,6 @@
     * [Video and Audio file analysis](forensics/basic-forensic-methodology/specific-software-file-type-tricks/video-and-audio-file-analysis.md)
     * [ZIPs tricks](forensics/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md)
   * [Windows Artifacts](forensics/basic-forensic-methodology/windows-forensics/README.md)
-    * [Windows Processes](forensics/basic-forensic-methodology/windows-forensics/windows-processes.md)
     * [Interesting Windows Registry Keys](forensics/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
 * [Brute Force - CheatSheet](generic-methodologies-and-resources/brute-force.md)
 * [Python Sandbox Escape & Pyscript](generic-methodologies-and-resources/python/README.md)

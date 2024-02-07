@@ -46,9 +46,9 @@ Puedes encontrar algunos trucos de Wireshark en:
 [wireshark-tricks.md](wireshark-tricks.md)
 {% endcontent-ref %}
 
-### Marco de Xplico
+### Marco Xplico
 
-[**Xplico** ](https://github.com/xplico/xplico)_(solo en linux)_ puede **analizar** un **pcap** y extraer información de él. Por ejemplo, de un archivo pcap, Xplico extrae cada correo electrónico (protocolos POP, IMAP y SMTP), todos los contenidos HTTP, cada llamada VoIP (SIP), FTP, TFTP, y más.
+[**Xplico** ](https://github.com/xplico/xplico)_(solo linux)_ puede **analizar** un **pcap** y extraer información de él. Por ejemplo, de un archivo pcap, Xplico extrae cada correo electrónico (protocolos POP, IMAP y SMTP), todos los contenidos HTTP, cada llamada VoIP (SIP), FTP, TFTP, y más.
 
 **Instalación**
 ```bash
@@ -74,9 +74,7 @@ Esta herramienta también es útil para obtener **otra información analizada** 
 ### NetWitness Investigator
 
 Puedes descargar [**NetWitness Investigator desde aquí**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Funciona en Windows)**.\
-Esta es otra herramienta útil que **analiza los paquetes** y ordena la información de una manera útil para **saber qué está sucediendo por dentro**.
-
-![](<../../../.gitbook/assets/image (567) (1).png>)
+Esta es otra herramienta útil que **analiza los paquetes** y ordena la información de una manera útil para **saber qué está sucediendo internamente**.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
@@ -142,7 +140,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ### Análisis de Malware
 
-Verifique si puede encontrar alguna huella de un malware conocido:
+Verifica si puedes encontrar alguna huella de un malware conocido:
 
 {% content-ref url="../malware-analysis.md" %}
 [malware-analysis.md](../malware-analysis.md)
@@ -150,9 +148,9 @@ Verifique si puede encontrar alguna huella de un malware conocido:
 
 ## Zeek
 
-> Zeek es un analizador de tráfico de red de código abierto y pasivo. Muchos operadores utilizan Zeek como Monitor de Seguridad de Red (NSM) para respaldar investigaciones de actividad sospechosa o maliciosa. Zeek también admite una amplia gama de tareas de análisis de tráfico más allá del dominio de la seguridad, incluida la medición del rendimiento y la resolución de problemas.
+> [Zeek](https://docs.zeek.org/en/master/about.html) es un analizador de tráfico de red pasivo y de código abierto. Muchos operadores utilizan Zeek como un Monitor de Seguridad de Red (NSM) para apoyar investigaciones de actividad sospechosa o maliciosa. Zeek también soporta una amplia gama de tareas de análisis de tráfico más allá del dominio de la seguridad, incluyendo medición de rendimiento y resolución de problemas.
 
-Básicamente, los registros creados por `zeek` no son **pcaps**. Por lo tanto, necesitarás usar **otras herramientas** para analizar los registros donde se encuentra la **información** sobre los pcaps.
+Básicamente, los registros creados por `zeek` no son **pcaps**. Por lo tanto, necesitarás utilizar **otras herramientas** para analizar los registros donde se encuentra la **información** sobre los pcaps.
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
