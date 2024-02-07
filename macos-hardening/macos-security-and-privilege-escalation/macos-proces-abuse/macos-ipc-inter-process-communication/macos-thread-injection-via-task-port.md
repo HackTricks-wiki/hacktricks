@@ -84,18 +84,18 @@ A scan of common libraries revealed appropriate candidates for these operations:
 1. **Reading Memory:**
    The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
 
-   ```c
-   const char *property_getName(objc_property_t prop) {
-       return prop->name;
-   }
-   ```
+```c
+const char *property_getName(objc_property_t prop) {
+      return prop->name;
+}
+```
    
    This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
 
 2. **Writing Memory:**
    Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
 
-```
+```c
 __xpc_int64_set_value:
     str x1, [x0, #0x18]
     ret
@@ -179,7 +179,7 @@ This comprehensive control is encapsulated within the [threadexec](https://githu
 By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
 
 # References
-* https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/
+* [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 
 <details>
 

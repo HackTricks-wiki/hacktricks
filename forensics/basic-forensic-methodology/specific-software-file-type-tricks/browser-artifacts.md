@@ -24,67 +24,54 @@ Get Access Today:
 
 ## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
 
-When we talk about browser artifacts we talk about, navigation history, bookmarks, list of downloaded files, cache data, etc.
+Browser artifacts include various types of data stored by web browsers, such as navigation history, bookmarks, and cache data. These artifacts are kept in specific folders within the operating system, differing in location and name across browsers, yet generally storing similar data types.
 
-These artifacts are files stored inside specific folders in the operating system.
+Here's a summary of the most common browser artifacts:
 
-Each browser stores its files in a different place than other browsers and they all have different names, but they all store (most of the time) the same type of data (artifacts).
+- **Navigation History**: Tracks user visits to websites, useful for identifying visits to malicious sites.
+- **Autocomplete Data**: Suggestions based on frequent searches, offering insights when combined with navigation history.
+- **Bookmarks**: Sites saved by the user for quick access.
+- **Extensions and Add-ons**: Browser extensions or add-ons installed by the user.
+- **Cache**: Stores web content (e.g., images, JavaScript files) to improve website loading times, valuable for forensic analysis.
+- **Logins**: Stored login credentials.
+- **Favicons**: Icons associated with websites, appearing in tabs and bookmarks, useful for additional information on user visits.
+- **Browser Sessions**: Data related to open browser sessions.
+- **Downloads**: Records of files downloaded through the browser.
+- **Form Data**: Information entered in web forms, saved for future autofill suggestions.
+- **Thumbnails**: Preview images of websites.
+- **Custom Dictionary.txt**: Words added by the user to the browser's dictionary.
 
-Let us take a look at the most common artifacts stored by browsers.
-
-* **Navigation History:** Contains data about the navigation history of the user. Can be used to track down if the user has visited some malicious sites for example
-* **Autocomplete Data:** This is the data that the browser suggests based on what you search for the most. Can be used in tandem with the navigation history to get more insight.
-* **Bookmarks:** Self Explanatory.
-* **Extensions and Add ons:** Self Explanatory.
-* **Cache:** When navigating websites, the browser creates all sorts of cache data (images, javascript files…etc) for many reasons. For example to speed the loading time of websites. These cache files can be a great source of data during a forensic investigation.
-* **Logins:** Self Explanatory.
-* **Favicons:** They are the little icons found in tabs, urls, bookmarks and the such. They can be used as another source to get more information about the website or places the user visited.
-* **Browser Sessions:** Self Explanatory.
-* **Downloads**: Self Explanatory.
-* **Form Data:** Anything typed inside forms is oftentimes stored by the browser, so the next time the user enters something inside of a form the browser can suggest previously entered data.
-* **Thumbnails:** Self Explanatory.
-* **Custom Dictionary.txt**: Words added to the dictionary by the user.
 
 ## Firefox
 
-Firefox create the profiles folder in \~/_**.mozilla/firefox/**_ (Linux), in **/Users/$USER/Library/Application Support/Firefox/Profiles/** (MacOS), _**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\\**_ (Windows)_**.**_\
-Inside this folder, the file _**profiles.ini**_ should appear with the name(s) of the user profile(s).\
-Each profile has a "**Path**" variable with the name of the folder where its data is going to be stored. The folder should be **present in the same directory where the \_profiles.ini**\_\*\* exist\*\*. If it isn't, then, probably it was deleted.
+Firefox organizes user data within profiles, stored in specific locations based on the operating system:
 
-Inside the folder **of each profile** (_\~/.mozilla/firefox/\<ProfileName>/_) path you should be able to find the following interesting files:
+- **Linux**: `~/.mozilla/firefox/`
+- **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
+- **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-* _**places.sqlite**_ : History (moz\_\_places), bookmarks (moz\_bookmarks), and downloads (moz\_\_annos). In Windows the tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) can be used to read the history inside _**places.sqlite**_.
-  * Query to dump history: `select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`
-    * Note that a link type is a number that indicates:
-      * 1: User followed a link
-      * 2: User wrote the URL
-      * 3: User used a favorite
-      * 4: Loaded from Iframe
-      * 5: Accessed via HTTP redirect 301
-      * 6: Accessed via HTTP redirect 302
-      * 7: Downloaded file
-      * 8: User followed a link inside an Iframe
-  * Query to dump downloads: `SELECT datetime(lastModified/1000000,'unixepoch') AS down_date, content as File, url as URL FROM moz_places, moz_annos WHERE moz_places.id = moz_annos.place_id;`
-  *
-* _**bookmarkbackups/**_ : Bookmarks backups
-* _**formhistory.sqlite**_ : **Web form data** (like emails)
-* _**handlers.json**_ : Protocol handlers (like, which app is going to handle _mailto://_ protocol)
-* _**persdict.dat**_ : Words added to the dictionary
-* _**addons.json**_ and \_**extensions.sqlite** \_ : Installed addons and extensions
-* _**cookies.sqlite**_ : Contains **cookies.** [**MZCookiesView**](https://www.nirsoft.net/utils/mzcv.html) can be used in Windows to inspect this file.
-*   _**cache2/entries**_ or _**startupCache**_ : Cache data (\~350MB). Tricks like **data carving** can also be used to obtain the files saved in the cache. [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html) can be used to see the **files saved in the cache**.
+A `profiles.ini` file within these directories lists the user profiles. Each profile's data is stored in a folder named in the `Path` variable within `profiles.ini`, located in the same directory as `profiles.ini` itself. If a profile's folder is missing, it may have been deleted.
 
-    Information that can be obtained:
+Within each profile folder, you can find several important files:
 
-    * URL, fetch Count, Filename, Content type, File size, Last modified time, Last fetched time, Server Last Modified, Server Response
-* _**favicons.sqlite**_ : Favicons
-* _**prefs.js**_ : Settings and Preferences
-* _**downloads.sqlite**_ : Old downloads database (now it's inside places.sqlite)
-* _**thumbnails/**_ : Thumbnails
-* _**logins.json**_ : Encrypted usernames and passwords
-* **Browser’s built-in anti-phishing:** `grep 'browser.safebrowsing' ~/Library/Application Support/Firefox/Profiles/*/prefs.js`
-  * Will return “safebrowsing.malware.enabled” and “phishing.enabled” as false if the safe search settings have been disabled
-* _**key4.db**_ or _**key3.db**_ : Master key?
+- **places.sqlite**: Stores history, bookmarks, and downloads. Tools like [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) on Windows can access the history data.
+  - Use specific SQL queries to extract history and downloads information.
+- **bookmarkbackups**: Contains backups of bookmarks.
+- **formhistory.sqlite**: Stores web form data.
+- **handlers.json**: Manages protocol handlers.
+- **persdict.dat**: Custom dictionary words.
+- **addons.json** and **extensions.sqlite**: Information on installed add-ons and extensions.
+- **cookies.sqlite**: Cookie storage, with [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) available for inspection on Windows.
+- **cache2/entries** or **startupCache**: Cache data, accessible through tools like [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html).
+- **favicons.sqlite**: Stores favicons.
+- **prefs.js**: User settings and preferences.
+- **downloads.sqlite**: Older downloads database, now integrated into places.sqlite.
+- **thumbnails**: Website thumbnails.
+- **logins.json**: Encrypted login information.
+- **key4.db** or **key3.db**: Stores encryption keys for securing sensitive information.
+
+Additionally, checking the browser’s anti-phishing settings can be done by searching for `browser.safebrowsing` entries in `prefs.js`, indicating whether safe browsing features are enabled or disabled.
+
 
 To try to decrypt the master password, you can use [https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox\_decrypt)\
 With the following script and call you can specify a password file to brute force:
@@ -106,30 +93,28 @@ done < $passfile
 
 ## Google Chrome
 
-Google Chrome creates the profile inside the home of the user _**\~/.config/google-chrome/**_ (Linux), in _**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\\**_ (Windows), or in \_**/Users/$USER/Library/Application Support/Google/Chrome/** \_ (MacOS).\
-Most of the information will be saved inside the _**Default/**_ or _**ChromeDefaultData/**_ folders inside the paths indicated before. Here you can find the following interesting files:
+Google Chrome stores user profiles in specific locations based on the operating system:
 
-* _**History**_: URLs, downloads and even searched keywords. In Windows, you can use the tool [ChromeHistoryView](https://www.nirsoft.net/utils/chrome\_history\_view.html) to read the history. The "Transition Type" column means:
-  * Link: User clicked on a link
-  * Typed: The url was written
-  * Auto Bookmark
-  * Auto Subframe: Add
-  * Start page: Home page
-  * Form Submit: A form was filled and sent
-  * Reloaded
-* _**Cookies**_: Cookies. [ChromeCookiesView](https://www.nirsoft.net/utils/chrome\_cookies\_view.html) can be used to inspect the cookies.
-* _**Cache**_: Cache. In Windows, you can use the tool [ChromeCacheView](https://www.nirsoft.net/utils/chrome\_cache\_view.html) to inspect the ca
-* _**Bookmarks**_: Bookmarks
-* _**Web Data**_: Form History
-* _**Favicons**_: Favicons
-* _**Login Data**_: Login information (usernames, passwords...)
-* _**Current Session**_ and _**Current Tabs**_: Current session data and current tabs
-* _**Last Session**_ and _**Last Tabs**_: These files hold sites that were active in the browser when Chrome was last closed.
-* _**Extensions**_: Extensions and addons folder
-* **Thumbnails** : Thumbnails
-* **Preferences**: This file contains a plethora of good information such as plugins, extensions, sites using geolocation, popups, notifications, DNS prefetching, certificate exceptions, and much more. If you’re trying to research whether or not a specific Chrome setting was enabled, you will likely find that setting in here.
-* **Browser’s built-in anti-phishing:** `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`
-  * You can simply grep for “**safebrowsing**” and look for `{"enabled: true,"}` in the result to indicate anti-phishing and malware protection is on.
+- **Linux**: `~/.config/google-chrome/`
+- **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
+- **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
+
+Within these directories, most user data can be found in the **Default/** or **ChromeDefaultData/** folders. The following files hold significant data:
+
+- **History**: Contains URLs, downloads, and search keywords. On Windows, [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) can be used to read the history. The "Transition Type" column has various meanings, including user clicks on links, typed URLs, form submissions, and page reloads.
+- **Cookies**: Stores cookies. For inspection, [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) is available.
+- **Cache**: Holds cached data. To inspect, Windows users can utilize [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html).
+- **Bookmarks**: User bookmarks.
+- **Web Data**: Contains form history.
+- **Favicons**: Stores website favicons.
+- **Login Data**: Includes login credentials like usernames and passwords.
+- **Current Session**/**Current Tabs**: Data about the current browsing session and open tabs.
+- **Last Session**/**Last Tabs**: Information about the sites active during the last session before Chrome was closed.
+- **Extensions**: Directories for browser extensions and addons.
+- **Thumbnails**: Stores website thumbnails.
+- **Preferences**: A file rich in information, including settings for plugins, extensions, pop-ups, notifications, and more.
+- **Browser’s built-in anti-phishing**: To check if anti-phishing and malware protection are enabled, run `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Look for `{"enabled: true,"}` in the output.
+
 
 ## **SQLite DB Data Recovery**
 
@@ -137,138 +122,65 @@ As you can observe in the previous sections, both Chrome and Firefox use **SQLit
 
 ## **Internet Explorer 11**
 
-Internet Explorer stores **data** and **metadata** in different locations. The metadata will allow finding the data.
+Internet Explorer 11 manages its data and metadata across various locations, aiding in separating stored information and its corresponding details for easy access and management.
 
-The **metadata** can be found in the folder `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` where VX can be V01, V16, or V24.\
-In the previous folder, you can also find the file V01.log. In case the **modified time** of this file and the WebcacheVX.data file **are different** you may need to run the command `esentutl /r V01 /d` to **fix** possible **incompatibilities**.
+### Metadata Storage
+Metadata for Internet Explorer is stored in `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (with VX being V01, V16, or V24). Accompanying this, the `V01.log` file might show modification time discrepancies with `WebcacheVX.data`, indicating a need for repair using `esentutl /r V01 /d`. This metadata, housed in an ESE database, can be recovered and inspected using tools like photorec and [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), respectively. Within the **Containers** table, one can discern the specific tables or containers where each data segment is stored, including cache details for other Microsoft tools such as Skype.
 
-Once **recovered** this artifact (It's an ESE database, photorec can recover it with the options Exchange Database or EDB) you can use the program [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) to open it. Once **opened**, go to the table named "**Containers**".
+### Cache Inspection
+The [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) tool allows for cache inspection, requiring the cache data extraction folder location. Metadata for cache includes filename, directory, access count, URL origin, and timestamps indicating cache creation, access, modification, and expiry times.
 
-![](<../../../.gitbook/assets/image (446).png>)
+### Cookies Management
+Cookies can be explored using [IECookiesView](https://www.nirsoft.net/utils/iecookies.html), with metadata encompassing names, URLs, access counts, and various time-related details. Persistent cookies are stored in `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`, with session cookies residing in memory.
 
-Inside this table, you can find in which other tables or containers each part of the stored information is saved. Following that, you can find the **locations of the data** stored by the browsers and the **metadata** that is inside.
+### Download Details
+Downloads metadata is accessible via [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), with specific containers holding data like URL, file type, and download location. Physical files can be found under `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`.
 
-**Note that this table indicates metadata of the cache for other Microsoft tools also (e.g. skype)**
+### Browsing History
+To review browsing history, [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) can be used, requiring the location of extracted history files and configuration for Internet Explorer. Metadata here includes modification and access times, along with access counts. History files are located in `%userprofile%\Appdata\Local\Microsoft\Windows\History`.
 
-### Cache
+### Typed URLs
+Typed URLs and their usage timings are stored within the registry under `NTUSER.DAT` at `Software\Microsoft\InternetExplorer\TypedURLs` and `Software\Microsoft\InternetExplorer\TypedURLsTime`, tracking the last 50 URLs entered by the user and their last input times.
 
-You can use the tool [IECacheView](https://www.nirsoft.net/utils/ie\_cache\_viewer.html) to inspect the cache. You need to indicate the folder where you have extracted the cache date.
-
-#### Metadata
-
-The metadata information about the cache stores:
-
-* Filename in the disc
-* SecureDIrectory: Location of the file inside the cache directories
-* AccessCount: Number of times it was saved in the cache
-* URL: The url origin
-* CreationTime: First time it was cached
-* AccessedTime: Time when the cache was used
-* ModifiedTime: Last webpage version
-* ExpiryTime: Time when the cache will expire
-
-#### Files
-
-The cache information can be found in _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5**_ and _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5\low**_
-
-The information inside these folders is a **snapshot of what the user was seeing**. The caches have a size of **250 MB** and the timestamps indicate when the page was visited (first time, creation date of the NTFS, last time, modification time of the NTFS).
-
-### Cookies
-
-You can use the tool [IECookiesView](https://www.nirsoft.net/utils/iecookies.html) to inspect the cookies. You need to indicate the folder where you have extracted the cookies.
-
-#### **Metadata**
-
-The metadata information about the cookies stored:
-
-* Cookie name in the filesystem
-* URL
-* AccessCount: Number of times the cookies have been sent to the server
-* CreationTime: First time the cookie was created
-* ModifiedTime: Last time the cookie was modified
-* AccessedTime: Last time the cookie was accessed
-* ExpiryTime: Time of expiration of the cookie
-
-#### Files
-
-The cookies data can be found in _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies**_ and _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies\low**_
-
-Session cookies will reside in memory and persistent cookie in the disk.
-
-### Downloads
-
-#### **Metadata**
-
-Checking the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) you can find the container with the metadata of the downloads:
-
-![](<../../../.gitbook/assets/image (445).png>)
-
-Getting the information of the column "ResponseHeaders" you can transform from hex that information and obtain the URL, the file type and the location of the downloaded file.
-
-#### Files
-
-Look in the path _**%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory**_
-
-### **History**
-
-The tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) can be used to read the history. But first, you need to indicate the browser in advanced options and the location of the extracted history files.
-
-#### **Metadata**
-
-* ModifiedTime: First time a URL is found
-* AccessedTime: Last time
-* AccessCount: Number of times accessed
-
-#### **Files**
-
-Search in _**userprofile%\Appdata\Local\Microsoft\Windows\History\History.IE5**_ and _**userprofile%\Appdata\Local\Microsoft\Windows\History\Low\History.IE5**_
-
-### **Typed URLs**
-
-This information can be found inside the registry NTDUSER.DAT in the path:
-
-* _**Software\Microsoft\InternetExplorer\TypedURLs**_
-  * Stores the last 50 URLs typed by the user
-* _**Software\Microsoft\InternetExplorer\TypedURLsTime**_
-  * last time the URL was typed
 
 ## Microsoft Edge
 
-For analyzing Microsoft Edge artifacts all the **explanations about cache and locations from the previous section (IE 11) remain valid** with the only difference that the base locating, in this case, is _**%userprofile%\Appdata\Local\Packages**_ (as can be observed in the following paths):
+Microsoft Edge stores user data in `%userprofile%\Appdata\Local\Packages`. The paths for various data types are:
 
-* Profile Path: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC**_
-* History, Cookies and Downloads: _**C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat**_
-* Settings, Bookmarks, and Reading List: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb**_
-* Cache: _**C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC#!XXX\MicrosoftEdge\Cache**_
-* Last active sessions: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active**_
+- **Profile Path**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
+- **History, Cookies, and Downloads**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
+- **Settings, Bookmarks, and Reading List**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb`
+- **Cache**: `C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC#!XXX\MicrosoftEdge\Cache`
+- **Last Active Sessions**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active`
 
-## **Safari**
+## Safari
 
-The databases can be found in `/Users/$User/Library/Safari`
+Safari data is stored at `/Users/$User/Library/Safari`. Key files include:
 
-* **History.db**: The tables `history_visits` _and_ `history_items` contains information about the history and timestamps.
-  * `sqlite3 ~/Library/Safari/History.db "SELECT h.visit_time, i.url FROM history_visits h INNER JOIN history_items i ON h.history_item = i.id"`
-* **Downloads.plist**: Contains the info about the downloaded files.
-* **Book-marks.plis**t: URLs bookmarked.
-* **TopSites.plist**: List of the most visited websites that the user browses to.
-* **Extensions.plist**: To retrieve an old-style list of Safari browser extensions.
-  * `plutil -p ~/Library/Safari/Extensions/Extensions.plist| grep "Bundle Directory Name" | sort --ignore-case`
-  * `pluginkit -mDvvv -p com.apple.Safari.extension`
-* **UserNotificationPermissions.plist**: Domains that are allowed to push notifications.
-  * `plutil -p ~/Library/Safari/UserNotificationPermissions.plist | grep -a3 '"Permission" => 1'`
-* **LastSession.plist**: Tabs that were opened the last time the user exited Safari.
-  * `plutil -p ~/Library/Safari/LastSession.plist | grep -iv sessionstate`
-* **Browser’s built-in anti-phishing:** `defaults read com.apple.Safari WarnAboutFraudulentWebsites`
-  * The reply should be 1 to indicate the setting is active
+- **History.db**: Contains `history_visits` and `history_items` tables with URLs and visit timestamps. Use `sqlite3` to query.
+- **Downloads.plist**: Information about downloaded files.
+- **Bookmarks.plist**: Stores bookmarked URLs.
+- **TopSites.plist**: Most frequently visited sites.
+- **Extensions.plist**: List of Safari browser extensions. Use `plutil` or `pluginkit` to retrieve.
+- **UserNotificationPermissions.plist**: Domains permitted to push notifications. Use `plutil` to parse.
+- **LastSession.plist**: Tabs from the last session. Use `plutil` to parse.
+- **Browser’s built-in anti-phishing**: Check using `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. A response of 1 indicates the feature is active.
 
 ## Opera
 
-The databases can be found in `/Users/$USER/Library/Application Support/com.operasoftware.Opera`
+Opera's data resides in `/Users/$USER/Library/Application Support/com.operasoftware.Opera` and shares Chrome's format for history and downloads.
 
-Opera **stores browser history and download data in the exact same format as Google Chrome**. This applies to the file names as well as the table names.
+- **Browser’s built-in anti-phishing**: Verify by checking if `fraud_protection_enabled` in the Preferences file is set to `true` using `grep`.
 
-* **Browser’s built-in anti-phishing:** `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
-  * **fraud\_protection\_enabled** should be **true**
+These paths and commands are crucial for accessing and understanding the browsing data stored by different web browsers.
+
+
+# References
+* [https://nasbench.medium.com/web-browsers-forensics-7e99940c579a](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
+* [https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
+* [https://books.google.com/books?id=jfMqCgAAQBAJ&pg=PA128&lpg=PA128&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ&pg=PA128&lpg=PA128&dq=%22This+file)
+* **Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
+
 
 <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 

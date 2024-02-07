@@ -32,8 +32,8 @@ The most common tool used in forensics to extract files from images is [**Autops
 
 ## Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** is a tool for searching binary files like images and audio files for embedded files and data.\
-It can be installed with `apt` however the [source](https://github.com/ReFirmLabs/binwalk) can be found on github.\
+**Binwalk** is a tool for analyzing binary files to find embedded content. It's installable via `apt` and its source is on [GitHub](https://github.com/ReFirmLabs/binwalk).
+
 **Useful commands**:
 
 ```bash

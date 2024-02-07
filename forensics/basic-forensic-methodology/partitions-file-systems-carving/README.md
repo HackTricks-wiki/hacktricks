@@ -80,27 +80,32 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 ### GPT (GUID Partition Table)
 
-It’s called GUID Partition Table because every partition on your drive has a **globally unique identifier**.
+The GUID Partition Table, known as GPT, is favored for its enhanced capabilities compared to MBR (Master Boot Record). Distinctive for its **globally unique identifier** for partitions, GPT stands out in several ways:
 
-Just like MBR it starts in the **sector 0**. The MBR occupies 32bits while **GPT** uses **64bits**.\
-GPT **allows up to 128 partitions** in Windows and up to **9.4ZB**.\
-Also, partitions can have a 36 character Unicode name.
+- **Location and Size**: Both GPT and MBR start at **sector 0**. However, GPT operates on **64bits**, contrasting with MBR's 32bits.
+- **Partition Limits**: GPT supports up to **128 partitions** on Windows systems and accommodates up to **9.4ZB** of data.
+- **Partition Names**: Offers the ability to name partitions with up to 36 Unicode characters.
 
-On an MBR disk, the partitioning and boot data are stored in one place. If this data is overwritten or corrupted, you’re in trouble. In contrast, **GPT stores multiple copies of this data across the disk**, so it’s much more robust and can recover if the data is corrupted.
+**Data Resilience and Recovery**:
 
-GPT also stores **cyclic redundancy check (CRC)** values to check that its data is intact. If the data is corrupted, GPT can notice the problem and **attempt to recover the damaged data** from another location on the disk.
+- **Redundancy**: Unlike MBR, GPT doesn't confine partitioning and boot data to a single place. It replicates this data across the disk, enhancing data integrity and resilience.
+- **Cyclic Redundancy Check (CRC)**: GPT employs CRC to ensure data integrity. It actively monitors for data corruption, and when detected, GPT attempts to recover the corrupted data from another disk location.
 
-**Protective MBR (LBA0)**
+**Protective MBR (LBA0)**:
 
-For limited backward compatibility, the space of the legacy MBR is still reserved in the GPT specification, but it is now used in a **way that prevents MBR-based disk utilities from misrecognizing and possibly overwriting GPT disks**. This is referred to as a protective MBR.
+- GPT maintains backward compatibility through a protective MBR. This feature resides in the legacy MBR space but is designed to prevent older MBR-based utilities from mistakenly overwriting GPT disks, hence safeguarding the data integrity on GPT-formatted disks.
 
-![](<../../../.gitbook/assets/image (491).png>)
+![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../.gitbook/assets/image (491).png>)
 
 **Hybrid MBR (LBA 0 + GPT)**
+
+[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
 In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
 
 **Partition table header (LBA 1)**
+
+[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
 The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table (offsets 80 and 84 in the table).
 
@@ -160,41 +165,27 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is named for its method of organization, the file allocation table, which resides at the beginning of the volume. To protect the volume, **two copies** of the table are kept, in case one becomes damaged. In addition, the file allocation tables and the root folder must be stored in a **fixed location** so that the files needed to start the system can be correctly located.
+The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. This system safeguards data by maintaining **two copies** of the table, ensuring data integrity even if one is corrupted. The table, along with the root folder, must be in a **fixed location**, crucial for the system's startup process.
 
-![](<../../../.gitbook/assets/image (495).png>)
+The file system's basic unit of storage is a **cluster, usually 512B**, comprising multiple sectors. FAT has evolved through versions: 
 
-The minimum space unit used by this file system is a **cluster, typically 512B** (which is composed of a number of sectors).
+- **FAT12**, supporting 12-bit cluster addresses and handling up to 4078 clusters (4084 with UNIX).
+- **FAT16**, enhancing to 16-bit addresses, thereby accommodating up to 65,517 clusters.
+- **FAT32**, further advancing with 32-bit addresses, allowing an impressive 268,435,456 clusters per volume.
 
-The earlier **FAT12** had a **cluster addresses to 12-bit** values with up to **4078** **clusters**; it allowed up to 4084 clusters with UNIX. The more efficient **FAT16** increased to **16-bit** cluster address allowing up to **65,517 clusters** per volume. FAT32 uses 32-bit cluster address allowing up to **268,435,456 clusters** per volume
+A significant limitation across FAT versions is the **4GB maximum file size**, imposed by the 32-bit field used for file size storage.
 
-The **maximum file size allowed by FAT is 4GB** (minus one byte) because the file system uses a 32-bit field to store the file size in bytes, and 2^32 bytes = 4 GiB. This happens for FAT12, FAT16 and FAT32.
+Key components of the root directory, particularly for FAT12 and FAT16, include:
 
-The **root directory** occupies a **specific position** for both FAT12 and FAT16 (in FAT32 it occupies a position like any other folder). Each file/folder entry contains this information:
-
-* Name of the file/folder (8 chars max)
-* Attributes
-* Date of creation
-* Date of modification
-* Date of last access
-* Address of the FAT table where the first cluster of the file starts
-* Size
-
-When a file is "deleted" using a FAT file system, the directory entry remains almost **unchanged** except for the **first character of the file name** (modified to 0xE5), preserving most of the "deleted" file's name, along with its time stamp, file length and — most importantly — its physical location on the disk. The list of disk clusters occupied by the file will, however, be erased from the File Allocation Table, marking those sectors available for use by other files created or modified thereafter. In the case of FAT32, it is additionally an erased field responsible for the upper 16 bits of the file start cluster value.
-
-### **NTFS**
-
-{% content-ref url="ntfs.md" %}
-[ntfs.md](ntfs.md)
-{% endcontent-ref %}
+- **File/Folder Name** (up to 8 characters)
+- **Attributes**
+- **Creation, Modification, and Last Access Dates**
+- **FAT Table Address** (indicating the start cluster of the file)
+- **File Size**
 
 ### EXT
 
 **Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
-
-{% content-ref url="ext.md" %}
-[ext.md](ext.md)
-{% endcontent-ref %}
 
 ## **Metadata**
 

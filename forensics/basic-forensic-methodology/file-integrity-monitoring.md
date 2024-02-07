@@ -24,12 +24,10 @@ This can also be done with the user accounts created, processes running, service
 
 ## File Integrity Monitoring
 
-File integrity monitoring is one of the most powerful techniques used to secure IT infrastructures and business data against a wide variety of both known and unknown threats.\
-The goal is to generate a **baseline of all the files** that you want to monitor and then **periodically** **check** those files for possible **changes** (in the content, attribute, metadata, etc.).
+File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
 
-1\. **Baseline comparison,** wherein one or more file attributes will be captured or calculated and stored as a baseline that can be compared against in the future. This can be as simple as the time and date of the file, however, since this data can be easily spoofed, a more trustworthy approach is typically used. This may include periodically assessing the cryptographic checksum for a monitored file, (e.g. using the MD5 or SHA-2 hashing algorithm) and then comparing the result to the previously calculated checksum.
-
-2\. **Real-time change notification**, which is typically implemented within or as an extension to the kernel of the operating system that will flag when a file is accessed or modified.
+1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
+2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
 
 ## Tools
 

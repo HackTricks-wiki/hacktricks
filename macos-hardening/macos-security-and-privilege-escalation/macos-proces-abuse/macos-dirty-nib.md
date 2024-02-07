@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-**For further detail about the technique check the original post from: [https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/)**. Here is a summary:
+**For further detail about the technique check the original post from: [https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/).** Here is a summary:
 
 NIB files, part of Apple's development ecosystem, are intended for defining **UI elements** and their interactions in applications. They encompass serialized objects such as windows and buttons, and are loaded at runtime. Despite their ongoing usage, Apple now advocates for Storyboards for more comprehensive UI flow visualization.
 

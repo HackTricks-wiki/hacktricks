@@ -80,8 +80,6 @@ This tool is also useful to get **other information analysed** from the packets 
 You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(It works in Windows)**.\
 This is another useful tool that **analyses the packets** and sorts the information in a useful way to **know what is happening inside**.
 
-![](<../../../.gitbook/assets/image (567) (1).png>)
-
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
 * Extracting and encoding usernames and passwords (HTTP, FTP, Telnet, IMAP, SMTP...)
@@ -162,7 +160,7 @@ Check if you can find any fingerprint of a known malware:
 
 ## Zeek
 
-> Zeek is a passive, open-source network traffic analyzer. Many operators use Zeek as a Network Security Monitor (NSM) to support investigations of suspicious or malicious activity. Zeek also supports a wide range of traffic analysis tasks beyond the security domain, including performance measurement and troubleshooting.
+> [Zeek](https://docs.zeek.org/en/master/about.html) is a passive, open-source network traffic analyzer. Many operators use Zeek as a Network Security Monitor (NSM) to support investigations of suspicious or malicious activity. Zeek also supports a wide range of traffic analysis tasks beyond the security domain, including performance measurement and troubleshooting.
 
 Basically, logs created by `zeek` aren't **pcaps**. Therefore you will need to use **other tools** to analyse the logs where the **information** about the pcaps are.
 

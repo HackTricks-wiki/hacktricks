@@ -56,19 +56,22 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 Based on this comment [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like these tools aren't working anymore in Big Sur.
 {% endhint %}
 
-The attacker still needs to gain access to the system as well as escalate to **root** privileges in order to run **keychaindump**. This approach comes with its own conditions. As mentioned earlier, **upon login your keychain is unlocked by default** and remains unlocked while you use your system. This is for convenience so that the user doesn’t need to enter their password every time an application wishes to access the keychain. If the user has changed this setting and chosen to lock the keychain after every use, keychaindump will no longer work; it relies on an unlocked keychain to function.
+### Keychaindump Overview
 
-It’s important to understand how Keychaindump extracts passwords out of memory. The most important process in this transaction is the ”**securityd**“ **process**. Apple refers to this process as a **security context daemon for authorization and cryptographic operations**. The Apple developer libraries don’t say a whole lot about it; however, they do tell us that securityd handles access to the keychain. In his research, Juuso refers to the **key needed to decrypt the keychain as ”The Master Key“**. A number of steps need to be taken to acquire this key as it is derived from the user’s OS X login password. If you want to read the keychain file you must have this master key. The following steps can be done to acquire it. **Perform a scan of securityd’s heap (keychaindump does this with the vmmap command)**. Possible master keys are stored in an area flagged as MALLOC\_TINY. You can see the locations of these heaps yourself with the following command:
+A tool named **keychaindump** has been developed to extract passwords from macOS keychains, but it faces limitations on newer macOS versions like Big Sur, as indicated in a [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). The use of **keychaindump** requires the attacker to gain access and escalate privileges to **root**. The tool exploits the fact that the keychain is unlocked by default upon user login for convenience, allowing applications to access it without requiring the user's password repeatedly. However, if a user opts to lock their keychain after each use, **keychaindump** becomes ineffective.
+
+**Keychaindump** operates by targeting a specific process called **securityd**, described by Apple as a daemon for authorization and cryptographic operations, crucial for accessing the keychain. The extraction process involves identifying a **Master Key** derived from the user's login password. This key is essential for reading the keychain file. To locate the **Master Key**, **keychaindump** scans the memory heap of **securityd** using the `vmmap` command, looking for potential keys within areas flagged as `MALLOC_TINY`. The following command is used to inspect these memory locations:
 
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
 
-**Keychaindump** will then search the returned heaps for occurrences of 0x0000000000000018. If the following 8-byte value points to the current heap, we’ve found a potential master key. From here a bit of deobfuscation still needs to occur which can be seen in the source code, but as an analyst the most important part to note is that the necessary data to decrypt this information is stored in securityd’s process memory. Here’s an example of keychain dump output.
+After identifying potential master keys, **keychaindump** searches through the heaps for a specific pattern (`0x0000000000000018`) that indicates a candidate for the master key. Further steps, including deobfuscation, are required to utilize this key, as outlined in **keychaindump**'s source code. Analysts focusing on this area should note that the crucial data for decrypting the keychain is stored within the memory of the **securityd** process. An example command to run **keychaindump** is:
 
 ```bash
 sudo ./keychaindump
 ```
+
 
 ### chainbreaker
 
@@ -87,14 +90,14 @@ Given the keychain unlock password, a master key obtained using [volafox](https:
 
 Without one of these methods of unlocking the Keychain, Chainbreaker will display all other available information.
 
-### **Dump keychain keys**
+#### **Dump keychain keys**
 
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
 
-### **Dump keychain keys (with passwords) with SystemKey**
+#### **Dump keychain keys (with passwords) with SystemKey**
 
 ```bash
 # First, get the keychain decryption key
@@ -104,7 +107,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
 
-### **Dump keychain keys (with passwords) cracking the hash**
+#### **Dump keychain keys (with passwords) cracking the hash**
 
 ```bash
 # Get the keychain hash
@@ -115,7 +118,7 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
 
-### **Dump keychain keys (with passwords) with memory dump**
+#### **Dump keychain keys (with passwords) with memory dump**
 
 [Follow these steps](..#dumping-memory-with-osxpmem) to perform a **memory dump**
 
@@ -128,7 +131,7 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
 
-### **Dump keychain keys (with passwords) using users password**
+#### **Dump keychain keys (with passwords) using users password**
 
 If you know the users password you can use it to **dump and decrypt keychains that belong to the user**.
 

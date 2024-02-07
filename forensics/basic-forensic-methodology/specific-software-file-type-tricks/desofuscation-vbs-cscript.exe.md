@@ -25,19 +25,19 @@ Wscript.Echo "Like this?"
 
 ## Commnets
 
-```text
+```bas
 ' this is a comment
 ```
 
 ## Test
 
-```text
+```bas
 cscript.exe file.vbs
 ```
 
 ## Write data to a file
 
-```aspnet
+```js
 Function writeBinary(strBinary, strPath)
 
     Dim oFSO: Set oFSO = CreateObject("Scripting.FileSystemObject")

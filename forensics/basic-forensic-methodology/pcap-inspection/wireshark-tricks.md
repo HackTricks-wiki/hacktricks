@@ -87,7 +87,9 @@ Other interesting filters:
 
 If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
 
-Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
+### Free pcap labs
+
+**Practice with the free challenges of: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)**
 
 ## Identifying Domains
 
@@ -123,7 +125,8 @@ Press _Edit_ and add all the data of the server and the private key (_IP, Port, 
 
 ### Decrypting https traffic with symmetric session keys
 
-It turns out that Firefox and Chrome both support logging the symmetric session key used to encrypt TLS traffic to a file. You can then point Wireshark at said file and presto! decrypted TLS traffic. More in: [https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
+Both Firefox and Chrome have the capability to log TLS session keys, which can be used with Wireshark to decrypt TLS traffic. This allows for in-depth analysis of secure communications. More details on how to perform this decryption can be found in a guide at [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
+
 To detect this search inside the environment for to variable `SSLKEYLOGFILE`
 
 A file of shared keys will look like this:

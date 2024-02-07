@@ -78,7 +78,7 @@ MacOS stores information such as passwords in several places:
 
 ### macOS Bundles
 
-Basically, a bundle is a **directory structure** within the file system. Interestingly, by default this directory **looks like a single object in Finder** (like `.app`).&#x20;
+A bundle is a **directory** which **looks like an object in Finder** (a Bundle example are `*.app` files).
 
 {% content-ref url="macos-bundles.md" %}
 [macos-bundles.md](macos-bundles.md)
@@ -196,14 +196,12 @@ Mac OS binaries usually are compiled as **universal binaries**. A **universal bi
 
 ## Risk Category Files Mac OS
 
-The files `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` contains the risk associated to files depending on the file extension.
+The directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` is where information about the **risk associated with different file extensions is stored**. This directory categorizes files into various risk levels, influencing how Safari handles these files upon download. The categories are as follows:
 
-The possible categories include the following:
-
-* **LSRiskCategorySafe**: **Totally** **safe**; Safari will auto-open after download
-* **LSRiskCategoryNeutral**: No warning, but **not auto-opened**
-* **LSRiskCategoryUnsafeExecutable**: **Triggers** a **warning** “This file is an application...”
-* **LSRiskCategoryMayContainUnsafeExecutable**: This is for things like archives that contain an executable. It **triggers a warning unless Safari can determine all the contents are safe or neutral**.
+- **LSRiskCategorySafe**: Files in this category are considered **completely safe**. Safari will automatically open these files after they are downloaded.
+- **LSRiskCategoryNeutral**: These files come with no warnings and are **not automatically opened** by Safari.
+- **LSRiskCategoryUnsafeExecutable**: Files under this category **trigger a warning** indicating that the file is an application. This serves as a security measure to alert the user.
+- **LSRiskCategoryMayContainUnsafeExecutable**: This category is for files, such as archives, that might contain an executable. Safari will **trigger a warning** unless it can verify that all contents are safe or neutral.
 
 ## Log files
 

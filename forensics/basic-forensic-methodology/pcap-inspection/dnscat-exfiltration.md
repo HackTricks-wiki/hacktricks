@@ -42,7 +42,7 @@ For more information: [https://github.com/jrmdev/ctf-writeups/tree/master/bsides
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
 
-There is a script that works with Python3: https://github.com/josemlwdf/DNScat-Decoder
+There is a script that works with Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain

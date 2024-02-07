@@ -30,8 +30,7 @@ This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION
 
 ## Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal), or Change Journal, is a feature of the Windows NT file system (NTFS) that **maintains a record of changes made to the volume**.\
-It's possible to use the tool [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) to search for modifications to this record.
+The **USN Journal** (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool allows for the examination of these changes.
 
 ![](<../../.gitbook/assets/image (449).png>)
 
@@ -39,9 +38,7 @@ The previous image is the **output** shown by the **tool** where it can be obser
 
 ## $LogFile
 
-All metadata changes to a file system are logged to ensure the consistent recovery of critical file system structures after a system crash. This is called [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead\_logging).\
-The logged metadata is stored in a file called “**$LogFile**”, which is found in a root directory of an NTFS file system.\
-It's possible to use tools like [LogFileParser](https://github.com/jschicht/LogFileParser) to parse this file and find changes.
+**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
 
 ![](<../../.gitbook/assets/image (450).png>)
 
@@ -137,13 +134,11 @@ Another file that saves information about the USBs is the file `setupapi.dev.log
 
 You can also delete them via GUI following the steps proposed in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-To disable shadow copies:
+To disable shadow copies [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Go to the Windows start button and type "services" into the text search box; open the Services program.
-2. Locate "Volume Shadow Copy" from the list, highlight it,  and then right-click > Properties.
-3. From the "Startup type" drop-down menu, select Disabled, and then click Apply and OK.
-
-![](<../../.gitbook/assets/image (453).png>)
+1. Open the Services program by typing "services" into the text search box after clicking the Windows start button.
+2. From the list, find "Volume Shadow Copy", select it, and then access Properties by right-clicking.
+3. Choose Disabled from the "Startup type" drop-down menu, and then confirm the change by clicking Apply and OK.
 
 It's also possible to modify the configuration of which files are going to be copied in the shadow copy in the registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
