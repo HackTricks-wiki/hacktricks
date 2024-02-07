@@ -6,9 +6,9 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -22,25 +22,20 @@ Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=b
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-De: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
+**Para más detalles, consulta: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)**
 
-El formato PDF es extremadamente complicado, con suficientes trucos y lugares ocultos [para escribir durante años](https://www.sultanik.com/pocorgtfo/). Esto también lo hace popular para desafíos forenses de CTF. La NSA escribió una guía sobre estos lugares ocultos en 2008 titulada "Datos ocultos y metadatos en archivos PDF de Adobe: Riesgos de publicación y contramedidas". Ya no está disponible en su URL original, pero puedes [encontrar una copia aquí](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf). Ange Albertini también mantiene un wiki en GitHub sobre [trucos del formato de archivo PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md).
+El formato PDF es conocido por su complejidad y potencial para ocultar datos, convirtiéndolo en un punto focal para desafíos forenses de CTF. Combina elementos de texto plano con objetos binarios, que pueden estar comprimidos o encriptados, y puede incluir scripts en lenguajes como JavaScript o Flash. Para entender la estructura de un PDF, se puede consultar el material introductorio de Didier Stevens [aquí](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/), o utilizar herramientas como un editor de texto o un editor específico de PDF como Origami.
 
-El formato PDF es parcialmente de texto plano, como HTML, pero con muchos "objetos" binarios en el contenido. Didier Stevens ha escrito [buen material introductorio](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) sobre el formato. Los objetos binarios pueden ser datos comprimidos o incluso encriptados, e incluyen contenido en lenguajes de script como JavaScript o Flash. Para mostrar la estructura de un PDF, puedes navegarlo con un editor de texto o abrirlo con un editor de formato de archivo con conocimiento de PDF como Origami.
+Para explorar o manipular PDFs en profundidad, están disponibles herramientas como [qpdf](https://github.com/qpdf/qpdf) y [Origami](https://github.com/mobmewireless/origami-pdf). Los datos ocultos dentro de los PDF pueden estar disimulados en:
 
-[qpdf](https://github.com/qpdf/qpdf) es una herramienta que puede ser útil para explorar un PDF y transformar o extraer información de él. Otra es un marco en Ruby llamado [Origami](https://github.com/mobmewireless/origami-pdf).
+* Capas invisibles
+* Formato de metadatos XMP de Adobe
+* Generaciones incrementales
+* Texto con el mismo color que el fondo
+* Texto detrás de imágenes o superpuesto a imágenes
+* Comentarios no mostrados
 
-Al explorar el contenido de un PDF en busca de datos ocultos, algunos de los lugares para verificar incluyen:
-
-* capas no visibles
-* el formato de metadatos de Adobe "XMP"
-* la característica de "generación incremental" de PDF en la que se conserva una versión anterior pero no es visible para el usuario
-* texto blanco sobre un fondo blanco
-* texto detrás de imágenes
-* una imagen detrás de una imagen superpuesta
-* comentarios no mostrados
-
-También existen varios paquetes de Python para trabajar con el formato de archivo PDF, como [PeepDF](https://github.com/jesparza/peepdf), que te permiten escribir tus propios scripts de análisis. 
+Para un análisis personalizado de PDF, se pueden utilizar bibliotecas de Python como [PeepDF](https://github.com/jesparza/peepdf) para crear scripts de análisis a medida. Además, el potencial de los PDF para el almacenamiento de datos ocultos es tan vasto que recursos como la guía de la NSA sobre riesgos y contramedidas de PDF, aunque ya no se encuentre alojada en su ubicación original, aún ofrecen información valiosa. Una [copia de la guía](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) y una colección de [trucos de formato PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md) por Ange Albertini pueden proporcionar lecturas adicionales sobre el tema.
 
 <details>
 
@@ -48,9 +43,9 @@ También existen varios paquetes de Python para trabajar con el formato de archi
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

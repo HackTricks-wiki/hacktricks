@@ -1,24 +1,24 @@
-## Docker --privileged
+# Docker --privileged
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 ## Qué afecta
 
-Cuando ejecutas un contenedor como privilegiado, estas deshabilitando las siguientes protecciones:
+Cuando ejecutas un contenedor con privilegios, deshabilitas las protecciones siguientes:
 
 ### Montar /dev
 
-En un contenedor privilegiado, todos los **dispositivos pueden ser accedidos en `/dev/`**. Por lo tanto, puedes **escapar** montando el disco del host.
+En un contenedor con privilegios, todos los **dispositivos pueden ser accedidos en `/dev/`**. Por lo tanto, puedes **escapar** mediante **montar** el disco del host.
 
 {% tabs %}
 {% tab title="Dentro del contenedor predeterminado" %}
@@ -30,7 +30,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {% endtab %}
 
-{% tab title="Dentro del contenedor privilegiado" %}
+{% tab title="Dentro del Contenedor con Privilegios" %}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -42,10 +42,7 @@ cpu              nbd0             pts              stdout           tty27       
 ```
 ### Sistemas de archivos de kernel de solo lectura
 
-Los sistemas de archivos de kernel proporcionan un mecanismo para que un proceso altere la forma en que se ejecuta el kernel. Por defecto, no queremos que los procesos del contenedor modifiquen el kernel, por lo que montamos los sistemas de archivos de kernel como de solo lectura dentro del contenedor.
-
-{% tabs %}
-{% tab title="Dentro del contenedor por defecto" %}
+Los sistemas de archivos de kernel proporcionan un mecanismo para que un proceso modifique el comportamiento del kernel. Sin embargo, cuando se trata de procesos de contenedor, queremos evitar que realicen cambios en el kernel. Por lo tanto, montamos los sistemas de archivos de kernel como **solo lectura** dentro del contenedor, asegurando que los procesos del contenedor no puedan modificar el kernel.
 ```bash
 # docker run --rm -it alpine sh
 mount | grep '(ro'
@@ -56,18 +53,17 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {% endtab %}
 
-{% tab title="Dentro del contenedor privilegiado" %}
+{% tab title="Dentro del Contenedor con Privilegios" %}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
 ```
-{% endtab %}
-{% tab title="Enmascaramiento de sistemas de archivos del kernel" %}
+### Enmascaramiento de sistemas de archivos del kernel
 
-El sistema de archivos **/proc** es consciente del espacio de nombres y se pueden permitir ciertas escrituras, por lo que no lo montamos en solo lectura. Sin embargo, se deben **proteger de la escritura** directorios específicos en el sistema de archivos /proc y, en algunos casos, **de la lectura**. En estos casos, los motores de contenedores montan sistemas de archivos **tmpfs** sobre directorios potencialmente peligrosos, evitando que los procesos dentro del contenedor los utilicen.
+El sistema de archivos **/proc** es selectivamente escribible, pero por motivos de seguridad, ciertas partes están protegidas del acceso de escritura y lectura al superponerlas con **tmpfs**, asegurando que los procesos del contenedor no puedan acceder a áreas sensibles.
 
 {% hint style="info" %}
-**tmpfs** es un sistema de archivos que almacena todos los archivos en memoria virtual. tmpfs no crea ningún archivo en su disco duro. Por lo tanto, si desmonta un sistema de archivos tmpfs, todos los archivos que residen en él se pierden para siempre.
+**tmpfs** es un sistema de archivos que almacena todos los archivos en la memoria virtual. tmpfs no crea archivos en tu disco duro. Por lo tanto, si desmontas un sistema de archivos tmpfs, todos los archivos que contiene se pierden para siempre.
 {% endhint %}
 
 {% tabs %}
@@ -81,22 +77,21 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
 {% endtab %}
 
-{% tab title="Dentro del contenedor privilegiado" %}
+{% tab title="Dentro del Contenedor con Privilegios" %}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
 ```
-{% endtab %}
-{% tab title="Dentro del contenedor por defecto" %}
+### Capacidades de Linux
 
-Los motores de contenedores lanzan los contenedores con un **número limitado de capacidades** para controlar lo que sucede dentro del contenedor de forma predeterminada. Los privilegiados tienen **todas** las **capacidades** accesibles. Para aprender sobre las capacidades, lee:
+Los motores de contenedores lanzan los contenedores con un **número limitado de capacidades** para controlar lo que sucede dentro del contenedor de forma predeterminada. Los contenedores **privilegiados** tienen **todas** las **capacidades** accesibles. Para aprender sobre las capacidades, lee:
 
 {% content-ref url="../linux-capabilities.md" %}
 [linux-capabilities.md](../linux-capabilities.md)
 {% endcontent-ref %}
 
-{% endtab %}
-{% endtabs %}
+{% tabs %}
+{% tab title="Dentro del contenedor predeterminado" %}
 ```bash
 # docker run --rm -it alpine sh
 apk add -U libcap; capsh --print
@@ -107,7 +102,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {% endtab %}
 
-{% tab title="Dentro del contenedor privilegiado" %}
+{% tab title="Dentro del Contenedor con Privilegios" %}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -117,18 +112,17 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 [...]
 ```
 {% endtab %}
-{% tab title="Manipulación de capacidades" %}
-Puedes manipular las capacidades disponibles para un contenedor sin ejecutarlo en modo `--privileged` usando las banderas `--cap-add` y `--cap-drop`.
+{% endtabs %}
+
+Puedes manipular las capacidades disponibles para un contenedor sin ejecutar en modo `--privileged` usando las banderas `--cap-add` y `--cap-drop`.
 
 ### Seccomp
 
-**Seccomp** es útil para **limitar** las **syscalls** que un contenedor puede llamar. Un perfil de seccomp predeterminado está habilitado por defecto al ejecutar contenedores de Docker, pero en modo privilegiado está deshabilitado. Aprende más sobre Seccomp aquí:
+**Seccomp** es útil para **limitar** las **llamadas al sistema** que un contenedor puede realizar. Un perfil de Seccomp predeterminado está habilitado de forma predeterminada al ejecutar contenedores de Docker, pero en modo privilegiado está deshabilitado. Obtén más información sobre Seccomp aquí:
 
 {% content-ref url="seccomp.md" %}
 [seccomp.md](seccomp.md)
 {% endcontent-ref %}
-{% endtab %}
-{% endtabs %}
 ```bash
 # docker run --rm -it alpine sh
 grep Seccomp /proc/1/status
@@ -150,11 +144,11 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-También, tenga en cuenta que cuando Docker (u otros CRIs) se utilizan en un clúster de **Kubernetes**, el filtro **seccomp** está desactivado por defecto.
+También, ten en cuenta que cuando Docker (u otros CRIs) se utilizan en un clúster de **Kubernetes**, el **filtro seccomp está deshabilitado de forma predeterminada**.
 
 ### AppArmor
 
-**AppArmor** es una mejora del kernel para confinar los **contenedores** a un **conjunto limitado de recursos** con **perfiles por programa**. Cuando se ejecuta con la bandera `--privileged`, esta protección se desactiva.
+**AppArmor** es una mejora del kernel para confinar los **contenedores** a un **conjunto limitado** de **recursos** con **perfiles por programa**. Cuando se ejecuta con la bandera `--privileged`, esta protección se deshabilita.
 
 {% content-ref url="apparmor.md" %}
 [apparmor.md](apparmor.md)
@@ -165,7 +159,7 @@ También, tenga en cuenta que cuando Docker (u otros CRIs) se utilizan en un cl�
 ```
 ### SELinux
 
-Cuando se ejecuta con la bandera `--privileged`, **las etiquetas SELinux se desactivan**, y el contenedor se ejecuta con la **etiqueta con la que se ejecutó el motor del contenedor**. Esta etiqueta suele ser `unconfined` y tiene **acceso completo a las etiquetas que tiene el motor del contenedor**. En el modo sin raíz, el contenedor se ejecuta con `container_runtime_t`. En el modo raíz, se ejecuta con `spc_t`.
+Ejecutar un contenedor con la bandera `--privileged` deshabilita las **etiquetas SELinux**, lo que hace que herede la etiqueta del motor de contenedores, típicamente `unconfined`, otorgando acceso completo similar al del motor de contenedores. En modo sin raíz, se utiliza `container_runtime_t`, mientras que en modo raíz se aplica `spc_t`.
 
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
@@ -178,7 +172,7 @@ Cuando se ejecuta con la bandera `--privileged`, **las etiquetas SELinux se desa
 
 ### Espacios de nombres
 
-Los espacios de nombres **NO se ven afectados** por la bandera `--privileged`. Aunque no tienen las restricciones de seguridad habilitadas, **no ven todos los procesos en el sistema o la red del host, por ejemplo**. Los usuarios pueden deshabilitar espacios de nombres individuales usando las banderas del motor de contenedores **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
+Los espacios de nombres **NO se ven afectados** por la bandera `--privileged`. Aunque no tengan habilitadas las restricciones de seguridad, **no ven todos los procesos en el sistema o la red del host, por ejemplo**. Los usuarios pueden deshabilitar espacios de nombres individuales utilizando las banderas de los motores de contenedores **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
 
 {% tabs %}
 {% tab title="Dentro del contenedor privilegiado predeterminado" %}
@@ -186,8 +180,8 @@ Los espacios de nombres **NO se ven afectados** por la bandera `--privileged`. A
 # docker run --rm --privileged -it alpine sh
 ps -ef
 PID   USER     TIME  COMMAND
-    1 root      0:00 sh
-   18 root      0:00 ps -ef
+1 root      0:00 sh
+18 root      0:00 ps -ef
 ```
 {% endtab %}
 
@@ -196,14 +190,17 @@ PID   USER     TIME  COMMAND
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef
 PID   USER     TIME  COMMAND
-    1 root      0:03 /sbin/init
-    2 root      0:00 [kthreadd]
-    3 root      0:00 [rcu_gp]ount | grep /proc.*tmpfs
+1 root      0:03 /sbin/init
+2 root      0:00 [kthreadd]
+3 root      0:00 [rcu_gp]ount | grep /proc.*tmpfs
 [...]
 ```
-### Namespace de usuario
+{% endtab %}
+{% endtabs %}
 
-Los motores de contenedores **NO usan el namespace de usuario por defecto**. Sin embargo, los contenedores sin root siempre lo usan para montar sistemas de archivos y usar más de un UID. En el caso sin root, el namespace de usuario no se puede desactivar; es necesario para ejecutar contenedores sin root. Los namespaces de usuario previenen ciertos privilegios y añaden una considerable seguridad.
+### Espacio de nombres de usuario
+
+**De forma predeterminada, los motores de contenedores no utilizan espacios de nombres de usuario, excepto para contenedores sin raíz**, que los requieren para el montaje del sistema de archivos y el uso de múltiples UID. Los espacios de nombres de usuario, esenciales para los contenedores sin raíz, no se pueden desactivar y mejoran significativamente la seguridad al restringir los privilegios.
 
 ## Referencias
 
@@ -213,10 +210,10 @@ Los motores de contenedores **NO usan el namespace de usuario por defecto**. Sin
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Consigue el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

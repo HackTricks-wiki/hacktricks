@@ -4,15 +4,16 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
+**Los archivos PNG** son altamente valorados en los desafíos de **CTF** por su **compresión sin pérdida**, lo que los hace ideales para incrustar datos ocultos. Herramientas como **Wireshark** permiten analizar archivos PNG desglosando sus datos dentro de paquetes de red, revelando información incrustada o anomalías.
 
-Los archivos PNG, en particular, son populares en desafíos CTF, probablemente por su compresión sin pérdida adecuada para ocultar datos no visuales en la imagen. Los archivos PNG pueden ser disecados en Wireshark. Para verificar la corrección o intentar reparar PNGs corruptos, puedes usar [pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)
+Para verificar la integridad de un archivo PNG y reparar la corrupción, **pngcheck** es una herramienta crucial que ofrece funcionalidad de línea de comandos para validar y diagnosticar archivos PNG ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). Cuando los archivos van más allá de correcciones simples, servicios en línea como [PixRecovery de OfficeRecovery](https://online.officerecovery.com/pixrecovery/) proporcionan una solución basada en web para **reparar PNGs corruptos**, ayudando en la recuperación de datos cruciales para los participantes de CTF.
 
-Puedes intentar reparar PNGs corruptos utilizando herramientas en línea como [https://online.officerecovery.com/pixrecovery/](https://online.officerecovery.com/pixrecovery/)
+Estas estrategias subrayan la importancia de un enfoque integral en los CTFs, utilizando una combinación de herramientas analíticas y técnicas de reparación para descubrir y recuperar datos ocultos o perdidos.

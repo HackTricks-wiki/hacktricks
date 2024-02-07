@@ -1,11 +1,11 @@
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
@@ -13,14 +13,14 @@ Otras formas de apoyar a HackTricks:
 </details>
 
 
-La exposición de `/proc` y `/sys` sin un aislamiento adecuado de espacio de nombres introduce riesgos de seguridad significativos, incluida la ampliación de la superficie de ataque y la divulgación de información. Estos directorios contienen archivos sensibles que, si están mal configurados o son accedidos por un usuario no autorizado, pueden llevar a la fuga del contenedor, modificación del host o proporcionar información que facilite ataques adicionales. Por ejemplo, montar incorrectamente `-v /proc:/host/proc` puede eludir la protección de AppArmor debido a su naturaleza basada en la ruta, dejando `/host/proc` desprotegido.
+La exposición de `/proc` y `/sys` sin un aislamiento adecuado de espacio de nombres introduce riesgos de seguridad significativos, incluida la ampliación de la superficie de ataque y la divulgación de información. Estos directorios contienen archivos sensibles que, si están mal configurados o son accedidos por un usuario no autorizado, pueden llevar a la fuga del contenedor, modificación del host o proporcionar información que facilite ataques adicionales. Por ejemplo, montar incorrectamente `-v /proc:/host/proc` puede eludir la protección de AppArmor debido a su naturaleza basada en rutas, dejando `/host/proc` desprotegido.
 
-Puedes encontrar más detalles sobre cada vulnerabilidad potencial en [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts).
+**Puedes encontrar más detalles de cada vulnerabilidad potencial en [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts).**
 
 # Vulnerabilidades de procfs
 
 ## `/proc/sys`
-Este directorio permite el acceso para modificar variables del kernel, generalmente a través de `sysctl(2)`, y contiene varios subdirectorios de interés:
+Este directorio permite acceder para modificar variables del kernel, generalmente a través de `sysctl(2)`, y contiene varios subdirectorios de interés:
 
 ### **`/proc/sys/kernel/core_pattern`**
 - Descrito en [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
@@ -42,7 +42,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acceso a modprobe
 ```
 
 ### **`/proc/sys/vm/panic_on_oom`**
-- Referenciado en [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Referido en [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Una bandera global que controla si el kernel entra en pánico o invoca al OOM killer cuando ocurre una condición de OOM.
 
 ### **`/proc/sys/fs`**
@@ -103,8 +103,8 @@ echo b > /proc/sysrq-trigger # Reinicia el host
 - Expone nombres de procesos, IDs e identificadores de cgroup.
 
 ### **`/proc/[pid]/mountinfo`**
-- Proporciona información sobre los puntos de montaje en el espacio de nombres de montaje del proceso.
-- Expone la ubicación del `rootfs` del contenedor o la imagen.
+- Proporciona información sobre puntos de montaje en el espacio de nombres de montaje del proceso.
+- Expone la ubicación del `rootfs` o imagen del contenedor.
 
 ## Vulnerabilidades de `/sys`
 
@@ -148,18 +148,18 @@ cat /output
 
 # Referencias
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
-* [Comprender y Fortalecer los Contenedores de Linux](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc\_group\_understanding\_hardening\_linux\_containers-1-1.pdf)
+* [Comprender y Reforzar los Contenedores de Linux](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc\_group\_understanding\_hardening\_linux\_containers-1-1.pdf)
 * [Abuso de Contenedores de Linux con y sin Privilegios](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container\_whitepaper.pdf)
 
 
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).

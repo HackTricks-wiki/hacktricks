@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks AWS)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks en AWS)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
@@ -10,26 +10,24 @@ Otras formas de apoyar a HackTricks:
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a** los repositorios de [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
-
 <figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de recompensas por errores.
+Únete al servidor de [**Discord de HackenProof**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de recompensas por errores.
 
 **Información sobre Hacking**\
-Involúcrate con contenido que explora la emoción y los desafíos del hacking
+Involúcrate con contenido que explora la emoción y los desafíos del hacking.
 
 **Noticias de Hacking en Tiempo Real**\
-Mantente actualizado con el mundo del hacking a través de noticias e información en tiempo real
+Mantente actualizado con el mundo del hacking a través de noticias e información en tiempo real.
 
 **Últimos Anuncios**\
-Mantente informado sobre los nuevos programas de recompensas por errores y actualizaciones importantes de plataformas
+Mantente informado sobre los nuevos programas de recompensas por errores y actualizaciones importantes de plataformas.
 
-**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo!
+**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy.
 
 ### **Mejor herramienta para buscar vectores de escalada de privilegios locales en Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
@@ -39,7 +37,7 @@ Mantente informado sobre los nuevos programas de recompensas por errores y actua
 * [ ] Verificar la [**RUTA**](privilege-escalation/#path), ¿alguna **carpeta escribible**?
 * [ ] Verificar las [**variables de entorno**](privilege-escalation/#env-info), ¿algún detalle sensible?
 * [ ] Buscar [**exploits de kernel**](privilege-escalation/#kernel-exploits) **usando scripts** (DirtyCow?)
-* [ ] **Verificar** si la [**versión de sudo** es vulnerable](privilege-escalation/#sudo-version)
+* [ ] **Verificar** si la [**versión de sudo es vulnerable**](privilege-escalation/#sudo-version)
 * [ ] [**Fallo de verificación de firma de Dmesg**](privilege-escalation/#dmesg-signature-verification-failed)
 * [ ] Más enumeración del sistema ([fecha, estadísticas del sistema, información de la CPU, impresoras](privilege-escalation/#more-system-enumeration))
 * [ ] [Enumerar más defensas](privilege-escalation/#enumerate-possible-defenses)
@@ -74,7 +72,7 @@ Mantente informado sobre los nuevos programas de recompensas por errores y actua
 ### [Servicios](privilege-escalation/#services)
 
 * [ ] ¿Algún archivo **.service escribible**?
-* [ ] ¿Algún binario **escribible** ejecutado por un **servicio**?
+* [ ] ¿Algún binario **ejecutado por un servicio** escribible?
 * [ ] ¿Alguna **carpeta escribible en la RUTA de systemd**?
 
 ### [Temporizadores](privilege-escalation/#timers)
@@ -93,9 +91,9 @@ Mantente informado sobre los nuevos programas de recompensas por errores y actua
 
 ### [Red](privilege-escalation/#network)
 
-* [ ] Enumerar la red para saber dónde estás
+* [ ] Enumerar la red para saber dónde te encuentras
 * [ ] ¿Puertos abiertos a los que no podías acceder antes de obtener una shell dentro de la máquina?
-* ¿Puedes **espiar el tráfico** usando `tcpdump`?
+* [ ] ¿Puedes **espiar el tráfico** usando `tcpdump`?
 
 ### [Usuarios](privilege-escalation/#users)
 
@@ -108,7 +106,7 @@ Mantente informado sobre los nuevos programas de recompensas por errores y actua
 
 ### [RUTA Escribible](privilege-escalation/#writable-path-abuses)
 
-* [ ] Si tienes **privilegios de escritura sobre alguna carpeta en la RUTA** podrías ser capaz de escalar privilegios
+* [ ] Si tienes **privilegios de escritura sobre alguna carpeta en la RUTA**, es posible que puedas escalar privilegios
 
 ### [Comandos SUDO y SUID](privilege-escalation/#sudo-and-suid)
 
@@ -146,10 +144,10 @@ Mantente informado sobre los nuevos programas de recompensas por errores y actua
 
 * [ ] **Archivos de perfil** - ¿Leer datos sensibles? ¿Escribir para escalada de privilegios?
 * [ ] Archivos **passwd/shadow** - ¿Leer datos sensibles? ¿Escribir para escalada de privilegios?
-* [ ] **Verificar carpetas comúnmente interesantes** en busca de datos sensibles
-* [ ] **Ubicación/Archivos de propiedad extraña,** a los que podrías tener acceso o alterar archivos ejecutables
+* [ ] Verificar carpetas comúnmente interesantes en busca de datos sensibles
+* [ ] **Ubicación/archivos de propiedad extraña**, a los que puedes acceder o alterar archivos ejecutables
 * [ ] **Modificado** en los últimos minutos
-* [ ] **Archivos de base de datos Sqlite**
+* [ ] Archivos de **base de datos Sqlite**
 * [ ] **Archivos ocultos**
 * [ ] **Scripts/Binarios en la RUTA**
 * [ ] **Archivos web** (¿contraseñas?)

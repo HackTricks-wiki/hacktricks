@@ -2,11 +2,11 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
@@ -16,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 ## Contexto
 
-En Linux, para ejecutar un programa, este debe existir como un archivo, debe ser accesible de alguna manera a través de la jerarquía del sistema de archivos (así es como funciona `execve()`). Este archivo puede residir en disco o en la memoria RAM (tmpfs, memfd), pero necesitas una ruta de archivo. Esto ha hecho muy fácil controlar lo que se ejecuta en un sistema Linux, facilita detectar amenazas y herramientas de atacantes o prevenir que intenten ejecutar algo propio en absoluto (_por ejemplo_, no permitir que usuarios no privilegiados coloquen archivos ejecutables en cualquier lugar).
+En Linux, para ejecutar un programa, este debe existir como un archivo, debe ser accesible de alguna manera a través de la jerarquía del sistema de archivos (así es como funciona `execve()`). Este archivo puede residir en disco o en la memoria RAM (tmpfs, memfd), pero necesitas una ruta de archivo. Esto ha hecho muy fácil controlar lo que se ejecuta en un sistema Linux, facilita detectar amenazas y herramientas de atacantes o evitar que intenten ejecutar algo propio en absoluto (_por ejemplo, no permitir que usuarios no privilegiados coloquen archivos ejecutables en cualquier lugar).
 
 Pero esta técnica está aquí para cambiar todo esto. Si no puedes iniciar el proceso que deseas... **entonces secuestras uno que ya existe**.
 
@@ -40,7 +40,7 @@ base64
 ```
 ## La técnica
 
-Si puedes modificar arbitrariamente la memoria de un proceso, puedes tomar el control de él. Esto se puede usar para secuestrar un proceso existente y reemplazarlo con otro programa. Podemos lograr esto ya sea usando la llamada al sistema `ptrace()` (lo cual requiere tener la capacidad de ejecutar llamadas al sistema o tener gdb disponible en el sistema) o, de manera más interesante, escribiendo en `/proc/$pid/mem`.
+Si puedes modificar arbitrariamente la memoria de un proceso, entonces puedes tomar el control de él. Esto se puede usar para secuestrar un proceso existente y reemplazarlo con otro programa. Podemos lograr esto ya sea usando la llamada al sistema `ptrace()` (lo cual requiere la capacidad de ejecutar llamadas al sistema o tener gdb disponible en el sistema) o, de manera más interesante, escribiendo en `/proc/$pid/mem`.
 
 El archivo `/proc/$pid/mem` es un mapeo uno a uno de todo el espacio de direcciones de un proceso (por ejemplo, desde `0x0000000000000000` hasta `0x7ffffffffffff000` en x86-64). Esto significa que leer o escribir en este archivo en un desplazamiento `x` es lo mismo que leer o modificar el contenido en la dirección virtual `x`.
 
@@ -56,7 +56,7 @@ Estos problemas tienen soluciones que, aunque no son perfectas, son buenas:
 - ASLR ni siquiera es un problema, podemos verificar el archivo `maps` de la shell o cualquier otro del procfs para obtener información sobre el espacio de direcciones del proceso.
 - Entonces necesitamos hacer `lseek()` sobre el archivo. Desde la shell esto no se puede hacer a menos que se use el infame `dd`.
 
-### Con más detalle
+### En más detalle
 
 Los pasos son relativamente fáciles y no requieren ningún tipo de experiencia para entenderlos:
 
@@ -75,7 +75,7 @@ Los pasos son relativamente fáciles y no requieren ningún tipo de experiencia 
 
 ## EverythingExec
 
-A partir del 12/12/2022, he encontrado varias alternativas a `dd`, una de las cuales, `tail`, es actualmente el programa predeterminado utilizado para `lseek()` a través del archivo `mem` (que era el único propósito de usar `dd`). Dichas alternativas son:
+Existen varias alternativas a `dd`, una de las cuales, `tail`, es actualmente el programa predeterminado utilizado para `lseek()` a través del archivo `mem` (que era el único propósito de usar `dd`). Dichas alternativas son:
 ```bash
 tail
 hexdump
@@ -92,16 +92,19 @@ SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls
 ```
 Bloquea esto, EDRs.
 
+# Referencias
+* [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
+
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de HackTricks AWS)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

