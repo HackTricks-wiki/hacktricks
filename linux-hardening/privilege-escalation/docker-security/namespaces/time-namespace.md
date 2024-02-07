@@ -1,52 +1,52 @@
-# Time Namespace
+# タイムネームスペース
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
+* **ハッキングテクニックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>
 
 ## 基本情報
 
-Time Namespaceは、システムのモノトニッククロックとブートタイムクロックに対して、名前空間ごとのオフセットを可能にします。Time Namespaceは、コンテナ内で日付/時刻を変更したり、チェックポイント/スナップショットからの復元後にコンテナ内のクロックを調整するために、Linuxコンテナの使用に適しています。
+Linux のタイムネームスペースは、システムの単調増加時計と起動時刻クロックに対するネームスペースごとのオフセットを可能にします。Linux コンテナでは、コンテナ内の日付/時刻を変更し、チェックポイントやスナップショットから復元した後にクロックを調整するために一般的に使用されます。
 
-## ラボ:
+## Lab:
 
-### 異なるNamespaceを作成する
+### 異なるネームスペースを作成する
 
 #### CLI
 ```bash
 sudo unshare -T [--mount-proc] /bin/bash
 ```
-`/proc` ファイルシステムの新しいインスタンスをマウントすることで、`--mount-proc` パラメータを使用すると、新しいマウント名前空間がその名前空間に特有の**正確で隔離されたプロセス情報のビューを持つことを保証します**。
+`--mount-proc` パラメータを使用して `/proc` ファイルシステムの新しいインスタンスをマウントすることで、新しいマウント名前空間がその名前空間固有のプロセス情報に正確で隔離されたビューを持つことが保証されます。
 
 <details>
 
-<summary>エラー: bash: fork: メモリを割り当てることができません</summary>
+<summary>エラー: bash: fork: Cannot allocate memory</summary>
 
-`unshare` を `-f` オプションなしで実行すると、Linuxが新しい PID (プロセス ID) 名前空間を扱う方法により、エラーが発生します。重要な詳細と解決策は以下の通りです：
+`-f` オプションを指定せずに `unshare` を実行すると、Linux が新しい PID (プロセス ID) 名前空間を処理する方法によりエラーが発生します。主要な詳細と解決策は以下に示されています:
 
 1. **問題の説明**:
-- Linuxカーネルは、プロセスが `unshare` システムコールを使用して新しい名前空間を作成することを許可しています。しかし、新しい PID 名前空間の作成を開始するプロセス（"unshare" プロセスと呼ばれる）は、新しい名前空間に入らず、その子プロセスのみが入ります。
-- `%unshare -p /bin/bash%` を実行すると、`/bin/bash` は `unshare` と同じプロセスで開始されます。その結果、`/bin/bash` とその子プロセスは元の PID 名前空間にあります。
-- 新しい名前空間での `/bin/bash` の最初の子プロセスは PID 1 になります。このプロセスが終了すると、他のプロセスがない場合、名前空間のクリーンアップがトリガーされます。なぜなら、PID 1 は孤立したプロセスを引き継ぐ特別な役割を持っているからです。その後、Linuxカーネルはその名前空間での PID 割り当てを無効にします。
+- Linux カーネルは、`unshare` システムコールを使用してプロセスが新しい名前空間を作成することを許可します。ただし、新しい PID 名前空間の作成を開始するプロセス（"unshare" プロセスと呼ばれる）は、新しい名前空間に入りません。その子プロセスのみが入ります。
+- `%unshare -p /bin/bash%` を実行すると、`/bin/bash` が `unshare` と同じプロセスで開始されます。その結果、`/bin/bash` とその子プロセスは元の PID 名前空間にあります。
+- 新しい名前空間内の `/bin/bash` の最初の子プロセスは PID 1 になります。このプロセスが終了すると、他のプロセスがいない場合、孤児プロセスを引き取る特別な役割を持つ PID 1 により、その名前空間のクリーンアップがトリガーされます。その後、Linux カーネルはその名前空間での PID 割り当てを無効にします。
 
 2. **結果**:
-- 新しい名前空間での PID 1 の終了は、`PIDNS_HASH_ADDING` フラグのクリーニングにつながります。これにより、新しいプロセスを作成する際に `alloc_pid` 関数が新しい PID を割り当てることができず、「メモリを割り当てることができません」というエラーが発生します。
+- 新しい名前空間内の PID 1 の終了により、`PIDNS_HASH_ADDING` フラグのクリーニングが行われます。これにより、新しいプロセスを作成する際に `alloc_pid` 関数が新しい PID を割り当てられなくなり、"Cannot allocate memory" エラーが発生します。
 
 3. **解決策**:
-- この問題は、`unshare` と `-f` オプションを使用することで解決できます。このオプションは、新しい PID 名前空間を作成した後に `unshare` が新しいプロセスをフォークするようにします。
+- `unshare` に `-f` オプションを使用することで問題を解決できます。このオプションにより、`unshare` は新しい PID 名前空間を作成した後に新しいプロセスをフォークします。
 - `%unshare -fp /bin/bash%` を実行すると、`unshare` コマンド自体が新しい名前空間で PID 1 になります。その後、`/bin/bash` とその子プロセスはこの新しい名前空間内に安全に含まれ、PID 1 の早期終了を防ぎ、通常の PID 割り当てを可能にします。
 
-`unshare` が `-f` フラグで実行されることを確認することで、新しい PID 名前空間が正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく操作できるようになります。
+`unshare` が `-f` フラグで実行されることを確認することで、新しい PID 名前空間が正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく動作できるようになります。
 
 </details>
 
@@ -54,12 +54,12 @@ sudo unshare -T [--mount-proc] /bin/bash
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### プロセスがどのネームスペースにあるかを確認する
+### &#x20;あなたのプロセスがどの名前空間にあるかを確認します
 ```bash
 ls -l /proc/self/ns/time
 lrwxrwxrwx 1 root root 0 Apr  4 21:16 /proc/self/ns/time -> 'time:[4026531834]'
 ```
-### すべてのTimeネームスペースを見つける
+### すべてのTime namespacesを見つける
 
 {% code overflow="wrap" %}
 ```bash
@@ -67,29 +67,10 @@ sudo find /proc -maxdepth 3 -type l -name time -exec readlink {} \; 2>/dev/null 
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name time -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-{% endcode %}
+### 時間ネームスペースに入る
 
-### Time ネームスペースに入る
+{% endcode %}
 ```bash
 nsenter -T TARGET_PID --pid /bin/bash
 ```
-```markdown
-また、**rootでなければ他のプロセスのネームスペースに** **入ることはできません**。そして、それを指すディスクリプタ（`/proc/self/ns/net`のような）**なしに**他のネームスペースに**入ることは** **できません**。
-
-# 参考文献
-* [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
-
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
-
-HackTricksをサポートする他の方法:
-
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で私を**フォロー**してください。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有してください**。
-
-</details>
-```
+また、**rootユーザーでないと他のプロセスの名前空間に入ることはできません**。そして、他の名前空間に**ディスクリプタ**が指すことなしに**入ることはできません**（例：`/proc/self/ns/net`）。

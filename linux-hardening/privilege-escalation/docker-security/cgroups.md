@@ -2,29 +2,29 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
+* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)をフォローする
+* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出する**
 
 </details>
 
 ## 基本情報
 
-**Linuxコントロールグループ**、またはcgroupsは、プロセスの集合に対して**システムリソース**を**制限**、管理、優先順位付けすることを可能にするLinuxカーネルの機能です。Cgroupsは、システム内のプロセスグループのリソース使用量（CPU、メモリ、ディスクI/O、ネットワークなど）を**管理し分離する**方法を提供します。これは、特定のプロセスグループに利用可能なリソースを制限したり、特定の種類のワークロードを他から分離したり、異なるプロセスグループ間でシステムリソースの使用を優先順位付けするなど、多くの目的に役立ちます。
+**Linux Control Groups**、または **cgroups** は、Linuxカーネルの機能であり、CPU、メモリ、およびディスクI/Oなどのシステムリソースの割り当て、制限、および優先順位付けをプロセスグループ間で可能にします。これらは、プロセスコレクションのリソース使用量を**管理および分離**するメカニズムを提供し、リソース制限、ワークロードの分離、および異なるプロセスグループ間でのリソースの優先順位付けなどの目的に役立ちます。
 
-cgroupsには**バージョン1と2**があり、両方が現在使用されており、システム上で同時に設定することができます。cgroupsバージョン1と**バージョン2**の間の最も**顕著な違い**は、後者がcgroupsの新しい階層的な組織を導入したことであり、グループを親子関係を持つ**ツリー構造**で配置することができます。これにより、異なるプロセスグループ間でリソースの割り当てをより柔軟かつ細かく制御することが可能になります。
+**cgroupsには2つのバージョン**があります: バージョン1とバージョン2。両方をシステムで同時に使用できます。主な違いは、**cgroupsバージョン2**が**階層的なツリー構造**を導入し、プロセスグループ間でより微妙で詳細なリソース分配を可能にすることです。さらに、バージョン2には次のようなさまざまな改善点があります:
 
-新しい階層的な組織に加えて、cgroupsバージョン2は**新しいリソースコントローラー**のサポート、レガシーアプリケーションのより良いサポート、パフォーマンスの向上など、**いくつかの他の変更と改善**も導入しました。
+新しい階層的な組織に加えて、cgroupsバージョン2は、**新しいリソースコントローラ**のサポート、レガシーアプリケーションのより良いサポート、およびパフォーマンスの向上など、**その他の変更と改善**を導入しました。
 
-全体として、cgroupsの**バージョン2はバージョン1よりも多くの機能と優れたパフォーマンスを提供します**が、古いシステムとの互換性が懸念される特定のシナリオでは、バージョン1が引き続き使用される場合があります。
+全体として、cgroups **バージョン2は、バージョン1よりも多くの機能と優れたパフォーマンス**を提供しますが、後者は、古いシステムとの互換性が懸念される場合には引き続き使用される可能性があります。
 
-/proc/\<pid>のcgroupファイルを見ることで、任意のプロセスのv1とv2のcgroupsをリストすることができます。次のコマンドでシェルのcgroupsを見てみることから始めることができます：
+任意のプロセスのv1およびv2 cgroupsをリストするには、そのプロセスのcgroupファイルを /proc/\<pid> で見ることができます。次のコマンドでシェルのcgroupsを確認できます:
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -39,68 +39,52 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
-システムによっては**出力がかなり短い**場合がありますが、これはおそらく**cgroups v2のみを持っている**ことを意味します。ここにある各行の出力は数字で始まり、異なるcgroupです。それを読むためのポインターは以下の通りです：
-
-* **数字の2～12はcgroups v1用です**。それらの**コントローラー**は数字の隣にリストされています。
-* **数字の1**も**バージョン1用**ですが、コントローラーはありません。このcgroupは**管理目的**のみのものです（この場合、systemdが設定しました）。
-* 最後の行、**数字の0**は、**cgroups v2用**です。ここにはコントローラーが表示されていません。cgroups v1を持たないシステムでは、これが唯一の出力行になります。
-* **名前は階層的で、ファイルパスの一部のように見えます**。この例では、いくつかのcgroupsが/user.sliceと名付けられ、他は/user.slice/user-1000.slice/session-2.scopeと名付けられているのがわかります。
-* /testcgroupという名前は、cgroups v1では、プロセスのcgroupsが完全に独立していることを示すために作成されました。
-* user.sliceの下にある**名前にsessionが含まれているもの**は、systemdによって割り当てられたログインセッションです。シェルのcgroupsを見ているときにそれらを見るでしょう。**システムサービス**の**cgroups**は**system.sliceの下にあります**。
+- **Numbers 2–12**: cgroups v1、各行が異なるcgroupを表す。これらのコントローラは数字の隣に指定される。
+- **Number 1**: cgroups v1でもありますが、管理目的のみ（例：systemdによって設定される）で、コントローラがありません。
+- **Number 0**: cgroups v2を表します。コントローラはリストされず、この行はcgroups v2のみを実行しているシステムにのみ存在します。
+- **名前は階層的**で、ファイルパスを模しており、異なるcgroup間の構造と関係を示しています。
+- **/user.sliceや/system.slice**のような名前は、cgroupの分類を指定し、通常はsystemdによって管理されるログインセッション用のuser.sliceと、システムサービス用のsystem.sliceを示します。
 
 ### cgroupsの表示
 
-Cgroupsは通常、**ファイルシステムを通じてアクセスされます**。これは、カーネルと対話するための従来のUnixシステムコールインターフェースとは対照的です。\
-シェルのcgroup設定を探るには、`/proc/self/cgroup`ファイルを見てシェルのcgroupを見つけ、次に`/sys/fs/cgroup`（または`/sys/fs/cgroup/unified`）ディレクトリに移動し、**cgroupと同じ名前のディレクトリ**を探します。このディレクトリに移動して周りを見ることで、cgroupの**さまざまな設定とリソース使用情報**を見ることができます。
+通常、Unixシステムコールインターフェイスではなく、**cgroups**にアクセスするためにファイルシステムが使用されます。シェルのcgroup構成を調査するには、**/proc/self/cgroup**ファイルを調べる必要があります。これにより、シェルのcgroupが明らかになります。次に、**/sys/fs/cgroup**（または**`/sys/fs/cgroup/unified`**）ディレクトリに移動し、cgroupの名前を共有するディレクトリを見つけることで、cgroupに関連するさまざまな設定やリソース使用情報を観察できます。
 
-<figure><img src="../../../.gitbook/assets/image (10) (2) (2).png" alt=""><figcaption></figcaption></figure>
+![Cgroup Filesystem](../../../.gitbook/assets/image%20(10)%20(2)%20(2).png)
 
-ここにある多くのファイルの中で、**主要なcgroupインターフェースファイルは`cgroup`で始まります**。`cgroup.procs`（catを使っても構いません）から始めてください。これはcgroup内のプロセスをリストします。同様のファイルである`cgroup.threads`にはスレッドも含まれています。
+cgroupsの主要なインターフェースファイルは**cgroup**で始まります。**cgroup.procs**ファイルは、catなどの標準コマンドで表示でき、cgroup内のプロセスがリストされます。別のファイルである**cgroup.threads**にはスレッド情報が含まれています。
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (5).png" alt=""><figcaption></figcaption></figure>
+![Cgroup Procs](../../../.gitbook/assets/image%20(1)%20(1)%20(5).png)
 
-シェルに使用されるほとんどのcgroupsには、これらの二つのコントローラーがあり、**使用されるメモリの量**と**cgroup内のプロセスの総数**を制御できます。コントローラーと対話するには、**コントローラーのプレフィックスに一致するファイル**を探します。例えば、cgroup内で実行中のスレッドの数を見たい場合は、pids.currentを参照してください：
+シェルを管理するcgroupsには通常、メモリ使用量とプロセス数を規制する2つのコントローラが含まれています。コントローラとやり取りするには、コントローラの接頭辞を持つファイルを参照する必要があります。例えば、**pids.current**は、cgroup内のスレッド数を確認するために参照されます。
 
-<figure><img src="../../../.gitbook/assets/image (3) (5).png" alt=""><figcaption></figcaption></figure>
+![Cgroup Memory](../../../.gitbook/assets/image%20(3)%20(5).png)
 
-**maxという値は、このcgroupに特定の制限がないことを意味します**が、cgroupsは階層的であるため、サブディレクトリチェーンを下ったcgroupがそれを制限する可能性があります。
+値に**max**が表示されている場合、その値はcgroupに特定の制限がないことを示します。ただし、cgroupsの階層構造のため、制限はディレクトリ階層の下位レベルのcgroupによって課せられる可能性があります。
+
 
 ### cgroupsの操作と作成
 
-プロセスをcgroupに入れるには、**rootとしてその`cgroup.procs`ファイルにPIDを書き込みます**：
-```shell-session
-# echo pid > cgroup.procs
+プロセスは、**そのプロセスID（PID）を`cgroup.procs`ファイルに書き込むこと**でcgroupsに割り当てられます。これにはroot権限が必要です。たとえば、プロセスを追加するには：
+```bash
+echo [pid] > cgroup.procs
 ```
-```markdown
-これがcgroupsの変更がどのように機能するかの一例です。例えば、**cgroupの最大PID数を制限したい**場合（例えば、3,000 PIDsに）、以下のように行います：
+同様に、**PID制限の設定など、cgroup属性の変更**は、関連するファイルに希望する値を書き込むことで行われます。cgroupに最大3,000個のPIDを設定するには：
+```bash
+echo 3000 > pids.max
 ```
-```shell-session
-# echo 3000 > pids.max
+**新しいcgroupsを作成する**には、cgroup階層内に新しいサブディレクトリを作成する必要があります。これにより、カーネルが必要なインターフェースファイルを自動的に生成します。`rmdir`を使用してプロセスがアクティブでないcgroupsを削除できますが、次の制約に注意してください：
+
+- **プロセスは、葉cgroupsにのみ配置できます**（つまり、階層内で最も入れ子になっているもの）。
+- **親に存在しないコントローラを持つcgroupは存在できません**。
+- **子cgroupsのコントローラは、`cgroup.subtree_control`ファイルで明示的に宣言する必要があります**。たとえば、子cgroupでCPUおよびPIDコントローラを有効にするには：
+```bash
+echo "+cpu +pids" > cgroup.subtree_control
 ```
-**cgroupsの作成はもっと複雑です**。技術的には、cgroupツリーのどこかにサブディレクトリを作成するのと同じくらい簡単です。そうすると、カーネルが自動的にインターフェースファイルを作成します。プロセスがないcgroupは、インターフェースファイルが存在してもrmdirでcgroupを削除できます。しかし、cgroupsを取り巻く規則には注意が必要です。これには以下のようなものがあります：
+**ルートcgroup**はこれらのルールの例外であり、直接プロセス配置を許可します。これは、プロセスをsystemdの管理から削除するために使用できます。
 
-* **プロセスは外側のレベル（「葉」）のcgroupsにのみ配置できます**。例えば、/my-cgroupと/my-cgroup/my-subgroupというcgroupsがある場合、/my-cgroupにはプロセスを配置できませんが、/my-cgroup/my-subgroupは大丈夫です。（例外は、cgroupsにコントローラーがない場合ですが、詳しくは触れません。）
-* cgroupは、**親cgroupにないコントローラーを持つことはできません**。
-* 子cgroupsには明示的に**コントローラーを指定する必要があります**。これは`cgroup.subtree_control`ファイルを通じて行います。例えば、子cgroupにcpuとpidsコントローラーを持たせたい場合、このファイルに+cpu +pidsと書き込みます。
+cgroup内での**CPU使用率の監視**は、`cpu.stat`ファイルを介して可能であり、消費された合計CPU時間を表示し、サービスのサブプロセス間での使用状況を追跡するのに役立ちます：
 
-これらの規則の例外は、階層の最下部にある**ルートcgroup**です。このcgroupには**プロセスを配置できます**。これを行いたい理由の一つは、プロセスをsystemdの制御から切り離すことです。
+<figure><img src="../../../.gitbook/assets/image (2) (6) (3).png" alt=""><figcaption>cpu.statファイルに表示されるCPU使用率統計</figcaption></figure>
 
-コントローラーが有効になっていなくても、cgroupのcpu.statファイルを見ることでCPU使用状況を確認できます：
-
-<figure><img src="../../../.gitbook/assets/image (2) (6) (3).png" alt=""><figcaption></figcaption></figure>
-
-これはcgroupの全生涯にわたる累積CPU使用量であるため、多くのサブプロセスを生成して最終的に終了するサービスがプロセッサ時間をどのように消費しているかを確認できます。
-
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>!</strong></summary>
-
-HackTricksをサポートする他の方法：
-
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
-* **HackTricks**の[**githubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを**共有する**。
-
-</details>
+## 参考文献
+* **書籍: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**

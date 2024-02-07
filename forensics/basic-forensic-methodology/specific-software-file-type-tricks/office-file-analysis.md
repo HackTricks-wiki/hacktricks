@@ -6,106 +6,53 @@
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする
-* **ハッキングトリックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する
+- **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** または [telegramグループ](https://t.me/peass) に **参加** または **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live) を **フォロー** してください。
+- **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>
 
 <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も**高度なコミュニティツール**によって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) を使用して、世界で最も高度なコミュニティツールによって強化された **ワークフローを簡単に構築** および **自動化** できます。\
 今すぐアクセスを取得:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## はじめに
+**詳細については [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/) をチェックしてください**
 
-Microsoft は**数十種類のオフィス文書ファイル形式**を作成しており、その多くは**マクロを含む**（VBAスクリプト）ため、**フィッシング攻撃やマルウェアの配布**に人気があります。
+Microsoft は多くのオフィス文書形式を作成しており、主なタイプは **OLE形式**（RTF、DOC、XLS、PPTなど）と **Office Open XML（OOXML）形式**（DOCX、XLSX、PPTXなど）です。これらの形式にはマクロが含まれることがあり、それによりフィッシングやマルウェアの標的となります。OOXMLファイルはzipコンテナとして構造化されており、解凍してファイルとフォルダの階層、XMLファイルの内容を表示できます。
 
-大まかに言えば、オフィスファイル形式には2つの世代があります: **OLE形式**（RTF、DOC、XLS、PPTなどのファイル拡張子）と "**Office Open XML**" 形式（DOCX、XLSX、PPTXを含むファイル拡張子）。**両方**の形式は、**リンクされたまたは埋め込まれたコンテンツ**（オブジェクト）を可能にする構造化された複合ファイルバイナリ形式です。OOXMLファイルはzipファイルコンテナであり、隠されたデータをチェックする最も簡単な方法の1つは、単にドキュメントを`unzip`することです。
-```
-$ unzip example.docx
-Archive:  example.docx
-inflating: [Content_Types].xml
-inflating: _rels/.rels
-inflating: word/_rels/document.xml.rels
-inflating: word/document.xml
-inflating: word/theme/theme1.xml
-extracting: docProps/thumbnail.jpeg
-inflating: word/comments.xml
-inflating: word/settings.xml
-inflating: word/fontTable.xml
-inflating: word/styles.xml
-inflating: word/stylesWithEffects.xml
-inflating: docProps/app.xml
-inflating: docProps/core.xml
-inflating: word/webSettings.xml
-inflating: word/numbering.xml
-$ tree
-.
-├── [Content_Types].xml
-├── _rels
-├── docProps
-│   ├── app.xml
-│   ├── core.xml
-│   └── thumbnail.jpeg
-└── word
-├── _rels
-│   └── document.xml.rels
-├── comments.xml
-├── document.xml
-├── fontTable.xml
-├── numbering.xml
-├── settings.xml
-├── styles.xml
-├── stylesWithEffects.xml
-├── theme
-│   └── theme1.xml
-└── webSettings.xml
-```
-如何見ても、ファイルとフォルダの階層構造が作成されています。残りの部分はXMLファイル内で指定されています。[_New Steganographic Techniques for the OOXML File Format_, 2011](http://download.springer.com/static/pdf/713/chp%3A10.1007%2F978-3-642-23300-5\_27.pdf?originUrl=http%3A%2F%2Flink.springer.com%2Fchapter%2F10.1007%2F978-3-642-23300-5\_27\&token2=exp=1497911340\~acl=%2Fstatic%2Fpdf%2F713%2Fchp%25253A10.1007%25252F978-3-642-23300-5\_27.pdf%3ForiginUrl%3Dhttp%253A%252F%252Flink.springer.com%252Fchapter%252F10.1007%252F978-3-642-23300-5\_27\*\~hmac=aca7e2655354b656ca7d699e8e68ceb19a95bcf64e1ac67354d8bca04146fd3d) はデータ隠蔽技術のいくつかのアイデアを詳細に説明していますが、CTFチャレンジの作成者は常に新しいアイデアを考え出しています。
+OOXMLファイル構造を探るために、ドキュメントを解凍するコマンドと出力構造が提供されています。これらのファイルにデータを隠す技術が文書化されており、CTFチャレンジ内でのデータの隠蔽に関する革新が続いています。
 
-OLEおよびOOXMLドキュメントの検査と分析のためのPythonツールセットが存在します: [oletools](http://www.decalage.info/python/oletools)。特にOOXMLドキュメントについては、[OfficeDissector](https://www.officedissector.com) が非常に強力な分析フレームワーク（およびPythonライブラリ）です。後者には、[使用方法のクイックガイド](https://github.com/grierforensics/officedissector/blob/master/doc/html/\_sources/txt/ANALYZING\_OOXML.txt) も含まれています。
+分析のために、**oletools** と **OfficeDissector** は、OLEおよびOOXMLドキュメントを調査するための包括的なツールセットを提供しています。これらのツールは、埋め込まれたマクロを特定し分析するのに役立ちます。これらのマクロはしばしばマルウェアの配信ベクトルとして機能し、通常は追加の悪意のあるペイロードをダウンロードして実行します。VBAマクロの分析は、Libre Officeを使用してMicrosoft Officeなしで行うことができ、ブレークポイントとウォッチ変数でデバッグが可能です。
 
-時には、隠された静的データを見つけることが課題ではなく、VBAマクロを分析してその動作を判断することが課題となります。これはより現実的なシナリオであり、現場のアナリストが毎日実行する作業の一つです。前述の解析ツールは、マクロの存在を示すことができ、おそらくそれを抽出することもできます。Windows上のOfficeドキュメント内の典型的なVBAマクロは、%TEMP%にPowerShellスクリプトをダウンロードして実行しようとします。この場合、PowerShellスクリプトの分析タスクも発生します。しかし、悪意のあるVBAマクロはめったに複雑ではありません。なぜなら、VBAは通常、コード実行の起点として使用されるだけだからです。複雑なVBAマクロを理解する必要がある場合や、マクロが難読化されておりアンパッカールーチンを持っている場合、Microsoft Officeのライセンスを所有している必要はありません。[Libre Office](http://libreoffice.org)を使用できます。[そのインターフェース](http://www.debugpoint.com/2014/09/debugging-libreoffice-macro-basic-using-breakpoint-and-watch/) は、プログラムのデバッグを行ったことがある人にとって馴染み深いものです。ブレークポイントを設定し、ウォッチ変数を作成し、アンパックされた後の値をキャプチャし、ペイロードの動作が実行される前に値を取得することができます。特定のドキュメントのマクロをコマンドラインから実行することさえできます。
-```
-$ soffice path/to/test.docx macro://./standard.module1.mymacro
-```
-## [oletools](https://github.com/decalage2/oletools)
+**oletools** のインストールと使用は簡単で、pipを使用してインストールするコマンドが提供されています。`AutoOpen`、`AutoExec`、または `Document_Open` などの関数によって、マクロの自動実行がトリガーされます。
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
-## 自動実行
-
-`AutoOpen`、`AutoExec`、`Document_Open`などのマクロ関数は**自動的に****実行**されます。
-
-## 参考
-
-* [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
-
 <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で**最も高度な**コミュニティツールによって**強化された**ワークフローを簡単に構築し、**自動化**します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><strong>**ゼロからヒーローまでのAWSハッキングを学ぶ**</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください
-* 独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションである[**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**してください。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つけてください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>

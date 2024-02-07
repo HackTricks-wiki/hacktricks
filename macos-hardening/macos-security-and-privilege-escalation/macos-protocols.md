@@ -9,14 +9,14 @@ HackTricksをサポートする他の方法：
 * **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter**で私をフォローしてください 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
+* **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
 ## リモートアクセスサービス
 
-これらは、リモートでアクセスするための一般的なmacOSサービスです。\
+これらはリモートでアクセスするための一般的なmacOSサービスです。\
 これらのサービスは`システム設定` --> `共有`で有効/無効にできます。
 
 * **VNC**、「Screen Sharing」として知られています（tcp:5900）
@@ -36,19 +36,19 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### ARDのペンテスト
 
-Apple Remote Desktop (ARD) は macOS 向けに追加機能を提供した [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) の拡張版です。ARD の脆弱性の1つは、コントロール画面パスワードの認証方法で、パスワードの最初の8文字のみを使用するため、[Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) や [GoRedShell](https://github.com/ahhh/GoRedShell/) などのツールを使用した[総当たり攻撃](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) に対して脆弱です。デフォルトのレート制限がないため、攻撃されやすくなります。
+Apple Remote Desktop (ARD) は、macOS向けにカスタマイズされた[Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing)の強化バージョンであり、追加機能を提供しています。 ARDの顕著な脆弱性は、制御画面パスワードの認証方法であり、パスワードの最初の8文字のみを使用するため、[Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html)や[GoRedShell](https://github.com/ahhh/GoRedShell/)などのツールを使用した[総当たり攻撃](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html)に対して脆弱性があります。デフォルトのレート制限がないため、攻撃が可能です。
 
-脆弱なインスタンスは **nmap** の `vnc-info` スクリプトを使用して特定できます。`VNC Authentication (2)` をサポートするサービスは、8文字のパスワード切り捨てにより、特に総当たり攻撃に対して脆弱です。
+脆弱なインスタンスは、**nmap**の`vnc-info`スクリプトを使用して特定できます。`VNC Authentication (2)`をサポートするサービスは、8文字のパスワード切り捨てにより、特に総当たり攻撃に対して脆弱です。
 
-特権昇格、GUI アクセス、ユーザーモニタリングなどのさまざまな管理タスクのために ARD を有効にするには、次のコマンドを使用します：
+特権昇格、GUIアクセス、ユーザーモニタリングなどのさまざまな管理タスクのためにARDを有効にするには、次のコマンドを使用します：
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARDは、観察、共有制御、フル制御など、多様な制御レベルを提供し、ユーザーパスワードの変更後もセッションが継続します。管理者ユーザーに対して、Unixコマンドを直接送信し、rootとして実行することが可能です。タスクスケジューリングやリモートスポットライト検索などの機能があり、複数のマシンで機密ファイルをリモートで低影響で検索することが容易になります。
+ARDは、観察、共有制御、フル制御など、さまざまな制御レベルを提供し、ユーザーパスワードの変更後もセッションが継続します。管理者ユーザーに対してUnixコマンドを直接送信し、rootとして実行することができます。タスクスケジューリングやリモートスポットライト検索などの機能があり、複数のマシンで機密ファイルをリモートで検索するのに役立ちます。
 
 ## Bonjourプロトコル
 
-Bonjourは、Appleが設計した技術で、**同じネットワーク上のデバイスがお互いの提供するサービスを検出**できるようにします。Rendezvous、**Zero Configuration**、またはZeroconfとしても知られ、デバイスがTCP/IPネットワークに参加し、**自動的にIPアドレスを選択**し、そのサービスを他のネットワークデバイスにブロードキャストできるようにします。
+Bonjourは、Appleが設計した技術で、**同じネットワーク上のデバイスがお互いの提供するサービスを検出**できます。Rendezvous、Zero Configuration、またはZeroconfとしても知られ、デバイスがTCP/IPネットワークに参加し、**自動的にIPアドレスを選択**し、そのサービスを他のネットワークデバイスにブロードキャストできるようにします。
 
 Bonjourによって提供されるZero Configuration Networkingにより、デバイスは次のことができます：
 * **DHCPサーバーが存在しなくてもIPアドレスを自動的に取得**する。
@@ -61,9 +61,9 @@ BonjourはDNSにおいて、**マルチキャストDNS（mDNS）プロトコル*
 
 ネットワークに参加すると、各デバイスは通常、ホスト名から派生した名前またはランダムに生成された名前で終わる名前を自己選択します。
 
-ネットワーク内でのサービス検出は、**DNS Service Discovery（DNS-SD）**によって容易になります。DNS SRVレコードの形式を活用するDNS-SDは、**DNS PTRレコード**を使用して複数のサービスのリストを可能にします。特定のサービスを求めるクライアントは、`<Service>.<Domain>`のPTRレコードをリクエストし、サービスが複数のホストから利用可能な場合は、`<Instance>.<Service>.<Domain>`としてフォーマットされたPTRレコードのリストを受け取ります。
+ネットワーク内でのサービス検出は、**DNS Service Discovery（DNS-SD）**によって容易になります。DNS SRVレコードの形式を活用するDNS-SDは、**DNS PTRレコード**を使用して複数のサービスをリスト化します。特定のサービスを求めるクライアントは、`<Service>.<Domain>`のPTRレコードをリクエストし、サービスが複数のホストから利用可能な場合は、`<Instance>.<Service>.<Domain>`としてフォーマットされたPTRレコードのリストを受け取ります。
 
-**dns-sd**ユーティリティを使用して、**ネットワークサービスの検出と広告**が行えます。以下はその使用例です：
+**`dns-sd`ユーティリティ**を使用して、ネットワークサービスの**検出と広告**が行えます。以下はその使用例です：
 
 ### SSHサービスの検索
 
@@ -71,7 +71,7 @@ BonjourはDNSにおいて、**マルチキャストDNS（mDNS）プロトコル*
 ```bash
 dns-sd -B _ssh._tcp
 ```
-このコマンドは、_ssh._tcp サービスのブラウジングを開始し、タイムスタンプ、フラグ、インターフェース、ドメイン、サービスタイプ、およびインスタンス名などの詳細を出力します。
+このコマンドは、_ssh._tcpサービスのブラウジングを開始し、タイムスタンプ、フラグ、インターフェース、ドメイン、サービスタイプ、およびインスタンス名などの詳細を出力します。
 
 ### HTTPサービスの広告
 
@@ -81,15 +81,15 @@ dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
 このコマンドは、ポート80で`/index.html`のパスを持つHTTPサービスを「Index」という名前で登録します。
 
-その後、ネットワーク上でHTTPサービスを検索するには:
+その後、ネットワーク上でHTTPサービスを検索するには：
 ```bash
 dns-sd -B _http._tcp
 ```
-サービスが開始されると、その存在をマルチキャストしてサブネット上のすべてのデバイスに通知します。これらのサービスに興味を持つデバイスはリクエストを送信する必要はありませんが、単にこれらのアナウンスを聞くだけです。
+サービスが開始すると、その存在をマルチキャストしてサブネット上のすべてのデバイスに通知します。これらのサービスに興味を持つデバイスはリクエストを送信する必要はありませんが、これらのアナウンスを受信するだけで済みます。
 
-よりユーザーフレンドリーなインターフェースのために、Apple App Storeで利用可能な****Discovery - DNS-SD Browser**アプリを使用すると、ローカルネットワークで提供されているサービスを視覚化できます。
+よりユーザーフレンドリーなインターフェースのために、Apple App Storeで入手可能な**Discovery - DNS-SD Browser**アプリを使用すると、ローカルネットワークで提供されているサービスを視覚化できます。
 
-また、`python-zeroconf`ライブラリを使用してサービスをブラウズおよび検出するためのカスタムスクリプトを作成することもできます。[**python-zeroconf**](https://github.com/jstasiak/python-zeroconf)スクリプトは、`_http._tcp.local.`サービス用のサービスブラウザを作成し、追加または削除されたサービスを出力します。
+また、`python-zeroconf`ライブラリを使用してサービスをブラウズおよび検出するためのカスタムスクリプトを作成することもできます。[**python-zeroconf**](https://github.com/jstasiak/python-zeroconf)スクリプトは、`_http._tcp.local.`サービス用のサービスブラウザの作成をデモし、追加または削除されたサービスを出力します。
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
@@ -111,7 +111,7 @@ finally:
 zeroconf.close()
 ```
 ### Bonjourの無効化
-セキュリティ上の懸念やその他の理由からBonjourを無効にする必要がある場合は、次のコマンドを使用してオフにすることができます:
+セキュリティ上の懸念やその他の理由からBonjourを無効にする必要がある場合は、次のコマンドを使用してオフにすることができます：
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
@@ -127,10 +127,10 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい場合は** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする。
-* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
 
 </details>

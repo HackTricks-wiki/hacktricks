@@ -1,206 +1,90 @@
 # インタレスティングなWindowsレジストリキー
 
-## インタレスティングなWindowsレジストリキー
+### インタレスティングなWindowsレジストリキー
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**か**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で**フォロー**する：[**@hacktricks_live**](https://twitter.com/hacktricks_live)**。**
-- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私たちをフォローする [**@hacktricks_live**](https://twitter.com/hacktricks_live)**。**
+- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
 
-## **Windowsシステム情報**
 
-### バージョン
+### **Windowsバージョンと所有者情報**
+- **`Software\Microsoft\Windows NT\CurrentVersion`**にあるWindowsバージョン、Service Pack、インストール時間、登録所有者の名前が簡単に見つかります。
 
-- **`Software\Microsoft\Windows NT\CurrentVersion`**: Windowsのバージョン、Service Pack、インストール時間、登録所有者
+### **コンピューター名**
+- ホスト名は**`System\ControlSet001\Control\ComputerName\ComputerName`**の下にあります。
 
-### ホスト名
+### **タイムゾーン設定**
+- システムのタイムゾーンは**`System\ControlSet001\Control\TimeZoneInformation`**に保存されています。
 
-- **`System\ControlSet001\Control\ComputerName\ComputerName`**: ホスト名
+### **アクセス時間の追跡**
+- デフォルトでは、最終アクセス時間の追跡はオフになっています（**`NtfsDisableLastAccessUpdate=1`**）。有効にするには、次のコマンドを使用します：
+`fsutil behavior set disablelastaccess 0`
 
-### タイムゾーン
+### WindowsバージョンとService Pack
+- **Windowsバージョン**はエディション（たとえば、Home、Pro）とリリース（たとえば、Windows 10、Windows 11）を示し、**Service Pack**は修正と時に新機能を含む更新です。
 
-- **`System\ControlSet001\Control\TimeZoneInformation`**: タイムゾーン
+### 最終アクセス時間の有効化
+- 最終アクセス時間の追跡を有効にすると、ファイルが最後に開かれた時刻がわかり、フォレンジック分析やシステムモニタリングに重要です。
 
-### 最終アクセス時刻
+### ネットワーク情報の詳細
+- レジストリには、ネットワーク構成に関する包括的なデータが保存されており、**ネットワークの種類（無線、ケーブル、3G）**や**ネットワークのカテゴリ（Public、Private/Home、Domain/Work）**などが含まれており、ネットワークセキュリティ設定と権限を理解する上で重要です。
 
-- **`System\ControlSet001\Control\Filesystem`**: 最終アクセス時刻（デフォルトでは`NtfsDisableLastAccessUpdate=1`で無効になっていますが、`0`の場合は有効）。
-- 有効にするには：`fsutil behavior set disablelastaccess 0`
-
-### シャットダウン時刻
-
-- `System\ControlSet001\Control\Windows`: シャットダウン時刻
-- `System\ControlSet001\Control\Watchdog\Display`: シャットダウン回数（XPのみ）
-
-### ネットワーク情報
-
-- **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**: ネットワークインターフェース
-- **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Unmanaged` & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed` & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Nla\Cache`**: ネットワーク接続が行われた最初と最後の時刻、VPN経由の接続
-- **`Software\Microsoft\WZCSVC\Parameters\Interfaces{GUID}`（XP用） & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles`**: ネットワークタイプ（0x47-ワイヤレス、0x06-ケーブル、0x17-3G）とカテゴリ（0-パブリック、1-プライベート/ホーム、2-ドメイン/ワーク）、最終接続
-
-### 共有フォルダ
-
-- **`System\ControlSet001\Services\lanmanserver\Shares\`**: 共有フォルダとその構成。**クライアントサイドキャッシュ**（CSCFLAGS）が有効になっている場合、共有ファイルのコピーがクライアントとサーバーの`C:\Windows\CSC`に保存されます。
-- CSCFlag=0 -> ユーザーはデフォルトでキャッシュするファイルを指定する必要があります
-- CSCFlag=16 -> ドキュメントの自動キャッシュ。共有フォルダからユーザーが開くすべてのファイルとプログラムが、「パフォーマンスを最適化」のチェックを外して「オフラインで使用可能」になります。
-- CSCFlag=32 -> 前のオプションと同様ですが、「パフォーマンスを最適化」のチェックが入っています
-- CSCFlag=48 -> キャッシュが無効になっています。
-- CSCFlag=2048: この設定はWin 7＆8にのみあり、[「シンプルなファイル共有」を無効にするか、「詳細」共有オプションを使用するまでデフォルトの設定です。また、「ホームグループ」のデフォルト設定のようです。
-- CSCFlag=768 -> この設定は共有プリンタデバイスでのみ見られました。
+### クライアントサイドキャッシュ（CSC）
+- **CSC**は共有ファイルのキャッシュを使用してオフラインファイルアクセスを向上させます。異なる**CSCFlags**設定は、どのファイルがどのようにキャッシュされるかを制御し、特に一時的な接続がある環境ではパフォーマンスやユーザーエクスペリエンスに影響します。
 
 ### 自動起動プログラム
+- `Run`および`RunOnce`レジストリキーにリストされているプログラムは、自動的に起動され、システムの起動時間に影響を与え、マルウェアや不要なソフトウェアの特定に興味を持つポイントになる可能性があります。
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
-- `Software\Microsoft\Windows\CurrentVersion\Runonce`
-- `Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run`
-- `Software\Microsoft\Windows\CurrentVersion\Run`
+### Shellbags
+- **Shellbags**はフォルダビューの設定だけでなく、フォルダへのアクセスのフォレンジック証拠も提供します。フォルダがもはや存在しなくても、他の手段では明らかでないユーザーのアクティビティを明らかにするために貴重です。
 
-### エクスプローラ検索
-
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordwheelQuery`: エクスプローラ/ヘルパーを使用してユーザーが検索した内容。`MRU=0`のアイテムが最後のものです。
-
-### 入力パス
-
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: エクスプローラで入力されたパス（W10のみ）
-
-### 最近のドキュメント
-
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: ユーザーが最近開いたドキュメント
-- `NTUSER.DAT\Software\Microsoft\Office{Version}{Excel|Word}\FileMRU`:最近のオフィスドキュメント。バージョン：
-  - 14.0 Office 2010
-  - 12.0 Office 2007
-  - 11.0 Office 2003
-  - 10.0 Office X
-- `NTUSER.DAT\Software\Microsoft\Office{Version}{Excel|Word} UserMRU\LiveID_###\FileMRU`: 最近のオフィスドキュメント。バージョン：
-  - 15.0 Office 2013
-  - 16.0 Office 2016
-
-### MRUs
-
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedMRU`
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LasVisitedPidlMRU`
-
-実行された実行可能ファイルのパスを示します
-
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\Op enSaveMRU`（XP）
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\Op enSavePidlMRU`
-
-開かれたウィンドウ内のファイルを示します
-
-### 最後に実行されたコマンド
-
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Policies\RunMR`
-
-### User AssistKey
-
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`
-
-GUIDはアプリケーションのIDです。保存されるデータ：
-
-- 最終実行時刻
-- 実行回数
-- GUIアプリケーション名（絶対パスなどの情報を含む）
-- フォーカス時間とフォーカス名
-
-## Shellbags
-
-ディレクトリを開くと、Windowsはそのディレクトリの視覚化方法に関するデータをレジストリに保存します。これらのエントリはShellbagsとして知られています。
-
-エクスプローラアクセス：
-
-- `USRCLASS.DAT\Local Settings\Software\Microsoft\Windows\Shell\Bags`
-- `USRCLASS.DAT\Local Settings\Software\Microsoft\Windows\Shell\BagMRU`
-
-デスクトップアクセス：
-
-- `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU`
-- `NTUSER.DAT\Software\Microsoft\Windows\Shell\Bags`
-
-Shellbagsを分析するには、[**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md)を使用でき、フォルダの**MAC時刻**と、フォルダがアクセスされた**最初の時刻と最後の時刻**に関連する**作成日時と変更日時**を見つけることができます。
-
-以下の画像から2つの重要な点を把握してください：
-
-1. **E:に挿入されたUSBのフォルダ名**がわかります
-2. **シェルバッグが作成および変更された時刻**とフォルダが作成およびアクセスされた時刻がわかります
-
-![](<../../../.gitbook/assets/image (475).png>)
-
-## USB情報
-
-### デバイス情報
-
-レジストリ`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`はPCに接続された各USBデバイスを監視します。\
-このレジストリ内で次の情報を見つけることができます：
-
-- メーカー名
-- 製品名とバージョン
-- デバイスクラスID
-- ボリューム名（次の画像ではハイライトされたサブキーがボリューム名です）
-
-![](<../../../.gitbook/assets/image (477).png>)
-
-![](<../../../.gitbook/assets/image (479) (1).png>)
-
-さらに、レジストリ`HKLM\SYSTEM\ControlSet001\Enum\USB`をチェックし、サブキーの値を比較することでVID値を見つけることができます。
-
-![](<../../../.gitbook/assets/image (478).png>)
-
-前述の情報を使用して、レジストリ`SOFTWARE\Microsoft\Windows Portable Devices\Devices`から**`{GUID}`**を取得できます：
-
-![](<../../../.gitbook/assets/image (480).png>)
-
-### デバイスを使用したユーザー
-
-デバイスの**{GUID}**を持っていると、**すべてのユーザーのNTUDER.DATハイブをチェック**し、GUIDを検索して、その中の1つで見つかるまで探すことができます（`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Mountpoints2`）。
-
-![](<../../../.gitbook/assets/image (481).png>)
-
-### 最後にマウントされたデバイス
-
-レジストリ`System\MoutedDevices`をチェックすると、**最後にマウントされたデバイス**を見つけることができます。次の画像では、`E:`に最後にマウントされたデバイスがToshibaであることがわかります（ツールRegistry Explorerを使用）。
-
-![](<../../../.gitbook/assets/image (483) (1) (1).png>)
+### USB情報とフォレンジック
+- USBデバイスに関するレジストリに保存されている詳細は、コンピューターに接続されたデバイスを追跡するのに役立ち、機密ファイルの転送や不正アクセスのインシデントにデバイスを関連付ける可能性があります。
 
 ### ボリュームシリアル番号
+- **ボリュームシリアル番号**は、ファイルシステムの特定のインスタンスを追跡するために重要であり、ファイルの起源を異なるデバイス間で確立する必要があるフォレンジックシナリオで役立ちます。
 
-`Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`にはボリュームシリアル番号が含まれています。**ボリューム名とボリュームシリアル番号を知ることで、その情報を使用するLNKファイルからの情報を関連付ける**ことができます。
+### **シャットダウンの詳細**
+- シャットダウン時刻とカウント（XPの場合のみ）は、**`System\ControlSet001\Control\Windows`**および**`System\ControlSet001\Control\Watchdog\Display`**に保存されています。
 
-USBデバイスがフォーマットされると：
+### **ネットワーク構成**
+- 詳細なネットワークインターフェイス情報については、**`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**を参照してください。
+- VPN接続を含む最初と最後のネットワーク接続時刻は、**`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**のさまざまなパスにログが記録されます。
 
-- 新しいボリューム名が作成されます
-- 新しいボリュームシリアル番号が作成されます
-- 物理シリアル番号は保持されます
+### **共有フォルダ**
+- 共有フォルダと設定は**`System\ControlSet001\Services\lanmanserver\Shares`**にあります。クライアントサイドキャッシュ（CSC）の設定はオフラインファイルの利用可能性を決定します。
 
-### タイムスタンプ
+### **自動的に起動するプログラム**
+- **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`**などのパスや`Software\Microsoft\Windows\CurrentVersion`の類似エントリには、起動時に実行されるプログラムの詳細が記載されています。
 
-`System\ControlSet001\Enum\USBSTOR{VEN_PROD_VERSION}{USB serial}\Properties{83da6326-97a6-4088-9453-a1923f573b29}\`には、デバイスが接続された最初と最後の時刻が記載されています：
+### **検索と入力されたパス**
+- エクスプローラーの検索と入力されたパスは、**`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`**のWordwheelQueryおよびTypedPathsの下にレジストリで追跡されます。
 
-- 0064 -- 最初の接続
-- 0066 -- 最後の接続
-- 0067 -- 切断
+### **最近使用したドキュメントとOfficeファイル**
+- アクセスした最近のドキュメントとOfficeファイルは、`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`および特定のOfficeバージョンのパスに記録されます。
 
-![](<../../../.gitbook/assets/image (482).png>)
+### **最近使用した（MRU）アイテム**
+- 最近のファイルパスとコマンドを示すMRUリストは、`NTUSER.DAT`のさまざまな`ComDlg32`および`Explorer`のサブキーに保存されています。
 
-<details>
+### **ユーザーアクティビティの追跡**
+- ユーザーアシスト機能は、**`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**で、実行回数や最終実行時刻などの詳細なアプリケーション使用統計を記録します。
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+### **Shellbags分析**
+- フォルダアクセスの詳細を明らかにするShellbagsは、`USRCLASS.DAT`および`NTUSER.DAT`の`Software\Microsoft\Windows\Shell`に保存されています。分析には**[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)**を使用してください。
 
-HackTricksをサポートする他の方法：
+### **USBデバイス履歴**
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`**および**`HKLM\SYSTEM\ControlSet001\Enum\USB`**には、接続されたUSBデバイスに関する詳細な情報が含まれており、製造元、製品名、接続時刻などが記載されています。
+- 特定のUSBデバイスに関連付けられたユーザーは、デバイスの**{GUID}**を検索して`NTUSER.DAT`ハイブから特定できます。
+- 最後にマウントされたデバイスとそのボリュームシリアル番号は、それぞれ`System\MountedDevices`および`Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`を通じて追跡できます。
 
-- **HackTricksで企業を宣伝したい**か**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で**フォロー**する：[**@hacktricks_live**](https://twitter.com/hacktricks_live)**。**
-- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
-
-</details>
+このガイドは、Windowsシステムでの詳細なシステム、ネットワーク、およびユーザーアクティビティ情報にアクセスするための重要なパスと方法を簡潔かつ使いやすくまとめたものです。

