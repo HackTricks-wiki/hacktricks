@@ -4,11 +4,11 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセス**したいですか、または**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセス**したいですか、または**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
 * [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦で私をフォローしてください[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングトリックを共有するには** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください**
 *
 * .
 
@@ -16,20 +16,20 @@
 
 ## 基本情報
 
-macOSのランチ制約は、**プロセスの開始方法、誰が、どこからプロセスを開始できるか**を規制することでセキュリティを強化するために導入されました。macOS Venturaで導入され、**各システムバイナリを異なる制約カテゴリに分類**するフレームワークを提供し、それらは**トラストキャッシュ**内に定義されたシステムバイナリとそれに対応するハッシュを含むリストを提供します。これらの制約は、システム内のすべての実行可能なバイナリに適用され、特定のバイナリを起動するための**要件を明確にする**一連の**ルール**を含みます。これらのルールには、バイナリが満たす必要がある自己制約、親プロセスが満たす必要がある親制約、および他の関連エンティティが守る必要がある責任制約が含まれます。
+macOSのランチ制約は、**プロセスの開始方法、誰が、どこからプロセスを開始できるかを規制**することでセキュリティを向上させるために導入されました。macOS Venturaで導入され、**各システムバイナリを異なる制約カテゴリに分類**するフレームワークを提供し、それらは**トラストキャッシュ**内に定義されたシステムバイナリとそれに対応するハッシュを含むリストを提供します。これらの制約は、システム内のすべての実行可能なバイナリに適用され、特定のバイナリを起動するための**要件を明確にする**一連の**ルール**を含みます。これらのルールには、バイナリが満たす必要がある自己制約、親プロセスが満たす必要がある親制約、および他の関連エンティティが守る必要がある責任制約が含まれます。
 
-このメカニズムは、macOS Sonomaから**環境制約**を介してサードパーティアプリケーションにも拡張され、開発者が**環境制約のためのキーと値のセットを指定**することでアプリを保護できるようになりました。
+このメカニズムは、macOS Sonomaから始まる**環境制約**を介してサードパーティアプリケーションにも拡張され、開発者がアプリケーションを保護するために**環境制約のキーと値を指定**できるようにします。
 
-**ランチ環境とライブラリ制約**は、**`launchd`プロパティリストファイル**に保存するか、**コードサイニングで使用する別個のプロパティリスト**ファイルに保存します。
+**ランチ環境とライブラリ制約**を定義するには、**`launchd`プロパティリストファイル**に保存するか、**コードサイニングで使用する別個のプロパティリスト**ファイルに保存します。
 
 制約には4種類あります：
 
 * **自己制約**：**実行中の**バイナリに適用される制約。
-* **親プロセス**：プロセスの**親に適用される**制約（たとえば**`launchd`**がXPサービスを実行している場合）。
+* **親プロセス**：プロセスの**親**に適用される制約（たとえば**`launchd`**がXPサービスを実行している場合）。
 * **責任制約**：XPC通信でサービスを呼び出すプロセスに適用される制約。
 * **ライブラリロード制約**：ロードできるコードを選択的に記述するためにライブラリロード制約を使用します。
 
-したがって、プロセスが別のプロセスを起動しようとするとき（`execve(_:_:_:)`または`posix_spawn(_:_:_:_:_:_:)`を呼び出すことにより）、オペレーティングシステムは、**実行可能ファイルが自己制約を満たしているかどうか**をチェックします。また、**親プロセスの実行可能ファイルが実行可能ファイルの親制約を満たしているか**、および**責任プロセスの実行可能ファイルが実行可能ファイルの責任プロセス制約を満たしているか**をチェックします。これらのランチ制約のいずれかが満たされていない場合、オペレーティングシステムはプログラムを実行しません。
+したがって、プロセスが別のプロセスを起動しようとするとき（`execve(_:_:_:)`または`posix_spawn(_:_:_:_:_:_:)`を呼び出すことにより）、オペレーティングシステムは**実行可能ファイルが自己制約を満たしているかどうか**をチェックします。また、**親プロセスの実行可能ファイルが実行可能ファイルの親制約を満たしているか**、および**責任プロセスの実行可能ファイルが実行可能ファイルの責任プロセス制約を満たしているか**をチェックします。これらのランチ制約のいずれかが満たされていない場合、オペレーティングシステムはプログラムを実行しません。
 
 ライブラリをロードする際に**ライブラリ制約の一部が真でない**場合、プロセスは**ライブラリをロードしません**。
 
@@ -40,18 +40,18 @@ LCは、**事実**と**論理演算**（and、orなど）で構成され、事�
 [**LCが使用できる事実は文書化されています**](https://developer.apple.com/documentation/security/defining\_launch\_environment\_and\_library\_constraints)。たとえば：
 
 * is-init-proc：実行可能ファイルがオペレーティングシステムの初期化プロセス（`launchd`）である必要があるかどうかを示すブール値。
-* is-sip-protected：System Integrity Protection（SIP）によって保護されたファイルである必要があるかどうかを示すブール値。
-* `on-authorized-authapfs-volume:`：オペレーティングシステムが認証されたAPFSボリュームから実行可能ファイルを読み込んだかどうかを示すブール値。
-* `on-authorized-authapfs-volume`：オペレーティングシステムが認証されたAPFSボリュームから実行可能ファイルを読み込んだかどうかを示すブール値。
+* is-sip-protected：実行可能ファイルがSystem Integrity Protection（SIP）によって保護されたファイルである必要があるかどうかを示すブール値。
+* `on-authorized-authapfs-volume:`：オペレーティングシステムが認証されたAPFSボリュームから実行可能ファイルをロードしたかどうかを示すブール値。
+* `on-authorized-authapfs-volume`：オペレーティングシステムが認証されたAPFSボリュームから実行可能ファイルをロードしたかどうかを示すブール値。
 * Cryptexesボリューム
-* `on-system-volume:`：オペレーティングシステムが現在起動しているシステムボリュームから実行可能ファイルを読み込んだかどうかを示すブール値。
+* `on-system-volume:`：オペレーティングシステムが現在起動しているシステムボリュームから実行可能ファイルをロードしたかどうかを示すブール値。
 * /System内部...
 * ...
 
-Appleバイナリが署名されると、**トラストキャッシュ**内の**LCカテゴリ**に割り当てられます。
+Appleのバイナリが署名されると、それを**トラストキャッシュ**内の**LCカテゴリに割り当て**ます。
 
-* **iOS 16 LCカテゴリ**は[**こちらで逆コンパイルされ文書化されています**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)。
-* 現在の**LCカテゴリ（macOS 14** - Somona）は逆コンパイルされ、[**こちらで説明が見つかります**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)。
+* **iOS 16のLCカテゴリ**は[**こちらで逆アセンブルされ文書化されています**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)。
+* 現在の**LCカテゴリ（macOS 14** - Somona）は逆アセンブルされ、[**こちらで説明が見つかります**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)。
 
 たとえば、カテゴリ1は：
 ```
@@ -66,7 +66,7 @@ Parent Constraint: is-init-proc
 
 ### LCカテゴリのリバースエンジニアリング
 
-詳細は[**こちら**](https://theevilbit.github.io/posts/launch\_constraints\_deep\_dive/#reversing-constraints)にありますが、基本的に、これらは**AMFI（AppleMobileFileIntegrity）**で定義されているため、**KEXT**を取得するためにKernel Development Kitをダウンロードする必要があります。 **`kConstraintCategory`**で始まるシンボルが**興味深い**ものです。これらを抽出すると、ASN.1でエンコードされたストリームが得られます。これを[ASN.1デコーダ](https://holtstrom.com/michael/tools/asn1decoder.php)やpython-asn1ライブラリとその`dump.py`スクリプト、[andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master)を使用してデコードする必要があります。これにより、より理解しやすい文字列が得られます。
+詳細は[**こちら**](https://theevilbit.github.io/posts/launch\_constraints\_deep\_dive/#reversing-constraints)にありますが、基本的に、これらは**AMFI（AppleMobileFileIntegrity）**で定義されているため、**KEXT**を取得するためにKernel Development Kitをダウンロードする必要があります。 **`kConstraintCategory`**で始まるシンボルが**興味深い**ものです。これらを抽出すると、ASN.1でエンコードされたストリームが得られます。これを[ASN.1デコーダ](https://holtstrom.com/michael/tools/asn1decoder.php)またはpython-asn1ライブラリとその`dump.py`スクリプト、[andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master)を使用してデコードする必要があります。これにより、より理解しやすい文字列が得られます。
 
 ## 環境制約
 
@@ -114,7 +114,7 @@ pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLau
 ```
 {% endcode %}
 
-（別のオプションとして、適切な場所にインストールすると、M1でもx86\_64用の古いリリースでも実行される[**img4tool**](https://github.com/tihmstar/img4tool)ツールを使用することもできます）。
+（別のオプションとして、適切な場所にインストールすると、古いリリースであってもM1で実行される[**img4tool**](https://github.com/tihmstar/img4tool)ツールを使用することもできます）。
 
 今、ツール[**trustcache**](https://github.com/CRKatri/trustcache)を使用して、情報を読みやすい形式で取得できます：
 ```bash
@@ -140,7 +140,7 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-信頼キャッシュは次の構造に従いますので、**LCカテゴリは4番目の列です**。
+信頼キャッシュは以下の構造に従いますので、**LCカテゴリは4番目の列です**。
 ```c
 struct trust_cache_entry2 {
 uint8_t cdhash[CS_CDHASH_LEN];
@@ -150,30 +150,27 @@ uint8_t constraintCategory;
 uint8_t reserved0;
 } __attribute__((__packed__));
 ```
-そのデータから、**[こちらのスクリプト](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30)** を使用してデータを抽出できます。
-
-そのデータを使用して、**`0`の起動制約値を持つアプリ**をチェックできます。これは制約されていないアプリです。各値の意味については、**[こちらを確認してください](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)**。
-
 ## 攻撃緩和
 
-起動制約は、**プロセスが予期しない状況で実行されないようにすることで**、いくつかの古い攻撃を緩和していました。たとえば、予期しない場所からの起動や予期しない親プロセスによる起動などです（launchdだけが起動するはずの場合）。
+Launch Constrainsは、**プロセスが予期しない状況で実行されないようにすることで**、いくつかの古い攻撃を緩和していました：たとえば、予期しない場所からの起動や予期しない親プロセスによる呼び出し（launchdだけが起動すべき場合）
 
-さらに、起動制約は**ダウングレード攻撃を緩和**します。
+さらに、Launch Constrainsは**ダウングレード攻撃を緩和**します。
 
-ただし、これらは**一般的なXPCの悪用、Electronのコードインジェクション、ライブラリの検証なしでのdylibインジェクション**（ライブラリを読み込むことができるチームIDがわかっている場合を除く）を緩和しません。
+ただし、これらは**一般的なXPC**の悪用、**Electron**コードインジェクション、ライブラリの検証なしでの**dylibインジェクション**（ライブラリを読み込むことができるチームIDがわかっている場合を除く）を緩和しません。
 
 ### XPCデーモン保護
 
-Sonomaリリースでは、デーモンXPCサービスの**責任構成**が注目されます。XPCサービスは自己責任であり、接続するクライアントが責任を負うのとは対照的です。これはフィードバックレポートFB13206884に記載されています。この設定は欠陥のように見えるかもしれませんが、次のようなXPCサービスとの相互作用を許可します：
+Sonomaリリースでは、デーモンXPCサービスの**責任構成**が注目されます。XPCサービスは、接続するクライアントが責任を負うのではなく、自己責任を負います。これはフィードバックレポートFB13206884に記載されています。この設定は欠陥のように見えるかもしれませんが、次のようなXPCサービスとの相互作用を許可します：
 
-- **XPCサービスの起動**：バグと仮定される場合、この設定では攻撃者のコードを介してXPCサービスを起動することは許可されません。
+- **XPCサービスの起動**：バグと仮定される場合、この設定では攻撃者コードを介してXPCサービスを起動することは許可されません。
 - **アクティブサービスへの接続**：XPCサービスが既に実行中の場合（おそらく元のアプリケーションによってアクティブ化された場合）、接続に障壁はありません。
 
-XPCサービスに制約を実装することで、**潜在的な攻撃の余地を狭める**ことができますが、これは主要な懸念には対処しません。XPCサービスのセキュリティを確保するには、**接続するクライアントを効果的に検証する**ことが不可欠です。これがサービスのセキュリティを強化する唯一の方法です。また、言及された責任構成が現在稼働していることに留意する価値がありますが、これは意図された設計と一致しない可能性があります。
+XPCサービスに制約を実装することで、**潜在的な攻撃の余地を狭める**ことができますが、これは主要な懸念に対処していません。XPCサービスのセキュリティを確保するには、**接続するクライアントを効果的に検証する**ことが不可欠です。これがサービスのセキュリティを強化する唯一の方法です。また、言及された責任構成が現在稼働中であることに留意する価値がありますが、これは意図された設計と一致しない可能性があります。
+
 
 ### Electron保護
 
-アプリケーションが**親の制約でLaunchServiceによって開かれる必要がある**場合でも、これは**`open`**（環境変数を設定できる）を使用するか、**Launch Services API**（環境変数を指定できる）を使用することで達成できます。
+アプリケーションが**親の制約でLaunchServiceによって開かれる必要がある**場合でも、これは**`open`**（環境変数を設定できる）を使用するか、**Launch Services API**（環境変数を指定できる）を使用して達成できます。
 
 ## 参考文献
 

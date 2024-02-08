@@ -1,60 +1,60 @@
-# ネットワークネームスペース
+# ネットワーク名前空間
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>で**ゼロからヒーローまでAWSハッキングを学ぶ**</summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有してください。
+- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)をフォローする
+- **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
 ## 基本情報
 
-ネットワークネームスペースは、ネットワークスタックの隔離を提供するLinuxカーネルの機能であり、**各ネットワークネームスペースが独自の独立したネットワーク構成を持つことができます**。インターフェース、IPアドレス、ルーティングテーブル、ファイアウォールルールが含まれます。この隔離は、コンテナ化などのさまざまなシナリオで役立ちます。ここでは、各コンテナが他のコンテナやホストシステムとは独立したネットワーク構成を持つべきです。
+ネットワーク名前空間は、Linuxカーネルの機能であり、**各ネットワーク名前空間が独自のネットワーク構成**、インターフェース、IPアドレス、ルーティングテーブル、およびファイアウォールルールを持つようにする分離を提供します。この分離は、コンテナ化などのさまざまなシナリオで有用であり、各コンテナが他のコンテナやホストシステムとは独立したネットワーク構成を持つ必要がある場合に役立ちます。
 
-### 動作原理:
+### 動作方法:
 
-1. 新しいネットワークネームスペースが作成されると、ループバックインターフェース(lo)を除いて、**完全に隔離されたネットワークスタック**が始まります。つまり、新しいネットワークネームスペースで実行されているプロセスは、デフォルトでは他のネームスペースやホストシステムのプロセスと通信できません。
-2. **仮想ネットワークインターフェース**（例えばvethペア）は作成され、ネットワークネームスペース間で移動することができます。これにより、ネームスペース間、またはネームスペースとホストシステム間のネットワーク接続を確立することができます。例えば、vethペアの一方の端をコンテナのネットワークネームスペースに配置し、他方の端をホストネームスペースの**ブリッジ**または別のネットワークインターフェースに接続することで、コンテナにネットワーク接続を提供できます。
-3. ネームスペース内のネットワークインターフェースは、他のネームスペースとは独立して、**独自のIPアドレス、ルーティングテーブル、ファイアウォールルール**を持つことができます。これにより、異なるネットワークネームスペースのプロセスは、異なるネットワーク構成を持ち、別々のネットワークシステムで実行されているかのように操作することができます。
-4. プロセスは、`setns()`システムコールを使用してネームスペース間を移動したり、`CLONE_NEWNET`フラグを使用して`unshare()`または`clone()`システムコールで新しいネームスペースを作成することができます。プロセスが新しいネームスペースに移動するか、新しいものを作成すると、そのネームスペースに関連付けられたネットワーク構成とインターフェースを使用し始めます。
+1. 新しいネットワーク名前空間が作成されると、**完全に分離されたネットワークスタック**が開始され、ループバックインターフェース（lo）を除く**ネットワークインターフェースが存在しない**状態となります。これにより、新しいネットワーク名前空間で実行されるプロセスは、デフォルトでは他の名前空間やホストシステムのプロセスと通信できません。
+2. vethペアなどの**仮想ネットワークインターフェース**を作成し、ネットワーク名前空間間や名前空間とホストシステム間のネットワーク接続を確立できます。たとえば、vethペアの一方の端をコンテナのネットワーク名前空間に配置し、他方の端を**ブリッジ**またはホスト名前空間の別のネットワークインターフェースに接続して、コンテナにネットワーク接続を提供できます。
+3. 名前空間内のネットワークインターフェースは、他の名前空間とは独立して、**独自のIPアドレス、ルーティングテーブル、およびファイアウォールルール**を持つことができます。これにより、異なるネットワーク名前空間のプロセスは、異なるネットワーク構成を持ち、別々のネットワークシステム上で実行されているかのように動作できます。
+4. プロセスは、`setns()`システムコールを使用して名前空間間を移動したり、`unshare()`または`CLONE_NEWNET`フラグを使用して`clone()`システムコールを使用して新しい名前空間を作成したりすることができます。プロセスが新しい名前空間に移動したり、新しい名前空間を作成したりすると、その名前空間に関連付けられたネットワーク構成とインターフェースを使用し始めます。
 
-## 実験室:
+## Lab:
 
-### 異なるネームスペースを作成する
+### 異なる名前空間を作成する
 
 #### CLI
 ```bash
 sudo unshare -n [--mount-proc] /bin/bash
 # Run ifconfig or ip -a
 ```
-`/proc` ファイルシステムの新しいインスタンスをマウントすることで、`--mount-proc` パラメータを使用すると、新しいマウント名前空間がその名前空間に特有の**正確で隔離されたプロセス情報のビューを持つことを保証します**。
+`--mount-proc`パラメータを使用して`/proc`ファイルシステムの新しいインスタンスをマウントすることで、新しいマウント名前空間がその名前空間固有のプロセス情報に正確で隔離されたビューを持つことが保証されます。
 
 <details>
 
-<summary>エラー: bash: fork: メモリを割り当てることができません</summary>
+<summary>エラー: bash: fork: Cannot allocate memory</summary>
 
-`unshare` を `-f` オプションなしで実行すると、Linuxが新しい PID (プロセス ID) 名前空間を扱う方法により、エラーが発生します。重要な詳細と解決策は以下の通りです：
+`-f`オプションなしで`unshare`を実行すると、Linuxが新しいPID（プロセスID）名前空間を処理する方法によりエラーが発生します。主要な詳細と解決策は以下に示されています:
 
 1. **問題の説明**:
-- Linuxカーネルは、プロセスが `unshare` システムコールを使用して新しい名前空間を作成することを許可しています。しかし、新しい PID 名前空間の作成を開始するプロセス（"unshare" プロセスと呼ばれる）は、新しい名前空間に入らず、その子プロセスのみが入ります。
-- `%unshare -p /bin/bash%` を実行すると、`/bin/bash` は `unshare` と同じプロセスで開始されます。その結果、`/bin/bash` とその子プロセスは元の PID 名前空間にあります。
-- 新しい名前空間での `/bin/bash` の最初の子プロセスが PID 1 になります。このプロセスが終了すると、他のプロセスがない場合、名前空間のクリーンアップがトリガーされます。PID 1 は孤立したプロセスを引き取る特別な役割を持っているため、Linuxカーネルはその名前空間での PID 割り当てを無効にします。
+- Linuxカーネルは、`unshare`システムコールを使用してプロセスが新しい名前空間を作成することを許可します。ただし、新しいPID名前空間の作成を開始するプロセス（「unshare」プロセスと呼ばれる）は、新しい名前空間に入りません。その子プロセスのみが入ります。
+- `%unshare -p /bin/bash%`を実行すると、`/bin/bash`が`unshare`と同じプロセスで開始されます。その結果、`/bin/bash`とその子プロセスは元のPID名前空間にあります。
+- 新しい名前空間内の`/bin/bash`の最初の子プロセスはPID 1になります。このプロセスが終了すると、他のプロセスがいない場合、孤児プロセスを引き取る特別な役割を持つPID 1により、その名前空間のクリーンアップがトリガーされます。その後、Linuxカーネルはその名前空間でPIDの割り当てを無効にします。
 
 2. **結果**:
-- 新しい名前空間での PID 1 の終了は、`PIDNS_HASH_ADDING` フラグのクリーニングにつながります。これにより、新しいプロセスを作成する際に `alloc_pid` 関数が新しい PID を割り当てることができず、「メモリを割り当てることができません」というエラーが発生します。
+- 新しい名前空間内のPID 1の終了により、`PIDNS_HASH_ADDING`フラグのクリーニングが行われます。これにより、新しいプロセスを作成する際に`alloc_pid`関数が新しいPIDを割り当てられなくなり、「Cannot allocate memory」エラーが発生します。
 
 3. **解決策**:
-- この問題は、`unshare` と `-f` オプションを使用することで解決できます。このオプションは、新しい PID 名前空間を作成した後に `unshare` が新しいプロセスをフォークするようにします。
-- `%unshare -fp /bin/bash%` を実行すると、`unshare` コマンド自体が新しい名前空間で PID 1 になります。`/bin/bash` とその子プロセスは、この新しい名前空間内で安全に保持され、PID 1 の早期終了を防ぎ、通常の PID 割り当てを可能にします。
+- `unshare`に`-f`オプションを使用することで問題を解決できます。このオプションにより、`unshare`は新しいPID名前空間を作成した後に新しいプロセスをフォークします。
+- `%unshare -fp /bin/bash%`を実行すると、`unshare`コマンド自体が新しい名前空間でPID 1になります。その後、`/bin/bash`とその子プロセスはこの新しい名前空間内に安全に含まれ、PID 1の早期終了を防ぎ、通常のPID割り当てを可能にします。
 
-`unshare` が `-f` フラグで実行されることを確認することで、新しい PID 名前空間が正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく操作できるようになります。
+`unshare`が`-f`フラグで実行されることを確認することで、新しいPID名前空間が正しく維持され、`/bin/bash`とそのサブプロセスがメモリ割り当てエラーに遭遇することなく動作するようになります。
 
 </details>
 
@@ -63,7 +63,7 @@ sudo unshare -n [--mount-proc] /bin/bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
-### プロセスがどのネームスペースにあるかを確認する
+### &#x20;あなたのプロセスがどのネームスペースにあるかを確認します
 ```bash
 ls -l /proc/self/ns/net
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/net -> 'net:[4026531840]'
@@ -76,29 +76,27 @@ sudo find /proc -maxdepth 3 -type l -name net -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name net -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-{% endcode %}
-
 ### ネットワーク名前空間に入る
+
+{% endcode %}
 ```bash
 nsenter -n TARGET_PID --pid /bin/bash
 ```
-```
-また、**rootである場合に限り、他のプロセスのネームスペースに入ることができます**。そして、それを指すディスクリプタ（`/proc/self/ns/net`のような）が**なければ**、他のネームスペースに**入ることはできません**。
+また、**rootユーザーでないと他のプロセスの名前空間に入ることはできません**。そして、他の名前空間に**ディスクリプタ**（`/proc/self/ns/net`のような）を指すことなしに**入ることはできません**。
 
-# 参考文献
+## 参考文献
 * [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをチェックしてください。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有してください**。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、**あなたのハッキングテクニックを共有**してください。
 
 </details>
-```

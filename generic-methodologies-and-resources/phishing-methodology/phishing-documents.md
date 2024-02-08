@@ -2,22 +2,22 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけてください
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 * **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 ## オフィスドキュメント
 
-Microsoft Wordはファイルを開く前にファイルデータの検証を行います。データ検証は、OfficeOpenXML標準に対するデータ構造の識別の形で行われます。データ構造の識別中にエラーが発生した場合、分析されているファイルは開かれません。
+Microsoft Wordはファイルを開く前にファイルデータの検証を行います。データ検証は、OfficeOpenXML標準に対するデータ構造の識別の形で行われます。データ構造の識別中にエラーが発生すると、分析されているファイルは開かれません。
 
-通常、マクロを含むWordファイルは`.docm`拡張子を使用します。ただし、ファイルの拡張子を変更しても、マクロの実行機能を保持することが可能です。\
-たとえば、RTFファイルは設計上マクロをサポートしていませんが、RTFに名前が変更されたDOCMファイルはMicrosoft Wordによって処理され、マクロの実行が可能になります。\
+通常、マクロを含むWordファイルは`.docm`拡張子を使用します。ただし、ファイルの拡張子を変更しても、マクロの実行機能を保持することができます。\
+たとえば、RTFファイルは設計上、マクロをサポートしていませんが、RTFに名前が変更されたDOCMファイルはMicrosoft Wordによって処理され、マクロの実行が可能になります。\
 同じ内部構造とメカニズムがMicrosoft Office Suiteのすべてのソフトウェア（Excel、PowerPointなど）に適用されます。
 
 次のコマンドを使用して、一部のOfficeプログラムによって実行される拡張子を確認できます：
@@ -27,13 +27,13 @@ assoc | findstr /i "word excel powerp"
 ### 外部画像の読み込み
 
 Go to: _挿入 --> クイックパーツ --> フィールド_\
-_**カテゴリ**: リンクと参照、**フィールド名**: includePicture、**ファイル名またはURL**:_ http://\<ip>/whatever
+_**カテゴリ**: リンクと参照、**フィールド名**: includePicture、**ファイル名またはURL**: _ http://\<ip>/whatever
 
 ![](<../../.gitbook/assets/image (316).png>)
 
 ### マクロバックドア
 
-文書から任意のコードを実行するためにマクロを使用することが可能です。
+マクロを使用して文書から任意のコードを実行することが可能です。
 
 #### 自動読み込み関数
 
@@ -79,7 +79,7 @@ proc.Create "powershell <beacon line generated>
 #### ドキュメントの拡張子
 
 作業が完了したら、**保存形式** ドロップダウンから、**`.docx`** から **Word 97-2003 `.doc`** に形式を変更します。\
-これは、**`.docx` 内にマクロを保存できない** ためです。また、マクロが有効な **`.docm`** 拡張子には **スティグマ** があります（たとえば、サムネイルアイコンには大きな `!` が表示され、一部のウェブ/メールゲートウェイが完全にブロックします）。そのため、この **レガシーの `.doc` 拡張子が最良の妥協策** です。
+これは、**`.docx` 内にマクロを保存できない** ためです。また、マクロが有効化された **`.docm`** 拡張子には **スティグマ** があります（たとえば、サムネイルアイコンには大きな `!` が表示され、一部のウェブ/メールゲートウェイが完全にブロックします）。そのため、この **レガシーの `.doc` 拡張子が最良の妥協策** です。
 
 #### 悪意のあるマクロ生成ツール
 
@@ -91,7 +91,7 @@ proc.Create "powershell <beacon line generated>
 
 HTA は、**HTML と VBScript、JScript などのスクリプト言語を組み合わせた Windows プログラム** です。これは、ブラウザのセキュリティモデルの制約なしに **"完全に信頼された" アプリケーションとして実行** されるユーザーインターフェースを生成します。
 
-HTA は **`mshta.exe`** を使用して実行され、通常は **Internet Explorer と一緒にインストール** されるため、**`mshta` は IE に依存** しています。したがって、IE がアンインストールされている場合、HTA は実行できません。
+HTA は、**`mshta.exe`** を使用して実行され、通常は **Internet Explorer と一緒にインストール** されるため、**`mshta` は IE に依存** しています。したがって、IE がアンインストールされている場合、HTA は実行できなくなります。
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -148,7 +148,7 @@ self.close
 ```
 ## NTLM認証の強制
 
-**リモートでNTLM認証を強制する**方法はいくつかあります。たとえば、ユーザーがアクセスするであろう電子メールやHTMLに**見えない画像**を追加したり（HTTP MitMでも可能？）、被害者に**フォルダを開くだけで認証をトリガーするファイルのアドレス**を送信することができます。
+**リモートでNTLM認証を強制する**方法はいくつかあります。たとえば、ユーザーがアクセスするであろう電子メールやHTMLに**見えない画像**を追加したり（たとんHTTP MitM？）、または被害者に**フォルダを開くだけで認証をトリガーするファイルのアドレス**を送信することができます。
 
 **以下のページでこれらのアイデアやその他の情報をチェックしてください:**
 
@@ -171,10 +171,10 @@ self.close
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけてください
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **💬**[**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

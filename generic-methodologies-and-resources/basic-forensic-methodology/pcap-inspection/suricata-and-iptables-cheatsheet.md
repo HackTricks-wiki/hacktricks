@@ -5,9 +5,9 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricks で企業を宣伝**してみたいですか？または、**PEASS の最新バージョンを入手したり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つけてください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションをご覧ください
 * [**公式 PEASS & HackTricks スウェグ**](https://peass.creator-spring.com) を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discord グループ**に**参加**するか、[**telegram グループ**](https://t.me/peass)に参加するか、**Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)** をフォロー**してください。
+* **[💬](https://emojipedia.org/speech-balloon/) Discord グループ**に**参加**するか、[**telegram グループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)** をフォロー**してください。
 * **ハッキングトリックを共有するために、[hacktricks リポジトリ](https://github.com/carlospolop/hacktricks) と [hacktricks-cloud リポジトリ](https://github.com/carlospolop/hacktricks-cloud)** に PR を提出してください。
 
 </details>
@@ -16,13 +16,13 @@
 
 ### チェーン
 
-iptables では、チェーンとして知られるルールのリストが順次処理されます。これらの中で、3 つの主要なチェーンが普遍的に存在し、システムの機能に応じて NAT のような追加のチェーンがサポートされる場合があります。
+iptables では、チェーンとして知られるルールのリストが順次処理されます。これらの中で、3 つの主要なチェーンが普遍的に存在し、システムの機能に応じて NAT のような追加のチェーンがサポートされることがあります。
 
 - **Input チェーン**：着信接続の動作を管理するために使用されます。
-- **Forward チェーン**：ローカルシステムに向けられていない着信接続を処理するために使用されます。これは、データを他の宛先に転送する必要があるデバイスで一般的であり、システムがルーティング、NAT、または類似の活動に関与している場合に主に関連します。
-- **Output チェーン**：送信接続の規制に専念します。
+- **Forward チェーン**：ローカルシステムに向けられていない着信接続を処理するために使用されます。これは、データが別の宛先に転送されることを意味するデバイスがルーターとして機能する場合に一般的です。このチェーンは、システムがルーティング、NAT、または類似のアクティビティに関与している場合に主に関連します。
+- **Output チェーン**：送信接続の規制に専念しています。
 
-これらのチェーンはネットワークトラフィックの整然な処理を確保し、システムにデータの流れを詳細に規定するルールを指定することを可能にします。
+これらのチェーンは、ネットワークトラフィックの整然な処理を確保し、システムにデータの流れを詳細に規定するルールを指定することを可能にします。
 ```bash
 # Delete all rules
 iptables -F
@@ -131,8 +131,8 @@ systemctl daemon-reload
 
 [ドキュメントから：](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) ルール/シグネチャは以下で構成されます：
 
-* **アクション**：シグネチャが一致したときに何が起こるかを決定します。
-* **ヘッダー**：プロトコル、IPアドレス、ポート、およびルールの方向を定義します。
+* **アクション**：シグネチャが一致したときの動作を決定します。
+* **ヘッダー**：ルールのプロトコル、IPアドレス、ポート、および方向を定義します。
 * **ルールオプション**：ルールの具体的な内容を定義します。
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
@@ -142,7 +142,7 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 * alert - アラートを生成する
 * pass - パケットのさらなる検査を停止する
 * **drop** - パケットを破棄してアラートを生成する
-* **reject** - 一致するパケットの送信元にRST/ICMP到達不能エラーを送信する
+* **reject** - 一致するパケットの送信元にRST/ICMP unreachableエラーを送信する
 * rejectsrc - 単に _reject_ と同じ
 * rejectdst - 一致するパケットの受信者にRST/ICMPエラーパケットを送信する
 * rejectboth - 会話の両側にRST/ICMPエラーパケットを送信する
@@ -177,9 +177,9 @@ IP範囲、否定、アドレスのリストをサポートしています:
 | \[80, 81, 82]   | ポート80、81、82                     |
 | \[80: 82]       | 80から82までの範囲                  |
 | \[1024: ]       | 1024から最も高いポート番号まで |
-| !80             | ポート80以外                      |
-| \[80:100,!99]   | 80から100までの範囲、ただし99は除外 |
-| \[1:80,!\[2,4]] | 1から80までの範囲、ただしポート2および4は除外 |
+| !80             | ポート80以外のすべてのポート                      |
+| \[80:100,!99]   | 80から100までの範囲、ただし99を除く |
+| \[1:80,!\[2,4]] | 1から80までの範囲、ただしポート2および4を除く  |
 
 #### 方向
 
@@ -190,7 +190,7 @@ source <> destination  (both directions)
 ```
 #### キーワード
 
-Suricataには**数百のオプション**があり、探している**特定のパケット**を検索するためのオプションがたくさんあります。興味深いものが見つかった場合はここに記載されます。詳細は[**ドキュメント**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)を参照してください！
+Suricataには**数百のオプション**があり、探している**特定のパケット**を検索するためのオプションがたくさんあります。ここでは、興味深いものが見つかった場合に言及されます。詳細については、[**ドキュメント**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)をチェックしてください！
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -235,10 +235,10 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**してみたいですか？または**PEASSの最新バージョンにアクセス**したいですか、または**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、当社の独占的な[NFTコレクション**](https://opensea.io/collection/the-peass-family)
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有**するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

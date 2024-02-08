@@ -2,23 +2,23 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
 * [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 * **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 ## 影響
 
-特権付きコンテナとしてコンテナを実行すると、次の保護が無効になります：
+特権付きコンテナを実行すると、次の保護が無効になります：
 
 ### /dev をマウント
 
-特権付きコンテナでは、すべての**デバイスに `/dev/`**でアクセスできます。そのため、ホストのディスクを**マウント**して**脱出**することができます。
+特権付きコンテナでは、すべての**デバイスに `/dev/` でアクセス**できます。そのため、ホストのディスクを**マウント**して**脱出**することができます。
 
 {% tabs %}
 {% tab title="デフォルトコンテナ内部" %}
@@ -60,7 +60,7 @@ mount  | grep '(ro'
 ```
 ### カーネルファイルシステムのマスキング
 
-**/proc**ファイルシステムは選択的に書き込み可能ですが、セキュリティのため、一部の部分は**tmpfs**でオーバーレイされ、コンテナプロセスが機密領域にアクセスできないように保護されています。
+**/proc**ファイルシステムは選択的に書き込み可能ですが、セキュリティのため、一部の部分は**tmpfs**でオーバーレイされ、コンテナプロセスが機密領域にアクセスできないように読み書きアクセスが遮断されています。
 
 {% hint style="info" %}
 **tmpfs**は仮想メモリにすべてのファイルを保存するファイルシステムです。tmpfsはハードドライブにファイルを作成しません。したがって、tmpfsファイルシステムをアンマウントすると、その中にあるすべてのファイルが永遠に失われます。
@@ -82,7 +82,7 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
 ```
-### Linux capabilities
+### Linuxの機能
 
 コンテナエンジンは、コンテナを**デフォルトで内部で何が起こるかを制御するために、**制限された数の機能**で起動します。**特権**を持つものは、**すべて**の**機能**にアクセスできます。機能について学ぶには、以下を参照してください：
 
@@ -114,11 +114,11 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {% endtab %}
 {% endtabs %}
 
-`--cap-add`および`--cap-drop`フラグを使用して、`--privileged`モードで実行せずにコンテナで利用可能な機能を操作できます。
+コンテナで利用可能な機能を`--privileged`モードで実行せずに、`--cap-add`および`--cap-drop`フラグを使用して操作することができます。
 
 ### Seccomp
 
-**Seccomp**は、コンテナが呼び出すことができる**syscalls**を**制限**するのに役立ちます。 Dockerコンテナを実行する際にはデフォルトでSeccompプロファイルが有効になっていますが、特権モードでは無効になります。 Seccompについて詳しくはこちら：
+**Seccomp**は、コンテナが呼び出すことができる**syscalls**を**制限**するのに役立ちます。 Dockerコンテナを実行する際にはデフォルトでseccompプロファイルが有効になっていますが、特権モードでは無効になります。Seccompについて詳しくはこちらを参照してください：
 
 {% content-ref url="seccomp.md" %}
 [seccomp.md](seccomp.md)
@@ -148,14 +148,18 @@ Seccomp_filters:	0
 
 ### AppArmor
 
-**AppArmor**は、**プログラムごとのプロファイル**を使用して**コンテナ**を**限られた****リソース**に制限するためのカーネルの拡張機能です。`--privileged`フラグを使用すると、この保護が無効になります。
+**AppArmor**は、**プログラムごとのプロファイル**を使用して**コンテナ**を**限られた**リソースセットに制限するためのカーネルの拡張機能です。`--privileged`フラグで実行すると、この保護が無効になります。
+
+{% content-ref url="apparmor.md" %}
+[apparmor.md](apparmor.md)
+{% endcontent-ref %}
 ```bash
 # You can manually disable seccomp in docker with
 --security-opt apparmor=unconfined
 ```
 ### SELinux
 
-`--privileged` フラグを使用してコンテナを実行すると、**SELinux ラベル**が無効になり、通常 `unconfined` のようなコンテナエンジンのラベルを継承し、コンテナエンジンと同様の完全アクセスが付与されます。ルートレスモードでは `container_runtime_t` を使用し、ルートモードでは `spc_t` が適用されます。
+`--privileged` フラグを使用してコンテナを実行すると、**SELinux ラベル**が無効になり、通常 `unconfined` であるコンテナエンジンのラベルを継承し、コンテナエンジンと同様の完全アクセス権限が付与されます。ルートレスモードでは `container_runtime_t` を使用し、ルートモードでは `spc_t` が適用されます。
 
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
@@ -191,9 +195,6 @@ PID   USER     TIME  COMMAND
 3 root      0:00 [rcu_gp]ount | grep /proc.*tmpfs
 [...]
 ```
-{% endtab %}
-{% endtabs %}
-
 ### ユーザー名前空間
 
 **デフォルトでは、コンテナエンジンはユーザー名前空間を利用しません。ただし、ルートレスコンテナでは、ファイルシステムのマウントや複数のUIDの使用に必要とされるため、ユーザー名前空間が使用されます。** ルートレスコンテナには不可欠であり、特権を制限することでセキュリティを大幅に向上させます。
@@ -201,15 +202,3 @@ PID   USER     TIME  COMMAND
 ## 参考文献
 
 * [https://www.redhat.com/sysadmin/privileged-flag-container-engines](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFT](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出して、あなたのハッキングトリックを共有してください。
-
-</details>

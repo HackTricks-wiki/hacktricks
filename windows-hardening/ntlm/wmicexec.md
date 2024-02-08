@@ -2,30 +2,30 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法：
+HackTricks をサポートする他の方法:
 
-* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私をフォローする：[**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-* **ハッキングトリックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
+* **💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする。
+* **ハッキングトリックを共有するために PR を送信して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに貢献する。
 
 </details>
 
 ## 動作の説明
 
-ユーザー名とパスワードまたはハッシュがわかっているホストでプロセスを開くことができます。WMIを使用してコマンドを実行し、Wmiexecによって半インタラクティブなシェル体験を提供します。
+ユーザー名とパスワードまたはハッシュがわかっているホストでプロセスを開くことができます。WMI を使用してコマンドを実行し、Wmiexec によって半インタラクティブなシェル体験を提供します。
 
-**dcomexec.py:** 異なるDCOMエンドポイントを利用し、このスクリプトはWmiexec.pyに似た半インタラクティブなシェルを提供します。具体的には、ShellBrowserWindow DCOMオブジェクトを活用しています。現在、MMC20、Application、Shell Windows、Shell Browser Windowオブジェクトをサポートしています。（出典：[Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)）
+**dcomexec.py:** 異なる DCOM エンドポイントを利用して、このスクリプトは Wmiexec.py に似た半インタラクティブなシェルを提供し、特に ShellBrowserWindow DCOM オブジェクトを活用しています。現在、MMC20. Application、Shell Windows、および Shell Browser Window オブジェクトをサポートしています。（出典: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)）
 
-## WMIの基礎
+## WMI の基礎
 
 ### 名前空間
 
-ディレクトリスタイルの階層構造で構成されており、WMIのトップレベルコンテナは\rootで、その下に名前空間として組織された追加のディレクトリがあります。
-名前空間をリストするコマンド：
+ディレクトリスタイルの階層構造で構成されており、WMI のトップレベルコンテナは \root で、その下に名前空間として組織された追加のディレクトリがあります。
+名前空間をリストするコマンド:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -36,7 +36,7 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-特定の名前空間内のクラスは、次のコマンドを使用してリストできます:
+特定の名前空間内のクラスは、次のコマンドを使用してリストアップできます:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
@@ -57,7 +57,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### メソッド
 
-メソッドは、WMIクラスの1つ以上の実行可能な機能です。
+メソッドは、WMIクラスの1つ以上の実行可能な関数です。
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -107,10 +107,10 @@ Empireエージェントを展開するなど、WMIを介してプロセスを�
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-このプロセスは、WMIのリモート実行およびシステム列挙の機能を示し、システム管理およびペネトレーションテストの両方での有用性を強調しています。
+このプロセスは、WMIのリモート実行およびシステム列挙の機能を示し、システム管理およびペネトレーションテストの両方における有用性を強調しています。
 
 
-# 参考文献
+## 参考文献
 * [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## 自動ツール
@@ -125,14 +125,14 @@ SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricks で企業を宣伝したい**場合や **HackTricks をPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や [**telegramグループ**](https://t.me/peass)に **参加**したり、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を **フォロー**する
-* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks)と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私をフォローする [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
+* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>

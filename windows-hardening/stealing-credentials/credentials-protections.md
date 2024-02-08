@@ -1,132 +1,104 @@
-# Windows クレデンシャル保護
+# Windows Credentials Protections
 
-## クレデンシャル保護
+## 資格情報の保護
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert) で AWS ハッキングをゼロからヒーローまで学ぶ</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks にあなたの会社を広告掲載したい場合**や**HackTricks を PDF でダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをチェックする
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f)や [**telegram グループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出して、あなたのハッキングテクニックを共有する。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
+* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
 ## WDigest
 
-[WDigest](https://technet.microsoft.com/pt-pt/library/cc778868\(v=ws.10\).aspx?f=255\&MSPPError=-2147217396) プロトコルは Windows XP で導入され、HTTP プロトコルでの認証に使用されるように設計されました。Microsoft はこのプロトコルを**デフォルトで複数の Windows バージョンで有効にしています**（Windows XP — Windows 8.0 および Windows Server 2003 — Windows Server 2012）、これは **平文のパスワードが LSASS**（Local Security Authority Subsystem Service）に保存されていることを意味します。**Mimikatz** は LSASS とやり取りすることができ、攻撃者が以下のコマンドを通じてこれらのクレデンシャルを**取得する**ことを可能にします：
-```
+[WDigest](https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396) プロトコルは、Windows XPで導入され、HTTPプロトコルを介した認証用に設計されており、**Windows XPからWindows 8.0、Windows Server 2003からWindows Server 2012までのデフォルトで有効**です。このデフォルト設定により、**LSASS（Local Security Authority Subsystem Service）に平文パスワードが保存**されます。攻撃者はMimikatzを使用して、次のコマンドを実行することで、これらの資格情報を**抽出**することができます：
+```bash
 sekurlsa::wdigest
 ```
-この動作は _**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ 内の _**UseLogonCredential**_ と _**Negotiate**_ の値を **1に設定することで** **無効化/有効化** できます。\
-これらのレジストリキーが **存在しない**、または値が **"0"** の場合、WDigestは **無効化** されます。
-```
+**この機能をオンまたはオフに切り替える**には、_**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ 内の _**UseLogonCredential**_ および _**Negotiate**_ レジストリキーを "1" に設定する必要があります。これらのキーが**存在しないか "0" に設定されている**場合、WDigest は**無効**になります。
+```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-## LSA 保護
+## LSA保護
 
-Microsoftは、**Windows 8.1 以降**で、信頼できないプロセスがLSAのメモリを**読み取る**ことやコードを注入することを**防ぐ**ために、LSAに追加の保護を提供しています。これにより、通常の `mimikatz.exe sekurlsa:logonpasswords` が適切に機能することを防ぎます。\
-この保護を**有効にする**には、_**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ の _**RunAsPPL**_ の値を1に設定する必要があります。
+**Windows 8.1**からは、MicrosoftはLSAのセキュリティを強化し、**信頼されていないプロセスによる許可されていないメモリ読み取りやコードインジェクションをブロック**するようにしました。この強化により、`mimikatz.exe sekurlsa:logonpasswords`のようなコマンドの通常の機能が妨げられます。この強化された保護を**有効にする**には、_**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_内の_RunAsPPL_値を1に調整する必要があります：
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
 ### バイパス
 
-この保護をバイパスする方法として、Mimikatzのドライバーmimidrv.sysがあります：
+Mimikatzドライバーmimidrv.sysを使用して、この保護をバイパスすることが可能です：
 
 ![](../../.gitbook/assets/mimidrv.png)
 
-## Credential Guard
+## 資格情報ガード
 
-**Credential Guard**はWindows 10（EnterpriseおよびEducationエディション）の新機能で、パスハッシュなどの脅威からマシン上の資格情報を保護するのに役立ちます。これはVirtual Secure Mode（VSM）と呼ばれる技術を通じて機能し、CPUの仮想化拡張を利用します（実際の仮想マシンではありません）が、**メモリの保護領域**に**保護**を提供します（Virtualization Based SecurityまたはVBSとして言及されることがあります）。VSMは、通常の**オペレーティングシステム**のプロセス、カーネルでさえも、**分離された**重要な**プロセス**のための別の「バブル」を作成し、**特定の信頼されたプロセスのみがVSM内のプロセス**（**trustlets**として知られています）と通信できます。これは、メインOSのプロセスがVSMのメモリを読み取ることができないことを意味します。**Local Security Authority（LSA）はVSM内のtrustletsの一つ**であり、既存のプロセスとの互換性を保つためにメインOSで引き続き実行される標準の**LSASS**プロセスもありますが、実際にはVSM内のバージョンと通信するためのプロキシまたはスタブとして機能し、実際の資格情報はVSMのバージョンで実行され、攻撃から保護されます。Windows 10の場合、Credential Guardはデフォルトでは**有効になっていません**ので、組織でオンにして展開する必要があります。
-[https://www.itprotoday.com/windows-10/what-credential-guard](https://www.itprotoday.com/windows-10/what-credential-guard)からの情報。Credential Guardを有効にするPS1スクリプトについての詳細は[こちらで見つけることができます](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage)。ただし、Windows 11 Enterprise、バージョン22H2およびWindows 11 Education、バージョン22H2では、互換性のあるシステムにはWindows Defender Credential Guardが[デフォルトでオンになっています](https://learn.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage#Default%20Enablement)。
+**資格情報ガード**は、**Windows 10（エンタープライズおよび教育エディション）**にのみ存在する機能で、**仮想セキュアモード（VSM）**と**仮想化ベースセキュリティ（VBS）**を使用してマシンの資格情報のセキュリティを強化します。CPU仮想化拡張機能を活用して、主要なオペレーティングシステムから保護されたメモリ空間内の重要なプロセスを分離します。この分離により、カーネルでさえVSM内のメモリにアクセスできないため、**ハッシュの渡し**などの攻撃から資格情報を効果的に保護します。**ローカルセキュリティ機関（LSA）**は、信頼性を持つ環境内で動作し、メインOSの**LSASS**プロセスはVSMのLSAとの通信者としてのみ機能します。
 
-この場合、**MimikatzはLSASSからハッシュを抽出するためのバイパスはほとんどできません**。しかし、**カスタムSSP**を追加して、ユーザーがログインしようとするときに**クリアテキスト**で**資格情報をキャプチャ**することはできます。\
-[**SSPとこれを行う方法についての詳細はこちら**](../active-directory-methodology/custom-ssp.md)。
+**資格情報ガード**はデフォルトではアクティブではなく、組織内での手動アクティベーションが必要です。これは、**Mimikatz**などのツールに対するセキュリティを強化するために重要です。ただし、カスタム**セキュリティサポートプロバイダ（SSP）**の追加により、ログイン試行中にクリアテキストで資格情報を取得する脆弱性が依然として悪用される可能性があります。
 
-Credentials Guardは**異なる方法で有効にすることができます**。レジストリを使用して有効にされたかどうかを確認するには、_**HKLM\System\CurrentControlSet\Control\LSA**_のキー_**LsaCfgFlags**_の値を確認できます。値が**"1"**ならUEFIロック付きでアクティブ、**"2"**ならロックなしでアクティブ、**"0"**なら有効ではありません。\
-これだけではCredentials Guardを有効にするには**十分ではありません**（しかし、強い指標です）。\
-Credential Guardを有効にするPS1スクリプトについての詳細は[こちらで見つけることができます](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage)。
-```
+**資格情報ガード**のアクティベーション状態を確認するには、**_HKLM\System\CurrentControlSet\Control\LSA_**の下にある**_LsaCfgFlags_**レジストリキーを調べることができます。値が「**1**」の場合は**UEFIロック**でのアクティベーションを示し、「**2**」はロックなし、そして「**0**」は無効であることを示します。このレジストリチェックは強力な指標であるが、資格情報ガードを有効にするための唯一の手順ではありません。この機能を有効にするための詳細なガイダンスとPowerShellスクリプトがオンラインで利用可能です。
+```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
+## 資格情報保護
+
+Windows 10 で **Credential Guard** を有効にする手順や、**Windows 11 Enterprise および Education (バージョン 22H2)** において自動的に有効化する方法についての包括的な理解と手順については、[Microsoft のドキュメント](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage) を参照してください。
+
+資格情報のキャプチャのためにカスタム SSP を実装する詳細については、[このガイド](../active-directory-methodology/custom-ssp.md) で提供されています。
+
+
 ## RDP RestrictedAdmin モード
 
-Windows 8.1とWindows Server 2012 R2では、新しいセキュリティ機能が導入されました。そのセキュリティ機能の一つが_RDPのRestricted Adminモード_です。この新しいセキュリティ機能は、[pass the hash](https://blog.ahasayen.com/pass-the-hash/)攻撃のリスクを軽減するために導入されました。
+**Windows 8.1 および Windows Server 2012 R2** では、**_RDP の Restricted Admin モード_** を含む複数の新しいセキュリティ機能が導入されました。このモードは、**[pass the hash](https://blog.ahasayen.com/pass-the-hash/)** 攻撃に関連するリスクを軽減することを目的として設計されました。
 
-RDPを使用してリモートコンピュータに接続すると、接続先のリモートコンピュータにあなたの資格情報が保存されます。通常、リモートサーバーに接続するために強力なアカウントを使用しており、これらのコンピュータすべてに資格情報が保存されることは、確かにセキュリティ上の脅威です。
+従来、RDP を介してリモートコンピュータに接続すると、資格情報がそのコンピュータに保存されます。これは、特権の昇格アカウントを使用する場合など、重大なセキュリティリスクを引き起こします。しかし、**_Restricted Admin モード_** の導入により、このリスクが大幅に低減されます。
 
-_RDPのRestricted Adminモード_を使用すると、コマンド **mstsc.exe /RestrictedAdmin** を使用してリモートコンピュータに接続する際、リモートコンピュータに認証されますが、**あなたの資格情報はそのリモートコンピュータに保存されません**。つまり、そのリモートサーバー上でマルウェアや悪意のあるユーザーが活動していても、リモートデスクトップサーバー上であなたの資格情報が利用可能になることはありません。
+コマンド **mstsc.exe /RestrictedAdmin** を使用して RDP 接続を開始すると、リモートコンピュータへの認証が資格情報を保存せずに行われます。このアプローチにより、マルウェア感染や悪意のあるユーザがリモートサーバにアクセスした場合でも、資格情報がサーバに保存されていないため、漏洩することはありません。
 
-資格情報がRDPセッションに保存されないため、**ネットワークリソースにアクセスしようとすると**、資格情報は使用されません。**代わりにマシンのIDが使用されます**。
+**Restricted Admin モード** では、RDP セッションからネットワークリソースにアクセスしようとする試みは、個人の資格情報ではなく、**マシンの識別子** が使用されます。
+
+この機能は、リモートデスクトップ接続のセキュリティを向上させ、セキュリティ侵害が発生した場合に機密情報が露出するのを防ぐ点で重要な進歩と言えます。
 
 ![](../../.gitbook/assets/ram.png)
 
-[こちら](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/)から。
+詳細については、[このリソース](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/) を参照してください。
+
 
 ## キャッシュされた資格情報
 
-**ドメイン資格情報**は、オペレーティングシステムのコンポーネントによって使用され、**Local** **Security Authority** (LSA)によって**認証**されます。通常、ドメイン資格情報は、ユーザーのログオンデータを認証する登録されたセキュリティパッケージによってユーザーに対して確立されます。この登録されたセキュリティパッケージは、**Kerberos**プロトコルまたは**NTLM**である可能性があります。
+Windows は **Local Security Authority (LSA)** を介して **ドメイン資格情報** を保護し、**Kerberos** や **NTLM** のようなセキュリティプロトコルをサポートしています。Windows の重要な機能の1つは、**最後の 10 つのドメインログイン** をキャッシュしており、**ドメインコントローラがオフライン** の場合でもユーザがコンピュータにアクセスできるようにしています。これは、会社のネットワークから離れていることが多いノートパソコンユーザにとって便利です。
 
-**Windowsは、ドメインコントローラがオフラインになった場合のために、最後の10回のドメインログイン資格情報を保存します**。ドメインコントローラがオフラインになった場合でも、ユーザーは**自分のコンピュータにログインすることができます**。この機能は主に、定期的に会社のドメインにログインしないノートパソコンユーザー向けです。コンピュータが保存する資格情報の数は、以下の**レジストリキー、またはグループポリシー経由で**制御できます：
+キャッシュされたログイン数は、特定の **レジストリキーまたはグループポリシー** を介して調整できます。この設定を表示または変更するには、次のコマンドを使用します：
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-認証情報は通常のユーザーから隠されており、管理者アカウントでさえもです。**SYSTEM** ユーザーのみがこれらの**認証情報**を**閲覧**する**権限**を持っています。管理者がレジストリ内のこれらの認証情報を閲覧するためには、SYSTEM ユーザーとしてレジストリにアクセスする必要があります。
-キャッシュされた認証情報は、以下のレジストリの場所に保存されています：
-```
-HKEY_LOCAL_MACHINE\SECURITY\Cache
-```
-**Mimikatzからの抽出**: `lsadump::cache`\
-[こちら](http://juggernaut.wikidot.com/cached-credentials)から。
+これらのキャッシュされた資格情報へのアクセスは厳密に制御されており、**SYSTEM**アカウントだけがそれらを表示するために必要な権限を持っています。この情報にアクセスする必要がある管理者は、SYSTEMユーザー権限で行う必要があります。資格情報は以下に保存されています：`HKEY_LOCAL_MACHINE\SECURITY\Cache`
+
+**Mimikatz**を使用して、`lsadump::cache`コマンドを使ってこれらのキャッシュされた資格情報を抽出することができます。
+
+詳細については、元の[ソース](http://juggernaut.wikidot.com/cached-credentials)が包括的な情報を提供しています。
+
 
 ## 保護されたユーザー
 
-サインインしているユーザーが保護されたユーザーのグループのメンバーである場合、以下の保護が適用されます：
+**Protected Usersグループ**へのメンバーシップにより、ユーザーのセキュリティが向上し、資格情報の盗難や誤用に対する保護レベルが向上します：
 
-* 資格情報の委任（CredSSP）は、**Allow delegating default credentials** グループポリシー設定が有効になっていても、ユーザーの平文の資格情報をキャッシュしません。
-* Windows 8.1およびWindows Server 2012 R2以降、Windows Digestは、Windows Digestが有効になっていても、ユーザーの平文の資格情報をキャッシュしません。
-* **NTLM** は、ユーザーの **平文の資格情報** や NT **ワンウェイ関数**（NTOWF）を **キャッシュしません**。
-* **Kerberos** は、**DES** や **RC4 キー** を作成 **しません**。また、初期のTGTが取得された後、ユーザーの平文の資格情報や長期キーをキャッシュしません。
-* **サインインやアンロック時にキャッシュされた検証器は作成されません**ので、オフラインでのサインインはもはやサポートされません。
+- **資格情報委任（CredSSP）**：**デフォルトの資格情報の委任を許可**するグループポリシー設定が有効になっていても、Protected Usersの平文資格情報はキャッシュされません。
+- **Windows Digest**：**Windows 8.1およびWindows Server 2012 R2**から、Protected Usersの平文資格情報はキャッシュされません。
+- **NTLM**：システムはProtected Usersの平文資格情報やNTワンウェイ関数（NTOWF）をキャッシュしません。
+- **Kerberos**：Protected Usersに対して、Kerberos認証は**DES**または**RC4キー**を生成せず、平文資格情報や初期のTicket-Granting Ticket（TGT）取得を超えた長期キーをキャッシュしません。
+- **オフラインサインイン**：Protected Usersはサインインやロック解除時にキャッシュされた検証子が作成されず、これらのアカウントではオフラインサインインがサポートされません。
 
-ユーザーアカウントが保護されたユーザーのグループに追加された後、ユーザーがデバイスにサインインすると保護が開始されます。**こちら** [**から**](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)**。**
+これらの保護機能は、**Protected Usersグループ**のメンバーであるユーザーがデバイスにサインインするとすぐに有効になります。これにより、さまざまな資格情報の侵害手法に対する保護が確保されます。
 
-| Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
-| ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
-| アカウントオペレーター       | アカウントオペレーター        | アカウントオペレーター                                                             | アカウントオペレーター            |
-| 管理者           | 管理者            | 管理者                                                                 | 管理者                |
-| 管理者グループ          | 管理者グループ           | 管理者グループ                                                                | 管理者グループ               |
-| バックアップオペレーター        | バックアップオペレーター         | バックアップオペレーター                                                              | バックアップオペレーター             |
-| 証明書発行者         |                          |                                                                               |                              |
-| ドメイン管理者           | ドメイン管理者            | ドメイン管理者                                                                 | ドメイン管理者                |
-| ドメインコントローラー      | ドメインコントローラー       | ドメインコントローラー                                                            | ドメインコントローラー           |
-| エンタープライズ管理者       | エンタープライズ管理者        | エンタープライズ管理者                                                             | エンタープライズ管理者            |
-|                         |                          |                                                                               | エンタープライズキーアドミン        |
-|                         |                          |                                                                               | キーアドミン                   |
-| Krbtgt                  | Krbtgt                   | Krbtgt                                                                        | Krbtgt                       |
-| プリントオペレーター         | プリントオペレーター          | プリントオペレーター                                                               | プリントオペレーター              |
-|                         |                          | 読み取り専用ドメインコントローラー                                                  | 読み取り専用ドメインコントローラー |
-| レプリケーター              | レプリケーター               | レプリケーター                                                                    | レプリケーター                   |
-| スキーマ管理者           | スキーマ管理者            | スキーマ管理者                                                                 | スキーマ管理者                |
-| サーバーオペレーター        | サーバーオペレーター         | サーバーオペレーター                                                              | サーバーオペレーター             |
+詳細な情報については、公式[ドキュメント](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)を参照してください。
 
-**こちら** [**からの表**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**。**
-
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
-
-HackTricksをサポートする他の方法：
-
-* **HackTricksにあなたの会社を広告したい**、または **HackTricksをPDFでダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や [**テレグラムグループ**](https://t.me/peass)に**参加する**、または **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
-
-</details>
+**ドキュメント**からの**表**[**の表**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**。**

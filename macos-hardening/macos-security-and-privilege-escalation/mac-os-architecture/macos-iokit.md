@@ -4,25 +4,25 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **Are you working in a cybersecurity company? Do you want to see your company advertised in HackTricks? Or do you want to have access to the latest version of PEASS or download HackTricks in PDF? Check the [SUBSCRIPTION PLANS](https://github.com/sponsors/carlospolop)!**
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our exclusive collection of [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS and HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) **Discord group** or the [**telegram group**](https://t.me/peass) or **follow me** on **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks\_live).
-* **Share your hacking tricks by sending PR to** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live).
+* **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Basic Information
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+I/O Kitは、XNUカーネル内のオープンソースのオブジェクト指向の**デバイスドライバーフレームワーク**であり、**動的にロードされるデバイスドライバー**を処理します。これにより、モジュラーコードをカーネルに即座に追加し、さまざまなハードウェアをサポートできます。
 
-IOKit drivers will basically **export functions from the kernel**. These function parameter **types** are **predefined** and are verified. Moreover, similar to XPC, IOKit is just another layer on **top of Mach messages**.
+IOKitドライバーは基本的にカーネルから**関数をエクスポート**します。これらの関数のパラメータ**タイプ**は**事前に定義**され、検証されます。さらに、XPCと同様に、IOKitは単なる**Machメッセージの上にある別のレイヤー**です。
 
-**IOKit XNU kernel code** is opensourced by Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Moreover, the user space IOKit components are also opensource [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNUカーネルコード**はAppleによってオープンソース化されており、[https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)で入手できます。さらに、ユーザースペースのIOKitコンポーネントもオープンソース化されています [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser)。
 
-However, **no IOKit drivers** are opensource. Anyway, from time to time a release of a driver might come with symbols that makes it easier to debug it. Check how to [**get the driver extensions from the firmware here**](./#ipsw)**.**
+ただし、**IOKitドライバー**はオープンソースではありません。とはいえ、時折、ドライバーのリリースによってデバッグが容易になるシンボルが付属することがあります。[**ここからファームウェアからドライバー拡張機能を取得する方法**](./#ipsw)**を確認してください**。
 
-It's written in **C++**. You can get demangled C++ symbols with:
+これは**C++**で書かれています。次のコマンドでC++のシンボルをデマングルできます：
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -38,16 +38,16 @@ IOKitの**公開された関数**は、クライアントが関数を呼び出�
 
 ## ドライバー
 
-macOSでは、次の場所にあります。
+macOSでは、次の場所にあります：
 
-* **`/System/Library/Extensions`**
-* OS Xオペレーティングシステムに組み込まれたKEXTファイル。
-* **`/Library/Extensions`**
-* サードパーティ製ソフトウェアによってインストールされたKEXTファイル
+- **`/System/Library/Extensions`**
+- OS Xオペレーティングシステムに組み込まれたKEXTファイル。
+- **`/Library/Extensions`**
+- サードパーティ製のソフトウェアによってインストールされたKEXTファイル
 
-iOSでは、次の場所にあります。
+iOSでは、次の場所にあります：
 
-* **`/System/Library/Extensions`**
+- **`/System/Library/Extensions`**
 ```bash
 #Use kextstat to print the loaded drivers
 kextstat
@@ -65,9 +65,9 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-1. 9までの番号のドライバーは、**アドレス0にロードされます**。これは、それらが実際のドライバーではなく、**カーネルの一部であり、アンロードできない**ことを意味します。
+1. 9までの番号がリストされたドライバーは、**アドレス0にロードされます**。これは、それらが実際のドライバーではなく、**カーネルの一部であり、アンロードできない**ことを意味します。
 
-特定の拡張機能を見つけるためには、次の方法を使用できます：
+特定の拡張機能を見つけるには、次の方法を使用できます：
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
@@ -79,7 +79,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry（IOレジストリ）**は、macOSとiOSのIOKitフレームワークの重要な部分であり、システムのハードウェア構成と状態を表すデータベースとして機能します。これは、システムにロードされたすべてのハードウェアとドライバを表すオブジェクトの階層的なコレクションであり、それらの関係を示しています。
+**IORegistry（IOレジストリ）**は、macOSとiOSのIOKitフレームワークの重要な部分であり、システムのハードウェア構成と状態を表すデータベースとして機能します。これは、システムにロードされたすべてのハードウェアとドライバーを表すオブジェクトの階層的なコレクションであり、お互いとの関係を示しています。
 
 **`ioreg`**コマンドラインインターフェース（特にiOS向けに特に便利）を使用して、コンソールからIORegistryを取得できます。
 ```bash
@@ -91,13 +91,13 @@ ioreg -p <plane> #Check other plane
 
 <figure><img src="../../../.gitbook/assets/image (695).png" alt="" width="563"><figcaption></figcaption></figure>
 
-IORegistryExplorerでは、「プレーン」が使用され、IORegistry内の異なるオブジェクト間の関係を整理して表示します。各プレーンは、特定の関係の種類またはシステムのハードウェアおよびドライバー構成の特定のビューを表します。以下は、IORegistryExplorerで遭遇する可能性のある一般的なプレーンのいくつかです：
+IORegistryExplorerでは、「プレーン」が使用され、IORegistry内の異なるオブジェクト間の関係を整理して表示します。各プレーンは、システムのハードウェアとドライバー構成の特定のビューまたは特定の関係を表します。以下は、IORegistryExplorerで遭遇する可能性のある一般的なプレーンのいくつかです：
 
-1. **IOService Plane**：これは最も一般的なプレーンで、ドライバーとナブ（ドライバー間の通信チャンネル）を表すサービスオブジェクトを表示します。これらのオブジェクト間のプロバイダー-クライアントの関係を示します。
-2. **IODeviceTree Plane**：このプレーンは、デバイスがシステムに接続される際の物理的な接続を表します。USBやPCIなどのバスを介して接続されたデバイスの階層構造を視覚化するためによく使用されます。
-3. **IOPower Plane**：電源管理の観点からオブジェクトとその関係を表示します。他のオブジェクトの電源状態に影響を与えているオブジェクトを示すことができ、電力関連の問題のデバッグに役立ちます。
-4. **IOUSB Plane**：USBデバイスとその関係に特化し、USBハブと接続されたデバイスの階層構造を表示します。
-5. **IOAudio Plane**：このプレーンは、システム内のオーディオデバイスとそれらの関係を表すためのものです。
+1. **IOService Plane**：これは最も一般的なプレーンで、ドライバーとナブ（ドライバー間の通信チャンネル）を表すサービスオブジェクトを表示します。これらのオブジェクト間のプロバイダー-クライアント関係を示します。
+2. **IODeviceTree Plane**：このプレーンは、デバイス間の物理的な接続を表し、システムに接続されたデバイスの階層構造を視覚化するためによく使用されます。USBやPCIなどのバスを介して接続されたデバイスの階層を表示します。
+3. **IOPower Plane**：電源管理の観点からオブジェクトとその関係を表示します。他のオブジェクトの電源状態に影響を与えているオブジェクトを示すことができ、電源関連の問題のデバッグに役立ちます。
+4. **IOUSB Plane**：USBデバイスとその関係に特化し、USBハブと接続されたデバイスの階層を表示します。
+5. **IOAudio Plane**：このプレーンは、システム内のオーディオデバイスとその関係を表します。
 6. ...
 
 ## ドライバー通信コード例
@@ -161,13 +161,13 @@ IOObjectRelease(iter);
 return 0;
 }
 ```
-他の**`IOConnectCallScalarMethod`**のようにIOKit関数を呼び出すために使用できる関数があります**`IOConnectCallMethod`**、**`IOConnectCallStructMethod`**...
+**その他**の関数があり、**`IOConnectCallScalarMethod`**の他に使用できるIOKit関数があります。**`IOConnectCallMethod`**、**`IOConnectCallStructMethod`**などがあります...
 
 ## ドライバーエントリーポイントのリバースエンジニアリング
 
 これらは、たとえば[**ファームウェアイメージ（ipsw）**](./#ipsw)から取得できます。次に、お気に入りのデコンパイラにロードします。
 
-**`externalMethod`**関数の逆コンパイルを開始できます。これは、呼び出しを受け取り正しい関数を呼び出すドライバー関数です:
+**`externalMethod`** 関数の逆コンパイルを開始できます。これは、呼び出しを受け取り、正しい関数を呼び出すドライバー関数です:
 
 <figure><img src="../../../.gitbook/assets/image (696).png" alt="" width="315"><figcaption></figcaption></figure>
 
@@ -203,7 +203,7 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../.gitbook/assets/image (703).png" alt=""><figcaption></figcaption></figure>
 
-次のステップでは、**`IOExternalMethodDispatch2022`** 構造体を定義しておく必要があります。これは[https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176)でオープンソースで提供されています。以下のように定義できます：
+次のステップでは、**`IOExternalMethodDispatch2022`** 構造体を定義する必要があります。これは[https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176)でオープンソースで提供されています。これを定義できます：
 
 <figure><img src="../../../.gitbook/assets/image (698).png" alt=""><figcaption></figcaption></figure>
 
@@ -228,17 +228,5 @@ OSObject * target, void * reference)
 <figure><img src="../../../.gitbook/assets/image (709).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="success" %}
-覚えておいてください。ユーザースペースから**エクスポートされた**関数を**呼び出す**際には、関数の名前ではなく**セレクタ番号**を呼び出す必要があります。ここで、セレクタ **0** は関数 **`initializeDecoder`**、セレクタ **1** は **`startDecoder`**、セレクタ **2** は **`initializeEncoder`** であることがわかります...
+覚えておいてください。ユーザースペースから**エクスポートされた**関数を**呼び出す**際には、関数の名前ではなく、**セレクタ番号**を呼び出す必要があります。ここでは、セレクタ **0** が関数 **`initializeDecoder`**、セレクタ **1** が **`startDecoder`**、セレクタ **2** が **`initializeEncoder`** であることがわかります...
 {% endhint %}
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks\_live).
-* **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>

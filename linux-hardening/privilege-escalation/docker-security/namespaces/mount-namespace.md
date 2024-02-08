@@ -2,32 +2,32 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>で**ゼロからヒーローまでAWSハッキングを学ぶ**！</summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有してください。
+- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私をフォローする：[**@carlospolopm**](https://twitter.com/carlospolopm)。
+- **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
 
 </details>
 
 ## 基本情報
 
-マウント名前空間は、プロセスグループが見るファイルシステムのマウントポイントの隔離を提供するLinuxカーネルの機能です。各マウント名前空間は、独自のファイルシステムマウントポイントのセットを持ち、**一つの名前空間でのマウントポイントの変更は他の名前空間に影響しません**。これは、異なるマウント名前空間で実行されているプロセスが、ファイルシステム階層の異なるビューを持つことができることを意味します。
+マウント名前空間は、Linuxカーネルの機能であり、一群のプロセスが見るファイルシステムマウントポイントを分離する機能を提供します。各マウント名前空間には独自のファイルシステムマウントポイントがあり、**1つの名前空間内でのマウントポイントの変更は他の名前空間に影響を与えません**。これにより、異なるマウント名前空間で実行されるプロセスは、ファイルシステム階層の異なるビューを持つことができます。
 
-マウント名前空間は、各コンテナが独自のファイルシステムと設定を持ち、他のコンテナやホストシステムから隔離されるべきであるコンテナ化に特に有用です。
+マウント名前空間は、コンテナ化において特に有用であり、各コンテナが他のコンテナやホストシステムから分離された独自のファイルシステムと構成を持つべきです。
 
-### 動作方法:
+### 動作方法：
 
-1. 新しいマウント名前空間が作成されると、**親名前空間のマウントポイントのコピーで初期化されます**。つまり、作成時に新しい名前空間は親と同じファイルシステムのビューを共有します。しかし、その後の名前空間内のマウントポイントの変更は、親や他の名前空間には影響しません。
-2. プロセスがその名前空間内でマウントポイントを変更すると、例えばファイルシステムのマウントやアンマウントを行うと、**その変更はその名前空間に局所的です** 他の名前空間には影響しません。これにより、各名前空間は独立したファイルシステム階層を持つことができます。
-3. プロセスは、`setns()`システムコールを使用して名前空間間を移動したり、`CLONE_NEWNS`フラグを使用して`unshare()`や`clone()`システムコールで新しい名前空間を作成することができます。プロセスが新しい名前空間に移動するか、新しいものを作成すると、その名前空間に関連付けられたマウントポイントを使用し始めます。
-4. **ファイルディスクリプタとinodeは名前空間間で共有されます**。つまり、ある名前空間のプロセスがファイルを指すオープンファイルディスクリプタを持っている場合、**そのファイルディスクリプタを別の名前空間のプロセスに渡すことができ**、**両方のプロセスが同じファイルにアクセスします**。ただし、マウントポイントの違いにより、ファイルのパスは両方の名前空間で同じではない可能性があります。
+1. 新しいマウント名前空間が作成されると、**親名前空間からマウントポイントのコピーが初期化**されます。これは、作成時に新しい名前空間が親と同じファイルシステムビューを共有していることを意味します。ただし、名前空間内のマウントポイントに対する後続の変更は、親または他の名前空間に影響を与えません。
+2. プロセスが名前空間内のマウントポイントを変更すると（ファイルシステムをマウントまたはアンマウントするなど）、**その名前空間内での変更はローカル**であり、他の名前空間に影響を与えません。これにより、各名前空間が独自のファイルシステム階層を持つことができます。
+3. プロセスは、`setns()`システムコールを使用して名前空間間を移動したり、`unshare()`または`CLONE_NEWNS`フラグを使用して`clone()`システムコールを使用して新しい名前空間を作成したりすることができます。プロセスが新しい名前空間に移動したり作成したりすると、その名前空間に関連付けられたマウントポイントを使用し始めます。
+4. **ファイルディスクリプタとinodeは名前空間間で共有**されるため、1つの名前空間のプロセスがファイルを指すオープンファイルディスクリプタを持っている場合、そのファイルディスクリプタを別の名前空間のプロセスに**渡す**ことができ、**両方のプロセスが同じファイルにアクセス**できます。ただし、マウントポイントの違いにより、両方の名前空間でのファイルのパスが同じでない場合があります。 
 
-## 実験室:
+## Lab:
 
 ### 異なる名前空間を作成する
 
@@ -35,27 +35,27 @@ HackTricksをサポートする他の方法:
 ```bash
 sudo unshare -m [--mount-proc] /bin/bash
 ```
-新しい `/proc` ファイルシステムのインスタンスをマウントすることで、`--mount-proc` パラメータを使用すると、新しいマウント名前空間が**その名前空間に特有のプロセス情報の正確で隔離されたビューを持つことを保証します**。
+`--mount-proc`パラメータを使用して`/proc`ファイルシステムの新しいインスタンスをマウントすることで、新しいマウント名前空間がその名前空間固有のプロセス情報に正確で隔離されたビューを持つことが保証されます。
 
 <details>
 
-<summary>エラー: bash: fork: メモリを割り当てることができません</summary>
+<summary>エラー: bash: fork: Cannot allocate memory</summary>
 
-`unshare` を `-f` オプションなしで実行すると、Linuxが新しいPID（プロセスID）名前空間を扱う方法により、エラーが発生します。重要な詳細と解決策は以下の通りです：
+`unshare`を`-f`オプションなしで実行すると、Linuxが新しいPID（プロセスID）名前空間を処理する方法によりエラーが発生します。主要な詳細と解決策は以下に示されています：
 
-1. **問題の説明**:
-- Linuxカーネルは、`unshare` システムコールを使用してプロセスが新しい名前空間を作成することを許可します。しかし、新しいPID名前空間の作成を開始するプロセス（"unshare" プロセスと呼ばれる）は、新しい名前空間に入らず、その子プロセスのみが入ります。
-- `%unshare -p /bin/bash%` を実行すると、`/bin/bash` は `unshare` と同じプロセスで開始されます。その結果、`/bin/bash` とその子プロセスは元のPID名前空間にあります。
-- 新しい名前空間での `/bin/bash` の最初の子プロセスがPID 1になります。このプロセスが終了すると、他のプロセスがない場合、名前空間のクリーンアップがトリガーされます。PID 1は孤立したプロセスを引き取る特別な役割を持っているため、Linuxカーネルはその名前空間でのPID割り当てを無効にします。
+1. **問題の説明**：
+- Linuxカーネルは、`unshare`システムコールを使用してプロセスが新しい名前空間を作成することを許可します。ただし、新しいPID名前空間の作成を開始するプロセス（「unshare」プロセスと呼ばれる）は、新しい名前空間に入りません。その子プロセスのみが入ります。
+- `%unshare -p /bin/bash%`を実行すると、`/bin/bash`が`unshare`と同じプロセスで開始されます。その結果、`/bin/bash`とその子プロセスは元のPID名前空間にあります。
+- 新しい名前空間内の`/bin/bash`の最初の子プロセスはPID 1になります。このプロセスが終了すると、他のプロセスがいない場合、孤児プロセスを引き取る特別な役割を持つPID 1により、その名前空間のクリーンアップがトリガーされます。その後、Linuxカーネルはその名前空間でのPID割り当てを無効にします。
 
-2. **結果**:
-- 新しい名前空間でのPID 1の終了は、`PIDNS_HASH_ADDING` フラグのクリーニングにつながります。これにより、新しいプロセスを作成する際に `alloc_pid` 関数が新しいPIDを割り当てることができず、「メモリを割り当てることができません」というエラーが発生します。
+2. **結果**：
+- 新しい名前空間内のPID 1の終了により、`PIDNS_HASH_ADDING`フラグのクリーニングが行われます。これにより、新しいプロセスを作成する際に`alloc_pid`関数が新しいPIDを割り当てられなくなり、「Cannot allocate memory」エラーが発生します。
 
-3. **解決策**:
-- この問題は、`unshare` と `-f` オプションを使用することで解決できます。このオプションは、新しいPID名前空間を作成した後に `unshare` が新しいプロセスをフォークするようにします。
-- `%unshare -fp /bin/bash%` を実行すると、`unshare` コマンド自体が新しい名前空間でPID 1になります。`/bin/bash` とその子プロセスは、この新しい名前空間内で安全に保持され、PID 1の早期終了を防ぎ、通常のPID割り当てを可能にします。
+3. **解決策**：
+- `unshare`に`-f`オプションを使用することで問題を解決できます。このオプションにより、`unshare`は新しいPID名前空間を作成した後に新しいプロセスをフォークします。
+- `%unshare -fp /bin/bash%`を実行すると、`unshare`コマンド自体が新しい名前空間でPID 1になります。その後、`/bin/bash`とその子プロセスはこの新しい名前空間内に安全に含まれ、PID 1の早期終了を防ぎ、通常のPID割り当てを可能にします。
 
-`unshare` が `-f` フラグで実行されることを確認することで、新しいPID名前空間が正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく操作できるようになります。
+`unshare`が`-f`フラグで実行されることを確認することで、新しいPID名前空間が正しく維持され、`/bin/bash`とそのサブプロセスがメモリ割り当てエラーに遭遇することなく動作するようになります。
 
 </details>
 
@@ -63,7 +63,7 @@ sudo unshare -m [--mount-proc] /bin/bash
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### プロセスがどのネームスペースにあるかを確認する
+### &#x20;あなたのプロセスがどの名前空間にあるかを確認します
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'
@@ -76,17 +76,17 @@ sudo find /proc -maxdepth 3 -type l -name mnt -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-{% endcode %}
-
 ### マウント名前空間に入る
+
+{% endcode %}
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash
 ```
-### マウントする
+また、**rootユーザーでないと他のプロセスの名前空間に入ることはできません**。そして、他の名前空間に**ディスクリプタ**（`/proc/self/ns/mnt`のような）を指すことなしに**入ることはできません**。
 
-また、**rootである場合に限り、他のプロセスのネームスペースに** **入ることができます**。そして、それを指し示すディスクリプタ（`/proc/self/ns/mnt`のような）**なしに** 他のネームスペースに**入ることはできません**。
+新しいマウントは名前空間内でのみアクセス可能なため、名前空間には名前空間からのみアクセス可能な機密情報が含まれている可能性があります。
 
-新しいマウントはそのネームスペース内でのみアクセス可能なので、ネームスペースにはそれからのみアクセス可能な機密情報が含まれている可能性があります。
+### 何かをマウントする
 ```bash
 # Generate new mount ns
 unshare -m /bin/bash
@@ -100,20 +100,20 @@ ls /tmp/mount_ns_example/test # Exists
 mount | grep tmpfs # Cannot see "tmpfs on /tmp/mount_ns_example"
 ls /tmp/mount_ns_example/test # Doesn't exist
 ```
-# 参考文献
+## 参考文献
 * [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキング</strong>をゼロからヒーローまで学ぶ</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをチェックしてください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有**してください。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を**フォロー**する。
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリに PR を提出して、あなたのハッキングテクニックを共有してください。
 
 </details>

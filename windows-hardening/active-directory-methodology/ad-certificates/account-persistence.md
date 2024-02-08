@@ -2,79 +2,54 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有してください**。
+* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦で私をフォローする [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
+* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
-## 証明書を介したアクティブユーザーの資格情報盗難 – PERSIST1
+**これは、[https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)** からの素晴らしい研究のマシン永続性章の要約です。
 
-ユーザーがドメイン認証を許可する証明書を要求できる場合、攻撃者はそれを**要求**し、**盗む**ことで**永続性**を**維持**することができます。
+## **証明書を使用したアクティブユーザー資格情報の盗難の理解 – PERSIST1**
 
-**`User`** テンプレートはそれを許可し、**デフォルト**で提供されています。ただし、無効になっている可能性があります。したがって、[**Certify**](https://github.com/GhostPack/Certify)を使用すると、永続化に有効な証明書を見つけることができます：
-```
+ユーザーがドメイン認証を許可する証明書をリクエストできるシナリオでは、攻撃者はネットワーク上で**永続性を維持**するためにこの証明書を**リクエスト**および**盗む**機会があります。Active Directoryの`User`テンプレートは、そのようなリクエストを許可するようになっていますが、時々無効になっていることがあります。
+
+[**Certify**](https://github.com/GhostPack/Certify)というツールを使用すると、永続的なアクセスを可能にする有効な証明書を検索できます。
+```bash
 Certify.exe find /clientauth
 ```
-**証明書は有効である限り**、ユーザーが**パスワードを変更しても**、そのユーザーとしての**認証に使用できる**ことに注意してください。
+強調されているのは、証明書の力は、証明書が**有効である限り**、パスワードの変更に関係なく、それが所属するユーザーとして**認証**できることにあります。
 
-**GUI**からは、`certmgr.msc`を使用して証明書を要求することができますし、コマンドラインからは`certreq.exe`を使用することができます。
-
-[**Certify**](https://github.com/GhostPack/Certify)を使用すると、次の操作を実行できます：
-```
+証明書は、`certmgr.msc`を使用してグラフィカルインターフェースを介してリクエストするか、`certreq.exe`を使用してコマンドラインを介してリクエストすることができます。**Certify**を使用すると、証明書をリクエストするプロセスは次のように簡略化されます：
+```bash
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
-結果は **証明書** + **秘密鍵** `.pem` 形式のテキストブロックになります。
+成功したリクエストの後、証明書とその秘密鍵が`.pem`形式で生成されます。これをWindowsシステムで使用可能な`.pfx`ファイルに変換するには、次のコマンドを使用します：
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-**その証明書を使用するには**、`.pfx`をターゲットに**アップロード**し、[**Rubeus**](https://github.com/GhostPack/Rubeus)を使用して登録されたユーザーのTGTを**要求**することができます。証明書の有効期間が続く限り（デフォルトの有効期間は1年です）：
+`.pfx`ファイルは、その後、ターゲットシステムにアップロードされ、ユーザーのためにチケット発行チケット（TGT）を要求するために[**Rubeus**](https://github.com/GhostPack/Rubeus)と呼ばれるツールと共に使用され、証明書が**有効**である限り（通常1年間）、攻撃者のアクセスを延長します。
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
-{% hint style="warning" %}
-[**THEFT5**](certificate-theft.md#ntlm-credential-theft-via-pkinit-theft5)セクションで説明されている技術と組み合わせることで、攻撃者は**アカウントのNTLMハッシュを永続的に取得**することもできます。これを利用して、攻撃者は**パス・ザ・ハッシュ**や**クラック**を通じて**プレーンテキスト**の**パスワード**を取得することができます。\
-これは**LSASSに触れずに**、**非昇格コンテキスト**から可能な**長期的なクレデンシャル盗難**の代替方法です。
-{% endhint %}
+重要な警告が共有されており、この技術が、**THEFT5**セクションで概説されている別の方法と組み合わさることで、攻撃者がローカルセキュリティ機関サブシステムサービス（LSASS）とやり取りせずに、非昇格コンテキストからアカウントの**NTLMハッシュ**を持続的に取得することが可能となり、長期間の資格情報盗難のためのよりステルスな方法が提供されます。
 
-## 証明書を通じたマシンの永続化 - PERSIST2
+## **証明書を使用したマシンの持続性の獲得 - PERSIST2**
 
-証明書テンプレートが**ドメインコンピュータ**を登録主体として許可している場合、攻撃者は**侵害されたシステムのマシンアカウントを登録**することができます。デフォルトの**`Machine`**テンプレートは、これらの特性すべてに一致します。
-
-攻撃者が侵害されたシステムで**権限を昇格**すると、攻撃者は**SYSTEM**アカウントを使用して、マシンアカウントに登録権限を付与する証明書テンプレートに登録することができます（詳細は[**THEFT3**](certificate-theft.md#machine-certificate-theft-via-dpapi-theft3)を参照）。
-
-[**Certify**](https://github.com/GhostPack/Certify) を使用して、自動的にSYSTEMに昇格し、マシンアカウントの証明書を取得することができます。
+別の方法は、侵害されたシステムのマシンアカウントを証明書に登録することで、デフォルトの`Machine`テンプレートを利用するものです。システムで昇格権限を取得した場合、**SYSTEM**アカウントを使用して証明書を要求することができ、一種の**持続性**を提供します。
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
-```markdown
-マシンアカウントの証明書にアクセスできると、攻撃者はマシンアカウントとして**Kerberosに認証**することができます。**S4U2Self**を使用すると、攻撃者は任意のユーザーとしてホスト上の任意のサービス（例：CIFS、HTTP、RPCSSなど）に対する**Kerberosサービスチケットを取得**することができます。
+このアクセスにより、攻撃者はマシンアカウントとして**Kerberos**に認証し、**S4U2Self**を利用してホスト上の任意のサービスのKerberosサービスチケットを取得し、事実上、攻撃者にマシンへの持続的アクセスが与えられます。
 
-結局のところ、これは攻撃者にマシンの永続性メソッドを提供します。
+## **証明書の更新を通じた持続性の拡張 - PERSIST3**
 
-## 証明書更新によるアカウントの永続性 - PERSIST3
+最後に議論された方法は、証明書テンプレートの**有効期間**と**更新期間**を活用することです。証明書を有効期限切れ前に更新することで、攻撃者は追加のチケット登録が必要なくActive Directoryへの認証を維持できます。これにより、証明書機関（CA）サーバーに痕跡を残す可能性がある追加のチケット登録を回避できます。
 
-証明書テンプレートには、発行された証明書が使用できる期間を決定する**有効期間**と、通常6週間の**更新期間**があります。これは証明書が**期限切れになる前の時間**で、**アカウントが発行証明機関からそれを更新できる**ウィンドウです。
-
-攻撃者が盗難または悪意のある登録によってドメイン認証が可能な証明書を侵害した場合、攻撃者は証明書の有効期間中、**ADに認証することができます**。しかし、攻撃者は**期限切れ前に証明書を更新する**ことができます。これは、追加のチケット登録が要求されることを**防ぎ**、CAサーバー自体に**アーティファクトを残す可能性がある**、**拡張された永続性**アプローチとして機能することができます。
-
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>!</strong></summary>
-
-HackTricksをサポートする他の方法：
-
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをチェックしてください。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加するか**、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有してください**。
-
-</details>
-```
+このアプローチにより、CAサーバーとのやり取りが少なくなり、侵入を管理者に知らせる可能性のあるアーティファクトの生成を回避することで、**拡張された持続性**方法が可能となり、検出リスクが最小限に抑えられます。

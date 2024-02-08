@@ -4,23 +4,23 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**してみたいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、当社の独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクション
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションです
+* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 * **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-Active Directory環境内にLinuxマシンが存在する可能性があります。
+Active Directory環境内にはLinuxマシンも存在する可能性があります。
 
-AD内のLinuxマシンでは、**異なるCCACHEチケットがファイル内に保存されている場合があります。これらのチケットは他のKerberosチケットと同様に使用および悪用できます**。これらのチケットを読み取るには、チケットの所有者であるユーザーまたは**マシン内のroot**である必要があります。
+AD内のLinuxマシンには、**異なるCCACHEチケットがファイル内に保存されている場合があります。これらのチケットは他のKerberosチケットと同様に使用および悪用できます**。これらのチケットを読むには、チケットの所有者であるか、またはマシン内の**root**である必要があります。
 
 ## 列挙
 
 ### LinuxからのAD列挙
 
-Linux（またはWindowsのbash）でADにアクセスできる場合、[https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn)を使用してADを列挙できます。
+LinuxでADにアクセスできる場合（またはWindowsのbashで）、[https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn)を使用してADを列挙できます。
 
 **LinuxからADを列挙する他の方法**を学ぶには、次のページをチェックしてください：
 
@@ -30,7 +30,7 @@ Linux（またはWindowsのbash）でADにアクセスできる場合、[https:/
 
 ### FreeIPA
 
-FreeIPAは、主に**Unix**環境向けのMicrosoft Windows **Active Directory**のオープンソース**代替**です。完全な**LDAPディレクトリ**と、Active Directoryに似た管理のためのMIT **Kerberos** Key Distribution Centerを組み合わせています。CA＆RA証明書管理のためのDogtag **Certificate System**を利用し、スマートカードを含む**マルチファクタ**認証をサポートしています。Unix認証プロセスにはSSSDが統合されています。詳細については以下を参照してください：
+FreeIPAは、主に**Unix**環境向けのMicrosoft Windows **Active Directory**のオープンソース**代替**です。完全な**LDAPディレクトリ**と、Active Directoryに似た管理のためのMIT **Kerberos** Key Distribution Centerを組み合わせています。CA＆RA証明書管理のためのDogtag **Certificate System**を利用し、スマートカードを含む**マルチファクタ**認証をサポートしています。Unix認証プロセスにはSSSDが統合されています。詳細は次で確認できます：
 
 {% content-ref url="../freeipa-pentesting.md" %}
 [freeipa-pentesting.md](../freeipa-pentesting.md)
@@ -38,9 +38,9 @@ FreeIPAは、主に**Unix**環境向けのMicrosoft Windows **Active Directory**
 
 ## チケット操作
 
-### パス・ザ・チケット
+### パスザチケット
 
-このページでは、Linuxホスト内で**kerberosチケットを見つける可能性のあるさまざまな場所**を見つけることができます。次のページでは、これらのCCacheチケット形式をWindowsで使用する必要があるKirbi形式に変換する方法や、PTT攻撃を実行する方法について学ぶことができます：
+このページでは、Linuxホスト内で**kerberosチケットを見つける可能性のあるさまざまな場所**を見つけることができます。次のページでは、これらのCCacheチケット形式をWindowsで使用する必要があるKirbi形式に変換する方法や、PTT攻撃を実行する方法を学ぶことができます：
 
 {% content-ref url="../../windows-hardening/active-directory-methodology/pass-the-ticket.md" %}
 [pass-the-ticket.md](../../windows-hardening/active-directory-methodology/pass-the-ticket.md)
@@ -63,7 +63,7 @@ export KRB5CCNAME=/tmp/krb5cc_1000
 
 **プロセスのメモリに保存されたKerberosチケットは抽出可能**であり、特にマシンのptrace保護が無効になっている場合(`/proc/sys/kernel/yama/ptrace_scope`)。この目的のために便利なツールは[https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)で見つけることができ、セッションにインジェクトして`/tmp`にチケットをダンプすることで抽出を容易にします。
 
-このツールを構成して使用するために、以下の手順に従います：
+このツールを構成して使用するためには、以下の手順に従います：
 ```bash
 git clone https://github.com/TarlogicSecurity/tickey
 cd tickey/tickey
@@ -120,10 +120,10 @@ crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDO
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを入手してください
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新版のPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
 * [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私をフォローしてください **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
 * **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

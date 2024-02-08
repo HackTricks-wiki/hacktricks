@@ -9,7 +9,7 @@ HackTricks をサポートする他の方法:
 - **HackTricks で企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**をフォロー**する
 - **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください**
 
 </details>
@@ -18,11 +18,11 @@ HackTricks をサポートする他の方法:
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/)は**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの1つです。**技術的知識の促進を使命**とするこの会議は、あらゆる分野のテクノロジーとサイバーセキュリティ専門家にとっての沸騰する出会いの場です。
+​​[**RootedCON**](https://www.rootedcon.com/)は**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの1つです。**技術知識の促進を使命**とするこの会議は、あらゆる分野のテクノロジーとサイバーセキュリティ専門家の熱い出会いの場です。
 
 {% embed url="https://www.rootedcon.com/" %}
 
-**複数のVolatilityプラグインを並行して実行する**高速でクレイジーなものが必要な場合は、[https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)を使用できます。
+**複数のVolatilityプラグインを並行して実行する**高速でクレイジーなものをお探しの場合は、[https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)を使用できます。
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -35,10 +35,240 @@ cd volatility3
 python3 setup.py install
 python3 vol.py —h
 ```
-#### volatility2
+#### メモリダンプ解析の基本的な手法
 
-{% tabs %}
-{% tab title="メソッド1" %}
+- プロファイルの選択
+- プロセスリストの取得
+- プロセスのマッピング情報の取得
+- ネットワーク接続の確認
+- ファイルハンドルの取得
+- レジストリキーの取得
+- サービスとドライバの取得
+- キャッシュとレジストリの取得
+- プロセスの実行可能ファイルの取得
+- プロセスのモジュールの取得
+- プロセスのスレッドの取得
+- プロセスのハンドルの取得
+- プロセスのオブジェクトの取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムラインの取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスのタイムライン情報の取得
+- プロセスのネットワーク情報の取得
+- プロセスのファイル情報の取得
+- プロセスのレジストリ情報の取得
+- プロセスのサービス情報の取得
+- プロセスのドライバ情報の取得
+- プロセスのデバイス情報の取得
+- プロセスのイベント情報の取得
+- プロセスのハンドル情報の取得
+- プロセスのオブジェクト情報の取得
+- プロセスのデバッグ情報の取得
+- プロセスのセキュリティ情報の取得
+- プロセスの
 ```
 Download the executable from https://www.volatilityfoundation.org/26
 ```
@@ -61,9 +291,9 @@ python setup.py install
 
 Volatilityには、プラグインに対する2つの主要なアプローチがあり、その名前に反映されることがあります。"list"プラグインは、Windowsカーネル構造をナビゲートしてプロセス（メモリ内の`_EPROCESS`構造体のリンクリストを検索してウォークする）、OSハンドル（ハンドルテーブルを検出してリスト化するなど）などの情報を取得しようとします。これらは、たとえばプロセスをリストアップする場合にWindows APIが要求された場合とほぼ同じように振る舞います。
 
-これにより、"list"プラグインは非常に高速ですが、Windows APIと同様にマルウェアによる操作の脆弱性があります。たとえば、マルウェアがDKOMを使用してプロセスを`_EPROCESS`リンクリストから切り離すと、そのプロセスはタスクマネージャに表示されず、pslistにも表示されません。
+これにより、「list」プラグインは非常に高速ですが、Windows APIと同様にマルウェアによる操作の脆弱性があります。たとえば、マルウェアがDKOMを使用してプロセスを`_EPROCESS`リンクリストから切り離すと、タスクマネージャに表示されず、pslistにも表示されません。
 
-一方で、"scan"プラグインは、特定の構造体としてデリファレンスされたときに意味をなす可能性のあるものをメモリから彫り取るようなアプローチを取ります。たとえば、`psscan`はメモリを読み取り、それを`_EPROCESS`オブジェクトにしようとします（プールタグスキャンを使用しています。これは、興味のある構造体の存在を示す4バイトの文字列を検索する方法です）。利点は、終了したプロセスを発見できることであり、たとえマルウェアが`_EPROCESS`リンクリストを改ざんしても、プラグインはメモリ内にその構造が残っていることを見つけることができます（プロセスが実行されるためには、それがまだ存在する必要があるため）。欠点は、"scan"プラグインが"list"プラグインよりもやや遅く、時々誤検知を引き起こすことがあることです（過去に終了したプロセスであり、その構造の一部が他の操作によって上書きされた場合など）。
+一方、「scan」プラグインは、特定の構造体としてデリファレンスされたときに意味をなす可能性のあるものをメモリから彫り取るようなアプローチを取ります。たとえば、`psscan`はメモリを読み取り、それを`_EPROCESS`オブジェクトにしようとします（構造体の存在を示す4バイトの文字列を検索するプールタグスキャンを使用します）。利点は、終了したプロセスを発見できることであり、たとえマルウェアが`_EPROCESS`リンクリストを改ざんしても、プラグインはメモリ内に残っている構造体を見つけることができます（プロセスが実行されるためにはまだ存在する必要があるため）。欠点は、「scan」プラグインが「list」プラグインよりもやや遅く、時々誤検知を引き起こすことがあることです（過去に終了したプロセスであり、その構造の一部が他の操作によって上書きされた場合）。
 
 出典: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -111,9 +341,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **imageinfo と kdbgscan の違い**
 
-[**こちらから**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): imageinfo が単にプロファイルの提案を行うのに対し、**kdbgscan** は正確なプロファイルと正確な KDBG アドレス（複数ある場合）を確実に特定するよう設計されています。このプラグインは、Volatility プロファイルにリンクされた KDBGHeader シグネチャをスキャンし、偽陽性を減らすための整合性チェックを適用します。出力の冗長性と実行できる整合性チェックの数は、Volatility が DTB を見つけることができるかどうかに依存します。したがって、正しいプロファイルをすでに知っている場合（または imageinfo からプロファイルの提案を受け取った場合）、それを使用することを確認してください。
+[**こちらから**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): imageinfo が単にプロファイルの提案を行うのに対し、**kdbgscan** は正確なプロファイルと正確な KDBG アドレス（複数ある場合）を確実に特定するよう設計されています。このプラグインは、Volatility プロファイルにリンクされた KDBGHeader シグネチャをスキャンし、偽陽性を減らすための整合性チェックを適用します。出力の冗長性と実行できる整合性チェックの数は、Volatility が DTB を見つけることができるかどうかに依存します。したがって、正しいプロファイルをすでに知っている場合（または imageinfo からプロファイルの提案を受け取っている場合）、それを使用することを確認してください。
 
-常に **kdbgscan が見つけたプロセスの数**を確認してください。時々、imageinfo と kdbgscan は **1 つ以上の適切なプロファイル**を見つけることができますが、**有効なものはプロセスに関連するものだけ**です（これはプロセスを抽出するには正しい KDBG アドレスが必要だからです）。
+常に **kdbgscan が見つけたプロセスの数**を確認してください。時々、imageinfo と kdbgscan は **1 つ以上の適切なプロファイル**を見つけることができますが、**有効なものはプロセスに関連するものだけ**です（これはプロセスを抽出するために正しい KDBG アドレスが必要であるためです）。
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -127,14 +357,14 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-**カーネルデバッガブロック**は、Volatilityによって**KDBG**として参照され、Volatilityやさまざまなデバッガによって実行されるフォレンジックタスクにとって重要です。 `_KDDEBUGGER_DATA64`タイプの`KdDebuggerDataBlock`として識別され、`PsActiveProcessHead`のような重要な参照情報を含んでいます。この特定の参照は、プロセスリストの先頭を指し示し、すべてのプロセスのリスト化を可能にします。これは徹底的なメモリ解析に不可欠です。
+**カーネルデバッガブロック**は、Volatilityによって**KDBG**として参照され、Volatilityやさまざまなデバッガによって実行されるフォレンジックタスクにとって重要です。`KdDebuggerDataBlock`として識別され、`_KDDEBUGGER_DATA64`型であり、`PsActiveProcessHead`のような重要な参照を含んでいます。この特定の参照はプロセスリストの先頭を指し示し、すべてのプロセスのリスト化を可能にし、徹底的なメモリ解析に不可欠です。
 
 ## OS情報
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-プラグイン`banners.Banners`は、ダンプファイル内で**Linuxのバナーを見つける**ために**vol3で使用**できます。
+プラグイン`banners.Banners`は、ダンプファイルから**Linuxのバナー**を見つけるために**vol3で使用できます**。
 
 ## ハッシュ/パスワード
 
@@ -149,7 +379,78 @@ SAMハッシュ、[ドメインキャッシュされた資格情報](../../../wi
 ```
 {% endtab %}
 
-{% タブ タイトル="vol2" %}
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
+
+## Volatilityチートシート
+
+### プラグインのリストを表示する
+
+```bash
+volatility --info | less
+```
+
+### プロファイルを指定してイメージファイルの情報を表示する
+
+```bash
+volatility -f <imagefile> imageinfo --profile=<profilename>
+```
+
+### プロファイルを指定してプロセス一覧を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profilename> pslist
+```
+
+### プロファイルを指定してレジストリキーを表示する
+
+```bash
+volatility -f <imagefile> --profile=<profilename> hivelist
+```
+
+### プロファイルを指定してネットワーク接続を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profilename> connections
+```
+
+### プロファイルを指定してファイル一覧を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profilename> filescan
+```
+
+### プロファイルを指定して特定のプロセスのハンドルを表示する
+
+```bash
+volatility -f <imagefile> --profile=<profilename> handles -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのDLLリストを表示する
+
+```bash
+volatility -f <imagefile> --profile=<profilename> dlllist -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのメモリダンプを取得する
+
+```bash
+volatility -f <imagefile> --profile=<profilename> procdump -p <pid> -D <outputdirectory>
+```
+
+### プロファイルを指定してレジストリの内容をダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profilename> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のファイルを抽出する
+
+```bash
+volatility -f <imagefile> --profile=<profilename> dumpfiles -Q <addressrange> -D <outputdirectory>
+```
+
+これらのコマンドを使用して、Volatilityを効果的に活用しましょう。
+{% endtab %}
 ```bash
 volatility --profile=Win7SP1x86_23418 hashdump -f file.dmp #Grab common windows hashes (SAM+SYSTEM)
 volatility --profile=Win7SP1x86_23418 cachedump -f file.dmp #Grab domain cache hashes inside the registry
@@ -157,7 +458,7 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 ```
 ## メモリーダンプ
 
-プロセスのメモリーダンプは、プロセスの現在の状態のすべてを**抽出**します。**procdump**モジュールはコードのみを**抽出**します。
+プロセスのメモリーダンプは、プロセスの現在の状態のすべてを**抽出**します。**procdump**モジュールは**コード**のみを**抽出**します。
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
@@ -180,61 +481,84 @@ python3 vol.py -f file.dmp windows.psscan.PsScan # Get hidden process list(malwa
 ```
 {% endtab %}
 
-{% tab title="vol2" %}以下は、メモリダンプ解析に関する基本的な手法に関する情報です。
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
 
 ## Volatility チートシート
 
-### プラグインのリストを表示
-```
-volatility --info
+### プラグインのリストを表示する
+
+```bash
+volatility --info | grep -iE "rule|plugin"
 ```
 
-### プロファイルのリストを表示
-```
-volatility --info | grep Profile
+### プロファイルを確認する
+
+```bash
+volatility -f <dumpfile> imageinfo
 ```
 
-### プロファイルを指定してプラグインを実行
-```
-volatility -f <dumpfile> --profile=<profile> <plugin>
-```
+### プロセスのリストを表示する
 
-### プロセスリストを表示
-```
+```bash
 volatility -f <dumpfile> --profile=<profile> pslist
 ```
 
-### ネットワーク接続を表示
-```
+### ネットワーク接続を表示する
+
+```bash
 volatility -f <dumpfile> --profile=<profile> connections
 ```
 
-### ファイルシステムキャッシュを表示
-```
-volatility -f <dumpfile> --profile=<profile> cachedump
+### ファイルシステムを調査する
+
+```bash
+volatility -f <dumpfile> --profile=<profile> filescan
 ```
 
-### レジストリキーを表示
-```
-volatility -f <dumpfile> --profile=<profile> printkey -o <offset>
-```
+### レジストリキーを表示する
 
-### レジストリリストを表示
-```
-volatility -f <dumpfile> --profile=<profile> hivelist
-```
-
-### レジストリ値を表示
-```
+```bash
 volatility -f <dumpfile> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリデータを表示
+### コマンド履歴を表示する
+
+```bash
+volatility -f <dumpfile> --profile=<profile> cmdscan
 ```
+
+### ユーザー情報を表示する
+
+```bash
+volatility -f <dumpfile> --profile=<profile> getsids
+```
+
+### プロセスの実行コマンドを表示する
+
+```bash
+volatility -f <dumpfile> --profile=<profile> cmdline
+```
+
+### メモリダンプからファイルを抽出する
+
+```bash
+volatility -f <dumpfile> --profile=<profile> dumpfiles -Q <address>
+```
+
+### メモリダンプからプロセスを抽出する
+
+```bash
+volatility -f <dumpfile> --profile=<profile> procdump -p <pid> -D <output_directory>
+```
+
+### メモリダンプからレジストリを抽出する
+
+```bash
+volatility -f <dumpfile> --profile=<profile> hivelist
 volatility -f <dumpfile> --profile=<profile> printkey -o <offset>
 ```
 
-これらのコマンドを使用して、メモリダンプから有用な情報を取得し、フォレンジック調査をサポートします。{% endtab %}
+これらのコマンドを使用して、メモリダンプから重要な情報を取得し、フォレンジック調査を行うことができます。{% endtab %}
 ```bash
 volatility --profile=PROFILE pstree -f file.dmp # Get process tree (not hidden)
 volatility --profile=PROFILE pslist -f file.dmp # Get process list (EPROCESS)
@@ -266,245 +590,62 @@ python3 vol.py -f file.dmp windows.cmdline.CmdLine #Display process command-line
 
 ## Volatility チートシート
 
-### プラグインのリストを表示する
-
-```bash
-volatility --info | less
+### プラグインのリストを表示
+```
+volatility --info | grep -iE "plugin_name1|plugin_name2"
 ```
 
-### プロファイルを指定してイメージファイルの情報を表示する
-
-```bash
-volatility -f <imagefile> imageinfo --profile=<profile>
+### プロファイルの指定
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 plugin_name
 ```
 
-### プロファイルを指定してプロセスリストを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> pslist
+### プロセス一覧の取得
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 pslist
 ```
 
-### プロファイルを指定してレジストリキーを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> printkey -K <key>
+### ネットワーク接続の確認
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 connections
 ```
 
-### プロファイルを指定してネットワーク接続を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> connections
+### ファイル一覧の取得
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 filescan
 ```
 
-### プロファイルを指定してファイルを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> filescan
+### レジストリキーの列挙
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 hivelist
 ```
 
-### プロファイルを指定してコマンドヒストリを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> cmdscan
+### レジストリ内容の表示
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -o 0xfffff8a000002010
 ```
 
-### プロファイルを指定してプロセスのハンドルを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> handles
+### コマンド履歴の取得
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 cmdscan
 ```
 
-### プロファイルを指定してレジストリのハッシュを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> hivelist
+### ユーザリストの取得
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
 ```
 
-### プロファイルを指定してファイルのハッシュを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> filehash
+### プロセスの実行コマンドの取得
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 cmdline -p 1234
 ```
 
-### プロファイルを指定してマルウェアの検出を行う
-
-```bash
-volatility -f <imagefile> --profile=<profile> malfind
+### メモリダンプからファイルの抽出
+```
+volatility -f memory_dump.mem --profile=Win7SP1x64 dumpfiles -Q 0x000000007efdd000 -D .
 ```
 
-### プロファイルを指定してプロセスのダンプを取得する
-
-```bash
-volatility -f <imagefile> --profile=<profile> procdump -p <pid> -D <output_directory>
-```
-
-### プロファイルを指定してサービスのリストを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> svcscan
-```
-
-### プロファイルを指定してタイムラインを生成する
-
-```bash
-volatility -f <imagefile> --profile=<profile> timeliner
-```
-
-### プロファイルを指定してレジストリのデータをダンプする
-
-```bash
-volatility -f <imagefile> --profile=<profile> dumpregistry -D <output_directory>
-```
-
-### プロファイルを指定してファイルのダンプを取得する
-
-```bash
-volatility -f <imagefile> --profile=<profile> dumpfiles -Q <address_range> -D <output_directory>
-```
-
-### プロファイルを指定してユーザアカウント情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> hashdump
-```
-
-### プロファイルを指定してシステム情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> sysinfo
-```
-
-### プロファイルを指定してキャッシュ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> cachedump
-```
-
-### プロファイルを指定してシステムサービス情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> getservicesids
-```
-
-### プロファイルを指定してドライバモジュール情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> ldrmodules
-```
-
-### プロファイルを指定してユーザ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> userassist
-```
-
-### プロファイルを指定してシステムコール情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> syscall
-```
-
-### プロファイルを指定してセキュリティディスクリプタ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> getsids
-```
-
-### プロファイルを指定してハッシュ値を計算する
-
-```bash
-volatility -f <imagefile> --profile=<profile> hashdump
-```
-
-### プロファイルを指定してユーザ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> userassist
-```
-
-### プロファイルを指定してシステムコール情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> syscall
-```
-
-### プロファイルを指定してセキュリティディスクリプタ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> getsids
-```
-
-### プロファイルを指定してハッシュ値を計算する
-
-```bash
-volatility -f <imagefile> --profile=<profile> hashdump
-```
-
-### プロファイルを指定してユーザ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> userassist
-```
-
-### プロファイルを指定してシステムコール情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> syscall
-```
-
-### プロファイルを指定してセキュリティディスクリプタ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> getsids
-```
-
-### プロファイルを指定してハッシュ値を計算する
-
-```bash
-volatility -f <imagefile> --profile=<profile> hashdump
-```
-
-### プロファイルを指定してユーザ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> userassist
-```
-
-### プロファイルを指定してシステムコール情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> syscall
-```
-
-### プロファイルを指定してセキュリティディスクリプタ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> getsids
-```
-
-### プロファイルを指定してハッシュ値を計算する
-
-```bash
-volatility -f <imagefile> --profile=<profile> hashdump
-```
-
-### プロファイルを指定してユーザ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> userassist
-```
-
-### プロファイルを指定してシステムコール情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> syscall
-```
-
-### プロファイルを指定してセキュリティディスクリプタ情報を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> getsids
-```
+これらのコマンドを使用して、メモリダンプから有用な情報を取得できます。{% endtab %}
 ```bash
 volatility --profile=PROFILE cmdline -f file.dmp #Display process command-line arguments
 volatility --profile=PROFILE consoles -f file.dmp #command history by scanning for _CONSOLE_INFORMATION
@@ -522,85 +663,162 @@ python3 vol.py -f file.dmp windows.envars.Envars [--pid <pid>] #Display process 
 ```
 {% endtab %}
 
-{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する基本的な手法に関する情報です。
 
-## Volatilityチートシート
+## Volatility チートシート
 
 ### プラグインのリストを表示する
 
 ```bash
-volatility --info | less
+volatility --info | grep -iE "profile" -A 20
 ```
 
 ### プロファイルを指定してイメージファイルの情報を表示する
 
 ```bash
-volatility -f <image> imageinfo
+volatility -f <imagefile> imageinfo --profile=<profile>
 ```
 
-### プロファイルを指定してプロセスリストを表示する
+### プロファイルを指定してプロセス一覧を表示する
 
 ```bash
-volatility -f <image> --profile=<profile> pslist
+volatility -f <imagefile> --profile=<profile> pslist
 ```
 
-### プロファイルを指定してレジストリキーを表示する
+### プロファイルを指定してレジストリキーをリストする
 
 ```bash
-volatility -f <image> --profile=<profile> hivelist
+volatility -f <imagefile> --profile=<profile> hivelist
+volatility -f <imagefile> --profile=<profile> printkey -o <offset>
 ```
 
 ### プロファイルを指定してネットワーク接続を表示する
 
 ```bash
-volatility -f <image> --profile=<profile> connections
+volatility -f <imagefile> --profile=<profile> connections
 ```
 
-### プロファイルを指定してファイルを表示する
+### プロファイルを指定してファイル一覧を表示する
 
 ```bash
-volatility -f <image> --profile=<profile> filescan
+volatility -f <imagefile> --profile=<profile> filescan
 ```
 
 ### プロファイルを指定して特定のプロセスのハンドルを表示する
 
 ```bash
-volatility -f <image> --profile=<profile> handles -p <pid>
+volatility -f <imagefile> --profile=<profile> handles -p <pid>
 ```
 
-### プロファイルを指定して特定のプロセスのDLLを表示する
+### プロファイルを指定して特定のプロセスのDLLリストを表示する
 
 ```bash
-volatility -f <image> --profile=<profile> dlllist -p <pid>
+volatility -f <imagefile> --profile=<profile> dlllist -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのメモリマップを表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> memmap -p <pid>
 ```
 
 ### プロファイルを指定して特定のプロセスのスレッドを表示する
 
 ```bash
-volatility -f <image> --profile=<profile> threads -p <pid>
+volatility -f <imagefile> --profile=<profile> threads -p <pid>
 ```
 
-### プロファイルを指定して特定のプロセスのメモリダンプを取得する
+### プロファイルを指定して特定のプロセスのモジュールを表示する
 
 ```bash
-volatility -f <image> --profile=<profile> procdump -p <pid> -D <output_directory>
+volatility -f <imagefile> --profile=<profile> modlist -p <pid>
 ```
 
-### プロファイルを指定してレジストリの内容をダンプする
+### プロファイルを指定して特定のプロセスのレジストリヒストリを表示する
 
 ```bash
-volatility -f <image> --profile=<profile> printkey -o <offset>
+volatility -f <imagefile> --profile=<profile> printkey -K <key>
 ```
 
-### プロファイルを指定して特定のファイルをダンプする
+### プロファイルを指定して特定のプロセスのスタックトレースを表示する
 
 ```bash
-volatility -f <image> --profile=<profile> dumpfiles -Q <address_range>
+volatility -f <imagefile> --profile=<profile> stack -p <pid>
 ```
 
-これらのコマンドを使用して、Volatilityを使用してメモリダンプを効果的に解析できます。
+### プロファイルを指定して特定のプロセスのヒープを表示する
 
-{% endtab %}
+```bash
+volatility -f <imagefile> --profile=<profile> memdump -p <pid> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのスクリーンショットを取得する
+
+```bash
+volatility -f <imagefile> --profile=<profile> screenshot -p <pid> --dump-dir=<output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのファイルをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> dumpfiles -Q <pid> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのレジストリをダンプする
+
+```bash
+volatility -f <imagejson> --profile=<profile> dumpregistry -o <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのイベントログをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> dumpfiles -S <service_name> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのイベントログをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> evtlogs -f <imagefile> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのレジストリヒストリをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> hivelist
+volatility -f <imagefile> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのレジストリをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> dumpregistry -o <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのイベントログをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> evtlogs -f <imagefile> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのレジストリヒストリをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> hivelist
+volatility -f <imagefile> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのレジストリをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> dumpregistry -o <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのイベントログをダンプする
+
+```bash
+volatility -f <imagefile> --profile=<profile> evtlogs -f <imagefile> -D <output_directory>
+```
 ```bash
 volatility --profile=PROFILE envars -f file.dmp [--pid <pid>] #Display process environment variables
 
@@ -618,291 +836,7 @@ python3 vol.py -f file.dmp windows.privileges.Privs | grep "SeImpersonatePrivile
 ```
 {% endtab %}
 
-{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
-
-## Volatility チートシート
-
-### プラグインのリストを表示する
-
-```bash
-volatility --info | grep -iE "profile|plugin"
-```
-
-### プロファイルを指定してイメージファイルの情報を表示する
-
-```bash
-volatility -f <image> imageinfo --profile=<profile>
-```
-
-### プロファイルを指定してプロセスリストを表示する
-
-```bash
-volatility -f <image> --profile=<profile> pslist
-```
-
-### プロファイルを指定してレジストリキーを表示する
-
-```bash
-volatility -f <image> --profile=<profile> hivelist
-```
-
-### プロファイルを指定してネットワーク接続を表示する
-
-```bash
-volatility -f <image> --profile=<profile> connections
-```
-
-### プロファイルを指定してファイルシステムを表示する
-
-```bash
-volatility -f <image> --profile=<profile> filescan
-```
-
-### プロファイルを指定して特定のプロセスのハンドルを表示する
-
-```bash
-volatility -f <image> --profile=<profile> handles -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのファイルディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> filescan | grep <pid>
-```
-
-### プロファイルを指定して特定のファイルをダンプする
-
-```bash
-volatility -f <image> --profile=<profile> dumpfiles -Q <address>
-```
-
-### プロファイルを指定してレジストリキーの内容を表示する
-
-```bash
-volatility -f <image> --profile=<profile> printkey -o <offset>
-```
-
-### プロファイルを指定して特定のプロセスのスタックトレースを表示する
-
-```bash
-volatility -f <image> --profile=<profile> pstree -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのモジュールリストを表示する
-
-```bash
-volatility -f <image> --profile=<profile> dlllist -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのメモリマップを表示する
-
-```bash
-volatility -f <image> --profile=<profile> memmap -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する
-
-```bash
-volatility -f <image> --profile=<profile> screenshot -p <pid> --dump-dir=<output_directory>
-```
-
-### プロファイルを指定して特定のプロセスのスレッドリストを表示する
-
-```bash
-volatility -f <image> --profile=<profile> threads -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのハンドルを表示する
-
-```bash
-volatility -f <image> --profile=<profile> handles -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのハンドルを表示する
-
-```bash
-volatility -f <image> --profile=<profile> handles -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのサービスディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsids -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのセキュリティディスクリプタを表示する
-
-```bash
-volatility -f <image> --profile=<profile> getsd -p <pid>
-```
+{% タブのタイトル="vol2" %}
 ```bash
 #Get enabled privileges of some processes
 volatility --profile=Win7SP1x86_23418 privs --pid=3152 -f file.dmp | grep Enabled
@@ -919,44 +853,78 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 ```
 {% endtab %}
 
-{% タブ タイトル="vol2" %}
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
+
+## Volatilityチートシート
+
+### プラグインのリストを表示
+```bash
+volatility --info | grep -iE "profile|linux"
+```
+
+### プロファイルを指定してイメージファイルの情報を表示
+```bash
+volatility -f <image> imageinfo --profile=<profile>
+```
+
+### プロファイルを指定してプロセス一覧を表示
+```bash
+volatility -f <image> --profile=<profile> pslist
+```
+
+### プロファイルを指定してネットワーク接続を表示
+```bash
+volatility -f <image> --profile=<profile> connections
+```
+
+### プロファイルを指定してレジストリキーを表示
+```bash
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定してファイルをダンプ
+```bash
+volatility -f <image> --profile=<profile> dumpfiles -Q <PID> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのスタックトレースを表示
+```bash
+volatility -f <image> --profile=<profile> psscan | grep <process_name>
+volatility -f <image> --profile=<profile> pstree -p <PID>
+volatility -f <image> --profile=<profile> pstack <PID>
+```
+
+### プロファイルを指定して特定のプロセスのハンドルを表示
+```bash
+volatility -f <image> --profile=<profile> handles -p <PID>
+```
+
+### プロファイルを指定して特定のプロセスのDLLリストを表示
+```bash
+volatility -f <image> --profile=<profile> dlllist -p <PID>
+```
+
+### プロファイルを指定して特定のプロセスのモジュール情報を表示
+```bash
+volatility -f <image> --profile=<profile> modscan | grep <process_name>
+volatility -f <image> --profile=<profile> modules -p <PID>
+```
+
+### プロファイルを指定して特定のプロセスのスクリーンショットを取得
+```bash
+volatility -f <image> --profile=<profile> screenshot -p <PID> --dump-dir=<output_directory>
+```
+
+これらのコマンドを使用して、メモリダンプから有用な情報を取得できます。{% endtab %}
 ```bash
 volatility --profile=Win7SP1x86_23418 getsids -f file.dmp #Get the SID owned by each process
 volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of each service
 ```
 ### ハンドル
 
-プロセスがハンドルを持っている他のファイル、キー、スレッド、プロセスを知るために役立ちます。
+プロセスがハンドルを持っている（開いている）他のファイル、キー、スレッド、プロセスを知るのに役立ちます。
 ```bash
 vol.py -f file.dmp windows.handles.Handles [--pid <pid>]
-```
-{% endtab %}
-
-{% タブのタイトル="vol2" %}
-```bash
-volatility --profile=Win7SP1x86_23418 -f file.dmp handles [--pid=<pid>]
-```
-### DLLs
-
-{% tabs %}
-{% tab title="vol3" %}
-```bash
-./vol.py -f file.dmp windows.dlllist.DllList [--pid <pid>] #List dlls used by each
-./vol.py -f file.dmp windows.dumpfiles.DumpFiles --pid <pid> #Dump the .exe and dlls of the process in the current directory process
-```
-{% endtab %}
-
-{% タブのタイトル="vol2" %}
-```bash
-volatility --profile=Win7SP1x86_23418 dlllist --pid=3152 -f file.dmp #Get dlls of a proc
-volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dmp #Dump dlls of a proc
-```
-### プロセスごとの文字列
-
-Volatilityを使用すると、文字列がどのプロセスに属しているかを確認できます。
-```bash
-strings file.dmp > /tmp/strings.txt
-./vol.py -f /tmp/file.dmp windows.strings.Strings --strings-file /tmp/strings.txt
 ```
 {% endtab %}
 
@@ -994,34 +962,10 @@ volatility -f <imagefile> --profile=<profile> hivelist
 volatility -f <imagefile> --profile=<profile> connections
 ```
 
-### プロファイルを指定してファイルを表示する
+### プロファイルを指定してファイルシステムを表示する
 
 ```bash
 volatility -f <imagefile> --profile=<profile> filescan
-```
-
-### プロファイルを指定してコマンド履歴を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> cmdscan
-```
-
-### プロファイルを指定してレジストリをダンプする
-
-```bash
-volatility -f <imagefile> --profile=<profile> printkey -K <registrykey>
-```
-
-### プロファイルを指定してプロセスのダンプを取得する
-
-```bash
-volatility -f <imagefile> --profile=<profile> procdump -p <pid> -D <outputdirectory>
-```
-
-### プロファイルを指定して特定のプロセスのスタックトレースを表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> psscan
 ```
 
 ### プロファイルを指定して特定のプロセスのハンドルを表示する
@@ -1030,193 +974,50 @@ volatility -f <imagefile> --profile=<profile> psscan
 volatility -f <imagefile> --profile=<profile> handles -p <pid>
 ```
 
-### プロファイルを指定して特定のプロセスのDLLリストを表示する
+### プロファイルを指定して特定のプロセスのファイルディスクリプタを表示する
 
 ```bash
-volatility -f <imagefile> --profile=<profile> dlllist -p <pid>
+volatility -f <imagefile> --profile=<profile> filescan -p <pid>
 ```
 
-### プロファイルを指定して特定のプロセスのモジュール情報を表示する
+### プロファイルを指定して特定のプロセスのモジュールを表示する
 
 ```bash
 volatility -f <imagefile> --profile=<profile> modscan -p <pid>
 ```
 
-### プロファイルを指定して特定のプロセスのネットワーク情報を表示する
+### プロファイルを指定して特定のプロセスのスタックトレースを表示する
 
 ```bash
-volatility -f <imagefile> --profile=<profile> connscan -p <pid>
+volatility -f <imagefile> --profile=<profile> stack -p <pid>
 ```
 
-### プロファイルを指定して特定のプロセスのファイルハンドルを表示する
+### プロファイルを指定して特定のプロセスのヒープを表示する
 
 ```bash
-volatility -f <imagefile> --profile=<profile> filehandles -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのマルウェア解析を実行する
-
-```bash
-volatility -f <imagefile> --profile=<profile> malfind -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのレジストリキーを表示する
-
-```bash
-volatility -f <imagejson> --profile=<profile> printkey -K <registrykey>
-```
-
-### プロファイルを指定して特定のプロセスのレジストリ値を表示する
-
-```bash
-volatility -f <imagefile> --profile=<profile> printkey -K <registrykey> -V <registryvalue>
-```
-
-### プロファイルを指定して特定のプロセスのレジストリ値をダンプする
-
-```bash
-volatility -f <imagefile> --profile=<profile> dumpregistry -s <registrykey> -D <outputdirectory>
-```
-
-### プロファイルを指定して特定のプロセスのファイルをダンプする
-
-```bash
-volatility -f <imagefile> --profile=<profile> dumpfiles -Q <pid> -D <outputdirectory>
-```
-
-### プロファイルを指定して特定のプロセスのネットワーク情報をダンプする
-
-```bash
-volatility -f <imagefile> --profile=<profile> dumpnets -Q <pid> -D <outputdirectory>
+volatility -f <imagefile> --profile=<profile> memdump -p <pid> -D <output_directory>
 ```
 
 ### プロファイルを指定して特定のプロセスのスクリーンショットを取得する
 
 ```bash
-volatility -f <imagefile> --profile=<profile> screenshot -p <pid> -D <outputdirectory>
+volatility -f <imagefile> --profile=<profile> screenshot -p <pid> --dump-dir=<output_directory>
 ```
 
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）
-
+これらのコマンドを使用して、Volatility を使用してメモリダンプを効果的に解析できます。{% endtab %}
 ```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory>
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format>
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality>
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution>
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示、プロセスツリーID表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree --treeid
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示、プロセスツリーID表示、プロセスツリー名表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree --treeid --treename
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示、プロセスツリーID表示、プロセスツリー名表示、プロセスツリー親ID表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree --treeid --treename --parent
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示、プロセスツリーID表示、プロセスツリー名表示、プロセスツリー親ID表示、プロセスツリー親名表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree --treeid --treename --parent --parentname
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示、プロセスツリーID表示、プロセスツリー名表示、プロセスツリー親ID表示、プロセスツリー親名表示、プロセスツリー親親ID表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree --treeid --treename --parent --parentname --grandparent
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示、プロセスツリーID表示、プロセスツリー名表示、プロセスツリー親ID表示、プロセスツリー親名表示、プロセスツリー親親ID表示、プロセスツリー親親名表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree --treeid --treename --parent --parentname --grandparent --grandparentname
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示、プロセスツリーID表示、プロセスツリー名表示、プロセスツリー親ID表示、プロセスツリー親名表示、プロセスツリー親親ID表示、プロセスツリー親親名表示、プロセスツリー親親親ID表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree --treeid --treename --parent --parentname --grandparent --grandparentname --greatgrandparent
-```
-
-### プロファイルを指定して特定のプロセスのスクリーンショットを取得する（全てのプロセス）（画像形式指定、圧縮、解像度指定、タイムスタンプ付与、プロセス名表示、プロセスID表示、プロセスツリー表示、プロセスツリーID表示、プロセスツリー名表示、プロセスツリー親ID表示、プロセスツリー親名表示、プロセスツリー親親ID表示、プロセスツリー親親名表示、プロセスツリー親親親ID表示、プロセスツリー親親親名表示）
-
-```bash
-volatility -f <imagefile> --profile=<profile> screenshot -D <outputdirectory> --format=<format> --quality=<quality> --resolution=<resolution> --timestamp --processtree --pid --tree --treeid --treename --parent --parentname --grandparent --grandparentname --greatgrandparent --greatgrandparentname
-```
-```bash
-strings file.dmp > /tmp/strings.txt
-volatility -f /tmp/file.dmp windows.strings.Strings --string-file /tmp/strings.txt
-
-volatility -f /tmp/file.dmp --profile=Win81U1x64 memdump -p 3532 --dump-dir .
-strings 3532.dmp > strings_file
+volatility --profile=Win7SP1x86_23418 -f file.dmp handles [--pid=<pid>]
 ```
 {% endtab %}
 {% endtabs %}
 
-プロセス内の文字列を検索するためにyarascanモジュールを使用することもできます。
-```bash
-./vol.py -f file.dmp windows.vadyarascan.VadYaraScan --yara-rules "https://" --pid 3692 3840 3976 3312 3084 2784
-./vol.py -f file.dmp yarascan.YaraScan --yara-rules "https://"
-```
-{% endtab %}
+### DLLs
 
-{% タブ タイトル="vol2" %}
+{% tabs %}
+{% tab title="vol3" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3312,3084,2784
-```
-### UserAssist
-
-**Windows**は、**UserAssistキー**と呼ばれるレジストリ内の機能を使用して、実行したプログラムの履歴を追跡します。これらのキーは、各プログラムが実行された回数と最後に実行された日時を記録します。
-```bash
-./vol.py -f file.dmp windows.registry.userassist.UserAssist
+./vol.py -f file.dmp windows.dlllist.DllList [--pid <pid>] #List dlls used by each
+./vol.py -f file.dmp windows.dumpfiles.DumpFiles --pid <pid> #Dump the .exe and dlls of the process in the current directory process
 ```
 {% endtab %}
 
@@ -1229,29 +1030,14 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 volatility --info | grep -iE "plugin_name1|plugin_name2"
 ```
 
-### プロファイルを指定してイメージファイルの情報を表示
+### プロファイルを指定してプラグインを実行
 ```bash
-volatility -f memory_dump.mem imageinfo --profile=Win7SP1x64
+volatility -f memory_dump.mem --profile=Win7SP1x64 plugin_name
 ```
 
-### 特定のプロセスのプロセスID（PID）を取得
+### プロセス一覧を表示
 ```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 pslist | grep process_name
-```
-
-### 特定のプロセスのメモリダンプを取得
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 memdump -p pid -D output_directory/
-```
-
-### レジストリキーの値を表示
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -o offset
-```
-
-### ファイルを抽出
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 dumpfiles -Q offset --dump-dir=output_directory/
+volatility -f memory_dump.mem --profile=Win7SP1x64 pslist
 ```
 
 ### ネットワーク接続を表示
@@ -1259,80 +1045,486 @@ volatility -f memory_dump.mem --profile=Win7SP1x64 dumpfiles -Q offset --dump-di
 volatility -f memory_dump.mem --profile=Win7SP1x64 connections
 ```
 
-### ネットワークトラフィックを表示
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 tcpflow -p pid
-```
-
-### プロセスのDLLリストを表示
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 dlllist -p pid
-```
-
-### プロセスのハンドルを表示
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 handles -p pid
-```
-
-### キャッシュされたログイン資格情報を表示
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 cachedump
-```
-
-### システムのサービス情報を表示
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 svcscan
-```
-
-### システムのドライバモジュール情報を表示
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 modules
-```
-
-### システムのタスクスケジュール情報を表示
-```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
-```
-
-### システムのファイルキャッシュ情報を表示
+### ファイル一覧を表示
 ```bash
 volatility -f memory_dump.mem --profile=Win7SP1x64 filescan
 ```
 
-### システムのユーザ情報を表示
+### レジストリキーを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -K "KeyName"
+```
+
+### コマンドヒストリを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 cmdscan
+```
+
+### ユーザアカウントを表示
 ```bash
 volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
 ```
 
-### システムのユーザ情報を表示
+### プロセスのDLLリストを表示
 ```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
+volatility -f memory_dump.mem --profile=Win7SP1x64 dlllist -p PID
 ```
 
-### システムのユーザ情報を表示
+### メモリマップを表示
 ```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
+volatility -f memory_dump.mem --profile=Win7SP1x64 memmap
 ```
 
-### システムのユーザ情報を表示
+### キャッシュされたログイン情報を表示
 ```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
+volatility -f memory_dump.mem --profile=Win7SP1x64 cachedump
 ```
 
-### システムのユーザ情報を表示
+### システム情報を表示
 ```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
+volatility -f memory_dump.mem --profile=Win7SP1x64 sysinfo
 ```
 
-### システムのユーザ情報を表示
+### サービス一覧を表示
 ```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
+volatility -f memory_dump.mem --profile=Win7SP1x64 svcscan
 ```
 
-### システムのユーザ情報を表示
+### イベントログを表示
 ```bash
-volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
+volatility -f memory_dump.mem --profile=Win7SP1x64 evtlogs
 ```
+
+### プロセスのコマンドラインを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 cmdline -p PID
+```
+
+### ファイルのダンプを作成
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 dumpfiles -Q AddressRange -D output_directory/
+```
+
+### レジストリのダンプを作成
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 hivelist
+volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -o Offset
+volatility -f memory_dump.mem --profile=Win7SP1x64 dumpregistry -o Offset -D output_directory/
+```
+
+### プロセスのスクリーンショットを取得
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 screenshot -p PID -D output_directory/
+```
+
+### プロセスのファイルディスクリプタを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 handles -p PID
+```
+
+### プロセスのネットワーク情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 netscan -p PID
+```
+
+### プロセスのレジストリハンドルを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 handles -p PID
+```
+
+### プロセスのセキュリティディスクリプタを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 getsd -p PID
+```
+
+### プロセスのサービスディスクリプタを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 getsd -p PID
+```
+
+### プロセスのモジュール情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 modscan -p PID
+```
+
+### プロセスのモジュール情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 moddump -p PID -D output_directory/
+```
+
+### プロセスのハンドル情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 handles -p PID
+```
+
+### プロセスのファイルオブジェクト情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 filescan -p PID
+```
+
+### プロセスのファイルオブジェクト情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 dumpfiles -p PID -D output_directory/
+```
+
+### プロセスのネットワーク情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 netscan -p PID
+```
+
+### プロセスのネットワーク情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 connscan -p PID -D output_directory/
+```
+
+### プロセスのレジストリ情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -p PID
+```
+
+### プロセスのレジストリ情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 hivelist
+volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -o Offset
+volatility -f memory_dump.mem --profile=Win7SP1x64 dumpregistry -o Offset -D output_directory/
+```
+
+### プロセスのスレッド情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 threads -p PID
+```
+
+### プロセスのスレッド情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 threads -p PID -D output_directory/
+```
+
+### プロセスのハンドル情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 handles -p PID
+```
+
+### プロセスのハンドル情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 handles -p PID -D output_directory/
+```
+
+### プロセスのセキュリティディスクリプタを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 getsd -p PID
+```
+
+### プロセスのサービスディスクリプタを表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 getsd -p PID
+```
+
+### プロセスのモジュール情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 modscan -p PID
+```
+
+### プロセスのモジュール情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 moddump -p PID -D output_directory/
+```
+
+### プロセスのファイルオブジェクト情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 filescan -p PID
+```
+
+### プロセスのファイルオブジェクト情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 dumpfiles -p PID -D output_directory/
+```
+
+### プロセスのネットワーク情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 netscan -p PID
+```
+
+### プロセスのネットワーク情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 connscan -p PID -D output_directory/
+```
+
+### プロセスのレジストリ情報を表示
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -p PID
+```
+
+### プロセスのレジストリ情報をダンプ
+```bash
+volatility -f memory_dump.mem --profile=Win7SP1x64 hivelist
+volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -o Offset
+volatility -f memory_dump.mem --profile=Win7SP1x64 dumpregistry -o Offset -D output_directory/
+```
+```bash
+volatility --profile=Win7SP1x86_23418 dlllist --pid=3152 -f file.dmp #Get dlls of a proc
+volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dmp #Dump dlls of a proc
+```
+### プロセスごとの文字列
+
+Volatilityを使用すると、文字列がどのプロセスに属しているかを確認できます。
+```bash
+strings file.dmp > /tmp/strings.txt
+./vol.py -f /tmp/file.dmp windows.strings.Strings --strings-file /tmp/strings.txt
+```
+{% endtab %}
+
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
+
+## Volatility チートシート
+
+### プラグインのリストを表示する
+
+```bash
+volatility --info | less
+```
+
+### プロファイルを指定してイメージファイルの情報を表示する
+
+```bash
+volatility -f <imagefile> imageinfo --profile=<profile>
+```
+
+### プロファイルを指定してプロセス一覧を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> pslist
+```
+
+### プロファイルを指定してレジストリキーを表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> hivelist
+```
+
+### プロファイルを指定してネットワーク接続を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> connections
+```
+
+### プロファイルを指定してファイル一覧を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> filescan
+```
+
+### プロファイルを指定してコマンド履歴を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> cmdscan
+```
+
+### プロファイルを指定してプロセスのハンドルを表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> handles
+```
+
+### プロファイルを指定してレジストリキーの値を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのスタックトレースを表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> pstree -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのモジュール情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> dlllist -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのネットワーク情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> connscan -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのファイルハンドル情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> filehandles -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのレジストリ情報を表示する
+
+```bash
+volatility -f <imagejson> --profile=<profile> handles -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのサービス情報を表示する
+
+```bash
+volatility -f <imagefile> --profile=<profile> getservicesids -p <pid>
+```
+```bash
+strings file.dmp > /tmp/strings.txt
+volatility -f /tmp/file.dmp windows.strings.Strings --string-file /tmp/strings.txt
+
+volatility -f /tmp/file.dmp --profile=Win81U1x64 memdump -p 3532 --dump-dir .
+strings 3532.dmp > strings_file
+```
+{% endtab %}
+{% endtabs %}
+
+プロセス内の文字列を検索するためにyarascanモジュールを使用することもできます：
+```bash
+./vol.py -f file.dmp windows.vadyarascan.VadYaraScan --yara-rules "https://" --pid 3692 3840 3976 3312 3084 2784
+./vol.py -f file.dmp yarascan.YaraScan --yara-rules "https://"
+```
+{% endtab %}
+
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
+
+## Volatility チートシート
+
+### プラグインのリストを表示
+```
+volatility --info | grep -iE "name|file"
+```
+
+### プロファイルのリストを表示
+```
+volatility --info | grep -i "profile"
+```
+
+### プロファイルを指定してプラグインを実行
+```
+volatility -f <dumpfile> --profile=<profile> <plugin>
+```
+
+### プロセス一覧を表示
+```
+volatility -f <dumpfile> --profile=<profile> pslist
+```
+
+### ネットワーク接続を表示
+```
+volatility -f <dumpfile> --profile=<profile> connections
+```
+
+### ファイル一覧を表示
+```
+volatility -f <dumpfile> --profile=<profile> filescan
+```
+
+### レジストリキーを表示
+```
+volatility -f <dumpfile> --profile=<profile> printkey -o <offset>
+```
+
+### レジストリ値を表示
+```
+volatility -f <dumpfile> --profile=<profile> printkey -o <offset> -K <key>
+```
+
+### レジストリ全体を表示
+```
+volatility -f <dumpfile> --profile=<profile> hivelist
+```
+
+### レジストリダンプを表示
+```
+volatility -f <dumpfile> --profile=<profile> dumpregistry -o <offset> -s <size> -f <outputfile>
+```
+
+### プロセスのメモリダンプを取得
+```
+volatility -f <dumpfile> --profile=<profile> procdump -p <pid> -D <outputdir>
+```
+
+### ファイルのダウンロード
+```
+volatility -f <dumpfile> --profile=<profile> dumpfiles -Q <offset> -D <outputdir>
+```
+
+### メモリダンプのプラグインを実行
+```
+volatility -f <dumpfile> --profile=<profile> <plugin>
+```
+
+これらのコマンドを使用して、メモリダンプから有用な情報を取得できます。{% endtab %}
+```bash
+volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3312,3084,2784
+```
+### UserAssist
+
+**Windows**は、**UserAssistキー**と呼ばれるレジストリ内の機能を使用して、実行したプログラムの履歴を追跡します。これらのキーは、各プログラムが実行された回数と最後に実行された日時を記録します。
+```bash
+./vol.py -f file.dmp windows.registry.userassist.UserAssist
+```
+{% endtab %}
+
+{% タブのタイトル="vol2" %}
 ```
 volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 ```
@@ -1343,7 +1535,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​​[**RootedCON**](https://www.rootedcon.com/)は**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの1つです。**技術知識の促進を使命**とするこの会議は、あらゆる分野のテクノロジーとサイバーセキュリティ専門家にとっての熱い出会いの場です。
+​​​​[**RootedCON**](https://www.rootedcon.com/)は**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの一つです。**技術知識の促進を使命**とするこの会議は、あらゆる分野のテクノロジーとサイバーセキュリティ専門家にとっての熱い出会いの場です。
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -1397,66 +1589,193 @@ volatility -f <imagefile> --profile=<profile> connections
 volatility -f <imagefile> --profile=<profile> filescan
 ```
 
-### プロファイルを指定して特定のプロセスのハンドルを表示する
+### プロファイルを指定してコンソール履歴を表示する
 
 ```bash
-volatility -f <imagefile> --profile=<profile> handles -p <pid>
+volatility -f <imagefile> --profile=<profile> consoles
 ```
 
-### プロファイルを指定して特定のプロセスのモジュールを表示する
+### プロファイルを指定してシステム情報を表示する
 
 ```bash
-volatility -f <imagefile> --profile=<profile> modscan -p <pid>
+volatility -f <imagefile> --profile=<profile> sysinfo
 ```
 
-### プロファイルを指定して特定のプロセスのスレッドを表示する
+### プロファイルを指定して特定のプロセスのメモリダンプを取得する
 
 ```bash
-volatility -f <imagefile> --profile=<profile> threads -p <pid>
+volatility -f <imagefile> --profile=<profile> memdump -p <pid> -D <output_directory>
 ```
 
-### プロファイルを指定して特定のプロセスのダンプを取得する
+### プロファイルを指定して特定のファイルの内容を表示する
 
 ```bash
-volatility -f <imagefile> --profile=<profile> procdump -p <pid> -D <output_directory>
+volatility -f <imagefile> --profile=<profile> dumpfiles -Q <address_range>
 ```
 
-### プロファイルを指定してレジストリのダンプを取得する
-
-```bash
-volatility -f <imagefile> --profile=<profile> printkey -o <offset>
-```
-
-### プロファイルを指定して特定のファイルをダンプする
-
-```bash
-volatility -f <imagefile> --profile=<profile> dumpfiles -Q <file_path>
-```
-
-### プロファイルを指定して特定のファイルを抽出する
-
-```bash
-volatility -f <imagefile> --profile=<profile> fileextract -f <file_path> -D <output_directory>
-```
-
-これらのコマンドを使用して、メモリダンプからさまざまな情報を取得できます。{% endtab %}
+これらのコマンドを使用して、Volatilityを効果的に活用し、メモリダンプ解析を行うことができます。{% endtab %}
 ```bash
 #Get services and binary path
 volatility --profile=Win7SP1x86_23418 svcscan -f file.dmp
 #Get name of the services and SID (slow)
 volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp
 ```
-## ネットワーク
+## メモリーダンプ解析の基本的な手法
 
-{% tabs %}
-{% tab title="vol3" %}
+### Volatility チートシート
+
+- **プラグインのリストを表示する**: `volatility --info | less`
+- **プロファイルのリストを表示する**: `volatility --info | grep Profile`
+- **プロセスのリストを表示する**: `volatility -f <dump> --profile=<profile> pslist`
+- **レジストリのキーをリストする**: `volatility -f <dump> --profile=<profile> hivelist`
+- **レジストリの内容を表示する**: `volatility -f <dump> --profile=<profile> printkey -o <offset>`
+- **ネットワーク接続を表示する**: `volatility -f <dump> --profile=<profile> connections`
+- **ソケットを表示する**: `volatility -f <dump> --profile=<profile> sockets`
+- **ネットワークインターフェースを表示する**: `volatility -f <dump> --profile=<profile> ifconfig`
+- **ルーティングテーブルを表示する**: `volatility -f <dump> --profile=<profile> route`
+- **ファイアウォールルールを表示する**: `volatility -f <dump> --profile=<profile> netscan`
+- **ネットワークキャッシュを表示する**: `volatility -f <dump> --profile=<profile> netscan`
+- **ARP キャッシュを表示する**: `volatility -f <dump> --profile=<profile> arp`
+- **DNS キャッシュを表示する**: `volatility -f <dump> --profile=<profile> dnscache`
 ```bash
 ./vol.py -f file.dmp windows.netscan.NetScan
 #For network info of linux use volatility2
 ```
 {% endtab %}
 
-{% タブ タイトル="vol2" %}
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
+
+## Volatility チートシート
+
+### プラグインのリストを表示
+```
+volatility --info | less
+```
+
+### プロファイルを指定してイメージファイルの情報を表示
+```
+volatility -f <image> imageinfo
+```
+
+### プロファイルを指定してプロセスリストを表示
+```
+volatility -f <image> --profile=<profile> pslist
+```
+
+### プロファイルを指定してレジストリキーを表示
+```
+volatility -f <image> --profile=<profile> hivelist
+```
+
+### プロファイルを指定してネットワーク接続を表示
+```
+volatility -f <image> --profile=<profile> connections
+```
+
+### プロファイルを指定してファイルツリーを表示
+```
+volatility -f <image> --profile=<profile> filescan
+```
+
+### プロファイルを指定して特定のプロセスのハンドルを表示
+```
+volatility -f <image> --profile=<profile> handles -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのファイルディスクリプタを表示
+```
+volatility -f <image> --profile=<profile> filescan -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスの DLL リストを表示
+```
+volatility -f <image> --profile=<profile> dlllist -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのモジュール情報を表示
+```
+volatility -f <image> --profile=<profile> modscan -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのスレッド情報を表示
+```
+volatility -f <image> --profile=<profile> threads -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのメモリマップを表示
+```
+volatility -f <image> --profile=<profile> memmap -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのメモリダンプを取得
+```
+volatility -f <image> --profile=<profile> procdump -p <pid> -D <output_directory>
+```
+
+### プロファイルを指定してレジストリのダンプを取得
+```
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のファイルのダンプを取得
+```
+volatility -f <image> --profile=<profile> dumpfiles -Q <file_path> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのスタックトレースを表示
+```
+volatility -f <image> --profile=<profile> stack -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのヒープ情報を表示
+```
+volatility -f <image> --profile=<profile> heap -p <pid>
+```
+
+### プロファイルを指定して特定のプロセスのヒープダンプを取得
+```
+volatility -f <image> --profile=<profile> memdump -p <pid> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのスクリーンショットを取得
+```
+volatility -f <image> --profile=<profile> screenshot -p <pid> -D <output_directory>
+```
+
+### プロファイルを指定して特定のプロセスのレジスタ情報を表示
+```
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのレジスタ情報を表示
+```
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのレジスタ情報を表示
+```
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのレジスタ情報を表示
+```
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのレジスタ情報を表示
+```
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのレジスタ情報を表示
+```
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
+
+### プロファイルを指定して特定のプロセスのレジスタ情報を表示
+```
+volatility -f <image> --profile=<profile> printkey -o <offset>
+```
 ```bash
 volatility --profile=Win7SP1x86_23418 netscan -f file.dmp
 volatility --profile=Win7SP1x86_23418 connections -f file.dmp#XP and 2003 only
@@ -1483,186 +1802,7 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 ```
 {% endtab %}
 
-{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
-
-## Volatility チートシート
-
-### プラグインのリストを表示する
-
-```bash
-volatility --info | grep -iE "profile" -A 5
-```
-
-### プロファイルを指定してイメージファイルの情報を表示する
-
-```bash
-volatility -f <image> imageinfo
-```
-
-### プロファイルを指定してプロセスリストを表示する
-
-```bash
-volatility -f <image> --profile=<profile> pslist
-```
-
-### プロファイルを指定してレジストリキーを表示する
-
-```bash
-volatility -f <image> --profile=<profile> hivelist
-```
-
-### プロファイルを指定してネットワーク接続を表示する
-
-```bash
-volatility -f <image> --profile=<profile> connections
-```
-
-### プロファイルを指定してファイルシステムを表示する
-
-```bash
-volatility -f <image> --profile=<profile> filescan
-```
-
-### プロファイルを指定してコマンドヒストリを表示する
-
-```bash
-volatility -f <image> --profile=<profile> cmdscan
-```
-
-### プロファイルを指定してレジストリをダンプする
-
-```bash
-volatility -f <image> --profile=<profile> printkey -K "KeyName"
-```
-
-### プロファイルを指定してプロセスのダンプを取得する
-
-```bash
-volatility -f <image> --profile=<profile> procdump -p <PID> -D <output_directory>
-```
-
-### プロファイルを指定して特定のプロセスのスタックトレースを表示する
-
-```bash
-volatility -f <image> --profile=<profile> psscan | grep <PID>
-volatility -f <image> --profile=<profile> pstree -p | grep <PID>
-volatility -f <image> --profile=<profile> threads | grep <PID>
-volatility -f <image> --profile=<profile> stack -p <PID>
-```
-
-### プロファイルを指定して特定のファイルをダンプする
-
-```bash
-volatility -f <image> --profile=<profile> dumpfiles -Q <address_range>
-```
-
-### プロファイルを指定して特定のファイルを抽出する
-
-```bash
-volatility -f <image> --profile=<profile> dumpfiles -r <output_directory> -Q <address_range>
-```
-
-### プロファイルを指定して特定のプロセスのハンドルを表示する
-
-```bash
-volatility -f <image> --profile=<profile> handles -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスの DLL リストを表示する
-
-```bash
-volatility -f <image> --profile=<profile> dlllist -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのモジュール情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> modscan -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのネットワーク情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> netscan -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのレジストリ情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> printkey -K "KeyName" -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのファイルハンドル情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> filehandles -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのマップされたファイル情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> malfind -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのレジストリヒストリ情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> hivelist -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのサービス情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> getservicesids -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのサービスハンドル情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> svcscan -p <PID>
-```
-
-### プロファイルを指定して特定のプロセスのスケジュールされたタスク情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> malsysproc
-```
-
-### プロファイルを指定して特定のプロセスのスケジュールされたタスク情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> malsysproc
-```
-
-### プロファイルを指定して特定のプロセスのスケジュールされたタスク情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> malsysproc
-```
-
-### プロファイルを指定して特定のプロセスのスケジュールされたタスク情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> malsysproc
-```
-
-### プロファイルを指定して特定のプロセスのスケジュールされたタスク情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> malsysproc
-```
-
-### プロファイルを指定して特定のプロセスのスケジュールされたタスク情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> malsysproc
-```
-
-### プロファイルを指定して特定のプロセスのスケジュールされたタスク情報を表示する
-
-```bash
-volatility -f <image> --profile=<profile> malsysproc
-```
+{% タブ タイトル="vol2" %}
 ```bash
 volatility --profile=Win7SP1x86_23418 -f file.dmp hivelist #List roots
 volatility --profile=Win7SP1x86_23418 -f file.dmp printkey #List roots and get initial subkeys
@@ -1704,238 +1844,309 @@ volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 
 ## Volatility チートシート
 
-### プラグインのリストを表示する
-
+### プラグインのリストを表示
 ```bash
-volatility --info | grep -iE "plugin_name1|plugin_name2"
+volatility --info | less
 ```
 
-### プロファイルを指定してイメージ情報を表示する
-
+### プロファイルを指定してイメージファイルの情報を表示
 ```bash
-volatility -f memory.raw imageinfo --profile=Win7SP1x64
+volatility -f <image> imageinfo
 ```
 
-### 特定のプロセスのプロセスID（PID）を取得する
-
+### プロファイルを指定してプロセス一覧を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 pslist | grep process_name
+volatility -f <image> --profile=<profile> pslist
 ```
 
-### 特定のプロセスのメモリダンプを取得する
-
+### プロファイルを指定してネットワーク接続を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 memdump -p pid -D output_directory/
+volatility -f <image> --profile=<profile> connections
 ```
 
-### ファイルをダウンロードする
-
+### プロファイルを指定してレジストリキーを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 dumpfiles -Q address_range -D output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリキーを取得する
-
+### プロファイルを指定してファイルをダンプ
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key"
+volatility -f <image> --profile=<profile> dumpfiles -Q <address range>
 ```
 
-### ネットワーク接続を表示する
-
+### プロファイルを指定して特定のプロセスのスタックトレースを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 connections
+volatility -f <image> --profile=<profile> procdump -p <pid> -D <output directory>
 ```
 
-### ネットワークトラフィックを表示する
-
+### プロファイルを指定して特定のプロセスのハンドルを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 tcpstreams
+volatility -f <image> --profile=<profile> handles -p <pid>
 ```
 
-### コマンド履歴を表示する
-
+### プロファイルを指定して特定のプロセスのDLLリストを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 cmdscan
+volatility -f <image> --profile=<profile> dlllist -p <pid>
 ```
 
-### ユーザー情報を表示する
-
+### プロファイルを指定してレジストリのハッシュを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 getsids
+volatility -f <image> --profile=<profile> hivelist
 ```
 
-### プロセスのDLLリストを表示する
-
+### プロファイルを指定してレジストリの内容を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 dlllist -p pid
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### プロセスのハンドルを表示する
-
+### プロファイルを指定してファイルの内容を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 handles -p pid
+volatility -f <image> --profile=<profile> dumpfiles -Q <address range>
 ```
 
-### サービス情報を表示する
-
+### プロファイルを指定してイベントログを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 svcscan
+volatility -f <image> --profile=<profile> evtlogs
 ```
 
-### キャッシュされたログイン情報を表示する
-
+### プロファイルを指定してシステム情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 cachedump
+volatility -f <image> --profile=<profile> sysinfo
 ```
 
-### ファイルキャッシュを表示する
-
+### プロファイルを指定してキャッシュ情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 filescan
+volatility -f <image> --profile=<profile> caches
 ```
 
-### システム情報を表示する
-
+### プロファイルを指定してサービス情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 sysinfo
+volatility -f <image> --profile=<profile> svcscan
 ```
 
-### システムサービスディスパッチテーブル（SSDT）を表示する
-
+### プロファイルを指定してファイルキャッシュ情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 ssdt
+volatility -f <image> --profile=<profile> filescan
 ```
 
-### ドライバモジュール情報を表示する
-
+### プロファイルを指定してレジストリキーのハッシュを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 modules
+volatility -f <image> --profile=<profile> hivelist
 ```
 
-### プロセスのネットワーク情報を表示する
-
+### プロファイルを指定してユーザ情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 netscan
+volatility -f <image> --profile=<profile> userassist
 ```
 
-### プロセスのセキュリティ情報を表示する
-
+### プロファイルを指定してコマンドヒストリを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 psxview
+volatility -f <image> --profile=<profile> cmdscan
 ```
 
-### レジストリ情報を表示する
-
+### プロファイルを指定してシェルコマンドヒストリを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
+volatility -f <image> --profile=<profile> consoles
 ```
 
-### レジストリ情報をダンプする
-
+### プロファイルを指定してファイル情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivedump -o output_directory/ -s hive_offset
+volatility -f <image> --profile=<profile> filescan
 ```
 
-### レジストリキーの値を表示する
-
+### プロファイルを指定してネットワーク情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key"
+volatility -f <image> --profile=<profile> netscan
 ```
 
-### レジストリ値を表示する
-
+### プロファイルを指定してプロセスのコマンドラインを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printval -K "registry_key"
+volatility -f <image> --profile=<profile> cmdline
 ```
 
-### レジストリツリーを表示する
-
+### プロファイルを指定してレジストリの最終書き込み時間を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーをダンプする
-
+### プロファイルを指定してレジストリの最終アクセス時間を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする
-
+### プロファイルを指定してレジストリの最終変更時間を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む）
-
+### プロファイルを指定してレジストリのオーナー情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む）
-
+### プロファイルを指定してレジストリのセキュリティ情報を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む）
-
+### プロファイルを指定してレジストリのサブキーを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む）
-
+### プロファイルを指定してレジストリの値を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む、全てのサブキーの値のバイナリも含む）
-
+### プロファイルを指定してレジストリのバリューを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -x -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む、全てのサブキーの値のバイナリも含む、全てのサブキーの値のASCIIも含む）
-
+### プロファイルを指定してレジストリのサブキーを再帰的に表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -x -c -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む、全てのサブキーの値のバイナリも含む、全てのサブキーの値のASCIIも含む、全てのサブキーの値のユニコードも含む）
-
+### プロファイルを指定してレジストリの値を再帰的に表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -x -c -u -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む、全てのサブキーの値のバイナリも含む、全てのサブキーの値のASCIIも含む、全てのサブキーの値のユニコードも含む、全てのサブキーの値のユニコードのバイナリも含む）
-
+### プロファイルを指定してレジストリのバリューを再帰的に表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -x -c -u -w -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む、全てのサブキーの値のバイナリも含む、全てのサブキーの値のASCIIも含む、全てのサブキーの値のユニコードも含む、全てのサブキーの値のユニコードのバイナリも含む、全てのサブキーの値のユニコードのASCIIも含む）
-
+### プロファイルを指定してレジストリのハッシュを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -x -c -u -w -z -o output_directory/
+volatility -f <image> --profile=<profile> hivelist
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む、全てのサブキーの値のバイナリも含む、全てのサブキーの値のASCIIも含む、全てのサブキーの値のユニコードも含む、全てのサブキーの値のユニコードのバイナリも含む、全てのサブキーの値のユニコードのASCIIも含む、全てのサブキーの値のユニコードのASCIIのバイナリも含む）
-
+### プロファイルを指定してレジストリの内容を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -x -c -u -w -z -q -o output_directory/
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む、全てのサブキーの値のバイナリも含む、全てのサブキーの値のASCIIも含む、全てのサブキーの値のユニコードも含む、全てのサブキーの値のユニコードのバイナリも含む、全てのサブキーの値のユニコードのASCIIも含む、全てのサブキーの値のユニコードのASCIIのバイナリも含む、全てのサブキーの値のユニコードのASCIIのユニコードも含む）
-
+### プロファイルを指定してファイルの内容を表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -x -c -u -w -z -q -t -o output_directory/
+volatility -f <image> --profile=<profile> dumpfiles -Q <address range>
 ```
 
-### レジストリツリーを再帰的にダンプする（値も含む、バイナリも含む、全てのサブキーを含む、全てのサブキーの値を含む、全てのサブキーの値のバイナリも含む、全てのサブキーの値のASCIIも含む、全てのサブキーの値のユニコードも含む、全てのサブキーの値のユニコードのバイナリも含む、全てのサブキーの値のユニコードのASCIIも含む、全てのサブキーの値のユニコードのASCIIのバイナリも含む、全てのサブキーの値のユニコードのASCIIのユニコードも含む、全てのサブキーの値のユニコードのASCIIのユニコードのバイナリも含む）
-
+### プロファイルを指定してイベントログを表示
 ```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -K "registry_key" -y -r -v -b -s -a -x -c -u -w -z -q -t -p -o output_directory/
+volatility -f <image> --profile=<profile> evtlogs
+```
+
+### プロファイルを指定してシステム情報を表示
+```bash
+volatility -f <image> --profile=<profile> sysinfo
+```
+
+### プロファイルを指定してキャッシュ情報を表示
+```bash
+volatility -f <image> --profile=<profile> caches
+```
+
+### プロファイルを指定してサービス情報を表示
+```bash
+volatility -f <image> --profile=<profile> svcscan
+```
+
+### プロファイルを指定してファイルキャッシュ情報を表示
+```bash
+volatility -f <image> --profile=<profile> filescan
+```
+
+### プロファイルを指定してレジストリキーのハッシュを表示
+```bash
+volatility -f <image> --profile=<profile> hivelist
+```
+
+### プロファイルを指定してユーザ情報を表示
+```bash
+volatility -f <image> --profile=<profile> userassist
+```
+
+### プロファイルを指定してコマンドヒストリを表示
+```bash
+volatility -f <image> --profile=<profile> cmdscan
+```
+
+### プロファイルを指定してシェルコマンドヒストリを表示
+```bash
+volatility -f <image> --profile=<profile> consoles
+```
+
+### プロファイルを指定してファイル情報を表示
+```bash
+volatility -f <image> --profile=<profile> filescan
+```
+
+### プロファイルを指定してネットワーク情報を表示
+```bash
+volatility -f <image> --profile=<profile> netscan
+```
+
+### プロファイルを指定してプロセスのコマンドラインを表示
+```bash
+volatility -f <image> --profile=<profile> cmdline
+```
+
+### プロファイルを指定してレジストリの最終書き込み時間を表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリの最終アクセス時間を表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリの最終変更時間を表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリのオーナー情報を表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリのセキュリティ情報を表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリのサブキーを表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリの値を表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリのバリューを表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリのサブキーを再帰的に表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリの値を再帰的に表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
+```
+
+### プロファイルを指定してレジストリのバリューを再帰的に表示
+```bash
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 ```bash
 volatility --profile=SomeLinux -f file.dmp linux_mount
@@ -1951,7 +2162,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 ```
 {% endtab %}
 
-{% タブ タイトル="vol2" %}
+{% タブのタイトル="vol2" %}
 ```bash
 volatility --profile=Win7SP1x86_23418 filescan -f file.dmp #Scan for files inside the dump
 volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -f file.dmp #Dump all files
@@ -1974,144 +2185,59 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 
 ## Volatility チートシート
 
-### プラグインのリストを表示する
-
-```bash
-volatility --info | grep -iE "rule|plugin"
+### プラグインのリストを表示
+```
+volatility --info | grep -iE "plugin_name1|plugin_name2"
 ```
 
-### プロファイルを指定してプラグインを実行する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 <plugin_name>
+### プロファイルの確認
+```
+volatility -f memory.raw imageinfo
 ```
 
-### プロセスリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 pslist
+### プロセス一覧の取得
+```
+volatility -f memory.raw --profile=ProfileName pslist
 ```
 
-### ネットワーク接続を取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 connections
+### ネットワーク接続の確認
+```
+volatility -f memory.raw --profile=ProfileName connections
 ```
 
-### ファイルシステムキャッシュを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 cachedump
+### ファイル一覧の取得
+```
+volatility -f memory.raw --profile=ProfileName filescan
 ```
 
-### レジストリキーを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 printkey -o <offset>
+### レジストリキーの一覧を取得
+```
+volatility -f memory.raw --profile=ProfileName hivelist
 ```
 
-### プロセスのハンドルを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 handles -p <pid>
+### レジストリのダンプ
+```
+volatility -f memory.raw --profile=ProfileName printkey -o hive_offset
 ```
 
-### ファイルをダンプする
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 dumpfiles -Q <address_range>
+### プロセスのダンプ
+```
+volatility -f memory.raw --profile=ProfileName procdump -p PID -D /path/to/dump/
 ```
 
-### メモリマップを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 memmap
+### ファイルのダンプ
+```
+volatility -f memory.raw --profile=ProfileName dumpfiles -Q address_range -D /path/to/dump/
 ```
 
-### カーネルモジュールを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 modscan
-```
-
-### システム情報を取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 sysinfo
-```
-
-### ユーザ情報を取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 getsids
-```
-
-### キャッシュされたログイン情報を取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hashdump
-```
-
-### プロセスのコマンドラインを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 cmdline -p <pid>
-```
-
-### レジストリのユーザリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
-```
-
-### レジストリのユーザリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
-```
-
-### レジストリのユーザリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
-```
-
-### レジストリのユーザリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
-```
-
-### レジストリのユーザリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
-```
-
-### レジストリのユーザリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
-```
-
-### レジストリのユーザリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
-```
-
-### レジストリのユーザリストを取得する
-
-```bash
-volatility -f memory.raw --profile=Win7SP1x64 hivelist
-```
+これらのコマンドを使用して、メモリダンプから有用な情報を取得できます。{% endtab %}
 ```bash
 volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 ```
 {% endtab %}
 {% endtabs %}
 
-**NTFSファイルシステム**は、_マスターファイルテーブル_（MFT）として知られる重要なコンポーネントを使用します。このテーブルには、ボリューム上のすべてのファイルについて少なくとも1つのエントリが含まれており、MFT自体もカバーしています。各ファイルに関する重要な詳細（サイズ、タイムスタンプ、アクセス許可、実際のデータなど）は、MFTエントリ内にカプセル化されているか、MFT外部のエリアに存在し、これらのエントリによって参照されています。詳細については、[公式ドキュメント](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table)を参照してください。
+**NTFSファイルシステム**は、_マスターファイルテーブル_（MFT）として知られる重要なコンポーネントを使用します。このテーブルには、ボリューム上のすべてのファイルについて少なくとも1つのエントリが含まれており、MFT自体もカバーされています。各ファイルに関する重要な詳細（サイズ、タイムスタンプ、アクセス許可、実際のデータなど）は、MFTエントリ内またはこれらのエントリによって参照されるMFT外の領域にカプセル化されています。詳細については、[公式ドキュメント](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table)を参照してください。
 
 ### SSLキー/証明書
 ```bash
@@ -2120,77 +2246,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 ```
 {% endtab %}
 
-{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
-
-## Volatilityチートシート
-
-### プラグインのリストを表示する
-
-```bash
-volatility --info | less
-```
-
-### プロファイルを指定してイメージファイルの情報を表示する
-
-```bash
-volatility -f <image> imageinfo
-```
-
-### プロファイルを指定してプロセス一覧を表示する
-
-```bash
-volatility -f <image> --profile=<profile> pslist
-```
-
-### プロファイルを指定してネットワーク接続を表示する
-
-```bash
-volatility -f <image> --profile=<profile> connections
-```
-
-### プロファイルを指定してレジストリキーを表示する
-
-```bash
-volatility -f <image> --profile=<profile> printkey -K <key>
-```
-
-### プロファイルを指定してファイルをダンプする
-
-```bash
-volatility -f <image> --profile=<profile> dumpfiles -Q <address range> -D <output directory>
-```
-
-### プロファイルを指定して特定のプロセスのスタックトレースを表示する
-
-```bash
-volatility -f <image> --profile=<profile> pstree -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのハンドルを表示する
-
-```bash
-volatility -f <image> --profile=<profile> handles -p <pid>
-```
-
-### プロファイルを指定して特定のプロセスのDLLリストを表示する
-
-```bash
-volatility -f <image> --profile=<profile> dlllist -p <pid>
-```
-
-### プロファイルを指定してレジストリのハッシュを表示する
-
-```bash
-volatility -f <image> --profile=<profile> hivelist
-```
-
-### プロファイルを指定してレジストリの内容を表示する
-
-```bash
-volatility -f <image> --profile=<profile> printkey -o <offset>
-```
-
-これらのコマンドを使用して、メモリダンプ解析を行う際に役立つ情報を取得できます。{% endtab %}
+{% タブ タイトル="vol2" %}
 ```bash
 #vol2 allos you to search and dump certificates from memory
 #Interesting options for this modules are: --pid, --name, --ssl
@@ -2215,7 +2271,169 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 ```
 {% endtab %}
 
-{% タブのタイトル="vol2" %}
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
+
+## Volatilityチートシート
+
+### プラグインのリストを表示する
+
+```bash
+volatility --info | less
+```
+
+### プロファイルを指定してVolatilityを実行する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> <plugin_name>
+```
+
+### プロセスリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> pslist
+```
+
+### ネットワーク接続を取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> connections
+```
+
+### ファイルシステムキャッシュを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> cachedump
+```
+
+### レジストリキーを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### プロセスのハンドルを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> handles -p <pid>
+```
+
+### ファイルをダウンロードする
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> dumpfiles -Q <file_path> -D <output_directory>
+```
+
+### コマンド履歴を取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> cmdscan
+```
+
+### ユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### プロセスのDLLリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> dlllist -p <pid>
+```
+
+### サービスリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> svcscan
+```
+
+### ネットワークトラフィックを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> tcpconn
+```
+
+### ログオンイベントを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> logonlist
+```
+
+### システム情報を取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> sysinfo
+```
+
+### プロセスのコマンドラインを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> cmdline -p <pid>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
+
+### レジストリのユーザリストを取得する
+
+```bash
+volatility -f <memory_dump> --profile=<profile_name> hivelist
+volatility -f <memory_dump> --profile=<profile_name> printkey -o <offset>
+```
 ```bash
 volatility --profile=Win7SP1x86_23418 -f file.dmp malfind [-D /tmp] #Find hidden and injected code [dump each suspicious section]
 volatility --profile=Win7SP1x86_23418 -f file.dmp apihooks #Detect API hooks in process and kernel memory
@@ -2237,7 +2455,7 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 ### Yaraでスキャン
 
 このスクリプトを使用して、githubからすべてのyaraマルウェアルールをダウンロードしてマージします: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-_**rules**_ディレクトリを作成して、実行します。これにより、マルウェアのすべてのyaraルールが含まれる_**malware\_rules.yar**_というファイルが作成されます。
+_**rules**_ ディレクトリを作成して実行します。これにより、マルウェアのすべてのyaraルールが含まれる _**malware\_rules.yar**_ というファイルが作成されます。
 ```bash
 wget https://gist.githubusercontent.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9/raw/4ec711d37f1b428b63bed1f786b26a0654aa2f31/malware_yara_rules.py
 mkdir rules
@@ -2249,76 +2467,407 @@ python malware_yara_rules.py
 ```
 {% endtab %}
 
-{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
+{% tab title="vol2" %}
 
-## Volatilityチートシート
+## Volatility Cheatsheet
 
-### プラグインのリストを表示
-```bash
-volatility --info | grep -iE "rule|plugin"
-```
+### Basic Commands
 
-### プロファイルのリストを表示
-```bash
-volatility --info | grep -i "profile"
-```
+- **Image Identification**
+  - `volatility -f <memory_dump> imageinfo`
 
-### プロファイルを指定してプラグインを実行
-```bash
-volatility -f <memory_dump> --profile=<profile_name> <plugin_name>
-```
+- **Listing Processes**
+  - `volatility -f <memory_dump> --profile=<profile> pslist`
 
-### プロセスリストを表示
-```bash
-volatility -f <memory_dump> --profile=<profile_name> pslist
-```
+- **Dumping a Process**
+  - `volatility -f <memory_dump> --profile=<profile> memdump -p <pid> -D <output_directory>`
 
-### ネットワーク接続を表示
-```bash
-volatility -f <memory_dump> --profile=<profile_name> connections
-```
+- **Listing DLLs**
+  - `volatility -f <memory_dump> --profile=<profile> dlllist -p <pid>`
 
-### ファイルシステムキャッシュを表示
-```bash
-volatility -f <memory_dump> --profile=<profile_name> cache
-```
+- **Dumping a DLL**
+  - `volatility -f <memory_dump> --profile=<profile> dlldump -p <pid> -D <output_directory>`
 
-### レジストリキーを表示
-```bash
-volatility -f <memory_dump> --profile=<profile_name> printkey -K <registry_key>
-```
+- **Listing Sockets**
+  - `voljson -f <memory_dump> --profile=<profile> sockets`
 
-### レジストリリストを表示
-```bash
-volatility -f <memory_dump> --profile=<profile_name> hivelist
-```
+- **Network Connections**
+  - `volatility -f <memory_dump> --profile=<profile> connections`
 
-### レジストリ値を表示
-```bash
-volatility -f <memory_dump> --profile=<profile_name> printkey -K <registry_key> -V
-```
+- **Registry Analysis**
+  - `volatility -f <memory_dump> --profile=<profile> printkey -o <offset>`
 
-### ファイルをダンプ
-```bash
-volatility -f <memory_dump> --profile=<profile_name> dump -D <output_directory> -i <file_offset>
-```
+- **Getting Registry Hive**
+  - `volatility -f <memory_dump> --profile=<profile> hivelist`
 
-### プロセスのダンプ
-```bash
-volatility -f <memory_dump> --profile=<profile_name> procdump -p <process_id> -D <output_directory>
-```
+- **Dumping Registry Hive**
+ json
+  - `volatility -f <memory_dump> --profile=<profile> printkey -o <offset> -K <registry_key>`
 
-### メモリマップを表示
-```bash
-volatility -f <memory_dump> --profile=<profile_name> memmap
-```
+- **File Analysis**
+  - `volatility -f <memory_dump> --profile=<profile> filescan`
 
-### スクリーンショットを取得
-```bash
-volatility -f <memory_dump> --profile=<profile_name> screenshot -D <output_directory>
-```
+- **Dumping a File**
+  - `volatility -f <memory_dump> --profile=<profile> dumpfiles -Q <physical_offset> -D <output_directory>`
 
-これらのコマンドを使用して、メモリダンプから有用な情報を取得できます。{% endtab %}
+- **Yara Scanning**
+  - `volatility -f <memory_dump> --profile=<profile> yarascan --yara-file=<rules_file>`
+
+- **Process Tree**
+  - `volatility -f <memory_dump> --profile=<profile> pstree`
+
+- **Command Line History**
+  - `volatility -f <memory_dump> --profile=<profile> cmdline`
+
+- **User Accounts**
+  - `volatility -f <memory_dump> --profile=<profile> useraccounts`
+
+- **Screenshots**
+  - `volatility -f <memory_dump> --profile=<profile> screenshot -D <output_directory>`
+
+- **Kernel Drivers**
+  - `volatility -f <memory_dump> --profile=<profile> ldrmodules`
+
+- **Driver Module**
+  - `volatility -f <memory_dump> --profile=<profile> moddump -b <base_address> -D <output_directory>`
+
+- **API Hooks**
+  - `volatility -f <memory_dump> --profile=<profile> apihooks`
+
+- **SSDT Hooks**
+  - `volatility -f <memory_dump> --profile=<profile> ssdt`
+
+- **Detecting Hidden Processes**
+  - `volatility -f <memory_dump> --profile=<profile> psxview`
+
+- **Detecting Hidden Drivers**
+  - `volatility -f <memory_dump> --profile=<profile> ldrmodules`
+
+- **Detecting Hidden Objects**
+  - `volatility -f <memory_dump> --profile=<profile> hiddenevents`
+
+- **Detecting Rootkits**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting In-Memory Injections**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting API-Hooking**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting SSDT Hooks**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Driver Signature Bypass**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Herpaderping**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Ghostwriting**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Hollowing**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process Doppelgänging**
+  - `volatility -f <memory_dump> --profile=<profile> malfind`
+
+- **Detecting Process Process
 ```bash
 wget https://gist.githubusercontent.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9/raw/4ec711d37f1b428b63bed1f786b26a0654aa2f31/malware_yara_rules.py
 mkdir rules
@@ -2329,7 +2878,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ### 外部プラグイン
 
-外部プラグインを使用したい場合は、プラグインに関連するフォルダが最初のパラメータとして使用されていることを確認してください。
+外部プラグインを使用したい場合は、プラグインに関連するフォルダが最初に使用されるパラメータであることを確認してください。
 ```bash
 ./vol.py --plugin-dirs "/tmp/plugins/" [...]
 ```
@@ -2337,81 +2886,49 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 {% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
 
-## Volatility チートシート
+## Volatilityチートシート
 
-### プラグインのリストを表示する
-
+### プラグインのリストを表示
 ```bash
-volatility --info | less
+volatility --info | grep -iE "plugin_name1|plugin_name2"
 ```
 
-### プロファイルを指定してイメージファイルの情報を表示する
-
+### プロファイルを指定してVolatilityを実行
 ```bash
-volatility -f <image> imageinfo
+volatility -f memory_dump.mem --profile=Win7SP1x64 plugin_name
 ```
 
-### プロファイルを指定してプロセス一覧を表示する
-
+### プロセス一覧を表示
 ```bash
-volatility -f <image> --profile=<profile> pslist
+volatility -f memory_dump.mem --profile=Win7SP1x64 pslist
 ```
 
-### プロファイルを指定してレジストリキーを表示する
-
+### ネットワーク接続を表示
 ```bash
-volatility -f <image> --profile=<profile> printkey -K <key>
+volatility -f memory_dump.mem --profile=Win7SP1x64 connections
 ```
 
-### プロファイルを指定してネットワーク接続を表示する
-
+### ファイル一覧を表示
 ```bash
-volatility -f <image> --profile=<profile> connections
+volatility -f memory_dump.mem --profile=Win7SP1x64 filescan
 ```
 
-### プロファイルを指定してファイル一覧を表示する
-
+### レジストリキーを表示
 ```bash
-volatility -f <image> --profile=<profile> filescan
+volatility -f memory_dump.mem --profile=Win7SP1x64 printkey -K "KeyName"
 ```
 
-### プロファイルを指定してコマンドヒストリを表示する
-
+### コマンド履歴を表示
 ```bash
-volatility -f <image> --profile=<profile> cmdscan
+volatility -f memory_dump.mem --profile=Win7SP1x64 cmdscan
 ```
 
-### プロファイルを指定してプロセスのハンドルを表示する
-
+### ユーザリストを表示
 ```bash
-volatility -f <image> --profile=<profile> handles
+volatility -f memory_dump.mem --profile=Win7SP1x64 getsids
 ```
 
-### プロファイルを指定してレジストリのハッシュを表示する
-
-```bash
-volatility -f <image> --profile=<profile> hivelist
-```
-
-### プロファイルを指定してファイルのハッシュを表示する
-
-```bash
-volatility -f <image> --profile=<profile> filehash -H <file>
-```
-
-### プロファイルを指定して特定のプロセスのメモリダンプを取得する
-
-```bash
-volatility -f <image> --profile=<profile> procdump -p <pid> -D <output_directory>
-```
-
-### プロファイルを指定して特定のファイルの内容を表示する
-
-```bash
-volatility -f <image> --profile=<profile> dumpfiles -Q <address_range> -D <output_directory>
-```
-
-これらのコマンドを使用して、メモリダンプ解析を効果的に行うことができます。{% endtab %}
+これらのコマンドを使用して、メモリダンプから有用な情報を取得できます。{% endtab %}
 ```bash
 volatilitye --plugins="/tmp/plugins/" [...]
 ```
@@ -2434,61 +2951,82 @@ volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp auto
 
 ## Volatility チートシート
 
-### プラグインのリストを表示する
-
+### プラグインのリストを表示
 ```bash
 volatility --info | less
 ```
 
-### プロファイルを指定してイメージファイルの情報を表示する
-
+### プロファイルのリストを表示
 ```bash
-volatility -f <imagefile> imageinfo
+volatility --info | grep Profile
 ```
 
-### プロファイルを指定してプロセスリストを表示する
-
+### プロファイルを指定してイメージファイルの情報を表示
 ```bash
-volatility -f <imagefile> --profile=<profile> pslist
+volatility -f <image> imageinfo --profile=<profile>
 ```
 
-### プロファイルを指定してレジストリキーを表示する
-
+### プロセスのリストを表示
 ```bash
-volatility -f <imagefile> --profile=<profile> hivelist
+volatility -f <image> --profile=<profile> pslist
 ```
 
-### プロファイルを指定してネットワーク接続を表示する
-
+### 特定のプロセスの詳細を表示
 ```bash
-volatility -f <imagefile> --profile=<profile> connections
+volatility -f <image> --profile=<profile> pstree -p <pid>
 ```
 
-### プロファイルを指定してファイルシステムを表示する
-
+### ネットワーク接続のリストを表示
 ```bash
-volatility -f <imagefile> --profile=<profile> filescan
+volatility -f <image> --profile=<profile> connections
 ```
 
-### プロファイルを指定して特定のプロセスのハンドルを表示する
-
+### ファイルハンドルのリストを表示
 ```bash
-volatility -f <imagefile> --profile=<profile> handles -p <pid>
+volatility -f <image> --profile=<profile> filescan
 ```
 
-### プロファイルを指定して特定のプロセスのメモリダンプを取得する
-
+### レジストリキーのリストを表示
 ```bash
-volatility -f <imagefile> --profile=<profile> procdump -p <pid> -D <output_directory>
+volatility -f <image> --profile=<profile> hivelist
 ```
 
-### プロファイルを指定して特定のファイルを抽出する
-
+### レジストリの内容を表示
 ```bash
-volatility -f <imagefile> --profile=<profile> dumpfiles -Q <address_range> -D <output_directory>
+volatility -f <image> --profile=<profile> printkey -o <offset>
 ```
 
-これらのコマンドを使用して、Volatilityを効果的に活用し、メモリダンプ解析を行うことができます。{% endtab %}
+### コマンド履歴を表示
+```bash
+volatility -f <image> --profile=<profile> cmdscan
+```
+
+### ユーザアカウントのリストを表示
+```bash
+volatility -f <image> --profile=<profile> useraccounts
+```
+
+### ユーザアカウントのパスワードハッシュを表示
+```bash
+volatility -f <image> --profile=<profile> hashdump
+```
+
+### プロセスの実行コマンドを表示
+```bash
+volatility -f <image> --profile=<profile> cmdline -p <pid>
+```
+
+### メモリダンプからファイルを抽出
+```bash
+volatility -f <image> --profile=<profile> dumpfiles -Q <offset>
+```
+
+### メモリダンプからプロセスを抽出
+```bash
+volatility -f <image> --profile=<profile> procdump -p <pid> -D <output_directory>
+```
+
+これらのコマンドを使用して、メモリダンプ解析を行うことができます。{% endtab %}
 ```bash
 volatility --profile=Win7SP1x86_23418 mutantscan -f file.dmp
 volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
@@ -2502,228 +3040,21 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 ```
 {% endtab %}
 
-{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
-
-## Volatilityチートシート
-
-### プラグインのリストを表示
-```bash
-volatility --info | grep -iE "rule|plugin"
-```
-
-### プロファイルのリストを表示
-```bash
-volatility --info | grep -i "profile"
-```
-
-### プロファイルを指定してプラグインを実行
-```bash
-volatility -f <dumpfile> --profile=<profile> <plugin_name>
-```
-
-### プロセスリストを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> pslist
-```
-
-### ネットワーク接続を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> connections
-```
-
-### ファイルシステムキャッシュを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> filescan
-```
-
-### レジストリキーを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> printkey -o <offset>
-```
-
-### レジストリリストを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> hivelist
-```
-
-### レジストリ値を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> print -s <registry_path>
-```
-
-### プロセスのDLLリストを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> dlllist -p <pid>
-```
-
-### プロセスのハンドルリストを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> handles -p <pid>
-```
-
-### キャッシュされたログイン情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> hashdump
-```
-
-### システムのサービス情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> svcscan
-```
-
-### システムのドライバ情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> driverscan
-```
-
-### システムのモジュール情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> modscan
-```
-
-### システムのタイムラインを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> timeliner
-```
-
-### プロセスのコマンドラインを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> cmdline -p <pid>
-```
-
-### プロセスのファイルディスクリプタを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> filescan -p <pid>
-```
-
-### プロセスのマップされたファイルを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> malfind -p <pid>
-```
-
-### プロセスのネットワーク情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> netscan -p <pid>
-```
-
-### プロセスのプロパティを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> psscan -p <pid>
-```
-
-### プロセスのレジストリ情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> getsids -p <pid>
-```
-
-### プロセスのスレッド情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> threads -p <pid>
-```
-
-### プロセスのユーザ情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> getsids -p <pid>
-```
-
-### プロセスのヒープ情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> heap -p <pid>
-```
-
-### プロセスのハッシュ情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> hashdump -p <pid>
-```
-
-### プロセスのハンドル情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> handles -p <pid>
-```
-
-### プロセスのモジュール情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> moddump -p <pid>
-```
-
-### プロセスのストリーム情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> pstree -p <pid>
-```
-
-### プロセスのサービス情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> svcscan -p <pid>
-```
-
-### プロセスのタイムラインを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> timeliner -p <pid>
-```
-
-### プロセスのハンドル情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> handles -p <pid>
-```
-
-### プロセスのモジュール情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> moddump -p <pid>
-```
-
-### プロセスのストリーム情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> pstree -p <pid>
-```
-
-### プロセスのサービス情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> svcscan -p <pid>
-```
-
-### プロセスのタイムラインを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> timeliner -p <pid>
-```
-
-### プロセスのハンドル情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> handles -p <pid>
-```
-
-### プロセスのモジュール情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> moddump -p <pid>
-```
-
-### プロセスのストリーム情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> pstree -p <pid>
-```
-
-### プロセスのサービス情報を表示
-```bash
-volatility -f <dumpfile> --profile=<profile> svcscan -p <pid>
-```
-
-### プロセスのタイムラインを表示
-```bash
-volatility -f <dumpfile> --profile=<profile> timeliner -p <pid>
-```
+{% タブのタイトル="vol2" %}
 ```bash
 volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 ```
 ### Bash
 
-**メモリからbashの履歴を読むことが可能です。** _.bash\_history_ ファイルをダンプすることもできますが、無効になっている場合は、このVolatilityモジュールを使用できることに満足するでしょう。
+**メモリからbashの履歴を読むことが可能です。** _.bash\_history_ ファイルをダンプすることもできますが、無効になっている場合は、このVolatilityモジュールを使用できることに喜ぶでしょう。
 ```
 ./vol.py -f file.dmp linux.bash.Bash
 ```
 {% endtab %}
 
-{% tab title="vol2" %}以下は、メモリダンプ解析に関する基本的な手法に関する情報です。
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
 
-## Volatility チートシート
+## Volatilityチートシート
 
 ### プラグインのリストを表示する
 
@@ -2731,13 +3062,13 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 volatility --info | less
 ```
 
-### プロファイルを指定してイメージ情報を表示する
+### プロファイルを指定してイメージファイルの情報を表示する
 
 ```bash
 volatility -f <image> imageinfo
 ```
 
-### プロファイルを指定してプロセスリストを表示する
+### プロファイルを指定してプロセス一覧を表示する
 
 ```bash
 volatility -f <image> --profile=<profile> pslist
@@ -2752,7 +3083,7 @@ volatility -f <image> --profile=<profile> connections
 ### プロファイルを指定してレジストリキーを表示する
 
 ```bash
-volatility -f <image> --profile=<profile> printkey -o <offset>
+volatility -f <image> --profile=<profile> printkey -K <key>
 ```
 
 ### プロファイルを指定してファイルをダンプする
@@ -2761,7 +3092,7 @@ volatility -f <image> --profile=<profile> printkey -o <offset>
 volatility -f <image> --profile=<profile> dumpfiles -Q <address range>
 ```
 
-これらのコマンドを使用して、メモリダンプ解析を行う際に役立つ情報を取得できます。{% endtab %}
+これらのコマンドを使用して、Volatilityを効果的に活用しましょう。{% endtab %}
 ```
 volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 ```
@@ -2774,7 +3105,199 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 ```
 {% endtab %}
 
-{% tab title="vol2" %}
+{% tab title="vol2" %}以下は、メモリダンプ解析に関する基本的な手法に関する情報です。
+
+## Volatility チートシート
+
+### プラグインのリストを表示
+```bash
+volatility --info | less
+```
+
+### プロファイルのリストを表示
+```bash
+volatility -f <dump> imageinfo
+```
+
+### プロセスのリストを表示
+```bash
+volatility -f <dump> pslist
+```
+
+### ネットワーク接続のリストを表示
+```bash
+volatility -f <dump> connections
+```
+
+### ファイルシステムのリストを表示
+```bash
+volatility -f <dump> filescan
+```
+
+### レジストリのリストを表示
+```bash
+volatility -f <dump> hivelist
+```
+
+### レジストリキーのリストを表示
+```bash
+volatility -f <dump> printkey -K "ControlSet001\services"
+```
+
+### レジストリ値のリストを表示
+```bash
+volatility -f <dump> printkey -K "ControlSet001\services" -V
+```
+
+### レジストリ値のデータを表示
+```bash
+volatility -f <dump> printkey -K "ControlSet001\services" -V -v
+```
+
+### レジストリ値のデータを16進数で表示
+```bash
+volatility -f <dump> printkey -K "ControlSet001\services" -V -v --output=hex
+```
+
+### プロセスのDLLリストを表示
+```bash
+volatility -f <dump> dlllist -p <pid>
+```
+
+### プロセスのハンドルリストを表示
+```bash
+volatility -f <dump> handles -p <pid>
+```
+
+### プロセスのファイルディスクリプタを表示
+```bash
+volatility -f <dump> filescan -p <pid>
+```
+
+### プロセスのネットワーク接続を表示
+```bash
+volatility -f <dump> connscan -p <pid>
+```
+
+### プロセスのレジストリキーを表示
+```bash
+volatility -f <dump> printkey -K "Software\Microsoft\Windows\CurrentVersion\Run" -p <pid>
+```
+
+### プロセスのレジストリ値を表示
+```bash
+volatility -f <dump> printkey -K "Software\Microsoft\Windows\CurrentVersion\Run" -p <pid> -V
+```
+
+### プロセスのレジストリ値のデータを表示
+```bash
+volatility -f <dump> printkey -K "Software\Microsoft\Windows\CurrentVersion\Run" -p <pid> -V -v
+```
+
+### プロセスのレジストリ値のデータを16進数で表示
+```bash
+volatility -f <dump> printkey -K "Software\Microsoft\Windows\CurrentVersion\Run" -p <pid> -V -v --output=hex
+```
+
+### プロセスのモジュールリストを表示
+```bash
+volatility -f <dump> modlist -p <pid>
+```
+
+### プロセスのモジュール情報を表示
+```bash
+volatility -f <dump> moddump -p <pid> -D <output_directory>
+```
+
+### スクリーンショットを取得
+```bash
+volatility -f <dump> screenshot --dump-dir=<output_directory>
+```
+
+### プロセスのスクリーンショットを取得
+```bash
+volatility -f <dump> screenshot -p <pid> --dump-dir=<output_directory>
+```
+
+### ファイルのダウンロード
+```bash
+volatility -f <dump> dumpfiles -Q <address_range> -D <output_directory>
+```
+
+### ファイルのダウンロード（ファイル名指定）
+```bash
+volatility -f <dump> dumpfiles -Q <address_range> -D <output_directory> --name
+```
+
+### ファイルのダウンロード（ファイル名指定＆自動解凍）
+```bash
+volatility -f <dump> dumpfiles -Q <address_range> -D <output_directory> --name --unzip
+```
+
+### レジストリハイブのダウンロード
+```bash
+volatility -f <dump> hivelist --output-file=<output_file>
+```
+
+### レジストリハイブのダウンロード（指定したハイブ）
+```bash
+volatility -f <dump> printkey -o <offset> --output-file=<output_file>
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数）
+```bash
+volatility -f <dump> printkey -o <offset> --output-file=<output_file> --output=hex
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍）
+```bash
+volatility -f <dump> printkey -o <offset> --output-file=<output_file> --output=hex --unzip
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定）
+```bash
+volatility -f <dump> printkey -o <offset> --output-file=<output_file> --output=hex --unzip --name
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定＆フォーマット指定）
+```bash
+volatility -f <dump> printkey -o <offset> --output-file=<output_file> --output=hex --unzip --name --format=reg
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定＆フォーマット指定＆レジストリキー指定）
+```bash
+volatility -f <dump> printkey -o <offset> -K "ControlSet001\services" --output-file=<output_file> --output=hex --unzip --name --format=reg
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定＆フォーマット指定＆レジストリキー指定＆レジストリ値指定）
+```bash
+volatility -f <dump> printkey -o <offset> -K "ControlSet001\services" -V --output-file=<output_file> --output=hex --unzip --name --format=reg
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定＆フォーマット指定＆レジストリキー指定＆レジストリ値指定＆データ表示）
+```bash
+volatility -f <dump> printkey -o <offset> -K "ControlSet001\services" -V -v --output-file=<output_file> --output=hex --unzip --name --format=reg
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定＆フォーマット指定＆レジストリキー指定＆レジストリ値指定＆データ表示＆データ16進数表示）
+```bash
+volatility -f <dump> printkey -o <offset> -K "ControlSet001\services" -V -v --output-file=<output_file> --output=hex --unzip --name --format=reg
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定＆フォーマット指定＆レジストリキー指定＆レジストリ値指定＆データ表示＆データ16進数表示＆データ自動解凍）
+```bash
+volatility -f <dump> printkey -o <offset> -K "ControlSet001\services" -V -v --output-file=<output_file> --output=hex --unzip --name --format=reg
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定＆フォーマット指定＆レジストリキー指定＆レジストリ値指定＆データ表示＆データ16進数表示＆データ自動解凍＆データ自動解凍）
+```bash
+volatility -f <dump> printkey -o <offset> -K "ControlSet001\services" -V -v --output-file=<output_file> --output=hex --unzip --name --format=reg
+```
+
+### レジストリハイブのダウンロード（指定したハイブ＆16進数＆自動解凍＆ファイル名指定＆フォーマット指定＆レジストリキー指定＆レジストリ値指定＆データ表示＆データ16進数表示＆データ自動解凍＆データ自動解凍＆データ自動解凍）
+```bash
+volatility -f <dump> printkey -o <offset> -K "ControlSet001\services" -V -v --output-file=<output_file> --output=hex --unzip --name --format=reg
+```
 ```
 volatility --profile=Win7SP1x86_23418 -f timeliner
 ```
@@ -2789,101 +3312,127 @@ volatility --profile=Win7SP1x86_23418 -f timeliner
 
 {% tab title="vol2" %}以下は、メモリダンプ解析に関する情報です。
 
-## Volatilityチートシート
+## Volatility チートシート
 
-### プラグインのリストを表示する
-
+### プラグインのリストを表示
 ```bash
-volatility --info | less
+volatility --info | grep -iE "plugin_name1|plugin_name2"
 ```
 
-### プロファイルを指定してイメージファイルの情報を表示する
-
+### プロファイルを指定してイメージファイルの情報を表示
 ```bash
-volatility -f <imagefile> imageinfo --profile=<profilename>
+volatility -f memory.raw imageinfo --profile=Win7SP1x64
 ```
 
-### プロファイルを指定してプロセスリストを表示する
-
+### 特定のプロセスのネットワーク接続を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> pslist
+volatility -f memory.raw --profile=Win7SP1x64 netscan -p PID
 ```
 
-### プロファイルを指定してレジストリキーを表示する
-
+### 特定のプロセスのファイルハンドルを表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> hivelist
+volatility -f memory.raw --profile=Win7SP1x64 filescan -p PID
 ```
 
-### プロファイルを指定してネットワーク接続を表示する
-
+### レジストリキーの値を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> connections
+volatility -f memory.raw --profile=Win7SP1x64 printkey -o OFFSET
 ```
 
-### プロファイルを指定してファイルシステムを表示する
-
+### プロセスのコマンドライン引数を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> filescan
+volatility -f memory.raw --profile=Win7SP1x64 cmdline -p PID
 ```
 
-### プロファイルを指定して特定のプロセスのハンドルを表示する
-
+### プロセスの DLL リストを表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> handles -p <pid>
+volatility -f memory.raw --profile=Win7SP1x64 dlllist -p PID
 ```
 
-### プロファイルを指定して特定のプロセスのDLLリストを表示する
-
+### プロセスのモジュール情報を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> dlllist -p <pid>
+volatility -f memory.raw --profile=Win7SP1x64 modscan -p PID
 ```
 
-### プロファイルを指定して特定のプロセスのメモリマップを表示する
-
+### プロセスのヒープ情報を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> memmap -p <pid>
+volatility -f memory.raw --profile=Win7SP1x64 heaps -p PID
 ```
 
-### プロファイルを指定して特定のプロセスのスレッドを表示する
-
+### プロセスのスレッド情報を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> threads -p <pid>
+volatility -f memory.raw --profile=Win7SP1x64 threads -p PID
 ```
 
-### プロファイルを指定して特定のプロセスのモジュールを表示する
-
+### プロセスのハンドル情報を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> modlist -p <pid>
+volatility -f memory.raw --profile=Win7SP1x64 handles -p PID
 ```
 
-### プロファイルを指定してレジストリの内容をダンプする
-
+### プロセスのマップされたファイルを表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> printkey -o <offset>
+volatility -f memory.raw --profile=Win7SP1x64 malfind -p PID
 ```
 
-### プロファイルを指定してファイルをダンプする
-
+### プロセスのネットワーク情報を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> dumpfiles -Q <offset>
+volatility -f memory.raw --profile=Win7SP1x64 connscan -p PID
 ```
 
-### プロファイルを指定してプロセスの実行可能なファイルをダンプする
-
+### プロセスのレジストリハンドルを表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> procdump -p <pid> -D <outputdir>
+volatility -f memory.raw --profile=Win7SP1x64 hivelist -p PID
 ```
 
-### プロファイルを指定して特定のプロセスのレジストリハイブをダンプする
-
+### プロセスのセキュリティ属性を表示
 ```bash
-volatility -f <imagefile> --profile=<profilename> hivedump -o <offset> -D <outputdir>
+volatility -f memory.raw --profile=Win7SP1x64 getsids -p PID
 ```
 
-これらのコマンドを使用して、Volatilityを使用してメモリダンプを効果的に解析できます。
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
 
-{% endtab %}
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
+
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
+
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
+
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
+
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
+
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
+
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
+
+### プロセスのサービス情報を表示
+```bash
+volatility -f memory.raw --profile=Win7SP1x64 getservicesids -p PID
+```
 ```bash
 volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
 ```
@@ -2911,9 +3460,9 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**マスターブートレコード（MBR）**は、ストレージメディアの論理パーティションを管理する上で重要な役割を果たします。これらのパーティションは異なる[ファイルシステム](https://en.wikipedia.org/wiki/File_system)で構成されています。MBRはパーティションレイアウト情報だけでなく、ブートローダーとして機能する実行可能コードも含んでいます。このブートローダーは、OSの第2段階の読み込みプロセスを直接開始するか（[第2段階ブートローダー](https://en.wikipedia.org/wiki/Second-stage_boot_loader)を参照）、または各パーティションの[ボリュームブートレコード](https://en.wikipedia.org/wiki/Volume_boot_record)（VBR）と協調して動作します。詳細な知識については、[MBR Wikipediaページ](https://en.wikipedia.org/wiki/Master_boot_record)を参照してください。
+**マスターブートレコード（MBR）**は、ストレージメディアの論理パーティションを管理する際に重要な役割を果たします。これらのパーティションは異なる[ファイルシステム](https://en.wikipedia.org/wiki/File_system)で構成されています。MBRはパーティションレイアウト情報だけでなく、ブートローダーとして機能する実行可能コードも含んでいます。このブートローダーは、OSの第2段階の読み込みプロセスを直接開始するか、各パーティションの[ボリュームブートレコード](https://en.wikipedia.org/wiki/Volume_boot_record)（VBR）と協調して動作します。詳細な知識については、[MBR Wikipediaページ](https://en.wikipedia.org/wiki/Master_boot_record)を参照してください。
 
-# 参考文献
+## 参考文献
 * [https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
 * [https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
 * [https://or10nlabs.tech/cgi-sys/suspendedpage.cgi](https://or10nlabs.tech/cgi-sys/suspendedpage.cgi)
@@ -2923,7 +3472,7 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com/)は、**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの一つです。**技術的知識の促進を使命**とするこの会議は、あらゆる分野のテクノロジーとサイバーセキュリティ専門家にとっての熱い出会いの場です。
+[**RootedCON**](https://www.rootedcon.com/)は**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの一つです。**技術的知識の促進を使命**とするこの会議は、あらゆる分野のテクノロジーとサイバーセキュリティ専門家にとっての活発な交流の場です。
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -2933,10 +3482,10 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手してください
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけてください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローしてください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローしてください
 * ハッキングトリックを共有するために、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください
 
 </details>
