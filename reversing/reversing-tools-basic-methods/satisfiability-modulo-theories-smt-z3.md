@@ -1,19 +1,19 @@
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue**me en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 
-Muy básicamente, esta herramienta nos ayudará a encontrar valores para variables que necesitan satisfacer algunas condiciones y calcularlos a mano sería muy molesto. Por lo tanto, puedes indicarle a Z3 las condiciones que las variables necesitan satisfacer y encontrará algunos valores (si es posible).
+Muy básicamente, esta herramienta nos ayudará a encontrar valores para variables que necesitan satisfacer algunas condiciones y calcularlos a mano sería muy molesto. Por lo tanto, puedes indicar a Z3 las condiciones que las variables deben satisfacer y encontrará algunos valores (si es posible).
 
 # Operaciones Básicas
 
@@ -52,7 +52,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## Impresión del Modelo
+## Imprimiendo el Modelo
 ```python
 from z3 import *
 
@@ -83,9 +83,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-## Números con signo/sin signo
+## Números Firmados/No Firmados
 
-Z3 ofrece versiones especiales firmadas de operaciones aritméticas donde importa si el **vector de bits se trata como con signo o sin signo**. En Z3Py, los operadores **<, <=, >, >=, /, % y >>** corresponden a las versiones **con signo**. Los operadores **sin signo** correspondientes son **ULT, ULE, UGT, UGE, UDiv, URem y LShR.**
+Z3 proporciona versiones especiales firmadas de operaciones aritméticas donde es importante si el **vector de bits se trata como firmado o no firmado**. En Z3Py, los operadores **<, <=, >, >=, /, % y >>** corresponden a las versiones **firmadas**. Los operadores **no firmados** correspondientes son **ULT, ULE, UGT, UGE, UDiv, URem y LShR**.
 ```python
 from z3 import *
 
@@ -105,9 +105,9 @@ solve(ULT(x, 0))
 ```
 ## Funciones
 
-**Funciones interpretadas** como la aritmética donde la **función +** tiene una **interpretación estándar fija** (suma dos números). Las **funciones no interpretadas** y las constantes son **máximamente flexibles**; permiten **cualquier interpretación** que sea **consistente** con las **restricciones** sobre la función o constante.
+Las **funciones interpretadas** como la aritmética donde la **función +** tiene una **interpretación estándar fija** (suma dos números). Las **funciones no interpretadas** y las constantes son **maximamente flexibles**; permiten **cualquier interpretación** que sea **consistente** con las **restricciones** sobre la función o constante.
 
-Ejemplo: f aplicada dos veces a x resulta en x de nuevo, pero f aplicada una vez a x es diferente de x.
+Ejemplo: aplicar f dos veces a x resulta en x nuevamente, pero aplicar f una vez a x es diferente de x.
 ```python
 from z3 import *
 
@@ -178,21 +178,21 @@ print_matrix(r)
 else:
 print "failed to solve"
 ```
-# Referencias
+## Referencias
 
 * [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

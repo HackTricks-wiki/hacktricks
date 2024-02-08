@@ -7,7 +7,7 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -22,7 +22,7 @@ Encuentra las vulnerabilidades que más importan para que puedas solucionarlas m
 
 ## Atacando Sistemas RFID con Proxmark3
 
-Lo primero que necesitas hacer es tener un [**Proxmark3**](https://proxmark.com) e [**instalar el software y sus dependencias**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Lo primero que necesitas es tener un [**Proxmark3**](https://proxmark.com) e [**instalar el software y sus dependencias**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
 ### Atacando MIFARE Classic 1KB
 
@@ -30,7 +30,7 @@ Tiene **16 sectores**, cada uno tiene **4 bloques** y cada bloque contiene **16B
 Para acceder a cada sector necesitas **2 claves** (**A** y **B**) que se almacenan en **el bloque 3 de cada sector** (sector trailer). El sector trailer también almacena los **bits de acceso** que dan los permisos de **lectura y escritura** en **cada bloque** utilizando las 2 claves.\
 2 claves son útiles para dar permisos de lectura si conoces la primera y de escritura si conoces la segunda (por ejemplo).
 
-Se pueden realizar varios ataques.
+Se pueden realizar varios ataques
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -67,15 +67,15 @@ Con esta información podrías intentar buscar información sobre la tarjeta y l
 
 ### Scripts
 
-El software de Proxmark3 viene con una lista predefinida de **scripts de automatización** que puedes utilizar para realizar tareas simples. Para obtener la lista completa, utiliza el comando `script list`. A continuación, utiliza el comando `script run`, seguido del nombre del script:
+El software de Proxmark3 viene con una lista predefinida de **scripts de automatización** que puedes utilizar para realizar tareas simples. Para recuperar la lista completa, utiliza el comando `script list`. A continuación, utiliza el comando `script run`, seguido del nombre del script:
 ```
 proxmark3> script run mfkeys
 ```
-Puedes crear un script para **fuzzear lectores de etiquetas**, copiando los datos de una **tarjeta válida** solo escribe un **script Lua** que **randomice** uno o más **bytes aleatorios** y verifica si el **lector se bloquea** con cualquier iteración.
+Puedes crear un script para **fuzzear lectores de etiquetas**, copiando los datos de una **tarjeta válida** solo escribe un **script Lua** que **aleatorice** uno o más **bytes** aleatorios y verifique si el **lector se bloquea** con cualquier iteración.
 
 <figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
+Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm_source=referral\&utm_campaign=hacktricks) hoy.
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -86,8 +86,8 @@ Encuentra las vulnerabilidades que más importan para que puedas solucionarlas m
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**oficial mercancía de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
