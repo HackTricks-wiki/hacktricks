@@ -14,54 +14,40 @@ Other ways to support HackTricks:
 
 </details>
 
-## Introduction
+## **Introduction**
 
-Firmware is a type of software that provides communication and control over a device’s hardware components. It’s the first piece of code that a device runs. Usually, it **boots the operating system** and provides very specific runtime services for programs by **communicating with various hardware components**. Most, if not all, electronic devices have firmware.
+Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
 
-Devices store firmware in **nonvolatile memory**, such as ROM, EPROM, or flash memory.
+## **Gathering Information**
 
-It’s important to **examine** the **firmware** and then attempt to **modify** it, because we can uncover many security issues during this process.
+**Gathering information** is a critical initial step in understanding a device's makeup and the technologies it uses. This process involves collecting data on:
 
-## **Information gathering and reconnaissance**
+- The CPU architecture and operating system it runs
+- Bootloader specifics
+- Hardware layout and datasheets
+- Codebase metrics and source locations
+- External libraries and license types
+- Update histories and regulatory certifications
+- Architectural and flow diagrams
+- Security assessments and identified vulnerabilities
 
-During this stage, collect as much information about the target as possible to understand its overall composition underlying technology. Attempt to gather the following:
+For this purpose, **open-source intelligence (OSINT)** tools are invaluable, as is the analysis of any available open-source software components through manual and automated review processes. Tools like [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore) offer free static analysis that can be leveraged to find potential issues.
 
-* Supported CPU architecture(s)
-* Operating system platform
-* Bootloader configurations
-* Hardware schematics
-* Datasheets
-* Lines-of-code (LoC) estimates
-* Source code repository location
-* Third-party components
-* Open source licenses (e.g. GPL)
-* Changelogs
-* FCC IDs
-* Design and data flow diagrams
-* Threat models
-* Previous penetration testing reports
-* Bug tracking tickets (e.g. Jira and bug bounty platforms such as BugCrowd or HackerOne)
+## **Acquiring the Firmware**
 
-Where possible, acquire data using open source intelligence (OSINT) tools and techniques. If open source software is used, download the repository and perform both manual as well as automated static analysis against the code base. Sometimes, open source software projects already use free static analysis tools provided by vendors that provide scan results such as [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore).
+Obtaining firmware can be approached through various means, each with its own level of complexity:
 
-## Getting the Firmware
-
-There are different ways with different difficulty levels to download the firmware
-
-* **Directly** from the development team, manufacturer/vendor or client
-* **Build from scratch** using walkthroughs provided by the manufacturer
-* From the **vendor's support site**
-* **Google dork** queries targeted towards binary file extensions and file sharing platforms such as Dropbox, Box, and Google drive
-  * It’s common to come across firmware images through customers who upload contents to forums, blogs, or comment on sites where they contacted the manufacturer to troubleshoot an issue and were given firmware via a zip or flash drive sent.
-  * Example: `intitle:"Netgear" intext:"Firmware Download"`
-* Download builds from exposed cloud provider storage locations such as Amazon Web Services (AWS) S3 buckets (with tools such as [https://github.com/sa7mon/S3Scanner](https://github.com/sa7mon/S3Scanner))
-* **Man-in-the-middle** (MITM) device communication during **updates**
-* Extract directly **from hardware** via **UART**, **JTAG**, **PICit**, etc.
-* Sniff **serial communication** within hardware components for **update server requests**
-* Via a **hardcoded endpoint** within the mobile or thick applications
-* **Dumping** firmware from the **bootloader** (e.g. U-boot) to flash storage or over the **network** via **tftp**
-* Removing the **flash chip** (e.g. SPI) or MCU from the board for offline analysis and data extraction (LAST RESORT).
-  * You will need a supported chip programmer for flash storage and/or the MCU.
+- **Directly** from the source (developers, manufacturers)
+- **Building** it from provided instructions
+- **Downloading** from official support sites
+- Utilizing **Google dork** queries for finding hosted firmware files
+- Accessing **cloud storage** directly, with tools like [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Intercepting **updates** via man-in-the-middle techniques
+- **Extracting** from the device through connections like **UART**, **JTAG**, or **PICit**
+- **Sniffing** for update requests within device communication
+- Identifying and using **hardcoded update endpoints**
+- **Dumping** from the bootloader or network
+- **Removing and reading** the storage chip, when all else fails, using appropriate hardware tools
 
 ## Analyzing the firmware
 
@@ -143,176 +129,109 @@ Files will be in "`squashfs-root`" directory afterwards.
 
 `$ ubidump.py <bin>`
 
-### Analyzing the Filesystem
 
-Now that you have the filesystem is time to start looking for bad practices such as:
+## Analyzing Firmware
 
-* Legacy **insecure network daemons** such as telnetd (sometimes manufactures rename binaries to disguise )
-* **Hardcoded credentials** (usernames, passwords, API keys, SSH keys, and backdoor variants )
-* **Hardcoded API** endpoints and backend server details
-* **Update server functionality** that could be used as an entry point
-* **Review uncompiled code and start up scripts** for remote code execution
-* **Extract compiled binaries** to be used for offline analysis with a disassembler for future steps
+Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
 
-Some **interesting things to look** for inside the firmware:
+### Initial Analysis Tools
 
-* etc/shadow and etc/passwd
-* list out the etc/ssl directory
-* search for SSL related files such as .pem, .crt, etc.
-* search for configuration files
-* look for script files
-* search for other .bin files
-* look for keywords such as admin, password, remote, AWS keys, etc.
-* search for common web servers used on IoT devices
-* search for common binaries such as ssh, tftp, dropbear, etc.
-* search for banned c functions
-* search for common command injection vulnerable functions
-* search for URLs, email addresses and IP addresses
-* and more…
+A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
 
-Tools that search for this kind of information (even if you always should take a manual look and get comfortable with the filesystem structure, the tools can help you finding **hidden things**):
+```bash
+file <bin>  
+strings -n8 <bin> 
+strings -tx <bin> #prints offsets in hexadecimal
+hexdump -C -n 512 <bin> > hexdump.out  
+hexdump -C <bin> | head #useful for finding signatures in the header
+fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
+```
 
-* [**LinPEAS**](https://github.com/carlospolop/PEASS-ng)**:** Awesome bash script that in this case is useful for searching **sensitive information** inside the filesystem. Just **chroot inside the firmware filesystem and run it**.
-* [**Firmwalker**](https://github.com/craigz28/firmwalker)**:** Bash script to search for potential sensitive information
-* [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT\_core):
-  * Identification of software components such as operating system, CPU architecture, and third-party components along with their associated version information
-  * Extraction of firmware filesystem (s ) from images
-  * Detection of certificates and private keys
-  * Detection of weak implementations mapping to Common Weakness Enumeration (CWE)
-  * Feed & signature-based detection of vulnerabilities
-  * Basic static behavioral analysis
-  * Comparison (diff) of firmware versions and files
-  * User mode emulation of filesystem binaries using QEMU
-  * Detection of binary mitigations such as NX, DEP, ASLR, stack canaries, RELRO, and FORTIFY\_SOURCE
-  * REST API
-  * and more...
-* [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer): FwAnalyzer is a tool to analyze (ext2/3/4), FAT/VFat, SquashFS, UBIFS filesystem images, cpio archives, and directory content using a set of configurable rules.
-* [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep): A Free Software IoT Firmware Security Analysis Tool
-* [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go): This is a complete rewrite of the original ByteSweep project in Go.
-* [**EMBA**](https://github.com/e-m-b-a/emba): _EMBA_ is designed as the central firmware analysis tool for penetration testers. It supports the complete security analysis process starting with the _firmware extraction_ process, doing _static analysis_ and _dynamic analysis_ via emulation and finally generating a report. _EMBA_ automatically discovers possible weak spots and vulnerabilities in firmware. Examples are insecure binaries, old and outdated software components, potentially vulnerable scripts or hard-coded passwords.
+To assess the encryption status of the image, the **entropy** is checked with `binwalk -E <bin>`. Low entropy suggests a lack of encryption, while high entropy indicates possible encryption or compression.
 
-{% hint style="warning" %}
-Inside the filesystem you can also find **source code** of programs (that you should always **check**), but also **compiled binaries**. These programs might be somehow exposed and you should **decompile** and **check** them for potential vulnerabilities.
+For extracting **embedded files**, tools and resources like the **file-data-carving-recovery-tools** documentation and **binvis.io** for file inspection are recommended.
 
-Tools like [**checksec.sh**](https://github.com/slimm609/checksec.sh) can be useful to find unprotected binaries. For Windows binaries you could use [**PESecurity**](https://github.com/NetSPI/PESecurity).
-{% endhint %}
+### Extracting the Filesystem
 
-## Emulating Firmware
+Using `binwalk -ev <bin>`, one can usually extract the filesystem, often into a directory named after the filesystem type (e.g., squashfs, ubifs). However, when **binwalk** fails to recognize the filesystem type due to missing magic bytes, manual extraction is necessary. This involves using `binwalk` to locate the filesystem's offset, followed by the `dd` command to carve out the filesystem:
 
-The idea to emulate the Firmware is to be able to perform a **dynamic analysis** of the device **running** or of a **single program**.
+```bash
+$ binwalk DIR850L_REVB.bin
 
-{% hint style="info" %}
-At times, partial or full emulation **may not work due to a hardware or architecture dependencies**. If the architecture and endianness match a device owned such as a raspberry pie, the root filesystem or specific binary can be transferred to the device for further testing. This method also applies to pre built virtual machines using the same architecture and endianness as the target.
-{% endhint %}
+$ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs 
+```
 
-### Binary Emulation
+Afterwards, depending on the filesystem type (e.g., squashfs, cpio, jffs2, ubifs), different commands are used to manually extract the contents.
 
-If you just want to emulate one program to search for vulnerabilities, you first need to identify its endianness and the CPU architecture for which it was compiled.
+### Filesystem Analysis
 
-#### MIPS example
+With the filesystem extracted, the search for security flaws begins. Attention is paid to insecure network daemons, hardcoded credentials, API endpoints, update server functionalities, uncompiled code, startup scripts, and compiled binaries for offline analysis.
+
+**Key locations** and **items** to inspect include:
+
+- **etc/shadow** and **etc/passwd** for user credentials
+- SSL certificates and keys in **etc/ssl**
+- Configuration and script files for potential vulnerabilities
+- Embedded binaries for further analysis
+- Common IoT device web servers and binaries
+
+Several tools assist in uncovering sensitive information and vulnerabilities within the filesystem:
+
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) for sensitive information search
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT\_core) for comprehensive firmware analysis
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), and [**EMBA**](https://github.com/e-m-b-a/emba) for static and dynamic analysis
+
+### Security Checks on Compiled Binaries
+
+Both source code and compiled binaries found in the filesystem must be scrutinized for vulnerabilities. Tools like **checksec.sh** for Unix binaries and **PESecurity** for Windows binaries help identify unprotected binaries that could be exploited.
+
+## Emulating Firmware for Dynamic Analysis
+
+The process of emulating firmware enables **dynamic analysis** either of a device's operation or an individual program. This approach can encounter challenges with hardware or architecture dependencies, but transferring the root filesystem or specific binaries to a device with matching architecture and endianness, such as a Raspberry Pi, or to a pre-built virtual machine, can facilitate further testing.
+
+### Emulating Individual Binaries
+
+For examining single programs, identifying the program's endianness and CPU architecture is crucial.
+
+#### Example with MIPS Architecture
+
+To emulate a MIPS architecture binary, one can use the command:
 
 ```bash
 file ./squashfs-root/bin/busybox
-./squashfs-root/bin/busybox: ELF 32-bit MSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped
 ```
 
-Now you can **emulate** the busybox executable using **QEMU**.
+And to install the necessary emulation tools:
 
 ```bash
- sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
+sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
 
-Because the executable **is** compiled for **MIPS** and follow the **big-endian** byte ordering, we’ll use QEMU’s **`qemu-mips`** emulator. To emulate **little-endian** executables, we would have to select the emulator with the `el` suffix(`qemu-mipsel`):
+For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
 
-```bash
-qemu-mips -L ./squashfs-root/ ./squashfs-root/bin/ls
-100              100.7z           15A6D2.squashfs  squashfs-root    squashfs-root-0
-```
+#### ARM Architecture Emulation
 
-#### ARM Example
-
-```bash
-file bin/busybox                
-bin/busybox: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-armhf.so.1, no section header
-```
-
-Emulation:
-
-```bash
-qemu-arm -L ./squashfs-root/ ./squashfs-root/bin/ls
-1C00000.squashfs  B80B6C            C41DD6.xz         squashfs-root     squashfs-root-0
-```
+For ARM binaries, the process is similar, with the `qemu-arm` emulator being utilized for emulation.
 
 ### Full System Emulation
 
-There are several tools, based in **qemu** in general, that will allow you to emulate the complete firmware:
+Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
 
-* [**https://github.com/firmadyne/firmadyne**](https://github.com/firmadyne/firmadyne)**:**
-  * You need to install several things, configure postgres, then run the extractor.py script to extract the firmware, use the getArch.sh script to get the architecture. Then, use tar2db.py and makeImage.sh scripts to store information from the extracted image in the database and generate a QEMU image that we can emulate. The, use inferNetwork.sh script to get the network interfaces, and finally use the run.sh script, which is automatically created in the ./scratch/1/folder.
-* [**https://github.com/attify/firmware-analysis-toolkit**](https://github.com/attify/firmware-analysis-toolkit)**:**
-  * This tool depends on firmadyne and automates the process of emulating the firmware using firmadynee. you need to configure `fat.config` before using it: `sudo python3 ./fat.py IoTGoat-rpi-2.img --qemu 2.5.0`
-* [**https://github.com/therealsaumil/emux**](https://github.com/therealsaumil/emux)
-* [**https://github.com/getCUJO/MIPS-X**](https://github.com/getCUJO/MIPS-X)
-* [**https://github.com/qilingframework/qiling#qltool**](https://github.com/qilingframework/qiling#qltool)
+## Dynamic Analysis in Practice
 
-## **Dynamic analysis**
+At this stage, either a real or emulated device environment is used for analysis. It's essential to maintain shell access to the OS and filesystem. Emulation may not perfectly mimic hardware interactions, necessitating occasional emulation restarts. Analysis should revisit the filesystem, exploit exposed webpages and network services, and explore bootloader vulnerabilities. Firmware integrity tests are critical to identify potential backdoor vulnerabilities.
 
-In this stage you should have either a device running the firmware to attack or the firmware being emulated to attack. In any case, it's highly recommended that you also have **a shell in the OS and filesystem that is running**.
+## Runtime Analysis Techniques
 
-Note that some times if you are emulating the firmware **some activities inside the emulation will fail** and you might need to restart emulating it. For example, a web application might need to get information from a device the original device is integrated with but the emulation is not emulating.
+Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
 
-You should **recheck the filesystem** as we already did in a **previous step as in the running env new information might be accessible.**
+## Binary Exploitation and Proof-of-Concept
 
-If **webpages** are exposed, reading the code and having access to them you should **test them**. In hacktricks you can find a lot of information about different web hacking techniques.
+Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
 
-If **network services** are exposed you should try to attack them. In hacktricks you can find a lot of information about different network services hacking techniques. You could also try to fuzz them with network and protocol **fuzzers** such as [Mutiny](https://github.com/Cisco-Talos/mutiny-fuzzer), [boofuzz](https://github.com/jtpereyda/boofuzz), and [kitty](https://github.com/cisco-sas/kitty).
+## Prepared Operating Systems for Firmware Analysis
 
-You should check if you can **attack the bootloader** to get a root shell:
-
-{% content-ref url="bootloader-testing.md" %}
-[bootloader-testing.md](bootloader-testing.md)
-{% endcontent-ref %}
-
-You should test if the device is doing any kind of **firmware integrity tests**, if not this would allow attackers to offer backdored firmwares, install them in devices other people owns or even deploy them remotely if there is any firmware update vulnerability:
-
-{% content-ref url="firmware-integrity.md" %}
-[firmware-integrity.md](firmware-integrity.md)
-{% endcontent-ref %}
-
-Firmware update vulnerabilities usually occurs because, the **integrity** of the **firmware** might **not** be **validated**, use **unencrypted** **network** protocols, use of **hardcoded** **credentials**, an **insecure authentication** to the cloud component that hosts the firmware, and even excessive and insecure **logging** (sensitive data), allow **physical updates** without verifications.
-
-## **Runtime analysis**
-
-Runtime analysis involves attaching to a running process or binary while a device is running in its normal or emulated environment. Basic runtime analysis steps are provided below:
-
-1. `sudo chroot . ./qemu-arch -L <optionalLibPath> -g <gdb_port> <binary>`
-2. Attach gdb-multiarch or use IDA to emulate the binary
-3. Set breakpoints for functions identified during step 4 such as memcpy, strncpy, strcmp, etc.
-4. Execute large payload strings to identify overflows or process crashes using a fuzzer
-5. Move to step 8 if a vulnerability is identified
-
-Tools that may be helpful are (non-exhaustive):
-
-* gdb-multiarch
-* [Peda](https://github.com/longld/peda)
-* Frida
-* ptrace
-* strace
-* IDA Pro
-* Ghidra
-* Binary Ninja
-* Hopper
-
-## **Binary Exploitation**
-
-After identifying a vulnerability within a binary from previous steps, a proper proof-of-concept (PoC) is required to demonstrate the real-world impact and risk. Developing exploit code requires programming experience in lower level languages (e.g. ASM, C/C++, shellcode, etc.) as well as background within the particular target architecture (e.g. MIPS, ARM, x86 etc.). PoC code involves obtaining arbitrary execution on a device or application by controlling an instruction in memory.
-
-It is not common for binary runtime protections (e.g. NX, DEP, ASLR, etc.) to be in place within embedded systems however when this happens, additional techniques may be required such as return oriented programming (ROP). ROP allows an attacker to implement arbitrary malicious functionality by chaining existing code in the target process/binary's code known as gadgets. Steps will need to be taken to exploit an identified vulnerability such as a buffer overflow by forming a ROP chain. A tool that can be useful for situations like these is Capstone's gadget finder or ROPGadget- [https://github.com/JonathanSalwan/ROPgadget](https://github.com/JonathanSalwan/ROPgadget).
-
-Utilize the following references for further guidance:
-
-* [https://azeria-labs.com/writing-arm-shellcode/](https://azeria-labs.com/writing-arm-shellcode/)
-* [https://www.corelan.be/index.php/category/security/exploit-writing-tutorials/](https://www.corelan.be/index.php/category/security/exploit-writing-tutorials/)
+Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) provide pre-configured environments for firmware security testing, equipped with necessary tools.
 
 ## Prepared OSs to analyze Firmware
 

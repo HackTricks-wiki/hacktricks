@@ -80,9 +80,9 @@ So, another way to impersonate the user `admin` would be to:
 
 The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
 
-** Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
+**Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
 
-# References
+## References
 
 * [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](http://cryptowiki.net/index.php?title=Electronic_Code_Book_\(ECB\))
 

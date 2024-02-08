@@ -14,6 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
+Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
 
 # Installation
 

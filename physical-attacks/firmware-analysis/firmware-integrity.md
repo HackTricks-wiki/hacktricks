@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-# Firmware Integrity
+## Firmware Integrity
 
 The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
 

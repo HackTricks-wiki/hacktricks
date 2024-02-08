@@ -19,11 +19,11 @@ Other ways to support HackTricks:
 
 In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
 
-![CBC encryption](https://defuse.ca/images/cbc\_encryption.png)
+![https://defuse.ca/images/cbc\_encryption.png](https://defuse.ca/images/cbc\_encryption.png)
 
 To decrypt CBC the **opposite** **operations** are done:
 
-![CBC decryption](https://defuse.ca/images/cbc\_decryption.png)
+![https://defuse.ca/images/cbc\_decryption.png](https://defuse.ca/images/cbc\_decryption.png)
 
 Notice how it's needed to use an **encryption** **key** and an **IV**.
 
@@ -114,7 +114,7 @@ If you **log in many times** and always get the **same cookie**, there is probab
 Now, if you try to **modify** the **cookie**, you can see that you get an **error** from the application.\
 But if you BF the padding (using padbuster for example) you manage to get another cookie valid for a different user. This scenario is highly probably vulnerable to padbuster.
 
-# References
+## References
 
 * [https://en.wikipedia.org/wiki/Block\_cipher\_mode\_of\_operation](https://en.wikipedia.org/wiki/Block\_cipher\_mode\_of\_operation)
 

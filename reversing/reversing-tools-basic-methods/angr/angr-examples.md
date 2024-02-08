@@ -13,8 +13,10 @@
 </details>
 
 {% hint style="info" %}
-If the program is using \*\*`scanf` \*\* to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
+If the program is using `scanf` to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
 {% endhint %}
+
+Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
 
 ### Input to reach address (indicating the address)
 
