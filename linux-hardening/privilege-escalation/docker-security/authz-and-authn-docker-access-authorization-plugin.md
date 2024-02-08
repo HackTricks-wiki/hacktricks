@@ -5,7 +5,7 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
@@ -13,7 +13,7 @@ Otras formas de apoyar a HackTricks:
 </details>
 
 
-El modelo de **autorización** predeterminado de **Docker** es de **todo o nada**. Cualquier usuario con permiso para acceder al demonio de Docker puede **ejecutar cualquier** comando de cliente de Docker. Lo mismo ocurre para los que utilizan la API del Motor de Docker para contactar con el demonio. Si necesitas un **mayor control de acceso**, puedes crear **plugins de autorización** y añadirlos a la configuración de tu demonio de Docker. Utilizando un plugin de autorización, un administrador de Docker puede **configurar políticas de acceso granulares** para gestionar el acceso al demonio de Docker.
+**El modelo de autorización** predeterminado de **Docker** es de **todo o nada**. Cualquier usuario con permiso para acceder al demonio de Docker puede **ejecutar cualquier** comando de cliente de Docker. Lo mismo ocurre para los que utilizan la API del Motor de Docker para contactar con el demonio. Si necesitas un **mayor control de acceso**, puedes crear **plugins de autorización** y añadirlos a la configuración de tu demonio de Docker. Utilizando un plugin de autorización, un administrador de Docker puede **configurar políticas de acceso granulares** para gestionar el acceso al demonio de Docker.
 
 # Arquitectura básica
 
@@ -43,7 +43,7 @@ Eres responsable de **registrar** tu **plugin** como parte del **inicio** del de
 
 ## Twistlock AuthZ Broker
 
-El plugin [**authz**](https://github.com/twistlock/authz) te permite crear un simple archivo **JSON** que el **plugin** leerá para autorizar las solicitudes. Por lo tanto, te brinda la oportunidad de controlar de manera muy sencilla qué puntos finales de API pueden alcanzar cada usuario.
+El plugin [**authz**](https://github.com/twistlock/authz) te permite crear un simple archivo **JSON** que el **plugin** leerá para autorizar las solicitudes. Por lo tanto, te brinda la oportunidad de controlar de manera muy sencilla qué puntos finales de la API pueden alcanzar cada usuario.
 
 Este es un ejemplo que permitirá que Alice y Bob puedan crear nuevos contenedores: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
@@ -51,7 +51,7 @@ En la página [route\_parser.go](https://github.com/twistlock/authz/blob/master/
 
 ## Tutorial de Plugin Simple
 
-Puedes encontrar un **plugin fácil de entender** con información detallada sobre la instalación y la depuración aquí: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
+Puedes encontrar un **plugin fácil de entender** con información detallada sobre la instalación y depuración aquí: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
 
 Lee el `README` y el código `plugin.go` para entender cómo funciona.
 
@@ -65,11 +65,11 @@ Para realizar esta enumeración puedes **utilizar la herramienta** [**https://gi
 
 ## `run --privileged` no permitido
 
-### Privilegios Mínimos
+### Privilegios mínimos
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
-### Ejecutando un contenedor y luego obteniendo una sesión privilegiada
+### Ejecutar un contenedor y luego obtener una sesión privilegiada
 
 En este caso, el sysadmin **prohibió a los usuarios montar volúmenes y ejecutar contenedores con la bandera `--privileged`** o dar cualquier capacidad adicional al contenedor:
 ```bash
@@ -89,7 +89,7 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-Ahora, el usuario puede escapar del contenedor utilizando cualquiera de las **técnicas previamente discutidas** y **escalar privilegios** dentro del host.
+Ahora, el usuario puede escapar del contenedor utilizando cualquiera de las [**técnicas discutidas anteriormente**](./#privileged-flag) y **escalar privilegios** dentro del host.
 
 ## Montar Carpeta Escribible
 
@@ -112,9 +112,9 @@ También ten en cuenta que si puedes **montar `/etc`** u otra carpeta **que cont
 
 ## Punto de conexión de API no verificado
 
-La responsabilidad del sysadmin al configurar este complemento sería controlar qué acciones y con qué privilegios puede realizar cada usuario. Por lo tanto, si el administrador adopta un enfoque de **lista negra** con los puntos de conexión y los atributos, podría **olvidar algunos** que podrían permitir a un atacante **escalar privilegios**.
+La responsabilidad del sysadmin que configura este plugin sería controlar qué acciones y con qué privilegios puede realizar cada usuario. Por lo tanto, si el administrador adopta un enfoque de **lista negra** con los puntos de conexión y los atributos, podría **olvidar algunos de ellos** que podrían permitir a un atacante **escalar privilegios**.
 
-Puedes consultar la API de Docker en [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
+Puedes verificar la API de Docker en [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
 ## Estructura JSON no verificada
 
@@ -155,7 +155,7 @@ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '
 ```
 ## Atributo JSON no verificado
 
-Es posible que cuando el sysadmin configuró el firewall de Docker, **olvidó algún atributo importante de un parámetro** de la [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) como "**Capabilities**" dentro de "**HostConfig**". En el siguiente ejemplo, es posible abusar de esta mala configuración para crear y ejecutar un contenedor con la capacidad **SYS_MODULE**:
+Es posible que cuando el administrador del sistema configuró el firewall de Docker, **olvidó algún atributo importante de un parámetro** de la [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) como "**Capabilities**" dentro de "**HostConfig**". En el siguiente ejemplo, es posible abusar de esta mala configuración para crear y ejecutar un contenedor con la capacidad **SYS\_MODULE**:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -189,7 +189,7 @@ Recuerda **volver a habilitar el plugin después de escalar**, ¡o un **reinicio
 
 * [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 
-# Referencias
+## Referencias
 
 * [https://docs.docker.com/engine/extend/plugins\_authorization/](https://docs.docker.com/engine/extend/plugins\_authorization/)
 
@@ -200,7 +200,7 @@ Recuerda **volver a habilitar el plugin después de escalar**, ¡o un **reinicio
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**

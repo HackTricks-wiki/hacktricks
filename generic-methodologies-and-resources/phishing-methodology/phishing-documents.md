@@ -7,16 +7,16 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 ## Documentos de Oficina
 
-Microsoft Word realiza validación de datos de archivo antes de abrir un archivo. La validación de datos se realiza en forma de identificación de estructura de datos, contra el estándar OfficeOpenXML. Si ocurre algún error durante la identificación de la estructura de datos, el archivo que se está analizando no se abrirá.
+Microsoft Word realiza validación de datos de archivo antes de abrir un archivo. La validación de datos se realiza en forma de identificación de estructura de datos, conforme al estándar OfficeOpenXML. Si ocurre algún error durante la identificación de la estructura de datos, el archivo analizado no se abrirá.
 
-Por lo general, los archivos de Word que contienen macros utilizan la extensión `.docm`. Sin embargo, es posible cambiar el nombre del archivo cambiando la extensión del archivo y aún así mantener sus capacidades de ejecución de macros.\
+Por lo general, los archivos de Word que contienen macros utilizan la extensión `.docm`. Sin embargo, es posible cambiar el nombre del archivo modificando la extensión y aún así mantener sus capacidades de ejecución de macros.\
 Por ejemplo, un archivo RTF no admite macros, por diseño, pero un archivo DOCM renombrado a RTF será manejado por Microsoft Word y será capaz de ejecutar macros.\
 Los mismos internos y mecanismos se aplican a todo el software de la suite de Microsoft Office (Excel, PowerPoint, etc.).
 
@@ -91,7 +91,7 @@ Haz esto porque **no puedes guardar macros dentro de un `.docx`** y hay un **est
 
 Un archivo HTA es un programa de Windows que **combina HTML y lenguajes de script (como VBScript y JScript)**. Genera la interfaz de usuario y se ejecuta como una aplicación "totalmente confiable", sin las limitaciones del modelo de seguridad de un navegador.
 
-Un HTA se ejecuta utilizando **`mshta.exe`**, que normalmente está **instalado** junto con **Internet Explorer**, haciendo que **`mshta` dependa de IE**. Por lo tanto, si se ha desinstalado, los HTAs no podrán ejecutarse.
+Un archivo HTA se ejecuta utilizando **`mshta.exe`**, que normalmente está **instalado** junto con **Internet Explorer**, lo que hace que **`mshta` dependa de IE**. Por lo tanto, si se ha desinstalado, los HTAs no podrán ejecutarse.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -160,12 +160,12 @@ Existen varias formas de **forzar la autenticación NTLM "de forma remota"**, po
 [places-to-steal-ntlm-creds.md](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)
 {% endcontent-ref %}
 
-### Relevo NTLM
+### Relevo de NTLM
 
-No olvides que no solo puedes robar el hash o la autenticación sino también **realizar ataques de relevo NTLM**:
+No olvides que no solo puedes robar el hash o la autenticación sino también **realizar ataques de relevo de NTLM**:
 
-* [**Ataques de relevo NTLM**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-* [**AD CS ESC8 (relevo NTLM a certificados)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+* [**Ataques de relevo de NTLM**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+* [**AD CS ESC8 (relevo de NTLM a certificados)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 <details>
 
@@ -174,7 +174,7 @@ No olvides que no solo puedes robar el hash o la autenticación sino también **
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

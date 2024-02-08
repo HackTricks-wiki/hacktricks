@@ -1,30 +1,29 @@
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al grupo de** 💬 [**Discord**](https://discord.gg/hRep4RUj7f) o al grupo de [**telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 
 ## Código
 
-El siguiente código de [aquí](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Permite **indicar un ID de Proceso como argumento** y un CMD **ejecutándose como el usuario** del proceso indicado se ejecutará.\
-Ejecutándose en un proceso de Alta Integridad puedes **indicar el PID de un proceso ejecutándose como Sistema** (como winlogon, wininit) y ejecutar un cmd.exe como sistema.
+El siguiente código de [aquí](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Permite **indicar un ID de Proceso como argumento** y se ejecutará un CMD **ejecutándose como el usuario** del proceso indicado.\
+Ejecutando en un proceso de Alta Integridad puedes **indicar el PID de un proceso ejecutándose como Sistema** (como winlogon, wininit) y ejecutar un cmd.exe como sistema.
 ```cpp
 impersonateuser.exe 1234
 ```
+{% code title="impersonateuser.cpp" %}
 ```cpp
-// impersonateuser.cpp
-```
-{% endcode %}
-```cpp
+// From https://securitytimes.medium.com/understanding-and-abusing-access-tokens-part-ii-b9069f432962
+
 #include <windows.h>
 #include <iostream>
 #include <Lmcons.h>
@@ -156,7 +155,7 @@ return 0;
 
 ## Error
 
-En algunas ocasiones, puedes intentar suplantar a System y no funcionará, mostrando un resultado como el siguiente:
+En algunas ocasiones, es posible que intentes suplantar a System y no funcione, mostrando una salida como la siguiente:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -168,37 +167,21 @@ En algunas ocasiones, puedes intentar suplantar a System y no funcionará, mostr
 [-] CreateProcessWithTokenW Error: 1326
 ```
 Esto significa que incluso si estás ejecutando en un nivel de Integridad Alto **no tienes suficientes permisos**.\
-Vamos a verificar los permisos actuales del Administrador sobre los procesos de `svchost.exe` con **processes explorer** (o también puedes usar process hacker):
+Vamos a verificar los permisos actuales del Administrador sobre los procesos `svchost.exe` con **processes explorer** (o también puedes usar process hacker):
 
 1. Selecciona un proceso de `svchost.exe`
 2. Haz clic derecho --> Propiedades
-3. Dentro de la pestaña "Seguridad" haz clic en el botón "Permisos" que está en la parte inferior derecha
+3. Dentro de la pestaña "Seguridad" haz clic en el botón "Permisos" en la esquina inferior derecha
 4. Haz clic en "Avanzado"
 5. Selecciona "Administradores" y haz clic en "Editar"
 6. Haz clic en "Mostrar permisos avanzados"
 
 ![](<../../.gitbook/assets/image (322).png>)
 
-La imagen anterior contiene todos los privilegios que "Administradores" tienen sobre el proceso seleccionado (como puedes ver en el caso de `svchost.exe` solo tienen privilegios de "Consulta")
+La imagen anterior contiene todos los privilegios que los "Administradores" tienen sobre el proceso seleccionado (como puedes ver en el caso de `svchost.exe`, solo tienen privilegios de "Consulta")
 
-Mira los privilegios que "Administradores" tienen sobre `winlogon.exe`:
+Observa los privilegios que tienen los "Administradores" sobre `winlogon.exe`:
 
 ![](<../../.gitbook/assets/image (323).png>)
 
-Dentro de ese proceso "Administradores" pueden "Leer Memoria" y "Leer Permisos" lo que probablemente permite a los Administradores suplantar el token utilizado por este proceso.
-
-
-
-<details>
-
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
-
-Otras formas de apoyar a HackTricks:
-
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en github.
-
-</details>
+Dentro de ese proceso, los "Administradores" pueden "Leer Memoria" y "Leer Permisos", lo que probablemente les permite a los Administradores suplantar el token utilizado por este proceso.

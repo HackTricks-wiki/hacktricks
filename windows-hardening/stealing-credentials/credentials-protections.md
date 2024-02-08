@@ -4,97 +4,101 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 ## WDigest
 
-El protocolo [WDigest](https://technet.microsoft.com/pt-pt/library/cc778868\(v=ws.10\).aspx?f=255\&MSPPError=-2147217396) fue introducido en Windows XP y fue diseñado para ser utilizado con el Protocolo HTTP para autenticación. Microsoft tiene este protocolo **habilitado por defecto en múltiples versiones de Windows** (Windows XP — Windows 8.0 y Windows Server 2003 — Windows Server 2012), lo que significa que **las contraseñas en texto plano se almacenan en el LSASS** (Local Security Authority Subsystem Service). **Mimikatz** puede interactuar con el LSASS permitiendo a un atacante **recuperar estas credenciales** a través del siguiente comando:
-```
+El protocolo [WDigest](https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396), introducido con Windows XP, está diseñado para la autenticación a través del Protocolo HTTP y está **habilitado de forma predeterminada en Windows XP hasta Windows 8.0 y Windows Server 2003 hasta Windows Server 2012**. Esta configuración predeterminada resulta en **almacenamiento de contraseñas en texto plano en LSASS** (Servicio de Subsistema de Autoridad de Seguridad Local). Un atacante puede usar Mimikatz para **extraer estas credenciales** ejecutando:
+```bash
 sekurlsa::wdigest
 ```
-Este comportamiento puede ser **desactivado/activado estableciendo en 1** el valor de _**UseLogonCredential**_ y _**Negotiate**_ en _**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_.\
-Si estas claves del registro **no existen** o el valor es **"0"**, entonces WDigest estará **desactivado**.
-```
+Para **activar o desactivar esta función**, las claves del registro _**UseLogonCredential**_ y _**Negotiate**_ dentro de _**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ deben establecerse en "1". Si estas claves están **ausentes o establecidas en "0"**, WDigest está **deshabilitado**:
+```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-## Protección LSA
+## Protección de LSA
 
-Microsoft en **Windows 8.1 y posteriores** ha proporcionado protección adicional para el LSA para **prevenir** que procesos no confiables puedan **leer su memoria** o inyectar código. Esto evitará que el comando regular `mimikatz.exe sekurlsa:logonpasswords` funcione correctamente.\
-Para **activar esta protección** necesitas establecer el valor _**RunAsPPL**_ en _**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ a 1.
+A partir de **Windows 8.1**, Microsoft mejoró la seguridad de LSA para **bloquear lecturas de memoria no autorizadas o inyecciones de código por procesos no confiables**. Esta mejora dificulta el funcionamiento típico de comandos como `mimikatz.exe sekurlsa:logonpasswords`. Para **habilitar esta protección mejorada**, el valor _**RunAsPPL**_ en _**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ debe ajustarse a 1:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-### Evasión
+### Salto
 
-Es posible evadir esta protección utilizando el driver de Mimikatz mimidrv.sys:
+Es posible saltarse esta protección utilizando el controlador Mimikatz mimidrv.sys:
 
 ![](../../.gitbook/assets/mimidrv.png)
 
-## Credential Guard
+## Guardia de Credenciales
 
-**Credential Guard** es una nueva característica en Windows 10 (edición Enterprise y Education) que ayuda a proteger tus credenciales en una máquina contra amenazas como pass the hash. Esto funciona a través de una tecnología llamada Modo Seguro Virtual (VSM) que utiliza extensiones de virtualización de la CPU (pero no es una máquina virtual real) para proporcionar **protección a áreas de la memoria** (puede que escuches esto referido como Seguridad Basada en Virtualización o VBS). VSM crea una "burbuja" separada para **procesos** clave que están **aislados** de los procesos regulares del **sistema operativo**, incluso del kernel y **solo procesos de confianza específicos pueden comunicarse con los procesos** (conocidos como **trustlets**) en VSM. Esto significa que un proceso en el sistema operativo principal no puede leer la memoria de VSM, incluso los procesos del kernel. La **Autoridad de Seguridad Local (LSA) es uno de los trustlets** en VSM además del proceso **LSASS** estándar que aún se ejecuta en el sistema operativo principal para asegurar la compatibilidad con los procesos existentes, pero realmente solo actúa como un proxy o stub para comunicarse con la versión en VSM asegurando que las credenciales reales se ejecuten en la versión de VSM y, por lo tanto, estén protegidas de ataques. Para Windows 10, Credential Guard debe estar activado e implementado en tu organización ya que **no está habilitado por defecto.**
-Desde [https://www.itprotoday.com/windows-10/what-credential-guard](https://www.itprotoday.com/windows-10/what-credential-guard). Más información y un script PS1 para habilitar Credential Guard [se puede encontrar aquí](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage). Sin embargo, a partir de Windows 11 Enterprise, versión 22H2 y Windows 11 Education, versión 22H2, los sistemas compatibles tienen Windows Defender Credential Guard [activado por defecto](https://learn.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage#Default%20Enablement).
+**Guardia de Credenciales**, una característica exclusiva de **Windows 10 (ediciones Enterprise y Education)**, mejora la seguridad de las credenciales de la máquina utilizando **Modo Seguro Virtual (VSM)** y **Seguridad Basada en Virtualización (VBS)**. Aprovecha las extensiones de virtualización de la CPU para aislar procesos clave dentro de un espacio de memoria protegido, lejos del alcance del sistema operativo principal. Esta aislamiento garantiza que ni siquiera el kernel pueda acceder a la memoria en VSM, protegiendo efectivamente las credenciales de ataques como **pass-the-hash**. La **Autoridad de Seguridad Local (LSA)** opera dentro de este entorno seguro como un trustlet, mientras que el proceso **LSASS** en el sistema operativo principal actúa simplemente como un comunicador con la LSA de VSM.
 
-En este caso **Mimikatz no puede hacer mucho para evadir** esto y extraer los hashes de LSASS. Pero siempre podrías agregar tu **SSP personalizado** y **capturar las credenciales** cuando un usuario intenta iniciar sesión en **texto claro**.\
-Más información sobre [**SSP y cómo hacer esto aquí**](../active-directory-methodology/custom-ssp.md).
+Por defecto, **Guardia de Credenciales** no está activa y requiere activación manual dentro de una organización. Es fundamental para mejorar la seguridad contra herramientas como **Mimikatz**, que se ven obstaculizadas en su capacidad para extraer credenciales. Sin embargo, las vulnerabilidades aún pueden ser explotadas a través de la adición de **Proveedores de Soporte de Seguridad (SSP)** personalizados para capturar credenciales en texto claro durante intentos de inicio de sesión.
 
-Credential Guard podría ser **habilitado de diferentes maneras**. Para verificar si se habilitó usando el registro, podrías revisar el valor de la clave _**LsaCfgFlags**_ en _**HKLM\System\CurrentControlSet\Control\LSA**_. Si el valor es **"1"**, entonces está activo con bloqueo UEFI, si **"2"** está activo sin bloqueo y si **"0"** no está habilitado.\
-Esto **no es suficiente para habilitar Credential Guard** (pero es un fuerte indicador).\
-Más información y un script PS1 para habilitar Credential Guard [se puede encontrar aquí](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
-```
+Para verificar el estado de activación de **Guardia de Credenciales**, se puede inspeccionar la clave del registro **_LsaCfgFlags_** bajo **_HKLM\System\CurrentControlSet\Control\LSA_**. Un valor de "**1**" indica activación con **bloqueo UEFI**, "**2**" sin bloqueo, y "**0**" indica que no está habilitado. Esta verificación en el registro, aunque es un indicador sólido, no es el único paso para habilitar Guardia de Credenciales. Orientación detallada y un script de PowerShell para habilitar esta característica están disponibles en línea.
+```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
+Para obtener una comprensión completa e instrucciones sobre cómo habilitar **Credential Guard** en Windows 10 y su activación automática en sistemas compatibles de **Windows 11 Enterprise y Education (versión 22H2)**, visita la [documentación de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+
+Para obtener más detalles sobre la implementación de SSP personalizados para la captura de credenciales, consulta [esta guía](../active-directory-methodology/custom-ssp.md).
+
+
 ## Modo RestrictedAdmin de RDP
 
-Con Windows 8.1 y Windows Server 2012 R2, se introdujeron nuevas características de seguridad. Una de esas características de seguridad es el _modo Restricted Admin para RDP_. Esta nueva característica de seguridad se introdujo para mitigar el riesgo de ataques de [pass the hash](https://blog.ahasayen.com/pass-the-hash/).
+**Windows 8.1 y Windows Server 2012 R2** introdujeron varias características de seguridad nuevas, incluido el **_modo Restricted Admin para RDP_**. Este modo fue diseñado para mejorar la seguridad al mitigar los riesgos asociados con los ataques de **[pasar el hash](https://blog.ahasayen.com/pass-the-hash/)**.
 
-Cuando te conectas a un ordenador remoto usando RDP, tus credenciales se almacenan en el ordenador remoto al que te conectas mediante RDP. Normalmente estás utilizando una cuenta poderosa para conectarte a servidores remotos, y tener tus credenciales almacenadas en todos estos ordenadores es una amenaza de seguridad de hecho.
+Tradicionalmente, al conectarse a una computadora remota a través de RDP, sus credenciales se almacenan en la máquina de destino. Esto plantea un riesgo de seguridad significativo, especialmente al usar cuentas con privilegios elevados. Sin embargo, con la introducción del **_modo Restricted Admin_**, este riesgo se reduce sustancialmente.
 
-Usando el _modo Restricted Admin para RDP_, cuando te conectas a un ordenador remoto usando el comando, **mstsc.exe /RestrictedAdmin**, serás autenticado en el ordenador remoto, pero **tus credenciales no se almacenarán en ese ordenador remoto**, como lo habrían estado en el pasado. Esto significa que si un malware o incluso un usuario malicioso está activo en ese servidor remoto, tus credenciales no estarán disponibles en ese servidor de escritorio remoto para que el malware ataque.
+Al iniciar una conexión RDP utilizando el comando **mstsc.exe /RestrictedAdmin**, la autenticación en la computadora remota se realiza sin almacenar sus credenciales en ella. Este enfoque garantiza que, en caso de una infección de malware o si un usuario malintencionado obtiene acceso al servidor remoto, sus credenciales no se vean comprometidas, ya que no se almacenan en el servidor.
 
-Ten en cuenta que como tus credenciales no se guardan en la sesión de RDP, si **intentas acceder a recursos de red** tus credenciales no se utilizarán. **En su lugar se utilizará la identidad de la máquina**.
+Es importante tener en cuenta que en el **modo Restricted Admin**, los intentos de acceder a recursos de red desde la sesión RDP no utilizarán sus credenciales personales; en su lugar, se utilizará la **identidad de la máquina**.
+
+Esta característica marca un avance significativo en la seguridad de las conexiones de escritorio remoto y en la protección de la información confidencial para evitar su exposición en caso de una violación de seguridad.
 
 ![](../../.gitbook/assets/ram.png)
 
-Desde [aquí](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Para obtener más información detallada, visita [este recurso](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+
 
 ## Credenciales en Caché
 
-Las **credenciales de dominio** son utilizadas por los componentes del sistema operativo y son **autenticadas** por la **Autoridad de Seguridad Local** (LSA). Típicamente, las credenciales de dominio se establecen para un usuario cuando un paquete de seguridad registrado autentica los datos de inicio de sesión del usuario. Este paquete de seguridad registrado puede ser el protocolo **Kerberos** o **NTLM**.
+Windows asegura las **credenciales de dominio** a través de la **Autoridad de Seguridad Local (LSA)**, admitiendo procesos de inicio de sesión con protocolos de seguridad como **Kerberos** y **NTLM**. Una característica clave de Windows es su capacidad para almacenar en caché los **últimos diez inicios de sesión de dominio** para garantizar que los usuarios aún puedan acceder a sus computadoras incluso si el **controlador de dominio está fuera de línea**—una ventaja para los usuarios de portátiles que a menudo están lejos de la red de su empresa.
 
-**Windows almacena las últimas diez credenciales de inicio de sesión de dominio en caso de que el controlador de dominio se desconecte**. Si el controlador de dominio se desconecta, un usuario **aún podrá iniciar sesión en su ordenador**. Esta característica es principalmente para usuarios de portátiles que no se conectan regularmente al dominio de su empresa. El número de credenciales que el ordenador almacena se puede controlar mediante la siguiente **clave de registro, o a través de política de grupo**:
+El número de inicios de sesión en caché es ajustable a través de una **clave de registro específica o una directiva de grupo**. Para ver o cambiar esta configuración, se utiliza el siguiente comando:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-Las credenciales están ocultas para los usuarios normales, incluso para las cuentas de administrador. El usuario **SYSTEM** es el único usuario que tiene **privilegios** para **ver** estas **credenciales**. Para que un administrador pueda ver estas credenciales en el registro, debe acceder al registro como usuario SYSTEM.
-Las credenciales almacenadas en caché se guardan en el registro en la siguiente ubicación del registro:
-```
-HKEY_LOCAL_MACHINE\SECURITY\Cache
-```
-**Extracción desde Mimikatz**: `lsadump::cache`\
-Desde [aquí](http://juggernaut.wikidot.com/cached-credentials).
+El acceso a estas credenciales en caché está estrictamente controlado, con solo la cuenta **SYSTEM** teniendo los permisos necesarios para verlas. Los administradores que necesiten acceder a esta información deben hacerlo con privilegios de usuario SYSTEM. Las credenciales se almacenan en: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+
+**Mimikatz** se puede utilizar para extraer estas credenciales en caché usando el comando `lsadump::cache`.
+
+Para más detalles, la [fuente](http://juggernaut.wikidot.com/cached-credentials) original proporciona información detallada.
 
 ## Usuarios Protegidos
 
-Cuando el usuario conectado es miembro del grupo de Usuarios Protegidos, se aplican las siguientes protecciones:
+La membresía en el grupo **Protected Users** introduce varias mejoras de seguridad para los usuarios, garantizando niveles más altos de protección contra el robo y mal uso de credenciales:
 
-* La delegación de credenciales (CredSSP) no almacenará las credenciales en texto plano del usuario, incluso cuando la configuración de la Política de Grupo **Permitir la delegación de credenciales predeterminadas** esté habilitada.
-* A partir de Windows 8.1 y Windows Server 2012 R2, Windows Digest no almacenará las credenciales en texto plano del usuario, incluso cuando Windows Digest esté habilitado.
-* **NTLM** no almacenará en caché las credenciales en **texto plano** del usuario o la función **unidireccional** de NT (NTOWF).
-* **Kerberos** ya no creará claves **DES** o **RC4**. Además, no almacenará en caché las credenciales en texto plano del usuario o las claves a largo plazo después de que se adquiera el TGT inicial.
-* **No se crea un verificador en caché al iniciar sesión o desbloquear**, por lo que el inicio de sesión sin conexión ya no es compatible.
+- **Delegación de Credenciales (CredSSP)**: Incluso si la configuración de directiva de grupo para **Permitir la delegación de credenciales predeterminadas** está habilitada, las credenciales en texto plano de los Usuarios Protegidos no se almacenarán en caché.
+- **Windows Digest**: A partir de **Windows 8.1 y Windows Server 2012 R2**, el sistema no almacenará en caché las credenciales en texto plano de los Usuarios Protegidos, independientemente del estado de Windows Digest.
+- **NTLM**: El sistema no almacenará en caché las credenciales en texto plano de los Usuarios Protegidos ni las funciones unidireccionales NT (NTOWF).
+- **Kerberos**: Para los Usuarios Protegidos, la autenticación Kerberos no generará claves **DES** o **RC4**, ni almacenará en caché las credenciales en texto plano o claves a largo plazo más allá de la adquisición inicial del Ticket-Granting Ticket (TGT).
+- **Inicio de Sesión sin Conexión**: Los Usuarios Protegidos no tendrán un verificador en caché creado al iniciar sesión o desbloquear, lo que significa que el inicio de sesión sin conexión no es compatible para estas cuentas.
 
-Después de que la cuenta de usuario se añade al grupo de Usuarios Protegidos, la protección comenzará cuando el usuario inicie sesión en el dispositivo. **Desde** [**aquí**](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)**.**
+Estas protecciones se activan en el momento en que un usuario, que es miembro del grupo **Protected Users**, inicia sesión en el dispositivo. Esto garantiza que se implementen medidas de seguridad críticas para protegerse contra varios métodos de compromiso de credenciales.
+
+Para obtener información más detallada, consulte la [documentación](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group) oficial.
+
+**Tabla de** [**la documentación**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -110,23 +114,7 @@ Después de que la cuenta de usuario se añade al grupo de Usuarios Protegidos, 
 |                         |                          |                                                                               | Key Admins                   |
 | Krbtgt                  | Krbtgt                   | Krbtgt                                                                        | Krbtgt                       |
 | Print Operators         | Print Operators          | Print Operators                                                               | Print Operators              |
-|                         |                          | Controladores de dominio de solo lectura                                      | Controladores de dominio de solo lectura |
+|                         |                          | Read-only Domain Controllers                                                  | Read-only Domain Controllers |
 | Replicator              | Replicator               | Replicator                                                                    | Replicator                   |
 | Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
 | Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
-
-**Tabla desde** [**aquí**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
-
-<details>
-
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
-
-Otras formas de apoyar a HackTricks:
-
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>

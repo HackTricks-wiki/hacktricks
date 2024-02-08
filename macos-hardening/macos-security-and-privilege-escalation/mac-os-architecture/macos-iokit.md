@@ -7,7 +7,7 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks\_live).
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live).
 * **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -87,11 +87,11 @@ ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-Puedes descargar **`IORegistryExplorer`** desde **Herramientas Adicionales de Xcode** en [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) e inspeccionar el **IORegistry de macOS** a través de una interfaz **gráfica**.
+Puedes descargar **`IORegistryExplorer`** desde **Xcode Additional Tools** en [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) e inspeccionar el **IORegistry de macOS** a través de una interfaz **gráfica**.
 
 <figure><img src="../../../.gitbook/assets/image (695).png" alt="" width="563"><figcaption></figcaption></figure>
 
-En IORegistryExplorer, se utilizan "planos" para organizar y mostrar las relaciones entre diferentes objetos en el IORegistry. Cada plano representa un tipo específico de relación o una vista particular de la configuración de hardware y controladores del sistema. Aquí tienes algunos de los planos comunes que podrías encontrar en IORegistryExplorer:
+En IORegistryExplorer, se utilizan "planos" para organizar y mostrar las relaciones entre diferentes objetos en el IORegistry de macOS. Cada plano representa un tipo específico de relación o una vista particular de la configuración de hardware y controladores del sistema. Aquí tienes algunos de los planos comunes que podrías encontrar en IORegistryExplorer:
 
 1. **Plano IOService**: Este es el plano más general, que muestra los objetos de servicio que representan controladores y nubs (canales de comunicación entre controladores). Muestra las relaciones proveedor-cliente entre estos objetos.
 2. **Plano IODeviceTree**: Este plano representa las conexiones físicas entre dispositivos a medida que se conectan al sistema. A menudo se utiliza para visualizar la jerarquía de dispositivos conectados a través de buses como USB o PCI.
@@ -181,7 +181,7 @@ IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArguments
 ```
 {% endcode %}
 
-Ten en cuenta cómo en la definición anterior falta el parámetro **`self`**, la buena definición sería:
+Tenga en cuenta cómo en la definición anterior falta el parámetro **`self`**, la buena definición sería:
 
 {% code overflow="wrap" %}
 ```cpp
@@ -223,10 +223,10 @@ Y como ahora sabemos que tenemos un **array de 7 elementos** (verifica el códig
 
 <figure><img src="../../../.gitbook/assets/image (708).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Después de crear el array puedes ver todas las funciones exportadas:
+Una vez creado el array, puedes ver todas las funciones exportadas:
 
 <figure><img src="../../../.gitbook/assets/image (709).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="success" %}
-Si recuerdas, para **llamar** una función **exportada** desde el espacio de usuario no necesitamos llamar al nombre de la función, sino al **número de selector**. Aquí puedes ver que el selector **0** es la función **`initializeDecoder`**, el selector **1** es **`startDecoder`**, el selector **2** **`initializeEncoder`**...
+Si recuerdas, para **llamar** a una función **exportada** desde el espacio de usuario no necesitamos llamar al nombre de la función, sino al **número de selector**. Aquí puedes ver que el selector **0** es la función **`initializeDecoder`**, el selector **1** es **`startDecoder`**, el selector **2** **`initializeEncoder`**...
 {% endhint %}

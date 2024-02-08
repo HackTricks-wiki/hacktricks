@@ -4,11 +4,11 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud)
 *
 * .
 
@@ -16,7 +16,7 @@
 
 ## Información Básica
 
-Las restricciones de inicio en macOS se introdujeron para mejorar la seguridad al **regular cómo, quién y desde dónde puede iniciarse un proceso**. Introducidas en macOS Ventura, proporcionan un marco que categoriza **cada binario del sistema en categorías de restricciones distintas**, definidas dentro de la **caché de confianza**, una lista que contiene binarios del sistema y sus respectivos hashes. Estas restricciones se extienden a cada binario ejecutable dentro del sistema, implicando un conjunto de **reglas** que delinean los requisitos para **iniciar un binario en particular**. Las reglas abarcan restricciones propias que un binario debe cumplir, restricciones parentales que deben cumplir su proceso padre y restricciones responsables que deben cumplir otras entidades relevantes.
+Las restricciones de inicio en macOS se introdujeron para mejorar la seguridad al **regular cómo, quién y desde dónde puede iniciarse un proceso**. Introducidas en macOS Ventura, proporcionan un marco que categoriza **cada binario del sistema en categorías de restricciones distintas**, definidas dentro de la **caché de confianza**, una lista que contiene binarios del sistema y sus respectivos hashes. Estas restricciones se extienden a cada binario ejecutable dentro del sistema, implicando un conjunto de **reglas** que delinean los requisitos para **lanzar un binario en particular**. Las reglas abarcan restricciones propias que un binario debe cumplir, restricciones parentales que deben cumplir su proceso padre y restricciones responsables que deben ser cumplidas por otras entidades relevantes.
 
 El mecanismo se extiende a aplicaciones de terceros a través de **Restricciones de Ambiente**, comenzando desde macOS Sonoma, lo que permite a los desarrolladores proteger sus aplicaciones especificando un **conjunto de claves y valores para las restricciones de ambiente**.
 
@@ -27,11 +27,11 @@ Existen 4 tipos de restricciones:
 * **Restricciones Propias**: Restricciones aplicadas al binario **en ejecución**.
 * **Proceso Padre**: Restricciones aplicadas al **proceso padre del proceso** (por ejemplo, **`launchd`** ejecutando un servicio XP).
 * **Restricciones Responsables**: Restricciones aplicadas al **proceso que llama al servicio** en una comunicación XPC.
-* **Restricciones de Carga de Biblioteca**: Utiliza restricciones de carga de biblioteca para describir selectivamente el código que se puede cargar.
+* **Restricciones de Carga de Biblioteca**: Utiliza restricciones de carga de biblioteca para describir selectivamente el código que puede cargarse.
 
-Por lo tanto, cuando un proceso intenta iniciar otro proceso —llamando a `execve(_:_:_:)` o `posix_spawn(_:_:_:_:_:_:)`—, el sistema operativo verifica que el **archivo ejecutable** cumpla su **propia restricción**, que el **proceso padre** del proceso cumpla la **restricción del padre del ejecutable**, y que el **proceso responsable** del proceso cumpla la **restricción del proceso responsable del ejecutable**. Si alguna de estas restricciones de inicio no se cumple, el sistema operativo no ejecuta el programa.
+Por lo tanto, cuando un proceso intenta lanzar otro proceso —llamando a `execve(_:_:_:)` o `posix_spawn(_:_:_:_:_:_:)`—, el sistema operativo verifica que el **archivo ejecutable** cumpla su **propia restricción**, que el **archivo ejecutable del proceso padre cumpla la restricción del proceso padre del ejecutable**, y que el **archivo ejecutable del proceso responsable cumpla la restricción del proceso responsable del ejecutable**. Si alguna de estas restricciones de inicio no se cumple, el sistema operativo no ejecuta el programa.
 
-Si al cargar una biblioteca alguna parte de la **restricción de la biblioteca no es verdadera**, tu proceso **no carga** la biblioteca.
+Si al cargar una biblioteca alguna parte de la **restricción de biblioteca no es verdadera**, tu proceso **no carga** la biblioteca.
 
 ## Categorías de LC
 
@@ -50,8 +50,8 @@ Los [**hechos que un LC puede usar están documentados**](https://developer.appl
 
 Cuando un binario de Apple está firmado, se **asigna a una categoría de LC** dentro de la **caché de confianza**.
 
-* Las **16 categorías de LC de iOS** fueron [**invertidas y documentadas aquí**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
-* Las actuales **categorías de LC (macOS 14** - Somona) han sido invertidas y sus [**descripciones se pueden encontrar aquí**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
+* Las **16 categorías de LC de iOS** fueron [**revertidas y documentadas aquí**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
+* Las actuales **categorías de LC (macOS 14** - Somona) han sido revertidas y sus [**descripciones se pueden encontrar aquí**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
 
 Por ejemplo, la Categoría 1 es:
 ```
@@ -59,7 +59,7 @@ Category 1:
 Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
 Parent Constraint: is-init-proc
 ```
-* `(en-volumen-authapfs-autorizado || en-volumen-del-sistema)`: Debe estar en el volumen del Sistema o Cryptexes.
+* `(en-volumen-autorizado-authapfs || en-volumen-del-sistema)`: Debe estar en el volumen del Sistema o Cryptexes.
 * `tipo-de-lanzamiento == 1`: Debe ser un servicio del sistema (plist en LaunchDaemons).
 * `categoría-de-validación == 1`: Un ejecutable del sistema operativo.
 * `es-proceso-de-inicio`: Launchd
@@ -70,7 +70,7 @@ Tienes más información [**sobre esto aquí**](https://theevilbit.github.io/pos
 
 ## Restricciones del Entorno
 
-Estas son las Restricciones de Lanzamiento configuradas en **aplicaciones de terceros**. El desarrollador puede seleccionar los **hechos** y **operandos lógicos a utilizar** en su aplicación para restringir el acceso a la misma.
+Estas son las Restricciones de Lanzamiento configuradas en **aplicaciones de terceros**. El desarrollador puede seleccionar los **hechos** y **operandos lógicos a utilizar** en su aplicación para restringir el acceso a sí misma.
 
 Es posible enumerar las Restricciones del Entorno de una aplicación con:
 ```bash
@@ -114,7 +114,7 @@ pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLau
 ```
 {% endcode %}
 
-(Otra opción podría ser usar la herramienta [**img4tool**](https://github.com/tihmstar/img4tool), la cual funcionará incluso en M1 aunque la versión sea antigua y para x86\_64 si la instalas en las ubicaciones adecuadas).
+(Otra opción podría ser usar la herramienta [**img4tool**](https://github.com/tihmstar/img4tool), que funcionará incluso en M1 aunque la versión sea antigua y para x86\_64 si la instalas en las ubicaciones adecuadas).
 
 Ahora puedes usar la herramienta [**trustcache**](https://github.com/CRKatri/trustcache) para obtener la información en un formato legible:
 ```bash
@@ -152,13 +152,13 @@ uint8_t reserved0;
 ```
 Luego, podrías usar un script como [**este**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) para extraer datos.
 
-A partir de esos datos, puedes verificar las aplicaciones con un valor de **restricciones de inicio de `0`**, que son las que no están restringidas ([**ver aquí**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) para ver qué representa cada valor).
+A partir de esos datos, puedes verificar las aplicaciones con un valor de **restricciones de inicio de `0`**, que son las que no están restringidas ([**ver aquí**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) para ver qué significa cada valor).
 
 ## Mitigaciones de Ataque
 
-Las Restricciones de Inicio habrían mitigado varios ataques antiguos al **asegurarse de que el proceso no se ejecute en condiciones inesperadas:** Por ejemplo, desde ubicaciones inesperadas o ser invocado por un proceso padre inesperado (si solo launchd debería iniciarlo).
+Las Restricciones de Inicio habrían mitigado varios ataques antiguos al **asegurarse de que el proceso no se ejecute en condiciones inesperadas:** Por ejemplo, desde ubicaciones inesperadas o siendo invocado por un proceso padre inesperado (si solo launchd debería iniciarlo).
 
-Además, las Restricciones de Inicio también **mitigan ataques degradados**.
+Además, las Restricciones de Inicio también **mitigan ataques de degradación**.
 
 Sin embargo, **no mitigan abusos comunes de XPC**, inyecciones de código de **Electron** o inyecciones de **dylib** sin validación de biblioteca (a menos que se conozcan los IDs de equipo que pueden cargar bibliotecas).
 
@@ -170,7 +170,6 @@ En la versión Sonoma, un punto notable es la **configuración de responsabilida
 - **Conectar a un Servicio Activo**: Si el servicio XPC ya está en ejecución (posiblemente activado por su aplicación original), no hay barreras para conectarse a él.
 
 Si bien implementar restricciones en el servicio XPC podría ser beneficioso al **reducir la ventana para posibles ataques**, no aborda la preocupación principal. Asegurar la seguridad del servicio XPC requiere fundamentalmente **validar efectivamente al cliente conectado**. Este sigue siendo el único método para fortalecer la seguridad del servicio. Además, cabe destacar que la configuración de responsabilidad mencionada está actualmente operativa, lo que puede no estar alineado con el diseño previsto.
-
 
 ### Protección de Electron
 

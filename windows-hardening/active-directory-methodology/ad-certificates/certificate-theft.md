@@ -7,19 +7,19 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
-**Este es un pequeño resumen de la increíble investigación de [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)**
+**Este es un pequeño resumen de los capítulos de Robo del increíble estudio de [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)**
 
 
 ## ¿Qué puedo hacer con un certificado?
 
-Antes de verificar cómo robar los certificados, aquí tienes información sobre para qué se puede utilizar el certificado:
+Antes de verificar cómo robar los certificados, aquí tienes información sobre para qué sirve el certificado:
 ```powershell
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -35,9 +35,9 @@ certutil.exe -dump -v cert.pfx
 
 En una **sesión de escritorio interactiva**, extraer un certificado de usuario o de máquina, junto con la clave privada, puede hacerse fácilmente, especialmente si la **clave privada es exportable**. Esto se puede lograr navegando hasta el certificado en `certmgr.msc`, haciendo clic derecho sobre él y seleccionando `Todas las tareas → Exportar` para generar un archivo .pfx protegido por contraseña.
 
-Para un enfoque **programático**, herramientas como el cmdlet PowerShell `ExportPfxCertificate` o proyectos como [el proyecto C# CertStealer de TheWover](https://github.com/TheWover/CertStealer) están disponibles. Estos utilizan la **API de Criptografía de Microsoft** (CAPI) o la API de Criptografía: Generación Siguiente (CNG) para interactuar con el almacén de certificados. Estas APIs proporcionan una variedad de servicios criptográficos, incluidos los necesarios para el almacenamiento y autenticación de certificados.
+Para un enfoque **programático**, herramientas como el cmdlet PowerShell `ExportPfxCertificate` o proyectos como [el proyecto CertStealer de C# de TheWover](https://github.com/TheWover/CertStealer) están disponibles. Estos utilizan la **API de Criptografía de Microsoft** (CAPI) o la API de Criptografía: Generación Siguiente (CNG) para interactuar con el almacén de certificados. Estas APIs proporcionan una variedad de servicios criptográficos, incluidos los necesarios para el almacenamiento y autenticación de certificados.
 
-Sin embargo, si una clave privada está configurada como no exportable, tanto CAPI como CNG normalmente bloquearán la extracción de dichos certificados. Para evitar esta restricción, se pueden emplear herramientas como **Mimikatz**. Mimikatz ofrece los comandos `crypto::capi` y `crypto::cng` para parchear las respectivas APIs, permitiendo la exportación de claves privadas. Específicamente, `crypto::capi` parchea el CAPI dentro del proceso actual, mientras que `crypto::cng` apunta a la memoria de **lsass.exe** para parchear.
+Sin embargo, si una clave privada se establece como no exportable, tanto CAPI como CNG normalmente bloquearán la extracción de dichos certificados. Para evitar esta restricción, se pueden emplear herramientas como **Mimikatz**. Mimikatz ofrece los comandos `crypto::capi` y `crypto::cng` para parchear las respectivas APIs, permitiendo la exportación de claves privadas. Específicamente, `crypto::capi` parchea el CAPI dentro del proceso actual, mientras que `crypto::cng` apunta a la memoria de **lsass.exe** para parchear.
 
 ## Robo de Certificado de Usuario a través de DPAPI – ROBO2
 

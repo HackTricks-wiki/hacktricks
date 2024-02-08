@@ -1,25 +1,26 @@
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 
-El siguiente código **explota los privilegios SeDebug y SeImpersonate** para copiar el token de un **proceso ejecutándose como SYSTEM** y con **todos los privilegios del token**. \
-En este caso, este código puede ser compilado y utilizado como un **binario de servicio de Windows** para verificar que está funcionando.\
+El siguiente código **explota los privilegios SeDebug y SeImpersonate** para copiar el token de un **proceso que se ejecuta como SYSTEM** y con **todos los privilegios del token**. \
+En este caso, este código puede compilarse y usarse como un **binario de servicio de Windows** para verificar que funciona.\
 Sin embargo, la parte principal del **código donde ocurre la elevación** está dentro de la **función `Exploit`**.\
-Dentro de esa función puedes ver que se busca el **proceso _lsass.exe_**, luego se **copia su token**, y finalmente ese **token se utiliza para generar un nuevo _cmd.exe_ con todos los privilegios del token copiado**.
+Dentro de esa función puedes ver que se busca el **proceso **_**lsass.exe**_**, luego se copia su **token**, y finalmente se utiliza ese token para generar un nuevo _**cmd.exe**_ con todos los privilegios del token copiado.
 
-**Otros procesos** que se ejecutan como SYSTEM con todos o la mayoría de los privilegios del token son: _services.exe_, _svhost.exe_ (uno de los primeros), _wininit.exe_, _csrss.exe_... (recuerda que no podrás copiar un token de un proceso Protegido). Además, puedes utilizar la herramienta [Process Hacker](https://processhacker.sourceforge.io/downloads.php) ejecutándola como administrador para ver los tokens de un proceso.
+**Otros procesos** que se ejecutan como SYSTEM con todos o la mayoría de los privilegios del token son: **services.exe**, **svhost.exe** (uno de los primeros), **wininit.exe**, **csrss.exe**... (_recuerda que no podrás copiar un token de un proceso protegido_). Además, puedes usar la herramienta [Process Hacker](https://processhacker.sourceforge.io/downloads.php) ejecutándola como administrador para ver los tokens de un proceso.
 ```c
+// From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
 #include <tlhelp32.h>
 #include <tchar.h>
@@ -222,19 +223,16 @@ StartServiceCtrlDispatcher( serviceTable );
 return 0;
 }
 ```
-**El código de este ejemplo fue compartido por una persona anónima.**
-
-
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>

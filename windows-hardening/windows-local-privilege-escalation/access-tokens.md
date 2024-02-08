@@ -7,7 +7,7 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -63,7 +63,7 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 ### Administrador local
 
 Cuando un administrador local inicia sesión, **se crean dos tokens de acceso**: Uno con derechos de administrador y otro con derechos normales. **Por defecto**, cuando este usuario ejecuta un proceso se utiliza el que tiene **derechos normales** (no administrador). Cuando este usuario intenta **ejecutar** algo **como administrador** ("Ejecutar como administrador", por ejemplo) se utilizará el **UAC** para solicitar permiso.\
-Si deseas [**aprender más sobre el UAC, lee esta página**](../authentication-credentials-uac-and-efs.md#uac)**.**
+Si deseas [**aprender más sobre el UAC lee esta página**](../authentication-credentials-uac-and-efs.md#uac)**.**
 
 ### Suplantación de credenciales de usuario
 
@@ -76,23 +76,23 @@ Puedes lanzar un proceso que **utiliza diferentes credenciales para acceder a se
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+Esto es útil si tienes credenciales válidas para acceder a objetos en la red pero esas credenciales no son válidas dentro del host actual ya que solo se utilizarán en la red (en el host actual se usarán los privilegios de tu usuario actual).
+
 ### Tipos de tokens
 
 Hay dos tipos de tokens disponibles:
 
-- **Token primario**: Los tokens primarios solo pueden ser **asociados a procesos**, y representan el sujeto de seguridad de un proceso. La creación de tokens primarios y su asociación a procesos son operaciones privilegiadas que requieren dos privilegios diferentes en nombre de la separación de privilegios: el escenario típico ve al servicio de autenticación creando el token, y un servicio de inicio de sesión asociándolo al shell del sistema operativo del usuario. Los procesos heredan inicialmente una copia del token primario del proceso padre.
-- **Token de suplantación**: La suplantación es un concepto de seguridad implementado en Windows NT que **permite** a una aplicación de servidor "**ser**" **temporalmente** "**el cliente**" en términos de acceso a objetos seguros. La suplantación tiene **cuatro niveles posibles**:
+* **Token primario**: Sirve como representación de las credenciales de seguridad de un proceso. La creación y asociación de tokens primarios con procesos son acciones que requieren privilegios elevados, enfatizando el principio de separación de privilegios. Típicamente, un servicio de autenticación es responsable de la creación del token, mientras que un servicio de inicio de sesión maneja su asociación con el shell del sistema operativo del usuario. Es importante tener en cuenta que los procesos heredan el token primario de su proceso padre al crearse.
 
-  - **anónimo**, otorgando al servidor el acceso de un usuario anónimo/no identificado
-  - **identificación**, permitiendo al servidor inspeccionar la identidad del cliente pero no usar esa identidad para acceder a objetos
-  - **suplantación**, permitiendo al servidor actuar en nombre del cliente
-  - **delegación**, igual que la suplantación pero extendida a sistemas remotos a los que se conecta el servidor (a través de la preservación de credenciales).
-
-El cliente puede elegir el nivel máximo de suplantación (si lo hay) disponible para el servidor como parámetro de conexión. La delegación y la suplantación son operaciones privilegiadas (la suplantación inicialmente no lo era, pero la negligencia histórica en la implementación de las API de cliente al no restringir el nivel predeterminado a "identificación", permitiendo a un servidor no privilegiado suplantar a un cliente privilegiado no dispuesto, lo requirió). **Los tokens de suplantación solo pueden ser asociados a hilos**, y representan el sujeto de seguridad de un proceso del cliente. Los tokens de suplantación suelen crearse y asociarse al hilo actual implícitamente, mediante mecanismos IPC como DCE RPC, DDE y tuberías con nombre.
+* **Token de suplantación**: Permite que una aplicación de servidor adopte temporalmente la identidad del cliente para acceder a objetos seguros. Este mecanismo se estratifica en cuatro niveles de operación:
+- **Anónimo**: Concede acceso al servidor similar al de un usuario no identificado.
+- **Identificación**: Permite al servidor verificar la identidad del cliente sin utilizarla para acceder a objetos.
+- **Suplantación**: Permite al servidor operar bajo la identidad del cliente.
+- **Delegación**: Similar a la Suplantación pero incluye la capacidad de extender esta asunción de identidad a sistemas remotos con los que el servidor interactúa, asegurando la preservación de credenciales.
 
 #### Suplantar Tokens
 
-Usando el módulo _**incognito**_ de metasploit si tienes suficientes privilegios puedes **listar** y **suplantar** otros **tokens** fácilmente. Esto podría ser útil para realizar **acciones como si fueras el otro usuario**. También podrías **escalar privilegios** con esta técnica.
+Utilizando el módulo _**incognito**_ de Metasploit, si tienes suficientes privilegios, puedes **listar** y **suplantar** otros **tokens** fácilmente. Esto podría ser útil para realizar **acciones como si fueras el otro usuario**. También podrías **escalar privilegios** con esta técnica.
 
 ### Privilegios de Tokens
 

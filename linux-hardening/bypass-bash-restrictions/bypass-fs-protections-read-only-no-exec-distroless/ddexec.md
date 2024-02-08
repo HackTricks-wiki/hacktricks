@@ -40,7 +40,7 @@ base64
 ```
 ## La técnica
 
-Si puedes modificar arbitrariamente la memoria de un proceso, entonces puedes tomar el control de él. Esto se puede usar para secuestrar un proceso existente y reemplazarlo con otro programa. Podemos lograr esto ya sea usando la llamada al sistema `ptrace()` (lo cual requiere la capacidad de ejecutar llamadas al sistema o tener gdb disponible en el sistema) o, de manera más interesante, escribiendo en `/proc/$pid/mem`.
+Si puedes modificar arbitrariamente la memoria de un proceso, entonces puedes tomar el control de él. Esto se puede utilizar para secuestrar un proceso existente y reemplazarlo con otro programa. Podemos lograr esto ya sea usando la llamada al sistema `ptrace()` (lo cual requiere tener la capacidad de ejecutar llamadas al sistema o tener gdb disponible en el sistema) o, de manera más interesante, escribiendo en `/proc/$pid/mem`.
 
 El archivo `/proc/$pid/mem` es un mapeo uno a uno de todo el espacio de direcciones de un proceso (por ejemplo, desde `0x0000000000000000` hasta `0x7ffffffffffff000` en x86-64). Esto significa que leer o escribir en este archivo en un desplazamiento `x` es lo mismo que leer o modificar el contenido en la dirección virtual `x`.
 
@@ -56,14 +56,14 @@ Estos problemas tienen soluciones que, aunque no son perfectas, son buenas:
 - ASLR ni siquiera es un problema, podemos verificar el archivo `maps` de la shell o cualquier otro del procfs para obtener información sobre el espacio de direcciones del proceso.
 - Entonces necesitamos hacer `lseek()` sobre el archivo. Desde la shell esto no se puede hacer a menos que se use el infame `dd`.
 
-### En más detalle
+### Con más detalle
 
 Los pasos son relativamente fáciles y no requieren ningún tipo de experiencia para entenderlos:
 
 - Analizar el binario que queremos ejecutar y el cargador para averiguar qué mapeos necesitan. Luego crear un "código" de "shell" que realizará, en términos generales, los mismos pasos que el kernel hace en cada llamada a `execve()`:
 - Crear dichos mapeos.
 - Leer los binarios en ellos.
-- Configurar permisos.
+- Configurar los permisos.
 - Finalmente, inicializar la pila con los argumentos del programa y colocar el vector auxiliar (necesario por el cargador).
 - Saltar al cargador y dejar que haga el resto (cargar las bibliotecas necesarias para el programa).
 - Obtener del archivo `syscall` la dirección a la que el proceso regresará después de la llamada al sistema que está ejecutando.
@@ -82,7 +82,7 @@ hexdump
 cmp
 xxd
 ```
-Al establecer la variable `SEEKER`, puedes cambiar el buscador utilizado, _por ejemplo_:
+Al establecer la variable `SEEKER` puedes cambiar el buscador utilizado, _por ejemplo_:
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
@@ -92,7 +92,7 @@ SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls
 ```
 Bloquea esto, EDRs.
 
-# Referencias
+## Referencias
 * [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 
 <details>
@@ -105,6 +105,6 @@ Otras formas de apoyar a HackTricks:
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
