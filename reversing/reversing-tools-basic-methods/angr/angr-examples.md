@@ -4,11 +4,11 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけます。
+* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れます。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
@@ -416,7 +416,7 @@ main(sys.argv)
 ### 制約の適用
 
 {% hint style="info" %}
-時には、16文字の単語を1文字ずつ比較するような単純な人間の操作は、**angr**にとってコストがかかります。なぜなら、それは1つのifごとに分岐を生成するため、指数関数的に分岐を生成する必要があるからです：`2^16`\
+時には、16文字の単語を1文字ずつ比較するような単純な人間の操作は、**angr**にとってコストがかかります。なぜなら、それは1つのifごとに1つのブランチを生成するため、**指数的に**ブランチを生成する必要があるからです：`2^16`\
 そのため、**angrに前のポイントに戻ってもらい**（実際に難しい部分がすでに完了している場所）**その制約を手動で設定する**方が簡単です。
 {% endhint %}
 ```python
@@ -490,16 +490,16 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 {% hint style="danger" %}
-いくつかのシナリオでは、**veritesting**をアクティブにすることができます。これにより、類似した状態がマージされ、無駄なブランチを保存して解決策を見つけることができます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
+いくつかのシナリオでは、**veritesting**をアクティブにすることができ、類似した状態をマージして無駄なブランチを保存し、解決策を見つけることができます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 {% endhint %}
 
 {% hint style="info" %}
-これらのシナリオでは、**angrが理解しやすいように関数をフックする**こともできます。
+これらのシナリオでは、**angrが理解できるように関数をフックする**こともできます。
 {% endhint %}
 
 ### シミュレーションマネージャ
 
-一部のシミュレーションマネージャは、他のものよりも有用な場合があります。前述の例では、多くの有用なブランチが作成された問題がありました。ここでは、**veritesting**テクニックを使用してこれらをマージし、解決策を見つけます。\
+一部のシミュレーションマネージャは、他のものよりも有用な場合があります。前述の例では、多くの有用なブランチが作成された問題がありました。ここでは、**veritesting**テクニックがそれらをマージし、解決策を見つけます。\
 このシミュレーションマネージャは、次のようにしてアクティブ化することもできます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -823,10 +823,10 @@ main(sys.argv)
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**したいですか？または**最新版のPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションです。
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[💬 Discordグループ](https://emojipedia.org/speech-balloon/)**に参加するか、[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**したいですか？または**最新版のPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。当社の独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクション
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 * **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

@@ -1,23 +1,23 @@
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローしてください。**
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 で私をフォローする [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
+* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github リポジトリに提出してください。
 
 </details>
 
 
-このツールは基本的に、手計算で満たすべき条件を持つ変数の値を見つけるのが非常に面倒な場合に役立ちます。したがって、変数が満たすべき条件をZ3に指示すると、可能であればいくつかの値を見つけてくれます。
+非常に基本的に、このツールは、特定の条件を満たす必要がある変数の値を見つけるのに役立ち、手計算するのは非常に面倒です。したがって、Z3に変数が満たす必要がある条件を示すことができ、それがいくつかの値を見つけます（可能な場合）。 
 
-# 基本操作
+# 基本的な操作
 
-## ブール/And/Or/Not
+## ブール値/And/Or/Not
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -66,9 +66,9 @@ print ("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# マシン算術
+# 機械算術
 
-現代のCPUと主流のプログラミング言語は、**固定サイズのビットベクトル**上での算術を使用します。マシン算術はZ3Pyで**ビットベクトル**として利用可能です。
+現代のCPUおよび主要なプログラミング言語は、**固定サイズのビットベクトル**上で算術演算を行います。機械算術はZ3Pyで**ビットベクトル**として利用できます。
 ```python
 from z3 import *
 
@@ -83,9 +83,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-## 符号付き/符号なし数値
+## 符号付き/符号なしの数値
 
-Z3は、**ビットベクターが符号付きまたは符号なしとして扱われるか**によって違いが生じる場合に特別な符号付きの算術演算を提供します。Z3Pyでは、演算子 **<, <=, >, >=, /, % および >>** は**符号付き**バージョンに対応しています。対応する**符号なし**演算子は **ULT, ULE, UGT, UGE, UDiv, URem および LShR** です。
+Z3は、**ビットベクトルが符号付きか符号なしかによって違いが生じる**特別な符号付きの算術演算を提供します。Z3Pyでは、演算子**<、<=、>、>=、/、%、および >>** が**符号付き**バージョンに対応しています。対応する**符号なし**演算子は**ULT、ULE、UGT、UGE、UDiv、URem、および LShR**です。
 ```python
 from z3 import *
 
@@ -105,9 +105,9 @@ solve(ULT(x, 0))
 ```
 ## 関数
 
-**解釈される関数** は、例えば算術において**関数 +** は**固定された標準的な解釈**を持っています（二つの数を加算します）。**解釈されない関数**と定数は**最大限に柔軟**です。それらは関数や定数に対する**制約**と**矛盾しない**任意の解釈を可能にします。
+**解釈された関数** は、**関数 +** が **固定された標準解釈** を持つ算術などの関数です（2つの数を加算します）。 **解釈されていない関数** と定数は **最大限に柔軟** です。関数や定数に関する **制約** と **整合性** を持つ **任意の解釈** を許可します。
 
-例：f が x に対して二回適用されると再び x になりますが、f が一回 x に適用されると x とは異なります。
+例: x に 2 回適用された f は再び x になりますが、x に 1 回適用された f は x とは異なります。
 ```python
 from z3 import *
 
@@ -178,21 +178,21 @@ print_matrix(r)
 else:
 print "failed to solve"
 ```
-# 参考文献
+## 参考文献
 
 * [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
+* **ハッキングテクニックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>

@@ -1,20 +1,20 @@
-# 外部フォレストドメイン - 片方向（アウトバウンド）
+# External Forest Domain - One-Way (Outbound)
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>をチェック！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
+* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github リポジトリに提出する
 
 </details>
 
-このシナリオでは、**あなたのドメイン**が**異なるドメイン**のプリンシパルに対していくつかの**権限**を**信頼**しています。
+このシナリオでは、**あなたのドメイン**が**異なるドメイン**のプリンシパルに一部の**特権**を**委任**しています。
 
 ## 列挙
 
@@ -40,46 +40,41 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
-## トラストアカウント攻撃
+## 信頼アカウント攻撃
 
-Active Directory ドメインまたはフォレストトラストがドメイン _B_ からドメイン _A_ へ設定されるとき（_**B**_ が A を信頼）、ドメイン **A** に **B. Kerberos trust keys** という名前のトラストアカウントが作成されます。これらは、ドメイン A のユーザーがドメイン B のサービスに対するサービスチケットを要求する際に、**相互レルム TGT の暗号化**に使用される、**トラストアカウントのパスワード**から派生したものです。
+ドメイン **A** とドメイン **B** の間に信頼関係が確立されると、セキュリティ上の脆弱性が存在します。ここで、ドメイン **B** がドメイン **A** に対して信頼を拡張します。この設定では、ドメイン **A** にはドメイン **B** 向けの特別なアカウントが作成され、両ドメイン間の認証プロセスで重要な役割を果たします。この特別なアカウントは、ドメイン **B** に関連付けられ、両ドメイン間のサービスへのアクセスに使用されるチケットの暗号化に使用されます。
 
-ドメインコントローラを使用して、信頼されたアカウントのパスワードとハッシュを取得することが可能です：
+ここで理解する重要な点は、この特別なアカウントのパスワードとハッシュを、ドメイン **A** のドメインコントローラからコマンドラインツールを使用して抽出できるということです。このアクションを実行するためのコマンドは次のとおりです：
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-リスクは、信頼アカウントB$が有効になっているため、**B$のプライマリグループがドメインAのドメインユーザーである**ことにあります。ドメインユーザーに付与された権限はB$にも適用され、B$の資格情報を使用してドメインAに対して認証することが可能です。
+この抽出は、そのアカウントが**$**で名前が示され、ドメイン**A**の"Domain Users"グループに属しているため、可能です。これにより、このグループに関連付けられた権限を継承します。これにより、個人はこのアカウントの資格情報を使用してドメイン**A**に対して認証できます。
 
-{% hint style="warning" %}
-したがって、**信頼しているドメインから信頼されているドメイン内のユーザーを取得することが可能です**。このユーザーは多くの権限を持っていないかもしれません（おそらくドメインユーザーのみ）が、**外部ドメインを列挙する**ことができます。
-{% endhint %}
+**警告:** この状況を利用して、ユーザーとしてドメイン**A**に足場を築くことが可能ですが、権限は制限されています。ただし、このアクセス権限は、ドメイン**A**で列挙を実行するのに十分です。
 
-この例では、信頼しているドメインは`ext.local`で、信頼されているドメインは`root.local`です。したがって、`root.local`内に`EXT$`というユーザーが作成されます。
+信頼するドメインが`ext.local`であり、信頼されるドメインが`root.local`であるシナリオでは、`root.local`内に`EXT$`というユーザーアカウントが作成されます。特定のツールを使用することで、Kerberos信頼キーをダンプし、`root.local`内の`EXT$`の資格情報を明らかにすることが可能です。これを達成するためのコマンドは次のとおりです:
 ```bash
-# Use mimikatz to dump trusted keys
 lsadump::trust /patch
-# You can see in the output the old and current credentials
-# You will find clear text, AES and RC4 hashes
 ```
-したがって、この時点で **`root.local\EXT$`** の現在の**クリアテキストパスワードとKerberos秘密鍵**を持っています。**`root.local\EXT$`** のKerberos AES秘密鍵は異なるソルトが使用されるためAESトラストキーとは同一ではありませんが、**RC4キーは同じです**。したがって、ext.localからダンプされた**RC4トラストキーを使用して**、`root.local\EXT$` として `root.local` に対して**認証**することができます。
+以下では、別のツールコマンドを使用して、`root.local`内の`root.local\EXT$`として認証するために抽出されたRC4キーを使用できます：
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-この方法を使えば、そのドメインの列挙を開始し、さらにユーザーに対してkerberoastingを行うことができます。
-```
+この認証ステップは、`root.local`内のサービスを列挙したり、Kerberoast攻撃を実行してサービスアカウントの資格情報を抽出する可能性を開く。
+```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
 ### クリアテキスト信頼パスワードの収集
 
-前のフローでは、**クリアテキストパスワード**（**mimikatzによってダンプされた**）の代わりに信頼ハッシュを使用しました。
+前のフローでは、**クリアテキストパスワード**（また、**mimikatzによってダンプされた**）の代わりに信頼ハッシュが使用されました。
 
-クリアテキストパスワードは、mimikatzの\[ CLEAR ]出力を16進数から変換し、ヌルバイト '\x00' を削除することで取得できます：
+クリアテキストパスワードは、mimikatzからの \[ CLEAR ] 出力を16進数から変換し、ヌルバイト '\x00' を削除することで取得できます：
 
 ![](<../../.gitbook/assets/image (2) (1) (2) (1).png>)
 
-信頼関係を作成する際には、ユーザーが信頼のためのパスワードを入力する必要があります。このデモンストレーションでは、キーは元の信頼パスワードであり、したがって人間が読める形式です。キーがサイクルする（30日ごと）と、クリアテキストは人間が読める形式ではなくなりますが、技術的にはまだ使用可能です。
+信頼関係を作成する際、ユーザーが信頼のためにパスワードを入力する必要がある場合があります。このデモンストレーションでは、キーは元の信頼パスワードであり、したがって人間が読める形式です。キーがサイクルする（30日間）と、クリアテキストは人間が読めなくなりますが、技術的にはまだ使用可能です。
 
-クリアテキストパスワードは、信頼アカウントのKerberos秘密鍵を使用してTGTを要求する代わりに、信頼アカウントとして通常の認証を実行するために使用できます。ここでは、ext.localからroot.localに対してDomain Adminsのメンバーを照会しています：
+クリアテキストパスワードは、信頼アカウントとして通常の認証を実行するために使用できます。信頼アカウントのKerberos秘密キーを使用してTGTを要求する代替手段です。ここでは、ext.local から root.local をクエリして Domain Admins のメンバーを取得しています：
 
 ![](<../../.gitbook/assets/image (1) (1) (1) (2).png>)
 
@@ -89,14 +84,14 @@ lsadump::trust /patch
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>こちら</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法：
+HackTricks をサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する。
-* **HackTricks**の[**githubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
+* **HackTricks で企業を宣伝したい**、または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
 
 </details>

@@ -4,10 +4,10 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたい**ですか？または、**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクション
 * [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**私をフォロー**する**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
 * **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
@@ -18,7 +18,7 @@ PowerUpSQLというPowerShellモジュールはこの場合非常に役立ちま
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ```
-### ドメインセッションなしでネットワークから列挙する
+### ドメインセッションなしでネットワークから列挙
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -80,9 +80,9 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL信頼されたリンク
 
-もしMSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合、ユーザーが信頼されたデータベースに権限を持っている場合、**信頼関係を使用して他のインスタンスでもクエリを実行できる**ようになります。これらの信頼関係は連鎖することができ、ユーザーはいくつかの構成ミスがあるデータベースを見つけてコマンドを実行できるかもしれません。
+もしMSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合、ユーザーが信頼されたデータベースに権限を持っている場合、**信頼関係を使用して他のインスタンスでもクエリを実行することができます**。この信頼関係は連鎖することができ、ユーザーはいくつかの設定ミスのあるデータベースを見つけてコマンドを実行することができるかもしれません。
 
-**データベース間のリンクは、フォレストトラストを超えて機能します。**
+**データベース間のリンクは、フォレストトラストを超えても機能します。**
 
 ### Powershellの悪用
 ```powershell
@@ -138,7 +138,7 @@ select * from master..sysservers
 ```
 ![](<../../.gitbook/assets/image (168).png>)
 
-#### 信頼できるリンクでクエリを実行
+#### 信頼できるリンクでクエリを実行する
 
 リンクを介してクエリを実行します（例：新しいアクセス可能なインスタンスでより多くのリンクを見つける）：
 ```sql

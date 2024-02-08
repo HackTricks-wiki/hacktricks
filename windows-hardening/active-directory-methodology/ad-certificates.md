@@ -2,108 +2,127 @@
 
 <details>
 
-<summary><strong>AWS ハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricks をサポートする他の方法：
+HackTricks をサポートする他の方法:
 
-* **HackTricks に広告を掲載したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFT**](https://opensea.io/collection/the-peass-family) のコレクションをチェックする
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に **参加する** か、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォローする**。
-* **HackTricks** の [**GitHub リポジトリ**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) に PR を提出して、ハッキングのコツを共有する。
+* **HackTricks で企業を宣伝**したい場合や **HackTricks をPDFでダウンロード**したい場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローする [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
 
 </details>
 
-## 基本情報
+## 導入
 
 ### 証明書の構成要素
 
-* **Subject** - 証明書の所有者。
-* **Public Key** - Subject を別に保存されている秘密鍵と関連付ける。
-* **NotBefore および NotAfter 日付** - 証明書が有効である期間を定義する。
-* **Serial Number** - CA によって割り当てられた証明書の識別子。
-* **Issuer** - 証明書を発行した人（通常は CA）を識別する。
-* **SubjectAlternativeName** - Subject が使用する可能性のある 1 つ以上の代替名を定義する。(_以下を参照_)
-* **Basic Constraints** - 証明書が CA であるかエンドエンティティであるかを識別し、証明書を使用する際の制約があるかどうかを示す。
-* **Extended Key Usages (EKUs)** - 証明書の使用方法を記述するオブジェクト識別子（OID）。Microsoft の用語では Enhanced Key Usage とも呼ばれる。一般的な EKU OID には以下が含まれる：
-* Code Signing (OID 1.3.6.1.5.5.7.3.3) - 実行可能コードの署名用の証明書。
-* Encrypting File System (OID 1.3.6.1.4.1.311.10.3.4) - ファイルシステムの暗号化用の証明書。
-* Secure Email (1.3.6.1.5.5.7.3.4) - 電子メールの暗号化用の証明書。
-* Client Authentication (OID 1.3.6.1.5.5.7.3.2) - 他のサーバー（例：AD）への認証用の証明書。
-* Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2) - スマートカード認証に使用する証明書。
-* Server Authentication (OID 1.3.6.1.5.5.7.3.1) - サーバー（例：HTTPS 証明書）を識別するための証明書。
-* **Signature Algorithm** - 証明書に署名するために使用されるアルゴリズムを指定する。
-* **Signature** - 発行者（例：CA）の秘密鍵を使用して証明書本体の署名。
+- 証明書の **Subject** は所有者を示します。
+- **Public Key** は証明書を正当な所有者にリンクするために非公開のキーとペアになります。
+- **NotBefore** および **NotAfter** 日付によって定義される **有効期間** は、証明書の有効期間を示します。
+- 証明書機関（CA）によって提供される一意の **Serial Number** は、各証明書を識別します。
+- **Issuer** は証明書を発行したCAを指します。
+- **SubjectAlternativeName** は、主体の追加名を許可し、識別の柔軟性を向上させます。
+- **Basic Constraints** は、証明書がCA用かエンドエンティティ用かを識別し、使用制限を定義します。
+- **Extended Key Usages (EKUs)** は、コード署名やメール暗号化などの証明書の特定の目的を、オブジェクト識別子（OID）を通じて明確にします。
+- **Signature Algorithm** は、証明書に署名するための方法を指定します。
+- **Signature** は、発行者の秘密鍵で作成され、証明書の信頼性を保証します。
 
-#### Subject Alternative Names
+### 特別な考慮事項
 
-**Subject Alternative Name**（SAN）は X.509v3 拡張機能です。これにより、**追加のアイデンティティ**を**証明書**にバインドすることができます。例えば、Web サーバーが**複数のドメインのコンテンツ**をホストしている場合、**各**適用される**ドメイン**を**SAN**に**含める**ことができ、Web サーバーは単一の HTTPS 証明書のみを必要とします。
+- **Subject Alternative Names (SANs)** は、複数の識別子に証明書を適用するために拡張され、複数のドメインを持つサーバーにとって重要です。SAN仕様を操作する攻撃者によるなりすましリスクを回避するために、安全な発行プロセスが重要です。
 
-デフォルトでは、証明書ベースの認証中に、AD は SAN に指定された UPN に基づいて証明書をユーザーアカウントにマッピングする方法の一つです。攻撃者がクライアント認証を可能にする EKU を持つ証明書のリクエスト時に**任意の SAN**を**指定できる**場合、CA が攻撃者が提供した SAN を使用して証明書を作成して署名すると、**攻撃者はドメイン内の任意のユーザーになることができます**。
+### Active Directory（AD）の証明書機関（CAs）
 
-### CAs
+AD CS は、ADフォレスト内のCA証明書を指定されたコンテナを介して認識します。各コンテナは固有の役割を果たします:
 
-AD CS は、`CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>` のコンテナの下にある 4 つの場所で、AD フォレストが信頼する CA 証明書を定義します。それぞれの目的によって異なります：
+- **Certification Authorities** コンテナには信頼されたルートCA証明書が保持されます。
+- **Enrolment Services** コンテナにはエンタープライズCAとその証明書テンプレートの詳細が記載されます。
+- **NTAuthCertificates** オブジェクトには、AD認証に認証されたCA証明書が含まれます。
+- **AIA (Authority Information Access)** コンテナは、中間およびクロスCA証明書を使用して証明書チェーンの検証を容易にします。
 
-* **Certification Authorities** コンテナは、**信頼されるルート CA 証明書**を定義します。これらの CA は PKI ツリー階層の**最上位**にあり、AD CS 環境での信頼の基盤です。各 CA はコンテナ内の AD オブジェクトとして表され、**objectClass** は **`certificationAuthority`** に設定され、**`cACertificate`** プロパティには **CA の証明書のバイト**が含まれます。Windows はこれらの CA 証明書を**各 Windows マシン**の信頼されたルート証明機関の証明書ストアに伝播します。AD が証明書を**信頼されたものとして考慮する**ためには、証明書の信頼**チェーン**は最終的にこのコンテナで定義された**ルート CA のいずれかで**終わる必要があります。
-* **Enrolment Services** コンテナは、**Enterprise CA**（つまり、Enterprise CA ロールが有効になっている AD CS で作成された CA）を定義します。各 Enterprise CA には、以下の属性を持つ AD オブジェクトがあります：
-* **objectClass** 属性を **`pKIEnrollmentService`** に設定
-* **`cACertificate`** 属性には **CA の証明書のバイト**が含まれる
-* **`dNSHostName`** プロパティには **CA の DNS ホスト**が設定されている
-* **certificateTemplates** フィールドには **有効な証明書テンプレート**が定義されています。証明書テンプレートは、CA が証明書を作成する際に使用する設定の「設計図」であり、EKU、登録権限、証明書の有効期限、発行要件、暗号化設定などが含まれます。証明書テンプレートについては後で詳しく説明します。
+### 証明書取得: クライアント証明書リクエストフロー
 
-{% hint style="info" %}
-AD 環境では、**クライアントは Enterprise CA と対話して、証明書テンプレートで定義された設定に基づいて証明書をリクエストします**。Enterprise CA の証明書は、各 Windows マシンの中間証明機関の証明書ストアに伝播されます。
-{% endhint %}
-
-* **NTAuthCertificates** AD オブジェクトは、AD への認証を可能にする CA 証明書を定義します。このオブジェクトには **objectClass** が **`certificationAuthority`** であり、オブジェクトの **`cACertificate`** プロパティは **信頼される CA 証明書の配列**を定義します。AD に参加している Windows マシンは、これらの CA を各マシンの中間証明機関の証明書ストアに伝播します。**クライアント** アプリケーションは、NTAuthCertificates オブジェクトによって定義された **CA のいずれかが** 認証クライアントの証明書に**署名している場合に限り**、AD に対して証明書を使用して**認証**することができます。
-* **AIA**（Authority Information Access）コンテナは、中間およびクロス CA の AD オブジェクトを保持します。**中間 CA はルート CA の「子」**であり、PKI ツリー階層内で、このコンテナは**証明書チェーンの検証**を支援するために存在します。Certification Authorities コンテナと同様に、各**CA は AIA コンテナ内の AD オブジェクト**として表され、objectClass 属性は certificationAuthority に設定され、**`cACertificate`** プロパティには **CA の証明書のバイト**が含まれます。これらの CA は、各 Windows マシンの中間証明機関の証明書ストアに伝播されます。
-
-### クライアント証明書リクエストフロー
-
-<figure><img src="../../.gitbook/assets/image (5) (2) (2).png" alt=""><figcaption></figcaption></figure>
-
-AD CS から**証明書を取得する**プロセスです。概要を説明すると、登録中にクライアントはまず上記で説明した**Enrolment Services** コンテナのオブジェクトに基づいて **Enterprise CA を見つけます**。
-
-1. クライアントは次に **公開鍵-秘密鍵ペア**を生成し、
-2. 公開鍵を **証明書署名リクエスト（CSR）** メッセージに配置し、証明書の主体や**証明書テンプレート名**などの詳細とともに配置します。クライアントは CSR を自分の秘密鍵で**署名**し、CSR を Enterprise CA サーバーに送信します。
-3. **CA** サーバーは、クライアントが**証明書をリクエストできるかどうかを確認します**。そうであれば、CSR で指定された**証明書テンプレート** AD オブジェクトを参照して、証明書を発行するかどうかを決定します。CA は、証明書テンプレート AD オブジェクトの**権限が**認証アカウントが**証明書を取得できるかどうかを確認します**。
-4. そうであれば、**CA は証明書を生成**します。これは、**証明書テンプレート**で定義された「設計図」設定（例：EKU、暗号化設定、発行要件など）を使用し、証明書のテンプレート設定で許可されている場合は CSR に提供されたその他の情報を使用します。**CA は証明書に自分の秘密鍵で署名**し、それをクライアントに返します。
+1. リクエストプロセスは、クライアントがエンタープライズCAを見つけることから始まります。
+2. パブリック-プライベートキーペアを生成した後、公開鍵やその他の詳細を含むCSRが作成されます。
+3. CAは、利用可能な証明書テンプレートに対してCSRを評価し、テンプレートの権限に基づいて証明書を発行します。
+4. 承認されると、CAは証明書に自身の秘密鍵で署名し、クライアントに返します。
 
 ### 証明書テンプレート
 
-AD CS は、利用可能な証明書テンプレートを以下のコンテナにある **`pKICertificateTemplate`** の **objectClass** を持つ AD オブジェクトとして格納します：
+AD内で定義されるこれらのテンプレートは、証明書の発行に関する設定と権限を概説し、証明書サービスへのアクセスを管理するために重要です。
 
-`CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>`
+## 証明書の登録
 
-AD 証明書テンプレートオブジェクトの属性はその**設定を定義し、セキュリティ記述子は**どの**プリンシパルが**証明書に登録できるか、または証明書テンプレートを**編集**できるかを制御します。
+証明書の登録プロセスは、管理者が **証明書テンプレートを作成** し、それがエンタープライズ証明書機関（CA）によって **公開** されることで開始されます。これにより、テンプレートの名前がActive Directoryオブジェクトの `certificatetemplates` フィールドに追加され、クライアントの登録が可能になります。
 
-AD 証明書テンプレートオブジェクトの **`pKIExtendedKeyUsage`** 属性には、テンプレートで有効になっている **OID の配列**が含まれます。これらの EKU OID は、**証明書を使用できる内容に影響を与えます**。[可能な OID のリストはこちら](https://www.pkisolutions.com/object-identifiers-oid-in-pki/)で見つけることができます。
+証明書をリクエストするためには、 **登録権限** が付与されている必要があります。これらの権限は、証明書テンプレートとエンタープライズCA自体のセキュリティ記述子で定義されます。リクエストが成功するには、両方の場所で権限が付与されている必要があります。
 
-#### 認証 OID
+### テンプレートの登録権限
 
-* `1.3.6.1.5.5.7.3.2`: クライアント認証
-* `1.3.6.1.5.2.3.4`: PKINIT クライアント認証（手動で追加する必要がある）
-* `1.3.6.1.4.1.311.20.2.2`: スマートカードログオン
-* `2.5.29.37.0`: 任意の目的
-* `(no EKUs)`: SubCA
-* 私たちが悪用できると判断した追加の EKU OID は、Certificate Request Agent OID (`1.3.6.1.4.1.311.20.2.1`) です。この OID を持つ証明書は、特定の制限が設けられていない限り、**他のユーザーに代わって証明書をリクエストするために使用できます**。
+これらの権限は、アクセス制御エントリ（ACE）を介して指定され、次のような権限を詳細に説明します:
+- **Certificate-Enrollment** および **Certificate-AutoEnrollment** 権限は、それぞれ特定のGUIDに関連付けられています。
+- **ExtendedRights** は、すべての拡張権限を許可します。
+- **FullControl/GenericAll** は、テンプレートに対する完全な制御を提供します。
 
-## 証明書登録
+### エンタープライズCAの登録権限
 
-管理者は**証明書テンプレートを作成する必要があり**、その後、**Enterprise CA がテンプレートを「公開」**し、クライアントが登録できるようにします。AD CS は、**Enterprise CA
+CAの権限は、証明書機関管理コンソールからアクセス可能なセキュリティ記述子に記載されています。一部の設定では、低特権ユーザーにリモートアクセスを許可することができ、これはセキュリティ上の懸念となる可能性があります。
+
+### 追加の発行コントロール
+
+次のようなコントロールが適用される場合があります:
+- **マネージャー承認**: 証明書マネージャーによる承認までリクエストを保留状態にします。
+- **Enrolment Agents and Authorized Signatures**: CSRに必要な署名の数や必要なApplication Policy OIDsを指定します。
+
+### 証明書をリクエストする方法
+
+証明書は、次の方法でリクエストできます:
+1. **Windowsクライアント証明書登録プロトコル**（MS-WCCE）、DCOMインターフェースを使用します。
+2. **ICertPassage Remote Protocol**（MS-ICPR）、名前付きパイプまたはTCP/IPを介して行います。
+3. **証明書登録Webインターフェース**、証明書機関Web登録ロールがインストールされている場合。
+4. **Certificate Enrollment Service**（CES）と **Certificate Enrollment Policy**（CEP）サービスと共に使用します。
+5. **Network Device Enrollment Service**（NDES）は、Simple Certificate Enrollment Protocol（SCEP）を使用してネットワークデバイス向けに証明書をリクエストします。
+
+Windowsユーザーは、GUI（`certmgr.msc` または `certlm.msc`）またはコマンドラインツール（`certreq.exe` または PowerShell の `Get-Certificate` コマンド）を使用して証明書をリクエストすることもできます。
+```powershell
+# Example of requesting a certificate using PowerShell
+Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
+```
+## 証明書認証
+
+Active Directory（AD）は、主に**Kerberos**および**Secure Channel（Schannel）**プロトコルを利用して証明書認証をサポートしています。
+
+### Kerberos認証プロセス
+
+Kerberos認証プロセスでは、ユーザーのチケット発行チケット（TGT）のリクエストは、ユーザーの証明書の**秘密鍵**を使用して署名されます。このリクエストは、ドメインコントローラーによって証明書の**有効性**、**パス**、および**失効状態**を含む複数の検証を受けます。検証には、証明書が信頼されるソースから来ていることの確認や、**NTAUTH証明書ストア**内の発行者の存在の確認も含まれます。成功した検証により、TGTが発行されます。AD内の**`NTAuthCertificates`**オブジェクトは、次の場所にあります：
 ```bash
-# https://github.com/GhostPack/Certify
-Certify.exe cas #enumerate trusted root CA certificates, certificates defined by the NTAuthCertificates object, and various information about Enterprise CAs
-Certify.exe find #enumerate certificate templates
-Certify.exe find /vulnerable #Enumerate vulenrable certificate templater
+CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
+```
+信頼を確立するための中心的な役割を果たします。
 
-# https://github.com/ly4k/Certipy
-certipy find -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
-certipy find -vulnerable [-hide-admins] -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128 #Search vulnerable templates
+### セキュア チャネル (Schannel) 認証
 
-certutil.exe -TCAInfo #enumerate Enterprise CAs
-certutil -v -dstemplate #enumerate certificate templates
+Schannel は安全な TLS/SSL 接続を容易にし、ハンドシェイク中にクライアントが証明書を提示し、成功裏に検証されるとアクセスが許可されます。証明書を AD アカウントにマッピングする際には、Kerberos の **S4U2Self** 関数や証明書の **Subject Alternative Name (SAN)** などの方法が関与する可能性があります。
+
+### AD 証明書サービスの列挙
+
+AD の証明書サービスは LDAP クエリを介して列挙でき、**Enterprise Certificate Authorities (CAs)** およびそれらの構成に関する情報が明らかになります。これは特別な特権を持たないドメイン認証ユーザーでもアクセス可能です。**[Certify](https://github.com/GhostPack/Certify)** や **[Certipy](https://github.com/ly4k/Certipy)** のようなツールは、AD CS 環境での列挙や脆弱性評価に使用されます。
+
+これらのツールを使用するためのコマンドは次のとおりです：
+```bash
+# Enumerate trusted root CA certificates and Enterprise CAs with Certify
+Certify.exe cas
+# Identify vulnerable certificate templates with Certify
+Certify.exe find /vulnerable
+
+# Use Certipy for enumeration and identifying vulnerable templates
+certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
+
+# Enumerate Enterprise CAs and certificate templates with certutil
+certutil.exe -TCAInfo
+certutil -v -dstemplate
 ```
 ## 参考文献
 
@@ -112,14 +131,14 @@ certutil -v -dstemplate #enumerate certificate templates
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでAWSハッキングを学ぶ</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする。
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>

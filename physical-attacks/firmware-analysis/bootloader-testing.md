@@ -4,18 +4,18 @@
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい場合**は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見る
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-* **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する
 
 </details>
 
 デバイスの起動構成やU-bootなどのブートローダーを変更するために推奨される手順は次のとおりです：
 
 1. **ブートローダーのインタープリターシェルにアクセス**:
-- ブート中に、「0」、「スペース」、または他の特定の「マジックコード」を押して、ブートローダーのインタープリターシェルにアクセスします。
+- 起動中に、「0」、「スペース」、または他の特定の「マジックコード」を押して、ブートローダーのインタープリターシェルにアクセスします。
 
 2. **ブート引数の変更**:
 - 以下のコマンドを実行して、ブート引数に '`init=/bin/sh`' を追加し、シェルコマンドを実行できるようにします：
@@ -44,13 +44,15 @@ HackTricksをサポートする他の方法：
 - 冗長なログ記録、任意のカーネルの読み込み、または信頼されていないソースからのブートなどのデバッグ機能が有効になっているかどうかを確認します。
 
 6. **注意深いハードウェア干渉**:
-- デバイスの起動シーケンス中に1つのピンを接地に接続し、特にカーネルが展開される前にSPIまたはNANDフラッシュチップとやり取りする際には、デバイスを損傷しないように非常に注意してください。ピンをショートする前にNANDフラッシュチップのデータシートを参照してください。
+- デバイスの起動シーケンス中に1つのピンを接地に接続し、特にカーネルが展開される前にSPIまたはNANDフラッシュチップとやり取りする際には、極めて注意してください。ピンをショートする前にNANDフラッシュチップのデータシートを参照してください。
 
 7. **ローグDHCPサーバーの設定**:
-- デバイスがPXEブート中に摂取する悪意のあるパラメータを持つローグDHCPサーバーを設定します。Metasploitの（MSF）DHCP補助サーバーなどのツールを利用します。デバイスの起動手順の入力検証をテストするために、'FILENAME'パラメータを`'a";/bin/sh;#'`などのコマンドインジェクションコマンドで変更します。
+- デバイスがPXEブート中に摂取する悪意のあるパラメータを持つローグDHCPサーバーを設定します。Metasploitの（MSF）DHCP補助サーバーなどのツールを利用します。デバイスの起動手順の入力検証をテストするために、'FILENAME'パラメータを `'a";/bin/sh;#'` のようなコマンドインジェクションコマンドで変更します。
 
-**注意**: デバイスのピンと物理的なやり取りを伴う手順（*アスタリスクでマークされています）は、デバイスを損傷しないように非常に注意してアプローチする必要があります。
+**注意**: デバイスのピンと物理的な相互作用を伴う手順（*アスタリスクでマークされています）は、デバイスを損傷させないように極めて注意して abord してください。
 
 
-# 参考文献
-* [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+## 参考文献
+* [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/) 
+
+<details>
