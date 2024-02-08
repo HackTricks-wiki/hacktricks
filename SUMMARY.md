@@ -673,7 +673,6 @@
 
 * [Physical Attacks](physical-attacks/physical-attacks.md)
 * [Escaping from KIOSKs](physical-attacks/escaping-from-gui-applications/README.md)
-  * [Show file extensions](physical-attacks/escaping-from-gui-applications/show-file-extensions.md)
 * [Firmware Analysis](physical-attacks/firmware-analysis/README.md)
   * [Bootloader testing](physical-attacks/firmware-analysis/bootloader-testing.md)
   * [Firmware Integrity](physical-attacks/firmware-analysis/firmware-integrity.md)
@@ -716,20 +715,8 @@
 * [Esoteric languages](stego/esoteric-languages.md)
 * [Blockchain & Crypto Currencies](blockchain/blockchain-and-crypto-currencies/README.md)
 
-## 🧐 External Platforms Reviews/Writeups
-
-* [BRA.I.NSMASHER Presentation](a.i.-exploiting/bra.i.nsmasher-presentation/README.md)
-  * [Basic Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/basic-bruteforcer.md)
-  * [Basic Captcha Breaker](a.i.-exploiting/bra.i.nsmasher-presentation/basic-captcha-breaker.md)
-  * [BIM Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/bim-bruteforcer.md)
-  * [Hybrid Malware Classifier Part 1](a.i.-exploiting/bra.i.nsmasher-presentation/hybrid-malware-classifier-part-1.md)
-  * [ML Basics](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/README.md)
-    * [Feature Engineering](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/feature-engineering.md)
-
 ## 🦂 C2
 
-* [Merlin](backdoors/merlin.md)
-* [Empire](backdoors/empire.md)
 * [Salseo](backdoors/salseo.md)
 * [ICMPsh](backdoors/icmpsh.md)
 * [Cobalt Strike](c2/cobalt-strike.md)
@@ -769,12 +756,6 @@
 * [Android Forensics](android-forensics.md)
 * [TR-069](todo/tr-069.md)
 * [6881/udp - Pentesting BitTorrent](6881-udp-pentesting-bittorrent.md)
-* [CTF Write-ups](ctf-write-ups/README.md)
-  * [challenge-0521.intigriti.io](ctf-write-ups/challenge-0521.intigriti.io.md)
-  * [Try Hack Me](ctf-write-ups/try-hack-me/README.md)
-    * [hc0n Christmas CTF - 2019](ctf-write-ups/try-hack-me/hc0n-christmas-ctf-2019.md)
-    * [Pickle Rick](ctf-write-ups/try-hack-me/pickle-rick.md)
-* [1911 - Pentesting fox](1911-pentesting-fox.md)
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
 * [Post Exploitation](post-exploitation.md)
