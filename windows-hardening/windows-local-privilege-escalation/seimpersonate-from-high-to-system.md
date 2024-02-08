@@ -26,6 +26,8 @@ impersonateuser.exe 1234
 
 {% code title="impersonateuser.cpp" %}
 ```cpp
+// From https://securitytimes.medium.com/understanding-and-abusing-access-tokens-part-ii-b9069f432962
+
 #include <windows.h>
 #include <iostream>
 #include <Lmcons.h>

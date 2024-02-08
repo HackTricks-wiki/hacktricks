@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-**This is a small summary of the awesome research from [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)**
+**This is a small summary of the Theft chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)**
 
 
 ## What can I do with a certificate

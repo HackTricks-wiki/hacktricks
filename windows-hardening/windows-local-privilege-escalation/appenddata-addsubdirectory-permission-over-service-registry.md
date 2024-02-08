@@ -18,29 +18,27 @@ Other ways to support HackTricks:
 **The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
 ## Summary
-The script's output indicates that the current user possesses write permissions on two registry keys:
 
-- `HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`
-- `HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`
+Two registry keys were found to be writable by the current user:
 
-To further investigate the permissions of the RpcEptMapper service, the user mentions the use of the regedit GUI and highlights the usefulness of the Advanced Security Settings window's Effective Permissions tab. This tab allows users to check the effective permissions granted to a specific user or group without inspecting individual ACEs.
+- **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
+- **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 
-The screenshot provided displays the permissions for the low-privileged lab-user account. Most permissions are standard, such as Query Value, but one permission stands out: Create Subkey. The generic name for this permission is AppendData/AddSubdirectory, which aligns with what was reported by the script.
+It was suggested to check the permissions of the **RpcEptMapper** service using the **regedit GUI**, specifically the **Advanced Security Settings** window's **Effective Permissions** tab. This approach enables the assessment of granted permissions to specific users or groups without the need to examine each Access Control Entry (ACE) individually.
 
-The user proceeds to explain that this means they cannot modify certain values directly but can only create new subkeys. They show an example where attempting to modify the ImagePath value results in an access denied error.
+A screenshot showed the permissions assigned to a low-privileged user, among which the **Create Subkey** permission was notable. This permission, also referred to as **AppendData/AddSubdirectory**, corresponds with the script's findings.
 
-However, they clarify that this is not a false positive and that there is an interesting opportunity here. They investigate the Windows registry structure and discover a potential way to leverage the Performance subkey, which doesn't exist by default for the RpcEptMapper service. This subkey could potentially allow for DLL registration and performance monitoring, offering an opportunity for privilege escalation.
+The inability to modify certain values directly, yet the capability to create new subkeys, was noted. An example highlighted was an attempt to alter the **ImagePath** value, which resulted in an access denied message.
 
-They mention that they found documentation related to the Performance subkey and how to use it for performance monitoring. This leads them to create a proof-of-concept DLL and show the code for implementing the required functions: OpenPerfData, CollectPerfData, and ClosePerfData. They also export these functions for external use.
+Despite these limitations, a potential for privilege escalation was identified through the possibility of leveraging the **Performance** subkey within the **RpcEptMapper** service's registry structure, a subkey not present by default. This could enable DLL registration and performance monitoring.
 
-The user demonstrates testing the DLL using rundll32 to ensure it functions as expected, successfully logging information.
+Documentation on the **Performance** subkey and its utilization for performance monitoring was consulted, leading to the development of a proof-of-concept DLL. This DLL, demonstrating the implementation of **OpenPerfData**, **CollectPerfData**, and **ClosePerfData** functions, was tested via **rundll32**, confirming its operational success.
 
-Next, they explain that the challenge is to trick the RPC Endpoint Mapper service into loading their Performance DLL. They mention that they observed their log file being created when querying WMI classes related to Performance Data in PowerShell. This allows them to execute arbitrary code in the context of the WMI service, which runs as LOCAL SYSTEM. This provides them with unexpected and elevated access.
+The goal was to coerce the **RPC Endpoint Mapper service** into loading the crafted Performance DLL. Observations revealed that executing WMI class queries related to Performance Data via PowerShell resulted in the creation of a log file, enabling the execution of arbitrary code under the **LOCAL SYSTEM** context, thus granting elevated privileges.
 
-In conclusion, the user highlights the unexplained persistence of this vulnerability and its potential impact, which could extend to post-exploitation, lateral movement, and antivirus/EDR evasion.
+The persistence and potential implications of this vulnerability were underscored, highlighting its relevance for post-exploitation strategies, lateral movement, and evasion of antivirus/EDR systems.
 
-They also mention that while they initially made the vulnerability public unintentionally through their script, its impact is limited to unsupported versions of Windows (e.g., Windows 7 / Server 2008 R2) with local access.
-
+Although the vulnerability was initially disclosed unintentionally through the script, it was emphasized that its exploitation is constrained to outdated Windows versions (e.g., **Windows 7 / Server 2008 R2**) and requires local access.
 
 <details>
 

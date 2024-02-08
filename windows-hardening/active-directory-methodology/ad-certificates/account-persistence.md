@@ -14,64 +14,56 @@ Other ways to support HackTricks:
 
 </details>
 
-## Active User Credential Theft via Certificates – PERSIST1
+**This is a small summary of the machine persistence chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)**
 
-If the user is allowed to request a certificate that allows domain authentication, an attacker could **request** and **steal** it to **maintain** **persistence**.
 
-The **`User`** template allows that and comes by **default**. However, it might be disabled. So, [**Certify**](https://github.com/GhostPack/Certify) allows you to find valid certificates to persist:
+## **Understanding Active User Credential Theft with Certificates – PERSIST1**
 
-```
+In a scenario where a certificate that allows domain authentication can be requested by a user, an attacker has the opportunity to **request** and **steal** this certificate to **maintain persistence** on a network. By default, the `User` template in Active Directory allows such requests, though it may sometimes be disabled.
+
+Using a tool named [**Certify**](https://github.com/GhostPack/Certify), one can search for valid certificates that enable persistent access:
+
+```bash
 Certify.exe find /clientauth
 ```
 
-Note that a **certificate can be used for authentication** as that user as long as the certificate is **valid**, **even** if the user **changes** their **password**.
+It's highlighted that a certificate's power lies in its ability to **authenticate as the user** it belongs to, regardless of any password changes, as long as the certificate remains **valid**.
 
-From the **GUI** it's possible to request a certificate with `certmgr.msc` or via the command-line with `certreq.exe`.
+Certificates can be requested through a graphical interface using `certmgr.msc` or through the command line with `certreq.exe`. With **Certify**, the process to request a certificate is simplified as follows:
 
-Using [**Certify**](https://github.com/GhostPack/Certify) you can run:
-
-```
+```bash
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
 
-The result will be a **certificate** + **private key** `.pem` formatted block of text
+Upon successful request, a certificate along with its private key is generated in `.pem` format. To convert this into a `.pfx` file, which is usable on Windows systems, the following command is utilized:
 
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
 
-To **use that certificate**, one can then **upload** the `.pfx` to a target and **use it with** [**Rubeus**](https://github.com/GhostPack/Rubeus) to **request a TGT** for the enrolled user, for as long as the certificate is valid (default lifetime is 1 year):
+The `.pfx` file can then be uploaded to a target system and used with a tool called [**Rubeus**](https://github.com/GhostPack/Rubeus) to request a Ticket Granting Ticket (TGT) for the user, extending the attacker's access for as long as the certificate is **valid** (typically one year):
 
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
 
-{% hint style="warning" %}
-Combined with the technique outlined in the [**THEFT5**](certificate-theft.md#ntlm-credential-theft-via-pkinit-theft5) section, an attacker can also persistently **obtain the account’s NTLM hash**, which the attacker could use to authenticate via **pass-the-hash** or **crack** to obtain the **plaintext** **password**. \
-This is an alternative method of **long-term credential theft** that does **not touch LSASS** and is possible from a **non-elevated context.**
-{% endhint %}
+An important warning is shared about how this technique, combined with another method outlined in the **THEFT5** section, allows an attacker to persistently obtain an account’s **NTLM hash** without interacting with the Local Security Authority Subsystem Service (LSASS), and from a non-elevated context, providing a stealthier method for long-term credential theft.
 
-## Machine Persistence via Certificates - PERSIST2
+## **Gaining Machine Persistence with Certificates - PERSIST2**
 
-If a certificate template allowed for **Domain Computers** as enrolment principals, an attacker could **enrol a compromised system’s machine account**. The default **`Machine`** template matches all those characteristics.
-
-If an **attacker elevates privileges** on compromised system, the attacker can use the **SYSTEM** account to enrol in certificate templates that grant enrolment privileges to machine accounts (more information in [**THEFT3**](certificate-theft.md#machine-certificate-theft-via-dpapi-theft3)).
-
-You can use [**Certify**](https://github.com/GhostPack/Certify)  to  gather a certificate for the machine account elevating automatically to SYSTEM with:
+Another method involves enrolling a compromised system’s machine account for a certificate, utilizing the default `Machine` template which allows such actions. If an attacker gains elevated privileges on a system, they can use the **SYSTEM** account to request certificates, providing a form of **persistence**:
 
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
 
-Note that with access to a machine account certificate, the attacker can then **authenticate to Kerberos** as the machine account. Using **S4U2Self**, an attacker can then obtain a **Kerberos service ticket to any service on the host** (e.g., CIFS, HTTP, RPCSS, etc.) as any user.
+This access enables the attacker to authenticate to **Kerberos** as the machine account and utilize **S4U2Self** to obtain Kerberos service tickets for any service on the host, effectively granting the attacker persistent access to the machine.
 
-Ultimately, this gives an attack a machine persistence method.
+## **Extending Persistence Through Certificate Renewal - PERSIST3**
 
-## Account Persistence via Certificate Renewal - PERSIST3
+The final method discussed involves leveraging the **validity** and **renewal periods** of certificate templates. By **renewing** a certificate before its expiration, an attacker can maintain authentication to Active Directory without the need for additional ticket enrolments, which could leave traces on the Certificate Authority (CA) server.
 
-Certificate templates have a **Validity Period** which determines how long an issued certificate can be used, as well as a **Renewal period** (usually 6 weeks). This is a window of **time before** the certificate **expires** where an **account can renew it** from the issuing certificate authority.
-
-If an attacker compromises a certificate capable of domain authentication through theft or malicious enrolment, the attacker can **authenticate to AD for the duration of the certificate’s validity period**. The attacker, however, can r**enew the certificate before expiration**. This can function as an **extended persistence** approach that **prevents additional ticket** enrolments from being requested, which **can leave artifacts** on the CA server itself.
+This approach allows for an **extended persistence** method, minimizing the risk of detection through fewer interactions with the CA server and avoiding the generation of artifacts that could alert administrators to the intrusion.
 
 <details>
 

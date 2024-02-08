@@ -32,7 +32,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 
 ### Hijackable Task Scheduler COM components
 
-Windows Tasks actually use Custom Triggers to call COM objects. And because they're executed via the Task Scheduler, it's easier to predict when they're going to be triggered.
+Windows Tasks use Custom Triggers to call COM objects and because they're executed through the Task Scheduler, it's easier to predict when they're gonna be triggered.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask

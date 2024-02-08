@@ -60,7 +60,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Registry
 
 {% hint style="info" %}
-Note: The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY\_LOCAL\_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
+[Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY\_LOCAL\_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
 {% endhint %}
 
 ### Runs
@@ -79,7 +79,7 @@ Note: The **Wow6432Node** registry entry indicates that you are running a 64-bit
 * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Run and RunOnce registry keys cause programs to run each time that a user logs on. The data value for a key is a command line no longer than 260 characters.
+Registry keys known as **Run** and **RunOnce** are designed to automatically execute programs every time a user logs into the system. The command line assigned as a key's data value is limited to 260 characters or less.
 
 **Service runs** (can control automatic startup of services during boot):
 
@@ -97,7 +97,11 @@ Run and RunOnce registry keys cause programs to run each time that a user logs o
 * `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 * `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-It's not created by default on Windows Vista and newer. Registry run key entries can reference programs directly or list them as a dependency. For example, it is possible to load a DLL at logon using a "Depend" key with RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
+On Windows Vista and later versions, the **Run** and **RunOnce** registry keys are not automatically generated. Entries in these keys can either directly start programs or specify them as dependencies. For instance, to load a DLL file at logon, one could use the **RunOnceEx** registry key along with a "Depend" key. This is demonstrated by adding a registry entry to execute "C:\\temp\\evil.dll" during the system start-up:
+
+```
+reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
+```
 
 {% hint style="info" %}
 **Exploit 1**: If you can write inside any of the mentioned registry inside **HKLM** you can escalate privileges when a different user logs in.
@@ -170,7 +174,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Any shortcut created to the location pointed by subkey Startup will launch the service during logon/reboot. Start up location is specified both at Local Machine and Current User.
+Shortcuts placed in the **Startup** folder will automatically trigger services or applications to launch during user logon or system reboot. The **Startup** folder's location is defined in the registry for both the **Local Machine** and **Current User** scopes. This means any shortcut added to these specified **Startup** locations will ensure the linked service or program starts up following the logon or reboot process, making it a straightforward method for scheduling programs to run automatically.
 
 {% hint style="info" %}
 If you can overwrite any \[User] Shell Folder under **HKLM**, you will e able to point it to a folder controlled by you and place a backdoor that will be executed anytime a user logs in the system escalating privileges.
@@ -192,8 +196,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Usually, **Userinit** key points to userinit.exe but if this key can be altered, then that exe will also launch by Winlogon.\
-**Shell** key should point to explorer.exe.
+Typically, the **Userinit** key is set to **userinit.exe**. However, if this key is modified, the specified executable will also be launched by **Winlogon** upon user logon. Similarly, the **Shell** key is intended to point to **explorer.exe**, which is the default shell for Windows.
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
@@ -222,30 +225,23 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### AlternateShell
 
-Path: **`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`**
+### Changing the Safe Mode Command Prompt
 
-Under the registry key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot` is the value **AlternateShell**, which by default is set to `cmd.exe` (the command prompt). When you press F8 during startup and select "Safe Mode with Command Prompt," the system uses this alternate shell.\
-You can, however, create a boot option so that you don't have to press F8, then select "Safe Mode with Command Prompt."
+In the Windows Registry under `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, there's a **`AlternateShell`** value set by default to `cmd.exe`. This means when you choose "Safe Mode with Command Prompt" during startup (by pressing F8), `cmd.exe` is used. But, it's possible to set up your computer to automatically start in this mode without needing to press F8 and manually select it.
 
-1. Edit the boot.ini (c:\boot.ini) file attributes to make the file nonread-only, nonsystem, and nonhidden (attrib c:\boot.ini -r -s -h).
-2. Open boot.ini.
-3. Add a line similar to the following: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. Save the file.
-5. Reapply the correct permissions (attrib c:\boot.ini +r +s +h).
+Steps to create a boot option for automatically starting in "Safe Mode with Command Prompt":
 
-Info from [here](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell).
+1. Change attributes of the `boot.ini` file to remove read-only, system, and hidden flags: `attrib c:\boot.ini -r -s -h`
+2. Open `boot.ini` for editing.
+3. Insert a line like: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. Save changes to `boot.ini`.
+5. Reapply the original file attributes: `attrib c:\boot.ini +r +s +h`
 
-{% hint style="info" %}
-**Exploit 1:** If you can modify this registry key you can point your backdoor
-{% endhint %}
+- **Exploit 1:** Changing the **AlternateShell** registry key allows for custom command shell setup, potentially for unauthorized access.
+- **Exploit 2 (PATH Write Permissions):** Having write permissions to any part of the system **PATH** variable, especially before `C:\Windows\system32`, lets you execute a custom `cmd.exe`, which could be a backdoor if the system is started in Safe Mode.
+- **Exploit 3 (PATH and boot.ini Write Permissions):** Writing access to `boot.ini` enables automatic Safe Mode startup, facilitating unauthorized access on the next reboot.
 
-{% hint style="info" %}
-**Exploit 2 (PATH write permissions)**: If you have write permission on any folder of the system **PATH** before _C:\Windows\system32_ (or if you can change it) you can create a cmd.exe file and if someone initiates the machine in Safe Mode your backdoor will be executed.
-{% endhint %}
-
-{% hint style="info" %}
-**Exploit 3 (PATH write permissions and boot.ini write permissions)**: If you can write boot.ini, you can automate the startup in safe mode for the next reboot.
-{% endhint %}
+To check the current **AlternateShell** setting, use these commands:
 
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
@@ -254,25 +250,28 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 
 ### Installed Component
 
-* `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
-* `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
-* `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
-* `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
+Active Setup is a feature in Windows that **initiates before the desktop environment is fully loaded**. It prioritizes the execution of certain commands, which must complete before the user logon proceeds. This process occurs even before other startup entries, such as those in the Run or RunOnce registry sections, are triggered.
 
-Active Setup runs before the Desktop appears. Commands started by Active Setup run synchronously, blocking the logon while they are executing. Active Setup is executed before any Run or RunOnce registry entries are evaluated.
+Active Setup is managed through the following registry keys:
 
-Inside those keys you will find more keys and each for those will home some interesting key-values. The most interesting ones are:
+- `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
+- `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
+- `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
+- `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-* **IsInstalled:**
-  * 0: The component’s command will not run.
-  * 1: The component’s command will be run once per user. This is the default (if the IsInstalled value does not exist).
-* **StubPath**
-  * Format: Any valid command line, e.g. “notepad”
-  * This is the command that is executed if Active Setup determines this component needs to run during logon.
+Within these keys, various subkeys exist, each corresponding to a specific component. Key values of particular interest include:
 
-{% hint style="info" %}
-If you could write/overwrite on any Key with _**IsInstalled == "1"**_ the key **StubPath**, you could point it to a backdoor and escalate privileges. Also, if you could overwrite any **binary** pointed by any **StubPath** key you could be able to escalate privileges.
-{% endhint %}
+- **IsInstalled:**
+  - `0` indicates the component's command will not execute.
+  - `1` means the command will execute once for each user, which is the default behavior if the `IsInstalled` value is missing.
+- **StubPath:** Defines the command to be executed by Active Setup. It can be any valid command line, such as launching `notepad`.
+
+**Security Insights:**
+
+- Modifying or writing to a key where **`IsInstalled`** is set to `"1"` with a specific **`StubPath`** can lead to unauthorized command execution, potentially for privilege escalation.
+- Altering the binary file referenced in any **`StubPath`** value could also achieve privilege escalation, given sufficient permissions.
+
+To inspect the **`StubPath`** configurations across Active Setup components, these commands can be used:
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -283,19 +282,25 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Browser Helper Objects
 
-* `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
-* `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
+### Overview of Browser Helper Objects (BHOs)
 
-A **Browser Helper Object** (**BHO**) is a DLL module designed as a plugin for Microsoft's Internet Explorer web browser to provide added functionality. These modules are executed for each new instance of Internet Explorer and for each new instance of Windows Explorer. However, a BHO can be prevented to be executed by each instance of Explorer setting the key **NoExplorer** to 1.
+Browser Helper Objects (BHOs) are DLL modules that add extra features to Microsoft's Internet Explorer. They load into Internet Explorer and Windows Explorer on each start. Yet, their execution can be blocked by setting **NoExplorer** key to 1, preventing them from loading with Windows Explorer instances.
 
-BHOs are still supported as of Windows 10, through Internet Explorer 11, while BHOs are not supported in the default web browser Microsoft Edge.
+BHOs are compatible with Windows 10 via Internet Explorer 11 but are not supported in Microsoft Edge, the default browser in newer versions of Windows.
+
+To explore BHOs registered on a system, you can inspect the following registry keys:
+
+- `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
+- `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
+
+Each BHO is represented by its **CLSID** in the registry, serving as a unique identifier. Detailed information about each CLSID can be found under `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+
+For querying BHOs in the registry, these commands can be utilized:
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-
-Note that the registry will contain 1 new registry per each dll and it will be represented by the **CLSID**. You can find the CLSID info in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
 ### Internet Explorer Extensions
 
@@ -345,13 +350,14 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 
 ## More
 
-Find more Autoruns like registries in [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
+**Find more Autoruns like registries in [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)**
 
 ## References
 
 * [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
+* [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
 <img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 

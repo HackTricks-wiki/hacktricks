@@ -16,11 +16,11 @@ Other ways to support HackTricks:
 
 ## Security Descriptors
 
-Security Descriptor Definition Language (SDDL) defines the format which is used to describe a security descriptor. SDDL uses ACE strings for DACL and SACL:: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
+[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) defines the format which is used to describe a security descriptor. SDDL uses ACE strings for DACL and SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
 The **security descriptors** are used to **store** the **permissions** an **object** has **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
 
-Then, this persistence technique is based on the hability to win every privilege needed against certain objects, to be able to perform a task that usually requires admin privileges but without the need of being admin.
+Then, this persistence technique is based on the ability to win every privilege needed against certain objects, to be able to perform a task that usually requires admin privileges but without the need of being admin.
 
 ### Access to WMI
 

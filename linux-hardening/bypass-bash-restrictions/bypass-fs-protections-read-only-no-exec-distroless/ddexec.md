@@ -100,7 +100,7 @@ SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls
 
 Block this, EDRs.
 
-# References
+## References
 * [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 
 <details>

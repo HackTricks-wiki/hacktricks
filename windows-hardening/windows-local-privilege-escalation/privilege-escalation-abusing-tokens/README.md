@@ -7,7 +7,7 @@
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
@@ -22,9 +22,9 @@ If you **don't know what are Windows Access Tokens** read this page before conti
 
 **Maybe you could be able to escalate privileges abusing the tokens you already have**
 
-### SeImpersonatePrivilege (3.1.1)
+### SeImpersonatePrivilege
 
-Any process holding this privilege can **impersonate** (but not create) any **token** for which it is able to gethandle. You can get a **privileged token** from a **Windows service** (DCOM) making it perform an **NTLM authentication** against the exploit, then execute a process as **SYSTEM**. Exploit it with [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM ](https://github.com/antonioCoco/RogueWinRM)(needs winrm disabled), [SweetPotato](https://github.com/CCob/SweetPotato), [PrintSpoofer](https://github.com/itm4n/PrintSpoofer):
+This is privilege that is held by any process allows the impersonation (but not creation) of any token, given that a handle to it can be obtained. A privileged token can be acquired from a Windows service (DCOM) by inducing it to perform NTLM authentication against an exploit, subsequently enabling the execution of a process with SYSTEM privileges. This vulnerability can be exploited using various tools, such as [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (which requires winrm to be disabled), [SweetPotato](https://github.com/CCob/SweetPotato), and [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 {% content-ref url="../roguepotato-and-printspoofer.md" %}
 [roguepotato-and-printspoofer.md](../roguepotato-and-printspoofer.md)
@@ -34,21 +34,19 @@ Any process holding this privilege can **impersonate** (but not create) any **to
 [juicypotato.md](../juicypotato.md)
 {% endcontent-ref %}
 
-### SeAssignPrimaryPrivilege (3.1.2)
+### SeAssignPrimaryPrivilege
 
 It is very similar to **SeImpersonatePrivilege**, it will use the **same method** to get a privileged token.\
 Then, this privilege allows **to assign a primary token** to a new/suspended process. With the privileged impersonation token you can derivate a primary token (DuplicateTokenEx).\
 With the token, you can create a **new process** with 'CreateProcessAsUser' or create a process suspended and **set the token** (in general, you cannot modify the primary token of a running process).
 
-### SeTcbPrivilege (3.1.3)
+### SeTcbPrivilege
 
 If you have enabled this token you can use **KERB\_S4U\_LOGON** to get an **impersonation token** for any other user without knowing the credentials, **add an arbitrary group** (admins) to the token, set the **integrity level** of the token to "**medium**", and assign this token to the **current thread** (SetThreadToken).
 
-### SeBackupPrivilege (3.1.4)
+### SeBackupPrivilege
 
-This privilege causes the system to **grant all read access** control to any file (only read).\
-Use it to **read the password hashes of local Administrator** accounts from the registry and then use "**psexec**" or "**wmicexec**" with the hash (PTH).\
-This attack won't work if the Local Administrator is disabled, or if it is configured that a Local Admin isn't admin if he is connected remotely.\
+The system is caused to **grant all read access** control to any file (limited to read operations) by this privilege. It is utilized for **reading the password hashes of local Administrator** accounts from the registry, following which, tools like "**psexec**" or "**wmicexec**" can be used with the hash (Pass-the-Hash technique). However, this technique fails under two conditions: when the Local Administrator account is disabled, or when a policy is in place that removes administrative rights from Local Administrators connecting remotely.\
 You can **abuse this privilege** with:
 
 * [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -60,34 +58,51 @@ You can **abuse this privilege** with:
 [privileged-groups-and-token-privileges.md](../../active-directory-methodology/privileged-groups-and-token-privileges.md)
 {% endcontent-ref %}
 
-### SeRestorePrivilege (3.1.5)
+### SeRestorePrivilege
 
-**Write access** control to any file on the system, regardless of the files ACL.\
-You can **modify services**, DLL Hijacking, set **debugger** (Image File Execution Options)… A lot of options to escalate.
+Permission for **write access** to any system file, irrespective of the file's Access Control List (ACL), is provided by this privilege. It opens up numerous possibilities for escalation, including the ability to **modify services**, perform DLL Hijacking, and set **debuggers** via Image File Execution Options among various other techniques.
 
-### SeCreateTokenPrivilege (3.1.6)
+### SeCreateTokenPrivilege
 
-This token **can be used** as EoP method **only** if the user **can impersonate** tokens (even without SeImpersonatePrivilege).\
-In a possible scenario, a user can impersonate the token if it is for the same user and the integrity level is less or equal to the current process integrity level.\
-In this case, the user could **create an impersonation token** and add to it a privileged group SID.
+SeCreateTokenPrivilege is a powerful permission, especially useful when a user possesses the ability to impersonate tokens, but also in the absence of SeImpersonatePrivilege. This capability hinges on the ability to impersonate a token that represents the same user and whose integrity level does not exceed that of the current process.
 
-### SeLoadDriverPrivilege (3.1.7)
-
-**Load and unload device drivers.**\
-You need to create an entry in the registry with values for ImagePath and Type.\
-As you don't have access to write to HKLM, you have to **use HKCU**. But HKCU doesn't mean anything for the kernel, the way to guide the kernel here and use the expected path for a driver config is to use the path: "\Registry\User\S-1-5-21-582075628-3447520101-2530640108-1003\System\CurrentControlSet\Services\DriverName" (the ID is the **RID** of the current user).\
-So, you have to **create all that path inside HKCU and set the ImagePath** (path to the binary that is going to be executed) **and Type** (SERVICE\_KERNEL\_DRIVER 0x00000001).\
+**Key Points:**
+- **Impersonation without SeImpersonatePrivilege:** It's possible to leverage SeCreateTokenPrivilege for EoP by impersonating tokens under specific conditions.
+- **Conditions for Token Impersonation:** Successful impersonation requires the target token to belong to the same user and have an integrity level that is less or equal to the integrity level of the process attempting impersonation.
+- **Creation and Modification of Impersonation Tokens:** Users can create an impersonation token and enhance it by adding a privileged group's SID (Security Identifier).
 
 
-{% content-ref url="abuse-seloaddriverprivilege.md" %}
-[abuse-seloaddriverprivilege.md](abuse-seloaddriverprivilege.md)
-{% endcontent-ref %}
+### SeLoadDriverPrivilege
 
-### SeTakeOwnershipPrivilege (3.1.8)
+Thi privilege allows to **load and unload device drivers** with the creation of a registry entry with specific values for `ImagePath` and `Type`. Since direct write access to `HKLM` (HKEY_LOCAL_MACHINE) is restricted, `HKCU` (HKEY_CURRENT_USER) must be utilized instead. However, to make `HKCU` recognizable to the kernel for driver configuration, a specific path must be followed. 
 
-This privilege is very similar to **SeRestorePrivilege**.\
-It allows a process to “**take ownership of an object** without being granted discretionary access” by granting the WRITE\_OWNER access right.\
-First, you have to **take ownership of the registry key** that you are going to write on and **modify the DACL** so you can write on it.
+This path is `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, where `<RID>` is the Relative Identifier of the current user. Inside `HKCU`, this entire path must be created, and two values need to be set: 
+- `ImagePath`, which is the path to the binary to be executed
+- `Type`, with a value of `SERVICE_KERNEL_DRIVER` (`0x00000001`).
+
+**Steps to Follow:**
+1. Access `HKCU` instead of `HKLM` due to restricted write access.
+2. Create the path `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` within `HKCU`, where `<RID>` represents the current user's Relative Identifier.
+3. Set the `ImagePath` to the binary's execution path.
+4. Assign the `Type` as `SERVICE_KERNEL_DRIVER` (`0x00000001`).
+
+```python
+# Example Python code to set the registry values
+import winreg as reg
+
+# Define the path and values
+path = r'Software\YourPath\System\CurrentControlSet\Services\DriverName' # Adjust 'YourPath' as needed
+key = reg.OpenKey(reg.HKEY_CURRENT_USER, path, 0, reg.KEY_WRITE)
+reg.SetValueEx(key, "ImagePath", 0, reg.REG_SZ, "path_to_binary")
+reg.SetValueEx(key, "Type", 0, reg.REG_DWORD, 0x00000001)
+reg.CloseKey(key)
+```
+
+More ways to abuse this privilege in [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege)
+
+### SeTakeOwnershipPrivilege
+
+This is similar to to **SeRestorePrivilege**. Its primary function allows a process to **assume ownership of an object**, circumventing the requirement for explicit discretionary access through the provision of WRITE_OWNER access rights. The process involves first securing ownership of the intended registry key for writing purposes, then altering the DACL to enable write operations.
 
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
@@ -105,14 +120,13 @@ icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
 c:\inetpub\wwwwroot\web.config
 ```
 
-### SeDebugPrivilege (3.1.9)
+### SeDebugPrivilege
 
-It allows the holder to **debug another process**, this includes reading and **writing** to that **process' memory.**\
-There are a lot of various **memory injection** strategies that can be used with this privilege that evade a majority of AV/HIPS solutions.
+This privilege permits the **debug other processes**, including to read and write in the memore. Various strategies for memory injection, capable of evading most antivirus and host intrusion prevention solutions, can be employed with this privilege.
 
 #### Dump memory
 
-One example of **abuse of this privilege** is to run [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) from the [SysInternals](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) to **dump a process memory**. For example, the **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local\_Security\_Authority\_Subsystem\_Service)**)** process, which stores user credentials after a user logs on to a system.
+You could use [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) from the [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) to **capture the memory of a process**. Specifically, this can apply to the **Local Security Authority Subsystem Service ([LSASS](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service))** process, which is responsible for storing user credentials once a user has successfully logged into a system.
 
 You can then load this dump in mimikatz to obtain passwords:
 
@@ -145,7 +159,7 @@ The **tokens that appear as Disabled** can be enable, you you actually can abuse
 
 ### Enable All the tokens
 
-You can use the script [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) to enable all the tokens:
+If you have tokens disables, you can use the script [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) to enable all the tokens:
 
 ```powershell
 .\EnableAllTokenPrivs.ps1
@@ -156,7 +170,7 @@ Or the **script** embed in this [**post**](https://www.leeholmes.com/adjusting-t
 
 ## Table
 
-Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), summary below will only list direct ways to exploit the privilege to obtain an admin session or read sensitive files.\\
+Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), summary below will only list direct ways to exploit the privilege to obtain an admin session or read sensitive files.
 
 | Privilege                  | Impact      | Tool                    | Execution path                                                                                                                                                                                                                                                                                                                                     | Remarks                                                                                                                                                                                                                                                                                                                        |
 | -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -181,7 +195,7 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

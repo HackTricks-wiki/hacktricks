@@ -349,7 +349,7 @@ csops -status <pid>
 and then check if the flag 0x800 is enabled.
 {% endhint %}
 
-# References
+## References
 * [https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/](https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/)
 
 <details>

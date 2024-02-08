@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-**This is a summary of the persistence techniques shared in [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)**. Check it for further details.
+**This is a summary of the domain persistence techniques shared in [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)**. Check it for further details.
 
 ## Forging Certificates with Stolen CA Certificates - DPERSIST1
 

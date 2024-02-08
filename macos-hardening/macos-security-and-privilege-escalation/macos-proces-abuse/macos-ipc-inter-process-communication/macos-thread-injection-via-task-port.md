@@ -178,7 +178,7 @@ This comprehensive control is encapsulated within the [threadexec](https://githu
 
 By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
 
-# References
+## References
 * [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 
 <details>

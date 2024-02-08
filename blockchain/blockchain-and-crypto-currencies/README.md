@@ -285,7 +285,7 @@ A submitted transaction includes the following information:
 
 Note that there isn't any field for the origin address, this is because this can be extrapolated from the signature.
 
-# References
+## References
 
 * [https://en.wikipedia.org/wiki/Proof\_of\_stake](https://en.wikipedia.org/wiki/Proof\_of\_stake)
 * [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)

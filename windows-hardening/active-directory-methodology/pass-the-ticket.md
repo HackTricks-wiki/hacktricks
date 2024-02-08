@@ -24,7 +24,8 @@ Get Access Today:
 
 ## Pass The Ticket (PTT)
 
-This kind of attack is similar to Pass the Key, but instead of using hashes to request a ticket, the ticket itself is stolen and used to authenticate as its owner.
+In the **Pass The Ticket (PTT)** attack method, attackers **steal a user's authentication ticket** instead of their password or hash values. This stolen ticket is then used to **impersonate the user**, gaining unauthorized access to resources and services within a network.
+
 
 **Read**:
 
@@ -33,16 +34,17 @@ This kind of attack is similar to Pass the Key, but instead of using hashes to r
 
 ### **Swaping Linux and Windows tickets between platforms**
 
-The [ticket\_converter](https://github.com/Zer1t0/ticket\_converter) script. The only needed parameters are the current ticket and the output file, it automatically detects the input ticket file format and converts it. For example:
+The [**ticket_converter**](https://github.com/Zer1t0/ticket\_converter) tool converts ticket formats using just the ticket itself and an output file.
 
-```
-root@kali:ticket_converter# python ticket_converter.py velociraptor.ccache velociraptor.kirbi
+```bash
+python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
-root@kali:ticket_converter# python ticket_converter.py velociraptor.kirbi velociraptor.ccache
+
+python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
 
-[Kekeo](https://github.com/gentilkiwi/kekeo), to convert them in Windows. This tool was not checked due to requiring a license in their ASN1 library, but I think it is worth mentioning.
+In Windows [Kekeo](https://github.com/gentilkiwi/kekeo) can be used.
 
 ### Pass The Ticket Attack
 

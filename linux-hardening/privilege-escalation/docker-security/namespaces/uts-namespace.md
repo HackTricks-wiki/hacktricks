@@ -96,7 +96,7 @@ unshare -u /bin/bash
 hostname newhostname # Hostname won't be changed inside the host UTS ns
 ```
 
-# References
+## References
 * [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 
 <details>
