@@ -54,7 +54,7 @@ The following steps are recommended for modifying device startup configurations 
 **Note**: The steps involving physical interaction with device pins (*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
 
 
-# References
+## References
 * [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 

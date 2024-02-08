@@ -34,6 +34,8 @@ Some blogs about the topic:
 
 ## Capturing Credentials
 
+**For more detailed steps, refer to the original [source](https://grimhacker.com/2018/03/09/just-a-printer/).**
+
 ### Method 1: Netcat Listener
 A simple netcat listener might suffice:
 
@@ -54,13 +56,12 @@ A more reliable approach involves setting up a full LDAP server because the prin
     - Set domain name on LDAP DB.
     - Configure LDAP TLS.
 3. **LDAP Service Execution**: Once set up, the LDAP service can be run using:
-    ```
-    slapd -d 2
-    ```
 
-**For more detailed steps, refer to the original [source](https://grimhacker.com/2018/03/09/just-a-printer/).**
+```bash
+slapd -d 2
+```
 
-# References
+## References
 * [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 
 

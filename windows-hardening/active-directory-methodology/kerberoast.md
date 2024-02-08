@@ -24,12 +24,15 @@ Other ways to support HackTricks:
 
 ## Kerberoast
 
-The goal of **Kerberoasting** is to harvest **TGS tickets for services that run on behalf of user accounts** in the AD, not computer accounts. Thus, **part** of these TGS **tickets are** **encrypted** with **keys** derived from user passwords. As a consequence, their credentials could be **cracked offline**.\
-You can know that a **user account** is being used as a **service** because the property **"ServicePrincipalName"** is **not null**.
+Kerberoasting focuses on the acquisition of **TGS tickets**, specifically those related to services operating under **user accounts** in **Active Directory (AD)**, excluding **computer accounts**. The encryption of these tickets utilizes keys that originate from **user passwords**, allowing for the possibility of **offline credential cracking**. The use of a user account as a service is indicated by a non-empty **"ServicePrincipalName"** property.
 
-Therefore, to perform Kerberoasting, only a domain account that can request for TGSs is necessary, which is anyone since no special privileges are required.
+For executing **Kerberoasting**, a domain account capable of requesting **TGS tickets** is essential; however, this process does not demand **special privileges**, making it accessible to anyone with **valid domain credentials**.
 
-**You need valid credentials inside the domain.**
+### Key Points:
+- **Kerberoasting** targets **TGS tickets** for **user-account services** within **AD**.
+- Tickets encrypted with keys from **user passwords** can be **cracked offline**.
+- A service is identified by a **ServicePrincipalName** that is not null.
+- **No special privileges** are needed, just **valid domain credentials**.
 
 ### **Attack**
 
@@ -146,26 +149,29 @@ If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW
 
 ### Mitigation
 
-Kerberoast is very stealthy if exploitable
+Kerberoasting can be conducted with a high degree of stealthiness if it is exploitable. In order to detect this activity, attention should be paid to **Security Event ID 4769**, which indicates that a Kerberos ticket has been requested. However, due to the high frequency of this event, specific filters must be applied to isolate suspicious activities:
 
-* Security Event ID 4769 – A Kerberos ticket was requested
-* Since 4769 is very frequent, lets filter the results:
-  * Service name should not be krbtgt
-  * Service name does not end with $ (to filter out machine accounts used for services)
-  * Account name should not be machine@domain (to filter out requests from machines)
-  * Failure code is '0x0' (to filter out failures, 0x0 is success)
-  * Most importantly, ticket encryption type is 0x17
-* Mitigation:
-  * Service Account Passwords should be hard to guess (greater than 25 characters)
-  * Use Managed Service Accounts (Automatic change of password periodically and delegated SPN Management)
+- The service name should not be **krbtgt**, as this is a normal request.
+- Service names ending with **$** should be excluded to avoid including machine accounts used for services.
+- Requests from machines should be filtered out by excluding account names formatted as **machine@domain**.
+- Only successful ticket requests should be considered, identified by a failure code of **'0x0'**.
+- **Most importantly**, the ticket encryption type should be **0x17**, which is often used in Kerberoasting attacks.
 
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
 
+To mitigate the risk of Kerberoasting:
+
+- Ensure that **Service Account Passwords are difficult to guess**, recommending a length of more than **25 characters**.
+- Utilize **Managed Service Accounts**, which offer benefits like **automatic password changes** and **delegated Service Principal Name (SPN) Management**, enhancing security against such attacks.
+
+By implementing these measures, organizations can significantly reduce the risk associated with Kerberoasting.
+
+
 ## Kerberoast w/o domain account
 
-In September 2022 a vulnerability was discovered by [Charlie Clark](https://exploit.ph/), ST (Service Tickets) can be obtained through KRB\_AS\_REQ request without having to control any Active Directory account. If a principal can authenticate without pre-authentication (like AS-REP Roasting attack), it is possible to use it to launch an **KRB\_AS\_REQ** request and trick the request to ask for a **ST** instead of a **encrypted TGT**, by modifying the **sname** attribute in the req-body part of the request.
+In **September 2022**, a new way to exploit a system was brought to light by a researcher named Charlie Clark, shared through his platform [exploit.ph](https://exploit.ph/). This method allows for the acquisition of **Service Tickets (ST)** via a **KRB_AS_REQ** request, which remarkably does not necessitate control over any Active Directory account. Essentially, if a principal is set up in such a way that it doesn't require pre-authentication—a scenario similar to what's known in the cybersecurity realm as an **AS-REP Roasting attack**—this characteristic can be leveraged to manipulate the request process. Specifically, by altering the **sname** attribute within the request's body, the system is deceived into issuing a **ST** rather than the standard encrypted Ticket Granting Ticket (TGT).
 
 The technique is fully explained in this article: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
@@ -189,7 +195,10 @@ GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "d
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```
 
-**More information about Kerberoasting in ired.team in** [**here** ](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)**and** [**here**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)**.**
+## References
+* [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+* [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
+* [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 <details>
 

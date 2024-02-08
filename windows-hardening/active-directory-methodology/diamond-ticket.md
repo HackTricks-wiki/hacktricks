@@ -41,12 +41,6 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 # /krbkey is the krbtgt AES256 hash. 
 ```
 
-\
-
-
-
-
-
 
 <details>
 

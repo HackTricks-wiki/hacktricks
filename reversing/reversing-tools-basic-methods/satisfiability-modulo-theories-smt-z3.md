@@ -194,7 +194,7 @@ else:
     print "failed to solve"
 ```
 
-# References
+## References
 
 * [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
