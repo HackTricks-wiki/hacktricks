@@ -6,11 +6,11 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -27,7 +27,7 @@ Otras formas de apoyar a HackTricks:
 * **/System**: Archivo para hacer funcionar OS X. Deberías encontrar principalmente archivos específicos de Apple aquí (no de terceros).
 * **/tmp**: Los archivos se eliminan después de 3 días (es un enlace simbólico a /private/tmp)
 * **/Users**: Directorio de inicio para los usuarios.
-* **/usr**: Configuración y binarios del sistema
+* **/usr**: Binarios de configuración y del sistema
 * **/var**: Archivos de registro
 * **/Volumes**: Las unidades montadas aparecerán aquí.
 * **/.vol**: Al ejecutar `stat a.txt` se obtiene algo como `16777223 7545753 -rw-r--r-- 1 nombredeusuario wheel ...` donde el primer número es el número de identificación del volumen donde se encuentra el archivo y el segundo es el número de inodo. Puedes acceder al contenido de este archivo a través de /.vol/ con esa información ejecutando `cat /.vol/16777223/7545753`
@@ -36,7 +36,7 @@ Otras formas de apoyar a HackTricks:
 
 * Las **aplicaciones del sistema** se encuentran en `/System/Applications`
 * Las aplicaciones **instaladas** suelen estar en `/Applications` o en `~/Applications`
-* Los datos de la **aplicación** se pueden encontrar en `/Library/Application Support` para las aplicaciones que se ejecutan como root y en `~/Library/Application Support` para las aplicaciones que se ejecutan como el usuario.
+* Los **datos de la aplicación** se pueden encontrar en `/Library/Application Support` para las aplicaciones que se ejecutan como root y en `~/Library/Application Support` para las aplicaciones que se ejecutan como el usuario.
 * Los **daemons** de aplicaciones de terceros que **necesitan ejecutarse como root** suelen estar ubicados en `/Library/PrivilegedHelperTools/`
 * Las aplicaciones **sandboxed** se mapean en la carpeta `~/Library/Containers`. Cada aplicación tiene una carpeta nombrada según el ID de paquete de la aplicación (`com.apple.Safari`).
 * El **núcleo** se encuentra en `/System/Library/Kernels/kernel`
@@ -70,7 +70,7 @@ macOS almacena información como contraseñas en varios lugares:
 * `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
 * **`.app`**: Aplicaciones de Apple que siguen una estructura de directorio (es un paquete).
 * **`.dylib`**: Bibliotecas dinámicas (como los archivos DLL de Windows)
-* **`.pkg`**: Son iguales que xar (formato de archivo de archivo extensible). El comando installer se puede usar para instalar el contenido de estos archivos.
+* **`.pkg`**: Son iguales que xar (formato de archivo extensible). El comando installer se puede usar para instalar el contenido de estos archivos.
 * **`.DS_Store`**: Este archivo está en cada directorio, guarda los atributos y personalizaciones del directorio.
 * **`.Spotlight-V100`**: Esta carpeta aparece en el directorio raíz de cada volumen en el sistema.
 * **`.metadata_never_index`**: Si este archivo está en la raíz de un volumen, Spotlight no indexará ese volumen.
@@ -84,13 +84,13 @@ Un paquete es un **directorio** que **parece un objeto en Finder** (un ejemplo d
 [macos-bundles.md](macos-bundles.md)
 {% endcontent-ref %}
 
-## Caché Compartida de Dyld
+## Caché Compartida Dyld
 
-En macOS (y iOS) todas las bibliotecas compartidas del sistema, como frameworks y dylibs, se **combinan en un solo archivo**, llamado la **caché compartida de dyld**. Esto mejora el rendimiento, ya que el código se puede cargar más rápido.
+En macOS (y iOS) todas las bibliotecas compartidas del sistema, como frameworks y dylibs, se **combinan en un solo archivo**, llamado la **caché compartida dyld**. Esto mejora el rendimiento, ya que el código se puede cargar más rápido.
 
-Al igual que la caché compartida de dyld, el núcleo y las extensiones del núcleo también se compilan en una caché de núcleo, que se carga en el arranque.
+Al igual que la caché compartida dyld, el núcleo y las extensiones del núcleo también se compilan en una caché de núcleo, que se carga en el arranque.
 
-Para extraer las bibliotecas del archivo único de la caché compartida de dylib, era posible usar el binario [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip) que podría no estar funcionando en la actualidad, pero también puedes usar [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
+Para extraer las bibliotecas del archivo único de caché compartida dylib, era posible usar el binario [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip) que podría no estar funcionando en la actualidad, pero también puedes usar [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 
 {% code overflow="wrap" %}
 ```bash
@@ -124,7 +124,7 @@ En una **carpeta**, **leer** permite **listarla**, **escribir** permite **borrar
 
 Existen algunas banderas que se pueden establecer en los archivos y que harán que el archivo se comporte de manera diferente. Puedes **verificar las banderas** de los archivos dentro de un directorio con `ls -lO /ruta/directorio`
 
-* **`uchg`**: Conocida como bandera de **uchange** evitará que se realice cualquier acción de cambio o eliminación del **archivo**. Para establecerla haz: `chflags uchg archivo.txt`
+* **`uchg`**: Conocida como bandera **uchange** evitará que se realice cualquier acción de cambio o eliminación del **archivo**. Para establecerla haz: `chflags uchg archivo.txt`
 * El usuario root podría **quitar la bandera** y modificar el archivo
 * **`restricted`**: Esta bandera hace que el archivo esté **protegido por SIP** (no puedes agregar esta bandera a un archivo).
 * **`Bit pegajoso`**: Si un directorio tiene el bit pegajoso, **solo** el **propietario de los directorios o root pueden renombrar o eliminar** archivos. Normalmente se establece en el directorio /tmp para evitar que los usuarios comunes eliminen o muevan archivos de otros usuarios.
@@ -151,9 +151,9 @@ Puedes encontrar **todos los archivos con ACLs** con (esto es muuuy lento):
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
-### Recursos de Horquillas | ADS de macOS
+### Tenedores de Recursos | ADS de macOS
 
-Esto es una forma de obtener **Flujos de Datos Alternativos en las máquinas de MacOS**. Puedes guardar contenido dentro de un atributo extendido llamado **com.apple.ResourceFork** dentro de un archivo guardándolo en **file/..namedfork/rsrc**.
+Esta es una forma de obtener **Flujos de Datos Alternativos en las máquinas MacOS**. Puedes guardar contenido dentro de un atributo extendido llamado **com.apple.ResourceFork** dentro de un archivo guardándolo en **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -170,8 +170,6 @@ Puedes **encontrar todos los archivos que contienen este atributo extendido** co
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
-{% endcode %}
-
 ## **Binarios universales y** Formato Mach-o
 
 Los binarios de Mac OS generalmente se compilan como **binarios universales**. Un **binario universal** puede **soportar múltiples arquitecturas en el mismo archivo**.
@@ -186,9 +184,9 @@ Los binarios de Mac OS generalmente se compilan como **binarios universales**. U
 [macos-memory-dumping.md](macos-memory-dumping.md)
 {% endcontent-ref %}
 
-## Archivos de Categoría de Riesgo de Mac OS
+## Archivos de Categoría de Riesgo en Mac OS
 
-El directorio `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` es donde se almacena información sobre el **riesgo asociado con diferentes extensiones de archivo**. Este directorio categoriza archivos en varios niveles de riesgo, influyendo en cómo Safari maneja estos archivos al descargarlos. Las categorías son las siguientes:
+El directorio `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` es donde se almacena información sobre el **riesgo asociado con diferentes extensiones de archivo**. Este directorio categoriza los archivos en varios niveles de riesgo, influyendo en cómo Safari maneja estos archivos al descargarlos. Las categorías son las siguientes:
 
 - **LSRiskCategorySafe**: Los archivos en esta categoría se consideran **completamente seguros**. Safari abrirá automáticamente estos archivos después de ser descargados.
 - **LSRiskCategoryNeutral**: Estos archivos no tienen advertencias y **no se abren automáticamente** en Safari.
@@ -197,25 +195,11 @@ El directorio `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/
 
 ## Archivos de registro
 
-* **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contiene información sobre archivos descargados, como la URL desde la que se descargaron.
+* **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contiene información sobre archivos descargados, como la URL desde donde se descargaron.
 * **`/var/log/system.log`**: Registro principal de los sistemas OSX. com.apple.syslogd.plist es responsable de la ejecución del registro del sistema (puedes verificar si está desactivado buscando "com.apple.syslogd" en `launchctl list`.
-* **`/private/var/log/asl/*.asl`**: Estos son los Registros del Sistema Apple que pueden contener información interesante.
+* **`/private/var/log/asl/*.asl`**: Estos son los Registros del Sistema de Apple que pueden contener información interesante.
 * **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Almacena archivos y aplicaciones accedidos recientemente a través de "Finder".
 * **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Almacena elementos para iniciar al arrancar el sistema.
 * **`$HOME/Library/Logs/DiskUtility.log`**: Archivo de registro para la aplicación DiskUtility (información sobre unidades, incluidas las USB).
 * **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Datos sobre puntos de acceso inalámbricos.
 * **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Lista de demonios desactivados.
-
-<details>
-
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
-
-Otras formas de apoyar a HackTricks:
-
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
-
-</details>

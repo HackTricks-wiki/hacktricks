@@ -9,16 +9,16 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Kernel XNU
 
-El **núcleo de macOS es XNU**, que significa "X is Not Unix". Este núcleo está compuesto fundamentalmente por el **microkernel Mach** (que se discutirá más adelante), **y** elementos de la Distribución de Software de Berkeley (**BSD**). XNU también proporciona una plataforma para **controladores de kernel a través de un sistema llamado I/O Kit**. El núcleo XNU es parte del proyecto de código abierto Darwin, lo que significa que **su código fuente es libremente accesible**.
+El **núcleo de macOS es XNU**, que significa "X is Not Unix". Este kernel está compuesto fundamentalmente por el **microkernel Mach** (que se discutirá más adelante), **y** elementos de la Distribución de Software de Berkeley (**BSD**). XNU también proporciona una plataforma para **controladores de kernel a través de un sistema llamado I/O Kit**. El kernel XNU es parte del proyecto de código abierto Darwin, lo que significa que **su código fuente es libremente accesible**.
 
-Desde la perspectiva de un investigador de seguridad o un desarrollador de Unix, **macOS** puede sentirse bastante **similar** a un sistema **FreeBSD** con una interfaz gráfica elegante y una serie de aplicaciones personalizadas. La mayoría de las aplicaciones desarrolladas para BSD se compilarán y ejecutarán en macOS sin necesidad de modificaciones, ya que las herramientas de línea de comandos familiares para los usuarios de Unix están presentes en macOS. Sin embargo, debido a que el núcleo XNU incorpora Mach, existen algunas diferencias significativas entre un sistema similar a Unix tradicional y macOS, y estas diferencias podrían causar problemas potenciales o proporcionar ventajas únicas.
+Desde la perspectiva de un investigador de seguridad o un desarrollador de Unix, **macOS** puede sentirse bastante **similar** a un sistema **FreeBSD** con una interfaz gráfica elegante y una serie de aplicaciones personalizadas. La mayoría de las aplicaciones desarrolladas para BSD se compilarán y ejecutarán en macOS sin necesidad de modificaciones, ya que las herramientas de línea de comandos familiares para los usuarios de Unix están presentes en macOS. Sin embargo, debido a que el kernel XNU incorpora Mach, existen algunas diferencias significativas entre un sistema similar a Unix tradicional y macOS, y estas diferencias podrían causar problemas potenciales o proporcionar ventajas únicas.
 
 Versión de código abierto de XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
@@ -26,11 +26,11 @@ Versión de código abierto de XNU: [https://opensource.apple.com/source/xnu/](h
 
 Mach es un **microkernel** diseñado para ser **compatible con UNIX**. Uno de sus principios de diseño clave fue **minimizar** la cantidad de **código** que se ejecuta en el **espacio del kernel** y, en su lugar, permitir que muchas funciones típicas del kernel, como el sistema de archivos, la red y la E/S, se **ejecuten como tareas a nivel de usuario**.
 
-En XNU, Mach es **responsable de muchas de las operaciones críticas de bajo nivel** que típicamente maneja un núcleo, como la programación de procesadores, el multitarea y la gestión de memoria virtual.
+En XNU, Mach es **responsable de muchas de las operaciones críticas de bajo nivel** que típicamente maneja un kernel, como la programación de procesadores, el multitarea y la gestión de memoria virtual.
 
 ### BSD
 
-El **núcleo** XNU también **incorpora** una cantidad significativa de código derivado del proyecto **FreeBSD**. Este código **se ejecuta como parte del núcleo junto con Mach**, en el mismo espacio de direcciones. Sin embargo, el código de FreeBSD dentro de XNU puede diferir sustancialmente del código original de FreeBSD porque se requirieron modificaciones para garantizar su compatibilidad con Mach. FreeBSD contribuye a muchas operaciones del núcleo, incluyendo:
+El **kernel** XNU también **incorpora** una cantidad significativa de código derivado del proyecto **FreeBSD**. Este código **se ejecuta como parte del kernel junto con Mach**, en el mismo espacio de direcciones. Sin embargo, el código de FreeBSD dentro de XNU puede diferir sustancialmente del código original de FreeBSD porque se requirieron modificaciones para garantizar su compatibilidad con Mach. FreeBSD contribuye a muchas operaciones del kernel, incluyendo:
 
 * Gestión de procesos
 * Manejo de señales
@@ -39,13 +39,13 @@ El **núcleo** XNU también **incorpora** una cantidad significativa de código 
 * Pila TCP/IP y sockets
 * Firewall y filtrado de paquetes
 
-Comprender la interacción entre BSD y Mach puede ser complejo, debido a sus diferentes marcos conceptuales. Por ejemplo, BSD utiliza procesos como su unidad de ejecución fundamental, mientras que Mach opera en función de hilos. Esta discrepancia se reconcilia en XNU **asociando cada proceso BSD con una tarea Mach** que contiene exactamente un hilo Mach. Cuando se utiliza la llamada al sistema fork() de BSD, el código de BSD dentro del núcleo utiliza funciones de Mach para crear una estructura de tarea y un hilo.
+Comprender la interacción entre BSD y Mach puede ser complejo, debido a sus diferentes marcos conceptuales. Por ejemplo, BSD utiliza procesos como su unidad de ejecución fundamental, mientras que Mach opera en función de hilos. Esta discrepancia se reconcilia en XNU **asociando cada proceso BSD con una tarea Mach** que contiene exactamente un hilo Mach. Cuando se utiliza la llamada al sistema fork() de BSD, el código de BSD dentro del kernel utiliza funciones de Mach para crear una estructura de tarea y un hilo.
 
-Además, **Mach y BSD mantienen modelos de seguridad diferentes**: el modelo de seguridad de **Mach** se basa en **derechos de puerto**, mientras que el modelo de seguridad de BSD opera en función de la **propiedad del proceso**. Las disparidades entre estos dos modelos a veces han dado lugar a vulnerabilidades de escalada de privilegios locales. Además de las llamadas al sistema típicas, también existen **trampas de Mach que permiten a los programas de espacio de usuario interactuar con el kernel**. Estos diferentes elementos juntos forman la arquitectura híbrida y multifacética del núcleo de macOS.
+Además, **Mach y BSD mantienen modelos de seguridad diferentes**: el modelo de seguridad de **Mach** se basa en **derechos de puerto**, mientras que el modelo de seguridad de BSD opera en función de la **propiedad del proceso**. Las disparidades entre estos dos modelos a veces han dado lugar a vulnerabilidades de escalada de privilegios locales. Además de las llamadas al sistema típicas, también existen **trampas de Mach que permiten que los programas de espacio de usuario interactúen con el kernel**. Estos elementos diferentes juntos forman la arquitectura híbrida y multifacética del kernel de macOS.
 
 ### I/O Kit - Controladores
 
-El I/O Kit es un **marco de controladores de dispositivos** orientado a objetos de código abierto en el núcleo XNU, que maneja **controladores de dispositivos cargados dinámicamente**. Permite agregar código modular al núcleo sobre la marcha, admitiendo hardware diverso.
+El I/O Kit es un marco de **controladores de dispositivos orientado a objetos** de código abierto en el kernel XNU, que maneja **controladores de dispositivos cargados dinámicamente**. Permite agregar código modular al kernel sobre la marcha, admitiendo hardware diverso.
 
 {% content-ref url="macos-iokit.md" %}
 [macos-iokit.md](macos-iokit.md)
@@ -59,9 +59,9 @@ El I/O Kit es un **marco de controladores de dispositivos** orientado a objetos 
 
 ### Kernelcache
 
-El **kernelcache** es una versión **precompilada y preenlazada del núcleo XNU**, junto con controladores de dispositivos esenciales y extensiones de kernel. Se almacena en un formato **comprimido** y se descomprime en la memoria durante el proceso de arranque. El kernelcache facilita un **tiempo de arranque más rápido** al tener una versión lista para ejecutarse del núcleo y controladores cruciales disponibles, reduciendo el tiempo y los recursos que de otro modo se gastarían en cargar y vincular dinámicamente estos componentes en el momento del arranque.
+El **kernelcache** es una versión **precompilada y preenlazada del kernel XNU**, junto con controladores de dispositivos esenciales y extensiones de kernel. Se almacena en un formato **comprimido** y se descomprime en la memoria durante el proceso de arranque. El kernelcache facilita un **tiempo de arranque más rápido** al tener una versión lista para ejecutarse del kernel y controladores cruciales disponibles, reduciendo el tiempo y los recursos que de otro modo se gastarían en cargar y vincular dinámicamente estos componentes en el momento del arranque.
 
-En iOS se encuentra en **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** en macOS se puede encontrar con **`find / -name kernelcache 2>/dev/null`**
+En iOS se encuentra en **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** en macOS puedes encontrarlo con **`find / -name kernelcache 2>/dev/null`**
 
 #### IMG4
 
@@ -74,7 +74,7 @@ Generalmente está compuesto por los siguientes componentes:
 * Opcionalmente cifrado
 * **Manifiesto (IM4M)**:
 * Contiene Firma
-* Diccionario de Clave/Valor adicional
+* Diccionario adicional de Clave/Valor
 * **Información de Restauración (IM4R)**:
 * También conocido como APNonce
 * Evita la repetición de algunas actualizaciones
@@ -128,7 +128,7 @@ nm -a binaries/com.apple.security.sandbox | wc -l
 ```
 ## Extensiones de Kernel de macOS
 
-macOS es **súper restrictivo para cargar Extensiones de Kernel** (.kext) debido a los altos privilegios con los que se ejecutará el código. De hecho, por defecto es virtualmente imposible (a menos que se encuentre un bypass).
+macOS es **muy restrictivo al cargar Extensiones de Kernel** (.kext) debido a los altos privilegios con los que se ejecutará el código. De hecho, por defecto es virtualmente imposible (a menos que se encuentre un bypass).
 
 {% content-ref url="macos-kernel-extensions.md" %}
 [macos-kernel-extensions.md](macos-kernel-extensions.md)
@@ -156,7 +156,7 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

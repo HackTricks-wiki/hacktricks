@@ -6,17 +6,17 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 ## Extensiones del Sistema / Marco de Seguridad de Punto Final
 
-A diferencia de las Extensiones del Kernel, las **Extensiones del Sistema se ejecutan en el espacio de usuario** en lugar del espacio del kernel, reduciendo el riesgo de un bloqueo del sistema debido al mal funcionamiento de la extensión.
+A diferencia de las Extensiones del Kernel, las **Extensiones del Sistema se ejecutan en el espacio de usuario** en lugar del espacio del kernel, reduciendo el riesgo de un fallo del sistema debido al mal funcionamiento de la extensión.
 
 <figure><img src="../../../.gitbook/assets/image (1) (3) (1) (1).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
@@ -38,7 +38,7 @@ Las Extensiones de Red proporcionan la capacidad de personalizar comportamientos
 
 ## Marco de Seguridad de Punto Final
 
-Endpoint Security es un marco proporcionado por Apple en macOS que ofrece un conjunto de APIs para la seguridad del sistema. Está destinado a ser utilizado por **proveedores de seguridad y desarrolladores para construir productos que puedan monitorear y controlar la actividad del sistema** para identificar y protegerse contra actividades maliciosas.
+El Marco de Seguridad de Punto Final es un marco proporcionado por Apple en macOS que ofrece un conjunto de APIs para la seguridad del sistema. Está destinado a ser utilizado por **proveedores de seguridad y desarrolladores para construir productos que puedan monitorear y controlar la actividad del sistema** para identificar y protegerse contra actividades maliciosas.
 
 Este marco proporciona una **colección de APIs para monitorear y controlar la actividad del sistema**, como ejecuciones de procesos, eventos del sistema de archivos, eventos de red y del kernel.
 
@@ -54,7 +54,7 @@ Los eventos que el marco de Seguridad de Punto Final puede monitorear se categor
 * Eventos de archivos
 * Eventos de procesos
 * Eventos de sockets
-* Eventos del kernel (como cargar/descargar una extensión del kernel o abrir un dispositivo de I/O Kit)
+* Eventos del kernel (como cargar/descargar una extensión del kernel o abrir un dispositivo I/O Kit)
 
 ### Arquitectura del Marco de Seguridad de Punto Final
 
@@ -62,10 +62,10 @@ Los eventos que el marco de Seguridad de Punto Final puede monitorear se categor
 
 La **comunicación en el espacio de usuario** con el marco de Seguridad de Punto Final se realiza a través de la clase IOUserClient. Se utilizan dos subclases diferentes, dependiendo del tipo de llamante:
 
-* **EndpointSecurityDriverClient**: Requiere el permiso `com.apple.private.endpoint-security.manager`, que solo es otorgado al proceso del sistema `endpointsecurityd`.
-* **EndpointSecurityExternalClient**: Requiere el permiso `com.apple.developer.endpoint-security.client`. Esto sería utilizado típicamente por software de seguridad de terceros que necesita interactuar con el marco de Seguridad de Punto Final.
+* **EndpointSecurityDriverClient**: Requiere el permiso `com.apple.private.endpoint-security.manager`, que solo es poseído por el proceso del sistema `endpointsecurityd`.
+* **EndpointSecurityExternalClient**: Requiere el permiso `com.apple.developer.endpoint-security.client`. Esto típicamente sería utilizado por software de seguridad de terceros que necesita interactuar con el marco de Seguridad de Punto Final.
 
-Las Extensiones de Seguridad de Punto Final:**`libEndpointSecurity.dylib`** es la biblioteca C que las extensiones del sistema utilizan para comunicarse con el kernel. Esta biblioteca utiliza I/O Kit (`IOKit`) para comunicarse con la KEXT de Seguridad de Punto Final.
+Las Extensiones de Seguridad de Punto Final:**`libEndpointSecurity.dylib`** es la biblioteca C que las extensiones del sistema utilizan para comunicarse con el kernel. Esta biblioteca utiliza el I/O Kit (`IOKit`) para comunicarse con la KEXT de Seguridad de Punto Final.
 
 **`endpointsecurityd`** es un demonio del sistema clave involucrado en la gestión y lanzamiento de extensiones del sistema de seguridad de punto final, especialmente durante el proceso de arranque temprano. **Solo las extensiones del sistema** marcadas con **`NSEndpointSecurityEarlyBoot`** en su archivo `Info.plist` reciben este tratamiento de arranque temprano.
 
@@ -92,14 +92,14 @@ Al final, esto se solucionó otorgando el nuevo permiso **`kTCCServiceEndpointSe
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

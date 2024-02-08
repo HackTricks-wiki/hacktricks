@@ -9,14 +9,14 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 ## Información Básica de Pkg
 
-Un **paquete de instalación** de macOS (también conocido como archivo `.pkg`) es un formato de archivo utilizado por macOS para **distribuir software**. Estos archivos son como una **caja que contiene todo lo que un software** necesita para instalarse y ejecutarse correctamente.
+Un **paquete de instalación de macOS** (también conocido como archivo `.pkg`) es un formato de archivo utilizado por macOS para **distribuir software**. Estos archivos son como una **caja que contiene todo lo que un software** necesita para instalarse y ejecutarse correctamente.
 
 El archivo del paquete en sí es un archivo comprimido que contiene una **jerarquía de archivos y directorios que se instalarán en el** ordenador de destino. También puede incluir **scripts** para realizar tareas antes y después de la instalación, como configurar archivos de configuración o limpiar versiones antiguas del software.
 
@@ -25,7 +25,7 @@ El archivo del paquete en sí es un archivo comprimido que contiene una **jerarq
 <figure><img src="../../../.gitbook/assets/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
 * **Distribución (xml)**: Personalizaciones (título, texto de bienvenida...) y comprobaciones de script/instalación
-* **PackageInfo (xml)**: Información, requisitos de instalación, ubicación de instalación, rutas a scripts a ejecutar
+* **PackageInfo (xml)**: Información, requisitos de instalación, ubicación de instalación, rutas a scripts para ejecutar
 * **Lista de materiales (bom)**: Lista de archivos para instalar, actualizar o eliminar con permisos de archivo
 * **Carga (archivo CPIO comprimido con gzip)**: Archivos para instalar en la `ubicación de instalación` desde PackageInfo
 * **Scripts (archivo CPIO comprimido con gzip)**: Scripts de pre y post instalación y más recursos extraídos a un directorio temporal para su ejecución.
@@ -46,7 +46,7 @@ cpio -i < Scripts
 ```
 ## Información básica de los archivos DMG
 
-Los archivos DMG, o Imágenes de Disco de Apple, son un formato de archivo utilizado por el macOS de Apple para imágenes de disco. Un archivo DMG es esencialmente una **imagen de disco montable** (contiene su propio sistema de archivos) que contiene datos de bloques crudos generalmente comprimidos y a veces encriptados. Cuando abres un archivo DMG, macOS lo **monta como si fuera un disco físico**, lo que te permite acceder a su contenido.
+Los archivos DMG, o Imágenes de Disco de Apple, son un formato de archivo utilizado por el macOS de Apple para imágenes de disco. Un archivo DMG es esencialmente una **imagen de disco montable** (contiene su propio sistema de archivos) que contiene datos de bloques crudos, generalmente comprimidos y a veces encriptados. Cuando abres un archivo DMG, macOS lo **monta como si fuera un disco físico**, lo que te permite acceder a su contenido.
 
 ### Jerarquía
 
@@ -58,7 +58,7 @@ La jerarquía de un archivo DMG puede ser diferente según el contenido. Sin emb
 - Aplicación (.app): Esta es la aplicación real. En macOS, una aplicación es típicamente un paquete que contiene muchos archivos y carpetas individuales que conforman la aplicación.
 - Enlace de Aplicaciones: Este es un acceso directo a la carpeta de Aplicaciones en macOS. El propósito de esto es facilitar la instalación de la aplicación. Puedes arrastrar el archivo .app a este acceso directo para instalar la aplicación.
 
-## Escalada de privilegios mediante el abuso de pkg
+## Escalada de privilegios mediante abuso de pkg
 
 ### Ejecución desde directorios públicos
 
@@ -94,5 +94,5 @@ Es posible agregar etiquetas **`<script>`** en el archivo **xml de distribución
 
 ## Referencias
 
-* [**DEF CON 27 - Desempaquetando Pkgs Un Vistazo Dentro de los Paquetes de Instalación de Macos y Fallas de Seguridad Comunes**](https://www.youtube.com/watch?v=iASSG0\_zobQ)
+* [**DEF CON 27 - Desempaquetando Pkgs: Un Vistazo Dentro de los Paquetes de Instalación de macOS y Fallos Comunes de Seguridad**](https://www.youtube.com/watch?v=iASSG0\_zobQ)
 * [**OBTS v4.0: "El Salvaje Mundo de los Instaladores de macOS" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)

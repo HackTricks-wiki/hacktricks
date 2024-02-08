@@ -6,21 +6,21 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Información Básica
 
-Los paquetes en macOS sirven como contenedores para una variedad de recursos que incluyen aplicaciones, bibliotecas y otros archivos necesarios, haciéndolos aparecer como objetos únicos en Finder, como los familiares archivos `*.app`. El paquete más comúnmente encontrado es el paquete `.app`, aunque también son prevalentes otros tipos como `.framework`, `.systemextension` y `.kext`.
+Los paquetes en macOS sirven como contenedores para una variedad de recursos que incluyen aplicaciones, bibliotecas y otros archivos necesarios, haciéndolos aparecer como objetos únicos en Finder, como los familiares archivos `*.app`. El paquete más comúnmente encontrado es el paquete `.app`, aunque otros tipos como `.framework`, `.systemextension` y `.kext` también son prevalentes.
 
 ### Componentes Esenciales de un Paquete
 
-Dentro de un paquete, particularmente dentro del directorio `<aplicación>.app/Contents/`, se encuentran alojados una variedad de recursos importantes:
+Dentro de un paquete, particularmente dentro del directorio `<aplicación>.app/Contents/`, se albergan una variedad de recursos importantes:
 
 - **_CodeSignature**: Este directorio almacena detalles de firma de código vitales para verificar la integridad de la aplicación. Puedes inspeccionar la información de firma de código usando comandos como:
 %%%bash
@@ -40,7 +40,7 @@ El archivo `Info.plist` es fundamental para la configuración de la aplicación,
 
 ### Explorando Paquetes
 
-Para explorar el contenido de un paquete, como `Safari.app`, se puede utilizar el siguiente comando:
+Para explorar el contenido de un paquete, como `Safari.app`, se puede usar el siguiente comando:
 %%%bash
 ls -lR /Applications/Safari.app/Contents
 %%%
@@ -49,7 +49,7 @@ Esta exploración revela directorios como `_CodeSignature`, `MacOS`, `Resources`
 
 #### Directorios Adicionales de Paquetes
 
-Más allá de los directorios comunes, los paquetes también pueden incluir:
+Además de los directorios comunes, los paquetes también pueden incluir:
 
 - **Frameworks**: Contiene frameworks empaquetados utilizados por la aplicación.
 - **PlugIns**: Un directorio para complementos y extensiones que mejoran las capacidades de la aplicación.
@@ -65,10 +65,10 @@ Para obtener información más detallada sobre las claves de `Info.plist` y sus 
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
