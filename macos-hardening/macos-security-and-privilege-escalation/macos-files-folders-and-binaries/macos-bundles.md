@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私をフォローする：[**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-* **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェック！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見る
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローする**.**
+* **ハッキングトリックを共有するには** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>
 
 ## 基本情報
 
-macOS のバンドルは、アプリケーション、ライブラリ、およびその他の必要なファイルを含むコンテナとして機能し、おなじみの `*.app` ファイルなど、Finder で単一のオブジェクトとして表示されます。最も一般的に遭遇するバンドルは `.app` バンドルですが、`.framework`、`.systemextension`、`.kext` などの他のタイプも一般的です。
+macOS のバンドルは、アプリケーション、ライブラリ、およびその他の必要なファイルを含むさまざまなリソースのコンテナとして機能し、おなじみの `*.app` ファイルなど、Finder で単一のオブジェクトとして表示されます。最も一般的に遭遇するバンドルは `.app` バンドルですが、`.framework`、`.systemextension`、`.kext` などの他のタイプも一般的です。
 
 ### バンドルの必須コンポーネント
 
@@ -28,11 +28,11 @@ openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.ca
 %%%
 - **MacOS**: ユーザーの操作に応じて実行されるアプリケーションの実行可能バイナリが含まれています。
 - **Resources**: 画像、ドキュメント、およびインターフェースの説明（nib/xib ファイル）など、アプリケーションのユーザーインターフェースコンポーネントのリポジトリです。
-- **Info.plist**: アプリケーションのメイン構成ファイルとして機能し、システムがアプリケーションを適切に認識して対話するために重要です。
+- **Info.plist**: システムがアプリケーションを認識し、適切に対話するために重要なアプリケーションのメイン構成ファイルとして機能します。
 
 #### Info.plist の重要なキー
 
-`Info.plist` ファイルは、アプリケーション構成の基盤であり、次のようなキーを含んでいます:
+`Info.plist` ファイルは、アプリケーションの構成にとって基本的なものであり、次のようなキーが含まれています:
 
 - **CFBundleExecutable**: `Contents/MacOS` ディレクトリにあるメイン実行ファイルの名前を指定します。
 - **CFBundleIdentifier**: アプリケーションのためのグローバル識別子を提供し、macOS がアプリケーション管理に広く使用します。
@@ -40,12 +40,12 @@ openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.ca
 
 ### バンドルの探索
 
-`Safari.app` などのバンドルの内容を探索するには、次のコマンドを使用できます:
+`Safari.app` などのバンンドルの内容を探索するには、次のコマンドを使用できます:
 %%%bash
 ls -lR /Applications/Safari.app/Contents
 %%%
 
-この探索により、`_CodeSignature`、`MacOS`、`Resources` などのディレクトリや `Info.plist` のようなファイルが表示され、それぞれがアプリケーションのセキュリティを確保したり、ユーザーインターフェースや操作パラメータを定義したりするための独自の目的を果たしています。
+この探索により、`_CodeSignature`、`MacOS`、`Resources` などのディレクトリや `Info.plist` のようなファイルが表示され、それぞれがアプリケーションのセキュリティを確保し、ユーザーインターフェースと操作パラメータを定義するための独自の目的を果たしています。
 
 #### 追加のバンドルディレクトリ
 
@@ -57,18 +57,18 @@ ls -lR /Applications/Safari.app/Contents
 
 この構造により、すべての必要なコンポーネントがバンドル内にカプセル化され、モジュラーで安全なアプリケーション環境が実現されます。
 
-`Info.plist` キーとその意味に関する詳細情報については、Apple 開発者ドキュメントが包括的なリソースを提供しています: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+`Info.plist` キーとその意味に関する詳細情報については、Apple 開発者ドキュメントが広範なリソースを提供しています: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私をフォローする：[**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-* **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェック！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見る
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローする**.**
+* **ハッキングトリックを共有するには** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>

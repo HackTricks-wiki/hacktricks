@@ -2,25 +2,25 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
-* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェック！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローする**。**
+* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する。
 
 </details>
 
 ## 基本情報
 
-Linux のタイムネームスペースは、システムの単調増加時計と起動時刻クロックに対するネームスペースごとのオフセットを可能にします。Linux コンテナでは、コンテナ内の日付/時刻を変更し、チェックポイントやスナップショットから復元した後にクロックを調整するために一般的に使用されます。
+Linuxのタイムネームスペースは、システムの単調増加時計と起動時刻クロックに対するネームスペースごとのオフセットを可能にします。Linuxコンテナでは、コンテナ内の日付/時刻を変更し、チェックポイントやスナップショットから復元した後にクロックを調整するために一般的に使用されます。
 
 ## Lab:
 
-### 異なるネームスペースを作成する
+### 異なるネームスペースを作成
 
 #### CLI
 ```bash
@@ -32,10 +32,10 @@ sudo unshare -T [--mount-proc] /bin/bash
 
 <summary>エラー: bash: fork: Cannot allocate memory</summary>
 
-`unshare` が `-f` オプションなしで実行されると、Linux が新しい PID (プロセス ID) 名前空間を処理する方法によりエラーが発生します。主要な詳細と解決策は以下に示されています:
+`-f` オプションを指定せずに `unshare` を実行すると、Linux が新しい PID (プロセス ID) 名前空間を処理する方法によりエラーが発生します。主要な詳細と解決策は以下に示されています:
 
 1. **問題の説明**:
-- Linux カーネルは、`unshare` システムコールを使用してプロセスが新しい名前空間を作成することを許可します。ただし、新しい PID 名前空間の作成を開始するプロセス（"unshare" プロセスと呼ばれる）は、新しい名前空間に入りません。その子プロセスだけが入ります。
+- Linux カーネルは、`unshare` システムコールを使用してプロセスが新しい名前空間を作成することを許可します。ただし、新しい PID 名前空間の作成を開始するプロセス（"unshare" プロセスと呼ばれる）は、新しい名前空間に入りません。その子プロセスのみが入ります。
 - `%unshare -p /bin/bash%` を実行すると、`/bin/bash` が `unshare` と同じプロセスで開始されます。その結果、`/bin/bash` とその子プロセスは元の PID 名前空間にあります。
 - 新しい名前空間内の `/bin/bash` の最初の子プロセスは PID 1 になります。このプロセスが終了すると、他のプロセスがいない場合、孤児プロセスを引き取る特別な役割を持つ PID 1 により、名前空間のクリーンアップがトリガーされます。その後、Linux カーネルはその名前空間での PID 割り当てを無効にします。
 
@@ -44,9 +44,9 @@ sudo unshare -T [--mount-proc] /bin/bash
 
 3. **解決策**:
 - `unshare` に `-f` オプションを使用することで問題を解決できます。このオプションにより、`unshare` は新しい PID 名前空間を作成した後に新しいプロセスをフォークします。
-- `%unshare -fp /bin/bash%` を実行すると、`unshare` コマンド自体が新しい名前空間で PID 1 になります。その後、`/bin/bash` とその子プロセスはこの新しい名前空間内に安全に含まれるため、PID 1 の早期終了を防ぎ、通常の PID 割り当てを可能にします。
+- `%unshare -fp /bin/bash%` を実行すると、`unshare` コマンド自体が新しい名前空間で PID 1 になります。その後、`/bin/bash` とその子プロセスはこの新しい名前空間内に安全に含まれ、PID 1 の早期終了を防ぎ、通常の PID 割り当てを可能にします。
 
-`unshare` が `-f` フラグとともに実行されることで、新しい PID 名前空間が正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく動作するようになります。
+`unshare` が `-f` フラグとともに実行されることで、新しい PID 名前空間が正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく動作できるようになります。
 
 </details>
 
@@ -67,13 +67,13 @@ sudo find /proc -maxdepth 3 -type l -name time -exec readlink {} \; 2>/dev/null 
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name time -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### 時間ネームスペースに入る
+### 時間名前空間に入る
 
 {% endcode %}
 ```bash
 nsenter -T TARGET_PID --pid /bin/bash
 ```
-また、**rootユーザーでないと他のプロセスの名前空間に入ることはできません**。そして、他の名前空間に**ディスクリプタ**が指すことなしには、**入ることはできません**（例：`/proc/self/ns/net`）。
+また、**rootユーザーでないと他のプロセスの名前空間に入ることはできません**。そして、他の名前空間に**ディスクリプタ**が指すことなしに**入ることはできません**（例：`/proc/self/ns/net`）。
 
 ## 参考文献
 * [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
@@ -81,14 +81,14 @@ nsenter -T TARGET_PID --pid /bin/bash
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
 * **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**してください。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>

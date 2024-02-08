@@ -2,68 +2,68 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい場合は**、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
+- **Discordグループ**に**参加**💬(https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**🐦で**フォロー**する[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+- **HackTricks**（https://github.com/carlospolop/hacktricks）と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
 
-## 主要なKeychains
+## メインキーチェーン
 
-* **ユーザーKeychain** (`~/Library/Keychains/login.keycahin-db`)は、アプリケーションのパスワード、インターネットのパスワード、ユーザーが生成した証明書、ネットワークのパスワード、ユーザーが生成した公開/秘密キーなどの**ユーザー固有の資格情報**を保存するために使用されます。
-* **システムKeychain** (`/Library/Keychains/System.keychain`)は、WiFiのパスワード、システムルート証明書、システム秘密キー、システムアプリケーションのパスワードなどの**システム全体の資格情報**を保存します。
+- **ユーザーキーチェーン**（`~/Library/Keychains/login.keycahin-db`）は、アプリケーションパスワード、インターネットパスワード、ユーザー生成証明書、ネットワークパスワード、ユーザー生成の公開/秘密鍵など、**ユーザー固有の資格情報**を保存するために使用されます。
+- **システムキーチェーン**（`/Library/Keychains/System.keychain`）は、WiFiパスワード、システムルート証明書、システムの秘密鍵、システムアプリケーションパスワードなど、**システム全体の資格情報**を保存します。
 
-### パスワードKeychainアクセス
+### パスワードキーチェーンアクセス
 
-これらのファイルは、本来の保護はありませんが、**ダウンロード**可能であり、暗号化されており、**ユーザーのプレーンテキストパスワードが必要です**。[**Chainbreaker**](https://github.com/n0fate/chainbreaker)のようなツールを使用して復号化することができます。
+これらのファイルは、固有の保護を持たないため、**ダウンロード**できますが、**ユーザーの平文パスワードが必要**です。[**Chainbreaker**](https://github.com/n0fate/chainbreaker)のようなツールを使用して復号化できます。
 
-## Keychainエントリの保護
+## キーチェーンエントリの保護
 
 ### ACLs
 
-Keychainの各エントリは**アクセス制御リスト（ACLs）**によって管理され、Keychainエントリに対してさまざまなアクションを実行できる人を決定します。これには以下が含まれます:
+キーチェーン内の各エントリは、**アクセス制御リスト（ACLs）**によって管理され、キーチェーンエントリでさまざまなアクションを実行できるユーザーを規定します。これには以下が含まれます：
 
-* **ACLAuhtorizationExportClear**: 秘密のクリアテキストを取得することを許可します。
-* **ACLAuhtorizationExportWrapped**: 別の提供されたパスワードで暗号化されたクリアテキストを取得することを許可します。
-* **ACLAuhtorizationAny**: 任意のアクションを実行することを許可します。
+- **ACLAuhtorizationExportClear**：保持者が秘密のクリアテキストを取得できるようにします。
+- **ACLAuhtorizationExportWrapped**：保持者が別の提供されたパスワードで暗号化されたクリアテキストを取得できるようにします。
+- **ACLAuhtorizationAny**：保持者が任意のアクションを実行できるようにします。
 
-ACLは、これらのアクションをプロンプトなしで実行できる**信頼できるアプリケーションのリスト**によってさらに補完されます。これには以下が含まれる可能性があります:
+ACLsにはさらに、プロンプトなしでこれらのアクションを実行できる**信頼されたアプリケーションのリスト**が付属しています。これには以下が含まれます：
 
-* &#x20;**N`il`** (認証不要、**全員が信頼されています**)
-* **空の**リスト (**誰も**信頼されていません)
-* 特定の**アプリケーション**の**リスト**。
+- **`Nil`**（認証不要、**誰もが信頼されている**）
+- **空の**リスト（**誰も**が信頼されていない）
+- 特定の**アプリケーション**の**リスト**。
 
-また、エントリには**`ACLAuthorizationPartitionID`,** というキーが含まれている場合があり、これは**teamid, apple,** および**cdhash**を識別するために使用されます。
+また、エントリには**`ACLAuthorizationPartitionID`**が含まれる場合があり、これは**teamid、apple、cdhash**を識別するために使用されます。
 
-* **teamid**が指定されている場合、**プロンプトなしで**エントリ値に**アクセスする**ためには、使用されるアプリケーションは**同じteamid**を持っている必要があります。
-* **apple**が指定されている場合、アプリは**Apple**によって**署名**されている必要があります。
-* **cdhash**が指定されている場合、**アプリ**は特定の**cdhash**を持っている必要があります。
+- **teamid**が指定されている場合、**エントリにアクセス**するためには、使用されるアプリケーションが**同じteamid**を持っている必要があります。
+- **apple**が指定されている場合、アプリは**Apple**によって**署名**されている必要があります。
+- **cdhash**が示されている場合、**アプリ**は特定の**cdhash**を持っている必要があります。
 
-### Keychainエントリの作成
+### キーチェーンエントリの作成
 
-**`Keychain Access.app`**を使用して**新しい** **エントリ**が作成される場合、以下のルールが適用されます:
+**`Keychain Access.app`**を使用して**新しいエントリ**を作成する場合、次のルールが適用されます：
 
-* すべてのアプリは暗号化できます。
-* **アプリは**エクスポート/復号化できません（ユーザーにプロンプトなしで）。
-* すべてのアプリは整合性チェックを見ることができます。
-* アプリはACLを変更できません。
-* **partitionID**は**`apple`**に設定されます。
+- すべてのアプリが暗号化できます。
+- **アプリは**エクスポート/復号化できません（ユーザーにプロンプトを表示せず）。
+- すべてのアプリが整合性チェックを見ることができます。
+- どのアプリもACLを変更できません。
+- **partitionID**は**`apple`**に設定されます。
 
-**アプリケーションがkeychainにエントリを作成する**場合、ルールは少し異なります:
+**アプリケーションがキーチェーンにエントリを作成**する場合、ルールは若干異なります：
 
-* すべてのアプリは暗号化できます。
-* **作成アプリケーション**（または明示的に追加された他のアプリ）のみがエクスポート/復号化できます（ユーザーにプロンプトなしで）。
-* すべてのアプリは整合性チェックを見ることができます。
-* アプリはACLを変更できません。
-* **partitionID**は**`teamid:[teamID here]`**に設定されます。
+- すべてのアプリが暗号化できます。
+- エクスポート/復号化を行うことができるのは**作成アプリケーション**（または明示的に追加された他のアプリ）だけです（ユーザーにプロンプトを表示せず）。
+- すべてのアプリが整合性チェックを見ることができます。
+- どのアプリもACLを変更できません。
+- **partitionID**は**`teamid:[ここにteamID]`**に設定されます。
 
-## Keychainへのアクセス
+## キーチェーンへのアクセス
 
 ### `security`
 ```bash
@@ -76,57 +76,57 @@ security find-generic-password -a "Slack" -g
 # Change the specified entrys PartitionID entry
 security set-generic-password-parition-list -s "test service" -a "test acount" -S
 ```
-### APIs
+### API
 
 {% hint style="success" %}
-キーチェーンの列挙とプロンプトを生成しない秘密の**ダンプ**は、ツール[**LockSmith**](https://github.com/its-a-feature/LockSmith)を使用して行うことができます。
+**プロンプトを生成しない**シークレットの**キーチェーン列挙とダンプ**は、[**LockSmith**](https://github.com/its-a-feature/LockSmith)ツールを使用して行うことができます。
 {% endhint %}
 
-各キーチェーンエントリについての**情報**をリストし、取得します：
+各キーチェーンエントリのリストと**情報**を取得します：
 
-* API **`SecItemCopyMatching`** は各エントリについての情報を提供し、使用時に設定できるいくつかの属性があります：
-* **`kSecReturnData`**: trueの場合、データの復号化を試みます（ポップアップを避けるためにfalseに設定）
-* **`kSecReturnRef`**: キーチェーンアイテムへの参照も取得します（後でポップアップなしで復号化できるとわかった場合にtrueに設定）
-* **`kSecReturnAttributes`**: エントリについてのメタデータを取得
-* **`kSecMatchLimit`**: 返す結果の数
-* **`kSecClass`**: キーチェーンエントリの種類
+* API **`SecItemCopyMatching`** は各エントリに関する情報を提供し、使用する際に設定できるいくつかの属性があります：
+* **`kSecReturnData`**：trueの場合、データの復号を試みます（ポップアップを回避するためにfalseに設定）
+* **`kSecReturnRef`**：キーチェーンアイテムへの参照も取得します（後でポップアップなしで復号できることがわかった場合にtrueに設定）
+* **`kSecReturnAttributes`**：エントリに関するメタデータを取得します
+* **`kSecMatchLimit`**：返す結果の数
+* **`kSecClass`**：どの種類のキーチェーンエントリか
 
 各エントリの**ACL**を取得します：
 
-* API **`SecAccessCopyACLList`** を使用すると、**キーチェーンアイテムのACL**を取得でき、それぞれのリストには（`ACLAuhtorizationExportClear`や前述の他のもののような）ACLのリストが返されます。各リストには以下が含まれます：
+* API **`SecAccessCopyACLList`** を使用すると、**キーチェーンアイテムのACL**を取得し、ACLのリスト（`ACLAuhtorizationExportClear`などの以前に言及されたもの）が返されます。各リストには以下が含まれます：
 * 説明
-* **信頼されたアプリケーションリスト**。これには以下が含まれる可能性があります：
+* **信頼されたアプリケーションリスト**。これには次のようなものが含まれる可能性があります：
 * アプリ：/Applications/Slack.app
 * バイナリ：/usr/libexec/airportd
 * グループ：group://AirPort
 
 データをエクスポートします：
 
-* API **`SecKeychainItemCopyContent`** はプレーンテキストを取得します
-* API **`SecItemExport`** はキーと証明書をエクスポートしますが、内容を暗号化してエクスポートするためにパスワードを設定する必要があるかもしれません
+* API **`SecKeychainItemCopyContent`** は平文を取得します
+* API **`SecItemExport`** はキーと証明書をエクスポートしますが、コンテンツを暗号化してエクスポートするにはパスワードを設定する必要があります
 
-そして、プロンプトなしで秘密を**エクスポート**するために必要な**要件**は以下の通りです：
+そして、**プロンプトなしでシークレットをエクスポート**するための**要件**は次のとおりです：
 
 * **1つ以上の信頼された**アプリがリストされている場合：
-* 適切な**認証**が必要です（**`Nil`**、または秘密情報へのアクセスを許可するアプリのリストの一部である必要があります）
+* 適切な**認可**が必要（**`Nil`**、またはシークレット情報にアクセスするための認可されたアプリの許可リストの一部である必要があります）
 * コード署名が**PartitionID**と一致する必要があります
-* コード署名が**信頼されたアプリ**の1つと一致する必要があります（または適切なKeychainAccessGroupのメンバーである必要があります）
+* コード署名が**信頼されたアプリ**のものと一致する必要があります（または適切なKeychainAccessGroupのメンバーである必要があります）
 * **すべてのアプリケーションが信頼されている**場合：
-* 適切な**認証**が必要です
+* 適切な**認可**が必要
 * コード署名が**PartitionID**と一致する必要があります
-* **PartitionIDがない**場合、これは必要ありません
+* **PartitionID**がない場合、これは必要ありません
 
 {% hint style="danger" %}
-したがって、**1つのアプリケーションがリストされている**場合、そのアプリケーションにコードを**注入する**必要があります。
+したがって、**1つのアプリケーションがリストされている**場合、そのアプリケーションに**コードをインジェクトする**必要があります。
 
-**apple**が**partitionID**に示されている場合、**`osascript`** を使用してアクセスできます。つまり、partitionIDにappleが含まれているすべてのアプリケーションを信頼しています。**`Python`** もこれに使用できます。
+**PartitionID**に**apple**が指定されている場合、**`osascript`**を使用してアクセスできます。つまり、PartitionIDにappleが含まれているすべてのアプリケーションを信頼しているものにアクセスできます。**`Python`**も使用できます。
 {% endhint %}
 
-### 追加の2つの属性
+### 2つの追加属性
 
-* **Invisible**: UIキーチェーンアプリからエントリを**隠す**ためのブールフラグです
-* **General**: **メタデータ**を保存するためのものです（従って、暗号化されていません）
-* Microsoftは、機密エンドポイントへのアクセスに必要なすべてのリフレッシュトークンをプレーンテキストで保存していました。
+* **Invisible**：UIキーチェーンアプリからエントリを**非表示**にするためのブールフラグです
+* **General**：**メタデータ**を保存するためのものです（つまり、**暗号化されていない**）
+* Microsoftは、機密エンドポイントにアクセスするためのすべてのリフレッシュトークンを平文で保存していました。
 
 ## 参考文献
 
@@ -134,14 +134,14 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 
 <details>
 
-<summary><strong>AWSのハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式のPEASS & HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。私たちの独占的な[**NFTコレクション**](https://opensea.io/collection/the-peass-family)です。
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)や[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有してください。
+* **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>

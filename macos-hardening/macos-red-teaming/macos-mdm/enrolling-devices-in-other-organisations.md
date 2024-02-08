@@ -1,25 +1,25 @@
-# 他の組織にデバイスを登録する
+# 他の組織へのデバイス登録
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>でAWSハッキングをゼロからヒーローまで学ぶ</summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</summary>
 
 HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい場合**は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-- **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で**@carlospolopm**をフォローしてください
+- **ハッキングトリックを共有するためにPRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください**
 
 </details>
 
 ## イントロ
 
-[**以前にコメントしたように**](./#what-is-mdm-mobile-device-management)**、組織にデバイスを登録しようとするためには、その組織に属するシリアル番号だけが必要です**。デバイスが登録されると、新しいデバイスに証明書、アプリケーション、WiFiパスワード、VPN構成などがインストールされます。\
+[**以前にコメントされたように**](./#what-is-mdm-mobile-device-management)、組織にデバイスを登録しようとするためには、**その組織に属するシリアル番号だけが必要**です。デバイスが登録されると、新しいデバイスには証明書、アプリケーション、WiFiパスワード、VPN構成などの機密データがいくつかの組織にインストールされます。\
 したがって、登録プロセスが適切に保護されていない場合、これは攻撃者にとって危険なエントリーポイントとなり得ます。
 
-**以下は、研究の要約です [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)。詳細な技術的詳細については、そちらをご確認ください！**
+**以下は、[https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)の研究の要約です。詳細な技術的詳細については、そちらをご確認ください！**
 
 ## DEPおよびMDMバイナリ解析の概要
 
@@ -33,22 +33,22 @@ DEPチェックインでは、`CPFetchActivationRecord`および`CPGetActivation
 
 ## TeslaプロトコルおよびAbsintheスキームのリバースエンジニアリング
 
-DEPチェックインには、`cloudconfigurationd`が暗号化された署名付きのJSONペイロードを_iprofiles.apple.com/macProfile_に送信します。ペイロードにはデバイスのシリアル番号とアクション「RequestProfileConfiguration」が含まれます。使用される暗号化スキームは内部的に「Absinthe」と呼ばれます。このスキームを解明するには複雑な手順が必要であり、Activation Recordリクエストに任意のシリアル番号を挿入するための代替手法を探ることにつながりました。
+DEPチェックインには、`cloudconfigurationd`が暗号化された署名付きJSONペイロードを_iprofiles.apple.com/macProfile_に送信します。ペイロードにはデバイスのシリアル番号とアクション「RequestProfileConfiguration」が含まれます。使用される暗号化スキームは内部的に「Absinthe」と呼ばれます。このスキームを解明するには複数のステップが必要であり、Activation Recordリクエストに任意のシリアル番号を挿入するための代替手法を探ることにつながりました。
 
 ## DEPリクエストのプロキシ
 
-Charles Proxyなどのツールを使用して_iprofiles.apple.com_へのDEPリクエストを傍受および変更しようとする試みは、ペイロードの暗号化とSSL/TLSセキュリティ対策によって妨げられました。ただし、`MCCloudConfigAcceptAnyHTTPSCertificate`構成を有効にすると、サーバー証明書の検証をバイパスできますが、ペイロードの暗号化により、復号鍵なしでシリアル番号を変更することはできません。
+Charles Proxyなどのツールを使用して_iprofiles.apple.com_へのDEPリクエストを傍受および変更しようとする試みは、ペイロードの暗号化とSSL/TLSセキュリティ対策によって妨げられました。ただし、`MCCloudConfigAcceptAnyHTTPSCertificate`構成を有効にすると、サーバー証明書の検証をバイパスできますが、ペイロードの暗号化された性質により、復号鍵なしでシリアル番号を変更することはできません。
 
 ## DEPとやり取りするシステムバイナリのインストゥルメンテーション
 
-`cloudconfigurationd`などのシステムバイナリのインストゥルメンテーションには、macOSでシステム整合性保護（SIP）を無効にする必要があります。SIPを無効にすると、LLDBのようなツールを使用してシステムプロセスにアタッチし、DEP APIとやり取りで使用されるシリアル番号を変更する可能性があります。この方法は、権限とコード署名の複雑さを回避できるため、好ましい方法です。
+`cloudconfigurationd`などのシステムバイナリをインストゥルメンテーションするには、macOSでSystem Integrity Protection（SIP）を無効にする必要があります。SIPを無効にすると、LLDBのようなツールを使用してシステムプロセスにアタッチし、DEP APIとのやり取りで使用されるシリアル番号を変更する可能性があります。この方法は、権限とコード署名の複雑さを回避できるため、好ましい方法です。
 
-**バイナリインストゥルメンテーションの悪用:**
-`cloudconfigurationd`でJSONシリアライズ前にDEPリクエストペイロードを変更することが効果的であることが示されました。このプロセスには以下が含まれます：
+**バイナリインストゥルメンテーションの悪用：**
+`cloudconfigurationd`でJSONシリアル化前にDEPリクエストペイロードを変更することが効果的であることが示されました。このプロセスには以下が含まれます：
 
-1. LLDBを`cloudconfigurationd`にアタッチする。
+1. `cloudconfigurationd`にLLDBをアタッチする。
 2. システムシリアル番号が取得されるポイントを特定する。
-3. ペイロードが暗号化および送信される前に、メモリに任意のシリアル番号を挿入する。
+3. ペイロードが暗号化および送信される前にメモリに任意のシリアル番号を挿入する。
 
 この方法により、任意のシリアル番号の完全なDEPプロファイルを取得することが可能であり、潜在的な脆弱性が示されました。
 
@@ -61,6 +61,6 @@ LLDB APIを使用して、Pythonを使用して悪用プロセスを自動化し
 研究は重要なセキュリティ上の懸念を示しました：
 
 1. **情報漏洩**：DEPに登録されたシリアル番号を提供することで、DEPプロファイルに含まれる機密組織情報を取得できます。
-2. **ローグDEP登録**：適切な認証がない場合、DEPに登録されたシリアル番号を持つ攻撃者は、組織のMDMサーバーにローグデバイスを登録し、機密データやネットワークリソースにアクセスする可能性があります。
+2. **不正なDEP登録**：適切な認証がない場合、DEPに登録されたシリアル番号を持つ攻撃者は、組織のMDMサーバーに不正なデバイスを登録し、機密データやネットワークリソースにアクセスできる可能性があります。
 
 結論として、DEPとMDMは企業環境でAppleデバイスを管理するための強力なツールを提供しますが、セキュリティ上の攻撃ベクトルを示す可能性があり、これらを保護し、監視する必要があります。

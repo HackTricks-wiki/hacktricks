@@ -7,22 +7,22 @@
 HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦で私をフォローする：[**@carlospolopm**](https://twitter.com/carlospolopm)。
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する。
 - **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
 
 </details>
 
 ## 基本情報
 
-UTS（UNIX Time-Sharing System）名前空間は、Linuxカーネルの機能であり、**2つのシステム識別子**、つまり**ホスト名**と**NIS**（Network Information Service）ドメイン名を**分離**します。この分離により、各UTS名前空間は**独自のホスト名とNISドメイン名**を持つことができ、特に各コンテナが独自のホスト名を持つ別々のシステムとして表示されるコンテナ化シナリオで便利です。
+UTS（UNIX Time-Sharing System）名前空間は、Linuxカーネルの機能であり、**ホスト名**と**NIS**（Network Information Service）ドメイン名の**2つのシステム識別子を分離**する機能を提供します。この分離により、各UTS名前空間は**独自のホスト名とNISドメイン名**を持つことができ、特に各コンテナが独自のホスト名を持つ別々のシステムとして表示されるべきコンテナ化シナリオで役立ちます。
 
 ### 動作方法：
 
 1. 新しいUTS名前空間が作成されると、**親名前空間からホスト名とNISドメイン名のコピー**で開始されます。つまり、作成時に新しい名前空間は**親と同じ識別子を共有**します。ただし、名前空間内でホスト名またはNISドメイン名を変更しても、他の名前空間には影響しません。
 2. UTS名前空間内のプロセスは、それぞれ`sethostname()`および`setdomainname()`システムコールを使用して、**ホスト名とNISドメイン名を変更**できます。これらの変更は名前空間内でのみ有効であり、他の名前空間やホストシステムには影響しません。
-3. プロセスは`setns()`システムコールを使用して名前空間間を移動したり、`unshare()`または`clone()`システムコールを`CLONE_NEWUTS`フラグとともに使用して新しい名前空間を作成したりできます。プロセスが新しい名前空間に移動するか、新しい名前空間を作成すると、その名前空間に関連付けられたホスト名とNISドメイン名が使用されます。
+3. プロセスは`setns()`システムコールを使用して名前空間間を移動したり、`unshare()`または`clone()`システムコールを`CLONE_NEWUTS`フラグと共に使用して新しい名前空間を作成したりできます。プロセスが新しい名前空間に移動するか、新しい名前空間を作成すると、その名前空間に関連付けられたホスト名とNISドメイン名が使用されます。
 
 ## Lab:
 
@@ -32,13 +32,13 @@ UTS（UNIX Time-Sharing System）名前空間は、Linuxカーネルの機能で
 ```bash
 sudo unshare -u [--mount-proc] /bin/bash
 ```
-マウントパラメータ`--mount-proc`を使用して新しい`/proc`ファイルシステムのインスタンスをマウントすることで、新しいマウント名前空間がその名前空間固有のプロセス情報に対して正確で隔離されたビューを持つことが保証されます。
+マウントパラメータ`--mount-proc`を使用して新しい`/proc`ファイルシステムのインスタンスをマウントすることで、新しいマウント名前空間がその名前空間固有のプロセス情報に正確で隔離されたビューを持つことが保証されます。
 
 <details>
 
 <summary>Error: bash: fork: Cannot allocate memory</summary>
 
-`unshare`を`-f`オプションなしで実行すると、Linuxが新しいPID（プロセスID）名前空間を処理する方法によりエラーが発生します。主要な詳細と解決策は以下に示されています:
+`unshare`が`-f`オプションなしで実行されると、Linuxが新しいPID（プロセスID）名前空間を処理する方法によりエラーが発生します。主要な詳細と解決策は以下に示されています：
 
 1. **問題の説明**:
 - Linuxカーネルは、`unshare`システムコールを使用してプロセスが新しい名前空間を作成することを許可します。ただし、新しいPID名前空間の作成を開始するプロセス（「unshare」プロセスと呼ばれる）は、新しい名前空間に入りません。その子プロセスのみが入ります。
@@ -79,7 +79,7 @@ sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
 ```
-また、**rootユーザーでないと**、**他のプロセスの名前空間に入ることはできません**。そして、他の名前空間に入るには、それを指す**記述子**（例：`/proc/self/ns/uts`）がないと**入ることができません**。
+また、**rootユーザーでないと**、**他のプロセスの名前空間に入ることはできません**。そして、他の名前空間に入るには、それを指す**記述子がないと**（たとえば `/proc/self/ns/uts` のようなものがないと）**入ることはできません**。
 
 ### ホスト名の変更
 ```bash
@@ -96,9 +96,9 @@ hostname newhostname # Hostname won't be changed inside the host UTS ns
 HackTricks をサポートする他の方法:
 
 * **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com) を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で私をフォローする **@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローする
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングテクニックを共有してください。
 
 </details>

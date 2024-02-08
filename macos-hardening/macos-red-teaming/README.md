@@ -8,9 +8,9 @@ HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-- **ハッキングテクニックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
+- **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
@@ -19,7 +19,7 @@ HackTricksをサポートする他の方法：
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-管理プラットフォームにアクセスするための**管理者資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
+管理プラットフォームにアクセスするために**管理者資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
 
 MacOS環境でのレッドチーミングでは、MDMの動作原理についてある程度理解していることが強く推奨されています：
 
@@ -29,13 +29,13 @@ MacOS環境でのレッドチーミングでは、MDMの動作原理について
 
 ### MDMをC2として使用する
 
-MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています。
+MDMは、プロファイルのインストール、クエリまたは削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています。
 
-独自のMDMを実行するには、[**https://mdmcert.download/**](https://mdmcert.download/)で取得できる**ベンダーによって署名されたCSR**が必要です。Appleデバイス用の独自のMDMを実行するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用できます。
+独自のMDMを実行するには、[**https://mdmcert.download/**](https://mdmcert.download/)で取得しようとするベンダーによって署名された**CSRが必要**です。Appleデバイス用の独自のMDMを実行するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用できます。
 
 ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントで署名する必要があります... ただし、MDM登録時に**デバイスはMDMのSSL証明書を信頼できるCAとして追加**するため、今後は何でも署名できます。
 
-デバイスをMDMに登録するには、ルートとして**`mobileconfig`**ファイルをインストールする必要があります。これは**pkg**ファイルを介して配信できます（Safariからダウンロードされると解凍されます）。
+デバイスをMDMに登録するには、**`mobileconfig`**ファイルをルートとしてインストールする必要があります。これは**pkg**ファイルを介して配信できます（Safariからダウンロードされると解凍されます）。
 
 **MythicエージェントOrthrus**はこのテクニックを使用しています。
 
@@ -45,11 +45,11 @@ JAMFは**カスタムスクリプト**（システム管理者が開発したス
 
 #### JAMFの自己登録
 
-`https://<company-name>.jamfcloud.com/enroll/`などのページに移動して、**自己登録が有効になっているかどうか**を確認します。有効になっている場合、**アクセスするための資格情報を要求**する場合があります。
+`https://<company-name>.jamfcloud.com/enroll/`などのページに移動して、**自己登録が有効になっているかどうか**を確認します。有効になっている場合は**アクセスするための資格情報を要求**するかもしれません。
 
 [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py)スクリプトを使用してパスワードスプレー攻撃を実行できます。
 
-さらに、適切な資格情報を見つけた後、次のフォームで他のユーザー名を総当たり攻撃することができるかもしれません：
+さらに、適切な資格情報を見つけた後、次のフォームで他のユーザ名をブルートフォースできるかもしれません：
 
 ![](<../../.gitbook/assets/image (7) (1) (1).png>)
 
@@ -80,7 +80,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 ```
 {% endcode %}
 
-したがって、攻撃者は、**このファイルを上書き**し、**TyphonエージェントからMythic C2リスナーへのURLを設定**して、JAMFをC2として悪用できるようにするために、悪意のあるパッケージ（`pkg`）をドロップできます。
+したがって、攻撃者は、**TyphonエージェントからMythic C2リスナーへのURLを設定**して、このファイルを**上書き**する悪意のあるパッケージ（`pkg`）をインストールすることができ、JAMFをC2として悪用することができます。
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -89,26 +89,26 @@ sudo jamf policy -id 0
 ```
 {% endcode %}
 
-#### JAMF Impersonation
+#### JAMFのなりすまし
 
-デバイスとJMFの間の通信を**偽装**するには、以下が必要です：
+デバイスとJMFの間の通信を**なりすます**には、以下が必要です：
 
 * デバイスの**UUID**：`ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 * **JAMFキーチェーン**：`/Library/Application\ Support/Jamf/JAMF.keychain`（デバイス証明書を含む）
 
-この情報を使用して、**盗まれた**ハードウェア**UUID**を持つVMを作成し、**SIPを無効に**し、**JAMFキーチェーン**を落とし、Jamf **エージェント**を**フック**して情報を盗みます。
+この情報を使用して、**盗まれた**ハードウェア**UUID**を持つVMを作成し、**SIPを無効に**して、**JAMFキーチェーン**を落とし、Jamf **エージェント**を**フック**して情報を盗みます。
 
-#### Secrets stealing
+#### 秘密の盗み出し
 
 <figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-また、`/Library/Application Support/Jamf/tmp/`の場所を監視して、管理者がJamfを介して実行したい**カスタムスクリプト**を監視することもできます。これらのスクリプトはここに**配置され、実行され、削除**されます。これらのスクリプトには**資格情報**が含まれる可能性があります。
+また、`/Library/Application Support/Jamf/tmp/`の場所を監視して、管理者がJamfを介して実行したい**カスタムスクリプト**を監視できます。これらのスクリプトはここに**配置され、実行され、削除**されます。これらのスクリプトには**資格情報**が含まれる可能性があります。
 
 ただし、これらのスクリプトには**パラメータ**として**資格情報**が渡される場合がありますので、`ps aux | grep -i jamf`を監視する必要があります（root権限でなくても）。
 
-スクリプト[**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py)は、新しいファイルの追加と新しいプロセス引数を監視できます。
+スクリプト[**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py)は、新しいファイルが追加されるのを監視し、新しいプロセス引数を受信できます。
 
-### macOS Remote Access
+### macOSリモートアクセス
 
 また、**MacOS**の"特別な"**ネットワーク** **プロトコル**についても：
 
@@ -118,7 +118,7 @@ sudo jamf policy -id 0
 
 ## Active Directory
 
-場合によっては、**MacOSコンピュータがADに接続**されていることがあります。このシナリオでは、通常どおりにActive Directoryを列挙してみてください。以下のページで**ヘルプ**を見つけることができます：
+場合によっては、**MacOSコンピューターがADに接続**されていることがあります。このシナリオでは、通常どおりにActive Directoryを列挙する必要があります。以下のページで**ヘルプ**を見つけることができます：
 
 {% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
 [pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
@@ -136,10 +136,10 @@ sudo jamf policy -id 0
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-また、MacOS向けにActive Directoryの自動列挙やKerberosの操作を行うためのツールがいくつか用意されています:
+また、MacOS向けにADを自動的に列挙し、kerberosを操作するためのツールがいくつか用意されています：
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHoundはBloodhound監査ツールの拡張で、MacOSホスト上でActive Directoryの関係を収集および取り込むことができます。
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrostは、macOS上でHeimdal krb5 APIとやり取りするように設計されたObjective-Cプロジェクトです。このプロジェクトの目標は、macOSデバイス上でKerberosに関するセキュリティテストをネイティブAPIを使用して行うことで、対象となる環境に他のフレームワークやパッケージを必要としないようにすることです。
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHoundはBloodhound監査ツールの拡張機能で、MacOSホスト上でActive Directoryの関係を収集および取り込むことができます。
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrostは、Objective-Cプロジェクトで、macOS上のHeimdal krb5 APIとやり取りするように設計されています。このプロジェクトの目標は、macOSデバイス上でKerberosに関するセキュリティテストを、ターゲット上で他のフレームワークやパッケージを必要とせずに、ネイティブAPIを使用して実現することです。
 - [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directoryの列挙を行うためのJavaScript for Automation (JXA)ツール。
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
@@ -149,17 +149,17 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 MacOSの3つのタイプのユーザーは次のとおりです：
 
 - **ローカルユーザー** — ローカルのOpenDirectoryサービスによって管理され、Active Directoryとは何の接続もありません。
-- **ネットワークユーザー** — DCサーバーに接続して認証する必要がある、不安定なActive Directoryユーザー。
+- **ネットワークユーザー** — DCサーバーに接続して認証する必要がある一時的なActive Directoryユーザー。
 - **モバイルユーザー** — 資格情報とファイルのローカルバックアップを持つActive Directoryユーザー。
 
 ユーザーとグループに関するローカル情報は、_var/db/dslocal/nodes/Default_ フォルダに保存されています。\
-たとえば、ユーザー _mark_ に関する情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存され、グループ _admin_ に関する情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ に保存されています。
+たとえば、ユーザー _mark_ の情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に、グループ _admin_ の情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ に保存されています。
 
 HasSessionとAdminToエッジを使用するだけでなく、**MacHoundはBloodhoundデータベースに3つの新しいエッジを追加**します：
 
-- **CanSSH** - ホストにSSH接続を許可されたエンティティ
-- **CanVNC** - ホストにVNC接続を許可されたエンティティ
-- **CanAE** - ホストでAppleEventスクリプトを実行することが許可されたエンティティ
+- **CanSSH** - ホストにSSHで接続を許可されたエンティティ
+- **CanVNC** - ホストにVNCで接続を許可されたエンティティ
+- **CanAE** - ホストでAppleEventスクリプトを実行することを許可されたエンティティ
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -193,7 +193,7 @@ dsconfigad -show
 
 ## 外部サービス
 
-MacOS Red Teamingは通常のWindows Red Teamingとは異なり、**MacOSは通常、複数の外部プラットフォームと直接統合**されています。 MacOSの一般的な構成は、**OneLoginと同期した資格情報を使用してコンピュータにアクセスし、OneLoginを介して複数の外部サービス**（github、awsなど）にアクセスすることです。
+MacOS Red Teamingは通常のWindows Red Teamingとは異なり、**MacOSは通常、複数の外部プラットフォームと直接統合**されています。 MacOSの一般的な構成は、**OneLoginと同期された資格情報を使用してコンピュータにアクセスし、OneLoginを介して複数の外部サービス**（github、awsなど）にアクセスすることです。
 
 ## その他のレッドチーム技術
 
