@@ -25,13 +25,13 @@ Wscript.Echo "Like this?"
 
 ## Commnets
 
-```bas
+```bash
 ' this is a comment
 ```
 
 ## Test
 
-```bas
+```bash
 cscript.exe file.vbs
 ```
 
