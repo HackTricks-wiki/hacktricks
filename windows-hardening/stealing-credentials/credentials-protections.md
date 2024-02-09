@@ -4,21 +4,21 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de Ataque AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## WDigest
 
-El protocolo [WDigest](https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396), introducido con Windows XP, está diseñado para la autenticación a través del Protocolo HTTP y está **habilitado de forma predeterminada en Windows XP hasta Windows 8.0 y Windows Server 2003 hasta Windows Server 2012**. Esta configuración predeterminada resulta en **almacenamiento de contraseñas en texto plano en LSASS** (Servicio de Subsistema de Autoridad de Seguridad Local). Un atacante puede usar Mimikatz para **extraer estas credenciales** ejecutando:
+El protocolo [WDigest](https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396), introducido con Windows XP, está diseñado para la autenticación a través del Protocolo HTTP y está **habilitado de forma predeterminada en Windows XP a través de Windows 8.0 y Windows Server 2003 a Windows Server 2012**. Esta configuración predeterminada resulta en **almacenamiento de contraseñas en texto plano en LSASS** (Servicio de Subsistema de Autoridad de Seguridad Local). Un atacante puede usar Mimikatz para **extraer estas credenciales** ejecutando:
 ```bash
 sekurlsa::wdigest
 ```
@@ -48,16 +48,16 @@ Para verificar el estado de activación de **Guardia de Credenciales**, se puede
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-Para obtener una comprensión completa e instrucciones sobre cómo habilitar **Credential Guard** en Windows 10 y su activación automática en sistemas compatibles de **Windows 11 Enterprise y Education (versión 22H2)**, visita la [documentación de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Para obtener una comprensión completa e instrucciones sobre cómo habilitar **Credential Guard** en Windows 10 y su activación automática en sistemas compatibles con **Windows 11 Enterprise y Education (versión 22H2)**, visita la [documentación de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
 Para obtener más detalles sobre la implementación de SSP personalizados para la captura de credenciales, consulta [esta guía](../active-directory-methodology/custom-ssp.md).
 
 
 ## Modo RestrictedAdmin de RDP
 
-**Windows 8.1 y Windows Server 2012 R2** introdujeron varias características de seguridad nuevas, incluido el **_modo Restricted Admin para RDP_**. Este modo fue diseñado para mejorar la seguridad al mitigar los riesgos asociados con los ataques de **[pasar el hash](https://blog.ahasayen.com/pass-the-hash/)**.
+**Windows 8.1 y Windows Server 2012 R2** introdujeron varias características de seguridad nuevas, incluido el **_modo Restricted Admin para RDP_**. Este modo fue diseñado para mejorar la seguridad al mitigar los riesgos asociados con los ataques de **[pass the hash](https://blog.ahasayen.com/pass-the-hash/)**.
 
-Tradicionalmente, al conectarse a una computadora remota a través de RDP, sus credenciales se almacenan en la máquina de destino. Esto plantea un riesgo de seguridad significativo, especialmente al usar cuentas con privilegios elevados. Sin embargo, con la introducción del **_modo Restricted Admin_**, este riesgo se reduce sustancialmente.
+Tradicionalmente, al conectarse a una computadora remota a través de RDP, sus credenciales se almacenan en la máquina de destino. Esto representa un riesgo de seguridad significativo, especialmente al usar cuentas con privilegios elevados. Sin embargo, con la introducción del **_modo Restricted Admin_**, este riesgo se reduce sustancialmente.
 
 Al iniciar una conexión RDP utilizando el comando **mstsc.exe /RestrictedAdmin**, la autenticación en la computadora remota se realiza sin almacenar sus credenciales en ella. Este enfoque garantiza que, en caso de una infección de malware o si un usuario malintencionado obtiene acceso al servidor remoto, sus credenciales no se vean comprometidas, ya que no se almacenan en el servidor.
 
@@ -67,7 +67,7 @@ Esta característica marca un avance significativo en la seguridad de las conexi
 
 ![](../../.gitbook/assets/ram.png)
 
-Para obtener más información detallada, visita [este recurso](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Para obtener información más detallada, visita [este recurso](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 
 ## Credenciales en Caché
@@ -80,9 +80,10 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLO
 ```
 El acceso a estas credenciales en caché está estrictamente controlado, con solo la cuenta **SYSTEM** teniendo los permisos necesarios para verlas. Los administradores que necesiten acceder a esta información deben hacerlo con privilegios de usuario SYSTEM. Las credenciales se almacenan en: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-**Mimikatz** se puede utilizar para extraer estas credenciales en caché usando el comando `lsadump::cache`.
+**Mimikatz** puede ser utilizado para extraer estas credenciales en caché usando el comando `lsadump::cache`.
 
 Para más detalles, la [fuente](http://juggernaut.wikidot.com/cached-credentials) original proporciona información detallada.
+
 
 ## Usuarios Protegidos
 

@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks AWS)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
@@ -14,7 +14,7 @@
 
 ## Qué afecta
 
-Cuando ejecutas un contenedor con privilegios, deshabilitas las protecciones siguientes:
+Cuando ejecutas un contenedor como privilegiado, deshabilitas las siguientes protecciones:
 
 ### Montar /dev
 
@@ -53,14 +53,14 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {% endtab %}
 
-{% tab title="Dentro del Contenedor con Privilegios" %}
+{% tab title="Dentro del contenedor privilegiado" %}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
 ```
 ### Enmascaramiento de sistemas de archivos del kernel
 
-El sistema de archivos **/proc** es selectivamente escribible, pero por motivos de seguridad, ciertas partes están protegidas del acceso de escritura y lectura al superponerlas con **tmpfs**, asegurando que los procesos del contenedor no puedan acceder a áreas sensibles.
+El sistema de archivos **/proc** es selectivamente escribible pero, por motivos de seguridad, ciertas partes están protegidas del acceso de escritura y lectura al superponerlas con **tmpfs**, asegurando que los procesos del contenedor no puedan acceder a áreas sensibles.
 
 {% hint style="info" %}
 **tmpfs** es un sistema de archivos que almacena todos los archivos en la memoria virtual. tmpfs no crea archivos en tu disco duro. Por lo tanto, si desmontas un sistema de archivos tmpfs, todos los archivos que residen en él se pierden para siempre.
@@ -118,7 +118,7 @@ Puedes manipular las capacidades disponibles para un contenedor sin ejecutarlo e
 
 ### Seccomp
 
-**Seccomp** es útil para **limitar** las **llamadas al sistema** que un contenedor puede realizar. Un perfil de Seccomp por defecto está habilitado al ejecutar contenedores de Docker, pero en modo privilegiado está deshabilitado. Aprende más sobre Seccomp aquí:
+**Seccomp** es útil para **limitar** las **llamadas al sistema (syscalls)** que un contenedor puede realizar. Un perfil de Seccomp predeterminado está habilitado de forma predeterminada al ejecutar contenedores de Docker, pero en modo privilegiado está deshabilitado. Obtén más información sobre Seccomp aquí:
 
 {% content-ref url="seccomp.md" %}
 [seccomp.md](seccomp.md)
@@ -208,7 +208,7 @@ PID   USER     TIME  COMMAND
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)

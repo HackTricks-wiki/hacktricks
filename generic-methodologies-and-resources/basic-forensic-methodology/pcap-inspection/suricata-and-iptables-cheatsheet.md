@@ -1,12 +1,12 @@
-# Hoja de trucos de Suricata & Iptables
+# Hoja de trucos de Suricata e Iptables
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
@@ -16,10 +16,10 @@
 
 ### Cadenas
 
-En iptables, se procesan secuencialmente listas de reglas conocidas como cadenas. Entre estas, tres cadenas principales están presentes universalmente, pudiendo ser potencialmente compatibles otras como NAT dependiendo de las capacidades del sistema.
+En iptables, se procesan secuencialmente listas de reglas conocidas como cadenas. Entre estas, tres cadenas principales están presentes universalmente, con otras adicionales como NAT que pueden ser potencialmente compatibles dependiendo de las capacidades del sistema.
 
 - **Cadena de Entrada**: Utilizada para gestionar el comportamiento de las conexiones entrantes.
-- **Cadena de Reenvío**: Empleada para manejar las conexiones entrantes que no están destinadas al sistema local. Esto es típico en dispositivos que actúan como routers, donde los datos recibidos están destinados a ser reenviados a otro destino. Esta cadena es relevante principalmente cuando el sistema está involucrado en enrutamiento, NATing u actividades similares.
+- **Cadena de Reenvío**: Empleada para manejar conexiones entrantes que no están destinadas al sistema local. Esto es típico en dispositivos que actúan como routers, donde los datos recibidos están destinados a ser reenviados a otro destino. Esta cadena es relevante principalmente cuando el sistema está involucrado en enrutamiento, NATing u actividades similares.
 - **Cadena de Salida**: Dedicada a la regulación de las conexiones salientes.
 
 Estas cadenas garantizan el procesamiento ordenado del tráfico de red, permitiendo la especificación de reglas detalladas que rigen el flujo de datos hacia, a través y fuera de un sistema.
@@ -143,7 +143,7 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 * pass - detener la inspección adicional del paquete
 * **drop** - descartar el paquete y generar una alerta
 * **reject** - enviar un error RST/ICMP inalcanzable al remitente del paquete coincidente.
-* rejectsrc - lo mismo que _reject_
+* rejectsrc - igual que _reject_
 * rejectdst - enviar un paquete de error RST/ICMP al receptor del paquete coincidente.
 * rejectboth - enviar paquetes de error RST/ICMP a ambos lados de la conversación.
 
@@ -152,34 +152,34 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 * tcp (para tráfico tcp)
 * udp
 * icmp
-* ip (ip representa 'todo' o 'cualquiera')
+* ip (ip significa 'todo' o 'cualquiera')
 * _protocolos de capa 7_: http, ftp, tls, smb, dns, ssh... (más en la [**documentación**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
 #### Direcciones de origen y destino
 
 Admite rangos de IP, negaciones y una lista de direcciones:
 
-| Ejemplo                        | Significado                             |
+| Ejemplo                        | Significado                                  |
 | ------------------------------ | ---------------------------------------- |
-| ! 1.1.1.1                      | Cada dirección IP excepto 1.1.1.1       |
+| ! 1.1.1.1                      | Cada dirección IP excepto 1.1.1.1             |
 | !\[1.1.1.1, 1.1.1.2]           | Cada dirección IP excepto 1.1.1.1 y 1.1.1.2 |
-| $HOME\_NET                     | Tu configuración de HOME\_NET en yaml   |
-| \[$EXTERNAL\_NET, !$HOME\_NET] | EXTERNAL\_NET y no HOME\_NET            |
-| \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24 excepto por 10.0.0.5        |
+| $HOME\_NET                     | Tu configuración de HOME\_NET en yaml        |
+| \[$EXTERNAL\_NET, !$HOME\_NET] | EXTERNAL\_NET y no HOME\_NET          |
+| \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24 excepto por 10.0.0.5          |
 
 #### Puertos de origen y destino
 
 Admite rangos de puertos, negaciones y listas de puertos
 
-| Ejemplo         | Significado                            |
+| Ejemplo         | Significado                                |
 | --------------- | -------------------------------------- |
-| any             | cualquier dirección                    |
+| any             | cualquier dirección                            |
 | \[80, 81, 82]   | puerto 80, 81 y 82                     |
-| \[80: 82]       | Rango desde 80 hasta 82                |
+| \[80: 82]       | Rango desde 80 hasta 82                  |
 | \[1024: ]       | Desde 1024 hasta el número de puerto más alto |
-| !80             | Cada puerto excepto 80                 |
-| \[80:100,!99]   | Rango de 80 a 100 pero excluyendo 99   |
-| \[1:80,!\[2,4]] | Rango de 1 a 80, excepto puertos 2 y 4 |
+| !80             | Cada puerto excepto 80                      |
+| \[80:100,!99]   | Rango de 80 a 100 pero excluyendo 99 |
+| \[1:80,!\[2,4]] | Rango de 1 a 80, excepto puertos 2 y 4  |
 
 #### Dirección
 
@@ -233,12 +233,12 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

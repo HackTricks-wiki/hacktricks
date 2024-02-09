@@ -8,9 +8,9 @@ Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
 
 </details>
 
@@ -18,19 +18,19 @@ Otras formas de apoyar a HackTricks:
 
 **Active Directory** sirve como una tecnología fundamental que permite a los **administradores de red** crear y gestionar eficientemente **dominios**, **usuarios** y **objetos** dentro de una red. Está diseñado para escalar, facilitando la organización de un gran número de usuarios en **grupos** y **subgrupos** manejables, al mismo tiempo que controla los **derechos de acceso** en varios niveles.
 
-La estructura de **Active Directory** se compone de tres capas principales: **dominios**, **árboles** y **bosques**. Un **dominio** abarca una colección de objetos, como **usuarios** o **dispositivos**, que comparten una base de datos común. Los **árboles** son grupos de estos dominios vinculados por una estructura compartida, y un **bosque** representa la colección de varios árboles interconectados a través de **relaciones de confianza**, formando la capa superior de la estructura organizativa. Se pueden designar **derechos de acceso** y **comunicación específicos** en cada uno de estos niveles.
+La estructura de **Active Directory** se compone de tres capas principales: **dominios**, **árboles** y **bosques**. Un **dominio** abarca una colección de objetos, como **usuarios** o **dispositivos**, que comparten una base de datos común. Los **árboles** son grupos de estos dominios vinculados por una estructura compartida, y un **bosque** representa la colección de múltiples árboles interconectados a través de **relaciones de confianza**, formando la capa superior de la estructura organizativa. Se pueden designar **derechos de acceso** y **comunicación específicos** en cada uno de estos niveles.
 
 Conceptos clave dentro de **Active Directory** incluyen:
 
 1. **Directorio** – Almacena toda la información relacionada con los objetos de Active Directory.
-2. **Objeto** – Denota entidades dentro del directorio, incluidos **usuarios**, **grupos** o **carpetas compartidas**.
+2. **Objeto** – Denota entidades dentro del directorio, incluyendo **usuarios**, **grupos** o **carpetas compartidas**.
 3. **Dominio** – Sirve como contenedor para objetos de directorio, con la capacidad de que múltiples dominios coexistan dentro de un **bosque**, manteniendo cada uno su propia colección de objetos.
 4. **Árbol** – Un grupo de dominios que comparten un dominio raíz común.
 5. **Bosque** – El pináculo de la estructura organizativa en Active Directory, compuesto por varios árboles con **relaciones de confianza** entre ellos.
 
-**Active Directory Domain Services (AD DS)** abarca una variedad de servicios críticos para la gestión centralizada y la comunicación dentro de una red. Estos servicios comprenden:
+**Active Directory Domain Services (AD DS)** abarca una variedad de servicios críticos para la gestión centralizada y la comunicación dentro de una red. Estos servicios incluyen:
 
-1. **Servicios de Dominio** – Centraliza el almacenamiento de datos y gestiona las interacciones entre **usuarios** y **dominios**, incluidas las funcionalidades de **autenticación** y **búsqueda**.
+1. **Servicios de Dominio** – Centraliza el almacenamiento de datos y gestiona las interacciones entre **usuarios** y **dominios**, incluyendo funcionalidades de **autenticación** y **búsqueda**.
 2. **Servicios de Certificados** – Supervisa la creación, distribución y gestión de **certificados digitales** seguros.
 3. **Servicios de Directorio Ligero** – Admite aplicaciones habilitadas para directorios a través del protocolo **LDAP**.
 4. **Servicios de Federación de Directorios** – Proporciona capacidades de **inicio de sesión único** para autenticar usuarios en múltiples aplicaciones web en una sola sesión.
@@ -55,9 +55,9 @@ Si solo tienes acceso a un entorno de AD pero no tienes credenciales/sesiones, p
 
 * **Realizar una prueba de penetración en la red:**
 * Escanear la red, encontrar máquinas y puertos abiertos e intentar **explotar vulnerabilidades** o **extraer credenciales** de ellos (por ejemplo, [las impresoras podrían ser objetivos muy interesantes](ad-information-in-printers.md).
-* Enumerar DNS podría proporcionar información sobre servidores clave en el dominio como web, impresoras, recursos compartidos, vpn, medios, etc.
+* Enumerar DNS podría proporcionar información sobre servidores clave en el dominio como web, impresoras, compartidos, vpn, medios, etc.
 * `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-* Echa un vistazo a la [**Metodología General de Pentesting**](../../generic-methodologies-and-resources/pentesting-methodology.md) para obtener más información sobre cómo hacer esto.
+* Echa un vistazo a la [**Metodología General de Pruebas de Penetración**](../../generic-methodologies-and-resources/pentesting-methodology.md) para obtener más información sobre cómo hacer esto.
 * **Verificar el acceso nulo y de invitado en los servicios smb** (esto no funcionará en versiones modernas de Windows):
 * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
@@ -81,8 +81,8 @@ Si solo tienes acceso a un entorno de AD pero no tienes credenciales/sesiones, p
 * Acceder al host mediante [**abusar del ataque de relé**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
 * Recopilar credenciales **exponiendo** [**servicios UPnP falsos con evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 * [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
-* Extraer nombres de usuario/nombres de documentos internos, redes sociales, servicios (principalmente web) dentro de los entornos de dominio y también de los públicamente disponibles.
-* Si encuentras los nombres completos de los trabajadores de la empresa, podrías probar diferentes **convenciones de nombres de usuario de AD (**[**lee esto**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Las convenciones más comunes son: _NombreApellido_, _Nombre.Apellido_, _NamSur_ (3 letras de cada uno), _Nam.Sur_, _NSurname_, _N.Surname_, _ApellidoNombre_, _Apellido.Nombre_, _ApellidoN_, _Apellido.N_, 3 _letras aleatorias y 3 números aleatorios_ (abc123).
+* Extraer nombres de usuario/nombres de documentos internos, redes sociales, servicios (principalmente web) dentro de los entornos de dominio y también de los disponibles públicamente.
+* Si encuentras los nombres completos de los trabajadores de la empresa, podrías probar diferentes **convenciones de nombres de usuario de AD** ([**lee esto**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Las convenciones más comunes son: _NombreApellido_, _Nombre.Apellido_, _NamApe_ (3 letras de cada uno), _Nam.Ape_, _NApellido_, _N.Apellido_, _ApellidoNombre_, _Apellido.Nombre_, _ApellidoN_, _Apellido.N_, 3 _letras aleatorias y 3 números aleatorios_ (abc123).
 * Herramientas:
 * [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 * [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
@@ -90,7 +90,7 @@ Si solo tienes acceso a un entorno de AD pero no tienes credenciales/sesiones, p
 ### Enumeración de usuarios
 
 * **Enum. anónima SMB/LDAP:** Consulta las páginas de [**pentesting SMB**](../../network-services-pentesting/pentesting-smb.md) y [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
-* **Enum. Kerbrute**: Cuando se solicita un **nombre de usuario no válido**, el servidor responderá utilizando el código de error de Kerberos _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_, lo que nos permite determinar que el nombre de usuario era inválido. Los **nombres de usuario válidos** provocarán la respuesta del **TGT en un AS-REP** o el error _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_, lo que indica que el usuario debe realizar una preautenticación.
+* **Enum. Kerbrute**: Cuando se solicita un **nombre de usuario no válido**, el servidor responderá utilizando el código de error de Kerberos _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_, lo que nos permite determinar que el nombre de usuario era inválido. Los **nombres de usuario válidos** provocarán la respuesta del **TGT en un AS-REP** o el error _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_, indicando que el usuario debe realizar una preautenticación.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -126,7 +126,7 @@ Sin embargo, deberías tener el **nombre de las personas que trabajan en la empr
 Ok, así que sabes que ya tienes un nombre de usuario válido pero no las contraseñas... Entonces intenta:
 
 * [**ASREPRoast**](asreproast.md): Si un usuario **no tiene** el atributo _DONT\_REQ\_PREAUTH_ puedes **solicitar un mensaje AS\_REP** para ese usuario que contendrá algunos datos encriptados por una derivación de la contraseña del usuario.
-* [**Password Spraying**](password-spraying.md): Intentemos las contraseñas más **comunes** con cada uno de los usuarios descubiertos, tal vez algún usuario esté usando una contraseña débil (¡ten en cuenta la política de contraseñas!).
+* [**Password Spraying**](password-spraying.md): Intenta las contraseñas más **comunes** con cada uno de los usuarios descubiertos, tal vez algún usuario esté usando una contraseña débil (¡ten en cuenta la política de contraseñas!).
 * Ten en cuenta que también puedes **rociar servidores de OWA** para intentar acceder a los servidores de correo de los usuarios.
 
 {% content-ref url="password-spraying.md" %}
@@ -135,7 +135,7 @@ Ok, así que sabes que ya tienes un nombre de usuario válido pero no las contra
 
 ### Envenenamiento LLMNR/NBT-NS
 
-Podrías ser capaz de **obtener** algunos **hashes de desafío** para crackear **envenenando** algunos protocolos de la **red**:
+Podrías **obtener** algunos **hashes de desafío** para crackear **envenenando** algunos protocolos de la **red**:
 
 {% content-ref url="../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md" %}
 [spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
@@ -153,9 +153,9 @@ Si puedes **acceder a otras PCs o recursos compartidos** con el **usuario nulo o
 [places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
 {% endcontent-ref %}
 
-## Enumerando Active Directory CON credenciales/sesión
+## Enumeración de Active Directory CON credenciales/sesión
 
-Para esta fase necesitas haber **comprometido las credenciales o una sesión de una cuenta de dominio válida**. Si tienes algunas credenciales válidas o un shell como usuario de dominio, **debes recordar que las opciones dadas anteriormente siguen siendo opciones para comprometer a otros usuarios**.
+Para esta fase necesitas haber **comprometido las credenciales o una sesión de una cuenta de dominio válida**. Si tienes algunas credenciales válidas o una shell como usuario de dominio, **debes recordar que las opciones dadas anteriormente siguen siendo opciones para comprometer a otros usuarios**.
 
 Antes de comenzar la enumeración autenticada debes saber cuál es el **problema de doble salto de Kerberos**.
 
@@ -165,7 +165,7 @@ Antes de comenzar la enumeración autenticada debes saber cuál es el **problema
 
 ### Enumeración
 
-Haber comprometido una cuenta es un **gran paso para comenzar a comprometer todo el dominio**, porque vas a poder comenzar la **Enumeración del Directorio Activo:**
+Haber comprometido una cuenta es un **gran paso para comenzar a comprometer todo el dominio**, porque vas a poder comenzar la **Enumeración de Active Directory:**
 
 Respecto a [**ASREPRoast**](asreproast.md) ahora puedes encontrar cada posible usuario vulnerable, y respecto a [**Password Spraying**](password-spraying.md) puedes obtener una **lista de todos los nombres de usuario** y probar la contraseña de la cuenta comprometida, contraseñas vacías y nuevas contraseñas prometedoras.
 
@@ -189,7 +189,7 @@ Es muy fácil obtener todos los nombres de usuario del dominio desde Windows (`n
 
 ### Kerberoast
 
-Kerberoasting implica obtener **tickets TGS** utilizados por servicios vinculados a cuentas de usuario y crackear su encriptación, que se basa en las contraseñas de usuario, **offline**.
+Kerberoasting implica obtener **tickets TGS** utilizados por servicios vinculados a cuentas de usuario y crackear su encriptación, que se basa en las contraseñas de usuario, **fuera de línea**.
 
 Más sobre esto en:
 
@@ -203,7 +203,7 @@ Una vez que hayas obtenido algunas credenciales podrías verificar si tienes acc
 
 ### Escalada de privilegios local
 
-Si has comprometido credenciales o una sesión como un usuario de dominio regular y tienes **acceso** con este usuario a **cualquier máquina en el dominio** deberías intentar encontrar la forma de **escalar privilegios localmente y saquear credenciales**. Esto se debe a que solo con privilegios de administrador local podrás **volcar hashes de otros usuarios** en memoria (LSASS) y localmente (SAM).
+Si has comprometido credenciales o una sesión como un usuario regular de dominio y tienes **acceso** con este usuario a **cualquier máquina en el dominio** deberías intentar encontrar la forma de **escalar privilegios localmente y saquear credenciales**. Esto se debe a que solo con privilegios de administrador local podrás **extraer hashes de otros usuarios** en memoria (LSASS) y localmente (SAM).
 
 Hay una página completa en este libro sobre [**escalada de privilegios local en Windows**](../windows-local-privilege-escalation/) y una [**lista de verificación**](../checklist-windows-privilege-escalation.md). Además, no olvides usar [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
@@ -219,9 +219,9 @@ Es muy **poco probable** que encuentres **tickets** en el usuario actual **que t
 ```
 ### NTML Relay
 
-Si has logrado enumerar el directorio activo, tendrás **más correos electrónicos y una mejor comprensión de la red**. Podrías ser capaz de forzar ataques de **relevo NTML**.
+Si has logrado enumerar el directorio activo, tendrás **más correos electrónicos y una mejor comprensión de la red**. Podrías ser capaz de forzar ataques de [**retransmisión NTML**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack).
 
-### Busca Credenciales en Comparticiones de Computadoras
+### Buscar Credenciales en Comparticiones de Computadoras
 
 Ahora que tienes algunas credenciales básicas, deberías verificar si puedes **encontrar** archivos **interesantes compartidos dentro del AD**. Podrías hacerlo manualmente, pero es una tarea muy aburrida y repetitiva (especialmente si encuentras cientos de documentos que necesitas revisar).
 
@@ -229,7 +229,7 @@ Ahora que tienes algunas credenciales básicas, deberías verificar si puedes **
 
 ### Robar Credenciales NTLM
 
-Si puedes **acceder a otras PCs o comparticiones**, podrías **colocar archivos** (como un archivo SCF) que, si son accedidos de alguna manera, **desencadenarán una autenticación NTML hacia ti** para que puedas **robar** el **desafío NTLM** y crackearlo:
+Si puedes **acceder a otras PCs o comparticiones**, podrías **colocar archivos** (como un archivo SCF) que, si son accedidos de alguna manera, **desencadenarán una autenticación NTML contra ti** para que puedas **robar** el **desafío NTLM** y crackearlo:
 
 {% content-ref url="../ntlm/places-to-steal-ntlm-creds.md" %}
 [places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
@@ -237,7 +237,7 @@ Si puedes **acceder a otras PCs o comparticiones**, podrías **colocar archivos*
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-Esta vulnerabilidad permitía a cualquier usuario autenticado **comprometer el controlador de dominio**.
+Esta vulnerabilidad permitía que cualquier usuario autenticado **comprometiera el controlador de dominio**.
 
 {% content-ref url="printnightmare.md" %}
 [printnightmare.md](printnightmare.md)
@@ -249,8 +249,8 @@ Esta vulnerabilidad permitía a cualquier usuario autenticado **comprometer el c
 
 ### Extracción de Hash
 
-Con suerte has logrado **comprometer alguna cuenta de administrador local** utilizando [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) incluyendo relays, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalando privilegios localmente](../windows-local-privilege-escalation/).\
-Entonces, es hora de volcar todos los hashes en memoria y localmente.\
+Con suerte has logrado **comprometer alguna cuenta de administrador local** utilizando [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) incluyendo retransmisión, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalando privilegios localmente](../windows-local-privilege-escalation/).\
+Entonces, es hora de volcar todos los hashes en la memoria y localmente.\
 [**Lee esta página sobre diferentes formas de obtener los hashes.**](broken-reference/)
 
 ### Pass the Hash
@@ -385,7 +385,7 @@ Una vez que obtienes privilegios de **Administrador de Dominio** o incluso mejor
 
 ### Escalada de Privilegios como Persistencia
 
-Algunas de las técnicas discutidas anteriormente se pueden utilizar para persistencia.\
+Algunas de las técnicas discutidas anteriormente se pueden utilizar para la persistencia.\
 Por ejemplo, podrías:
 
 *   Hacer que los usuarios sean vulnerables a [**Kerberoast**](kerberoast.md)
@@ -406,7 +406,7 @@ Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMINIO,DC=LOCAL" -PrincipalIdent
 
 ### Ticket de Plata
 
-El ataque del **Ticket de Plata** crea un **legítimo ticket de concesión de tickets (TGS)** para un servicio específico utilizando el **hash NTLM** (por ejemplo, el **hash de la cuenta de PC**). Este método se emplea para **acceder a los privilegios del servicio**.
+El ataque del **Ticket de Plata** crea un **legítimo ticket de concesión de servicio (TGS)** para un servicio específico utilizando el **hash NTLM** (por ejemplo, el **hash de la cuenta de PC**). Este método se emplea para **acceder a los privilegios del servicio**.
 
 {% content-ref url="silver-ticket.md" %}
 [silver-ticket.md](silver-ticket.md)
@@ -414,7 +414,7 @@ El ataque del **Ticket de Plata** crea un **legítimo ticket de concesión de ti
 
 ### Ticket de Oro
 
-Un ataque de **Ticket de Oro** implica que un atacante obtiene acceso al **hash NTLM de la cuenta krbtgt** en un entorno de Active Directory (AD). Esta cuenta es especial porque se utiliza para firmar todos los **Tickets de Concesión de Tickets (TGTs)**, que son esenciales para la autenticación dentro de la red de AD.
+Un ataque de **Ticket de Oro** implica que un atacante obtiene acceso al **hash NTLM de la cuenta krbtgt** en un entorno de Active Directory (AD). Esta cuenta es especial porque se utiliza para firmar todos los **Tickets de Concesión de Tickets (TGT)**, que son esenciales para la autenticación dentro de la red de AD.
 
 Una vez que el atacante obtiene este hash, puede crear **TGTs** para cualquier cuenta que elija (ataque de ticket de plata).
 
@@ -470,7 +470,7 @@ Podrías **dar** algunos **permisos especiales** a un **usuario** sobre algunos 
 
 ### Descriptores de Seguridad
 
-Los **descriptores de seguridad** se utilizan para **almacenar** los **permisos** que un **objeto** tiene **sobre** otro **objeto**. Si puedes **realizar** un **pequeño cambio** en el **descriptor de seguridad** de un objeto, puedes obtener privilegios muy interesantes sobre ese objeto sin necesidad de ser miembro de un grupo privilegiado.
+Los **descriptores de seguridad** se utilizan para **almacenar** los **permisos** que un **objeto** tiene **sobre** un **objeto**. Si puedes **realizar** un **pequeño cambio** en el **descriptor de seguridad** de un objeto, puedes obtener privilegios muy interesantes sobre ese objeto sin necesidad de ser miembro de un grupo privilegiado.
 
 {% content-ref url="security-descriptors.md" %}
 [security-descriptors.md](security-descriptors.md)
@@ -511,37 +511,38 @@ Revisa:
 [laps.md](laps.md)
 {% endcontent-ref %}
 
-## Escalada de Privilegios en el Bosque - Confianza de Dominios
+## Escalada de Privilegios en el Bosque - Confianzas de Dominio
 
 Microsoft considera el **Bosque** como el límite de seguridad. Esto implica que **comprometer un solo dominio podría potencialmente llevar a que todo el Bosque sea comprometido**.
 
 ### Información Básica
 
-Un [**confianza de dominio**](http://technet.microsoft.com/en-us/library/cc759554\(v=ws.10\).aspx) es un mecanismo de seguridad que permite a un usuario de un **dominio** acceder a recursos en otro **dominio**. Básicamente crea un enlace entre los sistemas de autenticación de los dos dominios, permitiendo que las verificaciones de autenticación fluyan sin problemas. Cuando los dominios establecen una confianza, intercambian y retienen claves específicas en sus **Controladores de Dominio (DCs)**, que son cruciales para la integridad de la confianza.
+Un [**dominio de confianza**](http://technet.microsoft.com/en-us/library/cc759554\(v=ws.10\).aspx) es un mecanismo de seguridad que permite a un usuario de un **dominio** acceder a recursos en otro **dominio**. Básicamente crea un enlace entre los sistemas de autenticación de los dos dominios, permitiendo que las verificaciones de autenticación fluyan sin problemas. Cuando los dominios establecen una confianza, intercambian y retienen claves específicas en sus **Controladores de Dominio (DCs)**, que son cruciales para la integridad de la confianza.
 
 En un escenario típico, si un usuario desea acceder a un servicio en un **dominio de confianza**, primero debe solicitar un ticket especial conocido como un **TGT inter-reino** de su propio DC de dominio. Este TGT está cifrado con una **clave compartida** en la que ambos dominios han acordado. El usuario luego presenta este TGT al **DC del dominio de confianza** para obtener un ticket de servicio (**TGS**). Tras la validación exitosa del TGT inter-reino por el DC del dominio de confianza, emite un TGS, otorgando al usuario acceso al servicio.
 
 **Pasos**:
 
-1. Un **equipo cliente** en **Dominio 1** inicia el proceso utilizando su **hash NTLM** para solicitar un **Ticket Granting Ticket (TGT)** a su **Controlador de Dominio (DC1)**.
+1. Un **equipo cliente** en **Dominio 1** inicia el proceso utilizando su **hash NTLM** para solicitar un **Ticket Granting Ticket (TGT)** de su **Controlador de Dominio (DC1)**.
 2. DC1 emite un nuevo TGT si el cliente se autentica con éxito.
 3. El cliente luego solicita un **TGT inter-reino** de DC1, que es necesario para acceder a recursos en **Dominio 2**.
-4. El TGT inter-reino está cifrado con una **clave de confianza** compartida entre DC1 y DC2 como parte de la confianza de doble vía.
+4. El TGT inter-reino está cifrado con una **clave de confianza** compartida entre DC1 y DC2 como parte de la confianza de doble vía entre dominios.
 5. El cliente lleva el TGT inter-reino al **Controlador de Dominio de Dominio 2 (DC2)**.
 6. DC2 verifica el TGT inter-reino utilizando su clave de confianza compartida y, si es válido, emite un **Ticket Granting Service (TGS)** para el servidor en Dominio 2 al que el cliente desea acceder.
 7. Finalmente, el cliente presenta este TGS al servidor, que está cifrado con el hash de la cuenta del servidor, para acceder al servicio en Dominio 2.
 
+
 ### Diferentes confianzas
 
-Es importante notar que **una confianza puede ser de 1 vía o de 2 vías**. En las opciones de 2 vías, ambos dominios confiarán entre sí, pero en la relación de confianza de **1 vía** uno de los dominios será el dominio **confiable** y el otro el dominio **confiante**. En este último caso, **solo podrás acceder a recursos dentro del dominio confiante desde el confiable**.
+Es importante notar que **una confianza puede ser de 1 vía o de 2 vías**. En las opciones de 2 vías, ambos dominios confiarán entre sí, pero en la relación de confianza de **1 vía** uno de los dominios será el dominio **confiable** y el otro el dominio **confiante**. En el último caso, **solo podrás acceder a recursos dentro del dominio confiante desde el confiable**.
 
 Si el Dominio A confía en el Dominio B, A es el dominio confiante y B es el dominio confiable. Además, en **Dominio A**, esto sería una **confianza saliente**; y en **Dominio B**, sería una **confianza entrante**.
 
 **Diferentes relaciones de confianza**
 
-* **Confianzas Padre-Hijo**: Esta es una configuración común dentro del mismo bosque, donde un dominio hijo tiene automáticamente una confianza de doble vía transitiva con su dominio padre. Básicamente, esto significa que las solicitudes de autenticación pueden fluir sin problemas entre el padre y el hijo.
-* **Confianzas de Enlace Cruzado**: Conocidas como "confianzas de acceso directo", se establecen entre dominios hijos para acelerar los procesos de referencia. En bosques complejos, las referencias de autenticación suelen tener que viajar hasta la raíz del bosque y luego descender al dominio de destino. Al crear enlaces cruzados, se acorta el viaje, lo cual es especialmente beneficioso en entornos geográficamente dispersos.
-* **Confianzas Externas**: Se establecen entre dominios diferentes y no relacionados y no son transitivas por naturaleza. Según la [documentación de Microsoft](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), las confianzas externas son útiles para acceder a recursos en un dominio fuera del bosque actual que no
+* **Confianzas Padre-Hijo**: Esta es una configuración común dentro del mismo bosque, donde un dominio hijo tiene automáticamente una confianza bidireccional transitiva con su dominio padre. Básicamente, esto significa que las solicitudes de autenticación pueden fluir sin problemas entre el padre y el hijo.
+* **Confianzas de Enlace Cruzado**: Conocidas como "confianzas de acceso directo", se establecen entre dominios hijos para acelerar los procesos de referencia. En bosques complejos, las referencias de autenticación suelen tener que viajar hasta la raíz del bosque y luego descender al dominio de destino. Al crear enlaces cruzados, se acorta el viaje, lo que es especialmente beneficioso en entornos geográficamente dispersos.
+* **Confianzas Externas**: Se establecen entre dominios diferentes y no relacionados y no son transitivas por naturaleza. Según la [documentación de Microsoft](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), las confianzas externas son útiles para acceder a recursos en un dominio fuera del bosque
 ```
 Get-DomainTrust
 
@@ -572,29 +573,29 @@ Escalada como administrador de empresa al dominio hijo/padre abusando de la conf
 
 #### Explotar la NC de Configuración escribible
 
-Es crucial comprender cómo se puede explotar el Contexto de Nombres de Configuración (NC) en Active Directory (AD). El NC de Configuración sirve como un repositorio central para datos de configuración en un bosque en entornos de Active Directory (AD). Estos datos se replican en cada Controlador de Dominio (DC) dentro del bosque, con DCs escribibles manteniendo una copia escribible del NC de Configuración. Para explotar esto, uno debe tener **privilegios de SYSTEM en un DC**, preferiblemente un DC hijo.
+Es crucial entender cómo la NC de Configuración puede ser explotada. La NC de Configuración sirve como un repositorio central para datos de configuración en un bosque en entornos de Active Directory (AD). Estos datos se replican en cada Controlador de Dominio (DC) dentro del bosque, con DCs escribibles manteniendo una copia escribible de la NC de Configuración. Para explotar esto, uno debe tener **privilegios de SYSTEM en un DC**, preferiblemente un DC hijo.
 
 **Vincular GPO al sitio del DC raíz**
 
-El contenedor de Sitios del NC de Configuración incluye información sobre todos los sitios de los equipos unidos al dominio dentro del bosque de AD. Al operar con privilegios de SYSTEM en cualquier DC, los atacantes pueden vincular GPOs a los sitios del DC raíz. Esta acción potencialmente compromete el dominio raíz al manipular las políticas aplicadas a estos sitios.
+El contenedor de Sitios de la NC de Configuración incluye información sobre todos los sitios de los equipos unidos al dominio dentro del bosque de AD. Al operar con privilegios de SYSTEM en cualquier DC, los atacantes pueden vincular GPOs a los sitios del DC raíz. Esta acción potencialmente compromete el dominio raíz al manipular las políticas aplicadas a estos sitios.
 
 Para obtener información detallada, se puede explorar la investigación sobre [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
 
 **Comprometer cualquier gMSA en el bosque**
 
-Un vector de ataque implica apuntar a gMSAs privilegiados dentro del dominio. La clave raíz de KDS, esencial para calcular las contraseñas de gMSAs, se almacena dentro del NC de Configuración. Con privilegios de SYSTEM en cualquier DC, es posible acceder a la clave raíz de KDS y calcular las contraseñas para cualquier gMSA en todo el bosque.
+Un vector de ataque implica apuntar a gMSAs privilegiadas dentro del dominio. La clave raíz de KDS, esencial para calcular las contraseñas de gMSAs, se almacena dentro de la NC de Configuración. Con privilegios de SYSTEM en cualquier DC, es posible acceder a la clave raíz de KDS y calcular las contraseñas para cualquier gMSA en todo el bosque.
 
 Un análisis detallado se puede encontrar en la discusión sobre [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
 **Ataque de cambio de esquema**
 
-Este método requiere paciencia, esperando la creación de nuevos objetos AD privilegiados. Con privilegios de SYSTEM, un atacante puede modificar el Esquema de AD para otorgar a cualquier usuario control completo sobre todas las clases. Esto podría llevar a un acceso no autorizado y control sobre los objetos AD recién creados.
+Este método requiere paciencia, esperando la creación de nuevos objetos AD privilegiados. Con privilegios de SYSTEM, un atacante puede modificar el Esquema AD para otorgar a cualquier usuario control completo sobre todas las clases. Esto podría llevar a un acceso no autorizado y control sobre los objetos AD recién creados.
 
 Más información está disponible en [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
 **De DA a EA con ADCS ESC5**
 
-La vulnerabilidad ADCS ESC5 apunta a obtener control sobre objetos de Infraestructura de Clave Pública (PKI) para crear una plantilla de certificado que permita la autenticación como cualquier usuario dentro del bosque. Dado que los objetos PKI residen en el NC de Configuración, comprometer un DC hijo escribible permite la ejecución de ataques ESC5.
+La vulnerabilidad ADCS ESC5 apunta a controlar los objetos de Infraestructura de Clave Pública (PKI) para crear una plantilla de certificado que permite la autenticación como cualquier usuario dentro del bosque. Dado que los objetos PKI residen en la NC de Configuración, comprometer un DC hijo escribible permite la ejecución de ataques ESC5.
 
 Más detalles sobre esto se pueden leer en [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). En escenarios sin ADCS, el atacante tiene la capacidad de configurar los componentes necesarios, como se discute en [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
@@ -651,7 +652,7 @@ Además, si la **víctima montó su disco duro**, desde el proceso de sesión de
 - El riesgo de ataques que aprovechan el atributo de historial de SID a través de las confianzas entre bosques se mitiga mediante el Filtrado de SID, que está activado de forma predeterminada en todas las confianzas entre bosques. Esto se basa en la suposición de que las confianzas dentro del bosque son seguras, considerando el bosque, en lugar del dominio, como el límite de seguridad según la postura de Microsoft.
 - Sin embargo, hay un problema: el filtrado de SID podría interrumpir aplicaciones y el acceso de usuarios, lo que lleva a su desactivación ocasional.
 
-### **Autenticación selectiva:**
+### **Autenticación Selectiva:**
 
 - Para las confianzas entre bosques, emplear la Autenticación Selectiva garantiza que los usuarios de los dos bosques no sean autenticados automáticamente. En su lugar, se requieren permisos explícitos para que los usuarios accedan a dominios y servidores dentro del dominio o bosque confiante.
 - Es importante tener en cuenta que estas medidas no protegen contra la explotación del Contexto de Nombres de Configuración (NC) escribible o los ataques a la cuenta de confianza.
@@ -666,11 +667,11 @@ Además, si la **víctima montó su disco duro**, desde el proceso de sesión de
 
 [**Aprende más sobre cómo proteger credenciales aquí.**](../stealing-credentials/credentials-protections.md)\
 
-### **Medidas defensivas para la protección de credenciales**
+### **Medidas Defensivas para la Protección de Credenciales**
 
 - **Restricciones de Administradores de Dominio**: Se recomienda que los Administradores de Dominio solo puedan iniciar sesión en Controladores de Dominio, evitando su uso en otros hosts.
 - **Privilegios de Cuenta de Servicio**: Los servicios no deben ejecutarse con privilegios de Administrador de Dominio (DA) para mantener la seguridad.
-- **Limitación temporal de privilegios**: Para tareas que requieran privilegios de DA, su duración debe ser limitada. Esto se puede lograr mediante: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **Limitación Temporal de Privilegios**: Para tareas que requieran privilegios de DA, su duración debe ser limitada. Esto se puede lograr mediante: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
 ### **Implementación de Técnicas de Engaño**
 
@@ -680,15 +681,15 @@ Además, si la **víctima montó su disco duro**, desde el proceso de sesión de
 
 ### **Identificación de Engaños**
 
-- **Para Objetos de Usuario**: Los indicadores sospechosos incluyen ObjectSID atípicos, logons poco frecuentes, fechas de creación y recuentos bajos de contraseñas incorrectas.
+- **Para Objetos de Usuario**: Los indicadores sospechosos incluyen ObjectSID atípicos, inicio de sesión poco frecuente, fechas de creación y recuentos bajos de contraseñas incorrectas.
 - **Indicadores Generales**: Comparar atributos de objetos señuelo potenciales con los de objetos genuinos puede revelar inconsistencias. Herramientas como [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) pueden ayudar a identificar tales engaños.
 
 ### **Eludir Sistemas de Detección**
 
-- **Elusión de Detección de Microsoft ATA**:
+- **Eludir la Detección de Microsoft ATA**:
 - **Enumeración de Usuarios**: Evitar la enumeración de sesiones en Controladores de Dominio para prevenir la detección de ATA.
-- **Suplantación de Tickets**: Utilizar claves **aes** para la creación de tickets ayuda a evadir la detección al no degradar a NTLM.
-- **Ataques DCSync**: Se recomienda ejecutarlos desde un servidor que no sea un Controlador de Dominio para evitar la detección de ATA, ya que la ejecución directa desde un Controlador de Dominio generará alertas.
+- **Suplantación de Tickets**: Utilizar claves **aes** para la creación de tickets ayuda a evadir la detección al no degradarse a NTLM.
+- **Ataques DCSync**: Se recomienda ejecutarlos desde un no-Controlador de Dominio para evitar la detección de ATA, ya que la ejecución directa desde un Controlador de Dominio generará alertas.
 
 
 ## Referencias
@@ -704,9 +705,9 @@ Además, si la **víctima montó su disco duro**, desde el proceso de sesión de
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

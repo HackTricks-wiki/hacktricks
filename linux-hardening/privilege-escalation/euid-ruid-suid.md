@@ -2,12 +2,12 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
@@ -23,8 +23,8 @@ Un proceso que no opera bajo root solo puede modificar su `euid` para que coinci
 
 ### Comprensión de las Funciones set*uid
 
-- **`setuid`**: Contrariamente a las suposiciones iniciales, `setuid` modifica principalmente `euid` en lugar de `ruid`. Específicamente, para procesos privilegiados, alinea `ruid`, `euid` y `suid` con el usuario especificado, a menudo root, solidificando efectivamente estos IDs debido al `suid` que los anula. Se pueden encontrar información detallada en la [página del manual de setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
-- **`setreuid`** y **`setresuid`**: Estas funciones permiten el ajuste sutil de `ruid`, `euid` y `suid`. Sin embargo, sus capacidades dependen del nivel de privilegio del proceso. Para procesos no root, las modificaciones están restringidas a los valores actuales de `ruid`, `euid` y `suid`. En contraste, los procesos root o aquellos con la capacidad `CAP_SETUID` pueden asignar valores arbitrarios a estos IDs. Se puede obtener más información en la página del manual de [setresuid](https://man7.org/linux/man-pages/man2/setresuid.2.html) y en la página del manual de [setreuid](https://man7.org/linux/man-pages/man2/setreuid.2.html).
+- **`setuid`**: Contrario a las suposiciones iniciales, `setuid` modifica principalmente `euid` en lugar de `ruid`. Específicamente, para procesos privilegiados, alinea `ruid`, `euid` y `suid` con el usuario especificado, a menudo root, solidificando efectivamente estos IDs debido a la anulación de `suid`. Se pueden encontrar información detallada en la [página del manual de setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
+- **`setreuid`** y **`setresuid`**: Estas funciones permiten el ajuste sutil de `ruid`, `euid` y `suid`. Sin embargo, sus capacidades dependen del nivel de privilegio del proceso. Para procesos no root, las modificaciones están restringidas a los valores actuales de `ruid`, `euid` y `suid`. En contraste, los procesos root o aquellos con la capacidad `CAP_SETUID` pueden asignar valores arbitrarios a estos IDs. Se puede obtener más información en la [página del manual de setresuid](https://man7.org/linux/man-pages/man2/setresuid.2.html) y en la [página del manual de setreuid](https://man7.org/linux/man-pages/man2/setreuid.2.html).
 
 Estas funcionalidades no están diseñadas como un mecanismo de seguridad, sino para facilitar el flujo operativo previsto, como cuando un programa adopta la identidad de otro usuario al alterar su ID de usuario efectivo.
 
@@ -32,25 +32,25 @@ Es importante destacar que si bien `setuid` puede ser común para la elevación 
 
 ### Mecanismos de Ejecución de Programas en Linux
 
-#### Llamada al Sistema **`execve`**
+#### **Llamada al Sistema `execve`**
 - **Funcionalidad**: `execve` inicia un programa, determinado por el primer argumento. Toma dos argumentos de matriz, `argv` para los argumentos y `envp` para el entorno.
 - **Comportamiento**: Conserva el espacio de memoria del llamante pero actualiza la pila, el montón y los segmentos de datos. El código del programa es reemplazado por el del nuevo programa.
 - **Preservación del ID de Usuario**:
-- Los IDs de grupo `ruid`, `euid` y suplementarios permanecen sin cambios.
+- Los IDs de `ruid`, `euid` y los IDs de grupo suplementarios permanecen sin cambios.
 - `euid` puede tener cambios sutiles si el nuevo programa tiene el bit SetUID establecido.
 - `suid` se actualiza desde `euid` después de la ejecución.
 - **Documentación**: Se puede encontrar información detallada en la [página del manual de `execve`](https://man7.org/linux/man-pages/man2/execve.2.html).
 
-#### Función **`system`**
+#### **Función `system`**
 - **Funcionalidad**: A diferencia de `execve`, `system` crea un proceso hijo usando `fork` y ejecuta un comando dentro de ese proceso hijo usando `execl`.
 - **Ejecución de Comandos**: Ejecuta el comando a través de `sh` con `execl("/bin/sh", "sh", "-c", comando, (char *) NULL);`.
 - **Comportamiento**: Como `execl` es una forma de `execve`, opera de manera similar pero en el contexto de un nuevo proceso hijo.
 - **Documentación**: Se pueden obtener más información en la [página del manual de `system`](https://man7.org/linux/man-pages/man3/system.3.html).
 
-#### Comportamiento de `bash` y `sh` con SUID
+#### **Comportamiento de `bash` y `sh` con SUID**
 - **`bash`**:
-- Tiene una opción `-p` que influye en cómo se tratan `euid` y `ruid`.
-- Sin `-p`, `bash` establece `euid` en `ruid` si difieren inicialmente.
+- Tiene una opción `-p` que influye en cómo se tratan `euid` y `ruid` en `bash`.
+- Sin `-p`, `bash` establece `euid` como `ruid` si difieren inicialmente.
 - Con `-p`, se conserva el `euid` inicial.
 - Se pueden encontrar más detalles en la [página del manual de `bash`](https://linux.die.net/man/1/bash).
 - **`sh`**:
@@ -58,7 +58,7 @@ Es importante destacar que si bien `setuid` puede ser común para la elevación 
 - El comportamiento con respecto a los IDs de usuario no se menciona explícitamente, excepto bajo la opción `-i`, que enfatiza la preservación de la igualdad de `euid` y `ruid`.
 - Se dispone de información adicional en la [página del manual de `sh`](https://man7.org/linux/man-pages/man1/sh.1p.html).
 
-Estos mecanismos, distintos en su funcionamiento, ofrecen una amplia gama de opciones para ejecutar y transicionar entre programas, con matices específicos en cómo se gestionan y preservan los IDs de usuario.
+Estos mecanismos, distintos en su funcionamiento, ofrecen una amplia gama de opciones para ejecutar y transicionar entre programas, con matices específicos en la gestión y preservación de los IDs de usuario.
 
 ### Pruebas de Comportamientos de ID de Usuario en Ejecuciones
 
@@ -194,11 +194,11 @@ uid=99(nobody) gid=99(nobody) euid=100
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 

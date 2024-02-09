@@ -14,7 +14,7 @@ Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=b
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén [**artículos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
@@ -25,7 +25,7 @@ Otras formas de apoyar a HackTricks:
 
 ### Información Básica
 
-En primer lugar, se recomienda tener una **USB** con **binarios y bibliotecas conocidos de calidad** (puedes simplemente obtener Ubuntu y copiar las carpetas _/bin_, _/sbin_, _/lib_ y _/lib64_), luego montar la USB y modificar las variables de entorno para utilizar esos binarios:
+En primer lugar, se recomienda tener una **USB** con **binarios y bibliotecas conocidos de calidad** (puedes simplemente obtener Ubuntu y copiar las carpetas _/bin_, _/sbin_, _/lib_ y _/lib64_), luego monta la USB y modifica las variables de entorno para utilizar esos binarios:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -62,11 +62,11 @@ Para obtener la memoria del sistema en ejecución, se recomienda utilizar [**LiM
 Para **compilarlo**, necesitas utilizar el **mismo kernel** que está utilizando la máquina víctima.
 
 {% hint style="info" %}
-Recuerda que **no puedes instalar LiME ni nada más** en la máquina víctima, ya que hará varios cambios en ella.
+Recuerda que **no puedes instalar LiME ni nada más** en la máquina víctima, ya que realizará varios cambios en ella.
 {% endhint %}
 
-Entonces, si tienes una versión idéntica de Ubuntu, puedes usar `apt-get install lime-forensics-dkms`\
-En otros casos, necesitas descargar [**LiME**](https://github.com/504ensicsLabs/LiME) desde github y compilarlo con los encabezados de kernel correctos. Para **obtener los encabezados de kernel exactos** de la máquina víctima, simplemente **copia el directorio** `/lib/modules/<versión del kernel>` a tu máquina, y luego **compila** LiME utilizando esos encabezados:
+Por lo tanto, si tienes una versión idéntica de Ubuntu, puedes usar `apt-get install lime-forensics-dkms`\
+En otros casos, necesitas descargar [**LiME**](https://github.com/504ensicsLabs/LiME) desde github y compilarlo con los encabezados de kernel correctos. Para **obtener los encabezados de kernel exactos** de la máquina víctima, simplemente **copia el directorio** `/lib/modules/<versión del kernel>` a tu máquina, y luego **compila** LiME utilizando estos:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -84,7 +84,7 @@ LiME también se puede utilizar para **enviar el volcado a través de la red** e
 #### Apagado
 
 En primer lugar, necesitarás **apagar el sistema**. Esto no siempre es una opción, ya que a veces el sistema será un servidor de producción que la empresa no puede permitirse apagar.\
-Hay **2 formas** de apagar el sistema, un **apagado normal** y un **apagado "desenchufar"**. El primero permitirá que los **procesos terminen como de costumbre** y que el **sistema de archivos** se **sincronice**, pero también permitirá que el posible **malware** **destruya evidencia**. El enfoque de "desenchufar" puede implicar **alguna pérdida de información** (no se perderá mucha información, ya que ya tomamos una imagen de la memoria) y el **malware no tendrá oportunidad** de hacer nada al respecto. Por lo tanto, si **sospechas** que puede haber un **malware**, simplemente ejecuta el **comando `sync`** en el sistema y desenchufa.
+Hay **2 formas** de apagar el sistema, un **apagado normal** y un **apagado "desenchufar"**. El primero permitirá que los **procesos terminen como de costumbre** y que el **sistema de archivos** se **sincronice**, pero también permitirá que el posible **malware** **destruya evidencia**. El enfoque "desenchufar" puede implicar **alguna pérdida de información** (no se perderá mucha información, ya que ya tomamos una imagen de la memoria) y el **malware no tendrá oportunidad** de hacer nada al respecto. Por lo tanto, si **sospechas** que puede haber un **malware**, simplemente ejecuta el **comando `sync`** en el sistema y desenchufa.
 
 #### Tomar una imagen del disco
 
@@ -179,7 +179,7 @@ Lea la siguiente página para conocer herramientas que pueden ser útiles para e
 
 ## Buscar programas instalados
 
-Para buscar de manera efectiva programas instalados en sistemas Debian y RedHat, considere aprovechar los registros y bases de datos del sistema junto con verificaciones manuales en directorios comunes.
+Para buscar eficazmente programas instalados en sistemas Debian y RedHat, considere aprovechar los registros y bases de datos del sistema junto con verificaciones manuales en directorios comunes.
 
 - Para Debian, inspeccione **_`/var/lib/dpkg/status`_** y **_`/var/log/dpkg.log`_** para obtener detalles sobre las instalaciones de paquetes, utilizando `grep` para filtrar información específica.
 
@@ -237,7 +237,7 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 
 Rutas donde un malware podría estar instalado como un servicio:
 
-- **/etc/inittab**: Llama a scripts de inicialización como rc.sysinit, dirigiéndose a scripts de inicio adicionales.
+- **/etc/inittab**: Llama a scripts de inicialización como rc.sysinit, dirigiendo a scripts de inicio adicionales.
 - **/etc/rc.d/** y **/etc/rc.boot/**: Contienen scripts para el inicio de servicios, siendo este último encontrado en versiones antiguas de Linux.
 - **/etc/init.d/**: Utilizado en ciertas versiones de Linux como Debian para almacenar scripts de inicio.
 - Los servicios también pueden ser activados a través de **/etc/inetd.conf** o **/etc/xinetd/**, dependiendo de la variante de Linux.
@@ -275,9 +275,9 @@ Los sistemas Linux registran las actividades de los usuarios y los eventos del s
 - **/var/log/maillog** o **/var/log/mail.log**: Registra actividades del servidor de correo electrónico, útil para rastrear servicios relacionados con el correo electrónico.
 - **/var/log/kern.log**: Almacena mensajes del kernel, incluidos errores y advertencias.
 - **/var/log/dmesg**: Contiene mensajes de controladores de dispositivos.
-- **/var/log/faillog**: Registra intentos de inicio de sesión fallidos, ayudando en investigaciones de violaciones de seguridad.
+- **/var/log/faillog**: Registra intentos de inicio de sesión fallidos, ayudando en investigaciones de brechas de seguridad.
 - **/var/log/cron**: Registra la ejecución de trabajos cron.
-- **/var/log/daemon.log**: Realiza un seguimiento de las actividades de los servicios en segundo plano.
+- **/var/log/daemon.log**: Realiza un seguimiento de las actividades de servicios en segundo plano.
 - **/var/log/btmp**: Documenta intentos de inicio de sesión fallidos.
 - **/var/log/httpd/**: Contiene registros de errores y accesos de Apache HTTPD.
 - **/var/log/mysqld.log** o **/var/log/mysql.log**: Registra actividades de la base de datos MySQL.
@@ -310,14 +310,14 @@ Algunas aplicaciones también generan sus propios registros:
 - **SSH**: Examina _~/.ssh/authorized_keys_ y _~/.ssh/known_hosts_ para conexiones remotas no autorizadas.
 - **Escritorio Gnome**: Revisa _~/.recently-used.xbel_ para archivos accedidos recientemente a través de aplicaciones de Gnome.
 - **Firefox/Chrome**: Verifica el historial y descargas del navegador en _~/.mozilla/firefox_ o _~/.config/google-chrome_ en busca de actividades sospechosas.
-- **VIM**: Revisa _~/.viminfo_ para detalles de uso, como rutas de archivos accedidos e historial de búsquedas.
+- **VIM**: Revisa _~/.viminfo_ para detalles de uso, como rutas de archivos accedidos e historial de búsqueda.
 - **Open Office**: Verifica el acceso a documentos recientes que puedan indicar archivos comprometidos.
 - **FTP/SFTP**: Revisa los registros en _~/.ftp_history_ o _~/.sftp_history_ para transferencias de archivos que podrían ser no autorizadas.
 - **MySQL**: Investiga _~/.mysql_history_ para consultas de MySQL ejecutadas, revelando potencialmente actividades no autorizadas en la base de datos.
 - **Less**: Analiza _~/.lesshst_ para historial de uso, incluidos archivos vistos y comandos ejecutados.
 - **Git**: Examina _~/.gitconfig_ y el proyecto _.git/logs_ para cambios en repositorios.
 
-### Registros USB
+### Registros de USB
 
 [**usbrip**](https://github.com/snovvcrash/usbrip) es un pequeño software escrito en Python 3 puro que analiza archivos de registro de Linux (`/var/log/syslog*` o `/var/log/messages*` dependiendo de la distribución) para construir tablas de historial de eventos USB.
 
@@ -338,7 +338,7 @@ usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
 ## Revisar Cuentas de Usuario y Actividades de Inicio de Sesión
 
-Examine los archivos _**/etc/passwd**_, _**/etc/shadow**_ y los **registros de seguridad** en busca de nombres inusuales o cuentas creadas y utilizadas en proximidad a eventos no autorizados conocidos. Además, verifique posibles ataques de fuerza bruta sudo.\
+Examine los archivos _**/etc/passwd**_, _**/etc/shadow**_ y los **registros de seguridad** en busca de nombres inusuales o cuentas creadas y/o utilizadas en proximidad a eventos no autorizados conocidos. Además, verifique posibles ataques de fuerza bruta sudo.\
 Además, revise archivos como _**/etc/sudoers**_ y _**/etc/groups**_ en busca de privilegios inesperados otorgados a usuarios.\
 Finalmente, busque cuentas sin contraseñas o contraseñas **fáciles de adivinar**.
 
@@ -373,7 +373,7 @@ Ten en cuenta que un **atacante** puede **modificar** la **hora** para que los *
 
 ## Comparar archivos de diferentes versiones de sistemas de archivos
 
-### Resumen de la Comparación de Versiones del Sistema de Archivos
+### Resumen de Comparación de Versiones de Sistemas de Archivos
 
 Para comparar versiones de sistemas de archivos y señalar cambios, utilizamos comandos simplificados de `git diff`:
 
@@ -409,13 +409,13 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**oficial mercancía de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 
 **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

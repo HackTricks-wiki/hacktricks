@@ -2,12 +2,12 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -62,12 +62,12 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
 ### Administrador local
 
-Cuando un administrador local inicia sesión, **se crean dos tokens de acceso**: Uno con derechos de administrador y otro con derechos normales. **Por defecto**, cuando este usuario ejecuta un proceso se utiliza el que tiene **derechos normales** (no administrador). Cuando este usuario intenta **ejecutar** algo **como administrador** ("Ejecutar como administrador", por ejemplo) se utilizará el **UAC** para solicitar permiso.\
+Cuando un administrador local inicia sesión, **se crean dos tokens de acceso**: Uno con derechos de administrador y otro con derechos normales. **Por defecto**, cuando este usuario ejecuta un proceso se utiliza el que tiene **derechos regulares** (no de administrador). Cuando este usuario intenta **ejecutar** algo **como administrador** ("Ejecutar como administrador", por ejemplo) se utilizará el **UAC** para solicitar permiso.\
 Si deseas [**aprender más sobre el UAC lee esta página**](../authentication-credentials-uac-and-efs.md#uac)**.**
 
 ### Suplantación de credenciales de usuario
 
-Si tienes las **credenciales válidas de cualquier otro usuario**, puedes **crear** una **nueva sesión de inicio de sesión** con esas credenciales:
+Si tienes **credenciales válidas de cualquier otro usuario**, puedes **crear** una **nueva sesión de inicio de sesión** con esas credenciales:
 ```
 runas /user:domain\username cmd.exe
 ```
@@ -82,28 +82,40 @@ Esto es útil si tienes credenciales válidas para acceder a objetos en la red p
 
 Hay dos tipos de tokens disponibles:
 
-* **Token primario**: Sirve como representación de las credenciales de seguridad de un proceso. La creación y asociación de tokens primarios con procesos son acciones que requieren privilegios elevados, enfatizando el principio de separación de privilegios. Típicamente, un servicio de autenticación es responsable de la creación del token, mientras que un servicio de inicio de sesión maneja su asociación con el shell del sistema operativo del usuario. Es importante tener en cuenta que los procesos heredan el token primario de su proceso padre al crearse.
+* **Token Primario**: Sirve como representación de las credenciales de seguridad de un proceso. La creación y asociación de tokens primarios con procesos son acciones que requieren privilegios elevados, enfatizando el principio de separación de privilegios. Típicamente, un servicio de autenticación es responsable de la creación del token, mientras que un servicio de inicio de sesión maneja su asociación con el shell del sistema operativo del usuario. Es importante tener en cuenta que los procesos heredan el token primario de su proceso padre al crearse.
 
-* **Token de suplantación**: Permite que una aplicación de servidor adopte temporalmente la identidad del cliente para acceder a objetos seguros. Este mecanismo se estratifica en cuatro niveles de operación:
+* **Token de Suplantación**: Permite que una aplicación de servidor adopte temporalmente la identidad del cliente para acceder a objetos seguros. Este mecanismo se estratifica en cuatro niveles de operación:
 - **Anónimo**: Concede acceso al servidor similar al de un usuario no identificado.
 - **Identificación**: Permite al servidor verificar la identidad del cliente sin utilizarla para acceder a objetos.
-- **Suplantación**: Permite al servidor operar bajo la identidad del cliente.
+- **Suplantación**: Permite que el servidor opere bajo la identidad del cliente.
 - **Delegación**: Similar a la Suplantación pero incluye la capacidad de extender esta asunción de identidad a sistemas remotos con los que el servidor interactúa, asegurando la preservación de credenciales.
 
 #### Suplantar Tokens
 
-Utilizando el módulo _**incognito**_ de Metasploit, si tienes suficientes privilegios, puedes **listar** y **suplantar** otros **tokens** fácilmente. Esto podría ser útil para realizar **acciones como si fueras el otro usuario**. También podrías **escalar privilegios** con esta técnica.
+Usando el módulo _**incognito**_ de metasploit si tienes suficientes privilegios puedes **listar** y **suplantar** otros **tokens** fácilmente. Esto podría ser útil para realizar **acciones como si fueras el otro usuario**. También podrías **escalar privilegios** con esta técnica.
 
 ### Privilegios de Tokens
 
-Aprende qué **privilegios de tokens pueden ser abusados para escalar privilegios:**
+Aprende qué **privilegios de token pueden ser abusados para escalar privilegios:**
 
 {% content-ref url="privilege-escalation-abusing-tokens/" %}
 [privilege-escalation-abusing-tokens](privilege-escalation-abusing-tokens/)
 {% endcontent-ref %}
 
-Echa un vistazo a [**todos los posibles privilegios de tokens y algunas definiciones en esta página externa**](https://github.com/gtworek/Priv2Admin).
+Echa un vistazo a [**todos los posibles privilegios de token y algunas definiciones en esta página externa**](https://github.com/gtworek/Priv2Admin).
 
 ## Referencias
 
 Aprende más sobre tokens en estos tutoriales: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) y [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+
+<details>
+
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿o quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>

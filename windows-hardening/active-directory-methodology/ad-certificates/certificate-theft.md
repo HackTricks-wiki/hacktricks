@@ -7,9 +7,9 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
@@ -19,7 +19,7 @@ Otras formas de apoyar a HackTricks:
 
 ## ¿Qué puedo hacer con un certificado?
 
-Antes de verificar cómo robar los certificados, aquí tienes información sobre para qué sirve el certificado:
+Antes de verificar cómo robar los certificados, aquí tienes información sobre para qué se puede utilizar el certificado:
 ```powershell
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -37,7 +37,7 @@ En una **sesión de escritorio interactiva**, extraer un certificado de usuario 
 
 Para un enfoque **programático**, herramientas como el cmdlet PowerShell `ExportPfxCertificate` o proyectos como [el proyecto CertStealer de C# de TheWover](https://github.com/TheWover/CertStealer) están disponibles. Estos utilizan la **API de Criptografía de Microsoft** (CAPI) o la API de Criptografía: Generación Siguiente (CNG) para interactuar con el almacén de certificados. Estas APIs proporcionan una variedad de servicios criptográficos, incluidos los necesarios para el almacenamiento y autenticación de certificados.
 
-Sin embargo, si una clave privada se establece como no exportable, tanto CAPI como CNG normalmente bloquearán la extracción de dichos certificados. Para evitar esta restricción, se pueden emplear herramientas como **Mimikatz**. Mimikatz ofrece los comandos `crypto::capi` y `crypto::cng` para parchear las respectivas APIs, permitiendo la exportación de claves privadas. Específicamente, `crypto::capi` parchea el CAPI dentro del proceso actual, mientras que `crypto::cng` apunta a la memoria de **lsass.exe** para parchear.
+Sin embargo, si una clave privada está configurada como no exportable, tanto CAPI como CNG normalmente bloquearán la extracción de dichos certificados. Para evitar esta restricción, se pueden emplear herramientas como **Mimikatz**. Mimikatz ofrece los comandos `crypto::capi` y `crypto::cng` para parchear las respectivas APIs, permitiendo la exportación de claves privadas. Específicamente, `crypto::capi` parchea el CAPI dentro del proceso actual, mientras que `crypto::cng` apunta a la memoria de **lsass.exe** para parchear.
 
 ## Robo de Certificado de Usuario a través de DPAPI – ROBO2
 
@@ -49,7 +49,7 @@ Más información sobre DPAPI en:
 
 En Windows, **las claves privadas de los certificados están protegidas por DPAPI**. Es crucial reconocer que las **ubicaciones de almacenamiento de las claves privadas de usuario y máquina** son distintas, y las estructuras de archivos varían dependiendo de la API criptográfica utilizada por el sistema operativo. **SharpDPAPI** es una herramienta que puede navegar automáticamente estas diferencias al descifrar los bloques de DPAPI.
 
-Los **certificados de usuario** se encuentran principalmente en el registro bajo `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, pero algunos también se pueden encontrar en el directorio `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. Las **claves privadas** correspondientes a estos certificados suelen almacenarse en `%APPDATA%\Microsoft\Crypto\RSA\User SID\` para claves de **CAPI** y `%APPDATA%\Microsoft\Crypto\Keys\` para claves de **CNG**.
+Los **certificados de usuario** se encuentran principalmente en el registro bajo `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, pero algunos también se pueden encontrar en el directorio `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. Las **claves privadas** correspondientes a estos certificados generalmente se almacenan en `%APPDATA%\Microsoft\Crypto\RSA\User SID\` para claves de **CAPI** y `%APPDATA%\Microsoft\Crypto\Keys\` para claves de **CNG**.
 
 Para **extraer un certificado y su clave privada asociada**, el proceso implica:
 
@@ -75,7 +75,7 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 ```
 ## Robo de Certificado de Máquina a través de DPAPI – THEFT3
 
-Los certificados de máquina almacenados por Windows en el registro en `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` y las claves privadas asociadas ubicadas en `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (para CAPI) y `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (para CNG) están encriptados utilizando las claves maestras DPAPI de la máquina. Estas claves no pueden ser descifradas con la clave de respaldo DPAPI del dominio; en su lugar, se requiere el **secreto LSA DPAPI_SYSTEM**, al cual solo el usuario SYSTEM puede acceder.
+Los certificados de máquina almacenados por Windows en el registro en `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` y las claves privadas asociadas ubicadas en `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (para CAPI) y `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (para CNG) están encriptados utilizando las claves maestras DPAPI de la máquina. Estas claves no pueden ser descifradas con la clave de respaldo DPAPI del dominio; en su lugar, se requiere el **secreto LSA DPAPI_SYSTEM**, al que solo el usuario SYSTEM puede acceder.
 
 La descifrado manual se puede lograr ejecutando el comando `lsadump::secrets` en **Mimikatz** para extraer el secreto LSA DPAPI_SYSTEM, y posteriormente utilizando esta clave para descifrar las claves maestras de la máquina. Alternativamente, el comando `crypto::certificates /export /systemstore:LOCAL_MACHINE` de Mimikatz se puede utilizar después de parchear CAPI/CNG como se describió anteriormente.
 

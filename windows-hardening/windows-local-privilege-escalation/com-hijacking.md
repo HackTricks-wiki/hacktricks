@@ -9,18 +9,18 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 ### Buscando componentes COM inexistentes
 
-Dado que los valores de HKCU pueden ser modificados por los usuarios, el **Secuestro de COM** podría ser utilizado como un **mecanismo persistente**. Usando `procmon`, es fácil encontrar registros COM buscados que no existen y que un atacante podría crear para persistir. Filtros:
+Dado que los valores de HKCU pueden ser modificados por los usuarios, el **Secuestro de COM** podría ser utilizado como un **mecanismo persistente**. Usando `procmon` es fácil encontrar registros COM buscados que no existen y que un atacante podría crear para persistir. Filtros:
 
 * Operaciones de **RegOpenKey**.
 * donde el _Resultado_ sea **NOMBRE NO ENCONTRADO**.
-* y el _Ruta_ termine con **InprocServer32**.
+* y la _Ruta_ termine con **InprocServer32**.
 
 Una vez que hayas decidido qué COM inexistente suplantar, ejecuta los siguientes comandos. _Ten cuidado si decides suplantar un COM que se carga cada pocos segundos, ya que podría ser excesivo._&#x20;
 ```bash
@@ -61,7 +61,7 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [más resultados similares...]</code></pre>
 
-Al revisar la salida, puedes seleccionar una que se va a ejecutar **cada vez que un usuario inicie sesión**, por ejemplo.
+Revisando la salida, puedes seleccionar una que se va a ejecutar **cada vez que un usuario inicie sesión**, por ejemplo.
 
 Ahora, al buscar el CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** en **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** y en HKLM y HKCU, generalmente descubrirás que el valor no existe en HKCU.
 ```bash
@@ -85,17 +85,3 @@ PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
 Entonces, simplemente puedes crear la entrada HKCU y cada vez que el usuario inicie sesión, tu puerta trasera se activará.
-
-<details>
-
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
-
-Otras formas de apoyar a HackTricks:
-
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
-
-</details>

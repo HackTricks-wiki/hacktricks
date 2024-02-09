@@ -1,4 +1,4 @@
-# Escalada de Privilegios con Autoruns
+# Escalada de privilegios con Autoruns
 
 <details>
 
@@ -9,14 +9,14 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera en hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere dominio del polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere dominio del polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -29,7 +29,7 @@ Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## Tareas Programadas
 
-Las **tareas** pueden programarse para ejecutarse con **cierta frecuencia**. Verifique qué binarios están programados para ejecutarse con:
+**Las tareas** pueden programarse para ejecutarse con **cierta frecuencia**. Verifique qué binarios están programados para ejecutarse con:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -61,46 +61,46 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 Registro de AutoRun **comúnmente conocido**:
 
-- `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
-- `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
-- `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run`
-- `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce`
-- `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`
-- `HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce`
-- `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run`
-- `HKCU\Software\Wow6432Npde\Microsoft\Windows\CurrentVersion\RunOnce`
-- `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Run`
-- `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
-- `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
+* `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
+* `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
+* `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run`
+* `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce`
+* `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`
+* `HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce`
+* `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run`
+* `HKCU\Software\Wow6432Npde\Microsoft\Windows\CurrentVersion\RunOnce`
+* `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Run`
+* `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
+* `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
 Las claves del registro conocidas como **Run** y **RunOnce** están diseñadas para ejecutar automáticamente programas cada vez que un usuario inicia sesión en el sistema. La línea de comandos asignada como valor de datos de una clave está limitada a 260 caracteres o menos.
 
 **Ejecuciones de servicios** (pueden controlar el inicio automático de servicios durante el arranque):
 
-- `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
-- `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
-- `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServices`
-- `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServices`
-- `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServicesOnce`
-- `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServicesOnce`
-- `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
-- `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
+* `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
+* `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
+* `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServices`
+* `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServices`
+* `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServicesOnce`
+* `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServicesOnce`
+* `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
+* `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
 
 **RunOnceEx:**
 
-- `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
-- `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
+* `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
+* `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-En Windows Vista y versiones posteriores, las claves del registro **Run** y **RunOnce** no se generan automáticamente. Las entradas en estas claves pueden iniciar programas directamente o especificarlos como dependencias. Por ejemplo, para cargar un archivo DLL en el inicio de sesión, se podría usar la clave del registro **RunOnceEx** junto con una clave "Depend". Esto se demuestra agregando una entrada de registro para ejecutar "C:\\temp\\evil.dll" durante el inicio del sistema:
+En Windows Vista y versiones posteriores, las claves del registro **Run** y **RunOnce** no se generan automáticamente. Las entradas en estas claves pueden iniciar programas directamente o especificarlos como dependencias. Por ejemplo, para cargar un archivo DLL al iniciar sesión, se podría usar la clave del registro **RunOnceEx** junto con una clave "Depend". Esto se demuestra agregando una entrada de registro para ejecutar "C:\\temp\\evil.dll" durante el inicio del sistema:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 {% hint style="info" %}
-**Explotación 1**: Si puedes escribir dentro de cualquiera de los registros mencionados dentro de **HKLM**, puedes escalar privilegios cuando inicie sesión un usuario diferente.
+**Explotar 1**: Si puedes escribir dentro de cualquiera de los registros mencionados dentro de **HKLM**, puedes escalar privilegios cuando inicie sesión un usuario diferente.
 {% endhint %}
 
 {% hint style="info" %}
-**Explotación 2**: Si puedes sobrescribir cualquiera de los binarios indicados en cualquiera de los registros dentro de **HKLM**, puedes modificar ese binario con una puerta trasera cuando inicie sesión un usuario diferente y escalar privilegios.
+**Explotar 2**: Si puedes sobrescribir cualquiera de los binarios indicados en cualquiera de los registros dentro de **HKLM**, puedes modificar ese binario con una puerta trasera cuando inicie sesión un usuario diferente y escalar privilegios.
 {% endhint %}
 ```bash
 #CMD
@@ -164,7 +164,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Los accesos directos ubicados en la carpeta **Inicio** activarán automáticamente servicios o aplicaciones para que se inicien durante el inicio de sesión del usuario o el reinicio del sistema. La ubicación de la carpeta **Inicio** está definida en el registro tanto para los ámbitos de **Máquina Local** como de **Usuario Actual**. Esto significa que cualquier acceso directo agregado a estas ubicaciones específicas de **Inicio** garantizará que el servicio o programa vinculado se inicie después del proceso de inicio de sesión o reinicio, lo que lo convierte en un método sencillo para programar la ejecución automática de programas.
+Los accesos directos ubicados en la carpeta **Inicio** activarán automáticamente servicios o aplicaciones durante el inicio de sesión del usuario o el reinicio del sistema. La ubicación de la carpeta **Inicio** está definida en el registro para los alcances de **Máquina Local** y **Usuario Actual**. Esto significa que cualquier acceso directo agregado a estas ubicaciones específicas de **Inicio** garantizará que el servicio o programa vinculado se inicie después del proceso de inicio de sesión o reinicio, convirtiéndolo en un método sencillo para programar la ejecución automática de programas.
 
 {% hint style="info" %}
 Si puedes sobrescribir cualquier \[Usuario] Carpeta Shell bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar un backdoor que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
@@ -246,7 +246,7 @@ Dentro de estas claves, existen varias subclaves, cada una correspondiente a un 
 - **IsInstalled:**
   - `0` indica que el comando del componente no se ejecutará.
   - `1` significa que el comando se ejecutará una vez por cada usuario, que es el comportamiento predeterminado si falta el valor `IsInstalled`.
-- **StubPath:** Define el comando a ejecutar por Active Setup. Puede ser cualquier línea de comando válida, como el lanzamiento de `notepad`.
+- **StubPath:** Define el comando a ejecutar por Active Setup. Puede ser cualquier línea de comando válida, como iniciar `notepad`.
 
 **Información de Seguridad:**
 
@@ -314,7 +314,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Tenga en cuenta que todos los sitios donde puede encontrar autoruns ya **han sido buscados por** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para obtener una lista **más completa de archivos ejecutados automáticamente**, puede utilizar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de SysInternals:
+Tenga en cuenta que todos los sitios donde puede encontrar autoruns ya han sido **buscados por** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para obtener una lista **más completa de archivos ejecutados automáticamente**, puede utilizar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de SysInternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
@@ -344,7 +344,7 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

