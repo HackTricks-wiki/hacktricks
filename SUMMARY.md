@@ -3,8 +3,9 @@
 ## 👾 Welcome!
 
 * [HackTricks](README.md)
-* [HackTricks Values & faq](welcome/hacktricks-values-and-faq.md)
+* [HackTricks Values & FAQ](welcome/hacktricks-values-and-faq.md)
 * [About the author](welcome/about-the-author.md)
+
 ## 🤩 Generic Methodologies & Resources
 
 * [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
@@ -337,7 +338,7 @@
 ## 👽 Network Services Pentesting
 
 * [Pentesting JDWP - Java Debug Wire Protocol](network-services-pentesting/pentesting-jdwp-java-debug-wire-protocol.md)
-* [Pentesting Printers](http://hacking-printers.net/wiki/index.php/Main_Page)
+* [Pentesting Printers](http://hacking-printers.net/wiki/index.php/Main\_Page)
 * [Pentesting SAP](network-services-pentesting/pentesting-sap.md)
 * [Pentesting VoIP](network-services-pentesting/pentesting-voip/README.md)
   * [Basic VoIP Protocols](network-services-pentesting/pentesting-voip/basic-voip-protocols/README.md)
