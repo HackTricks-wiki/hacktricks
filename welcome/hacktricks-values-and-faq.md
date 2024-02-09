@@ -1,4 +1,4 @@
-# HackTricks Values & faq
+# HackTricks Values & FAQ
 
 <details>
 
@@ -115,12 +115,28 @@ Note that asking this we will definitely **remove every link to your blog**, and
 
 **Unfortunatelly this practice might have happened in the beginning of the project when this page was just the notes of a pentester**. We always try to **give the original authors all the credits**. If you find a page with copy-pasted content (even with the original source referenced), let us know and we will either **remove it**, **leave the link**, or **rewrite it**.
 
-{% hint style="danger" %}
+## LICENSE&#x20;
 
-## License
+Copyright © All rights reserved unless otherwise specified.
 
-**Copyright © Carlos Polop 2024. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop is licensed under the**[ **Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
-**If you want to use it with commercial purposes, contact me.**
+#### License Summary:
+
+* Attribution: You are free to:
+  * Share — copy and redistribute the material in any medium or format.
+  * Adapt — remix, transform, and build upon the material.
+
+#### Additional Terms:
+
+* Third-Party Content: Some parts of this blog/book may include content from other sources, such as excerpts from other blogs or publications. The use of such content is done under the principles of fair use or with explicit permission from the respective copyright holders. Please refer to the original sources for specific licensing information regarding third-party content.
+* Authorship: The original content authored by HackTricks is subject to the terms of this license. You are encouraged to attribute this work to the author when sharing or adapting it.
+
+#### Exemptions:
+
+* Commercial Use: For inquiries regarding commercial use of this content, please contact me.
+
+This license does not grant any trademark or branding rights in relation to the content. All trademarks and branding featured in this blog/book are the property of their respective owners.
+
+**By accessing or using HackTricks, you agree to abide by the terms of this license. If you do not agree with these terms, please, do not access this website.**
 
 ## **Disclaimer**
 
