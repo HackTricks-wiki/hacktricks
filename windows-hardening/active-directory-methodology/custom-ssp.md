@@ -7,7 +7,7 @@ Otras formas de apoyar a HackTricks:
 * Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
@@ -20,7 +20,7 @@ Puedes crear tu **propio SSP** para **capturar** en **texto claro** las **creden
 
 ### Mimilib
 
-Puedes usar el binario `mimilib.dll` proporcionado por Mimikatz. **Esto registrará dentro de un archivo todas las credenciales en texto claro.**\
+Puedes usar el binario `mimilib.dll` proporcionado por Mimikatz. **Esto registrará en un archivo todas las credenciales en texto claro.**\
 Coloca el dll en `C:\Windows\System32\`\
 Obtén una lista de los Paquetes de Seguridad LSA existentes:
 

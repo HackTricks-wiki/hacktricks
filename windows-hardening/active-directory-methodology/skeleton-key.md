@@ -9,18 +9,16 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Ataque Skeleton Key
-
 El **ataque Skeleton Key** es una técnica sofisticada que permite a los atacantes **burlar la autenticación de Active Directory** al **inyectar una contraseña maestra** en el controlador de dominio. Esto permite al atacante **autenticarse como cualquier usuario** sin necesidad de su contraseña, otorgándoles efectivamente **acceso ilimitado** al dominio.
 
-Puede llevarse a cabo utilizando [Mimikatz](https://github.com/gentilkiwi/mimikatz). Para realizar este ataque, **se requieren derechos de Administrador de Dominio**, y el atacante debe apuntar a cada controlador de dominio para asegurar una brecha completa. Sin embargo, el efecto del ataque es temporal, ya que **reiniciar el controlador de dominio erradica el malware**, lo que requiere una reimplantación para un acceso sostenido.
+Puede llevarse a cabo utilizando [Mimikatz](https://github.com/gentilkiwi/mimikatz). Para realizar este ataque, se requieren **privilegios de Administrador de Dominio**, y el atacante debe apuntar a cada controlador de dominio para asegurar una brecha completa. Sin embargo, el efecto del ataque es temporal, ya que **reiniciar el controlador de dominio erradica el malware**, lo que requiere una reimplantación para un acceso sostenido.
 
-La **ejecución del ataque** requiere un solo comando: `misc::skeleton`.
+**Ejecutar el ataque** requiere un solo comando: `misc::skeleton`.
 
 ## Mitigaciones
 
@@ -34,7 +32,7 @@ Aquí están los comandos de PowerShell para mejorar las medidas de seguridad:
 
 - Para fortalecer `lsass.exe`, se recomienda habilitarlo como un proceso protegido: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
 
-Es crucial verificar después de reiniciar el sistema que las medidas de protección se hayan aplicado con éxito. Esto se logra a través de: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
+Es crucial verificar después de reiniciar el sistema que las medidas de protección se hayan aplicado con éxito. Esto se puede lograr mediante: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
 
 ## Referencias
 * [https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)

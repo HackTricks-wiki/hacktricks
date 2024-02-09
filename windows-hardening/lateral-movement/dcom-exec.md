@@ -2,11 +2,11 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud)..
 
@@ -14,7 +14,7 @@
 
 <figure><img src="../../.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
+Encuentra las vulnerabilidades más importantes para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -24,7 +24,8 @@ Encuentra las vulnerabilidades que más importan para que puedas solucionarlas m
 
 **Para obtener más información sobre esta técnica, consulta la publicación original en [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**
 
-El Modelo de Objetos de Componentes Distribuidos (DCOM) presenta una capacidad interesante para interacciones basadas en la red con objetos. Microsoft proporciona documentación completa tanto para DCOM como para el Modelo de Objetos de Componentes (COM), accesible [aquí para DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) y [aquí para COM](https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363\(v=vs.85\).aspx). Se puede recuperar una lista de aplicaciones DCOM utilizando el comando de PowerShell:
+
+Los objetos del Modelo de Objetos de Componentes Distribuidos (DCOM) presentan una capacidad interesante para interacciones basadas en la red con objetos. Microsoft proporciona documentación completa tanto para DCOM como para el Modelo de Objetos de Componentes (COM), accesible [aquí para DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) y [aquí para COM](https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363\(v=vs.85\).aspx). Se puede recuperar una lista de aplicaciones DCOM utilizando el comando de PowerShell:
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
@@ -54,11 +55,11 @@ ls \\10.10.10.10\c$\Users
 
 **Para obtener más información sobre esta técnica, consulta la publicación original [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-Se identificó que el objeto **MMC20.Application** carecía de "LaunchPermissions" explícitos, lo que lo hace predeterminado a permisos que permiten acceso a los administradores. Para más detalles, se puede explorar un hilo [aquí](https://twitter.com/tiraniddo/status/817532039771525120), y se recomienda el uso de OleView .NET de [@tiraniddo](https://twitter.com/tiraniddo) para filtrar objetos sin permisos de inicio explícitos.
+Se identificó que el objeto **MMC20.Application** carecía de "LaunchPermissions" explícitos, lo que lo hace recurrir a permisos que permiten el acceso a los administradores. Para más detalles, se puede explorar un hilo [aquí](https://twitter.com/tiraniddo/status/817532039771525120), y se recomienda el uso de OleView .NET de [@tiraniddo](https://twitter.com/tiraniddo) para filtrar objetos sin permisos de inicio explícitos.
 
 Dos objetos específicos, `ShellBrowserWindow` y `ShellWindows`, se destacaron debido a su falta de permisos de inicio explícitos. La ausencia de una entrada de registro `LaunchPermission` en `HKCR:\AppID\{guid}` significa que no hay permisos explícitos.
 
-### ShellWindows
+###  ShellWindows
 Para `ShellWindows`, que carece de un ProgID, los métodos .NET `Type.GetTypeFromCLSID` y `Activator.CreateInstance` facilitan la instanciación de objetos utilizando su AppID. Este proceso aprovecha OleView .NET para recuperar el CLSID de `ShellWindows`. Una vez instanciado, la interacción es posible a través del método `WindowsShell.Item`, lo que lleva a la invocación de métodos como `Document.Application.ShellExecute`.
 
 Se proporcionaron comandos de PowerShell de ejemplo para instanciar el objeto y ejecutar comandos de forma remota:
@@ -95,7 +96,7 @@ $Obj.DisplayAlerts = $false
 $Obj.DDEInitiate("cmd", "/c $Command")
 }
 ```
-### Herramientas de Automatización para el Movimiento Lateral
+### Herramientas de Automatización para Movimiento Lateral
 
 Se destacan dos herramientas para automatizar estas técnicas:
 
@@ -119,7 +120,7 @@ SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 
 <figure><img src="../../.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**¡Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
+Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**¡Pruébalo gratis**](https://www.intruder.io/?utm_source=referral\&utm_campaign=hacktricks) hoy.
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -132,7 +133,7 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

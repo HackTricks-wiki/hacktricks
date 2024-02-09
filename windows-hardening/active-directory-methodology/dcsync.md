@@ -10,14 +10,14 @@ Obtenga acceso hoy:
 
 <details>
 
-<summary><strong>Aprenda hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprenda hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtenga [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtenga [**artículos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubra [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síganos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparta sus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -28,8 +28,8 @@ El permiso **DCSync** implica tener estos permisos sobre el dominio mismo: **DS-
 
 **Notas importantes sobre DCSync:**
 
-* El ataque **DCSync simula el comportamiento de un Controlador de Dominio y solicita a otros Controladores de Dominio replicar información** utilizando el Protocolo Remoto de Servicio de Replicación de Directorio (MS-DRSR). Debido a que MS-DRSR es una función válida y necesaria de Active Directory, no se puede apagar ni deshabilitar.
-* Por defecto, solo los grupos **Domain Admins, Enterprise Admins, Administrators y Domain Controllers** tienen los privilegios requeridos.
+* El ataque **DCSync simula el comportamiento de un Controlador de Dominio y solicita a otros Controladores de Dominio replicar información** utilizando el Protocolo Remoto de Servicio de Replicación de Directorios (MS-DRSR). Debido a que MS-DRSR es una función válida y necesaria de Active Directory, no se puede apagar ni deshabilitar.
+* Por defecto, solo los grupos **Domain Admins, Enterprise Admins, Administrators y Domain Controllers** tienen los privilegios necesarios.
 * Si alguna contraseña de cuenta se almacena con cifrado reversible, hay una opción disponible en Mimikatz para devolver la contraseña en texto claro.
 
 ### Enumeración
@@ -53,7 +53,7 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 
 * uno con los **hashes NTLM**
 * uno con las **claves Kerberos**
-* uno con contraseñas en texto claro del NTDS para cualquier cuenta configurada con [**cifrado reversible**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) habilitado. Puedes obtener usuarios con cifrado reversible con
+* uno con contraseñas en texto claro del NTDS para cualquier cuenta configurada con [**encriptación reversible**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) habilitada. Puedes obtener usuarios con encriptación reversible con
 
 ```powershell
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
@@ -74,7 +74,7 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 * Evento de seguridad ID 4662 (La directiva de auditoría para el objeto debe estar habilitada) – Se realizó una operación en un objeto
 * Evento de seguridad ID 5136 (La directiva de auditoría para el objeto debe estar habilitada) – Se modificó un objeto de servicio de directorio
 * Evento de seguridad ID 4670 (La directiva de auditoría para el objeto debe estar habilitada) – Se cambiaron los permisos en un objeto
-* Escáner de ACL de AD - Crea y compara informes de ACL. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
+* AD ACL Scanner - Crea y compara informes de ACL. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## Referencias
 
@@ -83,22 +83,22 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las **herramientas comunitarias más avanzadas** del mundo.\
-¡Accede hoy mismo:
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+¡Accede hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

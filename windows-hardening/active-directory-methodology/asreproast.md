@@ -9,8 +9,8 @@ Otras formas de apoyar a HackTricks:
 * Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
@@ -39,7 +39,7 @@ Los principales requisitos para este ataque son:
 - **Cuenta de dominio opcional**: Tener una cuenta de dominio permite a los atacantes identificar de manera más eficiente a los usuarios vulnerables a través de consultas LDAP. Sin dicha cuenta, los atacantes deben adivinar nombres de usuario.
 
 
-#### Enumerando usuarios vulnerables (necesita credenciales de dominio)
+#### Enumeración de usuarios vulnerables (necesita credenciales de dominio)
 
 {% code title="Usando Windows" %}
 ```bash
@@ -80,7 +80,7 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistencia
 
-Forzar **preauth** no requerido para un usuario en el que tengas permisos de **GenericAll** (o permisos para escribir propiedades):
+Forzar que no se requiera **preautenticación** para un usuario en el que tengas permisos de **GenericAll** (o permisos para escribir propiedades):
 
 {% code title="Usando Windows" %}
 ```bash
@@ -111,7 +111,7 @@ Participa en contenido que explora la emoción y los desafíos del hacking
 Mantente al día con el mundo del hacking a través de noticias e información en tiempo real
 
 **Últimos Anuncios**\
-Mantente informado sobre los nuevos programas de recompensas por errores que se lanzan y las actualizaciones cruciales de las plataformas
+Mantente informado sobre los nuevos programas de recompensas por errores que se lanzan y las actualizaciones importantes de las plataformas
 
 **Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) ¡y comienza a colaborar con los mejores hackers hoy!
 
@@ -124,7 +124,7 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

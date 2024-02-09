@@ -2,14 +2,14 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de Ataque AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de Ataque AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
@@ -42,7 +42,7 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 ```
 ## Ataque a la Cuenta de Confianza
 
-Existe una vulnerabilidad de seguridad cuando se establece una relación de confianza entre dos dominios, identificados aquí como dominio **A** y dominio **B**, donde el dominio **B** extiende su confianza al dominio **A**. En esta configuración, se crea una cuenta especial en el dominio **A** para el dominio **B**, la cual desempeña un papel crucial en el proceso de autenticación entre los dos dominios. Esta cuenta, asociada con el dominio **B**, se utiliza para cifrar tickets para acceder a servicios en los dos dominios.
+Existe una vulnerabilidad de seguridad cuando se establece una relación de confianza entre dos dominios, identificados aquí como dominio **A** y dominio **B**, donde el dominio **B** extiende su confianza al dominio **A**. En esta configuración, se crea una cuenta especial en el dominio **A** para el dominio **B**, la cual desempeña un papel crucial en el proceso de autenticación entre los dos dominios. Esta cuenta, asociada con el dominio **B**, se utiliza para cifrar tickets para acceder a servicios en los dominios.
 
 El aspecto crítico a entender aquí es que la contraseña y el hash de esta cuenta especial pueden extraerse de un Controlador de Dominio en el dominio **A** utilizando una herramienta de línea de comandos. El comando para realizar esta acción es:
 ```powershell
@@ -60,7 +60,7 @@ Siguiendo esto, se podría usar la clave RC4 extraída para autenticarse como `r
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-Este paso de autenticación abre la posibilidad de enumerar e incluso explotar servicios dentro de `root.local`, como realizar un ataque de Kerberoast para extraer credenciales de cuentas de servicio utilizando:
+Este paso de autenticación abre la posibilidad de enumerar e incluso explotar servicios dentro de `root.local`, como realizar un ataque de Kerberoast para extraer credenciales de cuentas de servicio usando:
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
@@ -91,7 +91,7 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

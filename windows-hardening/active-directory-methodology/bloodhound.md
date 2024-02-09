@@ -2,9 +2,9 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
@@ -25,7 +25,7 @@ Se puede utilizar para descubrir vulnerabilidades sin conexión o para comparar 
 
 Se requerirá el nombre de usuario, la contraseña y la dirección para conectarse (se requiere cualquier usuario de AD).
 
-Para tomar una instantánea de AD, ve a `Archivo` --> `Crear Instantánea` e introduce un nombre para la instantánea.
+Para tomar una instantánea de AD, ve a `Archivo` --> `Crear instantánea` e introduce un nombre para la instantánea.
 
 ## ADRecon
 
@@ -44,7 +44,7 @@ BloodHound utiliza la teoría de grafos para revelar las relaciones ocultas y a 
 
 Por lo tanto, [Bloodhound](https://github.com/BloodHoundAD/BloodHound) es una herramienta increíble que puede enumerar un dominio automáticamente, guardar toda la información, encontrar posibles rutas de escalada de privilegios y mostrar toda la información utilizando gráficos.
 
-Booldhound se compone de 2 partes principales: **ingestores** y la **aplicación de visualización**.
+Bloodhound se compone de 2 partes principales: **ingestores** y la **aplicación de visualización**.
 
 Los **ingestores** se utilizan para **enumerar el dominio y extraer toda la información** en un formato que la aplicación de visualización entenderá.
 

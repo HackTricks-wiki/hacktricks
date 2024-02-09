@@ -2,11 +2,11 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
@@ -14,15 +14,15 @@
 
 ## Ataque de Inyección de Historial de SID
 
-El enfoque del **Ataque de Inyección de Historial de SID** es facilitar la **migración de usuarios entre dominios** garantizando el acceso continuo a recursos del dominio anterior. Esto se logra al **incorporar el Identificador de Seguridad (SID) anterior del usuario en el Historial de SID** de su nueva cuenta. Es importante destacar que este proceso puede ser manipulado para otorgar acceso no autorizado al agregar el SID de un grupo de alto privilegio (como Administradores de Empresa o Administradores de Dominio) del dominio principal al Historial de SID. Esta explotación confiere acceso a todos los recursos dentro del dominio principal.
+El enfoque del **Ataque de Inyección de Historial de SID** es facilitar la **migración de usuarios entre dominios** garantizando el acceso continuo a recursos del dominio anterior. Esto se logra **incorporando el Identificador de Seguridad (SID) anterior del usuario en el Historial de SID** de su nueva cuenta. Es importante destacar que este proceso puede ser manipulado para otorgar acceso no autorizado al agregar el SID de un grupo de alto privilegio (como Administradores de Empresa o Administradores de Dominio) del dominio principal al Historial de SID. Esta explotación confiere acceso a todos los recursos dentro del dominio principal.
 
-Existen dos métodos para llevar a cabo este ataque: a través de la creación de un **Golden Ticket** o un **Diamond Ticket**.
+Existen dos métodos para llevar a cabo este ataque: mediante la creación de un **Golden Ticket** o un **Diamond Ticket**.
 
-Para identificar el SID del grupo **"Administradores de Empresa"**, primero se debe localizar el SID del dominio raíz. Después de la identificación, el SID del grupo Administradores de Empresa se puede construir agregando `-519` al SID del dominio raíz. Por ejemplo, si el SID del dominio raíz es `S-1-5-21-280534878-1496970234-700767426`, el SID resultante para el grupo "Administradores de Empresa" sería `S-1-5-21-280534878-1496970234-700767426-519`.
+Para identificar el SID del grupo **"Enterprise Admins"**, primero se debe localizar el SID del dominio raíz. Después de la identificación, el SID del grupo Enterprise Admins se puede construir agregando `-519` al SID del dominio raíz. Por ejemplo, si el SID del dominio raíz es `S-1-5-21-280534878-1496970234-700767426`, el SID resultante para el grupo "Enterprise Admins" sería `S-1-5-21-280534878-1496970234-700767426-519`.
 
-También se puede usar el grupo **Administradores de Dominio**, que termina en **512**.
+También se puede utilizar el grupo **Domain Admins**, que termina en **512**.
 
-Otra forma de encontrar el SID de un grupo del otro dominio (por ejemplo "Administradores de Dominio") es con:
+Otra forma de encontrar el SID de un grupo del otro dominio (por ejemplo, "Domain Admins") es con:
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
@@ -142,7 +142,7 @@ El flujo es el siguiente:
 * Recupera el hash de la cuenta KRBTGT en el dominio hijo
 * Crea un Golden Ticket
 * Inicia sesión en el dominio padre
-* Recupera las credenciales de la cuenta de Administrador en el dominio padre
+* Recupera credenciales para la cuenta de Administrador en el dominio padre
 * Si se especifica el interruptor `target-exec`, se autentica en el Controlador de Dominio del dominio padre a través de Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
@@ -153,10 +153,10 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres que tu **empresa sea anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.

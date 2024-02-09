@@ -1,20 +1,25 @@
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sigue**me en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
+
+
+
+
+
 # Bus Pirate
 
-Para probar que un Bus Pirate está funcionando, conecta +5V con VPU y 3.3V con ADC y accede al bus pirate (usando Tera Term por ejemplo) y utiliza el comando `~`:
+Para probar si un Bus Pirate está funcionando, conecta +5V con VPU y 3.3V con ADC y accede al Bus Pirate (Usando Tera Term por ejemplo) y utiliza el comando `~`:
 ```bash
 # Use command
 HiZ>~
@@ -53,18 +58,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Como puedes ver en la línea de comandos anterior, se indicó que se encontraron 0 errores. Esto es muy útil para saber que está funcionando después de comprarlo o después de flashear un firmware.
+Como se puede ver en el comando anterior, indicó que no se encontraron errores. Esto es muy útil para saber que está funcionando después de comprarlo o después de flashear un firmware.
 
-Para conectar con el bus pirate puedes seguir la documentación:
+Para conectarse con el bus pirate, puedes seguir la documentación:
 
 ![](<../../.gitbook/assets/image (307) (2).png>)
 
-En este caso voy a conectar a una EPROM: ATMEL901 24C256 PU27:
+En este caso, voy a conectarme a un EPROM: ATMEL901 24C256 PU27:
 
 ![](<../../.gitbook/assets/image (465) (2) (1).png>)
 
-Para comunicarme con el bus pirate utilicé Tera Term conectado al puerto COM del bus pirate con una Configuración --> Puerto Serie --> Velocidad de 115200.\
-En la siguiente comunicación puedes encontrar cómo preparar el bus pirate para hablar I2C y cómo escribir y leer de la memoria (Los comentarios aparecen usando "#", no esperes esa parte en la comunicación):
+Para comunicarse con el bus pirate, utilicé Tera Term conectado al puerto COM del bus pirate con una configuración --> Puerto Serie --> Velocidad de 115200.\
+En la siguiente comunicación puedes encontrar cómo preparar el bus pirate para hablar I2C y cómo escribir y leer desde la memoria (Los comentarios aparecen usando "#", no esperes esa parte en la comunicación):
 ```bash
 # Check communication with buspirate
 i
@@ -215,14 +220,14 @@ Any key to exit
 ```
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipo Rojo de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Consigue el [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de github de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>

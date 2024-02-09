@@ -6,10 +6,10 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
@@ -21,9 +21,9 @@ Usando esto, un administrador de dominio puede **permitir** a un equipo **suplan
 * **Servicio para Usuario a sí mismo (**_**S4U2self**_**):** Si una **cuenta de servicio** tiene un valor _userAccountControl_ que contiene [TRUSTED\_TO\_AUTH\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) (T2A4D), entonces puede obtener un TGS para sí mismo (el servicio) en nombre de cualquier otro usuario.
 * **Servicio para Usuario a Proxy(**_**S4U2proxy**_**):** Una **cuenta de servicio** podría obtener un TGS en nombre de cualquier usuario para el servicio establecido en **msDS-AllowedToDelegateTo.** Para hacerlo, primero necesita un TGS de ese usuario para sí mismo, pero puede usar S4U2self para obtener ese TGS antes de solicitar el otro.
 
-**Nota**: Si un usuario está marcado como ‘_La cuenta es sensible y no se puede delegar_’ en AD, no podrás **suplantar** a ese usuario.
+**Nota**: Si un usuario está marcado como '_La cuenta es sensible y no se puede delegar_' en AD, no podrás **suplantar** a ese usuario.
 
-Esto significa que si **comprometes el hash del servicio** puedes **suplantar a usuarios** y obtener **acceso** en su nombre al **servicio configurado** (posible **escalada de privilegios**).
+Esto significa que si **comprometes el hash del servicio** puedes **suplantar usuarios** y obtener **acceso** en su nombre al **servicio configurado** (posible **escalada de privilegios**).
 
 Además, no solo tendrás acceso al servicio que el usuario puede suplantar, sino también a cualquier servicio porque el SPN (el nombre del servicio solicitado) no se está verificando, solo los privilegios. Por lo tanto, si tienes acceso al servicio **CIFS** también puedes tener acceso al servicio **HOST** usando la bandera `/altservice` en Rubeus.
 
@@ -62,7 +62,7 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140
 {% endcode %}
 
 {% hint style="warning" %}
-Hay **otras formas de obtener un ticket TGT** o el **RC4** o **AES256** sin ser SYSTEM en la computadora, como el Printer Bug y la delegación sin restricciones, el reenvío NTLM y el abuso del Servicio de Certificados de Active Directory.
+Hay **otras formas de obtener un ticket TGT** o el **RC4** o **AES256** sin ser SYSTEM en la computadora, como el Printer Bug y la delegación sin restricciones, el reenvío NTLM y el abuso del servicio de certificados de Active Directory.
 
 **Solo con tener ese ticket TGT (o hasheado) puedes llevar a cabo este ataque sin comprometer toda la computadora.**
 {% endhint %}
@@ -103,14 +103,14 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Consigue el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>

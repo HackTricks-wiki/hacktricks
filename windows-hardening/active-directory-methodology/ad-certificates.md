@@ -2,14 +2,14 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -31,15 +31,15 @@ Otras formas de apoyar a HackTricks:
 
 ### Consideraciones Especiales
 
-- Los **Nombres Alternativos del Sujeto (SANs)** amplían la aplicabilidad de un certificado a múltiples identidades, crucial para servidores con múltiples dominios. Los procesos seguros de emisión son vitales para evitar riesgos de suplantación por parte de atacantes que manipulan la especificación SAN.
+- Los **Nombres Alternativos del Sujeto (SANs)** amplían la aplicabilidad de un certificado a múltiples identidades, siendo crucial para servidores con múltiples dominios. Los procesos seguros de emisión son vitales para evitar riesgos de suplantación por parte de atacantes que manipulan la especificación SAN.
 
 ### Autoridades de Certificación (CAs) en Active Directory (AD)
 
 AD CS reconoce certificados de CA en un bosque de AD a través de contenedores designados, cada uno con roles únicos:
 
-- El contenedor de **Autoridades de Certificación** contiene certificados raíz de confianza.
+- El contenedor de **Autoridades de Certificación** contiene certificados raíz de CA de confianza.
 - El contenedor de **Servicios de Inscripción** detalla CAs empresariales y sus plantillas de certificado.
-- El objeto **NTAuthCertificates** incluye certificados de CA autorizados para la autenticación de AD.
+- El objeto **NTAuthCertificates** incluye certificados de CA autorizados para autenticación de AD.
 - El contenedor **AIA (Acceso a la Información de la Autoridad)** facilita la validación de la cadena de certificados con certificados intermedios y cruzados.
 
 ### Adquisición de Certificados: Flujo de Solicitud de Certificado del Cliente
@@ -51,7 +51,7 @@ AD CS reconoce certificados de CA en un bosque de AD a través de contenedores d
 
 ### Plantillas de Certificado
 
-Definidas dentro de AD, estas plantillas describen la configuración y permisos para emitir certificados, incluidos los EKUs permitidos y los derechos de inscripción o modificación, críticos para gestionar el acceso a los servicios de certificados.
+Definidas dentro de AD, estas plantillas describen la configuración y permisos para emitir certificados, incluidos los EKUs permitidos y los derechos de inscripción o modificación, fundamentales para gestionar el acceso a los servicios de certificados.
 
 ## Inscripción de Certificados
 
@@ -64,11 +64,11 @@ Para que un cliente solicite un certificado, se deben otorgar **derechos de insc
 Estos derechos se especifican a través de Entradas de Control de Acceso (ACEs), detallando permisos como:
 - Derechos de **Certificado-Inscripción** y **Certificado-AutoInscripción**, cada uno asociado con GUIDs específicos.
 - **ExtendedRights**, permitiendo todos los permisos extendidos.
-- **FullControl/GenericAll**, proporcionando control completo sobre la plantilla.
+- **ControlTotal/GenericAll**, proporcionando control completo sobre la plantilla.
 
 ### Derechos de Inscripción de CA Empresarial
 
-Los derechos de la CA están descritos en su descriptor de seguridad, accesible a través de la consola de administración de la Autoridad de Certificación. Algunas configuraciones incluso permiten a usuarios con pocos privilegios acceso remoto, lo que podría ser un problema de seguridad.
+Los derechos de la CA están delineados en su descriptor de seguridad, accesible a través de la consola de administración de la Autoridad de Certificación. Algunas configuraciones incluso permiten a usuarios con pocos privilegios acceso remoto, lo que podría ser un problema de seguridad.
 
 ### Controles de Emisión Adicionales
 
@@ -82,7 +82,7 @@ Los certificados pueden solicitarse a través de:
 1. **Protocolo de Inscripción de Certificado de Cliente de Windows** (MS-WCCE), utilizando interfaces DCOM.
 2. **Protocolo Remoto ICertPassage** (MS-ICPR), a través de tuberías con nombre o TCP/IP.
 3. La **interfaz web de inscripción de certificados**, con el rol de Inscripción Web de Autoridad de Certificación instalado.
-4. El **Servicio de Inscripción de Certificados** (CES), junto con el servicio de Política de Inscripción de Certificados (CEP).
+4. El **Servicio de Inscripción de Certificados** (CES), en conjunto con el servicio de Política de Inscripción de Certificados (CEP).
 5. El **Servicio de Inscripción de Dispositivos de Red** (NDES) para dispositivos de red, utilizando el Protocolo Simple de Inscripción de Certificados (SCEP).
 
 Los usuarios de Windows también pueden solicitar certificados a través de la interfaz gráfica de usuario (`certmgr.msc` o `certlm.msc`) o herramientas de línea de comandos (`certreq.exe` o el comando `Get-Certificate` de PowerShell).
@@ -102,13 +102,13 @@ CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<do
 ```
 ### Autenticación del Canal Seguro (Schannel)
 
-Schannel facilita conexiones seguras TLS/SSL, donde durante un apretón de manos, el cliente presenta un certificado que, si se valida correctamente, autoriza el acceso. El mapeo de un certificado a una cuenta de AD puede implicar la función **S4U2Self** de Kerberos o el **Nombre Alternativo del Sujeto (SAN)** del certificado, entre otros métodos.
+Schannel facilita conexiones seguras TLS/SSL, donde durante un saludo, el cliente presenta un certificado que, si se valida correctamente, autoriza el acceso. El mapeo de un certificado a una cuenta de AD puede implicar la función **S4U2Self** de Kerberos o el **Nombre Alternativo del Sujeto (SAN)** del certificado, entre otros métodos.
 
 ### Enumeración de Servicios de Certificados de AD
 
 Los servicios de certificados de AD pueden ser enumerados a través de consultas LDAP, revelando información sobre **Autoridades de Certificación Empresariales (CAs)** y sus configuraciones. Esto es accesible por cualquier usuario autenticado en el dominio sin privilegios especiales. Herramientas como **[Certify](https://github.com/GhostPack/Certify)** y **[Certipy](https://github.com/ly4k/Certipy)** se utilizan para enumeración y evaluación de vulnerabilidades en entornos de AD CS.
 
-Los comandos para utilizar estas herramientas incluyen:
+Los comandos para usar estas herramientas incluyen:
 ```bash
 # Enumerate trusted root CA certificates and Enterprise CAs with Certify
 Certify.exe cas
@@ -129,14 +129,14 @@ certutil -v -dstemplate
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github. 
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -4,7 +4,7 @@
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
-¡Obtenga acceso hoy:
+Obtenga acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -14,19 +14,19 @@ Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_mediu
 
 Otras formas de apoyar a HackTricks:
 
-* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtenga [**productos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síganos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparta sus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Kerberoast
 
-Kerberoasting se centra en la adquisición de **tickets TGS**, específicamente aquellos relacionados con servicios que operan bajo **cuentas de usuario** en **Active Directory (AD)**, excluyendo las **cuentas de computadora**. La encriptación de estos tickets utiliza claves que provienen de las **contraseñas de usuario**, lo que permite la posibilidad de **descifrado de credenciales sin conexión**. El uso de una cuenta de usuario como servicio se indica por una propiedad **"ServicePrincipalName"** no vacía.
+Kerberoasting se centra en la adquisición de **tickets TGS**, específicamente aquellos relacionados con servicios que operan bajo **cuentas de usuario** en **Active Directory (AD)**, excluyendo las **cuentas de computadora**. La encriptación de estos tickets utiliza claves que provienen de las **contraseñas de usuario**, lo que permite la posibilidad de **descifrado de credenciales sin conexión**. El uso de una cuenta de usuario como servicio se indica por una propiedad de **"ServicePrincipalName"** no vacía.
 
-Para ejecutar **Kerberoasting**, es esencial contar con una cuenta de dominio capaz de solicitar **tickets TGS**; sin embargo, este proceso no requiere **privilegios especiales**, por lo que es accesible para cualquier persona con **credenciales de dominio válidas**.
+Para ejecutar **Kerberoasting**, es esencial contar con una cuenta de dominio capaz de solicitar **tickets TGS**; sin embargo, este proceso no requiere de **privilegios especiales**, por lo que es accesible para cualquier persona con **credenciales de dominio válidas**.
 
 ### Puntos Clave:
 - **Kerberoasting** apunta a los **tickets TGS** de **servicios de cuentas de usuario** dentro de **AD**.
@@ -109,7 +109,7 @@ Cuando se solicita un TGS, se genera el evento de Windows `4769 - Se solicitó u
 <figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir fácilmente y **automatizar flujos de trabajo** impulsados por las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir fácilmente y **automatizar flujos de trabajo** impulsados por las herramientas comunitarias **más avanzadas** del mundo.\
 Obtén acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -128,7 +128,7 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 ```
 Puedes encontrar **herramientas** útiles para ataques de **kerberoast** aquí: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** se debe a la hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
+Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** se debe a la hora local, necesitas sincronizar el host con el controlador de dominio. Hay algunas opciones:
 
 * `ntpdate <IP del DC>` - Obsoleto a partir de Ubuntu 16.04
 * `rdate -n <IP del DC>`
@@ -155,7 +155,7 @@ Al implementar estas medidas, las organizaciones pueden reducir significativamen
 
 ## Kerberoast sin cuenta de dominio
 
-En **septiembre de 2022**, se dio a conocer una nueva forma de explotar un sistema por un investigador llamado Charlie Clark, compartida a través de su plataforma [exploit.ph](https://exploit.ph/). Este método permite la adquisición de **Tickets de Servicio (ST)** a través de una solicitud **KRB_AS_REQ**, lo cual no requiere control sobre ninguna cuenta de Active Directory. Básicamente, si un principal está configurado de tal manera que no requiere preautenticación, una situación similar a lo que se conoce en el ámbito de la ciberseguridad como un ataque de **AS-REP Roasting**, esta característica puede ser aprovechada para manipular el proceso de solicitud. Específicamente, al alterar el atributo **sname** dentro del cuerpo de la solicitud, el sistema es engañado para emitir un **ST** en lugar del Ticket de Concesión de Tiquete (TGT) cifrado estándar.
+En **septiembre de 2022**, se dio a conocer una nueva forma de explotar un sistema por un investigador llamado Charlie Clark, compartida a través de su plataforma [exploit.ph](https://exploit.ph/). Este método permite la adquisición de **Tickets de Servicio (ST)** a través de una solicitud **KRB_AS_REQ**, la cual no requiere control sobre ninguna cuenta de Active Directory. Básicamente, si un principal está configurado de tal manera que no requiere preautenticación, un escenario similar a lo que se conoce en el ámbito de la ciberseguridad como un ataque de **AS-REP Roasting**, esta característica puede ser aprovechada para manipular el proceso de solicitud. Específicamente, al alterar el atributo **sname** dentro del cuerpo de la solicitud, el sistema es engañado para emitir un **ST** en lugar del Ticket de Concesión de Tiquete (TGT) cifrado estándar.
 
 La técnica está completamente explicada en este artículo: [publicación de blog de Semperis](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
@@ -171,7 +171,7 @@ GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "d
 ```
 #### Windows
 
-* [GhostPack/Rubeus de PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+* [GhostPack/Rubeus desde PR #139](https://github.com/GhostPack/Rubeus/pull/139):
 ```bash
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```
@@ -182,15 +182,15 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de GitHub.
 
 </details>
 

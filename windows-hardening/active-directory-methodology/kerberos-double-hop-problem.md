@@ -2,9 +2,9 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
@@ -23,7 +23,7 @@ Esto se debe a que al conectarse con Kerberos, estos son los pasos:
 1. El Usuario1 proporciona credenciales y el **controlador de dominio** devuelve un **TGT** de Kerberos al Usuario1.
 2. El Usuario1 utiliza el **TGT** para solicitar un **ticket de servicio** para **conectarse** al Servidor1.
 3. El Usuario1 **se conecta** al **Servidor1** y proporciona el **ticket de servicio**.
-4. El **Servidor1** **no tiene** las **credenciales** de Usuario1 en caché ni el **TGT** de Usuario1. Por lo tanto, cuando Usuario1 desde Servidor1 intenta iniciar sesión en un segundo servidor, no puede **autenticarse**.
+4. El **Servidor1** **no tiene** las **credenciales** de Usuario1 en caché ni el **TGT** de Usuario1. Por lo tanto, cuando Usuario1 desde Servidor1 intenta iniciar sesión en un segundo servidor, **no puede autenticarse**.
 
 ### Delegación sin restricciones
 
@@ -32,9 +32,9 @@ Si la **delegación sin restricciones** está habilitada en la PC, esto no suced
 
 ### CredSSP
 
-Otra forma de evitar este problema, que es [**notablemente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7), es el **Proveedor de Soporte de Seguridad de Credenciales**. Según Microsoft:
+Otra forma de evitar este problema que es [**notablemente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) es el **Proveedor de Soporte de Seguridad de Credenciales**. Según Microsoft:
 
-> La autenticación de CredSSP delega las credenciales de usuario desde la computadora local a una computadora remota. Esta práctica aumenta el riesgo de seguridad de la operación remota. Si la computadora remota se ve comprometida, cuando se pasan las credenciales a ella, las credenciales se pueden utilizar para controlar la sesión de red.
+> La autenticación de CredSSP delega las credenciales de usuario de la computadora local a una computadora remota. Esta práctica aumenta el riesgo de seguridad de la operación remota. Si la computadora remota se ve comprometida, cuando se pasan las credenciales a ella, las credenciales se pueden utilizar para controlar la sesión de red.
 
 Se recomienda encarecidamente que **CredSSP** esté deshabilitado en sistemas de producción, redes sensibles y entornos similares debido a preocupaciones de seguridad. Para determinar si **CredSSP** está habilitado, se puede ejecutar el comando `Get-WSManCredSSP`. Este comando permite **verificar el estado de CredSSP** e incluso puede ejecutarse de forma remota, siempre que **WinRM** esté habilitado.
 ```powershell
@@ -98,11 +98,11 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
