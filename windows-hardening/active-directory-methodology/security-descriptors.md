@@ -8,9 +8,9 @@ HackTricks をサポートする他の方法:
 
 * **HackTricks で企業を宣伝**したい場合や **HackTricks をPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)をフォローする**
-* **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**してください。
+* **ハッキングテクニックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>
 
@@ -18,9 +18,9 @@ HackTricks をサポートする他の方法:
 
 [ドキュメントから](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): セキュリティ記述子定義言語（SDDL）は、セキュリティ記述子を記述するために使用される形式を定義します。SDDL は DACL と SACL に ACE 文字列を使用します: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
-**セキュリティ記述子** は、**オブジェクト**が**オブジェクト**に対して持つ**権限**を**格納**するために使用されます。オブジェクトの **セキュリティ記述子** をわずかに変更するだけで、特権グループのメンバーである必要がなく、そのオブジェクトに対して非常に興味深い権限を取得できます。
+**セキュリティ記述子**は、**オブジェクト**が**オブジェクト**に対して持つ**権限**を**格納**するために使用されます。オブジェクトの **セキュリティ記述子**をわずかに変更するだけで、特権グループのメンバーである必要がなく、そのオブジェクトに対して非常に興味深い権限を取得できます。
 
-この永続化技術は、通常管理者権限が必要なタスクを実行できるようにするために、特定のオブジェクトに対して必要なすべての権限を獲得する能力に基づいています。
+この永続化テクニックは、通常管理者権限が必要なタスクを実行できるようにするために、特定のオブジェクトに対して必要なすべての特権を獲得する能力に基づいています。
 
 ### WMI へのアクセス
 
@@ -31,7 +31,7 @@ Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2'
 ```
 ### WinRMへのアクセス
 
-[**こちらを使用して**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**、ユーザーにwinrm PSコンソールへのアクセスを許可します：**
+**[こちらを使用して]**(https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**、ユーザーに**winrm PSコンソールへのアクセス**を許可します。
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
@@ -60,10 +60,10 @@ Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**したり、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する。
 - **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>

@@ -1,14 +1,14 @@
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert) を使ってゼロからヒーローになる AWS ハッキングを学ぶ</strong></a><strong>!</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に**参加する**か、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを共有する。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見る
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする。
+* **ハッキングトリックを共有するためにPRを提出して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリに。
 
 </details>
 
@@ -17,62 +17,47 @@ HackTricks をサポートする他の方法:
 
 # JTAG
 
-JTAG はバウンダリスキャンを実行することができます。バウンダリスキャンは、各ピンの組み込みバウンダリスキャンセルとレジスタを含む特定の回路を分析します。
+JTAGはバウンダリスキャンを実行することを可能にします。バウンダリスキャンは、各ピンの埋め込みバウンダリスキャンセルとレジスタを含む特定の回路を分析します。
 
-JTAG 標準は、バウンダリスキャンを実施するための**特定のコマンド**を定義しています。以下を含みます:
+JTAG標準は、次のような**バウンダリスキャンを実行するための特定のコマンド**を定義しています：
 
-* **BYPASS** は他のチップを通過するオーバーヘッドなしで特定のチップをテストすることができます。
-* **SAMPLE/PRELOAD** は、デバイスが通常の機能モードにあるときに入出力されるデータのサンプルを取ります。
-* **EXTEST** はピンの状態を設定し読み取ります。
+* **BYPASS**は、他のチップを経由せずに特定のチップをテストできます。
+* **SAMPLE/PRELOAD**は、デバイスが通常の動作モードにあるときに入出力データのサンプルを取ります。
+* **EXTEST**は、ピンの状態を設定および読み取ります。
 
-また、以下のような他のコマンドもサポートすることができます:
+他のコマンドもサポートできます：
 
-* デバイスを識別するための **IDCODE**
-* デバイスの内部テストのための **INTEST**
+* デバイスを識別するための**IDCODE**
+* デバイスの内部テストのための**INTEST**
 
-これらの命令は、JTAGulator のようなツールを使用するときに遭遇するかもしれません。
+JTAGulatorのようなツールを使用すると、これらの命令に遭遇することがあります。
 
 ## テストアクセスポート
 
-バウンダリスキャンには、コンポーネントに組み込まれた JTAG テストサポート機能への**アクセスを提供する**一般的なポートである四線式の**テストアクセスポート (TAP)** のテストが含まれます。TAP は以下の五つのシグナルを使用します:
+バウンダリスキャンには、コンポーネントに組み込まれた**JTAGテストサポート機能にアクセス**を提供する汎用ポートである**4本のワイヤーテストアクセスポート（TAP）**のテストが含まれます。TAPは次の5つの信号を使用します：
 
-* テストクロック入力 (**TCK**) TCK は、TAP コントローラが単一のアクションを取る頻度（言い換えると、状態マシンの次の状態に移動する）を定義する**クロック**です。
-* テストモード選択 (**TMS**) 入力 TMS は**有限状態マシン**を制御します。クロックの各ビートで、デバイスの JTAG TAP コントローラは TMS ピンの電圧をチェックします。電圧が一定の閾値以下の場合、信号は低いと見なされ 0 と解釈され、電圧が一定の閾値を超えると、信号は高いと見なされ 1 と解釈されます。
-* テストデータ入力 (**TDI**) TDI は、スキャンセルを通じてチップに**データを送る**ピンです。JTAG はこのピン上の通信プロトコルを定義していないため、各ベンダーがこのピン上の通信プロトコルを定義する責任があります。
-* テストデータ出力 (**TDO**) TDO は、チップから**データを送る**ピンです。
-* テストリセット (**TRST**) 入力 オプションの TRST は、有限状態マシンを**既知の良い状態にリセット**します。または、TMS を 5 連続クロックサイクルで 1 に保持すると、TRST ピンがそうであるかのようにリセットを呼び出すため、TRST はオプションです。
+* テストクロック入力（**TCK**）TCKは、TAPコントローラが単一のアクションを取る頻度を定義する**クロック**です（つまり、ステートマシン内の次の状態に移動します）。
+* テストモード選択（**TMS**）入力 TMSは**有限状態マシン**を制御します。クロックのビートごとに、デバイスのJTAG TAPコントローラはTMSピンの電圧をチェックします。電圧がある閾値以下の場合、信号は低いと見なされ、0と解釈されます。一方、電圧がある閾値を超えると、信号は高いと見なされ、1と解釈されます。
+* テストデータ入力（**TDI**）TDIは、スキャンセルを介してチップに**データを送信**するピンです。各ベンダーは、このピンを介した通信プロトコルを定義する責任があります。なぜなら、JTAGはこれを定義していないからです。
+* テストデータ出力（**TDO**）TDOは、チップから**データを送信**するピンです。
+* テストリセット（**TRST**）入力 オプションのTRSTは、有限状態マシンを**既知の正常な状態にリセット**します。代替として、TMSが5つの連続したクロックサイクルで1に保持されている場合、リセットを呼び出し、TRSTピンと同じように動作します。そのため、TRSTはオプションです。
 
-時には、これらのピンが PCB にマークされているのを見つけることができます。他の場合では、**見つける**必要があるかもしれません。
+場合によっては、これらのピンがPCBにマークされていることがあります。他の場合は、**見つける必要がある**かもしれません。
 
-## JTAG ピンの特定
+## JTAGピンの識別
 
-JTAG ポートを検出する最も速いが最も高価な方法は、この目的のために特に作られたデバイスである **JTAGulator** を使用することです（ただし、**UART ピンアウトも検出する**ことができます）。
+JTAGポートを検出する最速で最も高価な方法は、この目的のために作成されたデバイスである**JTAGulator**を使用することです（UARTピン配置も**検出**できます）。
 
-それにはボードのピンに接続できる**24チャンネル**があります。次に、**IDCODE** と **BYPASS** バウンダリスキャンコマンドを送信するすべての可能な組み合わせの**BF攻撃**を実行します。応答を受け取ると、各 JTAG シグナルに対応するチャンネルを表示します。
+**24チャンネル**をボードのピンに接続できます。その後、**IDCODE**および**BYPASS**バウンダリスキャンコマンドを送信するすべての可能な組み合わせのBF攻撃を実行します。応答を受信した場合、各JTAG信号に対応するチャンネルが表示されます。
 
-JTAG ピンアウトを特定する安価だがはるかに遅い方法は、Arduino 互換のマイクロコントローラにロードされた [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) を使用することです。
+JTAGピン配置を特定するより安価でかなり遅い方法は、Arduino互換マイクロコントローラにロードされた[JTAGenum](https://github.com/cyphunk/JTAGenum/)を使用することです。
 
-**JTAGenum** を使用する場合、まず列挙に使用するプロービングデバイスの**ピンを定義**します。デバイスのピンアウト図を参照し、これらのピンをターゲットデバイスのテストポイントに接続する必要があります。
+**JTAGenum**を使用すると、まず、列挙のために使用するプローブデバイスのピンを**定義**する必要があります。デバイスのピン配置図を参照し、これらのピンをターゲットデバイスのテストポイントに接続する必要があります。
 
-JTAG ピンを特定する**第三の方法**は、PCB を検査してピンアウトの一つを探すことです。場合によっては、PCB が便利にも**Tag-Connect インターフェース**を提供していることがあり、これはボードに JTAG コネクタもある明確な兆候です。そのインターフェースがどのようなものかは [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) で見ることができます。さらに、PCB 上のチップセットの**データシート**を検査すると、JTAG インターフェースを指し示すピンアウト図が明らかになることがあります。
+JTAGピンを特定する**3番目の方法**は、PCBを**検査**してピン配置の1つを見つけることです。場合によっては、PCBが**Tag-Connectインターフェース**を提供していることがあり、これはボードにJTAGコネクタがあることを明確に示しています。そのインターフェースの外観は[https://www.tag-connect.com/info/](https://www.tag-connect.com/info/)で確認できます。さらに、PCB上のチップセットの**データシート**を検査すると、JTAGインターフェースを指すピン配置図が明らかになる場合があります。
 
 # SDW
 
-SWD はデバッグ用に設計された ARM 固有のプロトコルです。
+SWDはARM固有のデバッグ用プロトコルです。
 
-SWD インターフェースには**二つのピン**が必要です: 双方向の**SWDIO**信号で、これは JTAG の**TDI と TDO ピンとクロック**に相当し、**SWCLK** は JTAG の **TCK** に相当します。多くのデバイスは、**シリアルワイヤまたは JTAG デバッグポート (SWJ-DP)** をサポートしており、これは JTAG と SWD インターフェースを組み合わせたもので、SWD または JTAG プローブをターゲットに接続することができます。
-
-
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert) を使ってゼロからヒーローになる AWS ハッキングを学ぶ</strong></a><strong>!</strong></summary>
-
-HackTricks をサポートする他の方法:
-
-* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に**参加する**か、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを共有する。
-
-</details>
+SWDインターフェースには**2本のピン**が必要です：双方向の**SWDIO**信号（JTAGの**TDI**および**TDO**ピンに相当）と**クロック**である**SWCLK**（JTAGの**TCK**に相当）。多くのデバイスは、SWDまたはJTAGプローブをターゲットに接続できる**Serial WireまたはJTAGデバッグポート（SWJ-DP）**をサポートしています。

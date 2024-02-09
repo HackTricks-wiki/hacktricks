@@ -6,86 +6,86 @@
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝**したい場合や **HackTricks をPDFでダウンロード**したい場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローする [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
+* **HackTricks で企業を宣伝したい** または **HackTricks を PDF でダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションをご覧ください
+* **💬 [Discord グループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegram グループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローしてください [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
-## 導入
+## はじめに
 
 ### 証明書の構成要素
 
 - 証明書の **Subject** は所有者を示します。
-- **Public Key** は証明書を正当な所有者にリンクするために非公開のキーとペアになります。
-- **NotBefore** および **NotAfter** 日付によって定義される **有効期間** は、証明書の有効期間を示します。
-- 証明書機関（CA）によって提供される一意の **Serial Number** は、各証明書を識別します。
-- **Issuer** は証明書を発行したCAを指します。
-- **SubjectAlternativeName** は、主体の追加名を許可し、識別の柔軟性を向上させます。
-- **Basic Constraints** は、証明書がCA用かエンドエンティティ用かを識別し、使用制限を定義します。
-- **Extended Key Usages (EKUs)** は、コード署名やメール暗号化などの証明書の特定の目的を、オブジェクト識別子（OID）を通じて明確にします。
+- **Public Key** は証明書を正当な所有者にリンクするために、秘密鍵とペアになっています。
+- **有効期間** は、**NotBefore** と **NotAfter** の日付によって定義され、証明書の有効期間を示します。
+- 証明書毎に提供される一意の **Serial Number** は、Certificate Authority（CA）によって識別されます。
+- **Issuer** は証明書を発行した CA を指します。
+- **SubjectAlternativeName** は、サブジェクトの追加名を許可し、識別の柔軟性を向上させます。
+- **Basic Constraints** は、証明書が CA 用かエンドエンティティ用かを識別し、使用制限を定義します。
+- **Extended Key Usages (EKUs)** は、コード署名やメール暗号化などの特定の目的を、Object Identifiers（OIDs）を通じて証明書に明示します。
 - **Signature Algorithm** は、証明書に署名するための方法を指定します。
 - **Signature** は、発行者の秘密鍵で作成され、証明書の信頼性を保証します。
 
 ### 特別な考慮事項
 
-- **Subject Alternative Names (SANs)** は、複数の識別子に証明書を適用するために拡張され、複数のドメインを持つサーバーにとって重要です。SAN仕様を操作する攻撃者によるなりすましリスクを回避するために、安全な発行プロセスが重要です。
+- **Subject Alternative Names (SANs)** は、複数の識別子に証明書を適用するために拡張され、複数のドメインを持つサーバーにとって重要です。SAN 仕様を操作する攻撃者によるなりすましリスクを回避するために、安全な発行プロセスが重要です。
 
 ### Active Directory（AD）の証明書機関（CAs）
 
-AD CS は、ADフォレスト内のCA証明書を指定されたコンテナを介して認識します。各コンテナは固有の役割を果たします:
+AD CS は、AD フォレスト内の CA 証明書を指定されたコンテナを介して認識し、それぞれが固有の役割を果たします:
 
-- **Certification Authorities** コンテナには信頼されたルートCA証明書が保持されます。
-- **Enrolment Services** コンテナにはエンタープライズCAとその証明書テンプレートの詳細が記載されます。
-- **NTAuthCertificates** オブジェクトには、AD認証に認証されたCA証明書が含まれます。
-- **AIA (Authority Information Access)** コンテナは、中間およびクロスCA証明書を使用して証明書チェーンの検証を容易にします。
+- **Certification Authorities** コンテナには信頼されたルート CA 証明書が保持されます。
+- **Enrolment Services** コンテナにはエンタープライズ CA とその証明書テンプレートの詳細が記載されます。
+- **NTAuthCertificates** オブジェクトには、AD 認証に認証された CA 証明書が含まれます。
+- **AIA (Authority Information Access)** コンテナは、中間およびクロス CA 証明書を使用して証明書チェーンの検証を容易にします。
 
 ### 証明書取得: クライアント証明書リクエストフロー
 
-1. リクエストプロセスは、クライアントがエンタープライズCAを見つけることから始まります。
-2. パブリック-プライベートキーペアを生成した後、公開鍵やその他の詳細を含むCSRが作成されます。
-3. CAは、利用可能な証明書テンプレートに対してCSRを評価し、テンプレートの権限に基づいて証明書を発行します。
-4. 承認されると、CAは証明書に自身の秘密鍵で署名し、クライアントに返します。
+1. リクエストプロセスは、クライアントがエンタープライズ CA を見つけることから始まります。
+2. パブリック-プライベートキーペアを生成した後、公開鍵などを含む CSR が作成されます。
+3. CA は CSR を利用可能な証明書テンプレートと照合し、テンプレートの権限に基づいて証明書を発行します。
+4. 承認されると、CA は証明書に自身の秘密鍵で署名し、クライアントに返します。
 
 ### 証明書テンプレート
 
-AD内で定義されるこれらのテンプレートは、証明書の発行に関する設定と権限を概説し、証明書サービスへのアクセスを管理するために重要です。
+AD 内で定義されたこれらのテンプレートは、証明書の発行に関する設定と権限を概説し、証明書サービスへのアクセスを管理するために重要です。
 
 ## 証明書の登録
 
-証明書の登録プロセスは、管理者が **証明書テンプレートを作成** し、それがエンタープライズ証明書機関（CA）によって **公開** されることで開始されます。これにより、テンプレートの名前がActive Directoryオブジェクトの `certificatetemplates` フィールドに追加され、クライアントの登録が可能になります。
+証明書の登録プロセスは、管理者が **証明書テンプレートを作成** し、それがエンタープライズ証明書機関（CA）によって **公開** されることで開始されます。これにより、テンプレートの名前が Active Directory オブジェクトの `certificatetemplates` フィールドに追加され、クライアントの登録が可能になります。
 
-証明書をリクエストするためには、 **登録権限** が付与されている必要があります。これらの権限は、証明書テンプレートとエンタープライズCA自体のセキュリティ記述子で定義されます。リクエストが成功するには、両方の場所で権限が付与されている必要があります。
+証明書をリクエストするためには、 **登録権限** が付与されている必要があります。これらの権限は、証明書テンプレートとエンタープライズ CA 自体のセキュリティ記述子で定義されます。リクエストが成功するには、両方の場所で権限が付与されている必要があります。
 
 ### テンプレートの登録権限
 
-これらの権限は、アクセス制御エントリ（ACE）を介して指定され、次のような権限を詳細に説明します:
-- **Certificate-Enrollment** および **Certificate-AutoEnrollment** 権限は、それぞれ特定のGUIDに関連付けられています。
+これらの権限は、Access Control Entries（ACEs）を介して指定され、次のような権限が詳細に記載されています:
+- **Certificate-Enrollment** および **Certificate-AutoEnrollment** 権限は、それぞれ特定の GUID に関連付けられています。
 - **ExtendedRights** は、すべての拡張権限を許可します。
 - **FullControl/GenericAll** は、テンプレートに対する完全な制御を提供します。
 
-### エンタープライズCAの登録権限
+### エンタープライズ CA の登録権限
 
-CAの権限は、証明書機関管理コンソールからアクセス可能なセキュリティ記述子に記載されています。一部の設定では、低特権ユーザーにリモートアクセスを許可することができ、これはセキュリティ上の懸念となる可能性があります。
+CA の権限は、証明書機関管理コンソールからアクセス可能なセキュリティ記述子に記載されています。一部の設定では、低特権ユーザーにリモートアクセスを許可することができ、これはセキュリティ上の懸念となる可能性があります。
 
 ### 追加の発行コントロール
 
 次のようなコントロールが適用される場合があります:
 - **マネージャー承認**: 証明書マネージャーによる承認までリクエストを保留状態にします。
-- **Enrolment Agents and Authorized Signatures**: CSRに必要な署名の数や必要なApplication Policy OIDsを指定します。
+- **Enrolment Agents および Authorized Signatures**: CSR に必要な署名の数と必要な Application Policy OIDs を指定します。
 
 ### 証明書をリクエストする方法
 
 証明書は、次の方法でリクエストできます:
-1. **Windowsクライアント証明書登録プロトコル**（MS-WCCE）、DCOMインターフェースを使用します。
-2. **ICertPassage Remote Protocol**（MS-ICPR）、名前付きパイプまたはTCP/IPを介して行います。
-3. **証明書登録Webインターフェース**、証明書機関Web登録ロールがインストールされている場合。
+1. **Windows クライアント証明書登録プロトコル**（MS-WCCE）、DCOM インターフェースを使用します。
+2. **ICertPassage リモートプロトコル**（MS-ICPR）、名前付きパイプまたは TCP/IP を介して使用します。
+3. 証明書登録 Web インターフェース、Certificate Authority Web Enrollment ロールがインストールされている場合。
 4. **Certificate Enrollment Service**（CES）と **Certificate Enrollment Policy**（CEP）サービスと共に使用します。
-5. **Network Device Enrollment Service**（NDES）は、Simple Certificate Enrollment Protocol（SCEP）を使用してネットワークデバイス向けに証明書をリクエストします。
+5. ネットワークデバイス向けの **Network Device Enrollment Service**（NDES）、Simple Certificate Enrollment Protocol（SCEP）を使用します。
 
-Windowsユーザーは、GUI（`certmgr.msc` または `certlm.msc`）またはコマンドラインツール（`certreq.exe` または PowerShell の `Get-Certificate` コマンド）を使用して証明書をリクエストすることもできます。
+Windows ユーザーは、GUI（`certmgr.msc` または `certlm.msc`）またはコマンドラインツール（`certreq.exe` または PowerShell の `Get-Certificate` コマンド）を使用して証明書をリクエストすることもできます。
 ```powershell
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
@@ -100,11 +100,11 @@ Kerberos認証プロセスでは、ユーザーのチケット発行チケット
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-信頼を確立するための中心的な役割を果たします。
+証明書認証の信頼を確立するための中心的な役割を果たします。
 
 ### セキュア チャネル (Schannel) 認証
 
-Schannel は安全な TLS/SSL 接続を容易にし、ハンドシェイク中にクライアントが証明書を提示し、成功裏に検証されるとアクセスが許可されます。証明書を AD アカウントにマッピングする際には、Kerberos の **S4U2Self** 関数や証明書の **Subject Alternative Name (SAN)** などの方法が関与する可能性があります。
+Schannel はセキュアな TLS/SSL 接続を容易にし、ハンドシェイク中にクライアントが証明書を提示し、成功裏に検証されるとアクセスが許可されます。証明書を AD アカウントにマッピングする際には、Kerberos の **S4U2Self** 関数や証明書の **Subject Alternative Name (SAN)** などの方法が関与する可能性があります。
 
 ### AD 証明書サービスの列挙
 
@@ -133,12 +133,12 @@ certutil -v -dstemplate
 
 <summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする。
-* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする。
+* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>

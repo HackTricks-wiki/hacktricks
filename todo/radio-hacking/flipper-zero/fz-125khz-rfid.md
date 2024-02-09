@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでのAWSハッキングを学ぶ</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**のGitHubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見る
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私たちをフォローする [**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+- **HackTricks**と**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
 ## イントロ
 
-125kHzタグの動作についての詳細は以下をチェックしてください:
+125kHzタグの動作に関する詳細情報については、以下をチェックしてください：
 
 {% content-ref url="../../../radio-hacking/pentesting-rfid.md" %}
 [pentesting-rfid.md](../../../radio-hacking/pentesting-rfid.md)
@@ -24,40 +24,40 @@ HackTricksをサポートする他の方法:
 
 ## アクション
 
-これらのタグのタイプについての詳細は[**このイントロを読む**](../../../radio-hacking/pentesting-rfid.md#low-frequency-rfid-tags-125khz)。
+これらのタイプのタグに関する詳細情報については、[**このイントロ**](../../../radio-hacking/pentesting-rfid.md#low-frequency-rfid-tags-125khz)を読んでください。
 
-### 読む
+### 読み取り
 
-カード情報を**読み取り**、それを**エミュレート**します。
+カード情報を**読み取り**を試みます。その後、それらを**エミュレート**することができます。
 
 {% hint style="warning" %}
-一部のインターコムは、読み取りの前に書き込みコマンドを送信することで鍵の複製から自身を守ろうとします。書き込みが成功した場合、そのタグは偽物と見なされます。FlipperがRFIDをエミュレートするとき、リーダーはそれをオリジナルと区別する方法がないので、そのような問題は発生しません。
+一部のインターコムは、キーの複製を防ぐために、読み取りの前に書き込みコマンドを送信しようとします。書き込みが成功すると、そのタグは偽物と見なされます。FlipperがRFIDをエミュレートすると、リーダーがオリジナルと区別する方法がないため、そのような問題は発生しません。
 {% endhint %}
 
 ### 手動で追加
 
-手動でデータを指定して**偽のカードをFlipper Zeroで作成**し、それをエミュレートすることができます。
+Flipper Zeroで**データを指定して**偽のカードを作成し、それをエミュレートすることができます。
 
 #### カード上のID
 
-時々、カードを手に入れたときに、そのID（またはその一部）がカードに見える形で書かれていることがあります。
+カードを取得すると、そのID（または一部）がカードに記載されていることがあります。
 
-* **EM Marin**
+- **EM Marin**
 
-例えば、このEM-Marinカードでは、物理カードで**最後の3バイト中の5バイトをクリアに読むことができます**。\
-カードから読むことができない場合、他の2バイトはブルートフォースできます。
+たとえば、このEM-Marinカードでは、物理カードに**最後の5バイトのうち3バイトがクリアで読み取れる**可能性があります。\
+カードから読み取れない場合は、ブルートフォース攻撃で残りの2つを見つけることができます。
 
 <figure><img src="../../../.gitbook/assets/image (30).png" alt=""><figcaption></figcaption></figure>
 
-* **HID**
+- **HID**
 
-このHIDカードでも、カードに印刷されている3バイト中2バイトのみが見つかります
+同様に、このHIDカードでは、カードに印刷された3バイトのうち2バイトしか見つかりません
 
 <figure><img src="../../../.gitbook/assets/image (15) (3).png" alt=""><figcaption></figcaption></figure>
 
 ### エミュレート/書き込み
 
-カードを**コピー**した後、またはIDを**手動で入力**した後、Flipper Zeroでそれを**エミュレート**するか、実際のカードに**書き込む**ことができます。
+カードを**コピー**したり、IDを**手動で入力**した後、Flipper Zeroでそれを**エミュレート**するか、実際のカードに**書き込む**ことができます。
 
 ## 参考文献
 
@@ -65,14 +65,14 @@ HackTricksをサポートする他の方法:
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でゼロからヒーローまでのAWSハッキングを学ぶ</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**のGitHubリポジトリにPRを提出して、あなたのハッキングのコツを共有する。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見る
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私たちをフォローする [**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+- **HackTricks**と**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>

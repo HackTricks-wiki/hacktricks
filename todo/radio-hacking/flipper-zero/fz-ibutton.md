@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
+- **HackTricksで企業を宣伝したい**か**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 **@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローする。
+- **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
 
 </details>
 
 ## イントロ
 
-iButtonについての詳細は以下をチェックしてください:
+iButtonとは何かについての詳細は、以下を参照してください：
 
 {% content-ref url="../ibutton.md" %}
 [ibutton.md](../ibutton.md)
@@ -24,7 +24,7 @@ iButtonについての詳細は以下をチェックしてください:
 
 ## デザイン
 
-以下の画像の**青**部分は、Flipperが実際のiButtonを**読み取る**ために必要な配置です。**緑**部分は、Flipper zeroがiButtonを**正しくエミュレートする**ためにリーダーに触れる必要がある方法です。
+以下の画像の**青い**部分は、Flipperが**それを読むために実際のiButtonを配置する必要がある方法**です。**緑色**の部分は、Flipper zeroが**正しくiButtonをエミュレートするためにリーダーに触れる必要がある方法**です。
 
 <figure><img src="../../../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
 
@@ -32,18 +32,18 @@ iButtonについての詳細は以下をチェックしてください:
 
 ### 読み取り
 
-読み取りモードでは、FlipperはiButtonキーが触れるのを待っており、**Dallas、Cyfral、Metakom**の3種類のキーを消化することができます。Flipperは**自身でキーのタイプを判断します**。キープロトコルの名前は、ID番号の上に画面に表示されます。
+読み取りモードでは、FlipperはiButtonキーが触れるのを待ち、**Dallas、Cyfral、およびMetakom**の3種類のキーを処理できます。Flipperは**キーのタイプを自動的に特定**します。キーのプロトコル名は、ID番号の上に画面に表示されます。
 
 ### 手動で追加
 
-**Dallas、Cyfral、Metakom**タイプのiButtonを**手動で追加**することが可能です。
+**Dallas、Cyfral、およびMetakom**のタイプのiButtonを**手動で追加**することが可能です。
 
-### **エミュレート**
+### エミュレート
 
-保存されたiButton（読み取りまたは手動で追加されたもの）を**エミュレート**することが可能です。
+保存されたiButton（読み取りまたは手動で追加）を**エミュレート**することが可能です。
 
 {% hint style="info" %}
-Flipper Zeroの予想される接点がリーダーに触れない場合は、**外部GPIOを使用することができます:**
+Flipper Zeroの期待されるコンタクトをリーダーに触れさせることができない場合は、**外部GPIOを使用**できます：
 {% endhint %}
 
 <figure><img src="../../../.gitbook/assets/image (24) (1).png" alt=""><figcaption></figcaption></figure>
@@ -54,14 +54,14 @@ Flipper Zeroの予想される接点がリーダーに触れない場合は、**
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有する。
+- **HackTricksで企業を宣伝したい**か**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 **@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローする。
+- **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
 
 </details>

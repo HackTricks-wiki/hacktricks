@@ -6,28 +6,30 @@
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい場合**は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**する
-- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する。
+- **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
 ## 制約付き委任
 
-これを使用すると、ドメイン管理者はコンピュータを特定の**サービス**に対して**ユーザーまたはコンピュータをなりすます**ことを許可できます。
+これを使用すると、ドメイン管理者はコンピューターを特定の**サービス**に対して**ユーザーまたはコンピューターをなりすます**ことを許可できます。
 
-- **ユーザー自身のサービス（**_**S4U2self**_**）：** サービスアカウントが[TRUSTED\_TO\_AUTH\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx)（T2A4D）を含む_userAccountControl_値を持っている場合、他のユーザーを代表して自分自身（サービス）のためにTGSを取得できます。
-- **ユーザーからプロキシへのサービス（**_**S4U2proxy**_**）：** サービスアカウントは、**msDS-AllowedToDelegateTo**に設定されたサービスに対して任意のユーザーのためにTGSを取得できます。これを行うには、まずそのユーザーから自分自身へのTGSが必要ですが、他のTGSを要求する前にS4U2selfを使用してそのTGSを取得できます。
+- **ユーザー自身のサービス（**_**S4U2self**_**）：** サービスアカウントが[TRUSTED\_TO\_AUTH\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx)（T2A4D）を含む_userAccountControl_値を持っている場合、他のユーザーの代わりに自分自身（サービス）のためにTGSを取得できます。
+- **ユーザーからプロキシへのサービス（**_**S4U2proxy**_**）：** サービスアカウントは、**msDS-AllowedToDelegateTo**に設定されたサービスに対して任意のユーザーのためにTGSを取得できます。そのためには、まずそのユーザーから自分自身へのTGSが必要ですが、他のTGSを要求する前にS4U2selfを使用してそのTGSを取得できます。
 
-**注意**：ADでユーザーが「_アカウントは機密であり、委任できません_」とマークされている場合、そのユーザーを**なりすますことはできません**。
+**注意**：ユーザーがADで「_アカウントは機密であり、委任できません_」とマークされている場合、そのユーザーを**なりすます**ことはできません。
 
 これは、サービスのハッシュを**侵害**すると、ユーザーを**なりすまして**、そのユーザーの代わりに**アクセス**を取得できることを意味します（可能な**昇格**）。
 
-さらに、ユーザーがなりすますことができるサービスだけでなく、**SPN**（要求されたサービス名）がチェックされていないため、**任意のサービス**にもアクセスできます。したがって、**CIFSサービス**にアクセスできる場合、Rubeusの`/altservice`フラグを使用して**HOSTサービス**にもアクセスできます。
+さらに、ユーザーがなりすますことができるサービスだけでなく、**任意のサービス**にもアクセスできます。なぜなら、SPN（要求されたサービス名）がチェックされていないため、特権のみがチェックされているからです。したがって、**CIFSサービス**にアクセスできる場合、Rubeusの`/altservice`フラグを使用して**HOSTサービス**にもアクセスできます。
 
-また、**DC上のLDAPサービスへのアクセス**は、**DCSync**を悪用するために必要です。
+また、**DC上のLDAPサービス**へのアクセスは、**DCSync**を悪用するために必要です。
+
+{% code title="列挙" %}
 ```bash
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -60,7 +62,7 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140
 {% endcode %}
 
 {% hint style="warning" %}
-コンピュータ内でSYSTEMにならなくても、**TGTチケット**や**RC4**、**AES256**を取得する他の方法があります。プリンターバグや非制約委任、NTLMリレー、Active Directory証明書サービスの悪用などがあります。
+コンピューター内でSYSTEMにならなくても、**TGTチケット**や**RC4**または**AES256**を取得する**他の方法**があります。プリンターバグや非制約委任、NTLM中継、Active Directory証明書サービスの悪用などがあります。
 
 **TGTチケット（またはハッシュ化されたもの）を持っているだけで、コンピュータ全体を危険にさらすことなくこの攻撃を実行できます。**
 {% endhint %}
@@ -108,7 +110,7 @@ HackTricksをサポートする他の方法:
 * **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**する。
-* **ハッキングトリックを共有するために、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する。**
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する。
+* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>

@@ -2,19 +2,21 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけます。
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れます。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な[NFT](https://opensea.io/collection/the-peass-family)コレクションを発見
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れる
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**私をフォローする** 🐦[@carlospolopm](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
 {% hint style="info" %}
-プログラムが**`scanf`**を使用して**stdinから一度に複数の値を取得**している場合、**`scanf`**の後から開始する状態を生成する必要があります。
+プログラムが`scanf`を使用して**stdinから一度に複数の値を取得**している場合、**`scanf`**の後から開始する状態を生成する必要があります。
 {% endhint %}
+
+[https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)から取得したコード
 
 ### アドレスに到達するための入力（アドレスを示す）
 ```python
@@ -49,7 +51,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### アドレスに到達する入力（プリントを示す）
+### アドレスに到達するための入力（プリントを示す）
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -390,7 +392,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 {% hint style="info" %}
-シンボリックファイルには、シンボリックデータと結合された定数データが含まれている可能性もあることに注意してください：
+シンボリックファイルには、シンボリックデータと結合された定数データが含まれている場合もあることに注意してください：
 ```python
 # Hello world, my name is John.
 # ^                       ^
@@ -416,8 +418,8 @@ main(sys.argv)
 ### 制約の適用
 
 {% hint style="info" %}
-時には、16文字の単語を1文字ずつ比較するような単純な人間の操作は、**angr**にとってコストがかかります。なぜなら、それは1つのifごとに1つのブランチを生成するため、**指数的に**ブランチを生成する必要があるからです：`2^16`\
-そのため、**angrに前のポイントに戻ってもらい**（実際に難しい部分がすでに完了している場所）**その制約を手動で設定する**方が簡単です。
+時には、16文字の単語を1文字ずつ比較するような単純な人間の操作は、**angr**にとってコストがかかります。なぜなら、それは1つのifごとに分岐を生成するため、指数的に分岐を生成する必要があるからです：`2^16`\
+そのため、**angrに前のポイントに戻ってもらい**（実際に難しい部分がすでに完了している場所）**手動でその制約を設定する**方が簡単です。
 {% endhint %}
 ```python
 # After perform some complex poperations to the input the program checks
@@ -490,16 +492,16 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 {% hint style="danger" %}
-いくつかのシナリオでは、**veritesting**をアクティブにすることができ、類似した状態をマージして無駄なブランチを保存し、解決策を見つけることができます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
+いくつかのシナリオでは、**veritesting**をアクティブにすることができます。これにより、類似した状態がマージされ、無駄なブランチを保存して解決策を見つけることができます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 {% endhint %}
 
 {% hint style="info" %}
-これらのシナリオでは、**angrが理解できるように関数をフックする**こともできます。
+これらのシナリオでは、**angrが理解しやすいものを提供するために関数をフックする**こともできます。
 {% endhint %}
 
 ### シミュレーションマネージャ
 
-一部のシミュレーションマネージャは、他のものよりも有用な場合があります。前述の例では、多くの有用なブランチが作成された問題がありました。ここでは、**veritesting**テクニックがそれらをマージし、解決策を見つけます。\
+一部のシミュレーションマネージャは、他のものよりも有用な場合があります。前述の例では、多くの有用なブランチが作成された問題がありました。ここでは、**veritesting**テクニックがこれらをマージし、解決策を見つけます。\
 このシミュレーションマネージャは、次のようにしてアクティブ化することもできます：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -821,12 +823,12 @@ main(sys.argv)
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>からAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**したいですか？または**最新版のPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。当社の独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクション
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)に参加するか、[telegramグループ](https://t.me/peass)に参加するか、または**Twitter**で**私をフォロー**してください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

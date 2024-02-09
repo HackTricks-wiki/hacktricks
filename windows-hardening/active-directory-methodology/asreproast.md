@@ -9,8 +9,8 @@ HackTricksをサポートする他の方法：
 - **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で**@carlospolopm**をフォローする
-- **ハッキングトリックを共有する**には、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする。
+- **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、**ハッキングトリックを共有**してください。
 
 </details>
 
@@ -19,23 +19,23 @@ HackTricksをサポートする他の方法：
 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy)サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取りましょう！
 
 **ハッキングの洞察**\
-ハッキングのスリルと挑戦に深く入り込むコンテンツに参加しましょう
+ハッキングのスリルとチャレンジに深く入り込むコンテンツに参加する
 
 **リアルタイムハックニュース**\
-リアルタイムのニュースと洞察を通じて、ハッキングの世界の速いペースについていきましょう
+リアルタイムのニュースと洞察を通じて、ハッキングの世界の速いペースについていく
 
 **最新の発表**\
-最新のバグバウンティの開始や重要なプラットフォームの更新について情報を得ましょう
+最新のバグバウンティの開始や重要なプラットフォームの更新について情報を得る
 
-**[Discord](https://discord.com/invite/N3FrSbmwdy)**に参加して、今日からトップハッカーと協力しましょう！
+**[Discord](https://discord.com/invite/N3FrSbmwdy)**に参加して、今日からトップハッカーと協力を始めましょう！
 
 ## ASREPRoast
 
-ASREPRoastは、**Kerberos事前認証が必要な属性**を持たないユーザーを標的とするセキュリティ攻撃です。基本的に、この脆弱性により、攻撃者はユーザーのパスワードを必要とせずに、ドメインコントローラー（DC）からユーザーの認証をリクエストできます。その後、DCは、ユーザーのパスワード由来のキーで暗号化されたメッセージで応答し、攻撃者はオフラインでユーザーのパスワードを発見するためにクラックを試みることができます。
+ASREPRoastは、**Kerberos事前認証が必要な属性**を持たないユーザーを標的とするセキュリティ攻撃です。基本的に、この脆弱性により、攻撃者はユーザーのパスワードを必要とせずに、ドメインコントローラー（DC）からユーザーの認証をリクエストできます。その後、DCは、ユーザーのパスワード由来のキーで暗号化されたメッセージで応答し、攻撃者はオフラインでそのユーザーのパスワードを特定するためにクラックを試みることができます。
 
 この攻撃の主な要件は次のとおりです：
-- **Kerberos事前認証の不足**：標的となるユーザーは、このセキュリティ機能が有効になっていない必要があります。
-- **ドメインコントローラー（DC）への接続**：攻撃者は、リクエストを送信し、暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
+- **Kerberos事前認証の不足**：標的ユーザーはこのセキュリティ機能が有効になっていない必要があります。
+- **ドメインコントローラー（DC）への接続**：攻撃者はリクエストを送信し、暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
 - **オプションのドメインアカウント**：ドメインアカウントを持っていると、LDAPクエリを使用して脆弱なユーザーを効率的に特定できます。このようなアカウントがない場合、攻撃者はユーザー名を推測する必要があります。
 
 
@@ -51,9 +51,9 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-#### AS_REP メッセージのリクエスト
+#### AS_REPメッセージのリクエスト
 
-{% code title="Linux を使用する" %}
+{% code title="Linuxを使用する" %}
 ```bash
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
@@ -122,9 +122,9 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 HackTricks をサポートする他の方法:
 
 * **会社を HackTricks で宣伝したい** または **HackTricks を PDF でダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com) を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする
-* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングトリックを共有してください。
+* [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com) を手に入れましょう
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つけましょう
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローしましょう
+* **ハッキングトリックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出してください
 
 </details>

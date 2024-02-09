@@ -1,60 +1,60 @@
-```markdown
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を使って、ゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください。
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* **HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングのコツを共有してください。
+* **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)を入手する
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦で**@carlospolopm**をフォローする。
+
+* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 
-# GUIアプリケーション内で可能なアクションをチェックする
+# GUIアプリケーション内の可能なアクションをチェック
 
-**Common Dialogs**は、**ファイルの保存**、**ファイルの開く**、フォントの選択、色の選択などのオプションです。ほとんどの場合、**完全なExplorer機能を提供します**。これは、これらのオプションにアクセスできる場合、Explorerの機能にアクセスできることを意味します:
+**Common Dialogs**は、**ファイルの保存**、**ファイルの開く**、フォントの選択、色の選択などのオプションです。ほとんどの場合、これらのオプションにアクセスできる場合、**完全なエクスプローラ機能が提供**されます。
 
-* 閉じる/名前を付けて閉じる
-* 開く/開いて実行する
-* 印刷する
+* 閉じる/閉じるとして
+* 開く/開くとして
+* 印刷
 * エクスポート/インポート
 * 検索
 * スキャン
 
-以下のことができるかどうかを確認する必要があります:
+次のことをチェックする必要があります：
 
-* ファイルの変更または新規作成
-* シンボリックリンクの作成
-* 制限されたエリアへのアクセス
-* 他のアプリの実行
+* ファイルを変更または新規作成できるかどうか
+* シンボリックリンクを作成できるか
+* 制限された領域にアクセスできるか
+* 他のアプリを実行できるか
 
 ## コマンド実行
 
-**_**Open with**_** オプション**を使用して、何らかのシェルを開いたり実行したりすることができるかもしれません。
+おそらく**`Open with`**オプションを使用して、いくつかの種類のシェルを開いたり実行したりできるかもしれません。
 
 ### Windows
 
-例えば _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ ここでコマンドを実行するために使用できるバイナリをもっと見つけることができます: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+たとえば、_cmd.exe、command.com、Powershell/Powershell ISE、mmc.exe、at.exe、taskschd.msc..._ ここでコマンドを実行するために使用できる他のバイナリを見つける：[https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 ### \*NIX __
 
-_bash, sh, zsh..._ もっとここで: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash、sh、zsh..._ ここで詳細を確認：[https://gtfobins.github.io/](https://gtfobins.github.io)
 
 # Windows
 
 ## パス制限のバイパス
 
-* **環境変数**: パスを指している多くの環境変数があります
-* **他のプロトコル**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+* **環境変数**：いくつかのパスを指す環境変数がたくさんあります
+* **その他のプロトコル**：_about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 * **シンボリックリンク**
-* **ショートカット**: CTRL+N (新しいセッションを開く), CTRL+R (コマンドを実行する), CTRL+SHIFT+ESC (タスクマネージャー),  Windows+E (エクスプローラーを開く), CTRL-B, CTRL-I (お気に入り), CTRL-H (履歴), CTRL-L, CTRL-O (ファイル/開くダイアログ), CTRL-P (印刷ダイアログ), CTRL-S (名前を付けて保存)
-* 隠された管理メニュー: CTRL-ALT-F8, CTRL-ESC-F9
-* **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-* **UNCパス**: 共有フォルダに接続するためのパス。ローカルマシンのC$に接続しようとする必要があります ("\\\127.0.0.1\c$\Windows\System32")
+* **ショートカット**：CTRL+N（新しいセッションを開く）、CTRL+R（コマンドを実行）、CTRL+SHIFT+ESC（タスクマネージャー）、Windows+E（エクスプローラを開く）、CTRL-B、CTRL-I（お気に入り）、CTRL-H（履歴）、CTRL-L、CTRL-O（ファイル/開くダイアログ）、CTRL-P（印刷ダイアログ）、CTRL-S（名前を付けて保存）
+* 隠し管理メニュー：CTRL-ALT-F8、CTRL-ESC-F9
+* **シェルURI**：_shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
+* **UNCパス**：共有フォルダに接続するパス。ローカルマシンのC$に接続してみるべきです（"\\\127.0.0.1\c$\Windows\System32"）
 * **その他のUNCパス:**
 
 | UNC                       | UNC            | UNC                  |
@@ -71,11 +71,11 @@ _bash, sh, zsh..._ もっとここで: [https://gtfobins.github.io/](https://gtf
 
 ## バイナリのダウンロード
 
-コンソール: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
-エクスプローラー: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-レジストリエディタ: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
+Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
+Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-## ブラウザからファイルシステムにアクセスする
+## ブラウザからファイルシステムにアクセス
 
 | PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
@@ -96,17 +96,17 @@ _bash, sh, zsh..._ もっとここで: [https://gtfobins.github.io/](https://gtf
 * Filter Keys – 右SHIFTを12秒間押し続ける
 * WINDOWS+F1 – Windows検索
 * WINDOWS+D – デスクトップを表示
-* WINDOWS+E – Windowsエクスプローラーを起動
+* WINDOWS+E – Windowsエクスプローラを起動
 * WINDOWS+R – 実行
-* WINDOWS+U – アクセスの容易さセンター
+* WINDOWS+U – 利便性センター
 * WINDOWS+F – 検索
 * SHIFT+F10 – コンテキストメニュー
-* CTRL+SHIFT+ESC – タスクマネージャー
-* CTRL+ALT+DEL – 新しいWindowsバージョンではスプラッシュスクリーン
+* CTRL+SHIFT+ESC – タスクマネージャ
+* CTRL+ALT+DEL – 新しいWindowsバージョンのスプラッシュスクリーン
 * F1 – ヘルプ F3 – 検索
 * F6 – アドレスバー
-* F11 – Internet Explorer内で全画面表示を切り替える
-* CTRL+H – Internet Explorer履歴
+* F11 – Internet Explorer内でのフルスクリーンの切り替え
+* CTRL+H – Internet Explorerの履歴
 * CTRL+T – Internet Explorer – 新しいタブ
 * CTRL+N – Internet Explorer – 新しいページ
 * CTRL+O – ファイルを開く
@@ -114,20 +114,20 @@ _bash, sh, zsh..._ もっとここで: [https://gtfobins.github.io/](https://gtf
 
 ## スワイプ
 
-* 左側から右にスワイプして、全ての開いているWindowsを表示し、KIOSKアプリを最小化してOS全体に直接アクセスする；
-* 右側から左にスワイプしてアクションセンターを開き、KIOSKアプリを最小化してOS全体に直接アクセスする；
-* フルスクリーンモードでアプリを開いているときに、上端からスワイプしてタイトルバーを表示する；
-* フルスクリーンアプリで下からスワイプしてタスクバーを表示する。
+* 左端から右にスワイプしてすべての開いているウィンドウを表示し、KIOSKアプリを最小化してOS全体に直接アクセスする
+* 右端から左にスワイプしてアクションセンターを開き、KIOSKアプリを最小化してOS全体に直接アクセスする
+* 上端からスワイプして、フルスクリーンモードで開いているアプリのタイトルバーを表示する
+* 下端から上にスワイプして、フルスクリーンアプリでタスクバーを表示する
 
-## Internet Explorerのコツ
+## Internet Explorerのトリック
 
 ### 'Image Toolbar'
 
-画像がクリックされたときに画像の左上に表示されるツールバーです。Save、Print、Mailto、Explorerで"My Pictures"を開くことができます。KioskはInternet Explorerを使用している必要があります。
+画像をクリックすると画像の左上に表示されるツールバー。保存、印刷、メール送信、エクスプローラで「マイピクチャー」を開くなどができます。KioskはInternet Explorerを使用している必要があります。
 
-### Shell Protocol
+### シェルプロトコル
 
-Explorerビューを取得するためにこのURLを入力します:
+これらのURLを入力してエクスプローラビューを取得します：
 
 * `shell:Administrative Tools`
 * `shell:DocumentsLibrary`
@@ -151,104 +151,87 @@ Explorerビューを取得するためにこのURLを入力します:
 * `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> マイネットワークプレイス
 * `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-# ブラウザのコツ
+## ファイル拡張子の表示
 
-iKatのバックアップバージョン:
+詳細はこちら：[https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+
+# ブラウザのトリック
+
+iKatのバックアップバージョン：
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
 
-JavaScriptを使用して一般的なダイアログを作成し、ファイルエクスプローラにアクセスする: `document.write('<input/type=file>')`
-出典: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+JavaScriptを使用して共通のダイアログを作成し、ファイルエクスプローラにアクセスする：`document.write('<input/type=file>')`
+出典：https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 # iPad
 
-## ジェスチャーとボトムズ
+## ジェスチャーとボタン
 
-### 四本（または五本）の指で上にスワイプ / ホームボタンをダブルタップ
+* 4本（または5本）の指で上にスワイプ/ホームボタンを2回タップ：マルチタスクビューを表示してアプリを切り替える
 
-マルチタスクビューを表示し、アプリを変更する
+* 4本または5本の指で片方向にスワイプ：次の/前のアプリに切り替える
 
-### 四本または五本の指で片方にスワイプ
+* 5本の指で画面をつまむ/ホームボタンをタッチ/画面下部から上に素早く1本の指でスワイプ：ホームにアクセス
 
-次/前のアプリに変更する
+* 画面下部から1本の指でゆっくり1〜2インチ上にスワイプ：ドックが表示されます
 
-### 五本の指で画面をピンチ / ホームボタンに触れる / 画面の下から一本の指で素早く上にスワイプ
+* 画面上部から1本の指で下にスワイプ：通知を表示
 
-ホームにアクセスする
+* 画面の右上隅から1本の指で下にスワイプ：iPad Proのコントロールセンターを表示
 
-### 画面の下からゆっくりと1-2インチ（約2.5-5cm）一本の指でスワイプ
+* 画面の左端から1本の指で1〜2インチスワイプ：今日のビューを表示
 
-ドックが表示される
+* 画面の中央から右または左に素早く1本の指でスワイプ：次の/前のアプリに切り替える
 
-### 画面の上から一本の指でスワイプ
+* iPadの右上隅にあるOn/**Off**/Sleepボタンを押し続ける + スライドを右まで移動する：電源を切る
 
-通知を表示する
+* iPadの右上隅にあるOn/**Off**/Sleepボタンを数秒押し続ける + ホームボタン：強制的に電源を切る
 
-### 画面の右上隅から一本の指でスワイプ
-
-iPad Proのコントロールセンターを表示する
-
-### 画面の左から一本の指で1-2インチ（約2.5-5cm）スワイプ
-
-Todayビューを表示する
-
-### 画面の中央から一本の指で素早く右または左にスワイプ
-
-次/前のアプリに変更する
-
-### iPadの右上隅にあるOn/**Off**/Sleepボタンを押し続ける + **電源を切る**スライダーを右に全て動かす,
-
-電源を切る
-
-### iPadの右上隅にあるOn/**Off**/Sleepボタンとホームボタンを数秒間押し続ける
-
-強制的に電源を切る
-
-### iPadの右上隅にあるOn/**Off**/Sleepボタンとホームボタンを素早く押す
-
-スクリーンショットを撮り、表示の左下にポップアップします。ボタンを数秒間押し続けると、強制的に電源が切れます。
+* iPadの右上隅にあるOn/**Off**/Sleepボタンとホームボタンを素早く押す：画面左下にポップアップするスクリーンショットを撮る。両方のボタンを同時に非常に短く押すと、数秒間押し続けるかのように、強制的に電源が切れます。
 
 ## ショートカット
 
-iPadのキーボードまたはUSBキーボードアダプタが必要です。ここでは、アプリケーションからの脱出に役立つ可能性のあるショートカットのみを示します。
+iPadキーボードまたはUSBキーボードアダプターを持っている必要があります。アプリケーションから脱出するのに役立つショートカットのみがここに表示されます。
 
 | キー | 名前         |
 | --- | ------------ |
-| ⌘   | コマンド      |
-| ⌥   | オプション (Alt) |
-| ⇧   | シフト        |
-| ↩   | リターン       |
-| ⇥   | タブ          |
-| ^   | コントロール      |
-| ←   | 左矢印   |
-| →   | 右矢印  |
-| ↑   | 上矢印     |
-| ↓   | 下矢印   |
+| ⌘   | Command      |
+| ⌥   | Option (Alt) |
+| ⇧   | Shift        |
+| ↩   | Return       |
+| ⇥   | Tab          |
+| ^   | Control      |
+| ←   | Left Arrow   |
+| →   | Right Arrow  |
+| ↑   | Up Arrow     |
+| ↓   | Down Arrow   |
 
 ### システムショートカット
 
-これらのショートカットは、iPadの使用に応じて視覚設定と音設定のためのものです。
+これらのショートカットは、iPadの視覚設定や音声設定に依存します。
 
 | ショートカット | アクション                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
 | F1       | 画面を暗くする                                                                    |
 | F2       | 画面を明るくする                                                                |
-| F7       | 一曲戻る                                                                  |
+| F7       | 前の曲に戻る                                                                  |
 | F8       | 再生/一時停止                                                                     |
-| F9       | 曲をスキップ                                                                      |
+| F9       | 次の曲にスキップ                                                                      |
 | F10      | ミュート                                                                           |
 | F11      | 音量を下げる                                                                |
 | F12      | 音量を上げる                                                                |
-| ⌘ Space  | 使用可能な言語のリストを表示する; 選択するには、もう一度スペースバーをタップします。 |
+| ⌘ Space  | 利用可能な言語のリストを表示します。選択するには、再度スペースバーをタップします。 |
 
 ### iPadナビゲーション
 
 | ショートカット                                           | アクション                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | ホームに行く                                              |
-| ⌘⇧H (Command-Shift-H)                              | ホームに行く                                              |
+| ⌘H                                                 | ホームに移動                                              |
+| ⌘⇧H (Command-Shift-H)                              | ホームに移動                                              |
 | ⌘ (Space)                                          | Spotlightを開く                                          |
-| ⌘⇥ (Command-Tab)                                   | 最後に使用した10個のアプリをリストする                                 |
-| ⌘\~                                                | 最後のアプリに行く                                       |
-| ⌘⇧3 (Command-Shift-3)                              | スクリーンショット (保存またはアクションを行
+| ⌘⇥ (Command-Tab)                                   | 最後に使用した10個のアプリをリスト表示する                                 |
+| ⌘\~                                                | 最後のアプリに移動                                       |
+| ⌘⇧3 (Command-Shift-3)                              | スクリーンショット（左下にホバーして保存または操作） |
+| ⌘
