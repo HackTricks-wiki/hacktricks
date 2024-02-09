@@ -2,19 +2,19 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
 ## 影響
 
-特権付きコンテナを実行すると、次の保護が無効になります：
+特権付きコンテナとしてコンテナを実行すると、次の保護が無効になります：
 
 ### /dev をマウント
 
@@ -82,7 +82,7 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
 ```
-### Linuxの機能
+### Linux capabilities
 
 コンテナエンジンは、コンテナを**デフォルトで内部で何が起こるかを制御するために、**制限された数の機能**で起動します。**特権**を持つものは、**すべて**の**機能**にアクセスできます。機能について学ぶには、以下を参照してください：
 
@@ -148,7 +148,7 @@ Seccomp_filters:	0
 
 ### AppArmor
 
-**AppArmor**は、**プログラムごとのプロファイル**を使用して**コンテナ**を**限られた**リソースセットに制限するためのカーネルの拡張機能です。`--privileged`フラグで実行すると、この保護が無効になります。
+**AppArmor**は、**プログラムごとのプロファイル**を使用して**コンテナ**を**限られた**リソースに制限するためのカーネルの拡張機能です。`--privileged`フラグを使用して実行すると、この保護が無効になります。
 
 {% content-ref url="apparmor.md" %}
 [apparmor.md](apparmor.md)
@@ -159,7 +159,7 @@ Seccomp_filters:	0
 ```
 ### SELinux
 
-`--privileged` フラグを使用してコンテナを実行すると、**SELinux ラベル**が無効になり、通常 `unconfined` であるコンテナエンジンのラベルを継承し、コンテナエンジンと同様の完全アクセス権限が付与されます。ルートレスモードでは `container_runtime_t` を使用し、ルートモードでは `spc_t` が適用されます。
+`--privileged` フラグを使用してコンテナを実行すると、**SELinux ラベル**が無効になり、通常 `unconfined` のようなコンテナエンジンのラベルを継承し、コンテナエンジンと同様の完全アクセスが付与されます。ルートレスモードでは `container_runtime_t` を使用し、ルートモードでは `spc_t` が適用されます。
 
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
@@ -185,7 +185,7 @@ PID   USER     TIME  COMMAND
 ```
 {% endtab %}
 
-{% tab title="ホストの--pid=hostコンテナ内部" %}
+{% tab title="ホスト内 --pid=host コンテナ" %}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef
@@ -195,6 +195,9 @@ PID   USER     TIME  COMMAND
 3 root      0:00 [rcu_gp]ount | grep /proc.*tmpfs
 [...]
 ```
+{% endtab %}
+{% endtabs %}
+
 ### ユーザー名前空間
 
 **デフォルトでは、コンテナエンジンはユーザー名前空間を利用しません。ただし、ルートレスコンテナでは、ファイルシステムのマウントや複数のUIDの使用に必要とされるため、ユーザー名前空間が使用されます。** ルートレスコンテナには不可欠であり、特権を制限することでセキュリティを大幅に向上させます。
@@ -202,3 +205,15 @@ PID   USER     TIME  COMMAND
 ## 参考文献
 
 * [https://www.redhat.com/sysadmin/privileged-flag-container-engines](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
+
+<details>
+
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使って、ゼロからヒーローまでAWSハッキングを学びましょう！</summary>
+
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけましょう
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+
+</details>

@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で企業を宣伝**したいですか？または **最新版の PEASS にアクセスしたり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つけてください
-* [**公式 PEASS & HackTricks スウェグ**](https://peass.creator-spring.com) を手に入れましょう
-* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)** をフォロー**してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で企業を宣伝**してみたいですか？または **最新バージョンの PEASS にアクセスしたり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見しましょう。独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションです。
+* [**公式 PEASS & HackTricks スワッグ**](https://peass.creator-spring.com) を手に入れましょう。
+* **💬** [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live) **をフォロー**してください。
 * **ハッキングテクニックを共有するには、** [**hacktricks リポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud リポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **に PR を提出してください。**
 
 </details>
 
 ## アクセス トークン
 
-**システムにログインした各ユーザーは、そのログオンセッションのセキュリティ情報を持つアクセス トークンを保持**しています。ユーザーがログオンすると、システムはアクセス トークンを作成します。**ユーザーの代理で実行されるすべてのプロセスには、アクセス トークンのコピーがあります**。トークンには、ユーザー、ユーザーのグループ、およびユーザーの特権を識別する情報が含まれます。また、トークンには、現在のログオンセッションを識別するログオン SID（セキュリティ識別子）も含まれています。
+**システムにログインした各ユーザーは、そのログオンセッションのセキュリティ情報を持つアクセス トークンを保持**しています。ユーザーがログオンすると、システムはアクセス トークンを作成します。**ユーザーの代理で実行されるすべてのプロセスには、アクセス トークンのコピーがあります**。トークンには、ユーザー、ユーザーのグループ、およびユーザーの特権を識別する情報が含まれています。また、トークンには、現在のログオンセッションを識別するログオン SID（セキュリティ識別子）も含まれています。
 
-この情報は、`whoami /all` を実行することで確認できます。
+この情報は `whoami /all` を実行して確認できます。
 ```
 whoami /all
 
@@ -60,14 +60,18 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
+または、Sysinternalsの_Process Explorer_を使用する（プロセスを選択して"Security"タブにアクセス）：
+
+![](<../../.gitbook/assets/image (321).png>)
+
 ### ローカル管理者
 
-ローカル管理者がログインすると、**2つのアクセス トークン**が作成されます: 管理者権限を持つものと通常の権限を持つもの。**デフォルトでは**、このユーザーがプロセスを実行するときには**通常の**（管理者でない）**権限が使用されます**。このユーザーが管理者として何かを実行しようとすると（たとえば、「管理者として実行」）、**UAC**が許可を求めるために使用されます。\
-[**UAC について詳しく学びたい場合は、このページを読んでください**](../authentication-credentials-uac-and-efs.md#uac)**。**
+ローカル管理者がログインすると、**2つのアクセス トークンが作成**されます：1つは管理者権限を持ち、もう1つは通常の権限を持ちます。**デフォルトでは**、このユーザーがプロセスを実行するときは、**通常**（管理者でない）**権限を使用**します。このユーザーが管理者として何かを**実行**しようとすると（たとえば"管理者として実行"を選択すると）、**UAC**が許可を求めるために使用されます。\
+[UACについて詳しく知りたい場合は、[このページを読んでください](../authentication-credentials-uac-and-efs.md#uac)**。
 
 ### 資格情報ユーザーの偽装
 
-他のユーザーの**有効な資格情報**を持っている場合、それらの資格情報で**新しいログオン セッション**を**作成**できます:
+他のユーザーの**有効な資格情報**を持っている場合、それらの資格情報で**新しいログオン セッションを作成**できます：
 ```
 runas /user:domain\username cmd.exe
 ```
@@ -76,27 +80,25 @@ runas /user:domain\username cmd.exe
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-これは、ネットワーク内のオブジェクトにアクセスするための有用な資格情報を持っている場合に役立ちますが、これらの資格情報はネットワーク内でのみ使用されるため、現在のホスト内では有効ではありません（現在のホストでは現在のユーザー権限が使用されます）。
-
 ### トークンの種類
 
-利用可能なトークンには2種類あります：
+利用可能な2種類のトークンがあります：
 
-* **プライマリトークン**：プロセスのセキュリティ資格情報の表現として機能します。プライマリトークンの作成とプロセスへの関連付けは、特権の分離の原則を強調するために昇格された特権を必要とするアクションです。通常、認証サービスがトークンの作成を担当し、ログオンサービスがユーザーのオペレーティングシステムシェルとの関連付けを処理します。プロセスは、作成時に親プロセスのプライマリトークンを継承します。
+- **プライマリトークン**：プロセスのセキュリティ資格情報の表現として機能します。プライマリトークンの作成とプロセスへの関連付けは昇格された特権を必要とするアクションであり、特権の分離の原則を強調しています。通常、認証サービスがトークンの作成を担当し、ログオンサービスがユーザーのオペレーティングシステムシェルとの関連付けを処理します。プロセスは作成時に親プロセスのプライマリトークンを継承することに注意する価値があります。
 
-* **模倣トークン**：サーバーアプリケーションが一時的にクライアントのアイデンティティを採用してセキュアオブジェクトにアクセスするための権限を与えます。このメカニズムは、次の4つの操作レベルに分層されます：
-- **匿名**：未識別のユーザーと同様のサーバーアクセスを許可します。
-- **識別**：オブジェクトアクセスに使用せずにクライアントのアイデンティティをサーバーが確認できるようにします。
-- **模倣**：サーバーがクライアントのアイデンティティの下で操作できるようにします。
-- **委任**：模倣に似ていますが、このアイデンティティの仮定をサーバーが対話するリモートシステムに拡張できる能力を含み、資格情報の保持を確保します。
+- **模倣トークン**：サーバーアプリケーションが一時的にクライアントのアイデンティティを採用して安全なオブジェクトにアクセスするための権限を与えます。このメカニズムは、次の4つの操作レベルに分類されます：
+  - **匿名**：未識別のユーザーと同様のサーバーアクセスを許可します。
+  - **識別**：オブジェクトアクセスに使用せずにクライアントのアイデンティティをサーバーが検証できるようにします。
+  - **模倣**：サーバーがクライアントのアイデンティティの下で操作できるようにします。
+  - **委任**：模倣に似ていますが、サーバーが対話するリモートシステムにこのアイデンティティの仮定を拡張できる能力を含み、資格情報の保持を確保します。
 
 #### トークンの模倣
 
-十分な特権がある場合、metasploitの_incognito_モジュールを使用して他の**トークン**を簡単に**リスト**および**模倣**することができます。これは、**他のユーザーであるかのようにアクションを実行**したり、このテクニックを使用して**特権を昇格**させるのに役立つ場合があります。
+十分な特権を持っている場合、metasploitの**incognito**モジュールを使用して他の**トークン**を簡単に**リスト**および**模倣**することができます。これは**他のユーザーとして操作を行う**のに役立つ場合があります。このテクニックを使用して**特権を昇格**することもできます。
 
 ### トークン特権
 
-**特権を昇格させるために悪用できる**トークン特権を学びます：
+**特権を昇格させるために悪用できるトークン特権**を学びます：
 
 {% content-ref url="privilege-escalation-abusing-tokens/" %}
 [privilege-escalation-abusing-tokens](privilege-escalation-abusing-tokens/)

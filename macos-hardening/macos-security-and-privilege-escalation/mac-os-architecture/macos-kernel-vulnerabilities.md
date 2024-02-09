@@ -1,30 +1,30 @@
-# macOSカーネルの脆弱性
+# macOS カーネルの脆弱性
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live).
-* **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**したいですか？ または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をご覧ください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をチェックして、[**NFTs**](https://opensea.io/collection/the-peass-family)の独占コレクションを発見しましょう。
+* [**公式PEASSとHackTricksのスウォッグ**](https://peass.creator-spring.com)を入手しましょう。
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローしてください。
+* **[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)**と**[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを送信して、ハッキングのヒントを共有してください。
 
 </details>
 
 ## [OTAの乗っ取り](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-[**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)では、ソフトウェアアップデータを侵害することでカーネルを侵害することが可能になるいくつかの脆弱性が説明されています。\
+[**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)では、ソフトウェアアップデーターを侵害することでカーネルを侵害することを可能にしたいくつかの脆弱性が説明されています。\
 [**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live).
-* **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**したいですか？ または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をご覧ください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をチェックして、[**NFTs**](https://opensea.io/collection/the-peass-family)の独占コレクションを発見しましょう。
+* [**公式PEASSとHackTricksのスウォッグ**](https://peass.creator-spring.com)を入手しましょう。
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローしてください。
+* **[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)**と**[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを送信して、ハッキングのヒントを共有してください。
 
 </details>

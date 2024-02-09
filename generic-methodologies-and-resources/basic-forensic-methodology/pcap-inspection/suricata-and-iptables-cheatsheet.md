@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で企業を宣伝**してみたいですか？または、**PEASS の最新バージョンを入手したり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションをご覧ください
-* [**公式 PEASS & HackTricks スウェグ**](https://peass.creator-spring.com) を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discord グループ**に**参加**するか、[**telegram グループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)** をフォロー**してください。
-* **ハッキングトリックを共有するために、[hacktricks リポジトリ](https://github.com/carlospolop/hacktricks) と [hacktricks-cloud リポジトリ](https://github.com/carlospolop/hacktricks-cloud)** に PR を提出してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけてください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
@@ -16,11 +16,11 @@
 
 ### チェーン
 
-iptables では、チェーンとして知られるルールのリストが順次処理されます。これらの中で、3 つの主要なチェーンが普遍的に存在し、システムの機能に応じて NAT のような追加のチェーンがサポートされることがあります。
+iptablesでは、チェーンとして知られるルールのリストが順次処理されます。これらの中で、3つの主要なチェーンが普遍的に存在し、システムの機能に応じてNATなどの追加のチェーンがサポートされる場合があります。
 
-- **Input チェーン**：着信接続の動作を管理するために使用されます。
-- **Forward チェーン**：ローカルシステムに向けられていない着信接続を処理するために使用されます。これは、データが別の宛先に転送されることを意味するデバイスがルーターとして機能する場合に一般的です。このチェーンは、システムがルーティング、NAT、または類似のアクティビティに関与している場合に主に関連します。
-- **Output チェーン**：送信接続の規制に専念しています。
+- **Input Chain**: 受信接続の動作を管理するために使用されます。
+- **Forward Chain**: ローカルシステムに向けられていない受信接続を処理するために使用されます。これは、データが別の宛先に転送されることを意味するデバイスがルーターとして機能する場合に一般的です。このチェーンは、システムがルーティング、NAT、または類似のアクティビティに関与している場合に主に関連します。
+- **Output Chain**: 送信接続の規制に専念します。
 
 これらのチェーンは、ネットワークトラフィックの整然な処理を確保し、システムにデータの流れを詳細に規定するルールを指定することを可能にします。
 ```bash
@@ -131,8 +131,8 @@ systemctl daemon-reload
 
 [ドキュメントから：](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) ルール/シグネチャは以下で構成されます：
 
-* **アクション**：シグネチャが一致したときの動作を決定します。
-* **ヘッダー**：ルールのプロトコル、IPアドレス、ポート、および方向を定義します。
+* **アクション**：シグネチャが一致したときに何が起こるかを決定します。
+* **ヘッダー**：プロトコル、IPアドレス、ポート、およびルールの方向を定義します。
 * **ルールオプション**：ルールの具体的な内容を定義します。
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
@@ -153,17 +153,17 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 * udp
 * icmp
 * ip (ipは 'all' または 'any' を表す)
-* _layer7プロトコル_: http, ftp, tls, smb, dns, ssh... (詳細は[**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)を参照)
+* _layer7プロトコル_: http、ftp、tls、smb、dns、ssh... (詳細は[**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)を参照)
 
 #### 送信元および宛先アドレス
 
 IP範囲、否定、アドレスのリストをサポートしています:
 
-| 例                           | 意味                                  |
+| 例                            | 意味                                  |
 | ------------------------------ | ---------------------------------------- |
 | ! 1.1.1.1                      | 1.1.1.1以外のすべてのIPアドレス             |
 | !\[1.1.1.1, 1.1.1.2]           | 1.1.1.1および1.1.1.2以外のすべてのIPアドレス |
-| $HOME\_NET                     | yamlでのHOME\_NETの設定        |
+| $HOME\_NET                     | yamlでのHOME\_NETの設定                |
 | \[$EXTERNAL\_NET, !$HOME\_NET] | EXTERNAL\_NETおよびHOME\_NET以外          |
 | \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24、ただし10.0.0.5を除く          |
 
@@ -176,21 +176,21 @@ IP範囲、否定、アドレスのリストをサポートしています:
 | any             | 任意のアドレス                            |
 | \[80, 81, 82]   | ポート80、81、82                     |
 | \[80: 82]       | 80から82までの範囲                  |
-| \[1024: ]       | 1024から最も高いポート番号まで |
-| !80             | ポート80以外のすべてのポート                      |
-| \[80:100,!99]   | 80から100までの範囲、ただし99を除く |
-| \[1:80,!\[2,4]] | 1から80までの範囲、ただしポート2および4を除く  |
+| \[1024: ]       | 1024から最も高いポート番号まで       |
+| !80             | ポート80以外のすべてのポート                |
+| \[80:100,!99]   | 80から100までの範囲、ただし99は除外される |
+| \[1:80,!\[2,4]] | 1から80までの範囲、ただしポート2および4は除外される |
 
 #### 方向
 
-適用される通信ルールの方向を示すことが可能です:
+適用される通信ルールの方向を示すことができます:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### キーワード
 
-Suricataには**数百のオプション**があり、探している**特定のパケット**を検索するためのオプションがたくさんあります。ここでは、興味深いものが見つかった場合に言及されます。詳細については、[**ドキュメント**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)をチェックしてください！
+Suricataには**数百のオプション**があり、探している**特定のパケット**を検索するためのオプションがたくさんあります。興味深いものが見つかった場合はここに記載されます。詳細は[**ドキュメント**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)を参照してください！
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -233,12 +233,12 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 * **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

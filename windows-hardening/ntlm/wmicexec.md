@@ -2,23 +2,23 @@
 
 <details>
 
-<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
 * **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
-* **💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする。
-* **ハッキングトリックを共有するために PR を送信して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに貢献する。
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローする。
+* **ハッキングトリックを共有するために PR を提出して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに。
 
 </details>
 
 ## 動作の説明
 
-ユーザー名とパスワードまたはハッシュがわかっているホストでプロセスを開くことができます。WMI を使用してコマンドを実行し、Wmiexec によって半インタラクティブなシェル体験を提供します。
+ユーザー名とパスワードまたはハッシュがわかっているホストでプロセスを開くことができます。WMI を使用してコマンドを実行することで、Wmiexec によって半インタラクティブなシェル体験が提供されます。
 
-**dcomexec.py:** 異なる DCOM エンドポイントを利用して、このスクリプトは Wmiexec.py に似た半インタラクティブなシェルを提供し、特に ShellBrowserWindow DCOM オブジェクトを活用しています。現在、MMC20. Application、Shell Windows、および Shell Browser Window オブジェクトをサポートしています。（出典: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)）
+**dcomexec.py:** 異なる DCOM エンドポイントを利用し、このスクリプトは wmiexec.py に似た半インタラクティブなシェルを提供します。具体的には、ShellBrowserWindow DCOM オブジェクトを活用しています。現在、MMC20、Application、Shell Windows、Shell Browser Window オブジェクトをサポートしています。（出典: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)）
 
 ## WMI の基礎
 
@@ -99,7 +99,7 @@ wmic sysaccount list /format:list
 ```
 ### **手動リモートWMIクエリ**
 
-特定の情報（例：ローカル管理者またはログオンユーザー）を取得するために、慎重なコマンド構築を行うことで、リモートでWMIをクエリすることが可能です。
+特定の情報（例：ローカル管理者またはログオンユーザー）を取得するために、慎重なコマンド構築を行うことで、リモートWMIのクエリが可能です。
 
 リモートマシン上でのローカル管理者のステルス識別やログオンユーザーの特定は、特定のWMIクエリを使用して達成できます。`wmic`は、複数のノードでコマンドを同時に実行するために、テキストファイルから読み取ることもサポートしています。
 
@@ -107,7 +107,7 @@ Empireエージェントを展開するなど、WMIを介してプロセスを�
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-このプロセスは、WMIのリモート実行およびシステム列挙の機能を示し、システム管理およびペネトレーションテストの両方における有用性を強調しています。
+このプロセスは、WMIのリモート実行およびシステム列挙の機能を示し、システム管理およびペネトレーションテストの両方での有用性を強調しています。
 
 
 ## 参考文献
@@ -130,9 +130,7 @@ SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 HackTricksをサポートする他の方法：
 
 * **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私をフォローする [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
-
-</details>
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で**@carlospolopm**をフォローする
+* **ハッキングトリックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する**

@@ -1,24 +1,24 @@
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>でAWSハッキングをゼロからヒーローまで学ぶ！</strong></summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加し、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォロー** してください。
-* **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する。
+- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
 
-以下のコードは、**SeDebugとSeImpersonate権限を悪用**して、**SYSTEMとして実行されているプロセス**から**すべてのトークン権限**をコピーします。\
-このコードは、**Windowsサービスバイナリとしてコンパイルおよび使用**できます。\
-ただし、**昇格が発生するコードの主要部分**は、**`Exploit`** **関数の内部**にあります。\
-その関数の内部では、**プロセス **_**lsass.exe**_** が検索**され、その**トークンがコピー**され、最後にそのトークンを使用して、コピーされたトークンのすべての権限を持つ新しい _**cmd.exe**_ を生成することができます。
+以下のコードは、**SeDebugとSeImpersonateの特権を悪用**して、**SYSTEMとして実行されているプロセス**から**すべてのトークン特権**をコピーします。\
+このコードは、**Windowsサービスバイナリとしてコンパイルおよび使用**できることができます。\
+ただし、**昇格が発生するコードの主要部分**は**`Exploit`** **関数の内部にあります**。\
+その関数の内部では、**プロセス **_**lsass.exe**_** が検索**され、その**トークンがコピー**され、最後にそのトークンを使用して、コピーされたトークンのすべての特権を持つ新しい _**cmd.exe**_ が生成されます。
 
-**SYSTEMとして実行されている他のプロセス**で、すべてまたはほとんどのトークン権限を持つものには、**services.exe**、**svhost.exe**（最初のいくつかのプロセスの1つ）、**wininit.exe**、**csrss.exe** などがあります（_保護されたプロセスからトークンをコピーすることはできないことを覚えておいてください_）。さらに、管理者として実行されている [Process Hacker](https://processhacker.sourceforge.io/downloads.php) ツールを使用して、プロセスのトークンを表示することができます。
+**SYSTEMとして実行されている他のプロセス**で、すべてまたはほとんどのトークン特権を持つものには、**services.exe**、**svhost.exe**（最初のいくつかのプロセスの1つ）、**wininit.exe**、**csrss.exe**などがあります（_保護されたプロセスからトークンをコピーすることはできないことを覚えておいてください_）。さらに、管理者として実行されているツール[Process Hacker](https://processhacker.sourceforge.io/downloads.php)を使用して、プロセスのトークンを表示することができます。
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -227,12 +227,12 @@ return 0;
 
 <summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする
-* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する。
+- **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、**あなたのハッキングテクニックを共有**してください。
 
 </details>

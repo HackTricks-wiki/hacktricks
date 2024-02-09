@@ -2,24 +2,24 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
 * **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) をフォローする**
-* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローする**
+* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github リポジトリに提出する
 
 </details>
 
-**これは、[https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)** からの素晴らしいリサーチの盗難章の小さな要約です。
+**これは、[https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)** からの素晴らしいリサーチの盗難章の小さな要約です
 
 
 ## 証明書で何ができるか
 
-証明書を盗む方法を確認する前に、証明書がどのように有用かを見つける方法についての情報があります:
+証明書を盗む方法を確認する前に、証明書がどのように役立つかについての情報があります:
 ```powershell
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -31,33 +31,33 @@ $Cert.EnhancedKeyUsageList
 # cmd
 certutil.exe -dump -v cert.pfx
 ```
-## Crypto APIを使用して証明書をエクスポート – THEFT1
+## Crypto APIを使用した証明書のエクスポート – THEFT1
 
-**インタラクティブなデスクトップセッション** では、**プライベートキーがエクスポート可能** であれば、ユーザーまたはマシン証明書とプライベートキーを簡単に抽出できます。これは、`certmgr.msc` で証明書に移動し、右クリックして `All Tasks → Export` を選択して、パスワードで保護された .pfx ファイルを生成することで実現できます。
+**インタラクティブなデスクトップセッション**において、ユーザーまたはマシン証明書とそれに関連する秘密鍵を抽出することは、特に**秘密鍵がエクスポート可能**である場合、簡単に行うことができます。これは、`certmgr.msc`で証明書に移動し、右クリックして`すべてのタスク → エクスポート`を選択して、パスワードで保護された.pfxファイルを生成することで達成できます。
 
-**プログラムによるアプローチ** では、PowerShell の `ExportPfxCertificate` コマンドレットや [TheWover’s CertStealer C# プロジェクト](https://github.com/TheWover/CertStealer) のようなツールが利用可能です。これらは、**Microsoft CryptoAPI** (CAPI) や Cryptography API: Next Generation (CNG) を使用して証明書ストアとやり取りします。これらのAPIは、証明書の保存と認証に必要な暗号化サービスを提供します。
+**プログラマティックなアプローチ**では、PowerShellの`ExportPfxCertificate`コマンドレットや[TheWoverのCertStealer C#プロジェクト](https://github.com/TheWover/CertStealer)などのツールが利用可能です。これらは、**Microsoft CryptoAPI**（CAPI）またはCryptography API: Next Generation（CNG）を使用して証明書ストアとやり取りします。これらのAPIは、証明書の保存と認証に必要な暗号化サービスを提供します。
 
-ただし、プライベートキーがエクスポート不可能に設定されている場合、CAPI と CNG は通常、そのような証明書の抽出をブロックします。この制限をバイパスするために、**Mimikatz** のようなツールを使用できます。Mimikatz は、`crypto::capi` および `crypto::cng` コマンドを提供し、それぞれのAPIをパッチしてプライベートキーのエクスポートを可能にします。具体的には、`crypto::capi` は現在のプロセス内のCAPIをパッチし、`crypto::cng` はパッチのために **lsass.exe** のメモリを対象とします。
+ただし、秘密鍵がエクスポート不可能に設定されている場合、CAPIとCNGの両方は通常、そのような証明書の抽出をブロックします。この制限をバイパスするために、**Mimikatz**などのツールを使用することができます。Mimikatzは、該当するAPIをパッチする`crypto::capi`および`crypto::cng`コマンドを提供し、秘密鍵のエクスポートを可能にします。具体的には、`crypto::capi`は現在のプロセス内のCAPIをパッチし、`crypto::cng`は**lsass.exe**のメモリを対象にパッチします。
 
 ## DPAPIを介したユーザー証明書の盗難 – THEFT2
 
-DPAPIに関する詳細情報は以下を参照:
+DPAPIに関する詳細情報は以下を参照：
 
 {% content-ref url="../../windows-local-privilege-escalation/dpapi-extracting-passwords.md" %}
 [dpapi-extracting-passwords.md](../../windows-local-privilege-escalation/dpapi-extracting-passwords.md)
 {% endcontent-ref %}
 
-Windowsでは、**証明書のプライベートキーはDPAPIによって保護**されています。**ユーザーおよびマシンのプライベートキーの保存場所** が異なること、およびファイル構造がオペレーティングシステムで使用される暗号化APIによって異なることを認識することが重要です。**SharpDPAPI** は、DPAPIブロブを復号化する際にこれらの違いを自動的に調整するツールです。
+Windowsでは、**証明書の秘密鍵はDPAPIによって保護**されています。**ユーザーおよびマシンの秘密鍵の保存場所**が異なり、ファイル構造もオペレーティングシステムが利用する暗号化APIによって異なります。**SharpDPAPI**は、DPAPIブロブを復号化する際にこれらの違いを自動的に認識できるツールです。
 
-**ユーザー証明書** は主に、`HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates` のレジストリ内に格納されていますが、一部は `%APPDATA%\Microsoft\SystemCertificates\My\Certificates` ディレクトリにも見つかることがあります。これらの証明書に対応する **プライベートキー** は、**CAPI** キーの場合は通常 `%APPDATA%\Microsoft\Crypto\RSA\User SID\` に、**CNG** キーの場合は `%APPDATA%\Microsoft\Crypto\Keys\` に保存されます。
+**ユーザー証明書**は主にレジストリ内の`HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`に格納されていますが、一部は`%APPDATA%\Microsoft\SystemCertificates\My\Certificates`ディレクトリにも見つかることがあります。これらの証明書に対応する**秘密鍵**は、**CAPI**キーの場合は通常`%APPDATA%\Microsoft\Crypto\RSA\User SID\`に、**CNG**キーの場合は`%APPDATA%\Microsoft\Crypto\Keys\`に保存されます。
 
-証明書とそれに関連するプライベートキーを **抽出する** ためには、以下の手順が必要です:
+証明書とそれに関連する秘密鍵を**抽出する**ためのプロセスは次のとおりです：
 
-1. ユーザーのストアから **対象の証明書を選択** し、そのキーストア名を取得します。
-2. 対応するプライベートキーを復号化するために **必要なDPAPIマスターキーを特定** します。
-3. 平文のDPAPIマスターキーを利用して、プライベートキーを **復号化** します。
+1. ユーザーのストアから**ターゲット証明書**を選択し、そのキーストア名を取得します。
+2. 対応する秘密鍵を復号化するために必要な**DPAPIマスターキー**を特定します。
+3. 平文のDPAPIマスターキーを利用して、秘密鍵を**復号化**します。
 
-**平文のDPAPIマスターキーを取得** するためには、以下のアプローチが使用できます:
+平文のDPAPIマスターキーを**取得する**ためには、以下のアプローチが使用されます：
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -75,22 +75,22 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 ```
 ## DPAPIを介したマシン証明書の盗難 – THEFT3
 
-Windowsによってレジストリ内の`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates`に保存されているマシン証明書と、それに関連するプライベートキーは、CAPIの場合は`%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys`、CNGの場合は`%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys`にある。これらは、マシンのDPAPIマスターキーを使用して暗号化されています。これらのキーは、ドメインのDPAPIバックアップキーでは復号できず、代わりにSYSTEMユーザーのみがアクセスできる**DPAPI_SYSTEM LSAシークレット**が必要です。
+Windowsによってレジストリ内の`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates`に保存されているマシン証明書と、それに関連するプライベートキーは、CAPIの場合は`%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys`、CNGの場合は`%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys`にある。これらは、マシンのDPAPIマスターキーを使用して暗号化されている。これらのキーは、ドメインのDPAPIバックアップキーでは復号できず、代わりにSYSTEMユーザーのみがアクセスできる**DPAPI_SYSTEM LSAシークレット**が必要となる。
 
-手動で復号化するには、**Mimikatz**で`lsadump::secrets`コマンドを実行してDPAPI_SYSTEM LSAシークレットを抽出し、その後、このキーを使用してマシンのマスターキーを復号化します。または、以前に説明したようにCAPI/CNGをパッチした後、Mimikatzの`crypto::certificates /export /systemstore:LOCAL_MACHINE`コマンドを使用できます。
+手動で復号化するには、**Mimikatz**で`lsadump::secrets`コマンドを実行してDPAPI_SYSTEM LSAシークレットを抽出し、その後、このキーを使用してマシンのマスターキーを復号化する。また、以前に説明したようにCAPI/CNGをパッチした後に、Mimikatzの`crypto::certificates /export /systemstore:LOCAL_MACHINE`コマンドを使用することもできる。
 
-**SharpDPAPI**は、そのcertificatesコマンドを使用することでより自動化されたアプローチを提供します。`/machine`フラグを昇格権限で使用すると、SYSTEMにエスカレートし、DPAPI_SYSTEM LSAシークレットをダンプし、これを使用してマシンのDPAPIマスターキーを復号化し、その後これらの平文キーをルックアップテーブルとして使用してマシン証明書のプライベートキーを復号化します。
+**SharpDPAPI**は、そのcertificatesコマンドを使用することでより自動化されたアプローチを提供する。`/machine`フラグを昇格権限で使用すると、SYSTEMにエスカレートし、DPAPI_SYSTEM LSAシークレットをダンプし、これを使用してマシンのDPAPIマスターキーを復号化し、その後これらの平文キーをルックアップテーブルとして使用して任意のマシン証明書のプライベートキーを復号化する。
 
 
 ## 証明書ファイルの検索 – THEFT4
 
-証明書は、ファイル共有やダウンロードフォルダなどのファイルシステム内に直接見つかることがあります。Windows環境向けにターゲットとされる証明書ファイルの最も一般的なタイプは、`.pfx`および`.p12`ファイルです。頻度は低いですが、`.pkcs12`および`.pem`の拡張子を持つファイルも存在します。他にも注目すべき証明書関連のファイル拡張子には次のものがあります：
+証明書は、ファイル共有やダウンロードフォルダなどのファイルシステム内に直接見つかることがあります。Windows環境向けにターゲットとなる証明書ファイルの最も一般的なタイプは、`.pfx`および`.p12`ファイルです。頻度は低いですが、`.pkcs12`および`.pem`の拡張子を持つファイルも存在します。他にも注目すべき証明書関連のファイル拡張子には次のものがあります：
 - プライベートキー用の`.key`,
 - 証明書のみのための`.crt`/`.cer`,
 - 証明書やプライベートキーを含まない証明書署名リクエスト用の`.csr`,
 - Javaアプリケーションで使用される証明書とプライベートキーを保持する可能性のあるJava Keystores用の`.jks`/`.keystore`/`.keys`。
 
-これらのファイルは、PowerShellやコマンドプロンプトを使用して、上記の拡張子を検索することで検索できます。
+これらのファイルは、上記の拡張子を検索することでPowerShellやコマンドプロンプトで検索できます。
 
 PKCS#12証明書ファイルが見つかり、パスワードで保護されている場合、`pfx2john.py`を使用してハッシュの抽出が可能です。これは、[fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html)で入手できます。その後、JohnTheRipperを使用してパスワードの解読を試みることができます。
 ```powershell
@@ -103,13 +103,13 @@ pfx2john.py certificate.pfx > hash.txt
 # Command to crack the hash with JohnTheRipper
 john --wordlist=passwords.txt hash.txt
 ```
-## NTLM Credential Theft via PKINIT – THEFT5
+## NTLM資格情報のPKINIT経由での盗難 – THEFT5
 
-与えられた内容は、PKINITを介したNTLM資格情報の盗難方法であるTHEFT5を通じたNTLM資格情報の盗難方法を説明しています。ここでは、内容を受動態で再説明し、必要に応じて匿名化および要約します。
+与えられた内容は、PKINITを介したNTLM資格情報の盗難方法であるTHEFT5を通じて、NTLM資格情報の盗難方法を説明しています。以下は、受動態で再説明し、必要に応じて内容を匿名化および要約したものです：
 
-KDCは、Kerberos認証を容易にしないアプリケーションのためにNTLM認証[MS-NLMP]をサポートするために、PKCAが利用される際に、特に`PAC_CREDENTIAL_INFO`バッファ内でユーザーのNTLMワンウェイ関数（OWF）を特権属性証明書（PAC）に返すように設計されています。したがって、アカウントがPKINITを介してチケット発行チケット（TGT）を認証および保護し、現在のホストがTGTからNTLMハッシュを抽出するためのメカニズムが提供されます。このプロセスには、NTLM平文のNDRシリアル化された表現である`PAC_CREDENTIAL_DATA`構造の復号化が含まれます。
+KDCは、Kerberos認証を容易にしないアプリケーションのためにNTLM認証[MS-NLMP]をサポートするために、PKCAが利用される際に、特に`PAC_CREDENTIAL_INFO`バッファ内でユーザーのNTLMワンウェイ関数（OWF）を特権属性証明書（PAC）に返すように設計されています。したがって、アカウントがPKINITを介してチケット発行チケット（TGT）を認証および取得すると、現在のホストがTGTからNTLMハッシュを抽出するための仕組みが提供され、レガシー認証プロトコルを維持します。このプロセスには、NTLM平文のNDRシリアル化された表現である`PAC_CREDENTIAL_DATA`構造の復号化が含まれます。
 
-[https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo)でアクセス可能なユーティリティ**Kekeo**が、この特定のデータを含むTGTを要求し、ユーザーのNTLMの取得を容易にすると言及されています。この目的のために使用されるコマンドは次のとおりです：
+この特定のデータを含むTGTを要求することができるとされるユーティリティ**Kekeo**は、[https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo)で利用可能であり、ユーザーのNTLMを取得することを容易にします。この目的で使用されるコマンドは次のとおりです：
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```

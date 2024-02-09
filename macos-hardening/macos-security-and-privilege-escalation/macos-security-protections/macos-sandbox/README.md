@@ -2,34 +2,34 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
 * **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で私をフォローする [**@carlospolopm**](https://twitter.com/carlospolopm)**。**
-* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
+* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出する**
 
 </details>
 
 ## 基本情報
 
-MacOS サンドボックス（最初は Seatbelt と呼ばれていました）は、**アプリケーションがサンドボックス内で実行される際に許可されたアクション**に制限をかけます。これにより、**アプリケーションが予期されたリソースにのみアクセスすることが保証**されます。
+MacOS サンドボックス（最初は Seatbelt と呼ばれていました）は、**アプリケーションがサンドボックス内で実行される際に許可されたアクション**をサンドボックスプロファイルで指定されたものに**制限**します。これにより、**アプリケーションが予期されるリソースにのみアクセス**することが保証されます。
 
-**`com.apple.security.app-sandbox`** **権限**を持つアプリは、サンドボックス内で実行されます。**Apple バイナリ**は通常、サンドボックス内で実行され、**App Store** に公開するためには、**この権限が必須**です。したがって、ほとんどのアプリケーションはサンドボックス内で実行されます。
+**`com.apple.security.app-sandbox`** **権限**を持つアプリケーションは、サンドボックス内で実行されます。**Apple バイナリ**は通常、サンドボックス内で実行され、**App Store** に公開するためには、**この権限が必須**です。したがって、ほとんどのアプリケーションはサンドボックス内で実行されます。
 
-プロセスが何ができるかできないかを制御するために、**サンドボックスには** カーネル全体の **すべてのシスコールにフックがあります。**アプリの**権限**に応じて、サンドボックスは**特定のアクションを許可**します。
+プロセスが何を行うかを制御するために、**サンドボックスには** カーネル全体の **すべてのシスコール** に **フックがあります**。アプリケーションの **権限**に応じて、サンドボックスは特定のアクションを**許可**します。
 
 サンドボックスの重要なコンポーネントには次のものがあります:
 
 * **カーネル拡張** `/System/Library/Extensions/Sandbox.kext`
 * **プライベートフレームワーク** `/System/Library/PrivateFrameworks/AppSandbox.framework`
-* ユーザーランドで実行される**デーモン** `/usr/libexec/sandboxd`
+* ユーザーランドで実行される **デーモン** `/usr/libexec/sandboxd`
 * **コンテナ** `~/Library/Containers`
 
-コンテナフォルダ内には、**バンドルIDの名前で実行された各アプリ用のフォルダ**があります:
+コンテナフォルダ内には、**バンドルIDの名前で実行される各アプリケーションのサンドボックス内でのフォルダ**があります。
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -121,7 +121,7 @@ Sandboxアプリケーションによって作成/変更されたすべてのも
 
 Sandboxプロファイルは、そのSandboxで何が**許可/禁止**されるかを示す構成ファイルです。これは**Sandbox Profile Language (SBPL)**を使用し、[**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\))プログラミング言語を使用しています。
 
-ここでは、例を見つけることができます：
+ここに例を示します：
 ```scheme
 (version 1) ; First you get the version
 
@@ -140,7 +140,7 @@ Sandboxプロファイルは、そのSandboxで何が**許可/禁止**される�
 )
 ```
 {% hint style="success" %}
-[**こちらの研究**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **をチェックして、許可または拒否される可能性のあるさらなるアクションを確認してください。**
+[**こちらの研究**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **をチェックして、許可または拒否できるさらなるアクションを確認してください。**
 {% endhint %}
 
 重要な**システムサービス**も独自の**sandbox**内で実行されます。例えば、`mdnsresponder`サービスがあります。これらの独自の**sandboxプロファイル**は以下で確認できます:
@@ -155,7 +155,7 @@ SIPは/System/Library/Sandbox/rootless.confにあるplatform\_profileというSa
 
 ### Sandboxプロファイルの例
 
-**特定のsandboxプロファイル**でアプリケーションを起動するには、以下を使用できます:
+**特定のsandboxプロファイル**を使用してアプリケーションを起動するには、以下を使用できます:
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
@@ -210,7 +210,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {% endtabs %}
 
 {% hint style="info" %}
-**Windows**上で実行される**Apple製のソフトウェア**には、アプリケーションのサンドボックス化などの追加のセキュリティ対策がありません。
+**Apple-authored** **software**が**Windows**上で実行される場合、アプリケーションのサンドボックス化などの追加のセキュリティ対策はありません。
 {% endhint %}
 
 バイパスの例：
@@ -220,19 +220,19 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 
 ### MacOSサンドボックスプロファイル
 
-macOSはシステムのサンドボックスプロファイルを**/usr/share/sandbox/**と**/System/Library/Sandbox/Profiles**の2つの場所に保存しています。
+macOSはシステムのサンドボックスプロファイルを**/usr/share/sandbox/**と**/System/Library/Sandbox/Profiles**の2か所に保存しています。
 
-また、サードパーティ製のアプリケーションが _**com.apple.security.app-sandbox**_ 権限を持っている場合、システムはそのプロセスに**/System/Library/Sandbox/Profiles/application.sb**プロファイルを適用します。
+サードパーティのアプリケーションが _**com.apple.security.app-sandbox**_ 権限を持っている場合、システムはそのプロセスに**/System/Library/Sandbox/Profiles/application.sb**プロファイルを適用します。
 
 ### **iOSサンドボックスプロファイル**
 
-デフォルトのプロファイルは**container**と呼ばれ、SBPLテキスト表現はありません。メモリ上では、このサンドボックスは、サンドボックスの各権限に対してAllow/Denyバイナリツリーとして表現されます。
+デフォルトのプロファイルは**container**と呼ばれ、SBPLテキスト表現はありません。メモリ上では、このサンドボックスは、各権限ごとにAllow/Denyバイナリツリーとして表現されます。
 
-### サンドボックスのデバッグとバイパス
+### デバッグ＆サンドボックスバイパス
 
-macOSでは、iOSとは異なり、プロセスはカーネルによって最初からサンドボックス化されるわけではありません。つまり、macOSでは、プロセスは自らサンドボックスに入ることを積極的に決定するまで、サンドボックスによって制限されません。
+macOSでは、iOSとは異なり、プロセスはカーネルによって最初からサンドボックス化されるわけではありません。**プロセスは自らサンドボックスに参加する必要があります**。つまり、macOSでは、プロセスは、アクティブにサンドボックスに入るまでサンドボックスによって制限されません。
 
-プロセスは、`com.apple.security.app-sandbox`権限を持っている場合、起動時にユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を確認してください：
+プロセスは、`com.apple.security.app-sandbox`権限を持っている場合、ユーザーランドから起動されるときに自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を確認してください：
 
 {% content-ref url="macos-sandbox-debug-and-bypass/" %}
 [macos-sandbox-debug-and-bypass](macos-sandbox-debug-and-bypass/)
@@ -251,9 +251,9 @@ sbtool <pid> all
 ```
 ### App StoreアプリでのカスタムSBPL
 
-企業がアプリを**デフォルトではなくカスタムのサンドボックスプロファイル**で実行することが可能です。Appleによって承認される必要がある権限**`com.apple.security.temporary-exception.sbpl`**を使用する必要があります。
+企業がアプリを**デフォルトのものではなくカスタムのサンドボックスプロファイル**で実行することが可能です。Appleによって承認される必要がある権限**`com.apple.security.temporary-exception.sbpl`**を使用する必要があります。
 
-この権限の定義を**`/System/Library/Sandbox/Profiles/application.sb:`**で確認することが可能です。
+この権限の定義は**`/System/Library/Sandbox/Profiles/application.sb:`**で確認することができます。
 ```scheme
 (sandbox-array-entitlement
 "com.apple.security.temporary-exception.sbpl"
@@ -261,18 +261,18 @@ sbtool <pid> all
 (let* ((port (open-input-string string)) (sbpl (read port)))
 (with-transparent-redirection (eval sbpl)))))
 ```
-これは**この権限の後に文字列を評価**してSandboxプロファイルとして扱います。
+これは**この権限の後に文字列を評価**して、Sandboxプロファイルとして扱います。
 
 <details>
 
-<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する。
+* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>

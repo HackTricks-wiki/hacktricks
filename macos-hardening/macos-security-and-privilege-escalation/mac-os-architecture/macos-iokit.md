@@ -2,27 +2,27 @@
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live).
-* **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**したいですか？ または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？ [**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をご覧ください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、[**NFTs**](https://opensea.io/collection/the-peass-family)の独占コレクションをご覧ください
+* [**公式PEASSとHackTricksのスウォッグ**](https://peass.creator-spring.com)を手に入れる
+* **Discord**の[**💬**](https://emojipedia.org/speech-balloon/) **グループに参加**または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私に従ってください 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)。
+* **ハッキングのヒントを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に送信してください**。
 
 </details>
 
-## Basic Information
+## 基本情報
 
-I/O Kitは、XNUカーネル内のオープンソースのオブジェクト指向の**デバイスドライバーフレームワーク**であり、**動的にロードされるデバイスドライバー**を処理します。これにより、モジュラーコードをカーネルに即座に追加し、さまざまなハードウェアをサポートできます。
+I/O Kitは、XNUカーネル内のオープンソースのオブジェクト指向**デバイスドライバーフレームワーク**であり、**動的にロードされるデバイスドライバー**を処理します。これにより、カーネルにモジュラーコードを即座に追加し、さまざまなハードウェアをサポートできます。
 
-IOKitドライバーは基本的にカーネルから**関数をエクスポート**します。これらの関数のパラメータ**タイプ**は**事前に定義**され、検証されます。さらに、XPCと同様に、IOKitは単なる**Machメッセージの上にある別のレイヤー**です。
+IOKitドライバーは基本的にカーネルから**関数をエクスポート**します。これらの関数のパラメータ**タイプ**は**事前定義**され、検証されます。さらに、XPCと同様に、IOKitは単に**Machメッセージの上にある別のレイヤー**です。
 
-**IOKit XNUカーネルコード**はAppleによってオープンソース化されており、[https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)で入手できます。さらに、ユーザースペースのIOKitコンポーネントもオープンソース化されています [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser)。
+**IOKit XNUカーネルコード**はAppleによってオープンソース化されており、[https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit) で入手できます。さらに、ユーザースペースのIOKitコンポーネントもオープンソース化されています [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser)。
 
-ただし、**IOKitドライバー**はオープンソースではありません。とはいえ、時折、ドライバーのリリースによってデバッグが容易になるシンボルが付属することがあります。[**ここからファームウェアからドライバー拡張機能を取得する方法**](./#ipsw)**を確認してください**。
+ただし、**IOKitドライバー**はオープンソースではありません。とはいえ、時折、ドライバーのリリースによってデバッグが容易になるシンボルが付属することがあります。[**ここからファームウェアからドライバー拡張機能を取得する方法**](./#ipsw)を確認してください。
 
-これは**C++**で書かれています。次のコマンドでC++のシンボルをデマングルできます：
+これは**C++**で書かれています。以下のコマンドでC++のデマングルされたシンボルを取得できます：
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -40,14 +40,14 @@ IOKitの**公開された関数**は、クライアントが関数を呼び出�
 
 macOSでは、次の場所にあります：
 
-- **`/System/Library/Extensions`**
-- OS Xオペレーティングシステムに組み込まれたKEXTファイル。
-- **`/Library/Extensions`**
-- サードパーティ製のソフトウェアによってインストールされたKEXTファイル
+* **`/System/Library/Extensions`**
+* OS Xオペレーティングシステムに組み込まれたKEXTファイル。
+* **`/Library/Extensions`**
+* サードパーティ製ソフトウェアによってインストールされたKEXTファイル
 
 iOSでは、次の場所にあります：
 
-- **`/System/Library/Extensions`**
+* **`/System/Library/Extensions`**
 ```bash
 #Use kextstat to print the loaded drivers
 kextstat
@@ -72,16 +72,16 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-カーネル拡張機能をロードおよびアンロードするには次のようにします：
+カーネル拡張機能をロードおよびアンロードするには次の操作を行います：
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry（IOレジストリ）**は、macOSとiOSのIOKitフレームワークの重要な部分であり、システムのハードウェア構成と状態を表すデータベースとして機能します。これは、システムにロードされたすべてのハードウェアとドライバーを表すオブジェクトの階層的なコレクションであり、お互いとの関係を示しています。
+**IORegistry（IOレジストリ）**は、macOSとiOSのIOKitフレームワークの重要な部分であり、システムのハードウェア構成と状態を表すデータベースとして機能します。これは、システムにロードされたすべてのハードウェアとドライバを表すオブジェクトの階層的なコレクションであり、それらの関係を示しています。
 
-**`ioreg`**コマンドラインインターフェース（特にiOS向けに特に便利）を使用して、コンソールからIORegistryを取得できます。
+iOSの場合に特に便利なため、コンソールから**`ioreg`**コマンドを使用してIORegistryを取得し、検査することができます。
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
@@ -91,18 +91,18 @@ ioreg -p <plane> #Check other plane
 
 <figure><img src="../../../.gitbook/assets/image (695).png" alt="" width="563"><figcaption></figcaption></figure>
 
-IORegistryExplorerでは、「プレーン」が使用され、IORegistry内の異なるオブジェクト間の関係を整理して表示します。各プレーンは、システムのハードウェアとドライバー構成の特定のビューまたは特定の関係を表します。以下は、IORegistryExplorerで遭遇する可能性のある一般的なプレーンのいくつかです：
+IORegistryExplorerでは、「プレーン」が使用され、IORegistry内の異なるオブジェクト間の関係を整理して表示します。各プレーンは、特定の関係の種類またはシステムのハードウェアおよびドライバー構成の特定のビューを表します。以下は、IORegistryExplorerで遭遇する可能性のある一般的なプレーンのいくつかです：
 
-1. **IOService Plane**：これは最も一般的なプレーンで、ドライバーとナブ（ドライバー間の通信チャンネル）を表すサービスオブジェクトを表示します。これらのオブジェクト間のプロバイダー-クライアント関係を示します。
-2. **IODeviceTree Plane**：このプレーンは、デバイス間の物理的な接続を表し、システムに接続されたデバイスの階層構造を視覚化するためによく使用されます。USBやPCIなどのバスを介して接続されたデバイスの階層を表示します。
-3. **IOPower Plane**：電源管理の観点からオブジェクトとその関係を表示します。他のオブジェクトの電源状態に影響を与えているオブジェクトを示すことができ、電源関連の問題のデバッグに役立ちます。
-4. **IOUSB Plane**：USBデバイスとその関係に特化し、USBハブと接続されたデバイスの階層を表示します。
-5. **IOAudio Plane**：このプレーンは、システム内のオーディオデバイスとその関係を表します。
+1. **IOService Plane**：これは最も一般的なプレーンで、ドライバーとナブ（ドライバー間の通信チャンネル）を表すサービスオブジェクトを表示します。これにより、これらのオブジェクト間のプロバイダー-クライアント関係が表示されます。
+2. **IODeviceTree Plane**：このプレーンは、デバイスがシステムに接続される際の物理的な接続を表します。USBやPCIなどのバスを介して接続されたデバイスの階層構造を視覚化するためによく使用されます。
+3. **IOPower Plane**：電源管理の観点からオブジェクトとその関係を表示します。他のオブジェクトの電源状態に影響を与えているオブジェクトを示すことができ、電力関連の問題のデバッグに役立ちます。
+4. **IOUSB Plane**：USBデバイスとその関係に特化し、USBハブと接続されたデバイスの階層構造を表示します。
+5. **IOAudio Plane**：このプレーンは、システム内のオーディオデバイスとそれらの関係を表すためのものです。
 6. ...
 
 ## ドライバー通信コード例
 
-次のコードは、IOKitサービス`"YourServiceNameHere"`に接続し、セレクタ0内の関数を呼び出します。これには以下の手順が含まれます：
+次のコードは、IOKitサービス`"YourServiceNameHere"`に接続し、セレクタ0内の関数を呼び出します。これには以下が含まれます：
 
 * まず、**`IOServiceMatching`**と**`IOServiceGetMatchingServices`**を呼び出してサービスを取得します。
 * 次に、**`IOServiceOpen`**を呼び出して接続を確立します。
@@ -161,7 +161,7 @@ IOObjectRelease(iter);
 return 0;
 }
 ```
-**その他**の関数があり、**`IOConnectCallScalarMethod`**の他に使用できるIOKit関数があります。**`IOConnectCallMethod`**、**`IOConnectCallStructMethod`**などがあります...
+他にも、**`IOConnectCallScalarMethod`**のようにIOKit関数を呼び出すために使用できる関数があります。**`IOConnectCallMethod`**、**`IOConnectCallStructMethod`**...
 
 ## ドライバーエントリーポイントのリバースエンジニアリング
 
@@ -181,7 +181,7 @@ IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArguments
 ```
 {% endcode %}
 
-前の定義では、**`self`** パラメータが抜けていることに注意してください。適切な定義は次のようになります:
+前の定義では **`self`** パラメータが抜けていることに注意してください。正しい定義は次のようになります:
 
 {% code overflow="wrap" %}
 ```cpp
@@ -203,11 +203,11 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../.gitbook/assets/image (703).png" alt=""><figcaption></figcaption></figure>
 
-次のステップでは、**`IOExternalMethodDispatch2022`** 構造体を定義する必要があります。これは[https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176)でオープンソースで提供されています。これを定義できます：
+次のステップでは、**`IOExternalMethodDispatch2022`** 構造体を定義する必要があります。これはオープンソースで[こちら](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176)で入手できます。以下のように定義できます：
 
 <figure><img src="../../../.gitbook/assets/image (698).png" alt=""><figcaption></figcaption></figure>
 
-そして、`(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` に従って、多くのデータを見ることができます：
+次に、`(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` に従って多くのデータを見ることができます：
 
 <figure><img src="../../../.gitbook/assets/image (704).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -223,10 +223,10 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../.gitbook/assets/image (708).png" alt="" width="563"><figcaption></figcaption></figure>
 
-配列が作成された後、すべてのエクスポートされた関数を確認できます：
+配列が作成されたら、すべてのエクスポートされた関数を確認できます：
 
 <figure><img src="../../../.gitbook/assets/image (709).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="success" %}
-覚えておいてください。ユーザースペースから**エクスポートされた**関数を**呼び出す**際には、関数の名前ではなく、**セレクタ番号**を呼び出す必要があります。ここでは、セレクタ **0** が関数 **`initializeDecoder`**、セレクタ **1** が **`startDecoder`**、セレクタ **2** が **`initializeEncoder`** であることがわかります...
+覚えておいてください。ユーザースペースから**エクスポートされた**関数を**呼び出す**際には、関数の名前ではなく**セレクタ番号**を呼び出す必要があります。ここで、セレクタ **0** は関数 **`initializeDecoder`**、セレクタ **1** は **`startDecoder`**、セレクタ **2** は **`initializeEncoder`** であることがわかります...
 {% endhint %}
