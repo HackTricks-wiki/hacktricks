@@ -9,7 +9,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -580,6 +580,32 @@ hs.execute("/Applications/iTerm.app/Contents/MacOS/iTerm2")
 EOF
 ```
 
+### BetterTouchTool
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But BetterTouchTool must be installed
+* TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  * It requests Automation-Shortcuts and Accessibility permissions
+
+#### Location
+
+* `~/Library/Application Support/BetterTouchTool/*`
+
+This tool allows to indicate applications or scripts to execute when some shortcuts are pressed . An attacker might be able configure his own **shortcut and action to execute in the database** to make it execute arbitrary code (a shortcut could be to just to press a key).
+
+### Alfred
+
+* Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+  * But Alfred must be installed
+* TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+  * It requests Automation, Accessibility and even Full-Disk access permissions
+
+#### Location
+
+* `???`
+
+It allows to create workflows that can execute code when certain conditions are met. Potentially it's possible for an attacker to create a workflow file and make Alfred load it (it's needed to pay the premium version to use workflows).
+
 ### SSHRC
 
 Writeup: [https://theevilbit.github.io/beyond/beyond\_0006/](https://theevilbit.github.io/beyond/beyond\_0006/)
@@ -806,7 +832,7 @@ fa.scripts.push(myScript);
 ```
 
 Run the setup script with:
-  
+
 ```bash
 osascript -l JavaScript /Users/username/attach.scpt
 ```
@@ -1540,7 +1566,6 @@ The **StartupItem** is a directory that should be positioned within either `/Lib
 
 Ensure that both the rc script and the `StartupParameters.plist` file are correctly placed inside the **StartupItem** directory for the startup process to recognize and utilize them.
 
-
 {% tabs %}
 {% tab title="StartupParameters.plist" %}
 ```xml
@@ -1598,7 +1623,6 @@ For those aware of its existence, identifying any malicious usage of **emond** i
 ```bash
 ls -l /private/var/db/emondClients
 ```
-
 
 ### ~~XQuartz~~
 
@@ -1785,7 +1809,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
