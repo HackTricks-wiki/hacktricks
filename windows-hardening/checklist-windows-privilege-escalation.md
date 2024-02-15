@@ -59,6 +59,7 @@ Other ways to support HackTricks:
 * [ ] Processes binaries [**file and folders permissions**](windows-local-privilege-escalation/#file-and-folder-permissions)
 * [ ] [**Memory Password mining**](windows-local-privilege-escalation/#memory-password-mining)
 * [ ] [**Insecure GUI apps**](windows-local-privilege-escalation/#insecure-gui-apps)
+* [ ] Steal credentials with **interesting processes** via `ProcDump.exe` ? (firefox, chrome, etc ...)
 
 ### [Services](windows-local-privilege-escalation/#services)
 
