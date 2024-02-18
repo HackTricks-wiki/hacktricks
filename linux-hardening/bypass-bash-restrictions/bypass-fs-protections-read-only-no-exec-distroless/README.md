@@ -1,31 +1,38 @@
-# ファイルシステム保護のバイパス: 読み取り専用 / 実行不可 / Distroless
+# ファイルシステムの保護をバイパスする：読み取り専用 / 実行不可 / Distroless
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使用して、ゼロからヒーローまでAWSハッキングを学びましょう！</summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする
-* **ハッキングトリックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する**
+- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をフォローする
+- **ハッキングトリックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する**
 
 </details>
 
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+**ハッキングキャリア**に興味があり、**解読不能なものをハック**したい場合は、**採用中**です（_流暢なポーランド語の読み書きが必要です_）。
+
+{% embed url="https://www.stmcyber.com/careers" %}
+
 ## 動画
 
-以下の動画では、このページで言及されているテクニックについてより詳しく説明されています:
+以下の動画では、このページで言及されているテクニックについて詳しく説明されています：
 
-* [**DEF CON 31 - ステルスと回避のためのLinuxメモリ操作の探索**](https://www.youtube.com/watch?v=poHirez8jk4)
-* [**DDexec-ngとインメモリdlopen()によるステルス侵入 - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [**DEF CON 31 - ステルスと回避のためのLinuxメモリ操作の探索**](https://www.youtube.com/watch?v=poHirez8jk4)
+- [**DDexec-ngとインメモリdlopen()によるステルス侵入 - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM\_gjjiARaU)
 
 ## 読み取り専用 / 実行不可シナリオ
 
-Linuxマシンで**読み取り専用（ro）ファイルシステム保護**がより一般的になってきていますが、特にコンテナでは、`securitycontext`で**`readOnlyRootFilesystem: true`**を設定するだけで簡単にroファイルシステムでコンテナを実行できます:
+Linuxマシンが**読み取り専用（ro）ファイルシステム保護**でマウントされることがますます一般的になっていますが、特にコンテナではそうです。これは、`securitycontext`で**`readOnlyRootFilesystem: true`**を設定するだけで、roファイルシステムでコンテナを実行するのが簡単であるためです：
 
-<pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
+```yaml
+apiVersion: v1
 kind: Pod
 metadata:
 name: alpine-pod
@@ -34,43 +41,41 @@ containers:
 - name: alpine
 image: alpine
 securityContext:
-<strong>      readOnlyRootFilesystem: true
-</strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
-</code></pre>
+      readOnlyRootFilesystem: true
+    command: ["sh", "-c", "while true; do sleep 1000; done"]
+```
 
-しかし、ファイルシステムがroとしてマウントされていても、**`/dev/shm`**は書き込み可能なままであるため、ディスクに書き込むことができないかのように見えます。ただし、このフォルダは**実行不可保護でマウント**されているため、ここにバイナリをダウンロードしても**実行できません**。
+しかし、ファイルシステムがroとしてマウントされていても、**`/dev/shm`**は書き込み可能のままであるため、ディスクに書き込むことができないということはありません。ただし、このフォルダは**実行不可保護**でマウントされるため、ここにバイナリをダウンロードしても**実行できません**。
 
 {% hint style="warning" %}
-レッドチームの観点からすると、これにより、システムにすでに存在しない（`kubectl`のような）バックドアや列挙子のようなバイナリを**ダウンロードして実行するのが複雑**になります。
+レッドチームの観点からすると、これはバイナリ（バックドアや`kubectl`のような列挙ツールなど）を**ダウンロードして実行するのが複雑**になります。
 {% endhint %}
 
-## 最も簡単なバイパス: スクリプト
+## 最も簡単なバイパス：スクリプト
 
-バイナリと言及しましたが、インタプリタがマシン内にある限り、**シェルスクリプト**（`sh`が存在する場合）や**Pythonスクリプト**（`python`がインストールされている場合）など、**任意のスクリプトを実行**できます。
+バイナリを言及しましたが、インタプリタがマシン内にある限り、**シェルスクリプト**（`sh`が存在する場合）や**Pythonスクリプト**（`python`がインストールされている場合）など、**任意のスクリプトを実行**できます。
 
-ただし、これだけでは、バイナリバックドアや他の実行する必要があるバイナリツールを実行するのに十分ではありません。
+ただし、これだけではバイナリバックドアや他の実行する必要があるバイナリツールを実行するのには十分ではありません。
 
 ## メモリバイパス
 
-ファイルシステムがそれを許可していない場合にバイナリを実行したい場合、**メモリから実行する**のが最善の方法です。なぜなら、**その保護はそこには適用されない**からです。
+ファイルシステムがそれを許可していない場合にバイナリを実行したい場合、**メモリから実行**するのが最善です。なぜなら、**その保護はそこには適用されない**からです。
 
-### FD + execシスコールバイパス
+### FD + execシステムコールバイパス
 
-**Python**、**Perl**、**Ruby**などの強力なスクリプトエンジンがマシン内にある場合、メモリから実行するためにバイナリをダウンロードし、メモリファイルディスクリプタに保存し（`create_memfd`シスコール）、これらの保護によって保護されないため、**fdをファイルとして実行する**という**`exec`シスコール**を呼び出すことができます。
+**Python**、**Perl**、**Ruby**などの強力なスクリプトエンジンがマシン内にある場合、メモリから実行するためにバイナリをダウンロードし、メモリファイルディスクリプタに保存し（`create_memfd`システムコール）、これらの保護によって保護されないため、**fdをファイルとして実行する**ために**`exec`システムコール**を呼び出すことができます。
 
-これには、プロジェクト[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)を簡単に使用できます。バイナリを渡すと、**バイナリが圧縮されb64エンコードされた**スクリプトが生成され、`create_memfd`シスコールを呼び出して作成された**fd**に**デコードおよび解凍する**命令と、それを実行する**exec**シスコールの呼び出しが含まれます。
+これには、プロジェクト[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)を簡単に使用できます。バイナリを渡すと、バイナリが**デコードおよび解凍された**スクリプトが生成され、`create_memfd`システムコールを呼び出して作成された**fd**にバイナリを格納し、**実行するためのexec**システムコールが呼び出されます。
 
 {% hint style="warning" %}
-これは、PHPやNodeなどの他のスクリプト言語では機能しないため、スクリプトから**生のシスコールを呼び出すデフォルトの方法**がないため、`create_memfd`を呼び出して**バイナリを保存するメモリfd**を作成することはできません。
+これは、PHPやNodeなどの他のスクリプト言語では、スクリプトから**生のシステムコールを呼び出すデフォルトの方法**がないため、`create_memfd`を呼び出して**バイナリを格納するメモリfd**を作成することができないため、これは機能しません。
 
-さらに、`/dev/shm`内のファイルで**通常のfd**を作成しても、**実行不可保護**が適用されるため、実行できません。
+また、`/dev/shm`内のファイルで**通常のfd**を作成しても機能しないため、**実行不可保護**が適用されるため実行できません。
 {% endhint %}
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)は、**`/proc/self/mem`**を上書きすることで、**自分自身のプロセスのメモリを変更**する技術であります。
-
-したがって、プロセスによって実行されている**アセンブリコードを制御**することで、**シェルコード**を書き込み、プロセスを**任意のコードを実行**するように「変異」させることができます。
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)は、**`/proc/self/mem`**を上書きすることで、**自分自身のプロセスのメモリを変更**する技術であり、**プロセスが実行しているアセンブリコード**を制御することで、**シェルコード**を書き込んでプロセスを**任意のコードを実行**するように「変異」させることができます。
 
 {% hint style="success" %}
 **DDexec / EverythingExec**を使用すると、**自分自身のメモリから**自分自身の**シェルコード**または**任意のバイナリ**を**ロードして実行**できます。
@@ -99,7 +104,7 @@ Distrolessコンテナの目標は、**不要なコンポーネントを排除**
 
 ### リバースシェル
 
-Distrolessコンテナでは、通常のシェルを取得するための`sh`や`bash`などが**見つからない**かもしれません。`ls`、`whoami`、`id`などのバイナリも見つかりません。これらは通常、システムで実行するものです。
+Distrolessコンテナでは、通常のシェルを取得するための`sh`や`bash`などが**見つからない**かもしれません。また、`ls`、`whoami`、`id`などのバイナリも見つかりません。これらは通常、システムで実行するものです。
 
 {% hint style="warning" %}
 したがって、通常どおりに**リバースシェル**を取得したり、システムを**列挙**することはできません。

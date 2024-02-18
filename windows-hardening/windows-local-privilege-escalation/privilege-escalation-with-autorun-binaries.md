@@ -1,24 +1,24 @@
-# Autorunバイナリを使用した特権昇格
+# Autorunsを使用した特権昇格
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使用して、ゼロからヒーローまでAWSハッキングを学びましょう！</summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する。
+- **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する
 - **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<figure><img src="../../.gitbook/assets/i3.png" alt=""><figcaption></figcaption></figure>
 
-**ハッキングキャリア**に興味がある方、そして**解読不能なものをハック**したい方 - **採用中です！**（_流暢なポーランド語の読み書きが必要です_）。
+**バグバウンティのヒント**: **ハッカーによって作成されたプレミアムバグバウンティプラットフォーム**である**Intigriti**に**サインアップ**してください！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**のバウンティを獲得し始めましょう！
 
-{% embed url="https://www.stmcyber.com/careers" %}
+{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
@@ -29,7 +29,7 @@ Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## スケジュールされたタスク
 
-**タスク**は**特定の頻度**で実行されるようにスケジュールできます。次のコマンドでスケジュールされた実行ファイルを確認します：
+**タスク**は**特定の頻度**で実行されるようにスケジュールできます。次のコマンドでスケジュールされた実行ファイルを確認します:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -75,7 +75,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 **Run** および **RunOnce** として知られるレジストリキーは、ユーザーがシステムにログインするたびにプログラムを自動的に実行するように設計されています。キーのデータ値として割り当てられたコマンドラインは、260文字以下に制限されています。
 
-**サービス実行** (起動時にサービスの自動起動を制御できます):
+**サービスの実行** (起動時にサービスの自動起動を制御できます):
 
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -91,16 +91,16 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 * `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 * `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Windows Vista 以降のバージョンでは、**Run** および **RunOnce** レジストリキーは自動的に生成されません。これらのキーのエントリは、プログラムを直接起動するか、依存関係として指定することができます。たとえば、ログオン時に DLL ファイルを読み込むには、**RunOnceEx** レジストリキーと "Depend" キーを使用できます。システム起動時に "C:\\temp\\evil.dll" を実行するレジストリエントリを追加することで、これが実証されています:
+Windows Vista 以降のバージョンでは、**Run** および **RunOnce** レジストリキーは自動的に生成されません。これらのキーのエントリは、プログラムを直接起動するか、依存関係として指定することができます。たとえば、ログオン時に DLL ファイルを読み込むには、**RunOnceEx** レジストリキーと "Depend" キーを使用できます。これは、システムの起動時に "C:\temp\evil.dll" を実行するレジストリエントリを追加することで示されます。
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 {% hint style="info" %}
-**エクスプロイト1**: もし**HKLM**内のいずれかのレジストリに書き込むことができれば、別のユーザーがログインしたときに特権を昇格させることができます。
+**Exploit 1**: もし**HKLM**内のいずれかのレジストリに書き込むことができれば、異なるユーザーがログインする際に特権を昇格させることができます。
 {% endhint %}
 
 {% hint style="info" %}
-**エクスプロイト2**: もし**HKLM**内のいずれかのレジストリに示されているバイナリのいずれかを上書きできれば、別のユーザーがログインしたときにそのバイナリにバックドアを埋め込んで特権を昇格させることができます。
+**Exploit 2**: もし**HKLM**内のいずれかのレジストリに示されているバイナリのいずれかを上書きできれば、異なるユーザーがログインする際にそのバイナリにバックドアを埋め込んで特権を昇格させることができます。
 {% endhint %}
 ```bash
 #CMD
@@ -164,10 +164,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-**スタートアップ**フォルダに配置されたショートカットは、ユーザーログオン時やシステム再起動時に自動的にサービスやアプリケーションを起動させます。**スタートアップ**フォルダの場所は、**ローカルマシン**および**現在のユーザー**のスコープのためにレジストリで定義されています。これは、これらの指定された**スタートアップ**場所に追加されたショートカットが、ログオンまたは再起動プロセスの後にリンクされたサービスやプログラムが起動することを確認するため、プログラムを自動的に実行するための簡単な方法です。
+**スタートアップ**フォルダに配置されたショートカットは、ユーザーログオン時やシステム再起動時に自動的にサービスやアプリケーションを起動させます。**スタートアップ**フォルダの場所は、**ローカルマシン**および**現在のユーザー**のスコープのためにレジストリで定義されています。これは、これらの指定された**スタートアップ**場所に追加されたショートカットは、ログオンまたは再起動プロセスの後にリンクされたサービスやプログラムが起動することを確実にするため、プログラムを自動的に実行するための簡単な方法です。
 
 {% hint style="info" %}
-**HKLM**の下の任意の\[User] Shell Folderを上書きできる場合、それを自分が制御するフォルダを指すようにし、バックドアを配置して、ユーザーがシステムにログインするたびに実行される特権昇格を行うことができます。
+もし**HKLM**の下の任意の\[User] Shell Folderを上書きできれば、それを自分が制御するフォルダを指すように変更し、バックドアを配置して、ユーザーがシステムにログインするたびに実行される特権昇格を行うことができます。
 {% endhint %}
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -213,7 +213,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 Windowsレジストリの`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`の下には、デフォルトで`cmd.exe`に設定された**`AlternateShell`**値があります。これは、起動時に「コマンドプロンプト付きセーフモード」を選択すると、`cmd.exe`が使用されることを意味します。ただし、F8を押す必要なく、手動で選択することなく、コンピュータをこのモードで自動的に起動するように設定することが可能です。
 
-「コマンドプロンプト付きセーフモードで自動的に起動する」ための手順：
+「コマンドプロンプト付きセーフモードで自動的に起動する」ブートオプションを作成する手順：
 
 1. `boot.ini`ファイルの属性を変更して読み取り専用、システム、非表示フラグを削除します：`attrib c:\boot.ini -r -s -h`
 2. `boot.ini`を編集します。
@@ -221,9 +221,9 @@ Windowsレジストリの`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`の下�
 4. `boot.ini`への変更を保存します。
 5. 元のファイル属性を再適用します：`attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** **AlternateShell**レジストリキーを変更することで、カスタムコマンドシェルのセットアップが可能になり、不正アクセスが行われる可能性があります。
-- **Exploit 2 (PATH Write Permissions):** システムの**PATH**変数の任意の部分に書き込み権限がある場合、特に`C:\Windows\system32`の前に、カスタム`cmd.exe`を実行できるようになり、システムがセーフモードで起動された場合にはバックドアとなる可能性があります。
-- **Exploit 3 (PATH and boot.ini Write Permissions):** `boot.ini`への書き込みアクセスを持つことで、自動的なセーフモードの起動が可能になり、次回の再起動時に不正アクセスが容易になります。
+* **Exploit 1:** **AlternateShell**レジストリキーを変更することで、カスタムコマンドシェルのセットアップが可能になり、不正アクセスが行われる可能性があります。
+* **Exploit 2 (PATH Write Permissions):** システムの**PATH**変数の任意の部分に書き込み権限がある場合、特に`C:\Windows\system32`の前に、カスタム`cmd.exe`を実行できるようになり、システムがセーフモードで起動された場合にはバックドアとなる可能性があります。
+* **Exploit 3 (PATH and boot.ini Write Permissions):** `boot.ini`への書き込みアクセスを持つことで、自動的なセーフモードの起動が可能になり、次回の再起動時に不正アクセスが容易になります。
 
 現在の**AlternateShell**設定を確認するには、次のコマンドを使用します：
 ```bash
@@ -232,7 +232,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 ```
 ### インストールされたコンポーネント
 
-Active Setupは、**デスクトップ環境が完全にロードされる前に開始される**Windowsの機能です。特定のコマンドの実行を優先し、ユーザーログオンが進行する前に完了する必要があります。このプロセスは、RunまたはRunOnceレジストリセクションなど、他の起動エントリがトリガーされる前に発生します。
+Active Setupは、**デスクトップ環境が完全にロードされる前に開始される**Windowsの機能です。特定のコマンドの実行を優先し、ユーザーログオンが進行する前に完了する必要があります。このプロセスは、RunまたはRunOnceレジストリセクションなど、他の起動エントリよりも前に発生します。
 
 Active Setupは次のレジストリキーを介して管理されます：
 
@@ -244,13 +244,13 @@ Active Setupは次のレジストリキーを介して管理されます：
 これらのキー内には、特定のコンポーネントに対応する各サブキーが存在します。特に興味深いキー値には次のものがあります：
 
 - **IsInstalled:**
-- `0`はコンポーネントのコマンドが実行されないことを示します。
-- `1`はコマンドが各ユーザーごとに1回実行されることを意味し、`IsInstalled`値が欠落している場合はデフォルトの動作です。
+  - `0`はコンポーネントのコマンドが実行されないことを示します。
+  - `1`はコマンドが各ユーザーごとに1回実行されることを意味し、`IsInstalled`値が欠落している場合はデフォルトの動作です。
 - **StubPath:** Active Setupによって実行されるコマンドを定義します。`notepad`の起動など、有効なコマンドラインであることができます。
 
 **セキュリティInsights:**
 
-- 特定の**`StubPath`**で`IsInstalled`が`"1"`に設定されているキーを変更または書き込むと、権限昇格のための権限のないコマンド実行につながる可能性があります。
+- 特定の**`StubPath`**で`IsInstalled`が`"1"`に設定されたキーを変更または書き込むと、権限が十分であれば権限昇格のための権限のないコマンド実行につながる可能性があります。
 - 任意の**`StubPath`**値で参照されるバイナリファイルを変更することも、十分な権限があれば権限昇格を達成できる可能性があります。
 
 Active Setupコンポーネント全体の**`StubPath`**構成を検査するには、次のコマンドを使用できます：
@@ -264,14 +264,14 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### ブラウザーヘルパーオブジェクト（BHO）の概要
 
-ブラウザーヘルパーオブジェクト（BHO）は、MicrosoftのInternet Explorerに追加の機能を提供するDLLモジュールです。これらは、Internet ExplorerとWindows Explorerの起動時に読み込まれます。ただし、**NoExplorer**キーを1に設定することで、Windows Explorerのインスタンスでの読み込みを防ぐことができます。
+ブラウザーヘルパーオブジェクト（BHO）は、MicrosoftのInternet Explorerに追加機能を提供するDLLモジュールです。これらは、Internet ExplorerとWindows Explorerの起動時に読み込まれます。ただし、**NoExplorer** キーを1に設定することで、Windows Explorerのインスタンスでの読み込みを防ぐことができます。
 
 BHOは、Internet Explorer 11を介してWindows 10と互換性がありますが、新しいバージョンのWindowsでデフォルトのブラウザであるMicrosoft Edgeではサポートされていません。
 
 システムに登録されているBHOを調査するには、次のレジストリキーを調べることができます：
 
-- `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
-- `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
+* `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
+* `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
 各BHOは、レジストリ内の**CLSID**によって表され、一意の識別子として機能します。各CLSIDに関する詳細情報は、`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`の下で見つけることができます。
 
@@ -285,7 +285,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 * `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 * `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Note that the registry will contain 1 new registry per each dll and it will be represented by the **CLSID**. You can find the CLSID info in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+注意：レジストリには、各dllごとに1つの新しいレジストリが含まれ、**CLSID**によって表されます。`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`でCLSID情報を見つけることができます。
 
 ### Font Drivers
 
@@ -314,13 +314,13 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-自動実行ファイルのより包括的なリストを取得するには、[SysInternals](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)の[autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用できます。
+自動実行ファイルのより包括的なリストを取得するには、[SysInternalsのautoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用できます。注意すべきは、autorunsを見つけることができるすべてのサイトはすでに**winpeas.exe**によって検索されていることです。
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## もっと
 
-**[https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)** にあるように、レジストリのようなAutorunsの詳細を見つける。
+**レジストリのようなAutorunsの詳細は** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2) **で見つけることができます**
 
 ## 参考文献
 
@@ -329,22 +329,22 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 * [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 * [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<figure><img src="../../.gitbook/assets/i3.png" alt=""><figcaption></figcaption></figure>
 
-**ハッキングキャリア**に興味がある方や、**解読不能なものをハック**したい方 - **採用中です！**（_流暢なポーランド語の読み書きが必要です_）。
+**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、ハッカーによって作成されたプレミアム**バグバウンティプラットフォーム**です！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**のバウンティを獲得しましょう！
 
-{% embed url="https://www.stmcyber.com/careers" %}
+{% embed url="https://go.intigriti.com/hacktricks" %}
 
 <details>
 
-<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでのAWSハッキング**を学びましょう！</summary>
+<summary><strong>**ゼロからヒーローまでのAWSハッキングを学ぶ**</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法：
+HackTricksをサポートする他の方法:
 
 * **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)を**フォロー**する
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
