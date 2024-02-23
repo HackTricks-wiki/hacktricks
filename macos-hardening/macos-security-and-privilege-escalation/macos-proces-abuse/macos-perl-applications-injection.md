@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**する
-- **HackTricks**（https://github.com/carlospolop/hacktricks）と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する。
+- **ハッキングテクニックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
 
 </details>
 
 ## `PERL5OPT`および`PERL5LIB`環境変数を介して
 
-環境変数PERL5OPTを使用すると、perlが任意のコマンドを実行することが可能です。\
+環境変数`PERL5OPT`を使用すると、perlが任意のコマンドを実行することが可能です。\
 たとえば、次のスクリプトを作成します：
 
 {% code title="test.pl" %}
@@ -26,7 +26,7 @@ print "Hello from the Perl script!\n";
 ```
 {% endcode %}
 
-次に、**環境変数をエクスポート**して、**perl**スクリプトを実行します：
+次に、**環境変数をエクスポート**して**perl**スクリプトを実行します：
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
@@ -42,17 +42,17 @@ system('whoami');
 ```
 {% endcode %}
 
-その後、環境変数を使用します：
+そして、環境変数を使用します：
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
 ## 依存関係を介して
 
-Perlを実行している際に、依存関係フォルダの順序をリストアップすることが可能です。
+Perlを実行している際に、依存関係フォルダの順序をリストアップすることが可能です：
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
-次のようなものを返します：
+次のようになります：
 ```bash
 /Library/Perl/5.30/darwin-thread-multi-2level
 /Library/Perl/5.30
@@ -64,13 +64,13 @@ perl -e 'print join("\n", @INC)'
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-いくつかの返されたフォルダは存在しないが、**`/Library/Perl/5.30`** は**存在**し、**SIP** によって**保護されていない**上に、**SIP によって保護されているフォルダよりも前に位置している**。したがって、誰かがそのフォルダを悪用してスクリプトの依存関係を追加し、高特権のPerlスクリプトがそれを読み込むことができる可能性があります。
+いくつかの返されたフォルダは存在しない場合がありますが、**`/Library/Perl/5.30`** は**存在します**。これは**SIP**によって**保護されていません**し、**SIPによって保護されたフォルダよりも前に**あります。したがって、誰かがそのフォルダを悪用してスクリプトの依存関係を追加し、高特権のPerlスクリプトがそれを読み込むことができます。
 
 {% hint style="warning" %}
-ただし、そのフォルダに書き込むには**root権限が必要**であり、現在ではこの**TCCプロンプト**が表示されます：
+ただし、そのフォルダに書き込むには**root権限が必要**であり、現在ではこのような**TCCプロンプト**が表示されます：
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
 
 たとえば、スクリプトが**`use File::Basename;`**をインポートしている場合、`/Library/Perl/5.30/File/Basename.pm`を作成して任意のコードを実行させることが可能です。
 

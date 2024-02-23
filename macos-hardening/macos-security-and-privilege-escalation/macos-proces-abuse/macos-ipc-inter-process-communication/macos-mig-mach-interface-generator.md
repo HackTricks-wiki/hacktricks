@@ -2,23 +2,23 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>で学ぶ！</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksにあなたの会社を広告掲載したい場合**や**HackTricksをPDFでダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**テレグラムグループ**](https://t.me/peass)に**参加する**か、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを**共有する**。
+- **HackTricksで企業を宣伝したい**か**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する
+- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。
 
 </details>
 
-MIGは**Mach IPCコード作成のプロセスを簡素化するために作られました**。基本的には、与えられた定義でサーバーとクライアントが通信するために必要なコードを**生成します**。生成されたコードが見づらい場合でも、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードを持つことができます。
+MIGは**Mach IPCのコード作成プロセスを簡素化**するために作成されました。基本的には、サーバーとクライアントが指定された定義と通信するために**必要なコードを生成**します。生成されたコードが醜い場合でも、開発者はそれをインポートするだけで、彼のコードは以前よりもはるかにシンプルになります。
 
 ### 例
 
-定義ファイルを作成します。この場合は非常にシンプルな関数です：
+次のような非常にシンプルな関数を持つ定義ファイルを作成します：
 
 {% code title="myipc.defs" %}
 ```cpp
@@ -35,17 +35,15 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-```
 {% endcode %}
 
-migを使用して、Subtract関数を呼び出すために相互に通信できるサーバーとクライアントのコードを生成します：
-```
+今度は、migを使用して、互いに通信し合い、Subtract関数を呼び出すためのサーバーおよびクライアントコードを生成します:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
 現在のディレクトリにいくつかの新しいファイルが作成されます。
 
-ファイル **`myipcServer.c`** と **`myipcServer.h`** には、構造体 **`SERVERPREFmyipc_subsystem`** の宣言と定義が含まれており、これは基本的に受信したメッセージIDに基づいて呼び出す関数を定義しています（開始番号として500を指定しました）：
+**`myipcServer.c`** と **`myipcServer.h`** のファイルには、受信したメッセージIDに基づいて呼び出す関数を基本的に定義する **`SERVERPREFmyipc_subsystem`** 構造体の宣言と定義が含まれています（開始番号は500と指定されています）:
 
 {% tabs %}
 {% tab title="myipcServer.c" %}
@@ -66,7 +64,7 @@ myipc_server_routine,
 ```
 {% endtab %}
 
-{% tab title="myipcServer.h" %}
+{% tab title="myipcServer.h" %}次の手順は、`myipcServer.h`ファイルの内容です。{% endtab %}
 ```c
 /* Description of this subsystem, for use in direct RPC */
 extern const struct SERVERPREFmyipc_subsystem {
@@ -82,7 +80,7 @@ routine[1];
 {% endtab %}
 {% endtabs %}
 
-前述の構造体に基づいて、関数 **`myipc_server_routine`** は **メッセージID** を取得し、適切な関数を呼び出すために返します:
+前の構造に基づいて、関数**`myipc_server_routine`**は**メッセージID**を取得し、適切な呼び出すべき関数を返します:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -97,16 +95,16 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-この例では定義ファイルに1つの関数のみを定義しましたが、もし複数の関数を定義していた場合、それらは**`SERVERPREFmyipc_subsystem`** の配列内に存在し、最初の関数がID **500** に、次の関数がID **501** に割り当てられていたでしょう...
+この例では、定義で関数を1つだけ定義していますが、複数の関数を定義した場合、それらは**`SERVERPREFmyipc_subsystem`**の配列内にあり、最初の関数はID **500**に割り当てられ、2番目の関数はID **501**に割り当てられるでしょう...
 
-実際には、この関連性は **`myipcServer.h`** の構造体 **`subsystem_to_name_map_myipc`** で識別することが可能です：
+実際には、この関係を**`myipcServer.h`**の**`subsystem_to_name_map_myipc`**構造体で特定することが可能です:
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-サーバーを動作させるために重要な別の関数は、受信したIDに関連する**関数を実際に呼び出す** **`myipc_server`** です：
+最後に、サーバーを動作させるための重要な関数は**`myipc_server`**になります。これは、受信したIDに関連する関数を実際に**呼び出す**ものです：
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -123,7 +121,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* 最小サイズ: routine() が異なる場合は更新されます */
+/* 最小サイズ：異なる場合はroutine()が更新します */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -140,9 +138,9 @@ return FALSE;
 }
 </code></pre>
 
-IDによって関数を呼び出すためにアクセスする前に強調表示された行を確認してください。
+以前に強調された行をチェックして、IDによって呼び出す関数にアクセスします。
 
-以下は、クライアントがサーバーから関数Subtractを呼び出すことができる簡単な**サーバー**と**クライアント**を作成するコードです：
+以下は、サーバーとクライアントを作成するコードで、クライアントがサーバーから関数を呼び出すことができるシンプルな**サーバー**と**クライアント**のコードです：
 
 {% tabs %}
 {% tab title="myipc_server.c" %}
@@ -203,17 +201,16 @@ printf("Port right name %d\n", port);
 USERPREFSubtract(port, 40, 2);
 }
 ```
-{% endtab %}
-{% endtabs %}
+### バイナリ解析
 
-### バイナリ分析
+多くのバイナリが今やMIGを使用してmachポートを公開しているため、**MIGが使用されたことを特定**し、各メッセージIDでMIGが実行する**関数を特定**する方法を知ることが興味深いです。
 
-多くのバイナリがmachポートを公開するためにMIGを使用しているため、**MIGが使用されたことを特定する**方法と、各メッセージIDに対して**MIGが実行する関数を特定する**ことが重要です。
-
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)はMach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定することができます：
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)は、Mach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定できます。
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
+**`myipc_server`** 関数は、受信したメッセージ ID に応じて正しい関数を呼び出す機能を担当することが以前に言及されました。ただし、通常はバイナリのシンボル（関数名なし）を持っていないため、**デコンパイルしたものがどのように見えるかを確認する**ことが興味深いです。なぜなら、この関数のコードは常に非常に似ているからです（この関数のコードは公開された関数に依存しない）：
+
 {% tabs %}
 {% tab title="myipc_server decompiled 1" %}
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
@@ -229,19 +226,19 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // この関数を識別するのに役立つ sign_extend_64 の呼び出し
-// rax には呼び出す必要がある関数へのポインタが格納される
-// 関数アドレス配列のアドレス 0x100004040 の使用をチェック
-// 0x1f4 = 500 (開始ID)
+// これにより、呼び出す必要のある呼び出しのポインタが rax に格納されます
+// アドレス 0x100004040（関数アドレス配列の使用）を確認します
+// 0x1f4 = 500（開始 ID）
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// if-else で、if は false を返し、else は適切な関数を呼び出して true を返す
+// もし - そうでなければ、if は false を返し、else は正しい関数を呼び出して true を返します
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
 var_4 = 0x0;
 }
 else {
-// 2つの引数で適切な関数を呼び出す計算されたアドレス
+// 2 つの引数を使用して適切な関数を呼び出す計算されたアドレス
 <strong>                    (var_20)(var_10, var_18);
 </strong>                    var_4 = 0x1;
 }
@@ -258,7 +255,7 @@ return rax;
 {% endtab %}
 
 {% tab title="myipc_server decompiled 2" %}
-これは、異なる Hopper 無料版で逆コンパイルされた同じ関数です:
+これは、異なる Hopper free バージョンでデコンパイルされた同じ関数です：
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -290,7 +287,7 @@ r8 = 0x1;
 }
 if ((r8 &#x26; 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
-// 0x1f4 = 500 (開始ID)
+// 0x1f4 = 500（開始 ID）
 <strong>                    r8 = r8 - 0x1f4;
 </strong>                    asm { smaddl     x8, w8, w9, x10 };
 r8 = *(r8 + 0x8);
@@ -301,15 +298,15 @@ if (CPU_FLAGS &#x26; NE) {
 r8 = 0x1;
 }
 }
-// 前のバージョンと同じ if-else
-// 関数アドレス配列のアドレス 0x100004040 の使用をチェック
+// 前のバージョンと同じ if else
+// アドレス 0x100004040（関数アドレス配列の使用）を確認します
 <strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
 }
 else {
-// 関数があるべき計算されたアドレスへの呼び出し
+// 関数があるべき計算されたアドレスに呼び出し
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -333,24 +330,6 @@ return r0;
 {% endtab %}
 {% endtabs %}
 
-実際には、関数 **`0x100004000`** に行くと、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は実装されている **関数** の **アドレス** であり、構造体は 0x28 バイトを取ります。したがって、0x28 バイトごとに（バイト 0 から始まる）8 バイトを取得すると、それが呼び出される **関数のアドレス** になります:
-
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-このデータは [**この Hopper スクリプトを使用して**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) 抽出できます。
-
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert) で AWS ハッキングをゼロからヒーローまで学ぶ</strong></summary>
-
-HackTricks をサポートする他の方法:
-
-* HackTricks に **あなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい** 場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com) を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見する、私たちの独占的な [**NFT**](https://opensea.io/collection/the-peass-family) コレクション
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に **参加する** か、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) で **フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを共有する。
-
-</details>
+実際には、**`0x100004000`** 関数に移動すると、**`routine_descriptor`** 構造体の配列が見つかります。構造体の最初の要素は、**関数が実装されているアドレス**であり、**構造体は 0x28 バイト**を取るため、0 バイトから始まる 0x28 バイトごとに 8 バイトを取得し、それが**呼び出される関数のアドレス**になります。
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)**に参加するか、[**telegramグループ**](https://t.me/peass)**に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングテクニックを共有するには、[**HackTricks**](https://github.com/carlospolop/hacktricks)**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)**のGitHubリポジトリにPRを提出してください。**

