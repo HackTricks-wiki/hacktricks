@@ -161,6 +161,7 @@
   * [macOS Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/macos-privilege-escalation.md)
   * [macOS Proces Abuse](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/README.md)
     * [macOS Dirty NIB](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-dirty-nib.md)
+    * [macOS Chromium Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md)
     * [macOS Electron Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-electron-applications-injection.md)
     * [macOS Function Hooking](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-function-hooking.md)
     * [macOS IPC - Inter Process Communication](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/README.md)
@@ -509,7 +510,7 @@
 * [47808/udp - Pentesting BACNet](network-services-pentesting/47808-udp-bacnet.md)
 * [50030,50060,50070,50075,50090 - Pentesting Hadoop](network-services-pentesting/50030-50060-50070-50075-50090-pentesting-hadoop.md)
 
-## 🕸 Pentesting Web
+## 🕸️ Pentesting Web
 
 * [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology/README.md)
 * [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
@@ -664,7 +665,7 @@
   * [CSS Injection](pentesting-web/xs-search/css-injection/README.md)
     * [CSS Injection Code](pentesting-web/xs-search/css-injection/css-injection-code.md)
 
-## ⛈ Cloud Security
+## ⛈️ Cloud Security
 
 * [Pentesting Kubernetes](https://cloud.hacktricks.xyz/pentesting-cloud/kubernetes-security)
 * [Pentesting Cloud (AWS, GCP, Az...)](https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology)
@@ -722,7 +723,7 @@
 * [ICMPsh](backdoors/icmpsh.md)
 * [Cobalt Strike](c2/cobalt-strike.md)
 
-## ✍ TODO
+## ✍️ TODO
 
 * [Other Big References](misc/references.md)
 * [Rust Basics](todo/rust-basics.md)

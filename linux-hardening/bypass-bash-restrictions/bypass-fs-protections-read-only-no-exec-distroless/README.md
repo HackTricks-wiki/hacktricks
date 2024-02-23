@@ -14,7 +14,7 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando!** (_se requiere dominio del polaco escrito y hablado_).
 
@@ -29,7 +29,7 @@ En los siguientes videos puedes encontrar las técnicas mencionadas en esta pág
 
 ## Escenario de solo lectura / sin ejecución
 
-Es cada vez más común encontrar máquinas Linux montadas con protección de sistema de archivos en **solo lectura (ro)**, especialmente en contenedores. Esto se debe a que ejecutar un contenedor con sistema de archivos ro es tan fácil como establecer **`readOnlyRootFilesystem: true`** en el `securitycontext`:
+Es cada vez más común encontrar máquinas Linux montadas con **protección de sistema de archivos de solo lectura (ro)**, especialmente en contenedores. Esto se debe a que ejecutar un contenedor con sistema de archivos ro es tan fácil como establecer **`readOnlyRootFilesystem: true`** en el `securitycontext`:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -47,12 +47,12 @@ securityContext:
 Sin embargo, incluso si el sistema de archivos está montado como ro, **`/dev/shm`** seguirá siendo escribible, por lo que es falso que no podamos escribir nada en el disco. Sin embargo, esta carpeta estará **montada con protección sin ejecución**, por lo que si descargas un binario aquí, **no podrás ejecutarlo**.
 
 {% hint style="warning" %}
-Desde la perspectiva de un equipo rojo, esto hace que sea **complicado descargar y ejecutar** binarios que no estén en el sistema (como puertas traseras o enumeradores como `kubectl`).
+Desde la perspectiva de un equipo rojo, esto **complica la descarga y ejecución** de binarios que no están en el sistema (como puertas traseras o enumeradores como `kubectl`).
 {% endhint %}
 
 ## Salto más fácil: Scripts
 
-Ten en cuenta que mencioné binarios, puedes **ejecutar cualquier script** siempre que el intérprete esté dentro de la máquina, como un **script de shell** si `sh` está presente o un **script de python** si `python` está instalado.
+Ten en cuenta que mencioné binarios, puedes **ejecutar cualquier script** siempre que el intérprete esté dentro de la máquina, como un **script de shell** si `sh` está presente o un **script de Python** si `python` está instalado.
 
 Sin embargo, esto no es suficiente para ejecutar tu puerta trasera binaria u otras herramientas binarias que puedas necesitar ejecutar.
 
@@ -60,14 +60,14 @@ Sin embargo, esto no es suficiente para ejecutar tu puerta trasera binaria u otr
 
 Si deseas ejecutar un binario pero el sistema de archivos no lo permite, la mejor manera de hacerlo es **ejecutándolo desde la memoria**, ya que las **protecciones no se aplican allí**.
 
-### Salto de llamada de sistema FD + exec
+### Salto de llamada al sistema FD + exec
 
-Si tienes motores de script potentes dentro de la máquina, como **Python**, **Perl** o **Ruby**, podrías descargar el binario para ejecutarlo desde la memoria, almacenarlo en un descriptor de archivo de memoria (`create_memfd` syscall), que no estará protegido por esas protecciones y luego llamar a una **llamada de sistema `exec`** indicando el **fd como el archivo a ejecutar**.
+Si tienes motores de script potentes dentro de la máquina, como **Python**, **Perl** o **Ruby**, podrías descargar el binario para ejecutarlo desde la memoria, almacenarlo en un descriptor de archivo de memoria (`create_memfd` syscall), que no estará protegido por esas protecciones, y luego llamar a una **llamada al sistema `exec`** indicando el **fd como el archivo a ejecutar**.
 
-Para esto, puedes usar fácilmente el proyecto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Puedes pasarle un binario y generará un script en el lenguaje indicado con el **binario comprimido y codificado en b64** con las instrucciones para **decodificarlo y descomprimirlo** en un **fd** creado llamando a la llamada de sistema `create_memfd` y una llamada a la **llamada de sistema exec** para ejecutarlo.
+Para esto, puedes usar fácilmente el proyecto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Puedes pasarle un binario y generará un script en el lenguaje indicado con el **binario comprimido y codificado en b64** con las instrucciones para **decodificarlo y descomprimirlo** en un **fd** creado llamando a la llamada al sistema `create_memfd` y una llamada a la **llamada al sistema exec** para ejecutarlo.
 
 {% hint style="warning" %}
-Esto no funciona en otros lenguajes de script como PHP o Node porque no tienen una **forma predeterminada de llamar a llamadas de sistema en bruto** desde un script, por lo que no es posible llamar a `create_memfd` para crear el **fd de memoria** para almacenar el binario.
+Esto no funciona en otros lenguajes de script como PHP o Node porque no tienen una **forma predeterminada de llamar a llamadas al sistema en bruto** desde un script, por lo que no es posible llamar a `create_memfd` para crear el **fd de memoria** para almacenar el binario.
 
 Además, crear un **fd regular** con un archivo en `/dev/shm` no funcionará, ya que no se te permitirá ejecutarlo debido a que se aplicará la **protección sin ejecución**.
 {% endhint %}
@@ -93,7 +93,7 @@ Puedes encontrar un ejemplo de cómo usar **memexec para ejecutar binarios desde
 
 ### Memdlopen
 
-Con un propósito similar a DDexec, la técnica de [**memdlopen**](https://github.com/arget13/memdlopen) permite una **forma más fácil de cargar binarios** en memoria para luego ejecutarlos. Incluso podría permitir cargar binarios con dependencias.
+Con un propósito similar a DDexec, la técnica [**memdlopen**](https://github.com/arget13/memdlopen) permite una **forma más fácil de cargar binarios** en memoria para luego ejecutarlos. Incluso podría permitir cargar binarios con dependencias.
 
 ## Bypass de Distroless
 
@@ -120,14 +120,14 @@ Usando el lenguaje de script podrías **enumerar el sistema** utilizando las cap
 Si no hay protecciones de **`solo lectura/sin ejecución`** puedes abusar de tu shell inverso para **escribir en el sistema de archivos tus binarios** y **ejecutarlos**.
 
 {% hint style="success" %}
-Sin embargo, en este tipo de contenedores estas protecciones generalmente existirán, pero podrías usar las **técnicas de ejecución en memoria anteriores para evadirlas**.
+Sin embargo, en este tipo de contenedores estas protecciones generalmente existirán, pero podrías usar las **técnicas previas de ejecución en memoria para evadirlas**.
 {% endhint %}
 
 Puedes encontrar **ejemplos** de cómo **explotar algunas vulnerabilidades de RCE** para obtener **shells inversos de lenguajes de script** y ejecutar binarios desde la memoria en [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere dominio del polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere polaco escrito y hablado con fluidez_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
