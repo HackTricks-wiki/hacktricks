@@ -38,7 +38,7 @@ def main(argv):
   
   # Avoiding this address
   avoid_address = 0x080485A8
-  simulation.explore(find=good_address , avoid=avoid_address ))
+  simulation.explore(find=good_address, avoid=avoid_address)
 
   # If found a way to reach the address
   if simulation.found:
