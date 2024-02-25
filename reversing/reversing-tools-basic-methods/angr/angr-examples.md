@@ -37,7 +37,7 @@ good_address = 0x804867d
 
 # Avoiding this address
 avoid_address = 0x080485A8
-simulation.explore(find=good_address , avoid=avoid_address ))
+simulation.explore(find=good_address, avoid=avoid_address)
 
 # If found a way to reach the address
 if simulation.found:
@@ -418,8 +418,7 @@ Ten en cuenta que el archivo simbólico también podría contener datos constant
 ### Aplicando Restricciones
 
 {% hint style="info" %}
-A veces, operaciones simples como comparar 2 palabras de longitud 16 **carácter por carácter** (bucle), **cuestan** mucho a un **angr** porque necesita generar ramas **exponencialmente** ya que genera 1 rama por cada if: `2^16`\
-Por lo tanto, es más fácil **pedirle a angr que regrese a un punto anterior** (donde la parte realmente difícil ya se haya hecho) y **establecer esas restricciones manualmente**.
+A veces, operaciones simples como comparar 2 palabras de longitud 16 **carácter por carácter** (bucle), **cuestan mucho a un **angr** porque necesita generar ramas **exponencialmente** ya que genera 1 rama por cada if: `2^16`. Por lo tanto, es más fácil **pedirle a angr que regrese a un punto anterior** (donde la parte realmente difícil ya se haya hecho) y **establecer esas restricciones manualmente**.
 {% endhint %}
 ```python
 # After perform some complex poperations to the input the program checks
@@ -754,7 +753,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Binarios estáticos
+### Binarios Estáticos
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -823,7 +822,7 @@ main(sys.argv)
 ```
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
