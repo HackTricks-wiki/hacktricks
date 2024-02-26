@@ -1,4 +1,4 @@
-# Про автора
+# About the author
 
 <details>
 
