@@ -83,7 +83,7 @@ Note that we do not currently have vulnerability data for your image.
 * [**`trivy`**](https://github.com/aquasecurity/trivy)
 
 ```bash
-trivy -q -f json <ontainer_name>:<tag>
+trivy -q -f json <container_name>:<tag>
 ```
 
 * [**`snyk`**](https://docs.snyk.io/snyk-cli/getting-started-with-the-cli)
