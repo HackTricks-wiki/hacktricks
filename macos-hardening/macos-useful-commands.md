@@ -137,7 +137,7 @@ Check for **suspicious** applications installed and **privileges** over the.inst
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
-launchtl list #Services
+launchctl list #Services
 ```
 
 ### User Processes
