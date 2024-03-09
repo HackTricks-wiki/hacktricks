@@ -4,33 +4,25 @@
 
 <summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけます
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れます
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングトリックを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングトリックを共有するために、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください**。
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+## Proxmark3を使用したRFIDシステムへの攻撃
 
-最も重要な脆弱性を見つけて修正を迅速化します。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-***
-
-## Proxmark3を使用したRFIDシステムの攻撃
-
-最初に必要なのは[**Proxmark3**](https://proxmark.com)と[**ソフトウェアとその依存関係をインストール**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**します**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)。
+最初に必要なのは、[**Proxmark3**](https://proxmark.com)を持っており、[**ソフトウェアをインストールし、その依存関係を解決**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**します**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)。
 
 ### MIFARE Classic 1KBの攻撃
 
-**16のセクター**があり、それぞれに**4つのブロック**があり、各ブロックには**16B**が含まれています。 UIDはセクター0のブロック0にあります（変更できません）。\
-各セクターにアクセスするには、**2つのキー**（**A**と**B**）が必要で、これらは**各セクターのブロック3に保存**されています（セクタートレーラー）。セクタートレーラーには、各ブロックの**読み取りおよび書き込み**権限を与える**アクセスビット**も保存されています。\
-2つのキーは、最初のキーを知っている場合に読み取り権限を与え、2番目のキーを知っている場合に書き込み権限を与えるのに役立ちます（例えば）。
+**16のセクター**があり、それぞれに**4つのブロック**があり、各ブロックには**16B**が含まれています。UIDはセクター0のブロック0にあります（変更できません）。\
+各セクターにアクセスするには、**2つの鍵**（**A**と**B**）が必要で、これらは各セクターの**ブロック3に保存**されています（セクタートレーラー）。セクタートレーラーには、各ブロックの**読み取りおよび書き込み**権限を与える**アクセスビット**も保存されています。\
+2つの鍵は、最初の鍵を知っている場合に読み取り権限を与え、2番目の鍵を知っている場合に書き込み権限を与えるために役立ちます（例えば）。
 
-複数の攻撃が実行できます
+複数の攻撃が実行できます。
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -49,11 +41,11 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Proxmark3は、**盗聴**や**Tag to Reader communication**などの他のアクションを実行することができます。このカードでは、**暗号化操作が弱い**ため、通信をスニッフィングして使用されているキーを計算することができます（`mfkey64`ツール）。
+Proxmark3は、**盗聴**や**Tag to Reader通信**などの他のアクションを実行することができます。このカードでは、**暗号操作が弱い**ため、通信をスニッフィングして使用されているキーを計算することができます（`mfkey64`ツール）。
 
-### Raw Commands
+### 生のコマンド
 
-IoTシステムでは、**非ブランド品や非商用タグ**が使用されることがあります。この場合、Proxmark3を使用してタグにカスタム**生のコマンドを送信**することができます。
+IoTシステムでは、**非ブランドまたは非商用のタグ**が使用されることがあります。この場合、Proxmark3を使用してタグに対してカスタム**生のコマンドを送信**することができます。
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -63,7 +55,7 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-この情報を使用して、カードに関する情報やそれとの通信方法について調査できます。Proxmark3を使用すると、`hf 14a raw -p -b 7 26`のような生のコマンドを送信できます。
+この情報を使用して、カードに関する情報やそれとの通信方法について検索を試みることができます。Proxmark3を使用すると、`hf 14a raw -p -b 7 26`のような**rawコマンド**を送信できます。
 
 ### スクリプト
 
@@ -71,23 +63,6 @@ Proxmark3ソフトウェアには、簡単なタスクを実行するために�
 ```
 proxmark3> script run mfkeys
 ```
-**有効なカード**のデータをコピーして、**タグリーダー**を**ファズ**するスクリプトを作成できます。ただし、1つ以上の**ランダムなバイト**を**ランダム化**し、**リーダーがクラッシュ**するかどうかを確認する**Luaスクリプト**を作成してください。
-
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-最も重要な脆弱性を見つけて修正を迅速化できます。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリ、クラウドシステムまでの問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-
-<details>
-
-<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでのAWSハッキング**を学びましょう！</summary>
-
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセス**したいですか？または、**HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFT](https://opensea.io/collection/the-peass-family)コレクションを見つけます
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れます
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
-
-</details>
+```
+ある**有効なカード**のデータをコピーして、**タグリーダー**を**fuzz**するスクリプトを作成できます。ただし、1つ以上の**ランダムなバイト**を**ランダム化**し、**リーダーがクラッシュ**するかどうかを確認する**Luaスクリプト**を作成してください。
+```
