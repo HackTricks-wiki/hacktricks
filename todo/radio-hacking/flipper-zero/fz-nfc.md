@@ -2,27 +2,19 @@
 
 <details>
 
-<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを入手しましょう。
-* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するには、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください**。
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-最も重要な脆弱性を見つけて修正できるようにしましょう。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
-
-***
-
 ## イントロ <a href="#9wrzi" id="9wrzi"></a>
 
-RFIDとNFCに関する情報は次のページをチェックしてください：
+RFIDとNFCに関する情報は次のページを参照してください：
 
 {% content-ref url="../../../radio-hacking/pentesting-rfid.md" %}
 [pentesting-rfid.md](../../../radio-hacking/pentesting-rfid.md)
@@ -71,43 +63,36 @@ NFCに関するイントロについては、[**このページ**](../../../radi
 
 ### 読み取り
 
-Flipper Zeroは**NFCカードを読み取る**ことができますが、ISO 14443に基づく**すべてのプロトコルを理解しているわけではありません**。ただし、**UIDは低レベルの属性**であるため、**UIDは既に読み取られているが、高レベルのデータ転送プロトコルがまだ不明**な状況に陥ることがあります。UIDをプリミティブリーダーで使用して認証する場合、Flipperを使用してUIDを読み取り、エミュレート、手動で入力することができます。
+Flipper Zeroは**NFCカードを読み取る**ことができますが、ISO 14443に基づく**すべてのプロトコルを理解しているわけではありません**。ただし、**UIDは低レベルの属性**であるため、**UIDが既に読み取られているが、高レベルのデータ転送プロトコルがまだ不明**な状況に陥ることがあります。プリミティブリーダーではUIDを使用して認証する場合、Flipperを使用してUIDを読み取り、エミュレート、手動で入力することができます。
 
-#### UIDの読み取りと内部データの読み取り <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### UIDの読み取りと内部データの読み取りの比較 <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../.gitbook/assets/image (26).png" alt=""><figcaption></figcaption></figure>
 
 Flipperでは、13.56 MHzタグの読み取りを2つの部分に分けることができます：
 
-* **低レベルの読み取り** — UID、SAK、ATQAのみを読み取ります。Flipperは、カードから読み取ったこのデータに基づいて高レベルのプロトコルを推測しようとします。これは、特定の要因に基づいた仮定にすぎないため、100％確実ではありません。
+* **低レベルの読み取り** — UID、SAK、ATQAのみを読み取ります。Flipperは、カードから読み取ったこのデータに基づいて高レベルのプロトコルを推測しようとします。これは、特定の要因に基づく推測に過ぎないため、100％確実ではありません。
 * **高レベルの読み取り** — 特定の高レベルプロトコルを使用してカードのメモリからデータを読み取ります。これは、Mifare Ultralightのデータの読み取り、Mifare Classicからセクターの読み取り、PayPass/Apple Payからカードの属性の読み取りなどが該当します。
 
 ### 特定の読み取り
 
-Flipper Zeroが低レベルデータからカードのタイプを特定できない場合、`Extra Actions`で`Read Specific Card Type`を選択し、**読み取りたいカードのタイプを手動で指定**できます。
+Flipper Zeroが低レベルデータからカードのタイプを特定できない場合、`Extra Actions`で`Read Specific Card Type`を選択し、**手動で**読み取りたいカードのタイプを指定できます。
 
 #### EMV銀行カード（PayPass、payWave、Apple Pay、Google Pay） <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-UIDを単に読み取るだけでなく、銀行カードから多くのデータを抽出することができます。カードの表面にある16桁の**完全なカード番号**、**有効期限**、場合によっては**所有者の名前**と**最近の取引のリスト**さらに、**この方法ではCVVは読み取れません**（カードの裏面にある3桁の番号）。また、**銀行カードはリプレイ攻撃から保護されている**ため、Flipperでコピーしてから何かを支払うためにエミュレートしようとしても機能しません。
-
-## 参照
+UIDを単に読み取るだけでなく、銀行カードから多くのデータを抽出することができます。銀行カードのフロントにある16桁の**完全なカード番号**、**有効期限**、場合によっては**所有者の名前**と**最近の取引のリスト**さらに、**この方法ではCVVは読み取れません**（カード裏面の3桁）。また、**銀行カードはリプレイ攻撃から保護されている**ため、Flipperでコピーしてから何かを支払うためにエミュレートしようとしても機能しません。
+## 参考文献
 
 * [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
-
-<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
-
-最も重要な脆弱性を見つけて修正できるようにしましょう。Intruderは攻撃面を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまでの技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) 今すぐ。
-
-{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 <details>
 
 <summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを入手しましょう。
-* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングトリックを共有するために、PRを** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
