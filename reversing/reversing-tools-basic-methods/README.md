@@ -6,7 +6,7 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
@@ -33,15 +33,15 @@ Software:
 * [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 * [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## Descompilador .Net
+## Descompilador .NET
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
 dotPeek es un descompilador que **descompila y examina múltiples formatos**, incluyendo **bibliotecas** (.dll), archivos de metadatos de Windows (.winmd) y **ejecutables** (.exe). Una vez descompilada, una asamblea se puede guardar como un proyecto de Visual Studio (.csproj).
 
-El mérito aquí es que si se necesita restaurar un código fuente perdido de una asamblea heredada, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a lo largo del código descompilado, convirtiéndolo en una de las herramientas perfectas para el **análisis de algoritmos de Xamarin.**
+El mérito aquí es que si se necesita restaurar un código fuente perdido de una asamblea heredada, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a lo largo del código descompilado, convirtiéndolo en una de las herramientas perfectas para el análisis de algoritmos de **Xamarin**.
 
-### [.Net Reflector](https://www.red-gate.com/products/reflector/)
+### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
 Con un modelo de complemento integral y una API que extiende la herramienta para adaptarse a tus necesidades exactas, .NET Reflector ahorra tiempo y simplifica el desarrollo. Echemos un vistazo a la multitud de servicios de ingeniería inversa que esta herramienta proporciona:
 
@@ -55,13 +55,12 @@ Con un modelo de complemento integral y una API que extiende la herramienta para
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Complemento de ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
-Si necesitas **descompilar**, **modificar** y **recompilar** nuevamente, puedes usar: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) (**Clic derecho -> Modificar Método** para cambiar algo dentro de una función).\
-También puedes probar [https://www.jetbrains.com/es-es/decompiler/](https://www.jetbrains.com/es-es/decompiler/)
+Si necesitas **descompilar**, **modificar** y **recompilar** nuevamente, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork activamente mantenido de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).
 
 ### Registro de DNSpy
 
-Para hacer que **DNSpy registre cierta información en un archivo**, puedes usar estas líneas de .Net:
-```bash
+Para hacer que **DNSpy registre alguna información en un archivo**, puedes usar este fragmento:
+```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
@@ -87,35 +86,35 @@ Y haz clic en **compilar**:
 
 ![](<../../.gitbook/assets/image (314) (1) (1).png>)
 
-Luego guarda el nuevo archivo en _**Archivo >> Guardar módulo...**_:
+Luego guarda el nuevo archivo a través de _**Archivo >> Guardar módulo...**_:
 
 ![](<../../.gitbook/assets/image (279).png>)
 
-Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se alcance** o algunas **variables no existan**.
+Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o algunas **variables no existan**.
 
-Luego, si tu aplicación .Net está siendo **ejecutada** por **IIS** puedes **reiniciarla** con:
+Luego, si tu aplicación .NET está siendo **ejecutada** por **IIS**, puedes **reiniciarla** con:
 ```
 iisreset /noforce
 ```
-Luego, para comenzar a depurar, debes cerrar todos los archivos abiertos y dentro de la pestaña **Depurar** seleccionar **Adjuntar a proceso...**:
+Luego, para comenzar a depurar, debes cerrar todos los archivos abiertos y dentro de la **pestaña de Depuración** seleccionar **Adjuntar a Proceso...**:
 
 ![](<../../.gitbook/assets/image (280).png>)
 
-Luego selecciona **w3wp.exe** para adjuntarte al servidor **IIS** y haz clic en **Adjuntar**:
+Luego selecciona **w3wp.exe** para adjuntarlo al **servidor IIS** y haz clic en **adjuntar**:
 
 ![](<../../.gitbook/assets/image (281).png>)
 
-Ahora que estamos depurando el proceso, es hora de detenerlo y cargar todos los módulos. Primero haz clic en _Depurar >> Detener todo_ y luego haz clic en _**Depurar >> Ventanas >> Módulos**_:
+Ahora que estamos depurando el proceso, es hora de detenerlo y cargar todos los módulos. Primero haz clic en _Depurar >> Detener Todo_ y luego haz clic en _**Depurar >> Ventanas >> Módulos**_:
 
 ![](<../../.gitbook/assets/image (286).png>)
 
 ![](<../../.gitbook/assets/image (283).png>)
 
-Haz clic en cualquier módulo en **Módulos** y selecciona **Abrir todos los módulos**:
+Haz clic en cualquier módulo en **Módulos** y selecciona **Abrir Todos los Módulos**:
 
 ![](<../../.gitbook/assets/image (284).png>)
 
-Haz clic derecho en cualquier módulo en **Explorador de ensamblados** y haz clic en **Ordenar ensamblados**:
+Haz clic derecho en cualquier módulo en **Explorador de Ensamblajes** y haz clic en **Ordenar Ensamblajes**:
 
 ![](<../../.gitbook/assets/image (285).png>)
 
@@ -130,7 +129,7 @@ Haz clic derecho en cualquier módulo en **Explorador de ensamblados** y haz cli
 
 * **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
 * Seleccionar el depurador **Windbg**
-* Seleccionar "**Suspender en carga/descarga de biblioteca**"
+* Seleccionar "**Suspender en carga/descarga de librerías**"
 
 ![](<../../.gitbook/assets/image (135).png>)
 
@@ -138,14 +137,14 @@ Haz clic derecho en cualquier módulo en **Explorador de ensamblados** y haz cli
 
 ![](<../../.gitbook/assets/image (136).png>)
 
-Entonces, al comenzar a depurar, la ejecución se detendrá cuando se cargue cada DLL, por lo que cuando rundll32 cargue tu DLL, la ejecución se detendrá.
+Entonces, al comenzar a depurar, **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
 
 Pero, ¿cómo puedes acceder al código de la DLL que se cargó? Usando este método, no sé cómo.
 
 ### Usando x64dbg/x32dbg
 
 * **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
-* **Cambiar la línea de comandos** ( _Archivo --> Cambiar línea de comandos_ ) y establecer la ruta de la DLL y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii\_2.dll",DLLMain
+* **Cambiar la Línea de Comando** ( _Archivo --> Cambiar Línea de Comando_ ) y establecer la ruta de la DLL y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii\_2.dll",DLLMain
 * Cambiar _Opciones --> Configuración_ y seleccionar "**Entrada de DLL**".
 * Luego **iniciar la ejecución**, el depurador se detendrá en cada dll principal, en algún momento te **detendrás en la Entrada de DLL de tu dll**. Desde allí, simplemente busca los puntos donde deseas colocar un punto de interrupción.
 
@@ -169,19 +168,19 @@ Luego, al observar esto, puedes ver cuándo se detuvo la ejecución en la dll qu
 
 ## Shellcodes
 
-### Depuración de un shellcode con blobrunner
+### Depurando un shellcode con blobrunner
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) **asignará** el **shellcode** dentro de un espacio de memoria, te **indicará** la **dirección de memoria** donde se asignó el shellcode y **detendrá** la ejecución.\
 Luego, debes **adjuntar un depurador** (Ida o x64dbg) al proceso y colocar un **punto de interrupción en la dirección de memoria indicada** y **resumir** la ejecución. De esta manera estarás depurando el shellcode.
 
-La página de lanzamientos en GitHub contiene archivos zip que contienen las versiones compiladas: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+La página de lanzamientos en GitHub contiene archivos zip con las versiones compiladas: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
 
 {% content-ref url="blobrunner.md" %}
 [blobrunner.md](blobrunner.md)
 {% endcontent-ref %}
 
-### Depuración de un shellcode con jmp2it
+### Depurando un shellcode con jmp2it
 
 [**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego debes **adjuntar el depurador** al proceso, **iniciar, esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno, ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
 
@@ -189,15 +188,15 @@ Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguien
 
 Puedes descargar una versión compilada de [jmp2it en la página de lanzamientos](https://github.com/adamkramer/jmp2it/releases/).
 
-### Depuración de shellcode usando Cutter
+### Depurando shellcode usando Cutter
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la interfaz gráfica de radare. Con Cutter puedes emular el shellcode e inspeccionarlo dinámicamente.
 
-Cabe destacar que Cutter te permite "Abrir archivo" y "Abrir shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
+Ten en cuenta que Cutter te permite "Abrir Archivo" y "Abrir Shellcode". En mi caso, cuando abrí el shellcode como archivo, lo descompiló correctamente, pero cuando lo abrí como shellcode no lo hizo:
 
 ![](<../../.gitbook/assets/image (400).png>)
 
-Para iniciar la emulación en el lugar deseado, establece un punto de interrupción allí y aparentemente Cutter iniciará automáticamente la emulación desde ese punto:
+Para iniciar la emulación en el lugar que desees, establece un punto de interrupción allí y aparentemente Cutter iniciará automáticamente la emulación desde allí:
 
 ![](<../../.gitbook/assets/image (399).png>)
 
@@ -207,10 +206,10 @@ Puedes ver la pila, por ejemplo, dentro de un volcado hexadecimal:
 
 ![](<../../.gitbook/assets/image (402).png>)
 
-### Desofuscación de shellcode y obtención de funciones ejecutadas
+### Desofuscando shellcode y obteniendo funciones ejecutadas
 
 Deberías probar [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7\&pid=152).\
-Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se está **descodificando** en la memoria.
+Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se está **descodificando** en memoria.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -223,11 +222,11 @@ scDbg también cuenta con un lanzador gráfico donde puedes seleccionar las opci
 
 ![](<../../.gitbook/assets/image (398).png>)
 
-La opción **Crear volcado** volcará el shellcode final si se realiza algún cambio en el shellcode dinámicamente en la memoria (útil para descargar el shellcode decodificado). El **desplazamiento de inicio** puede ser útil para iniciar el shellcode en un desplazamiento específico. La opción **Depurar Shell** es útil para depurar el shellcode utilizando la terminal scDbg (sin embargo, considero que cualquiera de las opciones explicadas anteriormente es mejor para este propósito, ya que podrás utilizar Ida o x64dbg).
+La opción **Create Dump** volcará el shellcode final si se realiza algún cambio en el shellcode dinámicamente en la memoria (útil para descargar el shellcode decodificado). El **start offset** puede ser útil para iniciar el shellcode en un desplazamiento específico. La opción **Debug Shell** es útil para depurar el shellcode utilizando la terminal scDbg (sin embargo, considero que cualquiera de las opciones explicadas anteriormente es mejor para este propósito, ya que podrás utilizar Ida o x64dbg).
 
 ### Desensamblaje usando CyberChef
 
-Cargue su archivo de shellcode como entrada y utilice la siguiente receta para descompilarlo: [https://gchq.github.io/CyberChef/#recipe=To\_Hex('Space',0)Disassemble\_x86('32','Full%20x86%20architecture',16,0,true,true)](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('Space',0\)Disassemble\_x86\('32','Full%20x86%20architecture',16,0,true,true\))
+Carga tu archivo de shellcode como entrada y utiliza la siguiente receta para descompilarlo: [https://gchq.github.io/CyberChef/#recipe=To\_Hex('Space',0)Disassemble\_x86('32','Full%20x86%20architecture',16,0,true,true)](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('Space',0\)Disassemble\_x86\('32','Full%20x86%20architecture',16,0,true,true\))
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -251,7 +250,7 @@ Para encontrar el **punto de entrada** busca las funciones por `::main` como en:
 
 ![](<../../.gitbook/assets/image (612).png>)
 
-En este caso, el binario se llamaba autenticador, por lo que es bastante obvio que esta es la función principal interesante.\
+En este caso, el binario se llamaba authenticator, por lo que es bastante obvio que esta es la función principal interesante.\
 Teniendo el **nombre** de las **funciones** que se llaman, búscalas en **Internet** para aprender sobre sus **entradas** y **salidas**.
 
 ## **Delphi**
@@ -262,7 +261,7 @@ Si tienes que revertir un binario de Delphi te sugiero que uses el complemento d
 
 Simplemente presiona **ATL+f7** (importa el complemento de Python en IDA) y selecciona el complemento de Python.
 
-Este complemento ejecutará el binario y resolverá los nombres de las funciones dinámicamente al inicio de la depuración. Después de iniciar la depuración, presiona nuevamente el botón de inicio (el verde o f9) y se detendrá en el inicio del código real.
+Este complemento ejecutará el binario y resolverá los nombres de las funciones dinámicamente al inicio de la depuración. Después de iniciar la depuración, presiona nuevamente el botón de inicio (el verde o f9) y se detendrá en un punto de interrupción al comienzo del código real.
 
 También es muy interesante porque si presionas un botón en la aplicación gráfica, el depurador se detendrá en la función ejecutada por ese botón.
 
@@ -291,7 +290,7 @@ Si obtienes el **binario** de un juego de GBA, puedes usar diferentes herramient
 * [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Complemento de Ghidra
 * [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Complemento de Ghidra
 
-En [**no$gba**](https://problemkaputt.de/gba.htm), en _**Opciones --> Configuración de Emulación --> Controles**_\*\* \*\* puedes ver cómo presionar los **botones** de Game Boy Advance
+En [**no$gba**](https://problemkaputt.de/gba.htm), en _**Options --> Emulation Setup --> Controls**_\*\* \*\* puedes ver cómo presionar los **botones** de Game Boy Advance
 
 ![](<../../.gitbook/assets/image (578).png>)
 
@@ -308,7 +307,7 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Entonces, en este tipo de programas, una parte interesante será **cómo el programa trata la entrada del usuario**. En la dirección **0x4000130** encontrarás la función comúnmente encontrada: **KEYINPUT**.
+Entonces, en este tipo de programa, la parte interesante será **cómo el programa trata la entrada del usuario**. En la dirección **0x4000130** encontrarás la función comúnmente encontrada: **KEYINPUT**.
 
 ![](<../../.gitbook/assets/image (579).png>)
 
@@ -379,11 +378,11 @@ En el código anterior se puede ver que estamos comparando **uVar1** (el lugar d
 
 * Primero, se compara con el **valor 4** (botón **SELECT**): En el desafío este botón borra la pantalla.
 * Luego, se compara con el **valor 8** (botón **START**): En el desafío esto verifica si el código es válido para obtener la bandera.
-* En este caso, la variable **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo se ejecuta algún código.
-* En cualquier otro caso, se verifica un cont (`DAT_030000d4`). Es un cont porque se suma 1 justo después de ingresar el código.\
-Si es menor que 8, se hace algo que implica **agregar** valores a **`DAT_030000d8`** (básicamente se están sumando los valores de las teclas presionadas en esta variable siempre que el cont sea menor que 8).
+* En este caso, la variable **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo, se ejecuta algún código.
+* En cualquier otro caso, se verifica algún cont (`DAT_030000d4`). Es un cont porque se suma 1 justo después de ingresar el código.\
+Si es menor que 8, se hace algo que implica **agregar** valores a **`DAT_030000d8`** (básicamente se están sumando los valores de las teclas presionadas en esta variable siempre y cuando el cont sea menor que 8).
 
-Por lo tanto, en este desafío, sabiendo los valores de los botones, necesitabas **presionar una combinación con una longitud menor que 8 para que la suma resultante sea 0xf3**.
+Por lo tanto, en este desafío, sabiendo los valores de los botones, necesitabas **presionar una combinación con una longitud menor que 8 para que la suma resultante sea 0xf3.**
 
 **Referencia para este tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
@@ -403,7 +402,7 @@ Por lo tanto, en este desafío, sabiendo los valores de los botones, necesitabas
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
