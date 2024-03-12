@@ -14,7 +14,7 @@
 
 ### Hello!!
 
-First of all, it's needed to indicate that all **credits of techniques on reasearch from other sites belongs to the original authors** (there are references in the pages). Kudos to every research that shares knowledge to improme the security of the internet.
+First of all, it's needed to indicate that all **credits of techniques on research from other sites belongs to the original authors** (there are references in the pages). Kudos to every research that shares knowledge to improme the security of the internet.
 
 HackTricks is a educational Wiki that compiles knowledge about **cyber-security** lead by Carlos with hundreds of collaborators! It's a **huge collection of hacking tricks** that is updated by the community much as possible to keep it up to date. If you find something is missing or outdated, please, send a **Pull Request** to [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
 
