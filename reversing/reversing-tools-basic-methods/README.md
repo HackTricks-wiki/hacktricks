@@ -6,7 +6,7 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
@@ -14,32 +14,40 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
+
 ## Herramientas de Reversing basadas en ImGui
 
 Software:
 
 * ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## Descompilador Wasm / Compilador Wat
+## Decompilador Wasm / Compilador Wat
 
 En línea:
 
-* Usa [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) para **descompilar** de wasm (binario) a wat (texto claro)
+* Usa [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) para **decompilar** de wasm (binario) a wat (texto claro)
 * Usa [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) para **compilar** de wat a wasm
-* También puedes probar [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) para descompilar
+* También puedes probar [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) para decompilar
 
 Software:
 
 * [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 * [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## Descompilador .NET
+## Decompilador .NET
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek es un descompilador que **descompila y examina múltiples formatos**, incluyendo **bibliotecas** (.dll), archivos de metadatos de Windows (.winmd) y **ejecutables** (.exe). Una vez descompilada, una asamblea se puede guardar como un proyecto de Visual Studio (.csproj).
+dotPeek es un decompilador que **decompila y examina múltiples formatos**, incluyendo **bibliotecas** (.dll), archivos de metadatos de Windows (.winmd) y **ejecutables** (.exe). Una vez decompilado, un ensamblado se puede guardar como un proyecto de Visual Studio (.csproj).
 
-El mérito aquí es que si se necesita restaurar un código fuente perdido de una asamblea heredada, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a lo largo del código descompilado, convirtiéndolo en una de las herramientas perfectas para el análisis de algoritmos de **Xamarin**.
+El mérito aquí es que si se necesita restaurar un código fuente perdido de un ensamblado heredado, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación práctica a lo largo del código decompilado, convirtiéndolo en una de las herramientas perfectas para el análisis de algoritmos de Xamarin.
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -54,8 +62,8 @@ Con un modelo de complemento integral y una API que extiende la herramienta para
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Complemento de ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
-Si necesitas **descompilar**, **modificar** y **recompilar** nuevamente, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork activamente mantenido de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).
+[Complemento de ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargarlo de git. Haz clic en **Extensiones** y **busca ILSpy**).\
+Si necesitas **decompilar**, **modificar** y **recompilar** nuevamente, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork activamente mantenido de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).
 
 ### Registro de DNSpy
 
@@ -209,7 +217,7 @@ Puedes ver la pila, por ejemplo, dentro de un volcado hexadecimal:
 ### Desofuscando shellcode y obteniendo funciones ejecutadas
 
 Deberías probar [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7\&pid=152).\
-Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se está **descodificando** en memoria.
+Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se está **descodificando** en la memoria.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -222,7 +230,7 @@ scDbg también cuenta con un lanzador gráfico donde puedes seleccionar las opci
 
 ![](<../../.gitbook/assets/image (398).png>)
 
-La opción **Create Dump** volcará el shellcode final si se realiza algún cambio en el shellcode dinámicamente en la memoria (útil para descargar el shellcode decodificado). El **start offset** puede ser útil para iniciar el shellcode en un desplazamiento específico. La opción **Debug Shell** es útil para depurar el shellcode utilizando la terminal scDbg (sin embargo, considero que cualquiera de las opciones explicadas anteriormente es mejor para este propósito, ya que podrás utilizar Ida o x64dbg).
+La opción **Crear volcado** volcará el shellcode final si se realiza algún cambio en el shellcode dinámicamente en la memoria (útil para descargar el shellcode decodificado). El **desplazamiento de inicio** puede ser útil para iniciar el shellcode en un desplazamiento específico. La opción **Depurar Shell** es útil para depurar el shellcode utilizando la terminal scDbg (sin embargo, considero que cualquiera de las opciones explicadas anteriormente es mejor para este propósito, ya que podrás utilizar Ida o x64dbg).
 
 ### Desensamblaje usando CyberChef
 
@@ -261,7 +269,7 @@ Si tienes que revertir un binario de Delphi te sugiero que uses el complemento d
 
 Simplemente presiona **ATL+f7** (importa el complemento de Python en IDA) y selecciona el complemento de Python.
 
-Este complemento ejecutará el binario y resolverá los nombres de las funciones dinámicamente al inicio de la depuración. Después de iniciar la depuración, presiona nuevamente el botón de inicio (el verde o f9) y se detendrá en un punto de interrupción al comienzo del código real.
+Este complemento ejecutará el binario y resolverá los nombres de las funciones dinámicamente al inicio de la depuración. Después de iniciar la depuración, presiona nuevamente el botón de inicio (el verde o f9) y se detendrá en el inicio del código real.
 
 También es muy interesante porque si presionas un botón en la aplicación gráfica, el depurador se detendrá en la función ejecutada por ese botón.
 
@@ -290,7 +298,7 @@ Si obtienes el **binario** de un juego de GBA, puedes usar diferentes herramient
 * [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Complemento de Ghidra
 * [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Complemento de Ghidra
 
-En [**no$gba**](https://problemkaputt.de/gba.htm), en _**Options --> Emulation Setup --> Controls**_\*\* \*\* puedes ver cómo presionar los **botones** de Game Boy Advance
+En [**no$gba**](https://problemkaputt.de/gba.htm), en _**Opciones --> Configuración de Emulación --> Controles**_\*\* \*\* puedes ver cómo presionar los **botones** de Game Boy Advance
 
 ![](<../../.gitbook/assets/image (578).png>)
 
@@ -378,9 +386,9 @@ En el código anterior se puede ver que estamos comparando **uVar1** (el lugar d
 
 * Primero, se compara con el **valor 4** (botón **SELECT**): En el desafío este botón borra la pantalla.
 * Luego, se compara con el **valor 8** (botón **START**): En el desafío esto verifica si el código es válido para obtener la bandera.
-* En este caso, la variable **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo, se ejecuta algún código.
-* En cualquier otro caso, se verifica algún cont (`DAT_030000d4`). Es un cont porque se suma 1 justo después de ingresar el código.\
-Si es menor que 8, se hace algo que implica **agregar** valores a **`DAT_030000d8`** (básicamente se están sumando los valores de las teclas presionadas en esta variable siempre y cuando el cont sea menor que 8).
+* En este caso, la variable **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo se ejecuta algún código.
+* En cualquier otro caso, se verifica un cont (`DAT_030000d4`). Es un cont porque se suma 1 justo después de ingresar el código.\
+Si es menor que 8, se hace algo que implica **agregar** valores a **`DAT_030000d8`** (básicamente se están sumando los valores de las teclas presionadas en esta variable siempre que el cont sea menor que 8).
 
 Por lo tanto, en este desafío, sabiendo los valores de los botones, necesitabas **presionar una combinación con una longitud menor que 8 para que la suma resultante sea 0xf3.**
 
@@ -395,6 +403,12 @@ Por lo tanto, en este desafío, sabiendo los valores de los botones, necesitabas
 * [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
 * [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Desofuscación binaria)
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
 <details>
 
 <summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
@@ -402,7 +416,7 @@ Por lo tanto, en este desafío, sabiendo los valores de los botones, necesitabas
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).

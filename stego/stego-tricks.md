@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
@@ -13,6 +13,14 @@ Otras formas de apoyar a HackTricks:
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de GitHub.
 
 </details>
+
+**Grupo de Seguridad Try Hard**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
 
 ## **Extrayendo Datos de Archivos**
 
@@ -32,7 +40,7 @@ foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-Ayuda a ver los metadatos de un archivo, disponible [aquí](https://www.sno.phy.queensu.ca/\~phil/exiftool/).
+Ayuda a ver los metadatos del archivo, disponible [aquí](https://www.sno.phy.queensu.ca/\~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
@@ -84,7 +92,7 @@ Para intentar reparar una imagen dañada, agregar un comentario de metadatos pod
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
-### **Esteganografía con Steghide para Ocultar Datos**
+### **Esteganografía para Ocultar Datos**
 
 Steghide facilita ocultar datos dentro de archivos `JPEG, BMP, WAV y AU`, capaz de incrustar y extraer datos encriptados. La instalación es sencilla utilizando `apt`, y su [código fuente está disponible en GitHub](https://github.com/StefanoDeVuono/steghide).
 
@@ -97,7 +105,7 @@ Para extracción basada en web, visita [este sitio web](https://futureboy.us/ste
 
 **Ataque de Fuerza Bruta con Stegcracker:**
 
-* Para intentar descifrar contraseñas en Steghide, utiliza [stegcracker](https://github.com/Paradoxis/StegCracker.git) de la siguiente manera:
+* Para intentar la craqueo de contraseñas en Steghide, utiliza [stegcracker](https://github.com/Paradoxis/StegCracker.git) de la siguiente manera:
 ```bash
 stegcracker <file> [<wordlist>]
 ```
@@ -114,7 +122,7 @@ zsteg se especializa en descubrir datos ocultos en archivos PNG y BMP. La instal
 
 **stegoVeritas** verifica metadatos, realiza transformaciones de imagen y aplica fuerza bruta LSB, entre otras características. Utiliza `stegoveritas.py -h` para obtener una lista completa de opciones y `stegoveritas.py stego.jpg` para ejecutar todas las verificaciones.
 
-**Stegsolve** aplica varios filtros de color para revelar textos o mensajes ocultos dentro de imágenes. Está disponible en [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
+**Stegsolve** aplica varios filtros de color para revelar textos ocultos o mensajes dentro de imágenes. Está disponible en [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
 ### **FFT para la detección de contenido oculto**
 
@@ -129,6 +137,8 @@ Las técnicas de Transformada Rápida de Fourier (FFT) pueden revelar contenido 
 Stegpy permite incrustar información en archivos de imagen y audio, admitiendo formatos como PNG, BMP, GIF, WebP y WAV. Está disponible en [GitHub](https://github.com/dhsdshdhk/stegpy).
 
 ### **Pngcheck para análisis de archivos PNG**
+
+Para analizar archivos PNG o validar su autenticidad, utiliza:
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
@@ -179,7 +189,7 @@ Una herramienta invaluable para la inspección visual y analítica de archivos d
 
 ### **Tonos DTMF - Tonos de marcación**
 
-La detección de tonos DTMF en archivos de audio se puede lograr a través de herramientas en línea como [este detector DTMF](https://unframework.github.io/dtmf-detect/) y [DialABC](http://dialabc.com/sound/detect/index.html).
+La detección de tonos DTMF en archivos de audio se puede lograr a través de herramientas en línea como [este detector de DTMF](https://unframework.github.io/dtmf-detect/) y [DialABC](http://dialabc.com/sound/detect/index.html).
 
 ## **Otras Técnicas**
 
@@ -199,9 +209,15 @@ Para traducir Braille, el [Traductor de Braille de Branah](https://www.branah.co
 * [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 * [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
 
+**Grupo de Seguridad Try Hard**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
