@@ -6,13 +6,21 @@
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**か**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)を**フォロー**する
-- **ハッキングテクニックを共有する**には、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**をフォロー**する
+- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、**あなたのハッキングテクニックを共有**する
 
 </details>
+
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
 
 ## 彫刻と回復ツール
 
@@ -20,7 +28,7 @@ HackTricksをサポートする他の方法：
 
 ### Autopsy
 
-フォレンジックで最も一般的に使用されるファイルをイメージから抽出するツールは[**Autopsy**](https://www.autopsy.com/download/)です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけます。Autopsyはディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルはサポートしていません。
+ファイルをイメージから抽出するために最も一般的に使用されるツールは[**Autopsy**](https://www.autopsy.com/download/)です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけます。Autopsyはディスクイメージや他の種類のイメージをサポートするように構築されていますが、単純なファイルはサポートしていません。
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
@@ -35,7 +43,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ### Foremost
 
-別の一般的な隠しファイルを見つけるためのツールは **foremost** です。Foremost の設定ファイルは `/etc/foremost.conf` にあります。特定のファイルを検索したい場合は、それらのコメントを外してください。何もコメントを外さない場合、foremost はデフォルトで構成されたファイルタイプを検索します。
+もう1つの一般的な隠しファイルを見つけるためのツールは **foremost** です。 foremost の設定ファイルは `/etc/foremost.conf` にあります。特定のファイルを検索したい場合は、それらのコメントを外してください。何もコメントを外さない場合、foremost はデフォルトで設定されたファイルタイプを検索します。
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -52,44 +60,44 @@ scalpel file.img -o output
 
 このツールはKaliに含まれていますが、こちらで見つけることができます: [https://github.com/simsong/bulk\_extractor](https://github.com/simsong/bulk\_extractor)
 
-このツールは画像をスキャンし、その中に含まれる**pcapsを抽出**し、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**や他の**ファイル**を抽出することができます。以下の手順のみを行う必要があります:
+このツールは画像をスキャンし、その中から**pcapsを抽出**し、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**や他の**ファイル**を取得することができます。行う必要があるのは以下の通りです:
 ```
 bulk_extractor memory.img -o out_folder
 ```
 ### PhotoRec
 
-[https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk\_Download) で入手できます。
+[https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk\_Download)で見つけることができます。
 
-GUI と CLI バージョンがあります。PhotoRec が検索する**ファイルタイプ**を選択できます。
+GUIとCLIバージョンが付属しています。PhotoRecが検索する**ファイルタイプ**を選択できます。
 
 ![](<../../../.gitbook/assets/image (524).png>)
 
 ### binvis
 
-[コード](https://code.google.com/archive/p/binvis/) と [ウェブページツール](https://binvis.io/#/) を確認してください。
+[コード](https://code.google.com/archive/p/binvis/)と[ウェブページツール](https://binvis.io/#/)をチェックしてください。
 
-#### BinVis の特徴
+#### BinVisの特徴
 
 - ビジュアルでアクティブな**構造ビューア**
 - 異なる焦点点のための複数のプロット
 - サンプルの一部に焦点を当てる
-- PE または ELF 実行可能ファイル内の**文字列とリソース**を見る
+- PEやELF実行可能ファイルで**文字列やリソース**を見る
 - ファイルの暗号解析のための**パターン**を取得
-- パッカーやエンコーダーアルゴリズムを**特定**
-- パターンによるステガノグラフィの**識別**
+- パッカーやエンコーダーアルゴリズムを**見つける**
+- パターンによるステガノグラフィを**特定する**
 - **ビジュアル**バイナリ差分
 
-BinVis は、ブラックボックスシナリオで未知のターゲットに慣れるための素晴らしい**スタートポイント**です。
+BinVisは、ブラックボックスシナリオで未知のターゲットに慣れるための素晴らしい**スタートポイント**です。
 
 ## 特定のデータカービングツール
 
 ### FindAES
 
-TrueCrypt や BitLocker で使用されるような 128、192、256 ビットのキーを見つけるために、キースケジュールを検索することで AES キーを検索します。
+TrueCryptやBitLockerで使用されるような128、192、256ビットのキーを見つけるために、キースケジュールを検索することでAESキーを検索します。
 
 [こちらからダウンロード](https://sourceforge.net/projects/findaes/)できます。
 
 ## 付随するツール
 
 [**viu** ](https://github.com/atanunq/viu)を使用してターミナルから画像を表示できます。\
-Linux コマンドラインツール **pdftotext** を使用して、PDF をテキストに変換して読むことができます。
+Linuxコマンドラインツール**pdftotext**を使用して、PDFをテキストに変換して読むことができます。

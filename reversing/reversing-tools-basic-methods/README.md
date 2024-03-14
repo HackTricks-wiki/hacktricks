@@ -2,64 +2,72 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使って、ゼロからヒーローまでAWSハッキングを学びましょう！</summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェック！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする。
-* **ハッキングテクニックを共有するには** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する。
+- **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)を**フォロー**する。
+- **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
+
 ## ImGuiベースのリバースエンジニアリングツール
 
-ソフトウェア:
+ソフトウェア：
 
-* ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
+- ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## Wasmデコンパイラ / Watコンパイラ
+## Wasmデコンパイラ/Watコンパイラ
 
-オンライン:
+オンライン：
 
-* [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) を使用して、wasm（バイナリ）からwat（クリアテキスト）に**デコンパイル**します
-* [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) を使用して、watからwasmに**コンパイル**します
-* [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) も使用してデコンパイルできます
+- [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)を使用して、wasm（バイナリ）からwat（クリアテキスト）に**デコンパイル**します。
+- [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/)を使用して、watからwasmに**コンパイル**します。
+- [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/)を使用してデコンパイルすることもできます。
 
-ソフトウェア:
+ソフトウェア：
 
-* [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
-* [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
+- [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
+- [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
 ## .NETデコンパイラ
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek は、**ライブラリ**（.dll）、**Windowsメタデータファイル**（.winmd）、および**実行可能ファイル**（.exe）など、複数の形式を**デコンパイルおよび調査**します。デコンパイルされたアセンブリは、Visual Studioプロジェクト（.csproj）として保存できます。
+dotPeekは、**ライブラリ**（.dll）、**Windowsメタデータファイル**（.winmd）、および**実行可能ファイル**（.exe）を含む複数の形式を**デコンパイル**および調査します。デコンパイルされたアセンブリは、Visual Studioプロジェクト（.csproj）として保存できます。
 
-ここでのメリットは、失われたソースコードを復元する必要がある場合、このアクションが時間を節約できることです。さらに、dotPeek はデコンパイルされたコード全体を簡単にナビゲートできるため、**Xamarinアルゴリズム分析**に最適なツールの1つです。
+ここでの利点は、失われたソースコードを復元する必要がある場合、このアクションが時間を節約できることです。さらに、dotPeekは、デコンパイルされたコード全体を便利にナビゲートできるため、**Xamarinアルゴリズム分析**に最適なツールの1つです。
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-包括的なアドインモデルと、ツールを拡張して正確なニーズに合わせるAPIを備えた.NET Reflector は、時間を節約し、開発を簡素化します。このツールが提供する逆コンパイルサービスの多様性を見てみましょう:
+包括的なアドインモデルと、ツールを拡張して正確なニーズに合わせるAPIを備えた.NET Reflectorは、時間を節約し、開発を簡素化します。このツールが提供する逆コンパイルサービスの多様性を見てみましょう：
 
-* データがライブラリやコンポーネントを通過する方法に洞察を提供します
-* .NET言語やフレームワークの実装と使用方法に洞察を提供します
-* 使用されているAPIや技術からより多くの情報を取得するために未記載の機能や公開されていない機能を見つけます。
-* 依存関係や異なるアセンブリを見つけます
-* コード、サードパーティのコンポーネント、およびライブラリのエラーの正確な場所を特定します。
-* 作業しているすべての.NETコードのソースにデバッグします。
+- データがライブラリやコンポーネントを通過する方法についての洞察を提供します。
+- .NET言語やフレームワークの実装と使用に関する洞察を提供します。
+- 使用されているAPIや技術からより多くの情報を取得するために、未記載および非公開の機能を見つけます。
+- 依存関係や異なるアセンブリを見つけます。
+- コード、サードパーティのコンポーネント、およびライブラリのエラーの正確な場所を特定します。
+- 作業しているすべての.NETコードのソースにデバッグします。
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Visual Studio Code用ILSpyプラグイン](https://github.com/icsharpcode/ilspy-vscode): 任意のOSで使用できます（VSCodeから直接インストールできます。**Extensions** をクリックして **ILSpy** を検索します）。\
-**デコンパイル**、**変更**、そして**再コンパイル**が必要な場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases) またはそれをアクティブにメンテナンスしているフォークの [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) を使用できます（関数内の何かを変更するには **右クリック -> Modify Method**）。
+[Visual Studio Code用ILSpyプラグイン](https://github.com/icsharpcode/ilspy-vscode)：任意のOSで使用できます（VSCodeから直接インストールできます。**Extensions**をクリックして**ILSpy**を検索します）。\
+**デコンパイル**、**修正**、そして**再コンパイル**する必要がある場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases)またはそれをアクティブにメンテナンスされたフォーク、[**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)を使用できます（関数内の何かを変更するには、**右クリック -> メソッドの変更**）。
 
-### DNSpy ロギング
+### DNSpyログ
 
-**DNSpy が情報をファイルに記録するようにする**には、次のスニペットを使用できます:
+**DNSpyが情報をファイルに記録するようにする**には、次のスニペットを使用できます：
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -69,7 +77,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 DNSpyを使用してコードをデバッグするには、次の手順を実行する必要があります：
 
-まず、**デバッグ**に関連する**アセンブリ属性**を変更します：
+まず、**デバッグに関連する** **アセンブリ属性**を変更します：
 
 ![](<../../.gitbook/assets/image (278).png>)
 ```aspnet
@@ -77,7 +85,7 @@ DNSpyを使用してコードをデバッグするには、次の手順を実行
 ```
 ## リバースエンジニアリングツールと基本的な手法
 
-このセクションでは、リバースエンジニアリングに使用される一般的なツールと基本的な手法について説明します。リバースエンジニアリングは、プログラムやファイルを解析して、その動作や構造を理解するプロセスです。以下は、リバースエンジニアリングに役立ついくつかのツールと手法です。
+このセクションでは、リバースエンジニアリングに使用される一般的なツールと基本的な手法について説明します。リバースエンジニアリングは、プログラムやファイルを解析して、その動作や構造を理解するプロセスです。リバースエンジニアリングを行うことで、セキュリティ研究や脆弱性診断、マルウェア解析などのさまざまな目的に活用できます。
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -88,25 +96,25 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 ![](<../../.gitbook/assets/image (314) (1) (1).png>)
 
-次に、新しいファイルを _**File >> Save module...**_ を経由して保存してください：
+次に、新しいファイルを _**File >> Save module...**_ で保存してください：
 
 ![](<../../.gitbook/assets/image (279).png>)
 
-これは必要です。なぜなら、これを行わないと、**実行時**にコードにいくつかの**最適化**が適用され、**デバッグ**中に**ブレークポイントがヒットしない**か、一部の**変数が存在しない**可能性があるからです。
+これは、これを行わないと、**実行時**にコードにいくつかの**最適化**が適用され、**デバッグ**中に**ブレークポイントがヒットしない**か、一部の**変数が存在しない**可能性があるためです。
 
-その後、.NETアプリケーションが**IIS**によって**実行**されている場合は、次のように**再起動**できます：
+その後、.NETアプリケーションが**IIS**で**実行**されている場合は、次のように**再起動**できます：
 ```
 iisreset /noforce
 ```
-その後、デバッグを開始するためには、すべての開いているファイルを閉じ、**デバッグタブ**内で**プロセスにアタッチ...**を選択します：
+その後、デバッグを開始するためには、すべての開いているファイルを閉じ、**デバッグタブ**内で**プロセスにアタッチ**を選択します：
 
 ![](<../../.gitbook/assets/image (280).png>)
 
-次に、**IISサーバー**にアタッチするために**w3wp.exe**を選択し、**アタッチ**をクリックします：
+次に、**w3wp.exe**を選択して**IISサーバー**にアタッチし、**アタッチ**をクリックします：
 
 ![](<../../.gitbook/assets/image (281).png>)
 
-プロセスをデバッグしている今、プロセスを停止してすべてのモジュールをロードする時間です。まず、_Debug >> Break All_をクリックし、次に_Debug >> Windows >> Modules_をクリックします：
+プロセスのデバッグが開始されたので、プロセスを停止してすべてのモジュールをロードします。まず、_Debug >> Break All_ をクリックし、次に _**Debug >> Windows >> Modules**_ をクリックします：
 
 ![](<../../.gitbook/assets/image (286).png>)
 
@@ -116,21 +124,21 @@ iisreset /noforce
 
 ![](<../../.gitbook/assets/image (284).png>)
 
-**アセンブリエクスプローラ**内の任意のモジュールを右クリックし、**アセンブリをソート**をクリックします：
+**アセンブリエクスプローラ**内の任意のモジュールを右クリックし、**Sort Assemblies**をクリックします：
 
 ![](<../../.gitbook/assets/image (285).png>)
 
-## Javaデコンパイラ
+## Java decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## DLLのデバッグ
+## Debugging DLLs
 
-### IDAを使用する
+### Using IDA
 
 * **rundll32をロード**（64ビットはC:\Windows\System32\rundll32.exe、32ビットはC:\Windows\SysWOW64\rundll32.exe）
-* **Windbgデバッガ**を選択
+* **Windbgデバッガー**を選択
 * "**ライブラリの読み込み/アンロード時に中断**"を選択
 
 ![](<../../.gitbook/assets/image (135).png>)
@@ -141,20 +149,20 @@ iisreset /noforce
 
 その後、デバッグを開始すると、**各DLLがロードされるたびに実行が停止**され、rundll32がDLLをロードすると実行が停止します。
 
-しかし、ロードされたDLLのコードにどのようにアクセスできますか？この方法を使用すると、わかりません。
+しかし、ロードされたDLLのコードにどうやってアクセスできるのでしょうか？この方法を使用しても、私は方法がわかりません。
 
-### x64dbg/x32dbgを使用する
+### Using x64dbg/x32dbg
 
 * **rundll32をロード**（64ビットはC:\Windows\System32\rundll32.exe、32ビットはC:\Windows\SysWOW64\rundll32.exe）
-* **コマンドラインを変更**（_File --> Change Command Line_）し、dllのパスと呼び出したい関数を設定します。例："C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii\_2.dll",DLLMain
-* _Options --> Settings_を変更し、「**DLL Entry**」を選択します。
-* その後、**実行を開始**し、デバッガは各dllメインで停止し、いずれかの時点で**dllのエントリ**で実行が停止します。そこから、ブレークポイントを設定したいポイントを検索します。
+* **コマンドラインを変更**（ _File --> Change Command Line_ ）し、dllのパスと呼び出したい関数を設定します。例: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii\_2.dll",DLLMain
+* _Options --> Settings_ を変更し、**"DLL Entry"**を選択します。
+* その後、**実行を開始**し、デバッガーは各dllメインで停止します。いずれかの時点で、**dllのエントリ**に停止します。そこから、ブレークポイントを設定したいポイントを検索します。
 
-win64dbgで実行が何らかの理由で停止されると、**win64dbgウィンドウの上部**にいる**どのコードを見ているか**が表示されます：
+実行がwin64dbgで何らかの理由で停止されると、**win64dbgウィンドウの上部**にいる**どのコードを見ているか**が表示されます：
 
 ![](<../../.gitbook/assets/image (137).png>)
 
-その後、デバッグが停止されたdll内のコードを確認できます。
+その後、デバッグしたいdllで実行が停止したことがわかります。
 
 ## GUIアプリ/ビデオゲーム
 
@@ -173,10 +181,10 @@ win64dbgで実行が何らかの理由で停止されると、**win64dbgウィ�
 ### Blobrunnerを使用したシェルコードのデバッグ
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner)は、**シェルコード**をメモリ空間に**割り当て**し、シェルコードが割り当てられた**メモリアドレス**を示し、実行を**停止**します。\
-その後、プロセスにデバッガ（Idaまたはx64dbg）を**アタッチ**し、指定されたメモリアドレスに**ブレークポイントを設定**し、実行を**再開**します。これにより、シェルコードのデバッグが可能になります。
+その後、プロセスにデバッガー（Idaまたはx64dbg）を**アタッチ**し、指定されたメモリアドレスに**ブレークポイントを設定**し、実行を**再開**します。これにより、シェルコードのデバッグが可能になります。
 
-リリースのGitHubページには、コンパイルされたリリースが含まれるzipファイルがあります：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-以下のリンクにBlobrunnerのわずかに変更されたバージョンがあります。コンパイルするには、Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピーして貼り付け、ビルドします。
+リリースのgithubページには、コンパイルされたリリースが含まれるzipファイルがあります：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+以下のリンクにBlobrunnerのわずかに変更されたバージョンがあります。コンパイルするには、Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピーして貼り付け、ビルドしてください。
 
 {% content-ref url="blobrunner.md" %}
 [blobrunner.md](blobrunner.md)
@@ -184,25 +192,27 @@ win64dbgで実行が何らかの理由で停止されると、**win64dbgウィ�
 
 ### jmp2itを使用したシェルコードのデバッグ
 
-[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)はBlobrunnerに非常に似ています。**シェルコード**をメモリ空間に**割り当て**し、**永遠のループ**を開始します。その後、プロセスにデバッガを**アタッチ**し、**開始**を再生して2〜5秒待って**停止**を押すと、**永遠のループ**内にいます。永遠のループの次の命令にジャンプしてシェルコードを呼び出し、最終的にシェルコードを実行することができます。
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)は、Blobrunnerに非常に似ています。**シェルコード**をメモリ空間に**割り当て**し、**永遠のループ**を開始します。その後、プロセスに**デバッガーをアタッチ**し、**開始**を再生して2〜5秒待って**停止**を押すと、**永遠のループ**内にいます。永遠のループの次の命令にジャンプして、最終的にシェルコードを実行することができます。
 
 ![](<../../.gitbook/assets/image (397).png>)
 
-[リリースページ内でjmp2itのコンパイル済みバージョンをダウンロードできます](https://github.com/adamkramer/jmp2it/releases/)。
+[リリースページ内でjmp2itのコンパイル済みバージョンをダウンロード](https://github.com/adamkramer/jmp2it/releases/)できます。
 
 ### Cutterを使用したシェルコードのデバッグ
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0)はradareのGUIです。Cutterを使用すると、シェルコードをエミュレートして動的に検査できます。
 
-Cutterを使用すると、「ファイルを開く」と「シェルコードを開く」が可能です。私の場合、シェルコードをファイルとして開くと正しく逆コンパイルされましたが、シェルコードとして開くとできませんでした：
+Cutterでは、「ファイルを開く」と「シェルコードを開く」が可能です。私の場合、シェルコードをファイルとして開いたときは正しく逆コンパイルされましたが、シェルコードとして開いたときは逆コンパイルされませんでした：
 
 ![](<../../.gitbook/assets/image (400).png>)
 
-特定の場所でエミュレーションを開始するには、そこにブレークポイントを設定し、Cutterが自動的にそこからエミュレーションを開始するようにします：
+特定の場所でエミュレーションを開始するには、そこにbpを設定し、おそらくcutterは自動的にそこからエミュレーションを開始します：
 
 ![](<../../.gitbook/assets/image (399).png>)
 
-例えば、ヘックスダンプ内でスタックを表示できます：
+![](<../../.gitbook/assets/image (401).png>)
+
+例えば、16進ダンプ内でスタックを表示できます：
 
 ![](<../../.gitbook/assets/image (402).png>)
 
@@ -218,11 +228,11 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-scDbgには、グラフィカルなランチャーも備わっており、希望するオプションを選択してシェルコードを実行することができます。
+scDbgには、グラフィカルなランチャーも付属しており、そこから希望するオプションを選択してシェルコードを実行することができます。
 
 ![](<../../.gitbook/assets/image (398).png>)
 
-**Create Dump** オプションは、メモリ内でシェルコードが動的に変更された場合に最終的なシェルコードをダンプします（デコードされたシェルコードをダウンロードするのに便利です）。**start offset** は特定のオフセットでシェルコードを開始するのに役立ちます。**Debug Shell** オプションは、scDbgターミナルを使用してシェルコードをデバッグするのに役立ちます（ただし、前述のいずれかのオプションの方がこの問題に対してはより良いと考えられます。Idaやx64dbgを使用できるため）。
+**Create Dump** オプションは、メモリ内でシェルコードが動的に変更された場合に最終的なシェルコードをダンプします（デコードされたシェルコードをダウンロードするのに便利です）。**start offset** は特定のオフセットでシェルコードを開始するのに役立ちます。**Debug Shell** オプションは、scDbgターミナルを使用してシェルコードをデバッグするのに役立ちます（ただし、前述のいずれかのオプションの方がこの問題にはより適していると考えています。Idaやx64dbgを使用できるため）。
 
 ### CyberChefを使用した逆アセンブル
 
@@ -230,12 +240,12 @@ scDbgには、グラフィカルなランチャーも備わっており、希望
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-この難読化ツールは、すべての `mov` 命令を変更します（本当にクールです）。また、実行フローを変更するために割り込みを使用します。動作方法の詳細については以下を参照してください：
+この難読化ツールは、すべての`mov`命令を変更します（本当にクールです）。また、実行フローを変更するために割り込みを使用します。動作の詳細については以下を参照してください：
 
 * [https://www.youtube.com/watch?v=2VF\_wPkiBJY](https://www.youtube.com/watch?v=2VF\_wPkiBJY)
 * [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas\_2015\_the\_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas\_2015\_the\_movfuscator.pdf)
 
-幸運な場合、[demovfuscator](https://github.com/kirschju/demovfuscator) がバイナリを復号化するでしょう。いくつかの依存関係があります。
+幸運な場合、[demovfuscator](https://github.com/kirschju/demovfuscator) がバイナリを復号化することができます。いくつかの依存関係があります。
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
@@ -275,7 +285,7 @@ Golangバイナリを逆アセンブルする必要がある場合は、IDAプ�
 
 ## コンパイルされたPython
 
-このページでは、ELF/EXE PythonコンパイルされたバイナリからPythonコードを取得する方法が見つかります:
+このページでは、ELF/EXE Pythonコンパイル済みバイナリからPythonコードを取得する方法が見つかります:
 
 {% content-ref url="../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md" %}
 [.pyc.md](../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
@@ -290,7 +300,7 @@ GBAゲームの**バイナリ**を取得した場合、それを**エミュレ�
 * [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidraプラグイン
 * [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidraプラグイン
 
-[**no$gba**](https://problemkaputt.de/gba.htm)では、_**Options --> Emulation Setup --> Controls**_でGame Boy Advanceの**ボタン**を押す方法がわかります
+[**no$gba**](https://problemkaputt.de/gba.htm)では、_**Options --> Emulation Setup --> Controls**_でゲームボーイアドバンスの**ボタン**を押す方法がわかります
 
 ![](<../../.gitbook/assets/image (578).png>)
 
@@ -313,7 +323,7 @@ L = 256
 
 前の画像では、その関数が**FUN\_080015a8**（アドレス：_0x080015fa_および_0x080017ac_）から呼び出されていることがわかります。
 
-その関数では、いくつかの初期化操作（重要ではない）の後に:
+その関数では、いくつかの初期化操作（重要ではない）の後に、
 ```c
 void FUN_080015a8(void)
 
@@ -374,13 +384,13 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-前のコードでは、**uVar1**（**押されたボタンの値**が格納されている場所）をいくつかの値と比較しています：
+前のコードでは、**uVar1**（**押されたボタンの値**が格納される場所）をいくつかの値と比較しています：
 
-- まず、**値4**（**SELECT**ボタン）と比較されます：このボタンはチャレンジでは画面をクリアします
-- 次に、**値8**（**START**ボタン）と比較されます：このチャレンジでは、コードがフラグを取得するために有効かどうかをチェックします。
-- この場合、変数**`DAT_030000d8`**が0xf3と比較され、値が同じ場合はいくつかのコードが実行されます。
-- それ以外の場合、一部のcont（`DAT_030000d4`）がチェックされます。これはcontであるため、コードに入る直後に1が追加されます。\
-8未満の場合、**`DAT_030000d8`**に値を**追加**することが含まれる何かが行われます（基本的には、contが8未満の間、この変数に押されたキーの値を追加しています）。
+* まず、**値4**（**SELECT**ボタン）と比較されます：このボタンはチャレンジでは画面をクリアします
+* 次に、**値8**（**START**ボタン）と比較されます：このチャレンジでは、コードがフラグを取得するために有効かどうかをチェックします。
+* この場合、変数**`DAT_030000d8`**が0xf3と比較され、値が同じ場合はいくつかのコードが実行されます。
+* それ以外の場合、一部のcont（`DAT_030000d4`）がチェックされます。これはcontであるため、コードに入るとすぐに1が追加されます。\
+8未満の場合、**`DAT_030000d8`**に値を**追加**する何かが行われます（基本的には、contが8未満の間、この変数に押されたキーの値を追加しています）。
 
 したがって、このチャレンジでは、ボタンの値を知っていると、**長さが8未満で、結果の加算が0xf3になる組み合わせを押す必要がありました。**
 
@@ -395,16 +405,22 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 * [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
 * [https://github.com/malrev/ABD](https://github.com/malrev/ABD)（バイナリの難読化）
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
 <details>
 
-<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでAWSハッキングを学ぶ**</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>!</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksのPDFをダウンロード**したり、**HackTricksで企業を宣伝**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングトリックを共有するために、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+* 独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションである[**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**する。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する。
 
 </details>
