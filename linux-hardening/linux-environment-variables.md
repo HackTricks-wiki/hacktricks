@@ -14,6 +14,14 @@ Other ways to support HackTricks:
 
 </details>
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
+
 ## Global variables
 
 The global variables **will be** inherited by **child processes**.
@@ -132,6 +140,12 @@ One, two and three backgrounded jobs:
 One background job, one stopped and last command didn't finish correctly:
 
 ![](<../.gitbook/assets/image (90).png>)
+
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
 
 <details>
 

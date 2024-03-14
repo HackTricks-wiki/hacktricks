@@ -14,6 +14,14 @@ Other ways to support HackTricks:
 
 </details>
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
+
 ## ImGui Based Reversing tools
 
 Software:
@@ -416,6 +424,12 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 
 * [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
 * [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
+
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
 
 <details>
 

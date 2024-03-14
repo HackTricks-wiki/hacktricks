@@ -14,10 +14,6 @@ To get started follow this page where you will find the **typical flow** that **
 [pentesting-methodology.md](generic-methodologies-and-resources/pentesting-methodology.md)
 {% endcontent-ref %}
 
-## Platinum Sponsors
-
-_Your company could be here._
-
 ## Corporate Sponsors
 
 ### [STM Cyber](https://www.stmcyber.com)
@@ -30,6 +26,8 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 **STM Cyber** also support cybersecurity open source projects like HackTricks :)
 
+***
+
 ### [RootedCON](https://www.rootedcon.com/)
 
 <figure><img src=".gitbook/assets/image (4) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
@@ -37,6 +35,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 [**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
 
 {% embed url="https://www.rootedcon.com/" %}
+***
 
 ### [Intigriti](https://www.intigriti.com)
 
@@ -48,6 +47,8 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
+***
+
 ### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
 
 <figure><img src=".gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
@@ -58,6 +59,8 @@ Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=ba
 Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+
+***
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
@@ -85,6 +88,16 @@ Stay informed with the newest bug bounties launching and crucial platform update
 **Instantly available setup for vulnerability assessment & penetration testing**. Run a full pentest from anywhere with 20+ tools & features that go from recon to reporting. We don't replace pentesters - we develop custom tools, detection & exploitation modules to give them back some time to dig deeper, pop shells, and have fun.
 
 {% embed url="https://pentest-tools.com/" %}
+
+***
+
+### [Try Hard Security Group](https://discord.gg/tryhardsecurity)
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
 
 ### [WebSec](https://websec.nl/)
 

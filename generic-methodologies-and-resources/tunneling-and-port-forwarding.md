@@ -12,6 +12,14 @@
 
 </details>
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
+
 ## Nmap tip
 
 {% hint style="warning" %}
@@ -597,7 +605,7 @@ It opens 3 tunnels:
 tunnels:
   mytcp:
     addr: 4444
-    proto: tcp
+    proto: tcptunne
   anothertcp:
     addr: 5555
     proto: tcp
@@ -610,6 +618,14 @@ tunnels:
 
 * [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 * [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
 
 <details>
 

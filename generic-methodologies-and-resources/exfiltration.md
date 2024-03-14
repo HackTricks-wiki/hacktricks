@@ -14,6 +14,14 @@ Other ways to support HackTricks:
 
 </details>
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
+
 ## Commonly whitelisted domains to exfiltrate information
 
 Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
@@ -376,6 +384,11 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
 
 <details>
 

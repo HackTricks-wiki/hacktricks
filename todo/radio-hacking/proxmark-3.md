@@ -12,6 +12,14 @@
 
 </details>
 
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
+***
+
 ## Attacking RFID Systems with Proxmark3
 
 The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
@@ -70,6 +78,13 @@ proxmark3> script run mfkeys
 ```
 
 You can create a script to **fuzz tag readers**, so copying the data of a **valid card** just write a **Lua script** that **randomize** one or more random **bytes** and check if the **reader crashes** with any iteration.
+
+**Try Hard Security Group**
+
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://discord.gg/tryhardsecurity" %}
+
 
 <details>
 
