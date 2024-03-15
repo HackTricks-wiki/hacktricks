@@ -454,6 +454,7 @@
 * [554,8554 - Pentesting RTSP](network-services-pentesting/554-8554-pentesting-rtsp.md)
 * [623/UDP/TCP - IPMI](network-services-pentesting/623-udp-ipmi.md)
 * [631 - Internet Printing Protocol(IPP)](network-services-pentesting/pentesting-631-internet-printing-protocol-ipp.md)
+* [700 - Pentesting EPP](network-services-pentesting/700-pentesting-epp.md)
 * [873 - Pentesting Rsync](network-services-pentesting/873-pentesting-rsync.md)
 * [1026 - Pentesting Rusersd](network-services-pentesting/1026-pentesting-rusersd.md)
 * [1080 - Pentesting Socks](network-services-pentesting/1080-pentesting-socks.md)
