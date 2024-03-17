@@ -9,8 +9,8 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) de github.
 
 </details>
 
@@ -143,7 +143,7 @@ Hay alrededor de **50 tipos diferentes de comandos de carga** que el sistema man
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-Básicamente, este tipo de Comando de Carga define **cómo cargar los segmentos \_\_TEXT** (código ejecutable) **y \_\_DATA** (datos para el proceso) **de acuerdo con los desplazamientos indicados en la sección de Datos** cuando se ejecuta el binario.
+Básicamente, este tipo de Comando de Carga define **cómo cargar los segmentos \_\_TEXT** (código ejecutable) **y \_\_DATA** (datos para el proceso) **según los desplazamientos indicados en la sección de Datos** cuando se ejecuta el binario.
 {% endhint %}
 
 Estos comandos **definen segmentos** que se **mapean** en el **espacio de memoria virtual** de un proceso cuando se ejecuta.
@@ -194,33 +194,33 @@ Ejemplo de **encabezado de sección**:
 
 <figure><img src="../../../.gitbook/assets/image (6) (2).png" alt=""><figcaption></figcaption></figure>
 
-Si **sumas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde **comienza la arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+Si **sumas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener **información de encabezados** desde la **línea de comandos** con:
 ```bash
 otool -lv /bin/ls
 ```
-Segmentos comunes cargados por este comando:
+Segmentos comunes cargados por este cmd:
 
-- **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no pueda ser leída, escrita o ejecutada**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
-- Esta asignación es importante para **mitigar vulnerabilidades de referencia nula de puntero**.
-- **`__TEXT`**: Contiene **código ejecutable** con permisos de **lectura** y **ejecución** (sin escritura)**.** Secciones comunes de este segmento:
-  - `__text`: Código binario compilado
-  - `__const`: Datos constantes
-  - `__cstring`: Constantes de cadena
-  - `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
-- **`__DATA`**: Contiene datos que son **legibles** y **escribibles** (sin ejecución)**.**
-  - `__data`: Variables globales (que han sido inicializadas)
-  - `__bss`: Variables estáticas (que no han sido inicializadas)
-  - `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C
-- **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como "entradas de tabla de símbolos, cadenas y reubicación".
-- **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también puede encontrarse en el segmento \_\_DATA, dentro de varias secciones \_\_objc\_\*.
+* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
+* Esta asignación es importante para **mitigar vulnerabilidades de referencia nula de puntero**.
+* **`__TEXT`**: Contiene **código ejecutable** con permisos de **lectura** y **ejecución** (no escritura)**.** Secciones comunes de este segmento:
+* `__text`: Código binario compilado
+* `__const`: Datos constantes
+* `__cstring`: Constantes de cadena
+* `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
+* **`__DATA`**: Contiene datos que son **legibles** y **escribibles** (no ejecutables)**.**
+* `__data`: Variables globales (que han sido inicializadas)
+* `__bss`: Variables estáticas (que no han sido inicializadas)
+* `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C
+* **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como "entradas de tabla de símbolos, cadenas y reubicación".
+* **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también puede encontrarse en el segmento \_\_DATA, dentro de varias secciones \_\_objc\_\*.
 
 ### **`LC_MAIN`**
 
-Contiene el punto de entrada en el atributo **entryoff**. En el momento de carga, **dyld** simplemente **suma** este valor a la **base del binario** (en memoria), luego **salta** a esta instrucción para comenzar la ejecución del código del binario.
+Contiene el punto de entrada en el atributo **entryoff**. En el momento de carga, **dyld** simplemente **suma** este valor a la **base del binario** (en memoria), luego **salta** a esta instrucción para iniciar la ejecución del código del binario.
 
 ### **LC\_CODE\_SIGNATURE**
 
@@ -229,13 +229,13 @@ Sin embargo, puedes encontrar información sobre esta sección en [**esta public
 
 ### **LC\_LOAD\_DYLINKER**
 
-Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo kernel.
+Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo usuario**, no en modo kernel.
 
 ### **`LC_LOAD_DYLIB`**
 
 Este comando de carga describe una **dependencia de biblioteca dinámica** que **instruye** al **cargador** (dyld) a **cargar y enlazar dicha biblioteca**. Hay un comando de carga LC\_LOAD\_DYLIB **para cada biblioteca** que el binario Mach-O requiere.
 
-- Este comando de carga es una estructura de tipo **`dylib_command`** (que contiene una estructura dylib, describiendo la biblioteca dinámica dependiente real):
+* Este comando de carga es una estructura de tipo **`dylib_command`** (que contiene una estructura dylib, describiendo la biblioteca dinámica dependiente real):
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -262,12 +262,12 @@ otool -L /bin/ls
 ```
 Algunas bibliotecas potencialmente relacionadas con malware son:
 
-* **DiskArbitration**: Monitoreo de unidades USB
-* **AVFoundation:** Captura de audio y video
-* **CoreWLAN**: Escaneos de Wifi.
+- **DiskArbitration**: Monitoreo de unidades USB
+- **AVFoundation**: Captura de audio y video
+- **CoreWLAN**: Escaneos de Wifi.
 
 {% hint style="info" %}
-Un binario Mach-O puede contener uno o **más** **constructores**, que se **ejecutarán** **antes** de la dirección especificada en **LC\_MAIN**.\
+Un binario Mach-O puede contener uno o **más constructores**, que se **ejecutarán antes** de la dirección especificada en **LC\_MAIN**.\
 Los desplazamientos de cualquier constructor se encuentran en la sección **\_\_mod\_init\_func** del segmento **\_\_DATA\_CONST**.
 {% endhint %}
 
@@ -279,13 +279,13 @@ En el núcleo del archivo se encuentra la región de datos, que está compuesta 
 Los datos son básicamente la parte que contiene toda la **información** que es cargada por los comandos de carga **LC\_SEGMENTS\_64**
 {% endhint %}
 
-![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../.gitbook/assets/image (507) (3).png>)
+![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055\_02\_38.jpg](<../../../.gitbook/assets/image (507) (3).png>)
 
 Esto incluye:
 
-* **Tabla de funciones:** Que contiene información sobre las funciones del programa.
-* **Tabla de símbolos**: Que contiene información sobre las funciones externas utilizadas por el binario
-* También podría contener funciones internas, nombres de variables y más.
+- **Tabla de funciones:** Que contiene información sobre las funciones del programa.
+- **Tabla de símbolos**: Que contiene información sobre la función externa utilizada por el binario
+- También podría contener funciones internas, nombres de variables y más.
 
 Para verificarlo, puedes usar la herramienta [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
@@ -297,14 +297,14 @@ size -m /bin/ls
 ```
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>

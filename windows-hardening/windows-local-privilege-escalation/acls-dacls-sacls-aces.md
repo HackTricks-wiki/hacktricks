@@ -1,24 +1,24 @@
 # ACLs - DACLs/SACLs/ACEs
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
-Acceda hoy mismo:
+¡Acceda hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><strong>Aprenda hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprenda hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtenga la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubra [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síganos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparta sus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtenga [**artículos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síganos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparta sus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
 
 </details>
 
@@ -28,18 +28,17 @@ Una Lista de Control de Acceso (ACL) consiste en un conjunto ordenado de Entrada
 
 Existen dos tipos de ACLs:
 
-- **Lista de Control de Acceso Discrecional (DACL):** Especifica qué usuarios y grupos tienen o no tienen acceso a un objeto.
-- **Lista de Control de Acceso del Sistema (SACL):** Rige la auditoría de intentos de acceso a un objeto.
+* **Lista de Control de Acceso Discrecional (DACL):** Especifica qué usuarios y grupos tienen o no tienen acceso a un objeto.
+* **Lista de Control de Acceso del Sistema (SACL):** Rige la auditoría de intentos de acceso a un objeto.
 
 El proceso de acceso a un archivo implica que el sistema verifique el descriptor de seguridad del objeto con el token de acceso del usuario para determinar si se debe otorgar acceso y la extensión de ese acceso, basado en los ACEs.
 
 ### **Componentes Clave**
 
-- **DACL:** Contiene ACEs que otorgan o niegan permisos de acceso a usuarios y grupos para un objeto. Esencialmente, es el ACL principal que dicta los derechos de acceso.
+* **DACL:** Contiene ACEs que otorgan o niegan permisos de acceso a usuarios y grupos para un objeto. Esencialmente, es el ACL principal que dicta los derechos de acceso.
+* **SACL:** Utilizado para auditar el acceso a objetos, donde los ACEs definen los tipos de acceso que se registrarán en el Registro de Eventos de Seguridad. Esto puede ser invaluable para detectar intentos de acceso no autorizados o solucionar problemas de acceso.
 
-- **SACL:** Utilizado para auditar el acceso a objetos, donde los ACEs definen los tipos de acceso que se registrarán en el Registro de Eventos de Seguridad. Esto puede ser invaluable para detectar intentos de acceso no autorizados o solucionar problemas de acceso.
-
-### **Interacción del Sistema con los ACLs**
+### **Interacción del Sistema con ACLs**
 
 Cada sesión de usuario está asociada con un token de acceso que contiene información de seguridad relevante para esa sesión, incluidas identidades de usuario, grupo y privilegios. Este token también incluye un SID de inicio de sesión que identifica de manera única la sesión.
 
@@ -47,40 +46,40 @@ La Autoridad de Seguridad Local (LSASS) procesa las solicitudes de acceso a obje
 
 ### **Proceso Resumido**
 
-- **ACLs:** Definen permisos de acceso a través de DACLs y reglas de auditoría a través de SACLs.
-- **Token de Acceso:** Contiene información de usuario, grupo y privilegios para una sesión.
-- **Decisión de Acceso:** Se realiza comparando los ACEs de DACL con el token de acceso; los SACLs se utilizan para la auditoría.
+* **ACLs:** Definen permisos de acceso a través de DACLs y reglas de auditoría a través de SACLs.
+* **Token de Acceso:** Contiene información de usuario, grupo y privilegios para una sesión.
+* **Decisión de Acceso:** Se realiza comparando los ACEs de DACL con el token de acceso; los SACLs se utilizan para la auditoría.
 
 ### ACEs
 
 Existen **tres tipos principales de Entradas de Control de Acceso (ACEs)**:
 
-- **ACE de Acceso Denegado**: Este ACE niega explícitamente el acceso a un objeto para usuarios o grupos especificados (en un DACL).
-- **ACE de Acceso Permitido**: Este ACE otorga explícitamente acceso a un objeto para usuarios o grupos especificados (en un DACL).
-- **ACE de Auditoría del Sistema**: Posicionado dentro de una Lista de Control de Acceso del Sistema (SACL), este ACE es responsable de generar registros de auditoría en intentos de acceso a un objeto por parte de usuarios o grupos. Documenta si se permitió o denegó el acceso y la naturaleza del acceso.
+* **ACE de Acceso Denegado**: Este ACE niega explícitamente el acceso a un objeto para usuarios o grupos especificados (en un DACL).
+* **ACE de Acceso Permitido**: Este ACE otorga explícitamente acceso a un objeto para usuarios o grupos especificados (en un DACL).
+* **ACE de Auditoría del Sistema**: Ubicado dentro de una Lista de Control de Acceso del Sistema (SACL), este ACE es responsable de generar registros de auditoría en intentos de acceso a un objeto por usuarios o grupos. Documenta si se permitió o denegó el acceso y la naturaleza del acceso.
 
 Cada ACE tiene **cuatro componentes críticos**:
 
 1. El **Identificador de Seguridad (SID)** del usuario o grupo (o su nombre principal en una representación gráfica).
 2. Una **bandera** que identifica el tipo de ACE (acceso denegado, permitido o auditoría del sistema).
 3. **Banderas de herencia** que determinan si los objetos secundarios pueden heredar el ACE de su padre.
-4. Un **[máscara de acceso](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN)**, un valor de 32 bits que especifica los derechos otorgados al objeto.
+4. Una [**máscara de acceso**](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), un valor de 32 bits que especifica los derechos otorgados al objeto.
 
 La determinación de acceso se realiza examinando secuencialmente cada ACE hasta que:
 
-- Un **ACE de Acceso Denegado** niega explícitamente los derechos solicitados a un fideicomisario identificado en el token de acceso.
-- Los **ACE de Acceso Permitido** otorgan explícitamente todos los derechos solicitados a un fideicomisario en el token de acceso.
-- Al verificar todos los ACEs, si algún derecho solicitado **no ha sido explícitamente permitido**, el acceso se deniega implícitamente.
+* Un **ACE de Acceso Denegado** niega explícitamente los derechos solicitados a un fideicomisario identificado en el token de acceso.
+* Los **ACE de Acceso Permitido** otorgan explícitamente todos los derechos solicitados a un fideicomisario en el token de acceso.
+* Al verificar todos los ACEs, si algún derecho solicitado **no ha sido explícitamente permitido**, el acceso se niega implícitamente.
 
 ### Orden de ACEs
 
-La forma en que se colocan las **ACEs** (reglas que dicen quién puede o no puede acceder a algo) en una lista llamada **DACL** es muy importante. Esto se debe a que una vez que el sistema otorga o niega acceso en función de estas reglas, deja de mirar el resto.
+La forma en que se colocan las **ACEs** (reglas que dicen quién puede o no puede acceder a algo) en una lista llamada **DACL** es muy importante. Esto se debe a que una vez que el sistema otorga o niega acceso basado en estas reglas, deja de mirar el resto.
 
-Existe una mejor manera de organizar estas ACEs, y se llama **"orden canónico"**. Este método ayuda a garantizar que todo funcione de manera fluida y justa. Así es como funciona para sistemas como **Windows 2000** y **Windows Server 2003**:
+Existe una mejor manera de organizar estas ACEs, y se llama **"orden canónico"**. Este método ayuda a garantizar que todo funcione sin problemas y de manera justa. Así es como funciona para sistemas como **Windows 2000** y **Windows Server 2003**:
 
-- Primero, coloque todas las reglas que se crean **específicamente para este elemento** antes que las que provienen de otro lugar, como una carpeta principal.
-- En esas reglas específicas, coloque primero las que dicen **"no" (denegar)** antes que las que dicen **"sí" (permitir)**.
-- Para las reglas que provienen de otro lugar, comience con las que vienen de la **fuente más cercana**, como la carpeta principal, y luego retroceda desde allí. Nuevamente, coloque **"no"** antes de **"sí".**
+* Primero, coloque todas las reglas que se crean **específicamente para este elemento** antes que las que provienen de otro lugar, como una carpeta principal.
+* En esas reglas específicas, coloque primero las que dicen **"no" (denegar)** antes que las que dicen **"sí" (permitir)**.
+* Para las reglas que provienen de otro lugar, comience con las que vienen de la **fuente más cercana**, como la carpeta principal, y luego retroceda desde allí. Nuevamente, coloque **"no"** antes de **"sí"**.
 
 Esta configuración ayuda de dos maneras importantes:
 
@@ -91,30 +90,28 @@ Al hacer las cosas de esta manera, el propietario de un archivo o carpeta puede 
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-Por lo tanto, este **"orden canónico"** se trata de asegurarse de que las reglas de acceso sean claras y funcionen bien, colocando reglas específicas primero y organizando todo de manera inteligente.
+Entonces, este **"orden canónico"** se trata de asegurarse de que las reglas de acceso sean claras y funcionen bien, colocando reglas específicas primero y organizando todo de manera inteligente.
 
-
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
-Acceda hoy mismo:
+¡Acceda hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ### Ejemplo de GUI
 
-**[Ejemplo desde aquí](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)**
+[**Ejemplo desde aquí**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
 Esta es la pestaña de seguridad clásica de una carpeta que muestra el ACL, DACL y ACEs:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../.gitbook/assets/classicsectab.jpg)
 
-Si hacemos clic en el **botón Avanzado** obtendremos más opciones como la herencia:
+Si hacemos clic en el **botón Avanzado**, obtendremos más opciones como la herencia:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../.gitbook/assets/aceinheritance.jpg)
 
-Y si agrega o edita un Principal de Seguridad:
+Y si agregas o editas un Principal de Seguridad:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../.gitbook/assets/editseprincipalpointers1.jpg)
 
@@ -122,45 +119,43 @@ Y por último, tenemos el SACL en la pestaña de Auditoría:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../.gitbook/assets/audit-tab.jpg)
 
-### Explicación del Control de Acceso de manera Simplificada
+### Explicando el Control de Acceso de una Manera Simplificada
 
-Cuando se administra el acceso a recursos, como una carpeta, utilizamos listas y reglas conocidas como Listas de Control de Acceso (ACLs) y Entradas de Control de Acceso (ACEs). Estas definen quién puede o no puede acceder a ciertos datos.
+Al gestionar el acceso a recursos, como una carpeta, utilizamos listas y reglas conocidas como Listas de Control de Acceso (ACLs) y Entradas de Control de Acceso (ACEs). Estas definen quién puede o no puede acceder a ciertos datos.
 
 #### Denegar Acceso a un Grupo Específico
 
-Imagina que tienes una carpeta llamada Costo y quieres que todos accedan a ella excepto el equipo de marketing. Configurando las reglas correctamente, podemos asegurar que al equipo de marketing se le niegue explícitamente el acceso antes de permitir a todos los demás. Esto se logra colocando la regla para denegar el acceso al equipo de marketing antes de la regla que permite el acceso a todos.
+Imagina que tienes una carpeta llamada Costo, y quieres que todos la accedan excepto un equipo de marketing. Al configurar las reglas correctamente, podemos asegurar que al equipo de marketing se le deniegue explícitamente el acceso antes de permitir que todos los demás accedan. Esto se logra colocando la regla para denegar el acceso al equipo de marketing antes de la regla que permite el acceso a todos.
 
 #### Permitir Acceso a un Miembro Específico de un Grupo Denegado
 
-Digamos que Bob, el director de marketing, necesita acceso a la carpeta Costo, aunque en general el equipo de marketing no debería tener acceso. Podemos agregar una regla específica (ACE) para Bob que le otorgue acceso, y colocarla antes de la regla que deniega el acceso al equipo de marketing. De esta manera, Bob obtiene acceso a pesar de la restricción general de su equipo.
+Digamos que Bob, el director de marketing, necesita acceso a la carpeta Costo, aunque en general el equipo de marketing no debería tener acceso. Podemos agregar una regla específica (ACE) para Bob que le otorgue acceso, y colocarla antes de la regla que deniega el acceso al equipo de marketing. De esta manera, Bob obtiene acceso a pesar de la restricción general en su equipo.
 
 #### Entendiendo las Entradas de Control de Acceso
 
-Las ACEs son las reglas individuales en un ACL. Identifican usuarios o grupos, especifican qué acceso está permitido o denegado, y determinan cómo se aplican estas reglas a los subelementos (herencia). Hay dos tipos principales de ACEs:
+Las ACEs son las reglas individuales en un ACL. Identifican usuarios o grupos, especifican qué acceso está permitido o denegado, y determinan cómo se aplican estas reglas a subelementos (herencia). Hay dos tipos principales de ACEs:
 
-- **ACEs Genéricas**: Estas se aplican de manera amplia, afectando a todos los tipos de objetos o distinguiendo solo entre contenedores (como carpetas) y no contenedores (como archivos). Por ejemplo, una regla que permite a los usuarios ver el contenido de una carpeta pero no acceder a los archivos dentro de ella.
+* **ACEs Genéricas**: Estas se aplican de manera amplia, afectando a todos los tipos de objetos o distinguiendo solo entre contenedores (como carpetas) y no contenedores (como archivos). Por ejemplo, una regla que permite a los usuarios ver el contenido de una carpeta pero no acceder a los archivos dentro de ella.
+* **ACEs Específicas del Objeto**: Estas proporcionan un control más preciso, permitiendo establecer reglas para tipos específicos de objetos o incluso propiedades individuales dentro de un objeto. Por ejemplo, en un directorio de usuarios, una regla podría permitir a un usuario actualizar su número de teléfono pero no sus horas de inicio de sesión.
 
-- **ACEs Específicas del Objeto**: Estas proporcionan un control más preciso, permitiendo establecer reglas para tipos específicos de objetos o incluso propiedades individuales dentro de un objeto. Por ejemplo, en un directorio de usuarios, una regla podría permitir a un usuario actualizar su número de teléfono pero no sus horas de inicio de sesión.
-
-Cada ACE contiene información importante como a quién se aplica la regla (usando un Identificador de Seguridad o SID), qué permite o deniega la regla (usando una máscara de acceso) y cómo se hereda en otros objetos.
+Cada ACE contiene información importante como a quién se aplica la regla (usando un Identificador de Seguridad o SID), qué permite o deniega la regla (usando una máscara de acceso) y cómo se hereda por otros objetos.
 
 #### Diferencias Clave Entre los Tipos de ACE
 
-- Las **ACEs Genéricas** son adecuadas para escenarios simples de control de acceso, donde la misma regla se aplica a todos los aspectos de un objeto o a todos los objetos dentro de un contenedor.
-
-- Las **ACEs Específicas del Objeto** se utilizan para escenarios más complejos, especialmente en entornos como Active Directory, donde es posible que necesites controlar el acceso a propiedades específicas de un objeto de manera diferente.
+* Las **ACEs Genéricas** son adecuadas para escenarios simples de control de acceso, donde la misma regla se aplica a todos los aspectos de un objeto o a todos los objetos dentro de un contenedor.
+* Las **ACEs Específicas del Objeto** se utilizan para escenarios más complejos, especialmente en entornos como Active Directory, donde es posible que necesites controlar el acceso a propiedades específicas de un objeto de manera diferente.
 
 En resumen, las ACLs y ACEs ayudan a definir controles de acceso precisos, asegurando que solo las personas o grupos adecuados tengan acceso a información o recursos sensibles, con la capacidad de adaptar los derechos de acceso hasta el nivel de propiedades individuales o tipos de objetos.
 
 ### Diseño de la Entrada de Control de Acceso
 
-| Campo ACE | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Campo ACE  | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tipo        | Bandera que indica el tipo de ACE. Windows 2000 y Windows Server 2003 admiten seis tipos de ACE: Tres tipos de ACE genéricos que se adjuntan a todos los objetos securizables. Tres tipos de ACE específicos del objeto que pueden ocurrir para objetos de Active Directory.                                                                                                                                                                                                                                                            |
+| Tipo        | Indicador que muestra el tipo de ACE. Windows 2000 y Windows Server 2003 admiten seis tipos de ACE: Tres tipos de ACE genéricos que se adjuntan a todos los objetos securizables. Tres tipos de ACE específicos del objeto que pueden ocurrir para objetos de Active Directory.                                                                                                                                                                                                                                                            |
 | Banderas       | Conjunto de bits que controlan la herencia y la auditoría.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Tamaño        | Número de bytes de memoria asignados para el ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Máscara de acceso | Valor de 32 bits cuyos bits corresponden a los derechos de acceso para el objeto. Los bits pueden estar activados o desactivados, pero el significado de la configuración depende del tipo de ACE. Por ejemplo, si el bit que corresponde al derecho de leer permisos está activado, y el tipo de ACE es Denegar, el ACE deniega el derecho de leer los permisos del objeto. Si el mismo bit está activado pero el tipo de ACE es Permitir, el ACE otorga el derecho de leer los permisos del objeto. Más detalles de la Máscara de Acceso aparecen en la tabla siguiente. |
-| SID         | Identifica a un usuario o grupo cuyo acceso es controlado o monitoreado por este ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Máscara de acceso | Valor de 32 bits cuyos bits corresponden a los derechos de acceso para el objeto. Los bits pueden estar activados o desactivados, pero el significado de la configuración depende del tipo de ACE. Por ejemplo, si el bit que corresponde al derecho de leer permisos está activado, y el tipo de ACE es Denegar, el ACE deniega el derecho de leer los permisos del objeto. Si el mismo bit está activado pero el tipo de ACE es Permitir, el ACE otorga el derecho de leer los permisos del objeto. Se detallan más aspectos de la Máscara de Acceso en la tabla siguiente. |
+| SID         | Identifica a un usuario o grupo cuyo acceso está controlado o supervisado por este ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### Diseño de la Máscara de Acceso
 
@@ -179,14 +174,26 @@ En resumen, las ACLs y ACEs ayudan a definir controles de acceso precisos, asegu
 
 * [https://www.ntfs.com/ntfs-permissions-acl-use.htm](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
 * [https://secureidentity.se/acl-dacl-sacl-and-the-ace/](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
-* [https://www.coopware.in2.info/_ntfsacl_ht.htm](https://www.coopware.in2.info/_ntfsacl_ht.htm)
+* [https://www.coopware.in2.info/\_ntfsacl\_ht.htm](https://www.coopware.in2.info/\_ntfsacl\_ht.htm)
 
 <details>
 
-<summary><strong>Aprenda hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtenga la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubra [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**N
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
+
+</details>
+
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+
+\
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Obtén Acceso Hoy:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

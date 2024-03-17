@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
@@ -39,14 +39,14 @@ Los permisos son **heredados del padre** de la aplicación y los **permisos** se
 Las autorizaciones/negaciones se almacenan en algunas bases de datos de TCC:
 
 - La base de datos de todo el sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`**.
-- Esta base de datos está **protegida por SIP**, por lo que solo se puede escribir en ella mediante un bypass de SIP.
+- Esta base de datos está **protegida por SIP**, por lo que solo se puede escribir en ella con un bypass de SIP.
 - La base de datos de TCC del usuario **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para preferencias por usuario.
-- Esta base de datos está protegida, por lo que solo los procesos con altos privilegios de TCC como Acceso completo al disco pueden escribir en ella (pero no está protegida por SIP).
+- Esta base de datos está protegida, por lo que solo los procesos con altos privilegios de TCC como Acceso Total al Disco pueden escribir en ella (pero no está protegida por SIP).
 
 {% hint style="warning" %}
 Las bases de datos anteriores también están **protegidas por TCC para el acceso de lectura**. Por lo tanto, **no podrás leer** tu base de datos de TCC de usuario regular a menos que sea desde un proceso con privilegios de TCC.
 
-Sin embargo, recuerda que un proceso con estos altos privilegios (como **FDA** o **`kTCCServiceEndpointSecurityClient`**) podrá escribir en la base de datos de TCC de los usuarios.
+Sin embargo, recuerda que un proceso con estos altos privilegios (como **FDA** o **`kTCCServiceEndpointSecurityClient`**) podrá escribir en la base de datos de TCC de usuarios.
 {% endhint %}
 
 - Existe una **tercera** base de datos de TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para **acceder a los servicios de ubicación**.
@@ -126,8 +126,8 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 Al verificar ambas bases de datos, puedes comprobar los permisos que una aplicación ha permitido, ha prohibido o no tiene (solicitará permiso).
 {% endhint %}
 
-* El **`servicio`** es la representación en cadena de permisos de TCC
-* El **`cliente`** es el **ID de paquete** o la **ruta al binario** con los permisos
+* El **`servicio`** es la representación de cadena de permisos de TCC
+* El **`cliente`** es el **ID de paquete** o **ruta al binario** con los permisos
 * El **`tipo de cliente`** indica si es un Identificador de Paquete(0) o una ruta absoluta(1)
 
 <details>
@@ -174,7 +174,7 @@ Simplemente haz **`launctl load tu_bin.plist`**, con un plist como:
 </details>
 
 * El campo **`auth_value`** puede tener diferentes valores: denegado(0), desconocido(1), permitido(2) o limitado(3).
-* El campo **`auth_reason`** puede tomar los siguientes valores: Error(1), Consentimiento del usuario(2), Configurado por el usuario(3), Configurado por el sistema(4), Política de servicio(5), Política de MDM(6), Política de anulación(7), Cadena de uso faltante(8), Tiempo de espera de aviso(9), Desconocido en la preinstalación(10), Con derecho(11), Política de tipo de aplicación(12)
+* El campo **`auth_reason`** puede tomar los siguientes valores: Error(1), Consentimiento del usuario(2), Configurado por el usuario(3), Configurado por el sistema(4), Política de servicio(5), Política de MDM(6), Política de anulación(7), Cadena de uso faltante(8), Tiempo de espera de aviso(9), Desconocido en preinicio(10), Con derecho(11), Política de tipo de aplicación(12)
 * El campo **csreq** está ahí para indicar cómo verificar el binario a ejecutar y otorgar los permisos de TCC:
 ```bash
 # Query to get cserq in printable hex
@@ -234,9 +234,9 @@ Por lo tanto, otras aplicaciones que utilicen el mismo nombre y ID de paquete no
 Las aplicaciones **no solo necesitan** solicitar y haber **obtenido acceso** a algunos recursos, también necesitan **tener los entitlements relevantes**.\
 Por ejemplo, **Telegram** tiene el entitlement `com.apple.security.device.camera` para solicitar **acceso a la cámara**. Una **aplicación** que **no tenga** este **entitlement no podrá** acceder a la cámara (y al usuario ni siquiera se le pedirá los permisos).
 
-Sin embargo, para que las aplicaciones **accedan** a **ciertas carpetas de usuario**, como `~/Desktop`, `~/Downloads` y `~/Documents`, no necesitan tener ningún **entitlement específico.** El sistema manejará el acceso de forma transparente y **solicitará permiso al usuario** según sea necesario.
+Sin embargo, para que las aplicaciones **accedan a ciertas carpetas de usuario**, como `~/Desktop`, `~/Downloads` y `~/Documents`, **no necesitan** tener ningún **entitlement específico.** El sistema manejará el acceso de forma transparente y **solicitará permiso al usuario** según sea necesario.
 
-Las aplicaciones de Apple **no generarán solicitudes de permiso**. Contienen **derechos preconcedidos** en su lista de **entitlements**, lo que significa que **nunca generarán un aviso emergente**, **ni** aparecerán en ninguna de las **bases de datos de TCC.** Por ejemplo:
+Las aplicaciones de Apple **no generarán solicitudes**. Contienen **derechos preconcedidos** en su **lista de entitlements**, lo que significa que **nunca generarán un popup**, **ni** aparecerán en ninguna de las **bases de datos de TCC.** Por ejemplo:
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -247,7 +247,7 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 <string>kTCCServiceAddressBook</string>
 </array>
 ```
-Esto evitará que Calendar solicite al usuario acceder a recordatorios, calendario y la libreta de direcciones.
+Esto evitará que Calendar solicite al usuario acceso a recordatorios, calendario y la libreta de direcciones.
 
 {% hint style="success" %}
 Además de alguna documentación oficial sobre permisos, también es posible encontrar **información interesante no oficial sobre permisos en** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
@@ -257,7 +257,7 @@ Algunos permisos de TCC son: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCSe
 
 ### Lugares sensibles desprotegidos
 
-* $HOME (por sí mismo)
+* $HOME (él mismo)
 * $HOME/.ssh, $HOME/.aws, etc
 * /tmp
 
@@ -347,7 +347,7 @@ Si lograste ingresar a una aplicación con algunos permisos de TCC, consulta la 
 ### Automatización (Finder) a FDA\*
 
 El nombre de TCC del permiso de Automatización es: **`kTCCServiceAppleEvents`**\
-Este permiso de TCC específico también indica la **aplicación que puede ser gestionada** dentro de la base de datos de TCC (por lo que los permisos no permiten gestionar todo).
+Este permiso específico de TCC también indica la **aplicación que puede ser gestionada** dentro de la base de datos de TCC (por lo que los permisos no permiten gestionar todo).
 
 **Finder** es una aplicación que **siempre tiene FDA** (incluso si no aparece en la interfaz de usuario), por lo que si tienes privilegios de **Automatización** sobre ella, puedes abusar de sus privilegios para **hacer que realice algunas acciones**.\
 En este caso, tu aplicación necesitaría el permiso **`kTCCServiceAppleEvents`** sobre **`com.apple.Finder`**.
@@ -383,14 +383,14 @@ EOD
 Esto se podría abusar para **escribir tu propia base de datos de TCC de usuario**.
 
 {% hint style="warning" %}
-Con este permiso podrás **solicitar al buscador acceso a carpetas restringidas por TCC** y que te proporcione los archivos, pero hasta donde sé, **no podrás hacer que Finder ejecute código arbitrario** para abusar completamente de su acceso a FDA.
+Con este permiso podrás **solicitar al buscador acceso a carpetas restringidas por TCC** y que te dé los archivos, pero hasta donde sé, **no podrás hacer que Finder ejecute código arbitrario** para abusar completamente de su acceso a FDA.
 
 Por lo tanto, no podrás abusar de todas las capacidades de FDA.
 {% endhint %}
 
 Este es el aviso de TCC para obtener privilegios de Automatización sobre Finder:
 
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="244"><figcaption></figcaption></figure>
 
 {% hint style="danger" %}
 Ten en cuenta que debido a que la aplicación **Automator** tiene el permiso de TCC **`kTCCServiceAppleEvents`**, puede **controlar cualquier aplicación**, como Finder. Por lo tanto, al tener el permiso para controlar Automator, también podrías controlar el **Finder** con un código como el siguiente:
@@ -522,7 +522,7 @@ Consulte esta página para obtener algunos [**payloads para abusar de los permis
 
 ### **Cliente de Seguridad de Punto Final a FDA**
 
-Si tienes **`kTCCServiceEndpointSecurityClient`**, tienes FDA. Fin.
+Si tiene **`kTCCServiceEndpointSecurityClient`**, tiene FDA. Fin.
 
 ### Política del Sistema Archivos de SysAdmin a FDA
 
@@ -530,19 +530,19 @@ Si tienes **`kTCCServiceEndpointSecurityClient`**, tienes FDA. Fin.
 
 ### Base de Datos TCC de Usuario a FDA
 
-Obteniendo **permisos de escritura** sobre la **base de datos TCC** del usuario no puedes otorgarte permisos de **`FDA`**, solo el que reside en la base de datos del sistema puede otorgar eso.
+Obteniendo **permisos de escritura** sobre la **base de datos TCC** del usuario no puedes otorgarte permisos de **`FDA`**, solo el que reside en la base de datos del sistema puede otorgarlo.
 
 Pero puedes otorgarte **`Derechos de Automatización a Finder`**, y abusar de la técnica anterior para escalar a FDA\*.
 
-### **Permisos de FDA a TCC**
+### **FDA a permisos TCC**
 
 El nombre de TCC para **Acceso Completo al Disco** es **`kTCCServiceSystemPolicyAllFiles`**
 
-No creo que esto sea un verdadero escalado de privilegios, pero por si acaso te resulta útil: Si controlas un programa con FDA puedes **modificar la base de datos TCC de los usuarios y otorgarte cualquier acceso**. Esto puede ser útil como técnica de persistencia en caso de que pierdas tus permisos de FDA.
+No creo que esto sea realmente un escalado de privilegios, pero por si acaso te resulta útil: Si controlas un programa con FDA puedes **modificar la base de datos TCC de los usuarios y otorgarte cualquier acceso**. Esto puede ser útil como técnica de persistencia en caso de que pierdas tus permisos de FDA.
 
 ### **Bypass de SIP a Bypass de TCC**
 
-La base de datos del sistema **TCC** está protegida por **SIP**, por eso solo los procesos con los **derechos indicados podrán modificarla**. Por lo tanto, si un atacante encuentra un **bypass de SIP** sobre un **archivo** (puede modificar un archivo restringido por SIP), podrá:
+La base de datos del sistema **TCC** está protegida por **SIP**, por eso solo los procesos con las **capacidades indicadas podrán modificarla**. Por lo tanto, si un atacante encuentra un **bypass de SIP** sobre un **archivo** (puede modificar un archivo restringido por SIP), podrá:
 
 * **Eliminar la protección** de una base de datos TCC y otorgarse todos los permisos de TCC. Podría abusar de cualquiera de estos archivos, por ejemplo:
 * La base de datos de sistemas TCC

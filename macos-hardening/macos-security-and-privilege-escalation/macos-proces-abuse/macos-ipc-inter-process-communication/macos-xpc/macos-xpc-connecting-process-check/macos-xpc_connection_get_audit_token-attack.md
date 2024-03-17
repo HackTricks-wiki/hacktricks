@@ -1,4 +1,4 @@
-# Ataque xpc\_connection\_get\_audit\_token en macOS
+# Ataque xpc\_connection\_get\_audit\_token de macOS
 
 <details>
 
@@ -50,13 +50,13 @@ Aunque la situación anterior suena prometedora, hay escenarios donde esto no ca
 
 Dos métodos diferentes en los que esto podría ser explotable:
 
-1. Variante 1:
+1. Variante1:
 * El **exploit se conecta** al servicio **A** y al servicio **B**.
 * El servicio **B** puede llamar a una **funcionalidad privilegiada** en el servicio **A** que el usuario no puede.
 * El servicio **A** llama a **`xpc_connection_get_audit_token`** mientras _**no**_ está dentro del **manejador de eventos** para una conexión en un **`dispatch_async`**.
 * Por lo tanto, un **mensaje diferente** podría **sobrescribir el Token de Auditoría** porque se está despachando de forma asíncrona fuera del manejador de eventos.
 * El exploit pasa a **servicio B el derecho de ENVÍO a servicio A**.
-* Entonces, svc **B** realmente estará **enviando** los **mensajes** al servicio **A**.
+* Entonces svc **B** realmente estará **enviando** los **mensajes** al servicio **A**.
 * El **exploit** intenta **llamar** a la **acción privilegiada**. En un RC svc **A** **verifica** la autorización de esta **acción** mientras **svc B sobrescribió el Token de Auditoría** (dando al exploit acceso para llamar a la acción privilegiada).
 2. Variante 2:
 * El servicio **B** puede llamar a una **funcionalidad privilegiada** en el servicio **A** que el usuario no puede.
@@ -68,7 +68,7 @@ Dos métodos diferentes en los que esto podría ser explotable:
 
 Escenario:
 
-* Dos servicios mach **`A`** y **`B`** a los que ambos podemos conectarnos (basado en el perfil de sandbox y las verificaciones de autorización antes de aceptar la conexión).
+* Dos servicios mach **`A`** y **`B`** a los que ambos podemos conectarnos (según el perfil de sandbox y las verificaciones de autorización antes de aceptar la conexión).
 * _**A**_ debe tener una **verificación de autorización** para una acción específica que **`B`** puede pasar (pero nuestra aplicación no puede).
 * Por ejemplo, si B tiene algunos **privilegios** o se está ejecutando como **root**, podría permitirle pedir a A que realice una acción privilegiada.
 * Para esta verificación de autorización, **`A`** obtiene el token de auditoría de forma asíncrona, por ejemplo, llamando a `xpc_connection_get_audit_token` desde **`dispatch_async`**.
@@ -77,7 +77,7 @@ Escenario:
 En este caso, un atacante podría desencadenar una **Condición de Carrera** creando un **exploit** que **pide a A que realice una acción** varias veces mientras hace que **B envíe mensajes a `A`**. Cuando la CC es **exitosa**, el **token de auditoría** de **B** se copiará en la memoria **mientras** la solicitud de nuestro **exploit** está siendo **manejada** por A, dándole **acceso a la acción privilegiada que solo B podría solicitar**.
 {% endhint %}
 
-Esto ocurrió con **`A`** como `smd` y **`B`** como `diagnosticd`. La función [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) de smb se puede utilizar para instalar una nueva herramienta auxiliar privilegiada (como **root**). Si un **proceso que se ejecuta como root** contacta a **smd**, no se realizarán otras verificaciones.
+Esto ocurrió con **`A`** como `smd` y **`B`** como `diagnosticd`. La función [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) de smb se puede utilizar para instalar una nueva herramienta auxiliar privilegiada (como **root**). Si un **proceso que se ejecuta como root contacta** a **smd**, no se realizarán otras verificaciones.
 
 Por lo tanto, el servicio **B** es **`diagnosticd`** porque se ejecuta como **root** y se puede utilizar para **monitorear** un proceso, por lo que una vez que comienza el monitoreo, **enviará múltiples mensajes por segundo.**
 
@@ -98,7 +98,7 @@ En un entorno de Comunicación entre Procesos Cruzados (XPC), aunque los manejad
 1. **`xpc_connection_send_message_with_reply`**: Aquí, el mensaje XPC es recibido y procesado en una cola designada.
 2. **`xpc_connection_send_message_with_reply_sync`**: Por el contrario, en este método, el mensaje XPC es recibido y procesado en la cola de despacho actual.
 
-Esta distinción es crucial porque permite la posibilidad de que **los paquetes de respuesta sean analizados concurrentemente con la ejecución de un manejador de eventos XPC**. Es importante destacar que, aunque `_xpc_connection_set_creds` implementa bloqueo para proteger contra la sobrescritura parcial del token de auditoría, no extiende esta protección al objeto de conexión completo. En consecuencia, se crea una vulnerabilidad donde el token de auditoría puede ser reemplazado durante el intervalo entre el análisis de un paquete y la ejecución de su manejador de eventos.
+Esta distinción es crucial porque permite la posibilidad de que **los paquetes de respuesta sean analizados concurrentemente con la ejecución de un manejador de eventos XPC**. Es importante destacar que mientras `_xpc_connection_set_creds` implementa bloqueo para proteger contra la sobrescritura parcial del token de auditoría, no extiende esta protección al objeto de conexión completo. En consecuencia, esto crea una vulnerabilidad donde el token de auditoría puede ser reemplazado durante el intervalo entre el análisis de un paquete y la ejecución de su manejador de eventos.
 
 Para explotar esta vulnerabilidad, se requiere la siguiente configuración:
 
@@ -117,13 +117,13 @@ A continuación se muestra una representación visual del escenario de ataque de
 
 ![https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png](../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png)
 
-<figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png" width="563"><figcaption></figcaption></figure>
 
 ## Problemas de Descubrimiento
 
 * **Dificultades para Localizar Instancias**: La búsqueda de instancias de uso de `xpc_connection_get_audit_token` fue desafiante, tanto estática como dinámicamente.
 * **Metodología**: Se empleó Frida para enganchar la función `xpc_connection_get_audit_token`, filtrando llamadas que no se originaban desde manejadores de eventos. Sin embargo, este método estaba limitado al proceso enganchado y requería un uso activo.
-* **Herramientas de Análisis**: Se utilizaron herramientas como IDA/Ghidra para examinar servicios mach alcanzables, pero el proceso fue lento, complicado por llamadas que involucraban la caché compartida de dyld.
+* **Herramientas de Análisis**: Se utilizaron herramientas como IDA/Ghidra para examinar los servicios mach alcanzables, pero el proceso fue lento, complicado por llamadas que involucraban la caché compartida de dyld.
 * **Limitaciones de Scripting**: Los intentos de escribir un script para el análisis de llamadas a `xpc_connection_get_audit_token` desde bloques `dispatch_async` se vieron obstaculizados por complejidades en el análisis de bloques e interacciones con la caché compartida de dyld.
 
 ## La solución <a href="#the-fix" id="the-fix"></a>
@@ -132,4 +132,4 @@ A continuación se muestra una representación visual del escenario de ataque de
 * **Respuesta de Apple**: Apple abordó el problema en `smd` sustituyendo `xpc_connection_get_audit_token` por `xpc_dictionary_get_audit_token`.
 * **Naturaleza de la Solución**: La función `xpc_dictionary_get_audit_token` se considera segura ya que recupera el token de auditoría directamente del mensaje mach vinculado al mensaje XPC recibido. Sin embargo, no forma parte de la API pública, similar a `xpc_connection_get_audit_token`.
 * **Ausencia de una Solución más Amplia**: No está claro por qué Apple no implementó una solución más integral, como descartar mensajes que no se alinean con el token de auditoría guardado de la conexión. La posibilidad de cambios legítimos en el token de auditoría en ciertos escenarios (por ejemplo, uso de `setuid`) podría ser un factor.
-* **Estado Actual**: El problema persiste en iOS 17 y macOS 14, lo que representa un desafío para aquellos que buscan identificarlo y comprenderlo.
+* **Estado Actual**: El problema persiste en iOS 17 y macOS 14, lo que representa un desafío para aquellos que intentan identificarlo y comprenderlo.
