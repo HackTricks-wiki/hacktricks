@@ -1,43 +1,44 @@
 # Kerberoast
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も**高度な**コミュニティツールによって**強化**された**ワークフロー**を簡単に構築し**自動化**します。\
-今すぐアクセスを取得:
+今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**を使用して、ゼロからヒーローまでAWSハッキングを学びましょう！</strong></summary>
+<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で、ゼロからヒーローまでのAWSハッキングを学びましょう！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
 * **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する。
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つけます
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)を**フォロー**してください。
 * **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
 
 ## Kerberoast
 
-Kerberoastingは、特に**Active Directory (AD)**内の**ユーザーアカウント**で動作するサービスに関連する**TGSチケット**の取得に焦点を当てていますが、**コンピューターアカウント**は除外されます。これらのチケットの暗号化には、**ユーザーパスワード**から派生したキーが使用され、**オフライン資格情報クラッキング**の可能性があります。サービスとしてのユーザーアカウントの使用は、空でない**"ServicePrincipalName"**プロパティによって示されます。
+Kerberoastingは、**Active Directory（AD）**内の**ユーザーアカウント**で動作するサービスに関連する**TGSチケット**の取得に焦点を当てますが、**コンピューターアカウント**は除外されます。これらのチケットの暗号化には、**ユーザーパスワード**から派生したキーが使用され、**オフライン資格情報のクラック**の可能性があります。サービスとしてのユーザーアカウントの使用は、空でない**"ServicePrincipalName"**プロパティによって示されます。
 
-**Kerberoasting**を実行するには、**TGSチケットを要求できるドメインアカウント**が必要ですが、このプロセスには**特権が必要**ではなく、**有効なドメイン資格情報**を持つ誰でもアクセスできます。
+**Kerberoasting**を実行するには、**TGSチケット**を要求できるドメインアカウントが必要ですが、このプロセスには**特権が必要**ではなく、**有効なドメイン資格情報**を持つ誰でもアクセスできます。
 
-### キーポイント:
-- **Kerberoasting**は、**AD**内の**ユーザーアカウントサービス**向けの**TGSチケット**を対象としています。
-- **ユーザーパスワード**から派生したキーで暗号化されたチケットは、**オフラインでクラック**できます。
-- サービスは、空でない**ServicePrincipalName**によって識別されます。
-- **特別な特権**は必要ありません、単に**有効なドメイン資格情報**が必要です。
+### キーポイント：
+
+* **Kerberoasting**は、**AD**内の**ユーザーアカウントサービス**向けの**TGSチケット**を対象としています。
+* **ユーザーパスワード**からのキーで暗号化されたチケットは、**オフラインでクラック**できます。
+* サービスは、空でない**ServicePrincipalName**によって識別されます。
+* **特別な特権**は必要ありません、単に**有効なドメイン資格情報**が必要です。
 
 ### **攻撃**
 
 {% hint style="warning" %}
-**Kerberoastingツール**は通常、攻撃を実行し**TGS-REQリクエストを開始**する際に**`RC4暗号化`**を要求します。これは、**RC4が**他の暗号化アルゴリズム（AES-128やAES-256など）よりも**[弱い](https://www.stigviewer.com/stig/windows\_10/2017-04-28/finding/V-63795)**ため、Hashcatなどのツールを使用してオフラインで簡単にクラックできます。\
+**Kerberoastingツール**は通常、攻撃を実行し**TGS-REQリクエスト**を開始する際に**`RC4暗号化`**を要求します。これは、**RC4が**他の暗号化アルゴリズム（AES-128やAES-256など）よりも**[弱い**](https://www.stigviewer.com/stig/windows\_10/2017-04-28/finding/V-63795)ため、Hashcatなどのツールを使用してオフラインで簡単にクラックできます。\
 RC4（タイプ23）ハッシュは**`$krb5tgs$23$*`**で始まり、AES-256（タイプ18）は**`$krb5tgs$18$*`**で始まります。
 {% endhint %}
 
@@ -106,11 +107,11 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 TGSをリクエストすると、Windowsイベント`4769 - Kerberosサービスチケットが要求されました`が生成されます。
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
-今すぐアクセスを取得:
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**できます。\
+今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -122,39 +123,39 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### 永続性
 
-ユーザーに**十分な権限**がある場合、それを**Kerberoastable**にすることができます。
+ユーザーに**十分な権限**がある場合、それを**kerberoastable**にすることができます。
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
-以下は、**kerberoast** 攻撃に役立つ**ツール**が見つかります: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
+有用な**ツール**を**kerberoast**攻撃についてこちらで見つけることができます: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Linux でこの**エラー**が発生した場合: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`**、それはローカル時間の問題です。ホストを DC と同期する必要があります。いくつかのオプションがあります:
+Linuxからこの**エラー**が見つかった場合: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** それはローカル時間の問題です。ホストとDCを同期する必要があります。いくつかのオプションがあります:
 
-- `ntpdate <DCのIP>` - Ubuntu 16.04 以降では非推奨
-- `rdate -n <DCのIP>`
+* `ntpdate <DCのIP>` - Ubuntu 16.04以降非推奨
+* `rdate -n <DCのIP>`
 
 ### 緩和策
 
-Kerberoasting は、悪用可能な場合、非常に慎重に実行される可能性があります。この活動を検出するためには、**Security Event ID 4769** に注意を払う必要があります。これは、Kerberos チケットが要求されたことを示します。ただし、このイベントが頻繁に発生するため、疑わしい活動を分離するために特定のフィルタを適用する必要があります:
+Kerberoastingは、悪用可能な場合に高い潜在性で実行される可能性があります。この活動を検出するためには、**Security Event ID 4769**に注意を払う必要があります。これはKerberosチケットが要求されたことを示します。ただし、このイベントの頻度が高いため、疑わしい活動を分離するために特定のフィルタを適用する必要があります:
 
-- サービス名が **krbtgt** であってはならない。これは通常の要求です。
-- **$** で終わるサービス名は除外すべきです。これにより、サービスに使用されるマシンアカウントが含まれるのを避けることができます。
-- **machine@domain** という形式のアカウント名を除外することで、マシンからの要求をフィルタリングする必要があります。
-- 失敗コードが **'0x0'** で識別される成功したチケット要求のみを考慮すべきです。
-- **最も重要なのは**、チケットの暗号化タイプが **0x17** である必要があります。これは、Kerberoasting 攻撃でよく使用されます。
+* サービス名は**krbtgt**であってはならず、これは通常の要求です。
+* **$**で終わるサービス名は除外すべきです。これにより、サービスに使用されるマシンアカウントが含まれるのを避けることができます。
+* マシンからの要求は、**machine@domain**という形式のアカウント名を除外することでフィルタリングする必要があります。
+* 失敗コードが**'0x0'**で識別される成功したチケット要求のみを考慮すべきです。
+* **最も重要なのは**、チケットの暗号化タイプが**0x17**である必要があります。これはKerberoasting攻撃でよく使用されます。
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
-## Kerberoastリスクの軽減：
+リスクを軽減するためには：
 
-- **サービスアカウントのパスワードが推測困難**であることを確認し、**25文字以上**の長さを推奨します。
+- **サービスアカウントのパスワードが推測困難** であることを確認し、**25文字以上**の長さを推奨します。
 - **管理されたサービスアカウント**を利用し、**自動パスワード変更**や**委任されたサービスプリンシパル名（SPN）の管理**などの利点を提供し、このような攻撃に対するセキュリティを向上させます。
 
 これらの対策を実施することで、組織はKerberoastingに関連するリスクを大幅に軽減できます。
 
 ## ドメインアカウントなしのKerberoast
 
-**2022年9月**に、研究者のCharlie Clark氏によって新しいシステムの悪用方法が明らかにされ、彼のプラットフォーム[exploit.ph](https://exploit.ph/)を通じて共有されました。この方法では、**Active Directoryアカウントの制御を必要としない** **KRB_AS_REQ**リクエストを介して**サービスチケット（ST）**を取得することが可能です。基本的に、プリンシパルが事前認証を必要としないように設定されている場合、サイバーセキュリティ領域で知られる**AS-REP Roasting攻撃**と似たシナリオが発生し、この特性を利用してリクエストプロセスを操作できます。具体的には、リクエストの本文内の**sname**属性を変更することで、システムは標準の暗号化されたチケット発行チケット（TGT）ではなく**ST**を発行するように誤認させられます。
+**2022年9月**に、研究者のCharlie Clark氏によって新しいシステムの悪用方法が明らかにされ、彼のプラットフォーム[exploit.ph](https://exploit.ph/)を通じて共有されました。この方法により、**サービスチケット（ST）**を**KRB\_AS\_REQ**リクエストを介して取得することが可能となり、これにはActive Directoryアカウントの制御が必要ないという特筆すべき点があります。基本的に、プリンシパルが事前認証を必要としないように設定されている場合、サイバーセキュリティ領域で知られる**AS-REP Roasting攻撃**と似たシナリオが発生し、この特性を利用してリクエストプロセスを操作することができます。具体的には、リクエストの本文内の**sname**属性を変更することで、システムは標準の暗号化されたチケット発行チケット（TGT）ではなく**ST**を発行するように騙されます。
 
 この技術についての詳細は、この記事で完全に説明されています：[Semperisブログ投稿](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)。
 
@@ -164,7 +165,7 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 #### Linux
 
-* [impacket/GetUserSPNs.py from PR #1413](https://github.com/fortra/impacket/pull/1413):
+- [impacket/GetUserSPNs.py from PR #1413](https://github.com/fortra/impacket/pull/1413):
 ```bash
 GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "dc.domain.local" "domain.local"/
 ```
@@ -175,6 +176,7 @@ GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "d
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```
 ## 参考文献
+
 * [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 * [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
 * [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
@@ -188,15 +190,15 @@ HackTricksをサポートする他の方法：
 * **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローする。**
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する。
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによってパワードされた**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

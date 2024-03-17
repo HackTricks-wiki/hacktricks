@@ -1,6 +1,6 @@
 # 便利なLinuxコマンド
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
@@ -10,19 +10,19 @@
 
 <details>
 
-<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでのAWSハッキング**を学びましょう！</summary>
+<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**で**ゼロからヒーローまでのAWSハッキング**を学びましょう！</summary>
 
 HackTricksをサポートする他の方法：
 
 * **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksのスウェグ**](https://peass.creator-spring.com)を入手してください
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手してください
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つけてください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**してください。
-* **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)を**フォロー**してください。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
 
-## 一般的なBash
+## Common Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -141,10 +141,10 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も**高度な**コミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -291,99 +291,30 @@ nmap --script-help "(default or version) and smb)"
 Bash is a Unix shell and command language written by Brian Fox for the GNU Project as a free software replacement for the Bourne shell. It has been distributed widely as the default login shell for most Linux distributions.
 
 ### Useful Commands
-
 - `history`: Displays the command history list.
 - `alias`: Creates an alias for a command.
 - `unalias`: Removes an alias.
 - `source`: Executes commands from a file in the current shell.
 - `.` (dot command): Also executes commands from a file in the current shell.
 - `echo $SHELL`: Displays the shell you're using.
-- `echo $0`: Displays the name of the shell script.
+- `echo $0`: Displays the name of the shell or script.
 - `echo $PATH`: Displays the directories where the shell looks for commands.
-- `which [command]`: Displays the location of a command.
-- `whereis [command]`: Locates the binary, source, and manual page files for a command.
-- `type [command]`: Indicates how a command name is interpreted.
-- `man [command]`: Displays the manual page for a command.
-- `apropos [keyword]`: Searches the manual page names and descriptions for a keyword.
-- `help [builtin]`: Displays help information for shell builtins.
-- `whatis [command]`: Displays a one-line description of a command.
-- `info [command]`: Displays the info entry for a command.
-- `exit`: Exits the shell.
-- `logout`: Logs out of the shell.
-- `Ctrl + C`: Interrupts the current command.
-- `Ctrl + Z`: Stops the current command.
-- `bg`: Resumes a stopped background process.
-- `fg`: Brings a background process to the foreground.
-- `jobs`: Lists the current jobs.
-- `kill [PID]`: Sends a signal to a process.
-- `ps`: Displays information about active processes.
-- `top`: Displays real-time information about processes.
-- `uptime`: Shows how long the system has been running.
-- `free`: Displays the amount of free and used memory in the system.
-- `df`: Displays disk space usage.
-- `du`: Shows the disk usage of files and directories.
-- `uname -a`: Displays system information.
-- `ifconfig`: Displays network interface information.
-- `netstat`: Displays network connections, routing tables, interface statistics, masquerade connections, and multicast memberships.
-- `ss`: Another utility to investigate sockets.
-- `lsof`: Lists open files.
-- `watch [command]`: Executes a command repeatedly and displays the results.
-- `crontab`: Manages cron jobs.
-- `at`: Schedules a one-time task.
-- `chmod`: Changes file permissions.
-- `chown`: Changes file owner and group.
-- `chgrp`: Changes file group ownership.
-- `tar`: Manipulates archive files.
-- `zip`: Compresses files.
-- `unzip`: Extracts files from a zip archive.
-- `grep`: Searches text using patterns.
-- `sed`: Edits text.
-- `awk`: Processes and analyzes text files.
-- `sort`: Sorts lines in a text file.
-- `uniq`: Filters adjacent matching lines from input.
-- `wc`: Counts lines, words, and characters in a file.
-- `cut`: Cuts sections from each line of files.
-- `paste`: Merges lines of files.
-- `head`: Outputs the first part of files.
-- `tail`: Outputs the last part of files.
-- `tee`: Reads from standard input and writes to standard output and files.
-- `diff`: Compares files line by line.
-- `patch`: Updates files using diff output.
-- `find`: Searches for files in a directory hierarchy.
-- `locate`: Finds files by name.
-- `updatedb`: Updates the database for locate.
-- `mount`: Mounts a filesystem.
-- `umount`: Unmounts a filesystem.
-- `fdisk`: Manipulates disk partition table.
-- `mkfs`: Creates a filesystem.
-- `dd`: Converts and copies files.
-- `rsync`: Syncs files and directories.
-- `scp`: Copies files securely over SSH.
-- `wget`: Downloads files from the web.
-- `curl`: Transfers data with URLs.
-- `ssh`: Connects to a remote machine.
-- `telnet`: Communicates with another host using the TELNET protocol.
-- `ping`: Tests network connectivity.
-- `traceroute`: Traces the route taken by packets over an IP network.
-- `iptables`: Manages firewall rules.
-- `tcpdump`: Captures and analyzes network traffic.
-- `nmap`: Scans ports and services.
-- `sshd`: SSH daemon.
-- `passwd`: Changes user password.
-- `useradd`: Adds a new user.
-- `userdel`: Deletes a user.
-- `usermod`: Modifies a user account.
-- `groupadd`: Adds a new group.
-- `groupdel`: Deletes a group.
-- `groupmod`: Modifies a group.
-- `chage`: Changes user password expiry information.
-- `su`: Switches user.
-- `sudo`: Executes a command as another user.
-- `visudo`: Edits the sudoers file safely.
-- `adduser`: Interactive shortcut for useradd.
-- `deluser`: Interactive shortcut for userdel.
-- `addgroup`: Interactive shortcut for groupadd.
-- `delgroup`: Interactive shortcut for groupdel.
+- `type command`: Indicates how a command name is interpreted.
+- `which command`: Displays the location of a command.
+- `man command`: Displays the manual for a command.
+- `apropos keyword`: Searches the man page names and descriptions for a keyword.
+- `whatis command`: Displays a one-line manual page description.
+- `help command`: Provides help for shell built-ins.
+- `info command`: Displays the info entry for a command.
+- `compgen -c`: Lists all the commands you could run.
+- `compgen -b`: Lists all the shell built-ins.
+- `compgen -a`: Lists all the aliases you could run.
+- `compgen -k`: Lists all the keywords you could run.
+- `compgen -A function`: Lists all the functions you could run.
+- `compgen -A variable`: Lists all the variables you could run.
+- `compgen -A user`: Lists all the users you could run.
+- `compgen -A hostname`: Lists all the hostnames you could run.
+- `compgen -A service`: Lists all the services you could run.
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
@@ -397,21 +328,12 @@ IptablesはLinuxシステムで使用されるファイアウォールユーテ�
 以下はIptablesでよく使用されるコマンドの一部です。
 
 - `iptables -L`: 現在のファイアウォールルールをリスト表示します。
-- `iptables -F`: すべてのファイアウォールルールを削除します。
-- `iptables -A`: ファイアウォールルールを追加します。
-- `iptables -D`: ファイアウォールルールを削除します。
+- `iptables -F`: すべてのファイアウォールルールをフラッシュ（削除）します。
+- `iptables -A`: ファイアウォールルールに新しいルールを追加します。
+- `iptables -D`: ファイアウォールルールから特定のルールを削除します。
 
-### 使用例
-```bash
-# ファイアウォールルールをリスト表示
-iptables -L
-
-# ファイアウォールルールを追加
-iptables -A INPUT -s 192.168.1.1 -j ACCEPT
-
-# ファイアウォールルールを削除
-iptables -D INPUT -s 192.168.1.1 -j ACCEPT
-```
+### 注意事項
+Iptablesを使用する際は、慎重にルールを設定し、システムのセキュリティを確保することが重要です。不適切な設定はシステムの可用性やセキュリティに影響を与える可能性があります。
 ```bash
 #Delete curent rules and chains
 iptables --flush
@@ -444,22 +366,22 @@ iptables -P OUTPUT ACCEPT
 ```
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**する
-* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリに提出する
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**する
+* **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

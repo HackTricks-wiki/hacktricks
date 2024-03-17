@@ -2,15 +2,15 @@
 
 <details>
 
-<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい場合** は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローする [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+- **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする。
+- **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリに PR を提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
 
@@ -38,8 +38,8 @@ asd
 
 ### 任意の名前によるTCCリクエスト
 
-攻撃者は、`Info.plist`で任意の名前（例：Finder、Google Chrome...）のアプリを作成し、それをいくつかのTCC保護された場所へのアクセスをリクエストするようにします。ユーザーは、正規のアプリケーションがこのアクセスをリクエストしていると思うでしょう。\
-さらに、正規のアプリをDockから削除し、代わりに偽物を置くことが可能です。したがって、ユーザーが偽物をクリックすると（同じアイコンを使用できる）、それは正規のアプリを呼び出し、TCCの許可を求め、マルウェアを実行することができ、ユーザーは正規のアプリがアクセスをリクエストしたと信じることになります。
+攻撃者は、`Info.plist`で任意の名前（例：Finder、Google Chromeなど）のアプリを作成し、それをいくつかのTCC保護された場所へのアクセスをリクエストするようにします。ユーザーは、正規のアプリケーションがこのアクセスをリクエストしていると思うでしょう。\
+さらに、正規のアプリをDockから削除し、その代わりに偽物を置くことが可能です。したがって、ユーザーが偽物をクリックすると（同じアイコンを使用できる）、それは正規のアプリを呼び出し、TCCの許可を求め、マルウェアを実行し、ユーザーは正規のアプリがアクセスを要求したと信じることになります。
 
 <figure><img src="https://lh7-us.googleusercontent.com/Sh-Z9qekS_fgIqnhPVSvBRmGpCXCpyuVuTw0x5DLAIxc2MZsSlzBOP7QFeGo_fjMeCJJBNh82f7RnewW1aWo8r--JEx9Pp29S17zdDmiyGgps1hH9AGR8v240m5jJM8k0hovp7lm8ZOrbzv-RC8NwzbB8w=s2048" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -55,7 +55,7 @@ asd
 
 ![](<../../../../../.gitbook/assets/image (569).png>)
 
-ここでは、いくつかの**マルウェアがこの保護をバイパスできた**例を見つけることができます：
+ここでは、いくつかの**マルウェアがこの保護をバイパスできた例**を見つけることができます：
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
@@ -73,9 +73,9 @@ SSHを有効にするには、今では**Full Disk Access**が必要です
 
 権限**`com.apple.private.icloud-account-access`**を使用すると、**`com.apple.iCloudHelper`** XPCサービスと通信することが可能で、これによりiCloudトークンが**提供**されます。
 
-**iMovie**と**Garageband**にはこの権限と他の権限が付与されていました。
+**iMovie**と**Garageband**はこの権限を持っていました。
 
-その権限からiCloudトークンを取得する**エクスプロイト**についての詳細は、次のトークをチェックしてください：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+その権限からiCloudトークンを取得する**エクスプロイト**についての詳細については、次のトークをチェックしてください：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automation
 
@@ -113,7 +113,7 @@ osascript iterm.script
 ```
 #### Finderを介して
 
-または、アプリがFinderにアクセス権を持っている場合、次のようなスクリプトがあるかもしれません：
+または、アプリがFinderを介してアクセスできる場合、次のようなスクリプトがあるかもしれません：
 ```applescript
 set a_user to do shell script "logname"
 tell application "Finder"
@@ -123,11 +123,11 @@ set t to paragraphs of (do shell script "cat " & POSIX path of (copyFile as alia
 end tell
 do shell script "rm " & POSIX path of (copyFile as alias)
 ```
-## アプリケーションの挙動
+## アプリケーションの挙動による
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-ユーザーランドの**tccdデーモン**は、**`HOME`** **env**変数を使用して、次の場所からTCCユーザーデータベースにアクセスします: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+ユーザーランドの**tccdデーモン**は、**`HOME`** **env**変数を使用して、次の場所からTCCユーザーデータベースにアクセスしています：**`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 [このStack Exchangeの投稿](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686)によると、TCCデーモンは現在のユーザーのドメイン内で`launchd`を介して実行されているため、**それに渡されるすべての環境変数を制御**することが可能です。\
 したがって、**攻撃者は`launchctl`**で`$HOME`環境変数を**制御されたディレクトリ**を指すように設定し、**TCC**デーモンを**再起動**してから、TCCデータベースを**直接変更**して、エンドユーザーにプロンプトを表示せずに**利用可能なすべてのTCC権限を自分に与える**ことができます。\
@@ -160,7 +160,7 @@ $> ls ~/Documents
 ```
 ### CVE-2021-30761 - ノート
 
-ノートはTCCで保護された場所にアクセスできましたが、ノートが作成されるときは**保護されていない場所**に作成されます。そのため、ノートに保護されたファイルをコピーするように依頼し、その後ファイルにアクセスできました：
+ノートはTCCで保護された場所にアクセスできましたが、ノートが作成されるときは**保護されていない場所に作成**されます。したがって、ノートに保護されたファイルをコピーするように依頼し、その後ファイルにアクセスできます：
 
 <figure><img src="../../../../../.gitbook/assets/image (6) (1) (3).png" alt=""><figcaption></figcaption></figure>
 
@@ -168,11 +168,11 @@ $> ls ~/Documents
 
 ライブラリ`libsecurity_translocate`を持つバイナリ`/usr/libexec/lsd`は、`com.apple.private.nullfs_allow`という権限を持っていました。これにより**nullfs**マウントを作成し、`com.apple.private.tcc.allow`と**`kTCCServiceSystemPolicyAllFiles`**を持っていたため、すべてのファイルにアクセスできました。
 
-"Library"に隔離属性を追加し、**`com.apple.security.translocation`** XPCサービスを呼び出すことで、Libraryを**`$TMPDIR/AppTranslocation/d/d/Library`**にマップし、Library内のすべてのドキュメントに**アクセス**できるようになりました。
+"Library"に隔離属性を追加し、**`com.apple.security.translocation`** XPCサービスを呼び出すことが可能で、その後、Libraryを**`$TMPDIR/AppTranslocation/d/d/Library`**にマップし、Library内のすべてのドキュメントに**アクセス**できました。
 
 ### CVE-2023-38571 - Music & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
-**`Music`**には興味深い機能があります。実行中に**`~/Music/Music/Media.localized/Automatically Add to Music.localized`**にドロップされたファイルをユーザーの「メディアライブラリ」に**インポート**します。さらに、次のようなものを呼び出します：**`rename(a, b);`** ここで`a`と`b`は次のとおりです：
+**`Music`**には興味深い機能があります。実行中に、ユーザーの"メディアライブラリ"に**`~/Music/Music/Media.localized/Automatically Add to Music.localized`**にドロップされたファイルを**インポート**します。さらに、次のようなものを呼び出します：**`rename(a, b);`** ここで`a`と`b`は次のとおりです：
 
 * `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
 * `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
@@ -181,12 +181,12 @@ $> ls ~/Documents
 
 ### SQLITE\_SQLLOG\_DIR - CVE-2023-32422
 
-**`SQLITE_SQLLOG_DIR="path/folder"`**が設定されている場合、**任意のオープンされたdbがそのパスにコピー**されます。このCVEでは、この制御が悪用され、**TCCデータベースを持つプロセスによって開かれるSQLiteデータベース内に**書き込むことが可能であり、**`SQLITE_SQLLOG_DIR`**を**ファイル名にシンボリックリンク**を使用して悪用し、そのデータベースが**開かれる**と、ユーザーの**TCC.dbが上書き**されました。\
-**詳細は**[**こちらの解説**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **および**[**こちらのトーク**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y\&t=20548s) **で確認できます**。
+**`SQLITE_SQLLOG_DIR="path/folder"`**が設定されている場合、**任意のオープンされたdbがそのパスにコピー**されます。このCVEでは、この制御が悪用され、**TCCデータベースを持つプロセスによって開かれるSQLiteデータベース**内に**書き込む**ことが可能であり、その後、**`SQLITE_SQLLOG_DIR`**を**ファイル名にシンボリックリンク**として悪用し、そのデータベースが**開かれる**と、ユーザーの**TCC.dbが開かれたもので上書き**されました。\
+**詳細は**[**こちらの解説**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **および**[**こちらのトーク**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y\&t=20548s) **にあります**。
 
 ### **SQLITE\_AUTO\_TRACE**
 
-環境変数**`SQLITE_AUTO_TRACE`**が設定されている場合、ライブラリ**`libsqlite3.dylib`**はすべてのSQLクエリを**ログ記録**を開始します。多くのアプリケーションがこのライブラリを使用していたため、すべてのSQLiteクエリをログ記録することが可能でした。
+環境変数**`SQLITE_AUTO_TRACE`**が設定されている場合、ライブラリ**`libsqlite3.dylib`**はすべてのSQLクエリを**ログ**し始めます。多くのアプリケーションがこのライブラリを使用していたため、すべてのSQLiteクエリをログすることが可能でした。
 
 いくつかのAppleアプリケーションは、TCCで保護された情報にアクセスするためにこのライブラリを使用していました。
 ```bash
@@ -195,37 +195,37 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 ### MTL_DUMP_PIPELINES_TO_JSON_FILE - CVE-2023-32407
 
-この**環境変数は、`Metal`フレームワーク**で使用されており、さまざまなプログラムに依存しています。特に`Music`にはFDAがあります。
+この**環境変数は、`Metal`フレームワーク**で使用されます。これは、`Music`などのさまざまなプログラムに依存しており、FDAを持っています。
 
-次のように設定します：`MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`。`path`が有効なディレクトリである場合、バグがトリガーされ、プログラムで何が起こっているかを`fs_usage`で確認できます：
+次のように設定します：`MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`。`path`が有効なディレクトリである場合、バグがトリガーされ、`fs_usage`を使用してプログラム内で何が起こっているかを確認できます：
 
-* `open()`されるファイルは、`path/.dat.nosyncXXXX.XXXXXX`（Xはランダム）と呼ばれます
-* 1つ以上の`write()`がファイルに内容を書き込みます（これは制御できません）
-* `path/.dat.nosyncXXXX.XXXXXX`が`rename()`されて`path/name`になります
+- `open()`されるファイルは、`path/.dat.nosyncXXXX.XXXXXX`（Xはランダム）と呼ばれます
+- 1つ以上の`write()`がファイルに内容を書き込みます（これは制御できません）
+- `path/.dat.nosyncXXXX.XXXXXX`が`rename()`されて`path/name`になります
 
-これは一時ファイルの書き込みであり、その後に**セキュアでない`rename(old, new)`**が続きます。
+これは、**セキュリティが確保されていない**一時ファイル書き込みであり、**`rename(old, new)`**に続きます。
 
-これは**古いパスと新しいパスを別々に解決する必要があるため**、時間がかかり、競合状態に対して脆弱になる可能性があるため、セキュアではありません。詳細については、`xnu`関数`renameat_internal()`を確認してください。
+これは、**古いパスと新しいパスを別々に解決する必要があるため**、時間がかかり、競合状態に対して脆弱になる可能性があるため、セキュリティが確保されていません。詳細については、`xnu`関数`renameat_internal()`を確認してください。
 
 {% hint style="danger" %}
-つまり、特権プロセスがコントロールするフォルダから名前を変更している場合、RCEを獲得し、異なるファイルにアクセスしたり、このCVEのように特権アプリが作成したファイルを開いてFDを保存することができます。
+つまり、特権プロセスがコントロールするフォルダから名前を変更する場合、RCEを獲得し、異なるファイルにアクセスしたり、このCVEのように特権アプリが作成したファイルを開いてFDを保存したりできます。
 
-名前変更がコントロールするフォルダにアクセスし、ソースファイルを変更したり、そのFDを持っている場合、宛先ファイル（またはフォルダ）をシンボリックリンクに指すように変更して、いつでも書き込むことができます。
+名前を変更すると、コントロールするフォルダにアクセスし、ソースファイルを変更したり、FDを持っている場合、宛先ファイル（またはフォルダ）をシンボリックリンクに指すように変更できるため、いつでも書き込むことができます。
 {% endhint %}
 
-このCVEでの攻撃は次のとおりです。例えば、ユーザーの`TCC.db`を上書きするには：
+このCVEでの攻撃は次のとおりです：例えば、ユーザーの`TCC.db`を上書きするには：
 
-* `/Users/hacker/ourlink`を`/Users/hacker/Library/Application Support/com.apple.TCC/`を指すように作成します
-* ディレクトリ`/Users/hacker/tmp/`を作成します
-* `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db`を設定します
-* この環境変数を使用して`Music`を実行してバグをトリガーします
-* `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX`（Xはランダム）の`open()`をキャッチします
-* ここでも、このファイルを書き込み用に`open()`し、ファイルディスクリプタを保持します
-* `/Users/hacker/tmp`を`/Users/hacker/ourlink`に**ループ内で**アトミックに切り替えます
-* これは、競合ウィンドウが非常に狭いため、成功する可能性を最大化するために行いますが、競争に負けるとほとんどデメリットがあります
-* 少し待つ
-* 運が良ければテストします
-* そうでない場合は、最初からやり直します
+- `/Users/hacker/ourlink`を`/Users/hacker/Library/Application Support/com.apple.TCC/`にポイントするように作成します
+- ディレクトリ`/Users/hacker/tmp/`を作成します
+- `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db`を設定します
+- この環境変数を使用して`Music`を実行してバグをトリガーします
+- `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX`（Xはランダム）の`open()`をキャッチします
+- ここでも、このファイルを書き込み用に`open()`し、ファイルディスクリプタを保持します
+- `/Users/hacker/tmp`を`/Users/hacker/ourlink`に**ループ内で**原子的に切り替えます
+- これは、競合ウィンドウが非常に狭いため、成功する可能性を最大化するために行いますが、競争に負けるとほとんどデメリットがあります
+- 少し待つ
+- 運が良ければテストします
+- そうでない場合は、最初からやり直します
 
 詳細は[https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html](https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html)で確認できます。
 
@@ -258,17 +258,17 @@ Appleは、**`NFSHomeDirectory`**属性内に格納された設定を使用し�
 2. 必要なアクセス権限と_csreq_ blobを持つ偽の_TCC.db_ファイルを配置します。
 3. [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/)を使用してユーザーのDirectory Servicesエントリをエクスポートします。
 4. ユーザーのホームディレクトリを変更するためにDirectory Servicesエントリを変更します。
-5. 変更されたDirectory Servicesエントリを[**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/)を使用してインポートします。
+5. [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/)を使用して変更されたDirectory Servicesエントリをインポートします。
 6. ユーザーの_tccd_を停止し、プロセスを再起動します。
 
-**2番目のPOC**は、`/usr/libexec/configd`を使用し、`com.apple.private.tcc.allow`という値が`kTCCServiceSystemPolicySysAdminFiles`であるものでした。\
-攻撃者は、**`configd`**を**`-t`**オプションで実行することで、**カスタムバンドルをロード**できました。したがって、この脆弱性は、ユーザーのホームディレクトリを変更する**`configd`コードインジェクション**で**`dsexport`**および**`dsimport`**の方法を置き換えることができました。
+**2番目のPOC**は、`/usr/libexec/configd`を使用し、`com.apple.private.tcc.allow`が`kTCCServiceSystemPolicySysAdminFiles`の値を持っていました。\
+攻撃者は、**`configd`**を**`-t`**オプションで実行することで、**カスタムバンドルをロード**できました。したがって、この脆弱性は、ユーザーのホームディレクトリを変更する**`configd`コードインジェクション**で**`dsexport`**および**`dsimport`**方法を置き換えることができました。
 
 詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)を確認してください。
 
 ## プロセスインジェクションによる
 
-プロセス内にコードをインジェクトし、そのTCC権限を悪用するさまざまな技術があります：
+プロセス内にコードをインジェクトしてTCC権限を悪用するさまざまなテクニックがあります：
 
 {% content-ref url="../../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../../macos-proces-abuse/)
@@ -286,9 +286,9 @@ Appleは、**`NFSHomeDirectory`**属性内に格納された設定を使用し�
 詳細については、[**元のレポート**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)を確認してください。
 ### CVE-2020-29621 - Coreaudiod
 
-バイナリ **`/usr/sbin/coreaudiod`** には、`com.apple.security.cs.disable-library-validation` と `com.apple.private.tcc.manager` の権限がありました。最初の権限は **コードインジェクションを許可** し、2番目の権限は **TCCを管理する権限** を与えていました。
+バイナリ **`/usr/sbin/coreaudiod`** には、`com.apple.security.cs.disable-library-validation` と `com.apple.private.tcc.manager` の権限がありました。最初の権限は **コードインジェクションを許可** し、2番目の権限は **TCCの管理権限を与えました**。
 
-このバイナリは、`/Library/Audio/Plug-Ins/HAL` フォルダから **サードパーティのプラグインを読み込むことを許可**していました。そのため、この PoC を使用して **プラグインを読み込み、TCCの権限を悪用** することが可能でした：
+このバイナリは、`/Library/Audio/Plug-Ins/HAL` フォルダから **サードパーティプラグインを読み込むことを許可**していました。したがって、この PoC を使用して **プラグインを読み込み、TCC権限を悪用** することが可能でした：
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -321,7 +321,7 @@ exit(0);
 
 Core Media I/Oを介してカメラストリームを開くシステムアプリケーション（**`kTCCServiceCamera`**を持つアプリ）は、`/Library/CoreMediaIO/Plug-Ins/DAL`にあるこれらのプラグインをプロセス内に読み込みます（SIP制限なし）。
 
-そこに一般的な**コンストラクタ**を持つライブラリを保存するだけで、**コードを注入**することができます。
+そこに一般的な**コンストラクタ**を持つライブラリを保存するだけで、**コードをインジェクト**することができます。
 
 これに対していくつかのAppleアプリケーションが脆弱でした。
 
@@ -353,17 +353,15 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-詳細な情報は、[**元のレポートをチェックしてください**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)。
-
 ### CVE-2020-10006
 
-バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、これによりプロセス内にコードをインジェクトして TCC 権限を使用することができました。
+バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、これによりプロセス内にコードを注入して TCC 権限を使用することができました。
 
 ### CVE-2023-26818 - Telegram
 
-Telegram には、**`com.apple.security.cs.allow-dyld-environment-variables`** と **`com.apple.security.cs.disable-library-validation`** の権限があり、これを悪用してカメラでの録画などの権限にアクセスすることが可能でした。[**writeup にペイロードがあります**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)。
+Telegram には、**`com.apple.security.cs.allow-dyld-environment-variables`** と **`com.apple.security.cs.disable-library-validation`** の権限があり、これを悪用してカメラでの録画など、**その権限にアクセス**することが可能でした。[**writeup でペイロードを見つけることができます**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)。
 
-環境変数を使用してライブラリをロードする方法に注目し、**カスタム plist** を作成してこのライブラリをインジェクトし、**`launchctl`** を使用して起動する方法について説明します。
+環境変数を使用してライブラリをロードする方法に注目し、**カスタム plist** を作成してこのライブラリを注入し、**`launchctl`** を使用して起動する方法について説明します。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -399,9 +397,9 @@ launchctl load com.telegram.launcher.plist
 
 ### ターミナルスクリプト
 
-技術者が使用するコンピュータでは、ターミナルに**Full Disk Access (FDA)** を与えることが一般的です。そして、それを使用して**`.terminal`**スクリプトを呼び出すことが可能です。
+技術者が使用するコンピュータでは、ターミナルに**フルディスクアクセス（FDA）**を与えることが一般的です。そして、それを使用して**`.terminal`**スクリプトを呼び出すことが可能です。
 
-**`.terminal`**スクリプトは、**`CommandString`**キーで実行するコマンドが指定されたこのようなplistファイルです：
+**`.terminal`**スクリプトは、**`CommandString`**キーで実行するコマンドが指定されたこのようなplistファイルです。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -434,8 +432,8 @@ exploit_location]; task.standardOutput = pipe;
 
 ### CVE-2020-9771 - mount\_apfs TCC バイパスと権限昇格
 
-**どんなユーザー**（特権を持たないユーザーでも）がタイムマシンのスナップショットを作成し、マウントし、そのスナップショットの**すべてのファイルにアクセス**できます。\
-**必要な特権**は、使用されるアプリケーション（例：`Terminal`）が**Full Disk Access**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持っている必要があり、これは管理者によって許可される必要があります。
+**どんなユーザー**（特権を持たないユーザーでも）がタイムマシンのスナップショットを作成し、マウントし、そのスナップショット内の**すべてのファイルにアクセス**できます。\
+**必要な特権**は、使用されるアプリケーション（例：`Terminal`）が**Full Disk Access**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つ必要があり、これは管理者によって許可される必要があります。
 
 {% code overflow="wrap" %}
 ```bash
@@ -509,11 +507,11 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 
 これはもはや機能しませんが、[**過去には機能しました**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 [**CoreGraphics イベント**](https://objectivebythesea.org/v2/talks/OBTS\_v2\_Wardle.pdf)を使用した別の方法：
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## 参考
 

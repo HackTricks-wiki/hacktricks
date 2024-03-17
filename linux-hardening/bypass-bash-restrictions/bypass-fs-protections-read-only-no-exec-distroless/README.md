@@ -1,22 +1,22 @@
-# ファイルシステムの保護をバイパスする：読み取り専用 / 実行不可 / Distroless
+# ファイルシステム保護のバイパス：読み取り専用 / 実行不可 / Distroless
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>！</strong></a></summary>
 
 HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をフォローしてください。
-- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をフォローする
+- **Hackingトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**ハッキングキャリア**に興味がある方や**解読不能なものをハック**したい方 - **採用中です！**（_流暢なポーランド語の読み書きが必要です_）。
+**ハッキングキャリア**に興味があり、**解読不能なものをハック**したい場合は、**採用中**です！（_流暢なポーランド語の読み書きが必要です_）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -45,17 +45,17 @@ securityContext:
     command: ["sh", "-c", "while true; do sleep 1000; done"]
 ```
 
-しかし、ファイルシステムがroとしてマウントされていても、**`/dev/shm`**は書き込み可能のままであるため、ディスクに何も書き込めないというわけではありません。ただし、このフォルダは**実行不可保護**でマウントされているため、ここにバイナリをダウンロードしても**実行できません**。
+しかし、ファイルシステムがroとしてマウントされていても、**`/dev/shm`**は書き込み可能のままであるため、ディスクに書き込むことができないというのは偽物です。ただし、このフォルダは**実行不可保護**でマウントされるため、ここにバイナリをダウンロードしても**実行できません**。
 
 {% hint style="warning" %}
-レッドチームの観点からすると、これは**バイナリをダウンロードして実行するのが複雑**になります（バックドアや`kubectl`のような既存のシステムにないバイナリ）。
+レッドチームの観点からすると、これはバイナリ（バックドアや`kubectl`のような列挙ツールなど）を**ダウンロードして実行するのが複雑**になります。
 {% endhint %}
 
 ## 最も簡単なバイパス：スクリプト
 
-バイナリを言及しましたが、インタプリタがマシン内にある限り、**シェルスクリプト**（`sh`が存在する場合）や**Pythonスクリプト**（`python`がインストールされている場合）など、**任意のスクリプトを実行**できます。
+バイナリと言及しましたが、インタプリタがマシン内にある限り、**シェルスクリプト**（`sh`が存在する場合）や**Pythonスクリプト**（`python`がインストールされている場合）など、**任意のスクリプトを実行**できます。
 
-ただし、これだけではバイナリバックドアや実行する必要がある他のバイナリツールを実行するのには十分ではありません。
+ただし、これだけではバイナリバックドアや他の実行する必要があるバイナリツールを実行するのには十分ではありません。
 
 ## メモリバイパス
 
@@ -63,21 +63,19 @@ securityContext:
 
 ### FD + execシステムコールバイパス
 
-**Python**、**Perl**、**Ruby**などの強力なスクリプトエンジンがマシン内にある場合、メモリにバイナリをダウンロードして実行し、それを保護されないメモリファイルディスクリプタ（`create_memfd`システムコール）に保存し、その後**`exec`システムコール**を呼び出して**fdを実行するファイル**として指定します。
+**Python**、**Perl**、**Ruby**などの強力なスクリプトエンジンがマシン内にある場合、メモリから実行するためにバイナリをダウンロードし、メモリファイルディスクリプタに保存し（`create_memfd`システムコール）、これらの保護によって保護されないため、**fdをファイルとして実行する**ように**`exec`システムコール**を呼び出すことができます。
 
-これには、プロジェクト[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)を簡単に使用できます。バイナリを渡すと、バイナリが**デコードおよび解凍された**スクリプトが生成され、`create_memfd`システムコールを呼び出して作成された**fd**にバイナリを格納し、それを実行する**exec**システムコールが呼び出されます。
+これには、プロジェクト[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)を簡単に使用できます。バイナリを渡すと、バイナリが**デコードおよび解凍された**スクリプトが生成され、`create_memfd`システムコールを呼び出して作成された**fd**にバイナリを格納し、それを実行する**`exec`システムコール**への呼び出し手順が含まれます。
 
 {% hint style="warning" %}
-これは、PHPやNodeなどの他のスクリプト言語では**スクリプトから生のシステムコールを呼び出すデフォルトの方法**がないため、`create_memfd`を呼び出して**バイナリを格納するメモリfd**を作成することができません。
+これは、PHPやNodeなどの他のスクリプト言語では、スクリプトから**生のシステムコール**を呼び出す**デフォルトの方法**がないため、`create_memfd`を呼び出して**バイナリを格納するためのメモリfd**を作成することができないため、これは機能しません。
 
-また、`/dev/shm`内のファイルで**通常のfd**を作成しても機能しないため、**実行不可保護**が適用されるため実行できません。
+さらに、`/dev/shm`内のファイルで**通常のfd**を作成しても、**実行不可保護**が適用されるため、実行できません。
 {% endhint %}
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)は、**`/proc/self/mem`**を上書きすることで、**自分自身のプロセスのメモリを変更**する技術です。
-
-したがって、プロセスが実行している**アセンブリコードを制御**することで、**シェルコード**を書き込み、プロセスを**任意のコードを実行**するように「変異」させることができます。
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)は、**`/proc/self/mem`**を上書きすることで、**自分自身のプロセスのメモリを変更**する技術であり、**プロセスが実行しているアセンブリコード**を制御することで、**シェルコード**を書き込み、プロセスを**任意のコードを実行**するように「変異」させることができます。
 
 {% hint style="success" %}
 **DDexec / EverythingExec**を使用すると、**自分自身のメモリから**自分自身の**シェルコード**または**任意のバイナリ**を**ロードして実行**できます。
@@ -106,22 +104,22 @@ Distrolessコンテナの目標は、**不要なコンポーネントを排除**
 
 ### リバースシェル
 
-Distrolessコンテナでは、通常のシェルを取得するための`sh`や`bash`などが**見つからない**かもしれません。また、`ls`、`whoami`、`id`などのバイナリも見つかりません。これらは通常、システムで実行するものです。
+Distrolessコンテナでは、通常のシェルを取得するための`sh`や`bash`などが**見つからない**かもしれません。`ls`、`whoami`、`id`などのバイナリも見つけることはできません...通常システムで実行するものはすべて見つかりません。
 
 {% hint style="warning" %}
-したがって、通常どおりに**リバースシェル**を取得したり、システムを**列挙**することはできません。
+したがって、通常行うような**リバースシェル**の取得や**システムの列挙**はできません。
 {% endhint %}
 
 ただし、侵害されたコンテナが例えばflask webを実行している場合、Pythonがインストールされているため、**Pythonリバースシェル**を取得できます。Nodeを実行している場合はNodeリバースシェルを取得でき、ほとんどの**スクリプト言語**でも同様です。
 
 {% hint style="success" %}
-スクリプト言語を使用すると、言語の機能を使用してシステムを**列挙**できます。
+スクリプト言語を使用することで、言語の機能を利用して**システムを列挙**することができます。
 {% endhint %}
 
 **`read-only/no-exec`**の保護がない場合、リバースシェルを悪用してファイルシステムに**バイナリを書き込み**、それらを**実行**することができます。
 
 {% hint style="success" %}
-ただし、この種のコンテナでは通常、これらの保護が存在しますが、**以前のメモリ実行技術を使用してそれらをバイパス**することができます。
+ただし、この種のコンテナでは通常これらの保護が存在しますが、**以前のメモリ実行技術を使用してそれらをバイパス**することができます。
 {% endhint %}
 
 **RCE脆弱性を悪用してスクリプト言語のリバースシェルを取得**し、[**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE)でメモリからバイナリを実行する方法の**例**を見つけることができます。

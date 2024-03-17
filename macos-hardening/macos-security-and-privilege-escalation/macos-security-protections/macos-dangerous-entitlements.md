@@ -1,93 +1,92 @@
-# macOS 危険な権限とTCC権限
+# macOS危険な権限とTCC権限
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶには</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>をご覧ください！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を通じて、ゼロからヒーローまでAWSハッキングを学ぶ</summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォロー**してください。
-* **HackTricks**の[**GitHubリポジトリ**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出して、あなたのハッキングのコツを共有してください。
+- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **Discordグループ**に**参加**する💬（https://discord.gg/hRep4RUj7f）または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦で**フォロー**する[**@carlospolopm**](https://twitter.com/hacktricks_live)。
 
 </details>
 
 {% hint style="warning" %}
-**`com.apple`**で始まる権限は第三者には利用できず、Appleのみが付与できることに注意してください。
+**`com.apple`**で始まる権限はサードパーティには利用できず、Appleのみがそれを付与できることに注意してください。
 {% endhint %}
 
-## 高
+## High
 
 ### `com.apple.rootless.install.heritable`
 
-**`com.apple.rootless.install.heritable`** 権限は**SIPをバイパス**することを可能にします。[こちらを参照してください](macos-sip.md#com.apple.rootless.install.heritable)。
+権限**`com.apple.rootless.install.heritable`**は**SIPをバイパス**することを可能にします。詳細は[こちら](macos-sip.md#com.apple.rootless.install.heritable)を参照してください。
 
 ### **`com.apple.rootless.install`**
 
-**`com.apple.rootless.install`** 権限は**SIPをバイパス**することを可能にします。[こちらを参照してください](macos-sip.md#com.apple.rootless.install)。
+権限**`com.apple.rootless.install`**は**SIPをバイパス**することを可能にします。詳細は[こちら](macos-sip.md#com.apple.rootless.install)を参照してください。
 
-### **`com.apple.system-task-ports` (以前は `task_for_pid-allow` と呼ばれていた)**
+### **`com.apple.system-task-ports`（以前は`task_for_pid-allow`と呼ばれていました）**
 
-この権限は、カーネルを除く任意のプロセスの**タスクポートを取得**することを可能にします。[**こちらを参照してください**](../mac-os-architecture/macos-ipc-inter-process-communication/)。
+この権限は、カーネルを除く**任意の**プロセスの**タスクポートを取得**することを可能にします。詳細は[こちら](../mac-os-architecture/macos-ipc-inter-process-communication/)を参照してください。
 
 ### `com.apple.security.get-task-allow`
 
-この権限は、**`com.apple.security.cs.debugger`** 権限を持つ他のプロセスが、この権限を持つバイナリによって実行されるプロセスのタスクポートを取得し、**コードを注入する**ことを可能にします。[**こちらを参照してください**](../mac-os-architecture/macos-ipc-inter-process-communication/)。
+この権限は、他のプロセスが**`com.apple.security.cs.debugger`**権限を持つプロセスのタスクポートを取得し、この権限を持つバイナリで実行されるプロセスにコードを**インジェクト**することを可能にします。詳細は[こちら](../mac-os-architecture/macos-ipc-inter-process-communication/)を参照してください。
 
 ### `com.apple.security.cs.debugger`
 
-デバッグツール権限を持つアプリは、`task_for_pid()`を呼び出して、`Get Task Allow`権限が`true`に設定されている未署名およびサードパーティアプリの有効なタスクポートを取得できます。しかし、デバッグツール権限があっても、デバッガーは`Get Task Allow`権限を持たないプロセスのタスクポートを取得することは**できません**。これらのプロセスはシステムインテグリティ保護によって保護されています。[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger)。
+デバッグツール権限を持つアプリケーションは、`Get Task Allow`権限が`true`に設定された未署名およびサードパーティアプリケーションの有効なタスクポートを取得するために`task_for_pid()`を呼び出すことができます。ただし、デバッグツール権限があっても、デバッガーは**`Get Task Allow`権限を持たないプロセス**のタスクポートを取得できず、したがってシステム整合性保護によって保護されているプロセスのタスクポートを取得できません。詳細は[こちら](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_debugger)を参照してください。
 
 ### `com.apple.security.cs.disable-library-validation`
 
-この権限は、Appleによって署名されていない、またはメイン実行可能ファイルと同じチームIDで署名されていないフレームワーク、プラグイン、またはライブラリを**読み込むことを可能にします**。したがって、攻撃者は任意のライブラリの読み込みを悪用してコードを注入する可能性があります。[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)。
+この権限は、Appleによって署名されていないか、メインの実行可能ファイルと同じチームIDで署名されていないフレームワーク、プラグイン、またはライブラリを**ロード**することを可能にし、攻撃者が任意のライブラリのロードを悪用してコードをインジェクトすることができます。詳細は[こちら](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)を参照してください。
 
 ### `com.apple.private.security.clear-library-validation`
 
-この権限は**`com.apple.security.cs.disable-library-validation`** と非常に似ていますが、ライブラリ検証を**直接無効にする**のではなく、プロセスが`csops`システムコールを呼び出して無効にすることを可能にします。\
-[**こちらを参照してください**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)。
+この権限は**`com.apple.security.cs.disable-library-validation`**と非常に似ており、**ライブラリの検証を直接無効にする**代わりに、プロセスが**`csops`システムコールを呼び出して無効にする**ことを可能にします。\
+詳細は[こちら](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)を参照してください。
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-この権限は、ライブラリやコードを注入するために使用できる**DYLD環境変数の使用**を可能にします。[**こちらを参照してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)。
+この権限は、ライブラリやコードをインジェクトするために使用できる**DYLD環境変数**を使用することを可能にします。詳細は[こちら](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)を参照してください。
 
-### `com.apple.private.tcc.manager` または `com.apple.rootless.storage`.`TCC`
+### `com.apple.private.tcc.manager`または`com.apple.rootless.storage`.`TCC`
 
-[**このブログ**](https://objective-see.org/blog/blog\_0x4C.html) **と** [**このブログ**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)によると、これらの権限は**TCC**データベースを**変更**することを可能にします。
+[**このブログ**](https://objective-see.org/blog/blog\_0x4C.html) **および** [**このブログ**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)によると、これらの権限は**TCC**データベースを**変更**することを可能にします。
 
-### **`system.install.apple-software`** と **`system.install.apple-software.standar-user`**
+### **`system.install.apple-software`**および**`system.install.apple-software.standar-user`**
 
-これらの権限は、ユーザーに許可を求めることなく**ソフトウェアをインストール**することを可能にし、**権限昇格**に役立つ可能性があります。
+これらの権限は、ユーザーに許可を求めることなく**ソフトウェアをインストール**することを可能にし、**特権昇格**に役立ちます。
 
 ### `com.apple.private.security.kext-management`
 
-**カーネルにカーネル拡張をロード**するように要求するために必要な権限です。
+カーネルに**カーネル拡張機能をロードするように要求**するための権限が必要です。
 
 ### **`com.apple.private.icloud-account-access`**
 
-**`com.apple.private.icloud-account-access`** 権限を持つと、**`com.apple.iCloudHelper`** XPCサービスと通信し、**iCloudトークンを提供**することが可能です。
+権限**`com.apple.private.icloud-account-access`**を使用すると、**`com.apple.iCloudHelper`** XPCサービスと通信し、**iCloudトークンを提供**できます。
 
-**iMovie** と **Garageband** はこの権限を持っていました。
+**iMovie**と**Garageband**にはこの権限がありました。
 
-その権限から**iCloudトークンを取得する**ためのエクスプロイトについての詳細は、トーク: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)をご覧ください。
+この権限から**iCloudトークンを取得**するためのエクスプロイトについての詳細については、次のトークを参照してください：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: これが何を可能にするのかはわかりません
+TODO: これが何を許可するかわかりません
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)によると、これはリブート後にSSV保護されたコンテンツを更新するために使用できると言及されています。方法を知っている場合はPRを送ってください！
+TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **には、再起動後にSSVで保護されたコンテンツを更新するために**これを使用できる可能性があると記載されています。わかる場合はPRを送信してください！
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)によると、これはリブート後にSSV保護されたコンテンツを更新するために使用できると言及されています。方法を知っている場合はPRを送ってください！
+TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **には、再起動後にSSVで保護されたコンテンツを更新するために**これを使用できる可能性があると記載されています。わかる場合はPRを送信してください！
 
 ### `keychain-access-groups`
 
-この権限は、アプリケーションがアクセスできる**キーチェーン**グループをリストします：
+この権限リストは、アプリケーションがアクセスできる**キーチェーン**グループを示しています：
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -100,62 +99,60 @@ TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-O
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-**フルディスクアクセス**権限を与えます。これはTCCで最も高い権限の一つです。
+**フルディスクアクセス**権限を与え、持っているできるTCCの最高権限の1つです。
 
 ### **`kTCCServiceAppleEvents`**
 
-アプリに他のアプリケーションへイベントを送信することを許可し、これは一般的に**タスクの自動化**に使用されます。他のアプリを制御することで、それらのアプリに付与された権限を悪用することができます。
+アプリが**タスクの自動化**に一般的に使用される他のアプリケーションにイベントを送信することを許可します。他のアプリを制御することで、これらの他のアプリに付与された権限を悪用することができます。
 
-例えば、ユーザーにパスワードを求めるように仕向けることができます：
-
-{% code overflow="wrap" %}
+ユーザーにパスワードを求めさせるようにすることもできます：
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
 {% endcode %}
 
-または、**任意のアクション**を実行させること。
+またはそれらを**任意のアクション**を実行させることができます。
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-他の権限の中でも、**ユーザーのTCCデータベースを書き込む**ことを許可します。
+他の権限の中で、**ユーザーのTCCデータベースを書き込む**ことができます。
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-**`NFSHomeDirectory`** 属性を変更して、ユーザーのホームフォルダのパスを変更し、それによって**TCCをバイパス**することを許可します。
+ユーザーの`NFSHomeDirectory`属性を**変更**することを許可し、ホームフォルダのパスを変更してTCCを**バイパス**することができます。
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-デフォルトでは禁止されているアプリバンドル内のファイル（app.app内）を変更することを許可します。
+アプリのバンドル内のファイル（app.app内）を変更することを許可しますが、これは**デフォルトで許可されていません**。
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-このアクセス権を持っている人を _システム設定_ > _プライバシーとセキュリティ_ > _アプリ管理_ で確認できます。
+このアクセス権を持っているユーザーは、_システム設定_ > _プライバシーとセキュリティ_ > _アプリ管理_ で確認できます。
 
 ### `kTCCServiceAccessibility`
 
-このプロセスは、**macOSのアクセシビリティ機能を悪用**することができます。つまり、例えばキーストロークを押すことができるということです。したがって、Finderのようなアプリの制御を要求し、この権限でダイアログを承認することができます。
+プロセスは**macOSのアクセシビリティ機能を悪用**することができ、たとえばキーストロークを押すことができます。そのため、Finderのようなアプリを制御するアクセスをリクエストし、この権限でダイアログを承認することができます。
 
-## 中程度
+## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
-この権限は、`mmap()` システム関数に `MAP_JIT` フラグを渡すことで、**書き込み可能で実行可能なメモリを作成**することを許可します。詳細は[**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)。
+この権限により、`MAP_JIT`フラグを`mmap()`システム関数に渡すことで、**書き込み可能かつ実行可能なメモリを作成**することができます。詳細は[**こちら**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit)を参照してください。
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-この権限は、**Cコードをオーバーライドまたはパッチ**すること、長く非推奨とされている**`NSCreateObjectFileImageFromMemory`**（根本的に安全でない）を使用すること、または**DVDPlayback**フレームワークを使用することを許可します。詳細は[**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)。
+この権限により、Cコードを**オーバーライドまたはパッチ**することができ、長期間非推奨となっている**`NSCreateObjectFileImageFromMemory`**（基本的に安全ではない）を使用したり、**DVDPlayback**フレームワークを使用したりできます。詳細は[**こちら**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory)を参照してください。
 
 {% hint style="danger" %}
-この権限を含めると、メモリ安全でないコード言語の一般的な脆弱性にアプリがさらされる可能性があります。アプリがこの例外を必要とするかどうか慎重に検討してください。
+この権限を含めると、アプリがメモリの安全でないコード言語に一般的な脆弱性にさらされる可能性があります。この例外がアプリに必要かどうかを慎重に検討してください。
 {% endhint %}
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-この権限は、**自身の実行可能ファイルのセクションをディスク上で変更**して強制終了することを許可します。詳細は[**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)。
+この権限により、ディスク上の自身の実行可能ファイルのセクションを**強制的に終了**することができます。詳細は[**こちら**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-executable-page-protection)を参照してください。
 
 {% hint style="danger" %}
-実行可能メモリ保護を無効にする権限は、アプリから基本的なセキュリティ保護を取り除く極端な権限であり、攻撃者が検出されることなくアプリの実行コードを書き換える可能性を生じさせます。可能であれば、より狭い範囲の権限を優先してください。
+実行可能メモリ保護を無効にする権限は、アプリから基本的なセキュリティ保護を削除し、攻撃者がアプリの実行コードを検出されずに書き換えることが可能になります。可能であれば、より狭い権限を選択してください。
 {% endhint %}
 
 ### `com.apple.security.cs.allow-relative-library-loads`
@@ -164,31 +161,29 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-この権限は、デフォルトでは禁止されているnullfsファイルシステムをマウントすることを許可します。ツール: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master)。
+この権限により、通常は禁止されているnullfsファイルシステムをマウントすることができます。ツール: [**mount\_nullfs**](https://github.com/JamaicanMoose/mount\_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
-このブログポストによると、通常このTCC権限は以下の形で見つかります：
+このブログ投稿によると、このTCC権限は通常、以下の形式で見つかります:
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
 [Array]
 [String] kTCCServiceAll
 ```
-プロセスに**すべてのTCC権限を要求する**ことを許可します。
-
 ### **`kTCCServicePostEvent`**
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)で<strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+他のHackTricksのサポート方法:
 
-* **HackTricksにあなたの会社を広告したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS & HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをチェックする
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に**参加する**か、[**テレグラムグループ**](https://t.me/peass)に参加する、または**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)を**フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) および [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) githubリポジトリにPRを提出して、あなたのハッキングのコツを**共有する**。
+* **会社をHackTricksで宣伝したい**か、**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する。
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
