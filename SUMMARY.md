@@ -353,6 +353,7 @@
 * [22 - Pentesting SSH/SFTP](network-services-pentesting/pentesting-ssh.md)
 * [23 - Pentesting Telnet](network-services-pentesting/pentesting-telnet.md)
 * [25,465,587 - Pentesting SMTP/s](network-services-pentesting/pentesting-smtp/README.md)
+  * [SMTP Smuggling](network-services-pentesting/pentesting-smtp/smtp-smuggling.md)
   * [SMTP - Commands](network-services-pentesting/pentesting-smtp/smtp-commands.md)
 * [43 - Pentesting WHOIS](network-services-pentesting/43-pentesting-whois.md)
 * [49 - Pentesting TACACS+](network-services-pentesting/49-pentesting-tacacs+.md)
