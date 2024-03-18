@@ -155,7 +155,8 @@ _Login using Windows authentication:_
 #### Find Trustable Links
 
 ```sql
-select * from master..sysservers
+select * from master..sysservers;
+EXEC sp_linkedservers;
 ```
 
 ![](<../../.gitbook/assets/image (168).png>)
