@@ -6,17 +6,17 @@
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する
-- **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **githubリポジトリに提出してください。**
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で**フォロー**する。
+* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **githubリポジトリに提出してください。**
 
 </details>
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -24,14 +24,14 @@ HackTricksをサポートする他の方法：
 
 ## グローバル変数
 
-グローバル変数は**子プロセス**によって継承されます。
+グローバル変数は**子プロセス**によって**継承されます**。
 
 現在のセッション用にグローバル変数を作成することができます：
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
-この変数は、現在のセッションおよびその子プロセスからアクセスできます。
+この変数は、現在のセッションとその子プロセスからアクセスできます。
 
 次のようにして変数を**削除**できます：
 ```bash
@@ -39,7 +39,7 @@ unset MYGLOBAL
 ```
 ## ローカル変数
 
-**ローカル変数**は、**現在のシェル/スクリプト**からのみ**アクセス**できます。
+**ローカル変数** は **現在のシェル/スクリプト** からのみ **アクセス** できます。
 ```bash
 LOCAL="my local"
 echo $LOCAL
@@ -64,11 +64,11 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 * **HOME** – ホームディレクトリ。
 * **HOSTNAME** – コンピューターのホスト名。
 * **LANG** – 現在の言語。
-* **MAIL** – ユーザーのメールスプールの場所。通常は **/var/spool/mail/USER**。
+* **MAIL** – ユーザーのメールスプールの場所。通常は **/var/spool/mail/USER** です。
 * **MANPATH** – マニュアルページを検索するディレクトリのリスト。
 * **OSTYPE** – オペレーティングシステムのタイプ。
 * **PS1** – bash のデフォルトプロンプト。
-* **PATH** – 実行したいバイナリファイルを保持するすべてのディレクトリのパス。ファイル名を指定するだけで相対パスや絶対パスを指定せずに実行できます。
+* **PATH** – 実行したいバイナリファイルを保持するすべてのディレクトリのパス。ファイル名を指定するだけで相対パスや絶対パスを使用せずに実行できます。
 * **PWD** – 現在の作業ディレクトリ。
 * **SHELL** – 現在のコマンドシェルへのパス (例: **/bin/bash**)。
 * **TERM** – 現在の端末タイプ (例: **xterm**)。
@@ -79,24 +79,24 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 
 ### **HISTFILESIZE**
 
-この変数の **値を 0 に変更**してください。これにより、セッションを **終了** するときに **履歴ファイル** (\~/.bash\_history) **が削除されます**。
+この変数の **値を 0 に変更** してください。これにより、セッションを **終了** するときに **履歴ファイル** (\~/.bash\_history) **が削除** されます。
 ```bash
 export HISTFILESIZE=0
 ```
 ### **HISTSIZE**
 
-この変数の値を0に変更してください。これにより、セッションを終了するときには、どのコマンドも履歴ファイル（\~/.bash\_history）に追加されません。
+この変数の値を0に変更して、セッションを終了するときにはどんなコマンドも履歴ファイル（\~/.bash\_history）に追加されないようにします。
 ```bash
 export HISTSIZE=0
 ```
 ### http\_proxy & https\_proxy
 
-ここで宣言された **proxy** を使用して、プロセスは **http または https** を介してインターネットに接続します。
+プロセスは、ここで宣言された **proxy** を使用して、**httpまたはhttps** を介してインターネットに接続します。
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
-### SSL_CERT_FILE & SSL_CERT_DIR
+### SSL\_CERT\_FILE & SSL\_CERT\_DIR
 
 プロセスは、**これらの環境変数**で指定された証明書を信頼します。
 ```bash
@@ -127,7 +127,7 @@ Root:
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -138,9 +138,9 @@ Root:
 HackTricksをサポートする他の方法:
 
 * **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**したり、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する
+* **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
 
 </details>
