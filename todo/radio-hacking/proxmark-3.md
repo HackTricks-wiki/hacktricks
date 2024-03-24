@@ -2,10 +2,10 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
@@ -14,7 +14,7 @@
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -26,11 +26,11 @@ Lo primero que necesitas es tener un [**Proxmark3**](https://proxmark.com) e [**
 
 ### Atacando MIFARE Classic 1KB
 
-Tiene **16 sectores**, cada uno con **4 bloques** y cada bloque contiene **16B**. El UID está en el sector 0 bloque 0 (y no se puede alterar).\
-Para acceder a cada sector necesitas **2 claves** (**A** y **B**) que se almacenan en el **bloque 3 de cada sector** (sector trailer). El sector trailer también almacena los **bits de acceso** que dan permisos de **lectura y escritura** en **cada bloque** utilizando las 2 claves.\
+Tiene **16 sectores**, cada uno tiene **4 bloques** y cada bloque contiene **16B**. El UID está en el sector 0 bloque 0 (y no se puede alterar).\
+Para acceder a cada sector necesitas **2 claves** (**A** y **B**) que se almacenan en **el bloque 3 de cada sector** (sector trailer). El sector trailer también almacena los **bits de acceso** que dan los permisos de **lectura y escritura** en **cada bloque** utilizando las 2 claves.\
 2 claves son útiles para dar permisos de lectura si conoces la primera y de escritura si conoces la segunda (por ejemplo).
 
-Se pueden realizar varios ataques
+Se pueden realizar varios ataques.
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -49,7 +49,7 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-El Proxmark3 permite realizar otras acciones como **escuchar** una **comunicación de Tag a Lector** para intentar encontrar datos sensibles. En esta tarjeta, podrías simplemente husmear la comunicación y calcular la clave utilizada porque las **operaciones criptográficas utilizadas son débiles** y al conocer el texto plano y cifrado puedes calcularlo (herramienta `mfkey64`).
+El Proxmark3 permite realizar otras acciones como **escuchar** una **comunicación de Tag a Lector** para intentar encontrar datos sensibles. En esta tarjeta, podrías simplemente husmear la comunicación y calcular la clave utilizada porque las **operaciones criptográficas utilizadas son débiles** y al conocer el texto plano y cifrado puedes calcularla (herramienta `mfkey64`).
 
 ### Comandos en Bruto
 
@@ -71,11 +71,11 @@ El software de Proxmark3 viene con una lista predefinida de **scripts de automat
 ```
 proxmark3> script run mfkeys
 ```
-Puedes crear un script para **fuzzear lectores de etiquetas**, copiando los datos de una **tarjeta válida** solo escribe un **script Lua** que **aleatorice** uno o más **bytes aleatorios** y verifica si el **lector se bloquea** con cualquier iteración.
+Puedes crear un script para **fuzzear lectores de etiquetas**, copiando los datos de una **tarjeta válida** solo escribe un **script Lua** que **aleatorice** uno o más **bytes** aleatorios y comprueba si el **lector se bloquea** con cualquier iteración.
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -86,8 +86,8 @@ Puedes crear un script para **fuzzear lectores de etiquetas**, copiando los dato
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al **grupo de Telegram** o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -1,13 +1,13 @@
-# Trucos de Estego
+# Trucos de Esteganografía
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks AWS)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de GitHub.
@@ -16,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -40,7 +40,7 @@ foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-Ayuda a ver los metadatos del archivo, disponible [aquí](https://www.sno.phy.queensu.ca/\~phil/exiftool/).
+Ayuda a ver los metadatos de un archivo, disponible [aquí](https://www.sno.phy.queensu.ca/\~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
@@ -137,13 +137,11 @@ Las técnicas de Transformada Rápida de Fourier (FFT) pueden revelar contenido 
 Stegpy permite incrustar información en archivos de imagen y audio, admitiendo formatos como PNG, BMP, GIF, WebP y WAV. Está disponible en [GitHub](https://github.com/dhsdshdhk/stegpy).
 
 ### **Pngcheck para análisis de archivos PNG**
-
-Para analizar archivos PNG o validar su autenticidad, utiliza:
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
 ```
-### **Herramientas adicionales para análisis de imágenes**
+### **Herramientas Adicionales para Análisis de Imágenes**
 
 Para una exploración más detallada, considera visitar:
 
@@ -153,7 +151,7 @@ Para una exploración más detallada, considera visitar:
 * [OpenStego](https://www.openstego.com/)
 * [DIIT](https://diit.sourceforge.net/)
 
-## **Extracción de datos de archivos de audio**
+## **Extracción de Datos de Audios**
 
 La **esteganografía de audio** ofrece un método único para ocultar información dentro de archivos de sonido. Se utilizan diferentes herramientas para incrustar o recuperar contenido oculto.
 
@@ -195,7 +193,7 @@ La detección de tonos DTMF en archivos de audio se puede lograr a través de he
 
 ### **Longitud Binaria SQRT - Código QR**
 
-Los datos binarios que al cuadrar dan un número entero podrían representar un código QR. Utiliza este fragmento para verificar:
+Datos binarios que al ser elevados al cuadrado resultan en un número entero podrían representar un código QR. Utiliza este fragmento para verificar:
 ```python
 import math
 math.sqrt(2500) #50
@@ -211,13 +209,13 @@ Para traducir Braille, el [Traductor de Braille de Branah](https://www.branah.co
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
 <details>
 
-<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 

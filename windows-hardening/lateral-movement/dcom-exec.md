@@ -5,7 +5,7 @@
 <summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud)..
@@ -14,7 +14,7 @@
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -25,7 +25,7 @@
 **Para obtener más información sobre esta técnica, consulta la publicación original en [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**
 
 
-El Modelo de Objetos de Componentes Distribuidos (DCOM) presenta una capacidad interesante para interacciones basadas en la red con objetos. Microsoft proporciona documentación completa tanto para DCOM como para el Modelo de Objetos de Componentes (COM), accesible [aquí para DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) y [aquí para COM](https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363\(v=vs.85\).aspx). Se puede recuperar una lista de aplicaciones DCOM utilizando el comando de PowerShell:
+Los objetos del Modelo de Objetos de Componentes Distribuidos (DCOM) presentan una capacidad interesante para interacciones basadas en la red con objetos. Microsoft proporciona documentación completa tanto para DCOM como para el Modelo de Objetos de Componentes (COM), accesible [aquí para DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) y [aquí para COM](https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363\(v=vs.85\).aspx). Se puede recuperar una lista de aplicaciones DCOM utilizando el comando de PowerShell:
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
@@ -55,7 +55,7 @@ ls \\10.10.10.10\c$\Users
 
 **Para obtener más información sobre esta técnica, consulta la publicación original [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-Se identificó que el objeto **MMC20.Application** carecía de "LaunchPermissions" explícitos, lo que lo hace utilizar permisos que permiten el acceso a los administradores de forma predeterminada. Para más detalles, se puede explorar un hilo [aquí](https://twitter.com/tiraniddo/status/817532039771525120), y se recomienda el uso de OleView .NET de [@tiraniddo](https://twitter.com/tiraniddo) para filtrar objetos sin permisos de inicio explícitos.
+Se identificó que el objeto **MMC20.Application** carecía de "LaunchPermissions" explícitos, lo que lo hace predeterminado a permisos que permiten el acceso a los administradores. Para más detalles, se puede explorar un hilo [aquí](https://twitter.com/tiraniddo/status/817532039771525120), y se recomienda el uso de OleView .NET de [@tiraniddo](https://twitter.com/tiraniddo) para filtrar objetos sin permisos de inicio explícitos.
 
 Dos objetos específicos, `ShellBrowserWindow` y `ShellWindows`, se destacaron debido a su falta de Permisos de Inicio explícitos. La ausencia de una entrada de registro `LaunchPermission` en `HKCR:\AppID\{guid}` significa que no hay permisos explícitos.
 
@@ -73,7 +73,7 @@ $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\sy
 
 El movimiento lateral se puede lograr explotando objetos DCOM de Excel. Para obtener información detallada, se recomienda leer la discusión sobre el aprovechamiento de Excel DDE para el movimiento lateral a través de DCOM en el [blog de Cybereason](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).
 
-El proyecto Empire proporciona un script de PowerShell, que demuestra la utilización de Excel para la ejecución de código remoto (RCE) mediante la manipulación de objetos DCOM. A continuación se muestran fragmentos del script disponible en el [repositorio de GitHub de Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), que muestran diferentes métodos para abusar de Excel para RCE:
+El proyecto Empire proporciona un script de PowerShell, que demuestra la utilización de Excel para la ejecución remota de código (RCE) mediante la manipulación de objetos DCOM. A continuación se muestran fragmentos del script disponible en el [repositorio de GitHub de Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), que muestra diferentes métodos para abusar de Excel para RCE:
 ```powershell
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
@@ -96,7 +96,7 @@ $Obj.DisplayAlerts = $false
 $Obj.DDEInitiate("cmd", "/c $Command")
 }
 ```
-### Herramientas de Automatización para Movimiento Lateral
+### Herramientas de Automatización para el Movimiento Lateral
 
 Se destacan dos herramientas para automatizar estas técnicas:
 
@@ -120,7 +120,7 @@ SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
