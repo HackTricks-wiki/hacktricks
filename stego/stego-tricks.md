@@ -1,13 +1,13 @@
-# Trucos de Esteganografía
+# Trucos de Estego
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks AWS)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de GitHub.
@@ -16,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -82,7 +82,7 @@ Los caracteres invisibles en espacios aparentemente vacíos pueden ocultar infor
 
 ## **Extracción de Datos de Imágenes**
 
-### **Identificación de Detalles de Imágenes con GraphicMagick**
+### **Identificación de Detalles de Imagen con GraphicMagick**
 
 [GraphicMagick](https://imagemagick.org/script/download.php) sirve para determinar tipos de archivos de imagen e identificar posibles corrupciones. Ejecuta el siguiente comando para inspeccionar una imagen:
 ```bash
@@ -99,7 +99,7 @@ Steghide facilita ocultar datos dentro de archivos `JPEG, BMP, WAV y AU`, capaz 
 **Comandos:**
 
 * `steghide info archivo` revela si un archivo contiene datos ocultos.
-* `steghide extract -sf archivo [--contraseña contraseña]` extrae los datos ocultos, la contraseña es opcional.
+* `steghide extract -sf archivo [--contraseña contraseña]` extrae los datos ocultos, contraseña opcional.
 
 Para extracción basada en web, visita [este sitio web](https://futureboy.us/stegano/decinput.html).
 
@@ -143,7 +143,7 @@ pngcheck stego.png
 ```
 ### **Herramientas Adicionales para Análisis de Imágenes**
 
-Para una exploración más detallada, considera visitar:
+Para una exploración más profunda, considera visitar:
 
 * [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 * [Análisis de Nivel de Error de Imagen](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -171,7 +171,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg destaca en ocultar y extraer datos dentro de archivos WAV utilizando la estrategia del bit menos significativo. Es accesible en [GitHub](https://github.com/ragibson/Steganography#WavSteg). Los comandos incluyen:
+WavSteg destaca en ocultar y extraer datos dentro de archivos WAV utilizando la estrategia del bit menos significativo. Está disponible en [GitHub](https://github.com/ragibson/Steganography#WavSteg). Los comandos incluyen:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -187,13 +187,13 @@ Una herramienta invaluable para la inspección visual y analítica de archivos d
 
 ### **Tonos DTMF - Tonos de marcación**
 
-La detección de tonos DTMF en archivos de audio se puede lograr a través de herramientas en línea como [este detector de DTMF](https://unframework.github.io/dtmf-detect/) y [DialABC](http://dialabc.com/sound/detect/index.html).
+La detección de tonos DTMF en archivos de audio se puede lograr a través de herramientas en línea como [este detector DTMF](https://unframework.github.io/dtmf-detect/) y [DialABC](http://dialabc.com/sound/detect/index.html).
 
 ## **Otras Técnicas**
 
 ### **Longitud Binaria SQRT - Código QR**
 
-Datos binarios que al ser elevados al cuadrado resultan en un número entero podrían representar un código QR. Utiliza este fragmento para verificar:
+Los datos binarios que al cuadrar dan un número entero pueden representar un código QR. Utiliza este fragmento para verificar:
 ```python
 import math
 math.sqrt(2500) #50
@@ -209,7 +209,7 @@ Para traducir Braille, el [Traductor de Braille de Branah](https://www.branah.co
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -219,9 +219,9 @@ Para traducir Braille, el [Traductor de Braille de Branah](https://www.branah.co
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**oficial mercancía de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

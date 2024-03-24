@@ -14,9 +14,9 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-**Grupo de Seguridad Try Hard**
+**Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -51,16 +51,16 @@ foremost -v -i file.img -o output
 ```
 ### **Scalpel**
 
-**Scalpel** es otra herramienta que se puede utilizar para encontrar y extraer **archivos incrustados en un archivo**. En este caso, deberá descomentar del archivo de configuración (_/etc/scalpel/scalpel.conf_) los tipos de archivo que desea extraer.
+**Scalpel** es otra herramienta que se puede utilizar para encontrar y extraer **archivos incrustados en un archivo**. En este caso, deberás descomentar en el archivo de configuración (_/etc/scalpel/scalpel.conf_) los tipos de archivo que deseas extraer.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
 ### Bulk Extractor
 
-Esta herramienta viene incluida en Kali pero la puedes encontrar aquí: [https://github.com/simsong/bulk\_extractor](https://github.com/simsong/bulk\_extractor)
+Esta herramienta viene incluida en Kali pero puedes encontrarla aquí: [https://github.com/simsong/bulk\_extractor](https://github.com/simsong/bulk\_extractor)
 
-Esta herramienta puede escanear una imagen y **extraer pcaps** en su interior, **información de red (URL, dominios, IPs, MAC, correos electrónicos)** y más **archivos**. Solo necesitas hacer:
+Esta herramienta puede escanear una imagen y **extraer pcaps** en su interior, **información de red (URL, dominios, IPs, MAC, correos electrónicos)** y más **archivos**. Solo tienes que hacer:
 ```
 bulk_extractor memory.img -o out_folder
 ```
@@ -97,14 +97,14 @@ Busca claves AES buscando sus programaciones de claves. Capaz de encontrar clave
 
 Descarga [aquí](https://sourceforge.net/projects/findaes/).
 
-## Herramientas complementarias
+## Herramientas Complementarias
 
 Puedes usar [**viu**](https://github.com/atanunq/viu) para ver imágenes desde la terminal.\
 Puedes usar la herramienta de línea de comandos de Linux **pdftotext** para transformar un PDF en texto y leerlo.
 
 **Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
