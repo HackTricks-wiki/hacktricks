@@ -4,30 +4,30 @@
 
 <summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFT](https://opensea.io/collection/the-peass-family)コレクションを見つけます
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけます
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れます
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングトリックを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
 
 **Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
 ***
 
-## Proxmark3を使用したRFIDシステムの攻撃
+## Proxmark3を使用したRFIDシステムへの攻撃
 
-最初に必要なのは、[**Proxmark3**](https://proxmark.com)を持っており、[**ソフトウェアをインストールし、その依存関係を解決**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**します**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)。
+最初に必要なのは、[**Proxmark3**](https://proxmark.com)と[**ソフトウェアのインストールとその依存関係**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)です。
 
 ### MIFARE Classic 1KBの攻撃
 
-**16のセクター**があり、それぞれに**4つのブロック**があり、各ブロックには**16B**が含まれています。 UIDはセクター0ブロック0にあり（変更できません）。\
-各セクターにアクセスするには、**2つのキー**（**A**と**B**）が必要で、これらは各セクターの**ブロック3に保存**されています（セクタートレーラー）。 セクタートレーラーには、各ブロックの**2つのキーを使用して読み取りおよび書き込み権限**を与える**アクセスビット**も格納されています。\
+**16のセクター**があり、それぞれに**4つのブロック**があり、各ブロックには**16B**が含まれています。 UIDはセクター0ブロック0にあります（変更できません）。\
+各セクターにアクセスするには、**2つのキー**（**A**と**B**）が必要で、これらは**各セクターのブロック3に保存**されています（セクタートレーラー）。 セクタートレーラーには、各ブロックの**読み取りおよび書き込み**権限を与える**アクセスビット**も格納されています。\
 2つのキーは、最初のキーを知っている場合に読み取り権限を与え、2番目のキーを知っている場合に書き込み権限を与えるために役立ちます（例えば）。
 
 複数の攻撃が実行できます
@@ -49,11 +49,11 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Proxmark3は、**盗聴**や**タグとリーダー間の通信**を傍受して機密データを見つけるなど、他のアクションを実行することができます。このカードでは、**暗号操作が弱い**ため、通信を傍受して使用されているキーを計算したり、平文と暗号文を知っていればそれを計算することができます（`mfkey64`ツール）。
+Proxmark3は、**盗聴**や**Tag to Reader通信**などの他のアクションを実行することができます。このカードでは、**暗号化操作が弱い**ため、通信をスニッフして使用されているキーを計算することができます（`mfkey64`ツール）。
 
-### 生コマンド
+### 生のコマンド
 
-IoTシステムでは、**ブランドのないタグ**が使用されることがあります。この場合、Proxmark3を使用してタグに対してカスタムの**生コマンドを送信**することができます。
+IoTシステムでは、**非ブランド品や非商用タグ**が使用されることがあります。この場合、Proxmark3を使用してタグに対してカスタム**生のコマンドを送信**することができます。
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -71,11 +71,11 @@ Proxmark3ソフトウェアには、簡単なタスクを実行するために�
 ```
 proxmark3> script run mfkeys
 ```
-あなたは、**有効なカード**のデータをコピーして、1つ以上のランダムな**バイト**を**ランダム化**し、**リーダーがクラッシュ**するかどうかを確認する**Luaスクリプト**を作成できます。
+**有効なカード**のデータをコピーして、**タグリーダーをファズ**するスクリプトを作成できます。ただし、1つ以上の**ランダムなバイト**を**ランダム化**し、リーダーがどのイテレーションでも**クラッシュするかどうか**を確認する**Luaスクリプト**を作成してください。
 
 **Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -84,10 +84,10 @@ proxmark3> script run mfkeys
 
 <summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>で**ゼロからヒーローまでのAWSハッキング**を学びましょう！</summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセス**したいですか、または**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけます
-* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れます
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングトリックを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンを入手**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFT](https://opensea.io/collection/the-peass-family)コレクションを見つけてください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングトリックを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および**[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
