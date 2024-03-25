@@ -203,7 +203,7 @@ int main(void) {
 ```bash
 bash-4.2$ $ ./e
 bash-4.2$ $ id
-uid=99(nobody) gid=99(nobody) euid=100
+uid=99(nobody) gid=99(nobody) euid=1000
 ```
 
 ## References
