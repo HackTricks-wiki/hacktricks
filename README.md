@@ -92,7 +92,7 @@ Stay informed with the newest bug bounties launching and crucial platform update
 
 ***
 
-\### [Try Hard Security Group](https://discord.gg/tryhardsecurity)
+### [Try Hard Security Group](https://discord.gg/tryhardsecurity)
 
 <figure><img src=".gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
