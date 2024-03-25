@@ -20,7 +20,7 @@ Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **
 
 <figure><img src=".gitbook/assets/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) es una excelente empresa de ciberseguridad cuyo lema es **¡HACKEA LO INHACKEABLE!** Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, equipos Red y entrenamiento.
+[**STM Cyber**](https://www.stmcyber.com) es una excelente empresa de ciberseguridad cuyo lema es **¡HACKEA LO INHACKEABLE!** Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, equipos Red y formación.
 
 Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -30,9 +30,9 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 
 ### [RootedCON](https://www.rootedcon.com/)
 
-<figure><img src=".gitbook/assets/image (4) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (4) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro clave para profesionales de tecnología y ciberseguridad en todas las disciplinas.
+[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro crucial para profesionales de la tecnología y ciberseguridad en todas las disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -42,9 +42,9 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 
 <figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** es la plataforma de ethical hacking **número 1 de Europa** y de **bug bounty**.
+**Intigriti** es la plataforma de ethical hacking y **bug bounty #1** de Europa.
 
-**Consejo de bug bounty**: ¡Regístrate en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, ¡y comienza a ganar recompensas de hasta **$100,000**!
+Consejo de bug bounty: ¡Regístrate en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**! ¡Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy y comienza a ganar recompensas de hasta **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -55,7 +55,7 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 <figure><img src=".gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.
 
 Obtén acceso hoy:
 
@@ -78,7 +78,7 @@ Mantente al día con el mundo del hacking a través de noticias e información e
 **Últimos Anuncios**\
 Mantente informado sobre los nuevos bug bounties que se lanzan y las actualizaciones cruciales de la plataforma
 
-**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy!
+**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo!
 
 ***
 
@@ -92,7 +92,7 @@ Mantente informado sobre los nuevos bug bounties que se lanzan y las actualizaci
 
 ***
 
-\### [Try Hard Security Group](https://discord.gg/tryhardsecurity)
+### [Try Hard Security Group](https://discord.gg/tryhardsecurity)
 
 <figure><img src=".gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -104,9 +104,9 @@ Mantente informado sobre los nuevos bug bounties que se lanzan y las actualizaci
 
 <figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** a las empresas **en todo el mundo** contra las últimas amenazas de ciberseguridad mediante la provisión de servicios de **seguridad ofensiva** con un enfoque **moderno**.
+[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** a las empresas **en todo el mundo** contra las últimas amenazas de ciberseguridad mediante la provisión de servicios de seguridad ofensiva con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad **todo en uno**, lo que significa que hacen de todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Conciencia, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
+WebSec es una empresa de seguridad integral, lo que significa que hacen de todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
 
 Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta el punto de que **garantizan los mejores resultados de calidad**, lo que se indica en su sitio web "**¡Si no podemos hackearlo, no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
@@ -124,7 +124,7 @@ Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
