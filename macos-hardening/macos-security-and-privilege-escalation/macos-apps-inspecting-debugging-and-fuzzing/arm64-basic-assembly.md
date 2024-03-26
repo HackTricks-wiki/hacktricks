@@ -9,7 +9,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -86,6 +86,7 @@ These are the accessible fields:
     * The sum of two positive numbers yields a negative result.
     * The sum of two negative numbers yields a positive result.
     * In subtraction, when a large negative number is subtracted from a smaller positive number (or vice versa), and the result cannot be represented within the range of the given bit size.
+    * Obviously the processor doesn't now the operation is signed or not, so it will check C and V in the operations and indicate of a carry occurred in case it was signed or unsigned.
 
 {% hint style="warning" %}
 Not all the instructions update these flags. Some like **`CMP`** or **`TST`** do, and others that have an s suffix like **`ADDS`** also do it.
@@ -117,20 +118,31 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   * Example: `mov x0, x1` — This moves the value from `x1` to `x0`.
 * **`ldr`**: **Load** a value from **memory** into a **register**.
   * Example: `ldr x0, [x1]` — This loads a value from the memory location pointed to by `x1` into `x0`.
+  * **Offset mode**: An offset affecting the orin pointer is indicated, for example:
+    * `ldr x2, [x1, #8]`, this will load in x2 the value from x1 + 8
+    * &#x20;`ldr x2, [x0, x1, lsl #2]`, this will load in x2 an object from the array x0, from the position x1 (index) \* 4
+  * **Pre-indexed mode**: This will apply calculations to the origin, get the result and also store the new origin in the origin.
+    * `ldr x2, [x1, #8]!`, this will load `x1 + 8` in `x2` and store in x1 the result of `x1 + 8`
+    * `str lr, [sp, #-4]!`, Store the link register in sp and update the register sp
+  * **Post-index mode**: This is like the previous one but the memory address is accessed and then the offset is calculated and stored.
+    * `ldr x0, [x1], #8`, load `x1` in `x0` and update x1 with `x1 + 8`
+  * **PC-relative addressing**: In this case the address to load is calculated relative to the PC register
+    * `ldr x1, =_start`, This will load the address where the `_start` symbol starts in x1 related to the current PC.
 * **`str`**: **Store** a value from a **register** into **memory**.
   * Example: `str x0, [x1]` — This stores the value in `x0` into the memory location pointed to by `x1`.
 * **`ldp`**: **Load Pair of Registers**. This instruction **loads two registers** from **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
   * Example: `ldp x0, x1, [x2]` — This loads `x0` and `x1` from the memory locations at `x2` and `x2 + 8`, respectively.
 * **`stp`**: **Store Pair of Registers**. This instruction **stores two registers** to **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-  * Example: `stp x0, x1, [x2]` — This stores `x0` and `x1` to the memory locations at `x2` and `x2 + 8`, respectively.
+  * Example: `stp x0, x1, [sp]` — This stores `x0` and `x1` to the memory locations at `sp` and `sp + 8`, respectively.
+  * `stp x0, x1, [sp, #16]!` — This stores `x0` and `x1` to the memory locations at `sp+16` and `sp + 24`, respectively, and updates `sp` with `sp+16`.
 * **`add`**: **Add** the values of two registers and store the result in a register.
   * Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
     * Xn1 -> Destination
     * Xn2 -> Operand 1
     * Xn3 | #imm -> Operando 2 (register or immediate)
-    * \[shift #N | RRX] -> Performa shift or call RRX
+    * \[shift #N | RRX] -> Perform a shift or call RRX
   * Example: `add x0, x1, x2` — This adds the values in `x1` and `x2` together and stores the result in `x0`.
-  * `add x5, x5, #1, lsl #12` — This equals to 4096 (a 1 shifter 12 times) -> 1 0000 0000 0000 0000 &#x20;
+  * `add x5, x5, #1, lsl #12` — This equals to 4096 (a 1 shifter 12 times) -> 1 0000 0000 0000 0000
   * **`adds`** This perform an `add` and updates the flags
 * **`sub`**: **Subtract** the values of two registers and store the result in a register.
   * Check **`add`** **syntax**.
@@ -140,10 +152,10 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   * Example: `mul x0, x1, x2` — This multiplies the values in `x1` and `x2` and stores the result in `x0`.
 * **`div`**: **Divide** the value of one register by another and store the result in a register.
   * Example: `div x0, x1, x2` — This divides the value in `x1` by `x2` and stores the result in `x0`.
-* **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:&#x20;
+* **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
   * **Logical shift left**: Add 0s from the end moving the other bits forward (multiply by n-times 2)
   * **Logical shift right**: Add 1s at the beginning moving the other bits backward (divide by n-times 2 in unsigned)
-  * **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, **1s are added (**divide by ntimes 2 in signed)
+  * **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, \*\*1s are added (\*\*divide by ntimes 2 in signed)
   * **Rotate right**: Like **`lsr`** but whatever is removed from the right it's appended to the left
   * **Rotate Right with Extend**: Like **`ror`**, but with the carry flag as the "most significant bit". So the carry flag is moved to the bit 31 and the removed bit to the carry flag.
 * **`bfm`**: **Bit Filed Move**, these operations **copy bits `0...n`** from a value an place them in positions **`m..m+n`**. The **`#s`** specifies the **leftmost bit** position and **`#r`** the **rotate right amount**.
@@ -164,26 +176,50 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   * **`UXTB X1, W2`** Adds 0s (unsigned) to a byte **from W2 to X1** to fill the 64bits
 * **`extr`:** Extracts bits from a specified **pair of registers concatenated**.
   * Example: `EXTR W3, W2, W1, #3` This will **concat W1+W2** and get **from bit 3 of W2 up to bit 3 of W1** and store it in W3.
-* **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
-  * Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
-* **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`.
-  * Example: `blr x1` — This calls the function whose address is contained in `x1` and stores the return address in `x30`.
-* **`ret`**: **Return** from **subroutine**, typically using the address in **`x30`**.
-  * Example: `ret` — This returns from the current subroutine using the return address in `x30`.
 * **`cmp`**: **Compare** two registers and set condition flags. It's an **alias of `subs`** setting the destination register to the zero register. Useful to know if `m == n`.
   * It supports the **same syntax as `subs`**
   * Example: `cmp x0, x1` — This compares the values in `x0` and `x1` and sets the condition flags accordingly.
 * **`cmn`**: **Compare negative** operand. In this case it's an **alias of `adds`** and supports the same syntax. Useful to know if `m == -n`.
-* **tst**: It checks if any of the values of a reg is 1 (it works like and ANDS without storing the result anywhere)
-  * Example: `tst X1, #7` Check if any of the last 3 bits of X1 is 1&#x20;
-* **`b.eq`**: **Branch if equal**, based on the previous `cmp` instruction.
-  * Example: `b.eq label` — If the previous `cmp` instruction found two equal values, this jumps to `label`.
-* **`b.ne`**: **Branch if Not Equal**. This instruction checks the condition flags (which were set by a previous comparison instruction), and if the compared values were not equal, it branches to a label or address.
-  * Example: After a `cmp x0, x1` instruction, `b.ne label` — If the values in `x0` and `x1` were not equal, this jumps to `label`.
+* **`ccmp`**: Conditional comparison, it's a comparison that will be performed only if a previous comparison was true and will specifically set nzcv bits.
+  * `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> if x1 != x2 and x3 < x4, jump to func
+    * This is because **`ccmp`** will only be executed if the **previous `cmp` was a `NE`**, if it wasn't the bits `nzcv` will be set to 0 (which won't satisfy the `blt` comparison).
+    * This ca also be used as `ccmn` (same but negative, like `cmp` vs `cmn`).
+* **`tst`**: It checks if any of the values of the comparison are both 1 (it works like and ANDS without storing the result anywhere). It's useful to check a registry with a value and check if any of the bits of the registry indicated in the value is 1.
+  * Example: `tst X1, #7` Check if any of the last 3 bits of X1 is 1
+* **`teq`**: XOR operation discarding the result
+* **`b`**: Unconditional Branch
+  * Example: `b myFunction`&#x20;
+  * Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
+* **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
+  * Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
+  * Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
+* **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`. (This is&#x20;
+  * Example: `blr x1` — This calls the function whose address is contained in `x1` and stores the return address in `x30`.
+* **`ret`**: **Return** from **subroutine**, typically using the address in **`x30`**.
+  * Example: `ret` — This returns from the current subroutine using the return address in `x30`.
+* **`b.<cond>`**: Conditional branches
+  * **`b.eq`**: **Branch if equal**, based on the previous `cmp` instruction.
+    * Example: `b.eq label` — If the previous `cmp` instruction found two equal values, this jumps to `label`.
+  * **`b.ne`**: **Branch if Not Equal**. This instruction checks the condition flags (which were set by a previous comparison instruction), and if the compared values were not equal, it branches to a label or address.
+    * Example: After a `cmp x0, x1` instruction, `b.ne label` — If the values in `x0` and `x1` were not equal, this jumps to `label`.
 * **`cbz`**: **Compare and Branch on Zero**. This instruction compares a register with zero, and if they are equal, it branches to a label or address.
   * Example: `cbz x0, label` — If the value in `x0` is zero, this jumps to `label`.
 * **`cbnz`**: **Compare and Branch on Non-Zero**. This instruction compares a register with zero, and if they are not equal, it branches to a label or address.
   * Example: `cbnz x0, label` — If the value in `x0` is non-zero, this jumps to `label`.
+* **`tbnz`**: Test bit and branch on nonzero
+  * Example: `tbnz x0, #8, label`
+* **`tbz`**: Test bit and branch on zero
+  * Example: `tbz x0, #8, label`
+* **Conditional select operations**: These are operations whose behaviour varies depending on the conditional bits.
+  * `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> If true, X0 = X1, if false, X0 = X2
+  * `csinc Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = Xm + 1
+  * `cinc Xd, Xn, cond` -> If true, Xd = Xn + 1, if false, Xd = Xn
+  * `csinv Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = NOT(Xm)
+  * `cinv Xd, Xn, cond` -> If true, Xd = NOT(Xn), if false, Xd = Xn
+  * `csneg Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = - Xm
+  * `cneg Xd, Xn, cond` -> If true, Xd = - Xn, if false, Xd = Xn
+  * `cset Xd, Xn, Xm, cond` -> If true, Xd = 1, if false, Xd = 0
+  * `csetm Xd, Xn, Xm, cond` -> If true, Xd = \<all 1>, if false, Xd = 0
 * **`adrp`**: Compute the **page address of a symbol** and store it in a register.
   * Example: `adrp x0, symbol` — This computes the page address of `symbol` and stores it in `x0`.
 * **`ldrsw`**: **Load** a signed **32-bit** value from memory and **sign-extend it to 64** bits.
@@ -201,13 +237,14 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
 
 ### **Function Prologue**
 
-1.  **Save the link register and frame pointer to the stack**:
+1. **Save the link register and frame pointer to the stack**:
 
-    {% code overflow="wrap" %}
-    ```armasm
-    stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
-    ```
-    {% endcode %}
+{% code overflow="wrap" %}
+```armasm
+stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
+```
+{% endcode %}
+
 2. **Set up the new frame pointer**: `mov x29, sp` (sets up the new frame pointer for the current function)
 3. **Allocate space on the stack for local variables** (if needed): `sub sp, sp, <size>` (where `<size>` is the number of bytes needed)
 
@@ -228,7 +265,7 @@ ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment th
 
 Armv8-A support the execution of 32-bit programs. **AArch32** can run in one of **two instruction sets**: **`A32`** and **`T32`** and can switch between them via **`interworking`**.\
 **Privileged** 64-bit programs can schedule the **execution of 32-bit** programs by executing a exception level transfer to the lower privileged 32-bit.\
-Note that the transition from 64-bit to 32-bit occurs with a lower of the exception level (for example a 64-bit program in EL1 triggering a program in EL0). This is done by setting the **bit 4 of** **`SPSR_ELx`** special register **to 1** when the `AArch32` process thread is ready to be executed and the rest of `SPSR_ELx` stores the **`AArch32`** programs CPSR. Then, the privileged process calls the **`ERET`** instruction so the processor transitions to **`AArch32`** entering in A32 or T32 depending on CPSR**.**
+Note that the transition from 64-bit to 32-bit occurs with a lower of the exception level (for example a 64-bit program in EL1 triggering a program in EL0). This is done by setting the **bit 4 of** **`SPSR_ELx`** special register **to 1** when the `AArch32` process thread is ready to be executed and the rest of `SPSR_ELx` stores the **`AArch32`** programs CPSR. Then, the privileged process calls the **`ERET`** instruction so the processor transitions to **`AArch32`** entering in A32 or T32 depending on CPSR\*\*.\*\*
 
 The **`interworking`** occurs using the J and T bits of CPSR. `J=0` and `T=0` means **`A32`** and `J=0` and `T=1` means **T32**. This basically traduces on setting the **lowest bit to 1** to indicate the instruction set is T32.\
 This is set during the **interworking branch instructions,** but can also be set directly with other instructions when the PC is set as the destination register. Example:
@@ -276,7 +313,7 @@ The fields are divided in some groups:
 * The **`Q`** flag: It's set to 1 whenever **integer saturation occurs** during the execution of a specialized saturating arithmetic instruction. Once it's set to **`1`**, it'll maintain the value until it's manually set to 0. Moreover, there isn't any instruction that checks its value implicitly, it must be done reading it manually.
 *   **`GE`** (Greater than or equal) Flags: It's used in SIMD (Single Instruction, Multiple Data) operations, such as "parallel add" and "parallel subtract". These operations allow processing multiple data points in a single instruction.
 
-    For example, the **`UADD8`** instruction **adds four pairs of bytes** (from two 32-bit operands) in parallel and stores the results in a 32-bit register. It then **sets the `GE` flags in the `APSR`**  based on these results. Each GE flag corresponds to one of the byte additions, indicating if the addition for that byte pair **overflowed**.
+    For example, the **`UADD8`** instruction **adds four pairs of bytes** (from two 32-bit operands) in parallel and stores the results in a 32-bit register. It then **sets the `GE` flags in the `APSR`** based on these results. Each GE flag corresponds to one of the byte additions, indicating if the addition for that byte pair **overflowed**.
 
     The **`SEL`** instruction uses these GE flags to perform conditional actions.
 
@@ -284,8 +321,8 @@ The fields are divided in some groups:
 
 * The **`J`** and **`T`** bits: **`J`** should be 0 and if **`T`** is 0 the instruction set A32 is used, and if it's 1, the T32 is used.
 * **IT Block State Register** (`ITSTATE`): These are the bits from 10-15 and 25-26. They store conditions for instructions inside an **`IT`** prefixed group.
-* **`E`** bit: Indicates the **endianness**.&#x20;
-* **Mode and Exception Mask Bits** (0-4): They determine the current execution state. The **5th** one indicates if the program runs as 32bit (a 1) or 64bit (a 0). The other 4 represents the **exception mode currently in used** (when a exception occurs and it's being handled). The number set **indicates  the current priority** in case another exception is triggered while this is being handled.
+* **`E`** bit: Indicates the **endianness**.
+* **Mode and Exception Mask Bits** (0-4): They determine the current execution state. The **5th** one indicates if the program runs as 32bit (a 1) or 64bit (a 0). The other 4 represents the **exception mode currently in used** (when a exception occurs and it's being handled). The number set **indicates the current priority** in case another exception is triggered while this is being handled.
 
 <figure><img src="../../../.gitbook/assets/image (728).png" alt=""><figcaption></figcaption></figure>
 
@@ -684,7 +721,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
