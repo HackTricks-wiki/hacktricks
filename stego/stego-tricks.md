@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする
-- **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する。
+* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **githubリポジトリに提出してください。**
 
 </details>
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -26,7 +26,7 @@ HackTricksをサポートする他の方法：
 
 ### **Binwalk**
 
-埋め込まれた隠しファイルやデータを検索するためのツールです。`apt`を介してインストールされ、そのソースは[GitHub](https://github.com/ReFirmLabs/binwalk)で入手できます。
+埋め込まれた隠しファイルやデータを検索するためのツール。`apt`を介してインストールされ、そのソースは[GitHub](https://github.com/ReFirmLabs/binwalk)で入手できます。
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
@@ -46,7 +46,7 @@ exiftool file # Shows the metadata
 ```
 ### **Exiv2**
 
-exiftoolと同様、メタデータの表示に使用します。`apt`を介してインストール可能で、[GitHub](https://github.com/Exiv2/exiv2)でソースを入手でき、[公式ウェブサイト](http://www.exiv2.org/)もあります。
+Exiftoolと同様、メタデータの表示に使用します。`apt`を介してインストール可能で、[GitHub](https://github.com/Exiv2/exiv2)でソースを入手でき、公式ウェブサイトは[こちら](http://www.exiv2.org/)です。
 ```bash
 exiv2 file # Shows the metadata
 ```
@@ -74,71 +74,71 @@ strings -e B -n 6 file # 32bit strings (big-endian)
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-## **テキスト内の隠しデータの抽出**
+## **テキスト内の隠されたデータの抽出**
 
-### **スペース内の隠しデータ**
+### **スペース内の隠されたデータ**
 
-見かけ上空白のスペースに不可視文字が情報を隠しているかもしれません。このデータを抽出するには、[https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder) を訪れてください。
+見かけ上空白のスペースに不可視の文字が情報を隠しているかもしれません。このデータを抽出するには、[https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)を訪れてください。
 
 ## **画像からデータを抽出する**
 
 ### **GraphicMagickを使用して画像の詳細を特定する**
 
-[GraphicMagick](https://imagemagick.org/script/download.php) は画像ファイルの種類を特定し、潜在的な破損を特定するために使用されます。以下のコマンドを実行して画像を検査します：
+[GraphicMagick](https://imagemagick.org/script/download.php)は画像ファイルの種類を特定し、潜在的な破損を特定するために使用されます。以下のコマンドを実行して画像を検査します：
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-画像の修復を試みる際に、メタデータコメントを追加すると役立つかもしれません：
+修復を試みるために、損傷した画像にメタデータコメントを追加すると役立つかもしれません：
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
-### **データ隠蔽のためのSteghide**
+### **データの隠蔽にSteghideを使用**
 
 Steghideは、`JPEG、BMP、WAV、およびAU`ファイルにデータを隠蔽することを容易にし、暗号化されたデータを埋め込んだり抽出したりすることができます。`apt`を使用して簡単にインストールでき、[GitHubでソースコードが利用可能です](https://github.com/StefanoDeVuono/steghide)。
 
 **コマンド:**
 
-* `steghide info file`は、ファイルに隠されたデータが含まれているかどうかを明らかにします。
-* `steghide extract -sf file [--passphrase password]`は、隠されたデータを抽出し、パスワードはオプションです。
+* `steghide info file`はファイルに隠されたデータが含まれているかどうかを明らかにします。
+* `steghide extract -sf file [--passphrase password]`は隠されたデータを抽出し、パスワードはオプションです。
 
 Webベースの抽出を行う場合は、[このウェブサイト](https://futureboy.us/stegano/decinput.html)を訪れてください。
 
 **Stegcrackerを使用したブルートフォース攻撃:**
 
-* Steghideでパスワードクラッキングを試みるには、[stegcracker](https://github.com/Paradoxis/StegCracker.git)を以下のように使用します:
+* Steghideでパスワードクラックを試みるには、[stegcracker](https://github.com/Paradoxis/StegCracker.git)を以下のように使用します:
 ```bash
 stegcracker <file> [<wordlist>]
 ```
-### **PNG および BMP ファイル用の zsteg**
+### **PNGおよびBMPファイル用のzsteg**
 
-zsteg は、PNG および BMP ファイル内の隠されたデータを特定するのに特化しています。インストールは `gem install zsteg` を使用し、[GitHub でソースを入手](https://github.com/zed-0xff/zsteg) できます。
+zstegは、PNGおよびBMPファイル内の隠されたデータを特定することに特化しています。インストールは`gem install zsteg`を使用し、[GitHubでソースを入手](https://github.com/zed-0xff/zsteg)できます。
 
 **コマンド:**
 
-* `zsteg -a file` はファイルにすべての検出方法を適用します。
-* `zsteg -E file` はデータ抽出用のペイロードを指定します。
+* `zsteg -a file`はファイルにすべての検出方法を適用します。
+* `zsteg -E file`はデータ抽出用のペイロードを指定します。
 
-### **StegoVeritas および Stegsolve**
+### **StegoVeritasとStegsolve**
 
-**stegoVeritas** はメタデータをチェックし、画像変換を実行し、LSB ブルートフォースなどを適用します。すべてのオプションの完全なリストについては `stegoveritas.py -h` を使用し、すべてのチェックを実行するには `stegoveritas.py stego.jpg` を使用します。
+**stegoVeritas**はメタデータをチェックし、画像変換を実行し、LSBブルートフォースなどを適用します。すべてのチェックを実行するには、`stegoveritas.py stego.jpg`を使用して、オプションの完全なリストについては`stegoveritas.py -h`を使用します。
 
-**Stegsolve** はさまざまなカラーフィルタを適用して画像内の隠されたテキストやメッセージを表示します。[GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve) で入手できます。
+**Stegsolve**はさまざまなカラーフィルタを適用して画像内の隠されたテキストやメッセージを表示します。[GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)で入手できます。
 
-### **隠されたコンテンツの検出のための FFT**
+### **隠されたコンテンツの検出のためのFFT**
 
-高速フーリエ変換（FFT）技術を使用すると、画像内の隠されたコンテンツを明らかにすることができます。有用なリソースは次のとおりです:
+高速フーリエ変換（FFT）技術を使用すると、画像内の隠されたコンテンツを明らかにすることができます。有用なリソースには以下があります：
 
 * [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 * [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-* [GitHub 上の FFTStegPic](https://github.com/0xcomposure/FFTStegPic)
+* [GitHubのFFTStegPic](https://github.com/0xcomposure/FFTStegPic)
 
-### **オーディオおよび画像ファイル用の Stegpy**
+### **オーディオおよび画像ファイル用のStegpy**
 
-Stegpy は、PNG、BMP、GIF、WebP、WAV などの形式をサポートし、画像およびオーディオファイルに情報を埋め込むことができます。[GitHub](https://github.com/dhsdshdhk/stegpy) で入手できます。
+Stegpyを使用すると、PNG、BMP、GIF、WebP、WAVなどの形式をサポートする画像およびオーディオファイルに情報を埋め込むことができます。[GitHub](https://github.com/dhsdshdhk/stegpy)で入手できます。
 
-### **PNG ファイルの解析用の Pngcheck**
+### **PNGファイルの解析のためのPngcheck**
 
-PNG ファイルを解析したり、その信頼性を検証するには、以下を使用します:
+PNGファイルを解析したり、その信頼性を検証するには、
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
@@ -155,7 +155,7 @@ pngcheck stego.png
 
 ## **オーディオからデータを抽出する**
 
-**オーディオステガノグラフィ**は、音声ファイル内に情報を隠すためのユニークな方法を提供します。異なるツールが埋め込みや隠されたコンテンツの取り出しに使用されます。
+**オーディオステガノグラフィ**は、音声ファイル内に情報を隠すためのユニークな方法を提供します。異なるツールが埋め込みや隠されたコンテンツの取得に使用されます。
 
 ### **Steghide (JPEG、BMP、WAV、AU)**
 
@@ -167,7 +167,7 @@ Steghideは、JPEG、BMP、WAV、およびAUファイルにデータを隠すた
 
 ### **ffmpeg**
 
-ffmpegは、オーディオファイルの整合性を評価し、詳細な情報を強調し、不一致を特定するために重要です。
+ffmpegは、オーディオファイルの整合性を評価するために重要であり、詳細な情報を強調し、不一致を特定するのに役立ちます。
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -211,20 +211,20 @@ math.sqrt(2500) #50
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
 <details>
 
-<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>!</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）でゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>!</strong></summary>
 
 HackTricksをサポートする他の方法:
 
-* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい場合は**、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、**ハッキングトリックを共有**してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**する
+* **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、**ハッキングトリックを共有**する
 
 </details>

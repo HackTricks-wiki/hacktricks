@@ -7,16 +7,16 @@
 HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦で**フォロー**する：[**@hacktricks_live**](https://twitter.com/hacktricks_live)**。**
-- **ハッキングトリックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)で**フォロー**する
+- **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -24,14 +24,14 @@ HackTricksをサポートする他の方法：
 
 ## グローバル変数
 
-グローバル変数は**子プロセス**によって**継承されます**。
+グローバル変数は**子プロセス**によって継承されます。
 
 現在のセッション用にグローバル変数を作成することができます：
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
-この変数は、現在のセッションおよびその子プロセスからアクセスできます。
+この変数は、現在のセッションとその子プロセスからアクセスできます。
 
 次のようにして変数を**削除**できます：
 ```bash
@@ -58,7 +58,7 @@ cat /proc/`python -c "import os; print(os.getppid())"`/environ
 From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
 * **DISPLAY** – **X** が使用するディスプレイ。通常、この変数は **:0.0** に設定されます。これは現在のコンピューター上の最初のディスプレイを意味します。
-* **EDITOR** – ユーザーの選択したテキストエディター。
+* **EDITOR** – ユーザーの選好するテキストエディター。
 * **HISTFILESIZE** – 履歴ファイルに含まれる最大行数。
 * **HISTSIZE** – ユーザーがセッションを終了するときに履歴ファイルに追加される行数。
 * **HOME** – ホームディレクトリ。
@@ -79,19 +79,19 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 
 ### **HISTFILESIZE**
 
-この変数の **値を 0 に変更**してください。これにより、セッションを **終了** するときに **履歴ファイル**（\~/.bash\_history）が **削除** されます。
+この変数の **値を 0 に変更**してください。これにより、セッションを **終了** するときに **履歴ファイル** (\~/.bash\_history) **が削除**されます。
 ```bash
 export HISTFILESIZE=0
 ```
 ### **HISTSIZE**
 
-この変数の値を0に変更して、セッションを終了するときにはどんなコマンドも履歴ファイル（\~/.bash\_history）に追加されないようにします。
+この変数の値を0に変更してください。これにより、セッションを終了するときには、どのコマンドも履歴ファイル（\~/.bash\_history）に追加されません。
 ```bash
 export HISTSIZE=0
 ```
 ### http\_proxy & https\_proxy
 
-プロセスは、ここで宣言された **proxy** を使用して、**httpまたはhttps** を介してインターネットに接続します。
+プロセスは、ここで宣言された **プロキシ** を使用して、**httpまたはhttps** を介してインターネットに接続します。
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
@@ -127,7 +127,7 @@ Root:
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -138,9 +138,9 @@ Root:
 HackTricksをサポートする他の方法:
 
 * **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**してください。
+* **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
