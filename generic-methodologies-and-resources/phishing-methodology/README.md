@@ -37,7 +37,7 @@ Other ways to support HackTricks:
 * **hypened subdomain**: Change the **dot for a hyphen** of a subdomain (e.g., www-zelster.com).
 * **New TLD**: Same domain using a **new TLD** (e.g., zelster.org)
 * **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** (e.g., zelfser.com).
-* **Transposition:** It **swaps two letters** within the domain name (e.g., zelster.com).
+* **Transposition:** It **swaps two letters** within the domain name (e.g., zelsetr.com).
 * **Singularization/Pluralization**: Adds or removes “s” at the end of the domain name (e.g., zeltsers.com).
 * **Omission**: It **removes one** of the letters from the domain name (e.g., zelser.com).
 * **Repetition:** It **repeats one** of the letters in the domain name (e.g., zeltsser.com).
