@@ -7,8 +7,8 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -16,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -75,7 +75,7 @@ Python intenta **cargar bibliotecas desde el directorio actual primero** (el sig
 
 Puedes encontrar una **lista de paquetes preinstalados** aquí: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
 Ten en cuenta que desde un pickle puedes hacer que el entorno de Python **importe bibliotecas arbitrarias** instaladas en el sistema.\
-Por ejemplo, el siguiente pickle, al ser cargado, importará la biblioteca pip para usarla:
+Por ejemplo, el siguiente pickle, al cargarse, importará la biblioteca pip para usarla:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -200,7 +200,7 @@ class _:pass
 ```
 ### RCE creando objetos y sobrecargando
 
-Si puedes **declarar una clase** y **crear un objeto** de esa clase, podrías **escribir/sobrescribir diferentes métodos** que pueden ser **activados** **sin necesidad de llamarlos directamente**.
+Si puedes **declarar una clase** y **crear un objeto** de esa clase, podrías **escribir/sobrescribir diferentes métodos** que pueden ser **activados** **sin** **necesidad de llamarlos directamente**.
 
 #### RCE con clases personalizadas
 
@@ -273,7 +273,7 @@ Sub['import os; os.system("sh")']
 ```
 #### Creación de objetos con excepciones
 
-Cuando se **desencadena una excepción**, se **crea un objeto** de la clase **Exception** sin necesidad de llamar directamente al constructor (un truco de [**@\_nag0mez**](https://mobile.twitter.com/\_nag0mez)):
+Cuando se **desencadena una excepción** se **crea un objeto** de la **Excepción** sin necesidad de llamar al constructor directamente (un truco de [**@\_nag0mez**](https://mobile.twitter.com/\_nag0mez)):
 ```python
 class RCE(Exception):
 def __init__(self):
@@ -337,7 +337,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ### Sin Builtins
 
 Cuando no tienes `__builtins__`, no podrás importar nada ni siquiera leer o escribir archivos, ya que **todas las funciones globales** (como `open`, `import`, `print`...) **no están cargadas**.\
-Sin embargo, **por defecto Python importa muchos módulos en memoria**. Estos módulos pueden parecer inofensivos, pero algunos de ellos **también importan funcionalidades peligrosas** en su interior a las que se puede acceder para lograr incluso una **ejecución de código arbitraria**.
+Sin embargo, **por defecto Python importa muchos módulos en memoria**. Estos módulos pueden parecer inofensivos, pero algunos de ellos **también importan funcionalidades peligrosas** en su interior que pueden ser accedidas para lograr incluso una **ejecución de código arbitraria**.
 
 En los siguientes ejemplos puedes observar cómo **abusar** de algunos de estos módulos "**inofensivos**" cargados para **acceder** a **funcionalidades peligrosas** en su interior.
 
@@ -383,7 +383,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde puedes encontrar los **builtins**.
+[**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar **decenas**/**centenas** de **lugares** donde puedes encontrar los **builtins**.
 
 #### Python2 y Python3
 ```python
@@ -433,7 +433,7 @@ Aquí quiero explicar cómo descubrir fácilmente **funcionalidades más peligro
 
 #### Accediendo a subclases con bypasses
 
-Una de las partes más sensibles de esta técnica es poder **acceder a las subclases base**. En los ejemplos anteriores, esto se hizo usando `''.__class__.__base__.__subclasses__()`, pero hay **otras formas posibles**:
+Una de las partes más sensibles de esta técnica es poder **acceder a las subclases base**. En los ejemplos anteriores esto se hizo usando `''.__class__.__base__.__subclasses__()`, pero hay **otras formas posibles**:
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -463,7 +463,7 @@ defined_func.__class__.__base__.__subclasses__()
 ```
 ### Encontrar bibliotecas peligrosas cargadas
 
-Por ejemplo, sabiendo que con la biblioteca **`sys`** es posible **importar bibliotecas arbitrarias**, puedes buscar todos los **módulos cargados que hayan importado sys en su interior**:
+Por ejemplo, sabiendo que con la biblioteca **`sys`** es posible **importar bibliotecas arbitrarias**, puedes buscar todos los **módulos cargados que hayan importado sys dentro de ellos**:
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
@@ -734,7 +734,7 @@ return 'HAL 9000'
 **Más ejemplos** sobre ejemplos de **formato de cadena** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
 
 {% hint style="danger" %}
-Consulte también la siguiente página para encontrar gadgets que **leerán información sensible de objetos internos de Python**:
+Consulte también la siguiente página para obtener dispositivos que **leerán información sensible de los objetos internos de Python**:
 {% endhint %}
 
 {% content-ref url="../python-internal-read-gadgets.md" %}
@@ -752,13 +752,13 @@ Consulte también la siguiente página para encontrar gadgets que **leerán info
 # Access an element through several links
 {whoami.__globals__[server].__dict__[bridge].__dict__[db].__dict__}
 ```
-## Analizando Objetos en Python
+## Analizando Objetos de Python
 
 {% hint style="info" %}
 Si deseas **aprender** sobre el **bytecode de Python** en profundidad, lee este **increíble** artículo sobre el tema: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 {% endhint %}
 
-En algunos CTFs, se te puede proporcionar el nombre de una **función personalizada donde se encuentra la bandera** y necesitas ver los **internos** de la **función** para extraerla.
+En algunos CTFs, se te puede proporcionar el nombre de una **función personalizada donde se encuentra la bandera** y necesitas ver los **detalles** de la **función** para extraerla.
 
 Esta es la función a inspeccionar:
 ```python
@@ -789,7 +789,7 @@ get_flag.__globals__
 #If you have access to some variable value
 CustomClassObject.__class__.__init__.__globals__
 ```
-[**Ver aquí más lugares para obtener globales**](./#globals-and-locals)
+[**Ver aquí más lugares para obtener los globales**](./#globals-and-locals)
 
 ### **Accediendo al código de la función**
 
@@ -881,7 +881,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Ten en cuenta que si no puedes importar `dis` en el sandbox de Python, puedes obtener el **bytecode** de la función (`get_flag.func_code.co_code`) y **desensamblarlo** localmente. No verás el contenido de las variables que se cargan (`LOAD_CONST`), pero puedes adivinarlas a partir de (`get_flag.func_code.co_consts`) porque `LOAD_CONST` también indica el desplazamiento de la variable que se está cargando.
+Ten en cuenta que **si no puedes importar `dis` en el sandbox de Python** puedes obtener el **bytecode** de la función (`get_flag.func_code.co_code`) y **desensamblarlo** localmente. No verás el contenido de las variables que se cargan (`LOAD_CONST`) pero puedes adivinarlas a partir de (`get_flag.func_code.co_consts`) porque `LOAD_CONST` también indica el desplazamiento de la variable que se está cargando.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -952,7 +952,7 @@ types.CodeType.__doc__
 ### Recreando una función filtrada
 
 {% hint style="warning" %}
-En el siguiente ejemplo, vamos a tomar todos los datos necesarios para recrear la función a partir del objeto de código de la función directamente. En un **ejemplo real**, todos los **valores** para ejecutar la función **`code_type`** son lo que **necesitarás filtrar**.
+En el siguiente ejemplo, vamos a tomar todos los datos necesarios para recrear la función a partir del objeto de código de la función directamente. En un **ejemplo real**, todos los **valores** para ejecutar la función **`code_type`** es lo que **necesitarás filtrar**.
 {% endhint %}
 ```python
 fc = get_flag.__code__
@@ -966,7 +966,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Saltar Defensas
 
-En los ejemplos anteriores al principio de esta publicación, puedes ver **cómo ejecutar cualquier código de Python usando la función `compile`**. Esto es interesante porque puedes **ejecutar scripts completos** con bucles y todo en una **sola línea** (y podríamos hacer lo mismo usando **`exec`**).\
+En los ejemplos anteriores al principio de esta publicación, puedes ver **cómo ejecutar cualquier código Python usando la función `compile`**. Esto es interesante porque puedes **ejecutar scripts completos** con bucles y todo en una **sola línea** (y podríamos hacer lo mismo usando **`exec`**).\
 De todos modos, a veces podría ser útil **crear** un **objeto compilado** en una máquina local y ejecutarlo en la máquina del **CTF** (por ejemplo, porque no tenemos la función `compile` en el CTF).
 
 Por ejemplo, compilamos y ejecutamos manualmente una función que lee _./poc.py_:
@@ -996,7 +996,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-Si no puedes acceder a `eval` o `exec`, podrías crear una **función adecuada**, pero llamarla directamente generalmente fallará con: _constructor not accessible in restricted mode_. Por lo tanto, necesitas una **función que no esté en el entorno restringido para llamar a esta función.**
+Si no puedes acceder a `eval` o `exec`, podrías crear una **función adecuada**, pero llamarla directamente generalmente fallará con: _constructor not accessible in restricted mode_. Por lo tanto, necesitas una **función que no esté en el entorno restringido para llamar a esta función**.
 ```python
 #Compile a regular print
 ftype = type(lambda: None)
@@ -1014,12 +1014,12 @@ Usando herramientas como [**https://www.decompiler.com/**](https://www.decompile
 [.pyc.md](../../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
 {% endcontent-ref %}
 
-## Python Variado
+## Misceláneo Python
 
 ### Assert
 
 Python ejecutado con optimizaciones con el parámetro `-O` eliminará las declaraciones de aserción y cualquier código condicional en función del valor de **debug**.\
-Por lo tanto, verificaciones como
+Por lo tanto, comprobaciones como
 ```python
 def check_permission(super_user):
 try:
@@ -1028,7 +1028,7 @@ print("\nYou are a super user\n")
 except AssertionError:
 print(f"\nNot a Super User!!!\n")
 ```
-serán eludidos
+serán evadidos
 
 ## Referencias
 
@@ -1041,17 +1041,17 @@ serán eludidos
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**

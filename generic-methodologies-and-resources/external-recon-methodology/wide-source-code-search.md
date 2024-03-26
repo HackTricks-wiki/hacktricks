@@ -6,7 +6,7 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
@@ -14,9 +14,9 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-**Grupo de Seguridad Try Hard**
+**Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -24,21 +24,21 @@ Otras formas de apoyar a HackTricks:
 
 El objetivo de esta página es enumerar **plataformas que permiten buscar código** (literal o con regex) en miles/millones de repositorios en una o más plataformas.
 
-Esto ayuda en varias ocasiones a buscar **información filtrada** o patrones de **vulnerabilidades**.
+Esto ayuda en varias ocasiones a **buscar información filtrada** o patrones de **vulnerabilidades**.
 
-* [**SourceGraph**](https://sourcegraph.com/search): Busca en millones de repositorios. Hay una versión gratuita y una versión empresarial (con 15 días gratis). Admite regex.
-* [**Búsqueda en Github**](https://github.com/search): Busca en Github. Admite regex.
-* Tal vez también sea útil revisar [**Búsqueda de Código en Github**](https://cs.github.com/).
-* [**Búsqueda Avanzada en Gitlab**](https://docs.gitlab.com/ee/user/search/advanced\_search.html): Busca en proyectos de Gitlab. Admite regex.
+* [**SourceGraph**](https://sourcegraph.com/search): Busca en millones de repositorios. Hay una versión gratuita y una versión empresarial (con 15 días gratis). Admite regexes.
+* [**Github Search**](https://github.com/search): Busca en Github. Admite regexes.
+* Tal vez también sea útil revisar [**Github Code Search**](https://cs.github.com/).
+* [**Búsqueda Avanzada de Gitlab**](https://docs.gitlab.com/ee/user/search/advanced\_search.html): Busca en proyectos de Gitlab. Admite regexes.
 * [**SearchCode**](https://searchcode.com/): Busca código en millones de proyectos.
 
 {% hint style="warning" %}
-Cuando busques filtraciones en un repositorio y ejecutes algo como `git log -p` ¡no olvides que podría haber **otras ramas con otros commits** que contengan secretos!
+Cuando busques filtraciones en un repositorio y ejecutes algo como `git log -p`, ¡no olvides que podría haber **otras ramas con otros commits** que contengan secretos!
 {% endhint %}
 
-**Grupo de Seguridad Try Hard**
+**Try Hard Security Group**
 
-<figure><img src="../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -48,7 +48,7 @@ Cuando busques filtraciones en un repositorio y ejecutes algo como `git log -p` 
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
