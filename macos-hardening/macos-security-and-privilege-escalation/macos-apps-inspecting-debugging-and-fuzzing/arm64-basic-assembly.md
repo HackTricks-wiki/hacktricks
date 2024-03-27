@@ -49,6 +49,7 @@ ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can
    * This register can also be used as a **general-purpose registry** although it's usually used as reference to **local variables**.
 8. **`x30`** or **`lr`**- **Link register** . It holds the **return address** when a `BL` (Branch with Link) or `BLR` (Branch with Link to Register) instruction is executed by storing the **`pc`** value in this register.
    * It could also be used like any other register.
+   * If the current function is going to call a new function and therefore overwrite `lr`, it will store it in the stack at the beginning, this is the epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Store `fp` and `lr`, generate space and get new `fp`) and recover it at the end, this is the prologue (`ldp x29, x30, [sp], #48; ret` -> Recover `fp` and `lr` and return).
 9. **`sp`** - **Stack pointer**, used to keep track of the top of the stack.
    * the **`sp`** value should always be kept to at least a **quadword** **alignment** or a alignment exception may occur.
 10. **`pc`** - **Program counter**, which points to the next instruction. This register can only be updates through exception generations, exception returns, and branches. The only ordinary instructions that can read this register are branch with link instructions (BL, BLR) to store the **`pc`** address in **`lr`** (Link Register).
