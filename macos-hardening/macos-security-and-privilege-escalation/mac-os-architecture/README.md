@@ -7,9 +7,9 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -45,7 +45,7 @@ Además, **Mach y BSD mantienen modelos de seguridad diferentes**: el modelo de 
 
 ### I/O Kit - Controladores
 
-El I/O Kit es un marco de **controladores de dispositivos orientado a objetos** de código abierto en el kernel XNU, que maneja **controladores de dispositivos cargados dinámicamente**. Permite agregar código modular al kernel sobre la marcha, admitiendo hardware diverso.
+El I/O Kit es un marco de **controladores de dispositivos orientado a objetos de código abierto** en el kernel XNU, que maneja **controladores de dispositivos cargados dinámicamente**. Permite agregar código modular al kernel sobre la marcha, admitiendo hardware diverso.
 
 {% content-ref url="macos-iokit.md" %}
 [macos-iokit.md](macos-iokit.md)
@@ -61,7 +61,9 @@ El I/O Kit es un marco de **controladores de dispositivos orientado a objetos** 
 
 El **kernelcache** es una versión **precompilada y preenlazada del kernel XNU**, junto con controladores de dispositivos esenciales y extensiones de kernel. Se almacena en un formato **comprimido** y se descomprime en la memoria durante el proceso de arranque. El kernelcache facilita un **tiempo de arranque más rápido** al tener una versión lista para ejecutarse del kernel y controladores cruciales disponibles, reduciendo el tiempo y los recursos que de otro modo se gastarían en cargar y vincular dinámicamente estos componentes en el momento del arranque.
 
-En iOS se encuentra en **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** en macOS puedes encontrarlo con **`find / -name kernelcache 2>/dev/null`**
+En iOS se encuentra en **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** en macOS puedes encontrarlo con **`find / -name kernelcache 2>/dev/null`** o **`mdfind kernelcache | grep kernelcache`**
+
+Es posible ejecutar **`kextstat`** para verificar las extensiones de kernel cargadas.
 
 #### IMG4
 
@@ -71,7 +73,7 @@ Generalmente está compuesto por los siguientes componentes:
 
 * **Carga útil (IM4P)**:
 * A menudo comprimido (LZFSE4, LZSS, …)
-* Opcionalmente cifrado
+* Opcionalmente encriptado
 * **Manifiesto (IM4M)**:
 * Contiene Firma
 * Diccionario adicional de Clave/Valor
@@ -128,7 +130,7 @@ nm -a binaries/com.apple.security.sandbox | wc -l
 ```
 ## Extensiones de Kernel de macOS
 
-macOS es **muy restrictivo al cargar Extensiones de Kernel** (.kext) debido a los altos privilegios con los que se ejecutará el código. De hecho, por defecto es virtualmente imposible (a menos que se encuentre un bypass).
+macOS es **súper restrictivo para cargar Extensiones de Kernel** (.kext) debido a los altos privilegios con los que se ejecutará el código. De hecho, por defecto es virtualmente imposible (a menos que se encuentre un bypass).
 
 {% content-ref url="macos-kernel-extensions.md" %}
 [macos-kernel-extensions.md](macos-kernel-extensions.md)
@@ -156,7 +158,7 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
