@@ -1,4 +1,4 @@
-# macOS Archivos, Carpetas, Binarios y Memoria
+# Archivos, Carpetas, Binarios y Memoria de macOS
 
 <details>
 
@@ -9,7 +9,7 @@ Otras formas de apoyar a HackTricks:
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -27,7 +27,7 @@ Otras formas de apoyar a HackTricks:
 * **/System**: Archivo para hacer funcionar OS X. Deberías encontrar principalmente archivos específicos de Apple aquí (no de terceros).
 * **/tmp**: Los archivos se eliminan después de 3 días (es un enlace simbólico a /private/tmp)
 * **/Users**: Directorio de inicio para los usuarios.
-* **/usr**: Binarios de configuración y del sistema
+* **/usr**: Configuración y binarios del sistema
 * **/var**: Archivos de registro
 * **/Volumes**: Las unidades montadas aparecerán aquí.
 * **/.vol**: Al ejecutar `stat a.txt` se obtiene algo como `16777223 7545753 -rw-r--r-- 1 nombredeusuario wheel ...` donde el primer número es el número de identificación del volumen donde se encuentra el archivo y el segundo es el número de inodo. Puedes acceder al contenido de este archivo a través de /.vol/ con esa información ejecutando `cat /.vol/16777223/7545753`
@@ -38,7 +38,7 @@ Otras formas de apoyar a HackTricks:
 * Las aplicaciones **instaladas** suelen estar en `/Applications` o en `~/Applications`
 * Los **datos de la aplicación** se pueden encontrar en `/Library/Application Support` para las aplicaciones que se ejecutan como root y en `~/Library/Application Support` para las aplicaciones que se ejecutan como el usuario.
 * Los **daemons** de aplicaciones de terceros que **necesitan ejecutarse como root** suelen estar ubicados en `/Library/PrivilegedHelperTools/`
-* Las aplicaciones **sandboxed** se mapean en la carpeta `~/Library/Containers`. Cada aplicación tiene una carpeta nombrada según el ID de paquete de la aplicación (`com.apple.Safari`).
+* Las aplicaciones **sandboxed** se mapean en la carpeta `~/Library/Containers`. Cada aplicación tiene una carpeta con el nombre del ID de paquete de la aplicación (`com.apple.Safari`).
 * El **núcleo** se encuentra en `/System/Library/Kernels/kernel`
 * Las **extensiones de kernel de Apple** se encuentran en `/System/Library/Extensions`
 * Las **extensiones de kernel de terceros** se almacenan en `/Library/Extensions`
@@ -70,7 +70,7 @@ macOS almacena información como contraseñas en varios lugares:
 * `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
 * **`.app`**: Aplicaciones de Apple que siguen una estructura de directorio (es un paquete).
 * **`.dylib`**: Bibliotecas dinámicas (como los archivos DLL de Windows)
-* **`.pkg`**: Son iguales que xar (formato de archivo extensible). El comando installer se puede usar para instalar el contenido de estos archivos.
+* **`.pkg`**: Son iguales que xar (formato de archivo de archivo extensible). El comando installer se puede usar para instalar el contenido de estos archivos.
 * **`.DS_Store`**: Este archivo está en cada directorio, guarda los atributos y personalizaciones del directorio.
 * **`.Spotlight-V100`**: Esta carpeta aparece en el directorio raíz de cada volumen en el sistema.
 * **`.metadata_never_index`**: Si este archivo está en la raíz de un volumen, Spotlight no indexará ese volumen.
@@ -104,7 +104,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 ```
 {% endcode %}
 
-En versiones antiguas, es posible encontrar la **caché compartida** en **`/System/Library/dyld/`**.
+En versiones antiguas es posible encontrar la **caché compartida** en **`/System/Library/dyld/`**.
 
 En iOS puedes encontrarlas en **`/System/Library/Caches/com.apple.dyld/`**.
 
@@ -124,19 +124,41 @@ En una **carpeta**, **leer** permite **listarla**, **escribir** permite **borrar
 
 Existen algunas banderas que se pueden establecer en los archivos y que harán que el archivo se comporte de manera diferente. Puedes **verificar las banderas** de los archivos dentro de un directorio con `ls -lO /ruta/directorio`
 
-* **`uchg`**: Conocida como bandera **uchange** evitará que se realice cualquier acción de cambio o eliminación del **archivo**. Para establecerla haz: `chflags uchg archivo.txt`
+* **`uchg`**: Conocida como bandera de **cambio de usuario**, evitará que se realice cualquier acción que cambie o elimine el **archivo**. Para establecerla haz: `chflags uchg archivo.txt`
 * El usuario root podría **quitar la bandera** y modificar el archivo
 * **`restricted`**: Esta bandera hace que el archivo esté **protegido por SIP** (no puedes agregar esta bandera a un archivo).
-* **`Bit pegajoso`**: Si un directorio tiene el bit pegajoso, **solo** el **propietario de los directorios o root pueden renombrar o eliminar** archivos. Normalmente se establece en el directorio /tmp para evitar que los usuarios comunes eliminen o muevan archivos de otros usuarios.
+* **`Bit pegajoso`**: Si un directorio tiene el bit pegajoso, **solo** el **propietario de los directorios o root pueden renombrar o eliminar** archivos. Normalmente se establece en el directorio /tmp para evitar que los usuarios normales eliminen o muevan archivos de otros usuarios.
 
-### **ACLs de Archivos**
+Todas las banderas se pueden encontrar en el archivo `sys/stat.h` (encuéntralo usando `mdfind stat.h | grep stat.h`) y son:
 
-Las **ACLs de archivos** contienen **ACE** (Entradas de Control de Acceso) donde se pueden asignar permisos más **granulares** a diferentes usuarios.
+* `UF_SETTABLE` 0x0000ffff: Máscara de banderas cambiables por el propietario.
+* `UF_NODUMP` 0x00000001: No hacer volcado del archivo.
+* `UF_IMMUTABLE` 0x00000002: El archivo no se puede cambiar.
+* `UF_APPEND` 0x00000004: Los escritos en el archivo solo pueden ser de tipo añadir.
+* `UF_OPAQUE` 0x00000008: El directorio es opaco con respecto a la unión.
+* `UF_COMPRESSED` 0x00000020: El archivo está comprimido (en algunos sistemas de archivos).
+* `UF_TRACKED` 0x00000040: No hay notificaciones para eliminaciones/renombrados para archivos con esto establecido.
+* `UF_DATAVAULT` 0x00000080: Se requiere autorización para lectura y escritura.
+* `UF_HIDDEN` 0x00008000: Indica que este elemento no debe mostrarse en una interfaz gráfica.
+* `SF_SUPPORTED` 0x009f0000: Máscara de banderas soportadas por el superusuario.
+* `SF_SETTABLE` 0x3fff0000: Máscara de banderas cambiables por el superusuario.
+* `SF_SYNTHETIC` 0xc0000000: Máscara de banderas sintéticas de solo lectura del sistema.
+* `SF_ARCHIVED` 0x00010000: El archivo está archivado.
+* `SF_IMMUTABLE` 0x00020000: El archivo no se puede cambiar.
+* `SF_APPEND` 0x00040000: Los escritos en el archivo solo pueden ser de tipo añadir.
+* `SF_RESTRICTED` 0x00080000: Se requiere autorización para escritura.
+* `SF_NOUNLINK` 0x00100000: El elemento no se puede eliminar, renombrar o montar.
+* `SF_FIRMLINK` 0x00800000: El archivo es un firmlink.
+* `SF_DATALESS` 0x40000000: El archivo es un objeto sin datos.
 
-Es posible otorgar a una **carpeta** estos permisos: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
-Y a un **archivo**: `read`, `write`, `append`, `execute`.
+### **Listas de Control de Acceso (ACLs) de Archivos**
 
-Cuando el archivo contiene ACLs, verás un "+" al **listar los permisos como en**:
+Las **ACLs** de archivos contienen **ACE** (Entradas de Control de Acceso) donde se pueden asignar permisos más **granulares** a diferentes usuarios.
+
+Es posible otorgar a una **carpeta** estos permisos: `listar`, `buscar`, `añadir_archivo`, `añadir_subdirectorio`, `eliminar_hijo`, `eliminar_hijo`.\
+Y a un **archivo**: `leer`, `escribir`, `añadir`, `ejecutar`.
+
+Cuando el archivo contiene ACLs, verás un **"+" al listar los permisos como en**:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -151,9 +173,27 @@ Puedes encontrar **todos los archivos con ACLs** con (esto es muuuy lento):
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
-### Tenedores de Recursos | ADS de macOS
+### Atributos Extendidos
 
-Esta es una forma de obtener **Flujos de Datos Alternativos en las máquinas MacOS**. Puedes guardar contenido dentro de un atributo extendido llamado **com.apple.ResourceFork** dentro de un archivo guardándolo en **file/..namedfork/rsrc**.
+Los atributos extendidos tienen un nombre y un valor deseado, y se pueden ver usando `ls -@` y manipular usando el comando `xattr`. Algunos atributos extendidos comunes son:
+
+- `com.apple.resourceFork`: Compatibilidad con bifurcaciones de recursos. También visible como `filename/..namedfork/rsrc`
+- `com.apple.quarantine`: MacOS: Mecanismo de cuarentena de Gatekeeper (III/6)
+- `metadata:*`: MacOS: varios metadatos, como `_backup_excludeItem`, o `kMD*`
+- `com.apple.lastuseddate` (#PS): Fecha de último uso del archivo
+- `com.apple.FinderInfo`: MacOS: Información del Finder (por ejemplo, etiquetas de color)
+- `com.apple.TextEncoding`: Especifica la codificación de texto de archivos de texto ASCII
+- `com.apple.logd.metadata`: Utilizado por logd en archivos en `/var/db/diagnostics`
+- `com.apple.genstore.*`: Almacenamiento generacional (`/.DocumentRevisions-V100` en la raíz del sistema de archivos)
+- `com.apple.rootless`: MacOS: Utilizado por Protección de Integridad del Sistema para etiquetar archivos (III/10)
+- `com.apple.uuidb.boot-uuid`: Marcas de logd de épocas de arranque con UUID único
+- `com.apple.decmpfs`: MacOS: Compresión de archivos transparente (II/7)
+- `com.apple.cprotect`: \*OS: Datos de cifrado por archivo (III/11)
+- `com.apple.installd.*`: \*OS: Metadatos utilizados por installd, por ejemplo, `installType`, `uniqueInstallID`
+
+### Bifurcaciones de Recursos | ADS de macOS
+
+Esta es una forma de obtener **Flujos de Datos Alternativos en máquinas MacOS**. Puedes guardar contenido dentro de un atributo extendido llamado **com.apple.ResourceFork** dentro de un archivo guardándolo en **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -170,6 +210,14 @@ Puedes **encontrar todos los archivos que contienen este atributo extendido** co
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
+### decmpfs
+
+El atributo extendido `com.apple.decmpfs` indica que el archivo está almacenado encriptado, `ls -l` reportará un **tamaño de 0** y los datos comprimidos están dentro de este atributo. Cada vez que se accede al archivo, se desencriptará en memoria.
+
+Este atributo se puede ver con `ls -lO` indicado como comprimido porque los archivos comprimidos también están etiquetados con la bandera `UF_COMPRESSED`. Si se elimina un archivo comprimido, esta bandera con `chflags nocompressed </ruta/al/archivo>`, el sistema no sabrá que el archivo estaba comprimido y por lo tanto no podrá descomprimirlo y acceder a los datos (pensará que en realidad está vacío).
+
+La herramienta afscexpand se puede utilizar para forzar la descompresión de un archivo.
+
 ## **Binarios universales y** Formato Mach-o
 
 Los binarios de Mac OS generalmente se compilan como **binarios universales**. Un **binario universal** puede **soportar múltiples arquitecturas en el mismo archivo**.
@@ -184,14 +232,14 @@ Los binarios de Mac OS generalmente se compilan como **binarios universales**. U
 [macos-memory-dumping.md](macos-memory-dumping.md)
 {% endcontent-ref %}
 
-## Archivos de Categoría de Riesgo en Mac OS
+## Archivos de Categoría de Riesgo de Mac OS
 
 El directorio `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` es donde se almacena información sobre el **riesgo asociado con diferentes extensiones de archivo**. Este directorio categoriza los archivos en varios niveles de riesgo, influyendo en cómo Safari maneja estos archivos al descargarlos. Las categorías son las siguientes:
 
-- **LSRiskCategorySafe**: Los archivos en esta categoría se consideran **completamente seguros**. Safari abrirá automáticamente estos archivos después de ser descargados.
-- **LSRiskCategoryNeutral**: Estos archivos no tienen advertencias y **no se abren automáticamente** en Safari.
-- **LSRiskCategoryUnsafeExecutable**: Los archivos en esta categoría **generan una advertencia** que indica que el archivo es una aplicación. Esto sirve como una medida de seguridad para alertar al usuario.
-- **LSRiskCategoryMayContainUnsafeExecutable**: Esta categoría es para archivos, como archivos comprimidos, que podrían contener un ejecutable. Safari **generará una advertencia** a menos que pueda verificar que todo el contenido es seguro o neutral.
+* **LSRiskCategorySafe**: Los archivos en esta categoría se consideran **completamente seguros**. Safari abrirá automáticamente estos archivos después de ser descargados.
+* **LSRiskCategoryNeutral**: Estos archivos no vienen con advertencias y **no se abren automáticamente** en Safari.
+* **LSRiskCategoryUnsafeExecutable**: Los archivos en esta categoría **generan una advertencia** indicando que el archivo es una aplicación. Esto sirve como una medida de seguridad para alertar al usuario.
+* **LSRiskCategoryMayContainUnsafeExecutable**: Esta categoría es para archivos, como archivos comprimidos, que podrían contener un ejecutable. Safari **generará una advertencia** a menos que pueda verificar que todos los contenidos son seguros o neutrales.
 
 ## Archivos de registro
 
