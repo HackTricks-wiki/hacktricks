@@ -353,6 +353,35 @@ dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shar
 Sometimes it's easier to check the **decompiled** code from **`libsystem_kernel.dylib`** **than** checking the **source code** becasue the code of several syscalls (BSD and Mach) are generated via scripts (check comments in the source code) while in the dylib you can find what is being called.
 {% endhint %}
 
+### objc\_msgSend
+
+It's super common to find this function used in Objective-C or Swift programs. This function allows to call a method of an objective-C object.
+
+Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc\_msgsend)):
+
+* x0: self -> Pointer to the instance
+* x1: op -> Selector of the method
+* x2... -> Rest of the arguments of the invoked method
+
+So, if you put breakpoint before the branch to this function, you can easily find what is invoked in lldb with (in this example the object calls an object from `NSConcreteTask` that will run a command):
+
+```
+(lldb) po $x0
+<NSConcreteTask: 0x1052308e0>
+
+(lldb) x/s $x1
+0x1736d3a6e: "launch"
+
+(lldb) po [$x0 launchPath]
+/bin/sh
+
+(lldb) po [$x0 arguments]
+<__NSArrayI 0x1736801e0>(
+-c,
+whoami
+)
+```
+
 ### Shellcodes
 
 To compile:
