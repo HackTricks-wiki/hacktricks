@@ -9,7 +9,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -61,7 +61,9 @@ The I/O Kit is an open-source, object-oriented **device-driver framework** in th
 
 The **kernelcache** is a **pre-compiled and pre-linked version of the XNU kernel**, along with essential device **drivers** and **kernel extensions**. It's stored in a **compressed** format and gets decompressed into memory during the boot-up process. The kernelcache facilitates a **faster boot time** by having a ready-to-run version of the kernel and crucial drivers available, reducing the time and resources that would otherwise be spent on dynamically loading and linking these components at boot time.
 
-In iOS it's located in **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** in macOS you can find it with **`find / -name kernelcache 2>/dev/null`**
+In iOS it's located in **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** in macOS you can find it with **`find / -name kernelcache 2>/dev/null`** or **`mdfind kernelcache | grep kernelcache`**
+
+It's possible to run **`kextstat`** to check the loaded kernel extensions.
 
 #### IMG4
 
@@ -115,7 +117,7 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
 
-You can check the extracted kernelcache for symbols with:  **`nm -a kernelcache.release.iphone14.e | wc -l`**
+You can check the extracted kernelcache for symbols with: **`nm -a kernelcache.release.iphone14.e | wc -l`**
 
 With this we can now **extract all the extensions** or the **one you are insterested in:**
 
@@ -162,7 +164,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>

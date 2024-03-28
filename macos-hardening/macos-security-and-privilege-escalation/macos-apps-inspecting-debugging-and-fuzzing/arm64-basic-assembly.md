@@ -337,10 +337,11 @@ Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504
 
 ### Mach Traps
 
-Check out [**syscall\_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall\_sw.c.auto.html). Mach traps will have **x16 < 0**, so you need to call the numbers from the previous list with a **minus**: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
+Check out in [**syscall\_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall\_sw.c.auto.html) the `mach_trap_table` and in [**mach\_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach\_traps.h) the prototypes. The mex number of Mach traps is `MACH_TRAP_TABLE_COUNT` = 128. Mach traps will have **x16 < 0**, so you need to call the numbers from the previous list with a **minus**: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
 
 You can also check **`libsystem_kernel.dylib`** in a disassembler to find how to call these (and BSD) syscalls:
 
+{% code overflow="wrap" %}
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -348,10 +349,21 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
+{% endcode %}
 
 {% hint style="success" %}
-Sometimes it's easier to check the **decompiled** code from **`libsystem_kernel.dylib`** **than** checking the **source code** becasue the code of several syscalls (BSD and Mach) are generated via scripts (check comments in the source code) while in the dylib you can find what is being called.
+Sometimes it's easier to check the **decompiled** code from **`libsystem_kernel.dylib`** **than** checking the **source code** because the code of several syscalls (BSD and Mach) are generated via scripts (check comments in the source code) while in the dylib you can find what is being called.
 {% endhint %}
+
+### machdep calls
+
+XNU supports another type of calls called machine dependent. The numbers of these calls depends on the architecture and neither the calls or numbers are guaranteed to remain constant.
+
+### comm page
+
+This is a kernel owner memory page that is mapped into the address scape of every users process. It's meant to make the transition from user mode to kernel space faster than using syscalls for kernel services that are used so much the this transition would be vey inneficient.
+
+For example the call `gettimeofdate` reads the value of `timeval` directly from the comm page.
 
 ### objc\_msgSend
 
