@@ -8,7 +8,7 @@ _Logos y diseño de movimiento de Hacktricks por_ [_@ppiernacho_](https://www.in
 **¡Bienvenido al wiki donde encontrarás cada truco/técnica de hacking/lo que sea que haya aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias!**
 {% endhint %}
 
-Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **debes seguir al hacer pentesting** en una o más **máquinas:**
+Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **deberías seguir al hacer pentesting** en una o más **máquinas:**
 
 {% content-ref url="generic-methodologies-and-resources/pentesting-methodology.md" %}
 [pentesting-methodology.md](generic-methodologies-and-resources/pentesting-methodology.md)
@@ -30,9 +30,9 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 
 ### [RootedCON](https://www.rootedcon.com/)
 
-<figure><img src=".gitbook/assets/image (4) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (4) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro crucial para profesionales de la tecnología y ciberseguridad en todas las disciplinas.
+[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro crucial para profesionales de tecnología y ciberseguridad en todas las disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -40,11 +40,11 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 
 ### [Intigriti](https://www.intigriti.com)
 
-<figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** es la plataforma de ethical hacking y **bug bounty #1** de Europa.
+**Intigriti** es la plataforma de ethical hacking y **bug bounty #1 de Europa**.
 
-Consejo de bug bounty: ¡Regístrate en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**! ¡Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy y comienza a ganar recompensas de hasta **$100,000**!
+**Consejo de bug bounty**: ¡Regístrate en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, ¡y comienza a ganar recompensas de hasta **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -52,7 +52,7 @@ Consejo de bug bounty: ¡Regístrate en **Intigriti**, una plataforma premium de
 
 ### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
 
-<figure><img src=".gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.
@@ -78,17 +78,35 @@ Mantente al día con el mundo del hacking a través de noticias e información e
 **Últimos Anuncios**\
 Mantente informado sobre los nuevos bug bounties que se lanzan y las actualizaciones cruciales de la plataforma
 
-**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo!
+**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) ¡y comienza a colaborar con los mejores hackers hoy!
 
 ***
 
 ### [Pentest-Tools.com](https://pentest-tools.com/) - El kit de herramientas esencial para pruebas de penetración
 
-<figure><img src=".gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 **Configuración instantáneamente disponible para evaluación de vulnerabilidades y pruebas de penetración**. Ejecuta un pentest completo desde cualquier lugar con más de 20 herramientas y funciones que van desde la recolección de información hasta la generación de informes. No reemplazamos a los pentesters, desarrollamos herramientas personalizadas, módulos de detección y explotación para darles más tiempo para profundizar, obtener shells y divertirse.
 
 {% embed url="https://pentest-tools.com/" %}
+
+***
+
+### [SerpApi](https://serpapi.com/)
+
+<figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+SerpApi ofrece APIs en tiempo real rápidas y fáciles para **acceder a los resultados de los motores de búsqueda**. Raspan los motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
+
+Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para raspar diferentes motores de búsqueda, incluidos Google, Bing, Baidu, Yahoo, Yandex, y más.
+
+A diferencia de otros proveedores, SerpApi no solo raspa resultados orgánicos. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
+
+Los clientes actuales de SerpApi incluyen Apple, Shopify y GrubHub.
+
+Para obtener más información, consulta su [blog](https://serpapi.com/blog/)**,** o prueba un ejemplo en su [**playground**](https://serpapi.com/playground)**.**
+
+Puedes **crear una cuenta gratuita** [**aquí**](https://serpapi.com/users/sign\_up)**.**
 
 ***
 
@@ -104,17 +122,16 @@ Mantente informado sobre los nuevos bug bounties que se lanzan y las actualizaci
 
 <figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** a las empresas **en todo el mundo** contra las últimas amenazas de ciberseguridad mediante la provisión de servicios de seguridad ofensiva con un enfoque **moderno**.
+[**WebSec**](https://websec.nl) es una empresa de ciberseguridad profesional con sede en **Ámsterdam** que ayuda a **proteger** empresas **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de **seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad integral, lo que significa que hacen de todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
+WebSec es una empresa de seguridad integral, lo que significa que hacen de todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Conciencia, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Subcontratación de Expertos en Seguridad y mucho más.
 
 Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta el punto de que **garantizan los mejores resultados de calidad**, lo que se indica en su sitio web "**¡Si no podemos hackearlo, no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
 Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks**.
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
-
-## Licencia y Descargo de Responsabilidad
+## Licencia y Descargo de responsabilidad
 
 **Revísalos en:**
 

@@ -14,7 +14,7 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
@@ -24,9 +24,9 @@ Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_mediu
 
 ## Artefactos de Navegadores <a href="#id-3def" id="id-3def"></a>
 
-Los artefactos del navegador incluyen varios tipos de datos almacenados por los navegadores web, como historial de navegación, marcadores y datos de caché. Estos artefactos se guardan en carpetas específicas dentro del sistema operativo, difiriendo en ubicación y nombre entre navegadores, pero generalmente almacenando tipos de datos similares.
+Los artefactos del navegador incluyen varios tipos de datos almacenados por los navegadores web, como el historial de navegación, marcadores y datos de caché. Estos artefactos se guardan en carpetas específicas dentro del sistema operativo, con ubicaciones y nombres diferentes en cada navegador, pero generalmente almacenando tipos de datos similares.
 
-Aquí tienes un resumen de los artefactos de navegador más comunes:
+Aquí tienes un resumen de los artefactos más comunes del navegador:
 
 * **Historial de Navegación**: Registra las visitas del usuario a sitios web, útil para identificar visitas a sitios maliciosos.
 * **Datos de Autocompletar**: Sugerencias basadas en búsquedas frecuentes, ofreciendo información cuando se combina con el historial de navegación.
@@ -37,13 +37,13 @@ Aquí tienes un resumen de los artefactos de navegador más comunes:
 * **Favicons**: Iconos asociados con sitios web, que aparecen en pestañas y marcadores, útiles para obtener información adicional sobre las visitas del usuario.
 * **Sesiones del Navegador**: Datos relacionados con las sesiones del navegador abiertas.
 * **Descargas**: Registros de archivos descargados a través del navegador.
-* **Datos de Formularios**: Información ingresada en formularios web, guardada para sugerencias de autocompletar en el futuro.
+* **Datos de Formularios**: Información introducida en formularios web, guardada para sugerencias de autocompletar en el futuro.
 * **Miniaturas**: Imágenes de vista previa de sitios web.
 * **Custom Dictionary.txt**: Palabras añadidas por el usuario al diccionario del navegador.
 
 ## Firefox
 
-Firefox organiza los datos del usuario dentro de perfiles, almacenados en ubicaciones específicas según el sistema operativo:
+Firefox organiza los datos del usuario en perfiles, almacenados en ubicaciones específicas según el sistema operativo:
 
 * **Linux**: `~/.mozilla/firefox/`
 * **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
@@ -63,11 +63,11 @@ Dentro de cada carpeta de perfil, puedes encontrar varios archivos importantes:
 * **cookies.sqlite**: Almacenamiento de cookies, con [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) disponible para inspección en Windows.
 * **cache2/entries** o **startupCache**: Datos de caché, accesibles a través de herramientas como [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html).
 * **favicons.sqlite**: Almacena favicons.
-* **prefs.js**: Configuraciones y preferencias del usuario.
+* **prefs.js**: Ajustes y preferencias del usuario.
 * **downloads.sqlite**: Base de datos de descargas antiguas, ahora integrada en places.sqlite.
 * **thumbnails**: Miniaturas de sitios web.
 * **logins.json**: Información de inicio de sesión encriptada.
-* **key4.db** o **key3.db**: Almacena claves de cifrado para proteger información sensible.
+* **key4.db** o **key3.db**: Almacena claves de cifrado para asegurar información sensible.
 
 Además, verificar la configuración de antiphishing del navegador se puede hacer buscando entradas `browser.safebrowsing` en `prefs.js`, indicando si las funciones de navegación segura están habilitadas o deshabilitadas.
 
@@ -150,8 +150,8 @@ Las URLs escritas y sus tiempos de uso se almacenan en el registro en `NTUSER.DA
 Microsoft Edge almacena datos de usuario en `%userprofile%\Appdata\Local\Packages`. Las rutas para varios tipos de datos son:
 
 * **Ruta del perfil**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
-* **Historial, cookies y descargas**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
-* **Configuraciones, marcadores y lista de lectura**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb`
+* **Historial, Cookies y Descargas**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
+* **Configuraciones, Marcadores y Lista de lectura**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb`
 * **Caché**: `C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC#!XXX\MicrosoftEdge\Cache`
 * **Últimas sesiones activas**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active`
 
@@ -183,11 +183,11 @@ Estas rutas y comandos son cruciales para acceder y comprender los datos de nave
 * [https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
 * **Libro: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
-¡Accede hoy mismo:
+Accede hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 

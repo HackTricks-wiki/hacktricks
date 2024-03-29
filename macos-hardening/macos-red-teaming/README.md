@@ -6,7 +6,7 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
@@ -29,11 +29,11 @@ Para el red teaming en entornos de MacOS, es muy recomendable tener cierto enten
 
 ### Usando MDM como C2
 
-Un MDM tendrá permiso para instalar, consultar o eliminar perfiles, instalar aplicaciones, crear cuentas de administrador locales, establecer una contraseña de firmware, cambiar la clave de FileVault...
+Un MDM tendrá permiso para instalar, consultar o eliminar perfiles, instalar aplicaciones, crear cuentas de administrador locales, establecer contraseña de firmware, cambiar la clave de FileVault...
 
 Para ejecutar tu propio MDM, necesitas **tu CSR firmado por un proveedor** que podrías intentar obtener en [**https://mdmcert.download/**](https://mdmcert.download/). Y para ejecutar tu propio MDM para dispositivos Apple, podrías usar [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-Sin embargo, para instalar una aplicación en un dispositivo inscrito, aún necesitas que esté firmada por una cuenta de desarrollador... sin embargo, al inscribirse en MDM, el **dispositivo agrega el certificado SSL del MDM como una CA de confianza**, por lo que ahora puedes firmar cualquier cosa.
+Sin embargo, para instalar una aplicación en un dispositivo inscrito, aún necesitas que esté firmada por una cuenta de desarrollador... sin embargo, al inscribirse en el MDM, el **dispositivo agrega el certificado SSL del MDM como una CA de confianza**, por lo que ahora puedes firmar cualquier cosa.
 
 Para inscribir el dispositivo en un MDM, necesitas instalar un archivo **`mobileconfig`** como root, que podría entregarse a través de un archivo **pkg** (podrías comprimirlo en zip y al descargarlo desde Safari se descomprimirá).
 
@@ -55,14 +55,14 @@ Además, después de encontrar credenciales adecuadas, podrías ser capaz de rea
 
 #### Autenticación de dispositivos JAMF
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 El binario **`jamf`** contenía el secreto para abrir el llavero que en el momento del descubrimiento estaba **compartido** entre todos y era: **`jk23ucnq91jfu9aj`**.\
 Además, jamf **persiste** como un **LaunchDaemon** en **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### Toma de control de dispositivos JAMF
 
-La **URL de JSS** (Servidor de Software JAMF) que usará **`jamf`** se encuentra en **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
+La **URL de JSS** (Servidor de Software Jamf) que usará **`jamf`** se encuentra en **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
 Este archivo básicamente contiene la URL:
 
 {% code overflow="wrap" %}
@@ -100,15 +100,15 @@ Con esta información, **crea una VM** con el **UUID de hardware robado** y con 
 
 <figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-También podrías monitorear la ubicación `/Library/Application Support/Jamf/tmp/` para los **scripts personalizados** que los administradores podrían querer ejecutar a través de Jamf, ya que son **colocados aquí, ejecutados y eliminados**. Estos scripts **podrían contener credenciales**.
+También podrías monitorear la ubicación `/Library/Application Support/Jamf/tmp/` en busca de los **scripts personalizados** que los administradores podrían querer ejecutar a través de Jamf, ya que son **colocados aquí, ejecutados y eliminados**. Estos scripts **podrían contener credenciales**.
 
-Sin embargo, las **credenciales** podrían ser pasadas a estos scripts como **parámetros**, por lo que necesitarías monitorear `ps aux | grep -i jamf` (sin siquiera ser root).
+Sin embargo, las **credenciales** podrían ser pasadas a estos scripts como **parámetros**, por lo que necesitarías monitorear `ps aux | grep -i jamf` (incluso sin ser root).
 
 El script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) puede escuchar la adición de nuevos archivos y nuevos argumentos de procesos.
 
 ### Acceso Remoto a macOS
 
-Y también sobre los **protocolos** de **red** **"especiales"** de **MacOS**:
+Y también sobre los **protocolos de red** "especiales" de **MacOS**:
 
 {% content-ref url="../macos-security-and-privilege-escalation/macos-protocols.md" %}
 [macos-protocols.md](../macos-security-and-privilege-escalation/macos-protocols.md)
@@ -116,7 +116,7 @@ Y también sobre los **protocolos** de **red** **"especiales"** de **MacOS**:
 
 ## Directorio Activo
 
-En algunas ocasiones te encontrarás con que el **ordenador MacOS está conectado a un AD**. En este escenario deberías intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra algo de **ayuda** en las siguientes páginas:
+En algunas ocasiones encontrarás que la **computadora MacOS está conectada a un AD**. En este escenario deberías intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra algo de **ayuda** en las siguientes páginas:
 
 {% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
 [pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
@@ -148,9 +148,9 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 
 Los tres tipos de usuarios de MacOS son:
 
-* **Usuarios locales** — Administrados por el servicio local de OpenDirectory, no están conectados de ninguna manera al Active Directory.
-* **Usuarios de red** — Usuarios volátiles de Active Directory que requieren una conexión al servidor DC para autenticarse.
-* **Usuarios móviles** — Usuarios de Active Directory con una copia de seguridad local de sus credenciales y archivos.
+* **Usuarios locales** — Gestionados por el servicio local de OpenDirectory, no están conectados de ninguna manera al Directorio Activo.
+* **Usuarios de red** — Usuarios volátiles del Directorio Activo que requieren una conexión al servidor DC para autenticarse.
+* **Usuarios móviles** — Usuarios del Directorio Activo con una copia de seguridad local de sus credenciales y archivos.
 
 La información local sobre usuarios y grupos se almacena en la carpeta _/var/db/dslocal/nodes/Default._\
 Por ejemplo, la información sobre el usuario llamado _mark_ se almacena en _/var/db/dslocal/nodes/Default/users/mark.plist_ y la información sobre el grupo _admin_ está en _/var/db/dslocal/nodes/Default/groups/admin.plist_.

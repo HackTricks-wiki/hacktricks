@@ -7,7 +7,7 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
@@ -21,15 +21,15 @@ Y node tiene algunos **parámetros** y **variables de entorno** que se pueden us
 
 ### Fusibles de Electron
 
-Estas técnicas se discutirán a continuación, pero en tiempos recientes Electron ha añadido varios **indicadores de seguridad para prevenirlos**. Estos son los [**Fusibles de Electron**](https://www.electronjs.org/docs/latest/tutorial/fuses) y estos son los utilizados para **prevenir** que las aplicaciones de Electron en macOS carguen **código arbitrario**:
+Estas técnicas se discutirán a continuación, pero en tiempos recientes Electron ha añadido varios **indicadores de seguridad para prevenirlos**. Estos son los [**Fusibles de Electron**](https://www.electronjs.org/docs/latest/tutorial/fuses) y estos son los que se utilizan para **evitar** que las aplicaciones de Electron en macOS carguen **código arbitrario**:
 
 * **`RunAsNode`**: Si está deshabilitado, evita el uso de la variable de entorno **`ELECTRON_RUN_AS_NODE`** para inyectar código.
-* **`EnableNodeCliInspectArguments`**: Si está deshabilitado, los parámetros como `--inspect`, `--inspect-brk` no serán respetados. Evitando de esta manera inyectar código.
-* **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será validado por macOS. **Previniendo** de esta manera la **inyección de código** al modificar el contenido de este archivo.
+* **`EnableNodeCliInspectArguments`**: Si está deshabilitado, los parámetros como `--inspect`, `--inspect-brk` no serán respetados. Evitando de esta manera la inyección de código.
+* **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el archivo **`asar`** cargado será **validado** por macOS. **Evitando** de esta manera la **inyección de código** al modificar el contenido de este archivo.
 * **`OnlyLoadAppFromAsar`**: Si está habilitado, en lugar de buscar para cargar en el siguiente orden: **`app.asar`**, **`app`** y finalmente **`default_app.asar`**. Solo verificará y usará app.asar, asegurando así que cuando se **combine** con el fusible **`embeddedAsarIntegrityValidation`** sea **imposible** cargar código no validado.
 * **`LoadBrowserProcessSpecificV8Snapshot`**: Si está habilitado, el proceso del navegador utiliza el archivo llamado `browser_v8_context_snapshot.bin` para su instantánea de V8.
 
-Otro fusible interesante que no prevendrá la inyección de código es:
+Otro fusible interesante que no evitará la inyección de código es:
 
 * **EnableCookieEncryption**: Si está habilitado, el almacenamiento de cookies en disco se cifra utilizando claves de criptografía a nivel de sistema operativo.
 
@@ -49,9 +49,9 @@ EnableEmbeddedAsarIntegrityValidation is Enabled
 OnlyLoadAppFromAsar is Enabled
 LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
-### Modificación de Fusibles de Electron
+### Modificación de los Fusibles de Electron
 
-Como mencionan en la [**documentación**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), la configuración de los **Fusibles de Electron** se encuentra dentro del **binario de Electron** que contiene en algún lugar la cadena **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Como se menciona en la [**documentación**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), la configuración de los **Fusibles de Electron** se encuentra dentro del **binario de Electron** que contiene en algún lugar la cadena **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
 En las aplicaciones de macOS, esto suele estar en `aplicacion.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
@@ -60,7 +60,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 ```
 Puedes cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la cadena anterior. Después de esta cadena, puedes ver en ASCII un número "0" o "1" que indica si cada fusible está deshabilitado o habilitado. Simplemente modifica el código hexadecimal (`0x30` es `0` y `0x31` es `1`) para **modificar los valores de los fusibles**.
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Ten en cuenta que si intentas **sobrescribir** el **binario del Marco de Electron** dentro de una aplicación con estos bytes modificados, la aplicación no se ejecutará.
 
@@ -72,12 +72,12 @@ Podrían existir **archivos JS/HTML externos** que una Aplicación Electron est�
 Sin embargo, actualmente existen 2 limitaciones:
 
 * Se necesita el permiso **`kTCCServiceSystemPolicyAppBundles`** para modificar una Aplicación, por lo que por defecto esto ya no es posible.
-* El archivo compilado **`asap`** generalmente tiene los fusibles **`embeddedAsarIntegrityValidation`** y **`onlyLoadAppFromAsar`** habilitados
+* El archivo compilado **`asap`** generalmente tiene los fusibles **`embeddedAsarIntegrityValidation`** `y` **`onlyLoadAppFromAsar`** `habilitados`
 
 Lo que hace que este camino de ataque sea más complicado (o imposible).
 {% endhint %}
 
-Ten en cuenta que es posible evadir el requisito de **`kTCCServiceSystemPolicyAppBundles`** copiando la aplicación a otro directorio (como **`/tmp`**), renombrando la carpeta **`app.app/Contents`** a **`app.app/NotCon`**, **modificando** el archivo **asar** con tu código **malicioso**, renombrándolo de nuevo a **`app.app/Contents`** y ejecutándolo.
+Ten en cuenta que es posible evadir el requisito de **`kTCCServiceSystemPolicyAppBundles`** copiando la aplicación a otro directorio (como **`/tmp`**), renombrando la carpeta **`app.app/Contents`** a **`app.app/NotCon`**, **modificando** el archivo **asar** con tu código **malicioso**, volviendo a renombrarlo a **`app.app/Contents`** y ejecutándolo.
 
 Puedes desempaquetar el código del archivo asar con:
 ```bash

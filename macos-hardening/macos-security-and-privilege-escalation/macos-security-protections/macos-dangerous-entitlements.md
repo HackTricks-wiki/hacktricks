@@ -10,7 +10,7 @@ Otras formas de apoyar a HackTricks:
 * Obtén [**artículos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
+* **Comparte tus trucos de hacking enviando PRs a los** repositorios de [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
 
 </details>
 
@@ -42,11 +42,11 @@ Las aplicaciones con el Entitlement de Herramienta de Depuración pueden llamar 
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Este entitlement permite **cargar frameworks, complementos o bibliotecas sin estar firmados por Apple o firmados con el mismo ID de equipo** que el ejecutable principal, por lo que un atacante podría abusar de alguna carga arbitraria de biblioteca para inyectar código. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
+Este entitlement permite **cargar frameworks, complementos o bibliotecas sin estar firmados por Apple o firmados con el mismo ID de equipo** que el ejecutable principal, por lo que un atacante podría abusar de alguna carga de biblioteca arbitraria para inyectar código. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`** pero **en lugar de deshabilitar directamente** la validación de biblioteca, permite al proceso **llamar a una llamada de sistema `csops` para deshabilitarla**.\
+Este entitlement es muy similar a **`com.apple.security.cs.disable-library-validation`** pero **en lugar de deshabilitar directamente** la validación de la biblioteca, permite al proceso **llamar a una llamada al sistema `csops` para deshabilitarla**.\
 Consulta [**esto para más información**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -55,7 +55,7 @@ Este entitlement permite **utilizar variables de entorno DYLD** que podrían usa
 
 ### `com.apple.private.tcc.manager` o `com.apple.rootless.storage`.`TCC`
 
-Según [**este blog**](https://objective-see.org/blog/blog\_0x4C.html) **y** [**este blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), estos entitlements permiten **modificar** la **base de datos TCC**.
+[**Según este blog**](https://objective-see.org/blog/blog\_0x4C.html) **y** [**este blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), estos entitlements permiten **modificar** la **base de datos TCC**.
 
 ### **`system.install.apple-software`** y **`system.install.apple-software.standar-user`**
 
@@ -79,11 +79,11 @@ POR HACER: No sé qué permite hacer esto
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-POR HACER: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo, ¡envía un PR por favor!
+POR HACER: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, ¡envía un PR por favor!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-POR HACER: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo, ¡envía un PR por favor!
+POR HACER: En [**este informe**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se menciona que esto podría usarse para** actualizar los contenidos protegidos por SSV después de un reinicio. Si sabes cómo hacerlo, ¡envía un PR por favor!
 
 ### `keychain-access-groups`
 
@@ -104,9 +104,9 @@ Proporciona permisos de **Acceso completo al disco**, uno de los permisos más a
 
 ### **`kTCCServiceAppleEvents`**
 
-Permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Al controlar otras aplicaciones, puede abusar de los permisos otorgados a esas otras aplicaciones.
+Permite que la aplicación envíe eventos a otras aplicaciones que se utilizan comúnmente para **automatizar tareas**. Al controlar otras aplicaciones, puede abusar de los permisos otorgados a estas otras aplicaciones.
 
-Como hacer que le pidan al usuario su contraseña:
+Como hacer que le pidan la contraseña al usuario:
 
 {% code overflow="wrap" %}
 ```bash
@@ -128,9 +128,9 @@ Permite **cambiar** el atributo **`NFSHomeDirectory`** de un usuario que cambia 
 
 Permite modificar archivos dentro de los paquetes de aplicaciones (dentro de app.app), lo cual está **desactivado por defecto**.
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-Es posible verificar quién tiene este acceso en _Configuración del Sistema_ > _Privacidad y Seguridad_ > _Gestión de Aplicaciones_.
+Es posible verificar quién tiene este acceso en _Configuración del Sistema_ > _Privacidad y Seguridad_ > _Gestión de Aplicaciones._
 
 ### `kTCCServiceAccessibility`
 
@@ -140,11 +140,11 @@ El proceso podrá **abusar de las funciones de accesibilidad de macOS**, lo que 
 
 ### `com.apple.security.cs.allow-jit`
 
-Este permiso permite **crear memoria que es escribible y ejecutable** al pasar la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
+Este permiso permite **crear memoria que es escribible y ejecutable** pasando la bandera `MAP_JIT` a la función del sistema `mmap()`. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Este permiso permite **anular o parchear código C**, usar el obsoleto **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro), o usar el marco **DVDPlayback**. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
+Este permiso permite **anular o parchear código C**, usar el **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro), o usar el framework **DVDPlayback**. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-unsigned-executable-memory).
 
 {% hint style="danger" %}
 Incluir este permiso expone tu aplicación a vulnerabilidades comunes en lenguajes de código no seguros en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
@@ -186,9 +186,9 @@ Permitir que el proceso **solicite todos los permisos de TCC**.
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>

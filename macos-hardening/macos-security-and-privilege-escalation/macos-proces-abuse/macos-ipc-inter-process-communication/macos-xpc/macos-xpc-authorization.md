@@ -18,7 +18,7 @@ Otras formas de apoyar a HackTricks:
 
 Apple también propone otra forma de autenticar si el proceso conectado tiene **permisos para llamar a un método XPC expuesto**.
 
-Cuando una aplicación necesita **ejecutar acciones como usuario privilegiado**, en lugar de ejecutar la aplicación como usuario privilegiado, generalmente instala como root un HelperTool como un servicio XPC que puede ser llamado desde la aplicación para realizar esas acciones. Sin embargo, la aplicación que llama al servicio debe tener suficiente autorización.
+Cuando una aplicación necesita **ejecutar acciones como usuario privilegiado**, en lugar de ejecutar la aplicación como usuario privilegiado, generalmente instala como root un HelperTool como un servicio XPC que podría ser llamado desde la aplicación para realizar esas acciones. Sin embargo, la aplicación que llama al servicio debe tener suficiente autorización.
 
 ### ShouldAcceptNewConnection siempre YES
 
@@ -184,7 +184,7 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Esto significa que al final de este proceso, los permisos declarados dentro de `commandInfo` se almacenarán en `/var/db/auth.db`. Observa cómo allí puedes encontrar para **cada método** que **requiera autenticación**, el **nombre del permiso** y el **`kCommandKeyAuthRightDefault`**. Este último **indica quién puede obtener este derecho**.
+Esto significa que al final de este proceso, los permisos declarados dentro de `commandInfo` se almacenarán en `/var/db/auth.db`. Observa cómo puedes encontrar para **cada método** que requiera autenticación, el **nombre del permiso** y el **`kCommandKeyAuthRightDefault`**. Este último **indica quién puede obtener este derecho**.
 
 Existen diferentes ámbitos para indicar quién puede acceder a un derecho. Algunos de ellos están definidos en [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h) (puedes encontrar [todos ellos aquí](https://www.dssw.co.uk/reference/authorization-rights/)), pero en resumen:
 
@@ -240,9 +240,9 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Ten en cuenta que para **verificar los requisitos para obtener el derecho** de llamar a ese método, la función `authorizationRightForCommand` simplemente verificará el objeto previamente comentado **`commandInfo`**. Luego, llamará a **`AuthorizationCopyRights`** para verificar **si tiene los derechos** para llamar a la función (nota que las banderas permiten la interacción con el usuario).
+Ten en cuenta que para **verificar los requisitos para obtener el derecho** de llamar a ese método, la función `authorizationRightForCommand` simplemente verificará el objeto comentado previamente **`commandInfo`**. Luego, llamará a **`AuthorizationCopyRights`** para verificar **si tiene los derechos** para llamar a la función (nota que las banderas permiten la interacción con el usuario).
 
-En este caso, para llamar a la función `readLicenseKeyAuthorization`, se define `kCommandKeyAuthRightDefault` como `@kAuthorizationRuleClassAllow`. Por lo tanto, **cualquiera puede llamarlo**.
+En este caso, para llamar a la función `readLicenseKeyAuthorization`, se define `kCommandKeyAuthRightDefault` como `@kAuthorizationRuleClassAllow`. Por lo tanto, **cualquiera puede llamarla**.
 
 ### Información de la base de datos
 
@@ -264,9 +264,9 @@ Puedes encontrar **todas las configuraciones de permisos** [**aquí**](https://w
 * Esta es la clave más directa. Si se establece en `false`, especifica que un usuario no necesita proporcionar autenticación para obtener este derecho.
 * Se utiliza en **combinación con una de las 2 opciones a continuación o indicando un grupo** al que el usuario debe pertenecer.
 2. **'allow-root': 'true'**
-* Si un usuario está operando como usuario root (que tiene permisos elevados) y esta clave se establece en `true`, el usuario root podría potencialmente obtener este derecho sin necesidad de más autenticación. Sin embargo, típicamente, llegar a un estado de usuario root ya requiere autenticación, por lo que no es un escenario de "sin autenticación" para la mayoría de los usuarios.
+* Si un usuario está operando como el usuario root (que tiene permisos elevados) y esta clave se establece en `true`, el usuario root podría potencialmente obtener este derecho sin necesidad de más autenticación. Sin embargo, típicamente, llegar a un estado de usuario root ya requiere autenticación, por lo que no es un escenario de "sin autenticación" para la mayoría de los usuarios.
 3. **'session-owner': 'true'**
-* Si se establece en `true`, el propietario de la sesión (el usuario actualmente conectado) obtendría automáticamente este derecho. Esto podría evitar la autenticación adicional si el usuario ya está conectado.
+* Si se establece en `true`, el propietario de la sesión (el usuario que ha iniciado sesión actualmente) obtendría automáticamente este derecho. Esto podría evitar la autenticación adicional si el usuario ya ha iniciado sesión.
 4. **'shared': 'true'**
 * Esta clave no otorga derechos sin autenticación. En cambio, si se establece en `true`, significa que una vez que el derecho ha sido autenticado, puede ser compartido entre varios procesos sin que cada uno necesite volver a autenticarse. Pero la concesión inicial del derecho seguiría requiriendo autenticación a menos que se combine con otras claves como `'authenticate-user': 'false'`.
 
@@ -283,11 +283,11 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 ```
 ## Reversión de Autorización
 
-### Verificación de Uso de EvenBetterAuthorization
+### Verificación de uso de EvenBetterAuthorization
 
-Si encuentras la función: **`[HelperTool checkAuthorization:command:]`** probablemente el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
+Si encuentras la función: **`[HelperTool checkAuthorization:command:]`** probablemente el proceso esté utilizando el esquema de autorización mencionado anteriormente:
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Entonces, si esta función está llamando a funciones como `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, está utilizando [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
@@ -299,11 +299,11 @@ Luego, necesitas encontrar el esquema de protocolo para poder establecer una com
 
 La función **`shouldAcceptNewConnection`** indica el protocolo que se está exportando:
 
-<figure><img src="../../../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 En este caso, es el mismo que en EvenBetterAuthorizationSample, [**verifica esta línea**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Conociendo el nombre del protocolo utilizado, es posible **volcar su definición de encabezado** con:
+Sabiendo el nombre del protocolo utilizado, es posible **volcar su definición de encabezado** con:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -317,7 +317,7 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-Por último, solo necesitamos conocer el **nombre del Servicio Mach expuesto** para establecer una comunicación con él. Hay varias formas de encontrarlo:
+Por último, solo necesitamos saber el **nombre del Servicio Mach expuesto** para establecer una comunicación con él. Hay varias formas de encontrarlo:
 
 * En el **`[HelperTool init]`** donde puedes ver el Servicio Mach que se está utilizando:
 
@@ -435,6 +435,6 @@ Otras formas de apoyar a HackTricks:
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>

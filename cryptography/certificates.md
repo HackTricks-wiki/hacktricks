@@ -2,19 +2,19 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
@@ -36,9 +36,9 @@ En los certificados x509, varios **campos** desempeñan roles críticos para gar
 
 * El **Número de Versión** indica la versión del formato x509.
 * El **Número de Serie** identifica de forma única el certificado dentro del sistema de una Autoridad de Certificación (CA), principalmente para el seguimiento de revocaciones.
-* El campo **Sujeto** representa al propietario del certificado, que puede ser una máquina, un individuo u una organización. Incluye una identificación detallada como:
+* El campo **Sujeto** representa al propietario del certificado, que puede ser una máquina, un individuo o una organización. Incluye una identificación detallada como:
 * **Nombre Común (CN)**: Dominios cubiertos por el certificado.
-* **País (C)**, **Localidad (L)**, **Estado o Provincia (ST, S, o P)**, **Organización (O)** y **Unidad Organizativa (OU)** proporcionan detalles geográficos y organizativos.
+* **País (C)**, **Localidad (L)**, **Estado o Provincia (ST, S o P)**, **Organización (O)** y **Unidad Organizativa (OU)** proporcionan detalles geográficos y organizativos.
 * El **Nombre Distinguido (DN)** encapsula la identificación completa del sujeto.
 * El **Emisor** detalla quién verificó y firmó el certificado, incluyendo subcampos similares al Sujeto para la CA.
 * El **Período de Validez** está marcado por marcas de tiempo de **No Antes** y **No Después**, asegurando que el certificado no se use antes o después de una fecha determinada.
@@ -47,8 +47,8 @@ En los certificados x509, varios **campos** desempeñan roles críticos para gar
 
 #### **Uso de Clave y Extensiones**
 
-* **Uso de Clave** identifica las aplicaciones criptográficas de la clave pública, como firma digital o cifrado de clave.
-* **Uso Extendido de Clave** reduce aún más los casos de uso del certificado, por ejemplo, para autenticación de servidor TLS.
+* El **Uso de Clave** identifica las aplicaciones criptográficas de la clave pública, como firma digital o cifrado de clave.
+* El **Uso Extendido de Clave** reduce aún más los casos de uso del certificado, por ejemplo, para la autenticación del servidor TLS.
 * **Nombre Alternativo del Sujeto** y **Restricción Básica** definen nombres de host adicionales cubiertos por el certificado y si es un certificado de CA o de entidad final, respectivamente.
 * Identificadores como **Identificador de Clave del Sujeto** e **Identificador de Clave de Autoridad** garantizan la singularidad y trazabilidad de las claves.
 * **Acceso a la Información de la Autoridad** y **Puntos de Distribución de la Lista de Revocación (CRL)** proporcionan rutas para verificar la CA emisora y verificar el estado de revocación del certificado.
@@ -74,7 +74,7 @@ print(f"Issuer: {issuer}")
 print(f"Subject: {subject}")
 print(f"Public Key: {public_key}")
 ```
-### **Diferencia entre Puntos de Distribución OCSP y CRL**
+### **Diferencia entre los Puntos de Distribución OCSP y CRL**
 
 **OCSP** (**RFC 2560**) implica que un cliente y un respondedor trabajen juntos para verificar si un certificado de clave pública digital ha sido revocado, sin necesidad de descargar la **CRL** completa. Este método es más eficiente que la tradicional **CRL**, que proporciona una lista de números de serie de certificados revocados pero requiere la descarga de un archivo potencialmente grande. Las CRL pueden incluir hasta 512 entradas. Más detalles están disponibles [aquí](https://www.arubanetworks.com/techdocs/ArubaOS%206\_3\_1\_Web\_Help/Content/ArubaFrameStyles/CertRevocation/About\_OCSP\_and\_CRL.htm).
 
@@ -88,11 +88,11 @@ La Transparencia de Certificados ayuda a combatir las amenazas relacionadas con 
 
 #### **Registros de Certificados**
 
-Los registros de certificados son registros públicamente auditables y de solo anexión de certificados, mantenidos por servicios de red. Estos registros proporcionan pruebas criptográficas con fines de auditoría. Tanto las autoridades de emisión como el público pueden enviar certificados a estos registros o consultarlos para su verificación. Aunque el número exacto de servidores de registro no está fijo, se espera que sea inferior a mil a nivel mundial. Estos servidores pueden ser gestionados de forma independiente por Autoridades de Certificación, proveedores de servicios de Internet o cualquier entidad interesada.
+Los registros de certificados son registros públicamente auditables y de solo adición de certificados, mantenidos por servicios de red. Estos registros proporcionan pruebas criptográficas con fines de auditoría. Tanto las autoridades de emisión como el público pueden enviar certificados a estos registros o consultarlos para su verificación. Aunque el número exacto de servidores de registro no está fijo, se espera que sea inferior a mil a nivel mundial. Estos servidores pueden ser gestionados de forma independiente por Autoridades de Certificación, proveedores de servicios de Internet o cualquier entidad interesada.
 
 #### **Consulta**
 
-Para explorar los registros de Transparencia de Certificados de cualquier dominio, visita [https://crt.sh/](https://crt.sh).
+Para explorar los registros de Transparencia de Certificados para cualquier dominio, visita [https://crt.sh/](https://crt.sh).
 
 ## **Formatos**
 
@@ -158,6 +158,14 @@ openssl pkcs12 -in certificatename.pfx -out certificatename.pem
 openssl pkcs12 -in certificatename.pfx -nocerts -nodes -out certificatename.pem
 ```
 2. Convertir PEM a PKCS8
+
+Para convertir un archivo PEM a formato PKCS8, puedes utilizar la herramienta OpenSSL con el siguiente comando:
+
+```bash
+openssl pkcs8 -topk8 -inform PEM -outform DER -in archivo.pem -out archivo.pk8 -nocrypt
+```
+
+Esto convertirá el archivo PEM a formato PKCS8 y lo guardará como archivo.pk8 en formato DER.
 ```bash
 openSSL pkcs8 -in certificatename.pem -topk8 -nocrypt -out certificatename.pk8
 ```
@@ -172,23 +180,23 @@ openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certif
 ```
 ***
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas** del mundo.\
-Obtenga acceso hoy:
+¡Obtenga acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
-<summary><strong>Aprenda hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprenda hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtenga el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubra [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtenga [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síganos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Comparta sus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

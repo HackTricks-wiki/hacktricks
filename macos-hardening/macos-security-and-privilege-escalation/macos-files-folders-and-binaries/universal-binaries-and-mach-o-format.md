@@ -7,8 +7,8 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) de github.
 
@@ -84,7 +84,7 @@ Como estarás pensando, generalmente un binario universal compilado para 2 arqui
 
 ## **Encabezado Mach-O**
 
-El encabezado contiene información básica sobre el archivo, como bytes mágicos para identificarlo como un archivo Mach-O e información sobre la arquitectura objetivo. Puedes encontrarlo en: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+El encabezado contiene información básica sobre el archivo, como bytes mágicos para identificarlo como un archivo Mach-O e información sobre la arquitectura de destino. Puedes encontrarlo en: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -114,7 +114,7 @@ uint32_t	reserved;	/* reserved */
 **Tipos de archivos**:
 
 * MH\_EXECUTE (0x2): Ejecutable estándar Mach-O
-* MH\_DYLIB (0x6): Una biblioteca enlazada dinámicamente Mach-O (es decir, .dylib)
+* MH\_DYLIB (0x6): Una biblioteca dinámica Mach-O (es decir, .dylib)
 * MH\_BUNDLE (0x8): Un paquete Mach-O (es decir, .bundle)
 ```bash
 # Checking the mac header of a binary
@@ -143,7 +143,7 @@ Hay alrededor de **50 tipos diferentes de comandos de carga** que el sistema man
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-Básicamente, este tipo de Comando de Carga define **cómo cargar los segmentos \_\_TEXT** (código ejecutable) **y \_\_DATA** (datos para el proceso) **según los desplazamientos indicados en la sección de Datos** cuando se ejecuta el binario.
+Básicamente, este tipo de Comando de Carga define **cómo cargar los segmentos \_\_TEXT** (código ejecutable) **y \_\_DATA** (datos para el proceso) **de acuerdo con los desplazamientos indicados en la sección de Datos** cuando se ejecuta el binario.
 {% endhint %}
 
 Estos comandos **definen segmentos** que se **mapean** en el **espacio de memoria virtual** de un proceso cuando se ejecuta.
@@ -194,17 +194,17 @@ Ejemplo de **encabezado de sección**:
 
 <figure><img src="../../../.gitbook/assets/image (6) (2).png" alt=""><figcaption></figcaption></figure>
 
-Si **sumas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+Si **sumas** el **desplazamiento de la sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener **información de encabezados** desde la **línea de comandos** con:
 ```bash
 otool -lv /bin/ls
 ```
-Segmentos comunes cargados por este cmd:
+Segmentos comunes cargados por este comando:
 
-* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
+* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no pueda ser leída, escrita o ejecutada**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
 * Esta asignación es importante para **mitigar vulnerabilidades de referencia nula de puntero**.
 * **`__TEXT`**: Contiene **código ejecutable** con permisos de **lectura** y **ejecución** (no escritura)**.** Secciones comunes de este segmento:
 * `__text`: Código binario compilado

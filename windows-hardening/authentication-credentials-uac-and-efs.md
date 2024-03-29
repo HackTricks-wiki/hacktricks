@@ -6,17 +6,17 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén [**artículos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las **herramientas comunitarias más avanzadas** del mundo.\
 ¡Accede hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -25,8 +25,8 @@ Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_mediu
 
 Una lista blanca de aplicaciones es una lista de aplicaciones de software aprobadas o ejecutables que se permiten estar presentes y ejecutarse en un sistema. El objetivo es proteger el entorno de malware dañino y software no aprobado que no se alinea con las necesidades comerciales específicas de una organización.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) es la solución de **lista blanca de aplicaciones** de Microsoft y brinda a los administradores del sistema control sobre **qué aplicaciones y archivos pueden ejecutar los usuarios**. Proporciona **control granular** sobre ejecutables, scripts, archivos de instalación de Windows, DLL, aplicaciones empaquetadas e instaladores de aplicaciones empaquetadas.\
-Es común que las organizaciones **bloqueen cmd.exe y PowerShell.exe** y el acceso de escritura a ciertos directorios, **pero todo esto puede ser eludido**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) es la **solución de lista blanca de aplicaciones** de Microsoft y brinda a los administradores del sistema control sobre **qué aplicaciones y archivos pueden ejecutar los usuarios**. Proporciona **control granular** sobre ejecutables, scripts, archivos de instalación de Windows, DLL, aplicaciones empaquetadas e instaladores de aplicaciones empaquetadas.\
+Es común que las organizaciones **bloqueen cmd.exe y PowerShell.exe** y el acceso de escritura a ciertos directorios, **pero todo esto se puede evadir**.
 
 ### Verificación
 
@@ -45,7 +45,7 @@ Este camino de registro contiene las configuraciones y políticas aplicadas por 
 
 ### Bypass
 
-* Carpetas **escribibles** útiles para evadir la Política de AppLocker: Si AppLocker permite ejecutar cualquier cosa dentro de `C:\Windows\System32` o `C:\Windows`, hay **carpetas escribibles** que puedes usar para **evadir esto**.
+* Carpetas **escribibles** útiles para evitar la Política de AppLocker: Si AppLocker permite ejecutar cualquier cosa dentro de `C:\Windows\System32` o `C:\Windows`, hay carpetas **escribibles** que puedes usar para **evitar esto**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -56,7 +56,7 @@ C:\windows\tracing
 * Las reglas **mal escritas también podrían ser evadidas**.
 * Por ejemplo, con la regla **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puedes crear una **carpeta llamada `allowed`** en cualquier lugar y será permitida.
 * Las organizaciones a menudo se centran en **bloquear el ejecutable `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, pero olvidan los **otros** [**ubicaciones ejecutables de PowerShell**](https://www.powershelladmin.com/wiki/PowerShell\_Executables\_File\_System\_Locations) como `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
-* La **aplicación de DLL muy raramente está habilitada** debido a la carga adicional que puede poner en un sistema y la cantidad de pruebas requeridas para garantizar que nada se rompa. Por lo tanto, usar **DLLs como puertas traseras ayudará a evadir AppLocker**.
+* La **aplicación de DLL muy raramente está habilitada** debido a la carga adicional que puede poner en un sistema, y la cantidad de pruebas requeridas para asegurar que nada se rompa. Por lo tanto, usar **DLLs como puertas traseras ayudará a evadir AppLocker**.
 * Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **ejecutar código Powershell** en cualquier proceso y evadir AppLocker. Para más información, consulta: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Almacenamiento de Credenciales
@@ -71,24 +71,24 @@ Las **credenciales** (hasheadas) se **guardan** en la **memoria** de este subsis
 **LSA** administra la **política de seguridad** local (política de contraseñas, permisos de usuarios...), **autenticación**, **tokens de acceso**...\
 LSA será el encargado de **verificar** las credenciales proporcionadas dentro del archivo **SAM** (para un inicio de sesión local) y **comunicarse** con el **controlador de dominio** para autenticar a un usuario de dominio.
 
-Las **credenciales** se **guardan** dentro del **proceso LSASS**: tickets Kerberos, hashes NT y LM, contraseñas fácilmente descifrables.
+Las **credenciales** se **guardan** dentro del **proceso LSASS**: tickets de Kerberos, hashes NT y LM, contraseñas fácilmente descifrables.
 
 ### Secretos de LSA
 
 LSA podría guardar en disco algunas credenciales:
 
-* Contraseña de la cuenta de equipo del Directorio Activo (controlador de dominio inaccesible).
+* Contraseña de la cuenta de equipo del Active Directory (controlador de dominio inaccesible).
 * Contraseñas de las cuentas de servicios de Windows.
 * Contraseñas de tareas programadas.
-* Más (contraseña de aplicaciones IIS...).
+* Más (contraseña de aplicaciones de IIS...).
 
 ### NTDS.dit
 
-Es la base de datos del Directorio Activo. Solo está presente en los Controladores de Dominio.
+Es la base de datos del Active Directory. Solo está presente en los Controladores de Dominio.
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft\_Defender) es un Antivirus disponible en Windows 10 y Windows 11, y en versiones de Windows Server. **Bloquea** herramientas comunes de pentesting como **`WinPEAS`**. Sin embargo, existen formas de **evadir estas protecciones**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft\_Defender) es un Antivirus que está disponible en Windows 10 y Windows 11, y en versiones de Windows Server. **Bloquea** herramientas comunes de pentesting como **`WinPEAS`**. Sin embargo, existen formas de **evadir estas protecciones**.
 
 ### Verificación
 
@@ -161,7 +161,7 @@ Microsoft desarrolló las **Cuentas de Servicio Administradas por Grupo (gMSA)**
 
 - **Gestión Automática de Contraseñas**: Las gMSAs utilizan una contraseña compleja de 240 caracteres que cambia automáticamente según la política del dominio o del equipo. Este proceso es manejado por el Servicio de Distribución de Claves (KDC) de Microsoft, eliminando la necesidad de actualizaciones manuales de contraseñas.
 - **Seguridad Mejorada**: Estas cuentas son inmunes a bloqueos y no se pueden utilizar para inicios de sesión interactivos, mejorando su seguridad.
-- **Soporte para Múltiples Hosts**: Las gMSAs se pueden compartir en varios hosts, lo que las hace ideales para servicios que se ejecutan en múltiples servidores.
+- **Soporte para Múltiples Hosts**: Las gMSAs pueden compartirse en varios hosts, lo que las hace ideales para servicios que se ejecutan en múltiples servidores.
 - **Capacidad de Tareas Programadas**: A diferencia de las cuentas de servicio administradas, las gMSAs admiten la ejecución de tareas programadas.
 - **Gestión Simplificada de SPN**: El sistema actualiza automáticamente el Nombre Principal de Servicio (SPN) cuando hay cambios en los detalles de sAMaccount del equipo o en el nombre DNS, simplificando la gestión de SPN.
 
@@ -187,14 +187,14 @@ La **Solución de Contraseña de Administrador Local (LAPS)**, disponible para d
 
 ## Modo de Lenguaje Restringido de PS
 
-El [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) de PowerShell **bloquea muchas de las características** necesarias para utilizar PowerShell de manera efectiva, como bloquear objetos COM, permitir solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
+PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para utilizar PowerShell de manera efectiva, como bloquear objetos COM, permitir solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
 
 ### **Verificar**
 ```powershell
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
-### Salto de autenticación
+### Salto de restricciones
 ```powershell
 #Easy bypass
 Powershell -version 2
@@ -214,7 +214,7 @@ Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/
 
 ## Política de Ejecución de PS
 
-Por defecto está configurada como **restrictiva.** Principales formas de evadir esta política:
+Por defecto está configurada como **restringida.** Principales formas de evadir esta política:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -234,11 +234,13 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-## Interfaz de proveedor de soporte de seguridad (SSPI)
+Puedes encontrar más [aquí](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+
+## Interfaz de Proveedor de Soporte de Seguridad (SSPI)
 
 Es la API que se puede utilizar para autenticar usuarios.
 
-El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que desean comunicarse. El método preferido para esto es Kerberos. Luego, el SSPI negociará qué protocolo de autenticación se utilizará, estos protocolos de autenticación se llaman Proveedor de Soporte de Seguridad (SSP), se encuentran dentro de cada máquina con Windows en forma de una DLL y ambas máquinas deben admitir el mismo para poder comunicarse.
+El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que desean comunicarse. El método preferido para esto es Kerberos. Luego, el SSPI negociará qué protocolo de autenticación se utilizará, estos protocolos de autenticación se llaman Proveedor de Soporte de Seguridad (SSP), se encuentran dentro de cada máquina Windows en forma de una DLL y ambas máquinas deben admitir el mismo para poder comunicarse.
 
 ### Principales SSPs
 
@@ -255,19 +257,19 @@ El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que 
 
 #### La negociación podría ofrecer varios métodos o solo uno.
 
-## UAC - Control de cuentas de usuario
+## UAC - Control de Cuenta de Usuario
 
-[Control de cuentas de usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que habilita una **solicitud de consentimiento para actividades elevadas**.
+[Control de Cuenta de Usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que habilita una **solicitud de consentimiento para actividades elevadas**.
 
 {% content-ref url="windows-security-controls/uac-user-account-control.md" %}
 [uac-user-account-control.md](windows-security-controls/uac-user-account-control.md)
 {% endcontent-ref %}
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
-¡Obtén acceso hoy:
+Obtén acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
