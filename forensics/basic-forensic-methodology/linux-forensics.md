@@ -223,7 +223,7 @@ Get Access Today:
 
 ## Recover Deleted Running Binaries
 
-Imagina a process taht was executed from /tmp/exec and deleted. It's possible to extract it
+Imagine a process that was executed from /tmp/exec and then deleted. It's possible to extract it
 
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
@@ -251,7 +251,7 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 
 ### Services
 
-Paths where a malware could be isntalled as a service:
+Paths where a malware could be installed as a service:
 
 * **/etc/inittab**: Calls initialization scripts like rc.sysinit, directing further to startup scripts.
 * **/etc/rc.d/** and **/etc/rc.boot/**: Contain scripts for service startup, the latter being found in older Linux versions.
