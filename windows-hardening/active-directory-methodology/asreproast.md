@@ -110,7 +110,7 @@ ASRepCatcher relay -dc $DC_IP
 ASRepCatcher relay -dc $DC_IP --disable-spoofing
 
 # Passive listening of AS-REP packets, no packet alteration
-ASrepCatcher listen
+ASRepCatcher listen
 ```
 
 
