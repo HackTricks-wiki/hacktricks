@@ -44,7 +44,7 @@ With a **multimeter** and the device powered off:
 
 You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
 
-With a logic analyzer:
+In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires. 
 
 ## Identifying the UART Baud Rate
 
@@ -53,6 +53,30 @@ The easiest way to identify the correct baud rate is to look at the **TX pin’s
 {% hint style="danger" %}
 It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
 {% endhint %}
+
+# CP210X UART to TTY Adapter 
+
+The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target. 
+
+Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used. 
+
+To list the devices connected to Linux/MacOS systems:
+```
+ls /dev/
+```
+
+For basic interaction with the UART interface, use the following command:
+```
+picocom /dev/<adapter> --baud <baudrate>
+```
+
+For minicom, use the following command to configure it:
+```
+minicom -s
+```
+Configure the settings such as baudrate and device name in the `Serial port setup` option. 
+
+After configuration, use the command `minicom` to start get the UART Console.
 
 # Bus Pirate
 
