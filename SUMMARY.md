@@ -370,6 +370,7 @@
   * [Buckets](network-services-pentesting/pentesting-web/buckets/README.md)
     * [Firebase Database](network-services-pentesting/pentesting-web/buckets/firebase-database.md)
   * [CGI](network-services-pentesting/pentesting-web/cgi.md)
+  * [Django](network-services-pentesting/pentesting-web/django.md)
   * [DotNetNuke (DNN)](network-services-pentesting/pentesting-web/dotnetnuke-dnn.md)
   * [Drupal](network-services-pentesting/pentesting-web/drupal.md)
   * [Electron Desktop Apps](network-services-pentesting/pentesting-web/electron-desktop-apps/README.md)
