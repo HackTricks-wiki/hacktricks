@@ -78,7 +78,7 @@ Configure the settings such as baudrate and device name in the `Serial port setu
 
 After configuration, use the command `minicom` to start get the UART Console.
 
-# UART Via Arduino UNO R3 (Remoable Atmel 328p Chip Boards)
+# UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
 
 Incase UART Serial to USB adapters are not available, Arduino UNO R3 can be used with a quick hack. Since Arduino UNO R3 is usually available anywhere, this can save a lot of time. 
 
