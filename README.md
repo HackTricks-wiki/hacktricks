@@ -134,7 +134,7 @@ In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
 ## License & Disclaimer
 
-**Check them in:**
+Check them in:
 
 {% content-ref url="welcome/hacktricks-values-and-faq.md" %}
 [hacktricks-values-and-faq.md](welcome/hacktricks-values-and-faq.md)
