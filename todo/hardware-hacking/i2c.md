@@ -1,4 +1,4 @@
-
+# I2C
 
 <details>
 
@@ -9,17 +9,12 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
 
-
-
-
-
-
-# Bus Pirate
+## Bus Pirate
 
 To test a Bus Pirate is working, connect +5V with VPU and 3.3V with ADC and access the bus pirate (Using Tera Term for example) and use the command `~`:
 
@@ -66,11 +61,11 @@ As you can see in the previous command line it said that it found 0 errors. This
 
 To connect with the bus pirate you can follow the docs:
 
-![](<../../.gitbook/assets/image (307) (2).png>)
+![](<../../.gitbook/assets/image (481).png>)
 
 In this case I'm going to connect to an EPROM: ATMEL901 24C256 PU27:
 
-![](<../../.gitbook/assets/image (465) (2) (1).png>)
+![](<../../.gitbook/assets/image (961).png>)
 
 To talk with bus pirate I used Tera Term connected to the pirate bus COM port with a Setup --> Serial Port --> Speed of 115200.\
 In the following communication you can find how to prepare the bus pirate to talk I2C and how to write and read from the memory (Comments appear using "#", don't expect that part in the communication):
@@ -174,11 +169,11 @@ READ: 0x42  ACK 0x42  ACK 0x42  ACK 0x20  ACK 0x48  ACK 0x69  ACK 0x20  ACK 0x44
 NACK
 ```
 
-## Sniffer
+### Sniffer
 
 In this scenario we are going to sniff the I2C communication between the arduino and the previous EPROM, you just need to communicate both devices and then connect the bus pirate to the SCL, SDA and GND pins:
 
-![](<../../.gitbook/assets/image (201) (2) (1).png>)
+![](<../../.gitbook/assets/image (163).png>)
 
 ```bash
 I2C>m
@@ -226,7 +221,6 @@ Any key to exit
 [0xA0+0x00+0x69+0x41+0x41+0x41+0x20+0x48+0x69+0x20+0x44+0x72+0x65+0x67+0x21+0x20+0x41+0x41+0x41+0x00+]
 ```
 
-
 <details>
 
 <summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
@@ -236,9 +230,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
-
-

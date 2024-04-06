@@ -55,7 +55,7 @@ More info and PoC in:
 
 By default an access via **SSH used to have "Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
 
-![](<../../../../../.gitbook/assets/image (569).png>)
+![](<../../../../../.gitbook/assets/image (1074).png>)
 
 Here you can find examples of how some **malwares have been able to bypass this protection**:
 
@@ -91,7 +91,7 @@ For more info about Apple Scripts check:
 
 For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (978).png" alt=""><figcaption></figcaption></figure>
 
 #### Over iTerm
 
@@ -170,7 +170,7 @@ $> ls ~/Documents
 
 Notes had access to TCC protected locations but when a note is created this is **created in a non-protected location**. So, you could ask notes to copy a protected file in a noe (so in a non-protected location) and then access the file:
 
-<figure><img src="../../../../../.gitbook/assets/image (6) (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (473).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-30782 - Translocation
 
@@ -530,17 +530,17 @@ The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was
 
 In several occasions files will store sensitive information like emails, phone numbers, messages... in non protected locations (which count as a vulnerability in Apple).
 
-<figure><img src="../../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (471).png" alt=""><figcaption></figcaption></figure>
 
 ## Synthetic Clicks
 
 This doesn't work anymore, but it [**did in the past**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (26).png" alt=""><figcaption></figcaption></figure>
 
 Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS\_v2\_Wardle.pdf):
 
-<figure><img src="../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (27).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Reference
 

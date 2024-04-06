@@ -9,7 +9,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -154,7 +154,7 @@ The plugin `banners.Banners` can be used in **vol3 to try to find linux banners*
 
 ## Hashes/Passwords
 
-Extract SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) and [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs.md#lsa-secrets).
+Extract SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) and [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -806,14 +806,14 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
 
-The **Master Boot Record (MBR)** plays a crucial role in managing the logical partitions of a storage medium, which are structured with different [file systems](https://en.wikipedia.org/wiki/File_system). It not only holds partition layout information but also contains executable code acting as a boot loader. This boot loader either directly initiates the OS's second-stage loading process (see [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) or works in harmony with the [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) of each partition. For in-depth knowledge, refer to the [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).
+The **Master Boot Record (MBR)** plays a crucial role in managing the logical partitions of a storage medium, which are structured with different [file systems](https://en.wikipedia.org/wiki/File\_system). It not only holds partition layout information but also contains executable code acting as a boot loader. This boot loader either directly initiates the OS's second-stage loading process (see [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) or works in harmony with the [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) of each partition. For in-depth knowledge, refer to the [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
 ## References
+
 * [https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
 * [https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
 * [https://or10nlabs.tech/cgi-sys/suspendedpage.cgi](https://or10nlabs.tech/cgi-sys/suspendedpage.cgi)
-* [https://www.aldeid.com/wiki/Windows-userassist-keys](https://www.aldeid.com/wiki/Windows-userassist-keys)
-​* [https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+* [https://www.aldeid.com/wiki/Windows-userassist-keys](https://www.aldeid.com/wiki/Windows-userassist-keys) ​\* [https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
 * [https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
@@ -831,7 +831,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>

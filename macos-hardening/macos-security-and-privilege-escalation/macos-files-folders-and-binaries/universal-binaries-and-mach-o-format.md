@@ -24,7 +24,7 @@ These binaries follows the **Mach-O structure** which is basically compased of:
 * Load Commands
 * Data
 
-![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../.gitbook/assets/image (559).png>)
+![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../.gitbook/assets/image (467).png>)
 
 ## Fat Header
 
@@ -78,7 +78,7 @@ fat_magic FAT_MAGIC
 
 or using the [Mach-O View](https://sourceforge.net/projects/machoview/) tool:
 
-<figure><img src="../../../.gitbook/assets/image (5) (1) (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1091).png" alt=""><figcaption></figcaption></figure>
 
 As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
 
@@ -129,7 +129,7 @@ MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DY
 
 Or using [Mach-O View](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (4) (1) (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1130).png" alt=""><figcaption></figcaption></figure>
 
 ## **Mach-O Load commands**
 
@@ -177,7 +177,7 @@ In the header first you find the **segment header**:
 
 Example of segment header:
 
-<figure><img src="../../../.gitbook/assets/image (2) (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1123).png" alt=""><figcaption></figcaption></figure>
 
 This header defines the **number of sections whose headers appear after** it:
 
@@ -200,11 +200,11 @@ struct section_64 { /* for 64-bit architectures */
 
 Example of **section header**:
 
-<figure><img src="../../../.gitbook/assets/image (6) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1105).png" alt=""><figcaption></figcaption></figure>
 
 If you **add** the **section offset** (0x37DC) + the **offset** where the **arch starts**, in this case `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (698).png" alt=""><figcaption></figcaption></figure>
 
 It's also possible to get **headers information** from the **command line** with:
 
@@ -262,7 +262,7 @@ struct dylib {
 };
 ```
 
-![](<../../../.gitbook/assets/image (558).png>)
+![](<../../../.gitbook/assets/image (483).png>)
 
 You could also get this info from the cli with:
 
@@ -303,7 +303,7 @@ This includes:
 
 To check it you could use the [**Mach-O View**](https://sourceforge.net/projects/machoview/) tool:
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1117).png" alt=""><figcaption></figcaption></figure>
 
 Or from the cli:
 

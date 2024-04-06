@@ -9,14 +9,14 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
 
 ## Sandbox loading process
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (898).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 In the previous image it's possible to observe **how the sandbox will be loaded** when an application with the entitlement **`com.apple.security.app-sandbox`** is run.
 
@@ -77,7 +77,7 @@ If from then sandbox process you are able to **compromise other processes** runn
 [**This research**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) discovered 2 ways to bypass the Sandbox. Because the sandbox is applied from userland when the **libSystem** library is loaded. If a binary could avoid loading it, it would never get sandboxed:
 
 * If the binary was **completely statically compiled**, it could avoid loading that library.
-* If the **binary wouldn't need to load any libraries** (because the linker is also in libSystem), it won't need to load libSystem.&#x20;
+* If the **binary wouldn't need to load any libraries** (because the linker is also in libSystem), it won't need to load libSystem.
 
 ### Shellcodes
 
@@ -106,8 +106,8 @@ Note that even if some **actions** might be **allowed by at he sandbox** if an a
 
 For more information about **Interposting** check:
 
-{% content-ref url="../../../mac-os-architecture/macos-function-hooking.md" %}
-[macos-function-hooking.md](../../../mac-os-architecture/macos-function-hooking.md)
+{% content-ref url="../../../macos-proces-abuse/macos-function-hooking.md" %}
+[macos-function-hooking.md](../../../macos-proces-abuse/macos-function-hooking.md)
 {% endcontent-ref %}
 
 #### Interpost `_libsecinit_initializer` to prevent the sandbox
@@ -344,7 +344,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>

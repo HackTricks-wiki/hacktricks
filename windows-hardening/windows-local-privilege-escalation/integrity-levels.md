@@ -1,4 +1,4 @@
-
+# Integrity Levels
 
 <details>
 
@@ -9,34 +9,33 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
 
-
-# Integrity Levels
+## Integrity Levels
 
 In Windows Vista and later versions, all protected items come with an **integrity level** tag. This setup mostly assigns a "medium" integrity level to files and registry keys, except for certain folders and files that Internet Explorer 7 can write to at a low integrity level. The default behavior is for processes initiated by standard users to have a medium integrity level, whereas services typically operate at a system integrity level. A high-integrity label safeguards the root directory.
 
 A key rule is that objects can't be modified by processes with a lower integrity level than the object's level. The integrity levels are:
 
-- **Untrusted**: This level is for processes with anonymous logins. %%%Example: Chrome%%%
-- **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
-- **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
-- **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
-- **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
-- **Installer**: A unique level that stands above all others, enabling objects at this level to uninstall any other object.
+* **Untrusted**: This level is for processes with anonymous logins. %%%Example: Chrome%%%
+* **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
+* **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
+* **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
+* **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
+* **Installer**: A unique level that stands above all others, enabling objects at this level to uninstall any other object.
 
 You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
 
-![](<../../.gitbook/assets/image (318).png>)
+![](<../../.gitbook/assets/image (821).png>)
 
 You can also get your **current integrity level** using `whoami /groups`
 
-![](<../../.gitbook/assets/image (319).png>)
+![](<../../.gitbook/assets/image (322).png>)
 
-## Integrity Levels in File-system
+### Integrity Levels in File-system
 
 A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.\
 For example, lets **create a regular from a regular user console file and check the permissions**:
@@ -84,7 +83,7 @@ Access is denied.
 **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
 {% endhint %}
 
-## Integrity Levels in Binaries
+### Integrity Levels in Binaries
 
 I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
 
@@ -100,16 +99,15 @@ C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
 
 Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
 
-![](<../../.gitbook/assets/image (320).png>)
+![](<../../.gitbook/assets/image (310).png>)
 
 For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
 
-## Integrity Levels in Processes
+### Integrity Levels in Processes
 
 Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
 
 Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
-
 
 <details>
 
@@ -120,9 +118,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
-
-

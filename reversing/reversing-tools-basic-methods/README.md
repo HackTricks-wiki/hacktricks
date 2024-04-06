@@ -16,7 +16,7 @@ Other ways to support HackTricks:
 
 **Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 
@@ -81,7 +81,7 @@ In order to debug code using DNSpy you need to:
 
 First, change the **Assembly attributes** related to **debugging**:
 
-![](<../../.gitbook/assets/image (278).png>)
+![](<../../.gitbook/assets/image (970).png>)
 
 From:
 
@@ -100,11 +100,11 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 And click on **compile**:
 
-![](<../../.gitbook/assets/image (314) (1) (1).png>)
+![](<../../.gitbook/assets/image (314) (1).png>)
 
 Then save the new file via _**File >> Save module...**_:
 
-![](<../../.gitbook/assets/image (279).png>)
+![](<../../.gitbook/assets/image (599).png>)
 
 This is necessary because if you don't do this, at **runtime** several **optimisations** will be applied to the code and it could be possible that while debugging a **break-point is never hit** or some **variables don't exist**.
 
@@ -116,25 +116,25 @@ iisreset /noforce
 
 Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
 
-![](<../../.gitbook/assets/image (280).png>)
+![](<../../.gitbook/assets/image (315).png>)
 
 Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
 
-![](<../../.gitbook/assets/image (281).png>)
+![](<../../.gitbook/assets/image (110).png>)
 
 Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
 
-![](<../../.gitbook/assets/image (286).png>)
+![](<../../.gitbook/assets/image (129).png>)
 
-![](<../../.gitbook/assets/image (283).png>)
+![](<../../.gitbook/assets/image (831).png>)
 
 Click any module on **Modules** and select **Open All Modules**:
 
-![](<../../.gitbook/assets/image (284).png>)
+![](<../../.gitbook/assets/image (919).png>)
 
 Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 
-![](<../../.gitbook/assets/image (285).png>)
+![](<../../.gitbook/assets/image (336).png>)
 
 ## Java decompiler
 
@@ -149,11 +149,11 @@ Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 * Select **Windbg** debugger
 * Select "**Suspend on library load/unload**"
 
-![](<../../.gitbook/assets/image (135).png>)
+![](<../../.gitbook/assets/image (865).png>)
 
 * Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
 
-![](<../../.gitbook/assets/image (136).png>)
+![](<../../.gitbook/assets/image (701).png>)
 
 Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
 
@@ -168,7 +168,7 @@ But, how can you get to the code of the DLL that was lodaded? Using this method,
 
 Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
 
-![](<../../.gitbook/assets/image (137).png>)
+![](<../../.gitbook/assets/image (839).png>)
 
 Then, looking to this ca see when the execution was stopped in the dll you want to debug.
 
@@ -202,7 +202,7 @@ You can find a slightly modified version of Blobrunner in the following link. In
 
 [**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
 
-![](<../../.gitbook/assets/image (397).png>)
+![](<../../.gitbook/assets/image (506).png>)
 
 You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
 
@@ -212,17 +212,17 @@ You can download a compiled version of [jmp2it inside the releases page](https:/
 
 Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
 
-![](<../../.gitbook/assets/image (400).png>)
+![](<../../.gitbook/assets/image (559).png>)
 
 In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
 
-![](<../../.gitbook/assets/image (399).png>)
+![](<../../.gitbook/assets/image (586).png>)
 
-![](<../../.gitbook/assets/image (401).png>)
+![](<../../.gitbook/assets/image (384).png>)
 
 You can see the stack for example inside a hex dump:
 
-![](<../../.gitbook/assets/image (402).png>)
+![](<../../.gitbook/assets/image (183).png>)
 
 ### Deobfuscating shellcode and getting executed functions
 
@@ -240,7 +240,7 @@ scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 
 scDbg also counts with a graphical launcher where you can select the options you want and execute the shellcode
 
-![](<../../.gitbook/assets/image (398).png>)
+![](<../../.gitbook/assets/image (255).png>)
 
 The **Create Dump** option will dump the final shellcode if any change is done to the shellcode dynamically in memory (useful to download the decoded shellcode). The **start offset** can be useful to start the shellcode at a specific offset. The **Debug Shell** option is useful to debug the shellcode using the scDbg terminal (however I find any of the options explained before better for this matter as you will be able to use Ida or x64dbg).
 
@@ -270,7 +270,7 @@ If you are playing a **CTF, this workaround to find the flag** could be very use
 
 To find the **entry point** search the functions by `::main` like in:
 
-![](<../../.gitbook/assets/image (612).png>)
+![](<../../.gitbook/assets/image (1077).png>)
 
 In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
 Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
@@ -299,8 +299,8 @@ This will resolve the names of the functions.
 
 In this page you can find how to get the python code from an ELF/EXE python compiled binary:
 
-{% content-ref url="../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md" %}
-[.pyc.md](../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
+{% content-ref url="../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md" %}
+[.pyc.md](../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
 {% endcontent-ref %}
 
 ## GBA - Game Body Advance
@@ -333,7 +333,7 @@ L = 256
 
 So, in this kind of program, the interesting part will be **how the program treats the user input**. In the address **0x4000130** you will find the commonly found function: **KEYINPUT**.
 
-![](<../../.gitbook/assets/image (579).png>)
+![](<../../.gitbook/assets/image (444).png>)
 
 In the previous image you can find that the function is called from **FUN\_080015a8** (addresses: _0x080015fa_ and _0x080017ac_).
 
@@ -427,7 +427,7 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 
 **Try Hard Security Group**
 
-<figure><img src="/.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/telegram-cloud-document-1-5159108904864449420.jpg" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://discord.gg/tryhardsecurity" %}
 

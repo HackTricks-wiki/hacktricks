@@ -30,11 +30,11 @@ The entitlement **`com.apple.rootless.install`** allows to **bypass SIP**. Check
 
 ### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
 
-This entitlement allows to get the **task port for any** process, except the kernel. Check [**this for more info**](../mac-os-architecture/macos-ipc-inter-process-communication/).
+This entitlement allows to get the **task port for any** process, except the kernel. Check [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
 
 ### `com.apple.security.get-task-allow`
 
-This entitlement allows other processes with the **`com.apple.security.cs.debugger`** entitlement to get the task port of the process run by the binary with this entitlement and **inject code on it**. Check [**this for more info**](../mac-os-architecture/macos-ipc-inter-process-communication/).
+This entitlement allows other processes with the **`com.apple.security.cs.debugger`** entitlement to get the task port of the process run by the binary with this entitlement and **inject code on it**. Check [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
 
 ### `com.apple.security.cs.debugger`
 
@@ -130,7 +130,7 @@ Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes
 
 Allow to modify files inside apps bundle (inside app.app), which is **disallowed by default**.
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (28).png" alt=""><figcaption></figcaption></figure>
 
 It's possible to check who has this access in _System Settings_ > _Privacy & Security_ > _App Management._
 

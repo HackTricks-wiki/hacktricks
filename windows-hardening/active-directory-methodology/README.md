@@ -9,7 +9,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -37,8 +37,7 @@ Key concepts within **Active Directory** include:
 5. **Rights Management** – Assists in safeguarding copyright material by regulating its unauthorized distribution and use.
 6. **DNS Service** – Crucial for the resolution of **domain names**.
 
-For a more detailed explanation check: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
-
+For a more detailed explanation check: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active\_directory)
 
 ### **Kerberos Authentication**
 
@@ -64,8 +63,8 @@ If you just have access to an AD environment but you don't have any credentials/
   * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
   * A more detailed guide on how to enumerate a SMB server can be found here:
 
-{% content-ref url="../../network-services-pentesting/pentesting-smb.md" %}
-[pentesting-smb.md](../../network-services-pentesting/pentesting-smb.md)
+{% content-ref url="../../network-services-pentesting/pentesting-smb/" %}
+[pentesting-smb](../../network-services-pentesting/pentesting-smb/)
 {% endcontent-ref %}
 
 * **Enumerate Ldap**
@@ -89,7 +88,7 @@ If you just have access to an AD environment but you don't have any credentials/
 
 ### User enumeration
 
-* **Anonymous SMB/LDAP enum:** Check the [**pentesting SMB**](../../network-services-pentesting/pentesting-smb.md) and [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) pages.
+* **Anonymous SMB/LDAP enum:** Check the [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/) and [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) pages.
 * **Kerbrute enum**: When an **invalid username is requested** the server will respond using the **Kerberos error** code _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_, indicating that the user is required to perform pre-authentication.
 
 ```bash
@@ -231,7 +230,7 @@ If you have managed to enumerate the active directory you will have **more email
 
 Now that you have some basic credentials you should check if you can **find** any **interesting files being shared inside the AD**. You could do that manually but it's a very boring repetitive task (and more if you find hundreds of docs you need to check).
 
-[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb.md#domain-shared-folders-search)
+[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb/#domain-shared-folders-search)
 
 ### Steal NTLM Creds
 
@@ -257,7 +256,7 @@ This vulnerability allowed any authenticated user to **compromise the domain con
 
 Hopefully you have managed to **compromise some local admin** account using [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) including relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/).\
 Then, its time to dump all the hashes in memory and locally.\
-[**Read this page about different ways to obtain the hashes.**](broken-reference/)
+[**Read this page about different ways to obtain the hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Pass the Hash
 
@@ -345,7 +344,7 @@ The compromised user could have some **interesting privileges over some domain o
 Discovering a **Spool service listening** within the domain can be **abused** to **acquire new credentials** and **escalate privileges**.
 
 {% content-ref url="acl-persistence-abuse/" %}
-[printers-spooler-service-abuse](printers-spooler-service-abuse.md)
+[acl-persistence-abuse](acl-persistence-abuse/)
 {% endcontent-ref %}
 
 ### Third party sessions abuse
@@ -389,7 +388,7 @@ Once you get **Domain Admin** or even better **Enterprise Admin** privileges, yo
 
 [**More information about DCSync attack can be found here**](dcsync.md).
 
-[**More information about how to steal the NTDS.dit can be found here**](broken-reference/)
+[**More information about how to steal the NTDS.dit can be found here**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Privesc as Persistence
 
@@ -424,7 +423,7 @@ The **Silver Ticket attack** creates a **legitimate Ticket Granting Service (TGS
 
 A **Golden Ticket attack** involves an attacker gaining access to the **NTLM hash of the krbtgt account** in an Active Directory (AD) environment. This account is special because it's used to sign all **Ticket Granting Tickets (TGTs)**, which are essential for authenticating within the AD network.
 
-Once the attacker obtains this hash, they can create **TGTs** for any account they choose (Silver ticket attack). 
+Once the attacker obtains this hash, they can create **TGTs** for any account they choose (Silver ticket attack).
 
 {% content-ref url="golden-ticket.md" %}
 [golden-ticket.md](golden-ticket.md)
@@ -494,7 +493,7 @@ Alter **LSASS** in memory to establish a **universal password**, granting access
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)\
+[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
 You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\\
 
 {% content-ref url="custom-ssp.md" %}
@@ -539,7 +538,6 @@ In a typical scenario, if a user intends to access a service in a **trusted doma
 6. DC2 verifies the inter-realm TGT using its shared trust key and, if valid, issues a **Ticket Granting Service (TGS)** for the server in Domain 2 the client wants to access.
 7. Finally, the client presents this TGS to the server, which is encrypted with the server’s account hash, to get access to the service in Domain 2.
 
-
 ### Different trusts
 
 It's important to notice that **a trust can be 1 way or 2 ways**. In the 2 ways options, both domains will trust each other, but in the **1 way** trust relation one of the domains will be the **trusted** and the other the **trusting** domain. In the last case, **you will only be able to access resources inside the trusting domain from the trusted one**.
@@ -569,9 +567,9 @@ If Domain A trusts Domain B, A is the trusting domain and B ins the trusted one.
 
 Attackers with could access to resources in another domain through three primary mechanisms:
 
-- **Local Group Membership**: Principals might be added to local groups on machines, such as the “Administrators” group on a server, granting them significant control over that machine.
-- **Foreign Domain Group Membership**: Principals can also be members of groups within the foreign domain. However, the effectiveness of this method depends on the nature of the trust and the scope of the group.
-- **Access Control Lists (ACLs)**: Principals might be specified in an **ACL**, particularly as entities in **ACEs** within a **DACL**, providing them access to specific resources. For those looking to dive deeper into the mechanics of ACLs, DACLs, and ACEs, the whitepaper titled “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” is an invaluable resource.
+* **Local Group Membership**: Principals might be added to local groups on machines, such as the “Administrators” group on a server, granting them significant control over that machine.
+* **Foreign Domain Group Membership**: Principals can also be members of groups within the foreign domain. However, the effectiveness of this method depends on the nature of the trust and the scope of the group.
+* **Access Control Lists (ACLs)**: Principals might be specified in an **ACL**, particularly as entities in **ACEs** within a **DACL**, providing them access to specific resources. For those looking to dive deeper into the mechanics of ACLs, DACLs, and ACEs, the whitepaper titled “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an\_ace\_up\_the\_sleeve.pdf)” is an invaluable resource.
 
 ### Child-to-Parent forest privilege escalation
 
@@ -687,13 +685,13 @@ Moreover, if the **victim mounted his hard drive**, from the **RDP session** pro
 
 ### **SID Filtering:**
 
-- The risk of attacks leveraging the SID history attribute across forest trusts is mitigated by SID Filtering, which is activated by default on all inter-forest trusts. This is underpinned by the assumption that intra-forest trusts are secure, considering the forest, rather than the domain, as the security boundary as per Microsoft's stance.
-- However, there's a catch: SID filtering might disrupt applications and user access, leading to its occasional deactivation.
+* The risk of attacks leveraging the SID history attribute across forest trusts is mitigated by SID Filtering, which is activated by default on all inter-forest trusts. This is underpinned by the assumption that intra-forest trusts are secure, considering the forest, rather than the domain, as the security boundary as per Microsoft's stance.
+* However, there's a catch: SID filtering might disrupt applications and user access, leading to its occasional deactivation.
 
 ### **Selective Authentication:**
 
-- For inter-forest trusts, employing Selective Authentication ensures that users from the two forests are not automatically authenticated. Instead, explicit permissions are required for users to access domains and servers within the trusting domain or forest.
-- It's important to note that these measures do not safeguard against the exploitation of the writable Configuration Naming Context (NC) or attacks on the trust account.
+* For inter-forest trusts, employing Selective Authentication ensures that users from the two forests are not automatically authenticated. Instead, explicit permissions are required for users to access domains and servers within the trusting domain or forest.
+* It's important to note that these measures do not safeguard against the exploitation of the writable Configuration Naming Context (NC) or attacks on the trust account.
 
 [**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
@@ -703,32 +701,31 @@ Moreover, if the **victim mounted his hard drive**, from the **RDP session** pro
 
 ## Some General Defenses
 
-[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\
+[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\\
 
 ### **Defensive Measures for Credential Protection**
 
-- **Domain Admins Restrictions**: It is recommended that Domain Admins should only be allowed to login to Domain Controllers, avoiding their use on other hosts.
-- **Service Account Privileges**: Services should not be run with Domain Admin (DA) privileges to maintain security.
-- **Temporal Privilege Limitation**: For tasks requiring DA privileges, their duration should be limited. This can be achieved by: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+* **Domain Admins Restrictions**: It is recommended that Domain Admins should only be allowed to login to Domain Controllers, avoiding their use on other hosts.
+* **Service Account Privileges**: Services should not be run with Domain Admin (DA) privileges to maintain security.
+* **Temporal Privilege Limitation**: For tasks requiring DA privileges, their duration should be limited. This can be achieved by: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
 ### **Implementing Deception Techniques**
 
-- Implementing deception involves setting traps, like decoy users or computers, with features such as passwords that do not expire or are marked as Trusted for Delegation. A detailed approach includes creating users with specific rights or adding them to high privilege groups.
-- A practical example involves using tools like: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- More on deploying deception techniques can be found at [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception).
+* Implementing deception involves setting traps, like decoy users or computers, with features such as passwords that do not expire or are marked as Trusted for Delegation. A detailed approach includes creating users with specific rights or adding them to high privilege groups.
+* A practical example involves using tools like: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
+* More on deploying deception techniques can be found at [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception).
 
 ### **Identifying Deception**
 
-- **For User Objects**: Suspicious indicators include atypical ObjectSID, infrequent logons, creation dates, and low bad password counts.
-- **General Indicators**: Comparing attributes of potential decoy objects with those of genuine ones can reveal inconsistencies. Tools like [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) can assist in identifying such deceptions.
+* **For User Objects**: Suspicious indicators include atypical ObjectSID, infrequent logons, creation dates, and low bad password counts.
+* **General Indicators**: Comparing attributes of potential decoy objects with those of genuine ones can reveal inconsistencies. Tools like [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) can assist in identifying such deceptions.
 
 ### **Bypassing Detection Systems**
 
-- **Microsoft ATA Detection Bypass**:
-  - **User Enumeration**: Avoiding session enumeration on Domain Controllers to prevent ATA detection.
-  - **Ticket Impersonation**: Utilizing **aes** keys for ticket creation helps evade detection by not downgrading to NTLM.
-  - **DCSync Attacks**: Executing from a non-Domain Controller to avoid ATA detection is advised, as direct execution from a Domain Controller will trigger alerts.
-
+* **Microsoft ATA Detection Bypass**:
+  * **User Enumeration**: Avoiding session enumeration on Domain Controllers to prevent ATA detection.
+  * **Ticket Impersonation**: Utilizing **aes** keys for ticket creation helps evade detection by not downgrading to NTLM.
+  * **DCSync Attacks**: Executing from a non-Domain Controller to avoid ATA detection is advised, as direct execution from a Domain Controller will trigger alerts.
 
 ## References
 
@@ -745,7 +742,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>

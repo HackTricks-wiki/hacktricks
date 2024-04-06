@@ -1,4 +1,4 @@
-
+# UART
 
 <details>
 
@@ -9,13 +9,12 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
 
-
-# Basic Information
+## Basic Information
 
 UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
 
@@ -23,7 +22,7 @@ Generally, the line is held high (at a logical 1 value) while UART is in the idl
 
 We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
 
-![](<../../.gitbook/assets/image (648) (1) (1) (1) (1).png>)
+![](<../../.gitbook/assets/image (761).png>)
 
 Hardware tools to communicate with UART:
 
@@ -31,7 +30,7 @@ Hardware tools to communicate with UART:
 * Adapters with the CP2102 or PL2303 chips
 * Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
 
-## Identifying UART Ports
+### Identifying UART Ports
 
 UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
 
@@ -44,9 +43,9 @@ With a **multimeter** and the device powered off:
 
 You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
 
-In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires. 
+In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires.
 
-## Identifying the UART Baud Rate
+### Identifying the UART Baud Rate
 
 The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
 
@@ -54,31 +53,35 @@ The easiest way to identify the correct baud rate is to look at the **TX pin’s
 It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
 {% endhint %}
 
-# CP210X UART to TTY Adapter 
+## CP210X UART to TTY Adapter
 
-The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target. 
+The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target.
 
-Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used. 
+Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used.
 
 To list the devices connected to Linux/MacOS systems:
+
 ```
 ls /dev/
 ```
 
 For basic interaction with the UART interface, use the following command:
+
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
 
 For minicom, use the following command to configure it:
+
 ```
 minicom -s
 ```
-Configure the settings such as baudrate and device name in the `Serial port setup` option. 
+
+Configure the settings such as baudrate and device name in the `Serial port setup` option.
 
 After configuration, use the command `minicom` to start get the UART Console.
 
-# Bus Pirate
+## Bus Pirate
 
 In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
 
@@ -154,7 +157,6 @@ AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
 
-
 <details>
 
 <summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
@@ -164,9 +166,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
-
-

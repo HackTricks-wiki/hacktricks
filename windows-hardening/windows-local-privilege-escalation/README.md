@@ -44,8 +44,8 @@
 
 There are different things in Windows that could **prevent you from enumerating the system**, run executables or even **detect your activities**. You should **read** the following **page** and **enumerate** all these **defenses** **mechanisms** before starting the privilege escalation enumeration:
 
-{% content-ref url="../authentication-credentials-uac-and-efs.md" %}
-[authentication-credentials-uac-and-efs.md](../authentication-credentials-uac-and-efs.md)
+{% content-ref url="../authentication-credentials-uac-and-efs/" %}
+[authentication-credentials-uac-and-efs](../authentication-credentials-uac-and-efs/)
 {% endcontent-ref %}
 
 ## System Info
@@ -385,11 +385,11 @@ If you **belongs to some privileged group you may be able to escalate privileges
 
 ### Token manipulation
 
-**Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs.md#access-tokens).\
+**Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs/#access-tokens).\
 Check the following page to **learn about interesting tokens** and how to abuse them:
 
-{% content-ref url="privilege-escalation-abusing-tokens/" %}
-[privilege-escalation-abusing-tokens](privilege-escalation-abusing-tokens/)
+{% content-ref url="privilege-escalation-abusing-tokens.md" %}
+[privilege-escalation-abusing-tokens.md](privilege-escalation-abusing-tokens.md)
 {% endcontent-ref %}
 
 ### Logged users / Sessions
@@ -423,7 +423,7 @@ powershell -command "Get-Clipboard"
 ### File and Folder Permissions
 
 First of all, listing the processes **check for passwords inside the command line of the process**.\
-Check if you can **overwrite some binary running** or if you have write permissions of the binary folder to exploit possible [**DLL Hijacking attacks**](dll-hijacking.md):
+Check if you can **overwrite some binary running** or if you have write permissions of the binary folder to exploit possible [**DLL Hijacking attacks**](dll-hijacking/):
 
 ```bash
 Tasklist /SVC #List processes running and services
@@ -449,7 +449,7 @@ for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executabl
 )
 ```
 
-**Checking permissions of the folders of the processes binaries (**[**DLL Hijacking**](dll-hijacking.md)**)**
+**Checking permissions of the folders of the processes binaries (**[**DLL Hijacking**](dll-hijacking/)**)**
 
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v 
@@ -562,7 +562,7 @@ For the detection and exploitation of this vulnerability, the _exploit/windows/l
 
 ### Services binaries weak permissions
 
-**Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking.md))**.**\
+**Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking/))**.**\
 You can get every binary that is executed by a service using **wmic** (not in system32) and check your permissions using **icacls**:
 
 ```bash
@@ -653,7 +653,7 @@ Windows allows users to specify actions to be taken if a service fails. This fea
 
 ### Installed Applications
 
-Check **permissions of the binaries** (maybe you can overwrite one and escalate privileges) and of the **folders** ([DLL Hijacking](dll-hijacking.md)).
+Check **permissions of the binaries** (maybe you can overwrite one and escalate privileges) and of the **folders** ([DLL Hijacking](dll-hijacking/)).
 
 ```bash
 dir /a "C:\Program Files"
@@ -1357,7 +1357,7 @@ COM classes and interfaces are defined in the registry under **HKEY\_**_**CLASSE
 
 Inside the CLSIDs of this registry you can find the child registry **InProcServer32** which contains a **default value** pointing to a **DLL** and a value called **ThreadingModel** that can be **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) or **Neutral** (Thread Neutral).
 
-![](<../../.gitbook/assets/image (638).png>)
+![](<../../.gitbook/assets/image (726).png>)
 
 Basically, if you can **overwrite any of the DLLs** that are going to be executed, you could **escalate privileges** if that DLL is going to be executed by a different user.
 
@@ -1508,8 +1508,8 @@ Read this to **learn about Integrity Levels**:
 
 Then **read this to learn about UAC and UAC bypasses:**
 
-{% content-ref url="../windows-security-controls/uac-user-account-control.md" %}
-[uac-user-account-control.md](../windows-security-controls/uac-user-account-control.md)
+{% content-ref url="../authentication-credentials-uac-and-efs/uac-user-account-control.md" %}
+[uac-user-account-control.md](../authentication-credentials-uac-and-efs/uac-user-account-control.md)
 {% endcontent-ref %}
 
 ## **From High Integrity to System**
@@ -1547,7 +1547,7 @@ If you want to read an example of [**how to go from high integrity to System usi
 ### Dll Hijacking
 
 If you manages to **hijack a dll** being **loaded** by a **process** running as **SYSTEM** you will be able to execute arbitrary code with those permissions. Therefore Dll Hijacking is also useful to this kind of privilege escalation, and, moreover, if far **more easy to achieve from a high integrity process** as it will have **write permissions** on the folders used to load dlls.\
-**You can** [**learn more about Dll hijacking here**](dll-hijacking.md)**.**
+**You can** [**learn more about Dll hijacking here**](dll-hijacking/)**.**
 
 ### **From Administrator or Network Service to System**
 
@@ -1568,8 +1568,8 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 **PS**
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Check for misconfigurations and sensitive files (**[**check here**](../../windows/windows-local-privilege-escalation/broken-reference/)**). Detected.**\
-[**JAWS**](https://github.com/411Hall/JAWS) **-- Check for some possible misconfigurations and gather info (**[**check here**](../../windows/windows-local-privilege-escalation/broken-reference/)**).**\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Check for misconfigurations and sensitive files (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Detected.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- Check for some possible misconfigurations and gather info (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
 [**privesc** ](https://github.com/enjoiz/Privesc)**-- Check for misconfigurations**\
 [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use -Thorough in local.**\
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extracts crendentials from Credential Manager. Detected.**\

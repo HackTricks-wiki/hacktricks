@@ -9,7 +9,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -44,7 +44,7 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 
 ## Trust Account Attack
 
-A security vulnerability exists when a trust relationship is established between two domains, identified here as domain **A** and domain **B**, where domain **B** extends its trust to domain **A**. In this setup, a special account is created in domain **A** for domain **B**, which plays a crucial role in the authentication process between the two domains. This account, associated with domain **B**, is utilized for encrypting tickets for accessing services across the domains. 
+A security vulnerability exists when a trust relationship is established between two domains, identified here as domain **A** and domain **B**, where domain **B** extends its trust to domain **A**. In this setup, a special account is created in domain **A** for domain **B**, which plays a crucial role in the authentication process between the two domains. This account, associated with domain **B**, is utilized for encrypting tickets for accessing services across the domains.
 
 The critical aspect to understand here is that the password and hash of this special account can be extracted from a Domain Controller in domain **A** using a command line tool. The command to perform this action is:
 
@@ -80,13 +80,13 @@ In the previous flow it was used the trust hash instead of the **clear text pass
 
 The cleartext password can be obtained by converting the \[ CLEAR ] output from mimikatz from hexadecimal and removing null bytes ‘\x00’:
 
-![](<../../.gitbook/assets/image (2) (1) (2) (1).png>)
+![](<../../.gitbook/assets/image (935).png>)
 
 Sometimes when creating a trust relationship, a password must be typed in by the user for the trust. In this demonstration, the key is the original trust password and therefore human readable. As the key cycles (30 days), the cleartext will not be human-readable but technically still usable.
 
 The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT using the Kerberos secret key of the trust account. Here, querying root.local from ext.local for members of Domain Admins:
 
-![](<../../.gitbook/assets/image (1) (1) (1) (2).png>)
+![](<../../.gitbook/assets/image (789).png>)
 
 ## References
 
@@ -101,7 +101,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
