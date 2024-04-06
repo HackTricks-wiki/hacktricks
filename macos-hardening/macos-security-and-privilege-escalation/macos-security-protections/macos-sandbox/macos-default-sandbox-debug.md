@@ -1,4 +1,6 @@
-# macOS デフォルトサンドボックスのデバッグ
+# macOS Default Sandbox Debug
+
+## macOS デフォルトサンドボックスのデバッグ
 
 <details>
 
@@ -9,7 +11,7 @@ HackTricks をサポートする他の方法:
 * **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
-* **💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローする。
+* \*\*💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする。
 * **ハッキングテクニックを共有するために PR を送信して** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに貢献する。
 
 </details>
@@ -53,6 +55,7 @@ return 0;
 実行してコンパイルします：`clang -framework Foundation -o SandboxedShellApp main.m`
 
 2. `.app` バンドルをビルドします
+
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -74,7 +77,9 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
+
 3. エンタイトルメントを定義する
+
 ```bash
 cat << EOF > entitlements.plist
 <?xml version="1.0" encoding="UTF-8"?>
@@ -87,30 +92,13 @@ cat << EOF > entitlements.plist
 </plist>
 EOF
 ```
-{% endtab %}
 
-{% tab title="サンドボックス + ダウンロード" %}
-```bash
-cat << EOF > entitlements.plist
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-<key>com.apple.security.app-sandbox</key>
-<true/>
-<key>com.apple.security.files.downloads.read-write</key>
-<true/>
-</dict>
-</plist>
-EOF
-```
-4. アプリに署名します（キーチェーンで証明書を作成する必要があります）
-```bash
-codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
-./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
+\`\`\`bash cat << EOF > entitlements.plist com.apple.security.app-sandbox com.apple.security.files.downloads.read-write EOF \`\`\` 4. アプリに署名します（キーチェーンで証明書を作成する必要があります） \`\`\`bash codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
 
-# An d in case you need this in the future
+## An d in case you need this in the future
+
 codesign --remove-signature SandboxedShellApp.app
+
 ```
 <details>
 
@@ -125,3 +113,4 @@ HackTricks をサポートする他の方法:
 * **HackTricks**（https://github.com/carlospolop/hacktricks）および**HackTricks Cloud**（https://github.com/carlospolop/hacktricks-cloud）のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
 
 </details>
+```

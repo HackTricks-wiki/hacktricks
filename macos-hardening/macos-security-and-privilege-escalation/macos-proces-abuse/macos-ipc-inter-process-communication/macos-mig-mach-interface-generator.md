@@ -9,7 +9,7 @@ HackTricks をサポートする他の方法:
 * **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする**
+* **💬** [**Discordグループ**](https://discord.gg/hRep4RUj7f) **または** [**telegramグループ**](https://t.me/peass) **に参加するか、Twitter 🐦** [**@carlospolopm**](https://twitter.com/hacktricks\_live) **をフォローする**
 * **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
 
 </details>
@@ -38,15 +38,15 @@ n2          :  uint32_t);
 {% endcode %}
 
 今、migを使用して、互いに通信し合い、Subtract関数を呼び出すためのサーバーおよびクライアントコードを生成します:
+
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
+
 現在のディレクトリにいくつかの新しいファイルが作成されます。
 
 **`myipcServer.c`** と **`myipcServer.h`** のファイルには、**`SERVERPREFmyipc_subsystem`** 構造体の宣言と定義が含まれており、受信したメッセージIDに基づいて呼び出す関数が基本的に定義されています（開始番号は500と指定されています）:
 
-{% tabs %}
-{% tab title="myipcServer.c" %}
 ```c
 /* Description of this subsystem, for use in direct RPC */
 const struct SERVERPREFmyipc_subsystem SERVERPREFmyipc_subsystem = {
@@ -62,14 +62,14 @@ myipc_server_routine,
 }
 };
 ```
-{% endtab %}
 
-{% tab title="myipcServer.h" %}次の手順で、MIG インターフェースを生成します。
+次の手順で、MIG インターフェースを生成します。
 
 1. MIG 定義ファイル (myipc.defs) を作成します。
 2. MIG コンパイラを使用して、myipc.defs ファイルから myipcServer.c ファイルを生成します。
 3. myipcServer.c ファイルをサーバーアプリケーションに組み込みます。
-4. サーバーアプリケーションをビルドして実行します。{% endtab %}
+4. サーバーアプリケーションをビルドして実行します。
+
 ```c
 /* Description of this subsystem, for use in direct RPC */
 extern const struct SERVERPREFmyipc_subsystem {
@@ -82,10 +82,9 @@ struct routine_descriptor	/* Array of routine descriptors */
 routine[1];
 } SERVERPREFmyipc_subsystem;
 ```
-{% endtab %}
-{% endtabs %}
 
 前の構造に基づいて、**`myipc_server_routine`** 関数は **メッセージ ID** を取得し、適切な呼び出すべき関数を返します:
+
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -100,15 +99,18 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-この例では、定義で関数を1つだけ定義しましたが、複数の関数を定義した場合、それらは**`SERVERPREFmyipc_subsystem`**の配列内にあり、最初の関数はID **500**に割り当てられ、2番目の関数はID **501**に割り当てられます...
 
-実際には、この関係を**`myipcServer.h`**の**`subsystem_to_name_map_myipc`**構造体で特定することができます:
+この例では、定義で関数を1つだけ定義しましたが、複数の関数を定義した場合、それらは\*\*`SERVERPREFmyipc_subsystem`\*\*の配列内にあり、最初の関数はID **500**に割り当てられ、2番目の関数はID **501**に割り当てられます...
+
+実際には、この関係を\*\*`myipcServer.h`**の**`subsystem_to_name_map_myipc`\*\*構造体で特定することができます:
+
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
+
 ```c
 mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -141,6 +143,7 @@ return FALSE;
 	return TRUE;
 }
 ```
+
 ```c
 // gcc myipc_server.c myipcServer.c -o myipc_server
 
@@ -171,9 +174,9 @@ return 1;
 mach_msg_server(myipc_server, sizeof(union __RequestUnion__SERVERPREFmyipc_subsystem), port, MACH_MSG_TIMEOUT_NONE);
 }
 ```
-{% endtab %}
 
-{% tab title="myipc_client.c" %}
+
+
 ```c
 // gcc myipc_client.c myipcUser.c -o myipc_client
 
@@ -198,14 +201,17 @@ printf("Port right name %d\n", port);
 USERPREFSubtract(port, 40, 2);
 }
 ```
+
 ### バイナリ解析
 
 多くのバイナリが今やMIGを使用してmachポートを公開しているため、**MIGが使用されたことを特定**し、各メッセージIDでMIGが実行する**関数を特定**する方法を知ることが興味深いです。
 
 [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)は、Mach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定できます。
+
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
+
 **`myipc_server`** 関数は、受信したメッセージ ID に応じて正しい関数を呼び出す機能を担当することが以前に言及されました。ただし、通常はバイナリのシンボル（関数名なし）を持っていないため、**デコンパイルしたものがどのように見えるかを確認する**ことが興味深いです（この関数のコードは公開された関数に独立しています）：
 
 {% tabs %}
@@ -214,13 +220,13 @@ jtool2 -d __DATA.__const myipc_server | grep MIG
 var_10 = arg0;
 var_18 = arg1;
 // 適切な関数ポインタを見つけるための初期命令
-*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // この関数を識別するのに役立つ sign_extend_64 の呼び出し
 // これにより、呼び出す必要のある呼び出しのポインタが rax に格納されます
@@ -261,7 +267,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // 適切な関数ポインタを見つけるための初期命令
-*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -270,19 +276,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS & G) {
+if (CPU_FLAGS &#x26; G) {
 r8 = 0x1;
 }
 }
-if ((r8 & 0x1) == 0x0) {
+if ((r8 &#x26; 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 < 0x0) {
-if (CPU_FLAGS & L) {
+if (r8 &#x3C; 0x0) {
+if (CPU_FLAGS &#x26; L) {
 r8 = 0x1;
 }
 }
-if ((r8 & 0x1) == 0x0) {
+if ((r8 &#x26; 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500（開始 ID）
 <strong>                    r8 = r8 - 0x1f4;
@@ -291,13 +297,13 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS & NE) {
+if (CPU_FLAGS &#x26; NE) {
 r8 = 0x1;
 }
 }
 // 前のバージョンと同じ if else
 // アドレス 0x100004040（関数アドレス配列の使用）を確認します
-<strong>                    if ((r8 & 0x1) == 0x0) {
+<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
@@ -341,8 +347,13 @@ return r0;
 
 HackTricks をサポートする他の方法：
 
-- HackTricks で **会社を宣伝**したり、**HackTricks を PDF でダウンロード**したりするには、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-- [**公式 PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れる
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* **[**Discordグループ**](https://discord.gg/hRep4RUj7f)**に参加するか、[**telegramグループ**](https://t.me/peass)**に参加するか、**Twitter**で**@carlospolopm**をフォローしてください🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングトリックを共有するには、[**HackTricks**](https://github.com/carlospolop/hacktricks)**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)**のGitHubリポジトリにPRを提出してください。**
+* HackTricks で **会社を宣伝**したり、**HackTricks を PDF でダウンロード**したりするには、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式 PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れる
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFT**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+
+<!---->
+
+* [**Discordグループ**](https://discord.gg/hRep4RUj7f)**に参加するか、**[**telegramグループ**](https://t.me/peass)**に参加するか、Twitterで@carlospolopmをフォローしてください🐦** [**@carlospolopm**](https://twitter.com/hacktricks\_live)。\*\*
+* \*\*ハッキングトリックを共有するには、[**HackTricks**](https://github.com/carlospolop/hacktricks)\*\*と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)**のGitHubリポジトリにPRを提出してください。**
+
+</details>

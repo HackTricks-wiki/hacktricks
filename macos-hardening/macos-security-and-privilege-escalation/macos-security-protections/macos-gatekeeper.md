@@ -7,7 +7,7 @@
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**💬**](https://emojipedia.org/speech-balloon/) **Discordグループ**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
@@ -37,6 +37,7 @@ macOS Catalinaからは、**GatekeeperはアプリケーションがAppleによ�
 #### 署名の確認
 
 いくつかの**マルウェアサンプル**をチェックする際は、常にバイナリの**署名を確認**する必要があります。署名した**開発者**がすでに**マルウェア**と**関連付けられている**可能性があるためです。
+
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -53,6 +54,7 @@ spctl --assess --verbose /Applications/Safari.app
 # Sign a binary
 codesign -s <cert-name-keychain> toolsdemo
 ```
+
 ### Notarization
 
 Appleのノータリゼーションプロセスは、ユーザーを潜在的に有害なソフトウェアから保護する追加のセーフガードとして機能します。これには、開発者が自分のアプリケーションをAppleのノータリサービスに提出し、App Reviewとは異なることに注意する必要があります。このサービスは、提出されたソフトウェアを悪意のあるコンテンツやコードサイニングに関する潜在的な問題を検査する自動システムです。
@@ -66,10 +68,12 @@ Appleのノータリゼーションプロセスは、ユーザーを潜在的に
 GateKeeperは、実行される信頼されていないアプリケーションを防ぐいくつかのセキュリティコンポーネントであり、またその1つでもあります。
 
 GateKeeperのステータスを確認することができます:
+
 ```bash
 # Check the status
 spctl --status
 ```
+
 {% hint style="danger" %}
 GateKeeperの署名チェックは、**Quarantine属性を持つファイル**にのみ実行されることに注意してください。
 {% endhint %}
@@ -78,7 +82,8 @@ GateKeeperは、**設定と署名**に基づいてバイナリが実行可能か
 
 <figure><img src="../../../.gitbook/assets/image (678).png" alt=""><figcaption></figcaption></figure>
 
-この構成を保持するデータベースは、**`/var/db/SystemPolicy`**にあります。これをルートとして次のコマンドで確認できます：
+この構成を保持するデータベースは、\*\*`/var/db/SystemPolicy`\*\*にあります。これをルートとして次のコマンドで確認できます：
+
 ```bash
 # Open database
 sqlite3 /var/db/SystemPolicy
@@ -92,10 +97,12 @@ anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.9] exists
 anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists and (certificate leaf[field.1.2.840.113635.100.6.1.14] or certificate leaf[field.1.2.840.113635.100.6.1.13]) and notarized|1|0|Notarized Developer ID
 [...]
 ```
+
 注意してください、最初のルールは "**App Store**" で終わり、2番目のルールは "**Developer ID**" で終わり、前の画像では **App Store および識別された開発者からのアプリの実行が有効** になっていました。\
 その設定を App Store に変更すると、"**Notarized Developer ID**" ルールが消えます。
 
 **GKE タイプ** のルールも何千もあります。
+
 ```bash
 SELECT requirement,allow,disabled,label from authority where label = 'GKE' limit 5;
 cdhash H"b40281d347dc574ae0850682f0fd1173aa2d0a39"|1|0|GKE
@@ -104,13 +111,17 @@ cdhash H"4317047eefac8125ce4d44cab0eb7b1dff29d19a"|1|0|GKE
 cdhash H"0a71962e7a32f0c2b41ddb1fb8403f3420e1d861"|1|0|GKE
 cdhash H"8d0d90ff23c3071211646c4c9c607cdb601cb18f"|1|0|GKE
 ```
-これらは、**`/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`、`/var/db/gke.bundle/Contents/Resources/gk.db`**、および**`/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`**から来るハッシュです。
+
+これらは、**`/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`、`/var/db/gke.bundle/Contents/Resources/gk.db`**、および\*\*`/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`\*\*から来るハッシュです。
 
 または、前述の情報をリストすることもできます:
+
 ```bash
 sudo spctl --list
 ```
-オプション**`--master-disable`**と**`--global-disable`**は、**`spctl`**の署名チェックを完全に**無効**にします。
+
+オプション\*\*`--master-disable`**と**`--global-disable`**は、**`spctl`**の署名チェックを完全に**無効\*\*にします。
+
 ```bash
 # Disable GateKeeper
 spctl --global-disable
@@ -120,15 +131,19 @@ spctl --master-disable
 spctl --global-enable
 spctl --master-enable
 ```
+
 完全に有効にすると、新しいオプションが表示されます：
 
 <figure><img src="../../../.gitbook/assets/image (679).png" alt=""><figcaption></figcaption></figure>
 
 GateKeeperによってアプリが許可されるかどうかを**チェック**することができます。
+
 ```bash
 spctl --assess -v /Applications/App.app
 ```
+
 GateKeeperに新しいルールを追加して、特定のアプリの実行を許可することが可能です：
+
 ```bash
 # Check if allowed - nop
 spctl --assess -v /Applications/App.app
@@ -143,6 +158,7 @@ sudo spctl --enable --label "whitelist"
 spctl --assess -v /Applications/App.app
 /Applications/App.app: accepted
 ```
+
 ### ファイルの隔離
 
 特定のmacOS **アプリケーション**（Webブラウザやメールクライアントなど）が、アプリケーションやファイルを**ダウンロード**する際に、一般的に「**隔離フラグ**」として知られる**拡張ファイル属性**をダウンロードされたファイルに**添付**します。この属性は、ファイルを信頼できないソース（インターネット）から取得したものとしてマークし、潜在的なリスクを持つ可能性があることを示すセキュリティ対策として機能します。ただし、一部のアプリケーションはこの属性を添付しないこともあります。たとえば、一般的なBitTorrentクライアントソフトウェアは通常、このプロセスをバイパスします。
@@ -164,6 +180,7 @@ spctl --assess -v /Applications/App.app
 {% endhint %}
 
 その状態を**確認**し、有効化/無効化することが可能です（ルート権限が必要）:
+
 ```bash
 spctl --status
 assessments enabled
@@ -172,13 +189,17 @@ spctl --enable
 spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
+
 あるファイルが拡張属性を持っているかどうかを次のようにして見つけることもできます：
+
 ```bash
 xattr file.png
 com.apple.macl
 com.apple.quarantine
 ```
+
 **拡張属性**の**値**をチェックし、quarantine属性を書き込んだアプリを特定します。
+
 ```bash
 xattr -l portada.png
 com.apple.macl:
@@ -194,70 +215,34 @@ com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
 # Brave -- App
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
 ```
+
 実際にプロセスは「作成するファイルにクォータンティンフラグを設定できる可能性があります」（作成したファイルにUSER\_APPROVEDフラグを適用しようとしましたが、適用されませんでした）:
 
 <details>
 
 <summary>ソースコード クォータンティンフラグを適用</summary>
-```c
-#include <stdio.h>
-#include <stdlib.h>
 
-enum qtn_flags {
-QTN_FLAG_DOWNLOAD = 0x0001,
-QTN_FLAG_SANDBOX = 0x0002,
-QTN_FLAG_HARD = 0x0004,
-QTN_FLAG_USER_APPROVED = 0x0040,
-};
+\`\`\`c #include #include
 
-#define qtn_proc_alloc _qtn_proc_alloc
-#define qtn_proc_apply_to_self _qtn_proc_apply_to_self
-#define qtn_proc_free _qtn_proc_free
-#define qtn_proc_init _qtn_proc_init
-#define qtn_proc_init_with_self _qtn_proc_init_with_self
-#define qtn_proc_set_flags _qtn_proc_set_flags
-#define qtn_file_alloc _qtn_file_alloc
-#define qtn_file_init_with_path _qtn_file_init_with_path
-#define qtn_file_free _qtn_file_free
-#define qtn_file_apply_to_path _qtn_file_apply_to_path
-#define qtn_file_set_flags _qtn_file_set_flags
-#define qtn_file_get_flags _qtn_file_get_flags
-#define qtn_proc_set_identifier _qtn_proc_set_identifier
+enum qtn\_flags { QTN\_FLAG\_DOWNLOAD = 0x0001, QTN\_FLAG\_SANDBOX = 0x0002, QTN\_FLAG\_HARD = 0x0004, QTN\_FLAG\_USER\_APPROVED = 0x0040, };
 
-typedef struct _qtn_proc *qtn_proc_t;
-typedef struct _qtn_file *qtn_file_t;
+\#define qtn\_proc\_alloc \_qtn\_proc\_alloc #define qtn\_proc\_apply\_to\_self \_qtn\_proc\_apply\_to\_self #define qtn\_proc\_free \_qtn\_proc\_free #define qtn\_proc\_init \_qtn\_proc\_init #define qtn\_proc\_init\_with\_self \_qtn\_proc\_init\_with\_self #define qtn\_proc\_set\_flags \_qtn\_proc\_set\_flags #define qtn\_file\_alloc \_qtn\_file\_alloc #define qtn\_file\_init\_with\_path \_qtn\_file\_init\_with\_path #define qtn\_file\_free \_qtn\_file\_free #define qtn\_file\_apply\_to\_path \_qtn\_file\_apply\_to\_path #define qtn\_file\_set\_flags \_qtn\_file\_set\_flags #define qtn\_file\_get\_flags \_qtn\_file\_get\_flags #define qtn\_proc\_set\_identifier \_qtn\_proc\_set\_identifier
 
-int qtn_proc_apply_to_self(qtn_proc_t);
-void qtn_proc_init(qtn_proc_t);
-int qtn_proc_init_with_self(qtn_proc_t);
-int qtn_proc_set_flags(qtn_proc_t, uint32_t flags);
-qtn_proc_t qtn_proc_alloc();
-void qtn_proc_free(qtn_proc_t);
-qtn_file_t qtn_file_alloc(void);
-void qtn_file_free(qtn_file_t qf);
-int qtn_file_set_flags(qtn_file_t qf, uint32_t flags);
-uint32_t qtn_file_get_flags(qtn_file_t qf);
-int qtn_file_apply_to_path(qtn_file_t qf, const char *path);
-int qtn_file_init_with_path(qtn_file_t qf, const char *path);
-int qtn_proc_set_identifier(qtn_proc_t qp, const char* bundleid);
+typedef struct \_qtn\_proc \*qtn\_proc\_t; typedef struct \_qtn\_file \*qtn\_file\_t;
+
+int qtn\_proc\_apply\_to\_self(qtn\_proc\_t); void qtn\_proc\_init(qtn\_proc\_t); int qtn\_proc\_init\_with\_self(qtn\_proc\_t); int qtn\_proc\_set\_flags(qtn\_proc\_t, uint32\_t flags); qtn\_proc\_t qtn\_proc\_alloc(); void qtn\_proc\_free(qtn\_proc\_t); qtn\_file\_t qtn\_file\_alloc(void); void qtn\_file\_free(qtn\_file\_t qf); int qtn\_file\_set\_flags(qtn\_file\_t qf, uint32\_t flags); uint32\_t qtn\_file\_get\_flags(qtn\_file\_t qf); int qtn\_file\_apply\_to\_path(qtn\_file\_t qf, const char \*path); int qtn\_file\_init\_with\_path(qtn\_file\_t qf, const char _path); int qtn\_proc\_set\_identifier(qtn\_proc\_t qp, const char_ bundleid);
 
 int main() {
 
-qtn_proc_t qp = qtn_proc_alloc();
-qtn_proc_set_identifier(qp, "xyz.hacktricks.qa");
-qtn_proc_set_flags(qp, QTN_FLAG_DOWNLOAD | QTN_FLAG_USER_APPROVED);
-qtn_proc_apply_to_self(qp);
-qtn_proc_free(qp);
+qtn\_proc\_t qp = qtn\_proc\_alloc(); qtn\_proc\_set\_identifier(qp, "xyz.hacktricks.qa"); qtn\_proc\_set\_flags(qp, QTN\_FLAG\_DOWNLOAD | QTN\_FLAG\_USER\_APPROVED); qtn\_proc\_apply\_to\_self(qp); qtn\_proc\_free(qp);
 
-FILE *fp;
-fp = fopen("thisisquarantined.txt", "w+");
-fprintf(fp, "Hello Quarantine\n");
-fclose(fp);
+FILE \*fp; fp = fopen("thisisquarantined.txt", "w+"); fprintf(fp, "Hello Quarantine\n"); fclose(fp);
 
 return 0;
 
 }
-```
+
+````
 </details>
 
 そして、次のようにしてその属性を**削除**します:
@@ -265,7 +250,8 @@ return 0;
 xattr -d com.apple.quarantine portada.png
 #You can also remove this attribute from every file with
 find . -iname '*' -print0 | xargs -0 xattr -d com.apple.quarantine
-```
+````
+
 そして、次のコマンドを使用して、隔離されたすべてのファイルを検索します：
 
 {% code overflow="wrap" %}
@@ -276,11 +262,11 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 
 **Quarantine情報**は、LaunchServicesによって管理される中央データベースに保存されます。**`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**。
 
-#### **Quarantine.kext**
+**Quarantine.kext**
 
 このカーネル拡張機能は、システムの**カーネルキャッシュ**を介してのみ利用可能です。ただし、**https://developer.apple.com/** から**Kernel Debug Kit**をダウンロードすることで、この拡張機能のシンボル化されたバージョンを入手できます。
 
-### XProtect
+#### XProtect
 
 XProtectはmacOSに組み込まれた**対マルウェア**機能です。XProtectは、**アプリケーションが初めて起動されるか変更される際に、既知のマルウェアや安全でないファイルタイプのデータベース**と照合します。Safari、Mail、Messagesなどの特定のアプリを介してファイルをダウンロードすると、XProtectが自動的にファイルをスキャンします。データベース内の既知のマルウェアと一致する場合、XProtectはファイルの実行を**防止**し、脅威を通知します。
 
@@ -298,34 +284,32 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 
 XProtectは、**/Library/Apple/System/Library/CoreServices/XProtect.bundle**にあるSIP保護された場所にあり、バンドル内にはXProtectが使用する情報が含まれています:
 
-- **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: これらのcdhashesを持つコードがレガシー権限を使用できるようにします。
-- **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: BundleIDとTeamIDを介してロードを禁止されているプラグインと拡張機能のリスト、または最小バージョンを示します。
-- **`XProtect.bundle/Contents/Resources/XProtect.yara`**: マルウェアを検出するためのYaraルール。
-- **`XProtect.bundle/Contents/Resources/gk.db`**: ブロックされたアプリケーションとTeamIDのハッシュを持つSQLite3データベース。
+* **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: これらのcdhashesを持つコードがレガシー権限を使用できるようにします。
+* **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: BundleIDとTeamIDを介してロードを禁止されているプラグインと拡張機能のリスト、または最小バージョンを示します。
+* **`XProtect.bundle/Contents/Resources/XProtect.yara`**: マルウェアを検出するためのYaraルール。
+* **`XProtect.bundle/Contents/Resources/gk.db`**: ブロックされたアプリケーションとTeamIDのハッシュを持つSQLite3データベース。
 
-XProtectに関連するもう1つのAppが**`/Library/Apple/System/Library/CoreServices/XProtect.app`**にあり、Gatekeeperプロセスとは関係ありません。
+XProtectに関連するもう1つのAppが\*\*`/Library/Apple/System/Library/CoreServices/XProtect.app`\*\*にあり、Gatekeeperプロセスとは関係ありません。
 
-### Gatekeeperではない
+#### Gatekeeperではない
 
-{% hint style="danger" %}
 Gatekeeperは、アプリケーションを実行するたびに実行されるわけではないことに注意してください。_**AppleMobileFileIntegrity**_ (AMFI)は、Gatekeeperによってすでに実行および検証されたアプリケーションを実行するときにのみ、**実行可能コードの署名を検証**します。
-{% endhint %}
 
 したがって、以前はアプリケーションを実行してGatekeeperでキャッシュすることが可能で、その後アプリケーションの実行ファイル以外のファイル（Electron asarやNIBファイルなど）を変更し、他に保護がない場合、アプリケーションに**悪意のある**追加がされた状態で**実行**されていました。
 
 しかし、現在はmacOSがアプリケーションバンドル内のファイルを**変更できないように防止**しています。そのため、[Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md)攻撃を試みると、Gatekeeperでキャッシュするためにアプリケーションを実行した後でも、バンドルを変更できなくなることがわかります。たとえば、Contentsディレクトリの名前をExploitで示されているようにNotConに変更し、その後アプリケーションのメインバイナリをGatekeeperでキャッシュすると、エラーが発生して実行されません。
 
-## Gatekeeperのバイパス
+### Gatekeeperのバイパス
 
 Gatekeeperをバイパスする方法（ユーザーに何かをダウンロードさせ、Gatekeeperが拒否すべきときに実行させる方法）は、macOSの脆弱性と見なされます。これまでにGatekeeperをバイパスするための技術に割り当てられたいくつかのCVEは次のとおりです:
 
-### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
+#### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
 **Archive Utility**を使用している場合、**886文字を超えるパス**を持つファイルにはcom.apple.quarantine拡張属性が付与されません。この状況により、これらのファイルがGatekeeperのセキュリティチェックを**回避**することが誤って可能になります。
 
 詳細については、[**元のレポート**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)を参照してください。
 
-### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
+#### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
 
 **Automator**で作成されたアプリケーションでは、実行に必要な情報が`application.app/Contents/document.wflow`にあり、実行可能ファイルにはありません。実行可能ファイルは、**Automator Application Stub**と呼ばれる一般的なAutomatorバイナリです。
 
@@ -335,58 +319,67 @@ Gatekeeperをバイパスする方法（ユーザーに何かをダウンロー�
 
 詳細については、[**元のレポート**](https://ronmasas.com/posts/bypass-macos-gatekeeper)を参照してください。
 
-### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
+#### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-このバイパスでは、zipファイルが`application.app`ではなく`application.app/Contents`から圧縮を開始するように作成されました。したがって、**quarantine属性**が**`application.app/Contents`のすべてのファイル**に適用されましたが、**`application.app`**には適用されなかったため、Gatekeeperはバイパスされました。つまり、`application.app`がトリガーされたときには**quarantine属性が存在しなかった**のです。
+このバイパスでは、zipファイルが`application.app`ではなく`application.app/Contents`から圧縮を開始するように作成されました。したがって、**quarantine属性**が\*\*`application.app/Contents`のすべてのファイル**に適用されましたが、**`application.app`**には適用されなかったため、Gatekeeperはバイパスされました。つまり、`application.app`がトリガーされたときには**quarantine属性が存在しなかった\*\*のです。
+
 ```bash
 zip -r test.app/Contents test.zip
 ```
+
 チェックして、より詳細な情報を[**元のレポート**](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)で確認してください。
 
-### [CVE-2022-32910](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32910)
+#### [CVE-2022-32910](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32910)
 
-コンポーネントが異なる場合でも、この脆弱性の悪用は前回のものと非常に似ています。この場合、**`application.app/Contents`**からApple Archiveを生成し、**Archive Utility**によって展開される際に**`application.app`には隔離属性が付与されない**ようにします。
+コンポーネントが異なる場合でも、この脆弱性の悪用は前回のものと非常に似ています。この場合、**`application.app/Contents`からApple Archiveを生成し、Archive Utilityによって展開される際に`application.app`には隔離属性が付与されない**ようにします。
+
 ```bash
 aa archive -d test.app/Contents -o test.app.aar
 ```
+
 チェックして、より詳細な情報を[**元のレポート**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/)で確認してください。
 
-### [CVE-2022-42821](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+#### [CVE-2022-42821](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
-ACL **`writeextattr`**を使用して、ファイルの属性への書き込みを誰もが防ぐことができます：
+ACL \*\*`writeextattr`\*\*を使用して、ファイルの属性への書き込みを誰もが防ぐことができます：
+
 ```bash
 touch /tmp/no-attr
 chmod +a "everyone deny writeextattr" /tmp/no-attr
 xattr -w attrname vale /tmp/no-attr
 xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
+
 さらに、**AppleDouble**ファイル形式は、そのACEを含むファイルをコピーします。
 
-[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)では、**`com.apple.acl.text`**というxattrに格納されたACLテキスト表現が、展開されたファイルのACLとして設定されることがわかります。したがって、ACLを設定して他のxattrの書き込みを防止するACLを持つzipファイルにアプリケーションを圧縮した場合... クアランティンxattrはアプリケーションに設定されませんでした:
+[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)では、\*\*`com.apple.acl.text`\*\*というxattrに格納されたACLテキスト表現が、展開されたファイルのACLとして設定されることがわかります。したがって、ACLを設定して他のxattrの書き込みを防止するACLを持つzipファイルにアプリケーションを圧縮した場合... クアランティンxattrはアプリケーションに設定されませんでした:
+
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
 ditto -c -k test test.zip
 python3 -m http.server
 # Download the zip from the browser and decompress it, the file should be without a quarantine xattr
 ```
-{% endcode %}
 
 詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)をチェックしてください。
 
 これはAppleArchivesでも悪用される可能性があります。
+
 ```bash
 mkdir app
 touch app/test
 chmod +a "everyone deny write,writeattr,writeextattr" app/test
 aa archive -d app -o test.aar
 ```
-### [CVE-2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
+
+#### [CVE-2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
 
 **Google Chromeは、macOSの内部問題のためにダウンロードされたファイルにquarantine属性を設定していないことが発見されました。**
 
-### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
+#### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 
 AppleDoubleファイル形式は、ファイルの属性を`._`で始まる別のファイルに保存し、これによりmacOSマシン間でファイル属性をコピーするのに役立ちます。しかし、AppleDoubleファイルを展開した後、`._`で始まるファイルにquarantine属性が設定されていないことがわかりました。
+
 ```bash
 mkdir test
 echo a > test/a
@@ -396,10 +389,10 @@ aa archive -d test/ -o test.aar
 
 # If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
 ```
-{% endcode %}
 
 **Gatekeeper**をバイパスすることが可能でした。トリックは、AppleDouble名前規則を使用して（`._`で始める）、quarantine属性の設定されていない**隠しファイル**を作成し、この隠しファイルへの**シンボリックリンクとして見えるファイル**を作成することでした。\
 **dmgファイルが実行されると**、quarantine属性がないため、**Gatekeeperをバイパス**します。
+
 ```bash
 # Create an app bundle with the backdoor an call it app.app
 
@@ -415,6 +408,9 @@ ln -s ._app.dmg s/app/app.dmg
 echo "[+] compressing files"
 aa archive -d s/ -o app.aar
 ```
-### 隔離 xattr の防止
+
+#### 隔離 xattr の防止
 
 ".app" バンドルに隔離 xattr が追加されていない場合、それを実行しても **Gatekeeper はトリガーされません**。
+
+</details>

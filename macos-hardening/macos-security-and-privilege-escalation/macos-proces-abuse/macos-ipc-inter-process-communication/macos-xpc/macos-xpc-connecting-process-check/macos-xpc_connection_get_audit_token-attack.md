@@ -1,4 +1,4 @@
-# macOS xpc\_connection\_get\_audit\_token 攻撃
+# macOS xpc\_connection\_get\_audit\_token Attack
 
 <details>
 
@@ -9,7 +9,7 @@ HackTricks をサポートする他の方法:
 * **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする。
+* \*\*💬 [Discordグループ](https://discord.gg/hRep4RUj7f)\*\*に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする。
 * **ハッキングテクニックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する。
 
 </details>
@@ -20,12 +20,12 @@ HackTricks をサポートする他の方法:
 
 Machメッセージが何かわからない場合は、このページをチェックしてください:
 
-{% content-ref url="../../../../mac-os-architecture/macos-ipc-inter-process-communication/" %}
-[macos-ipc-inter-process-communication](../../../../mac-os-architecture/macos-ipc-inter-process-communication/)
+{% content-ref url="../../" %}
+[..](../../)
 {% endcontent-ref %}
 
 今のところ、([ここからの定義](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing))：\
-Machメッセージは_machポート_を介して送信され、これは**単一の受信者、複数の送信者通信**チャネルで、machカーネルに組み込まれています。**複数のプロセスがmachポートにメッセージを送信**できますが、いつでも**単一のプロセスだけがそれを読む**ことができます。ファイルディスクリプタやソケットと同様に、machポートはカーネルによって割り当てられ管理され、プロセスは整数しか見ません。これを使用して、カーネルに使用するmachポートを示すことができます。
+Machメッセージは\_machポート\_を介して送信され、これは**単一の受信者、複数の送信者通信**チャネルで、machカーネルに組み込まれています。**複数のプロセスがmachポートにメッセージを送信**できますが、いつでも**単一のプロセスだけがそれを読む**ことができます。ファイルディスクリプタやソケットと同様に、machポートはカーネルによって割り当てられ管理され、プロセスは整数しか見ません。これを使用して、カーネルに使用するmachポートを示すことができます。
 
 ## XPC接続
 
@@ -51,14 +51,17 @@ XPC接続がどのように確立されるかわからない場合は、次を�
 これが悪用される可能性がある2つの異なる方法:
 
 1. Variant1:
+
 * **Exploit** がサービス **A** とサービス **B** に **接続**します
 * サービス **B** は、ユーザーができない**特権機能**をサービス **A** で呼び出すことができます
-* サービス **A** は、**`dispatch_async`**内で **`xpc_connection_get_audit_token`** を呼び出す間、**イベントハンドラ**内に**いない**状態で監査トークンを取得します。
+* サービス **A** は、**`dispatch_async`内で `xpc_connection_get_audit_token` を呼び出す間、イベントハンドラ内にいない**状態で監査トークンを取得します。
 * したがって、**異なる**メッセージが**監査トークンを上書き**できるため、イベントハンドラの外部で非同期にディスパッチされています。
 * Exploit は、**サービス A に対して SEND 権限をサービス B に渡します**。
 * したがって、svc **B** は実際にはサービス **A** に**メッセージを送信**します。
 * **Exploit** は**特権アクションを呼び出そうとします**。RC svc **A** は、**svc B が監査トークンを上書き**したかどうかの認証をチェックします（これにより、悪用が特権アクションを呼び出す権限を与えられます）。
+
 2. Variant 2:
+
 * サービス **B** は、ユーザーができない**特権機能**をサービス **A** で呼び出すことができます
 * Exploit は、**サービス A** に接続し、特定の**リプライポート**で**応答を期待するメッセージ**を送信します。
 * Exploit は、**サービス B** に**そのリプライポート**を渡すメッセージを送信します。
@@ -87,9 +90,7 @@ XPC接続がどのように確立されるかわからない場合は、次を�
 2. `diagnosticd` に二次的な **接続** を形成します。通常の手順とは異なり、新しい2つのmachポートを作成して送信するのではなく、クライアントポートの送信権限は、`smd` 接続に関連付けられた **送信権限** の複製で置き換えられます。
 3. その結果、XPCメッセージを `diagnosticd` にディスパッチできますが、`diagnosticd` からの応答は `smd` にリダイレクトされます。`smd` にとっては、ユーザーと `diagnosticd` からのメッセージが同じ接続から発信されているように見えます。
 
-![攻撃プロセスを描いた画像](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
-4. 次のステップでは、`diagnosticd`に選択したプロセス（おそらくユーザー自身のプロセス）の監視を開始するよう指示します。同時に、`smd`にルーチンの1004メッセージの洪水を送信します。ここでの意図は、特権を持つツールをインストールすることです。
-5. このアクションにより、`handle_bless`関数内で競合状態が発生します。タイミングが重要です：`xpc_connection_get_pid`関数呼び出しは、ユーザーのプロセスのPIDを返さなければなりません（特権を持つツールはユーザーのアプリバンドルに存在します）。ただし、`xpc_connection_get_audit_token`関数、特に`connection_is_authorized`サブルーチン内で、`diagnosticd`に属する監査トークンを参照する必要があります。
+![攻撃プロセスを描いた画像](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png) 4. 次のステップでは、`diagnosticd`に選択したプロセス（おそらくユーザー自身のプロセス）の監視を開始するよう指示します。同時に、`smd`にルーチンの1004メッセージの洪水を送信します。ここでの意図は、特権を持つツールをインストールすることです。 5. このアクションにより、`handle_bless`関数内で競合状態が発生します。タイミングが重要です：`xpc_connection_get_pid`関数呼び出しは、ユーザーのプロセスのPIDを返さなければなりません（特権を持つツールはユーザーのアプリバンドルに存在します）。ただし、`xpc_connection_get_audit_token`関数、特に`connection_is_authorized`サブルーチン内で、`diagnosticd`に属する監査トークンを参照する必要があります。
 
 ## 変種2: 返信の転送
 
@@ -115,7 +116,7 @@ XPC（クロスプロセス通信）環境では、イベントハンドラは�
 
 以下は、説明された攻撃シナリオの視覚的表現です：
 
-![https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png](../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png)
+!\[https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png]\(../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png)
 
 <figure><img src="../../../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png" width="563"><figcaption></figcaption></figure>
 

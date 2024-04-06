@@ -1,4 +1,4 @@
-# macOS カーネル & システム拡張
+# macOS Kernel & System Extensions
 
 <details>
 
@@ -6,11 +6,11 @@
 
 HackTricks をサポートする他の方法:
 
-- **HackTricks で企業を宣伝**したい場合や **HackTricks を PDF でダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-- [**公式 PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見る
-- 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする
-- **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出する
+* **HackTricks で企業を宣伝**したい場合や **HackTricks を PDF でダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式 PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見る
+* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする
+* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出する
 
 </details>
 
@@ -32,12 +32,12 @@ XNU では、Mach が **プロセッサスケジューリング、マルチタ�
 
 XNU カーネルはまた、**FreeBSD** プロジェクトから派生した大量のコードを **組み込んで**います。このコードは、Mach と同じアドレス空間内でカーネルの一部として実行されます。ただし、XNU 内の FreeBSD コードは、Mach との互換性を確保するために変更が加えられたため、元の FreeBSD コードとは大きく異なる場合があります。FreeBSD は以下の多くのカーネル操作に貢献しています:
 
-- プロセス管理
-- シグナル処理
-- ユーザーおよびグループ管理を含む基本的なセキュリティメカニズム
-- システムコールインフラストラクチャ
-- TCP/IP スタックおよびソケット
-- ファイアウォールおよびパケットフィルタリング
+* プロセス管理
+* シグナル処理
+* ユーザーおよびグループ管理を含む基本的なセキュリティメカニズム
+* システムコールインフラストラクチャ
+* TCP/IP スタックおよびソケット
+* ファイアウォールおよびパケットフィルタリング
 
 BSD と Mach の相互作用を理解することは複雑であり、それぞれ異なる概念フレームワークを持っています。たとえば、BSD はプロセスを基本的な実行単位として使用しますが、Mach はスレッドに基づいて動作します。この相違は、XNU において BSD プロセスを Mach タスクに **関連付ける**ことで調整されます。BSD の fork() システムコールが使用されると、カーネル内の BSD コードは、タスクとスレッド構造を作成するために Mach 関数を使用します。
 
@@ -53,8 +53,8 @@ I/O Kit は XNU カーネル内のオープンソースのオブジェクト指�
 
 ### IPC - プロセス間通信
 
-{% content-ref url="macos-ipc-inter-process-communication/" %}
-[macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
+{% content-ref url="../macos-proces-abuse/macos-ipc-inter-process-communication/" %}
+[macos-ipc-inter-process-communication](../macos-proces-abuse/macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
 
 ### カーネルキャッシュ
@@ -71,18 +71,19 @@ IMG4 ファイル形式は、Apple が iOS および macOS デバイスで使用
 
 通常、以下のコンポーネントで構成されています:
 
-- **ペイロード (IM4P)**:
-  - しばしば圧縮されています（LZFSE4、LZSS など）
-  - オプションで暗号化されています
-- **マニフェスト (IM4M)**:
-  - 署名を含む
-  - 追加のキー/値の辞書
-- **リストア情報 (IM4R)**:
-  - APNonce としても知られています
-  - 一部の更新の再生を防止します
-  - オプション: 通常、これは見つかりません
+* **ペイロード (IM4P)**:
+  * しばしば圧縮されています（LZFSE4、LZSS など）
+  * オプションで暗号化されています
+* **マニフェスト (IM4M)**:
+  * 署名を含む
+  * 追加のキー/値の辞書
+* **リストア情報 (IM4R)**:
+  * APNonce としても知られています
+  * 一部の更新の再生を防止します
+  * オプション: 通常、これは見つかりません
 
 カーネルキャッシュを展開する:
+
 ```bash
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -90,6 +91,7 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 # img4tool (https://github.com/tihmstar/img4tool
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+
 #### カーネルキャッシュシンボル
 
 時々、Appleは**シンボル**付きの**カーネルキャッシュ**をリリースします。[https://theapplewiki.com](https://theapplewiki.com/)のリンクをたどることで、いくつかのファームウェアにシンボルが付いているものをダウンロードできます。
@@ -110,12 +112,15 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 {% endcode %}
 
 * [**img4tool**](https://github.com/tihmstar/img4tool)
+
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+
 次のコマンドを使用して、抽出されたkernelcacheのシンボルを確認できます: **`nm -a kernelcache.release.iphone14.e | wc -l`**
 
 これで、**すべての拡張機能**または**興味を持っている1つ**を抽出できます:
+
 ```bash
 # List all extensions
 kextex -l kernelcache.release.iphone14.e
@@ -128,6 +133,7 @@ kextex_all kernelcache.release.iphone14.e
 # Check the extension for symbols
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
+
 ## macOSカーネル拡張機能
 
 macOSは、コードが実行される高い特権のために、**カーネル拡張機能**（.kext）の読み込みを非常に制限しています。実際、デフォルトでは（回避策が見つかるまで）ほぼ不可能です。
