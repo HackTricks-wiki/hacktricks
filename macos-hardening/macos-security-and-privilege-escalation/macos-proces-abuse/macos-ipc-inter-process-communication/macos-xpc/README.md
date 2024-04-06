@@ -1,5 +1,7 @@
 # macOS XPC
 
+## macOS XPC
+
 <details>
 
 <summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
@@ -14,7 +16,7 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-## Información Básica
+### Información Básica
 
 XPC, que significa XNU (el kernel utilizado por macOS) inter-Process Communication, es un marco de trabajo para la **comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas a métodos seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, permitiendo la **creación de aplicaciones con separación de privilegios** donde cada **componente** funciona con **solo los permisos que necesita** para realizar su trabajo, limitando así el daño potencial de un proceso comprometido.
 
@@ -28,7 +30,7 @@ Los beneficios principales de XPC incluyen:
 
 El único **inconveniente** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto casi no se nota y los beneficios son mejores.
 
-## Servicios XPC Específicos de Aplicaciones
+### Servicios XPC Específicos de Aplicaciones
 
 Los componentes XPC de una aplicación están **dentro de la propia aplicación.** Por ejemplo, en Safari puedes encontrarlos en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y son **también paquetes** con el binario principal dentro de él: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` y un `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
@@ -36,11 +38,12 @@ Como podrías estar pensando, un **componente XPC tendrá diferentes derechos y 
 
 Los servicios XPC son **iniciados** por **launchd** cuando se requieren y se **cierran** una vez que todas las tareas están **completas** para liberar recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, reduciendo así el riesgo asociado con posibles vulnerabilidades.
 
-## Servicios XPC de Ámbito del Sistema
+### Servicios XPC de Ámbito del Sistema
 
 Los servicios XPC de ámbito del sistema están accesibles para todos los usuarios. Estos servicios, ya sean de tipo launchd o Mach, necesitan estar **definidos en archivos plist** ubicados en directorios especificados como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, o **`/Library/LaunchAgents`**.
 
 Estos archivos plist tendrán una clave llamada **`MachServices`** con el nombre del servicio, y una clave llamada **`Program`** con la ruta al binario:
+
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
@@ -74,13 +77,14 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
+
 Los que están en **`LaunchDameons`** son ejecutados por root. Por lo tanto, si un proceso no privilegiado puede comunicarse con uno de estos, podría ser capaz de escalar privilegios.
 
-## Mensajes de Eventos XPC
+### Mensajes de Eventos XPC
 
 Las aplicaciones pueden **suscribirse** a diferentes **mensajes** de eventos, lo que les permite ser **iniciadas bajo demanda** cuando ocurren dichos eventos. La **configuración** de estos servicios se realiza en archivos **plist de launchd**, ubicados en **los mismos directorios que los anteriores** y contienen una clave extra **`LaunchEvent`**.
 
-### Verificación del Proceso de Conexión XPC
+#### Verificación del Proceso de Conexión XPC
 
 Cuando un proceso intenta llamar a un método a través de una conexión XPC, el **servicio XPC debería verificar si ese proceso tiene permiso para conectarse**. Aquí están las formas comunes de verificarlo y las trampas comunes:
 
@@ -88,7 +92,7 @@ Cuando un proceso intenta llamar a un método a través de una conexión XPC, el
 [macos-xpc-connecting-process-check](macos-xpc-connecting-process-check/)
 {% endcontent-ref %}
 
-## Autorización XPC
+### Autorización XPC
 
 Apple también permite que las aplicaciones **configuren algunos derechos y cómo obtenerlos** para que, si el proceso que llama los tiene, se le **permita llamar a un método** del servicio XPC:
 
@@ -96,9 +100,10 @@ Apple también permite que las aplicaciones **configuren algunos derechos y cóm
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
 {% endcontent-ref %}
 
-## Sniffer XPC
+### Sniffer XPC
 
 Para espiar los mensajes XPC podrías usar [**xpcspy**](https://github.com/hot3eed/xpcspy) que utiliza **Frida**.
+
 ```bash
 # Install
 pip3 install xpcspy
@@ -109,10 +114,9 @@ xpcspy -U -r -W <bundle-id>
 ## Using filters (i: for input, o: for output)
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
-## Ejemplo de Código C para Comunicación XPC
 
-{% tabs %}
-{% tab title="xpc_server.c" %}
+### Ejemplo de Código C para Comunicación XPC
+
 ```c
 // gcc xpc_server.c -o xpc_server
 
@@ -166,9 +170,7 @@ dispatch_main();
 return 0;
 }
 ```
-{% endtab %}
 
-{% tab title="xpc_client.c" %}
 ```c
 // gcc xpc_client.c -o xpc_client
 
@@ -197,9 +199,7 @@ dispatch_main();
 return 0;
 }
 ```
-{% endtab %}
 
-{% tab title="xyz.hacktricks.service.plist" %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -220,7 +220,9 @@ return 0;
 </dict>
 </plist>
 ```
+
 No hay contenido en inglés proporcionado para traducir al español. Por favor, proporcione el texto en inglés que necesita ser traducido.
+
 ```bash
 # Compile the server & client
 gcc xpc_server.c -o xpc_server
@@ -240,7 +242,8 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-## Ejemplo de Código en Objective-C para Comunicación XPC
+
+### Ejemplo de Código en Objective-C para Comunicación XPC
 
 {% tabs %}
 {% tab title="oc_xpc_server.m" %}
@@ -343,25 +346,26 @@ return 0;
 ```
 {% endtab %}
 {% endtabs %}
-```bash
-# Compile the server & client
-gcc -framework Foundation oc_xpc_server.m -o oc_xpc_server
-gcc -framework Foundation oc_xpc_client.m -o oc_xpc_client
 
-# Save server on it's location
-cp oc_xpc_server /tmp
+\`\`\`bash # Compile the server & client gcc -framework Foundation oc\_xpc\_server.m -o oc\_xpc\_server gcc -framework Foundation oc\_xpc\_client.m -o oc\_xpc\_client
 
-# Load daemon
-sudo cp xyz.hacktricks.svcoc.plist /Library/LaunchDaemons
-sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
+## Save server on it's location
 
-# Call client
-./oc_xpc_client
+cp oc\_xpc\_server /tmp
 
-# Clean
-sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
-sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
-```
+## Load daemon
+
+sudo cp xyz.hacktricks.svcoc.plist /Library/LaunchDaemons sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
+
+## Call client
+
+./oc\_xpc\_client
+
+## Clean
+
+sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc\_xpc\_server
+
+````
 ## Cliente dentro de un código Dylb
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
@@ -395,7 +399,8 @@ NSLog(@"Done!");
 
 return;
 }
-```
+````
+
 <details>
 
 <summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>

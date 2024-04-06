@@ -1,4 +1,4 @@
-# Arquitectura de macOS Kernel y Extensiones del Sistema
+# macOS Kernel & System Extensions
 
 <details>
 
@@ -53,8 +53,8 @@ El I/O Kit es un marco de **controladores de dispositivos orientado a objetos de
 
 ### IPC - Comunicación entre Procesos
 
-{% content-ref url="macos-ipc-inter-process-communication/" %}
-[macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
+{% content-ref url="../macos-proces-abuse/macos-ipc-inter-process-communication/" %}
+[macos-ipc-inter-process-communication](../macos-proces-abuse/macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
 
 ### Kernelcache
@@ -83,6 +83,7 @@ Generalmente está compuesto por los siguientes componentes:
 * OPCIONAL: Por lo general, esto no se encuentra
 
 Descomprimir el Kernelcache:
+
 ```bash
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -90,6 +91,7 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 # img4tool (https://github.com/tihmstar/img4tool
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+
 #### Símbolos del Kernelcache
 
 A veces Apple lanza **kernelcache** con **símbolos**. Puedes descargar algunos firmwares con símbolos siguiendo los enlaces en [https://theapplewiki.com](https://theapplewiki.com/).
@@ -110,12 +112,15 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 {% endcode %}
 
 * [**img4tool**](https://github.com/tihmstar/img4tool)
+
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+
 Puedes verificar los símbolos extraídos del kernelcache con: **`nm -a kernelcache.release.iphone14.e | wc -l`**
 
 Con esto ahora podemos **extraer todas las extensiones** o la **que te interese:**
+
 ```bash
 # List all extensions
 kextex -l kernelcache.release.iphone14.e
@@ -128,6 +133,7 @@ kextex_all kernelcache.release.iphone14.e
 # Check the extension for symbols
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
+
 ## Extensiones de Kernel de macOS
 
 macOS es **súper restrictivo para cargar Extensiones de Kernel** (.kext) debido a los altos privilegios con los que se ejecutará el código. De hecho, por defecto es virtualmente imposible (a menos que se encuentre un bypass).

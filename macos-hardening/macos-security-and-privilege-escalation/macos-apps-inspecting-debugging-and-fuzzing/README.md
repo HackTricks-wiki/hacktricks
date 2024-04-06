@@ -1,4 +1,4 @@
-# macOS Apps - Inspección, depuración y Fuzzing
+# macOS Apps - Inspecting, debugging and Fuzzing
 
 <details>
 
@@ -17,13 +17,19 @@ Otras formas de apoyar a HackTricks:
 ## Análisis Estático
 
 ### otool
+
 ```bash
 otool -L /bin/ls #List dynamically linked libraries
 otool -tv /bin/ps #Decompile application
 ```
+
 ### objdump
 
 {% code overflow="wrap" %}
+```
+```
+{% endcode %}
+
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
@@ -32,9 +38,11 @@ objdump -m --full-contents /bin/ls # Dump every section
 objdump -d /bin/ls # Dissasemble the binary
 objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemble a function using intel flavour
 ```
+
 ### jtool2
 
 La herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y proporciona algunas características adicionales. [**Descárgalo aquí**](http://www.newosxbook.com/tools/jtool.html) o instálalo con `brew`.
+
 ```bash
 # Install
 brew install --cask jtool2
@@ -51,11 +59,13 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 # Get MIG information
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
+
 ### Codesign / ldid
 
 {% hint style="danger" %}
 **`Codesign`** se puede encontrar en **macOS** mientras que **`ldid`** se puede encontrar en **iOS**
 {% endhint %}
+
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -82,6 +92,7 @@ ldid -e <binary>
 ## /tmp/entl.xml is a XML file with the new entitlements to add
 ldid -S/tmp/entl.xml <binary>
 ```
+
 ### SuspiciousPackage
 
 [**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) es una herramienta útil para inspeccionar archivos **.pkg** (instaladores) y ver qué hay dentro antes de instalarlo.\
@@ -90,9 +101,11 @@ Estos instaladores tienen scripts bash `preinstall` y `postinstall` que los auto
 ### hdiutil
 
 Esta herramienta permite **montar** archivos de imagen de disco de Apple (**.dmg**) para inspeccionarlos antes de ejecutar cualquier cosa:
+
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
+
 Se montará en `/Volumes`
 
 ### Objective-C
@@ -108,9 +121,11 @@ Tenga en cuenta que los programas escritos en Objective-C **conservan** sus decl
 * Las variables de instancia de clase
 
 Puede obtener esta información utilizando [**class-dump**](https://github.com/nygard/class-dump):
+
 ```bash
 class-dump Kindle.app
 ```
+
 #### Llamada de funciones
 
 Cuando se llama a una función en un binario que utiliza Objective-C, en lugar de llamar directamente a esa función, el código compilado llamará a **`objc_msgSend`**. Lo cual llamará a la función final:
@@ -119,9 +134,9 @@ Cuando se llama a una función en un binario que utiliza Objective-C, en lugar d
 
 Los parámetros que esta función espera son:
 
-- El primer parámetro (**self**) es "un puntero que apunta a la **instancia de la clase que va a recibir el mensaje**". O de forma más simple, es el objeto sobre el cual se invoca el método. Si el método es un método de clase, esto será una instancia del objeto de la clase (en su totalidad), mientras que para un método de instancia, self apuntará a una instancia instanciada de la clase como un objeto.
-- El segundo parámetro, (**op**), es "el selector del método que maneja el mensaje". Nuevamente, de forma más simple, este es simplemente el **nombre del método**.
-- Los parámetros restantes son cualquier **valor requerido por el método** (op).
+* El primer parámetro (**self**) es "un puntero que apunta a la **instancia de la clase que va a recibir el mensaje**". O de forma más simple, es el objeto sobre el cual se invoca el método. Si el método es un método de clase, esto será una instancia del objeto de la clase (en su totalidad), mientras que para un método de instancia, self apuntará a una instancia instanciada de la clase como un objeto.
+* El segundo parámetro, (**op**), es "el selector del método que maneja el mensaje". Nuevamente, de forma más simple, este es simplemente el **nombre del método**.
+* Los parámetros restantes son cualquier **valor requerido por el método** (op).
 
 Vea cómo **obtener esta información fácilmente con `lldb` en ARM64** en esta página:
 
@@ -131,21 +146,22 @@ Vea cómo **obtener esta información fácilmente con `lldb` en ARM64** en esta 
 
 x64:
 
-| **Argumento**     | **Registro**                                                   | **(para) objc\_msgSend**                               |
-| ----------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
-| **1er argumento** | **rdi**                                                        | **self: objeto sobre el cual se invoca el método**     |
-| **2do argumento** | **rsi**                                                        | **op: nombre del método**                             |
-| **3er argumento** | **rdx**                                                        | **1er argumento del método**                          |
-| **4to argumento** | **rcx**                                                        | **2do argumento del método**                          |
-| **5to argumento** | **r8**                                                         | **3er argumento del método**                          |
-| **6to argumento** | **r9**                                                         | **4to argumento del método**                          |
-| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento del método**                         |
+| **Argumento**      | **Registro**                                                  | **(para) objc\_msgSend**                           |
+| ------------------ | ------------------------------------------------------------- | -------------------------------------------------- |
+| **1er argumento**  | **rdi**                                                       | **self: objeto sobre el cual se invoca el método** |
+| **2do argumento**  | **rsi**                                                       | **op: nombre del método**                          |
+| **3er argumento**  | **rdx**                                                       | **1er argumento del método**                       |
+| **4to argumento**  | **rcx**                                                       | **2do argumento del método**                       |
+| **5to argumento**  | **r8**                                                        | **3er argumento del método**                       |
+| **6to argumento**  | **r9**                                                        | **4to argumento del método**                       |
+| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento del método**                      |
 
 ### Swift
 
 Con binarios Swift, dado que hay compatibilidad con Objective-C, a veces se pueden extraer declaraciones usando [class-dump](https://github.com/nygard/class-dump/) pero no siempre.
 
 Con las líneas de comando **`jtool -l`** o **`otool -l`** es posible encontrar varias secciones que comienzan con el prefijo **`__swift5`**:
+
 ```bash
 jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
 LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
@@ -157,9 +173,11 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
+
 Puedes encontrar más información sobre la **información almacenada en esta sección en esta publicación de blog**.
 
 Además, **los binarios de Swift pueden tener símbolos** (por ejemplo, las bibliotecas necesitan almacenar símbolos para que sus funciones puedan ser llamadas). Los **símbolos suelen tener la información sobre el nombre de la función** y los atributos de una manera fea, por lo que son muy útiles y hay "**demanglers"** que pueden obtener el nombre original:
+
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -167,6 +185,7 @@ https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
 # Swift cli
 swift demangle
 ```
+
 ### Binarios empaquetados
 
 * Verificar la entropía alta
@@ -203,7 +222,7 @@ En el panel central puedes ver el **código desensamblado**. Y puedes verlo como
 
 Al hacer clic derecho en un objeto de código, puedes ver las **referencias a/desde ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo decompilado):
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 Además, en la **parte inferior central puedes escribir comandos de Python**.
 
@@ -224,6 +243,7 @@ También puedes **`dtrace`** o **`dtruss`** binarios que **hayas compilado**.
 {% endhint %}
 
 Las sondas disponibles de dtrace se pueden obtener con:
+
 ```bash
 dtrace -l | head
 ID   PROVIDER            MODULE                          FUNCTION NAME
@@ -233,6 +253,7 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 43    profile                                                     profile-97
 44    profile                                                     profile-199
 ```
+
 El nombre de la sonda consta de cuatro partes: el proveedor, el módulo, la función y el nombre (`fbt:mach_kernel:ptrace:entry`). Si no se especifica alguna parte del nombre, Dtrace aplicará esa parte como un comodín.
 
 Para configurar DTrace para activar sondas y especificar qué acciones realizar cuando se activen, necesitaremos usar el lenguaje D.
@@ -244,11 +265,14 @@ Una explicación más detallada y más ejemplos se pueden encontrar en [https://
 Ejecute `man -k dtrace` para listar los **scripts de DTrace disponibles**. Ejemplo: `sudo dtruss -n binary`
 
 * En línea
+
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
+
 * guion
+
 ```bash
 syscall:::entry
 /pid == $1/
@@ -286,17 +310,22 @@ printf("=%d\n", arg1);
 #Log sys calls with values
 sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 ```
+
 ### dtruss
+
 ```bash
 dtruss -c ls #Get syscalls of ls
 dtruss -c -p 1000 #get syscalls of PID 1000
 ```
+
 ### ktrace
 
 Puedes usar este incluso con **SIP activado**.
+
 ```bash
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
+
 ### ProcessMonitor
 
 [**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) es una herramienta muy útil para verificar las acciones relacionadas con procesos que un proceso está realizando (por ejemplo, monitorear qué nuevos procesos está creando un proceso).
@@ -325,10 +354,12 @@ Necesitas monitorear tu Mac con un comando como **`sudo eslogger fork exec renam
 ### fs\_usage
 
 Permite seguir las acciones realizadas por los procesos:
+
 ```bash
 fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names containing ls
 fs_usage -w -f network curl #This tracks network actions
 ```
+
 ### TaskExplorer
 
 [**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) es útil para ver las **bibliotecas** utilizadas por un binario, los **archivos** que está utilizando y las **conexiones de red**.\
@@ -341,16 +372,20 @@ En [**esta publicación de blog**](https://knight.sc/debugging/2019/06/03/debugg
 ### lldb
 
 **lldb** es la herramienta de **hecho** para **depurar** binarios en **macOS**.
+
 ```bash
 lldb ./malware.bin
 lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
+
 Puedes configurar el sabor de Intel al usar lldb creando un archivo llamado **`.lldbinit`** en tu carpeta de inicio con la siguiente línea:
+
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
+
 {% hint style="warning" %}
 Dentro de lldb, volcar un proceso con `process save-core`
 {% endhint %}
@@ -380,7 +415,8 @@ Al llamar a la función **`objc_sendMsg`**, el registro **rsi** contiene el **no
 * También se puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un deb**u**gger se adjunte y realice un seguimiento.
 * Puedes verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
 * Como se señala en este artículo, “[Derrotando Técnicas Anti-Depuración: variantes de ptrace en macOS](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-“_El mensaje Proceso # salió con **estado = 45 (0x0000002d)** suele ser una clara señal de que el objetivo de depuración está usando **PT\_DENY\_ATTACH**_”
+  “_El mensaje Proceso # salió con **estado = 45 (0x0000002d)** suele ser una clara señal de que el objetivo de depuración está usando **PT\_DENY\_ATTACH**_”
+
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
@@ -390,6 +426,7 @@ Para aplicaciones y otros procesos **que se ejecutan en el contexto de lanzamien
 Para demonios, otros procesos **que se ejecutan en el contexto de lanzamiento del sistema** y otros procesos privilegiados, ReportCrash se ejecuta como un LaunchDaemon y guarda los informes de bloqueo en `/Library/Logs/DiagnosticReports` del sistema.
 
 Si te preocupa que los informes de bloqueo **sean enviados a Apple**, puedes desactivarlos. De lo contrario, los informes de bloqueo pueden ser útiles para **descubrir cómo se bloqueó un servidor**.
+
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -399,6 +436,7 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
+
 ### Suspensión
 
 Durante el fuzzing en un MacOS es importante evitar que la Mac entre en suspensión:
@@ -414,10 +452,12 @@ Si estás realizando fuzzing a través de una conexión SSH, es importante asegu
 * TCPKeepAlive Yes
 * ClientAliveInterval 0
 * ClientAliveCountMax 0
+
 ```bash
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
+
 ### Controladores internos
 
 **Consulta la siguiente página** para descubrir cómo puedes encontrar qué aplicación es responsable de **manejar el esquema o protocolo especificado:**
@@ -427,12 +467,14 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 {% endcontent-ref %}
 
 ### Enumeración de Procesos de Red
+
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
 sort -u recv.log > procs.txt
 cat procs.txt
 ```
+
 O utiliza `netstat` o `lsof`
 
 ### Libgmalloc

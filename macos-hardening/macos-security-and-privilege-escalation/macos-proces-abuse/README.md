@@ -1,4 +1,4 @@
-# Abuso de Procesos en macOS
+# macOS Proces Abuse
 
 <details>
 
@@ -30,16 +30,16 @@ La Inyección de Bibliotecas es una técnica en la que un atacante **obliga a un
 
 El Enganche de Funciones implica **interceptar llamadas de funciones** o mensajes dentro de un código de software. Al enganchar funciones, un atacante puede **modificar el comportamiento** de un proceso, observar datos sensibles o incluso obtener control sobre el flujo de ejecución.
 
-{% content-ref url="../mac-os-architecture/macos-function-hooking.md" %}
-[macos-function-hooking.md](../mac-os-architecture/macos-function-hooking.md)
+{% content-ref url="macos-function-hooking.md" %}
+[macos-function-hooking.md](macos-function-hooking.md)
 {% endcontent-ref %}
 
 ### Comunicación entre Procesos
 
 La Comunicación entre Procesos (IPC) se refiere a diferentes métodos mediante los cuales procesos separados **comparten e intercambian datos**. Si bien el IPC es fundamental para muchas aplicaciones legítimas, también puede ser mal utilizado para subvertir el aislamiento de procesos, filtrar información sensible o realizar acciones no autorizadas.
 
-{% content-ref url="../mac-os-architecture/macos-ipc-inter-process-communication/" %}
-[macos-ipc-inter-process-communication](../mac-os-architecture/macos-ipc-inter-process-communication/)
+{% content-ref url="macos-ipc-inter-process-communication/" %}
+[macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
 
 ### Inyección de Aplicaciones Electron
@@ -107,19 +107,7 @@ Otras variables de entorno como **`PYTHONPATH`** y **`PYTHONHOME`** también pod
 
 Ten en cuenta que los ejecutables compilados con **`pyinstaller`** no utilizarán estas variables de entorno incluso si se ejecutan utilizando un Python integrado.
 
-{% hint style="danger" %}
-En general, no pude encontrar una forma de hacer que Python ejecute código arbitrario abusando de las variables de entorno.\
-Sin embargo, la mayoría de las personas instalan Python usando **Hombrew**, que instalará Python en una **ubicación escribible** para el usuario administrador predeterminado. Puedes secuestrarlo con algo como:
-```bash
-mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
-cat > /opt/homebrew/bin/python3 <<EOF
-#!/bin/bash
-# Extra hijack code
-/opt/homebrew/bin/python3.old "$@"
-EOF
-chmod +x /opt/homebrew/bin/python3
-```
-Incluso **root** ejecutará este código al ejecutar python.
+En general, no pude encontrar una forma de hacer que Python ejecute código arbitrario abusando de las variables de entorno.\ Sin embargo, la mayoría de las personas instalan Python usando \*\*Hombrew\*\*, que instalará Python en una \*\*ubicación escribible\*\* para el usuario administrador predeterminado. Puedes secuestrarlo con algo como: \`\`\`bash mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old cat > /opt/homebrew/bin/python3 <
 
 ## Detección
 
