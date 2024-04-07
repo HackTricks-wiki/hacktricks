@@ -9,7 +9,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -22,20 +22,23 @@ Other ways to support HackTricks:
 ## Basics
 
 ### **MDM (Mobile Device Management) Overview**
-[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) is utilized for overseeing various end-user devices like smartphones, laptops, and tablets. Particularly for Apple's platforms (iOS, macOS, tvOS), it involves a set of specialized features, APIs, and practices. The operation of MDM hinges on a compatible MDM server, which is either commercially available or open-source, and must support the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Key points include:
 
-- Centralized control over devices.
-- Dependence on an MDM server that adheres to the MDM protocol.
-- Capability of the MDM server to dispatch various commands to devices, for instance, remote data erasure or configuration installation.
+[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile\_device\_management) (MDM) is utilized for overseeing various end-user devices like smartphones, laptops, and tablets. Particularly for Apple's platforms (iOS, macOS, tvOS), it involves a set of specialized features, APIs, and practices. The operation of MDM hinges on a compatible MDM server, which is either commercially available or open-source, and must support the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Key points include:
+
+* Centralized control over devices.
+* Dependence on an MDM server that adheres to the MDM protocol.
+* Capability of the MDM server to dispatch various commands to devices, for instance, remote data erasure or configuration installation.
 
 ### **Basics of DEP (Device Enrollment Program)**
-The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) offered by Apple streamlines the integration of Mobile Device Management (MDM) by facilitating zero-touch configuration for iOS, macOS, and tvOS devices. DEP automates the enrollment process, allowing devices to be operational right out of the box, with minimal user or administrative intervention. Essential aspects include:
 
-- Enables devices to autonomously register with a pre-defined MDM server upon initial activation.
-- Primarily beneficial for brand-new devices, but also applicable for devices undergoing reconfiguration.
-- Facilitates a straightforward setup, making devices ready for organizational use swiftly.
+The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP\_Guide.pdf) (DEP) offered by Apple streamlines the integration of Mobile Device Management (MDM) by facilitating zero-touch configuration for iOS, macOS, and tvOS devices. DEP automates the enrollment process, allowing devices to be operational right out of the box, with minimal user or administrative intervention. Essential aspects include:
+
+* Enables devices to autonomously register with a pre-defined MDM server upon initial activation.
+* Primarily beneficial for brand-new devices, but also applicable for devices undergoing reconfiguration.
+* Facilitates a straightforward setup, making devices ready for organizational use swiftly.
 
 ### **Security Consideration**
+
 It's crucial to note that the ease of enrollment provided by DEP, while beneficial, can also pose security risks. If protective measures are not adequately enforced for MDM enrollment, attackers might exploit this streamlined process to register their device on the organization's MDM server, masquerading as a corporate device.
 
 {% hint style="danger" %}
@@ -101,7 +104,7 @@ Apple devices manufactured after 2010 generally have **12-character alphanumeric
 6. Profile installation (Device) a. incl. MDM, SCEP and root CA payloads
 7. MDM command issuance (Device)
 
-![](<../../../.gitbook/assets/image (564).png>)
+![](<../../../.gitbook/assets/image (691).png>)
 
 The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
 
@@ -109,7 +112,7 @@ The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Librar
 
 This part of the process occurs when a **user boots a Mac for the first time** (or after a complete wipe)
 
-![](<../../../.gitbook/assets/image (568).png>)
+![](<../../../.gitbook/assets/image (1041).png>)
 
 or when executing `sudo profiles show -type enrollment`
 
@@ -134,7 +137,7 @@ It follows a few steps to get the Activation Record performed by **`MCTeslaConfi
    2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
    3. All requests over HTTPs, built-in root certificates are used
 
-![](<../../../.gitbook/assets/image (566).png>)
+![](<../../../.gitbook/assets/image (566) (1).png>)
 
 The response is a JSON dictionary with some important data like:
 
@@ -143,7 +146,7 @@ The response is a JSON dictionary with some important data like:
 
 ### **Step 5: Profile Retrieval**
 
-![](<../../../.gitbook/assets/image (567).png>)
+![](<../../../.gitbook/assets/image (441).png>)
 
 * Request sent to **url provided in DEP profile**.
 * **Anchor certificates** are used to **evaluate trust** if provided.
@@ -154,7 +157,7 @@ The response is a JSON dictionary with some important data like:
 * Signed using the **device identity certificate (from APNS)**
 * **Certificate chain** includes expired **Apple iPhone Device CA**
 
-![](<../../../.gitbook/assets/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (7).png>)
+![](<../../../.gitbook/assets/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
 ### Step 6: Profile Installation
 
@@ -211,7 +214,6 @@ Therefore, this could be a dangerous entrypoint for attackers if the enrolment p
 [enrolling-devices-in-other-organisations.md](enrolling-devices-in-other-organisations.md)
 {% endcontent-ref %}
 
-
 <details>
 
 <summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
@@ -221,7 +223,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
