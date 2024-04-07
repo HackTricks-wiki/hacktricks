@@ -1,4 +1,4 @@
-# Abuso de AD MSSQL
+# Abuso de MSSQL AD
 
 <details>
 
@@ -6,11 +6,16 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
+
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
 
 ## **Enumeración / Descubrimiento de MSSQL**
 
@@ -132,12 +137,14 @@ Desde **Windows** también podrías encontrar los enlaces y ejecutar comandos ma
 
 _Iniciar sesión usando autenticación de Windows:_
 
-![](<../../.gitbook/assets/image (167) (1).png>)
+![](<../../.gitbook/assets/image (805).png>)
+
+#### Encontrar Enlaces Confiables
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-![](<../../.gitbook/assets/image (168).png>)
+![](<../../.gitbook/assets/image (713).png>)
 
 #### Ejecutar consultas en enlace confiable
 
@@ -149,7 +156,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 Verifica dónde se utilizan comillas dobles y simples, es importante usarlas de esa manera.
 {% endhint %}
 
-![](<../../.gitbook/assets/image (169).png>)
+![](<../../.gitbook/assets/image (640).png>)
 
 Puedes continuar esta cadena de enlaces confiables para siempre de forma manual.
 ```sql
@@ -171,6 +178,23 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 El usuario local de **MSSQL** generalmente tiene un tipo especial de privilegio llamado **`SeImpersonatePrivilege`**. Esto permite que la cuenta "suplante a un cliente después de la autenticación".
 
-Una estrategia que muchos autores han ideado es forzar a un servicio **SYSTEM** a autenticarse en un servicio falso o de intermediario creado por el atacante. Este servicio falso puede entonces suplantar al servicio **SYSTEM** mientras intenta autenticarse.
+Una estrategia que muchos autores han ideado es forzar a un servicio **SYSTEM** a autenticarse en un servicio falso o de intermediario creado por el atacante. Este servicio falso puede suplantar al servicio **SYSTEM** mientras intenta autenticarse.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) tiene una colección de estas diversas técnicas que pueden ejecutarse a través del comando `execute-assembly` de Beacon.
+[SweetPotato](https://github.com/CCob/SweetPotato) tiene una colección de estas diversas técnicas que se pueden ejecutar a través del comando `execute-assembly` de Beacon.
+
+
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
+<details>
+
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>

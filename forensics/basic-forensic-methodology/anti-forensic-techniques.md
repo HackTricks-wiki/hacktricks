@@ -1,16 +1,20 @@
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks en AWS)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
+
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
 
 
 # Marcas de tiempo
@@ -24,7 +28,7 @@ Ambos atributos tienen 4 marcas de tiempo: **Modificación**, **acceso**, **crea
 
 ## TimeStomp - Herramienta anti-forense
 
-Esta herramienta **modifica** la información de la marca de tiempo dentro de **`$STANDARD_INFORMATION`** **pero** **no** la información dentro de **`$FILE_NAME`**. Por lo tanto, es posible **identificar** **actividades sospechosas**.
+Esta herramienta **modifica** la información de marcas de tiempo dentro de **`$STANDARD_INFORMATION`** **pero** **no** la información dentro de **`$FILE_NAME`**. Por lo tanto, es posible **identificar** **actividades sospechosas**.
 
 ## Usnjrnl
 
@@ -36,13 +40,13 @@ La imagen anterior es la **salida** mostrada por la **herramienta** donde se pue
 
 ## $LogFile
 
-**Todos los cambios de metadatos en un sistema de archivos se registran** en un proceso conocido como [registro de escritura anticipada](https://en.wikipedia.org/wiki/Write-ahead_logging). Los metadatos registrados se mantienen en un archivo llamado `**$LogFile**`, ubicado en el directorio raíz de un sistema de archivos NTFS. Herramientas como [LogFileParser](https://github.com/jschicht/LogFileParser) se pueden utilizar para analizar este archivo e identificar cambios.
+**Todos los cambios de metadatos en un sistema de archivos se registran** en un proceso conocido como [registro anticipado](https://en.wikipedia.org/wiki/Write-ahead_logging). Los metadatos registrados se mantienen en un archivo llamado `**$LogFile**`, ubicado en el directorio raíz de un sistema de archivos NTFS. Herramientas como [LogFileParser](https://github.com/jschicht/LogFileParser) se pueden utilizar para analizar este archivo e identificar cambios.
 
 ![](<../../.gitbook/assets/image (450).png>)
 
-Nuevamente, en la salida de la herramienta es posible ver que **se realizaron algunos cambios**.
+Nuevamente, en la salida de la herramienta es posible ver que se realizaron **algunos cambios**.
 
-Utilizando la misma herramienta es posible identificar a **qué hora se modificaron las marcas de tiempo**:
+Usando la misma herramienta es posible identificar a **qué hora se modificaron las marcas de tiempo**:
 
 ![](<../../.gitbook/assets/image (451).png>)
 
@@ -65,7 +69,7 @@ Esta herramienta puede modificar ambos atributos `$STARNDAR_INFORMATION` y `$FIL
 
 # Ocultación de datos
 
-NTFS utiliza un clúster y el tamaño mínimo de información. Esto significa que si un archivo ocupa un clúster y medio, el **medio restante nunca se utilizará** hasta que se elimine el archivo. Por lo tanto, es posible **ocultar datos en este espacio vacío**.
+NTFS utiliza un clúster y el tamaño mínimo de información. Esto significa que si un archivo ocupa un clúster y medio, el **medio restante nunca se utilizará** hasta que se elimine el archivo. Entonces, es posible **ocultar datos en este espacio vacío**.
 
 Existen herramientas como slacker que permiten ocultar datos en este espacio "oculto". Sin embargo, un análisis del `$logfile` y `$usnjrnl` puede mostrar que se agregaron datos:
 
@@ -92,12 +96,12 @@ Es posible deshabilitar varios métodos de registro de Windows para dificultar m
 
 ## Deshabilitar marcas de tiempo - UserAssist
 
-Esta es una clave del registro que mantiene las fechas y horas en que se ejecutó cada ejecutable por el usuario.
+Esta es una clave de registro que mantiene las fechas y horas en que se ejecutó cada ejecutable por el usuario.
 
 Deshabilitar UserAssist requiere dos pasos:
 
-1. Establecer dos claves del registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` y `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, ambos en cero para indicar que queremos deshabilitar UserAssist.
-2. Limpiar las subramas de tu registro que se parecen a `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. Establecer dos claves de registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` y `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, ambos en cero para indicar que queremos deshabilitar UserAssist.
+2. Limpiar las subramas de registro que se parecen a `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
 ## Deshabilitar marcas de tiempo - Prefetch
 
@@ -117,15 +121,14 @@ Cada vez que se abre una carpeta desde un volumen NTFS en un servidor Windows NT
 2. Navegar a `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
 3. Buscar `NtfsDisableLastAccessUpdate`. Si no existe, agregar este DWORD y establecer su valor en 1, lo que deshabilitará el proceso.
 4. Cerrar el Editor del Registro y reiniciar el servidor.
+## Eliminar Historial de USB
 
-## Eliminar historial USB
+Todas las **Entradas de Dispositivos USB** se almacenan en el Registro de Windows bajo la clave del registro **USBSTOR** que contiene subclaves que se crean cada vez que conectas un dispositivo USB a tu PC o portátil. Puedes encontrar esta clave aquí `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. Al **eliminar esto** se borrará el historial de USB.\
+También puedes utilizar la herramienta [**USBDeview**](https://www.nirsoft.net/utils/usb\_devices\_view.html) para asegurarte de haberlos eliminado (y para eliminarlos).
 
-Todas las **Entradas de Dispositivos USB** se almacenan en el Registro de Windows bajo la clave del registro **USBSTOR** que contiene subclaves que se crean cada vez que conectas un Dispositivo USB a tu PC o portátil. Puedes encontrar esta clave aquí H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Al eliminar esto** eliminarás el historial USB.\
-También puedes usar la herramienta [**USBDeview**](https://www.nirsoft.net/utils/usb\_devices\_view.html) para asegurarte de haberlos eliminado (y para eliminarlos).
+Otro archivo que guarda información sobre los USBs es el archivo `setupapi.dev.log` dentro de `C:\Windows\INF`. Este también debería ser eliminado.
 
-Otro archivo que guarda información sobre los USB es el archivo `setupapi.dev.log` dentro de `C:\Windows\INF`. Este también debería ser eliminado.
-
-## Deshabilitar Copias de sombra
+## Deshabilitar Copias de Sombra
 
 **Listar** las copias de sombra con `vssadmin list shadowstorage`\
 **Eliminar** ejecutando `vssadmin delete shadow`
@@ -134,11 +137,11 @@ También puedes eliminarlas a través de la GUI siguiendo los pasos propuestos e
 
 Para deshabilitar las copias de sombra [pasos desde aquí](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Abrir el programa Servicios escribiendo "servicios" en el cuadro de búsqueda de texto después de hacer clic en el botón de inicio de Windows.
-2. En la lista, encontrar "Copia de sombra de volumen", seleccionarla y luego acceder a Propiedades haciendo clic derecho.
-3. Elegir Deshabilitado en el menú desplegable "Tipo de inicio" y luego confirmar el cambio haciendo clic en Aplicar y Aceptar.
+1. Abre el programa de Servicios escribiendo "services" en la caja de búsqueda de texto después de hacer clic en el botón de inicio de Windows.
+2. En la lista, encuentra "Copia de Sombra de Volumen", selecciónalo y luego accede a Propiedades haciendo clic derecho.
+3. Elige Deshabilitado en el menú desplegable "Tipo de inicio" y luego confirma el cambio haciendo clic en Aplicar y Aceptar.
 
-También es posible modificar la configuración de qué archivos se van a copiar en la copia de sombra en el registro `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+También es posible modificar la configuración de qué archivos van a ser copiados en la copia de sombra en el registro `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ## Sobrescribir archivos eliminados
 
@@ -147,18 +150,35 @@ También es posible modificar la configuración de qué archivos se van a copiar
 
 ## Eliminar registros de eventos de Windows
 
-* Windows + R --> eventvwr.msc --> Expandir "Registros de Windows" --> Hacer clic derecho en cada categoría y seleccionar "Borrar registro"
+* Windows + R --> eventvwr.msc --> Expandir "Registros de Windows" --> Haz clic derecho en cada categoría y selecciona "Borrar registro"
 * `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 * `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
 ## Deshabilitar registros de eventos de Windows
 
 * `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-* Dentro de la sección de servicios, deshabilitar el servicio "Registro de eventos de Windows"
+* Dentro de la sección de servicios, deshabilita el servicio "Registro de eventos de Windows"
 * `WEvtUtil.exec clear-log` o `WEvtUtil.exe cl`
 
 ## Deshabilitar $UsnJrnl
 
 * `fsutil usn deletejournal /d c:`
+
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
+
+<details>
+
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**oficial mercancía de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
