@@ -1,14 +1,14 @@
-# ハックトリック
+# ハックトリックス
 
 <figure><img src=".gitbook/assets/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._ 
+_Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_ によるものです。_
 
 {% hint style="success" %}
-**CTF、実際のアプリ、リサーチ、ニュースから学んだハッキングトリック/テクニック/その他を見つけることができるウィキへようこそ。**
+**CTF、実際のアプリ、リサーチ、ニュースから学んだハッキングトリック/テクニック/その他を見つけるウィキへようこそ。**
 {% endhint %}
 
-始めるには、1台以上の**マシンをペンテストする際に従うべき典型的なフロー**を見つけることができるこのページに従ってください：
+始めるには、1台以上の**マシンをペンテストする際に従うべき典型的なフロー**を見つけるこちらのページに従ってください：
 
 {% content-ref url="generic-methodologies-and-resources/pentesting-methodology.md" %}
 [pentesting-methodology.md](generic-methodologies-and-resources/pentesting-methodology.md)
@@ -20,7 +20,7 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 
 <figure><img src=".gitbook/assets/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) は、**HACK THE UNHACKABLE**というスローガンを掲げる優れたサイバーセキュリティ企業です。彼らは独自の研究を行い、独自のハッキングツールを開発して、ペンテスト、Redチーム、トレーニングなどの貴重なサイバーセキュリティサービスを提供しています。
+[**STM Cyber**](https://www.stmcyber.com) は、**HACK THE UNHACKABLE** というスローガンを掲げる優れたサイバーセキュリティ企業です。彼らは独自の研究を行い、独自のハッキングツールを開発して、ペンテスト、Redチーム、トレーニングなどの貴重なサイバーセキュリティサービスを提供しています。
 
 彼らの**ブログ**は[**https://blog.stmcyber.com**](https://blog.stmcyber.com)で確認できます。
 
@@ -32,7 +32,7 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 
 <figure><img src=".gitbook/assets/image (42).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) は、**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**で最も重要なイベントの1つです。技術的知識の促進を使命とするこの会議は、あらゆる分野のテクノロジーとサイバーセキュリティ専門家の熱い出会いの場です。
+[**RootedCON**](https://www.rootedcon.com) は、**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**で最も重要なイベントの1つです。**技術的知識の促進**を使命とするこの会議は、あらゆる分野のテクノロジーとサイバーセキュリティ専門家の熱い出会いの場です。
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -42,7 +42,7 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 
 <figure><img src=".gitbook/assets/image (44).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** は**ヨーロッパで最も優れた**倫理的ハッキングおよび**バグバウンティプラットフォーム**です。
+**Intigriti** は **ヨーロッパで最も優れた**倫理的ハッキングおよび**バグバウンティプラットフォーム**です。
 
 **バグバウンティのヒント**: **Intigriti** に**サインアップ**してください。ハッカーによって作成されたプレミアム**バグバウンティプラットフォーム**に参加しましょう！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**の報酬を獲得し始めましょう！
 
@@ -55,9 +55,9 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 <figure><img src=".gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって**パワード**された**ワークフローを簡単に構築**および**自動化**できます。
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) を使用して、世界で最も**高度な**コミュニティツールによって**ワークフローを簡単に構築**および**自動化**できます。
 
-今すぐアクセスしてください：
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -69,16 +69,11 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 
 経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy)サーバーに参加しましょう！
 
-**ハッキングの洞察**\
-ハッキングのスリルとチャレンジに深く入り込むコンテンツに参加しましょう
+* **ハッキングの洞察:** ハッキングのスリルとチャレンジに深く入り込むコンテンツに参加
+* **リアルタイムハックニュース:** リアルタイムのニュースと洞察を通じてハッキングの世界を最新の状態に保つ
+* **最新の発表:** 新しいバグバウンティの開始や重要なプラットフォームの更新に関する情報を把握
 
-**リアルタイムのハックニュース**\
-リアルタイムのニュースと洞察を通じて、迅速なハッキングワールドについて最新情報を入手しましょう
-
-**最新の発表**\
-最新のバグバウンティの開始や重要なプラットフォームの更新に関する情報を入手しましょう
-
-**Discord**で[**参加**](https://discord.com/invite/N3FrSbmwdy)して、今日からトップハッカーと協力を始めましょう！
+**[Discord](https://discord.com/invite/N3FrSbmwdy)**に参加して、今日からトップハッカーと協力を始めましょう！
 
 ***
 
@@ -86,7 +81,7 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 
 <figure><img src=".gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
-**脆弱性評価およびペネトレーションテストのための即座に利用可能なセットアップ**。20以上のツールと機能を備えた完全なペンテストをどこからでも実行します。私たちはペンテスターを置き換えるのではなく、彼らに時間を戻してより深く掘り下げたり、シェルをポップしたり、楽しんだりするためのカスタムツール、検出、およびエクスプロイトモジュールを開発しています。
+**脆弱性評価およびペネトレーションテストのための即座に利用可能なセットアップ**。20以上のツールと機能を備えた完全なペンテストをどこからでも実行できます。私たちはペンテスターを置き換えるのではなく、彼らに時間を戻してより深く掘り下げたり、シェルをポップしたり、楽しんだりするためのカスタムツール、検出、およびエクスプロイトモジュールを開発しています。
 
 {% embed url="https://pentest-tools.com/" %}
 
@@ -98,15 +93,12 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 
 SerpApiは、高速で簡単なリアルタイムAPIを提供して、**検索エンジンの結果にアクセス**できます。彼らは検索エンジンをスクレイピングし、プロキシを処理し、キャプチャを解決し、すべてのリッチな構造化データを解析します。
 
-SerpApiのプランに加入すると、Google、Bing、Baidu、Yahoo、Yandexなど、さまざまな検索エンジンをスクレイピングするための50以上の異なるAPIにアクセスできます。
+SerpApiのプランの1つに加入すると、Google、Bing、Baidu、Yahoo、Yandexなど、さまざまな検索エンジンをスクレイピングするための50以上の異なるAPIにアクセスできます。\
+他のプロバイダとは異なり、**SerpApiは有機的な結果だけでなく**、広告、インライン画像やビデオ、ナレッジグラフなど、検索結果に表示される他の要素や機能を一貫して含めます。
 
-他のプロバイダとは異なり、SerpApiは有機的な結果だけでなく、広告、インライン画像やビデオ、ナレッジグラフなど、検索結果に存在する他の要素や機能を一貫して含めます。
-
-現在のSerpApiの顧客には、Apple、Shopify、GrubHubなどが含まれます。
-
-詳細については、彼らの[ブログ](https://serpapi.com/blog/)をチェックしてください。または、彼らの[**プレイグラウンド**](https://serpapi.com/playground)で例を試してみてください。
-
-無料アカウントを[**こちら**](https://serpapi.com/users/sign\_up)で作成できます。
+現在のSerpApiの顧客には、**Apple、Shopify、GrubHub**などが含まれます。\
+詳細については、彼らの[**ブログ**](https://serpapi.com/blog/)をチェックしてください。または、彼らの[**プレイグラウンド**](https://serpapi.com/playground)で例を試してみてください。\
+[**こちら**](https://serpapi.com/users/sign_up)で**無料アカウント**を作成できます。
 
 ***
 
@@ -120,17 +112,17 @@ SerpApiのプランに加入すると、Google、Bing、Baidu、Yahoo、Yandex�
 
 ### [WebSec](https://websec.nl/)
 
-<figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
 
 [**WebSec**](https://websec.nl) は、**アムステルダム**を拠点とするプロフェッショナルなサイバーセキュリティ企業であり、**現代的なアプローチ**でビジネスを**世界中**の最新のサイバーセキュリティ脅威から保護するのを支援します。
 
-WebSecは**すべてを含むセキュリティ企業**であり、ペンテスト、**セキュリティ**監査、意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティエキスパートの外部委託など、すべてを行います。
+WebSecは**すべてを網羅するセキュリティ企業**であり、ペンテスト、**セキュリティ**監査、意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティエキスパートの外部委託などを提供しています。
 
-WebSecのもう1つの素晴らしい点は、業界平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持って**おり、その程度まで**最高品質の結果を保証**しています。彼らのウェブサイトには「**ハックできなければ、支払いはありません！**」と記載されています。詳細については、彼らの[**ウェブサイト**](https://websec.nl/en/)と[**ブログ**](https://websec.nl/blog/)をご覧ください！
+WebSecのもう1つの素晴らしい点は、業界平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持って**おり、その程度まで自信を持っています。彼らのウェブサイトには「**ハックできなければ、支払いはありません！**」と記載されています。詳細については、彼らの[**ウェブサイト**](https://websec.nl/en/)と[**ブログ**](https://websec.nl/blog/)をご覧ください！
 
 上記に加えて、WebSecはHackTricksの**熱心な支持者**でもあります。
 
-{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+<figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 ## ライセンスと免責事項
 
 以下で確認してください：
@@ -141,14 +133,14 @@ WebSecのもう1つの素晴らしい点は、業界平均とは異なり、WebS
 
 <details>
 
-<summary><strong>**htARTE (HackTricks AWS Red Team Expert)** でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>**htARTE (HackTricks AWS Red Team Expert)**を使用して、ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 HackTricksをサポートする他の方法：
 
 * **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に参加し、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)で**フォロー**してください。
-* **ハッキングテクニックを共有するために、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に参加し、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をフォローする**
+* **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
