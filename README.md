@@ -5,7 +5,7 @@
 _Logos y diseño de movimiento de Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="success" %}
-**¡Bienvenido al wiki donde encontrarás cada truco/técnica de hacking/lo que sea que haya aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias!**
+**¡Bienvenido al wiki donde encontrarás cada truco/técnica de hacking/o cualquier cosa que haya aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias!**
 {% endhint %}
 
 Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **debes seguir al hacer pentesting** en una o más **máquinas:**
@@ -32,7 +32,7 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 
 <figure><img src=".gitbook/assets/image (42).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro crucial para profesionales de tecnología y ciberseguridad en todas las disciplinas.
+[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro clave para profesionales de tecnología y ciberseguridad en todas las disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -44,7 +44,7 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 
 **Intigriti** es la plataforma de ethical hacking y **bug bounty #1 de Europa**.
 
-**Consejo de bug bounty**: ¡Regístrate en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**! Únete hoy a [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) y comienza a ganar recompensas de hasta **$100,000**.
+**Consejo de bug bounty**: ¡Regístrate en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, ¡y comienza a ganar recompensas de hasta **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -67,16 +67,11 @@ Obtén acceso hoy:
 
 <figure><img src=".gitbook/assets/image (47).png" alt=""><figcaption></figcaption></figure>
 
-Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bug bounty.
+¡Únete al servidor de Discord de [**HackenProof**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bug bounty!
 
-**Perspectivas de Hacking**\
-Participa en contenido que explora la emoción y los desafíos del hacking.
-
-**Noticias de Hacking en Tiempo Real**\
-Mantente al día con el mundo del hacking a través de noticias e información en tiempo real.
-
-**Últimos Anuncios**\
-Mantente informado sobre los nuevos bug bounties que se lanzan y las actualizaciones cruciales de la plataforma.
+* **Perspectivas de Hacking:** Participa en contenido que explora la emoción y los desafíos del hacking
+* **Noticias de Hacking en Tiempo Real:** Mantente al día con el mundo del hacking a través de noticias e información en tiempo real
+* **Últimos Anuncios:** Mantente informado sobre los nuevos bug bounties que se lanzan y las actualizaciones cruciales de la plataforma
 
 **Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) ¡y comienza a colaborar con los mejores hackers hoy!
 
@@ -98,14 +93,11 @@ Mantente informado sobre los nuevos bug bounties que se lanzan y las actualizaci
 
 SerpApi ofrece APIs en tiempo real rápidas y fáciles para **acceder a los resultados de los motores de búsqueda**. Raspan los motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
 
-Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para raspar diferentes motores de búsqueda, incluidos Google, Bing, Baidu, Yahoo, Yandex y más.
+Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para raspar diferentes motores de búsqueda, incluidos Google, Bing, Baidu, Yahoo, Yandex, y más.\
+A diferencia de otros proveedores, **SerpApi no solo raspa resultados orgánicos**. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
 
-A diferencia de otros proveedores, SerpApi no solo raspa resultados orgánicos. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
-
-Los clientes actuales de SerpApi incluyen Apple, Shopify y GrubHub.
-
-Para obtener más información, consulta su [blog](https://serpapi.com/blog/)**,** o prueba un ejemplo en su [**playground**](https://serpapi.com/playground)**.**
-
+Los clientes actuales de SerpApi incluyen a **Apple, Shopify y GrubHub**.\
+Para obtener más información, consulta su [**blog**](https://serpapi.com/blog/)**,** o prueba un ejemplo en su [**playground**](https://serpapi.com/playground)**.**\
 Puedes **crear una cuenta gratuita** [**aquí**](https://serpapi.com/users/sign\_up)**.**
 
 ***
@@ -120,20 +112,20 @@ Puedes **crear una cuenta gratuita** [**aquí**](https://serpapi.com/users/sign\
 
 ### [WebSec](https://websec.nl/)
 
-<figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) es una empresa de ciberseguridad profesional con sede en **Ámsterdam** que ayuda a **proteger** empresas **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de **seguridad ofensiva** con un enfoque **moderno**.
+[**WebSec**](https://websec.nl) es una empresa de ciberseguridad profesional con sede en **Ámsterdam** que ayuda a **proteger** a las empresas **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de **seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad integral, lo que significa que lo hacen todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
+WebSec es una empresa de seguridad **todo en uno**, lo que significa que lo hacen todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
 
 Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta el punto de que **garantizan los mejores resultados de calidad**, lo que se indica en su sitio web "**¡Si no podemos hackearlo, no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
 Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks**.
 
-{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+<figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 ## Licencia y Descargo de responsabilidad
 
-Revíselos en:
+Revísalos en:
 
 {% content-ref url="welcome/hacktricks-values-and-faq.md" %}
 [hacktricks-values-and-faq.md](welcome/hacktricks-values-and-faq.md)
@@ -141,14 +133,14 @@ Revíselos en:
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud). 
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
