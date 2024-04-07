@@ -14,6 +14,11 @@ Other ways to support HackTricks:
 
 </details>
 
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
+
 ## Intro
 
 For more info about how 125kHz tags work check:
@@ -62,6 +67,11 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 ## References
 
 * [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
 
 <details>
 

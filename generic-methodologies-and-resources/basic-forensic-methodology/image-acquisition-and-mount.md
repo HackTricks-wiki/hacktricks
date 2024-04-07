@@ -12,6 +12,10 @@
 
 </details>
 
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
 ## Acquisition
 
 ### DD
@@ -119,6 +123,10 @@ Note that sector size is **512** and start is **2048**. Then mount the image lik
 ```bash
 mount disk.img /mnt -o ro,offset=$((2048*512))
 ```
+
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
 
 <details>
 

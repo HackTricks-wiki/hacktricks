@@ -14,6 +14,10 @@ Other ways to support HackTricks:
 
 </details>
 
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
 
 # Timestamps
 
@@ -162,6 +166,10 @@ It's also possible to modify the configuration of which files are going to be co
 ## Disable $UsnJrnl
 
 * `fsutil usn deletejournal /d c:`
+
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
 
 
 <details>

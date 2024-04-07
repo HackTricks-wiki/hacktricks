@@ -16,6 +16,10 @@ Other ways to support HackTricks:
 
 </details>
 
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
 ## Generic Windows Artifacts
 
 ### Windows 10 Notifications
@@ -509,6 +513,10 @@ EventID 6005 indicates system startup, while EventID 6006 marks shutdown.
 #### Log Deletion
 
 Security EventID 1102 signals the deletion of logs, a critical event for forensic analysis.
+
+<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
 
 
 <details>
