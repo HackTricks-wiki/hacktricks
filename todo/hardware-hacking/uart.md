@@ -1,68 +1,69 @@
+# UART
+
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を通じて、ゼロからヒーローまでAWSハッキングを学びましょう</summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
-- **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする。
+- **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
+## 基本情報
 
-# 基本情報
+UARTはシリアルプロトコルであり、コンポーネント間でデータを1ビットずつ転送します。一方、並列通信プロトコルは複数のチャネルを通じてデータを同時に送信します。一般的なシリアルプロトコルにはRS-232、I2C、SPI、CAN、Ethernet、HDMI、PCI Express、USBなどがあります。
 
-UARTはシリアルプロトコルであり、コンポーネント間でデータを1ビットずつ転送します。一方、並列通信プロトコルは複数のチャネルを通じてデータを同時に送信します。一般的なシリアルプロトコルには、RS-232、I2C、SPI、CAN、Ethernet、HDMI、PCI Express、USBなどがあります。
+一般的に、UARTがアイドル状態にあるときは、ラインは高い（論理1の値）に保持されます。次に、データ転送の開始を示すために、送信機が開始ビットを受信機に送信します。この間、信号は低い（論理0の値）に保持されます。次に、送信機は実際のメッセージを含む5〜8ビットのデータビットを送信し、オプションのパリティビットと1または2ビットのストップビット（論理1の値）が続きます。エラーチェックに使用されるパリティビットは実際にはほとんど見られません。ストップビット（またはビット）は送信の終わりを示します。
 
-通常、UARTがアイドル状態にあるときは、ラインは高い（論理1の値）に保持されます。次に、データ転送の開始を示すために、送信機が受信機にスタートビットを送信します。この間、信号は低い（論理0の値）に保持されます。次に、送信機は、実際のメッセージを含む5〜8ビットのデータビットを送信し、オプションのパリティビットと1または2ビットのストップビット（論理1の値）が続きます。エラーチェックに使用されるパリティビットは実際にはほとんど見られません。ストップビット（またはビット）は送信の終わりを示します。
+最も一般的な構成を8N1と呼びます：8ビットのデータ、パリティなし、1ビットのストップビット。たとえば、8N1 UART構成で文字C、またはASCIIで0x43を送信したい場合、次のビットを送信します：0（開始ビット）；0、1、0、0、0、0、1、1（バイナリで0x43の値）、および0（ストップビット）。
 
-最も一般的な構成を8N1と呼びます：8つのデータビット、パリティなし、1つのストップビット。たとえば、8N1 UART構成で文字CまたはASCIIの0x43を送信したい場合、次のビットを送信します：0（スタートビット）；0、1、0、0、0、0、1、1（バイナリでの0x43の値）、および0（ストップビット）。
-
-![](<../../.gitbook/assets/image (648) (1) (1) (1) (1).png>)
+![](<../../.gitbook/assets/image (761).png>)
 
 UARTと通信するためのハードウェアツール：
 
-- USB-to-serialアダプタ
+- USBシリアルアダプタ
 - CP2102またはPL2303チップを搭載したアダプタ
 - Bus Pirate、Adafruit FT232H、Shikra、またはAttify Badgeなどの多目的ツール
 
-## UARTポートの識別
+### UARTポートの識別
 
-UARTには4つのポートがあります：**TX**（送信）、**RX**（受信）、**Vcc**（電圧）、および**GND**（グラウンド）。PCBに**`TX`**と**`RX`**の文字が**書かれている**4つのポートを見つけることができるかもしれません。ただし、明確な指示がない場合は、**マルチメータ**または**ロジックアナライザ**を使用して自分で見つける必要があるかもしれません。
+UARTには**TX**（送信）、**RX**（受信）、**Vcc**（電圧）、**GND**（グラウンド）の4つのポートがあります。PCBに**`TX`**と**`RX`**の文字が**書かれている**4つのポートを見つけることができるかもしれません。ただし、明確な表示がない場合は、**マルチメーター**または**ロジックアナライザー**を使用して自分で見つける必要があるかもしれません。
 
-**マルチメータ**とデバイスの電源を切った状態で：
+**マルチメーター**とデバイスの電源を切った状態で：
 
-- **GND**ピンを特定するには、**連続性テスト**モードを使用し、バックリードをグラウンドに置き、赤いリードでテストして、マルチメータから音が聞こえるまで試してください。複数のGNDピンがPCB上に見つかる場合がありますので、UARTに属するピンを見つけたかどうかはわかりません。
-- **VCCポート**を特定するには、**DC電圧モード**を設定し、20Vの電圧に設定します。黒いプローブをグラウンドに、赤いプローブをピンに置きます。デバイスの電源を入れます。マルチメータが3.3Vまたは5Vの定電圧を測定した場合、Vccピンを見つけました。他の電圧が表示される場合は、他のポートで再試行してください。
-- **TX** **ポート**を特定するには、**DC電圧モード**を20Vの電圧に設定し、黒いプローブをグラウンドに、赤いプローブをピンに置き、デバイスの電源を入れます。電源を入れると、一時的に電圧が変動し、その後Vccの値に安定する場合、おそらくTXポートを見つけた可能性が高いです。これは、電源を入れるとデバッグデータが送信されるためです。
+- **GND**ピンを特定するには、**連続性テスト**モードを使用し、バックリードをグラウンドに置き、赤いリードでテストして、マルチメーターから音が聞こえるまで確認します。複数のGNDピンがPCB上に見つかる場合があるため、UARTに属するピンを見つけたり見つけなかったりするかもしれません。
+- **VCCポート**を特定するには、**DC電圧モード**を設定し、20Vの電圧に設定します。黒いプローブをグラウンドに、赤いプローブをピンに置きます。デバイスの電源を入れます。マルチメーターが3.3Vまたは5Vの定電圧を測定した場合、Vccピンを見つけました。他の電圧が表示される場合は、他のポートで再試行してください。
+- **TX** **ポート**を特定するには、**DC電圧モード**を20Vの電圧に設定し、黒いプローブをグラウンドに、赤いプローブをピンに置き、デバイスの電源を入れます。電源を入れると、一時的に電圧が変動し、その後Vccの値に安定する場合、おそらくTXポートを見つけたと思われます。これは、電源を入れると、いくつかのデバッグデータが送信されるためです。
 - **RXポート**は他の3つに最も近いものであり、UARTピンの中で最も低い電圧変動と最も低い全体的な値を持っています。
 
-TXとRXポートを混同しても何も起こりませんが、GNDとVCCポートを混同すると回路を破損させる可能性があります。
+TXとRXポートを混同しても何も起こりませんが、GNDとVCCポートを混同すると回路を焼き切る可能性があります。
 
-一部のターゲットデバイスでは、製造元によってUARTポートが無効にされている場合があります。その場合、基板内の接続を追跡し、いくつかのブレイクアウトポイントを見つけることが役立ちます。UARTの検出がないことと回路の切断を確認する強力なヒントは、デバイスの保証を確認することです。デバイスに保証が付属して出荷された場合、製造元はいくつかのデバッグインターフェイス（この場合はUART）を残し、したがってUARTを切断し、デバッグ中に再接続する必要があります。これらのブレイクアウトピンは、はんだ付けまたはジャンパーワイヤーで接続できます。
+一部のターゲットデバイスでは、製造元によってUARTポートが無効にされている場合があります。その場合、基板内の接続を追跡し、いくつかのブレイクアウトポイントを見つけることが役立ちます。UARTの検出がないことと回路の切断を確認する強力なヒントは、デバイスの保証を確認することです。デバイスが保証付きで出荷された場合、製造元はいくつかのデバッグインターフェイス（この場合はUART）を残し、したがってUARTを切断し、デバッグ中に再接続する必要があります。これらのブレイクアウトピンは、はんだ付けまたはジャンパーワイヤーで接続できます。
 
-## UARTボーレートの識別
+### UARTボーレートの特定
 
-正しいボーレートを特定する最も簡単な方法は、**TXピンの出力を見てデータを読み取ろうとする**ことです。受信したデータが読み取れない場合は、データが読み取れるまで次の可能なボーレートに切り替えてください。これには、USB-to-serialアダプタやBus Pirateなどの多目的デバイスと、[baudrate.py](https://github.com/devttys0/baudrate/)などのヘルパースクリプトを使用できます。最も一般的なボーレートは9600、38400、19200、57600、115200です。
+正しいボーレートを特定する最も簡単な方法は、**TXピンの出力を見てデータを読み取ろうとする**ことです。受信したデータが読み取れない場合は、データが読み取れるまで次の可能なボーレートに切り替えてください。これにはUSBシリアルアダプタやBus Pirateなどの多目的デバイスと、[baudrate.py](https://github.com/devttys0/baudrate/)などのヘルパースクリプトが必要です。最も一般的なボーレートは9600、38400、19200、57600、115200です。
 
 {% hint style="danger" %}
 このプロトコルでは、1つのデバイスのTXを他のデバイスのRXに接続する必要があることに注意してください！
 {% endhint %}
 
-# CP210X UART to TTYアダプタ
+## CP210X UART to TTYアダプター
 
-CP210Xチップは、NodeMCU（esp8266搭載）などのプロトタイピングボードでシリアル通信に使用されます。これらのアダプタは比較的安価であり、ターゲットのUARTインターフェースに接続するために使用できます。デバイスには5つのピンがあります：5V、GND、RXD、TXD、3.3V。損傷を防ぐために、ターゲットがサポートする電圧に接続するように注意してください。最後に、アダプタのRXDピンをターゲットのTXDに、アダプタのTXDピンをターゲットのRXDに接続してください。
+CP210Xチップは、NodeMCU（esp8266搭載）などのプロトタイピングボードでシリアル通信に使用されます。これらのアダプターは比較的安価であり、ターゲットのUARTインターフェースに接続するために使用できます。デバイスには5つのピンがあります：5V、GND、RXD、TXD、3.3V。ターゲットがサポートする電圧に接続して、損傷を防ぐようにしてください。最後に、アダプターのRXDピンをターゲットのTXDに、アダプターのTXDピンをターゲットのRXDに接続してください。
 
-アダプタが検出されない場合は、ホストシステムにCP210Xドライバがインストールされていることを確認してください。アダプタが検出され、接続されたら、picocom、minicom、またはscreenなどのツールを使用できます。
+アダプターが検出されない場合は、ホストシステムにCP210Xドライバーがインストールされていることを確認してください。アダプターが検出され、接続されたら、picocom、minicom、またはscreenなどのツールを使用できます。
 
 Linux/MacOSシステムに接続されたデバイスをリストアップするには：
 ```
 ls /dev/
 ```
-UART インターフェースとの基本的なやり取りには、次のコマンドを使用します：
+UART インターフェースとの基本的なやり取りには、次のコマンドを使用します:
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
@@ -70,13 +71,21 @@ minicomを使用する場合は、次のコマンドを使用して構成しま�
 ```
 minicom -s
 ```
-シリアルポートの設定（ボーレートやデバイス名など）は、「シリアルポートの設定」オプションで行います。
+`Serial port setup`オプションでボーレートやデバイス名などの設定を構成します。
 
-設定後、`minicom`コマンドを使用してUARTコンソールを開始します。
+構成後、`minicom`コマンドを使用してUARTコンソールを開始します。
 
-# Bus Pirate
+## Arduino UNO R3を使用したUART（取り外し可能なAtmel 328pチップボードを搭載）
 
-このシナリオでは、ArduinoのUART通信をスニッフすることになります。Arduinoはプログラムのすべての出力をシリアルモニタに送信しています。
+UARTシリアルからUSBアダプタが利用できない場合、Arduino UNO R3をクイックハックとして使用できます。通常、どこでも入手可能なArduino UNO R3を使用することで、多くの時間を節約できます。
+
+Arduino UNO R3には、ボード自体にUSBからシリアルへのアダプタが内蔵されています。UART接続を取得するには、ボードからAtmel 328pマイクロコントローラチップを抜き取るだけです。このハックは、Atmel 328pがボードにはんだ付けされていないArduino UNO R3バリアントで機能します（SMDバージョンが使用されています）。ArduinoのRXピン（デジタルピン0）をUARTインターフェースのTXピンに接続し、ArduinoのTXピン（デジタルピン1）をUARTインターフェースのRXピンに接続します。
+
+最後に、UARTインターフェースに応じてボーレートを設定し、Arduino IDEを使用してシリアルコンソールを取得することをお勧めします。
+
+## Bus Pirate
+
+このシナリオでは、プログラムのすべての出力をシリアルモニタに送信しているArduinoのUART通信をスニッフすることになります。
 ```bash
 # Check the modes
 UART>m
@@ -155,9 +164,9 @@ waiting a few secs to repeat....
 HackTricksをサポートする他の方法:
 
 * **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見る
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**してください。
-* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手してください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを発見してください
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**してください。
+* **ハッキングトリックを共有するためにPRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
