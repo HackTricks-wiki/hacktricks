@@ -69,14 +69,9 @@ Get Access Today:
 
 Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+* **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
+* **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
+* **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
 
 **Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
 
@@ -98,14 +93,11 @@ Stay informed with the newest bug bounties launching and crucial platform update
 
 SerpApi offers fast and easy real-time APIs to **access search engine results**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
 
-A subscription to one of SerpApi’s plans includes access to over 50 different APIs for scraping different search engines, including Google, Bing, Baidu, Yahoo, Yandex, and more.
+A subscription to one of SerpApi’s plans includes access to over 50 different APIs for scraping different search engines, including Google, Bing, Baidu, Yahoo, Yandex, and more.\
+Unlike other providers, **SerpApi doesn’t just scrape organic results**. SerpApi responses consistently include all ads, inline images and videos, knowledge graphs, and other elements and features present in the search results.
 
-Unlike other providers, SerpApi doesn’t just scrape organic results. SerpApi responses consistently include all ads, inline images and videos, knowledge graphs, and other elements and features present in the search results.
-
-Current SerpApi customers include Apple, Shopify, and GrubHub.
-
-For more information check out their [blog](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**
-
+Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
+For more information check out their [**blog**](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**\
 You can **create a free account** [**here**](https://serpapi.com/users/sign\_up)**.**
 
 ***
@@ -120,7 +112,7 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign\_up)
 
 ### [WebSec](https://websec.nl/)
 
-<figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
 
 [**WebSec**](https://websec.nl) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
 
@@ -130,7 +122,7 @@ Another cool thing about WebSec is that unlike the industry average WebSec is **
 
 In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
-{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+<figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
 ## License & Disclaimer
 
