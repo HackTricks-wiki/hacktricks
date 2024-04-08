@@ -22,7 +22,13 @@ Multiple slaves can be connected to a master but slaves can't communicate with e
 
 The MOSI (Master Out, Slave In) and MISO (Master In, Slave Out) are responsible for data sending and recieving data. Data is sent to the slave device through the MOSI pin while the chip select is held low. The input data contains instructions, memory addresses or data as per the datasheet of the slave device vendor. Upon a valid input, the MISO pin is responsible for transmitting data to the master. The output data is sent exactly at the next clock cycle after the input ends. The MISO pins transmits data till the data is fully transmitter or the master sets the chip select pin high (in that case, the slave would stop transmitting and master would not listen after that clock cycle).
 
-## Dump Flash
+## Dumping Firmware from EEPROMs
+
+Dumping firmware can be useful for analysing the firmware and finding vulnerabilities in them. Often times, the firmware is not available on the internet or is irrelevant due to variations of factors like model number, version, etc. Hence, extracting the firmware directly from the physical device can be helpful to be specific while hunting for threats. 
+
+Getting Serial Console can be helpful, but often times it happens that the files are read-only. This constrains the analysis due to various reasons. For example, a tools that are required to send and recieve packages would not be there in the firmware. So extracting the binaries to reverse engineer them is not feasible. Hence, having the whole firmware dumped on the system and extracting the binaries for analysis can be very helpful. 
+
+Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping. 
 
 ### Bus Pirate + flashrom
 
