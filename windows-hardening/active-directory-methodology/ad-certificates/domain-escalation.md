@@ -683,7 +683,7 @@ Everything is explained [here](https://pkiblog.knobloch.info/esc12-shell-access-
 
 If the CA's private key stored on a physical USB device when you got a shell access, it is possible to recover the key.
 
-In frist, you should obtain the CA certificate, it is public: 
+In first, you need to obtain the CA certificate (this is public) and then:  
 
 ```cmd
 # import it to the user store with CA certificate
