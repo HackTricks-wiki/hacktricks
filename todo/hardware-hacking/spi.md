@@ -30,6 +30,24 @@ Getting Serial Console can be helpful, but often times it happens that the files
 
 Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping. 
 
+### CH341A EEPROM Programmer and Reader
+
+This device is an inexpensive tool for dumping firmwares from EEPROMs and also reflashing them with firmware files. This has been a popular choice for working with computer BIOS chips (which are just EEPROMs). This device connects over USB and needs minimal tools to get started. Also, it usually gets the task done quickly, so can be helpful in physical device access too. 
+
+![](<../../.gitbook/assets/board_image_ch341a.jpg>)
+
+Connect the EEPROM memory with the CH341a Programmer and plug the device into the computer. Incase the device is not getting detected, try installing drivers into the computer. Also, make sure that the EEPROM is connected in proper orientation (usually, place the VCC Pin in reverse orientation to the USB connector) or else, the software would not be able to detect the chip. Refer to the diagram if required:
+
+![](<../../.gitbook/assets/connect_wires_ch341a.jpg>)
+
+![](<../../.gitbook/assets/eeprom_plugged_ch341a.jpg>)
+
+Finally, use softwares like flashrom, G-Flash (GUI), etc. for dumping the firmware. G-Flash is a minimal GUI tool is fast and detects the EEPROM automatically. This can be helpful in the firmware needs to be extracted quickly, without much tinkering with the documentation. 
+
+![](<../../.gitbook/assets/connected_status_ch341a.jpg>)
+
+{% hint style="danger" %} Note that firmware extraction is a delicate process and requires a lot of patience. Any mishandling can potentially corrupt the firmware or even erase it completely and make the device unusable. It is recommended to study the specific device before attempting to extract the firmware. {% endhint %}
+
 ### Bus Pirate + flashrom
 
 ![](<../../.gitbook/assets/image (907).png>)
