@@ -112,7 +112,7 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign\_up)
 
 ### [WebSec](https://websec.nl/)
 
-<figure><img src=".gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
 [**WebSec**](https://websec.nl) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
 
@@ -122,7 +122,7 @@ Another cool thing about WebSec is that unlike the industry average WebSec is **
 
 In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
-<figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
+{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
 
 ## License & Disclaimer
 
