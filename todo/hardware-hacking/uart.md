@@ -10,7 +10,7 @@ Otras formas de apoyar a HackTricks:
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
 
 </details>
 
@@ -18,7 +18,7 @@ Otras formas de apoyar a HackTricks:
 
 UART es un protocolo serial, lo que significa que transfiere datos entre componentes un bit a la vez. En contraste, los protocolos de comunicación paralela transmiten datos simultáneamente a través de múltiples canales. Los protocolos seriales comunes incluyen RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express y USB.
 
-Generalmente, la línea se mantiene alta (en un valor lógico 1) mientras UART está en estado inactivo. Luego, para señalar el inicio de una transferencia de datos, el transmisor envía un bit de inicio al receptor, durante el cual la señal se mantiene baja (en un valor lógico 0). A continuación, el transmisor envía de cinco a ocho bits de datos que contienen el mensaje real, seguido de un bit de paridad opcional y uno o dos bits de parada (con un valor lógico 1), dependiendo de la configuración. El bit de paridad, utilizado para la verificación de errores, rara vez se ve en la práctica. El bit (o bits) de parada señalan el final de la transmisión.
+Generalmente, la línea se mantiene alta (en un valor lógico 1) mientras UART está en estado inactivo. Luego, para señalar el inicio de una transferencia de datos, el transmisor envía un bit de inicio al receptor, durante el cual la señal se mantiene baja (en un valor lógico 0). A continuación, el transmisor envía cinco a ocho bits de datos que contienen el mensaje real, seguido de un bit de paridad opcional y uno o dos bits de parada (con un valor lógico 1), dependiendo de la configuración. El bit de paridad, utilizado para la verificación de errores, rara vez se ve en la práctica. El bit de parada (o bits) señala el final de la transmisión.
 
 Llamamos a la configuración más común 8N1: ocho bits de datos, sin paridad y un bit de parada. Por ejemplo, si quisiéramos enviar el carácter C, o 0x43 en ASCII, en una configuración UART 8N1, enviaríamos los siguientes bits: 0 (el bit de inicio); 0, 1, 0, 0, 0, 0, 1, 1 (el valor de 0x43 en binario) y 0 (el bit de parada).
 
@@ -36,10 +36,10 @@ UART tiene 4 puertos: **TX** (Transmitir), **RX** (Recibir), **Vcc** (Voltaje) y
 
 Con un **multímetro** y el dispositivo apagado:
 
-* Para identificar el pin **GND** usa el modo de **Prueba de continuidad**, coloca el cable negro en tierra y prueba con el rojo hasta que escuches un sonido del multímetro. Varios pines GND pueden encontrarse en la PCB, por lo que es posible que hayas encontrado o no el que pertenece a UART.
+* Para identificar el pin **GND** usa el modo de **Prueba de continuidad**, coloca el cable de retorno en tierra y prueba con el cable rojo hasta que escuches un sonido del multímetro. Varios pines GND pueden encontrarse en la PCB, por lo que es posible que hayas encontrado o no el que pertenece a UART.
 * Para identificar el puerto **VCC**, configura el modo de **voltaje DC** y ajústalo a 20 V de voltaje. Sonda negra en tierra y sonda roja en el pin. Enciende el dispositivo. Si el multímetro mide un voltaje constante de 3.3 V o 5 V, has encontrado el pin Vcc. Si obtienes otros voltajes, intenta con otros puertos.
 * Para identificar el puerto **TX**, modo de **voltaje DC** hasta 20 V de voltaje, sonda negra en tierra y sonda roja en el pin, y enciende el dispositivo. Si encuentras que el voltaje fluctúa durante unos segundos y luego se estabiliza en el valor de Vcc, es probable que hayas encontrado el puerto TX. Esto se debe a que al encenderlo, envía algunos datos de depuración.
-* El **puerto RX** sería el más cercano a los otros 3, tiene la menor fluctuación de voltaje y el valor general más bajo de todos los pines UART.
+* El puerto **RX** sería el más cercano a los otros 3, tiene la menor fluctuación de voltaje y el valor general más bajo de todos los pines UART.
 
 Puedes confundir los puertos TX y RX y no pasaría nada, pero si confundes el GND y el puerto VCC podrías dañar el circuito.
 
@@ -79,7 +79,7 @@ Después de la configuración, utiliza el comando `minicom` para iniciar la Cons
 
 En caso de que los adaptadores UART Serial a USB no estén disponibles, se puede utilizar Arduino UNO R3 con un hack rápido. Dado que Arduino UNO R3 suele estar disponible en cualquier lugar, esto puede ahorrar mucho tiempo.
 
-Arduino UNO R3 tiene un adaptador USB a serie integrado en la placa. Para obtener la conexión UART, simplemente desenchufa el chip microcontrolador Atmel 328p de la placa. Este hack funciona en las variantes de Arduino UNO R3 que no tienen el Atmel 328p soldado en la placa (se utiliza la versión SMD). Conecta el pin RX de Arduino (Pin Digital 0) al pin TX de la interfaz UART y el pin TX de Arduino (Pin Digital 1) al pin RX de la interfaz UART.
+Arduino UNO R3 tiene un adaptador USB a serie integrado en la placa. Para obtener la conexión UART, simplemente desenchufa el chip microcontrolador Atmel 328p de la placa. Este hack funciona en las variantes de Arduino UNO R3 que no tienen soldado en la placa el Atmel 328p (se utiliza la versión SMD en él). Conecta el pin RX de Arduino (Pin Digital 0) al pin TX de la interfaz UART y el pin TX de Arduino (Pin Digital 1) al pin RX de la interfaz UART.
 
 Finalmente, se recomienda utilizar Arduino IDE para obtener la Consola Serie. En la sección `herramientas` en el menú, selecciona la opción `Consola Serie` y establece la velocidad de baudios según la interfaz UART.
 
@@ -157,16 +157,42 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
+## Volcado de Firmware con Consola UART
+
+La Consola UART proporciona una excelente manera de trabajar con el firmware subyacente en el entorno de ejecución. Pero cuando el acceso a la Consola UART es de solo lectura, puede introducir muchas limitaciones. En muchos dispositivos integrados, el firmware se almacena en EEPROM y se ejecuta en procesadores que tienen memoria volátil. Por lo tanto, el firmware se mantiene de solo lectura, ya que el firmware original durante la fabricación está dentro de la EEPROM misma y cualquier archivo nuevo se perdería debido a la memoria volátil. Por lo tanto, el volcado de firmware es un esfuerzo valioso al trabajar con firmwares integrados.
+
+Hay muchas formas de hacer esto y la sección SPI cubre métodos para extraer firmware directamente de la EEPROM con varios dispositivos. Aunque se recomienda intentar primero volcar el firmware con UART, ya que volcar el firmware con dispositivos físicos e interacciones externas puede ser arriesgado.
+
+Volcar firmware desde la Consola UART requiere primero obtener acceso a los cargadores de arranque. Muchos proveedores populares utilizan <b>uboot</b> (Universal Bootloader) como su cargador de arranque para cargar Linux. Por lo tanto, es necesario obtener acceso a <b>uboot</b>.
+
+Para acceder al cargador de arranque, conecta el puerto UART a la computadora y utiliza cualquiera de las herramientas de Consola Serie y mantén la fuente de alimentación del dispositivo desconectada. Una vez que la configuración esté lista, presiona la tecla Enter y mantenla presionada. Finalmente, conecta la fuente de alimentación al dispositivo y déjalo arrancar.
+
+Al hacer esto, se interrumpirá la carga de <b>uboot</b> y se mostrará un menú. Se recomienda comprender los comandos de <b>uboot</b> y utilizar el menú de ayuda para listarlos. Esto podría ser el comando `help`. Dado que diferentes proveedores utilizan diferentes configuraciones, es necesario comprender cada una de ellas por separado.
+
+Por lo general, el comando para volcar el firmware es:
+```
+md
+```
+que significa "volcado de memoria". Esto volcará la memoria (contenido de EEPROM) en la pantalla. Se recomienda registrar la salida de la Consola Serial antes de comenzar el procedimiento para capturar el volcado de memoria.
+
+Finalmente, simplemente elimine todos los datos innecesarios del archivo de registro y guárdelo como `nombrearchivo.rom` y use binwalk para extraer el contenido:
+```
+binwalk -e <filename.rom>
+```
+Esto listará los posibles contenidos de la EEPROM según las firmas encontradas en el archivo hexadecimal.
+
+Aunque es necesario tener en cuenta que no siempre es el caso de que el <b>uboot</b> esté desbloqueado incluso si se está utilizando. Si la tecla Enter no hace nada, verifique diferentes teclas como la tecla Espacio, etc. Si el cargador de arranque está bloqueado y no se interrumpe, este método no funcionaría. Para verificar si <b>uboot</b> es el cargador de arranque para el dispositivo, verifique la salida en la Consola UART mientras se inicia el dispositivo. Podría mencionar <b>uboot</b> durante el arranque.
+
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
