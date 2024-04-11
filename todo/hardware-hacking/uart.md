@@ -165,6 +165,32 @@ AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
 
+## Dumping Firmware with UART Console
+
+UART Console provides a great way to work with the underlying firmware in runtime environment. But when the UART Console access is read-only, it might introduce a lot of constrains. In many embedded devices, the firmware is stored in EEPROMs and executed in processors that have volatile memory. Hence, the firmware is kept read-only since the original firmware during manufacturing is inside the EEPROM itself and any new files would get lost due to volatile memory. Hence, dumping firmware is a valuable effort while working with embedded firmwares. 
+
+There are a lot of ways to do this and the SPI section covers methods to extract firmware directly from the EEPROM with various devices. Although, it is recommended to first try dumping firmware with UART since dumping firmware with physical devices and external interactions can be risky.
+
+Dumping firmware from UART Console requires first getting access to bootloaders. Many popular vendors make use of <b>uboot</b> (Universal Bootloader) as their bootloader to load Linux. Hence, getting access to <b>uboot</b> is necessary. 
+
+To get access to <b>boot</b> bootloader, connect the UART port to the computer and use any of the Serial Console tools and keep the power supply to the device disconnected. Once the setup is ready, press the Enter Key and hold it. Finally, connect the power supply to the device and let it boot. 
+
+Doing this will interrupt <b>uboot</b> from loading and will provide a menu. It is recommended to understand <b>uboot</b> commands and using help menu to list them. This might be `help` command. Since different vendors use different configurations, it is necessary to understand each of them seperately. 
+
+Usually, the command to dump the firmware is: 
+```
+md
+```
+which stands for "memory dump". This will dump the memory (EEPROM Content) on the screen. It is recommended to log the Serial Console output before starting the proceedure to capture the memory dump. 
+
+Finally, just strip out all the unnecessary data from the log file and store the file as `filename.rom` and use binwalk to extract the contents:
+```
+binwalk -e <filename.rom>
+```
+This will list the possible contents from the EEPROM as per the signatures found in the hex file. 
+
+Although, it is necessary to note that it's not always the case that the <b>uboot</b> is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if <b>uboot</b> is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention <b>uboot</b> while booting. 
+
 <details>
 
 <summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
