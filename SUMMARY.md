@@ -705,6 +705,7 @@
     * [Leaking libc address with ROP](binary-exploitation/rop-return-oriented-programing/ret2lib/rop-leaking-libc-address/README.md)
       * [Leaking libc - template](binary-exploitation/rop-return-oriented-programing/ret2lib/rop-leaking-libc-address/rop-leaking-libc-template.md)
     * [One Gadget](binary-exploitation/rop-return-oriented-programing/ret2lib/one-gadget.md)
+    * [Ret2lib + Printf leak - arm64](binary-exploitation/rop-return-oriented-programing/ret2lib/ret2lib-+-printf-leak-arm64.md)
   * [Ret2syscall](binary-exploitation/rop-return-oriented-programing/rop-syscall-execv.md)
   * [Ret2vDSO](binary-exploitation/rop-return-oriented-programing/ret2vdso.md)
   * [SROP - Sigreturn-Oriented Programming](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming.md)
