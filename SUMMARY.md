@@ -698,6 +698,7 @@
   * [Stack Pivoting - EBP2Ret - EBP chaining](binary-exploitation/stack-overflow/stack-pivoting-ebp2ret-ebp-chaining.md)
   * [Uninitialized Variables](binary-exploitation/stack-overflow/uninitialized-variables.md)
 * [ROP - Return Oriented Programing](binary-exploitation/rop-return-oriented-programing/README.md)
+  * [BROP - Blind Return Oriented Programming](binary-exploitation/rop-return-oriented-programing/brop-blind-return-oriented-programming.md)
   * [Ret2csu](binary-exploitation/rop-return-oriented-programing/ret2csu.md)
   * [Ret2dlresolve](binary-exploitation/rop-return-oriented-programing/ret2dlresolve.md)
   * [Ret2esp / Ret2reg](binary-exploitation/rop-return-oriented-programing/ret2esp-ret2reg.md)
