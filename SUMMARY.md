@@ -49,7 +49,7 @@
   * [Specific Software/File-Type Tricks](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/README.md)
     * [Decompile compiled python binaries (exe, elf) - Retreive from .pyc](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
     * [Browser Artifacts](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/browser-artifacts.md)
-    * [Desofuscation vbs (cscript.exe)](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/desofuscation-vbs-cscript.exe.md)
+    * [Deofuscation vbs (cscript.exe)](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/desofuscation-vbs-cscript.exe.md)
     * [Local Cloud Storage](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md)
     * [Office file analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md)
     * [PDF File analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/pdf-file-analysis.md)
