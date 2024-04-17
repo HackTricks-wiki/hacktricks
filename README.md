@@ -16,6 +16,18 @@ To get started follow this page where you will find the **typical flow** that **
 
 ## Corporate Sponsors
 
+### [WhiteIntel](https://whiteintel.io)
+
+<figure><img src=".gitbook/assets/whiteintel-banner.png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**. 
+
+Their primary goal of WhiteIntel is to combat account takeovers and ransomware attacks resulting from information-stealing malware.
+
+You can check their website and try their engine for **free** at [**https://whiteintel.io**](https://whiteintel.io)
+
+***
+
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src=".gitbook/assets/stm (1).png" alt=""><figcaption></figcaption></figure>
