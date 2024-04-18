@@ -14,6 +14,20 @@ Other ways to support HackTricks:
 
 </details>
 
+## WhiteIntel
+
+<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
+
+Their primary goal of WhiteIntel is to combat account takeovers and ransomware attacks resulting from information-stealing malware.
+
+You can check their website and try their engine for **free** at:
+
+{% embed url="https://whiteintel.io" %}
+
+---
+
 
 If you have pcap with data being **exfiltrated by DNSCat** (without using encryption), you can find the exfiltrated content.
 
@@ -44,7 +58,7 @@ For more information: [https://github.com/jrmdev/ctf-writeups/tree/master/bsides
 
 There is a script that works with Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 
-```
+```bash
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
 
