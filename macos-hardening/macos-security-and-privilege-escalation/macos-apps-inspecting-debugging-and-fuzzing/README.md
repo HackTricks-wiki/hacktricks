@@ -1,35 +1,43 @@
-# macOS Apps - Inspecting, debugging and Fuzzing
+# macOS Apps - Inspección, depuración y Fuzzing
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
+
+### [WhiteIntel](https://whiteintel.io)
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares robadores**.
+
+El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
+
+Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
+
+{% embed url="https://whiteintel.io" %}
+
+---
 
 ## Análisis Estático
 
 ### otool
-
 ```bash
 otool -L /bin/ls #List dynamically linked libraries
 otool -tv /bin/ps #Decompile application
 ```
-
 ### objdump
 
 {% code overflow="wrap" %}
-```
-```
-{% endcode %}
-
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
@@ -38,11 +46,9 @@ objdump -m --full-contents /bin/ls # Dump every section
 objdump -d /bin/ls # Dissasemble the binary
 objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemble a function using intel flavour
 ```
-
 ### jtool2
 
 La herramienta se puede utilizar como un **reemplazo** para **codesign**, **otool** y **objdump**, y proporciona algunas características adicionales. [**Descárgalo aquí**](http://www.newosxbook.com/tools/jtool.html) o instálalo con `brew`.
-
 ```bash
 # Install
 brew install --cask jtool2
@@ -59,13 +65,11 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 # Get MIG information
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-
 ### Codesign / ldid
 
 {% hint style="danger" %}
 **`Codesign`** se puede encontrar en **macOS** mientras que **`ldid`** se puede encontrar en **iOS**
 {% endhint %}
-
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -92,7 +96,6 @@ ldid -e <binary>
 ## /tmp/entl.xml is a XML file with the new entitlements to add
 ldid -S/tmp/entl.xml <binary>
 ```
-
 ### SuspiciousPackage
 
 [**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) es una herramienta útil para inspeccionar archivos **.pkg** (instaladores) y ver qué hay dentro antes de instalarlo.\
@@ -101,11 +104,9 @@ Estos instaladores tienen scripts bash `preinstall` y `postinstall` que los auto
 ### hdiutil
 
 Esta herramienta permite **montar** archivos de imagen de disco de Apple (**.dmg**) para inspeccionarlos antes de ejecutar cualquier cosa:
-
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
-
 Se montará en `/Volumes`
 
 ### Objective-C
@@ -121,22 +122,20 @@ Tenga en cuenta que los programas escritos en Objective-C **conservan** sus decl
 * Las variables de instancia de clase
 
 Puede obtener esta información utilizando [**class-dump**](https://github.com/nygard/class-dump):
-
 ```bash
 class-dump Kindle.app
 ```
-
 #### Llamada de funciones
 
 Cuando se llama a una función en un binario que utiliza Objective-C, en lugar de llamar directamente a esa función, el código compilado llamará a **`objc_msgSend`**. Lo cual llamará a la función final:
 
-![](<../../../.gitbook/assets/image (560).png>)
+![](<../../../.gitbook/assets/image (302).png>)
 
 Los parámetros que esta función espera son:
 
-* El primer parámetro (**self**) es "un puntero que apunta a la **instancia de la clase que va a recibir el mensaje**". O de forma más simple, es el objeto sobre el cual se invoca el método. Si el método es un método de clase, esto será una instancia del objeto de la clase (en su totalidad), mientras que para un método de instancia, self apuntará a una instancia instanciada de la clase como un objeto.
-* El segundo parámetro, (**op**), es "el selector del método que maneja el mensaje". Nuevamente, de forma más simple, este es simplemente el **nombre del método**.
-* Los parámetros restantes son cualquier **valor requerido por el método** (op).
+- El primer parámetro (**self**) es "un puntero que apunta a la **instancia de la clase que va a recibir el mensaje**". O de forma más simple, es el objeto sobre el cual se invoca el método. Si el método es un método de clase, esto será una instancia del objeto de la clase (en su totalidad), mientras que para un método de instancia, self apuntará a una instancia instanciada de la clase como un objeto.
+- El segundo parámetro (**op**) es "el selector del método que maneja el mensaje". Nuevamente, de forma más simple, este es simplemente el **nombre del método**.
+- Los parámetros restantes son cualquier **valor que sea requerido por el método** (op).
 
 Vea cómo **obtener esta información fácilmente con `lldb` en ARM64** en esta página:
 
@@ -146,22 +145,21 @@ Vea cómo **obtener esta información fácilmente con `lldb` en ARM64** en esta 
 
 x64:
 
-| **Argumento**      | **Registro**                                                  | **(para) objc\_msgSend**                           |
-| ------------------ | ------------------------------------------------------------- | -------------------------------------------------- |
-| **1er argumento**  | **rdi**                                                       | **self: objeto sobre el cual se invoca el método** |
-| **2do argumento**  | **rsi**                                                       | **op: nombre del método**                          |
-| **3er argumento**  | **rdx**                                                       | **1er argumento del método**                       |
-| **4to argumento**  | **rcx**                                                       | **2do argumento del método**                       |
-| **5to argumento**  | **r8**                                                        | **3er argumento del método**                       |
-| **6to argumento**  | **r9**                                                        | **4to argumento del método**                       |
-| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento del método**                      |
+| **Argumento**     | **Registro**                                                   | **(para) objc\_msgSend**                               |
+| ----------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
+| **1er argumento** | **rdi**                                                        | **self: objeto sobre el cual se invoca el método**     |
+| **2do argumento** | **rsi**                                                        | **op: nombre del método**                             |
+| **3er argumento** | **rdx**                                                        | **1er argumento para el método**                       |
+| **4to argumento** | **rcx**                                                        | **2do argumento para el método**                       |
+| **5to argumento** | **r8**                                                         | **3er argumento para el método**                       |
+| **6to argumento** | **r9**                                                         | **4to argumento para el método**                       |
+| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento para el método**                      |
 
 ### Swift
 
 Con binarios Swift, dado que hay compatibilidad con Objective-C, a veces se pueden extraer declaraciones usando [class-dump](https://github.com/nygard/class-dump/) pero no siempre.
 
 Con las líneas de comando **`jtool -l`** o **`otool -l`** es posible encontrar varias secciones que comienzan con el prefijo **`__swift5`**:
-
 ```bash
 jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
 LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
@@ -173,11 +171,9 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
+Puedes encontrar más información sobre la [**información almacenada en esta sección en esta publicación de blog**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
-Puedes encontrar más información sobre la **información almacenada en esta sección en esta publicación de blog**.
-
-Además, **los binarios de Swift pueden tener símbolos** (por ejemplo, las bibliotecas necesitan almacenar símbolos para que sus funciones puedan ser llamadas). Los **símbolos suelen tener la información sobre el nombre de la función** y los atributos de una manera fea, por lo que son muy útiles y hay "**demanglers"** que pueden obtener el nombre original:
-
+Además, **los binarios de Swift pueden tener símbolos** (por ejemplo, las bibliotecas necesitan almacenar símbolos para que sus funciones puedan ser llamadas). Los **símbolos suelen contener información sobre el nombre de la función** y los atributos de una manera fea, por lo que son muy útiles y existen "**demanglers"** que pueden obtener el nombre original:
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -185,10 +181,9 @@ https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
 # Swift cli
 swift demangle
 ```
-
 ### Binarios empaquetados
 
-* Verificar la entropía alta
+* Verificar la alta entropía
 * Revisar las cadenas de texto (si hay casi ninguna cadena comprensible, está empaquetado)
 * El empaquetador UPX para MacOS genera una sección llamada "\_\_XHDR"
 
@@ -199,12 +194,12 @@ Ten en cuenta que para depurar binarios, **SIP debe estar deshabilitado** (`csru
 {% endhint %}
 
 {% hint style="warning" %}
-Ten en cuenta que para **instrumentar binarios del sistema** (como `cloudconfigurationd`) en macOS, **SIP debe estar deshabilitado** (simplemente quitar la firma no funcionará).
+Ten en cuenta que para **instrumentar binarios del sistema** (como `cloudconfigurationd`) en macOS, **SIP debe estar deshabilitado** (simplemente eliminar la firma no funcionará).
 {% endhint %}
 
 ### Registros Unificados
 
-macOS genera muchos registros que pueden ser muy útiles al ejecutar una aplicación para tratar de entender **qué está haciendo**.
+MacOS genera muchos registros que pueden ser muy útiles al ejecutar una aplicación para entender **qué está haciendo**.
 
 Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** cierta información **identificable** del **usuario** o **computadora**. Sin embargo, es posible **instalar un certificado para revelar esta información**. Sigue las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
@@ -216,19 +211,19 @@ En el panel izquierdo de Hopper es posible ver los símbolos (**Etiquetas**) del
 
 #### Panel central
 
-En el panel central puedes ver el **código desensamblado**. Y puedes verlo como un desensamblado **en bruto**, como **gráfico**, como **decompilado** y como **binario** haciendo clic en el icono respectivo:
+En el panel central puedes ver el **código desensamblado**. Puedes verlo como un desensamblado **en bruto**, como **gráfico**, como **decompilado** y como **binario** haciendo clic en el icono respectivo:
 
-<figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (340).png" alt=""><figcaption></figcaption></figure>
 
 Al hacer clic derecho en un objeto de código, puedes ver las **referencias a/desde ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo decompilado):
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1114).png" alt=""><figcaption></figcaption></figure>
 
 Además, en la **parte inferior central puedes escribir comandos de Python**.
 
 #### Panel derecho
 
-En el panel derecho puedes ver información interesante como el **historial de navegación** (para saber cómo llegaste a la situación actual), el **grafo de llamadas** donde puedes ver todas las **funciones que llaman a esta función** y todas las funciones que **esta función llama**, e información de **variables locales**.
+En el panel derecho puedes ver información interesante como el **historial de navegación** (para saber cómo llegaste a la situación actual), el **grafo de llamadas** donde puedes ver todas las **funciones que llaman a esta función** y todas las funciones que **esta función llama**, y la información de **variables locales**.
 
 ### dtrace
 
@@ -243,7 +238,6 @@ También puedes **`dtrace`** o **`dtruss`** binarios que **hayas compilado**.
 {% endhint %}
 
 Las sondas disponibles de dtrace se pueden obtener con:
-
 ```bash
 dtrace -l | head
 ID   PROVIDER            MODULE                          FUNCTION NAME
@@ -253,7 +247,6 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 43    profile                                                     profile-97
 44    profile                                                     profile-199
 ```
-
 El nombre de la sonda consta de cuatro partes: el proveedor, el módulo, la función y el nombre (`fbt:mach_kernel:ptrace:entry`). Si no se especifica alguna parte del nombre, Dtrace aplicará esa parte como un comodín.
 
 Para configurar DTrace para activar sondas y especificar qué acciones realizar cuando se activen, necesitaremos usar el lenguaje D.
@@ -265,14 +258,11 @@ Una explicación más detallada y más ejemplos se pueden encontrar en [https://
 Ejecute `man -k dtrace` para listar los **scripts de DTrace disponibles**. Ejemplo: `sudo dtruss -n binary`
 
 * En línea
-
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
-
-* guion
-
+* script
 ```bash
 syscall:::entry
 /pid == $1/
@@ -310,22 +300,17 @@ printf("=%d\n", arg1);
 #Log sys calls with values
 sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 ```
-
 ### dtruss
-
 ```bash
 dtruss -c ls #Get syscalls of ls
 dtruss -c -p 1000 #get syscalls of PID 1000
 ```
-
 ### ktrace
 
 Puedes usar este incluso con **SIP activado**.
-
 ```bash
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
-
 ### ProcessMonitor
 
 [**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) es una herramienta muy útil para verificar las acciones relacionadas con procesos que un proceso está realizando (por ejemplo, monitorear qué nuevos procesos está creando un proceso).
@@ -335,7 +320,7 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 [**SpriteTree**](https://themittenmac.com/tools/) es una herramienta que imprime las relaciones entre procesos.\
 Necesitas monitorear tu Mac con un comando como **`sudo eslogger fork exec rename create > cap.json`** (la terminal que lanza esto requiere FDA). Y luego puedes cargar el json en esta herramienta para ver todas las relaciones:
 
-<figure><img src="../../../.gitbook/assets/image (710).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1179).png" alt="" width="375"><figcaption></figcaption></figure>
 
 ### FileMonitor
 
@@ -343,23 +328,21 @@ Necesitas monitorear tu Mac con un comando como **`sudo eslogger fork exec renam
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) es una herramienta GUI con la apariencia que los usuarios de Windows pueden conocer de _Procmon_ de Microsoft Sysinternals. Esta herramienta permite iniciar y detener la grabación de varios tipos de eventos, filtrar estos eventos por categorías como archivo, proceso, red, etc., y proporciona la funcionalidad para guardar los eventos registrados en un formato json.
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) es una herramienta GUI con la apariencia que los usuarios de Windows pueden conocer de _Procmon_ de Microsoft Sysinternals. Esta herramienta permite iniciar y detener la grabación de varios tipos de eventos, permite filtrar estos eventos por categorías como archivo, proceso, red, etc., y proporciona la funcionalidad para guardar los eventos grabados en formato json.
 
 ### Apple Instruments
 
 [**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) son parte de las herramientas de desarrollador de Xcode, utilizadas para monitorear el rendimiento de la aplicación, identificar fugas de memoria y rastrear la actividad del sistema de archivos.
 
-![](<../../../.gitbook/assets/image (15).png>)
+![](<../../../.gitbook/assets/image (1135).png>)
 
 ### fs\_usage
 
 Permite seguir las acciones realizadas por los procesos:
-
 ```bash
 fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names containing ls
 fs_usage -w -f network curl #This tracks network actions
 ```
-
 ### TaskExplorer
 
 [**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) es útil para ver las **bibliotecas** utilizadas por un binario, los **archivos** que está utilizando y las **conexiones de red**.\
@@ -371,21 +354,17 @@ En [**esta publicación de blog**](https://knight.sc/debugging/2019/06/03/debugg
 
 ### lldb
 
-**lldb** es la herramienta de **hecho** para **depurar** binarios en **macOS**.
-
+**lldb** es la herramienta de **hecho** para **depuración** de binarios en **macOS**.
 ```bash
 lldb ./malware.bin
 lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-
-Puedes configurar el sabor de Intel al usar lldb creando un archivo llamado **`.lldbinit`** en tu carpeta de inicio con la siguiente línea:
-
+Puedes establecer el sabor de Intel al usar lldb creando un archivo llamado **`.lldbinit`** en tu carpeta de inicio con la siguiente línea:
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
-
 {% hint style="warning" %}
 Dentro de lldb, volcar un proceso con `process save-core`
 {% endhint %}
@@ -415,8 +394,7 @@ Al llamar a la función **`objc_sendMsg`**, el registro **rsi** contiene el **no
 * También se puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un deb**u**gger se adjunte y realice un seguimiento.
 * Puedes verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
 * Como se señala en este artículo, “[Derrotando Técnicas Anti-Depuración: variantes de ptrace en macOS](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-  “_El mensaje Proceso # salió con **estado = 45 (0x0000002d)** suele ser una clara señal de que el objetivo de depuración está usando **PT\_DENY\_ATTACH**_”
-
+“_El mensaje Proceso # salió con **estado = 45 (0x0000002d)** suele ser una clara señal de que el objetivo de depuración está usando **PT\_DENY\_ATTACH**_”
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
@@ -425,8 +403,7 @@ ReportCrash **analiza los procesos que se bloquean y guarda un informe de bloque
 Para aplicaciones y otros procesos **que se ejecutan en el contexto de lanzamiento por usuario**, ReportCrash se ejecuta como un LaunchAgent y guarda los informes de bloqueo en `~/Library/Logs/DiagnosticReports/` del usuario.\
 Para demonios, otros procesos **que se ejecutan en el contexto de lanzamiento del sistema** y otros procesos privilegiados, ReportCrash se ejecuta como un LaunchDaemon y guarda los informes de bloqueo en `/Library/Logs/DiagnosticReports` del sistema.
 
-Si te preocupa que los informes de bloqueo **sean enviados a Apple**, puedes desactivarlos. De lo contrario, los informes de bloqueo pueden ser útiles para **descubrir cómo se bloqueó un servidor**.
-
+Si te preocupa que los informes de bloqueo **se envíen a Apple**, puedes desactivarlos. De lo contrario, los informes de bloqueo pueden ser útiles para **descubrir cómo se bloqueó un servidor**.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -436,10 +413,9 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-
 ### Suspensión
 
-Durante el fuzzing en un MacOS es importante evitar que la Mac entre en suspensión:
+Durante el fuzzing en un MacOS es importante evitar que el Mac entre en suspensión:
 
 * systemsetup -setsleep Never
 * pmset, Preferencias del Sistema
@@ -452,12 +428,10 @@ Si estás realizando fuzzing a través de una conexión SSH, es importante asegu
 * TCPKeepAlive Yes
 * ClientAliveInterval 0
 * ClientAliveCountMax 0
-
 ```bash
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
-
 ### Controladores internos
 
 **Consulta la siguiente página** para descubrir cómo puedes encontrar qué aplicación es responsable de **manejar el esquema o protocolo especificado:**
@@ -467,14 +441,12 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 {% endcontent-ref %}
 
 ### Enumeración de Procesos de Red
-
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
 sort -u recv.log > procs.txt
 cat procs.txt
 ```
-
 O utiliza `netstat` o `lsof`
 
 ### Libgmalloc
@@ -495,7 +467,7 @@ Funciona para herramientas de línea de comandos.
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-Funciona con herramientas de GUI de macOS. Ten en cuenta que algunas aplicaciones de macOS tienen requisitos específicos como nombres de archivo únicos, la extensión correcta, necesitan leer los archivos desde el sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
+Simplemente funciona con herramientas GUI de macOS. Ten en cuenta que algunas aplicaciones de macOS tienen requisitos específicos como nombres de archivo únicos, la extensión correcta, necesitan leer los archivos desde el sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
 
 Algunos ejemplos:
 
@@ -539,16 +511,29 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 * [**The Art of Mac Malware: The Guide to Analyzing Malicious Software**](https://taomm.org/)
 
+
+### [WhiteIntel](https://whiteintel.io)
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
+
+El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
+
+Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
+
+{% embed url="https://whiteintel.io" %}
+
 <details>
 
 <summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén [**productos oficiales de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github.
+* **Comparte tus trucos de hacking enviando PR a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

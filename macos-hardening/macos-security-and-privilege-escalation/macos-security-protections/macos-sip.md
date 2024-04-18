@@ -2,17 +2,31 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
+
+### [WhiteIntel](https://whiteintel.io)
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
+
+El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
+
+Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
+
+{% embed url="https://whiteintel.io" %}
+
+---
 
 ## **Información Básica**
 
@@ -23,7 +37,7 @@ Otras formas de apoyar a HackTricks:
 * **/sbin**
 * **/usr**
 
-Las reglas que rigen el comportamiento de SIP están definidas en el archivo de configuración ubicado en **`/System/Library/Sandbox/rootless.conf`**. Dentro de este archivo, las rutas que tienen un asterisco (*) como prefijo se consideran excepciones a las restricciones estrictas de SIP.
+Las reglas que rigen el comportamiento de SIP están definidas en el archivo de configuración ubicado en **`/System/Library/Sandbox/rootless.conf`**. Dentro de este archivo, las rutas que tienen un asterisco (\*) como prefijo se consideran excepciones a las restricciones estrictas de SIP.
 
 Considera el siguiente ejemplo:
 ```javascript
@@ -32,7 +46,7 @@ Considera el siguiente ejemplo:
 * /usr/local
 * /usr/share/man
 ```
-Este fragmento implica que aunque SIP generalmente asegura el directorio **`/usr`**, hay subdirectorios específicos (`/usr/libexec/cups`, `/usr/local` y `/usr/share/man`) donde las modificaciones son permitidas, como se indica por el asterisco (*) que precede a sus rutas.
+Este fragmento implica que aunque SIP generalmente asegura el directorio **`/usr`**, hay subdirectorios específicos (`/usr/libexec/cups`, `/usr/local` y `/usr/share/man`) donde las modificaciones son permitidas, como se indica por el asterisco (\*) que precede a sus rutas.
 
 Para verificar si un directorio o archivo está protegido por SIP, puedes usar el comando **`ls -lOd`** para verificar la presencia de la bandera **`restricted`** o **`sunlnk`**. Por ejemplo:
 ```bash
@@ -59,7 +73,7 @@ Además, si un archivo contiene el atributo extendido **`com.apple.rootless`**, 
 
 Las opciones se mantienen en la variable nvram como un bitflag (`csr-active-config` en Intel y `lp-sip0` se lee del Device Tree arrancado para ARM). Puedes encontrar las banderas en el código fuente de XNU en `csr.sh`:
 
-<figure><img src="../../../.gitbook/assets/image (720).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1189).png" alt=""><figcaption></figcaption></figure>
 
 ### Estado de SIP
 
@@ -77,20 +91,20 @@ csrutil enable --without debug
 ```
 ### Otras Restricciones
 
-- **Prohíbe la carga de extensiones de kernel no firmadas** (kexts), asegurando que solo las extensiones verificadas interactúen con el kernel del sistema.
-- **Evita la depuración** de los procesos del sistema macOS, protegiendo los componentes principales del sistema contra accesos y modificaciones no autorizados.
-- **Inhibe herramientas** como dtrace de inspeccionar los procesos del sistema, protegiendo aún más la integridad de la operación del sistema.
+* **Prohíbe la carga de extensiones de kernel no firmadas** (kexts), asegurando que solo las extensiones verificadas interactúen con el kernel del sistema.
+* **Evita la depuración** de procesos del sistema macOS, protegiendo los componentes principales del sistema contra accesos y modificaciones no autorizados.
+* **Inhibe herramientas** como dtrace de inspeccionar procesos del sistema, protegiendo aún más la integridad de la operación del sistema.
 
-**[Obtén más información sobre la información de SIP en esta charla](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship).**
+[**Obtén más información sobre SIP en esta charla**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**
 
 ## Saltos de SIP
 
 Saltarse SIP permite a un atacante:
 
-- **Acceder a Datos de Usuario**: Leer datos sensibles de usuario como correos, mensajes e historial de Safari de todas las cuentas de usuario.
-- **Salto de TCC**: Manipular directamente la base de datos de TCC (Transparencia, Consentimiento y Control) para otorgar acceso no autorizado a la cámara web, el micrófono y otros recursos.
-- **Establecer Persistencia**: Colocar malware en ubicaciones protegidas por SIP, haciéndolo resistente a la eliminación, incluso con privilegios de root. Esto también incluye la posibilidad de manipular la Herramienta de Eliminación de Malware (MRT).
-- **Cargar Extensiones de Kernel**: Aunque existen salvaguardas adicionales, saltarse SIP simplifica el proceso de carga de extensiones de kernel no firmadas.
+* **Acceder a Datos de Usuario**: Leer datos sensibles de usuario como correos, mensajes e historial de Safari de todas las cuentas de usuario.
+* **Saltarse TCC**: Manipular directamente la base de datos de TCC (Transparencia, Consentimiento y Control) para otorgar acceso no autorizado a la cámara web, micrófono y otros recursos.
+* **Establecer Persistencia**: Colocar malware en ubicaciones protegidas por SIP, haciéndolo resistente a la eliminación, incluso con privilegios de root. Esto también incluye la posibilidad de manipular la Herramienta de Eliminación de Malware (MRT).
+* **Cargar Extensiones de Kernel**: Aunque existen salvaguardas adicionales, saltarse SIP simplifica el proceso de carga de extensiones de kernel no firmadas.
 
 ### Paquetes de Instalador
 
@@ -98,13 +112,13 @@ Saltarse SIP permite a un atacante:
 
 ### Archivo SIP inexistente
 
-Una posible laguna es que si un archivo está especificado en **`rootless.conf` pero actualmente no existe**, puede ser creado. El malware podría explotar esto para **establecer persistencia** en el sistema. Por ejemplo, un programa malicioso podría crear un archivo .plist en `/System/Library/LaunchDaemons` si está listado en `rootless.conf` pero no está presente.
+Una posible laguna es que si un archivo está especificado en **`rootless.conf` pero actualmente no existe**, puede ser creado. El malware podría aprovechar esto para **establecer persistencia** en el sistema. Por ejemplo, un programa malicioso podría crear un archivo .plist en `/System/Library/LaunchDaemons` si está listado en `rootless.conf` pero no está presente.
 
 ### com.apple.rootless.install.heritable
 
 {% hint style="danger" %}
 El permiso **`com.apple.rootless.install.heritable`** permite saltarse SIP
-{% endhint %}
+{% endhint%}
 
 #### Shrootless
 
@@ -114,7 +128,7 @@ El demonio **`system_installd`** instalará paquetes que hayan sido firmados por
 
 Los investigadores descubrieron que durante la instalación de un paquete firmado por Apple (.pkg), **`system_installd`** **ejecuta** cualquier **script post-instalación** incluido en el paquete. Estos scripts son ejecutados por la shell predeterminada, **`zsh`**, que automáticamente **ejecuta** comandos del archivo **`/etc/zshenv`**, si existe, incluso en modo no interactivo. Este comportamiento podría ser explotado por atacantes: al crear un archivo malicioso `/etc/zshenv` y esperar a que **`system_installd` invoque `zsh`**, podrían realizar operaciones arbitrarias en el dispositivo.
 
-Además, se descubrió que **`/etc/zshenv` podría ser utilizado como técnica de ataque general**, no solo para un bypass de SIP. Cada perfil de usuario tiene un archivo `~/.zshenv`, que se comporta de la misma manera que `/etc/zshenv` pero no requiere permisos de root. Este archivo podría ser utilizado como mecanismo de persistencia, activándose cada vez que se inicia `zsh`, o como un mecanismo de elevación de privilegios. Si un usuario administrador se eleva a root usando `sudo -s` o `sudo <comando>`, el archivo `~/.zshenv` se activaría, elevándose efectivamente a root.
+Además, se descubrió que **`/etc/zshenv` podría ser utilizado como técnica de ataque general**, no solo para saltarse SIP. Cada perfil de usuario tiene un archivo `~/.zshenv`, que se comporta de la misma manera que `/etc/zshenv` pero no requiere permisos de root. Este archivo podría ser utilizado como mecanismo de persistencia, activándose cada vez que `zsh` se inicia, o como mecanismo de elevación de privilegios. Si un usuario administrador se eleva a root usando `sudo -s` o `sudo <comando>`, el archivo `~/.zshenv` se activaría, elevándose efectivamente a root.
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
@@ -122,7 +136,7 @@ En [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-
 
 #### [Utilidad fsck\_cs](https://www.theregister.com/2016/03/30/apple\_os\_x\_rootless/)
 
-Se identificó una vulnerabilidad donde **`fsck_cs`** fue engañado para corromper un archivo crucial, debido a su capacidad para seguir **enlaces simbólicos**. Específicamente, los atacantes crearon un enlace desde _`/dev/diskX`_ al archivo `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Ejecutar **`fsck_cs`** en _`/dev/diskX`_ llevó a la corrupción de `Info.plist`. La integridad de este archivo es vital para la Protección de Integridad del Sistema (SIP) del sistema operativo, que controla la carga de extensiones de kernel. Una vez corrompido, la capacidad de SIP para gestionar exclusiones de kernel se ve comprometida.
+Se identificó una vulnerabilidad donde **`fsck_cs`** fue engañado para corromper un archivo crucial, debido a su capacidad de seguir **enlaces simbólicos**. Específicamente, los atacantes crearon un enlace desde _`/dev/diskX`_ al archivo `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Ejecutar **`fsck_cs`** en _`/dev/diskX`_ llevó a la corrupción de `Info.plist`. La integridad de este archivo es vital para la Protección de Integridad del Sistema (SIP) del sistema operativo, que controla la carga de extensiones de kernel. Una vez corrompido, la capacidad de SIP para gestionar exclusiones de kernel se ve comprometida.
 
 Los comandos para explotar esta vulnerabilidad son:
 ```bash
@@ -132,7 +146,6 @@ touch /Library/Extensions/
 reboot
 ```
 La explotación de esta vulnerabilidad tiene graves implicaciones. El archivo `Info.plist`, normalmente responsable de gestionar los permisos para las extensiones del kernel, se vuelve ineficaz. Esto incluye la imposibilidad de poner en lista negra ciertas extensiones, como `AppleHWAccess.kext`. En consecuencia, con el mecanismo de control de SIP desactivado, esta extensión puede cargarse, otorgando acceso no autorizado de lectura y escritura a la RAM del sistema.
-
 
 #### [Montar sobre carpetas protegidas por SIP](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
@@ -155,7 +168,6 @@ El código del atacante obtiene control durante el proceso de actualización, ex
 
 Además, dentro de `InstallESD.dmg`, hay un `BaseSystem.dmg`, que sirve como sistema de archivos raíz del código de actualización. Inyectar una biblioteca dinámica en esto permite que el código malicioso opere dentro de un proceso capaz de alterar archivos a nivel de sistema, aumentando significativamente el potencial de compromiso del sistema.
 
-
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
 En esta charla de [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), se muestra cómo **`systemmigrationd`** (que puede evadir SIP) ejecuta un script de **bash** y un script de **perl**, que pueden ser abusados a través de las variables de entorno **`BASH_ENV`** y **`PERL5OPT`**.
@@ -163,12 +175,12 @@ En esta charla de [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk),
 ### **com.apple.rootless.install**
 
 {% hint style="danger" %}
-La concesión **`com.apple.rootless.install`** permite evadir SIP
+El permiso **`com.apple.rootless.install`** permite evadir SIP
 {% endhint %}
 
-La concesión `com.apple.rootless.install` es conocida por evadir la Protección de Integridad del Sistema (SIP) en macOS. Esto fue mencionado notablemente en relación con [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).
+El permiso `com.apple.rootless.install` es conocido por evadir la Protección de Integridad del Sistema (SIP) en macOS. Esto fue mencionado notablemente en relación con [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).
 
-En este caso específico, el servicio XPC del sistema ubicado en `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` posee esta concesión. Esto permite que el proceso relacionado evite las restricciones de SIP. Además, este servicio presenta notablemente un método que permite el movimiento de archivos sin aplicar medidas de seguridad.
+En este caso específico, el servicio XPC del sistema ubicado en `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` posee este permiso. Esto permite que el proceso relacionado circunvale las restricciones de SIP. Además, este servicio presenta notablemente un método que permite el movimiento de archivos sin aplicar medidas de seguridad.
 
 ## Instantáneas de Sistema Selladas
 
@@ -178,7 +190,7 @@ Aquí tienes un vistazo más detallado:
 
 1. **Sistema Inmutable**: Las Instantáneas de Sistema Selladas hacen que el volumen del sistema macOS sea "inmutable", lo que significa que no se puede modificar. Esto evita cambios no autorizados o accidentales en el sistema que podrían comprometer la seguridad o la estabilidad del sistema.
 2. **Actualizaciones de Software del Sistema**: Cuando instalas actualizaciones o mejoras de macOS, macOS crea una nueva instantánea del sistema. El volumen de arranque de macOS luego utiliza **APFS (Sistema de Archivos Apple)** para cambiar a esta nueva instantánea. Todo el proceso de aplicar actualizaciones se vuelve más seguro y confiable, ya que el sistema siempre puede revertir a la instantánea anterior si algo sale mal durante la actualización.
-3. **Separación de Datos**: En conjunto con el concepto de separación de volúmenes de Datos y Sistema introducido en macOS Catalina, la función de Instantáneas de Sistema Selladas se asegura de que todos tus datos y configuraciones se almacenen en un volumen "**Datos**" separado. Esta separación hace que tus datos sean independientes del sistema, lo que simplifica el proceso de actualizaciones del sistema y mejora la seguridad del sistema.
+3. **Separación de Datos**: En conjunto con el concepto de separación de volúmenes de Datos y Sistema introducido en macOS Catalina, la función de Instantáneas de Sistema Selladas asegura que todos tus datos y configuraciones se almacenen en un volumen "**Datos**" separado. Esta separación hace que tus datos sean independientes del sistema, lo que simplifica el proceso de actualizaciones del sistema y mejora la seguridad del sistema.
 
 Recuerda que estas instantáneas son gestionadas automáticamente por macOS y no ocupan espacio adicional en tu disco, gracias a las capacidades de uso compartido de espacio de APFS. También es importante tener en cuenta que estas instantáneas son diferentes de las **instantáneas de Time Machine**, que son copias de seguridad accesibles por el usuario de todo el sistema.
 
@@ -202,30 +214,30 @@ El comando **`diskutil apfs list`** lista los **detalles de los volúmenes APFS*
 |   |   ---------------------------------------------------
 <strong>|   |   Disco de Volumen APFS (Rol):   disco3s1 (Sistema)
 </strong>|   |   Nombre:                          Macintosh HD (No sensible a mayúsculas)
-<strong>|   |   Punto de Montaje:               /System/Volumes/Update/mnt1
-</strong>|   |   Capacidad Consumida:            12819210240 B (12.8 GB)
+<strong>|   |   Punto de Montaje:                /System/Volumes/Update/mnt1
+</strong>|   |   Capacidad Consumida:             12819210240 B (12.8 GB)
 |   |   Sellado:                         Roto
 |   |   FileVault:                      Sí (Desbloqueado)
-|   |   Encriptado:                     No
+|   |   Encriptado:                      No
 |   |   |
-|   |   Instantánea:                    FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
-|   |   Disco de Instantánea:           disco3s1s1
+|   |   Instantánea:                   FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
+|   |   Disco de Instantánea:          disco3s1s1
 <strong>|   |   Punto de Montaje de Instantánea: /
-</strong><strong>|   |   Instantánea Sellada:            Sí
+</strong><strong>|   |   Instantánea Sellada:           Sí
 </strong>[...]
 +-> Volumen disco3s5 281959B7-07A1-4940-BDDF-6419360F3327
 |   ---------------------------------------------------
 |   Disco de Volumen APFS (Rol):   disco3s5 (Datos)
 |   Nombre:                        Macintosh HD - Datos (No sensible a mayúsculas)
-<strong>    |   Punto de Montaje:               /System/Volumes/Data
+<strong>    |   Punto de Montaje:             /System/Volumes/Data
 </strong><strong>    |   Capacidad Consumida:         412071784448 B (412.1 GB)
-</strong>    |   Sellado:                      No
+</strong>    |   Sellado:                    No
 |   FileVault:                     Sí (Desbloqueado)
 </code></pre>
 
 En la salida anterior es posible ver que las **ubicaciones accesibles por el usuario** están montadas bajo `/System/Volumes/Data`.
 
-Además, la **instantánea del volumen del sistema macOS** está montada en `/` y está **sellada** (firmada criptográficamente por el sistema operativo). Por lo tanto, si se evade SIP y se modifica, el **sistema no arrancará más**.
+Además, la **instantánea del volumen del sistema macOS** está montada en `/` y está **sellada** (firmada criptográficamente por el sistema operativo). Por lo tanto, si se evade SIP y se modifica, el **sistema operativo no arrancará más**.
 
 También es posible **verificar que el sellado está habilitado** ejecutando:
 ```bash
@@ -233,20 +245,32 @@ csrutil authenticated-root status
 Authenticated Root status: enabled
 ```
 Además, el disco de instantáneas también se monta como **solo lectura**:
-```
+```bash
 mount
 /dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
 ```
+### [WhiteIntel](https://whiteintel.io)
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda impulsado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares ladrones**.
+
+El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
+
+Puedes visitar su sitio web y probar su motor de búsqueda de forma **gratuita** en:
+
+{% embed url="https://whiteintel.io" %}
+
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** Twitter 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
