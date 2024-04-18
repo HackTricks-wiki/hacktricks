@@ -14,6 +14,20 @@ Other ways to support HackTricks:
 
 </details>
 
+### [WhiteIntel](https://whiteintel.io)
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
+
+Their primary goal of WhiteIntel is to combat account takeovers and ransomware attacks resulting from information-stealing malware.
+
+You can check their website and try their engine for **free** at:
+
+{% embed url="https://whiteintel.io" %}
+
+---
+
 ## **Basic Information**
 
 **System Integrity Protection (SIP)** in macOS is a mechanism designed to prevent even the most privileged users from making unauthorized changes to key system folders. This feature plays a crucial role in maintaining the integrity of the system by restricting actions like adding, modifying, or deleting files in protected areas. The primary folders shielded by SIP include:
@@ -252,10 +266,22 @@ Authenticated Root status: enabled
 
 Moreover, the snapshot disk is also mounted as **read-only**:
 
-```
+```bash
 mount
 /dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
 ```
+
+### [WhiteIntel](https://whiteintel.io)
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
+
+Their primary goal of WhiteIntel is to combat account takeovers and ransomware attacks resulting from information-stealing malware.
+
+You can check their website and try their engine for **free** at:
+
+{% embed url="https://whiteintel.io" %}
 
 <details>
 
