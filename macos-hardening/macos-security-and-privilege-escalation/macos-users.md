@@ -14,11 +14,11 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares robadores**.
 
 El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
 
@@ -49,7 +49,7 @@ for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
 
 ### Privilegios de Usuario
 
-* **Usuario Estándar:** El usuario más básico. Este usuario necesita permisos otorgados por un usuario administrador al intentar instalar software u realizar otras tareas avanzadas. No pueden hacerlo por sí mismos.
+* **Usuario Estándar**: El usuario más básico. Este usuario necesita permisos otorgados por un usuario administrador al intentar instalar software u realizar otras tareas avanzadas. No pueden hacerlo por sí mismos.
 * **Usuario Admin**: Un usuario que opera la mayor parte del tiempo como un usuario estándar pero también tiene permitido realizar acciones de root como instalar software y otras tareas administrativas. Todos los usuarios pertenecientes al grupo admin **tienen acceso a root a través del archivo sudoers**.
 * **Root**: Root es un usuario permitido para realizar casi cualquier acción (hay limitaciones impuestas por protecciones como la Protección de la Integridad del Sistema).
 * Por ejemplo, root no podrá colocar un archivo dentro de `/System`
@@ -64,6 +64,6 @@ Otras formas de apoyar a HackTricks:
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

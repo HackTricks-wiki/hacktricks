@@ -1,10 +1,10 @@
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
@@ -12,11 +12,11 @@ Otras formas de apoyar a HackTricks:
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda impulsado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
 
 El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
 
@@ -28,7 +28,7 @@ Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
 
 # Verificar posibles acciones dentro de la aplicación GUI
 
-Los **Diálogos comunes** son esas opciones de **guardar un archivo**, **abrir un archivo**, seleccionar una fuente, un color... La mayoría de ellos **ofrecerán una funcionalidad completa de Explorador**. Esto significa que podrás acceder a funcionalidades de Explorador si puedes acceder a estas opciones:
+Los **Diálogos Comunes** son esas opciones de **guardar un archivo**, **abrir un archivo**, seleccionar una fuente, un color... La mayoría ofrecerá una funcionalidad completa de Explorador. Esto significa que podrás acceder a funcionalidades de Explorador si puedes acceder a estas opciones:
 
 * Cerrar/Cerrar como
 * Abrir/Abrir con
@@ -44,7 +44,7 @@ Deberías verificar si puedes:
 * Acceder a áreas restringidas
 * Ejecutar otras aplicaciones
 
-## Ejecución de comandos
+## Ejecución de Comandos
 
 Tal vez **usando la opción `Abrir con`** puedas abrir/ejecutar algún tipo de shell.
 
@@ -64,8 +64,8 @@ _bash, sh, zsh..._ Más aquí: [https://gtfobins.github.io/](https://gtfobins.gi
 * **Otros protocolos**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 * **Enlaces simbólicos**
 * **Accesos directos**: CTRL+N (abrir nueva sesión), CTRL+R (Ejecutar comandos), CTRL+SHIFT+ESC (Administrador de tareas),  Windows+E (abrir explorador), CTRL-B, CTRL-I (Favoritos), CTRL-H (Historial), CTRL-L, CTRL-O (Diálogo de Archivo/Abrir), CTRL-P (Diálogo de Imprimir), CTRL-S (Guardar como)
-* Menú administrativo oculto: CTRL-ALT-F8, CTRL-ESC-F9
-* **URIs de shell**: _shell:Herramientas Administrativas, shell:Bibliotecas de Documentos, shell:Bibliotecas, shell:Perfiles de Usuario, shell:Personal, shell:Carpeta de Inicio de Búsqueda, shell:Sistemas shell:Red, shell:Enviar a, shell:Perfiles de Usuarios, shell:Herramientas Administrativas Comunes, shell:Carpeta de Mi PC, shell:Carpeta de Internet_
+* Menú Administrativo oculto: CTRL-ALT-F8, CTRL-ESC-F9
+* **URIs de Shell**: _shell:Herramientas Administrativas, shell:Bibliotecas de Documentos, shell:Bibliotecas, shell:Perfiles de Usuario, shell:Personal, shell:Carpeta de Inicio de Búsqueda, shell:Sistemas, shell:Sitios de Red, shell:Enviar a, shell:Perfiles de Usuarios, shell:Herramientas Administrativas Comunes, shell:Mi PC, shell:Carpeta de Internet_
 * **Rutas UNC**: Rutas para conectarse a carpetas compartidas. Deberías intentar conectarte al C$ de la máquina local ("\\\127.0.0.1\c$\Windows\System32")
 * **Más rutas UNC:**
 
@@ -81,7 +81,7 @@ _bash, sh, zsh..._ Más aquí: [https://gtfobins.github.io/](https://gtfobins.gi
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-## Descarga tus binarios
+## Descarga tus Binarios
 
 Consola: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorador: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
@@ -101,27 +101,27 @@ Editor de registro: [https://sourceforge.net/projects/uberregedit/](https://sour
 
 ## Accesos directos
 
-* Teclas de acceso rápido – Presiona SHIFT 5 veces
-* Teclas del ratón – SHIFT+ALT+NUMLOCK
-* Alto contraste – SHIFT+ALT+PRINTSCN
-* Teclas de alternancia – Mantén presionado NUMLOCK durante 5 segundos
-* Teclas de filtro – Mantén presionado el botón derecho SHIFT durante 12 segundos
+* Teclas de Acceso Rápido – Presiona SHIFT 5 veces
+* Teclas del Ratón – SHIFT+ALT+NUMLOCK
+* Alto Contraste – SHIFT+ALT+PRINTSCN
+* Teclas de Alternancia – Mantén NUMLOCK durante 5 segundos
+* Teclas de Filtro – Mantén pulsado el SHIFT derecho durante 12 segundos
 * WINDOWS+F1 – Búsqueda de Windows
-* WINDOWS+D – Mostrar escritorio
+* WINDOWS+D – Mostrar Escritorio
 * WINDOWS+E – Abrir Explorador de Windows
 * WINDOWS+R – Ejecutar
-* WINDOWS+U – Centro de accesibilidad
+* WINDOWS+U – Centro de Accesibilidad
 * WINDOWS+F – Búsqueda
-* SHIFT+F10 – Menú contextual
+* SHIFT+F10 – Menú Contextual
 * CTRL+SHIFT+ESC – Administrador de tareas
 * CTRL+ALT+DEL – Pantalla de inicio en versiones más nuevas de Windows
 * F1 – Ayuda F3 – Búsqueda
 * F6 – Barra de direcciones
 * F11 – Alternar pantalla completa dentro de Internet Explorer
 * CTRL+H – Historial de Internet Explorer
-* CTRL+T – Internet Explorer – Nueva pestaña
-* CTRL+N – Internet Explorer – Nueva página
-* CTRL+O – Abrir archivo
+* CTRL+T – Internet Explorer – Nueva Pestaña
+* CTRL+N – Internet Explorer – Nueva Página
+* CTRL+O – Abrir Archivo
 * CTRL+S – Guardar CTRL+N – Nueva RDP / Citrix
 ## Deslizamientos
 
@@ -132,9 +132,9 @@ Editor de registro: [https://sourceforge.net/projects/uberregedit/](https://sour
 
 ## Trucos de Internet Explorer
 
-### 'Barra de herramientas de imagen'
+### 'Barra de Imagen'
 
-Es una barra de herramientas que aparece en la parte superior izquierda de la imagen cuando se hace clic en ella. Podrá Guardar, Imprimir, Enviar por correo electrónico, Abrir "Mis imágenes" en el Explorador. El Kiosk debe estar utilizando Internet Explorer.
+Es una barra de herramientas que aparece en la parte superior izquierda de la imagen cuando se hace clic en ella. Podrá Guardar, Imprimir, Enviar por correo electrónico, Abrir "Mis imágenes" en el Explorador. El Kiosko debe estar utilizando Internet Explorer.
 
 ### Protocolo Shell
 
@@ -151,7 +151,7 @@ Escriba estas URL para obtener una vista de Explorador:
 * `shell:PerfilesUsuarios`
 * `shell:HerramientasAdministrativasComunes`
 * `shell:MiPC`
-* `shell:CarpetaInternet`
+* `shell:Internet`
 * `Shell:Perfil`
 * `Shell:ArchivosPrograma`
 * `Shell:Sistema`
@@ -162,13 +162,13 @@ Escriba estas URL para obtener una vista de Explorador:
 * `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> Mis sitios de red
 * `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-## Mostrar extensiones de archivo
+## Mostrar Extensiones de Archivos
 
 Consulte esta página para obtener más información: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-# Trucos de navegadores
+# Trucos de Navegadores
 
-Hacer copias de seguridad de versiones iKat:
+Respaldo de versiones iKat:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
@@ -200,7 +200,7 @@ Fuente: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811
 
 * Presione el botón de Encendido/Apagado/Suspensión en la esquina superior derecha del iPad y el botón de Inicio durante unos segundos: Para forzar un apagado completo
 
-* Presione el botón de Encendido/Apagado/Suspensión en la esquina superior derecha del iPad y el botón de Inicio rápidamente: Para tomar una captura de pantalla que aparecerá en la esquina inferior izquierda de la pantalla. Presione ambos botones al mismo tiempo brevemente, ya que si los mantiene presionados durante unos segundos se realizará un apagado completo.
+* Presione el botón de Encendido/Apagado/Suspensión en la esquina superior derecha del iPad y el botón de Inicio rápidamente: Para tomar una captura de pantalla que aparecerá en la esquina inferior izquierda de la pantalla. Presione ambos botones al mismo tiempo brevemente, ya que si los mantiene presionados unos segundos se realizará un apagado completo.
 
 ## Accesos directos
 
@@ -214,10 +214,10 @@ Debe tener un teclado para iPad o un adaptador de teclado USB. Aquí se mostrar�
 | ↩   | Retorno       |
 | ⇥   | Tabulador          |
 | ^   | Control      |
-| ←   | Flecha izquierda   |
-| →   | Flecha derecha  |
-| ↑   | Flecha arriba     |
-| ↓   | Flecha abajo   |
+| ←   | Flecha Izquierda   |
+| →   | Flecha Derecha  |
+| ↑   | Flecha Arriba     |
+| ↓   | Flecha Abajo   |
 
 ### Accesos directos del sistema
 
@@ -240,15 +240,15 @@ Estos accesos directos son para la configuración visual y de sonido, dependiend
 | Acceso directo                                           | Acción                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
 | ⌘H                                                 | Ir a Inicio                                              |
-| ⌘⇧H (Comando-Mayúsculas-H)                              | Ir a Inicio                                              |
+| ⌘⇧H (Comando-Mayús-H)                              | Ir a Inicio                                              |
 | ⌘ (Espacio)                                          | Abrir Spotlight                                          |
 | ⌘⇥ (Comando-Tabulador)                                   | Listar las últimas diez aplicaciones utilizadas                                 |
 | ⌘\~                                                | Ir a la última aplicación                                       |
-| ⌘⇧3 (Comando-Mayúsculas-3)                              | Captura de pantalla (aparece en la esquina inferior izquierda para guardarla o actuar sobre ella) |
+| ⌘⇧3 (Comando-Mayús-3)                              | Captura de pantalla (aparece en la esquina inferior izquierda para guardarla o actuar sobre ella) |
 | ⌘⇧4                                                | Captura de pantalla y ábrala en el editor                    |
 | Mantener presionado ⌘                                   | Lista de accesos directos disponibles para la aplicación                 |
 | ⌘⌥D (Comando-Opción/Alt-D)                         | Muestra el dock                                      |
-| ^⌥H (Control-Opción-H)                             | Botón de inicio                                             |
+| ^⌥H (Control-Opción-H)                             | Botón de Inicio                                             |
 | ^⌥H H (Control-Opción-H-H)                         | Mostrar barra de multitarea                                      |
 | ^⌥I (Control-Opción-i)                             | Selector de elementos                                            |
 | Escape                                             | Botón de retroceso                                             |
@@ -259,7 +259,7 @@ Estos accesos directos son para la configuración visual y de sonido, dependiend
 | ⌥↑ (Opción-Flecha arriba)                               | Desplazarse hacia arriba                                               |
 | ⌥← o ⌥→ (Opción-Flecha izquierda o Opción-Flecha derecha) | Desplazarse hacia la izquierda o derecha                                    |
 | ^⌥S (Control-Opción-S)                             | Activar o desactivar el habla de VoiceOver                         |
-| ⌘⇧⇥ (Comando-Mayúsculas-Tabulador)                            | Cambiar a la aplicación anterior                              |
+| ⌘⇧⇥ (Comando-Mayús-Tabulador)                            | Cambiar a la aplicación anterior                              |
 | ⌘⇥ (Comando-Tabulador)                                   | Volver a la aplicación original                         |
 | ←+→, luego Opción + ← o Opción+→                   | Navegar a través del Dock                                   |
 ### Atajos de Safari
@@ -273,7 +273,7 @@ Estos accesos directos son para la configuración visual y de sonido, dependiend
 | ⌘.                      | Detener la carga de la pestaña actual            |
 | ^⇥                      | Cambiar a la siguiente pestaña                   |
 | ^⇧⇥ (Control-Mayús-Tab) | Moverse a la pestaña anterior                    |
-| ⌘L                      | Seleccionar el campo de entrada de texto/URL para modificarlo |
+| ⌘L                      | Seleccionar el campo de texto/URL para modificarlo |
 | ⌘⇧T (Comando-Mayús-T)   | Abrir la última pestaña cerrada (se puede usar varias veces) |
 | ⌘\[                     | Retroceder una página en tu historial de navegación |
 | ⌘]                      | Avanzar una página en tu historial de navegación |
@@ -281,13 +281,13 @@ Estos accesos directos son para la configuración visual y de sonido, dependiend
 
 ### Atajos de Correo
 
-| Atajo                     | Acción                       |
-| ------------------------- | ---------------------------- |
-| ⌘L                        | Abrir ubicación              |
-| ⌘T                        | Abrir una nueva pestaña      |
-| ⌘W                        | Cerrar la pestaña actual     |
-| ⌘R                        | Actualizar la pestaña actual |
-| ⌘.                        | Detener la carga de la pestaña actual |
+| Atajo                      | Acción                       |
+| -------------------------- | ---------------------------- |
+| ⌘L                         | Abrir ubicación              |
+| ⌘T                         | Abrir una nueva pestaña      |
+| ⌘W                         | Cerrar la pestaña actual     |
+| ⌘R                         | Actualizar la pestaña actual |
+| ⌘.                         | Detener la carga de la pestaña actual |
 | ⌘⌥F (Comando-Opción/Alt-F) | Buscar en tu buzón de correo  |
 
 # Referencias
@@ -298,15 +298,15 @@ Estos accesos directos son para la configuración visual y de sonido, dependiend
 * [http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
 
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
 
-El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
+El objetivo principal de WhiteIntel es combatir tomas de cuentas y ataques de ransomware resultantes de malwares que roban información.
 
-Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
+Puedes visitar su sitio web y probar su motor de búsqueda de forma **gratuita** en:
 
 {% embed url="https://whiteintel.io" %}
 
@@ -316,7 +316,7 @@ Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**

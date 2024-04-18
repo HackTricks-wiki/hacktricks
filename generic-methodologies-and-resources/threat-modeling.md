@@ -1,10 +1,10 @@
 # Modelado de Amenazas
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda impulsado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda impulsado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares ladrones**.
 
 El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
 
@@ -31,10 +31,10 @@ Los modelos de amenazas a menudo presentan elementos marcados en rojo, simboliza
 
 ### La Tríada CIA
 
-La Tríada CIA es un modelo ampliamente reconocido en el campo de la seguridad de la información, que representa Confidencialidad, Integridad y Disponibilidad. Estos tres pilares forman la base sobre la cual se construyen muchas medidas y políticas de seguridad, incluidas las metodologías de modelado de amenazas.
+La Tríada CIA es un modelo ampliamente reconocido en el campo de la seguridad de la información, que representa Confidencialidad, Integridad y Disponibilidad. Estos tres pilares forman la base sobre la cual se construyen muchas medidas de seguridad y políticas, incluidas las metodologías de modelado de amenazas.
 
-1. **Confidencialidad**: Garantizar que los datos o el sistema no sean accedidos por individuos no autorizados. Este es un aspecto central de la seguridad, que requiere controles de acceso adecuados, cifrado y otras medidas para prevenir brechas de datos.
-2. **Integridad**: La precisión, consistencia y confiabilidad de los datos a lo largo de su ciclo de vida. Este principio asegura que los datos no sean alterados o manipulados por partes no autorizadas. A menudo implica sumas de verificación, hash y otros métodos de verificación de datos.
+1. **Confidencialidad**: Asegurar que los datos o el sistema no sean accedidos por individuos no autorizados. Este es un aspecto central de la seguridad, que requiere controles de acceso adecuados, cifrado y otras medidas para prevenir brechas de datos.
+2. **Integridad**: La precisión, consistencia y confiabilidad de los datos a lo largo de su ciclo de vida. Este principio garantiza que los datos no sean alterados o manipulados por partes no autorizadas. A menudo implica sumas de verificación, hash y otros métodos de verificación de datos.
 3. **Disponibilidad**: Garantiza que los datos y servicios sean accesibles para los usuarios autorizados cuando sea necesario. Esto a menudo implica redundancia, tolerancia a fallos y configuraciones de alta disponibilidad para mantener los sistemas en funcionamiento incluso ante interrupciones.
 
 ### Metodologías de Modelado de Amenazas
@@ -44,7 +44,7 @@ La Tríada CIA es un modelo ampliamente reconocido en el campo de la seguridad d
 3. **PASTA** (Proceso para Simulación de Ataques y Análisis de Amenazas): Esta es una metodología de siete pasos centrada en el **riesgo**. Incluye definir e identificar objetivos de seguridad, crear un alcance técnico, descomposición de la aplicación, análisis de amenazas, análisis de vulnerabilidades y evaluación de riesgos/triage.
 4. **Trike**: Esta es una metodología basada en el riesgo que se centra en defender activos. Parte de una perspectiva de **gestión de riesgos** y examina amenazas y vulnerabilidades en ese contexto.
 5. **VAST** (Modelado de Amenazas Visual, Ágil y Simple): Este enfoque tiene como objetivo ser más accesible e integrarse en entornos de desarrollo ágil. Combina elementos de otras metodologías y se centra en **representaciones visuales de amenazas**.
-6. **OCTAVE** (Evaluación de Amenazas, Activos y Vulnerabilidades Críticas Operativamente): Desarrollado por el Centro de Coordinación CERT, este marco está orientado a la **evaluación de riesgos organizativos en lugar de sistemas o software específicos**.
+6. **OCTAVE** (Evaluación de Amenazas, Activos y Vulnerabilidades Críticas Operativamente): Desarrollado por el CERT Coordination Center, este marco está orientado a la **evaluación de riesgos organizativos en lugar de sistemas o software específicos**.
 
 ## Herramientas
 
@@ -70,7 +70,7 @@ Un proyecto de código abierto de OWASP, Threat Dragon es una aplicación web y 
 
 **Uso**
 
-1. Crea un Nuevo Proyecto
+1. Crear Nuevo Proyecto
 
 <figure><img src="../.gitbook/assets/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -78,11 +78,11 @@ A veces podría verse así:
 
 <figure><img src="../.gitbook/assets/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Inicia el Nuevo Proyecto
+2. Iniciar Nuevo Proyecto
 
 <figure><img src="../.gitbook/assets/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Guarda el Nuevo Proyecto
+3. Guardar el Nuevo Proyecto
 
 <figure><img src="../.gitbook/assets/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -100,7 +100,7 @@ Solo un poco de explicación sobre las entidades:
 * Límite de Confianza (Diferentes segmentos de red o alcances.)
 * Almacenamiento (Cosas donde se almacenan los datos, como bases de datos)
 
-5. Crea una Amenaza (Paso 1)
+5. Crear una Amenaza (Paso 1)
 
 Primero debes elegir la capa a la que deseas agregar una amenaza
 
@@ -124,11 +124,11 @@ Ahora tu modelo terminado debería verse algo así. Y así es como se crea un mo
 Esta es una herramienta gratuita de Microsoft que ayuda a encontrar amenazas en la fase de diseño de proyectos de software. Utiliza la metodología STRIDE y es particularmente adecuada para aquellos que desarrollan en la plataforma de Microsoft.
 
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares ladrones**.
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda impulsado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares ladrones**.
 
 Su objetivo principal es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
 

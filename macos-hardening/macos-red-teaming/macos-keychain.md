@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
 
@@ -33,7 +33,7 @@ Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
 * El **Llavero de Usuario** (`~/Library/Keychains/login.keycahin-db`), que se utiliza para almacenar **credenciales específicas del usuario** como contraseñas de aplicaciones, contraseñas de internet, certificados generados por el usuario, contraseñas de red y claves públicas/privadas generadas por el usuario.
 * El **Llavero del Sistema** (`/Library/Keychains/System.keychain`), que almacena **credenciales de todo el sistema** como contraseñas de WiFi, certificados raíz del sistema, claves privadas del sistema y contraseñas de aplicaciones del sistema.
 
-### Acceso a Contraseñas del Llavero
+### Acceso al Llavero de Contraseñas
 
 Estos archivos, aunque no tienen protección inherente y pueden ser **descargados**, están encriptados y requieren la **contraseña en texto plano del usuario para ser descifrados**. Una herramienta como [**Chainbreaker**](https://github.com/n0fate/chainbreaker) podría ser utilizada para el descifrado.
 
@@ -53,7 +53,7 @@ Las ACLs están acompañadas por una **lista de aplicaciones de confianza** que 
 * Una lista **vacía** (nadie es de confianza)
 * Lista de **aplicaciones** específicas.
 
-Además, la entrada podría contener la clave **`ACLAuthorizationPartitionID`,** que se utiliza para identificar el **teamid, apple** y **cdhash.**
+Además, la entrada podría contener la clave **`ACLAuthorizationPartitionID`,** que se utiliza para identificar el **teamid, apple,** y **cdhash.**
 
 * Si se especifica el **teamid**, entonces para **acceder al valor de la entrada** sin una **solicitud**, la aplicación utilizada debe tener el **mismo teamid**.
 * Si se especifica el **apple**, entonces la aplicación debe estar **firmada** por **Apple**.
@@ -107,7 +107,7 @@ Listar y obtener **información** sobre cada entrada del llavero:
 
 Obtener **ACLs** de cada entrada:
 
-* Con la API **`SecAccessCopyACLList`** puedes obtener el **ACL del elemento del llavero**, y devolverá una lista de ACLs (como `ACLAuhtorizationExportClear` y los otros mencionados anteriormente) donde cada lista tiene:
+* Con la API **`SecAccessCopyACLList`** puedes obtener el **ACL para el elemento del llavero**, y devolverá una lista de ACLs (como `ACLAuhtorizationExportClear` y los otros mencionados anteriormente) donde cada lista tiene:
 * Descripción
 * **Lista de Aplicaciones de Confianza**. Esto podría ser:
 * Una aplicación: /Applications/Slack.app
@@ -122,12 +122,12 @@ Exportar los datos:
 Y estos son los **requisitos** para poder **exportar un secreto sin un aviso**:
 
 * Si hay **1 o más aplicaciones de confianza** listadas:
-* Necesita las **autorizaciones apropiadas** (**`Nil`**, o ser **parte** de la lista permitida de aplicaciones en la autorización para acceder a la información secreta)
-* Necesita que la firma de código coincida con **PartitionID**
-* Necesita que la firma de código coincida con la de una **aplicación de confianza** (o ser miembro del grupo de acceso al llavero correcto)
+* Necesita las **autorizaciones** apropiadas (**`Nil`**, o ser **parte** de la lista permitida de aplicaciones en la autorización para acceder a la información secreta)
+* Necesita que la firma del código coincida con **PartitionID**
+* Necesita que la firma del código coincida con la de una **aplicación de confianza** (o ser miembro del grupo KeychainAccessGroup correcto)
 * Si **todas las aplicaciones son de confianza**:
-* Necesita las **autorizaciones apropiadas**
-* Necesita que la firma de código coincida con **PartitionID**
+* Necesita las **autorizaciones** apropiadas
+* Necesita que la firma del código coincida con **PartitionID**
 * Si no hay **PartitionID**, entonces esto no es necesario
 
 {% hint style="danger" %}
@@ -138,7 +138,7 @@ Si se indica **apple** en el **PartitionID**, podrías acceder con **`osascript`
 
 ### Dos atributos adicionales
 
-* **Invisible**: Es un indicador booleano para **ocultar** la entrada de la aplicación **UI** del llavero
+* **Invisible**: Es un indicador booleano para **ocultar** la entrada de la aplicación del llavero **UI**
 * **General**: Es para almacenar **metadatos** (por lo que NO ESTÁ CIFRADO)
 * Microsoft estaba almacenando en texto plano todos los tokens de actualización para acceder a puntos finales sensibles.
 
@@ -146,13 +146,13 @@ Si se indica **apple** en el **PartitionID**, podrías acceder con **`osascript`
 
 * [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
 
-El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
+El objetivo principal de WhiteIntel es combatir las tomas de cuentas y los ataques de ransomware resultantes de malwares que roban información.
 
 Puedes visitar su sitio web y probar su motor de búsqueda de forma **gratuita** en:
 
