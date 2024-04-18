@@ -7,22 +7,36 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
+## WhiteIntel
+
+<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares roba información**.
+
+El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
+
+Puedes visitar su sitio web y probar su motor de búsqueda de forma **gratuita** en:
+
+{% embed url="https://whiteintel.io" %}
+
+---
+
 ## Recuperación de Contraseña de BIOS y Seguridad del Sistema
 
-**Restablecer la BIOS** se puede lograr de varias formas. La mayoría de las placas base incluyen una **batería** que, al retirarse durante aproximadamente **30 minutos**, restablecerá los ajustes de la BIOS, incluida la contraseña. Alternativamente, se puede ajustar un **puente en la placa base** para restablecer estos ajustes conectando pines específicos.
+**Restablecer la BIOS** se puede lograr de varias formas. La mayoría de las placas base incluyen una **batería** que, al retirarse durante unos **30 minutos**, restablecerá los ajustes de la BIOS, incluida la contraseña. Alternativamente, se puede ajustar un **puente en la placa base** para restablecer estos ajustes conectando pines específicos.
 
-Para situaciones en las que no son posibles o prácticos los ajustes de hardware, las **herramientas de software** ofrecen una solución. Ejecutar un sistema desde un **Live CD/USB** con distribuciones como **Kali Linux** proporciona acceso a herramientas como **_killCmos_** y **_CmosPWD_**, que pueden ayudar en la recuperación de contraseñas de BIOS.
+Para situaciones donde los ajustes de hardware no son posibles o prácticos, las **herramientas de software** ofrecen una solución. Ejecutar un sistema desde un **Live CD/USB** con distribuciones como **Kali Linux** proporciona acceso a herramientas como **_killCmos_** y **_CmosPWD_**, que pueden ayudar en la recuperación de la contraseña de la BIOS.
 
-En casos en los que se desconozca la contraseña de la BIOS, al ingresarla incorrectamente **tres veces** generalmente resultará en un código de error. Este código se puede utilizar en sitios web como [https://bios-pw.org](https://bios-pw.org) para posiblemente recuperar una contraseña utilizable.
+En casos donde la contraseña de la BIOS es desconocida, al ingresarla incorrectamente **tres veces** generalmente resultará en un código de error. Este código se puede utilizar en sitios web como [https://bios-pw.org](https://bios-pw.org) para posiblemente recuperar una contraseña utilizable.
 
-### Seguridad de UEFI
+### Seguridad UEFI
 
 Para sistemas modernos que utilizan **UEFI** en lugar de la BIOS tradicional, la herramienta **chipsec** se puede utilizar para analizar y modificar los ajustes de UEFI, incluida la desactivación del **Secure Boot**. Esto se puede lograr con el siguiente comando:
 
@@ -34,7 +48,7 @@ La RAM retiene datos brevemente después de que se corta la energía, generalmen
 
 ### Ataques de Acceso Directo a la Memoria (DMA)
 
-**INCEPTION** es una herramienta diseñada para **manipulación de memoria física** a través de DMA, compatible con interfaces como **FireWire** y **Thunderbolt**. Permite eludir los procedimientos de inicio de sesión parcheando la memoria para aceptar cualquier contraseña. Sin embargo, es ineficaz contra sistemas **Windows 10**.
+**INCEPTION** es una herramienta diseñada para la **manipulación física de la memoria** a través de DMA, compatible con interfaces como **FireWire** y **Thunderbolt**. Permite eludir los procedimientos de inicio de sesión parcheando la memoria para aceptar cualquier contraseña. Sin embargo, es ineficaz contra sistemas **Windows 10**.
 
 ### Live CD/USB para Acceso al Sistema
 
@@ -65,17 +79,3 @@ El cifrado BitLocker potencialmente se puede eludir si se encuentra la **contras
 ### Ingeniería Social para Agregar una Clave de Recuperación
 
 Se puede agregar una nueva clave de recuperación de BitLocker a través de tácticas de ingeniería social, convenciendo a un usuario para que ejecute un comando que agregue una nueva clave de recuperación compuesta por ceros, simplificando así el proceso de descifrado.
-
-<details>
-
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
-
-Otras formas de apoyar a HackTricks:
-
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
