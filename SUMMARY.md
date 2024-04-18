@@ -715,6 +715,7 @@
 * [Array Indexing](binary-exploitation/array-indexing.md)
 * [Integer Overflow](binary-exploitation/integer-overflow.md)
 * [Format Strings](binary-exploitation/format-strings/README.md)
+  * [Format Strings - Arbitrary Read Example](binary-exploitation/format-strings/format-strings-arbitrary-read-example.md)
   * [Format Strings Template](binary-exploitation/format-strings/format-strings-template.md)
 * [Heap](binary-exploitation/heap/README.md)
   * [Use After Free](binary-exploitation/heap/use-after-free.md)
