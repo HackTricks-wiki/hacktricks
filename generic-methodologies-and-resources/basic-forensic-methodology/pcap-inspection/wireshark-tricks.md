@@ -1,7 +1,5 @@
 # Wireshark tricks
 
-## Wireshark tricks
-
 <details>
 
 <summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
@@ -15,6 +13,20 @@ Other ways to support HackTricks:
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
+
+## WhiteIntel
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
+
+Their primary goal of WhiteIntel is to combat account takeovers and ransomware attacks resulting from information-stealing malware.
+
+You can check their website and try their engine for **free** at:
+
+{% embed url="https://whiteintel.io" %}
+
+---
 
 ## Improve your Wireshark skills
 
@@ -167,6 +179,19 @@ f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
+
+## WhiteIntel
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
+
+Their primary goal of WhiteIntel is to combat account takeovers and ransomware attacks resulting from information-stealing malware.
+
+You can check their website and try their engine for **free** at:
+
+{% embed url="https://whiteintel.io" %}
+
 
 <details>
 
