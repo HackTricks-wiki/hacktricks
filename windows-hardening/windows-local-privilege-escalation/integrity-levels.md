@@ -1,43 +1,45 @@
+# Integrity Levels
+
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>でAWSハッキングをゼロからヒーローまで学ぶ！</strong></summary>
+<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法：
+HackTricks をサポートする他の方法:
 
-- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい場合は**[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手してください
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローしてください。
-- **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングテクニックを共有してください。
+- **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする
+- **HackTricks**と**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
 
 </details>
 
+### [WhiteIntel](https://whiteintel.io)
 
-# インテグリティレベル
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
-Windows Vista以降では、すべての保護されたアイテムには**インテグリティレベル**タグが付いています。このセットアップでは、一般的にファイルとレジストリキーには「中」のインテグリティレベルが割り当てられますが、Internet Explorer 7が低いインテグリティレベルで書き込むことができる特定のフォルダやファイルもあります。標準ユーザーによって開始されたプロセスは通常、中間のインテグリティレベルを持ち、サービスは通常、システムのインテグリティレベルで動作します。高いインテグリティラベルはルートディレクトリを保護します。
+[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンで、企業やその顧客が**盗難マルウェア**によって**侵害**されていないかをチェックするための**無料**機能を提供しています。
 
-重要なルールの1つは、オブジェクトはそのオブジェクトよりも低いインテグリティレベルを持つプロセスによって変更されないということです。インテグリティレベルは次のとおりです：
+WhiteIntelの主な目標は、情報窃取マルウェアによるアカウント乗っ取りやランサムウェア攻撃と戦うことです。
 
-- **信頼されていない**: このレベルは匿名ログインを持つプロセス向けです。 %%%例: Chrome%%%
-- **低**: 主にインターネットのやり取りに使用され、特にInternet Explorerの保護モードで影響を受ける関連ファイルやプロセス、および**一時インターネットフォルダ**などの特定のフォルダに影響します。低いインテグリティプロセスは、レジストリの書き込みアクセスがないことや、ユーザープロファイルの書き込みアクセスが制限されていることなど、重要な制限に直面します。
-- **中**: ほとんどのアクティビティのデフォルトレベルであり、標準ユーザーや特定のインテグリティレベルを持たないオブジェクトに割り当てられます。管理者グループのメンバーでさえ、デフォルトでこのレベルで動作します。
-- **高**: 管理者向けに予約されており、高いインテグリティレベル自体を含む低いインテグリティレベルのオブジェクトを変更できるようにします。
-- **システム**: Windowsカーネルとコアサービスのための最高の操作レベルであり、管理者でさえアクセスできないようになっており、重要なシステム機能を保護します。
-- **インストーラー**: 他のすべてのレベルを上回るユニークなレベルであり、このレベルのオブジェクトが他のすべてのオブジェクトをアンインストールできるようにします。
+彼らのウェブサイトをチェックして、**無料**でエンジンを試すことができます：
 
-プロセスのインテグリティレベルは、**Sysinternals**の**Process Explorer**を使用してプロセスの**プロパティ**にアクセスし、「**セキュリティ**」タブを表示することで取得できます：
+{% embed url="https://whiteintel.io" %}
 
-![](<../../.gitbook/assets/image (318).png>)
+---
 
-また、`whoami /groups`を使用して**現在のインテグリティレベル**を取得できます。
+## Integrity Levels
 
-![](<../../.gitbook/assets/image (319).png>)
+Windows Vista以降では、すべての保護されたアイテムには**整合性レベル**タグが付いています。このセットアップでは、ほとんどの場合、ファイルとレジストリキーには「中」の整合性レベルが割り当てられますが、Internet Explorer 7が低い整合性レベルで書き込むことができる特定のフォルダやファイルもあります。標準ユーザーによって開始されたプロセスは通常、中間整合性レベルを持ち、サービスは通常、システム整合性レベルで動作します。高整合性ラベルはルートディレクトリを保護します。
 
-## ファイルシステム内のインテグリティレベル
+重要なルールの1つは、オブジェクトはオブジェクトのレベルよりも低い整合性レベルのプロセスによって変更されないということです。整合性レベルは次のとおりです：
 
-ファイルシステム内のオブジェクトは、**最小のインテグリティレベル要件**を必要とする場合があり、プロセスがこのインテグリティプロセスを持っていない場合はそれとやり取りできません。\
-たとえば、**一般ユーザーコンソールから通常のファイルを作成し、アクセス許可を確認**してみましょう：
+- **信頼されていない**: このレベルは匿名ログインのプロセス向けです。 %%%例: Chrome%%%
+- **低**: 主にインターネットのやり取りに使用され、特にInternet Explorerの保護モードで影響を受ける関連ファイルやプロセス、および**一時インターネットフォルダ**などの特定のフォルダに影響します。低整合性プロセスは、レジストリの書き込みアクセスがないことや、ユーザープロファイルの書き込みアクセスが制限されていることなど、重要な制限に直面します。
+- **中**: ほとんどのアクティビティのデフォルトレベルで、標準ユーザーや特定の整合性レベルを持たないオブジェクトに割り当てられます。管理者グループのメンバーでさえ、デフォルトでこのレベルで動作します。
+- **高**: 管理者向けに予約されており、高い整合性レベル自体を含む低い整合性レベルのオブジェクトを変更できるようにします。
+- **システム**: Windowsカーネルとコアサービスのための最高の操作レベルで、管理者でさえアクセスできないようになっており、重要なシステム機能を保護します。
+- **インストーラー**: 他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールできるようにする、他のすべてのオブジェクトをアンインストールでき
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -48,7 +50,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-今、ファイルに最小整合性レベルを**High**に割り当てましょう。これは**管理者として実行されているコンソール**から行う必要があります。**通常のコンソール**は中間整合性レベルで実行されており、オブジェクトに高い整合性レベルを割り当てることは**許可されません**：
+今、ファイルに最小整合性レベルを**High**に割り当てましょう。これは**管理者として実行されているコンソール**から行う必要があります。**通常のコンソール**は中間整合性レベルで実行されており、オブジェクトに高い整合性レベルを割り当てることが**許可されていません**：
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -63,7 +65,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-これが興味深い部分です。ユーザー`DESKTOP-IDJHTKP\user`がファイルに**完全な権限**を持っていることがわかります（実際、このユーザーがファイルを作成したユーザーです）、しかし、実装された最小整合性レベルのため、彼はファイルを変更できなくなります（読むことはできますが）高整合性レベルで実行していない限り。
+これが興味深い部分です。ユーザー`DESKTOP-IDJHTKP\user`がファイルに対して**完全な権限**を持っていることがわかります（実際、このユーザーがファイルを作成したユーザーです）、しかし、実装された最小整合性レベルのため、彼はファイルを変更できなくなります（ただし、読むことはできます）。
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -76,9 +78,9 @@ Access is denied.
 **したがって、ファイルが最小整合性レベルを持っている場合、そのファイルを変更するには、少なくともその整合性レベルで実行する必要があります。**
 {% endhint %}
 
-## バイナリの整合性レベル
+### バイナリの整合性レベル
 
-`cmd.exe`のコピーを`C:\Windows\System32\cmd-low.exe`に作成し、**管理者コンソールから整合性レベルを低に設定しました:**
+`cmd.exe`のコピーを`C:\Windows\System32\cmd-low.exe`に作成し、**管理者コンソールからその整合性レベルを低に設定しました:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -88,14 +90,42 @@ APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
 Mandatory Label\Low Mandatory Level:(NW)
 ```
-今、`cmd-low.exe`を実行すると、**低完全性レベル**で実行されます。中完全性レベルではありません：
+Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
 
-![](<../../.gitbook/assets/image (320).png>)
+![](<../../.gitbook/assets/image (310).png>)
 
-興味を持つ人のために、バイナリに高完全性レベルを割り当てると（`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`）、高完全性レベルで実行されません（中完全性レベルから呼び出した場合、デフォルトでは中完全性レベルで実行されます）。
+For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
 
-## プロセスの完全性レベル
+### Integrity Levels in Processes
 
-すべてのファイルとフォルダには最小完全性レベルがありませんが、**すべてのプロセスは完全性レベルで実行されます**。ファイルシステムで起こったことと同様に、**プロセスが別のプロセス内に書き込みたい場合、少なくとも同じ完全性レベルを持っている必要があります**。これは、低完全性レベルのプロセスは中完全性レベルのプロセスに対して完全アクセス権を持つハンドルを開けないことを意味します。
+Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
 
-このセクションと前のセクションでコメントされた制限のため、セキュリティの観点からは、常に**可能な限り低い完全性レベルでプロセスを実行することが推奨**されます。
+Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
+
+
+### [WhiteIntel](https://whiteintel.io)
+
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
+
+Their primary goal of WhiteIntel is to combat account takeovers and ransomware attacks resulting from information-stealing malware.
+
+You can check their website and try their engine for **free** at:
+
+{% embed url="https://whiteintel.io" %}
+
+
+<details>
+
+<summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+Other ways to support HackTricks:
+
+* If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
+
+</details>
