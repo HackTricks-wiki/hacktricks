@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
@@ -62,7 +62,7 @@ If an attacker wants to append the string "append" he can:
 
 You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 

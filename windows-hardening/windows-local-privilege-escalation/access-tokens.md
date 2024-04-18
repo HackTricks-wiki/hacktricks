@@ -12,7 +12,7 @@
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
@@ -132,7 +132,7 @@ Take a look to [**all the possible token privileges and some definitions on this
 Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 

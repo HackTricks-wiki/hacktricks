@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
@@ -80,7 +80,7 @@ BitLocker encryption can potentially be bypassed if the **recovery password** is
 
 A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 

@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
@@ -148,7 +148,7 @@ If **apple** is indicated in the **partitionID**, you could access it with **`os
 
 * [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 

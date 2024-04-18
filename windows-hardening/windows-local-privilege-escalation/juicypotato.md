@@ -12,7 +12,7 @@
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
@@ -155,7 +155,7 @@ Then download [test\_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/maste
 
 * [https://github.com/ohpe/juicy-potato/blob/master/README.md](https://github.com/ohpe/juicy-potato/blob/master/README.md)
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 

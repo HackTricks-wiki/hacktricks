@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
@@ -206,7 +206,7 @@ This will list the possible contents from the EEPROM as per the signatures found
 Although, it is necessary to note that it's not always the case that the <b>uboot</b> is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if <b>uboot</b> is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention <b>uboot</b> while booting. 
 
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
 <figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
