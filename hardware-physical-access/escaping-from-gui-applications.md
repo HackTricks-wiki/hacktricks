@@ -1,26 +1,26 @@
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を通じて、ゼロからヒーローまでAWSハッキングを学びましょう</summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使って、<a href="https://training.hacktricks.xyz/courses/arte"><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、または**Twitter**で私たちをフォローする 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)。
-- **ハッキングテクニックを共有するために、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**@carlospolopm**をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+- **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンで、企業やその顧客が**盗難マルウェア**によって**侵害**されていないかをチェックする**無料**機能を提供しています。
+[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンで、企業やその顧客が**盗難マルウェア**によって**侵害**されていないかをチェックする**無料**の機能を提供しています。
 
 WhiteIntelの主な目標は、情報窃取マルウェアによるアカウント乗っ取りやランサムウェア攻撃に対抗することです。
 
-彼らのウェブサイトをチェックし、**無料**でエンジンを試すことができます：
+彼らのウェブサイトをチェックして、**無料**でエンジンを試すことができます：
 
 {% embed url="https://whiteintel.io" %}
 
@@ -44,11 +44,11 @@ WhiteIntelの主な目標は、情報窃取マルウェアによるアカウン�
 - ファイルの変更または新規作成
 - シンボリックリンクの作成
 - 制限された領域へのアクセス
-- 他のアプリの実行
+- 他のアプリケーションの実行
 
 ## コマンドの実行
 
-おそらく**`開くと`**オプションを使用して、ある種のシェルを開いたり実行したりできるかもしれません。
+おそらく**`開くと`**オプションを使用して、いくつかの種類のシェルを開いたり実行したりできるかもしれません。
 
 ### Windows
 
@@ -87,7 +87,7 @@ _bash、sh、zsh..._ ここで詳細を確認：[https://gtfobins.github.io/](ht
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+レジストリエディター: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
 ## ブラウザからファイルシステムにアクセス
 
@@ -124,7 +124,7 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 - CTRL+T – Internet Explorer – 新しいタブ
 - CTRL+N – Internet Explorer – 新しいページ
 - CTRL+O – ファイルを開く
-- CTRL+S – 名前を付けて保存 CTRL+N – 新しいRDP / Citrix
+- CTRL+S – 保存 CTRL+N – 新しいRDP / Citrix
 ## スワイプ
 
 * 左側から右側にスワイプして、すべての開いているウィンドウを表示し、KIOSKアプリを最小化してOS全体に直接アクセスします。
@@ -166,7 +166,7 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 
 ## ファイル拡張子の表示
 
-詳細については、このページをチェックしてください：[https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+詳細は次のページを参照してください：[https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
 # ブラウザのトリック
 
@@ -175,7 +175,7 @@ iKatのバージョンをバックアップします：
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
 
-JavaScriptを使用して共通のダイアログを作成し、ファイルエクスプローラーにアクセスします： `document.write('<input/type=file>')`
+JavaScriptを使用して共通のダイアログを作成し、ファイルエクスプローラーにアクセスします：`document.write('<input/type=file>')`
 出典：https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 # iPad
@@ -186,21 +186,21 @@ JavaScriptを使用して共通のダイアログを作成し、ファイルエ�
 
 * 4本または5本の指で片方向にスワイプ：次の/前のアプリに切り替えるため
 
-* 5本の指で画面をつまむ/ホームボタンをタッチ/画面下部から上に向かって1本の指で素早くスワイプ：ホームにアクセス
+* 5本の指で画面をつまむ/ホームボタンをタッチ/画面下部から上に1本の指で素早くスワイプ：ホームにアクセスするため
 
-* 画面下部から1-2インチ上に向かって1本の指でゆっくりスワイプ：ドックが表示されます
+* 画面下部から1-2インチ上に1本の指でゆっくりスワイプ：ドックが表示されます
 
-* 画面上部から1本の指で下に向かってスワイプ：通知を表示します
+* 画面上部から1本の指で下にスワイプ：通知を表示します
 
 * 画面の右上隅から1本の指で下にスワイプ：iPad Proのコントロールセンターを表示します
 
-* 画面の左端から1-2インチの指で1本の指で素早くスワイプ：今日のビューを表示します
+* 画面の左端から1-2インチの1本の指でスワイプ：今日のビューを表示します
 
 * 画面の中央から右または左に素早く1本の指でスワイプ：次の/前のアプリに切り替えます
 
 * iPadの右上隅にあるOn/**Off**/Sleepボタンを押し続ける + スライドを右まで移動する：電源を切ります
 
-* iPadの右上隅にあるOn/**Off**/Sleepボタンを押し続ける + ホームボタンを数秒間押し続ける：強制的に電源を切ります
+* iPadの右上隅にあるOn/**Off**/Sleepボタンを押し続ける + ホームボタンを数秒間押す：強制的に電源を切ります
 
 * iPadの右上隅にあるOn/**Off**/Sleepボタンを押し続ける + ホームボタンを素早く押す：画面左下にポップアップするスクリーンショットを撮影します。両方のボタンを同時に非常に短く押すと、数秒間押し続けるかのようにハードパワーオフが実行されます。
 
@@ -259,38 +259,38 @@ iPadキーボードまたはUSBキーボードアダプターを持っている�
 | ↑↓ (上矢印、下矢印)                          | 選択したアイテムを同時にタップ                        |
 | ⌥ ↓ (Option-下矢印)                            | 下にスクロール                                             |
 | ⌥↑ (Option-上矢印)                               | 上にスクロール                                               |
-| ⌥← または ⌥→ (Option-左矢印またはOption-右矢印) | 左または右にスクロール                                    |
+| ⌥←または⌥→ (Option-左矢印またはOption-右矢印) | 左または右にスクロール                                    |
 | ^⌥S (Control-Option-S)                             | VoiceOverスピーチをオンまたはオフにする                         |
 | ⌘⇧⇥ (Command-Shift-Tab)                            | 前のアプリに切り替える                              |
 | ⌘⇥ (Command-Tab)                                   | 元のアプリに戻る                         |
-| ←+→、次にOption + ← またはOption+→                   | ドックを通じてナビゲートする                                   |
+| ←+→、次にOption + ←またはOption+→                   | ドックを通じてナビゲートする                                   |
 ### Safariのショートカット
 
 | ショートカット           | アクション                           |
 | ----------------------- | ----------------------------------- |
-| ⌘L (Command-L)          | ロケーションを開く                    |
-| ⌘T                      | 新しいタブを開く                     |
-| ⌘W                      | 現在のタブを閉じる                   |
-| ⌘R                      | 現在のタブを更新                     |
-| ⌘.                      | 現在のタブの読み込みを停止           |
-| ^⇥                      | 次のタブに切り替え                   |
-| ^⇧⇥ (Control-Shift-Tab) | 前のタブに移動                       |
-| ⌘L                      | テキスト入力/URLフィールドを選択して修正 |
-| ⌘⇧T (Command-Shift-T)   | 最後に閉じたタブを開く（複数回使用可能） |
-| ⌘\[                     | ブラウジング履歴で1ページ戻る         |
-| ⌘]                      | ブラウジング履歴で1ページ進む         |
-| ⌘⇧R                     | リーダーモードをアクティブにする       |
+| ⌘L (Command-L)         | ロケーションを開く                   |
+| ⌘T                     | 新しいタブを開く                     |
+| ⌘W                     | 現在のタブを閉じる                   |
+| ⌘R                     | 現在のタブを更新する                 |
+| ⌘.                     | 現在のタブの読み込みを停止する       |
+| ^⇥                     | 次のタブに切り替える                 |
+| ^⇧⇥ (Control-Shift-Tab) | 前のタブに移動する                   |
+| ⌘L                     | テキスト入力/URLフィールドを選択して修正する |
+| ⌘⇧T (Command-Shift-T)  | 最後に閉じたタブを開く（複数回使用可能） |
+| ⌘\[                    | ブラウジング履歴で1ページ戻る         |
+| ⌘]                     | ブラウジング履歴で1ページ進む         |
+| ⌘⇧R                    | リーダーモードをアクティブにする       |
 
 ### メールのショートカット
 
-| ショートカット                   | アクション               |
-| -------------------------- | ---------------------- |
-| ⌘L                         | ロケーションを開く        |
-| ⌘T                         | 新しいタブを開く         |
-| ⌘W                         | 現在のタブを閉じる       |
-| ⌘R                         | 現在のタブを更新         |
-| ⌘.                         | 現在のタブの読み込みを停止 |
-| ⌘⌥F (Command-Option/Alt-F) | メールボックス内を検索     |
+| ショートカット           | アクション                   |
+| ----------------------- | -------------------------- |
+| ⌘L                     | ロケーションを開く           |
+| ⌘T                     | 新しいタブを開く             |
+| ⌘W                     | 現在のタブを閉じる           |
+| ⌘R                     | 現在のタブを更新する         |
+| ⌘.                     | 現在のタブの読み込みを停止する |
+| ⌘⌥F (Command-Option/Alt-F) | メールボックス内を検索する   |
 
 # 参考文献
 
@@ -300,13 +300,13 @@ iPadキーボードまたはUSBキーボードアダプターを持っている�
 * [http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
 
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンであり、企業やその顧客が**盗聴マルウェア**によって**侵害**されていないかをチェックするための**無料**機能を提供しています。
+[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンであり、企業やその顧客が**盗難マルウェア**によって**侵害**されていないかをチェックするための**無料**機能を提供しています。
 
-WhiteIntelの主な目標は、情報窃取マルウェアによるアカウント乗っ取りやランサムウェア攻撃と戦うことです。
+WhiteIntelの主な目標は、情報窃取マルウェアによるアカウント乗っ取りやランサムウェア攻撃に対抗することです。
 
 彼らのウェブサイトをチェックし、**無料**でエンジンを試すことができます：
 
@@ -314,14 +314,14 @@ WhiteIntelの主な目標は、情報窃取マルウェアによるアカウン�
 
 <details>
 
-<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**でAWSハッキングをゼロからヒーローまで学ぶ！</summary>
+<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでのAWSハッキング**を学びましょう！</summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝したい**、または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
+* **HackTricksをPDFでダウンロード**したり、**HackTricksで企業を宣伝**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を手に入れる
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする。
-* **HackTricks**と**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
 
 </details>

@@ -8,19 +8,19 @@ HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見る
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**@carlospolopm**をフォローする
-- **HackTricks**と**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
+- **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
 
 </details>
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンで、企業やその顧客が**スティーラーマルウェア**によって**侵害**されていないかをチェックする**無料**機能を提供しています。
+[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンで、企業やその顧客が**盗難マルウェア**によって**侵害**されていないかをチェックする**無料**機能を提供しています。
 
-WhiteIntelの主な目標は、情報窃取マルウェアによるアカウント乗っ取りやランサムウェア攻撃に対抗することです。
+WhiteIntelの主な目標は、情報窃取マルウェアによるアカウント乗っ取りやランサムウェア攻撃と戦うことです。
 
 彼らのウェブサイトをチェックして、**無料**でエンジンを試すことができます：
 
@@ -30,30 +30,30 @@ WhiteIntelの主な目標は、情報窃取マルウェアによるアカウン�
 
 ## メインキーチェーン
 
-- **ユーザーキーチェーン**（`~/Library/Keychains/login.keycahin-db`）は、アプリケーションパスワード、インターネットパスワード、ユーザー生成証明書、ネットワークパスワード、ユーザー生成の公開/秘密鍵など、**ユーザー固有の資格情報**を保存するために使用されます。
-- **システムキーチェーン**（`/Library/Keychains/System.keychain`）は、WiFiパスワード、システムルート証明書、システムの秘密鍵、システムアプリケーションパスワードなど、**システム全体の資格情報**を保存します。
+- **ユーザーキーチェーン**（`~/Library/Keychains/login.keycahin-db`）は、アプリケーションパスワード、インターネットパスワード、ユーザー生成証明書、ネットワークパスワード、ユーザー生成の公開/秘密鍵などの**ユーザー固有の資格情報**を保存するために使用されます。
+- **システムキーチェーン**（`/Library/Keychains/System.keychain`）は、WiFiパスワード、システムルート証明書、システムの秘密鍵、システムアプリケーションパスワードなどの**システム全体の資格情報**を保存します。
 
 ### パスワードキーチェーンアクセス
 
-これらのファイルは、固有の保護を持たないため、**ダウンロード**できますが、**ユーザーの平文パスワードが必要**です。[**Chainbreaker**](https://github.com/n0fate/chainbreaker)のようなツールを使用して復号化できます。
+これらのファイルは、固有の保護を持たず、**ダウンロード**できますが、**ユーザーの平文パスワードが必要**です。[**Chainbreaker**](https://github.com/n0fate/chainbreaker)のようなツールを使用して復号化できます。
 
 ## キーチェーンエントリの保護
 
 ### ACLs
 
-キーチェーン内の各エントリは、さまざまなアクションを実行できるユーザーを規定する**アクセス制御リスト（ACLs）**によって管理されます。これには以下が含まれます：
+キーチェーン内の各エントリは、さまざまなアクションを実行できる人物を規定する**アクセス制御リスト（ACLs）**によって管理されます。これには次のものが含まれます：
 
 - **ACLAuhtorizationExportClear**：保持者が秘密のクリアテキストを取得できるようにします。
-- **ACLAuhtorizationExportWrapped**：保持者が他の提供されたパスワードで暗号化されたクリアテキストを取得できるようにします。
+- **ACLAuhtorizationExportWrapped**：保持者が別の提供されたパスワードで暗号化されたクリアテキストを取得できるようにします。
 - **ACLAuhtorizationAny**：保持者が任意のアクションを実行できるようにします。
 
-ACLsには、プロンプトなしでこれらのアクションを実行できる**信頼されたアプリケーションのリスト**が付属しています。これには以下が含まれます：
+ACLsには、プロンプトなしでこれらのアクションを実行できる**信頼されたアプリケーションのリスト**が付属しています。これには次のものが含まれます：
 
 - **`Nil`**（認証不要、**誰もが信頼されている**）
 - 空のリスト（**誰もが信頼されていない**）
 - 特定の**アプリケーション**の**リスト**。
 
-また、エントリには**`ACLAuthorizationPartitionID`**が含まれる場合があり、**teamid、apple、cdhash**を識別するために使用されます。
+また、エントリには**`ACLAuthorizationPartitionID`**というキーが含まれている場合があり、**teamid、apple、cdhash**を識別するために使用されます。
 
 - **teamid**が指定されている場合、**エントリの値にアクセス**するためには、使用されるアプリケーションが**同じteamid**を持っている必要があります。
 - **apple**が指定されている場合、アプリは**Appleによって署名**されている必要があります。
@@ -61,13 +61,13 @@ ACLsには、プロンプトなしでこれらのアクションを実行でき�
 
 ### キーチェーンエントリの作成
 
-**`Keychain Access.app`**を使用して**新しいエントリ**を作成する場合、次のルールが適用されます：
+**`Keychain Access.app`**を使用して**新しい** **エントリ**を作成する場合、次のルールが適用されます：
 
 - すべてのアプリが暗号化できます。
 - **アプリは**エクスポート/復号化できません（ユーザーにプロンプトを表示せず）。
 - すべてのアプリが整合性チェックを見ることができます。
 - どのアプリもACLを変更できません。
-- **partitionID**は**`apple`**に設定されます。
+- **partitionID**は**`apple`**に設定されています。
 
 **アプリケーションがキーチェーンにエントリを作成**する場合、ルールは若干異なります：
 
@@ -75,7 +75,7 @@ ACLsには、プロンプトなしでこれらのアクションを実行でき�
 - エクスポート/復号化を行うことができるのは**作成アプリケーション**（または明示的に追加された他のアプリ）だけです（ユーザーにプロンプトを表示せず）。
 - すべてのアプリが整合性チェックを見ることができます。
 - どのアプリもACLを変更できません。
-- **partitionID**は**`teamid:[ここにteamID]`**に設定されます。
+- **partitionID**は**`teamid:[ここにteamID]`**に設定されています。
 
 ## キーチェーンへのアクセス
 
@@ -93,12 +93,12 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 ### API
 
 {% hint style="success" %}
-**キーチェーンの列挙とダンプ**は、[**LockSmith**](https://github.com/its-a-feature/LockSmith)というツールを使用して、**プロンプトを生成しない**シークレットの取得が可能です。
+**プロンプトを生成しない**シークレットの**キーチェーン列挙とダンプ**は、[**LockSmith**](https://github.com/its-a-feature/LockSmith)ツールを使用して行うことができます。
 {% endhint %}
 
-各キーチェーンエントリの**情報**をリスト化および取得します：
+各キーチェーンエントリの**情報**をリストおよび取得します：
 
-* API **`SecItemCopyMatching`** は各エントリに関する情報を提供し、使用時に設定できるいくつかの属性があります：
+* API **`SecItemCopyMatching`** は各エントリに関する情報を提供し、使用する際に設定できるいくつかの属性があります：
 * **`kSecReturnData`**：trueの場合、データの復号を試みます（ポップアップを回避するためにfalseに設定）
 * **`kSecReturnRef`**：キーチェーンアイテムへの参照も取得します（後でポップアップなしで復号できることがわかった場合にtrueに設定）
 * **`kSecReturnAttributes`**：エントリに関するメタデータを取得します
@@ -107,9 +107,9 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 
 各エントリの**ACL**を取得します：
 
-* API **`SecAccessCopyACLList`** を使用すると、キーチェーンアイテムの**ACL**を取得し、ACLのリスト（`ACLAuhtorizationExportClear`などの以前に言及されたもの）が返されます。各リストには以下が含まれます：
+* API **`SecAccessCopyACLList`** を使用すると、キーチェーンアイテムの**ACL**を取得し、ACLのリスト（`ACLAuhtorizationExportClear`などの以前に言及されたもの）が返されます。各リストには次のものが含まれます：
 * 説明
-* **信頼されたアプリケーションリスト**。これには次のようなものが含まれます：
+* **信頼されたアプリケーションリスト**。これには次のものが含まれる可能性があります：
 * アプリ：/Applications/Slack.app
 * バイナリ：/usr/libexec/airportd
 * グループ：group://AirPort
@@ -119,7 +119,7 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 * API **`SecKeychainItemCopyContent`** は平文を取得します
 * API **`SecItemExport`** はキーと証明書をエクスポートしますが、コンテンツを暗号化してエクスポートするにはパスワードを設定する必要があります
 
-そして、**プロンプトを生成せずにシークレットをエクスポート**するための**要件**は次のとおりです：
+そして、**プロンプトなしでシークレットをエクスポート**するための**要件**は次のとおりです：
 
 * **1つ以上の信頼された**アプリがリストされている場合：
 * 適切な**認可**が必要（**`Nil`**、またはシークレット情報にアクセスするための認可されたアプリの許可リストの一部である必要があります）
@@ -133,7 +133,7 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 {% hint style="danger" %}
 したがって、**1つのアプリケーションがリストされている**場合、そのアプリケーションに**コードをインジェクトする**必要があります。
 
-**PartitionID**に**apple**が指定されている場合、**`osascript`**を使用してアクセスできます。つまり、PartitionIDにappleを持つすべてのアプリケーションに信頼されているものです。**`Python`**も使用できます。
+**PartitionID**に**apple**が指定されている場合、**`osascript`**を使用してアクセスできます。つまり、PartitionIDにappleを含むすべてのアプリケーションを信頼しているものにアクセスできます。**`Python`**も使用できます。
 {% endhint %}
 
 ### 2つの追加属性
@@ -146,9 +146,9 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 
 * [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
-## WhiteIntel
+### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンであり、企業やその顧客が**盗難マルウェア**によって**侵害**されていないかを確認するための**無料**機能を提供しています。
 
@@ -164,10 +164,10 @@ WhiteIntelの主な目標は、情報窃取マルウェアによるアカウン�
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝**したり、**PDFでHackTricksをダウンロード**したりするには、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手してください
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローしてください。
+* 独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションである[**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローしてください。
 * **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>
