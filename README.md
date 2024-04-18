@@ -5,7 +5,7 @@
 _Logos y diseño de movimiento de Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="success" %}
-**¡Bienvenido al wiki donde encontrarás cada truco/técnica de hacking/lo que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias!**
+**¡Bienvenido al wiki donde encontrarás cada truco/técnica de hacking/lo que sea que haya aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias!**
 {% endhint %}
 
 Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **debes seguir al hacer pentesting** en una o más **máquinas:**
@@ -67,7 +67,7 @@ Obtén acceso hoy:
 
 <figure><img src=".gitbook/assets/image (47).png" alt=""><figcaption></figcaption></figure>
 
-¡Únete al servidor de Discord de [**HackenProof**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bug bounty!
+Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bug bounty!
 
 * **Perspectivas de Hacking:** Participa en contenido que explora la emoción y los desafíos del hacking
 * **Noticias de Hacking en Tiempo Real:** Mantente al día con el mundo del hacking a través de noticias e información en tiempo real
@@ -81,7 +81,7 @@ Obtén acceso hoy:
 
 <figure><img src=".gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
-**Configuración instantáneamente disponible para evaluación de vulnerabilidades y pruebas de penetración**. Ejecuta un pentest completo desde cualquier lugar con más de 20 herramientas y funciones que van desde la recolección de información hasta la generación de informes. No reemplazamos a los pentesters, desarrollamos herramientas personalizadas, módulos de detección y explotación para darles tiempo para profundizar, obtener shells y divertirse.
+**Configuración instantáneamente disponible para evaluación de vulnerabilidades y pruebas de penetración**. Ejecuta una prueba de penetración completa desde cualquier lugar con más de 20 herramientas y funciones que van desde la recolección de información hasta la generación de informes. No reemplazamos a los pentesters, desarrollamos herramientas personalizadas, módulos de detección y explotación para darles más tiempo para profundizar, obtener shells y divertirse.
 
 {% embed url="https://pentest-tools.com/" %}
 
@@ -93,7 +93,7 @@ Obtén acceso hoy:
 
 SerpApi ofrece APIs en tiempo real rápidas y fáciles para **acceder a los resultados de los motores de búsqueda**. Raspan los motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
 
-Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para raspar diferentes motores de búsqueda, incluidos Google, Bing, Baidu, Yahoo, Yandex y más.\
+Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para raspar diferentes motores de búsqueda, incluidos Google, Bing, Baidu, Yahoo, Yandex, y más.\
 A diferencia de otros proveedores, **SerpApi no solo raspa resultados orgánicos**. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
 
 Los clientes actuales de SerpApi incluyen a **Apple, Shopify y GrubHub**.\
@@ -116,16 +116,28 @@ Puedes **crear una cuenta gratuita** [**aquí**](https://serpapi.com/users/sign\
 
 [**WebSec**](https://websec.nl) es una empresa de ciberseguridad profesional con sede en **Ámsterdam** que ayuda a **proteger** empresas **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de **seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad integral, lo que significa que lo hacen todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
+WebSec es una empresa de seguridad integral que lo hace todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
 
-Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta el punto de que garantizan los mejores resultados de calidad, ¡se afirma en su sitio web "**¡Si no podemos hackearlo, no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
+Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta el punto de que **garantizan los mejores resultados de calidad**, lo que se indica en su sitio web "**¡Si no podemos hackearlo, no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
 Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks**.
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+## WhiteIntel
+
+<figure><img src=".gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda impulsado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares ladrones**.
+
+El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
+
+Puedes visitar su sitio web y probar su motor de búsqueda de forma **gratuita** en:
+
+{% embed url="https://whiteintel.io" %}
+
 ## Licencia y Descargo de responsabilidad
 
-Revísalos en:
+Encuéntralos en:
 
 {% content-ref url="welcome/hacktricks-values-and-faq.md" %}
 [hacktricks-values-and-faq.md](welcome/hacktricks-values-and-faq.md)
@@ -133,13 +145,13 @@ Revísalos en:
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
