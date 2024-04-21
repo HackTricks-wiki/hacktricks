@@ -180,6 +180,10 @@ Then, looking to this ca see when the execution was stopped in the dll you want 
 [cheat-engine.md](cheat-engine.md)
 {% endcontent-ref %}
 
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
+
+[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables. 
+
 ## ARM & MIPS
 
 {% embed url="https://github.com/nongiach/arm_now" %}
