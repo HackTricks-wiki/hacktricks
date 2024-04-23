@@ -725,6 +725,7 @@
     * [Ret2plt](binary-exploitation/common-binary-protections-and-bypasses/aslr/ret2plt.md)
     * [Ret2ret & Reo2pop](binary-exploitation/common-binary-protections-and-bypasses/aslr/ret2ret.md)
   * [CET & Shadow Stack](binary-exploitation/common-binary-protections-and-bypasses/cet-and-shadow-stack.md)
+  * [Libc Protections](binary-exploitation/common-binary-protections-and-bypasses/libc-protections.md)
   * [Memory Tagging Extension (MTE)](binary-exploitation/common-binary-protections-and-bypasses/memory-tagging-extension-mte.md)
   * [No-exec / NX](binary-exploitation/common-binary-protections-and-bypasses/no-exec-nx.md)
   * [PIE](binary-exploitation/common-binary-protections-and-bypasses/pie/README.md)
