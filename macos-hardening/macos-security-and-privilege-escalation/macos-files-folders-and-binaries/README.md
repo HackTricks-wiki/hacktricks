@@ -75,6 +75,7 @@ MacOS stores information such as passwords in several places:
 * **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
 * **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
 * **`.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
+* **`.sdef`**: Files inside bundles specifying how it's possible to interact wth the application from an AppleScript.
 
 ### macOS Bundles
 
