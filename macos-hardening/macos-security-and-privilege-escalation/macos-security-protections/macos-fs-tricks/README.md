@@ -311,6 +311,116 @@ FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
 
+## POSIX Shared Memory
+
+**POSIX shared memory** allows processes in POSIX-compliant operating systems to access a common memory area, facilitating faster communication compared to other inter-process communication methods. It involves creating or opening a shared memory object with `shm_open()`, setting its size with `ftruncate()`, and mapping it into the process's address space using `mmap()`. Processes can then directly read from and write to this memory area. To manage concurrent access and prevent data corruption, synchronization mechanisms such as mutexes or semaphores are often used. Finally, processes unmap and close the shared memory with `munmap()` and `close()`, and optionally remove the memory object with `shm_unlink()`. This system is especially effective for efficient, fast IPC in environments where multiple processes need to access shared data rapidly.
+
+<details>
+
+<summary>Producer Code Example</summary>
+
+```c
+// gcc producer.c -o producer -lrt
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    const char *name = "/my_shared_memory";
+    const int SIZE = 4096; // Size of the shared memory object
+
+    // Create the shared memory object
+    int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+    if (shm_fd == -1) {
+        perror("shm_open");
+        return EXIT_FAILURE;
+    }
+
+    // Configure the size of the shared memory object
+    if (ftruncate(shm_fd, SIZE) == -1) {
+        perror("ftruncate");
+        return EXIT_FAILURE;
+    }
+
+    // Memory map the shared memory
+    void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    if (ptr == MAP_FAILED) {
+        perror("mmap");
+        return EXIT_FAILURE;
+    }
+
+    // Write to the shared memory
+    sprintf(ptr, "Hello from Producer!");
+
+    // Unmap and close, but do not unlink
+    munmap(ptr, SIZE);
+    close(shm_fd);
+
+    return 0;
+}
+```
+
+</details>
+
+<details>
+
+<summary>Consumer Code Example</summary>
+
+```c
+// gcc consumer.c -o consumer -lrt
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    const char *name = "/my_shared_memory";
+    const int SIZE = 4096; // Size of the shared memory object
+
+    // Open the shared memory object
+    int shm_fd = shm_open(name, O_RDONLY, 0666);
+    if (shm_fd == -1) {
+        perror("shm_open");
+        return EXIT_FAILURE;
+    }
+
+    // Memory map the shared memory
+    void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+    if (ptr == MAP_FAILED) {
+        perror("mmap");
+        return EXIT_FAILURE;
+    }
+
+    // Read from the shared memory
+    printf("Consumer received: %s\n", (char *)ptr);
+
+    // Cleanup
+    munmap(ptr, SIZE);
+    close(shm_fd);
+    shm_unlink(name); // Optionally unlink
+
+    return 0;
+}
+
+```
+
+</details>
+
+## macOS Guarded Descriptors
+
+**macOSCguarded descriptors** are a security feature introduced in macOS to enhance the safety and reliability of **file descriptor operations** in user applications. These guarded descriptors provide a way to associate specific restrictions or "guards" with file descriptors, which are enforced by the kernel.
+
+This feature is particularly useful for preventing certain classes of security vulnerabilities such as **unauthorized file access** or **race conditions**. These vulnerabilities occurs when for example a thread is accessing a file description giving **another vulnerable thread access over it** or when a file descriptor is **inherited** by a vulnerable child process. Some functions related to this functionality are:
+
+* `guarded_open_np`: Opend a FD with a guard
+* `guarded_close_np`: Close it
+* `change_fdguard_np`: Change guard flags on a descriptor (even removing the guard protection)
+
 ## References
 
 * [https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/](https://theevilbit.github.io/posts/exploiting\_directory\_permissions\_on\_macos/)
