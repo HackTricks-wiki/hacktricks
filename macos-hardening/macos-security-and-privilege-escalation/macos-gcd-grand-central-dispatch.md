@@ -16,15 +16,80 @@ Other ways to support HackTricks:
 
 ## Basic Information
 
-**Grand Central Dispatch (GCD),** also known as **libdispatch**, is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.
+**Grand Central Dispatch (GCD),** also known as **libdispatch** (`libdispatch.dyld`), is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.
 
 **GCD** provides and manages **FIFO queues** to which your application can **submit tasks** in the form of **block objects**. Blocks submitted to dispatch queues are **executed on a pool of threads** fully managed by the system. GCD automatically creates threads for executing the tasks in the dispatch queues and schedules those tasks to run on the available cores.
 
 {% hint style="success" %}
-In summary, to execute code in **parallel**, processes can send **blocks of code to GCD**, which will take care of their execution. Therefore, processes don't create new threads; **GCD executes the given code with its own pool of threads**.
+In summary, to execute code in **parallel**, processes can send **blocks of code to GCD**, which will take care of their execution. Therefore, processes don't create new threads; **GCD executes the given code with its own pool of threads** (which might increase or decrease as necessary).
 {% endhint %}
 
-This is very helpful to manage parallel execution successfully, greatly reducing the number of threads processes create and optimising the parallel execution. This is idea for tasks that require **great parallelism** (brute-forcing?) or for tasks that shouldn't block the main thread: For example, the main thread on iOS handles UI interactions, so any other functionality that could make the app hang (searching, accessing a web, reading a file...) is managed this way.
+This is very helpful to manage parallel execution successfully, greatly reducing the number of threads processes create and optimising the parallel execution. This is ideal for tasks that require **great parallelism** (brute-forcing?) or for tasks that shouldn't block the main thread: For example, the main thread on iOS handles UI interactions, so any other functionality that could make the app hang (searching, accessing a web, reading a file...) is managed this way.
+
+### Blocks
+
+A block is a **self contained section of code** (like a function with arguments returning a value) and can also specify bound variables.\
+However, at compiler level blocks doesn't exist, they are `os_object`s. Each of these objects is formed by two structures:
+
+* **block literal**:&#x20;
+  * It starts by the **`isa`** field, pointing to the block's class:
+    * `NSConcreteGlobalBlock` (blocks from `__DATA.__const`)
+    * `NSConcreteMallocBlock` (blocks in the heap)
+    * `NSConcreateStackBlock` (blocks in stack)
+  * It has **`flags`** (indicating fields present in the block descriptor) and some reserved bytes
+  * The function pointer to call
+  * A pointer to the block descriptor
+  * Block imported variables (if any)
+* **block descriptor**: It's size depends on the data that is present (as indicated in the previous flags)
+  * It has some reserved bytes
+  * The size of it
+  * It'll usually have a pointer to an Objective-C style signature to know how much space is needed for the params (flag `BLOCK_HAS_SIGNATURE`)
+  * If variables are referenced, this block will also have pointers to a copy helper (copying the value at the begining) and dispose helper (freeing it).
+
+### Queues
+
+A dispatch queue is a named object providing FIFO ordering of blocks for executions.
+
+Blocks a set in queues to be executed, and these support 2 modes: `DISPATCH_QUEUE_SERIAL` and `DISPATCH_QUEUE_CONCURRENT`. Of course the **serial** one **won't have race condition** problems as a block won't be executed until the previous one has finished. But **the other type of queue might have it**.
+
+Default queues:
+
+* `.main-thread`: From `dispatch_get_main_queue()`
+* `.libdispatch-manager`: GCD's queue manager
+* `.root.libdispatch-manager`: GCD's queue manager
+* `.root.maintenance-qos`: Lowest priority tasks
+* `.root.maintenance-qos.overcommit`
+* `.root.background-qos`: Available as `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
+* `.root.background-qos.overcommit`
+* `.root.utility-qos`: Available as `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
+* `.root.utility-qos.overcommit`
+* `.root.default-qos`: Available as `DISPATCH_QUEUE_PRIORITY_DEFAULT`
+* `.root.background-qos.overcommit`
+* `.root.user-initiated-qos`: Available as `DISPATCH_QUEUE_PRIORITY_HIGH`
+* `.root.background-qos.overcommit`
+* `.root.user-interactive-qos`: Highest priority
+* `.root.background-qos.overcommit`
+
+Notice that it will be the system who decides **which threads handle which queues at each time** (multiple threads might work in the same queue or the same thread might work in different queues at some point)
+
+#### Attributtes
+
+When creating a queue with **`dispatch_queue_create`** the third argument is a `dispatch_queue_attr_t`, which usually is either `DISPATCH_QUEUE_SERIAL` (which is actually NULL) or `DISPATCH_QUEUE_CONCURRENT` which is a pointer to a `dispatch_queue_attr_t` struct which allow to control some parameters of the queue.
+
+### Dispatch objects
+
+There are several objects that libdispatch uses and queues and blocks are just 2 of them. It's possible to create these objects with `dispatch_object_create`:
+
+* `block`
+* `data`: Data blocks
+* `group`: Group of blocks
+* `io`: Async I/O requests
+* `mach`: Mach ports
+* `mach_msg`: Mach messages
+* `pthread_root_queue`:A queue with a pthread thread pool and not workqueues
+* `queue`
+* `semaphore`
+* `source`: Event source
 
 ## Objective-C
 
@@ -166,6 +231,10 @@ Right click on the variable -> Retype Variable and select in this case **`swift_
 Ghidra will automatically rewrite everything:
 
 <figure><img src="../../.gitbook/assets/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
+
+## References
+
+* [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 <details>
 
