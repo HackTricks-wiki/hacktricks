@@ -18,6 +18,14 @@ Other ways to support HackTricks:
 The code of **dyld is open source** and can be found in [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) and cab be downloaded a tar using a **URL such as** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 {% endhint %}
 
+## **Dyld Process**
+
+Take a look on how Dyld loads libraries inside binaries in:
+
+{% content-ref url="macos-dyld-process.md" %}
+[macos-dyld-process.md](macos-dyld-process.md)
+{% endcontent-ref %}
+
 ## **DYLD\_INSERT\_LIBRARIES**
 
 This is like the [**LD\_PRELOAD on Linux**](../../../../linux-hardening/privilege-escalation/#ld\_preload). It allows to indicate a process that is going to be run to load a specific library from a path (if the env var is enabled)
@@ -352,6 +360,7 @@ and then check if the flag 0x800 is enabled.
 ## References
 
 * [https://theevilbit.github.io/posts/dyld\_insert\_libraries\_dylib\_injection\_in\_macos\_osx\_deep\_dive/](https://theevilbit.github.io/posts/dyld\_insert\_libraries\_dylib\_injection\_in\_macos\_osx\_deep\_dive/)
+* [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 <details>
 

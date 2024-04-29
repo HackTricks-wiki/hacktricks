@@ -175,6 +175,7 @@
     * [macOS Java Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-java-apps-injection.md)
     * [macOS Library Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/README.md)
       * [macOS Dyld Hijacking & DYLD\_INSERT\_LIBRARIES](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
+      * [macOS Dyld Process](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/macos-dyld-process.md)
     * [macOS Perl Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-perl-applications-injection.md)
     * [macOS Python Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-python-applications-injection.md)
     * [macOS Ruby Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ruby-applications-injection.md)

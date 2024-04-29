@@ -16,7 +16,7 @@ Other ways to support HackTricks:
 
 ## Function Interposing
 
-Create a **dylib** with an **`__interpose`** section (or a section flagged with **`S_INTERPOSING`**) containing tuples of **function pointers** that refer to the **original** and the **replacement** functions.
+Create a **dylib** with an **`__interpose` (`__DATA___interpose`)** section (or a section flagged with **`S_INTERPOSING`**) containing tuples of **function pointers** that refer to the **original** and the **replacement** functions.
 
 Then, **inject** the dylib with **`DYLD_INSERT_LIBRARIES`** (the interposing needs occur before the main app loads). Obviously the [**restrictions** applied to the use of **`DYLD_INSERT_LIBRARIES`** applies here also](macos-library-injection/#check-restrictions).
 
@@ -24,7 +24,7 @@ Then, **inject** the dylib with **`DYLD_INSERT_LIBRARIES`** (the interposing nee
 
 {% tabs %}
 {% tab title="interpose.c" %}
-{% code title="interpose.c" %}
+{% code title="interpose.c" overflow="wrap" %}
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 #include <stdio.h>
@@ -59,6 +59,7 @@ int main() {
 {% endtab %}
 
 {% tab title="interpose2.c" %}
+{% code overflow="wrap" %}
 ```c
 // Just another way to define an interpose
 // gcc -dynamiclib interpose2.c -o interpose2.dylib
@@ -82,6 +83,7 @@ int my_printf(const char *format, ...)
 
 DYLD_INTERPOSE(my_printf,printf);
 ```
+{% endcode %}
 {% endtab %}
 {% endtabs %}
 
@@ -91,6 +93,27 @@ Hello from interpose
 
 DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
+```
+
+{% hint style="warning" %}
+The **`DYLD_PRINT_INTERPOSTING`** env variable can be used to debug interposing and will print the interpose process.
+{% endhint %}
+
+Also note that **interposing occurs between the process and the loaded libraries**, it doesn't work with the shared library cache.
+
+### Dynamic Interposing
+
+Now it's also possible to interpose a function dynamically using the function **`dyld_dynamic_interpose`**. This allows to programatically interpose a function in run time instead of doing it only from the begining.
+
+It's just needed to indicate the **tuples** of the **function to replace and the replacement** function.
+
+```c
+struct dyld_interpose_tuple {
+    const void* replacement;
+    const void* replacee;
+};
+extern void dyld_dynamic_interpose(const struct mach_header* mh,
+        const struct dyld_interpose_tuple array[], size_t count);
 ```
 
 ## Method Swizzling
@@ -111,6 +134,7 @@ Note that because methods and classes are accessed based on their names, this in
 
 It's possible to access the information of the methods such as name, number of params or address like in the following example:
 
+{% code overflow="wrap" %}
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -176,6 +200,7 @@ int main() {
     return 0;
 }
 ```
+{% endcode %}
 
 ### Method Swizzling with method\_exchangeImplementations
 
@@ -185,6 +210,7 @@ The function **`method_exchangeImplementations`** allows to **change** the **add
 So when a function is called what is **executed is the other one**.
 {% endhint %}
 
+{% code overflow="wrap" %}
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -228,6 +254,7 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 ```
+{% endcode %}
 
 {% hint style="warning" %}
 In this case if the **implementation code of the legit** method **verifies** the **method** **name** it could **detect** this swizzling and prevent it from running.
@@ -241,6 +268,7 @@ The previous format is weird because you are changing the implementation of 2 me
 
 Just remember to **store the address of the implementation of the original one** if you are going to to call it from the new implementation before overwriting it because later it will be much complicated to locate that address.
 
+{% code overflow="wrap" %}
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -292,6 +320,7 @@ int main(int argc, const char * argv[]) {
     }
 }
 ```
+{% endcode %}
 
 ## Hooking Attack Methodology
 
@@ -329,6 +358,7 @@ Note that in newer versions of macOS if you **strip the signature** of the appli
 
 #### Library example
 
+{% code overflow="wrap" %}
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
@@ -364,6 +394,7 @@ static void customConstructor(int argc, const char **argv) {
     real_setPassword = method_setImplementation(real_Method, fake_IMP);
 }
 ```
+{% endcode %}
 
 ## References
 

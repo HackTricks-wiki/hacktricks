@@ -85,9 +85,12 @@ A bundle is a **directory** which **looks like an object in Finder** (a Bundle e
 [macos-bundles.md](macos-bundles.md)
 {% endcontent-ref %}
 
-## Dyld Shared Cache
+## Dyld Shared Library Cache (SLC)
 
 On macOS (and iOS) all system shared libraries, like frameworks and dylibs, are **combined into a single file**, called the **dyld shared cache**. This improved performance, since code can be loaded faster.
+
+This is located in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` and in older versions you might be able to find the **shared cache** in **`/System/Library/dyld/`**.\
+In iOS you can find them in **`/System/Library/Caches/com.apple.dyld/`**.
 
 Similar to the dyld shared cache, the kernel and the kernel extensions are also compiled into a kernel cache, which is loaded at boot time.
 
@@ -105,15 +108,32 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 ```
 {% endcode %}
 
-In older versions you might be able to find the **shared cache** in **`/System/Library/dyld/`**.
-
-In iOS you can find them in **`/System/Library/Caches/com.apple.dyld/`**.
-
 {% hint style="success" %}
 Note that even if `dyld_shared_cache_util` tool doesn't work, you can pass the **shared dyld binary to Hopper** and Hopper will be able to identify all the libraries and let you **select which one** you want to investigate:
 {% endhint %}
 
 <figure><img src="../../../.gitbook/assets/image (1149).png" alt="" width="563"><figcaption></figcaption></figure>
+
+Some extractors won't work as dylibs are prelinked with hard coded addresses in therefore they might be jumping to unknown addresses
+
+{% hint style="success" %}
+It's also possible to download the Shared Library Cache of other \*OS devices in macos by using an emulator in Xcode. They will be downloaded inside: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, like:`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+{% endhint %}
+
+### Mapping SLC
+
+**`dyld`** uses the syscall **`shared_region_check_np`** to know if the SLC has been mapped (which returns the address) and **`shared_region_map_and_slide_np`** to map the SLC.
+
+Note that even if the SLC is slid on the first use, all the **processes** use the **same copy**, which **eliminated the ASLR** protection if the attacker was able to run processes in the system. This was actually exploited in the past and fixed with shared region pager.
+
+Branch pools are little Mach-O dylibs that creates small spaces between image mappings making impossible to interpose the functions.
+
+### Override SLCs
+
+Using the the env variables:
+
+* **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> This will allow to load a new shared library cache
+* **`DYLD_SHARED_CACHE_DIR=avoid`** and manually replace the libraries with symlinks to the shared cache with the real ones (you will need to extract them)
 
 ## Special File Permissions
 
