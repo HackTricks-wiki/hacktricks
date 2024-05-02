@@ -4,22 +4,21 @@
 
 <summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセス**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけてください
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセス**したいですか、またはHackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFT](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および**[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
-
 ## はじめに
 
-Kerberosの「ダブルホップ」問題は、**Kerberos認証を2つのホップを介して**使用しようとするときに発生します。たとえば、**PowerShell**/**WinRM**を使用する場合です。
+Kerberosの「ダブルホップ」問題は、**Kerberos認証を2つのホップを介して**、例えば**PowerShell**/**WinRM**を使用しようとするときに発生します。
 
 **Kerberos**を介した**認証**が行われると、**資格情報**は**メモリにキャッシュされません**。したがって、mimikatzを実行しても、ユーザーの資格情報をマシンで見つけることはできません。
 
@@ -41,17 +40,17 @@ PCで**制約のない委任**が有効になっている場合、**サーバー
 
 > CredSSP認証は、ユーザーの資格情報をローカルコンピューターからリモートコンピューターに委任します。この慣行は、リモート操作のセキュリティリスクを高めます。リモートコンピューターが侵害された場合、資格情報が渡されると、その資格情報を使用してネットワークセッションを制御することができます。
 
-セキュリティ上の懸念から、**CredSSP**は本番システム、機密ネットワーク、類似の環境で無効にすることが強く推奨されます。**CredSSP**が有効かどうかを確認するには、`Get-WSManCredSSP`コマンドを実行できます。このコマンドにより、**CredSSPの状態を確認**でき、**WinRM**が有効になっている場合はリモートで実行することもできます。
+セキュリティ上の懸念から、**CredSSP**は本番システム、機密ネットワーク、類似環境で無効にすることが強く推奨されます。**CredSSP**が有効かどうかを確認するには、`Get-WSManCredSSP`コマンドを実行できます。このコマンドにより、**CredSSPの状態を確認**し、**WinRM**が有効になっていればリモートで実行することもできます。
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
 }
 ```
-## 対処法
+## 回避策
 
 ### Invoke Command
 
-ダブルホップの問題に対処するために、ネストされた `Invoke-Command` を使用する方法が提示されています。これは問題を直接解決するのではなく、特別な構成を必要とせずに回避策を提供します。このアプローチにより、初期の攻撃マシンから実行されたPowerShellコマンドまたは最初のサーバーと事前に確立されたPS-Sessionを介して、セカンダリサーバーでコマンド (`hostname`) を実行できます。以下にその方法を示します：
+ダブルホップの問題に対処するために、ネストされた `Invoke-Command` を使用する方法が提示されています。これは問題を直接解決するのではなく、特別な構成を必要とせずに回避策を提供します。このアプローチにより、初期の攻撃マシンから実行されたPowerShellコマンドまたは最初のサーバーと事前に確立されたPS-Sessionを介して、セカンダリサーバーでコマンド (`hostname`) を実行できます。以下に手順を示します：
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
@@ -60,11 +59,11 @@ Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 ```
 ### リモート PSSession の確立
 
-最初のサーバーとの PS-Session を確立し、`$cred` を使用して `Invoke-Command` を実行することで、タスクを一元化することが提案されています。
+最初のサーバーとの PS-Session を確立し、`$cred` を使用して `Invoke-Command` を実行することが、タスクを一元化するために提案されています。
 
 ### PSSession 構成の登録
 
-ダブルホップ問題をバイパスするための解決策は、`Register-PSSessionConfiguration` と `Enter-PSSession` を使用することです。この方法は `evil-winrm` とは異なるアプローチを必要とし、ダブルホップの制限を受けないセッションを可能にします。
+ダブルホップ問題をバイパスする解決策として、`Register-PSSessionConfiguration` と `Enter-PSSession` を使用する方法があります。この方法は `evil-winrm` とは異なるアプローチが必要であり、ダブルホップの制限を受けないセッションを可能にします。
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
@@ -80,7 +79,7 @@ netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP lo
 ```
 #### winrs.exe
 
-`winrs.exe`は、WinRMリクエストを転送するために使用できます。PowerShellの監視が懸念される場合、検出されにくいオプションとして機能します。以下のコマンドは、その使用方法を示しています:
+`winrs.exe`は、WinRMリクエストを転送するために使用でき、PowerShellの監視が懸念される場合には検出されにくいオプションとして機能します。以下のコマンドは、その使用方法を示しています:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
@@ -94,29 +93,29 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 2. zipファイルを解凍し、`Install-sshd.ps1`スクリプトを実行します。
 3. ポート22を開くためのファイアウォールルールを追加し、SSHサービスが実行されていることを確認します。
 
-`Connection reset`エラーを解決するには、アクセス権限を更新して、OpenSSHディレクトリで誰もが読み取りおよび実行アクセスを許可する必要があるかもしれません。
+`Connection reset`エラーを解決するには、アクセス許可を更新してOpenSSHディレクトリで誰もが読み取りおよび実行アクセスを許可する必要がある場合があります。
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-## 参考文献
+## 参考
 
 * [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 * [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
 * [https://learn.microsoft.com/en-gb/archive/blogs/sergey\_babkins\_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey\_babkins\_blog/another-solution-to-multi-hop-powershell-remoting)
 * [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 <details>
 
-<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）を使用して、ゼロからヒーローまでAWSハッキングを学ぶ</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセス**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れる
-* **💬**[**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングトリックを共有するために**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および**[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を入手してください
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有するために、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および**[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

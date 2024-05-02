@@ -2,28 +2,27 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>から<strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong>！</summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じてゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および**[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください**
+* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングトリックを共有するために** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください**
 
 </details>
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
-
 ## Gatekeeper
 
-**Gatekeeper**は、Macオペレーティングシステム向けに開発されたセキュリティ機能で、ユーザーがシステム上で**信頼されたソフトウェアのみを実行**することを保証するために設計されています。ユーザーがApp Store以外のソースから（アプリ、プラグイン、またはインストーラーパッケージなど）ダウンロードして開こうとするソフトウェアを**検証**することで機能します。
+**Gatekeeper**は、Macオペレーティングシステム向けに開発されたセキュリティ機能で、ユーザーがシステム上で**信頼されたソフトウェアのみを実行**することを確認するために設計されています。ユーザーがApp Store以外のソースからダウンロードして開こうとするソフトウェアを**検証**することによって機能します。
 
-Gatekeeperの主要なメカニズムは、その**検証**プロセスにあります。ダウンロードしたソフトウェアが**認識された開発者によって署名されているかどうか**をチェックし、ソフトウェアの信頼性を確認します。さらに、Appleによって**ノータライズされているかどうか**を確認し、既知の悪意のあるコンテンツが含まれていないこと、およびノータライズ後に改ざんされていないことを確認します。
+Gatekeeperの主要なメカニズムは、その**検証**プロセスにあります。ダウンロードしたソフトウェアが**認識された開発者によって署名されているかどうか**をチェックし、ソフトウェアの信頼性を確認します。さらに、Appleによって**ノータライズ**されているかどうかを確認し、既知の悪意のあるコンテンツが含まれていないこと、およびノータライズ後に改ざんされていないことを確認します。
 
-さらに、Gatekeeperは、ユーザーがダウンロードしたソフトウェアの初回の開きを承認するよう**ユーザーに促す**ことで、ユーザーの誤って害のある実行可能コードを実行するのを防ぐのに役立ちます。
+さらに、Gatekeeperは、ユーザーが初めてダウンロードしたソフトウェアの開きを承認するよう**ユーザーに促す**ことで、ユーザーの誤って害のある実行可能コードを実行するのを防ぐのに役立ちます。
 
 ### アプリケーション署名
 
@@ -31,17 +30,17 @@ Gatekeeperの主要なメカニズムは、その**検証**プロセスにあり
 
 動作方法は次のとおりです：
 
-1. **アプリケーションの署名:** 開発者がアプリケーションを配布する準備が整ったとき、**開発者はプライベートキーを使用してアプリケーションに署名**します。このプライベートキーは、Appleが開発者がApple Developer Programに登録するときに発行する**証明書**と関連付けられています。署名プロセスには、アプリのすべての部分の暗号ハッシュを作成し、このハッシュを開発者のプライベートキーで暗号化することが含まれます。
+1. **アプリケーションの署名:** 開発者がアプリケーションを配布する準備が整ったとき、**開発者はプライベートキーを使用してアプリケーションに署名**します。このプライベートキーは、AppleがApple Developer Programに登録したときに開発者に発行する**証明書**と関連付けられています。署名プロセスには、アプリのすべての部分の暗号ハッシュを作成し、このハッシュを開発者のプライベートキーで暗号化することが含まれます。
 2. **アプリケーションの配布:** 署名されたアプリケーションは、開発者の証明書とともにユーザーに配布されます。この証明書には、対応する公開キーが含まれています。
-3. **アプリケーションの検証:** ユーザーがアプリケーションをダウンロードして実行しようとすると、Macオペレーティングシステムは、開発者の証明書から公開キーを使用してハッシュを復号化します。その後、アプリケーションの現在の状態に基づいてハッシュを再計算し、これを復号化されたハッシュと比較します。一致する場合、それは開発者が署名したときから**アプリケーションが変更されていない**ことを意味し、システムはアプリケーションの実行を許可します。
+3. **アプリケーションの検証:** ユーザーがアプリケーションをダウンロードして実行しようとすると、Macオペレーティングシステムは、開発者の証明書から公開キーを使用してハッシュを復号化します。その後、アプリケーションの現在の状態に基づいてハッシュを再計算し、これを復号化されたハッシュと比較します。一致する場合、それは開発者が署名した後に**アプリケーションが変更されていない**ことを意味し、システムはアプリケーションの実行を許可します。
 
-アプリケーション署名は、AppleのGatekeeperテクノロジーの重要な部分です。ユーザーがインターネットから**ダウンロードしたアプリケーションを開こうとする**と、Gatekeeperはアプリケーションの署名を検証します。Appleが既知の開発者に発行した証明書で署名されており、コードが改ざんされていない場合、Gatekeeperはアプリケーションの実行を許可します。そうでない場合、アプリケーションをブロックしてユーザーに警告します。
+アプリケーション署名は、AppleのGatekeeperテクノロジーの重要な部分です。ユーザーがインターネットからダウンロードしたアプリケーションを**開こうとすると**、Gatekeeperはアプリケーションの署名を検証します。Appleが既知の開発者に発行した証明書で署名されており、コードが改ざんされていない場合、Gatekeeperはアプリケーションの実行を許可します。それ以外の場合、アプリケーションをブロックしてユーザーに警告します。
 
 macOS Catalinaからは、**GatekeeperはアプリケーションがAppleによってノータライズされているかどうかも確認**し、追加のセキュリティレイヤーを追加します。ノータライズプロセスは、アプリケーションを既知のセキュリティ問題や悪意のあるコードに対してチェックし、これらのチェックに合格した場合、AppleはGatekeeperが検証できるアプリケーションにチケットを追加します。
 
 #### 署名の確認
 
-いくつかの**マルウェアサンプル**をチェックするときは、常にバイナリの**署名を確認**する必要があります。署名した**開発者**がすでに**マルウェア**と**関連付けられている**可能性があるためです。
+いくつかの**マルウェアサンプル**をチェックする際は、バイナリの**署名を常に確認**する必要があります。署名した**開発者**がすでに**マルウェア**と**関連付けられている**可能性があるためです。
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -60,11 +59,11 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### Notarization
 
-Appleのノータリゼーションプロセスは、ユーザーを潜在的に有害なソフトウェアから保護する追加の保護機能として機能します。これには、開発者が自分のアプリケーションをAppleのノータリサービスに提出することが含まれます。このサービスはApp Reviewとは異なることに注意してください。このサービスは、提出されたソフトウェアを悪意のあるコンテンツやコード署名に関する潜在的な問題を検査する自動システムです。
+Appleのノータリゼーションプロセスは、ユーザーを潜在的に有害なソフトウェアから保護する追加のセキュリティ対策として機能します。これには、開発者が自分のアプリケーションをAppleのノータリサービスに提出するという手順が含まれます。このサービスはApp Reviewとは異なることに注意する必要があります。このサービスは、提出されたソフトウェアを悪意のあるコンテンツやコードサイニングに関する潜在的な問題を検査する自動システムです。
 
-ソフトウェアがこの検査をパスし、懸念事項がない場合、ノータリサービスはノータリゼーションチケットを生成します。その後、開発者はこのチケットを自分のソフトウェアに添付する必要があります。このプロセスは「ステープリング」として知られています。さらに、ノータリゼーションチケットはオンラインでも公開され、Gatekeeper（Appleのセキュリティテクノロジー）がアクセスできます。
+ソフトウェアがこの検査をパスし、懸念事項がない場合、ノータリサービスはノータリゼーションチケットを生成します。その後、開発者はこのチケットを自分のソフトウェアに添付する必要があります。このプロセスは「ステープリング」として知られています。さらに、ノータリゼーションチケットはオンラインでも公開され、Gatekeeper（Appleのセキュリティテクノロジー）がアクセスできるようになります。
 
-ユーザーがソフトウェアを初めてインストールまたは実行する際、実行可能ファイルにステープリングされたノータリゼーションチケットまたはオンラインで見つかったノータリゼーションチケットの存在により、GatekeeperにそのソフトウェアがAppleによってノータリゼーションされたことが通知されます。その結果、Gatekeeperは初回起動ダイアログに記述的なメッセージを表示し、Appleによる悪意のあるコンテンツのチェックを受けたことを示します。このプロセスにより、ユーザーは自分のシステムにインストールまたは実行するソフトウェアのセキュリティに対する信頼を高めることができます。
+ユーザーがソフトウェアを初めてインストールまたは実行する際、実行可能ファイルにステープリングされているかオンラインで見つかるかにかかわらず、ノータリゼーションチケットの存在により、GatekeeperにそのソフトウェアがAppleによってノータリゼーションされたことが通知されます。その結果、Gatekeeperは初回起動ダイアログに記述的なメッセージを表示し、Appleによる悪意のあるコンテンツのチェックを受けたことを示します。このプロセスにより、ユーザーは自分のシステムにインストールまたは実行するソフトウェアのセキュリティに対する信頼を高めることができます。
 
 ### Enumerating GateKeeper
 
@@ -79,11 +78,11 @@ spctl --status
 GateKeeperの署名チェックは、**Quarantine属性を持つファイル**にのみ実行されることに注意してください。
 {% endhint %}
 
-GateKeeperは、**設定と署名**に基づいてバイナリが実行可能かどうかをチェックします：
+GateKeeperは、**設定と署名**に従ってバイナリが実行可能かどうかをチェックします：
 
 <figure><img src="../../../.gitbook/assets/image (1147).png" alt=""><figcaption></figcaption></figure>
 
-この構成を保持するデータベースは、**`/var/db/SystemPolicy`**にあります。これをルートとして次のコマンドで確認できます：
+この構成を保持するデータベースは**`/var/db/SystemPolicy`**にあります。これをルートとして次のコマンドで確認できます：
 ```bash
 # Open database
 sqlite3 /var/db/SystemPolicy
@@ -97,10 +96,10 @@ anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.9] exists
 anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists and (certificate leaf[field.1.2.840.113635.100.6.1.14] or certificate leaf[field.1.2.840.113635.100.6.1.13]) and notarized|1|0|Notarized Developer ID
 [...]
 ```
-注意してください、最初のルールは "**App Store**" で終わり、2番目のルールは "**Developer ID**" で終わり、前の画像では**App Storeおよび識別された開発者からのアプリの実行が有効**になっていました。\
-その設定をApp Storeに変更すると、"**Notarized Developer ID**" ルールが消えます。
+注意してください、最初のルールは "**App Store**" で終わり、2番目のルールは "**Developer ID**" で終わり、前の画像では **App Store および識別された開発者からのアプリの実行が有効になっていました**。\
+その設定を App Store に変更すると、"**Notarized Developer ID**" ルールが消えます。
 
-**GKE** タイプのルールも何千もあります。
+**GKE タイプ** のルールも何千もあります。
 ```bash
 SELECT requirement,allow,disabled,label from authority where label = 'GKE' limit 5;
 cdhash H"b40281d347dc574ae0850682f0fd1173aa2d0a39"|1|0|GKE
@@ -109,13 +108,13 @@ cdhash H"4317047eefac8125ce4d44cab0eb7b1dff29d19a"|1|0|GKE
 cdhash H"0a71962e7a32f0c2b41ddb1fb8403f3420e1d861"|1|0|GKE
 cdhash H"8d0d90ff23c3071211646c4c9c607cdb601cb18f"|1|0|GKE
 ```
-これらは、**`/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`、`/var/db/gke.bundle/Contents/Resources/gk.db`**、および**`/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`**から来るハッシュです。
+これらは、**`/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`、`/var/db/gke.bundle/Contents/Resources/gk.db`**、および**`/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`**から取得されたハッシュです。
 
 または、前述の情報をリストすることもできます:
 ```bash
 sudo spctl --list
 ```
-オプション**`--master-disable`**と**`--global-disable`**は、**`spctl`**のこれらの署名チェックを完全に**無効**にします。
+オプション**`--master-disable`**と**`--global-disable`**は、**`spctl`**の署名チェックを完全に**無効**にします。
 ```bash
 # Disable GateKeeper
 spctl --global-disable
@@ -129,7 +128,7 @@ spctl --master-enable
 
 <figure><img src="../../../.gitbook/assets/image (1148).png" alt=""><figcaption></figcaption></figure>
 
-GateKeeperによってアプリが許可されるかどうかを**チェックする**ことが可能です。
+GateKeeper によってアプリが許可されるかどうかを**チェックする**ことが可能です。
 ```bash
 spctl --assess -v /Applications/App.app
 ```
@@ -150,14 +149,14 @@ spctl --assess -v /Applications/App.app
 ```
 ### ファイルの隔離
 
-特定のmacOSアプリケーション（Webブラウザやメールクライアントなど）が、アプリケーションやファイルを**ダウンロード**する際に、一般的に「**隔離フラグ**」として知られる拡張ファイル属性をダウンロードされたファイルに**添付**します。この属性は、ファイルを（インターネットなどの）信頼されていないソースから来たものとして**マークし**、潜在的なリスクを持つ可能性があることを示すセキュリティ対策として機能します。ただし、一部のアプリケーションはこの属性を添付しないこともあります。たとえば、一般的なBitTorrentクライアントソフトウェアは通常、このプロセスをバイパスします。
+特定のmacOSアプリケーション（Webブラウザやメールクライアントなど）は、アプリケーションやファイルを**ダウンロード**する際に、**拡張ファイル属性**である一般的には"**隔離フラグ**"として知られるものをダウンロードされたファイルに**添付**します。この属性は、ファイルを信頼できないソース（インターネット）から取得したものとしてマークし、潜在的なリスクを伴う可能性があることを示すセキュリティ対策として機能します。ただし、すべてのアプリケーションがこの属性を添付するわけではなく、たとえば一般的なBitTorrentクライアントソフトウェアは通常、このプロセスをバイパスします。
 
 **隔離フラグが存在する場合、ユーザーがファイルを実行しようとすると、macOSのGatekeeperセキュリティ機能が作動します**。
 
-隔離フラグが存在しない場合（一部のBitTorrentクライアントを介してダウンロードされたファイルなど）、Gatekeeperの**チェックが実行されない**可能性があります。したがって、ユーザーは安全でないまたは不明なソースからダウンロードしたファイルを開く際には注意を払う必要があります。
+**隔離フラグが存在しない場合**（一部のBitTorrentクライアントを介してダウンロードされたファイルなど）、Gatekeeperの**チェックが実行されない**可能性があります。したがって、ユーザーは、安全でないまたは不明なソースからダウンロードしたファイルを開く際には注意を払う必要があります。
 
 {% hint style="info" %}
-**コード署名の妥当性**をチェックすることは、コードとそのバンドルされたリソースの暗号ハッシュを生成するなど、**リソースを多く消費する**プロセスです。さらに、証明書の有効性をチェックするには、発行後に取り消されていないかどうかをAppleのサーバーに**オンラインで確認**する必要があります。これらの理由から、アプリが起動するたびに完全なコード署名と公証チェックを実行するのは**実用的ではありません**。
+**コード署名の妥当性**をチェックすることは、コードとそのバンドルされたリソースの暗号ハッシュを生成するなど、**リソースを多く消費する**プロセスです。さらに、証明書の有効性をチェックするには、発行後に取り消されていないかをAppleのサーバーに**オンラインで確認**する必要があります。これらの理由から、完全なコード署名とノータリゼーションのチェックは、**アプリが起動するたびに実行するのは非現実的**です。
 
 したがって、これらのチェックは**隔離属性を持つアプリを実行するときにのみ実行**されます。
 {% endhint %}
@@ -165,10 +164,10 @@ spctl --assess -v /Applications/App.app
 {% hint style="warning" %}
 この属性は、ファイルを作成/ダウンロードするアプリケーションによって**設定する必要があります**。
 
-ただし、サンドボックス化されたファイルは、作成されるすべてのファイルにこの属性が設定されます。サンドボックス化されていないアプリは自分で設定するか、**Info.plist**で[**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/lsfilequarantineenabled?language=objc)キーを指定することで、システムに`com.apple.quarantine`拡張属性を設定させることができます。
+ただし、サンドボックス化されたファイルは、作成されるすべてのファイルにこの属性が設定されます。サンドボックス化されていないアプリは、自分で設定するか、または**Info.plist**で[**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/lsfilequarantineenabled?language=objc)キーを指定することで、システムが作成されたファイルに`com.apple.quarantine`拡張属性を設定するようにできます。
 {% endhint %}
 
-その状態を**確認して有効化/無効化**（root権限が必要）することが可能です。
+状態を**確認**し、有効化/無効化を行うことが可能です（ルート権限が必要です）:
 ```bash
 spctl --status
 assessments enabled
@@ -177,13 +176,13 @@ spctl --enable
 spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
-次のコマンドを使用して、ファイルに拡張属性があるかどうかを確認できます:
+あなたは次の方法でも、ファイルが拡張属性を持っているかどうかを見つけることができます:
 ```bash
 xattr file.png
 com.apple.macl
 com.apple.quarantine
 ```
-**拡張属性**の**値**をチェックし、quarantine属性を書き込んだアプリを特定します。
+次のようにして、**拡張** **属性**の**値**をチェックし、quarantine属性を書き込んだアプリを特定します：
 ```bash
 xattr -l portada.png
 com.apple.macl:
@@ -199,11 +198,11 @@ com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
 # Brave -- App
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
 ```
-実際には、プロセスは作成するファイルにクォータンティンフラグを設定できます（作成したファイルにUSER\_APPROVEDフラグを適用しようとしましたが、適用されませんでした）：
+実際にプロセスは「作成するファイルに検疫フラグを設定できる可能性があります」（作成したファイルにUSER\_APPROVEDフラグを適用しようとしましたが、適用されませんでした）:
 
 <details>
 
-<summary>ソースコード クォータンティンフラグの適用</summary>
+<summary>ソースコード 検疫フラグの適用</summary>
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -271,7 +270,7 @@ xattr -d com.apple.quarantine portada.png
 #You can also remove this attribute from every file with
 find . -iname '*' -print0 | xargs -0 xattr -d com.apple.quarantine
 ```
-そして、次のコマンドを使用して、すべての隔離されたファイルを検索します：
+そして、次のコマンドで隔離されたすべてのファイルを検索します：
 
 {% code overflow="wrap" %}
 ```bash
@@ -279,19 +278,19 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 {% endcode %}
 
-**Quarantine情報**は、LaunchServicesによって管理される中央データベースに保存されています。**`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**。
+**Quarantine情報**は、LaunchServicesによって管理される中央データベースに保存されます。**`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**。
 
 #### **Quarantine.kext**
 
-カーネル拡張機能は、システムの**カーネルキャッシュ**を介してのみ利用可能です。ただし、**https://developer.apple.com/** から**Kernel Debug Kit**をダウンロードすることで、拡張機能のシンボル化バージョンを入手できます。
+このカーネル拡張機能は、システム上の**カーネルキャッシュ**を介してのみ利用可能です。ただし、**https://developer.apple.com/** から**Kernel Debug Kit**をダウンロードすることで、この拡張機能のシンボル化バージョンを入手できます。
 
 ### XProtect
 
-XProtectはmacOSに組み込まれた**対マルウェア**機能です。XProtectは、**アプリケーションが初めて起動されるか変更される際に、既知のマルウェアや安全でないファイルタイプのデータベース**と照合します。Safari、Mail、Messagesなどの特定のアプリを介してファイルをダウンロードすると、XProtectが自動的にファイルをスキャンします。データベース内の既知のマルウェアと一致する場合、XProtectはファイルの実行を**防止**し、脅威を警告します。
+XProtectはmacOSに組み込まれた**対マルウェア**機能です。XProtectは、**アプリケーションが初めて起動されるか変更される際に、既知のマルウェアや安全でないファイルタイプのデータベース**と照合します。Safari、Mail、Messagesなどの特定のアプリを介してファイルをダウンロードすると、XProtectが自動的にファイルをスキャンします。データベース内の既知のマルウェアに一致する場合、XProtectはファイルの実行を**防止**し、脅威を通知します。
 
-XProtectデータベースは、Appleによって**定期的に更新**され、これらの更新は自動的にMacにダウンロードされてインストールされます。これにより、XProtectが常に最新の既知の脅威に対応していることが保証されます。
+XProtectデータベースはAppleによって**定期的に更新**され、これらの更新は自動的にMacにダウンロードおよびインストールされます。これにより、XProtectが常に最新の既知の脅威と同期されることが保証されます。
 
-ただし、**XProtectは完全なアンチウイルスソリューションではない**ことに注意する価値があります。特定の既知の脅威のリストのみをチェックし、ほとんどのアンチウイルスソフトウェアのようにアクセス時スキャンを実行しません。
+ただし、**XProtectは完全なアンチウイルスソリューションではない**ことに注意する価値があります。XProtectは特定の既知の脅威のリストのみをチェックし、ほとんどのアンチウイルスソフトウェアのようにアクセス時スキャンを実行しません。
 
 最新のXProtect更新に関する情報を取得するには、次のコマンドを実行します：
 
@@ -301,10 +300,10 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 ```
 {% endcode %}
 
-XProtectは、SIP保護された場所にあり、**/Library/Apple/System/Library/CoreServices/XProtect.bundle**にあり、バンドル内にはXProtectが使用する情報が含まれています：
+XProtectは、**/Library/Apple/System/Library/CoreServices/XProtect.bundle**にあるSIP保護された場所にあり、バンドル内にはXProtectが使用する情報が含まれています：
 
 - **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**：これらのcdhashを持つコードがレガシー権限を使用できるようにします。
-- **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**：BundleIDとTeamIDを介してロードを禁止されているプラグインと拡張機能のリスト、または最小バージョンを示すリスト。
+- **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**：BundleIDとTeamIDを介してロードが禁止されているプラグインと拡張機能のリスト、または最小バージョンを示す。
 - **`XProtect.bundle/Contents/Resources/XProtect.yara`**：マルウェアを検出するためのYaraルール。
 - **`XProtect.bundle/Contents/Resources/gk.db`**：ブロックされたアプリケーションとTeamIDのハッシュを持つSQLite3データベース。
 
@@ -316,9 +315,9 @@ XProtectに関連するもう1つのAppが**`/Library/Apple/System/Library/CoreS
 Gatekeeperは、アプリケーションを実行するたびに実行されるわけではないことに注意してください。実行されたアプリケーションがGatekeeperによってすでに検証されている場合、_**AppleMobileFileIntegrity**_（AMFI）は実行時に**実行可能コードの署名を検証**します。
 {% endhint %}
 
-したがって、以前はアプリケーションを実行してGatekeeperでキャッシュすることが可能で、その後、（Electron asarやNIBファイルなどの）アプリケーションの実行ファイル以外のファイルを**変更**し、他に保護がない場合、アプリケーションは**悪意のある**追加を含めて**実行**されていました。
+したがって、以前はアプリケーションを実行してGatekeeperでキャッシュすることが可能で、その後アプリケーションの実行ファイル以外（Electron asarやNIBファイルなど）を**変更**し、他に保護がない場合、アプリケーションは**悪意のある**追加を含めて**実行**されていました。
 
-しかし、現在はmacOSがアプリケーションバンドル内のファイルを**変更できないように防止**しています。そのため、[Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md)攻撃を試みると、Gatekeeperでキャッシュするためにアプリケーションを実行した後、バンドルを変更できなくなるため、悪用することができなくなりました。例えば、Contentsディレクトリの名前をExploitで示されているようにNotConに変更し、その後アプリのメインバイナリを実行してGatekeeperでキャッシュしようとすると、エラーが発生して実行されません。
+しかし、現在はmacOSがアプリケーションバンドル内のファイルを**変更できないように防止**しています。したがって、[Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md)攻撃を試みると、Gatekeeperでキャッシュするためにアプリケーションを実行した後、バンドルを変更できなくなるため、それを悪用することはもはや不可能であることがわかります。例えば、Contentsディレクトリの名前をExploitで示されているようにNotConに変更し、その後アプリケーションのメインバイナリを実行してGatekeeperでキャッシュしようとすると、エラーが発生して実行されません。
 
 ## Gatekeeperのバイパス
 
@@ -326,13 +325,13 @@ Gatekeeperをバイパスする方法（ユーザーに何かをダウンロー�
 
 ### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
-**Archive Utility**を使用している場合、**886文字を超えるパス**を持つファイルにはcom.apple.quarantine拡張属性が付与されません。この状況により、これらのファイルが**Gatekeeperの**セキュリティチェックを**回避**することが誤って可能になります。
+**Archive Utility**を使用してファイルを解凍すると、**886文字を超えるパス**を持つファイルにはcom.apple.quarantine拡張属性が付与されません。この状況により、これらのファイルがGatekeeperのセキュリティチェックを**回避**することが誤って許可されます。
 
 詳細については、[**元のレポート**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)を参照してください。
 
 ### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
 
-**Automator**で作成されたアプリケーションでは、実行に必要な情報が`application.app/Contents/document.wflow`にあり、実行可能ファイルにはありません。実行可能ファイルは、**Automator Application Stub**と呼ばれる一般的なAutomatorバイナリです。
+**Automator**で作成されたアプリケーションでは、実行に必要な情報が`application.app/Contents/document.wflow`に含まれており、実行可能ファイルには含まれていません。実行可能ファイルは、**Automator Application Stub**と呼ばれる汎用のAutomatorバイナリです。
 
 したがって、`application.app/Contents/MacOS/Automator\ Application\ Stub`を別のシステム内のAutomator Application Stubにシンボリックリンクさせることで、`document.wflow`（スクリプト）内の内容を実行し、実際の実行可能ファイルにはquarantine xattrがないため、Gatekeeperをトリガーせずに実行できます。
 
@@ -342,23 +341,23 @@ Gatekeeperをバイパスする方法（ユーザーに何かをダウンロー�
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-このバイパスでは、zipファイルが`application.app`ではなく`application.app/Contents`から圧縮を開始するように作成されました。したがって、**quarantine属性**が`application.app/Contents`の**すべてのファイルに**適用されましたが、**`application.app`には**適用されなかったため、Gatekeeperは`application.app`がトリガーされたときに**quarantine属性がなかった**ため、バイパスされました。
+このバイパスでは、zipファイルが`application.app`ではなく`application.app/Contents`から圧縮を開始するように作成されました。したがって、**quarantine属性**が`application.app/Contents`のすべての**ファイルに適用**されましたが、Gatekeeperがチェックしていた`application.app`には適用されず、`application.app`がトリガーされたときには**quarantine属性がなかった**ため、Gatekeeperがバイパスされました。
 ```bash
 zip -r test.app/Contents test.zip
 ```
-[**元のレポート**](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)を確認して、詳細情報をご覧ください。
+チェックして、詳細情報は[**元のレポート**](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)を参照してください。
 
 ### [CVE-2022-32910](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32910)
 
-コンポーネントが異なる場合でも、この脆弱性の悪用は前回と非常に似ています。この場合、**`application.app/Contents`** からApple Archiveを生成し、**Archive Utility** によって展開される際に **`application.app` には隔離属性が付与されない**ようにします。
+コンポーネントが異なる場合でも、この脆弱性の悪用は前のものと非常に似ています。この場合、**`application.app/Contents`** からApple Archiveを生成し、**Archive Utility** によって展開される際に **`application.app` が隔離属性を取得しない**ようにします。
 ```bash
 aa archive -d test.app/Contents -o test.app.aar
 ```
-チェックして、より詳細な情報を[**元のレポート**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/)で確認してください。
+チェックして、詳細情報を[**元のレポート**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/)をご覧ください。
 
 ### [CVE-2022-42821](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
-ACL **`writeextattr`**を使用して、誰もファイル内の属性を書き込めないようにすることができます：
+ACL **`writeextattr`** は、ファイル内の属性の書き込みを誰もが防ぐために使用できます。
 ```bash
 touch /tmp/no-attr
 chmod +a "everyone deny writeextattr" /tmp/no-attr
@@ -367,7 +366,7 @@ xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
 さらに、**AppleDouble**ファイル形式は、そのACEを含むファイルをコピーします。
 
-[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)では、xattr内に格納されたACLテキスト表現が**`com.apple.acl.text`**と呼ばれるxattrに設定されることがわかります。したがって、ACLを含むzipファイルにアプリケーションを圧縮し、他のxattrの書き込みを防ぐACLを設定した場合... クアランティンxattrはアプリケーションに設定されませんでした:
+[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)では、**`com.apple.acl.text`**というxattr内に格納されたACLテキスト表現が、展開されたファイルのACLとして設定されることがわかります。したがって、ACLを使用して他のxattrの書き込みを防止するzipファイルにアプリケーションを圧縮した場合... クアランティンxattrはアプリケーションに設定されませんでした:
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
 ditto -c -k test test.zip
@@ -376,7 +375,7 @@ python3 -m http.server
 ```
 {% endcode %}
 
-詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)をチェックしてください。
+詳細については、[**元のレポート**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)をご確認ください。
 
 AppleArchivesを使用してもこの脆弱性を悪用することができる可能性があります。
 ```bash
@@ -387,11 +386,11 @@ aa archive -d app -o test.aar
 ```
 ### [CVE-2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
 
-**Google Chromeは、macOSの内部問題のためにダウンロードされたファイルにquarantine属性を設定していないことが発見されました。**
+**Google Chromeは、macOSの内部問題のためにダウンロードされたファイルに隔離属性を設定していないことが発見されました。**
 
 ### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 
-AppleDoubleファイル形式は、ファイルの属性を`._`で始まる別のファイルに保存し、これによりmacOSマシン間でファイル属性をコピーするのに役立ちます。しかし、AppleDoubleファイルを展開した後、`._`で始まるファイルにquarantine属性が設定されていないことがわかりました。
+AppleDoubleファイル形式は、ファイルの属性を`._`で始まる別のファイルに保存し、これによりmacOSマシン間でファイル属性をコピーするのに役立ちます。しかし、AppleDoubleファイルを展開した後、`._`で始まるファイルには**隔離属性が設定されていない**ことがわかりました。
 ```bash
 mkdir test
 echo a > test/a
@@ -403,7 +402,8 @@ aa archive -d test/ -o test.aar
 ```
 {% endcode %}
 
-クォリンティン属性が設定されていないファイルを作成できるようになると、**Gatekeeperをバイパスすることが可能**でした。トリックは、AppleDouble名前規則を使用して（`._`で始める）、クォリンティン属性のない**非表示ファイルへのシンボリックリンクとして**見えるファイルを作成し、**DMGファイルを実行**すると、Gatekeeperを**バイパス**できます。
+Gatekeeperをバイパスすることが可能でした。AppleDouble名前規則を使用して（`._`で始める）、quarantine属性が設定されていない**隠しファイル**を作成し、この隠しファイルへの**シンボリックリンクとして見えるファイル**を作成するトリックで、quarantine属性が設定されていないファイルを作成することができました。\
+**dmgファイルが実行されると**、quarantine属性がないため、Gatekeeperを**バイパス**します。
 ```bash
 # Create an app bundle with the backdoor an call it app.app
 
@@ -421,4 +421,8 @@ aa archive -d s/ -o app.aar
 ```
 ### Quarantine xattrの防止
 
-".app"バンドル内でquarantine xattrが追加されていない場合、それを実行しても**Gatekeeperはトリガーされません**。
+".app"バンドルにQuarantine xattrが追加されていない場合、それを実行しても**Gatekeeperはトリガーされません**。
+
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+
+{% embed url="https://websec.nl/" %}

