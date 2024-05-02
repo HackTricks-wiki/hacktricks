@@ -2,27 +2,27 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks AWS)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord**](https://discord.gg/hRep4RUj7f) o al **grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 ## Introducción
 
-El problema de "Doble Salto" de Kerberos aparece cuando un atacante intenta utilizar **autenticación Kerberos a través de dos** **saltos**, por ejemplo usando **PowerShell**/**WinRM**.
+El problema de "Doble Salto" de Kerberos ocurre cuando un atacante intenta utilizar la autenticación de **Kerberos a través de dos** **saltos**, por ejemplo, utilizando **PowerShell**/**WinRM**.
 
-Cuando ocurre una **autenticación** a través de **Kerberos**, las **credenciales** **no** se almacenan en la **memoria**. Por lo tanto, si ejecutas mimikatz, no encontrarás las credenciales del usuario en la máquina aunque esté ejecutando procesos.
+Cuando ocurre una **autenticación** a través de **Kerberos**, las **credenciales** **no** se almacenan en la **memoria**. Por lo tanto, si ejecutas mimikatz, **no encontrarás las credenciales** del usuario en la máquina aunque esté ejecutando procesos.
 
-Esto se debe a que al conectarse con Kerberos, se siguen estos pasos:
+Esto se debe a que al conectarse con Kerberos, estos son los pasos:
 
 1. El Usuario1 proporciona credenciales y el **controlador de dominio** devuelve un **TGT** de Kerberos al Usuario1.
 2. El Usuario1 utiliza el **TGT** para solicitar un **ticket de servicio** para **conectarse** al Servidor1.
@@ -57,6 +57,8 @@ Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
+Alternativamente, se sugiere establecer una sesión de PS con el primer servidor y ejecutar el `Invoke-Command` usando `$cred` para centralizar tareas.
+
 ### Registrar la Configuración de la Sesión de PS
 
 Una solución para evitar el problema de doble salto implica usar `Register-PSSessionConfiguration` con `Enter-PSSession`. Este método requiere un enfoque diferente al de `evil-winrm` y permite una sesión que no sufre la limitación del doble salto.
@@ -66,9 +68,9 @@ Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
 klist
 ```
-### Reenvío de puertos
+### Reenvío de Puertos
 
-Para los administradores locales en un objetivo intermedio, el reenvío de puertos permite enviar solicitudes a un servidor final. Utilizando `netsh`, se puede agregar una regla para el reenvío de puertos, junto con una regla de firewall de Windows para permitir el puerto reenviado.
+Para los administradores locales en un objetivo intermedio, el reenvío de puertos permite enviar solicitudes a un servidor final. Utilizando `netsh`, se puede agregar una regla para el reenvío de puertos, junto con una regla del firewall de Windows para permitir el puerto reenviado.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
@@ -81,7 +83,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-La instalación de OpenSSH en el primer servidor habilita una solución alternativa para el problema de doble salto, particularmente útil para escenarios de caja de salto. Este método requiere la instalación de CLI y la configuración de OpenSSH para Windows. Cuando se configura para la Autenticación de Contraseña, esto permite que el servidor intermedio obtenga un TGT en nombre del usuario.
+La instalación de OpenSSH en el primer servidor habilita una solución alternativa para el problema del doble salto, particularmente útil para escenarios de caja de salto. Este método requiere la instalación de CLI y la configuración de OpenSSH para Windows. Cuando se configura para la Autenticación de Contraseña, esto permite que el servidor intermedio obtenga un TGT en nombre del usuario.
 
 #### Pasos de Instalación de OpenSSH
 
@@ -100,7 +102,7 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 * [https://learn.microsoft.com/en-gb/archive/blogs/sergey\_babkins\_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey\_babkins\_blog/another-solution-to-multi-hop-powershell-remoting)
 * [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="/.gitbook/assets/WebSec_1500x400_10fps_21sn_lightoptimized_v2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
@@ -110,7 +112,7 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
