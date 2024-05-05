@@ -6,31 +6,31 @@
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝**したい場合や **HackTricks をPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [Discord グループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegram グループ](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする
-* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出して、あなたのハッキングトリックを共有する
+* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**する。
+* **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
 
 </details>
 
 ## PID 再利用
 
-macOS の **XPC サービス** が **PID** に基づいて呼び出し元プロセスをチェックしており、**監査トークン**ではない場合、PID 再利用攻撃の脆弱性があります。この攻撃は、**悪用**される機能を **乱用**する **エクスプロイト** が **XPC サービスにメッセージを送信**し、その直後に **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** を実行する **競合状態** に基づいています。
+macOS **XPCサービス**が**PID**に基づいて呼び出し元プロセスをチェックしている場合、**PID再利用攻撃**の脆弱性があります。この攻撃は、**悪用**される機能を**乱用**する**エクスプロイト**が**XPCサービスにメッセージを送信**し、その直後に**`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**を実行する**競合状態**に基づいています。
 
-この関数は、**許可されたバイナリが PID を所有**するようにしますが、**悪意のある XPC メッセージは**ちょうどその前に送信されている可能性があります。したがって、**XPC** サービスが **PID** を使用して **送信元を認証**し、**`posix_spawn`** の実行後にそれをチェックする場合、それは **認証された** プロセスから来たと思うでしょう。
+この関数は、**許可されたバイナリがPIDを所有**するようにしますが、**悪意のあるXPCメッセージは**ちょうどその前に送信されています。したがって、**XPC**サービスが**PID**を使用して**送信元を認証**し、**`posix_spawn`**の実行**後**にそれをチェックする場合、それは**認証された**プロセスから来たと思うでしょう。
 
 ### エクスプロイト例
 
-関数 **`shouldAcceptNewConnection`** またはそれによって呼び出される関数が **`auditToken`** を呼び出さずに **`processIdentifier`** を呼び出している場合、それはプロセスの PID を検証している可能性が高いです。\
+関数**`shouldAcceptNewConnection`**またはそれによって呼び出される関数が**`auditToken`**を呼び出さずに**`processIdentifier`**を呼び出している場合、それは**プロセスPID**を検証している可能性が高いです。\
 たとえば、この画像（参照から取得）のように：
 
-<figure><img src="../../../../../../.gitbook/assets/image (303).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-この例のエクスプロイト（再度、参照から取得）をチェックして、エクスプロイトの 2 つの部分を見てください：
+このエクスプロイトの例を確認してください（再度、参照から取得）2つのエクスプロイトの部分を見るために：
 
 * **複数のフォークを生成**するもの
-* 各フォークは **`posix_spawn`** を実行しながら **XPC サービスに** **ペイロード** を **送信**します。
+* 各フォークは**`posix_spawn`**を実行しながら**XPCサービスにペイロード**を**送信**します。
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
 "empty:\n"
@@ -40,7 +40,7 @@ asm(".section __DATA,__objc_fork_ok\n"
 
 {% tabs %}
 {% tab title="NSTasks" %}
-**`NSTasks`** を使用した最初のオプションで、子プロセスを起動して RC を悪用します。
+**`NSTasks`** を使用した最初のオプションとして、子プロセスを起動して RC を悪用します
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -282,6 +282,9 @@ pwned = true;
 return 0;
 }
 ```
+{% endtab %}
+{% endtabs %}
+
 ## その他の例
 
 * [https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html](https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html)
@@ -293,14 +296,14 @@ return 0;
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>こちら</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を使って、ゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksで企業を宣伝したい** または **HackTricksをPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい場合** は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする**
-* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする**
+* **ハッキングトリックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する
 
 </details>

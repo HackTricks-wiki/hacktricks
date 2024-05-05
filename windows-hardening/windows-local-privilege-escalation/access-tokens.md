@@ -2,21 +2,21 @@
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>を通じて、ゼロからヒーローまでAWSハッキングを学びましょう</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE (HackTricks AWS Red Team Expert) でゼロからヒーローまでAWSハッキングを学びましょう</strong></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください
-* [**公式PEASS＆HackTricksのスウェグ**](https://peass.creator-spring.com)を手に入れましょう
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で企業を宣伝**したいですか？または **最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な [**NFTs**](https://opensea.io/collection/the-peass-family)コレクションです。
+* [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れましょう。
 * **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングテクニックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
+* **ハッキングテクニックを共有するために、** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンで、**企業やその顧客が** **スチーラーマルウェア**によって**侵害**されていないかをチェックする**無料**機能を提供しています。
+[**WhiteIntel**](https://whiteintel.io) は、**ダークウェブ**を活用した検索エンジンで、**企業やその顧客が** **スティーラーマルウェアによって** **侵害されたかどうかを確認する** **無料**の機能を提供しています。
 
 WhiteIntelの主な目標は、情報窃取マルウェアによるアカウント乗っ取りやランサムウェア攻撃に対抗することです。
 
@@ -24,11 +24,11 @@ WhiteIntelの主な目標は、情報窃取マルウェアによるアカウン�
 
 {% embed url="https://whiteintel.io" %}
 
----
+***
 
 ## アクセス トークン
 
-**システムにログインした各ユーザーは、そのログオンセッションのセキュリティ情報を持つアクセス トークンを保持しています。** ユーザーがログオンすると、システムはアクセス トークンを作成します。**ユーザーの代理で実行されるすべてのプロセスには、アクセス トークンのコピーがあります。** トークンには、ユーザー、ユーザーのグループ、およびユーザーの特権が識別されます。 トークンには、現在のログオンセッションを識別するログオンSID（セキュリティ識別子）も含まれています。
+**システムにログインした各ユーザーは、そのログオンセッションのセキュリティ情報を持つアクセス トークンを保持**しています。ユーザーがログオンすると、システムはアクセス トークンを作成します。**ユーザーの代理で実行されるすべてのプロセスには、アクセス トークンのコピーがあります**。 トークンには、ユーザー、ユーザーのグループ、およびユーザーの特権が識別されます。 トークンには、現在のログオンセッションを識別するログオンSID（セキュリティ識別子）も含まれています。
 
 この情報は、`whoami /all`を実行して確認できます。
 ```
@@ -76,11 +76,11 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
 または、Sysinternalsの_Process Explorer_を使用する（プロセスを選択して"Security"タブにアクセス）：
 
-![](<../../.gitbook/assets/image (769).png>)
+![](<../../.gitbook/assets/image (772).png>)
 
 ### ローカル管理者
 
-ローカル管理者がログインすると、**2つのアクセス トークンが作成**されます：1つは管理者権限を持ち、もう1つは通常の権限を持ちます。**デフォルトでは**、このユーザーがプロセスを実行するときは、**通常**（管理者でない）**権限を使用**します。このユーザーが管理者として何かを**実行**しようとすると（たとえば"管理者として実行"を選択すると）、**UAC**が許可を求めるために使用されます。\
+ローカル管理者がログインすると、**2つのアクセス トークンが作成**されます：1つは管理者権限を持ち、もう1つは通常の権限を持ちます。**デフォルトでは**、このユーザーがプロセスを実行するときは、**通常**（管理者でない）**権限を使用**します。このユーザーが管理者として何かを**実行**しようとすると（たとえば"管理者として実行"）、**UAC**が許可を求めるために使用されます。\
 UACについて[**詳しく学びたい場合は、このページを読んでください**](../authentication-credentials-uac-and-efs/#uac)**。**
 
 ### 資格情報ユーザーの偽装
@@ -89,8 +89,8 @@ UACについて[**詳しく学びたい場合は、このページを読んで�
 ```
 runas /user:domain\username cmd.exe
 ```
-**アクセス トークン** には、**LSASS** 内のログオン セッションの **参照** も含まれており、プロセスがネットワークのオブジェクトにアクセスする必要がある場合に役立ちます。\
-ネットワーク サービスにアクセスするために **異なる資格情報を使用するプロセス** を起動できます。
+**アクセス トークン** には、**LSASS** 内のログオン セッションの **参照** も含まれています。これは、プロセスがネットワークのオブジェクトにアクセスする必要がある場合に役立ちます。\
+次の方法で、ネットワーク サービスにアクセスするために **異なる資格情報を使用するプロセス** を起動できます:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
@@ -98,51 +98,23 @@ runas /user:domain\username /netonly cmd.exe
 
 利用可能な2種類のトークンがあります：
 
-- **プライマリトークン**：プロセスのセキュリティ資格情報の表現として機能します。プライマリトークンの作成とプロセスへの関連付けは、特権の分離の原則を強調するために昇格された特権を必要とするアクションです。通常、認証サービスがトークンの作成を担当し、ログオンサービスがユーザーのオペレーティングシステムシェルとの関連付けを処理します。プロセスは、作成時に親プロセスのプライマリトークンを継承します。
-- **模倣トークン**：サーバーアプリケーションが一時的にクライアントのアイデンティティを採用して安全なオブジェクトにアクセスするための権限を与えます。このメカニズムは、次の4つの操作レベルに分層されます：
+- **プライマリトークン**：プロセスのセキュリティ資格情報の表現として機能します。プライマリトークンの作成とプロセスへの関連付けは昇格された特権を必要とするアクションであり、特権の分離の原則を強調しています。通常、認証サービスがトークンの作成を担当し、ログオンサービスがユーザーのオペレーティングシステムシェルとの関連付けを処理します。プロセスは作成時に親プロセスのプライマリトークンを継承します。
+- **模倣トークン**：サーバーアプリケーションが一時的にクライアントのアイデンティティを採用して安全なオブジェクトにアクセスするための権限を与えます。このメカニズムは次の4つの操作レベルに分層されます：
   - **匿名**：未識別のユーザーと同様のサーバーアクセスを許可します。
   - **識別**：オブジェクトアクセスに使用せずにクライアントのアイデンティティをサーバーが確認できるようにします。
   - **模倣**：サーバーがクライアントのアイデンティティの下で動作できるようにします。
-  - **委任**：模倣と同様ですが、サーバーが相互作用するリモートシステムにこのアイデンティティ仮定を拡張し、資格情報の保持を確保します。
+  - **委任**：模倣に似ていますが、サーバーが対話するリモートシステムにこのアイデンティティ仮定を拡張し、資格情報の保持を確保します。
 
 #### トークンの模倣
 
-十分な特権を持っている場合、metasploitの**incognito**モジュールを使用して他の**トークン**を簡単に**リスト**および**模倣**することができます。これは、**他のユーザーであるかのようにアクションを実行**したり、このテクニックを使用して**特権を昇格**するのに役立ちます。
+十分な特権がある場合、metasploitの**incognito**モジュールを使用して他の**トークン**を簡単に**リスト**および**模倣**できます。これは**他のユーザーであるかのようにアクションを実行**するのに役立ちます。このテクニックを使用して**特権を昇格**することもできます。
 
 ### トークン特権
 
-**特権を昇格させるために悪用できる**トークン特権を学びます：
+**特権を濫用して特権を昇格させるために濫用できる**トークン特権を学びます：
 
 {% content-ref url="privilege-escalation-abusing-tokens.md" %}
 [privilege-escalation-abusing-tokens.md](privilege-escalation-abusing-tokens.md)
 {% endcontent-ref %}
 
-[**すべての可能なトークン特権とこの外部ページでの定義について詳しく見る**](https://github.com/gtworek/Priv2Admin)。
-
-## 参考文献
-
-このチュートリアルでトークンについて詳しく学ぶ：[https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) および [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)。
-
-### [WhiteIntel](https://whiteintel.io)
-
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
-
-[**WhiteIntel**](https://whiteintel.io)は、**ダークウェブ**を活用した検索エンジンで、企業やその顧客が**盗難マルウェア**によって**侵害**されていないかをチェックするための**無料**機能を提供します。
-
-WhiteIntelの主な目標は、情報窃取マルウェアによるアカウント乗っ取りやランサムウェア攻撃に対抗することです。
-
-彼らのウェブサイトをチェックして、**無料**でエンジンを試すことができます：
-
-{% embed url="https://whiteintel.io" %}
-
-<details>
-
-<summary><strong>**htARTE（HackTricks AWS Red Team Expert）**で**ゼロからヒーローまでのAWSハッキング**を学びましょう！</summary>
-
-- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**してみたいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つけてください
-- [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を手に入れましょう
-- **💬** [**Discordグループ**](https://discord.gg/hRep4RUj7f)に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-- **ハッキングトリックを共有するには、**[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください**。
-
-</details>
+[**すべての可能なトークン特権とこの外部ページでの定義について詳しく見る**](https://github.com/gtworek/Priv2Admin)

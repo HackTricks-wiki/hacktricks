@@ -1,22 +1,23 @@
-# macOSのユニバーサルバイナリとMach-Oフォーマット
+# macOSのUniversalバイナリとMach-Oフォーマット
 
 <details>
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）でAWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
 HackTricksをサポートする他の方法：
 
-- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい場合**は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 - [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)をフォローする
-- **HackTricks**と**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter**で**@carlospolopm**をフォローする
+
+- **HackTricks**および**HackTricks Cloud**のGitHubリポジトリにPRを提出して、あなたのハッキングテクニックを共有する
 
 </details>
 
 ## 基本情報
 
-Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコンパイルされます。**ユニバーサルバイナリ**は**同じファイル内で複数のアーキテクチャをサポート**できます。
+Mac OSのバイナリは通常、**universal binaries**としてコンパイルされます。**universal binary**は**同じファイル内で複数のアーキテクチャをサポート**できます。
 
 これらのバイナリは基本的に以下のような**Mach-O構造**に従います：
 
@@ -24,7 +25,7 @@ Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコ�
 - ロードコマンド
 - データ
 
-![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../.gitbook/assets/image (467).png>)
+![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../.gitbook/assets/image (470).png>)
 
 ## Fatヘッダー
 
@@ -48,11 +49,11 @@ struct fat_arch {
 };
 ```
 
-ヘッダーには**マジック**バイトが続き、ファイルが含む**アーキテクチャの数**（`nfat_arch`）と各アーキテクチャには`fat_arch`構造体があります。
+ヘッダーには**magic**バイトが続き、ファイルが含む**archs**の**数**（`nfat_arch`）と各アーキテクチャが`fat_arch`構造体を持ちます。
 
 次のコマンドで確認します：
 
-```shell-session
+```shell
 % file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
 /bin/ls (for architecture x86_64):	Mach-O 64-bit executable x86_64
@@ -78,15 +79,15 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
     align 2^14 (16384)
 ```
 
-または[Mach-O View](https://sourceforge.net/projects/machoview/)ツールを使用して：
+または[Mach-O View](https://sourceforge.net/projects/machoview/)ツールを使用して確認できます：
 
-<figure><img src="../../../.gitbook/assets/image (1091).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-通常、2つのアーキテクチャ用にコンパイルされたユニバーサルバイナリは、1つのアーキテクチャ用にコンパイルされたものの**サイズを倍に**します。
+通常、2つのアーキテクチャ向けにコンパイルされたuniversal binaryは、1つのアーキテクチャ向けにコンパイルされたものの**サイズを倍に**します。
 
 ## **Mach-Oヘッダー**
 
-ヘッダーには、ファイルを識別するためのマジックバイトや対象アーキテクチャに関する情報など、ファイルに関する基本情報が含まれています。次の場所にあります：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+ヘッダーには、ファイルを識別するためのマジックバイトや対象アーキテクチャに関する情報など、ファイルに関する基本情報が含まれています。次のコマンドで確認できます：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -113,19 +114,19 @@ uint32_t	flags;		/* flags */
 uint32_t	reserved;	/* reserved */
 };
 ```
-### Mach-Oファイルの種類
+### Mach-Oファイルタイプ
 
-異なるファイルタイプがあります。これらは[**こちらのソースコードで定義されています**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL\_HEADERS/mach-o/loader.h)。最も重要なものは次のとおりです：
+異なるファイルタイプがあります。これらは[**例えばこちらのソースコード**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL\_HEADERS/mach-o/loader.h)で定義されています。最も重要なものは次のとおりです：
 
-- `MH_OBJECT`: 再配置可能オブジェクトファイル（コンパイルの中間生成物であり、まだ実行ファイルではありません）。
+- `MH_OBJECT`: 再配置可能なオブジェクトファイル（コンパイルの中間生成物であり、まだ実行可能ではありません）。
 - `MH_EXECUTE`: 実行可能ファイル。
 - `MH_FVMLIB`: 固定VMライブラリファイル。
 - `MH_CORE`: コードダンプ
-- `MH_PRELOAD`: プリロードされた実行ファイル（XNUではもはやサポートされていません）
+- `MH_PRELOAD`: プリロードされた実行可能ファイル（XNUではもはやサポートされていません）
 - `MH_DYLIB`: ダイナミックライブラリ
 - `MH_DYLINKER`: ダイナミックリンカ
 - `MH_BUNDLE`: "プラグインファイル"。gccの-bundleを使用して生成され、`NSBundle`または`dlopen`によって明示的にロードされます。
-- `MH_DYSM`: 付随する`.dSym`ファイル（デバッグ用のシンボルを含むファイル）。
+- `MH_DYSM`: デバッグ用シンボルを持つ`.dSym`ファイル（補助ファイル）。
 - `MH_KEXT_BUNDLE`: カーネル拡張。
 ```bash
 # Checking the mac header of a binary
@@ -136,14 +137,14 @@ MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DY
 ```
 または、[Mach-O View](https://sourceforge.net/projects/machoview/) を使用する：
 
-<figure><img src="../../../.gitbook/assets/image (1130).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1133).png" alt=""><figcaption></figcaption></figure>
 
 ## **Mach-O フラグ**
 
-ソースコードでは、次のようなライブラリの読み込みに役立ついくつかのフラグが定義されています：
+ソースコードでは、ライブラリの読み込みに役立ついくつかのフラグも定義されています：
 
 * `MH_NOUNDEFS`: 未定義の参照なし（完全にリンクされている）
-* `MH_DYLDLINK`: Dyld リンキング
+* `MH_DYLDLINK`: Dyld リンク
 * `MH_PREBOUND`: 動的参照が事前にバインドされています。
 * `MH_SPLIT_SEGS`: ファイルが r/o および r/w セグメントに分割されています。
 * `MH_WEAK_DEFINES`: バイナリには弱く定義されたシンボルが含まれています
@@ -159,7 +160,7 @@ MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DY
 
 ## **Mach-O ロードコマンド**
 
-**メモリ内のファイルのレイアウト** がここで指定され、**シンボルテーブルの位置**、実行開始時のメインスレッドのコンテキスト、および必要な **共有ライブラリ** が詳細に記載されています。バイナリのメモリへの読み込みプロセスに関する指示が、動的ローダー **(dyld)** に提供されます。
+**メモリ内のファイルのレイアウト** がここで指定され、**シンボルテーブルの位置**、実行開始時のメインスレッドのコンテキスト、および必要な **共有ライブラリ** が詳細に記載されています。メモリへのバイナリの読み込みプロセスに関する指示が、動的ローダー **(dyld)** に提供されます。
 
 これには、**`loader.h`** で定義された **load\_command** 構造が使用されます。
 ```objectivec
@@ -174,32 +175,32 @@ uint32_t cmdsize;       /* total size of command in bytes */
 基本的に、このタイプのロードコマンドは、バイナリが実行されるときに、**\_\_TEXT**（実行コード）と**\_\_DATA**（プロセス用データ）**セグメントをどのようにロードするか**を、データセクションで示されたオフセットに従って定義します。
 {% endhint %}
 
-これらのコマンドは、プロセスが実行されるときに、**仮想メモリ空間にマップされる** **セグメントを定義**します。
+これらのコマンドは、プロセスが実行されるときに、**仮想メモリ空間にマップされるセグメント**を**定義**します。
 
-**\_\_TEXT**セグメント（プログラムの実行コードを保持する）や**\_\_DATA**セグメント（プロセスによって使用されるデータを含む）など、**さまざまなタイプのセグメント**があります。これらの**セグメントは、Mach-Oファイルのデータセクションに配置**されています。
+**異なる種類**のセグメントがあり、プログラムの実行コードを保持する**\_\_TEXT**セグメントや、プロセスによって使用されるデータを含む**\_\_DATA**セグメントなどがあります。これらの**セグメントは、Mach-Oファイルのデータセクションに配置**されています。
 
-**各セグメント**は、さらに複数の**セクションに分割**できます。**ロードコマンド構造**には、それぞれのセグメント内の**これらのセクションに関する情報**が含まれています。
+**各セグメント**は、さらに複数の**セクション**に**分割**できます。**ロードコマンド構造**には、それぞれのセグメント内の**これらのセクションに関する情報**が含まれています。
 
 ヘッダー内にはまず、**セグメントヘッダー**があります：
 
-<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
+<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* 64ビットアーキテクチャ用 */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
-uint32_t	cmdsize;	/* includes sizeof section_64 structs */
-char		segname[16];	/* segment name */
-uint64_t	vmaddr;		/* memory address of this segment */
-uint64_t	vmsize;		/* memory size of this segment */
-uint64_t	fileoff;	/* file offset of this segment */
-uint64_t	filesize;	/* amount to map from the file */
-int32_t		maxprot;	/* maximum VM protection */
-int32_t		initprot;	/* initial VM protection */
-<strong>	uint32_t	nsects;		/* number of sections in segment */
-</strong>	uint32_t	flags;		/* flags */
+uint32_t	cmdsize;	/* section_64構造体のサイズを含む */
+char		segname[16];	/* セグメント名 */
+uint64_t	vmaddr;		/* このセグメントのメモリアドレス */
+uint64_t	vmsize;		/* このセグメントのメモリサイズ */
+uint64_t	fileoff;	/* このセグメントのファイルオフセット */
+uint64_t	filesize;	/* ファイルからマップする量 */
+int32_t		maxprot;	/* 最大VM保護 */
+int32_t		initprot;	/* 初期VM保護 */
+<strong>	uint32_t	nsects;		/* セグメント内のセクション数 */
+</strong>	uint32_t	flags;		/* フラグ */
 };
 </code></pre>
 
 セグメントヘッダーの例：
 
-<figure><img src="../../../.gitbook/assets/image (1123).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1126).png" alt=""><figcaption></figcaption></figure>
 
 このヘッダーは、**その後に表示されるセクションヘッダーの数を定義**しています。
 ```c
@@ -220,58 +221,61 @@ uint32_t	reserved3;	/* reserved */
 ```
 ### **セクションヘッダーの例**:
 
-<figure><img src="../../../.gitbook/assets/image (1105).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-もし**セクションオフセット**（0x37DC）に**アーキテクチャが始まるオフセット**（この場合 `0x18000`）を**追加**すると、`0x37DC + 0x18000 = 0x1B7DC` になります。
+もし、**セクションオフセット**（0x37DC）に**アーキテクチャが始まるオフセット**（この場合 `0x18000`）を**追加**すると、`0x37DC + 0x18000 = 0x1B7DC` になります。
 
-<figure><img src="../../../.gitbook/assets/image (698).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (701).png" alt=""><figcaption></figcaption></figure>
 
-また、**コマンドライン**から**ヘッダー情報**を取得することも可能です。
+また、**コマンドライン**からも**ヘッダー情報**を取得することが可能です。
 ```bash
 otool -lv /bin/ls
 ```
-```html
-<p>このcmdによってロードされる一般的なセグメント：</p>
+```markdown
+このcmdによってロードされる一般的なセグメント：
 
-<ul>
-<li><strong>__PAGEZERO:</strong> カーネルにアドレスゼロを**マップ**するよう指示し、**読み取り、書き込み、実行**できないようにします。構造体内のmaxprotとminprot変数はゼロに設定され、このページには**読み取り書き込み実行権限がない**ことを示します。</li>
-<li>この割り当ては**NULLポインターのデリファレンス脆弱性を緩和**するために重要です。これは、XNUが最初のページ（i386を除く）がアクセスできないようにする厳格なページゼロを強制するためです。バイナリは、最初の4kをカバーする小さな\_\_PAGEZERO（`-pagezero_size`を使用）を作成し、残りの32ビットメモリをユーザーモードとカーネルモードの両方でアクセス可能にすることでこれらの要件を満たすことができます。</li>
-<li><strong>__TEXT</strong>: **読み取り**および**実行**権限（書き込みなし）を持つ**実行可能なコード**が含まれています。このセグメントの一般的なセクション：</li>
-<ul>
-<li>__text: コンパイルされたバイナリコード</li>
-<li>__const: 定数データ（読み取り専用）</li>
-<li>__[c/u/os_log]string: C、Unicode、またはosログ文字列定数</li>
-<li>__stubsおよび__stubs_helper: ダイナミックライブラリロードプロセス中に関与</li>
-<li>__unwind_info: スタックアンワインドデータ</li>
-</ul>
-<li>このすべてのコンテンツは署名されていますが、実行可能としてマークされています（この特権が必要ないセクションの悪用のためのオプションを作成します、例えば文字列専用セクション）。</li>
-<li><strong>__DATA</strong>: **読み取り**および**書き込み**可能なデータが含まれています（実行不可）。</li>
-<li>__got: Global Offset Table</li>
-<li>__nl_symbol_ptr: 遅延なし（ロード時にバインド）シンボルポインター</li>
-<li>__la_symbol_ptr: 遅延（使用時にバインド）シンボルポインター</li>
-<li>__const: 読み取り専用データであるべき（実際にはそうではない）</li>
-<li>__cfstring: CoreFoundation文字列</li>
-<li>__data: 初期化されたグローバル変数</li>
-<li>__bss: 初期化されていない静的変数</li>
-<li>__objc_*（\_\_objc\_classlist、\_\_objc\_protolistなど）: Objective-Cランタイムで使用される情報</li>
-<li><strong>__DATA_CONST</strong>: \_\_DATA.\_\_constは定数であることが保証されていません（書き込み権限）、他のポインターやGOTも同様です。このセクションは、`mprotect`を使用して`__const`、一部の初期化子、およびGOTテーブル（解決後）を**読み取り専用**にします。</li>
-<li><strong>__LINKEDIT</strong>: シンボル、文字列、および再配置テーブルエントリなど、リンカー（dyld）のための情報が含まれています。これは`__TEXT`または`__DATA`に含まれないコンテンツの一般的なコンテナであり、その内容は他のロードコマンドで説明されています。</li>
-</ul>
+* **`__PAGEZERO`:** カーネルに**アドレスゼロをマップ**するよう指示し、**読み取り、書き込み、実行**ができないようにします。構造体内のmaxprotとminprot変数はゼロに設定され、このページには**読み取り書き込み実行権限がない**ことを示します。
+* この割り当ては**NULLポインターのデリファレンス脆弱性を緩和**するために重要です。これは、XNUが最初のページ（i386を除く）がアクセスできないようにする厳格なページゼロを強制するためです。バイナリは、最初の4kをカバーする小さな\_\_PAGEZERO（`-pagezero_size`を使用）を作成し、残りの32ビットメモリをユーザーモードとカーネルモードの両方でアクセス可能にすることでこれらの要件を満たすことができます。
+* **`__TEXT`**: **読み取り**および**実行**権限（書き込みなし）を持つ**実行可能なコード**を含みます。このセグメントの一般的なセクション：
+* `__text`: コンパイルされたバイナリコード
+* `__const`: 定数データ（読み取り専用）
+* `__[c/u/os_log]string`: C、Unicode、またはosログの文字列定数
+* `__stubs`および`__stubs_helper`: ダイナミックライブラリの読み込みプロセス中に関与
+* `__unwind_info`: スタックアンワインドデータ
+* このすべてのコンテンツが署名されているが、実行可能としてマークされていることに注意してください（この特権が必要ないセクションの悪用のためのさらなるオプションを作成します、例えば文字列専用セクション）。
+* **`__DATA`**: **読み取り**および**書き込み**可能なデータを含みます（実行不可）。
+* `__got:` グローバルオフセットテーブル
+* `__nl_symbol_ptr`: 遅延なし（ロード時にバインド）シンボルポインタ
+* `__la_symbol_ptr`: 遅延（使用時にバインド）シンボルポインタ
+* `__const`: 読み取り専用データであるべき（実際にはそうではない）
+* `__cfstring`: CoreFoundation文字列
+* `__data`: 初期化されたグローバル変数
+* `__bss`: 初期化されていない静的変数
+* `__objc_*`（\_\_objc\_classlist、\_\_objc\_protolistなど）：Objective-Cランタイムで使用される情報
+* **`__DATA_CONST`**: \_\_DATA.\_\_constは定数であることが保証されていません（書き込み権限があります）、他のポインタやGOTも同様です。このセクションは、`mprotect`を使用して`__const`、一部の初期化子、およびGOTテーブル（解決後）を**読み取り専用**にします。
+* **`__LINKEDIT`**: リンカー（dyld）のための情報を含み、シンボル、文字列、および再配置テーブルエントリが含まれます。これは`__TEXT`または`__DATA`に含まれないコンテンツのための一般的なコンテナであり、その内容は他のロードコマンドで説明されています。
+* dyld情報：再配置、遅延なし/遅延/弱いバインディングオペコードおよびエクスポート情報
+* 関数開始：関数の開始アドレスのテーブル
+* コード内データ：\_\_text内のデータアイランド
+* シンボルテーブル：バイナリ内のシンボル
+* 間接シンボルテーブル：ポインタ/スタブシンボル
+* 文字列テーブル
+* コード署名
+* **`__OBJC`**: Objective-Cランタイムで使用される情報を含みます。ただし、この情報は、さまざまな\_\_objc\_\*セクション内にも見つかる可能性があります。
+* **`__RESTRICT`**: コンテンツのないセグメントで、**`__restrict`**（空でも）という単一のセクションがあり、バイナリを実行する際にDYLD環境変数を無視することを保証します。
 
-<p>コードで見られたように、**セグメントもフラグをサポート**しています（あまり使用されていませんが）：</p>
+コードで見られたように、**セグメントもフラグをサポート**しています（あまり使用されていませんが）：
 
-<ul>
-<li>SG_HIGHVM: コアのみ（使用されていません）</li>
-<li>SG_FVMLIB: 使用されていません</li>
-<li>SG_NORELOC: セグメントに再配置がない</li>
-<li>SG_PROTECTED_VERSION_1: 暗号化。例えば、Finderが`__TEXT`セグメントのテキストを暗号化するために使用されます。</li>
-</ul>
+* `SG_HIGHVM`: コアのみ（使用されていません）
+* `SG_FVMLIB`: 使用されていません
+* `SG_NORELOC`: セグメントに再配置がない
+* `SG_PROTECTED_VERSION_1`: 暗号化。例えばFinderが`__TEXT`セグメントのテキストを暗号化するために使用されます。
 
-<h3><strong>LC_UNIXTHREAD/LC_MAIN</strong></h3>
+### **`LC_UNIXTHREAD/LC_MAIN`**
 
-<p><strong>LC_MAIN</strong>には**entryoff属性**でエントリーポイントが含まれています。ロード時に、**dyld**は単にこの値を（メモリ内の）バイナリのベースに**追加**し、その後この命令に**ジャンプ**してバイナリのコードの実行を開始します。</p>
+**`LC_MAIN`** は**entryoff属性**にエントリーポイントを含みます。ロード時に、**dyld**は単にこの値を（メモリ内の）バイナリのベースに**追加**し、その後この命令に**ジャンプ**してバイナリのコードの実行を開始します。
 
-<p><strong>LC_UNIXTHREAD</strong>には、メインスレッドを開始するときにレジスタが持っている必要がある値が含まれています。これはすでに非推奨ですが、**`dyld`**はまだ使用しています。これによって設定されたレジスタの値を次のコマンドで確認できます：</p>
+**`LC_UNIXTHREAD`** は、メインスレッドを開始するときにレジスタが持っている必要がある値を含みます。これはすでに非推奨となっていますが、**`dyld`** はまだ使用しています。これによって設定されたレジスタの値を次のように確認できます：
 ```
 ```bash
 otool -l /usr/lib/dyld
@@ -298,7 +302,7 @@ cpsr 0x00000000
 ```
 ### **`LC_CODE_SIGNATURE`**
 
-Macho-Oファイルの**コード署名**に関する情報を含んでいます。**署名ブロブ**を指す**オフセット**のみを含んでいます。通常、ファイルの最後にあります。\
+Macho-Oファイルの**コード署名**に関する情報を含みます。**署名ブロブ**を指す**オフセット**のみを含んでいます。通常、ファイルの最後にあります。\
 ただし、このセクションに関する情報は、[**このブログ投稿**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)とこの[**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)で見つけることができます。
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
@@ -307,7 +311,7 @@ Macho-Oファイルの**コード署名**に関する情報を含んでいます
 
 ### **`LC_LOAD_DYLINKER`**
 
-共有ライブラリをプロセスのアドレス空間にマップする**動的リンカー実行ファイルへのパス**を含んでいます。**値は常に`/usr/lib/dyld`に設定**されています。macOSでは、dylibのマッピングが**カーネルモードではなくユーザーモード**で行われることに注意することが重要です。
+共有ライブラリをプロセスのアドレス空間にマップする**動的リンカー実行ファイルへのパス**を含みます。**値は常に`/usr/lib/dyld`に設定**されています。macOSでは、dylibのマッピングが**カーネルモードではなくユーザーモード**で行われることに注意することが重要です。
 
 ### **`LC_IDENT`**
 
@@ -325,7 +329,7 @@ Macho-Oファイルの**コード署名**に関する情報を含んでいます
 
 このロードコマンドは、**ローダー**(dyld)に**ライブラリをロードしてリンクするよう指示する** **動的ライブラリ**依存関係を記述します。Mach-Oバイナリが必要とする**各ライブラリ**には`LC_LOAD_DYLIB`ロードコマンドがあります。
 
-* このロードコマンドは、**`dylib_command`**型の構造体（実際の依存する動的ライブラリを記述するstruct dylibを含む）です。
+* このロードコマンドは、**実際の依存する動的ライブラリを記述するstruct dylibを含むdylib_command**型の構造体です。
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -340,9 +344,9 @@ uint32_t current_version;           /* library's current version number */
 uint32_t compatibility_version;     /* library's compatibility vers number*/
 };
 ```
-![](<../../../.gitbook/assets/image (483).png>)
+![](<../../../.gitbook/assets/image (486).png>)
 
-これに関する情報は、次のコマンドラインからも取得できます:
+次のコマンドラインからもこの情報を取得できます：
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -352,18 +356,18 @@ otool -L /bin/ls
 ```
 いくつかの潜在的なマルウェア関連ライブラリは次のとおりです：
 
-- **DiskArbitration**：USBドライブの監視
-- **AVFoundation**：オーディオとビデオのキャプチャ
-- **CoreWLAN**：Wifiスキャン
+- **DiskArbitration**: USB ドライブの監視
+- **AVFoundation**: 音声とビデオのキャプチャ
+- **CoreWLAN**: Wifi スキャン
 
 {% hint style="info" %}
-Mach-Oバイナリには、**LC\_MAIN**で指定されたアドレスの**前に実行される**1つ以上の**コンストラクタ**が含まれる可能性があります。\
-任意のコンストラクタのオフセットは、**\_\_DATA\_CONST**セグメントの**\_\_mod\_init\_func**セクションに保持されます。
+Mach-O バイナリには、**LC\_MAIN** で指定されたアドレスの**前に実行される**1つ以上の**コンストラクタ**が含まれる可能性があります。\
+任意のコンストラクタのオフセットは、**\_\_DATA\_CONST** セグメントの**\_\_mod\_init\_func** セクションに保持されます。
 {% endhint %}
 
-## **Mach-Oデータ**
+## **Mach-O データ**
 
-ファイルの中心には、ロードコマンド領域で定義された複数のセグメントで構成されるデータ領域があります。**各セグメントにはさまざまなデータセクションが収容され、各セクションには**コードまたはデータ**が含まれています。
+ファイルの中心には、ロードコマンド領域で定義された複数のセグメントで構成されるデータ領域があります。**各セグメント内にはさまざまなデータセクションが収められており**、各セクションには**コードまたはデータ**が特定のタイプに固有のものが含まれています。
 
 {% hint style="success" %}
 データは基本的に、ロードコマンド**LC\_SEGMENTS\_64**によって読み込まれる**すべての情報**を含む部分です。
@@ -377,24 +381,32 @@ Mach-Oバイナリには、**LC\_MAIN**で指定されたアドレスの**前に
 - **シンボルテーブル**：バイナリで使用される外部関数に関する情報を含む
 - 内部関数、変数名なども含まれる可能性があります。
 
-確認するには、[**Mach-O View**](https://sourceforge.net/projects/machoview/)ツールを使用できます：
+確認するには、[**Mach-O View**](https://sourceforge.net/projects/machoview/) ツールを使用できます：
 
-<figure><img src="../../../.gitbook/assets/image (1117).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1120).png" alt=""><figcaption></figcaption></figure>
 
-または、CLIから：
+または、CLI から：
 ```bash
 size -m /bin/ls
 ```
-<details>
+## Objective-C共通セクション
 
-<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
+`__TEXT`セグメント（r-x）内：
 
-HackTricks をサポートする他の方法:
+- `__objc_classname`: クラス名（文字列）
+- `__objc_methname`: メソッド名（文字列）
+- `__objc_methtype`: メソッドタイプ（文字列）
 
-* **HackTricks で企業を宣伝したい**または **HackTricks をPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)で**フォロー**する
-* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
+`__DATA`セグメント（rw-）内：
 
-</details>
+- `__objc_classlist`: すべてのObjective-Cクラスへのポインタ
+- `__objc_nlclslist`: 遅延ロードされないObjective-Cクラスへのポインタ
+- `__objc_catlist`: カテゴリへのポインタ
+- `__objc_nlcatlist`: 遅延ロードされないカテゴリへのポインタ
+- `__objc_protolist`: プロトコルリスト
+- `__objc_const`: 定数データ
+- `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
+
+## Swift
+
+- `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`

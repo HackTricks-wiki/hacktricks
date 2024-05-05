@@ -1,22 +1,23 @@
+# SeImpersonate from High To System
+
 <details>
 
-<summary><strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学びましょう</strong></a><strong>！</strong></summary>
 
 HackTricks をサポートする他の方法:
 
 * **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい** 場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) コレクションを発見する
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 で **@carlospolopm** をフォローする
-* **ハッキングトリックを共有するには、PRを** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリに提出してください。**
+* [**公式PEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) に参加するか、[**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする**
+* **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks) **と** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリにPRを提出する**
 
 </details>
 
-
-## コード
+### コード
 
 [こちら](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)からの以下のコードは、**引数としてプロセスIDを指定**し、指定されたプロセスのユーザーとして実行されるCMDを実行できます。\
-高い整合性プロセスで実行すると、**Systemとして実行されているプロセスのPIDを指定**でき、cmd.exeをSystemとして実行できます。
+高い整合性プロセスで実行すると、**Systemとして実行されているプロセスのPIDを指定**でき（winlogon、wininitなど）、cmd.exeをシステムとして実行できます。
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -151,9 +152,11 @@ printf("[-] CreateProcessWithTokenW Error: %i\n", GetLastError());
 return 0;
 }
 ```
-## エラー
+{% endcode %}
 
-時折、システムの権限での偽装を試みても、次のような出力が表示されて機能しないことがあります：
+### エラー
+
+時々、システムの擬似化を試みても、次のような出力が表示されて機能しないことがあります:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -174,12 +177,12 @@ return 0;
 5. "管理者" を選択し、"編集" をクリックします
 6. "詳細権限を表示" をクリックします
 
-![](<../../.gitbook/assets/image (322).png>)
+![](<../../.gitbook/assets/image (437).png>)
 
-前の画像には、"管理者" が選択したプロセスに対して持っている特権がすべて含まれています（`svchost.exe` の場合、"Query" 特権のみを持っていることがわかります）
+前の画像には、"管理者" が選択したプロセスに対して持つすべての特権が含まれています（`svchost.exe` の場合、"Query" 特権のみを持っていることがわかります）
 
 `winlogon.exe` に対する "管理者" の特権を確認してください：
 
-![](<../../.gitbook/assets/image (323).png>)
+![](<../../.gitbook/assets/image (1102).png>)
 
-そのプロセス内で "管理者" は "Read Memory" と "Read Permissions" を行うことができ、おそらくこのプロセスで使用されているトークンを偽装することができるでしょう。
+そのプロセス内では、"管理者" は "Read Memory" と "Read Permissions" を行うことができ、おそらくこのプロセスで使用されているトークンを偽装することができます。
