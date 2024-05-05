@@ -6,27 +6,27 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Usa [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
 ¡Accede hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## Artefactos de Navegadores <a href="#id-3def" id="id-3def"></a>
 
-Los artefactos del navegador incluyen varios tipos de datos almacenados por los navegadores web, como el historial de navegación, marcadores y datos de caché. Estos artefactos se guardan en carpetas específicas dentro del sistema operativo, con ubicaciones y nombres diferentes en cada navegador, pero generalmente almacenando tipos de datos similares.
+Los artefactos del navegador incluyen varios tipos de datos almacenados por los navegadores web, como historial de navegación, marcadores y datos de caché. Estos artefactos se guardan en carpetas específicas dentro del sistema operativo, difiriendo en ubicación y nombre entre navegadores, pero generalmente almacenando tipos de datos similares.
 
-Aquí tienes un resumen de los artefactos más comunes del navegador:
+Aquí tienes un resumen de los artefactos de navegador más comunes:
 
 * **Historial de Navegación**: Registra las visitas del usuario a sitios web, útil para identificar visitas a sitios maliciosos.
 * **Datos de Autocompletar**: Sugerencias basadas en búsquedas frecuentes, ofreciendo información cuando se combina con el historial de navegación.
@@ -37,28 +37,28 @@ Aquí tienes un resumen de los artefactos más comunes del navegador:
 * **Favicons**: Iconos asociados con sitios web, que aparecen en pestañas y marcadores, útiles para obtener información adicional sobre las visitas del usuario.
 * **Sesiones del Navegador**: Datos relacionados con las sesiones del navegador abiertas.
 * **Descargas**: Registros de archivos descargados a través del navegador.
-* **Datos de Formularios**: Información introducida en formularios web, guardada para sugerencias de autocompletar en el futuro.
+* **Datos de Formularios**: Información introducida en formularios web, guardada para sugerencias de autocompletar futuras.
 * **Miniaturas**: Imágenes de vista previa de sitios web.
-* **Custom Dictionary.txt**: Palabras añadidas por el usuario al diccionario del navegador.
+* **Diccionario Personalizado.txt**: Palabras añadidas por el usuario al diccionario del navegador.
 
 ## Firefox
 
-Firefox organiza los datos del usuario en perfiles, almacenados en ubicaciones específicas según el sistema operativo:
+Firefox organiza los datos del usuario dentro de perfiles, almacenados en ubicaciones específicas según el sistema operativo:
 
 * **Linux**: `~/.mozilla/firefox/`
 * **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
 * **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-Un archivo `profiles.ini` dentro de estos directorios lista los perfiles de usuario. Los datos de cada perfil se almacenan en una carpeta nombrada en la variable `Path` dentro de `profiles.ini`, ubicada en el mismo directorio que `profiles.ini` en sí. Si falta la carpeta de un perfil, es posible que haya sido eliminada.
+Un archivo `profiles.ini` dentro de estos directorios lista los perfiles de usuario. Los datos de cada perfil se almacenan en una carpeta nombrada en la variable `Path` dentro de `profiles.ini`, ubicada en el mismo directorio que `profiles.ini` en sí. Si falta la carpeta de un perfil, puede haber sido eliminada.
 
 Dentro de cada carpeta de perfil, puedes encontrar varios archivos importantes:
 
 * **places.sqlite**: Almacena historial, marcadores y descargas. Herramientas como [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) en Windows pueden acceder a los datos del historial.
-* Utiliza consultas SQL específicas para extraer información del historial y descargas.
+* Utiliza consultas SQL específicas para extraer información de historial y descargas.
 * **bookmarkbackups**: Contiene copias de seguridad de marcadores.
 * **formhistory.sqlite**: Almacena datos de formularios web.
 * **handlers.json**: Gestiona los manejadores de protocolo.
-* **persdict.dat**: Palabras personalizadas del diccionario.
+* **persdict.dat**: Palabras del diccionario personalizado.
 * **addons.json** y **extensions.sqlite**: Información sobre extensiones y complementos instalados.
 * **cookies.sqlite**: Almacenamiento de cookies, con [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) disponible para inspección en Windows.
 * **cache2/entries** o **startupCache**: Datos de caché, accesibles a través de herramientas como [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html).
@@ -72,7 +72,7 @@ Dentro de cada carpeta de perfil, puedes encontrar varios archivos importantes:
 Además, verificar la configuración de antiphishing del navegador se puede hacer buscando entradas `browser.safebrowsing` en `prefs.js`, indicando si las funciones de navegación segura están habilitadas o deshabilitadas.
 
 Para intentar descifrar la contraseña maestra, puedes usar [https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox\_decrypt)\
-Con el siguiente script y llamada puedes especificar un archivo de contraseña para realizar un ataque de fuerza bruta:
+Con el siguiente script y llamada puedes especificar un archivo de contraseña para fuerza bruta:
 
 {% code title="brute.sh" %}
 ```bash
@@ -87,7 +87,7 @@ done < $passfile
 ```
 {% endcode %}
 
-![](<../../../.gitbook/assets/image (417).png>)
+![](<../../../.gitbook/assets/image (692).png>)
 
 ## Google Chrome
 
@@ -97,7 +97,7 @@ Google Chrome almacena perfiles de usuario en ubicaciones específicas según el
 * **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
 * **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
 
-Dentro de estos directorios, la mayoría de los datos de usuario se encuentran en las carpetas **Default/** o **ChromeDefaultData/**. Los siguientes archivos contienen datos significativos:
+Dentro de estos directorios, la mayoría de los datos de usuario se pueden encontrar en las carpetas **Default/** o **ChromeDefaultData/**. Los siguientes archivos contienen datos significativos:
 
 * **Historial**: Contiene URLs, descargas y palabras clave de búsqueda. En Windows, se puede utilizar [ChromeHistoryView](https://www.nirsoft.net/utils/chrome\_history\_view.html) para leer el historial. La columna "Tipo de transición" tiene varios significados, incluidos clics de usuario en enlaces, URLs escritas, envíos de formularios y recargas de página.
 * **Cookies**: Almacena cookies. Para inspeccionarlas, está disponible [ChromeCookiesView](https://www.nirsoft.net/utils/chrome\_cookies\_view.html).
@@ -111,7 +111,7 @@ Dentro de estos directorios, la mayoría de los datos de usuario se encuentran e
 * **Extensiones**: Directorios para extensiones y complementos del navegador.
 * **Miniaturas**: Almacena miniaturas de sitios web.
 * **Preferencias**: Un archivo rico en información, que incluye configuraciones para complementos, extensiones, ventanas emergentes, notificaciones y más.
-* **Antiphishing integrado del navegador**: Para verificar si la protección contra phishing y malware está habilitada, ejecuta `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Busca `{"enabled: true,"}` en la salida.
+* **Antiphishing integrado en el navegador**: Para verificar si la protección contra phishing y malware está habilitada, ejecuta `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Busca `{"enabled: true,"}` en la salida.
 
 ## **Recuperación de datos de bases de datos SQLite**
 
@@ -162,17 +162,17 @@ Los datos de Safari se almacenan en `/Users/$User/Library/Safari`. Los archivos 
 * **History.db**: Contiene tablas `history_visits` y `history_items` con URLs y marcas de tiempo de visita. Usa `sqlite3` para consultar.
 * **Downloads.plist**: Información sobre archivos descargados.
 * **Bookmarks.plist**: Almacena URLs marcadas.
-* **TopSites.plist**: Sitios más visitados.
+* **TopSites.plist**: Sitios más visitados con frecuencia.
 * **Extensions.plist**: Lista de extensiones del navegador Safari. Usa `plutil` o `pluginkit` para recuperar.
 * **UserNotificationPermissions.plist**: Dominios permitidos para enviar notificaciones. Usa `plutil` para analizar.
 * **LastSession.plist**: Pestañas de la última sesión. Usa `plutil` para analizar.
-* **Antiphishing integrado del navegador**: Verifica usando `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. Una respuesta de 1 indica que la función está activa.
+* **Antiphishing integrado en el navegador**: Verifica usando `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. Una respuesta de 1 indica que la función está activa.
 
 ## Opera
 
 Los datos de Opera residen en `/Users/$USER/Library/Application Support/com.operasoftware.Opera` y comparten el formato de Chrome para historial y descargas.
 
-* **Antiphishing integrado del navegador**: Verifica si `fraud_protection_enabled` en el archivo de Preferencias está configurado en `true` usando `grep`.
+* **Antiphishing integrado en el navegador**: Verifica si `fraud_protection_enabled` en el archivo de Preferencias está configurado en `true` usando `grep`.
 
 Estas rutas y comandos son cruciales para acceder y comprender los datos de navegación almacenados por diferentes navegadores web.
 
@@ -183,7 +183,7 @@ Estas rutas y comandos son cruciales para acceder y comprender los datos de nave
 * [https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
 * **Libro: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\

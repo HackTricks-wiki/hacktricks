@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking de AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red de HackTricks AWS)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
@@ -14,9 +14,9 @@
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares robadores**.
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares de robo**.
 
 El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
 
@@ -24,10 +24,10 @@ Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
 
 {% embed url="https://whiteintel.io" %}
 
----
+***
 
 {% hint style="warning" %}
-**JuicyPotato no funciona** en Windows Server 2019 y Windows 10 a partir de la compilación 1809. Sin embargo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) se pueden utilizar para **aprovechar los mismos privilegios y obtener acceso de nivel `NT AUTHORITY\SYSTEM`**. _**Verificar:**_
+**JuicyPotato no funciona** en Windows Server 2019 y Windows 10 versión 1809 en adelante. Sin embargo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) se pueden utilizar para **aprovechar los mismos privilegios y obtener acceso de nivel `NT AUTHORITY\SYSTEM`**. _**Verifica:**_
 {% endhint %}
 
 {% content-ref url="roguepotato-and-printspoofer.md" %}
@@ -44,7 +44,7 @@ _Una versión azucarada de_ [_RottenPotatoNG_](https://github.com/breenmachine/R
 
 [**Desde el Readme de juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) y sus [variantes](https://github.com/decoder-it/lonelypotato) aprovechan la cadena de escalada de privilegios basada en el servicio [`BITS`](https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799\(v=vs.85\).aspx) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) teniendo el escucha MiTM en `127.0.0.1:6666` y cuando tienes los privilegios `SeImpersonate` o `SeAssignPrimaryToken`. Durante una revisión de la compilación de Windows encontramos una configuración donde `BITS` fue deshabilitado intencionalmente y el puerto `6666` estaba ocupado.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) y sus [variantes](https://github.com/decoder-it/lonelypotato) aprovechan la cadena de escalada de privilegios basada en el servicio [`BITS`](https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799\(v=vs.85\).aspx) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) teniendo el escucha MiTM en `127.0.0.1:6666` y cuando tienes privilegios `SeImpersonate` o `SeAssignPrimaryToken`. Durante una revisión de la construcción de Windows encontramos una configuración donde `BITS` fue deshabilitado intencionalmente y el puerto `6666` estaba ocupado.
 
 Decidimos armar [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Dale la bienvenida a Juicy Potato**.
 
@@ -74,7 +74,7 @@ JuicyPotato te permite:
 * **Dirección del servidor RPC** _para un enfoque sigiloso, puedes autenticarte en un servidor RPC externo_
 * **Puerto del servidor RPC** _útil si deseas autenticarte en un servidor externo y el firewall está bloqueando el puerto `135`..._
 * **Modo de PRUEBA** _principalmente para propósitos de prueba, es decir, probar CLSIDs. Crea el DCOM e imprime el usuario del token. Ver_ [_aquí para pruebas_](http://ohpe.it/juicy-potato/Test/)
-### Uso <a href="#usage" id="usage"></a>
+### Uso <a href="#uso" id="uso"></a>
 ```
 T:\>JuicyPotato.exe
 JuicyPotato v0.1
@@ -99,13 +99,13 @@ Si el usuario tiene privilegios `SeImpersonate` o `SeAssignPrimaryToken`, entonc
 
 Es casi imposible prevenir el abuso de todos estos Servidores COM. Podrías pensar en modificar los permisos de estos objetos a través de `DCOMCNFG`, pero buena suerte, esto va a ser desafiante.
 
-La solución actual es proteger cuentas sensibles y aplicaciones que se ejecutan bajo las cuentas `* SERVICE`. Detener `DCOM` ciertamente inhibiría este exploit, pero podría tener un impacto serio en el sistema operativo subyacente.
+La solución actual es proteger cuentas sensibles y aplicaciones que se ejecutan bajo las cuentas `* SERVICE`. Detener `DCOM` ciertamente inhibiría este exploit, pero podría tener un impacto grave en el sistema operativo subyacente.
 
 Desde: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
 ## Ejemplos
 
-Nota: Visita [esta página](https://ohpe.it/juicy-potato/CLSID/) para obtener una lista de CLSIDs para probar.
+Nota: Visita [esta página](https://ohpe.it/juicy-potato/CLSID/) para ver una lista de CLSIDs para probar.
 
 ### Obtener una shell inversa con nc.exe
 ```
@@ -128,7 +128,7 @@ c:\Users\Public>
 ```
 ### Iniciar un nuevo CMD (si tienes acceso RDP)
 
-![](<../../.gitbook/assets/image (297).png>)
+![](<../../.gitbook/assets/image (300).png>)
 
 ## Problemas con CLSID
 
@@ -152,9 +152,9 @@ Luego descarga [test\_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/mast
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
-[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares robadores**.
+[**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda alimentado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares ladrones**.
 
 El objetivo principal de WhiteIntel es combatir los secuestros de cuentas y los ataques de ransomware resultantes de malwares que roban información.
 
@@ -169,7 +169,7 @@ Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

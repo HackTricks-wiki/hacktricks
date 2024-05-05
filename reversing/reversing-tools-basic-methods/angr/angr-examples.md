@@ -5,10 +5,10 @@
 <summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -16,7 +16,7 @@
 Si el programa está utilizando `scanf` para obtener **varios valores a la vez desde stdin** necesitas generar un estado que comience después del **`scanf`**.
 {% endhint %}
 
-Códigos tomados de [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+Códigos tomados de [https://github.com/jakespringer/angr\_ctf](https://github.com/jakespringer/angr\_ctf)
 
 ### Entrada para llegar a la dirección (indicando la dirección)
 ```python
@@ -214,7 +214,7 @@ main(sys.argv)
 ```
 En este escenario, la entrada se tomó con `scanf("%u %u")` y se dio el valor `"1 1"`, por lo que los valores **`0x00000001`** de la pila provienen de la **entrada del usuario**. Puedes ver cómo estos valores comienzan en `$ebp - 8`. Por lo tanto, en el código hemos **restado 8 bytes a `$esp` (ya que en ese momento `$ebp` y `$esp` tenían el mismo valor)** y luego hemos empujado el BVS.
 
-![](<../../../.gitbook/assets/image (614).png>)
+![](<../../../.gitbook/assets/image (136).png>)
 
 ### Valores de memoria estática (variables globales)
 ```python
@@ -418,7 +418,8 @@ Ten en cuenta que el archivo simbólico también podría contener datos constant
 ### Aplicando Restricciones
 
 {% hint style="info" %}
-A veces, operaciones simples como comparar 2 palabras de longitud 16 **carácter por carácter** (bucle), **cuestan mucho a un **angr** porque necesita generar ramas **exponencialmente** ya que genera 1 rama por cada if: `2^16`. Por lo tanto, es más fácil **pedirle a angr que regrese a un punto anterior** (donde la parte realmente difícil ya se haya hecho) y **establecer esas restricciones manualmente**.
+A veces operaciones simples para humanos como comparar 2 palabras de longitud 16 **carácter por carácter** (bucle), **cuestan** mucho a un **angr** porque necesita generar ramas **exponencialmente** ya que genera 1 rama por cada if: `2^16`\
+Por lo tanto, es más fácil **pedirle a angr que regrese a un punto anterior** (donde la parte realmente difícil ya se haya hecho) y **establecer esas restricciones manualmente**.
 {% endhint %}
 ```python
 # After perform some complex poperations to the input the program checks
@@ -500,7 +501,7 @@ Otra cosa que puedes hacer en estos escenarios es **enganchar la función dándo
 
 ### Gestores de Simulación
 
-Algunos gestores de simulación pueden ser más útiles que otros. En el ejemplo anterior, había un problema con la creación de muchas ramas útiles. Aquí, la técnica de **veritesting** fusionará esas ramas y encontrará una solución.\
+Algunos gestores de simulación pueden ser más útiles que otros. En el ejemplo anterior, hubo un problema con la creación de muchas ramas útiles. Aquí, la técnica de **veritesting** fusionará esas ramas y encontrará una solución.\
 Este gestor de simulación también se puede activar con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -539,7 +540,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Enganchando/Eludiendo una llamada a una función
+### Enganche/Saltarse una llamada a una función
 ```python
 # This level performs the following computations:
 #
@@ -607,7 +608,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Enganchar una función / Simprocedimiento
+### Enganchar una función / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -753,7 +754,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Binarios Estáticos
+### Binarios estáticos
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -822,12 +823,12 @@ main(sys.argv)
 ```
 <details>
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

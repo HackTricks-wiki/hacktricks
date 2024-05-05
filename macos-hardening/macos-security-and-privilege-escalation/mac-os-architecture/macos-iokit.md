@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipo Rojo de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
@@ -16,11 +16,11 @@
 
 El I/O Kit es un **marco de controladores de dispositivos** orientado a objetos de código abierto en el kernel XNU, que maneja **controladores de dispositivos cargados dinámicamente**. Permite agregar código modular al kernel sobre la marcha, admitiendo hardware diverso.
 
-Los controladores de IOKit básicamente **exportan funciones desde el kernel**. Estos tipos de parámetros de función están **predefinidos** y son verificados. Además, al igual que XPC, IOKit es simplemente otra capa encima de **mensajes Mach**.
+Los controladores de IOKit básicamente **exportan funciones desde el kernel**. Estos tipos de parámetros de función están **predefinidos** y son verificados. Además, al igual que XPC, IOKit es solo otra capa en la parte **superior de los mensajes Mach**.
 
 El código del **kernel IOKit XNU** es de código abierto por Apple en [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Además, los componentes de IOKit en el espacio de usuario también son de código abierto [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Sin embargo, **ningún controlador de IOKit** es de código abierto. De todos modos, de vez en cuando, una versión de un controlador puede venir con símbolos que facilitan su depuración. Consulta cómo [**obtener las extensiones de controlador desde el firmware aquí**](./#ipsw)**.**
+Sin embargo, **ningún controlador de IOKit** es de código abierto. De todos modos, de vez en cuando, una versión de un controlador puede venir con símbolos que facilitan su depuración. Consulta cómo [**obtener las extensiones del controlador desde el firmware aquí**](./#ipsw)**.**
 
 Está escrito en **C++**. Puedes obtener símbolos C++ desenmascarados con:
 ```bash
@@ -79,7 +79,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-El **IORegistry** es una parte crucial del marco de trabajo IOKit en macOS e iOS que sirve como una base de datos para representar la configuración de hardware y el estado del sistema. Es una **colección jerárquica de objetos que representan todo el hardware y controladores** cargados en el sistema, y sus relaciones entre sí. 
+El **IORegistry** es una parte crucial del marco de trabajo IOKit en macOS e iOS que sirve como una base de datos para representar la configuración de hardware y el estado del sistema. Es una **colección jerárquica de objetos que representan todo el hardware y controladores** cargados en el sistema, y sus relaciones entre sí.
 
 Puedes obtener el IORegistry utilizando la cli **`ioreg`** para inspeccionarlo desde la consola (especialmente útil para iOS).
 ```bash
@@ -87,20 +87,20 @@ ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-Puedes descargar **`IORegistryExplorer`** desde **Herramientas Adicionales de Xcode** en [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) e inspeccionar el **IORegistry de macOS** a través de una interfaz **gráfica**.
+Puedes descargar **`IORegistryExplorer`** desde **Xcode Additional Tools** en [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) e inspeccionar el **IORegistry de macOS** a través de una interfaz **gráfica**.
 
-<figure><img src="../../../.gitbook/assets/image (695).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-En IORegistryExplorer, se utilizan "planos" para organizar y mostrar las relaciones entre diferentes objetos en el IORegistry. Cada plano representa un tipo específico de relación o una vista particular de la configuración de hardware y controladores del sistema. Aquí tienes algunos de los planos comunes que podrías encontrar en IORegistryExplorer:
+En IORegistryExplorer, se utilizan "planos" para organizar y mostrar las relaciones entre diferentes objetos en el IORegistry de macOS. Cada plano representa un tipo específico de relación o una vista particular de la configuración de hardware y controladores del sistema. Aquí tienes algunos de los planos comunes que podrías encontrar en IORegistryExplorer:
 
 1. **Plano IOService**: Este es el plano más general, que muestra los objetos de servicio que representan controladores y nubs (canales de comunicación entre controladores). Muestra las relaciones proveedor-cliente entre estos objetos.
-2. **Plano IODeviceTree**: Este plano representa las conexiones físicas entre dispositivos a medida que se conectan al sistema. A menudo se utiliza para visualizar la jerarquía de dispositivos conectados a través de buses como USB o PCI.
-3. **Plano IOPower**: Muestra objetos y sus relaciones en términos de gestión de energía. Puede mostrar qué objetos están afectando al estado de energía de otros, útil para depurar problemas relacionados con la energía.
+2. **Plano IODeviceTree**: Este plano representa las conexiones físicas entre dispositivos tal como están conectados al sistema. A menudo se utiliza para visualizar la jerarquía de dispositivos conectados a través de buses como USB o PCI.
+3. **Plano IOPower**: Muestra objetos y sus relaciones en términos de gestión de energía. Puede mostrar qué objetos están afectando el estado de energía de otros, útil para depurar problemas relacionados con la energía.
 4. **Plano IOUSB**: Específicamente enfocado en dispositivos USB y sus relaciones, mostrando la jerarquía de concentradores USB y dispositivos conectados.
 5. **Plano IOAudio**: Este plano es para representar dispositivos de audio y sus relaciones dentro del sistema.
 6. ...
 
-## Ejemplo de Código de Comunicación de Controlador
+## Ejemplo de Código de Comunicación del Controlador
 
 El siguiente código se conecta al servicio IOKit `"NombreDeTuServicioAquí"` y llama a la función dentro del selector 0. Para ello:
 
@@ -165,15 +165,15 @@ Hay **otras** funciones que se pueden utilizar para llamar a funciones de IOKit 
 
 ## Reversing driver entrypoint
 
-Podrías obtener estas, por ejemplo, de una [**imagen de firmware (ipsw)**](./#ipsw). Luego, cárgala en tu descompilador favorito.
+Podrías obtener estas, por ejemplo, de una [imagen de firmware (ipsw)](./#ipsw). Luego, cárgala en tu descompilador favorito.
 
 Podrías empezar descompilando la función **`externalMethod`** ya que esta es la función del controlador que recibirá la llamada y llamará a la función correcta:
 
-<figure><img src="../../../.gitbook/assets/image (696).png" alt="" width="315"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
-<figure><img src="../../../.gitbook/assets/image (697).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Esa horrible llamada demanglada significa:
+Esa horrible llamada demangleada significa:
 
 {% code overflow="wrap" %}
 ```cpp
@@ -181,7 +181,7 @@ IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArguments
 ```
 {% endcode %}
 
-Tenga en cuenta cómo en la definición anterior falta el parámetro **`self`**, la buena definición sería:
+Tenga en cuenta que en la definición anterior falta el parámetro **`self`**, la buena definición sería:
 
 {% code overflow="wrap" %}
 ```cpp
@@ -197,35 +197,35 @@ OSObject * target, void * reference)
 ```
 Con esta información puedes reescribir Ctrl+Right -> `Editar firma de función` y establecer los tipos conocidos:
 
-<figure><img src="../../../.gitbook/assets/image (702).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1174).png" alt=""><figcaption></figcaption></figure>
 
 El nuevo código descompilado se verá así:
 
-<figure><img src="../../../.gitbook/assets/image (703).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Para el siguiente paso necesitamos haber definido la estructura **`IOExternalMethodDispatch2022`**. Es de código abierto en [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), podrías definirlo:
+Para el siguiente paso necesitamos haber definido la estructura **`IOExternalMethodDispatch2022`**. Es de código abierto en [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), puedes definirla así:
 
-<figure><img src="../../../.gitbook/assets/image (698).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1170).png" alt=""><figcaption></figcaption></figure>
 
 Ahora, siguiendo `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` puedes ver muchos datos:
 
-<figure><img src="../../../.gitbook/assets/image (704).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Cambia el Tipo de Datos a **`IOExternalMethodDispatch2022:`**
 
-<figure><img src="../../../.gitbook/assets/image (705).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
 después del cambio:
 
-<figure><img src="../../../.gitbook/assets/image (707).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Y como ahora sabemos que tenemos un **array de 7 elementos** (verifica el código descompilado final), haz clic para crear un array de 7 elementos:
 
-<figure><img src="../../../.gitbook/assets/image (708).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Una vez creado el array, puedes ver todas las funciones exportadas:
 
-<figure><img src="../../../.gitbook/assets/image (709).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="success" %}
 Si recuerdas, para **llamar** una función **exportada** desde el espacio de usuario no necesitamos llamar al nombre de la función, sino al **número de selector**. Aquí puedes ver que el selector **0** es la función **`initializeDecoder`**, el selector **1** es **`startDecoder`**, el selector **2** **`initializeEncoder`**...

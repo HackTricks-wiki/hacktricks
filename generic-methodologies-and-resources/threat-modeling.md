@@ -2,7 +2,7 @@
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda impulsado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares ladrones**.
 
@@ -12,7 +12,7 @@ Puedes visitar su sitio web y probar su motor de forma **gratuita** en:
 
 {% embed url="https://whiteintel.io" %}
 
----
+***
 
 ## Modelado de Amenazas
 
@@ -33,18 +33,18 @@ Los modelos de amenazas a menudo presentan elementos marcados en rojo, simboliza
 
 La Tríada CIA es un modelo ampliamente reconocido en el campo de la seguridad de la información, que representa Confidencialidad, Integridad y Disponibilidad. Estos tres pilares forman la base sobre la cual se construyen muchas medidas de seguridad y políticas, incluidas las metodologías de modelado de amenazas.
 
-1. **Confidencialidad**: Asegurar que los datos o el sistema no sean accedidos por individuos no autorizados. Este es un aspecto central de la seguridad, que requiere controles de acceso adecuados, cifrado y otras medidas para prevenir brechas de datos.
+1. **Confidencialidad**: Asegurar que los datos o el sistema no sean accedidos por individuos no autorizados. Este es un aspecto central de la seguridad, que requiere controles de acceso apropiados, cifrado y otras medidas para prevenir brechas de datos.
 2. **Integridad**: La precisión, consistencia y confiabilidad de los datos a lo largo de su ciclo de vida. Este principio garantiza que los datos no sean alterados o manipulados por partes no autorizadas. A menudo implica sumas de verificación, hash y otros métodos de verificación de datos.
 3. **Disponibilidad**: Garantiza que los datos y servicios sean accesibles para los usuarios autorizados cuando sea necesario. Esto a menudo implica redundancia, tolerancia a fallos y configuraciones de alta disponibilidad para mantener los sistemas en funcionamiento incluso ante interrupciones.
 
 ### Metodologías de Modelado de Amenazas
 
 1. **STRIDE**: Desarrollado por Microsoft, STRIDE es un acrónimo de **Suplantación, Manipulación, Repudio, Divulgación de Información, Denegación de Servicio y Elevación de Privilegios**. Cada categoría representa un tipo de amenaza, y esta metodología se utiliza comúnmente en la fase de diseño de un programa o sistema para identificar posibles amenazas.
-2. **DREAD**: Esta es otra metodología de Microsoft utilizada para la evaluación de riesgos de amenazas identificadas. DREAD significa **Potencial de Daño, Reproducibilidad, Explotabilidad, Usuarios Afectados y Descubribilidad**. Cada uno de estos factores se puntúa, y el resultado se utiliza para priorizar las amenazas identificadas.
-3. **PASTA** (Proceso para Simulación de Ataques y Análisis de Amenazas): Esta es una metodología de siete pasos centrada en el **riesgo**. Incluye definir e identificar objetivos de seguridad, crear un alcance técnico, descomposición de la aplicación, análisis de amenazas, análisis de vulnerabilidades y evaluación de riesgos/triage.
+2. **DREAD**: Esta es otra metodología de Microsoft utilizada para la evaluación de riesgos de amenazas identificadas. DREAD significa **Potencial de Daño, Reproducibilidad, Explotabilidad, Usuarios Afectados y Descubribilidad**. Cada uno de estos factores se puntúa y el resultado se utiliza para priorizar las amenazas identificadas.
+3. **PASTA** (Proceso para Simulación de Ataques y Análisis de Amenazas): Esta es una metodología de siete pasos, centrada en el **riesgo**. Incluye definir e identificar objetivos de seguridad, crear un alcance técnico, descomposición de la aplicación, análisis de amenazas, análisis de vulnerabilidades y evaluación de riesgos/triage.
 4. **Trike**: Esta es una metodología basada en el riesgo que se centra en defender activos. Parte de una perspectiva de **gestión de riesgos** y examina amenazas y vulnerabilidades en ese contexto.
 5. **VAST** (Modelado de Amenazas Visual, Ágil y Simple): Este enfoque tiene como objetivo ser más accesible e integrarse en entornos de desarrollo ágil. Combina elementos de otras metodologías y se centra en **representaciones visuales de amenazas**.
-6. **OCTAVE** (Evaluación de Amenazas, Activos y Vulnerabilidades Críticas Operativamente): Desarrollado por el CERT Coordination Center, este marco está orientado a la **evaluación de riesgos organizativos en lugar de sistemas o software específicos**.
+6. **OCTAVE** (Evaluación de Amenazas, Activos y Vulnerabilidades Críticas Operativamente): Desarrollado por el CERT Coordination Center, este marco está orientado a la **evaluación de riesgos organizacionales en lugar de sistemas o software específicos**.
 
 ## Herramientas
 
@@ -94,11 +94,11 @@ Puedes usar herramientas como SpiderSuite Crawler para inspirarte, un modelo bá
 
 Solo un poco de explicación sobre las entidades:
 
-* Proceso (La entidad en sí misma, como un servidor web o una funcionalidad web)
-* Actor (Una persona, como un visitante del sitio web, usuario o administrador)
+* Proceso (La entidad en sí misma como un servidor web o funcionalidad web)
+* Actor (Una persona como un visitante del sitio web, usuario o administrador)
 * Línea de Flujo de Datos (Indicador de Interacción)
 * Límite de Confianza (Diferentes segmentos de red o alcances.)
-* Almacenamiento (Cosas donde se almacenan los datos, como bases de datos)
+* Almacenar (Cosas donde se almacenan los datos, como bases de datos)
 
 5. Crear una Amenaza (Paso 1)
 
@@ -119,14 +119,13 @@ Ten en cuenta que hay una diferencia entre Amenazas de Actores y Amenazas de Pro
 Ahora tu modelo terminado debería verse algo así. Y así es como se crea un modelo de amenazas simple con OWASP Threat Dragon.
 
 <figure><img src="../.gitbook/assets/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
-### [Herramienta de Modelado de Amenazas de Microsoft](https://aka.ms/threatmodelingtool)
+### [Herramienta de modelado de amenazas de Microsoft](https://aka.ms/threatmodelingtool)
 
 Esta es una herramienta gratuita de Microsoft que ayuda a encontrar amenazas en la fase de diseño de proyectos de software. Utiliza la metodología STRIDE y es particularmente adecuada para aquellos que desarrollan en la plataforma de Microsoft.
 
-
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) es un motor de búsqueda impulsado por la **dark web** que ofrece funcionalidades **gratuitas** para verificar si una empresa o sus clientes han sido **comprometidos** por **malwares ladrones**.
 

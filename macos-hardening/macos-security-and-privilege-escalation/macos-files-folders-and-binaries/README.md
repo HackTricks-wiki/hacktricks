@@ -7,14 +7,14 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
-## Estructura Jerárquica de Archivos
+## Estructura jerárquica de archivos
 
 * **/Applications**: Las aplicaciones instaladas deberían estar aquí. Todos los usuarios podrán acceder a ellas.
 * **/bin**: Binarios de línea de comandos
@@ -23,7 +23,7 @@ Otras formas de apoyar a HackTricks:
 * **/etc**: Archivos de configuración
 * **/Library**: Se pueden encontrar muchas subcarpetas y archivos relacionados con preferencias, cachés y registros. Existe una carpeta Library en la raíz y en el directorio de cada usuario.
 * **/private**: No documentado, pero muchas de las carpetas mencionadas son enlaces simbólicos al directorio privado.
-* **/sbin**: Binarios del sistema esenciales (relacionados con la administración)
+* **/sbin**: Binarios esenciales del sistema (relacionados con la administración)
 * **/System**: Archivo para hacer funcionar OS X. Deberías encontrar principalmente archivos específicos de Apple aquí (no de terceros).
 * **/tmp**: Los archivos se eliminan después de 3 días (es un enlace simbólico a /private/tmp)
 * **/Users**: Directorio de inicio para los usuarios.
@@ -59,7 +59,7 @@ macOS almacena información como contraseñas en varios lugares:
 
 ## Extensiones Específicas de OS X
 
-* **`.dmg`**: Los archivos de imagen de disco de Apple son muy frecuentes para instaladores.
+* **`.dmg`**: Los archivos de imagen de disco de Apple son muy frecuentes para los instaladores.
 * **`.kext`**: Debe seguir una estructura específica y es la versión de OS X de un controlador (es un paquete).
 * **`.plist`**: También conocido como lista de propiedades, almacena información en formato XML o binario.
 * Puede ser XML o binario. Los binarios se pueden leer con:
@@ -87,14 +87,14 @@ Un paquete es un **directorio** que **parece un objeto en Finder** (un ejemplo d
 
 ## Caché de Bibliotecas Compartidas Dyld (SLC)
 
-En macOS (e iOS) todas las bibliotecas compartidas del sistema, como frameworks y dylibs, se **combinan en un solo archivo**, llamado la **caché de bibliotecas compartidas dyld**. Esto mejora el rendimiento, ya que el código se puede cargar más rápido.
+En macOS (y iOS) todas las bibliotecas compartidas del sistema, como frameworks y dylibs, se **combinan en un solo archivo**, llamado **caché de bibliotecas compartidas dyld**. Esto mejora el rendimiento, ya que el código se puede cargar más rápido.
 
 Esto se encuentra en macOS en `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` y en versiones antiguas es posible que puedas encontrar la **caché compartida** en **`/System/Library/dyld/`**.\
 En iOS puedes encontrarlas en **`/System/Library/Caches/com.apple.dyld/`**.
 
-Al igual que la caché de bibliotecas compartidas dyld, el núcleo y las extensiones de kernel también se compilan en una caché de kernel, que se carga en el arranque.
+Al igual que la caché de bibliotecas compartidas dyld, el núcleo y las extensiones de núcleo también se compilan en una caché de núcleo, que se carga en el arranque.
 
-Para extraer las bibliotecas de la caché de bibliotecas compartidas dyld única, era posible usar el binario [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip) que podría no estar funcionando en la actualidad, pero también puedes usar [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
+Para extraer las bibliotecas del archivo único de caché de bibliotecas dyld era posible usar el binario [dyld\_shared\_cache\_util](https://www.mbsplugins.de/files/dyld\_shared\_cache\_util-dyld-733.8.zip) que puede que no funcione en la actualidad, pero también puedes usar [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 
 {% code overflow="wrap" %}
 ```bash
@@ -112,7 +112,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 Ten en cuenta que incluso si la herramienta `dyld_shared_cache_util` no funciona, puedes pasar el **binario dyld compartido a Hopper** y Hopper podrá identificar todas las bibliotecas y permitirte **seleccionar cuál** quieres investigar:
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (1149).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Algunos extractores no funcionarán ya que las dylibs están preenlazadas con direcciones codificadas en duro, por lo tanto podrían estar saltando a direcciones desconocidas.
 
@@ -124,9 +124,9 @@ También es posible descargar la Caché de Bibliotecas Compartidas de otros disp
 
 **`dyld`** utiliza la llamada al sistema **`shared_region_check_np`** para saber si la SLC ha sido mapeada (que devuelve la dirección) y **`shared_region_map_and_slide_np`** para mapear la SLC.
 
-Ten en cuenta que incluso si la SLC se desliza en el primer uso, todos los **procesos** utilizan la **misma copia**, lo que **elimina la protección ASLR** si el atacante lograra ejecutar procesos en el sistema. Esto fue realmente explotado en el pasado y se solucionó con el paginador de región compartida.
+Ten en cuenta que incluso si la SLC se desliza en el primer uso, todos los **procesos** utilizan la **misma copia**, lo que **elimina la protección ASLR** si el atacante pudo ejecutar procesos en el sistema. Esto fue realmente explotado en el pasado y se solucionó con el paginador de región compartida.
 
-Los pools de ramas son pequeñas dylibs de Mach-O que crean pequeños espacios entre los mapeos de imágenes, lo que hace imposible interponerse en las funciones.
+Los grupos de ramas son pequeñas dylibs de Mach-O que crean pequeños espacios entre los mapeos de imágenes haciendo imposible interponerse en las funciones.
 
 ### Anular SLCs
 
@@ -155,19 +155,19 @@ Todas las banderas se pueden encontrar en el archivo `sys/stat.h` (encuéntralo 
 * `UF_SETTABLE` 0x0000ffff: Máscara de banderas cambiables por el propietario.
 * `UF_NODUMP` 0x00000001: No volcar archivo.
 * `UF_IMMUTABLE` 0x00000002: El archivo no se puede cambiar.
-* `UF_APPEND` 0x00000004: Los escritos en el archivo solo pueden ser añadidos.
+* `UF_APPEND` 0x00000004: Los escritos en el archivo solo pueden ser de tipo añadir.
 * `UF_OPAQUE` 0x00000008: El directorio es opaco con respecto a la unión.
 * `UF_COMPRESSED` 0x00000020: El archivo está comprimido (algunos sistemas de archivos).
 * `UF_TRACKED` 0x00000040: No hay notificaciones para eliminaciones/renombramientos para archivos con esto establecido.
-* `UF_DATAVAULT` 0x00000080: Se requiere autorización para lectura y escritura.
-* `UF_HIDDEN` 0x00008000: Indica que este elemento no debe mostrarse en una GUI.
+* `UF_DATAVAULT` 0x00000080: Se requiere autorización para leer y escribir.
+* `UF_HIDDEN` 0x00008000: Indica que este elemento no debe mostrarse en una interfaz gráfica.
 * `SF_SUPPORTED` 0x009f0000: Máscara de banderas soportadas por el superusuario.
 * `SF_SETTABLE` 0x3fff0000: Máscara de banderas cambiables por el superusuario.
 * `SF_SYNTHETIC` 0xc0000000: Máscara de banderas sintéticas de solo lectura del sistema.
 * `SF_ARCHIVED` 0x00010000: El archivo está archivado.
 * `SF_IMMUTABLE` 0x00020000: El archivo no se puede cambiar.
-* `SF_APPEND` 0x00040000: Los escritos en el archivo solo pueden ser añadidos.
-* `SF_RESTRICTED` 0x00080000: Se requiere autorización para escritura.
+* `SF_APPEND` 0x00040000: Los escritos en el archivo solo pueden ser de tipo añadir.
+* `SF_RESTRICTED` 0x00080000: Se requiere autorización para escribir.
 * `SF_NOUNLINK` 0x00100000: El elemento no se puede eliminar, renombrar o montar.
 * `SF_FIRMLINK` 0x00800000: El archivo es un firmlink.
 * `SF_DATALESS` 0x40000000: El archivo es un objeto sin datos.
@@ -184,7 +184,7 @@ Cuando el archivo contiene ACLs, verás un "+" al listar los permisos como en:
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-Puedes **leer los ACLs** del archivo con:
+Puedes **leer los ACL** del archivo con:
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
@@ -249,13 +249,15 @@ Los binarios de Mac OS generalmente se compilan como **binarios universales**. U
 [universal-binaries-and-mach-o-format.md](universal-binaries-and-mach-o-format.md)
 {% endcontent-ref %}
 
-## Volcado de memoria de macOS
+## Memoria de Proceso macOS
+
+## Volcado de memoria macOS
 
 {% content-ref url="macos-memory-dumping.md" %}
 [macos-memory-dumping.md](macos-memory-dumping.md)
 {% endcontent-ref %}
 
-## Archivos de Categoría de Riesgo en Mac OS
+## Archivos de Categoría de Riesgo Mac OS
 
 El directorio `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` es donde se almacena información sobre el **riesgo asociado con diferentes extensiones de archivo**. Este directorio categoriza los archivos en varios niveles de riesgo, influyendo en cómo Safari maneja estos archivos al descargarlos. Las categorías son las siguientes:
 
@@ -268,9 +270,23 @@ El directorio `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/
 
 * **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contiene información sobre archivos descargados, como la URL desde donde se descargaron.
 * **`/var/log/system.log`**: Registro principal de los sistemas OSX. com.apple.syslogd.plist es responsable de la ejecución del registro del sistema (puedes verificar si está desactivado buscando "com.apple.syslogd" en `launchctl list`.
-* **`/private/var/log/asl/*.asl`**: Estos son los Registros del Sistema Apple que pueden contener información interesante.
+* **`/private/var/log/asl/*.asl`**: Estos son los Registros del Sistema de Apple que pueden contener información interesante.
 * **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Almacena archivos y aplicaciones accedidos recientemente a través de "Finder".
 * **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Almacena elementos para iniciar al arrancar el sistema.
 * **`$HOME/Library/Logs/DiskUtility.log`**: Archivo de registro para la aplicación DiskUtility (información sobre unidades, incluidas las USB).
 * **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Datos sobre puntos de acceso inalámbricos.
 * **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Lista de demonios desactivados.
+
+<details>
+
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+Otras formas de apoyar a HackTricks:
+
+* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**oficial mercancía de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
+
+</details>

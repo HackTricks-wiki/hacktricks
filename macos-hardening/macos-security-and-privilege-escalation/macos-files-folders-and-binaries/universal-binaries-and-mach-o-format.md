@@ -2,15 +2,15 @@
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -18,13 +18,13 @@ Otras formas de apoyar a HackTricks:
 
 Los binarios de Mac OS generalmente se compilan como **binarios universales**. Un **binario universal** puede **soportar múltiples arquitecturas en el mismo archivo**.
 
-Estos binarios siguen la estructura **Mach-O** que básicamente se compone de:
+Estos binarios siguen la **estructura Mach-O** que básicamente se compone de:
 
 * Encabezado
 * Comandos de carga
 * Datos
 
-![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../.gitbook/assets/image (467).png>)
+![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../.gitbook/assets/image (470).png>)
 
 ## Encabezado Fat
 
@@ -78,7 +78,7 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 
 o utilizando la herramienta [Mach-O View](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (1091).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1094).png" alt=""><figcaption></figcaption></figure>
 
 Como estarás pensando, generalmente un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
 
@@ -134,7 +134,7 @@ MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DY
 ```
 O utilizando [Mach-O View](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (1130).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1133).png" alt=""><figcaption></figcaption></figure>
 
 ## **Banderas Mach-O**
 
@@ -143,12 +143,12 @@ El código fuente también define varias banderas útiles para cargar biblioteca
 * `MH_NOUNDEFS`: Sin referencias indefinidas (totalmente enlazado)
 * `MH_DYLDLINK`: Enlace Dyld
 * `MH_PREBOUND`: Referencias dinámicas preenlazadas.
-* `MH_SPLIT_SEGS`: Archivo divide segmentos de solo lectura y lectura/escritura.
+* `MH_SPLIT_SEGS`: Archivo divide segmentos de solo lectura y de lectura/escritura.
 * `MH_WEAK_DEFINES`: Binario tiene símbolos débilmente definidos
 * `MH_BINDS_TO_WEAK`: Binario utiliza símbolos débiles
 * `MH_ALLOW_STACK_EXECUTION`: Hacer la pila ejecutable
 * `MH_NO_REEXPORTED_DYLIBS`: Biblioteca sin comandos LC\_REEXPORT
-* `MH_PIE`: Ejecutable de posición independiente
+* `MH_PIE`: Ejecutable Independiente de la Posición
 * `MH_HAS_TLV_DESCRIPTORS`: Hay una sección con variables locales de subprocesos
 * `MH_NO_HEAP_EXECUTION`: Sin ejecución para páginas de montón/datos
 * `MH_HAS_OBJC`: Binario tiene secciones de Objective-C
@@ -171,7 +171,7 @@ Hay alrededor de **50 tipos diferentes de comandos de carga** que el sistema man
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-Básicamente, este tipo de Comando de Carga define **cómo cargar los segmentos \_\_TEXT** (código ejecutable) **y \_\_DATA** (datos para el proceso) **según los desplazamientos indicados en la sección de Datos** cuando se ejecuta el binario.
+Básicamente, este tipo de Comando de Carga define **cómo cargar el \_\_TEXT** (código ejecutable) **y \_\_DATA** (datos para el proceso) **segmentos** de acuerdo con los **desplazamientos indicados en la sección de Datos** cuando se ejecuta el binario.
 {% endhint %}
 
 Estos comandos **definen segmentos** que se **mapean** en el **espacio de memoria virtual** de un proceso cuando se ejecuta.
@@ -188,7 +188,7 @@ uint32_t	cmdsize;	/* incluye el tamaño de las estructuras section_64 */
 char		segname[16];	/* nombre del segmento */
 uint64_t	vmaddr;		/* dirección de memoria de este segmento */
 uint64_t	vmsize;		/* tamaño de memoria de este segmento */
-uint64_t	fileoff;	/* desplazamiento en el archivo de este segmento */
+uint64_t	fileoff;	/* desplazamiento de archivo de este segmento */
 uint64_t	filesize;	/* cantidad a mapear desde el archivo */
 int32_t		maxprot;	/* protección VM máxima */
 int32_t		initprot;	/* protección VM inicial */
@@ -199,7 +199,7 @@ int32_t		initprot;	/* protección VM inicial */
 
 Ejemplo de encabezado de segmento:
 
-<figure><img src="../../../.gitbook/assets/image (1123).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1126).png" alt=""><figcaption></figcaption></figure>
 
 Este encabezado define el **número de secciones cuyos encabezados aparecen después** de él:
 ```c
@@ -220,11 +220,11 @@ uint32_t	reserved3;	/* reserved */
 ```
 Ejemplo de **encabezado de sección**:
 
-<figure><img src="../../../.gitbook/assets/image (1105).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1108).png" alt=""><figcaption></figcaption></figure>
 
 Si **sumas** el **desplazamiento de la sección** (0x37DC) + el **desplazamiento** donde **comienza la arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (698).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (701).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener **información de encabezados** desde la **línea de comandos** con:
 ```bash
@@ -241,12 +241,12 @@ Segmentos comunes cargados por este cmd:
 * `__[c/u/os_log]string`: Constantes de cadena de C, Unicode u os logs
 * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
 * `__unwind_info`: Datos de desenrollado de pila.
-* Tenga en cuenta que todo este contenido está firmado pero también marcado como ejecutable (creando más opciones para la explotación de secciones que no necesariamente necesitan este privilegio, como secciones dedicadas a cadenas).
+* Tenga en cuenta que todo este contenido está firmado pero también marcado como ejecutable (creando más opciones para la explotación de secciones que no necesariamente requieren este privilegio, como secciones dedicadas a cadenas).
 * **`__DATA`**: Contiene datos que son **legibles** y **escribibles** (no ejecutables)**.**
 * `__got:` Tabla de Desplazamiento Global
 * `__nl_symbol_ptr`: Puntero de símbolo no perezoso (vinculado en la carga)
 * `__la_symbol_ptr`: Puntero de símbolo perezoso (vinculado en uso)
-* `__const`: Debería ser datos de solo lectura (no realmente)
+* `__const`: Debería ser datos de solo lectura (en realidad no)
 * `__cfstring`: Cadenas de CoreFoundation
 * `__data`: Variables globales (que han sido inicializadas)
 * `__bss`: Variables estáticas (que no han sido inicializadas)
@@ -261,7 +261,7 @@ Segmentos comunes cargados por este cmd:
 * Tabla de Cadenas
 * Firma de Código
 * **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también se puede encontrar en el segmento \_\_DATA, dentro de varias secciones en \_\_objc\_\*.
-* **`__RESTRICT`**: Un segmento sin contenido con una sola sección llamada **`__restrict`** (también vacía) que asegura que al ejecutar el binario, ignorará las variables de entorno de DYLD.
+* **`__RESTRICT`**: Un segmento sin contenido con una sola sección llamada **`__restrict`** (también vacía) que asegura que al ejecutar el binario, ignorará las variables de entorno DYLD.
 
 Como se pudo ver en el código, **los segmentos también admiten banderas** (aunque no se usan mucho):
 
@@ -306,7 +306,7 @@ Sin embargo, puedes encontrar información sobre esta sección en [**esta public
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Soporte para encriptación binaria. Sin embargo, si un atacante logra comprometer el proceso, podrá volcar la memoria sin cifrar.
+Soporte para encriptación binaria. Sin embargo, por supuesto, si un atacante logra comprometer el proceso, podrá volcar la memoria sin cifrar.
 
 ### **`LC_LOAD_DYLINKER`**
 
@@ -314,11 +314,11 @@ Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas
 
 ### **`LC_IDENT`**
 
-Obsoleto, pero cuando se configura para generar volcados en caso de fallo, se crea un volcado central Mach-O y se establece la versión del kernel en el comando `LC_IDENT`.
+Obsoleto, pero cuando está configurado para generar volcados en caso de pánico, se crea un volcado central Mach-O y la versión del kernel se establece en el comando `LC_IDENT`.
 
 ### **`LC_UUID`**
 
-UUID aleatorio. No es útil directamente, pero XNU lo almacena en caché con el resto de la información del proceso. Puede ser utilizado en informes de fallos.
+UUID aleatorio. No es útil directamente, pero XNU lo almacena en caché con el resto de la información del proceso. Puede usarse en informes de fallos.
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
@@ -343,7 +343,7 @@ uint32_t current_version;           /* library's current version number */
 uint32_t compatibility_version;     /* library's compatibility vers number*/
 };
 ```
-![](<../../../.gitbook/assets/image (483).png>)
+![](<../../../.gitbook/assets/image (486).png>)
 
 También puedes obtener esta información desde la línea de comandos con:
 ```bash
@@ -355,9 +355,9 @@ otool -L /bin/ls
 ```
 Algunas bibliotecas potencialmente relacionadas con malware son:
 
-- **DiskArbitration**: Monitoreo de unidades USB
-- **AVFoundation**: Captura de audio y video
-- **CoreWLAN**: Escaneos de Wifi.
+* **DiskArbitration**: Monitoreo de unidades USB
+* **AVFoundation:** Captura de audio y video
+* **CoreWLAN**: Escaneos de Wifi.
 
 {% hint style="info" %}
 Un binario Mach-O puede contener uno o **más constructores**, que se **ejecutarán antes** de la dirección especificada en **LC\_MAIN**.\
@@ -376,28 +376,36 @@ Los datos son básicamente la parte que contiene toda la **información** que es
 
 Esto incluye:
 
-- **Tabla de funciones:** Que contiene información sobre las funciones del programa.
-- **Tabla de símbolos**: Que contiene información sobre la función externa utilizada por el binario
-- También podría contener funciones internas, nombres de variables y más.
+* **Tabla de funciones:** Que contiene información sobre las funciones del programa.
+* **Tabla de símbolos**: Que contiene información sobre la función externa utilizada por el binario
+* También podría contener funciones internas, nombres de variables y más.
 
 Para verificarlo, puedes usar la herramienta [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (1117).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1120).png" alt=""><figcaption></figcaption></figure>
 
 O desde la línea de comandos:
 ```bash
 size -m /bin/ls
 ```
-<details>
+## Secciones Comunes de Objetive-C
 
-<summary><strong>Aprende hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+En el segmento `__TEXT` (r-x):
 
-Otras formas de apoyar a HackTricks:
+* `__objc_classname`: Nombres de las clases (cadenas de texto)
+* `__objc_methname`: Nombres de los métodos (cadenas de texto)
+* `__objc_methtype`: Tipos de los métodos (cadenas de texto)
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+En el segmento `__DATA` (rw-):
 
-</details>
+* `__objc_classlist`: Punteros a todas las clases de Objetive-C
+* `__objc_nlclslist`: Punteros a clases de Objetive-C no perezosas
+* `__objc_catlist`: Puntero a Categorías
+* `__objc_nlcatlist`: Puntero a Categorías no perezosas
+* `__objc_protolist`: Lista de protocolos
+* `__objc_const`: Datos constantes
+* `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
+
+## Swift
+
+* `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`

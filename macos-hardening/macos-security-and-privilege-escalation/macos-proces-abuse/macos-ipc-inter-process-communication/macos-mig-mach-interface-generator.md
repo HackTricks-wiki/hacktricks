@@ -6,11 +6,11 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
@@ -37,13 +37,13 @@ n2          :  uint32_t);
 ```
 {% endcode %}
 
-Ahora utiliza mig para generar el código del servidor y del cliente que serán capaces de comunicarse entre sí para llamar a la función Subtract:
+Ahora utiliza mig para generar el código del servidor y del cliente que serán capaces de comunicarse entre sí para llamar a la función Restar:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
 Se crearán varios archivos nuevos en el directorio actual.
 
-En los archivos **`myipcServer.c`** y **`myipcServer.h`** se puede encontrar la declaración y definición de la estructura **`SERVERPREFmyipc_subsystem`**, que básicamente define la función a llamar en función del ID del mensaje recibido (indicamos un número de inicio de 500):
+En los archivos **`myipcServer.c`** y **`myipcServer.h`** puedes encontrar la declaración y definición de la estructura **`SERVERPREFmyipc_subsystem`**, la cual básicamente define la función a llamar basada en el ID del mensaje recibido (indicamos un número inicial de 500):
 
 {% tabs %}
 {% tab title="myipcServer.c" %}
@@ -68,37 +68,25 @@ myipc_server_routine,
 
 ### macOS MIG (Mach Interface Generator)
 
-El Generador de Interfaz Mach (Mach Interface Generator, MIG) es una herramienta utilizada en macOS para generar código fuente en C a partir de definiciones de interfaz. Permite la comunicación entre procesos a través de llamadas a procedimientos remotos.
+El Generador de Interfaz Mach (MIG) es una herramienta utilizada en macOS para simplificar la comunicación entre procesos a nivel de kernel. Permite a los desarrolladores definir interfaces para las llamadas de procedimiento remoto (RPC) entre procesos. Esto facilita la comunicación entre procesos y puede ser utilizado de manera maliciosa para la escalada de privilegios en macOS.
 
-#### Creación de una definición de interfaz MIG
-
-Para crear una definición de interfaz MIG, se debe definir un archivo `.defs` que contenga las declaraciones de los procedimientos remotos que se desean exponer. Luego, se utiliza la herramienta `mig` para generar el código fuente en C correspondiente.
-
-#### Implementación de un servidor MIG
-
-Una vez que se ha generado el código fuente en C a partir de la definición de interfaz MIG, se puede implementar un servidor MIG que maneje las llamadas a procedimientos remotos definidos en la interfaz.
+#### Ejemplo de archivo de definición MIG
 
 ```c
-#include <stdio.h>
-#include <mach/mach.h>
-#include "myipcServer.h"
-
-kern_return_t my_remote_procedure_implementation(mach_port_t server, int data, int *result) {
-    // Implementación del procedimiento remoto
-    *result = data * 2;
-    return KERN_SUCCESS;
-}
-
-int main() {
-    mach_port_t server = mig_create_server();
-    mig_server(server);
-    return 0;
-}
+routine my_remote_procedure {
+    mach_msg_type_number_t in0Cnt;
+    char in0[4096];
+    mach_msg_type_number_t out0Cnt;
+    char out0[4096];
+} -> {
+    mach_msg_type_number_t out0Cnt;
+    char out0[4096];
+};
 ```
 
-En el ejemplo anterior, se muestra la implementación de un servidor MIG simple que maneja una llamada a un procedimiento remoto para multiplicar un número por 2.
+En este ejemplo, se define una rutina `my_remote_procedure` que toma una entrada `in0` y devuelve una salida `out0`. Este es solo un ejemplo básico y las definiciones MIG pueden ser mucho más complejas dependiendo de los requisitos del desarrollador.
 
-La comunicación entre procesos a través de MIG es fundamental en macOS y puede ser utilizada de manera maliciosa para abusar de los privilegios del sistema. Es importante asegurar que las implementaciones de servidores MIG estén correctamente protegidas para prevenir posibles vulnerabilidades de seguridad. 
+El uso indebido de MIG y la comunicación entre procesos en macOS pueden conducir a vulnerabilidades de seguridad significativas si no se implementan correctamente las medidas de protección adecuadas.
 
 {% endtab %}
 ```c
@@ -116,7 +104,7 @@ routine[1];
 {% endtab %}
 {% endtabs %}
 
-Basado en la estructura anterior, la función **`myipc_server_routine`** obtendrá el **ID del mensaje** y devolverá la función adecuada para llamar:
+Basado en la estructura anterior, la función **`myipc_server_routine`** recibirá el **ID del mensaje** y devolverá la función adecuada para llamar:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -131,7 +119,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-En este ejemplo solo hemos definido 1 función en las definiciones, pero si hubiéramos definido más funciones, estarían dentro del array de **`SERVERPREFmyipc_subsystem`** y la primera se habría asignado al ID **500**, la segunda al ID **501**...
+En este ejemplo solo hemos definido 1 función en las definiciones, pero si hubiéramos definido más funciones, estas estarían dentro del array de **`SERVERPREFmyipc_subsystem`** y la primera se habría asignado al ID **500**, la segunda al ID **501**...
 
 De hecho, es posible identificar esta relación en la estructura **`subsystem_to_name_map_myipc`** de **`myipcServer.h`**:
 ```c
@@ -140,10 +128,9 @@ De hecho, es posible identificar esta relación en la estructura **`subsystem_to
 { "Subtract", 500 }
 #endif
 ```
-Finalmente, otra función importante para que el servidor funcione será **`myipc_server`**, que es la que realmente **llamará a la función** relacionada con el ID recibido:
+Finalmente, otra función importante para hacer que el servidor funcione será **`myipc_server`**, que es la que realmente **llamará a la función** relacionada con el id recibido:
 
-```c
-mig_external boolean_t myipc_server
+<pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
 {
 /*
@@ -164,20 +151,20 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
-	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
-		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+<strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
+</strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
 return FALSE;
 }
-	(*routine) (InHeadP, OutHeadP);
-	return TRUE;
+<strong>	(*routine) (InHeadP, OutHeadP);
+</strong>	return TRUE;
 }
-```
+</code></pre>
 
 Verifique las líneas previamente resaltadas accediendo a la función a llamar por ID.
 
-En el siguiente código se muestra cómo crear un **servidor** y un **cliente** simples donde el cliente puede llamar a las funciones Restar del servidor:
+En lo siguiente se muestra el código para crear un **servidor** y un **cliente** simples donde el cliente puede llamar a las funciones Restar del servidor:
 
 {% tabs %}
 {% tab title="myipc_server.c" %}
@@ -215,37 +202,33 @@ mach_msg_server(myipc_server, sizeof(union __RequestUnion__SERVERPREFmyipc_subsy
 
 {% tab title="myipc_client.c" %} 
 
-### macOS MIG (Mach Interface Generator)
+### Cliente de IPC
 
-El Generador de Interfaz Mach (MIG) es una herramienta utilizada en macOS para generar código fuente en C que facilita la comunicación entre procesos a través de llamadas a procedimientos remotos. Permite a los procesos enviar mensajes y datos entre sí de manera eficiente y segura.
-
-En el contexto de la seguridad, los atacantes pueden abusar de las interfaces generadas por MIG para realizar ataques de escalada de privilegios o para comprometer la integridad del sistema. Es fundamental implementar medidas de seguridad adecuadas al utilizar MIG para prevenir posibles vulnerabilidades y proteger la comunicación entre procesos en macOS. 
-
-Para más información sobre cómo protegerse de posibles abusos de procesos en macOS, consulta la sección correspondiente en este libro. 
+El cliente de IPC es responsable de enviar mensajes al servidor de IPC y recibir respuestas. Aquí hay un ejemplo de cómo se puede implementar un cliente de IPC en C:
 
 ```c
 #include <stdio.h>
 #include <mach/mach.h>
-#include <servers/bootstrap.h>
-#include "myipc.h"
+#include <mach/message.h>
 
 int main() {
     mach_port_t server_port;
     kern_return_t kr;
 
-    kr = bootstrap_look_up(bootstrap_port, "com.example.myipc", &server_port);
+    kr = task_for_pid(mach_task_self(), getpid(), &server_port);
     if (kr != KERN_SUCCESS) {
-        printf("Failed to look up server port\n");
+        printf("Error obteniendo el puerto del servidor: %s\n", mach_error_string(kr));
         return 1;
     }
 
-    myipc_function(server_port);
+    // Construir el mensaje
+    // Enviar el mensaje al servidor
 
     return 0;
 }
 ```
 
-{% endtab %}
+En este ejemplo, el cliente obtiene el puerto del servidor y luego puede construir un mensaje para enviar al servidor de IPC.
 ```c
 // gcc myipc_client.c myipcUser.c -o myipc_client
 
@@ -401,12 +384,22 @@ return r0;
 
 De hecho, si vas a la función **`0x100004000`** encontrarás el array de estructuras **`routine_descriptor`**. El primer elemento de la estructura es la **dirección** donde está implementada la **función**, y la **estructura ocupa 0x28 bytes**, por lo que cada 0x28 bytes (comenzando desde el byte 0) puedes obtener 8 bytes y esa será la **dirección de la función** que se llamará:
 
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (35).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (36).png" alt=""><figcaption></figcaption></figure>
 
 Estos datos se pueden extraer [**usando este script de Hopper**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) en GitHub.
+
+<details>
+
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+
+Otras formas de apoyar a HackTricks:
+
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de GitHub.
 
 </details>

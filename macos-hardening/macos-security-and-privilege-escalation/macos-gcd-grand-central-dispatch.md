@@ -36,9 +36,9 @@ Sin embargo, a nivel de compilador los bloques no existen, son `os_object`s. Cad
 * `NSConcreteGlobalBlock` (bloques de `__DATA.__const`)
 * `NSConcreteMallocBlock` (bloques en el montón)
 * `NSConcreateStackBlock` (bloques en la pila)
-* Tiene **`flags`** (indicando los campos presentes en el descriptor de bloque) y algunos bytes reservados
+* Tiene **`flags`** (indicando los campos presentes en el descriptor del bloque) y algunos bytes reservados
 * El puntero a la función a llamar
-* Un puntero al descriptor de bloque
+* Un puntero al descriptor del bloque
 * Variables importadas del bloque (si las hay)
 * **descriptor de bloque**: Su tamaño depende de los datos presentes (como se indica en las banderas anteriores)
 * Tiene algunos bytes reservados
@@ -50,7 +50,7 @@ Sin embargo, a nivel de compilador los bloques no existen, son `os_object`s. Cad
 
 Una cola de despacho es un objeto nombrado que proporciona el orden FIFO de bloques para su ejecución.
 
-Los bloques se establecen en colas para ser ejecutados, y estas admiten 2 modos: `DISPATCH_QUEUE_SERIAL` y `DISPATCH_QUEUE_CONCURRENT`. Por supuesto, el **serial** no tendrá problemas de condición de carrera ya que un bloque no se ejecutará hasta que el anterior haya terminado. Pero **el otro tipo de cola podría tenerlo**.
+Los bloques se establecen en colas para ser ejecutados, y estas admiten 2 modos: `DISPATCH_QUEUE_SERIAL` y `DISPATCH_QUEUE_CONCURRENT`. Por supuesto, la **cola serial** **no tendrá problemas de condición de carrera** ya que un bloque no se ejecutará hasta que el anterior haya terminado. Pero **el otro tipo de cola podría tenerlo**.
 
 Colas predeterminadas:
 
@@ -202,27 +202,27 @@ Actualmente Ghidra no entiende ni la estructura **`dispatch_block_t`** de Object
 
 Entonces, si deseas que las entienda, simplemente puedes **declararlas**:
 
-<figure><img src="../../.gitbook/assets/image (1157).png" alt="" width="563"><figcaption></figcaption></figure>
-
-<figure><img src="../../.gitbook/assets/image (1159).png" alt="" width="563"><figcaption></figcaption></figure>
-
 <figure><img src="../../.gitbook/assets/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/image (1162).png" alt="" width="563"><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Luego, encuentra un lugar en el código donde se **utilicen**:
 
 {% hint style="success" %}
-Ten en cuenta todas las referencias hechas a "block" para entender cómo podrías descubrir que se está utilizando la estructura.
+Ten en cuenta todas las referencias hechas a "block" para entender cómo podrías darte cuenta de que se está utilizando la estructura.
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/image (1161).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Haz clic derecho en la variable -> Cambiar tipo de variable y selecciona en este caso **`swift_dispatch_block`**:
 
-<figure><img src="../../.gitbook/assets/image (1162).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Ghidra reescribirá automáticamente todo:
 
-<figure><img src="../../.gitbook/assets/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Referencias
 

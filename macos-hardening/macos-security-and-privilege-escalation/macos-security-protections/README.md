@@ -6,17 +6,17 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
 ## Gatekeeper
 
-Gatekeeper se usa generalmente para referirse a la combinación de **Cuarentena + Gatekeeper + XProtect**, 3 módulos de seguridad de macOS que intentarán **evitar que los usuarios ejecuten software potencialmente malicioso descargado**.
+Gatekeeper se usa generalmente para referirse a la combinación de **Quarantine + Gatekeeper + XProtect**, 3 módulos de seguridad de macOS que intentarán **evitar que los usuarios ejecuten software potencialmente malicioso descargado**.
 
 Más información en:
 
@@ -50,7 +50,7 @@ El Sandbox de macOS **limita las aplicaciones** que se ejecutan dentro del sandb
 
 ### Restricciones de Inicio/Ambiente y Caché de Confianza
 
-Las restricciones de inicio en macOS son una característica de seguridad para **regular la iniciación de procesos** definiendo **quién puede iniciar** un proceso, **cómo** y **desde dónde**. Introducidas en macOS Ventura, categorizan los binarios del sistema en categorías de restricción dentro de una **caché de confianza**. Cada binario ejecutable tiene **reglas** establecidas para su **inicio**, incluidas restricciones **propia**, del **padre** y **responsable**. Extendidas a aplicaciones de terceros como Restricciones de **Ambiente** en macOS Sonoma, estas características ayudan a mitigar posibles explotaciones del sistema al gobernar las condiciones de inicio de procesos.
+Las restricciones de inicio en macOS son una característica de seguridad para **regular la iniciación de procesos** definiendo **quién puede iniciar** un proceso, **cómo** y **desde dónde**. Introducidas en macOS Ventura, categorizan los binarios del sistema en categorías de restricción dentro de una **caché de confianza**. Cada binario ejecutable tiene reglas establecidas para su inicio, incluidas restricciones **propias**, del **padre** y **responsables**. Extendidas a aplicaciones de terceros como Restricciones de **Ambiente** en macOS Sonoma, estas características ayudan a mitigar posibles explotaciones del sistema al gobernar las condiciones de inicio de procesos.
 
 {% content-ref url="macos-launch-environment-constraints.md" %}
 [macos-launch-environment-constraints.md](macos-launch-environment-constraints.md)
@@ -60,7 +60,7 @@ Las restricciones de inicio en macOS son una característica de seguridad para *
 
 La Herramienta de Eliminación de Malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar malware conocido de sistemas infectados**.
 
-Una vez que se detecta malware en un Mac (ya sea por XProtect u otro medio), MRT se puede utilizar para **eliminar automáticamente el malware**. MRT opera en segundo plano de forma silenciosa y generalmente se ejecuta cada vez que se actualiza el sistema o se descarga una nueva definición de malware (parece que las reglas que MRT tiene para detectar malware están dentro del binario).
+Una vez que se detecta malware en un Mac (ya sea por XProtect u otro medio), MRT se puede utilizar para **eliminar automáticamente el malware**. MRT opera en segundo plano de forma silenciosa y generalmente se ejecuta cada vez que se actualiza el sistema o cuando se descarga una nueva definición de malware (parece que las reglas que MRT tiene para detectar malware están dentro del binario).
 
 Si bien tanto XProtect como MRT son parte de las medidas de seguridad de macOS, realizan funciones diferentes:
 
@@ -73,13 +73,13 @@ La aplicación MRT se encuentra en **`/Library/Apple/System/Library/CoreServices
 
 **macOS** ahora **alerta** cada vez que una herramienta utiliza una **técnica conocida para persistir la ejecución de código** (como Elementos de inicio, Demonios...), para que el usuario sepa mejor **qué software está persistiendo**.
 
-<figure><img src="../../../.gitbook/assets/image (711).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1183).png" alt=""><figcaption></figcaption></figure>
 
 Esto se ejecuta con un **daemon** ubicado en `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` y el **agente** en `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
 
 La forma en que **`backgroundtaskmanagementd`** sabe que algo está instalado en una carpeta persistente es mediante la **obtención de los FSEvents** y la creación de algunos **manejadores** para estos.
 
-Además, hay un archivo plist que contiene **aplicaciones conocidas** que persisten con frecuencia mantenidas por Apple ubicado en: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Además, hay un archivo plist que contiene **aplicaciones conocidas** que persisten con frecuencia mantenidas por Apple ubicadas en: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -97,7 +97,7 @@ Además, hay un archivo plist que contiene **aplicaciones conocidas** que persis
 ```
 ### Enumeración
 
-Es posible **enumerar todos** los elementos de fondo configurados que se están ejecutando utilizando la herramienta de línea de comandos de Apple:
+Es posible **enumerar todos** los elementos de fondo configurados que se ejecutan con la herramienta de línea de comandos de Apple:
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
@@ -109,13 +109,13 @@ chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Esta información se almacena en **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** y Terminal necesita FDA.
+Esta información se almacena en **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** y el Terminal necesita FDA.
 
 ### Manipulando BTM
 
 Cuando se encuentra una nueva persistencia, se genera un evento de tipo **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Por lo tanto, cualquier forma de **prevenir** que este **evento** se envíe o que el **agente alerte** al usuario ayudará a un atacante a _**burlar**_ BTM.
 
-* **Restablecer la base de datos**: Ejecutar el siguiente comando restablecerá la base de datos (debería reconstruirla desde cero), sin embargo, por alguna razón, después de ejecutar esto, **no se alertará sobre nuevas persistencias hasta que se reinicie el sistema**.
+* **Restablecer la base de datos**: Ejecutar el siguiente comando restablecerá la base de datos (debería reconstruirla desde cero), sin embargo, por alguna razón, después de ejecutar esto, **no se alertará sobre ninguna nueva persistencia hasta que se reinicie el sistema**.
 * Se requiere **root**.
 ```bash
 # Reset the database
@@ -134,7 +134,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-* **Error**: Si el **proceso que creó la persistencia existe rápidamente después de él**, el demonio intentará **obtener información** al respecto, **fallará** y **no podrá enviar el evento** que indica que algo nuevo está persistiendo.
+* **Error**: Si el **proceso que creó la persistencia existe rápidamente después de él**, el demonio intentará **obtener información** al respecto, **fallará** y **no podrá enviar el evento** indicando que algo nuevo está persistiendo.
 
 Referencias y **más información sobre BTM**:
 
@@ -149,9 +149,9 @@ Referencias y **más información sobre BTM**:
 Otras formas de apoyar a HackTricks:
 
 * Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>

