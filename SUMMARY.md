@@ -790,6 +790,8 @@
   * [Radio](todo/hardware-hacking/radio.md)
   * [JTAG](todo/hardware-hacking/jtag.md)
   * [SPI](todo/hardware-hacking/spi.md)
+* [Industrial Control Systems Hacking](todo/industrial-control-systems-hacking/README.md)
+  * [Modbus Protocol](todo/industrial-control-systems-hacking/modbus.md)
 * [Radio Hacking](todo/radio-hacking/README.md)
   * [Pentesting RFID](todo/radio-hacking/pentesting-rfid.md)
   * [Infrared](todo/radio-hacking/infrared.md)
