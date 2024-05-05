@@ -77,7 +77,7 @@ This is useful in containers because **shutting down the process and starting a 
 
 To connect to a **Chromium-based browser**, the `chrome://inspect` or `edge://inspect` URLs can be accessed for Chrome or Edge, respectively. By clicking the Configure button, it should be ensured that the **target host and port** are correctly listed. The image shows a Remote Code Execution (RCE) example:
 
-![](<../../.gitbook/assets/image (671).png>)
+![](<../../.gitbook/assets/image (674).png>)
 
 Using the **command line** you can connect to a debugger/inspector with:
 

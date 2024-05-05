@@ -18,9 +18,9 @@ Other ways to support HackTricks:
 
 When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --> WLAN Traffic_:
 
-![](<../../../.gitbook/assets/image (103).png>)
+![](<../../../.gitbook/assets/image (106).png>)
 
-![](<../../../.gitbook/assets/image (489).png>)
+![](<../../../.gitbook/assets/image (492).png>)
 
 ### Brute Force
 
@@ -50,7 +50,7 @@ Once you have detected **unknown MAC** addresses communicating inside the networ
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 
-![](<../../../.gitbook/assets/image (496).png>)
+![](<../../../.gitbook/assets/image (499).png>)
 
 <details>
 

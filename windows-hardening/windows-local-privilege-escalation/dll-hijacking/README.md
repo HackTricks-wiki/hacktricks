@@ -39,13 +39,13 @@ Several methods are employed for DLL hijacking, each with its effectiveness depe
 
 The most common way to find missing Dlls inside a system is running [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) from sysinternals, **setting** the **following 2 filters**:
 
-![](<../../../.gitbook/assets/image (958).png>)
+![](<../../../.gitbook/assets/image (961).png>)
 
-![](<../../../.gitbook/assets/image (227).png>)
+![](<../../../.gitbook/assets/image (230).png>)
 
 and just show the **File System Activity**:
 
-![](<../../../.gitbook/assets/image (150).png>)
+![](<../../../.gitbook/assets/image (153).png>)
 
 If you are looking for **missing dlls in general** you **leave** this running for some **seconds**.\
 If you are looking for a **missing dll inside an specific executable** you should set **another filter like "Process Name" "contains" "\<exec name>", execute it, and stop capturing events**.

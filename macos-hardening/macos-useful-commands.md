@@ -157,7 +157,7 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 Without prompts
 
-<figure><img src="../.gitbook/assets/image (76).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (79).png" alt=""><figcaption></figcaption></figure>
 
 <details>
 

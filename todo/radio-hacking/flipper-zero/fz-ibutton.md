@@ -26,7 +26,7 @@ For more info about what is an iButton check:
 
 The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
 
-<figure><img src="../../../.gitbook/assets/image (562).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (565).png" alt=""><figcaption></figcaption></figure>
 
 ## Actions
 
@@ -46,7 +46,7 @@ It's possible to **emulate** saved iButtons (read or manually added).
 If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (135).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (138).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 

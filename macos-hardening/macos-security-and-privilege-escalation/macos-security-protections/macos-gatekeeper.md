@@ -16,7 +16,6 @@
 
 {% embed url="https://websec.nl/" %}
 
-
 ## Gatekeeper
 
 **Gatekeeper** is a security feature developed for Mac operating systems, designed to ensure that users **run only trusted software** on their systems. It functions by **validating software** that a user downloads and attempts to open from **sources outside the App Store**, such as an app, a plug-in, or an installer package.
@@ -85,7 +84,7 @@ Note that GateKeeper signature checks are performed only to **files with the Qua
 
 GateKeeper will check if according to the **preferences & the signature** a binary can be executed:
 
-<figure><img src="../../../.gitbook/assets/image (1147).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1150).png" alt=""><figcaption></figcaption></figure>
 
 The database that keeps this configuration ins located in **`/var/db/SystemPolicy`**. You can check this database as root with:
 
@@ -139,7 +138,7 @@ spctl --master-enable
 
 When completely enabled, a new option will appear:
 
-<figure><img src="../../../.gitbook/assets/image (1148).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1151).png" alt=""><figcaption></figcaption></figure>
 
 It's possible to **check if an App will be allowed by GateKeeper** with:
 
@@ -183,6 +182,8 @@ This attribute must be **set by the application creating/downloading** the file.
 
 However, files that are sandboxed will have this attribute set to every file they create. And non sandboxed apps can set it themselves, or specify the [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/lsfilequarantineenabled?language=objc) key in the **Info.plist** which will make the system set the `com.apple.quarantine` extended attribute on the files created,
 {% endhint %}
+
+Moreover, all files created by a process calling **`qtn_proc_apply_to_self`** are quarantined. Or the API **`qtn_file_apply_to_path`** adds the quarantine attribute to a specified file path.
 
 It's possible to **check it's status and enable/disable** (root required) with:
 
@@ -460,6 +461,15 @@ echo "[+] compressing files"
 aa archive -d s/ -o app.aar
 ```
 
+### uchg (from this [talk](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf))
+
+* Create a directory containing an app.
+* Add uchg to the app.
+* Compress the app to a tar.gz file.
+* Send the tar.gz file to a victim.
+* The victim opens the tar.gz file and runs the app.
+* Gatekeeper does not check the app.
+
 ### Prevent Quarantine xattr
 
 In an ".app" bundle if the quarantine xattr is not added to it, when executing it **Gatekeeper won't be triggered**.
@@ -467,7 +477,6 @@ In an ".app" bundle if the quarantine xattr is not added to it, when executing i
 <figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
-
 
 <details>
 

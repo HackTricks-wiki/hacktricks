@@ -261,7 +261,7 @@ You must **configure a SPF record for the new domain**. If you don't know what i
 
 You can use [https://www.spfwizard.net/](https://www.spfwizard.net) to generate your SPF policy (use the IP of the VPS machine)
 
-![](<../../.gitbook/assets/image (1034).png>)
+![](<../../.gitbook/assets/image (1037).png>)
 
 This is the content that must be set inside a TXT record inside the domain:
 
@@ -379,7 +379,7 @@ Note that **in order to increase the credibility of the email**, it's recommende
 * Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
 * Try to contact **some valid discovered** email and wait for the response
 
-![](<../../.gitbook/assets/image (77).png>)
+![](<../../.gitbook/assets/image (80).png>)
 
 {% hint style="info" %}
 The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
@@ -392,7 +392,7 @@ The Email Template also allows to **attach files to send**. If you would also li
 * Mark **Capture Submitted Data** and **Capture Passwords**
 * Set a **redirection**
 
-![](<../../.gitbook/assets/image (823).png>)
+![](<../../.gitbook/assets/image (826).png>)
 
 {% hint style="info" %}
 Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
@@ -408,7 +408,7 @@ For the redirection you could **redirect the users to the legit main web page** 
 * Set a name
 * **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
 
-![](<../../.gitbook/assets/image (160).png>)
+![](<../../.gitbook/assets/image (163).png>)
 
 ### Campaign
 
@@ -416,7 +416,7 @@ Finally, create a campaign selecting a name, the email template, the landing pag
 
 Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
 
-![](<../../.gitbook/assets/image (189).png>)
+![](<../../.gitbook/assets/image (192).png>)
 
 {% hint style="info" %}
 I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.

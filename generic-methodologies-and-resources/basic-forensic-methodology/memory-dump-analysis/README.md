@@ -32,17 +32,17 @@ Start **searching** for **malware** inside the pcap. Use the **tools** mentioned
 
 When the dump is small (just some KB, maybe a few MB) then it's probably a mini dump crash report and not a memory dump.
 
-![](<../../../.gitbook/assets/image (529).png>)
+![](<../../../.gitbook/assets/image (532).png>)
 
 If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and modules being executed:
 
-![](<../../../.gitbook/assets/image (260).png>)
+![](<../../../.gitbook/assets/image (263).png>)
 
 You can also load the exception and see the decompiled instructions
 
-![](<../../../.gitbook/assets/image (139).png>)
+![](<../../../.gitbook/assets/image (142).png>)
 
-![](<../../../.gitbook/assets/image (607).png>)
+![](<../../../.gitbook/assets/image (610).png>)
 
 Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
 

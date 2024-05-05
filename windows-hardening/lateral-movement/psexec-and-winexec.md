@@ -39,7 +39,7 @@ Find moe detailed steps in: [https://blog.ropnop.com/using-credentials-to-own-wi
 
 **You could also use the Windows Sysinternals binary PsExec.exe:**
 
-![](<../../.gitbook/assets/image (925).png>)
+![](<../../.gitbook/assets/image (928).png>)
 
 You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 

@@ -112,7 +112,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 Note that even if `dyld_shared_cache_util` tool doesn't work, you can pass the **shared dyld binary to Hopper** and Hopper will be able to identify all the libraries and let you **select which one** you want to investigate:
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (1149).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Some extractors won't work as dylibs are prelinked with hard coded addresses in therefore they might be jumping to unknown addresses
 
@@ -256,6 +256,8 @@ Mac OS binaries usually are compiled as **universal binaries**. A **universal bi
 {% content-ref url="universal-binaries-and-mach-o-format.md" %}
 [universal-binaries-and-mach-o-format.md](universal-binaries-and-mach-o-format.md)
 {% endcontent-ref %}
+
+## macOS Process Memory
 
 ## macOS memory dumping
 

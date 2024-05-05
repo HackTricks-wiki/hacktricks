@@ -1277,7 +1277,7 @@ screen -ls
 screen -ls <username>/ # Show another user' screen sessions
 ```
 
-![](<../../.gitbook/assets/image (138).png>)
+![](<../../.gitbook/assets/image (141).png>)
 
 **Attach to a session**
 
@@ -1299,7 +1299,7 @@ ps aux | grep tmux #Search for tmux consoles not using default folder for socket
 tmux -S /tmp/dev_sess ls #List using that socket, you can start a tmux session in that socket with: tmux -S /tmp/dev_sess
 ```
 
-![](<../../.gitbook/assets/image (834).png>)
+![](<../../.gitbook/assets/image (837).png>)
 
 **Attach to a session**
 

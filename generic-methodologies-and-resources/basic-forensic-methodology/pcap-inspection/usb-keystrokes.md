@@ -16,7 +16,7 @@ Other ways to support HackTricks:
 
 If you have a pcap containing the communication via USB of a keyboard like the following one:
 
-![](<../../../.gitbook/assets/image (959).png>)
+![](<../../../.gitbook/assets/image (962).png>)
 
 You can use the tool [**ctf-usb-keyboard-parser**](https://github.com/carlospolop-forks/ctf-usb-keyboard-parser) to get what was written in the communication:
 

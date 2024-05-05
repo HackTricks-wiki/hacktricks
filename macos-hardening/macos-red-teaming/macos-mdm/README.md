@@ -104,7 +104,7 @@ Apple devices manufactured after 2010 generally have **12-character alphanumeric
 6. Profile installation (Device) a. incl. MDM, SCEP and root CA payloads
 7. MDM command issuance (Device)
 
-![](<../../../.gitbook/assets/image (691).png>)
+![](<../../../.gitbook/assets/image (694).png>)
 
 The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
 
@@ -112,7 +112,7 @@ The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Librar
 
 This part of the process occurs when a **user boots a Mac for the first time** (or after a complete wipe)
 
-![](<../../../.gitbook/assets/image (1041).png>)
+![](<../../../.gitbook/assets/image (1044).png>)
 
 or when executing `sudo profiles show -type enrollment`
 
@@ -146,7 +146,7 @@ The response is a JSON dictionary with some important data like:
 
 ### **Step 5: Profile Retrieval**
 
-![](<../../../.gitbook/assets/image (441).png>)
+![](<../../../.gitbook/assets/image (444).png>)
 
 * Request sent to **url provided in DEP profile**.
 * **Anchor certificates** are used to **evaluate trust** if provided.

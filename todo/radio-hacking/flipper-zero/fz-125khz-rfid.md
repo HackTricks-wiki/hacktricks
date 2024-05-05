@@ -18,7 +18,6 @@ Other ways to support HackTricks:
 
 {% embed url="https://websec.nl/" %}
 
-
 ## Intro
 
 For more info about how 125kHz tags work check:
@@ -52,13 +51,13 @@ Some times, when you get a card you will find the ID (or part) of it written in 
 For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
 The other 2 can be brute-forced if you cannot read them from the card.
 
-<figure><img src="../../../.gitbook/assets/image (101).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (104).png" alt=""><figcaption></figcaption></figure>
 
 * **HID**
 
 Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
 
-<figure><img src="../../../.gitbook/assets/image (1011).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1014).png" alt=""><figcaption></figcaption></figure>
 
 ### Emulate/Write
 
@@ -71,7 +70,6 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 <figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
-
 
 <details>
 
