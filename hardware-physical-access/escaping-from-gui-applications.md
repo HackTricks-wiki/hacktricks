@@ -26,7 +26,17 @@ You can check their website and try their engine for **free** at:
 
 {% embed url="https://whiteintel.io" %}
 
-***
+---
+
+## Check physical device
+
+|   Component   | Action                                                               |
+| ------------- | -------------------------------------------------------------------- |
+| Power button  | Turning the device off and on again may expose the start screen      |
+| Power cable   | Check whether the device reboots when the power is cut off briefly   |
+| USB ports     | Connect physical keyboard with more shortcuts                        |
+| Ethernet      | Network scan or sniffing may enable further exploitation             |
+
 
 ## Check for possible actions inside the GUI application
 
