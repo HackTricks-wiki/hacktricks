@@ -2,23 +2,42 @@
 
 <details>
 
-<summary><strong>AWSハッキングをゼロからヒーローまで学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>！</strong></summary>
+<summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong>から<strong>ゼロからヒーローまでAWSハッキングを学ぶ</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE（HackTricks AWS Red Team Expert）</strong></a><strong>を学ぶ！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-- **HackTricksで企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-- [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を入手する
-- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-- **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦で**@carlospolopm**をフォローする
-- **ハッキングトリックを共有するためにPRを提出して** [**HackTricks**](https://github.com/carlospolop/hacktricks) **および** [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) **のGitHubリポジトリにコントリビュートする**
+* **HackTricks で企業を宣伝したい** または **HackTricks をPDFでダウンロードしたい場合は** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！
+* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクションを見つける
+* **💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f) または [**telegramグループ**](https://t.me/peass) に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live) をフォローする。
+* **ハッキングテクニックを共有するために、** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のGitHubリポジトリにPRを提出する。
 
 </details>
 
-MIGは**Mach IPCのコード作成プロセスを簡素化**するために作成されました。基本的には、サーバーとクライアントが指定された定義と通信するために必要なコードを**生成**します。生成されたコードが見た目が悪くても、開発者はそれをインポートするだけで、彼のコードは以前よりもはるかにシンプルになります。
+## 基本情報
+
+MIG は **Mach IPC のプロセスを簡素化するために作成** されました。基本的には、サーバーとクライアントが指定された定義と通信するために必要なコードを **生成** します。生成されたコードが見た目が悪くても、開発者はそれをインポートするだけで、以前よりもコードがはるかにシンプルになります。
+
+定義は、`.defs` 拡張子を使用して、Interface Definition Language（IDL）で指定されます。
+
+これらの定義には 5 つのセクションがあります:
+
+* **サブシステム宣言**: キーワード `subsystem` は **名前** と **ID** を示すために使用されます。また、サーバーがカーネルで実行される必要がある場合は **`KernelServer`** としてマークすることも可能です。
+* **インクルージョンとインポート**: MIG は C プリプロセッサを使用しているため、インポートを使用することができます。さらに、ユーザーまたはサーバー生成コードに `uimport` および `simport` を使用することも可能です。
+* **型の宣言**: データ型を定義することができますが、通常は `mach_types.defs` と `std_types.defs` をインポートします。カスタムの場合は、いくつかの構文を使用できます:
+* \[i`n/out]tran`: 受信メッセージから変換する必要がある関数、または送信メッセージに変換する必要がある関数
+* `c[user/server]type`: 別の C 型にマッピングします。
+* `destructor`: この型が解放されるときにこの関数を呼び出します。
+* **操作**: これらは RPC メソッドの定義です。5 つの異なるタイプがあります:
+* `routine`: 返信を期待します
+* `simpleroutine`: 返信を期待しません
+* `procedure`: 返信を期待します
+* `simpleprocedure`: 返信を期待しません
+* `function`: 返信を期待します
 
 ### 例
 
-定義ファイルを作成し、この場合は非常にシンプルな関数を持つもの:
+非常にシンプルな関数を持つ定義ファイルを作成します:
 
 {% code title="myipc.defs" %}
 ```cpp
@@ -37,13 +56,15 @@ n2          :  uint32_t);
 ```
 {% endcode %}
 
-今度は、migを使用して、互いに通信し合い、Subtract関数を呼び出すことができるサーバーおよびクライアントコードを生成します:
+最初の**引数はバインドするポート**であり、MIGは**自動的に応答ポートを処理**します（クライアントコードで`mig_get_reply_port()`を呼び出さない限り）。さらに、**操作のID**は、指定されたサブシステムIDから始まる**連続した**ものになります（したがって、操作が非推奨になると削除され、そのIDを引き続き使用するために`skip`が使用されます）。
+
+今、MIGを使用して、互いに通信できるサーバーおよびクライアントコードを生成し、Subtract関数を呼び出すようにします：
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
 複数の新しいファイルが現在のディレクトリに作成されます。
 
-**`myipcServer.c`** と **`myipcServer.h`** のファイルには、受信したメッセージIDに基づいて呼び出す関数を基本的に定義する **`SERVERPREFmyipc_subsystem`** 構造体の宣言と定義が含まれています（開始番号は500としました）:
+**`myipcServer.c`** と **`myipcServer.h`** のファイルには、基本的に受信したメッセージIDに基づいて呼び出す関数を定義する **`SERVERPREFmyipc_subsystem`** 構造体の宣言と定義が含まれています（開始番号は500としました）:
 
 {% tabs %}
 {% tab title="myipcServer.c" %}
@@ -64,33 +85,7 @@ myipc_server_routine,
 ```
 {% endtab %}
 
-{% tab title="myipcServer.h" %} 
-
-### macOS IPC: Inter-Process Communication
-
-#### macOS MIG: Mach Interface Generator
-
-Mach Interface Generator (MIG) is a tool used to define inter-process communication on macOS systems. It generates client-side and server-side code for message-based communication between processes. MIG is commonly used in macOS for communication between user-space applications and system services.
-
-When working with macOS IPC and MIG, it is important to understand how messages are defined, sent, and received between processes. By utilizing MIG, developers can create structured interfaces for communication, making it easier to manage inter-process communication in macOS environments.
-
-#### Example Usage of MIG
-
-```c
-#include <mach/mach.h>
-#include <mach/message.h>
-#include <mach/mig.h>
-
-#include "myipcServer.h"
-
-kern_return_t myipc_server(mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP);
-```
-
-In the example above, `myipc_server` is a function generated by MIG that handles incoming messages from client processes. This function processes the incoming message and generates an appropriate response to be sent back to the client.
-
-By leveraging MIG in macOS IPC scenarios, developers can streamline the process of defining and handling inter-process communication, enhancing the overall security and efficiency of communication between processes. 
-
-{% endtab %}
+{% tab title="myipcServer.h" %}次の手順は、`myipcServer.h`ファイルの内容を示しています。このファイルは、Machインターフェースジェネレータ（MIG）を使用して生成されたMachサーバーのIPC関数を定義します。IPC関数は、プロセス間通信を処理するために使用されます。%}
 ```c
 /* Description of this subsystem, for use in direct RPC */
 extern const struct SERVERPREFmyipc_subsystem {
@@ -106,7 +101,7 @@ routine[1];
 {% endtab %}
 {% endtabs %}
 
-前の構造に基づいて、関数**`myipc_server_routine`**は**メッセージID**を取得し、適切な呼び出すべき関数を返します：
+前の構造に基づいて、関数**`myipc_server_routine`**は**メッセージID**を取得し、適切な呼び出すべき関数を返します:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -121,7 +116,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-以下の例では、定義で関数を1つだけ定義していますが、複数の関数を定義した場合、それらは**`SERVERPREFmyipc_subsystem`**の配列内にあり、最初の関数はID **500**に割り当てられ、2番目の関数はID **501**に割り当てられるでしょう...
+この例では、定義で関数を1つだけ定義していますが、複数の関数を定義した場合、それらは**`SERVERPREFmyipc_subsystem`**の配列内にあり、最初の関数はID **500**に割り当てられ、2番目の関数はID **501**に割り当てられるでしょう...
 
 実際には、この関係を**`myipcServer.h`**の**`subsystem_to_name_map_myipc`**構造体で特定することが可能です:
 ```c
@@ -130,7 +125,7 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 { "Subtract", 500 }
 #endif
 ```
-最後に、サーバーを動作させるための重要な関数である**`myipc_server`**があります。これは、実際に受信したIDに関連する関数を**呼び出す**ものです。
+最後に、サーバーを動作させるための重要な関数は**`myipc_server`**になります。これは実際に受信したIDに関連する関数を**呼び出す**ものです：
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -166,7 +161,7 @@ return FALSE;
 
 以前に強調された行をチェックして、IDによって呼び出す関数にアクセスします。
 
-以下は、サーバーとクライアントを作成するコードで、クライアントがサーバーから関数を呼び出すことができる簡単な**サーバー**と**クライアント**のコードです：
+以下は、クライアントがサーバーから関数を呼び出すことができる単純な**サーバー**と**クライアント**を作成するコードです：
 
 {% tabs %}
 {% tab title="myipc_server.c" %}
@@ -204,34 +199,17 @@ mach_msg_server(myipc_server, sizeof(union __RequestUnion__SERVERPREFmyipc_subsy
 
 {% tab title="myipc_client.c" %} 
 
-### macOS IPC: クライアントコード
+### macOS IPC: Inter-Process Communication
 
-```c
-#include <stdio.h>
-#include <mach/mach.h>
-#include <servers/bootstrap.h>
-#include "myipc.h"
+#### macOS MIG: Mach Interface Generator
 
-int main() {
-    kern_return_t kr;
-    mach_port_t server_port;
-    char *message = "Hello, server!";
+Mach Interface Generator (MIG) is a tool used to define inter-process communication (IPC) interfaces for Mach-based systems. It generates C code that handles the serialization and deserialization of messages sent between processes. By using MIG, developers can define the messages that can be sent and received by processes, making IPC implementation easier and more structured.
 
-    kr = bootstrap_look_up(bootstrap_port, "com.example.myipcserver", &server_port);
-    if (kr != KERN_SUCCESS) {
-        printf("Failed to look up server port: %s\n", mach_error_string(kr));
-        return 1;
-    }
+To use MIG, developers need to write an interface definition file (.defs) that specifies the messages and data structures to be used for IPC. This file is then processed by MIG to generate the necessary C code for handling IPC. The generated code includes functions for sending and receiving messages, as well as functions for managing memory and resources during IPC.
 
-    kr = myipc_send_message(server_port, message);
-    if (kr != KERN_SUCCESS) {
-        printf("Failed to send message: %s\n", mach_error_string(kr));
-        return 1;
-    }
+By leveraging MIG, developers can ensure that IPC in their applications is well-defined and secure, reducing the risk of vulnerabilities related to inter-process communication. Additionally, MIG helps in maintaining a clear separation of concerns between processes, making it easier to reason about the flow of data and messages in a system.
 
-    return 0;
-}
-```
+Overall, MIG is a powerful tool for defining and implementing IPC interfaces in macOS, providing developers with a structured and secure way to handle inter-process communication in their applications.
 
 {% endtab %}
 ```c
@@ -262,11 +240,11 @@ USERPREFSubtract(port, 40, 2);
 
 多くのバイナリが今やMIGを使用してmachポートを公開しているため、**MIGが使用されたことを特定**し、各メッセージIDでMIGが実行する**関数を特定**する方法を知ることが興味深いです。
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)は、Mach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定できます。
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)は、Mach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定することができます。
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-以前に、**受信したメッセージIDに応じて正しい関数を呼び出す関数**は`myipc_server`であると述べられていました。ただし、通常はバイナリのシンボル（関数名なし）を持っていないため、**逆コンパイルしたものを確認するのが興味深い**です。なぜなら、（この関数のコードは公開された関数に独立しているため）常に非常に似ているからです：
+以前に、**受信したメッセージIDに応じて正しい関数を呼び出す関数**は`myipc_server`であると述べられていました。ただし、通常はバイナリのシンボル（関数名なし）を持っていないため、**逆コンパイルしたものを確認するのが興味深い**でしょう。なぜなら、この関数のコードは常に非常に似ているからです（この関数のコードは公開された関数に独立しています）：
 
 {% tabs %}
 {% tab title="myipc_server decompiled 1" %}
@@ -282,7 +260,7 @@ var_18 = arg1;
 *(int32_t *)(var_18 + 0x10) = 0x0;
 if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
-// この関数を特定するのに役立つsign_extend_64への呼び出し
+// この関数を識別するのに役立つsign_extend_64への呼び出し
 // これにより、呼び出す必要のある呼び出しのポインタがraxに格納されます
 // アドレス0x100004040（関数アドレス配列の使用を確認）
 // 0x1f4 = 500（開始ID）
@@ -363,7 +341,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// 関数が呼び出されるべき計算されたアドレスに対する呼び出し
+// 関数があるべき計算されたアドレスに呼び出し
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -387,7 +365,7 @@ return r0;
 {% endtab %}
 {% endtabs %}
 
-実際には、**`0x100004000`**関数に移動すると、**`routine_descriptor`**構造体の配列が見つかります。構造体の最初の要素は**関数が実装されているアドレス**であり、**構造体は0x28バイト**を取るため、0バイトから始まる0x28バイトごとに8バイトを取得し、それが**呼び出される関数のアドレス**になります。
+実際には、**`0x100004000`**関数に移動すると、**`routine_descriptor`**構造体の配列が見つかります。構造体の最初の要素は**関数が実装されているアドレス**であり、**構造体は0x28バイト**を取るため、0バイトから始まる各0x28バイトで8バイトを取得し、それが**呼び出される関数のアドレス**になります。
 
 <figure><img src="../../../../.gitbook/assets/image (35).png" alt=""><figcaption></figcaption></figure>
 
