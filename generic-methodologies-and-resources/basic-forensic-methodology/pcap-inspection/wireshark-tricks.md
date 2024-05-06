@@ -16,7 +16,7 @@ Other ways to support HackTricks:
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
 
@@ -26,7 +26,7 @@ You can check their website and try their engine for **free** at:
 
 {% embed url="https://whiteintel.io" %}
 
----
+***
 
 ## Improve your Wireshark skills
 
@@ -45,43 +45,43 @@ The following tutorials are amazing to learn some cool basic tricks:
 
 Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
 
-![](<../../../.gitbook/assets/image (253).png>)
+![](<../../../.gitbook/assets/image (256).png>)
 
 **Resolved Addresses**
 
 Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
 
-![](<../../../.gitbook/assets/image (890).png>)
+![](<../../../.gitbook/assets/image (893).png>)
 
 **Protocol Hierarchy**
 
 Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
 
-![](<../../../.gitbook/assets/image (583).png>)
+![](<../../../.gitbook/assets/image (586).png>)
 
 **Conversations**
 
 Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
 
-![](<../../../.gitbook/assets/image (450).png>)
+![](<../../../.gitbook/assets/image (453).png>)
 
 **Endpoints**
 
 Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
 
-![](<../../../.gitbook/assets/image (893).png>)
+![](<../../../.gitbook/assets/image (896).png>)
 
 **DNS info**
 
 Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
 
-![](<../../../.gitbook/assets/image (1060).png>)
+![](<../../../.gitbook/assets/image (1063).png>)
 
 **I/O Graph**
 
 Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
 
-![](<../../../.gitbook/assets/image (989).png>)
+![](<../../../.gitbook/assets/image (992).png>)
 
 ### Filters
 
@@ -107,7 +107,7 @@ If you want to **search** for **content** inside the **packets** of the sessions
 
 You can add a column that shows the Host HTTP header:
 
-![](<../../../.gitbook/assets/image (635).png>)
+![](<../../../.gitbook/assets/image (639).png>)
 
 And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
 
@@ -119,11 +119,11 @@ And a column that add the Server name from an initiating HTTPS connection (**ssl
 
 In current Wireshark instead of `bootp` you need to search for `DHCP`
 
-![](<../../../.gitbook/assets/image (1010).png>)
+![](<../../../.gitbook/assets/image (1013).png>)
 
 ### From NBNS
 
-![](<../../../.gitbook/assets/image (1000).png>)
+![](<../../../.gitbook/assets/image (1003).png>)
 
 ## Decrypting TLS
 
@@ -131,7 +131,7 @@ In current Wireshark instead of `bootp` you need to search for `DHCP`
 
 _edit>preference>protocol>ssl>_
 
-![](<../../../.gitbook/assets/image (1100).png>)
+![](<../../../.gitbook/assets/image (1103).png>)
 
 Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
 
@@ -143,11 +143,11 @@ To detect this search inside the environment for to variable `SSLKEYLOGFILE`
 
 A file of shared keys will look like this:
 
-![](<../../../.gitbook/assets/image (817).png>)
+![](<../../../.gitbook/assets/image (820).png>)
 
 To import this in wireshark go to \_edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
 
-![](<../../../.gitbook/assets/image (986).png>)
+![](<../../../.gitbook/assets/image (989).png>)
 
 ## ADB communication
 
@@ -182,7 +182,7 @@ f.close()
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
 
@@ -191,7 +191,6 @@ Their primary goal of WhiteIntel is to combat account takeovers and ransomware a
 You can check their website and try their engine for **free** at:
 
 {% embed url="https://whiteintel.io" %}
-
 
 <details>
 

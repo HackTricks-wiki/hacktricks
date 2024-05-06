@@ -217,11 +217,11 @@ cat /sys/class/graphics/fb0/virtual_size
 
 To **open** the **raw image** you can use **GIMP**, select the \*\*`screen.raw` \*\* file and select as file type **Raw image data**:
 
-![](<../../../.gitbook/assets/image (460).png>)
+![](<../../../.gitbook/assets/image (463).png>)
 
 Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen):
 
-![](<../../../.gitbook/assets/image (314).png>)
+![](<../../../.gitbook/assets/image (317).png>)
 
 ## Root Group
 

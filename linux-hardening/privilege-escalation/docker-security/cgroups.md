@@ -53,15 +53,15 @@ The output structure is as follows:
 
 The filesystem is typically utilized for accessing **cgroups**, diverging from the Unix system call interface traditionally used for kernel interactions. To investigate a shell's cgroup configuration, one should examine the **/proc/self/cgroup** file, which reveals the shell's cgroup. Then, by navigating to the **/sys/fs/cgroup** (or **`/sys/fs/cgroup/unified`**) directory and locating a directory that shares the cgroup's name, one can observe various settings and resource usage information pertinent to the cgroup.
 
-![Cgroup Filesystem](<../../../.gitbook/assets/image (1125).png>)
+![Cgroup Filesystem](<../../../.gitbook/assets/image (1128).png>)
 
 The key interface files for cgroups are prefixed with **cgroup**. The **cgroup.procs** file, which can be viewed with standard commands like cat, lists the processes within the cgroup. Another file, **cgroup.threads**, includes thread information.
 
-![Cgroup Procs](<../../../.gitbook/assets/image (278).png>)
+![Cgroup Procs](<../../../.gitbook/assets/image (281).png>)
 
 Cgroups managing shells typically encompass two controllers that regulate memory usage and process count. To interact with a controller, files bearing the controller's prefix should be consulted. For instance, **pids.current** would be referenced to ascertain the count of threads in the cgroup.
 
-![Cgroup Memory](<../../../.gitbook/assets/image (674).png>)
+![Cgroup Memory](<../../../.gitbook/assets/image (677).png>)
 
 The indication of **max** in a value suggests the absence of a specific limit for the cgroup. However, due to the hierarchical nature of cgroups, limits might be imposed by a cgroup at a lower level in the directory hierarchy.
 
@@ -93,7 +93,7 @@ The **root cgroup** is an exception to these rules, allowing direct process plac
 
 **Monitoring CPU usage** within a cgroup is possible through the `cpu.stat` file, displaying total CPU time consumed, helpful for tracking usage across a service's subprocesses:
 
-<figure><img src="../../../.gitbook/assets/image (905).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (908).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
 
 ## References
 

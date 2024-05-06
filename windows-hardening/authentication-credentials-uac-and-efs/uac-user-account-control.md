@@ -14,7 +14,7 @@ Other ways to support HackTricks:
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:
@@ -193,7 +193,7 @@ Also, using [this](https://en.wikipedia.org/wiki/Windows\_10\_version\_history) 
 
 You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
 
-![](<../../.gitbook/assets/image (860).png>)
+![](<../../.gitbook/assets/image (863).png>)
 
 (_explorer.exe_ should works)
 
@@ -222,7 +222,7 @@ If you take a look to **UACME** you will note that **most UAC bypasses abuse a D
 
 Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
 
-<figure><img src="../../.gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:

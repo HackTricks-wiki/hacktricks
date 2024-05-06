@@ -80,7 +80,7 @@ You can find it in [https://www.cgsecurity.org/wiki/TestDisk\_Download](https://
 
 It comes with GUI and CLI versions. You can select the **file-types** you want PhotoRec to search for.
 
-![](<../../../.gitbook/assets/image (239).png>)
+![](<../../../.gitbook/assets/image (242).png>)
 
 ### binvis
 

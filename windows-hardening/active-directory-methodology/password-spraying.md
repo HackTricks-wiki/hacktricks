@@ -79,7 +79,7 @@ python kerbrute.py -domain jurassic.park -users users.txt -password Password123 
 
 * With the `scanner/smb/smb_login` module of **Metasploit**:
 
-![](<../../.gitbook/assets/image (742).png>)
+![](<../../.gitbook/assets/image (745).png>)
 
 * Using **rpcclient**:
 

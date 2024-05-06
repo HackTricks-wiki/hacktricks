@@ -44,7 +44,7 @@ When a file is deleted in this folder 2 specific files are created:
 * `$I{id}`: File information (date of when it was deleted}
 * `$R{id}`: Content of the file
 
-![](<../../../.gitbook/assets/image (1026).png>)
+![](<../../../.gitbook/assets/image (1029).png>)
 
 Having these files you can use the tool [**Rifiuti**](https://github.com/abelcheung/rifiuti2) to get the original address of the deleted files and the date it was deleted (use `rifiuti-vista.exe` for Vista – Win10).
 
@@ -60,15 +60,15 @@ Shadow Copy is a technology included in Microsoft Windows that can create **back
 
 These backups are usually located in the `\System Volume Information` from the root of the file system and the name is composed of **UIDs** shown in the following image:
 
-![](<../../../.gitbook/assets/image (91).png>)
+![](<../../../.gitbook/assets/image (94).png>)
 
 Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow\_copy\_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
 
-![](<../../../.gitbook/assets/image (573).png>)
+![](<../../../.gitbook/assets/image (576).png>)
 
 The registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contains the files and keys **to not backup**:
 
-![](<../../../.gitbook/assets/image (251).png>)
+![](<../../../.gitbook/assets/image (254).png>)
 
 The registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` also contains configuration information about the `Volume Shadow Copies`.
 
@@ -128,7 +128,7 @@ The **created time** of any jumplist indicates the **the first time the file was
 
 You can inspect the jumplists using [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
-![](<../../../.gitbook/assets/image (165).png>)
+![](<../../../.gitbook/assets/image (168).png>)
 
 (_Note that the timestamps provided by JumplistExplorer are related to the jumplist file itself_)
 
@@ -146,7 +146,7 @@ It's possible to identify that a USB device was used thanks to the creation of:
 
 Note that some LNK file instead of pointing to the original path, points to the WPDNSE folder:
 
-![](<../../../.gitbook/assets/image (215).png>)
+![](<../../../.gitbook/assets/image (218).png>)
 
 The files in the folder WPDNSE are a copy of the original ones, then won't survive a restart of the PC and the GUID is taken from a shellbag.
 
@@ -164,7 +164,7 @@ Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about whe
 
 [**USBDetective**](https://usbdetective.com) can be used to obtain information about the USB devices that have been connected to an image.
 
-![](<../../../.gitbook/assets/image (449).png>)
+![](<../../../.gitbook/assets/image (452).png>)
 
 ### Plug and Play Cleanup
 
@@ -195,7 +195,7 @@ Emails contain **2 interesting parts: The headers and the content** of the email
 
 Also, inside the `References` and `In-Reply-To` headers you can find the ID of the messages:
 
-![](<../../../.gitbook/assets/image (590).png>)
+![](<../../../.gitbook/assets/image (593).png>)
 
 ### Windows Mail App
 
@@ -223,7 +223,7 @@ The registry path `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion
 
 You can open the PST file using the tool [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
 
-![](<../../../.gitbook/assets/image (495).png>)
+![](<../../../.gitbook/assets/image (498).png>)
 
 ### Microsoft Outlook OST Files
 
@@ -314,7 +314,7 @@ To inspect these files you can use the tool [**PEcmd.exe**](https://github.com/E
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
 
-![](<../../../.gitbook/assets/image (312).png>)
+![](<../../../.gitbook/assets/image (315).png>)
 
 ### Superprefetch
 
@@ -364,7 +364,7 @@ Such data is stored within the registry at specific locations based on the versi
 
 To parse the stored information, the [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser) is recommended for use.
 
-![](<../../../.gitbook/assets/image (72).png>)
+![](<../../../.gitbook/assets/image (75).png>)
 
 ### Amcache
 

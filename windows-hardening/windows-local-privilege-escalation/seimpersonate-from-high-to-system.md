@@ -181,13 +181,13 @@ Let's check current Administrator permissions over `svchost.exe` processes with 
 5. Select "Administrators" and click on "Edit"
 6. Click on "Show advanced permissions"
 
-![](<../../.gitbook/assets/image (434).png>)
+![](<../../.gitbook/assets/image (437).png>)
 
 The previous image contains all the privileges that "Administrators" have over the selected process (as you can see in case of `svchost.exe` they only have "Query" privileges)
 
 See the privileges "Administrators" have over `winlogon.exe`:
 
-![](<../../.gitbook/assets/image (1099).png>)
+![](<../../.gitbook/assets/image (1102).png>)
 
 Inside that process "Administrators" can "Read Memory" and "Read Permissions" which probably allows Administrators to impersonate the token used by this process.
 

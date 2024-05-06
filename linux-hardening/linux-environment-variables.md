@@ -127,19 +127,19 @@ Change how your prompt looks.
 
 Root:
 
-![](<../.gitbook/assets/image (894).png>)
+![](<../.gitbook/assets/image (897).png>)
 
 Regular user:
 
-![](<../.gitbook/assets/image (737).png>)
+![](<../.gitbook/assets/image (740).png>)
 
 One, two and three backgrounded jobs:
 
-![](<../.gitbook/assets/image (142).png>)
+![](<../.gitbook/assets/image (145).png>)
 
 One background job, one stopped and last command didn't finish correctly:
 
-![](<../.gitbook/assets/image (712).png>)
+![](<../.gitbook/assets/image (715).png>)
 
 **Try Hard Security Group**
 

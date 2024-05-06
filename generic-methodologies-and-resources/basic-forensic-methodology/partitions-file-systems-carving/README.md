@@ -25,13 +25,13 @@ It's allocated in the **first sector of the disk after the 446B of the boot code
 It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
 MBR allows **max 2.2TB**.
 
-![](<../../../.gitbook/assets/image (347).png>)
+![](<../../../.gitbook/assets/image (350).png>)
 
-![](<../../../.gitbook/assets/image (301).png>)
+![](<../../../.gitbook/assets/image (304).png>)
 
 From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
-![](<../../../.gitbook/assets/image (306).png>)
+![](<../../../.gitbook/assets/image (310).png>)
 
 **Format**
 
@@ -93,7 +93,7 @@ The GUID Partition Table, known as GPT, is favored for its enhanced capabilities
 
 * GPT maintains backward compatibility through a protective MBR. This feature resides in the legacy MBR space but is designed to prevent older MBR-based utilities from mistakenly overwriting GPT disks, hence safeguarding the data integrity on GPT-formatted disks.
 
-![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID\_Partition\_Table\_Scheme.svg/800px-GUID\_Partition\_Table\_Scheme.svg.png](<../../../.gitbook/assets/image (1059).png>)
+![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID\_Partition\_Table\_Scheme.svg/800px-GUID\_Partition\_Table\_Scheme.svg.png](<../../../.gitbook/assets/image (1062).png>)
 
 **Hybrid MBR (LBA 0 + GPT)**
 
@@ -139,7 +139,7 @@ The partition table header defines the usable blocks on the disk. It also define
 
 **Partitions Types**
 
-![](<../../../.gitbook/assets/image (80).png>)
+![](<../../../.gitbook/assets/image (83).png>)
 
 More partition types in [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](https://en.wikipedia.org/wiki/GUID\_Partition\_Table)
 
@@ -147,7 +147,7 @@ More partition types in [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](h
 
 After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
 
-![](<../../../.gitbook/assets/image (351).png>)
+![](<../../../.gitbook/assets/image (354).png>)
 
 If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
 

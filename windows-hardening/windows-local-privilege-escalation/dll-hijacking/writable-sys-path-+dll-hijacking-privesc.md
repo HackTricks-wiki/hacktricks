@@ -59,13 +59,13 @@ if ($envPath -notlike "*$folderPath*") {
 * **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
 * Add these **filters** and you will find all the Dlls that some **proccess tried to load** from the writable System Path folder:
 
-<figure><img src="../../../.gitbook/assets/image (942).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (945).png" alt=""><figcaption></figcaption></figure>
 
 ### Missed Dlls
 
 Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
 
-<figure><img src="../../../.gitbook/assets/image (604).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (607).png" alt=""><figcaption></figcaption></figure>
 
 In this case the .exe are useless so ignore them, the missed DLLs where from:
 

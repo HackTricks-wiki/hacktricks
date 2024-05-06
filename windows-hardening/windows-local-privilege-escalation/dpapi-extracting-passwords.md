@@ -86,7 +86,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 This is what a bunch of Master Keys of a user will looks like:
 
-![](<../../.gitbook/assets/image (1118).png>)
+![](<../../.gitbook/assets/image (1121).png>)
 
 Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting** the **encrypted Master Key** is interesting in order to **decrypt** later that **other content** encrypted with it.
 

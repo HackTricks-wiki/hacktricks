@@ -14,7 +14,7 @@
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
 
@@ -24,7 +24,7 @@ You can check their website and try their engine for **free** at:
 
 {% embed url="https://whiteintel.io" %}
 
----
+***
 
 {% hint style="warning" %}
 **JuicyPotato doesn't work** on Windows Server 2019 and Windows 10 build 1809 onwards. However, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) can be used to **leverage the same privileges and gain `NT AUTHORITY\SYSTEM`** level access. _**Check:**_
@@ -133,7 +133,7 @@ c:\Users\Public>
 
 ### Launch a new CMD (if you have RDP access)
 
-![](<../../.gitbook/assets/image (297).png>)
+![](<../../.gitbook/assets/image (300).png>)
 
 ## CLSID Problems
 
@@ -157,7 +157,7 @@ Then download [test\_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/maste
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
 

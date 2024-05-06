@@ -58,7 +58,7 @@ Note that **`.dmg`** installers support **so many formats** that in the past som
 
 ### Hierarchy
 
-<figure><img src="../../../.gitbook/assets/image (222).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (225).png" alt=""><figcaption></figcaption></figure>
 
 The hierarchy of a DMG file can be different based on the content. However, for application DMGs, it usually follows this structure:
 
@@ -102,7 +102,7 @@ It's possible to just generate a **`.pkg`** file with **pre and post-install scr
 
 It's possible to add **`<script>`** tags in the **distribution xml** file of the package and that code will get executed and it can **execute commands** using **`system.run`**:
 
-<figure><img src="../../../.gitbook/assets/image (1040).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1043).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 

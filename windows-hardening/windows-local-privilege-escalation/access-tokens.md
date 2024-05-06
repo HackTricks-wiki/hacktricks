@@ -14,7 +14,7 @@
 
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
 
@@ -24,7 +24,7 @@ You can check their website and try their engine for **free** at:
 
 {% embed url="https://whiteintel.io" %}
 
----
+***
 
 ## Access Tokens
 
@@ -78,7 +78,7 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 
 or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
-![](<../../.gitbook/assets/image (769).png>)
+![](<../../.gitbook/assets/image (772).png>)
 
 ### Local administrator
 
@@ -131,10 +131,9 @@ Take a look to [**all the possible token privileges and some definitions on this
 
 Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
-
 ### [WhiteIntel](https://whiteintel.io)
 
-<figure><img src="/.gitbook/assets/image (1224).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1227).png" alt=""><figcaption></figcaption></figure>
 
 [**WhiteIntel**](https://whiteintel.io) is a **dark-web** fueled search engine that offers **free** functionalities to check if a company or its customers have been **compromised** by **stealer malwares**.
 

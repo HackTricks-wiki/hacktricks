@@ -77,7 +77,7 @@ They are often used to store the **base address of the thread-local storage** re
 **PSTATE** contains several process components serialized into the operating-system-visible **`SPSR_ELx`** special register, being X the **permission** **level of the triggered** exception (this allows to recover the process state when the exception ends).\
 These are the accessible fields:
 
-<figure><img src="../../../.gitbook/assets/image (1193).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1196).png" alt=""><figcaption></figcaption></figure>
 
 * The **`N`**, **`Z`**, **`C`** and **`V`** condition flags:
   * **`N`** means the operation yielded a negative result
@@ -121,7 +121,7 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   * Example: `ldr x0, [x1]` — This loads a value from the memory location pointed to by `x1` into `x0`.
   * **Offset mode**: An offset affecting the orin pointer is indicated, for example:
     * `ldr x2, [x1, #8]`, this will load in x2 the value from x1 + 8
-    * &#x20;`ldr x2, [x0, x1, lsl #2]`, this will load in x2 an object from the array x0, from the position x1 (index) \* 4
+    * `ldr x2, [x0, x1, lsl #2]`, this will load in x2 an object from the array x0, from the position x1 (index) \* 4
   * **Pre-indexed mode**: This will apply calculations to the origin, get the result and also store the new origin in the origin.
     * `ldr x2, [x1, #8]!`, this will load `x1 + 8` in `x2` and store in x1 the result of `x1 + 8`
     * `str lr, [sp, #-4]!`, Store the link register in sp and update the register sp
@@ -189,12 +189,12 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   * Example: `tst X1, #7` Check if any of the last 3 bits of X1 is 1
 * **`teq`**: XOR operation discarding the result
 * **`b`**: Unconditional Branch
-  * Example: `b myFunction`&#x20;
+  * Example: `b myFunction`
   * Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
 * **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
   * Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
   * Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
-* **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`. (This is&#x20;
+* **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`. (This is
   * Example: `blr x1` — This calls the function whose address is contained in `x1` and stores the return address in `x30`.
 * **`ret`**: **Return** from **subroutine**, typically using the address in **`x30`**.
   * Example: `ret` — This returns from the current subroutine using the return address in `x30`.
@@ -301,7 +301,7 @@ This is done by **saving the processor state from the `CPSR` to the `SPSR`** of 
 
 In AArch32 the CPSR works similar to **`PSTATE`** in AArch64 and is also stored in **`SPSR_ELx`** when a exception is taken to restore later the execution:
 
-<figure><img src="../../../.gitbook/assets/image (1194).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1197).png" alt=""><figcaption></figcaption></figure>
 
 The fields are divided in some groups:
 
@@ -325,7 +325,7 @@ The fields are divided in some groups:
 * **`E`** bit: Indicates the **endianness**.
 * **Mode and Exception Mask Bits** (0-4): They determine the current execution state. The **5th** one indicates if the program runs as 32bit (a 1) or 64bit (a 0). The other 4 represents the **exception mode currently in used** (when a exception occurs and it's being handled). The number set **indicates the current priority** in case another exception is triggered while this is being handled.
 
-<figure><img src="../../../.gitbook/assets/image (1197).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1200).png" alt=""><figcaption></figcaption></figure>
 
 * **`AIF`**: Certain exceptions can be disabled using the bits **`A`**, `I`, `F`. If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
 
@@ -394,6 +394,10 @@ whoami
 )
 ```
 
+{% hint style="success" %}
+Setting the env variable `NSObjCMessageLoggingEnabled=1` it's possible to log when this function is called in a file like `/tmp/msgSends-pid`.
+{% endhint %}
+
 ### Shellcodes
 
 To compile:
@@ -423,7 +427,6 @@ for s in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ;
     echo -n $s | awk '{for (i = 7; i > 0; i -= 2) {printf "\\x" substr($0, i, 2)}}'
 done
 ```
-
 
 <details>
 

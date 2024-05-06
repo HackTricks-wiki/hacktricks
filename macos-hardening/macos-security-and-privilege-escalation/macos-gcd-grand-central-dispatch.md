@@ -210,11 +210,11 @@ Currently Ghidra doesn't understand neither the ObjectiveC **`dispatch_block_t`*
 
 So if you want it to understand them, you could just **declare them**:
 
-<figure><img src="../../.gitbook/assets/image (1157).png" alt="" width="563"><figcaption></figcaption></figure>
-
-<figure><img src="../../.gitbook/assets/image (1159).png" alt="" width="563"><figcaption></figcaption></figure>
-
 <figure><img src="../../.gitbook/assets/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/image (1162).png" alt="" width="563"><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Then, find a place in the code where they are **used**:
 
@@ -222,15 +222,15 @@ Then, find a place in the code where they are **used**:
 Note all of references made to "block" to understand how you could figure out that the struct is being used.
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/image (1161).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Right click on the variable -> Retype Variable and select in this case **`swift_dispatch_block`**:
 
-<figure><img src="../../.gitbook/assets/image (1162).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Ghidra will automatically rewrite everything:
 
-<figure><img src="../../.gitbook/assets/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## References
 

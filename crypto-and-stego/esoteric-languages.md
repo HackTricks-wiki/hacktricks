@@ -27,7 +27,7 @@ Check that wiki to search more esotreic languages
 
 ## npiet
 
-![](<../.gitbook/assets/image (688).png>)
+![](<../.gitbook/assets/image (691).png>)
 
 [https://www.bertnase.de/npiet/npiet-execute.php](https://www.bertnase.de/npiet/npiet-execute.php)
 

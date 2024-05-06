@@ -37,7 +37,7 @@ You can check and configure which protocol will be used:
 
 Execute _secpol.msc_ -> Local policies -> Security Options -> Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5).
 
-![](<../../.gitbook/assets/image (916).png>)
+![](<../../.gitbook/assets/image (919).png>)
 
 ### Registry
 
