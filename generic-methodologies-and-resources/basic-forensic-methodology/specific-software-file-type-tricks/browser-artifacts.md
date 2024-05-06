@@ -6,25 +6,25 @@
 
 Otras formas de apoyar a HackTricks:
 
-* Si quieres ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 <figure><img src="../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=browser-artifacts) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 ¡Accede hoy mismo:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=browser-artifacts" %}
 
 ## Artefactos de Navegadores <a href="#id-3def" id="id-3def"></a>
 
-Los artefactos del navegador incluyen varios tipos de datos almacenados por los navegadores web, como historial de navegación, marcadores y datos de caché. Estos artefactos se guardan en carpetas específicas dentro del sistema operativo, difiriendo en ubicación y nombre entre navegadores, pero generalmente almacenando tipos de datos similares.
+Los artefactos del navegador incluyen varios tipos de datos almacenados por los navegadores web, como el historial de navegación, marcadores y datos de caché. Estos artefactos se guardan en carpetas específicas dentro del sistema operativo, con ubicaciones y nombres diferentes según el navegador, pero generalmente almacenando tipos de datos similares.
 
 Aquí tienes un resumen de los artefactos de navegador más comunes:
 
@@ -37,24 +37,24 @@ Aquí tienes un resumen de los artefactos de navegador más comunes:
 * **Favicons**: Iconos asociados con sitios web, que aparecen en pestañas y marcadores, útiles para obtener información adicional sobre las visitas del usuario.
 * **Sesiones del Navegador**: Datos relacionados con las sesiones del navegador abiertas.
 * **Descargas**: Registros de archivos descargados a través del navegador.
-* **Datos de Formularios**: Información introducida en formularios web, guardada para sugerencias de autocompletar futuras.
+* **Datos de Formularios**: Información introducida en formularios web, guardada para sugerencias de autocompletar en el futuro.
 * **Miniaturas**: Imágenes de vista previa de sitios web.
 * **Diccionario Personalizado.txt**: Palabras añadidas por el usuario al diccionario del navegador.
 
 ## Firefox
 
-Firefox organiza los datos del usuario dentro de perfiles, almacenados en ubicaciones específicas según el sistema operativo:
+Firefox organiza los datos del usuario en perfiles, almacenados en ubicaciones específicas según el sistema operativo:
 
 * **Linux**: `~/.mozilla/firefox/`
 * **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
 * **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-Un archivo `profiles.ini` dentro de estos directorios lista los perfiles de usuario. Los datos de cada perfil se almacenan en una carpeta nombrada en la variable `Path` dentro de `profiles.ini`, ubicada en el mismo directorio que `profiles.ini` en sí. Si falta la carpeta de un perfil, puede haber sido eliminada.
+Un archivo `profiles.ini` dentro de estos directorios lista los perfiles de usuario. Los datos de cada perfil se almacenan en una carpeta nombrada con la variable `Path` dentro de `profiles.ini`, ubicada en el mismo directorio que `profiles.ini` en sí. Si falta la carpeta de un perfil, es posible que haya sido eliminada.
 
 Dentro de cada carpeta de perfil, puedes encontrar varios archivos importantes:
 
 * **places.sqlite**: Almacena historial, marcadores y descargas. Herramientas como [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) en Windows pueden acceder a los datos del historial.
-* Utiliza consultas SQL específicas para extraer información de historial y descargas.
+* Utiliza consultas SQL específicas para extraer información del historial y descargas.
 * **bookmarkbackups**: Contiene copias de seguridad de marcadores.
 * **formhistory.sqlite**: Almacena datos de formularios web.
 * **handlers.json**: Gestiona los manejadores de protocolo.
@@ -67,12 +67,12 @@ Dentro de cada carpeta de perfil, puedes encontrar varios archivos importantes:
 * **downloads.sqlite**: Base de datos de descargas antiguas, ahora integrada en places.sqlite.
 * **thumbnails**: Miniaturas de sitios web.
 * **logins.json**: Información de inicio de sesión encriptada.
-* **key4.db** o **key3.db**: Almacena claves de cifrado para asegurar información sensible.
+* **key4.db** o **key3.db**: Almacena claves de cifrado para proteger información sensible.
 
 Además, verificar la configuración de antiphishing del navegador se puede hacer buscando entradas `browser.safebrowsing` en `prefs.js`, indicando si las funciones de navegación segura están habilitadas o deshabilitadas.
 
-Para intentar descifrar la contraseña maestra, puedes usar [https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox\_decrypt)\
-Con el siguiente script y llamada puedes especificar un archivo de contraseña para fuerza bruta:
+Para intentar descifrar la contraseña maestra, puedes utilizar [https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox\_decrypt)\
+Con el siguiente script y llamada puedes especificar un archivo de contraseñas para realizar fuerza bruta:
 
 {% code title="brute.sh" %}
 ```bash
@@ -123,7 +123,7 @@ Internet Explorer 11 gestiona sus datos y metadatos en varias ubicaciones, lo qu
 
 ### Almacenamiento de metadatos
 
-Los metadatos de Internet Explorer se almacenan en `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (siendo VX V01, V16 o V24). Además, el archivo `V01.log` puede mostrar discrepancias en la hora de modificación con `WebcacheVX.data`, lo que indica la necesidad de reparación utilizando `esentutl /r V01 /d`. Estos metadatos, alojados en una base de datos ESE, pueden recuperarse e inspeccionarse utilizando herramientas como photorec y [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html), respectivamente. Dentro de la tabla **Containers**, se puede discernir las tablas o contenedores específicos donde se almacena cada segmento de datos, incluidos detalles de caché para otras herramientas de Microsoft como Skype.
+Los metadatos de Internet Explorer se almacenan en `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (siendo VX V01, V16 o V24). Además, el archivo `V01.log` puede mostrar discrepancias en el tiempo de modificación con `WebcacheVX.data`, lo que indica la necesidad de reparación utilizando `esentutl /r V01 /d`. Estos metadatos, alojados en una base de datos ESE, pueden recuperarse e inspeccionarse utilizando herramientas como photorec y [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html), respectivamente. Dentro de la tabla **Containers**, se puede discernir las tablas o contenedores específicos donde se almacena cada segmento de datos, incluidos detalles de caché para otras herramientas de Microsoft como Skype.
 
 ### Inspección de caché
 
@@ -150,8 +150,8 @@ Las URLs escritas y sus tiempos de uso se almacenan en el registro en `NTUSER.DA
 Microsoft Edge almacena datos de usuario en `%userprofile%\Appdata\Local\Packages`. Las rutas para varios tipos de datos son:
 
 * **Ruta del perfil**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
-* **Historial, Cookies y Descargas**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
-* **Configuraciones, Marcadores y Lista de lectura**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb`
+* **Historial, cookies y descargas**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
+* **Configuraciones, marcadores y lista de lectura**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb`
 * **Caché**: `C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC#!XXX\MicrosoftEdge\Cache`
 * **Últimas sesiones activas**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active`
 
@@ -162,7 +162,7 @@ Los datos de Safari se almacenan en `/Users/$User/Library/Safari`. Los archivos 
 * **History.db**: Contiene tablas `history_visits` y `history_items` con URLs y marcas de tiempo de visita. Usa `sqlite3` para consultar.
 * **Downloads.plist**: Información sobre archivos descargados.
 * **Bookmarks.plist**: Almacena URLs marcadas.
-* **TopSites.plist**: Sitios más visitados con frecuencia.
+* **TopSites.plist**: Sitios más visitados.
 * **Extensions.plist**: Lista de extensiones del navegador Safari. Usa `plutil` o `pluginkit` para recuperar.
 * **UserNotificationPermissions.plist**: Dominios permitidos para enviar notificaciones. Usa `plutil` para analizar.
 * **LastSession.plist**: Pestañas de la última sesión. Usa `plutil` para analizar.
@@ -186,10 +186,10 @@ Estas rutas y comandos son cruciales para acceder y comprender los datos de nave
 <figure><img src="../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=browser-artifacts) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
 Accede hoy mismo:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=browser-artifacts" %}
 
 <details>
 

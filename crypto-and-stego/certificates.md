@@ -17,10 +17,10 @@ Otras formas de apoyar a HackTricks:
 <figure><img src="../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=certificates) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 ¡Accede hoy mismo:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=certificates" %}
 
 ## ¿Qué es un Certificado
 
@@ -36,12 +36,12 @@ En los certificados x509, varios **campos** desempeñan roles críticos para gar
 
 * El **Número de Versión** indica la versión del formato x509.
 * El **Número de Serie** identifica de forma única el certificado dentro del sistema de una Autoridad de Certificación (CA), principalmente para el seguimiento de revocaciones.
-* El campo **Sujeto** representa al propietario del certificado, que puede ser una máquina, un individuo u una organización. Incluye una identificación detallada como:
+* El campo **Sujeto** representa al propietario del certificado, que puede ser una máquina, un individuo o una organización. Incluye una identificación detallada como:
 * **Nombre Común (CN)**: Dominios cubiertos por el certificado.
 * **País (C)**, **Localidad (L)**, **Estado o Provincia (ST, S o P)**, **Organización (O)** y **Unidad Organizativa (OU)** proporcionan detalles geográficos y organizativos.
 * El **Nombre Distinguido (DN)** encapsula la identificación completa del sujeto.
-* **Emisor** detalla quién verificó y firmó el certificado, incluyendo subcampos similares al Sujeto para la CA.
-* El **Período de Validez** está marcado por las marcas de tiempo **No Antes** y **No Después**, asegurando que el certificado no se use antes o después de una fecha determinada.
+* El **Emisor** detalla quién verificó y firmó el certificado, incluyendo subcampos similares al Sujeto para la CA.
+* El **Período de Validez** está marcado por marcas de tiempo de **No Antes** y **No Después**, asegurando que el certificado no se use antes o después de una fecha determinada.
 * La sección de **Clave Pública**, crucial para la seguridad del certificado, especifica el algoritmo, tamaño y otros detalles técnicos de la clave pública.
 * Las **extensiones x509v3** mejoran la funcionalidad del certificado, especificando **Uso de Clave**, **Uso Extendido de Clave**, **Nombre Alternativo del Sujeto** y otras propiedades para ajustar la aplicación del certificado.
 
@@ -74,7 +74,7 @@ print(f"Issuer: {issuer}")
 print(f"Subject: {subject}")
 print(f"Public Key: {public_key}")
 ```
-### **Diferencia entre los Puntos de Distribución OCSP y CRL**
+### **Diferencia entre Puntos de Distribución OCSP y CRL**
 
 **OCSP** (**RFC 2560**) implica que un cliente y un respondedor trabajen juntos para verificar si un certificado de clave pública digital ha sido revocado, sin necesidad de descargar la **CRL** completa. Este método es más eficiente que la tradicional **CRL**, que proporciona una lista de números de serie de certificados revocados pero requiere la descarga de un archivo potencialmente grande. Las CRL pueden incluir hasta 512 entradas. Más detalles están disponibles [aquí](https://www.arubanetworks.com/techdocs/ArubaOS%206\_3\_1\_Web\_Help/Content/ArubaFrameStyles/CertRevocation/About\_OCSP\_and\_CRL.htm).
 
@@ -103,7 +103,7 @@ Diferentes formatos existen para almacenar certificados, cada uno con sus propio
 * Formato más ampliamente utilizado para certificados.
 * Requiere archivos separados para certificados y claves privadas, codificados en Base64 ASCII.
 * Extensiones comunes: .cer, .crt, .pem, .key.
-* Utilizado principalmente por servidores Apache y similares.
+* Principalmente utilizado por servidores Apache y similares.
 
 ### **Formato DER**
 
@@ -177,21 +177,21 @@ openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certif
 <figure><img src="../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas** del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=certificates) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas** del mundo.\
 Obtenga acceso hoy:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=certificates" %}
 
 <details>
 
-<summary><strong>Aprenda hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Red Team de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprenda hacking en AWS de cero a héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtenga el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * Descubra [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síganos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Comparta sus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparta sus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud). 
 
 </details>

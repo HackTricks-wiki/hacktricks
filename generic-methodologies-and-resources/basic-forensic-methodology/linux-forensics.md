@@ -2,22 +2,23 @@
 
 <figure><img src="../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
-¡Accede hoy mismo:
+\
+Utilice [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas del mundo**.\
+Acceda hoy mismo:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}
 
 <details>
 
-<summary><strong>Aprende a hackear AWS desde cero hasta convertirte en un héroe con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (Experto en Equipos Rojos de AWS de HackTricks)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprenda hacking en AWS desde cero hasta convertirse en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Si desea ver su **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Obtenga la [**merchandising oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* **Únase al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síganos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Comparta sus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -25,7 +26,7 @@ Otras formas de apoyar a HackTricks:
 
 ### Información Básica
 
-En primer lugar, se recomienda tener una **USB** con **binarios y bibliotecas conocidos y buenos** (puedes simplemente obtener Ubuntu y copiar las carpetas _/bin_, _/sbin_, _/lib_ y _/lib64_), luego montar la USB y modificar las variables de entorno para usar esos binarios:
+En primer lugar, se recomienda tener una **USB** con **binarios y bibliotecas conocidos y buenos** (puede simplemente obtener Ubuntu y copiar las carpetas _/bin_, _/sbin_, _/lib_ y _/lib64_), luego montar la USB y modificar las variables de entorno para usar esos binarios:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -54,7 +55,7 @@ Mientras se obtiene la información básica, se debe verificar cosas extrañas c
 
 - Los **procesos de root** generalmente se ejecutan con PIDS bajos, por lo que si encuentras un proceso de root con un PID alto, puedes sospechar
 - Verificar **inicios de sesión registrados** de usuarios sin shell dentro de `/etc/passwd`
-- Verificar los **hashes de contraseñas** dentro de `/etc/shadow` para usuarios sin shell
+- Verificar **hashes de contraseñas** dentro de `/etc/shadow` para usuarios sin shell
 
 ### Volcado de memoria
 
@@ -97,9 +98,9 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-### Pre-análisis de la imagen del disco
+### Análisis previo de la imagen del disco
 
-Crear una imagen de disco sin más datos.
+Crear una imagen del disco sin más datos.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -155,10 +156,10 @@ ThisisTheMasterSecret
 <figure><img src="../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
 Obtenga acceso hoy:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}
 
 ## Buscar Malware conocido
 
@@ -167,7 +168,7 @@ Obtenga acceso hoy:
 Linux ofrece herramientas para garantizar la integridad de los componentes del sistema, crucial para detectar archivos potencialmente problemáticos.
 
 * **Sistemas basados en RedHat**: Utilice `rpm -Va` para una verificación exhaustiva.
-* **Sistemas basados en Debian**: `dpkg --verify` para verificación inicial, seguido de `debsums | grep -v "OK$"` (después de instalar `debsums` con `apt-get install debsums`) para identificar cualquier problema.
+* **Sistemas basados en Debian**: `dpkg --verify` para verificación inicial, seguido de `debsums | grep -v "OK$"` (después de instalar `debsums` con `apt-get install debsums`) para identificar problemas.
 
 ### Detectores de Malware/Rootkit
 
@@ -179,7 +180,7 @@ Lea la siguiente página para conocer herramientas que pueden ser útiles para e
 
 ## Buscar programas instalados
 
-Para buscar de manera efectiva programas instalados en sistemas Debian y RedHat, considere aprovechar los registros y bases de datos del sistema junto con verificaciones manuales en directorios comunes.
+Para buscar eficazmente programas instalados en sistemas Debian y RedHat, considere aprovechar los registros y bases de datos del sistema junto con verificaciones manuales en directorios comunes.
 
 * Para Debian, inspeccione _**`/var/lib/dpkg/status`**_ y _**`/var/log/dpkg.log`**_ para obtener detalles sobre las instalaciones de paquetes, utilizando `grep` para filtrar información específica.
 * Los usuarios de RedHat pueden consultar la base de datos RPM con `rpm -qa --root=/mntpath/var/lib/rpm` para listar los paquetes instalados.
@@ -203,10 +204,10 @@ find / -type f -executable | grep <something>
 <figure><img src="../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas** del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias **más avanzadas** del mundo.\
 Obtenga acceso hoy:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}
 
 ## Recuperar Binarios en Ejecución Eliminados
 
@@ -258,7 +259,7 @@ Los módulos del kernel de Linux, a menudo utilizados por malware como component
 
 Linux emplea varios archivos para ejecutar programas automáticamente al iniciar sesión de usuario, potencialmente albergando malware:
 
-- **/etc/profile.d/**\*, **/etc/profile** y **/etc/bash.bashrc**: Ejecutado para cualquier inicio de sesión de usuario.
+- **/etc/profile.d/**\*, **/etc/profile** y **/etc/bash.bashrc**: Ejecutados para cualquier inicio de sesión de usuario.
 - **\~/.bashrc**, **\~/.bash\_profile**, **\~/.profile** y **\~/.config/autostart**: Archivos específicos del usuario que se ejecutan al iniciar sesión.
 - **/etc/rc.local**: Se ejecuta después de que todos los servicios del sistema se han iniciado, marcando el final de la transición a un entorno multiusuario.
 
@@ -274,7 +275,7 @@ Los sistemas Linux registran las actividades de los usuarios y los eventos del s
 - **/var/log/kern.log**: Almacena mensajes del kernel, incluidos errores y advertencias.
 - **/var/log/dmesg**: Contiene mensajes de controladores de dispositivos.
 - **/var/log/faillog**: Registra intentos de inicio de sesión fallidos, ayudando en investigaciones de violaciones de seguridad.
-- **/var/log/cron**: Registra ejecuciones de trabajos cron.
+- **/var/log/cron**: Registra la ejecución de trabajos cron.
 - **/var/log/daemon.log**: Realiza un seguimiento de las actividades de los servicios en segundo plano.
 - **/var/log/btmp**: Documenta intentos de inicio de sesión fallidos.
 - **/var/log/httpd/**: Contiene registros de errores y accesos de Apache HTTPD.
@@ -306,9 +307,9 @@ Revisa archivos que pueden otorgar privilegios adicionales:
 Algunas aplicaciones también generan sus propios registros:
 
 - **SSH**: Examina _\~/.ssh/authorized\_keys_ y _\~/.ssh/known\_hosts_ para conexiones remotas no autorizadas.
-- **Escritorio Gnome**: Revisa _\~/.recently-used.xbel_ para archivos accedidos recientemente a través de aplicaciones Gnome.
+- **Escritorio Gnome**: Revisa _\~/.recently-used.xbel_ para archivos accedidos recientemente a través de aplicaciones de Gnome.
 - **Firefox/Chrome**: Verifica el historial y descargas del navegador en _\~/.mozilla/firefox_ o _\~/.config/google-chrome_ en busca de actividades sospechosas.
-- **VIM**: Revisa _\~/.viminfo_ para detalles de uso, como rutas de archivos accedidos e historial de búsquedas.
+- **VIM**: Revisa _\~/.viminfo_ para detalles de uso, como rutas de archivos accedidos e historial de búsqueda.
 - **Open Office**: Verifica el acceso a documentos recientes que puedan indicar archivos comprometidos.
 - **FTP/SFTP**: Revisa los registros en _\~/.ftp\_history_ o _\~/.sftp\_history_ para transferencias de archivos que podrían ser no autorizadas.
 - **MySQL**: Investiga _\~/.mysql\_history_ para consultas MySQL ejecutadas, revelando potencialmente actividades no autorizadas en la base de datos.
@@ -339,30 +340,30 @@ Más ejemplos e información en el github: [https://github.com/snovvcrash/usbrip
 <figure><img src="../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
 Accede hoy mismo:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}
 
 ## Revisar Cuentas de Usuario y Actividades de Inicio de Sesión
 
-Examina los archivos _**/etc/passwd**_, _**/etc/shadow**_ y los **registros de seguridad** en busca de nombres inusuales o cuentas creadas y utilizadas en proximidad a eventos no autorizados conocidos. Además, verifica posibles ataques de fuerza bruta sudo.\
+Examina los archivos _**/etc/passwd**_, _**/etc/shadow**_ y los **registros de seguridad** en busca de nombres inusuales o cuentas creadas y utilizadas en proximidad a eventos no autorizados conocidos. Además, verifica posibles ataques de fuerza bruta a sudo.\
 Además, revisa archivos como _**/etc/sudoers**_ y _**/etc/groups**_ en busca de privilegios inesperados otorgados a usuarios.\
-Finalmente, busca cuentas sin contraseñas o con contraseñas **fáciles de adivinar**.
+Finalmente, busca cuentas sin **contraseñas** o con contraseñas **fáciles de adivinar**.
 
 ## Examinar el Sistema de Archivos
 
 ### Analizando Estructuras del Sistema de Archivos en Investigaciones de Malware
 
-Cuando se investigan incidentes de malware, la estructura del sistema de archivos es una fuente crucial de información, revelando tanto la secuencia de eventos como el contenido del malware. Sin embargo, los autores de malware están desarrollando técnicas para dificultar este análisis, como modificar las marcas de tiempo de los archivos o evitar el sistema de archivos para el almacenamiento de datos.
+En investigaciones de incidentes de malware, la estructura del sistema de archivos es una fuente crucial de información, revelando tanto la secuencia de eventos como el contenido del malware. Sin embargo, los autores de malware están desarrollando técnicas para dificultar este análisis, como modificar las marcas de tiempo de los archivos o evitar el sistema de archivos para el almacenamiento de datos.
 
 Para contrarrestar estos métodos antiforense, es esencial:
 
 * Realizar un **análisis detallado de la línea de tiempo** utilizando herramientas como **Autopsy** para visualizar las líneas de tiempo de eventos o `mactime` de **Sleuth Kit** para obtener datos detallados de la línea de tiempo.
 * Investigar **scripts inesperados** en la variable $PATH del sistema, que podrían incluir scripts de shell o PHP utilizados por atacantes.
-* Examinar `/dev` en busca de archivos atípicos, ya que tradicionalmente contiene archivos especiales, pero puede contener archivos relacionados con malware.
+* Examinar `/dev` en busca de archivos atípicos, ya que tradicionalmente contiene archivos especiales, pero podría contener archivos relacionados con malware.
 * Buscar archivos o directorios ocultos con nombres como ".. " (punto punto espacio) o "..^G" (punto punto control-G), que podrían ocultar contenido malicioso.
-* Identificar archivos con setuid root utilizando el comando: `find / -user root -perm -04000 -print` Esto encuentra archivos con permisos elevados, que podrían ser abusados por atacantes.
+* Identificar archivos setuid root con el comando: `find / -user root -perm -04000 -print` Esto encuentra archivos con permisos elevados, que podrían ser abusados por atacantes.
 * Revisar las marcas de tiempo de eliminación en las tablas de inodos para detectar eliminaciones masivas de archivos, lo que podría indicar la presencia de rootkits o troyanos.
 * Inspeccionar inodos consecutivos en busca de archivos maliciosos cercanos después de identificar uno, ya que podrían haber sido colocados juntos.
 * Verificar archivos modificados recientemente en directorios binarios comunes (_/bin_, _/sbin_), ya que podrían ser alterados por malware.
@@ -421,7 +422,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord**](https://discord.gg/hRep4RUj7f) o al **grupo de telegram** o **sígueme** en **Twitter** 🐦[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 
 **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -430,7 +431,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 <figure><img src="../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
-¡Accede hoy mismo:
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+¡Accede hoy:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}

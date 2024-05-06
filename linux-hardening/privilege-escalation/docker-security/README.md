@@ -7,37 +7,37 @@
 Otras formas de apoyar a HackTricks:
 
 * Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF** ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**ropa oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Descubre [**La Familia PEASS**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* **Comparte tus trucos de hacking enviando PRs a los repositorios de** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 <figure><img src="../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
 ¡Accede hoy mismo:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
 
 ## **Seguridad Básica del Motor de Docker**
 
-El **motor de Docker** utiliza los **Namespaces** y **Cgroups** del kernel de Linux para aislar contenedores, ofreciendo una capa básica de seguridad. La protección adicional se logra mediante la **reducción de capacidades**, **Seccomp**, y **SELinux/AppArmor**, mejorando el aislamiento de los contenedores. Un **plugin de autenticación** puede restringir aún más las acciones de los usuarios.
+El **motor de Docker** emplea los **Namespaces** y **Cgroups** del kernel de Linux para aislar contenedores, ofreciendo una capa básica de seguridad. La protección adicional se logra mediante la **reducción de capacidades**, **Seccomp**, y **SELinux/AppArmor**, mejorando el aislamiento de los contenedores. Un **plugin de autenticación** puede restringir aún más las acciones de los usuarios.
 
 ![Seguridad de Docker](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
 ### Acceso Seguro al Motor de Docker
 
-El motor de Docker puede ser accedido localmente a través de un socket Unix o de forma remota utilizando HTTP. Para el acceso remoto, es esencial utilizar HTTPS y **TLS** para garantizar la confidencialidad, integridad y autenticación.
+El motor de Docker puede ser accedido localmente a través de un socket Unix o de forma remota utilizando HTTP. Para el acceso remoto, es esencial emplear HTTPS y **TLS** para garantizar la confidencialidad, integridad y autenticación.
 
-El motor de Docker, por defecto, escucha en el socket Unix en `unix:///var/run/docker.sock`. En sistemas Ubuntu, las opciones de inicio de Docker se definen en `/etc/default/docker`. Para habilitar el acceso remoto a la API y al cliente de Docker, expone el demonio de Docker sobre un socket HTTP agregando la siguiente configuración:
+El motor de Docker, por defecto, escucha en el socket Unix en `unix:///var/run/docker.sock`. En sistemas Ubuntu, las opciones de inicio de Docker se definen en `/etc/default/docker`. Para habilitar el acceso remoto a la API y al cliente de Docker, expone el demonio de Docker sobre un socket HTTP añadiendo la siguiente configuración:
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
-Sin embargo, exponer el demonio de Docker a través de HTTP no es recomendado debido a preocupaciones de seguridad. Es aconsejable asegurar las conexiones utilizando HTTPS. Hay dos enfoques principales para asegurar la conexión:
+Sin embargo, exponer el demonio de Docker a través de HTTP no es recomendado debido a preocupaciones de seguridad. Es recomendable asegurar las conexiones utilizando HTTPS. Hay dos enfoques principales para asegurar la conexión:
 
 1. El cliente verifica la identidad del servidor.
 2. Tanto el cliente como el servidor se autentican mutuamente.
@@ -50,17 +50,17 @@ Las imágenes de contenedores pueden almacenarse en repositorios privados o púb
 
 * [**Docker Hub**](https://hub.docker.com): Un servicio de registro público de Docker.
 * [**Docker Registry**](https://github.com/docker/distribution): Un proyecto de código abierto que permite a los usuarios alojar su propio registro.
-* [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Oferta comercial de Docker, que incluye autenticación de usuario basada en roles e integración con servicios de directorio LDAP.
+* [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Oferta de registro comercial de Docker, con autenticación de usuario basada en roles e integración con servicios de directorio LDAP.
 
 ### Escaneo de Imágenes
 
-Los contenedores pueden tener **vulnerabilidades de seguridad** ya sea debido a la imagen base o al software instalado encima de la imagen base. Docker está trabajando en un proyecto llamado **Nautilus** que realiza un escaneo de seguridad de los contenedores y enumera las vulnerabilidades. Nautilus funciona comparando cada capa de imagen de contenedor con un repositorio de vulnerabilidades para identificar agujeros de seguridad.
+Los contenedores pueden tener **vulnerabilidades de seguridad** ya sea debido a la imagen base o al software instalado encima de la imagen base. Docker está trabajando en un proyecto llamado **Nautilus** que realiza un escaneo de seguridad de los contenedores y lista las vulnerabilidades. Nautilus funciona comparando cada capa de imagen de contenedor con un repositorio de vulnerabilidades para identificar agujeros de seguridad.
 
 Para más [**información lee esto**](https://docs.docker.com/engine/scan/).
 
 * **`docker scan`**
 
-El comando **`docker scan`** te permite escanear imágenes de Docker existentes utilizando el nombre de la imagen o el ID. Por ejemplo, ejecuta el siguiente comando para escanear la imagen hello-world:
+El comando **`docker scan`** te permite escanear imágenes de Docker existentes utilizando el nombre o ID de la imagen. Por ejemplo, ejecuta el siguiente comando para escanear la imagen hello-world:
 ```bash
 docker scan hello-world
 
@@ -90,13 +90,13 @@ clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
 ### Firma de Imágenes de Docker
 
-La firma de imágenes de Docker garantiza la seguridad y la integridad de las imágenes utilizadas en contenedores. Aquí tienes una explicación resumida:
+La firma de imágenes de Docker garantiza la seguridad e integridad de las imágenes utilizadas en contenedores. Aquí tienes una explicación resumida:
 
-- **Docker Content Trust** utiliza el proyecto Notary, basado en The Update Framework (TUF), para gestionar la firma de imágenes. Para obtener más información, consulta [Notary](https://github.com/docker/notary) y [TUF](https://theupdateframework.github.io).
+- **Docker Content Trust** utiliza el proyecto Notary, basado en The Update Framework (TUF), para gestionar la firma de imágenes. Para más información, consulta [Notary](https://github.com/docker/notary) y [TUF](https://theupdateframework.github.io).
 - Para activar la confianza en el contenido de Docker, establece `export DOCKER_CONTENT_TRUST=1`. Esta función está desactivada de forma predeterminada en Docker versión 1.10 y posteriores.
-- Con esta función habilitada, solo se pueden descargar imágenes firmadas. La carga inicial de la imagen requiere establecer frases de contraseña para las claves raíz y de etiquetado, con Docker también admitiendo Yubikey para una seguridad mejorada. Puedes encontrar más detalles [aquí](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Con esta función habilitada, solo se pueden descargar imágenes firmadas. La carga inicial de la imagen requiere establecer frases de paso para las claves raíz y de etiquetado, con Docker también admitiendo Yubikey para una seguridad mejorada. Puedes encontrar más detalles [aquí](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 - Intentar descargar una imagen no firmada con la confianza en el contenido habilitada resulta en un error de "No hay datos de confianza para latest".
-- Para las cargas de imágenes posteriores a la primera, Docker solicita la frase de contraseña de la clave del repositorio para firmar la imagen.
+- Para las cargas de imágenes posteriores a la primera, Docker solicita la frase de paso de la clave del repositorio para firmar la imagen.
 
 Para hacer una copia de seguridad de tus claves privadas, utiliza el comando:
 ```bash
@@ -109,10 +109,10 @@ Cuando se cambia de hosts de Docker, es necesario mover las claves de root y del
 <figure><img src="../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir fácilmente y **automatizar flujos de trabajo** impulsados por las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) para construir fácilmente y **automatizar flujos de trabajo** impulsados por las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
 
 ## Características de Seguridad de Contenedores
 
@@ -120,13 +120,13 @@ Obtén acceso hoy:
 
 <summary>Resumen de las Características de Seguridad de Contenedores</summary>
 
-**Principales Características de Aislamiento de Procesos**
+**Características Principales de Aislamiento de Procesos**
 
 En entornos contenerizados, aislar proyectos y sus procesos es fundamental para la seguridad y la gestión de recursos. Aquí tienes una explicación simplificada de conceptos clave:
 
 **Espacios de Nombres (Namespaces)**
 
-* **Propósito**: Asegurar el aislamiento de recursos como procesos, red y sistemas de archivos. Especialmente en Docker, los espacios de nombres mantienen separados los procesos de un contenedor del host y de otros contenedores.
+* **Propósito**: Asegurar el aislamiento de recursos como procesos, red y sistemas de archivos. Especialmente en Docker, los espacios de nombres mantienen los procesos de un contenedor separados del host y de otros contenedores.
 * **Uso de `unshare`**: El comando `unshare` (o la llamada al sistema subyacente) se utiliza para crear nuevos espacios de nombres, proporcionando una capa adicional de aislamiento. Sin embargo, mientras que Kubernetes no bloquea esto inherentemente, Docker sí lo hace.
 * **Limitación**: Crear nuevos espacios de nombres no permite que un proceso vuelva a los espacios de nombres predeterminados del host. Para penetrar en los espacios de nombres del host, normalmente se requeriría acceso al directorio `/proc` del host, utilizando `nsenter` para entrar.
 
@@ -155,7 +155,7 @@ El **perfil Seccomp predeterminado de Docker** se puede encontrar en [https://gi
 
 **AppArmor**
 
-Docker tiene una plantilla que se puede activar: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+Docker tiene una plantilla que puedes activar: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
 Esto permitirá reducir capacidades, syscalls, acceso a archivos y carpetas...
 
@@ -182,7 +182,7 @@ Para **más información sobre los namespaces** consulta la siguiente página:
 ### cgroups
 
 La característica del kernel de Linux **cgroups** proporciona la capacidad de **restringir recursos como cpu, memoria, io, ancho de banda de red entre** un conjunto de procesos. Docker permite crear Contenedores utilizando la característica cgroup que permite el control de recursos para el Contenedor específico.\
-A continuación se muestra un Contenedor creado con la memoria del espacio de usuario limitada a 500m, la memoria del kernel limitada a 50m, la cuota de cpu a 512, el peso de blkioweight a 400. La cuota de CPU es una proporción que controla el uso de CPU del Contenedor. Tiene un valor predeterminado de 1024 y un rango entre 0 y 1024. Si tres Contenedores tienen la misma cuota de CPU de 1024, cada Contenedor puede utilizar hasta el 33% de la CPU en caso de contención de recursos de CPU. blkio-weight es una proporción que controla la E/S del Contenedor. Tiene un valor predeterminado de 500 y un rango entre 10 y 1000.
+A continuación se muestra un Contenedor creado con la memoria del espacio de usuario limitada a 500m, la memoria del kernel limitada a 50m, la cuota de cpu a 512, el peso de blkioweight a 400. La cuota de CPU es una proporción que controla el uso de CPU del Contenedor. Tiene un valor predeterminado de 1024 y un rango entre 0 y 1024. Si tres Contenedores tienen la misma cuota de CPU de 1024, cada Contenedor puede tomar hasta el 33% de la CPU en caso de contención de recursos de CPU. blkio-weight es una proporción que controla la E/S del Contenedor. Tiene un valor predeterminado de 500 y un rango entre 10 y 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
@@ -202,7 +202,7 @@ Para obtener más información, consulta:
 
 Las capacidades permiten un **control más preciso de las capacidades que se pueden permitir** para el usuario root. Docker utiliza la característica de capacidades del kernel de Linux para **limitar las operaciones que se pueden realizar dentro de un contenedor** independientemente del tipo de usuario.
 
-Cuando se ejecuta un contenedor de Docker, el **proceso elimina las capacidades sensibles que el proceso podría usar para escapar del aislamiento**. Esto intenta asegurar que el proceso no pueda realizar acciones sensibles y escapar:
+Cuando se ejecuta un contenedor de Docker, el **proceso elimina las capacidades sensibles que el proceso podría usar para escapar del aislamiento**. Esto intenta asegurar que el proceso no podrá realizar acciones sensibles y escapar:
 
 {% content-ref url="../linux-capabilities.md" %}
 [linux-capabilities.md](../linux-capabilities.md)
@@ -232,7 +232,7 @@ Esta es una característica de seguridad que permite a Docker **limitar las sysc
 * **Etiquetado de Archivos dentro de los Contenedores**: Los archivos dentro del contenedor suelen estar etiquetados como `container_file_t`.
 * **Reglas de Política**: La política de SELinux garantiza principalmente que los procesos con la etiqueta `container_t` solo puedan interactuar (leer, escribir, ejecutar) con archivos etiquetados como `container_file_t`.
 
-Este mecanismo garantiza que incluso si un proceso dentro de un contenedor se ve comprometido, está confinado a interactuar solo con objetos que tengan las etiquetas correspondientes, limitando significativamente el daño potencial de tales compromisos.
+Este mecanismo garantiza que incluso si un proceso dentro de un contenedor se ve comprometido, esté confinado a interactuar solo con objetos que tengan las etiquetas correspondientes, limitando significativamente el daño potencial de tales compromisos.
 
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
@@ -240,10 +240,10 @@ Este mecanismo garantiza que incluso si un proceso dentro de un contenedor se ve
 
 ### AuthZ & AuthN
 
-En Docker, un complemento de autorización desempeña un papel crucial en la seguridad al decidir si permitir o bloquear las solicitudes al demonio de Docker. Esta decisión se toma examinando dos contextos clave:
+En Docker, un complemento de autorización juega un papel crucial en la seguridad al decidir si permitir o bloquear las solicitudes al demonio de Docker. Esta decisión se toma examinando dos contextos clave:
 
-* **Contexto de Autenticación**: Incluye información completa sobre el usuario, como quiénes son y cómo se han autenticado.
-* **Contexto de Comando**: Comprende todos los datos pertinentes relacionados con la solicitud que se está realizando.
+* **Contexto de Autenticación**: Esto incluye información completa sobre el usuario, como quiénes son y cómo se han autenticado.
+* **Contexto de Comando**: Esto comprende todos los datos pertinentes relacionados con la solicitud que se está realizando.
 
 Estos contextos ayudan a garantizar que solo se procesen solicitudes legítimas de usuarios autenticados, mejorando la seguridad de las operaciones de Docker.
 
@@ -253,7 +253,7 @@ Estos contextos ayudan a garantizar que solo se procesen solicitudes legítimas 
 
 ## DoS desde un contenedor
 
-Si no estás limitando adecuadamente los recursos que un contenedor puede utilizar, un contenedor comprometido podría hacer un DoS en el host donde se está ejecutando.
+Si no se limitan adecuadamente los recursos que un contenedor puede utilizar, un contenedor comprometido podría realizar un ataque de denegación de servicio (DoS) en el host donde se está ejecutando.
 
 * DoS de CPU
 ```bash
@@ -287,7 +287,7 @@ Ejecutar el contenedor con la opción **`no-new-privileges`** habilitada **evita
 ```
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
-#### Otros
+#### Otro
 ```bash
 #You can manually add/drop capabilities with
 --cap-add
@@ -343,7 +343,7 @@ En entornos de Kubernetes, los secretos son compatibles de forma nativa y se pue
 
 ### gVisor
 
-**gVisor** es un kernel de aplicación, escrito en Go, que implementa una parte sustancial de la superficie del sistema Linux. Incluye un tiempo de ejecución de [Open Container Initiative (OCI)](https://www.opencontainers.org) llamado `runsc` que proporciona un **límite de aislamiento entre la aplicación y el kernel del host**. El tiempo de ejecución `runsc` se integra con Docker y Kubernetes, lo que facilita la ejecución de contenedores en sandbox.
+**gVisor** es un núcleo de aplicación, escrito en Go, que implementa una parte sustancial de la superficie del sistema Linux. Incluye un tiempo de ejecución de [Open Container Initiative (OCI)](https://www.opencontainers.org) llamado `runsc` que proporciona un **límite de aislamiento entre la aplicación y el núcleo del host**. El tiempo de ejecución `runsc` se integra con Docker y Kubernetes, lo que facilita la ejecución de contenedores en sandbox.
 
 {% embed url="https://github.com/google/gvisor" %}
 
@@ -356,15 +356,15 @@ En entornos de Kubernetes, los secretos son compatibles de forma nativa y se pue
 ### Consejos Resumidos
 
 * **No utilices la bandera `--privileged` ni montes un** [**socket de Docker dentro del contenedor**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** El socket de Docker permite la creación de contenedores, por lo que es una forma sencilla de tomar el control total del host, por ejemplo, ejecutando otro contenedor con la bandera `--privileged`.
-* No ejecutes como root dentro del contenedor. Utiliza un [**usuario diferente**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) y [**espacios de nombres de usuario**](https://docs.docker.com/engine/security/userns-remap/). El root en el contenedor es el mismo que en el host a menos que se remapee con espacios de nombres de usuario. Está solo ligeramente restringido por, principalmente, espacios de nombres de Linux, capacidades y cgroups.
+* No ejecutes como root dentro del contenedor. Utiliza un [**usuario diferente**](https://docs.docker.com/develop/develop-images/dockerfile\_best-practices/#user) y [**espacios de nombres de usuario**](https://docs.docker.com/engine/security/userns-remap/). El root en el contenedor es el mismo que en el host a menos que se remapee con espacios de nombres de usuario. Está solo ligeramente restringido por, principalmente, espacios de nombres de Linux, capacidades y cgroups.
 * [**Elimina todas las capacidades**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) y habilita solo las necesarias** (`--cap-add=...`). Muchas cargas de trabajo no necesitan capacidades y agregarlas aumenta el alcance de un posible ataque.
 * [**Utiliza la opción de seguridad “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) para evitar que los procesos obtengan más privilegios, por ejemplo, a través de binarios suid.
 * [**Limita los recursos disponibles para el contenedor**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Los límites de recursos pueden proteger la máquina de ataques de denegación de servicio.
 * **Ajusta los perfiles de** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(o SELinux)** para restringir las acciones y llamadas al sistema disponibles para el contenedor al mínimo requerido.
-* **Utiliza** [**imágenes oficiales de Docker**](https://docs.docker.com/docker-hub/official_images/) **y exige firmas** o construye las tuyas basadas en ellas. No heredes ni uses imágenes [con puertas traseras](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). También guarda las claves raíz, frases de contraseña en un lugar seguro. Docker tiene planes para gestionar claves con UCP.
+* **Utiliza** [**imágenes oficiales de Docker**](https://docs.docker.com/docker-hub/official\_images/) **y exige firmas** o construye las tuyas basadas en ellas. No heredes ni uses imágenes [con puertas traseras](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). También guarda las claves raíz, frases de contraseña en un lugar seguro. Docker tiene planes para gestionar claves con UCP.
 * **Reconstruye regularmente** tus imágenes para **aplicar parches de seguridad al host e imágenes**.
 * Gestiona tus **secretos sabiamente** para que sea difícil para el atacante acceder a ellos.
-* Si **expones el daemon de Docker, utiliza HTTPS** con autenticación de cliente y servidor.
+* Si **expones el demonio de Docker, utiliza HTTPS** con autenticación de cliente y servidor.
 * En tu Dockerfile, **prefiere COPY en lugar de ADD**. ADD extrae automáticamente archivos comprimidos y puede copiar archivos desde URL. COPY no tiene estas capacidades. Siempre que sea posible, evita usar ADD para no ser susceptible a ataques a través de URL remotas y archivos Zip.
 * Ten **contenedores separados para cada microservicio**.
 * **No incluyas ssh** dentro del contenedor, "docker exec" se puede usar para ssh al contenedor.
@@ -389,7 +389,7 @@ Si tienes acceso al socket de Docker o tienes acceso a un usuario en el **grupo 
 ## Reforzando Docker
 
 * La herramienta [**docker-bench-security**](https://github.com/docker/docker-bench-security) es un script que verifica docenas de prácticas recomendadas comunes sobre la implementación de contenedores Docker en producción. Las pruebas son todas automatizadas y se basan en el [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un contenedor con suficientes privilegios. Descubre **cómo ejecutarla en el README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un contenedor con suficientes privilegios. Descubre **cómo ejecutarlo en el README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Referencias
 
@@ -410,10 +410,10 @@ Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un conten
 <figure><img src="../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
 
 <details>
 
