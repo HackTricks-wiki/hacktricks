@@ -20,7 +20,9 @@ Other ways to support HackTricks:
 
 Mach uses **tasks** as the **smallest unit** for sharing resources, and each task can contain **multiple threads**. These **tasks and threads are mapped 1:1 to POSIX processes and threads**.
 
-Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilising one-way communication channels. **Messages are transferred between ports**, which act like **message queues** managed by the kernel.
+Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilising one-way communication channels. **Messages are transferred between ports**, which act kind of **message queues** managed by the kernel.
+
+A **port** is the **basic** element of Mach IPC. It can be used to **send messages and to receive** them.
 
 Each process has an **IPC table**, in there it's possible to find the **mach ports of the process**. The name of a mach port is actually a number (a pointer to the kernel object).
 
@@ -32,9 +34,12 @@ Port rights, which define what operations a task can perform, are key to this co
 
 * **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
   * A **task with the Receive** right can receive messages and **create Send rights**, allowing it to send messages. Originally only the **own task has Receive right over its por**t.
+  * If the owner of the Receive right **dies** or kills it, the **send right became useless (dead name).**
 * **Send right**, which allows sending messages to the port.
   * The Send right can be **cloned** so a task owning a Send right can clone the right and **grant it to a third task**.
+  * Note that **port rights** can also be **passed** though Mac messages.
 * **Send-once right**, which allows sending one message to the port and then disappears.
+  * This right **cannot** be **cloned**, but it can be **moved**.
 * **Port set right**, which denotes a _port set_ rather than a single port. Dequeuing a message from a port set dequeues a message from one of the ports it contains. Port sets can be used to listen on several ports simultaneously, a lot like `select`/`poll`/`epoll`/`kqueue` in Unix.
 * **Dead name**, which is not an actual port right, but merely a placeholder. When a port is destroyed, all existing port rights to the port turn into dead names.
 
@@ -46,16 +51,19 @@ File ports allows to encapsulate file descriptors in Mac ports (using Mach port 
 
 ### Establishing a communication
 
-#### Steps:
+As mentioned previously, it's possible to send rights using Mach messages, however, you **cannot send a right without already having a right** to send a Mach message. So, how is the first communication stablished?
 
-As it's mentioned, in order to establish the communication channel, the **bootstrap server** (**launchd** in mac) is involved.
+For this, he **bootstrap server** (**launchd** in mac) is involved, as **everyone can get a SEND right to the bootstrap server**, it's possible to ask it for a right to send a message to another process:
 
-1. Task **A** initiates a **new port**, obtaining a **RECEIVE right** in the process.
+1. Task **A** creates a **new port**, getting the **RECEIVE right** over it.
 2. Task **A**, being the holder of the RECEIVE right, **generates a SEND right for the port**.
-3. Task **A** establishes a **connection** with the **bootstrap server**, providing the **port's service name** and the **SEND right** through a procedure known as the bootstrap register.
-4. Task **B** interacts with the **bootstrap server** to execute a bootstrap **lookup for the service** name. If successful, the **server duplicates the SEND right** received from Task A and **transmits it to Task B**.
-5. Upon acquiring a SEND right, Task **B** is capable of **formulating** a **message** and dispatching it **to Task A**.
-6. For a bi-directional communication usually task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** so it can send messages to TASK B (bi-directional communication).
+3. Task **A** establishes a **connection** with the **bootstrap server**, and **sends it the SEND right** for the port it generated at the beginning.
+   * Remember that anyone can get a SEND right to the bootstrap server.
+4. Task A sends a `bootstrap_register` message to the bootstrap server to **associate the given port with a name** like `com.apple.taska`
+5. Task **B** interacts with the **bootstrap server** to execute a bootstrap **lookup for the service** name (`bootstrap_lookup`). So the bootstrap server can respond, task B will send it a **SEND right to a port it previously created** inside the lookup message. If the lookup is successful, the **server duplicates the SEND right** received from Task A and **transmits it to Task B**.
+   * Remember that anyone can get a SEND right to the bootstrap server.
+6. With this SEND right, **Task B** is capable of **sending** a **message** **to Task A**.
+7. For a bi-directional communication usually task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** so it can send messages to TASK B (bi-directional communication).
 
 The bootstrap server **cannot authenticate** the service name claimed by a task. This means a **task** could potentially **impersonate any system task**, such as falsely **claiming an authorization service name** and then approving every request.
 
@@ -65,11 +73,15 @@ For these predefined services, the **lookup process differs slightly**. When a s
 
 * Task **B** initiates a bootstrap **lookup** for a service name.
 * **launchd** checks if the task is running and if it isn’t, **starts** it.
-* Task **A** (the service) performs a **bootstrap check-in**. Here, the **bootstrap** server creates a SEND right, retains it, and **transfers the RECEIVE right to Task A**.
+* Task **A** (the service) performs a **bootstrap check-in** (`bootstrap_check_in()`). Here, the **bootstrap** server creates a SEND right, retains it, and **transfers the RECEIVE right to Task A**.
 * launchd duplicates the **SEND right and sends it to Task B**.
 * Task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** (the svc) so it can send messages to TASK B (bi-directional communication).
 
 However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
+
+{% hint style="danger" %}
+Therefore, launchd should never crash or the whole sysem will crash.
+{% endhint %}
 
 ### A Mach Message
 
@@ -90,7 +102,32 @@ typedef struct {
 
 Processes possessing a _**receive right**_ can receive messages on a Mach port. Conversely, the **senders** are granted a _**send**_ or a _**send-once right**_. The send-once right is exclusively for sending a single message, after which it becomes invalid.
 
-In order to achieve an easy **bi-directional communication** a process can specify a **mach port** in the mach **message header** called the _reply port_ (**`msgh_local_port`**) where the **receiver** of the message can **send a reply** to this message. The bitflags in **`msgh_bits`** can be used to **indicate** that a **send-once** **right** should be derived and transferred for this port (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+The initial field **`msgh_bits`** is a bitmap:
+
+* First bit (most significative) is used to indicate that a message is complex (more on this below)
+* The 3rd and 4th are used by the kernel
+* The **5 least significant bits of the 2nd byte** from can be used for **voucher**: another type of port to send key/value combinations.
+* The **5 least significant bits of the 3rd byte** from can be used for **local port**
+* The **5 least significant bits of the 4th byte** from can be used for **remote port**
+
+The types that can be specified in the voucher, local and remote ports are (from [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+
+```c
+#define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
+#define MACH_MSG_TYPE_MOVE_SEND         17      /* Must hold send right(s) */
+#define MACH_MSG_TYPE_MOVE_SEND_ONCE    18      /* Must hold sendonce right */
+#define MACH_MSG_TYPE_COPY_SEND         19      /* Must hold send right(s) */
+#define MACH_MSG_TYPE_MAKE_SEND         20      /* Must hold receive right */
+#define MACH_MSG_TYPE_MAKE_SEND_ONCE    21      /* Must hold receive right */
+#define MACH_MSG_TYPE_COPY_RECEIVE      22      /* NOT VALID */
+#define MACH_MSG_TYPE_DISPOSE_RECEIVE   24      /* must hold receive right */
+#define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
+#define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
+```
+
+For example, `MACH_MSG_TYPE_MAKE_SEND_ONCE` can be used to **indicate** that a **send-once** **right** should be derived and transferred for this port. It can also be specified `MACH_PORT_NULL` to prevent the recipient to be able to reply.
+
+In order to achieve an easy **bi-directional communication** a process can specify a **mach port** in the mach **message header** called the _reply port_ (**`msgh_local_port`**) where the **receiver** of the message can **send a reply** to this message.
 
 {% hint style="success" %}
 Note that this kind of bi-directional communication is used in XPC messages that expect a replay (`xpc_connection_send_message_with_reply` and `xpc_connection_send_message_with_reply_sync`). But **usually different ports are created** as explained previously to create the bi-directional communication.
@@ -104,13 +141,172 @@ The other fields of the message header are:
 * `msgh_id`: the ID of this message, which is interpreted by the receiver.
 
 {% hint style="danger" %}
-Note that **mach messages are sent over a \_mach port**\_, which is a **single receiver**, **multiple sender** communication channel built into the mach kernel. **Multiple processes** can **send messages** to a mach port, but at any point only **a single process can read** from it.
+Note that **mach messages are sent over a `mach port`**, which is a **single receiver**, **multiple sender** communication channel built into the mach kernel. **Multiple processes** can **send messages** to a mach port, but at any point only **a single process can read** from it.
 {% endhint %}
+
+Messages are then formed by the **`mach_msg_header_t`** header followed by the **body** and by the **trailer** (if any) and it can grant permission to reply to it. In these cases, the kernel just need to pass the message from one task to the other.
+
+A **trailer** is **information added to the message by the kernel** (cannot be set by the user) which can be requested in message reception with the flags `MACH_RCV_TRAILER_<trailer_opt>` (there is different information that can be requested).
+
+#### Complex Messages
+
+However, there are other more **complex** messages, like the ones passing additional port rights or sharing memory, where the kernel also needs to send these objects to the recipient. In this cases the most significant bit of the header `msgh_bits` is set.
+
+The possible descriptors to pass are defined in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):
+
+```c
+#define MACH_MSG_PORT_DESCRIPTOR                0
+#define MACH_MSG_OOL_DESCRIPTOR                 1
+#define MACH_MSG_OOL_PORTS_DESCRIPTOR           2
+#define MACH_MSG_OOL_VOLATILE_DESCRIPTOR        3
+#define MACH_MSG_GUARDED_PORT_DESCRIPTOR        4
+
+#pragma pack(push, 4)
+
+typedef struct{
+	natural_t                     pad1;
+	mach_msg_size_t               pad2;
+	unsigned int                  pad3 : 24;
+	mach_msg_descriptor_type_t    type : 8;
+} mach_msg_type_descriptor_t;
+```
+
+In 32bits, all the descriptors are 12B and the descriptor type is in the 11th one. In 64 bits, the sizes vary.
+
+{% hint style="danger" %}
+The kernel will copy the descriptors from one task to the other but first **creating a copy in kernel memory**. This technique, known as "Feng Shui" has been abused in several exploits to make the **kernel copy data in its memory** making a process send descriptors to itself. Then the process can receive the messages (the kernel will free them).
+
+It's also possible to **send port rights to a vulnerable process**, and the port rights will just appear in the process (even if he isn't handling them).
+{% endhint %}
+
+### Mac Ports APIs
+
+Note that ports are associated to the task namespace, so to create or search for a port, the task namespace is also queried (more in `mach/mach_port.h`):
+
+* **`mach_port_allocate` | `mach_port_construct`**: **Create** a port.
+  * `mach_port_allocate` can also create a **port set**: receive right over a group of ports. Whenever a message is received it's indicated the port from where it was.
+* `mach_port_allocate_name`: Change the name of the port (by default 32bit integer)
+* `mach_port_names`: Get port names from a target
+* `mach_port_type`: Get rights of a task over a name
+* `mach_port_rename`: Rename a port (like dup2 for FDs)
+* `mach_port_allocate`: Allocate a new RECEIVE, PORT\_SET or DEAD\_NAME
+* `mach_port_insert_right`: Create a new right in a port where you have RECEIVE
+* `mach_port_...`
+* **`mach_msg`** | **`mach_msg_overwrite`**: Functions used to **send and receive mach messages**. The overwrite version allows to specify a different buffer for message reception (the other version will just reuse it).
+
+### Debug mach\_msg
+
+As the functions **`mach_msg`** and **`mach_msg_overwrite`** are the ones used to send a receive messages, setting a breakpoint on them would allow to inspect the sent a received messages.
+
+For example start debugging any application you can debug as it will load **`libSystem.B` which will use this function**.
+
+<pre class="language-armasm"><code class="lang-armasm"><strong>(lldb) b mach_msg
+</strong>Breakpoint 1: where = libsystem_kernel.dylib`mach_msg, address = 0x00000001803f6c20
+<strong>(lldb) r
+</strong>Process 71019 launched: '/Users/carlospolop/Desktop/sandboxedapp/SandboxedShellAppDown.app/Contents/MacOS/SandboxedShellApp' (arm64)
+Process 71019 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
+libsystem_kernel.dylib`mach_msg:
+->  0x181d3ac20 &#x3C;+0>:  pacibsp
+    0x181d3ac24 &#x3C;+4>:  sub    sp, sp, #0x20
+    0x181d3ac28 &#x3C;+8>:  stp    x29, x30, [sp, #0x10]
+    0x181d3ac2c &#x3C;+12>: add    x29, sp, #0x10
+Target 0: (SandboxedShellApp) stopped.
+<strong>(lldb) bt
+</strong>* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+  * frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
+    frame #1: 0x0000000181ac3454 libxpc.dylib`_xpc_pipe_mach_msg + 56
+    frame #2: 0x0000000181ac2c8c libxpc.dylib`_xpc_pipe_routine + 388
+    frame #3: 0x0000000181a9a710 libxpc.dylib`_xpc_interface_routine + 208
+    frame #4: 0x0000000181abbe24 libxpc.dylib`_xpc_init_pid_domain + 348
+    frame #5: 0x0000000181abb398 libxpc.dylib`_xpc_uncork_pid_domain_locked + 76
+    frame #6: 0x0000000181abbbfc libxpc.dylib`_xpc_early_init + 92
+    frame #7: 0x0000000181a9583c libxpc.dylib`_libxpc_initializer + 1104
+    frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
+    frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&#x26;) const::$_0::operator()() const + 168
+</code></pre>
+
+To get the arguments of **`mach_msg`** check the registers. These are the arguments (from [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+
+```c
+__WATCHOS_PROHIBITED __TVOS_PROHIBITED
+extern mach_msg_return_t        mach_msg(
+	mach_msg_header_t *msg,
+	mach_msg_option_t option,
+	mach_msg_size_t send_size,
+	mach_msg_size_t rcv_size,
+	mach_port_name_t rcv_name,
+	mach_msg_timeout_t timeout,
+	mach_port_name_t notify);
+```
+
+Get the values from the registries:
+
+```armasm
+reg read $x0 $x1 $x2 $x3 $x4 $x5 $x6
+      x0 = 0x0000000124e04ce8 ;mach_msg_header_t (*msg)
+      x1 = 0x0000000003114207 ;mach_msg_option_t (option)
+      x2 = 0x0000000000000388 ;mach_msg_size_t (send_size)
+      x3 = 0x0000000000000388 ;mach_msg_size_t (rcv_size)
+      x4 = 0x0000000000001f03 ;mach_port_name_t (rcv_name)
+      x5 = 0x0000000000000000 ;mach_msg_timeout_t (timeout)
+      x6 = 0x0000000000000000 ;mach_port_name_t (notify)
+```
+
+Inspect the message header checking the first argument:
+
+```armasm
+(lldb) x/6w $x0
+0x124e04ce8: 0x00131513 0x00000388 0x00000807 0x00001f03
+0x124e04cf8: 0x00000b07 0x40000322
+
+; 0x00131513 -> mach_msg_bits_t (msgh_bits) = 0x13 (MACH_MSG_TYPE_COPY_SEND) in local | 0x1500 (MACH_MSG_TYPE_MAKE_SEND_ONCE) in remote | 0x130000 (MACH_MSG_TYPE_COPY_SEND) in voucher
+; 0x00000388 -> mach_msg_size_t (msgh_size)
+; 0x00000807 -> mach_port_t (msgh_remote_port)
+; 0x00001f03 -> mach_port_t (msgh_local_port)
+; 0x00000b07 -> mach_port_name_t (msgh_voucher_port)
+; 0x40000322 -> mach_msg_id_t (msgh_id)
+```
+
+That type of `mach_msg_bits_t` is very common to allow a reply.
+
+
 
 ### Enumerate ports
 
 ```bash
 lsmp -p <pid>
+
+sudo lsmp -p 1 
+Process (1) : launchd
+  name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  qlimit  msgcount  context            identifier  type
+---------   ----------  ----------  -------- -----  ---- ----- ----- ----- ----  ------  --------  ------------------ ----------- ------------
+0x00000203  0x181c4e1d  send        --------        ---            2                                                  0x00000000  TASK-CONTROL SELF (1) launchd
+0x00000303  0x183f1f8d  recv        --------     0  ---      1               N        5         0  0x0000000000000000
+0x00000403  0x183eb9dd  recv        --------     0  ---      1               N        5         0  0x0000000000000000
+0x0000051b  0x1840cf3d  send        --------        ---            2        ->        6         0  0x0000000000000000 0x00011817  (380) WindowServer
+0x00000603  0x183f698d  recv        --------     0  ---      1               N        5         0  0x0000000000000000
+0x0000070b  0x175915fd  recv,send   ---GS---     0  ---      1     2         Y        5         0  0x0000000000000000
+0x00000803  0x1758794d  send        --------        ---            1                                                  0x00000000  CLOCK
+0x0000091b  0x192c71fd  send        --------        D--            1        ->        1         0  0x0000000000000000 0x00028da7  (418) runningboardd
+0x00000a6b  0x1d4a18cd  send        --------        ---            2        ->       16         0  0x0000000000000000 0x00006a03  (92247) Dock
+0x00000b03  0x175a5d4d  send        --------        ---            2        ->       16         0  0x0000000000000000 0x00001803  (310) logd
+[...]
+0x000016a7  0x192c743d  recv,send   --TGSI--     0  ---      1     1         Y       16         0  0x0000000000000000
+                  +     send        --------        ---            1         <-                                       0x00002d03  (81948) seserviced
+                  +     send        --------        ---            1         <-                                       0x00002603  (74295) passd
+                  [...]
+```
+
+The **name** is the default name given to the port (check how it's **increasing** in the first 3 bytes). The **`ipc-object`** is the **obfuscated** unique **identifier** of the port.\
+Note also how the ports with only **`send`** right are **identifying the owner** of it (port name + pid).\
+Also note the use of **`+`** to indicate **other tasks connected to the same port**.
+
+It's also possible to use [**procesxp**](https://www.newosxbook.com/tools/procexp.html) to see also the **registered service names** (with SIP disabled due to the need of `com.apple.system-task-port`):
+
+```
+procesp 1 ports
 ```
 
 You can install this tool in iOS downloading it from [http://newosxbook.com/tools/binpack64-256.tar.gz](http://newosxbook.com/tools/binpack64-256.tar.gz)
