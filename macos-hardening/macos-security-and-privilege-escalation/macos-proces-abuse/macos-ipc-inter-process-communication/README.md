@@ -10,7 +10,7 @@ Otras formas de apoyar a HackTricks:
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs a** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
 
 </details>
 
@@ -24,9 +24,9 @@ La comunicación entre tareas ocurre a través de la Comunicación entre Proceso
 
 Un **puerto** es el **elemento básico** de la IPC de Mach. Se puede utilizar para **enviar mensajes y recibirlos**.
 
-Cada proceso tiene una **tabla de IPC**, donde es posible encontrar los **puertos Mach del proceso**. El nombre de un puerto Mach es en realidad un número (un puntero al objeto del kernel).
+Cada proceso tiene una **tabla IPC**, donde es posible encontrar los **puertos mach del proceso**. El nombre de un puerto mach es en realidad un número (un puntero al objeto del kernel).
 
-Un proceso también puede enviar un nombre de puerto con algunos derechos **a una tarea diferente** y el kernel hará que esta entrada aparezca en la **tabla de IPC de la otra tarea**.
+Un proceso también puede enviar un nombre de puerto con algunos derechos **a una tarea diferente** y el kernel hará que esta entrada aparezca en la **tabla IPC de la otra tarea**.
 
 ### Derechos de Puerto
 
@@ -34,7 +34,7 @@ Los derechos de puerto, que definen qué operaciones puede realizar una tarea, s
 
 * **Derecho de Recepción**, que permite recibir mensajes enviados al puerto. Los puertos Mach son colas MPSC (múltiples productores, un solo consumidor), lo que significa que solo puede haber **un derecho de recepción para cada puerto** en todo el sistema (a diferencia de las tuberías, donde varios procesos pueden tener descriptores de archivo para el extremo de lectura de una tubería).
 * Una **tarea con el Derecho de Recepción** puede recibir mensajes y **crear Derechos de Envío**, lo que le permite enviar mensajes. Originalmente, solo la **propia tarea tiene el Derecho de Recepción sobre su puerto**.
-* Si el propietario del Derecho de Recepción **muere** o lo elimina, el **derecho de envío se vuelve inútil (nombre muerto).**
+* Si el propietario del Derecho de Recepción **muere** o lo mata, el **derecho de envío se vuelve inútil (nombre muerto).**
 * **Derecho de Envío**, que permite enviar mensajes al puerto.
 * El Derecho de Envío se puede **clonar** para que una tarea que posea un Derecho de Envío pueda clonar el derecho y **concedérselo a una tercera tarea**.
 * Ten en cuenta que los **derechos de puerto** también se pueden **pasar** a través de mensajes de Mac.
@@ -56,11 +56,11 @@ Como se mencionó anteriormente, es posible enviar derechos usando mensajes Mach
 Para esto, el **servidor de arranque** (**launchd** en Mac) está involucrado, ya que **cualquiera puede obtener un DERECHO DE ENVÍO al servidor de arranque**, es posible pedirle un derecho para enviar un mensaje a otro proceso:
 
 1. La tarea **A** crea un **nuevo puerto**, obteniendo el **derecho de RECEPCIÓN** sobre él.
-2. La tarea **A**, siendo la titular del derecho de RECEPCIÓN, **genera un derecho de ENVÍO para el puerto**.
-3. La tarea **A** establece una **conexión** con el **servidor de arranque**, y **le envía el derecho de ENVÍO** para el puerto que generó al principio.
+2. La tarea **A**, siendo la titular del derecho de RECEPCIÓN, **genera un DERECHO DE ENVÍO para el puerto**.
+3. La tarea **A** establece una **conexión** con el **servidor de arranque**, y **le envía el DERECHO DE ENVÍO** para el puerto que generó al principio.
 * Recuerda que cualquiera puede obtener un DERECHO DE ENVÍO al servidor de arranque.
 4. La tarea A envía un mensaje `bootstrap_register` al servidor de arranque para **asociar el puerto dado con un nombre** como `com.apple.taska`.
-5. La tarea **B** interactúa con el **servidor de arranque** para ejecutar una **búsqueda de arranque para el nombre del servicio** (`bootstrap_lookup`). Para que el servidor de arranque pueda responder, la tarea B le enviará un **derecho de ENVÍO a un puerto que creó previamente** dentro del mensaje de búsqueda. Si la búsqueda tiene éxito, el **servidor duplica el derecho de ENVÍO** recibido de la tarea A y **lo transmite a la tarea B**.
+5. La tarea **B** interactúa con el **servidor de arranque** para ejecutar una **búsqueda de arranque para el nombre del servicio** (`bootstrap_lookup`). Para que el servidor de arranque pueda responder, la tarea B le enviará un **DERECHO DE ENVÍO a un puerto que creó previamente** dentro del mensaje de búsqueda. Si la búsqueda tiene éxito, el **servidor duplica el DERECHO DE ENVÍO** recibido de la tarea A y **lo transmite a la tarea B**.
 * Recuerda que cualquiera puede obtener un DERECHO DE ENVÍO al servidor de arranque.
 6. Con este DERECHO DE ENVÍO, **la tarea B** es capaz de **enviar** un **mensaje** **a la tarea A**.
 7. Para una comunicación bidireccional, por lo general la tarea **B** genera un nuevo puerto con un **derecho de RECEPCIÓN** y un **derecho de ENVÍO**, y le da el **derecho de ENVÍO a la tarea A** para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
@@ -73,16 +73,16 @@ Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente
 
 * La tarea **B** inicia una **búsqueda de arranque** para un nombre de servicio.
 * **launchd** verifica si la tarea se está ejecutando y si no lo está, **la inicia**.
-* La tarea **A** (el servicio) realiza un **registro de arranque** (`bootstrap_check_in()`). Aquí, el **servidor de arranque** crea un DERECHO DE ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la tarea A**.
-* launchd duplica el **derecho de ENVÍO y lo envía a la tarea B**.
+* La tarea **A** (el servicio) realiza un **registro de arranque** (`bootstrap_check_in()`). Aquí, el **servidor de arranque** crea un DERECHO DE ENVÍO, lo retiene y **transfiere el DERECHO DE RECEPCIÓN a la tarea A**.
+* launchd duplica el **DERECHO DE ENVÍO y lo envía a la tarea B**.
 * La tarea **B** genera un nuevo puerto con un **derecho de RECEPCIÓN** y un **derecho de ENVÍO**, y le da el **derecho de ENVÍO a la tarea A** (el servicio) para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
 
-Sin embargo, este proceso solo se aplica a las tareas del sistema predefinidas. Las tareas no del sistema aún operan como se describió originalmente, lo que podría permitir potencialmente la suplantación.
+Sin embargo, este proceso solo se aplica a las tareas del sistema predefinidas. Las tareas no del sistema aún operan como se describió originalmente, lo que podría permitir la suplantación.
 
 {% hint style="danger" %}
 Por lo tanto, launchd nunca debería fallar o todo el sistema fallará.
 {% endhint %}
-### Un Mensaje Mach
+### Un mensaje Mach
 
 [Encuentra más información aquí](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
@@ -97,15 +97,15 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-Los procesos que poseen un _**derecho de recepción**_ pueden recibir mensajes en un puerto Mach. Por otro lado, los **emisores** tienen otorgado un _**derecho de envío**_ o un _**derecho de envío único**_. El derecho de envío único es exclusivamente para enviar un único mensaje, después de lo cual se vuelve inválido.
+Los procesos que poseen un _**derecho de recepción**_ pueden recibir mensajes en un puerto Mach. Por otro lado, los **emisores** reciben un _**derecho de envío**_ o un _**derecho de envío único**_. El derecho de envío único es exclusivamente para enviar un único mensaje, después de lo cual se vuelve inválido.
 
 El campo inicial **`msgh_bits`** es un mapa de bits:
 
 - El primer bit (más significativo) se utiliza para indicar que un mensaje es complejo (más sobre esto a continuación)
 - El 3er y 4to bit son utilizados por el kernel
-- Los **5 bits menos significativos del 2do byte** pueden ser utilizados para **vale**: otro tipo de puerto para enviar combinaciones de clave/valor.
-- Los **5 bits menos significativos del 3er byte** pueden ser utilizados para **puerto local**
-- Los **5 bits menos significativos del 4to byte** pueden ser utilizados para **puerto remoto**
+- Los **5 bits menos significativos del segundo byte** se pueden utilizar para **vale**: otro tipo de puerto para enviar combinaciones de clave/valor.
+- Los **5 bits menos significativos del tercer byte** se pueden utilizar para **puerto local**
+- Los **5 bits menos significativos del cuarto byte** se pueden utilizar para **puerto remoto**
 
 Los tipos que se pueden especificar en el vale, puertos locales y remotos son (de [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
@@ -120,9 +120,9 @@ Los tipos que se pueden especificar en el vale, puertos locales y remotos son (d
 #define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
-Por ejemplo, `MACH_MSG_TYPE_MAKE_SEND_ONCE` se puede usar para **indicar** que un **derecho** de **envío-único** debe ser derivado y transferido para este puerto. También se puede especificar `MACH_PORT_NULL` para evitar que el destinatario pueda responder.
+Por ejemplo, `MACH_MSG_TYPE_MAKE_SEND_ONCE` se puede usar para **indicar** que un **derecho de envío único** debe ser derivado y transferido para este puerto. También se puede especificar `MACH_PORT_NULL` para evitar que el destinatario pueda responder.
 
-Para lograr una **comunicación bidireccional** fácil, un proceso puede especificar un **puerto mach** en el **encabezado del mensaje mach** llamado el _puerto de respuesta_ (**`msgh_local_port`**) donde el **receptor** del mensaje puede **enviar una respuesta** a este mensaje.
+Para lograr una **comunicación bidireccional** sencilla, un proceso puede especificar un **puerto mach** en el **encabezado del mensaje mach** llamado el _puerto de respuesta_ (**`msgh_local_port`**) donde el **receptor** del mensaje puede **enviar una respuesta** a este mensaje.
 
 {% hint style="success" %}
 Tenga en cuenta que este tipo de comunicación bidireccional se utiliza en mensajes XPC que esperan una respuesta (`xpc_connection_send_message_with_reply` y `xpc_connection_send_message_with_reply_sync`). Pero **generalmente se crean puertos diferentes** como se explicó anteriormente para crear la comunicación bidireccional.
@@ -164,12 +164,12 @@ unsigned int                  pad3 : 24;
 mach_msg_descriptor_type_t    type : 8;
 } mach_msg_type_descriptor_t;
 ```
-En 32 bits, todos los descriptores son de 12 bytes y el tipo de descriptor está en el onceavo. En 64 bits, los tamaños varían.
+En 32 bits, todos los descriptores son de 12B y el tipo de descriptor está en el 11º. En 64 bits, los tamaños varían.
 
 {% hint style="danger" %}
 El kernel copiará los descriptores de una tarea a la otra, pero primero **creando una copia en la memoria del kernel**. Esta técnica, conocida como "Feng Shui", ha sido abusada en varios exploits para hacer que el **kernel copie datos en su memoria** haciendo que un proceso envíe descriptores a sí mismo. Luego, el proceso puede recibir los mensajes (el kernel los liberará).
 
-También es posible **enviar derechos de puerto a un proceso vulnerable**, y los derechos de puerto simplemente aparecerán en el proceso (incluso si no los está manejando).
+También es posible **enviar derechos de puerto a un proceso vulnerable**, y los derechos del puerto simplemente aparecerán en el proceso (incluso si no los está manejando).
 {% endhint %}
 
 ### APIs de Puertos de Mac
@@ -185,7 +185,7 @@ Tenga en cuenta que los puertos están asociados al espacio de nombres de la tar
 * `mach_port_allocate`: Asignar un nuevo RECEIVE, PORT\_SET o DEAD\_NAME
 * `mach_port_insert_right`: Crear un nuevo derecho en un puerto donde tienes RECEIVE
 * `mach_port_...`
-* **`mach_msg`** | **`mach_msg_overwrite`**: Funciones utilizadas para **enviar y recibir mensajes mach**. La versión overwrite permite especificar un búfer diferente para la recepción del mensaje (la otra versión simplemente lo reutilizará).
+* **`mach_msg`** | **`mach_msg_overwrite`**: Funciones utilizadas para **enviar y recibir mensajes mach**. La versión de sobrescritura permite especificar un búfer diferente para la recepción del mensaje (la otra versión simplemente lo reutilizará).
 
 ### Depurar mach\_msg
 
@@ -367,7 +367,49 @@ printf("Text: %s, number: %d\n", message.some_text, message.some_number);
 ```
 {% endtab %}
 
-{% tab title="sender.c" %}
+{% tab title="sender.c" %} 
+
+### sender.c
+
+El archivo `sender.c` contiene el código fuente del programa que envía mensajes a través de IPC en macOS.
+
+Este programa se encarga de enviar mensajes a un puerto específico utilizando IPC para la comunicación entre procesos en el sistema operativo macOS.
+
+El código fuente de `sender.c` muestra cómo se pueden enviar mensajes entre procesos utilizando IPC y cómo se pueden abusar de estos mecanismos para realizar escaladas de privilegios en macOS.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <mach/mach.h>
+
+#define PORT_NAME "com.example.ipc"
+
+int main() {
+    mach_port_t port;
+    kern_return_t kr;
+
+    kr = bootstrap_look_up(bootstrap_port, PORT_NAME, &port);
+    if (kr != KERN_SUCCESS) {
+        fprintf(stderr, "Failed to look up port. Error: %s\n", mach_error_string(kr));
+        exit(1);
+    }
+
+    char *message = "Hello, receiver!";
+    kr = mach_msg((mach_msg_header_t *)message, MACH_SEND_MSG, strlen(message), 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
+    if (kr != KERN_SUCCESS) {
+        fprintf(stderr, "Failed to send message. Error: %s\n", mach_error_string(kr));
+        exit(1);
+    }
+
+    return 0;
+}
+```
+
+Este código muestra un ejemplo básico de cómo enviar un mensaje a través de IPC en macOS utilizando la función `mach_msg`. 
+
+{% endtab %}
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc sender.c -o sender
@@ -428,9 +470,9 @@ printf("Sent a message\n");
 * **Puerto de privilegio del host**: Un proceso con el derecho de **Enviar** sobre este puerto puede realizar **acciones privilegiadas** como cargar una extensión del kernel. El **proceso necesita ser root** para obtener este permiso.
 * Además, para llamar a la API **`kext_request`** se necesitan otros permisos **`com.apple.private.kext*`** que solo se otorgan a binarios de Apple.
 * **Puerto del nombre de la tarea:** Una versión no privilegiada del _puerto de la tarea_. Hace referencia a la tarea, pero no permite controlarla. Lo único que parece estar disponible a través de él es `task_info()`.
-* **Puerto de la tarea** (también conocido como puerto del kernel)**:** Con permiso de Envío sobre este puerto, es posible controlar la tarea (leer/escribir memoria, crear hilos...).
+* **Puerto de la tarea** (también conocido como puerto del kernel)**:** Con permiso de Envío sobre este puerto es posible controlar la tarea (leer/escribir memoria, crear hilos...).
 * Llama a `mach_task_self()` para **obtener el nombre** de este puerto para la tarea del llamante. Este puerto solo se **hereda** a través de **`exec()`**; una nueva tarea creada con `fork()` obtiene un nuevo puerto de tarea (como caso especial, una tarea también obtiene un nuevo puerto de tarea después de `exec()` en un binario suid). La única forma de generar una tarea y obtener su puerto es realizar la ["danza de intercambio de puertos"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) mientras se hace un `fork()`.
-* Estas son las restricciones para acceder al puerto (desde `macos_task_policy` del binario `AppleMobileFileIntegrity`):
+* Estas son las restricciones para acceder al puerto (de `macos_task_policy` del binario `AppleMobileFileIntegrity`):
 * Si la aplicación tiene el permiso de **`com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de la tarea** (comúnmente agregado por Xcode para depurar). El proceso de **notarización** no lo permitirá en versiones de producción.
 * Las aplicaciones con el permiso **`com.apple.system-task-ports`** pueden obtener el **puerto de la tarea de cualquier** proceso, excepto el del kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se otorga a aplicaciones de Apple.
 * **Root puede acceder a los puertos de tarea** de aplicaciones **no** compiladas con un tiempo de ejecución **fortificado** (y no de Apple).
@@ -475,17 +517,9 @@ return 0;
 
 {% tab title="entitlements.plist" %} 
 
-### macOS IPC (Comunicación entre Procesos)
+### Archivo `entitlements.plist`
 
-La comunicación entre procesos (IPC) en macOS es un mecanismo que permite a los procesos intercambiar datos y comunicarse entre sí. Existen varias formas de IPC en macOS, como notificaciones push, Apple Events, y más. Los desarrolladores pueden utilizar IPC para que sus aplicaciones se comuniquen entre sí o para permitir que diferentes partes de una aplicación se comuniquen.
-
-Los IPC pueden ser abusados por actores malintencionados para realizar ataques de escalada de privilegios o para eludir las medidas de seguridad. Es importante asegurarse de que la comunicación entre procesos esté correctamente configurada y restringida para evitar posibles abusos.
-
-En macOS, los entitlements.plist son archivos de configuración que especifican los permisos y capacidades de una aplicación. Al configurar adecuadamente los entitlements.plist, los desarrolladores pueden controlar qué acciones puede realizar una aplicación y a qué recursos puede acceder. Es importante revisar y limitar cuidadosamente los entitlements de una aplicación para reducir el riesgo de abuso de IPC y otros vectores de ataque. 
-
-Para más información sobre cómo asegurar la comunicación entre procesos en macOS, consulte la documentación oficial de Apple sobre seguridad y desarrollo de aplicaciones para macOS. 
-
-{% endtab %}
+El archivo `entitlements.plist` contiene información sobre los permisos y capacidades especiales que una aplicación tiene en macOS. Estos permisos pueden ser abusados para realizar escaladas de privilegios y llevar a cabo ataques de intercomunicación entre procesos (IPC) en el sistema. Es crucial revisar y limitar cuidadosamente los permisos otorgados en este archivo para garantizar la seguridad del sistema.
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -706,7 +740,7 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ```
 ### Inyección de Dylib en hilo a través del puerto de Tarea
 
-En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la **API `pthread` posix**. El hilo que generamos en la inyección anterior, fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
+En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la **API `pthread` posix**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
 
 Fue posible **inyectar un shellcode simple** para ejecutar un comando porque **no era necesario trabajar con APIs compatibles con posix**, solo con Mach. **Inyecciones más complejas** necesitarían que el **hilo** también sea **compatible con posix**.
 
@@ -961,7 +995,7 @@ kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64
 (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
 
 if (kr != KERN_SUCCESS) {
-fprintf(stderr,"No se puede crear el hilo remoto: error %s", mach_error_string (kr));
+fprintf(stderr,"No se puede crear un hilo remoto: error %s", mach_error_string (kr));
 return (-3);
 }
 
@@ -1009,7 +1043,7 @@ En esta técnica se secuestra un hilo del proceso:
 
 ### Información básica
 
-XPC, que significa Comunicación entre Procesos XNU (el kernel utilizado por macOS), es un marco para la **comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas de método seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, permitiendo la **creación de aplicaciones con privilegios separados** donde cada **componente** se ejecuta con **solo los permisos que necesita** para hacer su trabajo, limitando así el daño potencial de un proceso comprometido.
+XPC, que significa Comunicación entre Procesos XNU (el kernel utilizado por macOS), es un marco para la **comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas de método seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, permitiendo la **creación de aplicaciones con privilegios separados** donde cada **componente** se ejecuta con **solo los permisos necesarios** para realizar su trabajo, limitando así el daño potencial de un proceso comprometido.
 
 Para obtener más información sobre cómo funciona esta **comunicación** y cómo **podría ser vulnerable**, consulta:
 
@@ -1019,9 +1053,11 @@ Para obtener más información sobre cómo funciona esta **comunicación** y có
 
 ## MIG - Generador de Interfaz Mach
 
-MIG fue creado para **simplificar el proceso de creación de código Mach IPC**. Básicamente **genera el código necesario** para que el servidor y el cliente se comuniquen con una definición dada. Aunque el código generado puede ser feo, un desarrollador solo necesitará importarlo y su código será mucho más simple que antes.
+MIG fue creado para **simplificar el proceso de creación de código de IPC de Mach**. Esto se debe a que gran parte del trabajo para programar RPC implica las mismas acciones (empaquetar argumentos, enviar el mensaje, desempaquetar los datos en el servidor...).
 
-Para más información, consulta:
+MIC básicamente **genera el código necesario** para que el servidor y el cliente se comuniquen con una definición dada (en IDL -Lenguaje de Definición de Interfaz-). Aunque el código generado sea feo, un desarrollador solo necesitará importarlo y su código será mucho más simple que antes.
+
+Para obtener más información, consulta:
 
 {% content-ref url="macos-mig-mach-interface-generator.md" %}
 [macos-mig-mach-interface-generator.md](macos-mig-mach-interface-generator.md)
@@ -1041,7 +1077,7 @@ Para más información, consulta:
 
 Otras formas de apoyar a HackTricks:
 
-* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Si deseas ver tu **empresa anunciada en HackTricks** o **descargar HackTricks en PDF**, ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
