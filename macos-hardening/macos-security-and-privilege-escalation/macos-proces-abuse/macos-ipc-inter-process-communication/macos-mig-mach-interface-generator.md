@@ -14,7 +14,26 @@ Other ways to support HackTricks:
 
 </details>
 
+## Basic Information
+
 MIG was created to **simplify the process of Mach IPC** code creation. It basically **generates the needed code** for server and client to communicate with a given definition. Even if the generated code is ugly, a developer will just need to import it and his code will be much simpler than before.
+
+The definition is specified in Interface Definition Language (IDL) using the `.defs` extension.
+
+These definitions have 5 sections:
+
+* **Subsystem declaration**: The keyword subsystem is used to indicate the **name** and the **id**. It's also possible to mark it as **`KernelServer`** if the server should run in the kernel.
+* **Inclusions and imports**: MIG uses the C-prepocessor, so it's able to use imports. Moreover, it's possible to use `uimport` and `simport` for user or server generated code.
+* **Type declarations**: It's possible to define data types although usually it will import `mach_types.defs` and `std_types.defs`. For custom ones some syntax can be used:
+  * \[i`n/out]tran`: Function that needs to be trasnlated from an incoming or to an outgoing message
+  * `c[user/server]type`: Mapping to another C type.
+  * `destructor`: Call this function when the type is released.
+* **Operations**: These are the definitions of the RPC methods. There are 5 different types:
+  * `routine`: Expects reply
+  * `simpleroutine`: Doesn't expect reply
+  * `procedure`: Expects reply
+  * `simpleprocedure`: Doesn't expect reply
+  * `function`: Expects reply
 
 ### Example
 
@@ -37,7 +56,9 @@ simpleroutine Subtract(
 ```
 {% endcode %}
 
-Now use mig to generate the server and client code that will be able to comunicate within each other to call the Subtract function:
+Note that the first **argument is the port to bind** and MIG will **automatically handle the reply port** (unless calling `mig_get_reply_port()` in the client code). Moreover, the **ID of the operations** will be **sequential** starting by the indicated subsystem ID (so if an operation is deprecated it's deleted and `skip` is used to still use its ID).
+
+Now use MIG to generate the server and client code that will be able to communicate within each other to call the Subtract function:
 
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
