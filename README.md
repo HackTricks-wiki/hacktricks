@@ -79,7 +79,7 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 ### [Pentest-Tools.com](https://pentest-tools.com/) - The essential penetration testing toolkit
 
-<figure><img src=".gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (15) (1).png" alt=""><figcaption></figcaption></figure>
 
 **Instantly available setup for vulnerability assessment & penetration testing**. Run a full pentest from anywhere with 20+ tools & features that go from recon to reporting. We don't replace pentesters - we develop custom tools, detection & exploitation modules to give them back some time to dig deeper, pop shells, and have fun.
 
@@ -89,7 +89,7 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 ### [SerpApi](https://serpapi.com/)
 
-<figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 SerpApi offers fast and easy real-time APIs to **access search engine results**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
 
