@@ -24,7 +24,7 @@ Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **
 
 Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-**STM Cyber** también apoya proyectos de código abierto de ciberseguridad como HackTricks :)
+**STM Cyber** también apoya proyectos de código abierto de ciberseguridad como ¡HackTricks! :)
 
 ***
 
@@ -32,7 +32,7 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 
 <figure><img src=".gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro candente para profesionales de tecnología y ciberseguridad en todas las disciplinas.
+[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro crucial para profesionales de tecnología y ciberseguridad en todas las disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -55,7 +55,7 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 <figure><img src=".gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.
+Usa [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas comunitarias más avanzadas del mundo.
 
 Obtén acceso hoy:
 
@@ -67,21 +67,21 @@ Obtén acceso hoy:
 
 <figure><img src=".gitbook/assets/image (50).png" alt=""><figcaption></figcaption></figure>
 
-Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bug bounty!
+¡Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bug bounty!
 
-* **Perspectivas de Hacking:** Participa en contenido que profundiza en la emoción y desafíos del hacking
-* **Noticias de Hacking en Tiempo Real:** Mantente actualizado con el mundo del hacking a través de noticias e información en tiempo real
-* **Últimos Anuncios:** Mantente informado sobre los nuevos bug bounties lanzados y actualizaciones importantes de la plataforma
+* **Perspectivas de Hacking:** Participa en contenido que explora la emoción y los desafíos del hacking
+* **Noticias de Hacking en Tiempo Real:** Mantente al día con el mundo del hacking a través de noticias e información en tiempo real
+* **Últimos Anuncios:** Mantente informado sobre los nuevos bug bounties que se lanzan y actualizaciones cruciales de la plataforma
 
-**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo!
+**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) ¡y comienza a colaborar con los mejores hackers hoy!
 
 ***
 
 ### [Pentest-Tools.com](https://pentest-tools.com/) - El kit de herramientas esencial para pruebas de penetración
 
-<figure><img src=".gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (15) (1).png" alt=""><figcaption></figcaption></figure>
 
-**Configuración instantáneamente disponible para evaluación de vulnerabilidades y pruebas de penetración**. Ejecuta un pentest completo desde cualquier lugar con más de 20 herramientas y funciones que van desde la recolección de información hasta la generación de informes. No reemplazamos a los pentesters, desarrollamos herramientas personalizadas, módulos de detección y explotación para darles tiempo para profundizar, obtener shells y divertirse.
+**Configuración instantáneamente disponible para evaluación de vulnerabilidades y pruebas de penetración**. Ejecuta un pentest completo desde cualquier lugar con más de 20 herramientas y funciones que van desde la recolección de información hasta la generación de informes. No reemplazamos a los pentesters, desarrollamos herramientas personalizadas, módulos de detección y explotación para darles más tiempo para profundizar, obtener shells y divertirse.
 
 {% embed url="https://pentest-tools.com/" %}
 
@@ -89,11 +89,11 @@ Obtén acceso hoy:
 
 ### [SerpApi](https://serpapi.com/)
 
-<figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
-SerpApi ofrece APIs en tiempo real rápidas y fáciles para **acceder a los resultados de los motores de búsqueda**. Raspan los motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
+SerpApi ofrece APIs rápidas y fáciles en tiempo real para **acceder a los resultados de los motores de búsqueda**. Raspan los motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
 
-Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para raspar diferentes motores de búsqueda, incluidos Google, Bing, Baidu, Yahoo, Yandex, y más.\
+Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para raspar diferentes motores de búsqueda, incluidos Google, Bing, Baidu, Yahoo, Yandex y más.\
 A diferencia de otros proveedores, **SerpApi no solo raspa resultados orgánicos**. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
 
 Los clientes actuales de SerpApi incluyen a **Apple, Shopify y GrubHub**.\
@@ -116,11 +116,11 @@ Puedes **crear una cuenta gratuita** [**aquí**](https://serpapi.com/users/sign\
 
 [**WebSec**](https://websec.nl) es una empresa de ciberseguridad profesional con sede en **Ámsterdam** que ayuda a **proteger** empresas **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de **seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad **todo en uno**, lo que significa que hacen de todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
+WebSec es una empresa de seguridad integral, lo que significa que hacen de todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Concienciación, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
 
-Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec **tiene mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, lo que se indica en su sitio web "**¡Si no podemos hackearlo, no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
+Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, lo que se indica en su sitio web "**¡Si no podemos hackearlo, no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/).
 
-Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks.**
+Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks**.
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
 ### [WhiteIntel](https://whiteintel.io)
@@ -145,7 +145,7 @@ Encuéntralos en:
 
 <details>
 
-<summary><strong>Aprende hacking en AWS desde cero hasta convertirte en un experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
+<summary><strong>Aprende hacking en AWS desde cero hasta experto con</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
 
 Otras formas de apoyar a HackTricks:
 
