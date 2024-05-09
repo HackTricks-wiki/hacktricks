@@ -4,13 +4,13 @@
 
 <summary><strong>htARTE（HackTricks AWS Red Team Expert）</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>でゼロからヒーローまでAWSハッキングを学ぶ</strong></a><strong>！</strong></summary>
 
-HackTricks をサポートする他の方法:
+HackTricksをサポートする他の方法：
 
-* **HackTricks で企業を宣伝したい**または**HackTricksをPDFでダウンロードしたい**場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
-* **💬 [Discordグループ](https://discord.gg/hRep4RUj7f)**に参加するか、[Telegramグループ](https://t.me/peass)に参加するか、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**する。
-* **ハッキングトリックを共有するために、[HackTricks](https://github.com/carlospolop/hacktricks)と[HackTricks Cloud](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出**する。
+- **HackTricksで企業を宣伝**したい場合や**HackTricksをPDFでダウンロード**したい場合は、[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+- [**公式PEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を入手する
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見し、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションを見つける
+- 💬 [**Discordグループ**](https://discord.gg/hRep4RUj7f)や[**telegramグループ**](https://t.me/peass)に**参加**したり、**Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)を**フォロー**する
+- **ハッキングトリックを共有するために** [**HackTricks**](https://github.com/carlospolop/hacktricks)と[**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)のGitHubリポジトリにPRを提出する
 
 </details>
 
@@ -18,7 +18,7 @@ HackTricks をサポートする他の方法:
 
 ### 基本情報
 
-Machは**リソース共有の最小単位としてタスク**を使用し、各タスクには**複数のスレッド**が含まれることができます。これらの**タスクとスレッドは、1:1でPOSIXプロセスとスレッドにマップ**されます。
+Machはリソースを共有するための**最小単位としてタスク**を使用し、各タスクには**複数のスレッド**が含まれることができます。これらの**タスクとスレッドは、1:1でPOSIXプロセスとスレッドにマップ**されます。
 
 タスク間の通信は、Machインタープロセス通信（IPC）を介して行われ、カーネルによって管理される**メッセージキューのように機能するポート間でメッセージが転送**されます。
 
@@ -26,24 +26,24 @@ Machは**リソース共有の最小単位としてタスク**を使用し、各
 
 各プロセスには**IPCテーブル**があり、そこには**プロセスのMachポート**が見つかります。Machポートの名前は実際には数値（カーネルオブジェクトへのポインタ）です。
 
-プロセスはまた、ポート名といくつかの権限を**異なるタスクに送信**することができ、カーネルはこれを他のタスクの**IPCテーブルにエントリ**として表示します。
+プロセスはまた、ポート名といくつかの権限を**異なるタスクに送信**することができ、カーネルはこれを他のタスクの**IPCテーブルにエントリとして登録**します。
 
 ### ポート権限
 
-タスクが実行できる操作を定義するポート権限は、この通信に重要です。可能な**ポート権限**は以下の通りです（[ここからの定義](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)）:
+タスクが実行できる操作を定義するポート権限は、この通信に重要です。可能な**ポート権限**は以下の通りです（[ここからの定義](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)）：
 
-* **受信権限**は、ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（multiple-producer, single-consumer）キューであり、システム全体で**各ポートにつき1つの受信権限しか存在しない**ことを意味します（複数のプロセスが1つのパイプの読み取り端に対するファイルディスクリプタをすべて保持できるパイプとは異なります）。
-* **受信権限を持つタスク**はメッセージを受信し、**送信権限を作成**できるようになり、メッセージを送信できるようになります。元々は**自分のタスクだけがポートに対して受信権限を持っていました**。
-* 受信権限の所有者が**死亡**したり、削除した場合、**送信権限は無効になります（デッドネーム）**。
-* **送信権限**は、ポートにメッセージを送信することを許可します。
-* 送信権限は**クローン**できるため、送信権限を所有するタスクは権限を複製し、**第三のタスクに権限を付与**できます。
-* **ポート権限**はMacメッセージを介しても**渡す**ことができます。
-* **一度だけ送信権限**は、ポートに1つのメッセージを送信してから消えることを許可します。
-* この権限は**クローン**できませんが、**移動**できます。
-* **ポートセット権限**は、単一のポートではなく_ポートセット_を示します。ポートセットからメッセージをデキューすると、それに含まれるポートの1つからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように複数のポートで同時にリッスンするために使用できます。
-* **デッドネーム**は実際のポート権限ではなく、単なるプレースホルダーです。ポートが破棄されると、ポートへのすべての既存のポート権限がデッドネームに変わります。
+- **受信権限**：ポートに送信されたメッセージを受信する権限。MachポートはMPSC（multiple-producer, single-consumer）キューであり、システム全体で**各ポートにつき1つの受信権限しか存在しない**（複数のプロセスが1つのパイプの読み取り端に対するファイルディスクリプタを保持できるパイプとは異なります）。
+- **受信権限を持つタスク**はメッセージを受信し、**送信権限を作成**できるようになり、メッセージを送信できるようになります。元々は**自分のタスクだけがポートに対して受信権限を持っていました**。
+- 受信権限の所有者が**死亡**したり、削除した場合、**送信権限は無効になります（デッドネーム）**。
+- **送信権限**：ポートにメッセージを送信する権限。
+- 送信権限は**クローン**できるため、送信権限を所有するタスクは権限を複製し、**第三のタスクに付与**できます。
+- **ポート権限**はMacメッセージを介しても**渡す**ことができます。
+- **一度だけ送信権限**：ポートに1つのメッセージを送信し、その後消える権限。
+- この権限は**クローン**できませんが、**移動**できます。
+- **ポートセット権限**：単一のポートではなく_ポートセット_を示す権限。ポートセットからメッセージをデキューすると、それが含むポートの1つからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように複数のポートで同時にリッスンするために使用できます。
+- **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダーです。ポートが破棄されると、ポートへのすべての既存のポート権限がデッドネームに変わります。
 
-**タスクはSEND権限を他のタスクに転送**して、メッセージを返信することができます。**SEND権限はクローン**できるため、タスクは権限を複製して**第三のタスクに権限を与える**ことができます。これにより、**ブートストラップサーバ**と呼ばれる中間プロセスと組み合わせることで、タスク間の効果的な通信が可能となります。
+**タスクはSEND権限を他のタスクに転送**して、メッセージを返信できるようにします。**SEND権限はクローン**できるため、タスクは権限を複製して**第三のタスクに権限を与える**ことができます。これにより、**ブートストラップサーバ**と呼ばれる中間プロセスと組み合わせることで、タスク間の効果的な通信が可能となります。
 
 ### ファイルポート
 
@@ -53,31 +53,31 @@ Machは**リソース共有の最小単位としてタスク**を使用し、各
 
 前述のように、Machメッセージを使用して権限を送信することが可能ですが、**Machメッセージを送信する権限がない場合は権限を送信することはできません**。では、最初の通信はどのように確立されるのでしょうか？
 
-このために、**ブートストラップサーバ**（macでは**launchd**）が関与します。**誰でもブートストラップサーバにSEND権限を取得**できるため、他のプロセスにメッセージを送信する権限を要求することができます:
+このために、**ブートストラップサーバ**（macでは**launchd**）が関与します。**誰でもブートストラップサーバにSEND権限を取得**できるため、他のプロセスにメッセージを送信する権限を要求することができます：
 
-1. タスク**A**は**新しいポート**を作成し、その**上に受信権限**を取得します。
-2. 受信権限の所有者であるタスク**A**は、最初に生成したポートに対して**SEND権限を生成**します。
-3. タスク**A**は**ブートストラップサーバ**と**接続**し、最初に生成したポートの**SEND権限を送信**します。
-* 誰でもブートストラップサーバにSEND権限を取得できます。
-4. タスクAは、`com.apple.taska`のような名前でポートを関連付けるために、ブートストラップサーバに`bootstrap_register`メッセージを送信します。
-5. タスク**B**は、サービス名（`bootstrap_lookup`）に対してブートストラップサーバとやり取りします。ブートストラップサーバが応答するために、タスクBはルックアップメッセージ内で以前に作成した**ポートに対するSEND権限**を送信します。ルックアップが成功すると、**サーバ**はタスクAから受け取ったSEND権限を**タスクBに複製**し、**タスクBに送信**します。
-* 誰でもブートストラップサーバにSEND権限を取得できます。
-6. このSEND権限を使用して、**タスクB**は**タスクA**に**メッセージを送信**できます。
-7. 双方向通信のために通常、タスク**B**は**受信権限**と**送信権限**を持つ新しいポートを生成し、**SEND権限をタスクAに渡す**ことで、タスクBにメッセージを送信できるようにします（双方向通信）。
+1. タスク**A**は**新しいポート**を作成し、そのポートに対する**受信権限**を取得します。
+2. 受信権限の所有者であるタスク**A**は、ポートに対する**送信権限を生成**します。
+3. タスク**A**は**ブートストラップサーバ**と**接続**し、最初に生成したポートの**送信権限をブートストラップサーバに送信**します。
+   - 誰でもブートストラップサーバにSEND権限を取得できることを覚えておいてください。
+4. タスクAは`bootstrap_register`メッセージをブートストラップサーバに送信して、`com.apple.taska`のような名前で指定されたポートを**関連付け**します。
+5. タスク**B**は**ブートストラップサーバ**とやり取りして、サービス名（`bootstrap_lookup`）の**ブートストラップ検索**を実行します。ブートストラップサーバが応答するために、タスクBは検索メッセージ内で以前に作成した**ポートに対するSEND権限**をブートストラップサーバに送信します。検索が成功すると、**サーバはTask Aから受け取ったSEND権限を複製**し、**Task Bに送信**します。
+   - 誰でもブートストラップサーバにSEND権限を取得できることを覚えておいてください。
+6. このSEND権限を使用して、**Task B**は**Task A**に**メッセージを送信**できます。
+7. 双方向通信のために通常、タスク**B**は**受信**権限と**送信**権限を持つ新しいポートを生成し、**SEND権限をTask Aに渡す**ことで、Task Bにメッセージを送信できるようにします（双方向通信）。
 
-ブートストラップサーバはサービス名を認証できません。これは、**タスク**が潜在的に**任意のシステムタスクをなりすます**可能性があることを意味します。例えば、認証サービス名を偽装して承認リクエストをすべて承認することができます。
+ブートストラップサーバは、タスクが主張するサービス名を認証できません。これは、**タスク**が潜在的に**任意のシステムタスクをなりすます**可能性があることを意味します。たとえば、認証サービス名を偽って**承認リクエストを承認**することができます。
 
-その後、Appleは**システム提供サービスの名前**を、SIPで保護されたディレクトリにあるセキュアな構成ファイルに保存しています：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバは、これらのサービス名ごとに**受信権限を作成**し保持します。
+その後、Appleは**システム提供サービスの名前**を、**SIPで保護された**ディレクトリにあるセキュアな構成ファイルに保存しています：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバは、これらのサービス名ごとに**受信権限を作成**し、保持します。
 
-これらの事前定義されたサービスについては、**ルックアッププロセスがわずかに異なります**。サービス名が検索されると、launchdはサービスを動的に開始します。新しいワークフローは次のとおりです:
+これらの事前定義されたサービスについては、**検索プロセスがわずかに異なります**。サービス名が検索されると、launchdはサービスを動的に開始します。新しいワークフローは次のとおりです：
 
-* タスク**B**はサービス名に対してブートストラップ**ルックアップ**を開始します。
-* **launchd**はタスクが実行されているかどうかをチェックし、実行されていない場合は**開始**します。
-* タスク**A**（サービス）は**ブートストラップチェックイン**（`bootstrap_check_in()`）を実行します。ここで、**ブートストラップ**サーバはSEND権限を作成し、保持し、**受信権限をタスクAに転送**します。
-* launchdは**SEND権限を複製**し、タスクBに送信します。
-* タスク**B**は**受信権限**と**送信権限**を持つ新しいポートを生成し、**SEND権限をタスクA**（svc）に渡します。これにより、タスクAがタスクBにメッセージを送信できるようになります（双方向通信）。
+- タスク**B**はサービス名のためにブートストラップ**検索**を開始します。
+- **launchd**はタスクが実行されているかどうかをチェックし、実行されていない場合は**起動**します。
+- タスク**A**（サービス）は**ブートストラップチェックイン**（`bootstrap_check_in()`）を実行します。ここで、**ブートストラップ**サーバはSEND権限を作成し、保持し、**受信権限をTask Aに転送**します。
+- launchdは**SEND権限を複製**し、Task Bに送信します。
+- タスク**B**は**受信**権限と**送信**権限を持つ新しいポートを生成し、**Task A**（svc）に**SEND権限を渡します**（Task Bにメッセージを送信できるようにするため）。
 
-ただし、このプロセスは事前定義されたシステムタスクにのみ適用されます。非システムタスクは引き続き最初に説明したように動作し、なりすましを許可する可能性があります。
+ただし、このプロセスは事前定義されたシステムタスクにのみ適用されます。非システムタスクは引き続き最初に説明されたように動作し、なりすましを許可する可能性があります。
 
 {% hint style="danger" %}
 したがって、launchdがクラッシュするとシステム全体がクラッシュします。
@@ -97,17 +97,17 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-プロセスは _**受信権**_ を持っていると、Machポートでメッセージを受信できます。逆に、**送信者** は _**送信権**_ または _**一度だけ送信権**_ を付与されます。一度だけ送信権は、1回のメッセージ送信にのみ使用され、その後は無効になります。
+プロセスは _**受信権**_ を持っていると、Mach ポートでメッセージを受信できます。逆に、**送信者** は _**送信権**_ または _**一度だけ送信権**_ を付与されます。一度だけ送信権は、1回のメッセージ送信後に無効になります。
 
 初期フィールド **`msgh_bits`** はビットマップです:
 
 * 最初のビット（最も重要なビット）は、メッセージが複雑であることを示すために使用されます（後述）
 * 3番目と4番目はカーネルによって使用されます
-* 2番目のバイトの**最も下位の5ビット** は **バウチャー** に使用できます: キー/値の組み合わせを送信するための別のポートの種類。
-* 3番目のバイトの**最も下位の5ビット** は **ローカルポート** に使用できます
-* 4番目のバイトの**最も下位の5ビット** は **リモートポート** に使用できます
+* 2番目のバイトの**最下位5ビット** は **バウチャー** に使用できます: キー/値の組み合わせを送信するための別のポートの種類。
+* 3番目のバイトの**最下位5ビット** は **ローカルポート** に使用できます
+* 4番目のバイトの**最下位5ビット** は **リモートポート** に使用できます
 
-バウチャー、ローカルポート、リモートポートに指定できるタイプは、[**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html) から次の通りです:
+バウチャー、ローカルポート、リモートポートに指定できるタイプは、[**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html) から次のとおりです:
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
 #define MACH_MSG_TYPE_MOVE_SEND         17      /* Must hold send right(s) */
@@ -122,30 +122,30 @@ mach_msg_id_t                 msgh_id;
 ```
 たとえば、`MACH_MSG_TYPE_MAKE_SEND_ONCE`は、このポートに対して派生および転送されるべき**send-once right**を示すために使用できます。受信者がこのメッセージに返信できないようにするために`MACH_PORT_NULL`を指定することもできます。
 
-簡単な**双方向通信**を実現するために、プロセスは_mach message header_内の**返信ポート**(**`msgh_local_port`**)と呼ばれるmach portを指定できます。メッセージの受信者は、このメッセージに返信を送信できます。
+簡単な**双方向通信**を実現するために、プロセスは_mach message header_内の**返信ポート**(**`msgh_local_port`**)と呼ばれる**mach port**を指定できます。メッセージの受信者はこのメッセージに返信することができます。
 
 {% hint style="success" %}
-この種の双方向通信は、リプライを期待するXPCメッセージで使用され、(`xpc_connection_send_message_with_reply`および`xpc_connection_send_message_with_reply_sync`)。ただし、通常は異なるポートが作成され、双方向通信が作成されるように以前に説明されています。
+この種の双方向通信は、リプライを期待するXPCメッセージで使用され、(`xpc_connection_send_message_with_reply`および`xpc_connection_send_message_with_reply_sync`)。ただし、通常は異なるポートが作成され、双方向通信が作成されるように説明されています。
 {% endhint %}
 
 メッセージヘッダーの他のフィールドは次のとおりです。
 
-- `msgh_size`：パケット全体のサイズ。
-- `msgh_remote_port`：このメッセージが送信されるポート。
-- `msgh_voucher_port`：[mach vouchers](https://robert.sesek.com/2023/6/mach\_vouchers.html)。
-- `msgh_id`：このメッセージのID、受信者によって解釈されます。
+- `msgh_size`: パケット全体のサイズ。
+- `msgh_remote_port`: このメッセージが送信されるポート。
+- `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach\_vouchers.html)。
+- `msgh_id`: 受信者によって解釈されるこのメッセージのID。
 
 {% hint style="danger" %}
-**machメッセージは`mach port`を介して送信され**、これはmachカーネルに組み込まれた**単一の受信者**、**複数の送信者**通信チャネルです。**複数のプロセス**がmachポートに**メッセージを送信**できますが、いつでも**単一のプロセスだけが**それから読み取ることができます。
+**machメッセージは`mach port`を介して送信される**ことに注意してください。これは、machカーネルに組み込まれた**単一の受信者**、**複数の送信者**通信チャネルです。**複数のプロセス**がmachポートに**メッセージを送信**できますが、いつでも**単一のプロセスだけが**それから読み取ることができます。
 {% endhint %}
 
-その後、メッセージは**`mach_msg_header_t`**ヘッダーに続いて**本文**と**トレーラー**（ある場合）で形成され、それに返信する権限を付与できます。この場合、カーネルは単にメッセージを1つのタスクからもう1つのタスクに渡す必要があります。
+その後、メッセージは**`mach_msg_header_t`**ヘッダーに続く**本文**と**トレーラー**（ある場合）によって形成され、それに返信する権限を付与できます。この場合、カーネルは単にメッセージを1つのタスクからもう1つのタスクに渡す必要があります。
 
-**トレーラー**は、**カーネルによってメッセージに追加される情報**（ユーザーによって設定できない）であり、メッセージ受信時に`MACH_RCV_TRAILER_<trailer_opt>`フラグでリクエストできます（リクエストできる異なる情報があります）。
+**トレーラー**は、**カーネルによってメッセージに追加される情報**（ユーザーによって設定されることはできません）であり、メッセージ受信時に`MACH_RCV_TRAILER_<trailer_opt>`フラグでリクエストできます（リクエストできる異なる情報があります）。
 
 #### 複雑なメッセージ
 
-ただし、追加のポート権限を渡すメッセージやメモリを共有するメッセージなど、より**複雑な**メッセージもあります。この場合、カーネルはこれらのオブジェクトを受信者に送信する必要があります。この場合、ヘッダー`msgh_bits`の最上位ビットが設定されます。
+ただし、追加のポート権限を渡すかメモリを共有するなど、より**複雑な**メッセージもあります。この場合、カーネルはこれらのオブジェクトを受信者に送信する必要があります。この場合、ヘッダー`msgh_bits`の最上位ビットが設定されます。
 
 渡す可能性のある記述子は、[**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)で定義されています。
 ```c
@@ -170,12 +170,12 @@ mach_msg_descriptor_type_t    type : 8;
 
 - **`mach_port_allocate` | `mach_port_construct`**: ポートを**作成**します。
 - `mach_port_allocate`は**ポートセット**を作成することもできます：ポートのグループに対する受信権利。メッセージを受信するたびに、それがどのポートから送信されたかが示されます。
-- `mach_port_allocate_name`: ポートの名前を変更します（デフォルトは32ビット整数）。
-- `mach_port_names`: ターゲットからポート名を取得します。
-- `mach_port_type`: タスクが名前に対して持つ権利を取得します。
-- `mach_port_rename`: ポートの名前を変更します（FDのdup2のようなもの）。
-- `mach_port_allocate`: 新しいRECEIVE、PORT_SET、またはDEAD_NAMEを割り当てます。
-- `mach_port_insert_right`: 受信権限を持つポートに新しい権限を作成します。
+- `mach_port_allocate_name`: ポートの名前を変更します（デフォルトは32ビット整数）
+- `mach_port_names`: ターゲットからポート名を取得します
+- `mach_port_type`: タスクが名前に対して持つ権利を取得します
+- `mach_port_rename`: ポートの名前を変更します（FDのdup2のようなもの）
+- `mach_port_allocate`: 新しいRECEIVE、PORT_SET、またはDEAD_NAMEを割り当てます
+- `mach_port_insert_right`: 受信権限を持つポートに新しい権限を作成します
 - `mach_port_...`
 - **`mach_msg`** | **`mach_msg_overwrite`**: **machメッセージを送受信**するために使用される関数。上書きバージョンでは、メッセージ受信用に異なるバッファを指定できます（他のバージョンは再利用します）。
 
@@ -224,7 +224,7 @@ mach_port_name_t rcv_name,
 mach_msg_timeout_t timeout,
 mach_port_name_t notify);
 ```
-レジストリから値を取得します：
+レジストリから値を取得します:
 ```armasm
 reg read $x0 $x1 $x2 $x3 $x4 $x5 $x6
 x0 = 0x0000000124e04ce8 ;mach_msg_header_t (*msg)
@@ -235,7 +235,7 @@ x4 = 0x0000000000001f03 ;mach_port_name_t (rcv_name)
 x5 = 0x0000000000000000 ;mach_msg_timeout_t (timeout)
 x6 = 0x0000000000000000 ;mach_port_name_t (notify)
 ```
-最初の引数をチェックしてメッセージヘッダーを検査します。
+メッセージヘッダーを調査し、最初の引数をチェックします。
 ```armasm
 (lldb) x/6w $x0
 0x124e04ce8: 0x00131513 0x00000388 0x00000807 0x00001f03
@@ -277,10 +277,10 @@ name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  q
 [...]
 ```
 **名前** はポートにデフォルトで与えられる名前です（最初の3バイトで**増加**しているかを確認してください）。 **`ipc-object`** はポートの**難読化**された一意の**識別子**です。\
-また、**`send`** 権限のみを持つポートが所有者を**識別**していることに注目してください（ポート名 + pid）。\
-また、**`+`** を使用して、**同じポートに接続された他のタスク** を示すことにも注目してください。
+また、**`send`** 権限のみを持つポートは、それの所有者を**識別**しています（ポート名 + pid）。\
+また、**`+`** を使用して、**同じポートに接続された他のタスク** を示すことに注意してください。
 
-また、[**procesxp**](https://www.newosxbook.com/tools/procexp.html) を使用して、**登録されたサービス名**（`com.apple.system-task-port` の必要性により SIP が無効になっている）も表示することが可能です：
+また、[**procesxp**](https://www.newosxbook.com/tools/procexp.html) を使用して、**登録されたサービス名**（`com.apple.system-task-port` の必要性により SIP が無効になっている）も表示することができます。
 ```
 procesp 1 ports
 ```
@@ -288,7 +288,7 @@ iOS でこのツールをインストールするには、[http://newosxbook.com
 
 ### コード例
 
-**sender** がポートを**割り当て**、名前 `org.darlinghq.example` の **send right** を作成し、それを **ブートストラップサーバ** に送信する方法に注目してください。送信者はその名前の **send right** を要求し、それを使用して **メッセージを送信** しました。
+**sender** がポートを**割り当て**、名前 `org.darlinghq.example` の**送信権**を作成し、それを**ブートストラップサーバー**に送信する方法に注目してください。送信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**しました。
 
 {% tabs %}
 {% tab title="receiver.c" %}
@@ -360,23 +360,49 @@ printf("Text: %s, number: %d\n", message.some_text, message.some_number);
 {% endtab %}
 
 {% tab title="sender.c" %}  
-## macOS Inter-Process Communication (IPC)
+### macOS Inter-Process Communication (IPC)
 
 macOS provides several mechanisms for inter-process communication (IPC), such as Mach ports, XPC services, and UNIX domain sockets. These mechanisms allow processes to communicate and share data with each other.
 
-### Mach Ports
+One common use case for IPC is to send messages or data between processes. This can be useful for implementing features like inter-application communication, service management, and more.
 
-Mach ports are a fundamental IPC mechanism in macOS. They are used for message passing between processes and are essential for various system functions.
+In this example, we demonstrate how to use Mach ports for IPC in macOS. Mach ports are a low-level IPC mechanism that allows processes to send messages to each other. By creating a Mach port and sending messages through it, processes can communicate and exchange data.
 
-### XPC Services
+```c
+// sender.c
 
-XXPC services are a high-level IPC mechanism that allows processes to communicate with each other securely. XPC services are commonly used for system services and daemons.
+#include <stdio.h>
+#include <mach/mach.h>
 
-### UNIX Domain Sockets
+int main() {
+    mach_port_t port;
+    kern_return_t kr;
 
-UNIX domain sockets are another IPC mechanism that allows communication between processes on the same system. They are widely used for local communication and can be used for various purposes.
+    // Create a new Mach port
+    kr = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &port);
+    if (kr != KERN_SUCCESS) {
+        printf("Failed to create Mach port: %s\n", mach_error_string(kr));
+        return 1;
+    }
 
-Understanding these IPC mechanisms is essential for developing secure and efficient macOS applications.  
+    printf("Created Mach port: %d\n", port);
+
+    // Send a message through the Mach port
+    kr = mach_msg((mach_msg_header_t *) "Hello, receiver!", MACH_SEND_MSG, sizeof("Hello, receiver!"), 0, port, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
+    if (kr != KERN_SUCCESS) {
+        printf("Failed to send message: %s\n", mach_error_string(kr));
+        return 1;
+    }
+
+    printf("Message sent successfully\n");
+
+    return 0;
+}
+```
+
+In this code snippet, we first create a Mach port using `mach_port_allocate()`, then send a message through the port using `mach_msg()`. The receiver process would need to have a corresponding Mach port to receive the message sent by the sender.
+
+This is a basic example of IPC using Mach ports in macOS. Depending on your use case, you may need to implement additional error handling and security measures to ensure the integrity and confidentiality of the communication between processes.  
 {% endtab %}
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
@@ -429,22 +455,80 @@ return 1;
 printf("Sent a message\n");
 }
 ```
-### 特権ポート
+{% endtab %}
+{% endtabs %}
 
-- **ホストポート**: プロセスがこのポートに対して**Send**権限を持っている場合、**システム**に関する**情報**（例：`host_processor_info`）を取得できます。
-- **ホスト特権ポート**: このポートに対して**Send**権限を持つプロセスは、カーネル拡張機能の読み込みなどの**特権アクション**を実行できます。この権限を取得するには、**プロセスはrootである必要があります**。
-- さらに、**`kext_request`** APIを呼び出すには、Appleのバイナリにのみ付与される**`com.apple.private.kext*`**という他の権限が必要です。
-- **タスク名ポート**: _タスクポート_の権限がないバージョンです。タスクを参照しますが、それを制御することはできません。これを介して利用可能なのは`task_info()`だけです。
-- **タスクポート**（別名カーネルポート）**: このポートに対してSend権限があると、タスクを制御できます（メモリの読み書き、スレッドの作成など）。
-- `mach_task_self()`を呼び出して、呼び出し元のタスクのためのこのポートの**名前を取得**します。このポートは**`exec()`**を介してのみ**継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別なケースとして、`exec()`後にsuidバイナリで新しいタスクポートを取得します）。タスクを生成してそのポートを取得する唯一の方法は、`fork()`を行う際に["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
-- これらは、ポートへのアクセス制限です（バイナリ`AppleMobileFileIntegrity`の`macos_task_policy`から）:
-  - アプリが**`com.apple.security.get-task-allow`権限**を持っている場合、**同じユーザーのプロセスがタスクポートにアクセス**できます（デバッグ用にXcodeによって一般的に追加されます）。**ノータリゼーション**プロセスは、本番リリースではこれを許可しません。
+## 特権ポート
+
+特定の機密操作を実行したり、特定の機密データにアクセスしたりすることができる特別なポートがいくつかあります。これらのポートは、それらに対して**SEND**権限を持つタスクがある場合にのみ、非常に興味深いものとなります。これは、攻撃者の観点からだけでなく、**複数のタスク間でSEND権限を共有**できるためです。
+
+### ホスト特別ポート
+
+これらのポートは番号で表されます。
+
+**SEND** 権限は、**`host_get_special_port`** を呼び出すことで取得でき、**RECEIVE** 権限は **`host_set_special_port`** を呼び出すことで取得できます。ただし、これらの呼び出しには **`host_priv`** ポートが必要であり、これにアクセスできるのは root のみです。さらに、過去には root が **`host_set_special_port`** を呼び出して任意のポートを乗っ取ることができ、たとえば `HOST_KEXTD_PORT` を乗っ取ることでコード署名をバイパスすることが可能でした（SIP がこれを防止しています）。
+
+これらは 2 つのグループに分かれています: **最初の 7 つのポートはカーネルが所有**し、1 が `HOST_PORT`、2 が `HOST_PRIV_PORT`、3 が `HOST_IO_MASTER_PORT`、7 が `HOST_MAX_SPECIAL_KERNEL_PORT` です。\
+**8** から始まるポートは **システムデーモンが所有**し、[**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host\_special\_ports.h.auto.html) で宣言されています。
+
+* **Host port**: プロセスがこのポートに対して**SEND**権限を持っている場合、次のようなルーチンを呼び出すことで**システム**に関する**情報**を取得できます:
+* `host_processor_info`: プロセッサ情報を取得
+* `host_info`: ホスト情報を取得
+* `host_virtual_physical_table_info`: 仮想/物理ページテーブル（MACH\_VMDEBUG が必要）
+* `host_statistics`: ホスト統計情報を取得
+* `mach_memory_info`: カーネルメモリレイアウトを取得
+* **Host Priv port**: このポートに対して**SEND**権限を持つプロセスは、ブートデータを表示したり、カーネル拡張をロードしようとしたりするなど、**特権操作**を実行できます。この権限を取得するには、**プロセスは root である必要があります**。
+* さらに、**`kext_request`** API を呼び出すには、Apple バイナリにのみ与えられる **`com.apple.private.kext*`** という他の権限が必要です。
+* 呼び出すことができる他のルーチンには次のものがあります:
+* `host_get_boot_info`: `machine_boot_info()` を取得
+* `host_priv_statistics`: 特権統計情報を取得
+* `vm_allocate_cpm`: 連続した物理メモリを割り当て
+* `host_processors`: ホストプロセッサに対するSEND権限
+* `mach_vm_wire`: メモリを常駐させる
+* **root** はこの権限にアクセスできるため、`host_set_[special/exception]_port[s]` を呼び出して**ホストの特別ポートや例外ポートを乗っ取る**ことができます。
+
+すべてのホスト特別ポートを表示することができます。
+```bash
+procexp all ports | grep "HSP"
+```
+### タスクポート
+
+元々Machには「プロセス」ではなく「タスク」があり、これはスレッドのコンテナのように考えられていました。MachがBSDと統合された際、**各タスクはBSDプロセスと関連付けられました**。したがって、すべてのBSDプロセスにはプロセスであるために必要な詳細があり、すべてのMachタスクにも内部動作があります（ただし、存在しないpid 0は`kernel_task`です）。
+
+これに関連する2つの非常に興味深い関数があります：
+
+- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: 指定された`pid`に関連するタスクのタスクポートのSEND権を取得し、指定された`target_task_port`（通常は`mach_task_self()`を使用した呼び出し元タスクですが、異なるタスク上のSENDポートでもかまいません）にそれを与えます。
+- `pid_for_task(task, &pid)`: タスクへのSEND権を持つ場合、このタスクが関連付けられているPIDを見つけます。
+
+タスク内でアクションを実行するためには、タスク自体に対する`SEND`権が必要で、`mach_task_self()`を呼び出すことでこれを取得します（これは`task_self_trap`（28）を使用します）。この権限を持つと、タスクは次のようなアクションを実行できます：
+
+- `task_threads`: タスクのスレッドのすべてのタスクポートに対するSEND権を取得
+- `task_info`: タスクに関する情報を取得
+- `task_suspend/resume`: タスクを一時停止または再開
+- `task_[get/set]_special_port`
+- `thread_create`: スレッドを作成
+- `task_[get/set]_state`: タスクの状態を制御
+- その他、[**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)で見つけることができます。
+
+{% hint style="danger" %}
+異なるタスクのタスクポートに対するSEND権を持つと、異なるタスク上でそのようなアクションを実行できる可能性があります。
+{% endhint %}
+
+さらに、タスクポートは**`vm_map`**ポートでもあり、`vm_read()`や`vm_write()`などの関数を使用してタスク内のメモリを**読み取りおよび操作**できます。基本的に、異なるタスクのタスクポートに対するSEND権を持つタスクは、そのタスクに**コードをインジェクト**できることを意味します。
+
+**カーネルもタスクである**ことを覚えておいてください。したがって、誰かが**`kernel_task`に対してSEND権限**を取得すると、カーネルに任意のコードを実行させることができます（ジェイルブレイク）。
+
+- `mach_task_self()`を呼び出して、呼び出し元タスクのこのポートの**名前を取得**します。このポートは**`exec()`**を介してのみ**継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別なケースとして、`exec()`後のsuidバイナリではタスクも新しいタスクポートを取得します）。タスクを生成してそのポートを取得する唯一の方法は、`fork()`を実行しながら["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
+- これらはポートへのアクセス制限です（バイナリ`AppleMobileFileIntegrity`の`macos_task_policy`から）：
+  - アプリが**`com.apple.security.get-task-allow`権限**を持っている場合、**同じユーザーのプロセスがタスクポートにアクセス**できます（デバッグ用にXcodeによって一般的に追加されます）。**ノータリゼーション**プロセスはこれを本番リリースには許可しません。
   - **`com.apple.system-task-ports`**権限を持つアプリは、カーネルを除く**任意の**プロセスの**タスクポートを取得**できます。以前のバージョンでは**`task_for_pid-allow`**と呼ばれていました。これはAppleアプリケーションにのみ付与されます。
-  - **Rootは、ハード化されたランタイムでコンパイルされていないアプリケーションのタスクポート**にアクセスできます（Apple製品ではないもの）。
+  - **Rootは、ハード化されていない**ランタイムでコンパイルされたアプリケーションのタスクポートにアクセスできます（Apple製品ではない）。
+
+**タスク名ポート：**_タスクポート_の権限がないバージョン。タスクを参照しますが、制御することはできません。これを介して利用可能な唯一のものは、`task_info()`のようです。
 
 ### タスクポートを介したスレッドへのシェルコードインジェクション
 
-以下からシェルコードを取得できます:
+シェルコードを取得できます：
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -483,43 +567,7 @@ return 0;
 ```
 {% endtab %}
 
-{% tab title="entitlements.plist" %} 
-
-## macOS IPC (Inter-Process Communication)
-
-### macOS IPC Mechanisms
-
-macOS provides several mechanisms for inter-process communication (IPC), including:
-
-- **Mach Messages**: Low-level messaging system used by macOS for IPC.
-- **XPC Services**: Lightweight inter-process communication mechanism.
-- **Distributed Objects**: Allows objects to be used across process boundaries.
-- **NSDistributedNotificationCenter**: For sending notifications between processes.
-- **Apple Events**: Inter-application messaging system.
-
-### macOS IPC Abuse
-
-Attackers can abuse IPC mechanisms for privilege escalation and persistence, such as:
-
-- **XPC Abuse**: Exploiting insecure XPC services to execute arbitrary code.
-- **Mach Message Abuse**: Sending malicious Mach messages to escalate privileges.
-- **Distributed Objects Abuse**: Leveraging distributed objects for persistence.
-- **NSDistributedNotificationCenter Abuse**: Intercepting sensitive notifications.
-- **Apple Events Abuse**: Triggering malicious actions in target applications.
-
-### Mitigation
-
-To secure macOS systems against IPC abuse, consider the following mitigation strategies:
-
-- **Validate Inputs**: Ensure all inputs to IPC mechanisms are properly validated.
-- **Use Code Signing**: Enforce code signing requirements for IPC communication.
-- **Implement Sandboxing**: Restrict IPC interactions using sandboxing mechanisms.
-- **Monitor IPC Activity**: Monitor IPC communications for suspicious behavior.
-- **Update Regularly**: Keep macOS systems and applications up to date to patch known vulnerabilities.
-
-By understanding macOS IPC mechanisms and potential abuse scenarios, defenders can better protect their systems against privilege escalation and unauthorized access. 
-
-{% endtab %}
+{% tab title="entitlements.plist" %}次の手順は、IPC（プロセス間通信）を使用して権限昇格を行う方法を示しています。IPCは、macOSシステム内のプロセス間でデータをやり取りするためのメカニズムです。攻撃者は、IPCを悪用して権限を昇格させることができます。{% endtab %}
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -539,6 +587,9 @@ By understanding macOS IPC mechanisms and potential abuse scenarios, defenders c
 <summary>sc_injector.m</summary>
 ```objectivec
 // gcc -framework Foundation -framework Appkit sc_injector.m -o sc_injector
+// Based on https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a?permalink_comment_id=2981669
+// and on https://newosxbook.com/src.jl?tree=listings&file=inject.c
+
 
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
@@ -735,20 +786,26 @@ return 0;
 ```
 </details>  
 
-### macOS IPC (Inter-Process Communication)  
+## macOS IPC (Inter-Process Communication)
 
-macOS IPC mechanisms are used by processes to communicate and share data with each other. Understanding how IPC works is crucial for identifying potential security vulnerabilities and privilege escalation opportunities in macOS systems. This section explores various IPC techniques and their implications for macOS security.
+### Overview
+
+Inter-Process Communication (IPC) mechanisms on macOS can be abused by attackers to facilitate privilege escalation. Understanding how IPC works on macOS is crucial for identifying and exploiting potential security weaknesses.
 ```bash
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
-### タスクポート経由でのスレッド内のDylibインジェクション
+{% hint style="success" %}
+iOSでこれを動作させるには、書き込み可能なメモリを実行可能にするために、`dynamic-codesigning`の権限が必要です。
+{% endhint %}
 
-macOSでは、**スレッド**は**Mach**を使用するか、**posix `pthread` api**を使用して操作される可能性があります。前回のインジェクションで生成したスレッドはMach apiを使用して生成されたため、**posixに準拠していません**。
+### タスクポートを介したスレッドへのDylibインジェクション
 
-単純なシェルコードを**インジェクトすることが可能**だったのは、**posixに準拠する必要がなかった**ためで、Machだけで動作する必要がありました。**より複雑なインジェクション**を行うには、スレッドが**posixに準拠している必要があります**。
+macOSでは、**スレッド**は**Mach**を介して操作されるか、**posix `pthread` api**を使用して操作される可能性があります。前のインジェクションで生成したスレッドはMach apiを使用して生成されたため、**posixに準拠していません**。
 
-したがって、スレッドを**改善する**ためには、**`pthread_create_from_mach_thread`**を呼び出すべきです。これにより、有効なpthreadが作成されます。その後、この新しいpthreadは**dlopenを呼び出して**システムからdylibを**ロード**することができます。つまり、異なるアクションを実行するための新しいシェルコードを書く代わりに、カスタムライブラリをロードすることが可能です。
+単純なシェルコードをインジェクトしてコマンドを実行することが可能でしたが、これは**posixに準拠する必要がなかった**ため、Machだけで動作しました。**より複雑なインジェクション**を行うには、スレッドが**posixにも準拠する必要があります**。
+
+したがって、スレッドを**改善する**ためには、**`pthread_create_from_mach_thread`**を呼び出すべきです。これにより、**有効なpthreadが作成**されます。その後、この新しいpthreadは**dlopenを呼び出して**システムから**dylibをロード**することができます。つまり、異なるアクションを実行するための新しいシェルコードを書く代わりに、カスタムライブラリをロードすることが可能です。
 
 例えば、（ログを生成してそれを聞くことができるものなど）**例のdylibs**を以下で見つけることができます：
 
@@ -1032,15 +1089,32 @@ fprintf(stderr,"Dylib が見つかりません\n");
 ```
 </details>  
 
-## macOS IPC (Inter-Process Communication)
+### macOS IPC (Inter-Process Communication)
 
-### Overview
+#### macOS IPC Overview
 
-Inter-Process Communication (IPC) mechanisms are commonly used in macOS systems to allow communication between processes. Understanding how IPC works is crucial for both defensive and offensive security research. This document provides an overview of macOS IPC mechanisms and how they can be abused for privilege escalation and other malicious purposes.
+Inter-process communication (IPC) mechanisms are commonly used in macOS to allow communication between processes. Understanding how IPC works is crucial for both legitimate software development and security research. This section provides an overview of macOS IPC mechanisms and their potential security implications.
 
-### Mach Messages
+#### macOS IPC Mechanisms
 
-Mach messages are a fundamental IPC mechanism in macOS systems. They are used for communication between tasks and are essential for various system functionalities. Understanding how Mach messages work is important for analyzing potential security vulnerabilities related to IPC in macOS.
+macOS supports various IPC mechanisms, including:
+
+- **Mach Messages**: Low-level IPC mechanism used by macOS for inter-process communication.
+- **XPC Services**: High-level API for creating inter-process communication in macOS.
+- **Distributed Objects**: Framework for distributed computing using Objective-C.
+- **Apple Events**: Inter-application communication mechanism used in macOS.
+- **Unix Domain Sockets**: Inter-process communication between processes on the same system.
+
+#### macOS IPC Security Considerations
+
+When analyzing macOS IPC mechanisms, it is essential to consider security implications such as:
+
+- **Privilege Escalation**: Improperly implemented IPC mechanisms can be abused for privilege escalation attacks.
+- **Data Integrity**: Ensuring data integrity and confidentiality during IPC communication.
+- **Authentication**: Verifying the identity of communicating processes to prevent unauthorized access.
+- **Denial of Service**: Protecting IPC mechanisms from denial of service attacks.
+
+Understanding macOS IPC mechanisms and their security considerations is crucial for securing macOS systems against potential threats.
 ```bash
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
@@ -1057,9 +1131,9 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 ### 基本情報
 
-XPCは、macOSおよびiOSで使用されるカーネルであるXNU間のプロセス間通信を意味するもので、macOSおよびiOS上のプロセス間で**安全な非同期メソッド呼び出し**を行うためのフレームワークです。 XPCは、Appleのセキュリティパラダイムの一部であり、**特権を分離したアプリケーション**の作成を可能にし、各**コンポーネント**がその仕事を行うために必要な権限のみで実行されるようにします。これにより、侵害されたプロセスからの潜在的な被害を制限します。
+XPCは、macOSおよびiOSで使用されるカーネルであるXNUの間のプロセス間通信を意味するもので、**プロセス間の通信**のためのフレームワークです。 XPCは、システム上の異なるプロセス間で**安全で非同期のメソッド呼び出しを行うメカニズム**を提供します。これはAppleのセキュリティパラダイムの一部であり、**特権を分離したアプリケーション**の作成を可能にし、各**コンポーネント**がその仕事を行うために必要な権限のみで実行されるようにします。これにより、侵害されたプロセスからの潜在的な被害を制限します。
 
-この**通信方法**や**脆弱性**についての詳細については、以下を参照してください:
+この**通信方法**や**脆弱性**についての詳細は、以下を参照してください:
 
 {% content-ref url="macos-xpc/" %}
 [macos-xpc](macos-xpc/)
@@ -1067,11 +1141,11 @@ XPCは、macOSおよびiOSで使用されるカーネルであるXNU間のプロ
 
 ## MIG - Mach Interface Generator
 
-MIGは、Mach IPCのコード作成プロセスを**簡素化するために作成**されました。これは、RPCをプログラムするための多くの作業が同じアクション（引数のパッキング、メッセージの送信、サーバーでのデータのアンパッキングなど）を必要とするためです。
+MIGは、Mach IPCのプロセスを**簡素化するために作成**されました。これは、RPCをプログラムするための多くの作業が同じアクション（引数のパッキング、メッセージの送信、サーバーでのデータのアンパッキングなど）を必要とするためです。
 
-MIGは基本的に、サーバーとクライアントが指定された定義（IDL - Interface Definition Language - で）通信するために必要なコードを**生成**します。生成されたコードが醜い場合でも、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードになります。
+MIGは基本的に、サーバーとクライアントが指定された定義（IDL - Interface Definition Language - で）で通信するために必要なコードを**生成**します。生成されたコードが醜い場合でも、開発者はそれをインポートするだけで、以前よりもはるかにシンプルなコードになります。
 
-詳細については、以下をチェックしてください:
+詳細については、以下を確認してください:
 
 {% content-ref url="macos-mig-mach-interface-generator.md" %}
 [macos-mig-mach-interface-generator.md](macos-mig-mach-interface-generator.md)
@@ -1084,4 +1158,4 @@ MIGは基本的に、サーバーとクライアントが指定された定義�
 * [https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
 * [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 * [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-* [\*OS Internals、Volume I、User Mode、Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+* [\*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
