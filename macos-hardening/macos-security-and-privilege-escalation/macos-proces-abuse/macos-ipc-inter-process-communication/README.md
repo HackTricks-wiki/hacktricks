@@ -439,18 +439,75 @@ int main() {
 {% endtab %}
 {% endtabs %}
 
-### Privileged Ports
+## Privileged Ports
 
-* **Host port**: If a process has **Send** privilege over this port he can get **information** about the **system** (e.g. `host_processor_info`).
-* **Host priv port**: A process with **Send** right over this port can perform **privileged actions** like loading a kernel extension. The **process need to be root** to get this permission.
+There are some special ports that allows to **perform certain sensitive actions or access certain sensitive data** in case a tasks have the **SEND** permissions over them. This makes these ports very interesting from an attackers perspective not only because of the capabilities but because it's possible to **share SEND permissions across tasks**.
+
+### Host Special Ports
+
+These ports are represented by a number.
+
+**SEND** rights can be obtained by calling **`host_get_special_port`** and **RECEIVE** rights calling **`host_set_special_port`**. However, both calls require the **`host_priv`** port which only root can access. Moreover, in the past root was able to call **`host_set_special_port`** and hijack arbitrary that allowed for example to bypass code signatures by hijacking `HOST_KEXTD_PORT` (SIP now prevents this).
+
+These are divided in 2 groups: The **first 7 ports are owned by the kernel** being the 1 `HOST_PORT`, the 2 `HOST_PRIV_PORT` , the 3 `HOST_IO_MASTER_PORT` and the 7 is `HOST_MAX_SPECIAL_KERNEL_PORT`.\
+The ones starting **from** the number **8** are **owned by system daemons** and they can be found declared in [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host\_special\_ports.h.auto.html).
+
+* **Host port**: If a process has **SEND** privilege over this port he can get **information** about the **system** calling its routines like:
+  * `host_processor_info`: Get processor info
+  * `host_info`: Get host info
+  * `host_virtual_physical_table_info`: Virtual/Physical page table (requires MACH\_VMDEBUG)
+  * `host_statistics`: Get host statistics
+  * `mach_memory_info`: Get kernel memory layout
+* **Host Priv port**: A process with **SEND** right over this port can perform **privileged actions** like showing boot data or trying to load a kernel extension. The **process need to be root** to get this permission.
   * Moreover, in order to call **`kext_request`** API it's needed to have other entitlements **`com.apple.private.kext*`** which are only given to Apple binaries.
-* **Task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
-* **Task port** (aka kernel port)**:** With Send permission over this port it's possible to control the task (read/write memory, create threads...).
-  * Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`in a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) while doing a `fork()`.
-  * These are the restrictions to access the port (from `macos_task_policy` from the binary `AppleMobileFileIntegrity`):
-    * If the app has **`com.apple.security.get-task-allow` entitlement** processes from the **same user can access the task port** (commonly added by Xcode for debugging). The **notarization** process won't allow it to production releases.
-    * Apps with the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
-    * **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
+  * Other routines that can be called are:
+    * `host_get_boot_info`: Get `machine_boot_info()`
+    * `host_priv_statistics`: Get privileged statistics
+    * `vm_allocate_cpm`: Allocate Contiguous Physical Memory
+    * `host_processors`: Send right to host processors
+    * `mach_vm_wire`: Make memory resident
+  * As **root** can access this permission, it could call `host_set_[special/exception]_port[s]` to **hijack host special or exception ports**.
+
+It's possible to **see all the host special ports** by running:
+
+```bash
+procexp all ports | grep "HSP"
+```
+
+### Task Ports
+
+Originally Mach didn't have "processes" it had "tasks" which was considered more like a container of threads. When Mach was merged with BSD **each task was correlated with a BSD process**. Therefore every BSD process has the details it needs to be a process and every Mach task also have its inner workings (except for the inexistent pid 0 which is the `kernel_task`).
+
+There are two very interesting functions related to this:
+
+* `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Get a SEND right for the task por of the task related to the specified by the `pid` and give it to the indicated `target_task_port` (which is usually the caller task which has used `mach_task_self()`, but could be a SEND port over a different task.)
+* `pid_for_task(task, &pid)`: Given a SEND right to a task, find to which PID this task is related to.
+
+In order to perform actions within the task, the task needed a `SEND` right to itself calling `mach_task_self()` (which uses the `task_self_trap` (28)). With this permission a task can perform several actions like:
+
+* `task_threads`: Get SEND right over all task ports of the threads of the task
+* `task_info`: Get info about a task
+* `task_suspend/resume`: Suspend or resume a task
+* `task_[get/set]_special_port`
+* `thread_create`: Create a thread
+* `task_[get/set]_state`: Control task state
+* and more can be found in [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
+
+{% hint style="danger" %}
+Notice that with a SEND right over a task port of a **different task**, it's possible to perform such actions over a different task.
+{% endhint %}
+
+Moreover,  the task\_port is also the **`vm_map`** port which allows to **read an manipulate memory** inside a task with functions such as `vm_read()` and `vm_write()`. This basically means that a task with SEND rights over the task\_port of a different task is going to be able to **inject code into that task**.
+
+Remember that because the **kernel is also a task**, if someone manages to get a **SEND permissions** over the **`kernel_task`**, it'll be able to make the kernel execute anything (jailbreaks).
+
+* Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`in a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) while doing a `fork()`.
+* These are the restrictions to access the port (from `macos_task_policy` from the binary `AppleMobileFileIntegrity`):
+  * If the app has **`com.apple.security.get-task-allow` entitlement** processes from the **same user can access the task port** (commonly added by Xcode for debugging). The **notarization** process won't allow it to production releases.
+  * Apps with the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
+  * **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
+
+**The task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
 
 ### Shellcode Injection in thread via Task port
 
@@ -514,6 +571,9 @@ processIdentifier]);
 
 ```objectivec
 // gcc -framework Foundation -framework Appkit sc_injector.m -o sc_injector
+// Based on https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a?permalink_comment_id=2981669
+// and on https://newosxbook.com/src.jl?tree=listings&file=inject.c
+
 
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
@@ -715,6 +775,10 @@ int main(int argc, const char * argv[]) {
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
+
+{% hint style="success" %}
+For this to work on iOS you need the entitlement `dynamic-codesigning` in order to be able to make a writable memory executable.
+{% endhint %}
 
 ### Dylib Injection in thread via Task port
 
