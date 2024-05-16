@@ -731,6 +731,8 @@
     * [First Fit](binary-exploitation/heap/use-after-free/first-fit.md)
   * [Double Free](binary-exploitation/heap/double-free.md)
   * [Unlink Attack](binary-exploitation/heap/unlink-attack.md)
+  * [Fast Bin Attack](binary-exploitation/heap/fast-bin-attack.md)
+  * [Unsorted Bin Attack](binary-exploitation/heap/unsorted-bin-attack.md)
   * [Off by one overflow](binary-exploitation/heap/off-by-one-overflow.md)
   * [House of Spirit](binary-exploitation/heap/house-of-spirit.md)
   * [House of Lore](binary-exploitation/heap/house-of-lore.md)
