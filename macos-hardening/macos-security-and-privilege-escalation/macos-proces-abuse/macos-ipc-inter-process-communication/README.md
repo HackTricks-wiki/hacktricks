@@ -474,6 +474,29 @@ It's possible to **see all the host special ports** by running:
 procexp all ports | grep "HSP"
 ```
 
+### Task Special Ports
+
+These are ports reserved for well known services. It's possible to get/set them calling `task_[get/set]_special_port`. They can be found in `task_special_ports.h`:
+
+```c
+typedef	int	task_special_port_t;
+
+#define TASK_KERNEL_PORT	1	/* Represents task to the outside
+					   world.*/
+#define TASK_HOST_PORT		2	/* The host (priv) port for task.  */
+#define TASK_BOOTSTRAP_PORT	4	/* Bootstrap environment for task. */
+#define TASK_WIRED_LEDGER_PORT	5	/* Wired resource ledger for task. */
+#define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
+```
+
+From [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task\_get\_special\_port.html):
+
+* **TASK\_KERNEL\_PORT**\[task-self send right]: The port used to control this task. Used to send messages that affect the task. This is the port returned by **mach\_task\_self (see Task Ports below)**.
+* **TASK\_BOOTSTRAP\_PORT**\[bootstrap send right]: The task's bootstrap port. Used to send messages requesting return of other system service ports.
+* **TASK\_HOST\_NAME\_PORT**\[host-self send right]: The port used to request information of the containing host. This is the port returned by **mach\_host\_self**.
+* **TASK\_WIRED\_LEDGER\_PORT**\[ledger send right]: The port naming the source from which this task draws its wired kernel memory.
+* **TASK\_PAGED\_LEDGER\_PORT**\[ledger send right]: The port naming the source from which this task draws its default memory managed memory.
+
 ### Task Ports
 
 Originally Mach didn't have "processes" it had "tasks" which was considered more like a container of threads. When Mach was merged with BSD **each task was correlated with a BSD process**. Therefore every BSD process has the details it needs to be a process and every Mach task also have its inner workings (except for the inexistent pid 0 which is the `kernel_task`).
@@ -508,6 +531,19 @@ Remember that because the **kernel is also a task**, if someone manages to get a
   * **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
 
 **The task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
+
+### Thread Ports
+
+Threads also have associated ports, which are visible from the task calling **`task_threads`** and from the processor with `processor_set_threads`. A SEND right to the thread port allows to use the function from the `thread_act` subsystem, like:
+
+* `thread_terminate`
+* `thread_[get/set]_state`
+* `act_[get/set]_state`
+* `thread_[suspend/resume]`
+* `thread_info`
+* ...
+
+Any thread can get this port calling to **`mach_thread_sef`**.
 
 ### Shellcode Injection in thread via Task port
 
@@ -1084,6 +1120,148 @@ In this technique a thread of the process is hijacked:
 [macos-thread-injection-via-task-port.md](macos-thread-injection-via-task-port.md)
 {% endcontent-ref %}
 
+### Task Port Injection Detection
+
+When calling `task_for_pid` or `thread_create_*` increments a counter in the struct task from the kernel which can by accessed from user mode calling task\_info(task, TASK\_EXTMOD\_INFO, ...)
+
+## Exception Ports
+
+When a exception occurs in a thread, this exception is sent to the designated exception port of the thread. If the thread doesn't handle it, then it's sent to the task exception ports. If the task doesn't handle it, then it's sent to the host port which is managed by launchd (where it'll be acknowledge). This is called exception triage.
+
+Note that at the end usually if not properly handle the report will end up being handle by the ReportCrash daemon. However, it's possible for another thread in the same task to manage the exception, this is what crash reporting tools like `PLCreashReporter` does.
+
+## Other Objects
+
+### Clock
+
+Any user can access information about the clock however in order to set the time or modify other settings one has to be root.
+
+In order to get info its possible to call functions from the `clock` subsystem like: `clock_get_time`, `clock_get_attributtes` or `clock_alarm`\
+In order to modify values the `clock_priv` subsystem can be sued with functions like `clock_set_time` and `clock_set_attributes`
+
+### Processors and Processor Set
+
+The processor apis allows to control a single logical processor calling functions like `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...
+
+Moreover, the **processor set** apis provides a way to group multiple processors into a group. It's possible to retrieve the default processor set calling **`processor_set_default`**.\
+These are some interesting APIs to interact with the processor set:
+
+* `processor_set_statistics`
+* `processor_set_tasks`: Return an array of send rights to all tasks inside the processor set
+* `processor_set_threads`: Return an array of send rights to all threads inside the processor set
+* `processor_set_stack_usage`
+* `processor_set_info`
+
+As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor\_set\_tasks-access-to-kernel-memory-vulnerability/), in the past this allowed to bypass the previously mentioned protection to get task ports in other processes to control them by calling **`processor_set_tasks`** and getting a host port on every process.\
+Nowadays you need root to use that function and this is protected so you will only be able to get these ports on unprotected processes.
+
+You can try it with:
+
+<details>
+
+<summary><strong>processor_set_tasks code</strong></summary>
+
+````c
+// Maincpart fo the code from https://newosxbook.com/articles/PST2.html
+//gcc ./port_pid.c -o port_pid
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/sysctl.h>
+#include <libproc.h>
+#include <mach/mach.h>
+#include <errno.h>
+#include <string.h>
+#include <mach/exception_types.h>
+#include <mach/mach_host.h>
+#include <mach/host_priv.h>
+#include <mach/processor_set.h>
+#include <mach/mach_init.h>
+#include <mach/mach_port.h>
+#include <mach/vm_map.h>
+#include <mach/task.h>
+#include <mach/task_info.h>
+#include <mach/mach_traps.h>
+#include <mach/mach_error.h>
+#include <mach/thread_act.h>
+#include <mach/thread_info.h>
+#include <mach-o/loader.h>
+#include <mach-o/nlist.h>
+#include <sys/ptrace.h>
+
+mach_port_t task_for_pid_workaround(int Pid)
+{
+  
+  host_t        myhost = mach_host_self(); // host self is host priv if you're root anyway..
+  mach_port_t   psDefault;
+  mach_port_t   psDefault_control;
+
+  task_array_t  tasks;
+  mach_msg_type_number_t numTasks;
+  int i;
+
+   thread_array_t       threads;
+   thread_info_data_t   tInfo;
+
+  kern_return_t kr;
+
+  kr = processor_set_default(myhost, &psDefault);
+
+  kr = host_processor_set_priv(myhost, psDefault, &psDefault_control);
+ if (kr != KERN_SUCCESS) { fprintf(stderr, "host_processor_set_priv failed with error %x\n", kr);
+         mach_error("host_processor_set_priv",kr); exit(1);}
+
+  printf("So far so good\n");
+
+  kr = processor_set_tasks(psDefault_control, &tasks, &numTasks);
+  if (kr != KERN_SUCCESS) { fprintf(stderr,"processor_set_tasks failed with error %x\n",kr); exit(1); }
+
+  for (i = 0; i < numTasks; i++)
+        {
+                int pid;
+                pid_for_task(tasks[i], &pid);
+                printf("TASK %d PID :%d\n", i,pid);
+				char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+				if (proc_pidpath(pid, pathbuf, sizeof(pathbuf)) > 0) {
+					printf("Command line: %s\n", pathbuf);
+				} else {
+					printf("proc_pidpath failed: %s\n", strerror(errno));
+				}
+            if (pid == Pid){
+                printf("Found\n");
+                return (tasks[i]);
+            }
+        }
+
+   return (MACH_PORT_NULL);
+} // end workaround
+
+
+
+int main(int argc, char *argv[]) {
+    /*if (argc != 2) {
+        fprintf(stderr, "Usage: %s <PID>\n", argv[0]);
+        return 1;
+    }
+
+    pid_t pid = atoi(argv[1]);
+    if (pid <= 0) {
+        fprintf(stderr, "Invalid PID. Please enter a numeric value greater than 0.\n");
+        return 1;
+    }*/
+
+    int pid = 1;
+
+    task_for_pid_workaround(pid);
+    return 0;
+}
+
+```
+````
+
+</details>
+
 ## XPC
 
 ### Basic Information
@@ -1116,6 +1294,7 @@ For more info check:
 * [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 * [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 * [\*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+* [https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task\_get\_special\_port.html](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task\_get\_special\_port.html)
 
 <details>
 
