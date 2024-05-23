@@ -46,6 +46,12 @@ Here you can find start locations useful for **sandbox bypass** that allows you 
 * **`~/Library/LaunchDemons`**
   * **Trigger**: Relog-in
 
+{% hint style="success" %}
+As interesting fact, **`launchd`** has an embedded property list in a the Mach-o section `__Text.__config` which contains other well known services launchd must start. Moreover, these services can contain the `RequireSuccess`, `RequireRun` and `RebootOnSuccess` that means that they must be run and complete successfully.
+
+Ofc, It cannot be modified because of code signing.
+{% endhint %}
+
 #### Description & Exploitation
 
 **`launchd`** is the **first** **process** executed by OX S kernel at startup and the last one to finish at shut down. It should always have the **PID 1**. This process will **read and execute** the configurations indicated in the **ASEP** **plists** in:
@@ -100,6 +106,28 @@ launchctl list
 {% hint style="warning" %}
 If a plist is owned by a user, even if it's in a daemon system wide folders, the **task will be executed as the user** and not as root. This can prevent some privilege escalation attacks.
 {% endhint %}
+
+#### More info about launchd
+
+**`launchd`** is the **first** user mode process which is started from the **kernel**. The process start must be **successful** and it **cannot exit or crash**. It's even **protected** against some **killing signals**.
+
+One of the first things `launchd` would do is to **start** all the **daemons** like:
+
+* **Timer daemons** based on time to be executed:
+  * atd (`com.apple.atrun.plist`): Has a `StartInterval` of 30min
+  * crond (`com.apple.systemstats.daily.plist`): Has `StartCalendarInterval` to start at 00:15
+* **Network daemons** like:
+  * `org.cups.cups-lpd`: Listens in TCP (`SockType: stream`) with `SockServiceName: printer`
+    * &#x20;SockServiceName must be either a port or a service from `/etc/services`
+  * `com.apple.xscertd.plist`: Listens on TCP in port 1640
+* **Path daemons** that are executed when a specified path changes:
+  * `com.apple.postfix.master`: Checking the path `/etc/postfix/aliases`
+* **IOKit notifications daemons**:
+  * `com.apple.xartstorageremoted`: `"com.apple.iokit.matching" => { "com.apple.device-attach" => { "IOMatchLaunchStream" => 1 ...`
+* **Mach port:**
+  * `com.apple.xscertd-helper.plist`: It's indicating in the `MachServices` entry the name `com.apple.xscertd.helper`
+* **UserEventAgent:**
+  * This is different from the previous one. It makes launchd spawn apps in response to specific event. However, in this case, the main binary involved isn't `launchd` but `/usr/libexec/UserEventAgent`. It loads plugins from the SIP restricted folder /System/Library/UserEventPlugins/ where each plugin indicates its initialiser in the `XPCEventModuleInitializer` key or. in the case of older plugins, in the `CFPluginFactories` dict under the key `FB86416D-6164-2070-726F-70735C216EC0` of its `Info.plist`.
 
 ### shell startup files
 

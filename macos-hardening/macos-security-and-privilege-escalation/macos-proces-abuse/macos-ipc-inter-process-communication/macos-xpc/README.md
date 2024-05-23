@@ -9,7 +9,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -78,6 +78,59 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
 The ones in **`LaunchDameons`** are run by root. So if an unprivileged process can talk with one of these it could be able to escalate privileges.
 
+## XPC Objects
+
+* **`xpc_object_t`**
+
+Every XPC message is a dictionary object that simplifies the serialization and deserialization. Moreover, `libxpc.dylib` declares most of the data types so it's possible to make that the received data is of the expected type. In the C API every object is a `xpc_object_t` (and it's type can be checked using `xpc_get_type(object)`).\
+Moreover, the function `xpc_copy_description(object)` can be used to get a string representation of the object that can be useful for debugging purposes.\
+These objects also have some methods to call like `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
+
+The `xpc_object_t` are created calling `xpc_<objetType>_create` function, which internally calls `_xpc_base_create(Class, Size)` where it's indicated the type of the class of the object (one of `XPC_TYPE_*`) and the size of it (some extra 40B will be added to the size for metadata). Which means that the data of the object will start at the offset 40B.\
+Therefore, the `xpc_<objectType>_t` is kind of a subclass of the `xpc_object_t` which would be a subclass of `os_object_t*`.
+
+{% hint style="warning" %}
+Note that it should be the developer who uses `xpc_dictionary_[get/set]_<objectType>` to get or set the type and real value of a key.
+{% endhint %}
+
+* **`xpc_pipe`**
+
+A **`xpc_pipe`** is a FIFO pipe that processes can use to communicate (the communication use Mach messages).\
+It's possible to create a XPC server calling `xpc_pipe_create()` or `xpc_pipe_create_from_port()` to create it using a specific Mach port. Then, to receive messages it's possible to call `xpc_pipe_receive` and `xpc_pipe_try_receive`.
+
+Note that the **`xpc_pipe`** object is a **`xpc_object_t`** with information in its struct about the two Mach ports used and the name (if any). The name, for example, the daemon `secinitd` in its plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` configures the pipe called `com.apple.secinitd`.
+
+An example of a **`xpc_pipe`** is the **bootstrap pip**e created by **`launchd`** making possible sharing Mach ports.
+
+* **`NSXPC*`**
+
+These are Objective-C high level objects which allows the abstraction of XPC connections.\
+Moreover, it's easier to debug these objects with DTrace than the previous ones.
+
+* **`GCD Queues`**
+
+XPC uses GCD to pass messages, moreover it generates certain dispatch queues like `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
+
+## XPC Services
+
+These are **bundles with `.xpc`** extension located inside the **`XPCServices`** folder of other projects and in the `Info.plist` they have the `CFBundlePackageType` set to **`XPC!`**.\
+This file have other configuration keys like `ServiceType` which can be Application, User, System or `_SandboxProfile` which can define a sandbox or `_AllowedClients` which might indicate entitlements or ID required to contact the ser. these and other configuration options will be useful to configure the service when being launched.
+
+### Starting a Service
+
+The app attempts to **connect** to a XPC service using `xpc_connection_create_mach_service`, then launchd locates the daemon and starts **`xpcproxy`**. **`xpcproxy`** enforce configured restrictions and. spawns the service with the provided FDs and Mach ports.
+
+In order to improve the speed of the search of the XPC service, a cache is used.
+
+It's possible to trace the actions of `xpcproxy` using:
+
+```bash
+supraudit S -C -o /tmp/output /dev/auditpipe
+```
+
+The XPC library use `kdebug` to log actions calling `xpc_ktrace_pid0` and `xpc_ktrace_pid1`. The codes it uses are undocumented so it's needed to add the into `/usr/share/misc/trace.codes`. They have the prefix `0x29` and for example one is `0x29000004`: `XPC_serializer_pack`.\
+The utility `xpcproxy` uses the prefix `0x22`, for example: `0x2200001c: xpcproxy:will_do_preexec`.
+
 ## XPC Event Messages
 
 Applications can **subscribe** to different event **messages**, enabling them to be **initiated on-demand** when such events happen. The **setup** for these services is done in l**aunchd plist files**, located in the **same directories as the previous ones** and containing an extra **`LaunchEvent`** key.
@@ -112,6 +165,8 @@ xpcspy -U -r -W <bundle-id>
 ## Using filters (i: for input, o: for output)
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
+
+Another possible tool to use is [**XPoCe2**](https://newosxbook.com/tools/XPoCe2.html).
 
 ## XPC Communication C Code Example
 
@@ -407,6 +462,28 @@ static void customConstructor(int argc, const char **argv)
 }
 ```
 
+## Remote XPC
+
+This functionality provided by `RemoteXPC.framework` (from `libxpc`) allows to communicate via XPC through different hosts.\
+The services that supports remote XPC will have in their plist the key UsesRemoteXPC like it's the case of `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. However, although the service will be registered with `launchd`, it's `UserEventAgent` with the plugins `com.apple.remoted.plugin` and `com.apple.remoteservicediscovery.events.plugin` which provides the functionality.
+
+Moreover, the `RemoteServiceDiscovery.framework` allows to get info from the `com.apple.remoted.plugin` exposing functions such as `get_device`, `get_unique_device`, `connect`...
+
+Once connect is used and the socket `fd` of the service is gathered, it's possible to use `remote_xpc_connection_*` class.
+
+It's possible to get information about remote services using the cli tool `/usr/libexec/remotectl` using parameters as:
+
+```bash
+/usr/libexec/remotectl list # Get bridge devices
+/usr/libexec/remotectl show ...# Get device properties and services
+/usr/libexec/remotectl dumpstate # Like dump withuot indicateing a servie
+/usr/libexec/remotectl [netcat|relay] ... # Expose a service in a port
+...
+```
+
+The communication between BridgeOS and the host occurs through a dedicated IPv6 interface. The `MultiverseSupport.framework` allows to establish sockets whose `fd` will be used for communicating.\
+It's possible to find thee communications using `netstat`, `nettop` or the open source option, `netbottom`.
+
 <details>
 
 <summary><strong>Learn AWS hacking from zero to hero with</strong> <a href="https://training.hacktricks.xyz/courses/arte"><strong>htARTE (HackTricks AWS Red Team Expert)</strong></a><strong>!</strong></summary>
@@ -416,7 +493,7 @@ Other ways to support HackTricks:
 * If you want to see your **company advertised in HackTricks** or **download HackTricks in PDF** Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
