@@ -425,7 +425,6 @@
     * [Basic Tomcat Info](network-services-pentesting/pentesting-web/tomcat/basic-tomcat-info.md)
   * [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
   * [VMWare (ESX, VCenter...)](network-services-pentesting/pentesting-web/vmware-esx-vcenter....md)
-  * [WAF Bypass](network-services-pentesting/pentesting-web/waf-bypass.md)
   * [Web API Pentesting](network-services-pentesting/pentesting-web/web-api-pentesting.md)
   * [WebDav](network-services-pentesting/pentesting-web/put-method-webdav.md)
   * [Werkzeug / Flask Debug](network-services-pentesting/pentesting-web/werkzeug.md)
