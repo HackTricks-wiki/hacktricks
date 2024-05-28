@@ -343,8 +343,8 @@ The compromised user could have some **interesting privileges over some domain o
 
 Discovering a **Spool service listening** within the domain can be **abused** to **acquire new credentials** and **escalate privileges**.
 
-{% content-ref url="acl-persistence-abuse/" %}
-[acl-persistence-abuse](acl-persistence-abuse/)
+{% content-ref url="printers-spooler-service-abuse.md" %}
+[printers-spooler-service-abuse.md](printers-spooler-service-abuse.md)
 {% endcontent-ref %}
 
 ### Third party sessions abuse
