@@ -138,6 +138,7 @@
 
 * [macOS Security & Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/README.md)
   * [macOS Apps - Inspecting, debugging and Fuzzing](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/README.md)
+    * [Objects in memory](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md)
     * [Introduction to x64](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/introduction-to-x64.md)
     * [Introduction to ARM64v8](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
   * [macOS AppleFS](macos-hardening/macos-security-and-privilege-escalation/macos-applefs.md)

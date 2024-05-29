@@ -377,7 +377,8 @@ Parameters ([more info in the docs](https://developer.apple.com/documentation/ob
 
 So, if you put breakpoint before the branch to this function, you can easily find what is invoked in lldb with (in this example the object calls an object from `NSConcreteTask` that will run a command):
 
-```
+```bash
+# Right in the line were objc_msgSend will be called
 (lldb) po $x0
 <NSConcreteTask: 0x1052308e0>
 
@@ -395,8 +396,28 @@ whoami
 ```
 
 {% hint style="success" %}
-Setting the env variable `NSObjCMessageLoggingEnabled=1` it's possible to log when this function is called in a file like `/tmp/msgSends-pid`.
+Setting the env variable **`NSObjCMessageLoggingEnabled=1`** it's possible to log when this function is called in a file like `/tmp/msgSends-pid`.
+
+Moreover, setting **`OBJC_HELP=1`** and calling any binary you can see other environment variables you could use to **log** when certain Objc-C actions occurs.
 {% endhint %}
+
+When this function is called, it's needed to find the called method of the indicated instance, for this different searches are made:
+
+* Perform optimistic cache lookup:
+  * If successful, done
+* Acquire runtimeLock (read)
+  * If (realize && !cls->realized) realize class
+  * If (initialize && !cls->initialized) initialize class
+* Try class own cache:
+  * If successful, done
+* Try class method list:
+  * If found, fill cache and done
+* Try superclass cache:
+  * If successful, done
+* Try superclass method list:
+  * If found, fill cache and done
+* If (resolver) try method resolver, and repeat from class lookup
+* If still here (= all else has failed) try forwarder
 
 ### Shellcodes
 
