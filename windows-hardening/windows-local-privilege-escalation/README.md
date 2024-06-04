@@ -96,7 +96,7 @@ Any credential/Juicy info saved in the env variables?
 ```bash
 set
 dir env:
-Get-ChildItem Env: | ft Key,Value
+Get-ChildItem Env: | ft Key,Value -AutoSize
 ```
 
 ### PowerShell History
