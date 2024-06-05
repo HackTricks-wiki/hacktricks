@@ -637,6 +637,7 @@
 * [Reverse Tab Nabbing](pentesting-web/reverse-tab-nabbing.md)
 * [Unicode Injection](pentesting-web/unicode-injection/README.md)
   * [Unicode Normalization](pentesting-web/unicode-injection/unicode-normalization.md)
+* [UUID Insecurities](pentesting-web/uuid-insecurities.md)
 * [WebSocket Attacks](pentesting-web/websocket-attacks.md)
 * [Web Tool - WFuzz](pentesting-web/web-tool-wfuzz.md)
 * [XPATH injection](pentesting-web/xpath-injection.md)

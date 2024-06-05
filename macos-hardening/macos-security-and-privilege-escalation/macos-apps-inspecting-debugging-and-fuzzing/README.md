@@ -169,6 +169,10 @@ x64:
 | **6th argument**  | **r9**                                                          | **4th argument to the method**                         |
 | **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **5th+ argument to the method**                        |
 
+### Dynadump
+
+[**Dynadump**](https://github.com/DerekSelander/dynadump) is a tool to get Objc-Classes from dylibs.
+
 ### Swift
 
 With Swift binaries, since there is Objective-C compatibility, sometimes you can extract declarations using [class-dump](https://github.com/nygard/class-dump/) but not always.
