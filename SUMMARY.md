@@ -736,6 +736,7 @@
   * [Fast Bin Attack](binary-exploitation/heap/fast-bin-attack.md)
   * [Unsorted Bin Attack](binary-exploitation/heap/unsorted-bin-attack.md)
   * [Large Bin Attack](binary-exploitation/heap/large-bin-attack.md)
+  * [Tcache Bin Attack](binary-exploitation/heap/tcache-bin-attack.md)
   * [Off by one overflow](binary-exploitation/heap/off-by-one-overflow.md)
   * [House of Spirit](binary-exploitation/heap/house-of-spirit.md)
   * [House of Lore](binary-exploitation/heap/house-of-lore.md)
@@ -762,7 +763,7 @@
   * [WWW2Exec - atexit()](binary-exploitation/arbitrary-write-2-exec/www2exec-atexit.md)
   * [WWW2Exec - .dtors & .fini\_array](binary-exploitation/arbitrary-write-2-exec/www2exec-.dtors-and-.fini\_array.md)
   * [WWW2Exec - GOT/PLT](binary-exploitation/arbitrary-write-2-exec/aw2exec-got-plt.md)
-  * [WWW2Exec - \_\_malloc\_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-\_\_malloc\_hook.md)
+  * [WWW2Exec - \_\_malloc\_hook & \_\_free\_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-\_\_malloc\_hook.md)
 * [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
 * [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
 
