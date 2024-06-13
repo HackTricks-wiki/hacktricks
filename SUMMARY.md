@@ -731,6 +731,7 @@
   * [Use After Free](binary-exploitation/heap/use-after-free/README.md)
     * [First Fit](binary-exploitation/heap/use-after-free/first-fit.md)
   * [Double Free](binary-exploitation/heap/double-free.md)
+  * [Overwriting a freed chunk](binary-exploitation/heap/overwriting-a-freed-chunk.md)
   * [Heap Overflow](binary-exploitation/heap/heap-overflow.md)
   * [Unlink Attack](binary-exploitation/heap/unlink-attack.md)
   * [Fast Bin Attack](binary-exploitation/heap/fast-bin-attack.md)
