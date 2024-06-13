@@ -740,7 +740,7 @@
   * [Tcache Bin Attack](binary-exploitation/heap/tcache-bin-attack.md)
   * [Off by one overflow](binary-exploitation/heap/off-by-one-overflow.md)
   * [House of Spirit](binary-exploitation/heap/house-of-spirit.md)
-  * [House of Lore](binary-exploitation/heap/house-of-lore.md)
+  * [House of Lore | Small bin Attack](binary-exploitation/heap/house-of-lore.md)
   * [House of Einherjar](binary-exploitation/heap/house-of-einherjar.md)
   * [House of Force](binary-exploitation/heap/house-of-force.md)
   * [House of Orange](binary-exploitation/heap/house-of-orange.md)
