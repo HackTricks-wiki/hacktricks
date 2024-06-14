@@ -587,7 +587,6 @@
 * [Upgrade Header Smuggling](pentesting-web/h2c-smuggling.md)
 * [hop-by-hop headers](pentesting-web/abusing-hop-by-hop-headers.md)
 * [IDOR](pentesting-web/idor.md)
-* [Integer Overflow](pentesting-web/integer-overflow.md)
 * [JWT Vulnerabilities (Json Web Tokens)](pentesting-web/hacking-jwt-json-web-tokens.md)
 * [LDAP Injection](pentesting-web/ldap-injection.md)
 * [Login Bypass](pentesting-web/login-bypass/README.md)
@@ -651,6 +650,7 @@
   * [DOM Invader](pentesting-web/xss-cross-site-scripting/dom-invader.md)
   * [DOM XSS](pentesting-web/xss-cross-site-scripting/dom-xss.md)
   * [Iframes in XSS, CSP and SOP](pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md)
+  * [Integer Overflow](pentesting-web/xss-cross-site-scripting/integer-overflow.md)
   * [JS Hoisting](pentesting-web/xss-cross-site-scripting/js-hoisting.md)
   * [Misc JS Tricks & Relevant Info](pentesting-web/xss-cross-site-scripting/other-js-tricks.md)
   * [PDF Injection](pentesting-web/xss-cross-site-scripting/pdf-injection.md)
@@ -672,6 +672,7 @@
   * [JavaScript Execution XS Leak](pentesting-web/xs-search/javascript-execution-xs-leak.md)
   * [CSS Injection](pentesting-web/xs-search/css-injection/README.md)
     * [CSS Injection Code](pentesting-web/xs-search/css-injection/css-injection-code.md)
+* [Iframe Traps](pentesting-web/iframe-traps.md)
 
 ## ⛈️ Cloud Security
 
