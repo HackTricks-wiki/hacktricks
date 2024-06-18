@@ -690,10 +690,10 @@
 
 ## 🎯 Binary Exploitation
 
-* [Basic Binary Exploitation Methodology](binary-exploitation/basic-binary-exploitation-methodology/README.md)
-  * [ELF Basic Information](binary-exploitation/basic-binary-exploitation-methodology/elf-tricks.md)
-  * [Exploiting Tools](binary-exploitation/basic-binary-exploitation-methodology/tools/README.md)
-    * [PwnTools](binary-exploitation/basic-binary-exploitation-methodology/tools/pwntools.md)
+* [Basic Stack Binary Exploitation Methodology](binary-exploitation/basic-stack-binary-exploitation-methodology/README.md)
+  * [ELF Basic Information](binary-exploitation/basic-stack-binary-exploitation-methodology/elf-tricks.md)
+  * [Exploiting Tools](binary-exploitation/basic-stack-binary-exploitation-methodology/tools/README.md)
+    * [PwnTools](binary-exploitation/basic-stack-binary-exploitation-methodology/tools/pwntools.md)
 * [Stack Overflow](binary-exploitation/stack-overflow/README.md)
   * [Pointer Redirecting](binary-exploitation/stack-overflow/pointer-redirecting.md)
   * [Ret2win](binary-exploitation/stack-overflow/ret2win/README.md)
