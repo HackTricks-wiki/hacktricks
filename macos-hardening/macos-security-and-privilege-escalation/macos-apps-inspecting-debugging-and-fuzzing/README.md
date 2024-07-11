@@ -30,14 +30,12 @@ You can check their website and try their engine for **free** at:
 
 ## Static Analysis
 
-### otool
+### otool & objdump & nm
 
 ```bash
 otool -L /bin/ls #List dynamically linked libraries
 otool -tv /bin/ps #Decompile application
 ```
-
-### objdump
 
 {% code overflow="wrap" %}
 ```bash
@@ -50,9 +48,24 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 ```
 {% endcode %}
 
-### jtool2
+```bash
+nm -m ./tccd # List of symbols
+```
 
-The tool can be used as a **replacement** for **codesign**, **otool**, and **objdump**, and provides a few additional features. [**Download it here**](http://www.newosxbook.com/tools/jtool.html) or install it with `brew`.
+### jtool2 & Disarm
+
+You can [**download disarm from here**](https://newosxbook.com/tools/disarm.html).
+
+```bash
+ARCH=arm64e disarm -c -i -I --signature /path/bin # Get bin info and signature
+ARCH=arm64e disarm -c -l /path/bin # Get binary sections
+ARCH=arm64e disarm -c -L /path/bin # Get binary commands (dependencies included)
+ARCH=arm64e disarm -c -S /path/bin # Get symbols (func names, strings...)
+ARCH=arm64e disarm -c -d /path/bin # Get disasembled
+jtool2 -d __DATA.__const myipc_server | grep MIG # Get MIG info
+```
+
+You can [**download jtool2 here**](http://www.newosxbook.com/tools/jtool.html) or install it with `brew`.
 
 ```bash
 # Install
@@ -71,9 +84,13 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
 
+{% hint style="danger" %}
+**jtool is deprecated in favour of disarm**
+{% endhint %}
+
 ### Codesign / ldid
 
-{% hint style="danger" %}
+{% hint style="success" %}
 **`Codesign`** can be found in **macOS** while **`ldid`** can be found in **iOS**
 {% endhint %}
 
@@ -119,27 +136,28 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 
 It will be mounted in `/Volumes`
 
-### Objective-C
+### Packed binaries
 
-#### Metadata
+* Check for high entropy
+* Check the strings (is there is almost no understandable string, packed)
+* The UPX packer for MacOS generates a section called "\_\_XHDR"
+
+## Static Objective-C analysis
+
+### Metadata
 
 {% hint style="danger" %}
 Note that programs written in Objective-C **retain** their class declarations **when** **compiled** into [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Such class declarations **include** the name and type of:
 {% endhint %}
 
-* The class
-* The class methods
-* The class instance variables
-
-You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
-
-```bash
-class-dump Kindle.app
-```
+* The interfaces defined
+* The interface methods
+* The interface instance variables
+* The protocols defined
 
 Note that this names could be obfuscated to make the reversing of the binary more difficult.
 
-#### Function calling
+### Function calling
 
 When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call **`objc_msgSend`**. Which will be calling the final function:
 
@@ -169,11 +187,44 @@ x64:
 | **6th argument**  | **r9**                                                          | **4th argument to the method**                         |
 | **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **5th+ argument to the method**                        |
 
+### Dump ObjectiveC metadata
+
 ### Dynadump
 
-[**Dynadump**](https://github.com/DerekSelander/dynadump) is a tool to get Objc-Classes from dylibs.
+[**Dynadump**](https://github.com/DerekSelander/dynadump) is a tool to class-dump Objective-C binaries. The github specifies dylibs but this also works with executables.
 
-### Swift
+```bash
+./dynadump dump /path/to/bin
+```
+
+At the time of the writing, this is **currently the one that works the best**.
+
+#### Regular tools
+
+```bash
+nm --dyldinfo-only /path/to/bin
+otool -ov /path/to/bin
+objdump --macho --objc-meta-data /path/to/bin
+```
+
+#### class-dump
+
+[**class-dump**](https://github.com/nygard/class-dump/) is the original tool to generates declarations for the classes, categories and protocols in ObjetiveC formatted code.
+
+It's old and unmaintained so it probably won't work properly.
+
+#### ICDump
+
+[**iCDump**](https://github.com/romainthomas/iCDump) is a modern and cross-platform Objective-C class dump. Compared to existing tools, iCDump can run independently from the Apple ecosystem and it exposes Python bindings.
+
+```python
+import icdump
+metadata = icdump.objc.parse("/path/to/bin")
+
+print(metadata.to_decl())
+```
+
+## Static Swift analysis
 
 With Swift binaries, since there is Objective-C compatibility, sometimes you can extract declarations using [class-dump](https://github.com/nygard/class-dump/) but not always.
 
@@ -202,12 +253,6 @@ https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
 # Swift cli
 swift demangle
 ```
-
-### Packed binaries
-
-* Check for high entropy
-* Check the strings (is there is almost no understandable string, packed)
-* The UPX packer for MacOS generates a section called "\_\_XHDR"
 
 ## Dynamic Analysis
 
