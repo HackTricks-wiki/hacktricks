@@ -39,7 +39,7 @@ Imagine a server which is **signing** some **data** by **appending** a **secret*
   * Usually a default one is used, so if the other 3 requirements are met, this also is
   * The padding vary depending on the length of the secret+data, that's why the length of the secret is needed
 
-Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previos data + appended data**.
+Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previous data + appended data**.
 
 ### How?
 

@@ -702,7 +702,7 @@ These items are stored in the file **`~/Library/Application Support/com.apple.ba
 
 ### ZIP as Login Item
 
-(Check previos section about Login Items, this is an extension)
+(Check previous section about Login Items, this is an extension)
 
 If you store a **ZIP** file as a **Login Item** the **`Archive Utility`** will open it and if the zip was for example stored in **`~/Library`** and contained the Folder **`LaunchAgents/file.plist`** with a backdoor, that folder will be created (it isn't by default) and the plist will be added so the next time the user logs in again, the **backdoor indicated in the plist will be executed**.
 
