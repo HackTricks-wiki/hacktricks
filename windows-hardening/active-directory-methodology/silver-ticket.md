@@ -125,8 +125,8 @@ wmic remote.computer.local list full /format:list
 
 Find **more information about wmiexec** in the following page:
 
-{% content-ref url="../lateral-movement/wmicexec.md" %}
-[wmicexec.md](../lateral-movement/wmicexec.md)
+{% content-ref url="../lateral-movement/wmiexec.md" %}
+[wmiexec.md](../lateral-movement/wmiexec.md)
 {% endcontent-ref %}
 
 ### HOST + WSMAN (WINRM)

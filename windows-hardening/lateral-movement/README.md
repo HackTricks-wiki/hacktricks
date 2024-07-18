@@ -16,7 +16,7 @@ There are different different ways to execute commands in external systems, here
 
 * [**PsExec**](psexec-and-winexec.md)
 * [**SmbExec**](smbexec.md)
-* [**WmicExec**](wmicexec.md)
+* [**WmiExec**](wmiexec.md)
 * [**AtExec / SchtasksExec**](atexec.md)
 * [**WinRM**](winrm.md)
 * [**DCOM Exec**](dcom-exec.md)
