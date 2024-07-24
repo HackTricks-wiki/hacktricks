@@ -279,7 +279,7 @@
   * [PsExec/Winexec/ScExec](windows-hardening/lateral-movement/psexec-and-winexec.md)
   * [SmbExec/ScExec](windows-hardening/lateral-movement/smbexec.md)
   * [WinRM](windows-hardening/lateral-movement/winrm.md)
-  * [WmicExec](windows-hardening/lateral-movement/wmicexec.md)
+  * [WmiExec](windows-hardening/lateral-movement/wmiexec.md)
 * [Pivoting to the Cloud](https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements)
 * [Stealing Windows Credentials](windows-hardening/stealing-credentials/README.md)
   * [Windows Credentials Protections](windows-hardening/stealing-credentials/credentials-protections.md)
