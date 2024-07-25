@@ -85,6 +85,12 @@ sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l  {} \; 2>/dev/null | g
 ```
 {% endcode %}
 
+{% code overflow="wrap" %}
+```bash
+findmnt
+```
+{% endcode %}
+
 ### Enter inside a Mount namespace
 
 ```bash
@@ -111,8 +117,35 @@ mount | grep tmpfs # Cannot see "tmpfs on /tmp/mount_ns_example"
 ls /tmp/mount_ns_example/test # Doesn't exist
 ```
 
+```
+# findmnt # List existing mounts
+TARGET                                SOURCE                                                                                                           FSTYPE     OPTIONS
+/                                     /dev/mapper/web05--vg-root         
+
+# unshare --mount  # run a shell in a new mount namespace
+# mount --bind /usr/bin/ /mnt/
+# ls /mnt/cp
+/mnt/cp
+# exit  # exit the shell, and hence the mount namespace
+# ls /mnt/cp
+ls: cannot access '/mnt/cp': No such file or directory
+
+## Notice there's different files in /tmp
+# ls /tmp
+revshell.elf
+
+# ls /mnt/tmp
+krb5cc_75401103_X5yEyy
+systemd-private-3d87c249e8a84451994ad692609cd4b6-apache2.service-77w9dT
+systemd-private-3d87c249e8a84451994ad692609cd4b6-systemd-resolved.service-RnMUhT
+systemd-private-3d87c249e8a84451994ad692609cd4b6-systemd-timesyncd.service-FAnDql
+vmware-root_662-2689143848
+
+```
+
 ## References
 * [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
+* [https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux](https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux)
 
 
 {% hint style="success" %}
