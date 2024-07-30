@@ -595,6 +595,7 @@
 * [NoSQL injection](pentesting-web/nosql-injection.md)
 * [OAuth to Account takeover](pentesting-web/oauth-to-account-takeover.md)
 * [Open Redirect](pentesting-web/open-redirect.md)
+* [ORM Injection](pentesting-web/orm-injection.md)
 * [Parameter Pollution](pentesting-web/parameter-pollution.md)
 * [Phone Number Injections](pentesting-web/phone-number-injections.md)
 * [PostMessage Vulnerabilities](pentesting-web/postmessage-vulnerabilities/README.md)
