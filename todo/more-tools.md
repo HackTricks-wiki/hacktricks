@@ -51,6 +51,8 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 
 # **WEB**
 
+* [https://itsknrirfan.github.io/dorkbounty](https://itsknrirfan.github.io/dorkbounty/) : google dorks
+* [https://itsknrirfan.github.io/toolsmania](https://itsknrirfan.github.io/toolsmania/) : Collection of tools for bug hunters.
 * [https://github.com/AlisamTechnology/ATSCAN](https://github.com/AlisamTechnology/ATSCAN)
 * [https://github.com/momenbasel/KeyFinder](https://github.com/momenbasel/KeyFinder)
 * [https://github.com/hahwul/XSpear](https://github.com/hahwul/XSpear)
