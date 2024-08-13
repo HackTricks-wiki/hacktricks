@@ -116,7 +116,7 @@ This will dump all the passwords that the user can read, allowing you to get a b
 
 ## ** Using LAPS Password **
 ```
-freerdp /v:192.168.1.1:3389  /u:Administrator
+xfreerdp /v:192.168.1.1:3389  /u:Administrator
 Password: 2Z@Ae)7!{9#Cq
 
 python psexec.py Administrator@web.example.com
