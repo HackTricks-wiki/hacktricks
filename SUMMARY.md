@@ -531,6 +531,7 @@
 * [Bypass Payment Process](pentesting-web/bypass-payment-process.md)
 * [Captcha Bypass](pentesting-web/captcha-bypass.md)
 * [Cache Poisoning and Cache Deception](pentesting-web/cache-deception/README.md)
+  * [Cache Poisoning via URL discrepancies](pentesting-web/cache-deception/cache-poisoning-via-url-discrepancies.md)
   * [Cache Poisoning to DoS](pentesting-web/cache-deception/cache-poisoning-to-dos.md)
 * [Clickjacking](pentesting-web/clickjacking.md)
 * [Client Side Template Injection (CSTI)](pentesting-web/client-side-template-injection-csti.md)
