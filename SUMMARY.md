@@ -398,6 +398,7 @@
   * [Laravel](network-services-pentesting/pentesting-web/laravel.md)
   * [Moodle](network-services-pentesting/pentesting-web/moodle.md)
   * [Nginx](network-services-pentesting/pentesting-web/nginx.md)
+  * [NextJS](network-services-pentesting/pentesting-web/nextjs.md)
   * [PHP Tricks](network-services-pentesting/pentesting-web/php-tricks-esp/README.md)
     * [PHP - Useful Functions & disable\_functions/open\_basedir bypass](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable\_functions-open\_basedir-bypass/README.md)
       * [disable\_functions bypass - php-fpm/FastCGI](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable\_functions-open\_basedir-bypass/disable\_functions-bypass-php-fpm-fastcgi.md)
