@@ -840,7 +840,6 @@
 * [Burp Suite](todo/burp-suite.md)
 * [Other Web Tricks](todo/other-web-tricks.md)
 * [Interesting HTTP](todo/interesting-http.md)
-* [Emails Vulnerabilities](todo/emails-vulns.md)
 * [Android Forensics](todo/android-forensics.md)
 * [TR-069](todo/tr-069.md)
 * [6881/udp - Pentesting BitTorrent](todo/6881-udp-pentesting-bittorrent.md)
