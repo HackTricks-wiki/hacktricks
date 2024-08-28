@@ -44,7 +44,7 @@ Note that when using the security binary to **dump the passwords decrypted**, se
 
 ```bash
 #security
-secuirty dump-trust-settings [-s] [-d] #List certificates
+security dump-trust-settings [-s] [-d] #List certificates
 security list-keychains #List keychain dbs
 security list-smartcards #List smartcards
 security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
