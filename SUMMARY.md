@@ -74,11 +74,11 @@
 * [Tunneling and Port Forwarding](generic-methodologies-and-resources/tunneling-and-port-forwarding.md)
 * [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 * [Search Exploits](generic-methodologies-and-resources/search-exploits.md)
-* [Shells (Linux, Windows, MSFVenom)](generic-methodologies-and-resources/shells/README.md)
-  * [MSFVenom - CheatSheet](generic-methodologies-and-resources/shells/msfvenom.md)
-  * [Shells - Windows](generic-methodologies-and-resources/shells/windows.md)
-  * [Shells - Linux](generic-methodologies-and-resources/shells/linux.md)
-  * [Full TTYs](generic-methodologies-and-resources/shells/full-ttys.md)
+* [Reverse Shells (Linux, Windows, MSFVenom)](generic-methodologies-and-resources/reverse-shells/README.md)
+  * [MSFVenom - CheatSheet](generic-methodologies-and-resources/reverse-shells/msfvenom.md)
+  * [Reverse Shells - Windows](generic-methodologies-and-resources/reverse-shells/windows.md)
+  * [Reverse Shells - Linux](generic-methodologies-and-resources/reverse-shells/linux.md)
+  * [Full TTYs](generic-methodologies-and-resources/reverse-shells/full-ttys.md)
 
 ## 🐧 Linux Hardening
 
