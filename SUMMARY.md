@@ -630,7 +630,7 @@
     * [Big Binary Files Upload (PostgreSQL)](pentesting-web/sql-injection/postgresql-injection/big-binary-files-upload-postgresql.md)
     * [RCE with PostgreSQL Languages](pentesting-web/sql-injection/postgresql-injection/rce-with-postgresql-languages.md)
     * [RCE with PostgreSQL Extensions](pentesting-web/sql-injection/postgresql-injection/rce-with-postgresql-extensions.md)
-  * [SQLMap - Cheetsheat](pentesting-web/sql-injection/sqlmap/README.md)
+  * [SQLMap - CheatSheet](pentesting-web/sql-injection/sqlmap/README.md)
     * [Second Order Injection - SQLMap](pentesting-web/sql-injection/sqlmap/second-order-injection-sqlmap.md)
 * [SSRF (Server Side Request Forgery)](pentesting-web/ssrf-server-side-request-forgery/README.md)
   * [URL Format Bypass](pentesting-web/ssrf-server-side-request-forgery/url-format-bypass.md)
