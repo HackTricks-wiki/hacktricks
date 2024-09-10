@@ -111,7 +111,7 @@ whoami /groups | findstr Level
 ## UAC bypass
 
 {% hint style="info" %}
-Note that if you have graphical access to the victim, UAC bypass is straight forward as you can simply click on "Yes" when the UAS prompt appears
+Note that if you have graphical access to the victim, UAC bypass is straight forward as you can simply click on "Yes" when the UAC prompt appears
 {% endhint %}
 
 The UAC bypass is needed in the following situation: **the UAC is activated, your process is running in a medium integrity context, and your user belongs to the administrators group**.
