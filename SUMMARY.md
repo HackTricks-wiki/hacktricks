@@ -838,6 +838,7 @@
   * [Low-Power Wide Area Network](todo/radio-hacking/low-power-wide-area-network.md)
   * [Pentesting BLE - Bluetooth Low Energy](todo/radio-hacking/pentesting-ble-bluetooth-low-energy.md)
 * [Industrial Control Systems Hacking](todo/industrial-control-systems-hacking/README.md)
+* [Test LLMs](todo/test-llms.md)
 * [LLM Training - Data Preparation](todo/llm-training-data-preparation/README.md)
   * [0. Basic LLM Concepts](todo/llm-training-data-preparation/0.-basic-llm-concepts.md)
   * [1. Tokenizing](todo/llm-training-data-preparation/1.-tokenizing.md)
