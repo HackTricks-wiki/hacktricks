@@ -1,8 +1,8 @@
 # macOS Gatekeeper / Quarantine / XProtect
 
 {% hint style="success" %}
-Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src="../../../.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../../../.gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="../../../.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
@@ -70,11 +70,13 @@ If the software **passes** this inspection without raising any concerns, the Not
 
 Upon the user's first installation or execution of the software, the existence of the notarization ticket - whether stapled to the executable or found online - **informs Gatekeeper that the software has been notarized by Apple**. As a result, Gatekeeper displays a descriptive message in the initial launch dialog, indicating that the software has undergone checks for malicious content by Apple. This process thereby enhances user confidence in the security of the software they install or run on their systems.
 
-### Enumerating GateKeeper
+### spctl & syspolicyd
 
-GateKeeper is both, **several security components** that prevent untrusted apps from being executed and also **one of the components**.
+{% hint style="danger" %}
+Note that from Sequoia version, **`spctl`** doesn't allow to modify Gatekeeper configuration anymore.
+{% endhint %}
 
-It's possible to see the **status** of GateKeeper with:
+**`spctl`** is the CLI tool to enumerate and interact with Gatekeeper (with the `syspolicyd` daemon via XPC messages). For example, it's possible to see the **status** of GateKeeper with:
 
 ```bash
 # Check the status
@@ -89,7 +91,9 @@ GateKeeper will check if according to the **preferences & the signature** a bina
 
 <figure><img src="../../../.gitbook/assets/image (1150).png" alt=""><figcaption></figcaption></figure>
 
-The database that keeps this configuration ins located in **`/var/db/SystemPolicy`**. You can check this database as root with:
+**`syspolicyd`** is the main daemon responsible to enforcing Gatekeeper. It maintains a database located in `/var/db/SystemPolicy` and it's possible to find the code to support the [database here](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity\_codesigning/lib/policydb.cpp) and the [SQL template here](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity\_codesigning/lib/syspolicy.sql). Note that the database is unrestricted by SIP and writable by root and the database `/var/db/.SystemPolicy-default` is used as an original backup in case the other gets corrupted.
+
+Moreover, the bundles **`/var/db/gke.bundle`** and **`/var/db/gkopaque.bundle`** contains files with rules that are inserted in the database. You can check this database as root with:
 
 ```bash
 # Open database
@@ -105,10 +109,12 @@ anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists an
 [...]
 ```
 
+**`syspolicyd`** also exposes a XPC server with different operations like `assess`, `update`, `record` and `cancel` which are also reachable using **`Security.framework`'s `SecAssessment*`** APIs and **`xpctl`** actually talks to **`syspolicyd`** via XPC.
+
 Note how the first rule ended in "**App Store**" and the second one in "**Developer ID**" and that in the previous imaged it was **enabled to execute apps from the App Store and identified developers**.\
 If you **modify** that setting to App Store, the "**Notarized Developer ID" rules will disappear**.
 
-There are also thousands of rules of **type GKE**:
+There are also thousands of rules of **type GKE** :
 
 ```bash
 SELECT requirement,allow,disabled,label from authority where label = 'GKE' limit 5;
@@ -119,7 +125,11 @@ cdhash H"0a71962e7a32f0c2b41ddb1fb8403f3420e1d861"|1|0|GKE
 cdhash H"8d0d90ff23c3071211646c4c9c607cdb601cb18f"|1|0|GKE
 ```
 
-These are hashes that come from **`/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`, `/var/db/gke.bundle/Contents/Resources/gk.db`** and **`/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`**
+These are hashes that from:
+
+* `/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`
+* `/var/db/gke.bundle/Contents/Resources/gk.db`
+* `/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`
 
 Or you could list the previous info with:
 
@@ -165,6 +175,8 @@ sudo spctl --enable --label "whitelist"
 spctl --assess -v /Applications/App.app            
 /Applications/App.app: accepted
 ```
+
+Regarding **kernel extensions**, the folder `/var/db/SystemPolicyConfiguration` contains files with lists of kexts allowed to be loaded. Moreover, `spctl` has the entitlement `com.apple.private.iokit.nvram-csr` because it's capable of  adding new pre-approved kernel extensions which need to be saved also in NVRAM in a `kext-allowed-teams` key.
 
 ### Quarantine Files
 
@@ -225,7 +237,7 @@ com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
 ```
 
-Actually a process "could set quarantine flags to the files it creates" (i tried to apply the USER\_APPROVED flag in a created file but it won't apply it):
+Actually a process "could set quarantine flags to the files it creates" (I already tried to apply the USER\_APPROVED flag in a created file but it won't apply it):
 
 <details>
 
@@ -309,11 +321,24 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 {% endcode %}
 
-Quarantine information is also stored in a central database managed by LaunchServices in **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**.
+Quarantine information is also stored in a central database managed by LaunchServices in **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`** which allows the GUI to obtain data about the file origins. Moreover this can be overwritten by applications which might be interested in hiding its origins. Moreover, this can be done from LaunchServices APIS.
+
+#### **libquarantine.dylb**
+
+This library exports several functions that allow to manipulate the extended attribute fields.
+
+The `qtn_file_*` APIs deal with file quarantine policies, the `qtn_proc_*` APIs are applied to processes (files created by the process). The unexported `__qtn_syscall_quarantine*` functions are the ones that applies the policies which calls `mac_syscall` with "Quarantine" as first argument which sends the requests to `Quarantine.kext`.
 
 #### **Quarantine.kext**
 
-The kernel extension is only available through the **kernel cache on the system**; however, you _can_ download the **Kernel Debug Kit from https://developer.apple.com/**, which will contain a symbolicated version of the extension.
+The kernel extension is only available through the **kernel cache on the system**; however, you _can_ download the **Kernel Debug Kit from** [**https://developer.apple.com/**](https://developer.apple.com/), which will contain a symbolicated version of the extension.
+
+This Kext will hook via MACF several calls in order to traps all file lifecycle events: Creation, opening, renaming, hard-linkning... even `setxattr` to prevent it from setting the `com.apple.quarantine` extended attribute.
+
+It also uses a couple of MIBs:
+
+* `security.mac.qtn.sandbox_enforce`: Enforce quarantine along Sandbox
+* `security.mac.qtn.user_approved_exec`: Querantined procs can only execute approved files
 
 ### XProtect
 
@@ -482,8 +507,8 @@ In an ".app" bundle if the quarantine xattr is not added to it, when executing i
 {% embed url="https://websec.nl/" %}
 
 {% hint style="success" %}
-Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src="../../../.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../../../.gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="../../../.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
