@@ -15,11 +15,13 @@ Learn & practice GCP Hacking: <img src="../../.gitbook/assets/grte.png" alt="" d
 </details>
 {% endhint %}
 
-
 ## Main Keychains
 
-* The **User Keychain** (`~/Library/Keychains/login.keycahin-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
+* The **User Keychain** (`~/Library/Keychains/login.keychain-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
 * The **System Keychain** (`/Library/Keychains/System.keychain`), which stores **system-wide credentials** such as WiFi passwords, system root certificates, system private keys, and system application passwords.
+  * It's possible to find other components like certificates in `/System/Library/Keychains/*`
+* In **iOS** there is only one **Keychain** located in `/private/var/Keychains/`. This folder also contains databases for the `TrustStore`, certificates authorities (`caissuercache`) and OSCP entries (`ocspache`).
+  * Apps will be restricted in the keychain only to their private area based on their application identifier.
 
 ### Password Keychain Access
 
@@ -90,9 +92,11 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 
 {% hint style="success" %}
 The **keychain enumeration and dumping** of secrets that **won't generate a prompt** can be done with the tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+
+Other API endpoints can be found in [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity\_keychain/libsecurity\_keychain-55017/lib/SecKeychain.h.auto.html) source code.
 {% endhint %}
 
-List and get **info** about each keychain entry:
+List and get **info** about each keychain entry using the **Security Framework** or you could also check the Apple's open source cli tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Some API examples:
 
 * The API **`SecItemCopyMatching`** gives info about each entry and there are some attributes you can set when using it:
   * **`kSecReturnData`**: If true, it will try to decrypt the data (set to false to avoid potential pop-ups)
@@ -141,7 +145,6 @@ If **apple** is indicated in the **partitionID**, you could access it with **`os
 ## References
 
 * [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
-
 
 {% hint style="success" %}
 Learn & practice AWS Hacking:<img src="../../.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../../.gitbook/assets/arte.png" alt="" data-size="line">\
