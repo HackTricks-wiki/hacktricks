@@ -401,7 +401,7 @@ Note that in iOS the kernel extension contains **hardcoded all the profiles** in
 
 **`Sandbox.kext`** uses more than a hundred of hooks via MACF. Most of the hooks will just check some trivial cases that allows to perform the action if it not, they will call **`cred_sb_evalutate`** with the **credentials** from MACF and a number corresponding to the **operation** to perform and a **buffer** for the output.
 
-A good example of that is the function  **`_mpo_file_check_mmap`** which hooked **`mmap`** and which will start checking if the new memory is going to be writable (and if not allow the execution), then it'll check if its used for the dyld shared cache and if so allow the execution, and finally it'll call **`cred_sb_evalutate`** to perform further allowance checks.
+A good example of that is the function  **`_mpo_file_check_mmap`** which hooked **`mmap`** and which will start checking if the new memory is going to be writable (and if not allow the execution), then it'll check if its used for the dyld shared cache and if so allow the execution, and finally it'll call **`sb_evaluate_internal`** (or one of its wrappers) to perform further allowance checks.
 
 Moreover, out of the hundred(s) hooks Sandbox uses, there are 3 in particular that are very interesting:
 
@@ -409,7 +409,7 @@ Moreover, out of the hundred(s) hooks Sandbox uses, there are 3 in particular th
 * `mpo_vnode_check_exec`: Called when a process loads the associated binary, then a profile check is perfomed and also a check forbidding SUID/SGID executions.
 * `mpo_cred_label_update_execve`: This is called when the label is assigned. This is the longest one as it's called when the binary is fully loaded but it hasn't been executed yet. It'll perform actions such as creating the sandbox object, attach sandbox struct to the kauth credentials, remove access to mach ports...
 
-Note that **`cred_sb_evalutate`** is a wrapper over **`sb_evaluate`** and this function gets the credentials passed and then performs the evaluation using the **`eval`** function which usually evaluates the **platform profile** which is by default applied to all processes and then the **specific process profile**. Note that the platform profile is one of the main components of **SIP** in macOS.
+Note that **`_cred_sb_evalutate`** is a wrapper over **`sb_evaluate_internal`** and this function gets the credentials passed and then performs the evaluation using the **`eval`** function which usually evaluates the **platform profile** which is by default applied to all processes and then the **specific process profile**. Note that the platform profile is one of the main components of **SIP** in macOS.
 
 ## Sandboxd
 
