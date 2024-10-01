@@ -195,6 +195,33 @@ openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile cacert.cer
 ```
 
+* **ASN.1 (DER/PEM) editing** (works with certificates or almost any other ASN.1 structure):
+  1. Clone [asn1template](https://github.com/wllm-rbnt/asn1template/)
+
+```bash
+git clone https://github.com/wllm-rbnt/asn1template.git
+```
+
+2. Convert DER/PEM to OpenSSL's generation format
+
+```bash
+asn1template/asn1template.pl certificatename.der > certificatename.tpl
+asn1template/asn1template.pl -p certificatename.pem > certificatename.tpl
+```
+
+3. Edit certificatename.tpl according to your requirements
+
+```bash
+vim certificatename.tpl
+```
+
+4. Rebuild the modified certificate
+
+```bash
+openssl asn1parse -genconf certificatename.tpl -out certificatename_new.der
+openssl asn1parse -genconf certificatename.tpl -outform PEM -out certificatename_new.pem
+```
+
 ***
 
 <figure><img src="../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
