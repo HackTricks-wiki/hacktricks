@@ -863,4 +863,5 @@
 * [Online Platforms with API](todo/online-platforms-with-api.md)
 * [Stealing Sensitive Information Disclosure from a Web](todo/stealing-sensitive-information-disclosure-from-a-web.md)
 * [Post Exploitation](todo/post-exploitation.md)
+* [Investment Terms](todo/investment-terms.md)
 * [Cookies Policy](todo/cookies-policy.md)
