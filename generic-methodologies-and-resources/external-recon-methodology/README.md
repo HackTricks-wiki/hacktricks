@@ -75,7 +75,7 @@ bbot -t tesla.com -f subdomain-enum
 ```
 
 You can find the IP ranges of an organisation also using [http://asnlookup.com/](http://asnlookup.com) (it has free API).\
-You can fins the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4info.com).
+You can find the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4info.com).
 
 ### **Looking for vulnerabilities**
 
