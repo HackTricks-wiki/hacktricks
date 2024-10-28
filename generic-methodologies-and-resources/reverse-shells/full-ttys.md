@@ -117,7 +117,7 @@ sftp -P 8888 127.0.0.1
 ```
 ## Penelope
 
-Penelope (https://github.com/brightio/penelope) automatically upgrades Linux reverse shells to TTY, handles the terminal size, logs everything and much more. Also it provides readline support for Windows shells.
+[Penelope](https://github.com/brightio/penelope) automatically upgrades Linux reverse shells to TTY, handles the terminal size, logs everything and much more. Also it provides readline support for Windows shells.
 
 ![penelope](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
 
