@@ -77,13 +77,31 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 ***
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - The essential penetration testing toolkit
+### [Pentest-Tools.com](https://pentest-tools.com/?utm\_term=jul2024\&utm\_medium=link\&utm\_source=hacktricks\&utm\_campaign=spons) - The essential penetration testing toolkit
 
-<figure><img src="/.gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
 **Instantly available setup for vulnerability assessment & penetration testing**. Run a full pentest from anywhere with 20+ tools & features that go from recon to reporting. We don't replace pentesters - we develop custom tools, detection & exploitation modules to give them back some time to dig deeper, pop shells, and have fun.
 
 {% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
+\
+
+{% endembed %}
+
+***
+
+### [SerpApi](https://serpapi.com/)
+
+<figure><img src=".gitbook/assets/image (1254).png" alt=""><figcaption></figcaption></figure>
+
+**SerpApi** offers fast and easy real-time APIs to **access search engine results**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
+
+A subscription to one of SerpApi’s plans includes access to over 50 different APIs for scraping different search engines, including Google, Bing, Baidu, Yahoo, Yandex, and more.\
+Unlike other providers, **SerpApi doesn’t just scrape organic results**. SerpApi responses consistently include all ads, inline images and videos, knowledge graphs, and other elements and features present in the search results.
+
+Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
+For more information check out their [**blog**](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**\
+You can **create a free account** [**here**](https://serpapi.com/users/sign\_up)**.**
 
 ***
 
@@ -101,7 +119,6 @@ In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
 
-
 ## License & Disclaimer
 
 Check them in:
@@ -112,12 +129,11 @@ Check them in:
 
 ## Github Stats
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg "Repobeats analytics image")
-
+![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {% hint style="success" %}
-Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src=".gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src=".gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src=".gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src=".gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
