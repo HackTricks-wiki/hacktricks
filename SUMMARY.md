@@ -570,6 +570,7 @@
   * [Exploiting \_\_VIEWSTATE without knowing the secrets](pentesting-web/deserialization/exploiting-\_\_viewstate-parameter.md)
   * [Python Yaml Deserialization](pentesting-web/deserialization/python-yaml-deserialization.md)
   * [JNDI - Java Naming and Directory Interface & Log4Shell](pentesting-web/deserialization/jndi-java-naming-and-directory-interface-and-log4shell.md)
+  * [Ruby Class Pollution](pentesting-web/deserialization/ruby-class-pollution.md)
 * [Domain/Subdomain takeover](pentesting-web/domain-subdomain-takeover.md)
 * [Email Injections](pentesting-web/email-injections.md)
 * [File Inclusion/Path traversal](pentesting-web/file-inclusion/README.md)
