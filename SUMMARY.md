@@ -778,6 +778,7 @@
   * [WWW2Exec - \_\_malloc\_hook & \_\_free\_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-\_\_malloc\_hook.md)
 * [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
 * [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
+* [iOS Exploiting](binary-exploitation/ios-exploiting.md)
 
 ## 🔩 Reversing
 
