@@ -17,7 +17,7 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 
 <figure><img src="/.gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-#### Get a hacker's perspective on your web apps, network, and cloud
+**Get a hacker's perspective on your web apps, network, and cloud**
 
 **Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
 
@@ -60,7 +60,7 @@ FOr further details check [https://blog.ropnop.com/using-credentials-to-own-wind
 
 <figure><img src="/.gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-#### Get a hacker's perspective on your web apps, network, and cloud
+**Get a hacker's perspective on your web apps, network, and cloud**
 
 **Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
 
