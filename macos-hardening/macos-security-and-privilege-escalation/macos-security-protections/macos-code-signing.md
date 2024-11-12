@@ -19,7 +19,7 @@ Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="
 
 Mach-o binaries contains a load command called **`LC_CODE_SIGNATURE`** that indicates the **offset** and **size** of the signatures inside the binary. Actually, using the GUI tool MachOView, it's possible to find at the end of the binary a section called **Code Signature** with this information:
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt="" width="431"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
 The magic header of the Code Signature is **`0xFADE0CC0`**. Then you have information such as the length and the number of blobs of the superBlob that contains them.\
 It's possible to find this information in the [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs\_blobs.h#L276):
