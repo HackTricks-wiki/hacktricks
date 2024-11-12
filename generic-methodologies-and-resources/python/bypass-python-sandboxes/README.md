@@ -15,15 +15,13 @@ Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="
 </details>
 {% endhint %}
 
-<figure><img src="/.gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
 **Get a hacker's perspective on your web apps, network, and cloud**
 
 **Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
 
 {% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
-
 
 These are some tricks to bypass python sandbox protections and execute arbitrary commands.
 
@@ -814,6 +812,10 @@ x = new_user.User(username='{i.find.__globals__[so].mapperlib.sys.modules[__main
 str(x) # Out: clueless
 ```
 
+### LLM Jails bypass
+
+From [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
+
 ### From format to RCE loading libraries
 
 According to the [**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/) it's possible to load arbitrary libraries from disk abusing the format string vulnerability in python.
@@ -1171,7 +1173,7 @@ will be bypassed
 * [https://nedbatchelder.com/blog/201206/eval\_really\_is\_dangerous.html](https://nedbatchelder.com/blog/201206/eval\_really\_is\_dangerous.html)
 * [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
 
-<figure><img src="/.gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
 **Get a hacker's perspective on your web apps, network, and cloud**
 
