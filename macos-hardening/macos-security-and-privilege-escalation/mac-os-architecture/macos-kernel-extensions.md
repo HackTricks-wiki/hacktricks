@@ -54,7 +54,7 @@ If **`kextd`** is not available, **`kextutil`** can perform the same checks.
 kextstat
 
 # Get dependencies of the kext number 22
-kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
+kext_num=22; kextstat 2>/dev/null | awk "/ $kext_num /"'{print $6}'
 ```
 
 ## Kernelcache
