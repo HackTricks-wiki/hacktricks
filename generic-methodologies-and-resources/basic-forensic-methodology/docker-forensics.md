@@ -15,6 +15,12 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 </details>
 {% endhint %}
 
+<figure><img src="/.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+
+{% embed url="https://academy.8ksec.io/" %}
+
 ## Container modification
 
 There are suspicions that some docker container was compromised:
@@ -128,6 +134,12 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 Note that when you run a docker container inside a host **you can see the processes running on the container from the host** just running `ps -ef`
 
 Therefore (as root) you can **dump the memory of the processes** from the host and search for **credentials** just [**like in the following example**](../../linux-hardening/privilege-escalation/#process-memory).
+
+<figure><img src="/.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+
+{% embed url="https://academy.8ksec.io/" %}
 
 {% hint style="success" %}
 Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\

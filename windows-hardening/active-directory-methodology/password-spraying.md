@@ -15,6 +15,12 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 </details>
 {% endhint %}
 
+<figure><img src="/.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+
+{% embed url="https://academy.8ksec.io/" %}
+
 ## **Password Spraying**
 
 Once you have found several **valid usernames** you can try the most **common passwords** (keep in mind the password policy of the environment) with each of the discovered users.\
@@ -160,6 +166,13 @@ To use any of these tools, you need a user list and a password / a small list of
 * [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 * [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 * [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
+
+
+<figure><img src="/.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+
+{% embed url="https://academy.8ksec.io/" %}
 
 {% hint style="success" %}
 Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\

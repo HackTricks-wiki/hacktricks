@@ -15,6 +15,13 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 </details>
 {% endhint %}
 
+<figure><img src="/.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+
+{% embed url="https://academy.8ksec.io/" %}
+
+
 **This page is based on one from [adsecurity.org](https://adsecurity.org/?page\_id=1821)**. Check the original for further info!
 
 ## LM and Clear-Text in memory
@@ -209,6 +216,12 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Extract passwords from Windows Vault.
   - `mimikatz "vault::cred /patch" exit`
 
+
+<figure><img src="/.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+
+{% embed url="https://academy.8ksec.io/" %}
 
 {% hint style="success" %}
 Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\

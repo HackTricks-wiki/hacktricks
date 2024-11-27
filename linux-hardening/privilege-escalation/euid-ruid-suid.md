@@ -15,6 +15,13 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 </details>
 {% endhint %}
 
+<figure><img src="/.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+
+{% embed url="https://academy.8ksec.io/" %}
+
+
 ### User Identification Variables
 
 - **`ruid`**: The **real user ID** denotes the user who initiated the process.
@@ -211,6 +218,13 @@ uid=99(nobody) gid=99(nobody) euid=100
 
 ## References
 * [https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail](https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail)
+
+
+<figure><img src="/.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+
+{% embed url="https://academy.8ksec.io/" %}
 
 
 {% hint style="success" %}
