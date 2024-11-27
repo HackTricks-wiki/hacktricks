@@ -1,15 +1,15 @@
 # Tunneling and Port Forwarding
 
 {% hint style="success" %}
-Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src="../.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../.gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src="../.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="../.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
 <summary>Support HackTricks</summary>
 
 * Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks_live)**.**
 * **Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -128,7 +128,9 @@ For example, forwarding all the traffic going to 10.10.10.0/24
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
+
 Connect with a private key
+
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
@@ -197,9 +199,9 @@ rportfwd stop [bind port]
 
 To note:
 
-- Beacon's reverse port forward is designed to **tunnel traffic to the Team Server, not for relaying between individual machines**.
-- Traffic is **tunneled within Beacon's C2 traffic**, including P2P links.
-- **Admin privileges are not required** to create reverse port forwards on high ports.
+* Beacon's reverse port forward is designed to **tunnel traffic to the Team Server, not for relaying between individual machines**.
+* Traffic is **tunneled within Beacon's C2 traffic**, including P2P links.
+* **Admin privileges are not required** to create reverse port forwards on high ports.
 
 ### rPort2Port local
 
@@ -579,13 +581,14 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 
 ## ngrok
 
-**[ngrok](https://ngrok.com/) is a tool to expose solutions to Internet in one command line.**  
-*Exposition URI are like:* **UID.ngrok.io**
+[**ngrok**](https://ngrok.com/) **is a tool to expose solutions to Internet in one command line.**\
+&#xNAN;_&#x45;xposition URI are like:_ **UID.ngrok.io**
 
 ### Installation
 
-- Create an account: https://ngrok.com/signup
-- Client download:
+* Create an account: https://ngrok.com/signup
+* Client download:
+
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
 chmod a+x ./ngrok
@@ -597,7 +600,7 @@ chmod a+x ./ngrok
 
 **Documentation:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-*It is also possible to add authentication and TLS, if necessary.*
+_It is also possible to add authentication and TLS, if necessary._
 
 #### Tunneling TCP
 
@@ -618,7 +621,7 @@ chmod a+x ./ngrok
 
 #### Sniffing HTTP calls
 
-*Useful for XSS,SSRF,SSTI ...*  
+_Useful for XSS,SSRF,SSTI ..._\
 Directly from stdout or in the HTTP interface [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
 #### Tunneling internal HTTP service
@@ -633,8 +636,9 @@ Directly from stdout or in the HTTP interface [http://127.0.0.1:4040](http://127
 #### ngrok.yaml simple configuration example
 
 It opens 3 tunnels:
-- 2 TCP
-- 1 HTTP with static files exposition from /tmp/httpbin/
+
+* 2 TCP
+* 1 HTTP with static files exposition from /tmp/httpbin/
 
 ```yaml
 tunnels:
@@ -655,15 +659,15 @@ tunnels:
 * [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
 
 {% hint style="success" %}
-Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src="../.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../.gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src="../.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="../.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
 <summary>Support HackTricks</summary>
 
 * Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks_live)**.**
 * **Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>

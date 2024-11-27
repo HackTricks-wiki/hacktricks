@@ -50,12 +50,12 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ***
 
-### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
+### [Trickest](https://trickest.com/?utm_campaign=hacktrics\&utm_medium=banner\&utm_source=hacktricks)
 
 <figure><img src=".gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.
+Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics\&utm_medium=banner\&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.
 
 Get Access Today:
 
@@ -65,7 +65,7 @@ Get Access Today:
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src="/.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
 
@@ -77,7 +77,7 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 ***
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm\_term=jul2024\&utm\_medium=link\&utm\_source=hacktricks\&utm\_campaign=spons) - The essential penetration testing toolkit
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024\&utm_medium=link\&utm_source=hacktricks\&utm_campaign=spons) - The essential penetration testing toolkit
 
 <figure><img src=".gitbook/assets/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
@@ -100,7 +100,17 @@ Unlike other providers, **SerpApi doesn’t just scrape organic results**. SerpA
 
 Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
 For more information check out their [**blog**](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**\
-You can **create a free account** [**here**](https://serpapi.com/users/sign\_up)**.**
+You can **create a free account** [**here**](https://serpapi.com/users/sign_up)**.**
+
+***
+
+### 8kSec Academy – In-Depth Mobile Security Courses
+
+<figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+
+{% embed url="https://academy.8ksec.io/" %}
 
 ***
 
@@ -139,7 +149,7 @@ Learn & practice GCP Hacking: <img src=".gitbook/assets/grte.png" alt="" data-si
 <summary>Support HackTricks</summary>
 
 * Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks_live)**.**
 * **Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>

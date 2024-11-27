@@ -9,7 +9,7 @@ Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="
 <summary>Support HackTricks</summary>
 
 * Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks_live)**.**
 * **Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
@@ -19,10 +19,10 @@ Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="
 
 Mach-o binaries contains a load command called **`LC_CODE_SIGNATURE`** that indicates the **offset** and **size** of the signatures inside the binary. Actually, using the GUI tool MachOView, it's possible to find at the end of the binary a section called **Code Signature** with this information:
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
 The magic header of the Code Signature is **`0xFADE0CC0`**. Then you have information such as the length and the number of blobs of the superBlob that contains them.\
-It's possible to find this information in the [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs\_blobs.h#L276):
+It's possible to find this information in the [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):
 
 ```c
 /*
@@ -60,7 +60,7 @@ Moreover, signatures cloud be detached from the binaries and stored in `/var/db/
 
 ## Code Directory Blob
 
-It's possible to find the declaration of the [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs\_blobs.h#L104):
+It's possible to find the declaration of the [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
 
 ```c
 typedef struct __CodeDirectory {
@@ -181,7 +181,7 @@ Actually, it's possible to see in the Code Directory structs a parameter called 
 
 ## Code Signing Flags
 
-Every process has related a bitmask known as the `status` which is started by the kernel and some of them can be overridden by the **code signature**. These flags that can be included in the code signing are [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs\_blobs.h#L36):
+Every process has related a bitmask known as the `status` which is started by the kernel and some of them can be overridden by the **code signature**. These flags that can be included in the code signing are [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
 
 ```c
 /* code signing attributes of a process */
@@ -228,7 +228,7 @@ Every process has related a bitmask known as the `status` which is started by th
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
 
-Note that the function [**exec\_mach\_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern\_exec.c#L1420) can also add the `CS_EXEC_*` flags dynamically when starting the execution.
+Note that the function [**exec\_mach\_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) can also add the `CS_EXEC_*` flags dynamically when starting the execution.
 
 ## Code Signature Requirements
 
@@ -320,7 +320,7 @@ The **kernel** is the one that **checks the code signature** before allowing the
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs\_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc\_internal.h#L106) struct contains the information about the entitlement of the running process on it. `csb_platform_binary` also informs if the application is a platform binary (which is checked in different moments by the OS to apply security mechanisms like to protect the SEND rights to the task ports of these processes).
+[**cs\_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct contains the information about the entitlement of the running process on it. `csb_platform_binary` also informs if the application is a platform binary (which is checked in different moments by the OS to apply security mechanisms like to protect the SEND rights to the task ports of these processes).
 
 ```c
 struct cs_blob {
@@ -394,7 +394,7 @@ Learn & practice GCP Hacking: <img src="../../../.gitbook/assets/grte.png" alt="
 <summary>Support HackTricks</summary>
 
 * Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
-* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks_live)**.**
 * **Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
