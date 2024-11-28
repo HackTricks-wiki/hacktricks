@@ -153,6 +153,15 @@ If you want to get a `NT SYSTEM` shell you could use:
 import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<command_to_execute>)
 ```
 
+### SeManageVolumePrivilege
+
+The `SeManageVolumePrivilege` is a Windows user right that allows users to manage disk volumes, including creating and deleting them. While intended for administrators, if granted to non-admin users, it can be exploited for privilege escalation.
+
+It's possible to leverage this privilege to manipulate volumes, leading to full volume access. The [SeManageVolumeExploit](https://github.com/CsEnox/SeManageVolumeExploit) can be used to give full access to all users for C:\
+
+Additionally, the process outlined in [this Medium article](https://medium.com/@raphaeltzy13/exploiting-semanagevolumeprivilege-with-dll-hijacking-windows-privilege-escalation-1a4f28372d37) describes using DLL hijacking in conjunction with `SeManageVolumePrivilege` to escalate privileges. 
+By placing a payload DLL `C:\Windows\System32\wbem\tzres.dll` and calling `systeminfo` the dll is executed.
+
 ## Check privileges
 
 ```
