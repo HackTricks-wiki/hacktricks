@@ -430,7 +430,7 @@
   * [Source code Review / SAST Tools](network-services-pentesting/pentesting-web/code-review-tools.md)
   * [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
   * [Symfony](network-services-pentesting/pentesting-web/symphony.md)
-  * [Tomcat](network-services-pentesting/pentesting-web/tomcat.md)
+  * [Tomcat](network-services-pentesting/pentesting-web/tomcat/README.md)
   * [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
   * [VMWare (ESX, VCenter...)](network-services-pentesting/pentesting-web/vmware-esx-vcenter....md)
   * [Web API Pentesting](network-services-pentesting/pentesting-web/web-api-pentesting.md)
