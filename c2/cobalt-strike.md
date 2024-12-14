@@ -233,3 +233,4 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 
 
 ```
+
