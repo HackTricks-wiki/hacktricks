@@ -59,7 +59,6 @@
     * [ZIPs tricks](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md)
   * [Windows Artifacts](generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/README.md)
     * [Interesting Windows Registry Keys](generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
-* [Brute Force - CheatSheet](generic-methodologies-and-resources/brute-force.md)
 * [Python Sandbox Escape & Pyscript](generic-methodologies-and-resources/python/README.md)
   * [Bypass Python sandboxes](generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md)
     * [LOAD\_NAME / LOAD\_CONST opcode OOB Read](generic-methodologies-and-resources/python/bypass-python-sandboxes/load_name-load_const-opcode-oob-read.md)
@@ -70,16 +69,20 @@
   * [Web Requests](generic-methodologies-and-resources/python/web-requests.md)
   * [Bruteforce hash (few chars)](generic-methodologies-and-resources/python/bruteforce-hash-few-chars.md)
   * [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
-* [Exfiltration](generic-methodologies-and-resources/exfiltration.md)
-* [Tunneling and Port Forwarding](generic-methodologies-and-resources/tunneling-and-port-forwarding.md)
 * [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
-* [Search Exploits](generic-methodologies-and-resources/search-exploits.md)
-* [Reverse Shells (Linux, Windows, MSFVenom)](generic-methodologies-and-resources/reverse-shells/README.md)
-  * [MSFVenom - CheatSheet](generic-methodologies-and-resources/reverse-shells/msfvenom.md)
-  * [Reverse Shells - Windows](generic-methodologies-and-resources/reverse-shells/windows.md)
-  * [Reverse Shells - Linux](generic-methodologies-and-resources/reverse-shells/linux.md)
-  * [Expose local to the internet](generic-methodologies-and-resources/reverse-shells/expose-local-to-the-internet.md)
-  * [Full TTYs](generic-methodologies-and-resources/reverse-shells/full-ttys.md)
+
+## Generic Hacking
+
+* [Brute Force - CheatSheet](generic-hacking/brute-force.md)
+* [Exfiltration](generic-hacking/exfiltration.md)
+* [Reverse Shells (Linux, Windows, MSFVenom)](generic-hacking/reverse-shells/README.md)
+  * [MSFVenom - CheatSheet](generic-hacking/reverse-shells/msfvenom.md)
+  * [Reverse Shells - Windows](generic-hacking/reverse-shells/windows.md)
+  * [Reverse Shells - Linux](generic-hacking/reverse-shells/linux.md)
+  * [Expose local to the internet](generic-hacking/reverse-shells/expose-local-to-the-internet.md)
+  * [Full TTYs](generic-hacking/reverse-shells/full-ttys.md)
+* [Search Exploits](generic-hacking/search-exploits.md)
+* [Tunneling and Port Forwarding](generic-hacking/tunneling-and-port-forwarding.md)
 
 ## 🐧 Linux Hardening
 
@@ -295,6 +298,7 @@
 * [Basic PowerShell for Pentesters](windows-hardening/basic-powershell-for-pentesters/README.md)
   * [PowerView/SharpView](windows-hardening/basic-powershell-for-pentesters/powerview.md)
 * [Antivirus (AV) Bypass](windows-hardening/av-bypass.md)
+* [Cobalt Strike](windows-hardening/cobalt-strike.md)
 
 ## 📱 Mobile Pentesting
 
@@ -807,12 +811,6 @@
 * [Esoteric languages](crypto-and-stego/esoteric-languages.md)
 * [Blockchain & Crypto Currencies](crypto-and-stego/blockchain-and-crypto-currencies.md)
 
-## 🦂 C2
-
-* [Salseo](c2/salseo.md)
-* [ICMPsh](c2/icmpsh.md)
-* [Cobalt Strike](c2/cobalt-strike.md)
-
 ## ✍️ TODO
 
 * [Other Big References](todo/references.md)
@@ -867,4 +865,3 @@
 * [Post Exploitation](todo/post-exploitation.md)
 * [Investment Terms](todo/investment-terms.md)
 * [Cookies Policy](todo/cookies-policy.md)
-
