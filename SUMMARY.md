@@ -71,7 +71,7 @@
   * [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 * [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 
-## Generic Hacking
+## 🧙‍♂️ Generic Hacking
 
 * [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 * [Exfiltration](generic-hacking/exfiltration.md)
