@@ -287,6 +287,14 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 listener_list
 ```
 
+### Access Agent's Local Ports
+
+```bash
+# Establish a tunnel from the proxy server to the agent
+# Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
+interface_add_route --name "ligolo" --route 240.0.0.1/32
+```
+
 ## Rpivot
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
