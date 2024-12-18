@@ -26,13 +26,13 @@ If you need a tool that automates memory analysis with different scan levels and
 
 ```bash
 # Full scan (runs all plugins)
-python3 volatility_forensics.py -f MEMFILE -o OUT_DIR -s full
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
 # Minimal scan (runs a limited set of plugins)
-python3 volatility_forensics.py -f MEMFILE -o OUT_DIR -s minimal
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 
 # Normal scan (runs a balanced set of plugins)
-python3 volatility_forensics.py -f MEMFILE -o OUT_DIR -s normal
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
 
