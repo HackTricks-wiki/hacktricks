@@ -22,8 +22,19 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 ​​[**RootedCON**](https://www.rootedcon.com/) є найважливішою подією в сфері кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою популяризації технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в усіх дисциплінах.
 
 {% embed url="https://www.rootedcon.com/" %}
+Якщо вам потрібен інструмент, який автоматизує аналіз пам'яті з різними рівнями сканування та запускає кілька плагінів Volatility3 паралельно, ви можете використовувати autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
-Якщо ви хочете щось **швидке та божевільне**, що запустить кілька плагінів Volatility паралельно, ви можете використовувати: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
+Якщо ви хочете щось **швидке і божевільне**, що запустить кілька плагінів Volatility паралельно, ви можете використовувати: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -64,7 +75,7 @@ Volatility має два основних підходи до плагінів, 
 
 Це робить плагіни “list” досить швидкими, але такими ж вразливими до маніпуляцій зловмисним ПЗ, як і API Windows. Наприклад, якщо зловмисне ПЗ використовує DKOM, щоб відключити процес від зв'язаного списку `_EPROCESS`, він не з'явиться в Диспетчері завдань, і не з'явиться в pslist.
 
-Плагіни “scan”, з іншого боку, використовують підхід, схожий на карвінг пам'яті для речей, які можуть мати сенс, коли їх розіменовують як специфічні структури. `psscan`, наприклад, прочитає пам'ять і спробує створити об'єкти `_EPROCESS` з неї (він використовує сканування за тегами пулу, що полягає в пошуку 4-байтових рядків, які вказують на наявність структури, що цікавить). Перевага полягає в тому, що він може виявити процеси, які завершили роботу, і навіть якщо зловмисне ПЗ втручається в зв'язаний список `_EPROCESS`, плагін все ще знайде структуру, що залишилася в пам'яті (оскільки вона все ще повинна існувати, щоб процес міг працювати). Недолік полягає в тому, що плагіни “scan” трохи повільніші, ніж плагіни “list”, і іноді можуть давати хибнопозитивні результати (процес, який завершив роботу занадто давно і частини його структури були перезаписані іншими операціями).
+Плагіни “scan”, з іншого боку, використовують підхід, схожий на вирізання пам'яті для речей, які можуть мати сенс, коли їх розіменовують як специфічні структури. `psscan`, наприклад, прочитає пам'ять і спробує створити об'єкти `_EPROCESS` з неї (він використовує сканування тегів пулу, яке шукає 4-байтові рядки, що вказують на наявність структури, що цікавить). Перевага полягає в тому, що він може виявити процеси, які завершили роботу, і навіть якщо зловмисне ПЗ втручається в зв'язаний список `_EPROCESS`, плагін все ще знайде структуру, що залишилася в пам'яті (оскільки вона все ще повинна існувати, щоб процес міг працювати). Недолік полягає в тому, що плагіни “scan” трохи повільніші, ніж плагіни “list”, і іноді можуть давати хибнопозитивні результати (процес, який завершив роботу занадто давно і частини його структури були перезаписані іншими операціями).
 
 З: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -87,7 +98,7 @@ Volatility має два основних підходи до плагінів, 
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Якщо ви хочете використовувати **новий профіль, який ви завантажили** (наприклад, для linux), вам потрібно створити десь таку структуру папок: _plugins/overlays/linux_ і помістити всередину цієї папки zip-файл, що містить профіль. Потім отримайте номер профілів, використовуючи:
+Якщо ви хочете використовувати **новий профіль, який ви завантажили** (наприклад, лінуксовий), вам потрібно створити десь таку структуру папок: _plugins/overlays/linux_ і помістити всередину цієї папки zip-файл, що містить профіль. Потім отримайте номер профілів, використовуючи:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -128,18 +139,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-**Блок налагодження ядра**, відомий як **KDBG** у Volatility, є критично важливим для судово-медичних завдань, які виконуються Volatility та різними налагоджувачами. Ідентифікований як `KdDebuggerDataBlock` і типу `_KDDEBUGGER_DATA64`, він містить важливі посилання, такі як `PsActiveProcessHead`. Це конкретне посилання вказує на голову списку процесів, що дозволяє перерахувати всі процеси, що є основою для ретельного аналізу пам'яті.
+**Блок відладки ядра**, відомий як **KDBG** у Volatility, є критично важливим для судово-медичних завдань, які виконуються Volatility та різними відладчиками. Ідентифікований як `KdDebuggerDataBlock` і типу `_KDDEBUGGER_DATA64`, він містить важливі посилання, такі як `PsActiveProcessHead`. Це конкретне посилання вказує на голову списку процесів, що дозволяє перерахувати всі процеси, що є основою для ретельного аналізу пам'яті.
 
 ## OS Information
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-Плагін `banners.Banners` може бути використаний у **vol3 для спроби знайти linux банери** у дампі.
+The plugin `banners.Banners` може бути використаний у **vol3 для спроби знайти linux банери** у дампі.
 
 ## Хеші/Паролі
 
-Екстрактуйте хеші SAM, [кешовані облікові дані домену](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) та [секрети lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Екстрактуйте SAM хеші, [кешовані облікові дані домену](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) та [секрети lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -167,7 +178,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​[**RootedCON**](https://www.rootedcon.com/) є найактуальнішою подією в сфері кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою просування технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в кожній дисципліні.
+​​​[**RootedCON**](https://www.rootedcon.com/) є найактуальнішою подією в сфері кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою популяризації технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в усіх дисциплінах.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -215,7 +226,7 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 
 ### Командний рядок
 
-Щось підозріле було виконано?
+Чи було виконано щось підозріле?
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -232,7 +243,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {% endtab %}
 {% endtabs %}
 
-Команди, виконані в `cmd.exe`, управляються **`conhost.exe`** (або `csrss.exe` на системах до Windows 7). Це означає, що якщо **`cmd.exe`** буде завершено зловмисником до отримання дампу пам'яті, все ще можливо відновити історію команд сесії з пам'яті **`conhost.exe`**. Для цього, якщо в модулях консолі виявлено незвичну активність, пам'ять відповідного процесу **`conhost.exe`** слід дампувати. Потім, шукаючи **рядки** в цьому дампі, можна потенційно витягнути команди, використані в сесії.
+Команди, виконані в `cmd.exe`, керуються **`conhost.exe`** (або `csrss.exe` на системах до Windows 7). Це означає, що якщо **`cmd.exe`** буде завершено зловмисником до отримання дампу пам'яті, все ще можливо відновити історію команд сесії з пам'яті **`conhost.exe`**. Для цього, якщо в модулях консолі виявлено незвичну активність, пам'ять відповідного процесу **`conhost.exe`** слід дампувати. Потім, шукаючи **рядки** в цьому дампі, можна потенційно витягнути команди, використані в сесії.
 
 ### Середовище
 
@@ -395,7 +406,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​​[**RootedCON**](https://www.rootedcon.com/) є найважливішою подією в сфері кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою просування технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в усіх дисциплінах.
+​​​​[**RootedCON**](https://www.rootedcon.com/) є найактуальнішою подією в сфері кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою популяризації технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в усіх дисциплінах.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -447,7 +458,7 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 {% endtab %}
 {% endtabs %}
 
-## Реєстраційний хів
+## Реєстровий хів
 
 ### Друк доступних хівів
 
@@ -550,9 +561,9 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {% endtab %}
 {% endtabs %}
 
-Файлова система **NTFS** використовує критично важливий компонент, відомий як _таблиця майстер-файлів_ (MFT). Ця таблиця містить принаймні один запис для кожного файлу на томі, охоплюючи також саму MFT. Важливі деталі про кожен файл, такі як **розмір, часові мітки, дозволи та фактичні дані**, інкапсульовані в записах MFT або в областях, що знаходяться зовні MFT, але на які посилаються ці записи. Більше деталей можна знайти в [офіційній документації](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+Файлова система **NTFS** використовує критично важливий компонент, відомий як _таблиця майстер-файлів_ (MFT). Ця таблиця містить принаймні один запис для кожного файлу на томі, охоплюючи також саму MFT. Важливі деталі про кожен файл, такі як **розмір, мітки часу, дозволи та фактичні дані**, інкапсульовані в записах MFT або в областях, що знаходяться зовні MFT, але на які посилаються ці записи. Більше деталей можна знайти в [офіційній документації](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
-### SSL Ключі/Сертифікати
+### SSL Keys/Certs
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -782,7 +793,7 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com/) є найважливішою подією в сфері кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою просування технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в усіх дисциплінах.
+[**RootedCON**](https://www.rootedcon.com/) є найважливішою подією в галузі кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою просування технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в усіх дисциплінах.
 
 {% embed url="https://www.rootedcon.com/" %}
 
