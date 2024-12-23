@@ -22,8 +22,19 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 ​​[**RootedCON**](https://www.rootedcon.com/) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo okupljalište za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
 
 {% embed url="https://www.rootedcon.com/" %}
+If you need a tool that automates memory analysis with different scan levels and runs multiple Volatility3 plugins in parallel, you can use autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
-If you want something **fast and crazy** that will launch several Volatility plugins on parallel you can use: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
+Ako želite nešto **brzo i ludo** što će pokrenuti nekoliko Volatility dodataka paralelno, možete koristiti: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -60,11 +71,11 @@ Access the official doc in [Volatility command reference](https://github.com/vol
 
 ### A note on “list” vs. “scan” plugins
 
-Volatility ima dva glavna pristupa za plugine, što se ponekad odražava u njihovim imenima. “list” plugini će pokušati da se kreću kroz strukture Windows Kernel-a kako bi dobili informacije kao što su procesi (lociranje i prolazak kroz povezanu listu `_EPROCESS` struktura u memoriji), OS handle-ovi (lociranje i listanje tabele handle-ova, dereferenciranje bilo kojih pronađenih pokazivača, itd). Oni se više-manje ponašaju kao što bi se Windows API ponašao kada bi se, na primer, tražilo da listaju procese.
+Volatility ima dva glavna pristupa za plugine, što se ponekad odražava u njihovim nazivima. “list” plugini će pokušati da se kreću kroz strukture Windows Kernel-a kako bi dobili informacije kao što su procesi (lociranje i prolazak kroz povezanu listu `_EPROCESS` struktura u memoriji), OS handle-ovi (lociranje i listanje tabele handle-ova, dereferenciranje bilo kojih pronađenih pokazivača, itd). Oni se više-manje ponašaju kao što bi se Windows API ponašao kada bi se, na primer, tražilo da listaju procese.
 
-To čini “list” plugine prilično brzim, ali jednako ranjivim kao Windows API na manipulaciju od strane malvera. Na primer, ako malver koristi DKOM da unlink-uje proces iz `_EPROCESS` povezane liste, neće se pojaviti u Task Manager-u, niti u pslist-u.
+To čini “list” plugine prilično brzim, ali jednako ranjivim kao Windows API na manipulaciju od strane malvera. Na primer, ako malver koristi DKOM da unlink-uje proces iz `_EPROCESS` povezane liste, on se neće pojaviti u Task Manager-u, niti u pslist-u.
 
-“scan” plugini, s druge strane, će uzeti pristup sličan sečenju memorije za stvari koje bi mogle imati smisla kada se dereferenciraju kao specifične strukture. `psscan` na primer će čitati memoriju i pokušati da napravi `_EPROCESS` objekte iz nje (koristi skeniranje pool-taga, koje traži 4-bajtne stringove koji ukazuju na prisustvo strukture od interesa). Prednost je u tome što može pronaći procese koji su izašli, i čak i ako malver manipuliše `_EPROCESS` povezanim listama, plugin će i dalje pronaći strukturu koja leži u memoriji (pošto i dalje mora postojati da bi proces radio). Nedostatak je što su “scan” plugini malo sporiji od “list” plugina, i ponekad mogu dati lažne pozitivne rezultate (proces koji je izašao previše davno i čiji su delovi strukture prepisani drugim operacijama).
+“scan” plugini, s druge strane, će uzeti pristup sličan vađenju iz memorije za stvari koje bi mogle imati smisla kada se dereferenciraju kao specifične strukture. `psscan` na primer će čitati memoriju i pokušati da napravi `_EPROCESS` objekte iz nje (koristi skeniranje pool-taga, koje traži 4-bajtne stringove koji ukazuju na prisustvo strukture od interesa). Prednost je u tome što može pronaći procese koji su izašli, i čak i ako malver manipuliše `_EPROCESS` povezanim listama, plugin će i dalje pronaći strukturu koja leži u memoriji (pošto ona i dalje mora postojati da bi proces radio). Nedostatak je što su “scan” plugini malo sporiji od “list” plugina, i ponekad mogu dati lažne pozitivne rezultate (proces koji je izašao previše davno i čiji su delovi strukture prepisani drugim operacijama).
 
 From: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -112,7 +123,7 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Razlike između imageinfo i kdbgscan**
 
-[**Odavde**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Za razliku od imageinfo koji jednostavno pruža predloge profila, **kdbgscan** je dizajniran da pozitivno identifikuje tačan profil i tačnu KDBG adresu (ako ih ima više). Ovaj dodatak skenira KDBGHeader potpise povezane sa Volatility profilima i primenjuje provere ispravnosti kako bi smanjio lažne pozitivne rezultate. Opširnost izlaza i broj provera ispravnosti koje se mogu izvršiti zavise od toga da li Volatility može pronaći DTB, tako da, ako već znate tačan profil (ili ako imate predlog profila iz imageinfo), obavezno ga koristite.
+[**Odavde**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Za razliku od imageinfo koji jednostavno pruža predloge profila, **kdbgscan** je dizajniran da pozitivno identifikuje tačan profil i tačnu KDBG adresu (ako ih ima više). Ovaj dodatak skenira KDBGHeader potpise povezane sa Volatility profilima i primenjuje provere ispravnosti kako bi smanjio lažne pozitivne rezultate. Opširnost izlaza i broj provera ispravnosti koje se mogu izvršiti zavise od toga da li Volatility može pronaći DTB, tako da ako već znate tačan profil (ili ako imate predlog profila iz imageinfo), obavezno ga koristite.
 
 Uvek obratite pažnju na **broj procesa koje je kdbgscan pronašao**. Ponekad imageinfo i kdbgscan mogu pronaći **više od jednog** odgovarajućeg **profila**, ali samo će **važeći imati neki proces povezan** (To je zato što je za ekstrakciju procesa potrebna tačna KDBG adresa).
 ```bash
@@ -167,7 +178,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​[**RootedCON**](https://www.rootedcon.com/) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo okupljanje za profesionalce iz tehnologije i sajber bezbednosti u svakoj disciplini.
+​​​[**RootedCON**](https://www.rootedcon.com/) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo okupljanje za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -232,7 +243,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {% endtab %}
 {% endtabs %}
 
-Komande izvršene u `cmd.exe` upravlja **`conhost.exe`** (ili `csrss.exe` na sistemima pre Windows 7). To znači da, ako **`cmd.exe`** bude prekinut od strane napadača pre nego što se dobije memorijski dump, još uvek je moguće povratiti istoriju komandi sesije iz memorije **`conhost.exe`**. Da bi se to uradilo, ako se otkrije neobična aktivnost unutar modula konzole, memorija povezanog procesa **`conhost.exe`** treba da se dumpuje. Zatim, pretraživanjem **stringova** unutar ovog dump-a, mogu se potencijalno izvući komandne linije korišćene u sesiji.
+Komande izvršene u `cmd.exe` upravlja **`conhost.exe`** (ili `csrss.exe` na sistemima pre Windows 7). To znači da ako **`cmd.exe`** bude prekinut od strane napadača pre nego što se dobije memorijski dump, još uvek je moguće povratiti istoriju komandi sesije iz memorije **`conhost.exe`**. Da bi se to uradilo, ako se otkrije neobična aktivnost unutar modula konzole, memorija povezanog procesa **`conhost.exe`** treba da se dumpuje. Zatim, pretraživanjem **stringova** unutar ovog dumpa, mogu se potencijalno izvući komandne linije korišćene u sesiji.
 
 ### Okruženje
 
@@ -257,7 +268,7 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 ### Token privilegije
 
 Proverite privilegovane tokene u neočekivanim servisima.\
-Može biti zanimljivo nabrojati procese koji koriste neki privilegovani token.
+Može biti zanimljivo napraviti listu procesa koji koriste neki privilegovani token.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -336,9 +347,9 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 {% endtab %}
 {% endtabs %}
 
-### Strings per processes
+### Stringovi po procesima
 
-Volatility nam omogućava da proverimo kojem procesu pripada string. 
+Volatility nam omogućava da proverimo kojem procesu pripada string.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -398,7 +409,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​​[**RootedCON**](https://www.rootedcon.com/) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo okupljalište za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
+​​​​[**RootedCON**](https://www.rootedcon.com/) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo okupljanje za profesionalce iz tehnologije i sajber bezbednosti u svakoj disciplini.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -495,7 +506,7 @@ volatility --profile=Win7SP1x86_23418 hivedump -o 0x9aad6148 -f file.dmp #Offset
 #Dump all hives
 volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
-## Datotečni sistem
+## Datoteke
 
 ### Montiranje
 
@@ -553,7 +564,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {% endtab %}
 {% endtabs %}
 
-**NTFS datotečni sistem** koristi kritičnu komponentu poznatu kao _master file table_ (MFT). Ova tabela uključuje barem jedan unos za svaku datoteku na volumenu, pokrivajući i samu MFT. Vitalni detalji o svakoj datoteci, kao što su **veličina, vremenske oznake, dozvole i stvarni podaci**, su enkapsulirani unutar MFT unosa ili u oblastima van MFT, ali na koje se pozivaju ovi unosi. Više detalja može se naći u [službenoj dokumentaciji](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+**NTFS datotečni sistem** koristi kritičnu komponentu poznatu kao _master file table_ (MFT). Ova tabela uključuje barem jedan unos za svaku datoteku na volumenu, pokrivajući i samu MFT. Vitalni detalji o svakoj datoteci, kao što su **veličina, vremenske oznake, dozvole i stvarni podaci**, su enkapsulirani unutar MFT unosa ili u oblastima van MFT-a, ali na koje se pozivaju ovi unosi. Više detalja može se pronaći u [službenoj dokumentaciji](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
 ### SSL Ključevi/Cerifikati
 
@@ -717,7 +728,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 {% endtab %}
 {% endtabs %}
 
-### Vremenska linija
+### Vremenska Linija
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -770,7 +781,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**Master Boot Record (MBR)** igra ključnu ulogu u upravljanju logičkim particijama skladišnog medija, koje su strukturirane sa različitim [file systems](https://en.wikipedia.org/wiki/File\_system). On ne samo da sadrži informacije o rasporedu particija, već takođe sadrži izvršni kod koji deluje kao boot loader. Ovaj boot loader ili direktno pokreće proces učitavanja drugog stepena OS-a (vidi [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) ili radi u harmoniji sa [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) svake particije. Za detaljno znanje, pogledajte [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master\_boot\_record).
+**Master Boot Record (MBR)** igra ključnu ulogu u upravljanju logičkim particijama skladišnog medija, koje su strukturirane sa različitim [file systems](https://en.wikipedia.org/wiki/File\_system). On ne samo da sadrži informacije o rasporedu particija, već takođe sadrži izvršni kod koji deluje kao boot loader. Ovaj boot loader ili direktno pokreće drugi deo procesa učitavanja OS-a (vidi [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) ili radi u harmoniji sa [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) svake particije. Za detaljno znanje, pogledajte [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
 ## References
 
@@ -782,7 +793,7 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com/) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo okupljalište za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
+[**RootedCON**](https://www.rootedcon.com/) je najrelevantnija cyber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo okupljalište za profesionalce u tehnologiji i cyber bezbednosti u svakoj disciplini.
 
 {% embed url="https://www.rootedcon.com/" %}
 
