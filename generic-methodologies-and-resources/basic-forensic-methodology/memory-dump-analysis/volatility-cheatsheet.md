@@ -9,8 +9,8 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 <summary>Support HackTricks</summary>
 
 * Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
-* **Rejoignez le** 💬 [**groupe Discord**](https://discord.gg/hRep4RUj7f) ou le [**groupe telegram**](https://t.me/peass) ou **suivez** nous sur **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Partagez des astuces de hacking en soumettant des PRs aux** [**HackTricks**](https://github.com/carlospolop/hacktricks) et [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) dépôts github.
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
 {% endhint %}
@@ -22,8 +22,19 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 ​​[**RootedCON**](https://www.rootedcon.com/) est l'événement de cybersécurité le plus pertinent en **Espagne** et l'un des plus importants en **Europe**. Avec **la mission de promouvoir les connaissances techniques**, ce congrès est un point de rencontre bouillonnant pour les professionnels de la technologie et de la cybersécurité dans chaque discipline.
 
 {% embed url="https://www.rootedcon.com/" %}
+If you need a tool that automates memory analysis with different scan levels and runs multiple Volatility3 plugins in parallel, you can use autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
-If you want something **fast and crazy** that will launch several Volatility plugins on parallel you can use: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
+Si vous voulez quelque chose **de rapide et fou** qui lancera plusieurs plugins Volatility en parallèle, vous pouvez utiliser : [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -62,9 +73,9 @@ Accédez à la documentation officielle dans [référence de commande Volatility
 
 Volatility a deux approches principales pour les plugins, qui se reflètent parfois dans leurs noms. Les plugins “list” essaieront de naviguer à travers les structures du noyau Windows pour récupérer des informations comme les processus (localiser et parcourir la liste chaînée des structures `_EPROCESS` en mémoire), les poignées du système d'exploitation (localiser et lister la table des poignées, déréférencer les pointeurs trouvés, etc.). Ils se comportent plus ou moins comme le ferait l'API Windows si on lui demandait, par exemple, de lister les processus.
 
-Cela rend les plugins “list” assez rapides, mais tout aussi vulnérables que l'API Windows à la manipulation par des logiciels malveillants. Par exemple, si un logiciel malveillant utilise DKOM pour dissocier un processus de la liste chaînée `_EPROCESS`, il n'apparaîtra pas dans le Gestionnaire des tâches et ne sera pas non plus dans pslist.
+Cela rend les plugins “list” assez rapides, mais tout aussi vulnérables que l'API Windows à la manipulation par des logiciels malveillants. Par exemple, si un logiciel malveillant utilise DKOM pour dissocier un processus de la liste chaînée `_EPROCESS`, il n'apparaîtra pas dans le Gestionnaire des tâches et ne sera pas non plus dans le pslist.
 
-Les plugins “scan”, en revanche, adopteront une approche similaire à l'extraction de la mémoire pour des éléments qui pourraient avoir du sens lorsqu'ils sont déréférencés en tant que structures spécifiques. `psscan`, par exemple, lira la mémoire et essaiera de créer des objets `_EPROCESS` à partir de celle-ci (il utilise le balayage de balises de pool, qui recherche des chaînes de 4 octets indiquant la présence d'une structure d'intérêt). L'avantage est qu'il peut déterrer des processus qui ont quitté, et même si un logiciel malveillant altère la liste chaînée `_EPROCESS`, le plugin trouvera toujours la structure laissée en mémoire (puisqu'elle doit encore exister pour que le processus fonctionne). Le désavantage est que les plugins “scan” sont un peu plus lents que les plugins “list”, et peuvent parfois donner des faux positifs (un processus qui a quitté trop longtemps et dont des parties de la structure ont été écrasées par d'autres opérations).
+Les plugins “scan”, en revanche, adopteront une approche similaire à l'extraction de la mémoire pour des éléments qui pourraient avoir du sens lorsqu'ils sont déréférencés en tant que structures spécifiques. `psscan`, par exemple, lira la mémoire et essaiera de créer des objets `_EPROCESS` à partir de celle-ci (il utilise le balayage de balises de pool, qui recherche des chaînes de 4 octets indiquant la présence d'une structure d'intérêt). L'avantage est qu'il peut déterrer des processus qui ont quitté, et même si un logiciel malveillant altère la liste chaînée `_EPROCESS`, le plugin trouvera toujours la structure traînant en mémoire (puisqu'elle doit encore exister pour que le processus fonctionne). Le désavantage est que les plugins “scan” sont un peu plus lents que les plugins “list”, et peuvent parfois donner des faux positifs (un processus qui a quitté trop longtemps et dont des parties de la structure ont été écrasées par d'autres opérations).
 
 De : [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -112,9 +123,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Différences entre imageinfo et kdbgscan**
 
-[**D'ici**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Contrairement à imageinfo qui fournit simplement des suggestions de profil, **kdbgscan** est conçu pour identifier positivement le bon profil et la bonne adresse KDBG (s'il y a plusieurs adresses). Ce plugin recherche les signatures KDBGHeader liées aux profils Volatility et applique des vérifications de validité pour réduire les faux positifs. La verbosité de la sortie et le nombre de vérifications de validité qui peuvent être effectuées dépendent de la capacité de Volatility à trouver un DTB, donc si vous connaissez déjà le bon profil (ou si vous avez une suggestion de profil d'imageinfo), assurez-vous de l'utiliser.
+[**D'ici**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Contrairement à imageinfo qui fournit simplement des suggestions de profil, **kdbgscan** est conçu pour identifier positivement le bon profil et la bonne adresse KDBG (s'il y a plusieurs). Ce plugin recherche les signatures KDBGHeader liées aux profils Volatility et applique des vérifications de validité pour réduire les faux positifs. La verbosité de la sortie et le nombre de vérifications de validité qui peuvent être effectuées dépendent de la capacité de Volatility à trouver un DTB, donc si vous connaissez déjà le bon profil (ou si vous avez une suggestion de profil d'imageinfo), assurez-vous de l'utiliser.
 
-Vérifiez toujours le **nombre de processus que kdbgscan a trouvés**. Parfois, imageinfo et kdbgscan peuvent trouver **plus d'un** **profil** approprié, mais seul le **valide aura des processus associés** (C'est parce que pour extraire des processus, la bonne adresse KDBG est nécessaire).
+Vérifiez toujours le **nombre de processus que kdbgscan a trouvés**. Parfois, imageinfo et kdbgscan peuvent trouver **plus d'un** **profil** approprié mais seul le **valide aura des processus associés** (C'est parce que pour extraire des processus, la bonne adresse KDBG est nécessaire)
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -171,9 +182,9 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 {% embed url="https://www.rootedcon.com/" %}
 
-## Processus
+## Processes
 
-### Lister les processus
+### List processes
 
 Essayez de trouver des processus **suspects** (par nom) ou des **processus** enfants **inattendus** (par exemple un cmd.exe comme enfant de iexplorer.exe).\
 Il pourrait être intéressant de **comparer** le résultat de pslist avec celui de psscan pour identifier les processus cachés.
@@ -302,7 +313,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Utile de savoir à quels autres fichiers, clés, threads, processus... un **processus a un handle** (a ouvert)
+Utile de savoir à quels autres fichiers, clés, threads, processus... un **processus a un handle** (a ouvert) 
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -378,7 +389,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** garde une trace des programmes que vous exécutez grâce à une fonctionnalité dans le registre appelée **UserAssist keys**. Ces clés enregistrent combien de fois chaque programme est exécuté et quand il a été exécuté pour la dernière fois.
+**Windows** garde une trace des programmes que vous exécutez grâce à une fonctionnalité dans le registre appelée **UserAssist keys**. Ces clés enregistrent combien de fois chaque programme a été exécuté et quand il a été exécuté pour la dernière fois.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -514,7 +525,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {% endtab %}
 {% endtabs %}
 
-### Analyse/vidage
+### Analyse/dump
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -754,7 +765,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
 #Just vol2
 volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 ```
-### Obtenir l'historique d'IE
+### Obtenir l'historique IE
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
@@ -773,7 +784,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-Le **Master Boot Record (MBR)** joue un rôle crucial dans la gestion des partitions logiques d'un support de stockage, qui sont structurées avec différents [systèmes de fichiers](https://en.wikipedia.org/wiki/File\_system). Il contient non seulement des informations sur la disposition des partitions, mais également du code exécutable agissant comme un chargeur de démarrage. Ce chargeur de démarrage initie soit directement le processus de chargement de deuxième étape du système d'exploitation (voir [chargeur de démarrage de deuxième étape](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)), soit fonctionne en harmonie avec le [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) de chaque partition. Pour des connaissances approfondies, consultez la [page Wikipedia du MBR](https://en.wikipedia.org/wiki/Master\_boot\_record).
+Le **Master Boot Record (MBR)** joue un rôle crucial dans la gestion des partitions logiques d'un support de stockage, qui sont structurées avec différents [systèmes de fichiers](https://en.wikipedia.org/wiki/File\_system). Il contient non seulement des informations sur la disposition des partitions, mais également du code exécutable agissant comme un chargeur de démarrage. Ce chargeur de démarrage initie soit directement le processus de chargement de deuxième étape de l'OS (voir [chargeur de démarrage de deuxième étape](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)), soit fonctionne en harmonie avec le [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) de chaque partition. Pour des connaissances approfondies, consultez la [page Wikipedia du MBR](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
 ## Références
 
@@ -799,7 +810,7 @@ Apprenez et pratiquez le hacking GCP : <img src="/.gitbook/assets/grte.png" alt=
 
 * Consultez les [**plans d'abonnement**](https://github.com/sponsors/carlospolop) !
 * **Rejoignez le** 💬 [**groupe Discord**](https://discord.gg/hRep4RUj7f) ou le [**groupe telegram**](https://t.me/peass) ou **suivez-nous sur** **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Partagez des astuces de hacking en soumettant des PR aux** [**HackTricks**](https://github.com/carlospolop/hacktricks) et [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) dépôts GitHub.
+* **Partagez des astuces de hacking en soumettant des PRs aux** [**HackTricks**](https://github.com/carlospolop/hacktricks) et [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) dépôts GitHub.
 
 </details>
 {% endhint %}
