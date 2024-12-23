@@ -22,7 +22,18 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 ​​[**RootedCON**](https://www.rootedcon.com/) είναι η πιο σχετική εκδήλωση κυβερνοασφάλειας στην **Ισπανία** και μία από τις πιο σημαντικές στην **Ευρώπη**. Με **αποστολή την προώθηση της τεχνικής γνώσης**, αυτό το συνέδριο είναι ένα καυτό σημείο συνάντησης για επαγγελματίες της τεχνολογίας και της κυβερνοασφάλειας σε κάθε τομέα.
 
 {% embed url="https://www.rootedcon.com/" %}
+Αν χρειάζεστε ένα εργαλείο που αυτοματοποιεί την ανάλυση μνήμης με διαφορετικά επίπεδα σάρωσης και εκτελεί πολλαπλά plugins του Volatility3 παράλληλα, μπορείτε να χρησιμοποιήσετε το autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
 Αν θέλετε κάτι **γρήγορο και τρελό** που θα εκκινήσει αρκετά plugins του Volatility παράλληλα, μπορείτε να χρησιμοποιήσετε: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
@@ -64,7 +75,7 @@ Access the official doc in [Volatility command reference](https://github.com/vol
 
 Αυτό καθιστά τα plugins “list” αρκετά γρήγορα, αλλά εξίσου ευάλωτα όπως το Windows API σε χειρισμό από κακόβουλο λογισμικό. Για παράδειγμα, αν το κακόβουλο λογισμικό χρησιμοποιήσει DKOM για να αποσυνδέσει μια διαδικασία από τη συνδεδεμένη λίστα `_EPROCESS`, δεν θα εμφανιστεί στον Διαχειριστή Εργασιών και ούτε θα εμφανιστεί στην pslist.
 
-Τα plugins “scan”, από την άλλη πλευρά, θα ακολουθήσουν μια προσέγγιση παρόμοια με την εκσκαφή της μνήμης για πράγματα που μπορεί να έχουν νόημα όταν αποαναφέρονται ως συγκεκριμένες δομές. Το `psscan` για παράδειγμα θα διαβάσει τη μνήμη και θα προσπαθήσει να δημιουργήσει αντικείμενα `_EPROCESS` από αυτήν (χρησιμοποιεί σάρωση pool-tag, η οποία αναζητά 4-byte strings που υποδεικνύουν την παρουσία μιας δομής ενδιαφέροντος). Το πλεονέκτημα είναι ότι μπορεί να ανακαλύψει διαδικασίες που έχουν τερματιστεί, και ακόμη και αν το κακόβουλο λογισμικό παρέμβει στη συνδεδεμένη λίστα `_EPROCESS`, το plugin θα βρει ακόμα τη δομή που βρίσκεται στη μνήμη (καθώς πρέπει να υπάρχει για να εκτελείται η διαδικασία). Το μειονέκτημα είναι ότι τα plugins “scan” είναι λίγο πιο αργά από τα plugins “list”, και μερικές φορές μπορεί να δώσουν ψευδώς θετικά αποτελέσματα (μια διαδικασία που έχει τερματιστεί πολύ καιρό πριν και είχε μέρη της δομής της αντικατασταθεί από άλλες λειτουργίες).
+Τα plugins “scan”, από την άλλη πλευρά, θα ακολουθήσουν μια προσέγγιση παρόμοια με την εκσκαφή της μνήμης για πράγματα που μπορεί να έχουν νόημα όταν αποαναφέρονται ως συγκεκριμένες δομές. Το `psscan` για παράδειγμα θα διαβάσει τη μνήμη και θα προσπαθήσει να δημιουργήσει αντικείμενα `_EPROCESS` από αυτήν (χρησιμοποιεί σάρωση pool-tag, η οποία αναζητά 4-byte strings που υποδεικνύουν την παρουσία μιας δομής ενδιαφέροντος). Το πλεονέκτημα είναι ότι μπορεί να ανακαλύψει διαδικασίες που έχουν τερματιστεί, και ακόμη και αν το κακόβουλο λογισμικό παρέμβει στη συνδεδεμένη λίστα `_EPROCESS`, το plugin θα βρει ακόμα τη δομή που βρίσκεται στη μνήμη (καθώς πρέπει να υπάρχει για να εκτελείται η διαδικασία). Η αδυναμία είναι ότι τα plugins “scan” είναι λίγο πιο αργά από τα plugins “list”, και μερικές φορές μπορεί να δώσουν ψευδώς θετικά αποτελέσματα (μια διαδικασία που έχει τερματιστεί πολύ καιρό πριν και είχε μέρη της δομής της αντικατασταθεί από άλλες λειτουργίες).
 
 From: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -73,7 +84,7 @@ From: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis
 ### Volatility3
 
 Όπως εξηγείται μέσα στο readme, πρέπει να τοποθετήσετε τον **πίνακα συμβόλων του OS** που θέλετε να υποστηρίξετε μέσα στο _volatility3/volatility/symbols_.\
-Οι πακέτες πίνακα συμβόλων για τα διάφορα λειτουργικά συστήματα είναι διαθέσιμοι για **λήψη** στο:
+Τα πακέτα πίνακα συμβόλων για τα διάφορα λειτουργικά συστήματα είναι διαθέσιμα για **λήψη** στο:
 
 * [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 * [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -128,18 +139,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-Το **μπλοκ αποσφαλμάτωσης πυρήνα**, που αναφέρεται ως **KDBG** από το Volatility, είναι κρίσιμο για τις εγκληματολογικές εργασίες που εκτελούνται από το Volatility και διάφορους αποσφαλματωτές. Αναγνωρίζεται ως `KdDebuggerDataBlock` και τύπου `_KDDEBUGGER_DATA64`, περιέχει βασικές αναφορές όπως το `PsActiveProcessHead`. Αυτή η συγκεκριμένη αναφορά δείχνει στην κεφαλή της λίστας διεργασιών, επιτρέποντας την καταγραφή όλων των διεργασιών, που είναι θεμελιώδους σημασίας για λεπτομερή ανάλυση μνήμης.
+Το **block αποσφαλμάτωσης πυρήνα**, που αναφέρεται ως **KDBG** από το Volatility, είναι κρίσιμο για τις εγκληματολογικές εργασίες που εκτελούνται από το Volatility και διάφορους αποσφαλματωτές. Αναγνωρίζεται ως `KdDebuggerDataBlock` και τύπου `_KDDEBUGGER_DATA64`, περιέχει βασικές αναφορές όπως το `PsActiveProcessHead`. Αυτή η συγκεκριμένη αναφορά δείχνει στην κεφαλή της λίστας διεργασιών, επιτρέποντας την καταγραφή όλων των διεργασιών, που είναι θεμελιώδους σημασίας για λεπτομερή ανάλυση μνήμης.
 
 ## OS Information
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-The plugin `banners.Banners` μπορεί να χρησιμοποιηθεί στο **vol3 για να προσπαθήσει να βρει linux banners** στο dump.
+Ο plugin `banners.Banners` μπορεί να χρησιμοποιηθεί στο **vol3 για να προσπαθήσει να βρει linux banners** στο dump.
 
-## Hashes/Passwords
+## Hashes/Κωδικοί πρόσβασης
 
-Εξαγάγετε SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) και [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Εξαγάγετε SAM hashes, [cached credentials τομέα](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) και [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -165,6 +176,8 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
+​
+
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
 ​​​[**RootedCON**](https://www.rootedcon.com/) είναι η πιο σχετική εκδήλωση κυβερνοασφάλειας στην **Ισπανία** και μία από τις πιο σημαντικές στην **Ευρώπη**. Με **αποστολή την προώθηση της τεχνικής γνώσης**, αυτό το συνέδριο είναι ένα καυτό σημείο συνάντησης για επαγγελματίες της τεχνολογίας και της κυβερνοασφάλειας σε κάθε πειθαρχία.
@@ -215,7 +228,7 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 
 ### Γραμμή εντολών
 
-Εκτελέστηκε οτιδήποτε ύποπτο;
+Εκτελέστηκε οτιδήποτε ύποπτο; 
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -236,7 +249,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 
 ### Περιβάλλον
 
-Αποκτήστε τις μεταβλητές περιβάλλοντος κάθε εκτελούμενης διαδικασίας. Μπορεί να υπάρχουν μερικές ενδιαφέρουσες τιμές.
+Αποκτήστε τις μεταβλητές περιβάλλοντος κάθε εκτελούμενης διαδικασίας. Μπορεί να υπάρχουν κάποιες ενδιαφέρουσες τιμές.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -302,7 +315,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Χειριστές
 
-Χρήσιμο να γνωρίζουμε σε ποιες άλλες αρχεία, κλειδιά, νήματα, διαδικασίες... έχει **χειριστή** μια διαδικασία (έχει ανοίξει) 
+Χρήσιμο να γνωρίζουμε σε ποιες άλλες αρχεία, κλειδιά, νήματα, διαδικασίες... έχει **χειριστή** μια διαδικασία (έχει ανοίξει)
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -398,7 +411,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​​[**RootedCON**](https://www.rootedcon.com/) είναι η πιο σχετική εκδήλωση κυβερνοασφάλειας στην **Ισπανία** και μία από τις πιο σημαντικές στην **Ευρώπη**. Με **την αποστολή της προώθησης της τεχνικής γνώσης**, αυτό το συνέδριο είναι ένα καυτό σημείο συνάντησης για επαγγελματίες της τεχνολογίας και της κυβερνοασφάλειας σε κάθε πειθαρχία.
+​​​​[**RootedCON**](https://www.rootedcon.com/) είναι η πιο σχετική εκδήλωση κυβερνοασφάλειας στην **Ισπανία** και μία από τις πιο σημαντικές στην **Ευρώπη**. Με **την αποστολή της προώθησης της τεχνικής γνώσης**, αυτό το συνέδριο είναι ένα βραστό σημείο συνάντησης για επαγγελματίες της τεχνολογίας και της κυβερνοασφάλειας σε κάθε πειθαρχία.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -574,7 +587,7 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {% endtab %}
 {% endtabs %}
 
-## Κακόβουλο λογισμικό
+## Κακόβουλο Λογισμικό
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -640,7 +653,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 {% endtab %}
 {% endtabs %}
 
-## ΔΙΑΦΟΡΑ
+## MISC
 
 ### Εξωτερικά πρόσθετα
 
@@ -701,7 +714,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Είναι δυνατόν να **διαβάσετε από τη μνήμη την ιστορία του bash.** Θα μπορούσατε επίσης να εκφορτώσετε το αρχείο _.bash\_history_, αλλά ήταν απενεργοποιημένο, θα είστε ευχαριστημένοι που μπορείτε να χρησιμοποιήσετε αυτό το module του volatility.
+Είναι δυνατόν να **διαβάσετε από τη μνήμη το ιστορικό bash.** Μπορείτε επίσης να εξάγετε το αρχείο _.bash\_history_, αλλά έχει απενεργοποιηθεί, θα είστε ευτυχείς που μπορείτε να χρησιμοποιήσετε αυτό το module της volatility.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -759,7 +772,7 @@ volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
-### Πάρε κείμενο σημειωματάριου
+### Πάρε κείμενο από το notepad
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
