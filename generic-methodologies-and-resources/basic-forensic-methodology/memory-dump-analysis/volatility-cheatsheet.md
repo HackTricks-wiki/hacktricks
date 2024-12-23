@@ -22,8 +22,19 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 ​​[**RootedCON**](https://www.rootedcon.com/) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro vibrante para profesionales de la tecnología y la ciberseguridad en cada disciplina.
 
 {% embed url="https://www.rootedcon.com/" %}
+Si necesitas una herramienta que automatice el análisis de memoria con diferentes niveles de escaneo y ejecute múltiples plugins de Volatility3 en paralelo, puedes usar autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
-Si quieres algo **rápido y loco** que lance varios plugins de Volatility en paralelo, puedes usar: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
+Si quieres algo **rápido y loco** que lanzará varios plugins de Volatility en paralelo, puedes usar: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -60,15 +71,15 @@ Accede a la documentación oficial en [Referencia de comandos de Volatility](htt
 
 ### Una nota sobre los plugins “list” vs. “scan”
 
-Volatility tiene dos enfoques principales para los plugins, que a veces se reflejan en sus nombres. Los plugins “list” intentarán navegar a través de las estructuras del núcleo de Windows para recuperar información como procesos (localizar y recorrer la lista enlazada de estructuras `_EPROCESS` en memoria), manejadores del sistema operativo (localizando y listando la tabla de manejadores, desreferenciando cualquier puntero encontrado, etc.). Se comportan más o menos como lo haría la API de Windows si se le solicitara, por ejemplo, listar procesos.
+Volatility tiene dos enfoques principales para los plugins, que a veces se reflejan en sus nombres. Los plugins “list” intentarán navegar a través de las estructuras del Kernel de Windows para recuperar información como procesos (localizar y recorrer la lista enlazada de estructuras `_EPROCESS` en memoria), manejadores del SO (localizando y listando la tabla de manejadores, desreferenciando cualquier puntero encontrado, etc.). Se comportan más o menos como lo haría la API de Windows si se le solicitara, por ejemplo, listar procesos.
 
 Eso hace que los plugins “list” sean bastante rápidos, pero igual de vulnerables a la manipulación por malware que la API de Windows. Por ejemplo, si el malware utiliza DKOM para desvincular un proceso de la lista enlazada `_EPROCESS`, no aparecerá en el Administrador de tareas ni en el pslist.
 
-Los plugins “scan”, por otro lado, adoptarán un enfoque similar a la extracción de memoria para cosas que podrían tener sentido cuando se desreferencian como estructuras específicas. `psscan`, por ejemplo, leerá la memoria e intentará crear objetos `_EPROCESS` a partir de ella (utiliza escaneo de etiquetas de pool, que busca cadenas de 4 bytes que indican la presencia de una estructura de interés). La ventaja es que puede encontrar procesos que han salido, e incluso si el malware manipula la lista enlazada `_EPROCESS`, el plugin aún encontrará la estructura en memoria (ya que aún necesita existir para que el proceso se ejecute). La desventaja es que los plugins “scan” son un poco más lentos que los plugins “list”, y a veces pueden generar falsos positivos (un proceso que salió hace demasiado tiempo y tuvo partes de su estructura sobrescritas por otras operaciones).
+Los plugins “scan”, por otro lado, adoptarán un enfoque similar al de tallar la memoria en busca de cosas que podrían tener sentido cuando se desreferencian como estructuras específicas. `psscan`, por ejemplo, leerá la memoria e intentará crear objetos `_EPROCESS` a partir de ella (utiliza escaneo de etiquetas de pool, que busca cadenas de 4 bytes que indican la presencia de una estructura de interés). La ventaja es que puede encontrar procesos que han salido, e incluso si el malware manipula la lista enlazada `_EPROCESS`, el plugin aún encontrará la estructura en memoria (ya que aún necesita existir para que el proceso se ejecute). La desventaja es que los plugins “scan” son un poco más lentos que los plugins “list”, y a veces pueden dar falsos positivos (un proceso que salió hace demasiado tiempo y tuvo partes de su estructura sobrescritas por otras operaciones).
 
 De: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
-## Perfiles de SO
+## Perfiles del SO
 
 ### Volatility3
 
@@ -232,7 +243,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {% endtab %}
 {% endtabs %}
 
-Los comandos ejecutados en `cmd.exe` son gestionados por **`conhost.exe`** (o `csrss.exe` en sistemas anteriores a Windows 7). Esto significa que si **`cmd.exe`** es terminado por un atacante antes de que se obtenga un volcado de memoria, aún es posible recuperar el historial de comandos de la sesión desde la memoria de **`conhost.exe`**. Para hacer esto, si se detecta actividad inusual dentro de los módulos de la consola, se debe volcar la memoria del proceso asociado **`conhost.exe`**. Luego, al buscar **strings** dentro de este volcado, se pueden extraer potencialmente las líneas de comando utilizadas en la sesión.
+Los comandos ejecutados en `cmd.exe` son gestionados por **`conhost.exe`** (o `csrss.exe` en sistemas anteriores a Windows 7). Esto significa que si **`cmd.exe`** es terminado por un atacante antes de que se obtenga un volcado de memoria, aún es posible recuperar el historial de comandos de la sesión de la memoria de **`conhost.exe`**. Para hacer esto, si se detecta actividad inusual dentro de los módulos de la consola, se debe volcar la memoria del proceso asociado **`conhost.exe`**. Luego, al buscar **strings** dentro de este volcado, se pueden extraer potencialmente las líneas de comando utilizadas en la sesión.
 
 ### Entorno
 
@@ -773,7 +784,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-El **Master Boot Record (MBR)** juega un papel crucial en la gestión de las particiones lógicas de un medio de almacenamiento, que están estructuradas con diferentes [sistemas de archivos](https://en.wikipedia.org/wiki/File\_system). No solo contiene información sobre la disposición de las particiones, sino que también incluye código ejecutable que actúa como un cargador de arranque. Este cargador de arranque inicia directamente el proceso de carga de segunda etapa del sistema operativo (ver [cargador de arranque de segunda etapa](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) o trabaja en armonía con el [registro de arranque de volumen](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) de cada partición. Para un conocimiento más profundo, consulta la [página de Wikipedia del MBR](https://en.wikipedia.org/wiki/Master\_boot\_record).
+El **Master Boot Record (MBR)** juega un papel crucial en la gestión de las particiones lógicas de un medio de almacenamiento, que están estructuradas con diferentes [file systems](https://en.wikipedia.org/wiki/File\_system). No solo contiene información sobre el diseño de las particiones, sino que también incluye código ejecutable que actúa como un cargador de arranque. Este cargador de arranque inicia directamente el proceso de carga de segunda etapa del sistema operativo (ver [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) o trabaja en armonía con el [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) de cada partición. Para un conocimiento más profundo, consulta la [página de Wikipedia del MBR](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
 ## Referencias
 
@@ -790,16 +801,16 @@ El **Master Boot Record (MBR)** juega un papel crucial en la gestión de las par
 {% embed url="https://www.rootedcon.com/" %}
 
 {% hint style="success" %}
-Aprende y practica Hacking en AWS:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Aprende y practica Hacking en GCP: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
-<summary>Apoya a HackTricks</summary>
+<summary>Support HackTricks</summary>
 
-* Revisa los [**planes de suscripción**](https://github.com/sponsors/carlospolop)!
-* **Únete al** 💬 [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síguenos** en **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte trucos de hacking enviando PRs a los** [**HackTricks**](https://github.com/carlospolop/hacktricks) y [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repositorios de github.
+* Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
 {% endhint %}
