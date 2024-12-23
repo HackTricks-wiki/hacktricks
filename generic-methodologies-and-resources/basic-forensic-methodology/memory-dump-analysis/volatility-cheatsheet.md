@@ -19,11 +19,22 @@
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。该大会的 **使命是促进技术知识**，是各个学科技术和网络安全专业人士的热烈交流点。
+​​[**RootedCON**](https://www.rootedcon.com/) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。该大会的 **使命是促进技术知识**，是各个学科技术和网络安全专业人士的热烈交流平台。
 
 {% embed url="https://www.rootedcon.com/" %}
+如果您需要一个可以自动化内存分析的工具，具有不同的扫描级别并能并行运行多个 Volatility3 插件，您可以使用 autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
-如果你想要一些 **快速而疯狂** 的东西，可以并行启动多个 Volatility 插件，你可以使用：[https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
+如果你想要一些**快速而疯狂**的东西，可以并行启动多个Volatility插件，你可以使用：[https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -58,13 +69,13 @@ python setup.py install
 
 访问官方文档 [Volatility 命令参考](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
-### 关于“list”与“scan”插件的说明
+### 关于“list”和“scan”插件的说明
 
-Volatility 有两种主要的插件方法，有时在其名称中反映出来。“list” 插件会尝试通过 Windows 内核结构导航，以检索诸如进程（定位并遍历内存中的 `_EPROCESS` 结构的链表）、操作系统句柄（定位并列出句柄表，解引用找到的任何指针等）等信息。它们的行为或多或少类似于 Windows API，如果请求列出进程的话。
+Volatility 有两种主要的插件方法，有时在其名称中反映出来。“list” 插件将尝试通过 Windows 内核结构导航以检索信息，如进程（定位并遍历内存中的 `_EPROCESS` 结构的链表）、操作系统句柄（定位和列出句柄表，解引用找到的任何指针等）。它们的行为或多或少类似于 Windows API，如果请求列出进程的话。
 
-这使得“list”插件相当快速，但与 Windows API 一样容易受到恶意软件的操控。例如，如果恶意软件使用 DKOM 从 `_EPROCESS` 链表中解除链接一个进程，它将不会出现在任务管理器中，也不会出现在 pslist 中。
+这使得“list”插件非常快速，但与 Windows API 一样容易受到恶意软件的操控。例如，如果恶意软件使用 DKOM 从 `_EPROCESS` 链表中取消链接一个进程，它将不会出现在任务管理器中，也不会出现在 pslist 中。
 
-另一方面，“scan” 插件将采取类似于在内存中雕刻可能在解引用为特定结构时有意义的东西的方法。例如，`psscan` 将读取内存并尝试从中创建 `_EPROCESS` 对象（它使用池标签扫描，搜索指示感兴趣结构存在的 4 字节字符串）。其优点在于它可以挖掘已退出的进程，即使恶意软件篡改了 `_EPROCESS` 链表，插件仍然会找到在内存中存在的结构（因为它仍然需要存在以便进程运行）。缺点是“scan”插件比“list”插件稍慢，有时可能会产生误报（一个退出时间过长且其结构部分被其他操作覆盖的进程）。
+另一方面，“scan” 插件将采取类似于在内存中雕刻可能在解引用为特定结构时有意义的内容的方法。例如，`psscan` 将读取内存并尝试从中创建 `_EPROCESS` 对象（它使用池标签扫描，搜索指示感兴趣结构存在的 4 字节字符串）。其优点是它可以挖掘已退出的进程，即使恶意软件篡改了 `_EPROCESS` 链表，插件仍然会找到在内存中存在的结构（因为它仍然需要存在以便进程运行）。缺点是“scan”插件比“list”插件稍慢，有时可能会产生误报（一个退出时间过长且其结构部分被其他操作覆盖的进程）。
 
 来自: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -72,7 +83,7 @@ Volatility 有两种主要的插件方法，有时在其名称中反映出来。
 
 ### Volatility3
 
-如 readme 中所述，您需要将您想要支持的 **操作系统的符号表** 放入 _volatility3/volatility/symbols_ 中。\
+如 readme 中所述，您需要将您想要支持的 **操作系统符号表** 放入 _volatility3/volatility/symbols_ 中。\
 各种操作系统的符号表包可在以下位置 **下载**：
 
 * [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
@@ -112,7 +123,7 @@ volatility kdbgscan -f file.dmp
 ```
 #### **imageinfo 和 kdbgscan 之间的区别**
 
-[**从这里**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): 与仅提供配置文件建议的 imageinfo 相比，**kdbgscan** 旨在准确识别正确的配置文件和正确的 KDBG 地址（如果存在多个）。此插件扫描与 Volatility 配置文件相关的 KDBGHeader 签名，并应用合理性检查以减少误报。输出的详细程度和可以执行的合理性检查数量取决于 Volatility 是否能够找到 DTB，因此如果您已经知道正确的配置文件（或者如果您有来自 imageinfo 的配置文件建议），请确保使用它。
+[**从这里**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): 与仅提供配置文件建议的 imageinfo 相比，**kdbgscan** 旨在准确识别正确的配置文件和正确的 KDBG 地址（如果存在多个）。该插件扫描与 Volatility 配置文件相关的 KDBGHeader 签名，并应用合理性检查以减少误报。输出的详细程度和可以执行的合理性检查数量取决于 Volatility 是否能够找到 DTB，因此如果您已经知道正确的配置文件（或者如果您有来自 imageinfo 的配置文件建议），请确保使用它。
 
 始终查看 **kdbgscan 找到的进程数量**。有时 imageinfo 和 kdbgscan 可以找到 **多个** 合适的 **配置文件**，但只有 **有效的一个会有一些相关的进程**（这是因为提取进程需要正确的 KDBG 地址）。
 ```bash
@@ -130,16 +141,16 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 
 **内核调试器块**，在Volatility中称为**KDBG**，对于Volatility和各种调试器执行的取证任务至关重要。它被识别为`KdDebuggerDataBlock`，类型为`_KDDEBUGGER_DATA64`，包含重要的引用，如`PsActiveProcessHead`。这个特定的引用指向进程列表的头部，使得能够列出所有进程，这对于全面的内存分析是基础。
 
-## OS 信息
+## 操作系统信息
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-插件 `banners.Banners` 可用于 **vol3 尝试在转储中查找 Linux 横幅**。
+The plugin `banners.Banners` 可以在 **vol3 中尝试查找 linux 横幅** 在转储中。
 
 ## 哈希/密码
 
-提取 SAM 哈希、[域缓存凭据](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 和 [lsa 密钥](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets)。
+提取 SAM 哈希，[域缓存凭据](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 和 [lsa 密钥](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets)。
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -167,7 +178,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​[**RootedCON**](https://www.rootedcon.com/) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的活动之一。该大会的 **使命是促进技术知识**，是各个学科技术和网络安全专业人士的热烈交流点。
+​​​[**RootedCON**](https://www.rootedcon.com/) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的活动之一。该大会的 **使命是促进技术知识**，是各个学科的技术和网络安全专业人士的热烈交流平台。
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -302,7 +313,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### 句柄
 
-了解一个 **进程拥有的句柄**（已打开）指向哪些其他文件、密钥、线程、进程... 是很有用的。
+了解一个 **进程拥有的句柄**（已打开）指向哪些其他文件、密钥、线程、进程... 是很有用的
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -553,7 +564,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {% endtab %}
 {% endtabs %}
 
-**NTFS文件系统**使用一个称为_主文件表_（MFT）的关键组件。该表为卷上的每个文件至少包含一个条目，也包括MFT本身。关于每个文件的重要细节，如**大小、时间戳、权限和实际数据**，都封装在MFT条目中或在MFT外部但由这些条目引用的区域中。更多细节可以在[官方文档](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table)中找到。
+**NTFS文件系统**使用一个称为_主文件表_（MFT）的关键组件。该表为卷上的每个文件至少包含一个条目，也包括MFT本身。关于每个文件的重要细节，如**大小、时间戳、权限和实际数据**，都封装在MFT条目中或在MFT外部但由这些条目引用的区域中。更多详细信息可以在[官方文档](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table)中找到。
 
 ### SSL密钥/证书
 
@@ -612,10 +623,10 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 {% endtab %}
 {% endtabs %}
 
-### 使用yara扫描
+### 使用 yara 扫描
 
-使用此脚本从github下载并合并所有yara恶意软件规则: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-创建_**rules**_目录并执行它。这将创建一个名为_**malware\_rules.yar**_的文件，其中包含所有恶意软件的yara规则。
+使用此脚本从 github 下载并合并所有 yara 恶意软件规则: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
+创建 _**rules**_ 目录并执行它。这将创建一个名为 _**malware\_rules.yar**_ 的文件，其中包含所有恶意软件的 yara 规则。
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -662,7 +673,7 @@ volatilitye --plugins="/tmp/plugins/" [...]
 
 #### Autoruns
 
-从 [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns) 下载它
+从 [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns) 下载
 ```
 volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
 ```
@@ -701,7 +712,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-可以**从内存中读取 bash 历史记录。** 你也可以转储 _.bash\_history_ 文件，但它已被禁用，你会很高兴可以使用这个 volatility 模块。
+可以**从内存中读取bash历史记录。** 你也可以转储_.bash\_history_文件，但它已被禁用，你会很高兴可以使用这个volatility模块。
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -773,7 +784,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**主引导记录 (MBR)** 在管理存储介质的逻辑分区中发挥着至关重要的作用，这些分区采用不同的 [文件系统](https://en.wikipedia.org/wiki/File\_system) 进行结构化。它不仅保存分区布局信息，还包含作为引导加载程序的可执行代码。该引导加载程序要么直接启动操作系统的二阶段加载过程（参见 [二阶段引导加载程序](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)），要么与每个分区的 [卷引导记录](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) 协同工作。有关深入知识，请参阅 [MBR 维基百科页面](https://en.wikipedia.org/wiki/Master\_boot\_record)。
+**主引导记录 (MBR)** 在管理存储介质的逻辑分区中发挥着至关重要的作用，这些分区采用不同的 [文件系统](https://en.wikipedia.org/wiki/File\_system) 进行结构化。它不仅包含分区布局信息，还包含作为引导加载程序的可执行代码。该引导加载程序要么直接启动操作系统的二阶段加载过程（参见 [二阶段引导加载程序](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)），要么与每个分区的 [卷引导记录](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) 协同工作。有关深入知识，请参阅 [MBR 维基百科页面](https://en.wikipedia.org/wiki/Master\_boot\_record)。
 
 ## 参考文献
 
@@ -785,13 +796,13 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com/) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的活动之一。该大会 **旨在促进技术知识**，是各个学科的技术和网络安全专业人士的热烈交流平台。
+[**RootedCON**](https://www.rootedcon.com/) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。该大会 **旨在促进技术知识**，是各个学科的技术和网络安全专业人士的热烈交流平台。
 
 {% embed url="https://www.rootedcon.com/" %}
 
 {% hint style="success" %}
-学习与实践 AWS 渗透测试：<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks 培训 AWS 红队专家 (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-学习与实践 GCP 渗透测试：<img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks 培训 GCP 红队专家 (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+学习和实践 AWS 渗透测试：<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks 培训 AWS 红队专家 (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
+学习和实践 GCP 渗透测试：<img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks 培训 GCP 红队专家 (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
