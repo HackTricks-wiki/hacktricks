@@ -19,11 +19,22 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) **İspanya'daki** en ilgili siber güvenlik etkinliği ve **Avrupa'daki** en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplinde teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
+​​[**RootedCON**](https://www.rootedcon.com/) **İspanya'daki** en önemli siber güvenlik etkinliği ve **Avrupa'daki** en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplindeki teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
 
 {% embed url="https://www.rootedcon.com/" %}
+Farklı tarama seviyeleri ile bellek analizini otomatikleştiren ve birden fazla Volatility3 eklentisini paralel olarak çalıştıran bir araca ihtiyacınız varsa, autoVolatility3'ü kullanabilirsiniz:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
-Eğer birkaç Volatility eklentisini paralel olarak başlatacak **hızlı ve çılgın** bir şey istiyorsanız, şunu kullanabilirsiniz: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
+Eğer birkaç Volatility eklentisini paralel olarak başlatacak **hızlı ve çılgın** bir şey istiyorsanız şunu kullanabilirsiniz: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -64,7 +75,7 @@ Volatility, bazen isimlerinde yansıtılan iki ana eklenti yaklaşımına sahipt
 
 Bu, “list” eklentilerini oldukça hızlı hale getirir, ancak kötü amaçlı yazılımlar tarafından manipülasyona karşı Windows API'si kadar savunmasızdır. Örneğin, kötü amaçlı yazılım DKOM kullanarak bir süreci `_EPROCESS` bağlı listesinden ayırırsa, bu süreç Görev Yöneticisi'nde görünmeyecek ve pslist'te de görünmeyecektir.
 
-Diğer yandan, “scan” eklentileri, bellekten belirli yapılar olarak çözümlendiğinde anlamlı olabilecek şeyleri kazıma yaklaşımını benimseyecektir. Örneğin, `psscan` bellek okur ve ondan `_EPROCESS` nesneleri oluşturmaya çalışır (ilgi çekici bir yapının varlığını gösteren 4 baytlık dizeleri arayan havuz etiketi taraması kullanır). Avantajı, çıkmış süreçleri bulabilmesidir ve kötü amaçlı yazılım `_EPROCESS` bağlı listesiyle oynasa bile, eklenti hala bellekte yatan yapıyı bulacaktır (çünkü sürecin çalışması için hala var olması gerekir). Dezavantajı ise, “scan” eklentilerinin “list” eklentilerinden biraz daha yavaş olması ve bazen yanlış pozitifler verebilmesidir (çok uzun süre önce çıkmış ve yapısının bazı kısımları diğer işlemler tarafından üzerine yazılmış bir süreç).
+Diğer yandan, “scan” eklentileri, bellekten belirli yapılar olarak çözümlendiğinde anlamlı olabilecek şeyleri kazıma yaklaşımını benimseyecektir. Örneğin, `psscan` bellek okur ve ondan `_EPROCESS` nesneleri oluşturmaya çalışır (ilgi çekici bir yapının varlığını gösteren 4 baytlık dizeleri arayan havuz etiketi taraması kullanır). Avantajı, çıkmış süreçleri bulabilmesidir ve kötü amaçlı yazılım `_EPROCESS` bağlı listesiyle oynasa bile, eklenti hala bellekte yatan yapıyı bulacaktır (çünkü sürecin çalışması için hala var olması gerekir). Dezavantajı, “scan” eklentilerinin “list” eklentilerinden biraz daha yavaş olması ve bazen yanlış pozitifler verebilmesidir (çok uzun süre önce çıkmış ve yapısının bazı kısımları diğer işlemler tarafından üzerine yazılmış bir süreç).
 
 Kaynak: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -72,8 +83,8 @@ Kaynak: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analys
 
 ### Volatility3
 
-Readme içinde açıklandığı gibi, desteklemek istediğiniz **OS sembol tablosunu** _volatility3/volatility/symbols_ içine koymanız gerekir.\
-Çeşitli işletim sistemleri için sembol tablosu paketleri **indirilebilir** olarak mevcuttur:
+Readme içinde açıklandığı gibi, desteklemek istediğiniz **OS'nin sembol tablosunu** _volatility3/volatility/symbols_ içine koymalısınız.\
+Çeşitli işletim sistemleri için sembol tablosu paketleri **indirme** için mevcuttur:
 
 * [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 * [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -87,7 +98,7 @@ Desteklenen profillerin listesini almak için:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Eğer **indirdiğiniz yeni bir profili** (örneğin bir linux profili) kullanmak istiyorsanız, aşağıdaki klasör yapısını bir yere oluşturmanız gerekiyor: _plugins/overlays/linux_ ve bu klasörün içine profili içeren zip dosyasını koymalısınız. Ardından, profillerin numarasını almak için:
+Eğer **indirdiğiniz yeni bir profili** (örneğin bir linux profili) kullanmak istiyorsanız, aşağıdaki klasör yapısını bir yere oluşturmanız gerekir: _plugins/overlays/linux_ ve bu klasörün içine profili içeren zip dosyasını koymalısınız. Ardından, profillerin numarasını almak için:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -302,7 +313,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Bir **işlemin bir handle**'ı olduğu diğer dosyalara, anahtarlara, iş parçacıklarına, süreçlere... hangi bağlantıları kurduğunu bilmek faydalıdır. 
+Bir **işlemin bir handle'ı** olduğu diğer dosyalara, anahtarlara, iş parçacıklarına, süreçlere... hangi bağlantıları kurduğunu bilmek faydalıdır. 
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -338,7 +349,7 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 
 ### Süreç başına dizgiler
 
-Volatility, bir dizginin hangi işleme ait olduğunu kontrol etmemize olanak tanır.
+Volatility, bir dizginin hangi işleme ait olduğunu kontrol etmemizi sağlar.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -398,7 +409,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​​[**RootedCON**](https://www.rootedcon.com/) **İspanya**'daki en ilgili siber güvenlik etkinliği ve **Avrupa**'daki en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplinde teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
+​​​​[**RootedCON**](https://www.rootedcon.com/) **İspanya**'daki en ilgili siber güvenlik etkinliği ve **Avrupa**'daki en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplindeki teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -553,7 +564,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {% endtab %}
 {% endtabs %}
 
-**NTFS dosya sistemi**, _master file table_ (MFT) olarak bilinen kritik bir bileşen kullanır. Bu tablo, bir hacimdeki her dosya için en az bir giriş içerir ve MFT'nin kendisini de kapsar. Her dosya hakkında **boyut, zaman damgaları, izinler ve gerçek veriler** gibi hayati bilgiler, MFT girişleri içinde veya bu girişler tarafından referans verilen MFT dışındaki alanlarda kapsüllenmiştir. Daha fazla ayrıntı için [resmi belgeleri](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table) inceleyebilirsiniz.
+**NTFS dosya sistemi**, _master file table_ (MFT) olarak bilinen kritik bir bileşen kullanır. Bu tablo, bir hacimdeki her dosya için en az bir giriş içerir ve MFT'nin kendisini de kapsar. Her dosya hakkında **boyut, zaman damgaları, izinler ve gerçek veriler** gibi hayati bilgiler, MFT girişlerinde veya bu girişler tarafından referans verilen MFT dışındaki alanlarda kapsüllenmiştir. Daha fazla ayrıntı için [resmi belgeleri](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table) inceleyebilirsiniz.
 
 ### SSL Anahtarları/Sertifikaları
 
@@ -662,7 +673,7 @@ volatilitye --plugins="/tmp/plugins/" [...]
 
 #### Autoruns
 
-[https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns) adresinden indirin.
+Bunu [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns) adresinden indirin.
 ```
 volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
 ```
@@ -701,7 +712,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-**Bellekten bash geçmişini okumak mümkündür.** Ayrıca _.bash\_history_ dosyasını da dökebilirsiniz, ancak bu devre dışı bırakıldı, bu nedenle bu volatility modülünü kullanabileceğiniz için mutlu olacaksınız.
+**Bellekten bash geçmişini okumak mümkündür.** Ayrıca _.bash\_history_ dosyasını dökebilirsiniz, ancak bu devre dışı bırakıldı, bu nedenle bu volatility modülünü kullanabileceğiniz için mutlu olacaksınız.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -773,7 +784,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**Master Boot Record (MBR)**, bir depolama ortamının mantıksal bölümlerini yönetmede kritik bir rol oynar ve bu bölümler farklı [dosya sistemleri](https://en.wikipedia.org/wiki/File\_system) ile yapılandırılmıştır. Sadece bölüm düzeni bilgilerini tutmakla kalmaz, aynı zamanda bir önyükleyici olarak işlev gören yürütülebilir kod içerir. Bu önyükleyici, ya doğrudan işletim sisteminin ikinci aşama yükleme sürecini başlatır (bkz. [ikinci aşama önyükleyici](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) ya da her bölümün [hacim önyükleme kaydı](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) ile uyum içinde çalışır. Derinlemesine bilgi için [MBR Wikipedia sayfasına](https://en.wikipedia.org/wiki/Master\_boot\_record) bakın.
+**Master Boot Record (MBR)**, bir depolama ortamının mantıksal bölümlerini yönetmede kritik bir rol oynar ve bu bölümler farklı [dosya sistemleri](https://en.wikipedia.org/wiki/File\_system) ile yapılandırılmıştır. Sadece bölüm düzeni bilgilerini tutmakla kalmaz, aynı zamanda bir önyükleyici olarak işlev gören yürütülebilir kod içerir. Bu önyükleyici, işletim sisteminin ikinci aşama yükleme sürecini doğrudan başlatır (bkz. [ikinci aşama önyükleyici](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) veya her bölümün [hacim önyükleme kaydı](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) ile uyum içinde çalışır. Derinlemesine bilgi için [MBR Vikipedi sayfasına](https://en.wikipedia.org/wiki/Master\_boot\_record) bakın.
 
 ## Referanslar
 
@@ -785,7 +796,7 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com/) **İspanya**'daki en ilgili siber güvenlik etkinliği ve **Avrupa**'daki en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplindeki teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
+[**RootedCON**](https://www.rootedcon.com/) **İspanya**'daki en ilgili siber güvenlik etkinliği ve **Avrupa**'daki en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplinde teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
 
 {% embed url="https://www.rootedcon.com/" %}
 
