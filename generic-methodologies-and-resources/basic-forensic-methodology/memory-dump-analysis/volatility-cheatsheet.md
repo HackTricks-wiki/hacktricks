@@ -22,8 +22,19 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 ​​[**RootedCON**](https://www.rootedcon.com/) è l'evento di cybersecurity più rilevante in **Spagna** e uno dei più importanti in **Europa**. Con **la missione di promuovere la conoscenza tecnica**, questo congresso è un punto di incontro vivace per professionisti della tecnologia e della cybersecurity in ogni disciplina.
 
 {% embed url="https://www.rootedcon.com/" %}
+Se hai bisogno di uno strumento che automatizzi l'analisi della memoria con diversi livelli di scansione e esegua più plugin Volatility3 in parallelo, puoi usare autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
-Se vuoi qualcosa di **veloce e folle** che lanci diversi plugin di Volatility in parallelo, puoi usare: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
+Se vuoi qualcosa **veloce e folle** che lancerà diversi plugin di Volatility in parallelo, puoi usare: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -62,7 +73,7 @@ Accedi alla documentazione ufficiale in [riferimento ai comandi di Volatility](h
 
 Volatility ha due approcci principali ai plugin, che a volte si riflettono nei loro nomi. I plugin “list” cercheranno di navigare attraverso le strutture del kernel di Windows per recuperare informazioni come i processi (localizzare e percorrere la lista collegata delle strutture `_EPROCESS` in memoria), gestori del sistema operativo (localizzare e elencare la tabella dei gestori, dereferenziare eventuali puntatori trovati, ecc.). Si comportano più o meno come farebbe l'API di Windows se richiesto di, ad esempio, elencare i processi.
 
-Questo rende i plugin “list” piuttosto veloci, ma altrettanto vulnerabili alla manipolazione da parte di malware. Ad esempio, se il malware utilizza DKOM per scollegare un processo dalla lista collegata `_EPROCESS`, non apparirà nel Task Manager e nemmeno in pslist.
+Questo rende i plugin “list” piuttosto veloci, ma altrettanto vulnerabili quanto l'API di Windows alla manipolazione da parte di malware. Ad esempio, se un malware utilizza DKOM per scollegare un processo dalla lista collegata `_EPROCESS`, non apparirà nel Task Manager e nemmeno in pslist.
 
 I plugin “scan”, d'altra parte, adotteranno un approccio simile al carving della memoria per cose che potrebbero avere senso quando dereferenziate come strutture specifiche. `psscan`, ad esempio, leggerà la memoria e cercherà di creare oggetti `_EPROCESS` da essa (utilizza la scansione dei pool-tag, che cerca stringhe di 4 byte che indicano la presenza di una struttura di interesse). Il vantaggio è che può recuperare processi che sono terminati, e anche se il malware manomette la lista collegata `_EPROCESS`, il plugin troverà comunque la struttura presente in memoria (poiché deve ancora esistere affinché il processo funzioni). Lo svantaggio è che i plugin “scan” sono un po' più lenti dei plugin “list” e possono talvolta restituire falsi positivi (un processo che è terminato troppo tempo fa e ha avuto parti della sua struttura sovrascritte da altre operazioni).
 
@@ -112,9 +123,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Differenze tra imageinfo e kdbgscan**
 
-[**Da qui**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): A differenza di imageinfo che fornisce semplicemente suggerimenti sui profili, **kdbgscan** è progettato per identificare positivamente il profilo corretto e l'indirizzo KDBG corretto (se ce ne sono più di uno). Questo plugin cerca le firme KDBGHeader collegate ai profili di Volatility e applica controlli di sanità per ridurre i falsi positivi. La verbosità dell'output e il numero di controlli di sanità che possono essere eseguiti dipendono dal fatto che Volatility riesca a trovare un DTB, quindi se già conosci il profilo corretto (o se hai un suggerimento di profilo da imageinfo), assicurati di usarlo.
+[**Da qui**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): A differenza di imageinfo che fornisce semplicemente suggerimenti sui profili, **kdbgscan** è progettato per identificare positivamente il profilo corretto e l'indirizzo KDBG corretto (se ce ne sono più di uno). Questo plugin cerca le firme KDBGHeader collegate ai profili di Volatility e applica controlli di sanità per ridurre i falsi positivi. La verbosità dell'output e il numero di controlli di sanità che possono essere eseguiti dipendono dal fatto che Volatility possa trovare un DTB, quindi se già conosci il profilo corretto (o se hai un suggerimento di profilo da imageinfo), assicurati di usarlo.
 
-Dai sempre un'occhiata al **numero di processi che kdbgscan ha trovato**. A volte imageinfo e kdbgscan possono trovare **più di un** **profilo** adatto, ma solo il **valido avrà qualche processo correlato** (Questo perché per estrarre i processi è necessario l'indirizzo KDBG corretto).
+Dai sempre un'occhiata al **numero di processi che kdbgscan ha trovato**. A volte imageinfo e kdbgscan possono trovare **più di un** **profilo** adatto, ma solo il **valido avrà alcuni processi correlati** (Questo perché per estrarre i processi è necessario l'indirizzo KDBG corretto).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -128,7 +139,7 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-Il **kernel debugger block**, noto come **KDBG** da Volatility, è cruciale per i compiti forensi eseguiti da Volatility e vari debugger. Identificato come `KdDebuggerDataBlock` e di tipo `_KDDEBUGGER_DATA64`, contiene riferimenti essenziali come `PsActiveProcessHead`. Questo riferimento specifico punta alla testa dell'elenco dei processi, consentendo l'elenco di tutti i processi, che è fondamentale per un'analisi approfondita della memoria.
+Il **kernel debugger block**, noto come **KDBG** da Volatility, è cruciale per i compiti forensi eseguiti da Volatility e vari debugger. Identificato come `KdDebuggerDataBlock` e di tipo `_KDDEBUGGER_DATA64`, contiene riferimenti essenziali come `PsActiveProcessHead`. Questo riferimento specifico punta alla testa della lista dei processi, consentendo l'elenco di tutti i processi, fondamentale per un'analisi approfondita della memoria.
 
 ## OS Information
 ```bash
@@ -139,7 +150,7 @@ Il plugin `banners.Banners` può essere utilizzato in **vol3 per cercare banner 
 
 ## Hash/Password
 
-Estrai gli hash SAM, [credenziali memorizzate nella cache del dominio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) e [segreti lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Estrai gli hash SAM, [credenziali memorizzate nel dominio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) e [segreti lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -167,13 +178,13 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​[**RootedCON**](https://www.rootedcon.com/) è l'evento di cybersecurity più rilevante in **Spagna** e uno dei più importanti in **Europa**. Con **la missione di promuovere la conoscenza tecnica**, questo congresso è un punto di incontro fervente per professionisti della tecnologia e della cybersecurity in ogni disciplina.
+​​​[**RootedCON**](https://www.rootedcon.com/) è l'evento di cybersecurity più rilevante in **Spagna** e uno dei più importanti in **Europa**. Con **la missione di promuovere la conoscenza tecnica**, questo congresso è un punto di incontro vivace per professionisti della tecnologia e della cybersecurity in ogni disciplina.
 
 {% embed url="https://www.rootedcon.com/" %}
 
 ## Processi
 
-### Elenca i processi
+### Elenco processi
 
 Cerca di trovare processi **sospetti** (per nome) o **processi** figlio **inaspettati** (ad esempio un cmd.exe come figlio di iexplorer.exe).\
 Potrebbe essere interessante **confrontare** il risultato di pslist con quello di psscan per identificare processi nascosti.
@@ -232,7 +243,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {% endtab %}
 {% endtabs %}
 
-I comandi eseguiti in `cmd.exe` sono gestiti da **`conhost.exe`** (o `csrss.exe` sui sistemi precedenti a Windows 7). Ciò significa che se **`cmd.exe`** viene terminato da un attaccante prima che venga ottenuto un memory dump, è ancora possibile recuperare la cronologia dei comandi della sessione dalla memoria di **`conhost.exe`**. Per fare ciò, se viene rilevata un'attività insolita all'interno dei moduli della console, la memoria del processo associato **`conhost.exe`** dovrebbe essere dumpata. Quindi, cercando **stringhe** all'interno di questo dump, le righe di comando utilizzate nella sessione possono essere potenzialmente estratte.
+I comandi eseguiti in `cmd.exe` sono gestiti da **`conhost.exe`** (o `csrss.exe` sui sistemi precedenti a Windows 7). Ciò significa che se **`cmd.exe`** viene terminato da un attaccante prima che venga ottenuto un memory dump, è ancora possibile recuperare la cronologia dei comandi della sessione dalla memoria di **`conhost.exe`**. Per fare ciò, se viene rilevata un'attività insolita all'interno dei moduli della console, la memoria del processo associato **`conhost.exe`** dovrebbe essere dumpata. Quindi, cercando **stringhe** all'interno di questo dump, le righe di comando utilizzate nella sessione possono potenzialmente essere estratte.
 
 ### Ambiente
 
@@ -254,7 +265,7 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {% endtab %}
 {% endtabs %}
 
-### Privilegi del token
+### Privilegi dei token
 
 Controlla i token di privilegi in servizi inaspettati.\
 Potrebbe essere interessante elencare i processi che utilizzano alcuni token privilegiati.
@@ -302,7 +313,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Utile sapere a quali altri file, chiavi, thread, processi... un **processo ha un handle** (ha aperto) 
+Utile sapere a quali altri file, chiavi, thread, processi... un **processo ha un handle** (ha aperto)
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -450,9 +461,9 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 {% endtab %}
 {% endtabs %}
 
-## Alveare del registro
+## Registro hives
 
-### Stampa gli alveari disponibili
+### Stampa hives disponibili
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -553,7 +564,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {% endtab %}
 {% endtabs %}
 
-Il **sistema di file NTFS** utilizza un componente critico noto come _master file table_ (MFT). Questa tabella include almeno un'entrata per ogni file su un volume, coprendo anche l'MFT stesso. Dettagli vitali su ogni file, come **dimensione, timestamp, permessi e dati effettivi**, sono racchiusi all'interno delle entrate MFT o in aree esterne all'MFT ma referenziate da queste entrate. Maggiori dettagli possono essere trovati nella [documentazione ufficiale](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+Il **file system NTFS** utilizza un componente critico noto come _master file table_ (MFT). Questa tabella include almeno un'entrata per ogni file su un volume, coprendo anche la MFT stessa. Dettagli vitali su ogni file, come **dimensione, timestamp, permessi e dati effettivi**, sono racchiusi all'interno delle entrate MFT o in aree esterne alla MFT ma referenziate da queste entrate. Maggiori dettagli possono essere trovati nella [documentazione ufficiale](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
 ### Chiavi/Certificati SSL
 
