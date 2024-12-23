@@ -22,7 +22,18 @@ Aprenda e pratique Hacking GCP: <img src="/.gitbook/assets/grte.png" alt="" data
 ​​[**RootedCON**](https://www.rootedcon.com/) é o evento de cibersegurança mais relevante na **Espanha** e um dos mais importantes na **Europa**. Com **a missão de promover o conhecimento técnico**, este congresso é um ponto de encontro fervilhante para profissionais de tecnologia e cibersegurança em todas as disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
+Se você precisa de uma ferramenta que automatize a análise de memória com diferentes níveis de varredura e execute vários plugins do Volatility3 em paralelo, você pode usar autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
 Se você quer algo **rápido e louco** que lançará vários plugins do Volatility em paralelo, você pode usar: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
@@ -62,9 +73,9 @@ Acesse a documentação oficial em [Referência de comandos do Volatility](https
 
 O Volatility tem duas abordagens principais para plugins, que às vezes são refletidas em seus nomes. Plugins “list” tentarão navegar pelas estruturas do Kernel do Windows para recuperar informações como processos (localizar e percorrer a lista encadeada de estruturas `_EPROCESS` na memória), handles do SO (localizando e listando a tabela de handles, desreferenciando quaisquer ponteiros encontrados, etc). Eles se comportam mais ou menos como a API do Windows se solicitada a, por exemplo, listar processos.
 
-Isso torna os plugins “list” bastante rápidos, mas tão vulneráveis quanto a API do Windows a manipulações por malware. Por exemplo, se um malware usar DKOM para desvincular um processo da lista encadeada `_EPROCESS`, ele não aparecerá no Gerenciador de Tarefas e nem no pslist.
+Isso torna os plugins “list” bastante rápidos, mas tão vulneráveis quanto a API do Windows à manipulação por malware. Por exemplo, se um malware usar DKOM para desvincular um processo da lista encadeada `_EPROCESS`, ele não aparecerá no Gerenciador de Tarefas e nem no pslist.
 
-Os plugins “scan”, por outro lado, adotarão uma abordagem semelhante à escultura da memória para coisas que podem fazer sentido quando desreferenciadas como estruturas específicas. O `psscan`, por exemplo, lerá a memória e tentará criar objetos `_EPROCESS` a partir dela (usa a varredura de pool-tag, que busca por strings de 4 bytes que indicam a presença de uma estrutura de interesse). A vantagem é que pode encontrar processos que já saíram, e mesmo que o malware interfira na lista encadeada `_EPROCESS`, o plugin ainda encontrará a estrutura presente na memória (já que ainda precisa existir para o processo ser executado). A desvantagem é que os plugins “scan” são um pouco mais lentos que os plugins “list” e podem, às vezes, gerar falsos positivos (um processo que saiu há muito tempo e teve partes de sua estrutura sobrescritas por outras operações).
+Os plugins “scan”, por outro lado, adotarão uma abordagem semelhante à escultura da memória para coisas que podem fazer sentido quando desreferenciadas como estruturas específicas. O `psscan`, por exemplo, lerá a memória e tentará criar objetos `_EPROCESS` a partir dela (usa a varredura de pool-tag, que busca por strings de 4 bytes que indicam a presença de uma estrutura de interesse). A vantagem é que pode encontrar processos que já saíram, e mesmo que o malware manipule a lista encadeada `_EPROCESS`, o plugin ainda encontrará a estrutura presente na memória (já que ainda precisa existir para o processo ser executado). A desvantagem é que os plugins “scan” são um pouco mais lentos que os plugins “list” e podem, às vezes, gerar falsos positivos (um processo que saiu há muito tempo e teve partes de sua estrutura sobrescritas por outras operações).
 
 De: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -257,7 +268,7 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 ### Privilégios de token
 
 Verifique os tokens de privilégios em serviços inesperados.\
-Pode ser interessante listar os processos que utilizam algum token privilegiado.
+Pode ser interessante listar os processos que usam algum token privilegiado.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -553,7 +564,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {% endtab %}
 {% endtabs %}
 
-O **sistema de arquivos NTFS** usa um componente crítico conhecido como _tabela mestre de arquivos_ (MFT). Esta tabela inclui pelo menos uma entrada para cada arquivo em um volume, cobrindo a própria MFT também. Detalhes vitais sobre cada arquivo, como **tamanho, carimbos de data/hora, permissões e dados reais**, estão encapsulados dentro das entradas da MFT ou em áreas externas à MFT, mas referenciadas por essas entradas. Mais detalhes podem ser encontrados na [documentação oficial](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+O **sistema de arquivos NTFS** usa um componente crítico conhecido como a _tabela de arquivos mestre_ (MFT). Esta tabela inclui pelo menos uma entrada para cada arquivo em um volume, cobrindo a própria MFT também. Detalhes vitais sobre cada arquivo, como **tamanho, carimbos de data/hora, permissões e dados reais**, estão encapsulados dentro das entradas da MFT ou em áreas externas à MFT, mas referenciadas por essas entradas. Mais detalhes podem ser encontrados na [documentação oficial](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
 ### Chaves/Certificados SSL
 
@@ -773,7 +784,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-O **Master Boot Record (MBR)** desempenha um papel crucial na gestão das partições lógicas de um meio de armazenamento, que são estruturadas com diferentes [file systems](https://en.wikipedia.org/wiki/File\_system). Ele não apenas contém informações sobre o layout das partições, mas também inclui código executável que atua como um carregador de inicialização. Este carregador de inicialização inicia diretamente o processo de carregamento de segunda fase do SO (veja [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) ou trabalha em harmonia com o [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) de cada partição. Para um conhecimento mais aprofundado, consulte a [página da Wikipedia sobre MBR](https://en.wikipedia.org/wiki/Master\_boot\_record).
+O **Master Boot Record (MBR)** desempenha um papel crucial na gestão das partições lógicas de um meio de armazenamento, que são estruturadas com diferentes [file systems](https://en.wikipedia.org/wiki/File\_system). Ele não apenas contém informações sobre o layout das partições, mas também contém código executável que atua como um carregador de inicialização. Este carregador de inicialização inicia diretamente o processo de carregamento de segunda fase do SO (veja [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) ou trabalha em harmonia com o [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) de cada partição. Para um conhecimento mais aprofundado, consulte a [página da Wikipedia sobre MBR](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
 ## Referências
 
