@@ -1,16 +1,16 @@
 # Volatility - CheatSheet
 
 {% hint style="success" %}
-Lernen & üben Sie AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
-Lernen & üben Sie GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
+Learn & practice AWS Hacking:<img src="/.gitbook/assets/arte.png" alt="" data-size="line">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="/.gitbook/assets/arte.png" alt="" data-size="line">\
+Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-size="line">[**HackTricks Training GCP Red Team Expert (GRTE)**<img src="/.gitbook/assets/grte.png" alt="" data-size="line">](https://training.hacktricks.xyz/courses/grte)
 
 <details>
 
-<summary>Unterstützen Sie HackTricks</summary>
+<summary>Support HackTricks</summary>
 
-* Überprüfen Sie die [**Abonnementpläne**](https://github.com/sponsors/carlospolop)!
-* **Treten Sie der** 💬 [**Discord-Gruppe**](https://discord.gg/hRep4RUj7f) oder der [**Telegram-Gruppe**](https://t.me/peass) bei oder **folgen** Sie uns auf **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Teilen Sie Hacking-Tricks, indem Sie PRs an die** [**HackTricks**](https://github.com/carlospolop/hacktricks) und [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) GitHub-Repos senden.
+* Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
+* **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
+* **Share hacking tricks by submitting PRs to the** [**HackTricks**](https://github.com/carlospolop/hacktricks) and [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos.
 
 </details>
 {% endhint %}
@@ -22,7 +22,18 @@ Lernen & üben Sie GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data
 ​​[**RootedCON**](https://www.rootedcon.com/) ist die relevanteste Cybersecurity-Veranstaltung in **Spanien** und eine der wichtigsten in **Europa**. Mit **der Mission, technisches Wissen zu fördern**, ist dieser Kongress ein brodelnder Treffpunkt für Technologie- und Cybersecurity-Profis in jeder Disziplin.
 
 {% embed url="https://www.rootedcon.com/" %}
+Wenn Sie ein Tool benötigen, das die Speicheranalyse mit verschiedenen Scan-Ebenen automatisiert und mehrere Volatility3-Plugins parallel ausführt, können Sie autoVolatility3 verwenden:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
 Wenn Sie etwas **schnelles und verrücktes** wollen, das mehrere Volatility-Plugins parallel ausführt, können Sie verwenden: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
@@ -60,11 +71,11 @@ Zugriff auf die offizielle Dokumentation in [Volatility-Befehlsreferenz](https:/
 
 ### Eine Anmerkung zu „list“ vs. „scan“ Plugins
 
-Volatility hat zwei Hauptansätze für Plugins, die sich manchmal in ihren Namen widerspiegeln. „list“ Plugins versuchen, durch Windows-Kernel-Strukturen zu navigieren, um Informationen wie Prozesse abzurufen (lokalisieren und die verkettete Liste von `_EPROCESS`-Strukturen im Speicher durchlaufen), OS-Handles (lokalisieren und die Handle-Tabelle auflisten, alle gefundenen Zeiger dereferenzieren usw.). Sie verhalten sich mehr oder weniger so, wie die Windows-API es tun würde, wenn sie beispielsweise aufgefordert wird, Prozesse aufzulisten.
+Volatility hat zwei Hauptansätze für Plugins, die sich manchmal in ihren Namen widerspiegeln. „list“-Plugins versuchen, durch Windows-Kernel-Strukturen zu navigieren, um Informationen wie Prozesse abzurufen (lokalisieren und die verkettete Liste von `_EPROCESS`-Strukturen im Speicher durchlaufen), OS-Handles (lokalisieren und die Handle-Tabelle auflisten, alle gefundenen Zeiger dereferenzieren usw.). Sie verhalten sich mehr oder weniger so, wie die Windows-API es tun würde, wenn sie beispielsweise aufgefordert wird, Prozesse aufzulisten.
 
-Das macht „list“ Plugins ziemlich schnell, aber ebenso anfällig für Manipulationen durch Malware wie die Windows-API. Wenn Malware beispielsweise DKOM verwendet, um einen Prozess von der `_EPROCESS`-verketteten Liste zu trennen, wird er im Task-Manager nicht angezeigt und auch nicht in der pslist.
+Das macht „list“-Plugins ziemlich schnell, aber ebenso anfällig für Manipulationen durch Malware wie die Windows-API. Wenn Malware beispielsweise DKOM verwendet, um einen Prozess von der verketteten Liste `_EPROCESS` zu trennen, wird er im Task-Manager nicht angezeigt und auch nicht in der pslist.
 
-„scan“ Plugins hingegen verfolgen einen Ansatz, der dem Carving des Speichers ähnelt, um Dinge zu finden, die sinnvoll erscheinen, wenn sie als spezifische Strukturen dereferenziert werden. `psscan` wird beispielsweise den Speicher lesen und versuchen, `_EPROCESS`-Objekte daraus zu erstellen (es verwendet Pool-Tag-Scanning, das nach 4-Byte-Strings sucht, die auf das Vorhandensein einer interessanten Struktur hinweisen). Der Vorteil ist, dass es Prozesse finden kann, die beendet wurden, und selbst wenn Malware mit der `_EPROCESS`-verketteten Liste manipuliert, wird das Plugin die Struktur, die im Speicher liegt, immer noch finden (da sie weiterhin existieren muss, damit der Prozess ausgeführt werden kann). Der Nachteil ist, dass „scan“ Plugins etwas langsamer sind als „list“ Plugins und manchmal falsch-positive Ergebnisse liefern können (ein Prozess, der zu lange beendet wurde und Teile seiner Struktur von anderen Operationen überschrieben wurden).
+„scan“-Plugins hingegen verfolgen einen Ansatz, der dem Carving des Speichers ähnelt, um Dinge zu finden, die sinnvoll erscheinen, wenn sie als spezifische Strukturen dereferenziert werden. `psscan` wird beispielsweise den Speicher lesen und versuchen, `_EPROCESS`-Objekte daraus zu erstellen (es verwendet Pool-Tag-Scanning, das nach 4-Byte-Strings sucht, die auf das Vorhandensein einer interessanten Struktur hinweisen). Der Vorteil ist, dass es Prozesse finden kann, die beendet wurden, und selbst wenn Malware mit der verketteten Liste `_EPROCESS` manipuliert, wird das Plugin die Struktur, die im Speicher liegt, immer noch finden (da sie weiterhin existieren muss, damit der Prozess ausgeführt werden kann). Der Nachteil ist, dass „scan“-Plugins etwas langsamer sind als „list“-Plugins und manchmal falsch-positive Ergebnisse liefern können (ein Prozess, der zu lange beendet wurde und Teile seiner Struktur von anderen Operationen überschrieben wurden).
 
 Von: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -72,7 +83,7 @@ Von: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/
 
 ### Volatility3
 
-Wie im Readme erklärt, müssen Sie die **Symboltabelle des OS**, das Sie unterstützen möchten, in _volatility3/volatility/symbols_ ablegen.\
+Wie im Readme erklärt, müssen Sie die **Symboltabelle des OS**, das Sie unterstützen möchten, in _volatility3/volatility/symbols_ einfügen.\
 Symboltabellenpakete für die verschiedenen Betriebssysteme sind **zum Download** verfügbar unter:
 
 * [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
@@ -114,7 +125,7 @@ volatility kdbgscan -f file.dmp
 
 [**Von hier**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Im Gegensatz zu imageinfo, das einfach Profilvorschläge bietet, ist **kdbgscan** darauf ausgelegt, das richtige Profil und die richtige KDBG-Adresse (falls mehrere vorhanden sind) positiv zu identifizieren. Dieses Plugin scannt nach den KDBGHeader-Signaturen, die mit Volatility-Profilen verknüpft sind, und führt Plausibilitätsprüfungen durch, um Fehlalarme zu reduzieren. Die Ausführlichkeit der Ausgabe und die Anzahl der durchgeführten Plausibilitätsprüfungen hängen davon ab, ob Volatility einen DTB finden kann. Wenn Sie also bereits das richtige Profil kennen (oder wenn Sie einen Profilvorschlag von imageinfo haben), stellen Sie sicher, dass Sie es verwenden.
 
-Achten Sie immer auf die **Anzahl der Prozesse, die kdbgscan gefunden hat**. Manchmal können imageinfo und kdbgscan **mehr als ein** geeignetes **Profil** finden, aber nur das **gültige wird einige prozessbezogene** Informationen haben (Dies liegt daran, dass die richtige KDBG-Adresse benötigt wird, um Prozesse zu extrahieren).
+Achten Sie immer auf die **Anzahl der Prozesse, die kdbgscan gefunden hat**. Manchmal können imageinfo und kdbgscan **mehr als ein** geeignetes **Profil** finden, aber nur das **gültige wird einige prozessbezogene** Informationen haben (Dies liegt daran, dass die korrekte KDBG-Adresse benötigt wird, um Prozesse zu extrahieren).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -135,7 +146,7 @@ Der **Kernel-Debugger-Block**, von Volatility als **KDBG** bezeichnet, ist entsc
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-Der Plugin `banners.Banners` kann in **vol3 verwendet werden, um nach Linux-Bannern** im Dump zu suchen.
+Der Plugin `banners.Banners` kann in **vol3 verwendet werden, um zu versuchen, Linux-Banner** im Dump zu finden.
 
 ## Hashes/Passwörter
 
@@ -514,7 +525,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {% endtab %}
 {% endtabs %}
 
-### Scan/dump
+### Scannen/Dump
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -701,7 +712,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Es ist möglich, **aus dem Speicher die Bash-Historie zu lesen.** Sie könnten auch die _.bash\_history_-Datei dumpen, aber sie wurde deaktiviert, Sie werden froh sein, dass Sie dieses Volatility-Modul verwenden können.
+Es ist möglich, **aus dem Speicher die Bash-Historie zu lesen.** Sie könnten auch die _.bash\_history_ Datei dumpen, aber sie wurde deaktiviert, Sie werden froh sein, dass Sie dieses Volatility-Modul verwenden können.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -773,7 +784,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-Der **Master Boot Record (MBR)** spielt eine entscheidende Rolle bei der Verwaltung der logischen Partitionen eines Speichermediums, die mit verschiedenen [Dateisystemen](https://de.wikipedia.org/wiki/Dateisystem) strukturiert sind. Er enthält nicht nur Informationen über das Partitionierungslayout, sondern auch ausführbaren Code, der als Bootloader fungiert. Dieser Bootloader initiiert entweder direkt den zweiten Ladeprozess des Betriebssystems (siehe [zweiter Bootloader](https://de.wikipedia.org/wiki/Zweiter_Bootloader)) oder arbeitet harmonisch mit dem [Volume Boot Record](https://de.wikipedia.org/wiki/Volume_Boot_Record) (VBR) jeder Partition zusammen. Für vertiefte Kenntnisse siehe die [MBR Wikipedia-Seite](https://de.wikipedia.org/wiki/Master_Boot_Record).
+Der **Master Boot Record (MBR)** spielt eine entscheidende Rolle bei der Verwaltung der logischen Partitionen eines Speichermediums, die mit verschiedenen [Dateisystemen](https://en.wikipedia.org/wiki/File\_system) strukturiert sind. Er enthält nicht nur Informationen über das Partitionierungslayout, sondern auch ausführbaren Code, der als Bootloader fungiert. Dieser Bootloader initiiert entweder direkt den zweiten Ladeprozess des Betriebssystems (siehe [zweiter Bootloader](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)) oder arbeitet harmonisch mit dem [Volume Boot Record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) jeder Partition zusammen. Für vertiefte Kenntnisse siehe die [MBR Wikipedia-Seite](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
 ## Referenzen
 
