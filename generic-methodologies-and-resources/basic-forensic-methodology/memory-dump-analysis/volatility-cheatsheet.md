@@ -10,7 +10,7 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 
 * Check the [**subscription plans**](https://github.com/sponsors/carlospolop)!
 * **Dołącz do** 💬 [**grupy Discord**](https://discord.gg/hRep4RUj7f) lub [**grupy telegram**](https://t.me/peass) lub **śledź** nas na **Twitterze** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Podziel się trikami hackingowymi, przesyłając PR-y do** [**HackTricks**](https://github.com/carlospolop/hacktricks) i [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repozytoriów github.
+* **Podziel się trikami hackingowymi, przesyłając PR-y do** [**HackTricks**](https://github.com/carlospolop/hacktricks) i [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repozytoriów na githubie.
 
 </details>
 {% endhint %}
@@ -19,11 +19,22 @@ Learn & practice GCP Hacking: <img src="/.gitbook/assets/grte.png" alt="" data-s
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) to najważniejsze wydarzenie związane z cyberbezpieczeństwem w **Hiszpanii** i jedno z najważniejszych w **Europie**. Z **misją promowania wiedzy technicznej**, ten kongres jest gorącym punktem spotkań dla profesjonalistów z technologii i cyberbezpieczeństwa w każdej dziedzinie.
+​​[**RootedCON**](https://www.rootedcon.com/) to najważniejsze wydarzenie związane z cyberbezpieczeństwem w **Hiszpanii** i jedno z najważniejszych w **Europie**. Z **misją promowania wiedzy technicznej**, ten kongres jest gorącym punktem spotkań dla profesjonalistów z dziedziny technologii i cyberbezpieczeństwa w każdej dyscyplinie.
 
 {% embed url="https://www.rootedcon.com/" %}
+If you need a tool that automates memory analysis with different scan levels and runs multiple Volatility3 plugins in parallel, you can use autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+```bash
+# Full scan (runs all plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
 
-If you want something **fast and crazy** that will launch several Volatility plugins on parallel you can use: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+# Minimal scan (runs a limited set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
+
+# Normal scan (runs a balanced set of plugins)
+python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
+
+```
+Jeśli chcesz czegoś **szybkiego i szalonego**, co uruchomi kilka wtyczek Volatility równolegle, możesz użyć: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -73,7 +84,7 @@ Z: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](
 ### Volatility3
 
 Jak wyjaśniono w readme, musisz umieścić **tabelę symboli systemu operacyjnego**, który chcesz obsługiwać, w _volatility3/volatility/symbols_.\
-Pakiety tabel symboli dla różnych systemów operacyjnych są dostępne do **pobrania** pod:
+Pakiety tabel symboli dla różnych systemów operacyjnych są dostępne do **pobrania** pod adresem:
 
 * [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 * [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -87,7 +98,7 @@ Możesz uzyskać listę obsługiwanych profili, wykonując:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Jeśli chcesz użyć **nowego profilu, który pobrałeś** (na przykład linuxowego), musisz stworzyć gdzieś następującą strukturę folderów: _plugins/overlays/linux_ i umieścić w tym folderze plik zip zawierający profil. Następnie, uzyskaj numer profili używając:
+Jeśli chcesz użyć **nowego profilu, który pobrałeś** (na przykład profilu linux), musisz stworzyć gdzieś następującą strukturę folderów: _plugins/overlays/linux_ i umieścić w tym folderze plik zip zawierający profil. Następnie, uzyskaj numer profili używając:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -112,9 +123,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Różnice między imageinfo a kdbgscan**
 
-[**Stąd**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): W przeciwieństwie do imageinfo, które po prostu sugeruje profile, **kdbgscan** jest zaprojektowane do pozytywnej identyfikacji poprawnego profilu i poprawnego adresu KDBG (jeśli występuje ich wiele). Ten plugin skanuje sygnatury KDBGHeader powiązane z profilami Volatility i stosuje kontrole sanity, aby zredukować fałszywe pozytywy. Szczegółowość wyników i liczba kontroli sanity, które można przeprowadzić, zależy od tego, czy Volatility może znaleźć DTB, więc jeśli już znasz poprawny profil (lub jeśli masz sugestię profilu z imageinfo), upewnij się, że go używasz.
+[**Stąd**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): W przeciwieństwie do imageinfo, które po prostu sugeruje profile, **kdbgscan** jest zaprojektowane do pozytywnej identyfikacji poprawnego profilu i poprawnego adresu KDBG (jeśli występuje ich wiele). Ten plugin skanuje sygnatury KDBGHeader powiązane z profilami Volatility i stosuje kontrole sanity, aby zredukować fałszywe pozytywy. Szczegółowość wyjścia i liczba kontroli sanity, które można przeprowadzić, zależy od tego, czy Volatility może znaleźć DTB, więc jeśli już znasz poprawny profil (lub jeśli masz sugestię profilu z imageinfo), upewnij się, że go używasz.
 
-Zawsze zwracaj uwagę na **liczbę procesów, które znalazł kdbgscan**. Czasami imageinfo i kdbgscan mogą znaleźć **więcej niż jeden** odpowiedni **profil**, ale tylko **ważny będzie miał jakieś procesy związane** (To dlatego, że do wyodrębnienia procesów potrzebny jest poprawny adres KDBG).
+Zawsze zwracaj uwagę na **liczbę procesów, które znalazł kdbgscan**. Czasami imageinfo i kdbgscan mogą znaleźć **więcej niż jeden** odpowiedni **profil**, ale tylko **ważny będzie miał jakieś powiązane procesy** (To dlatego, że do wyodrębnienia procesów potrzebny jest poprawny adres KDBG).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -137,9 +148,9 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 Plugin `banners.Banners` może być użyty w **vol3, aby spróbować znaleźć bannery linuxowe** w zrzucie.
 
-## Hashe/Hasła
+## Hasła/Hash
 
-Wyodrębnij hashe SAM, [pamiętane poświadczenia domeny](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) oraz [sekrety lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Wyodrębnij hashe SAM, [cached credentials domeny](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) oraz [sekrety lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -167,7 +178,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​[**RootedCON**](https://www.rootedcon.com/) to najważniejsze wydarzenie związane z cyberbezpieczeństwem w **Hiszpanii** i jedno z najważniejszych w **Europie**. Z **misją promowania wiedzy technicznej**, ten kongres jest gorącym punktem spotkań dla profesjonalistów z technologii i cyberbezpieczeństwa w każdej dziedzinie.
+​​​[**RootedCON**](https://www.rootedcon.com/) to najważniejsze wydarzenie związane z cyberbezpieczeństwem w **Hiszpanii** i jedno z najważniejszych w **Europie**. Z **misją promowania wiedzy technicznej**, ten kongres jest gorącym punktem spotkań dla profesjonalistów z dziedziny technologii i cyberbezpieczeństwa w każdej dyscyplinie.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -236,7 +247,7 @@ Polecenia wykonywane w `cmd.exe` są zarządzane przez **`conhost.exe`** (lub `c
 
 ### Środowisko
 
-Uzyskaj zmienne env każdego uruchomionego procesu. Mogą istnieć interesujące wartości.
+Uzyskaj zmienne środowiskowe każdego uruchomionego procesu. Mogą istnieć interesujące wartości.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -615,7 +626,7 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 ### Skanowanie z yara
 
 Użyj tego skryptu, aby pobrać i połączyć wszystkie zasady malware yara z github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Utwórz katalog _**rules**_ i uruchom go. To stworzy plik o nazwie _**malware\_rules.yar**_, który zawiera wszystkie zasady yara dla malware. 
+Utwórz katalog _**rules**_ i uruchom go. To stworzy plik o nazwie _**malware\_rules.yar**_, który zawiera wszystkie zasady yara dla malware.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -769,11 +780,11 @@ volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```
-### Mistrzowski rekord rozruchowy (MBR)
+### Mistrzowski Rekord Rozruchowy (MBR)
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**Master Boot Record (MBR)** odgrywa kluczową rolę w zarządzaniu logicznymi partycjami nośnika danych, które są zorganizowane w różne [systemy plików](https://en.wikipedia.org/wiki/File\_system). Nie tylko przechowuje informacje o układzie partycji, ale także zawiera kod wykonywalny działający jako program rozruchowy. Ten program rozruchowy albo bezpośrednio inicjuje proces ładowania drugiego etapu systemu operacyjnego (zobacz [drugi program rozruchowy](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)), albo współpracuje z [rekordem rozruchowym woluminu](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) każdej partycji. Aby uzyskać szczegółowe informacje, zapoznaj się z [stroną MBR na Wikipedii](https://en.wikipedia.org/wiki/Master\_boot\_record).
+**Master Boot Record (MBR)** odgrywa kluczową rolę w zarządzaniu logicznymi partycjami nośnika danych, które są zorganizowane w różne [systemy plików](https://en.wikipedia.org/wiki/File\_system). Nie tylko przechowuje informacje o układzie partycji, ale także zawiera kod wykonywalny działający jako program rozruchowy. Ten program rozruchowy albo bezpośrednio inicjuje proces ładowania drugiego etapu systemu operacyjnego (zobacz [program rozruchowy drugiego etapu](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader)), albo współpracuje z [rekordem rozruchowym woluminu](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR) każdej partycji. Aby uzyskać szczegółowe informacje, zapoznaj się z [stroną Wikipedii MBR](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
 ## References
 
@@ -799,7 +810,7 @@ Ucz się i ćwicz Hacking GCP: <img src="/.gitbook/assets/grte.png" alt="" data-
 
 * Sprawdź [**plany subskrypcyjne**](https://github.com/sponsors/carlospolop)!
 * **Dołącz do** 💬 [**grupy Discord**](https://discord.gg/hRep4RUj7f) lub [**grupy telegram**](https://t.me/peass) lub **śledź** nas na **Twitterze** 🐦 [**@hacktricks\_live**](https://twitter.com/hacktricks\_live)**.**
-* **Dziel się trikami hackingowymi, przesyłając PR-y do** [**HackTricks**](https://github.com/carlospolop/hacktricks) i [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repozytoriów na GitHubie.
+* **Podziel się trikami hackingowymi, przesyłając PR-y do** [**HackTricks**](https://github.com/carlospolop/hacktricks) i [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) repozytoriów github.
 
 </details>
 {% endhint %}
