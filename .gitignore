@@ -5,3 +5,8 @@ scripts/*
 **/.DS_Store
 .vscode
 .vscode/*
+
+#mdbook
+book
+book/*
+hacktricks-preprocessor.log

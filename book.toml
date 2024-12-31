@@ -1,0 +1,44 @@
+[book]
+authors = ["Carlos Polop"]
+language = "en"
+multilingual = false
+src = "src"
+title = "HackTricks"
+
+[build]
+create-missing = false
+extra-watch-dirs = ["translations"]
+
+[preprocessor.alerts]
+after = ["links"]
+
+[preprocessor.reading-time]
+
+[preprocessor.pagetoc]
+
+[preprocessor.tabs]
+
+[preprocessor.codename]
+
+[preprocessor.hacktricks]
+command = "python3 ./hacktricks-preprocessor.py"
+
+[output.html]
+additional-css = ["theme/pagetoc.css", "theme/tabs.css"]
+additional-js = [
+    "theme/pagetoc.js",
+    "theme/tabs.js",
+    "theme/ht_searcher.js",
+    "theme/sponsor.js",
+]
+no-section-label = true
+preferred-dark-theme = "hacktricks-dark"
+default-theme = "hacktricks-light"
+
+[output.html.fold]
+enable = true # whether or not to enable section folding
+level = 0     # the depth to start folding
+
+
+[output.html.print]
+enable = false # whether or not to enable print
