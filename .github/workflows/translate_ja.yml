@@ -1,4 +1,4 @@
-name: Translator to JP (Japanese)
+name: Translator to JA (Japanese)
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - '.github/**'
   workflow_dispatch:
 
-concurrency: jp
+concurrency: ja
 
 jobs:
   run-translation:
@@ -18,7 +18,7 @@ jobs:
     environment: prod
     env:
       LANGUAGE: Japanese
-      BRANCH: jp
+      BRANCH: ja
 
     steps:
       - name: Checkout code
