@@ -1,4 +1,4 @@
-name: Translator to RS (Serbian)
+name: Translator to GR (Greek)
 
 on:
   push:
@@ -10,15 +10,15 @@ on:
       - '.github/**'
   workflow_dispatch:
 
-concurrency: rs
+concurrency: el
 
 jobs:
   run-translation:
     runs-on: ubuntu-latest
     environment: prod
     env:
-      LANGUAGE: Serbian
-      BRANCH: rs
+      LANGUAGE: Greek
+      BRANCH: el
 
     steps:
       - name: Checkout code

@@ -10,7 +10,7 @@ on:
       - '.github/**'
   workflow_dispatch:
 
-concurrency: kr
+concurrency: ko
 
 jobs:
   run-translation:
@@ -18,7 +18,7 @@ jobs:
     environment: prod
     env:
       LANGUAGE: Korean
-      BRANCH: kr
+      BRANCH: ko
 
     steps:
       - name: Checkout code

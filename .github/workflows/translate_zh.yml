@@ -1,4 +1,4 @@
-name: Translator to CN (Chinese)
+name: Translator to ZH (Chinese)
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - '.github/**'
   workflow_dispatch:
 
-concurrency: cn
+concurrency: zh
 
 jobs:
   run-translation:
@@ -18,7 +18,7 @@ jobs:
     environment: prod
     env:
       LANGUAGE: Chinese
-      BRANCH: cn
+      BRANCH: zh
 
     steps:
       - name: Checkout code
