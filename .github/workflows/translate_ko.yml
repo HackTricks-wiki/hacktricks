@@ -1,4 +1,4 @@
-name: Translator to KR (Korean)
+name: Translator to KO (Korean)
 
 on:
   push:
@@ -12,6 +12,10 @@ on:
 
 concurrency: ko
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   run-translation:
     runs-on: ubuntu-latest
@@ -22,20 +26,38 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0 #Needed to download everything to be able to access the master & language branches
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
-      - name: Install dependencies
+      - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
           pip3 install openai tqdm tiktoken
-          
+      
+      # Install Rust and Cargo
+      - name: Install Rust and Cargo
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      
+      # Install mdBook and Plugins
+      - name: Install mdBook and Plugins
+        run: |
+          cargo install mdbook
+          cargo install mdbook-alerts
+          cargo install mdbook-reading-time
+          cargo install mdbook-pagetoc
+          cargo install mdbook-tabs
+          cargo install mdbook-codename
+
+      
       - name: Update & install wget & translator.py
         run: |
           sudo apt-get update
@@ -73,9 +95,25 @@ jobs:
           echo "Translating $(cat /tmp/file_paths.txt)"
           python scripts/translator.py --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" -f "$(cat /tmp/file_paths.txt)" -t 3
 
+      # Push changes to the repository
       - name: Commit and push changes
         run: |
           git checkout "$BRANCH"
           git add -A
           git commit -m "Translated $BRANCH files" || true
           git push --set-upstream origin "$BRANCH"
+
+      # Build the mdBook
+      - name: Build mdBook
+        run: mdbook build
+      
+      # Login in AWs
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      
+      # Sync the build to S3
+      - name: Sync to S3
+        run: aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
