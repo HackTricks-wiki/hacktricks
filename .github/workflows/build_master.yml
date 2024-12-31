@@ -1,0 +1,66 @@
+name: Build Master
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'scripts/**'
+      - '.gitignore'
+      - '.github/**'
+      - 'book/**'
+  workflow_dispatch:
+
+concurrency: build_master
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  run-translation:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 #Needed to download everything to be able to access the master & language branches
+
+      # Install Rust and Cargo
+      - name: Install Rust and Cargo
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      
+      # Install mdBook and Plugins
+      - name: Install mdBook and Plugins
+        run: |
+          cargo install mdbook
+          cargo install mdbook-alerts
+          cargo install mdbook-reading-time
+          cargo install mdbook-pagetoc
+          cargo install mdbook-tabs
+          cargo install mdbook-codename
+
+      # Build the mdBook
+      - name: Build mdBook
+        run: mdbook build
+      
+      # Cat hacktricks-preprocessor.log
+      #- name: Cat hacktricks-preprocessor.log
+      #  run: cat hacktricks-preprocessor.log
+      
+      # Login in AWs
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      
+      # Sync the build to S3
+      - name: Sync to S3
+        run: aws s3 sync ./book s3://hacktricks-wiki/en --delete
+      
