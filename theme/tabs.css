@@ -1,0 +1,41 @@
+.mdbook-tabs-container{
+    background-color: var(--bg);
+    border: 1px solid var(--table-border-color);
+    border-radius: 8px;
+}
+
+.mdbook-tabs {
+    display: flex;
+    margin-top: 0 !important;
+}
+
+.mdbook-tab {
+    background-color: var(--bg);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border: none;
+    font-size: 1.6rem;
+    line-height: 1.45em;
+    color: var(--icons-hover);
+}
+
+.mdbook-tab:hover {
+    color: var(--icons);
+}
+
+.mdbook-tab.active {
+    background-color: var(--theme-hover);
+    color: var(--icons);
+}
+
+.mdbook-tab-content {
+    padding: 1.2rem;
+}
+
+.mdbook-tab-content table {
+    margin: unset;
+}
+
+.mdbook-tab-content pre {
+    margin: unset;
+}
