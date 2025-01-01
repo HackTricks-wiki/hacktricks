@@ -67,3 +67,4 @@ However, the buyer will be paying some fee to the seller for opening the option 
 * **Futures:** The profit or loss is based on the difference between the market price at expiration and the agreed-upon price in the contract.
 * **Options:** The buyer profits when the market moves favorably beyond the strike price by more than the premium paid. The seller profits by keeping the premium if the option is not exercised.
 
+

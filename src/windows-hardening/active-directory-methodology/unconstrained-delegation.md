@@ -53,3 +53,4 @@ printers-spooler-service-abuse.md
 - Set "Account is sensitive and cannot be delegated" for privileged accounts.
 
 {{#include ../../banners/hacktricks-training.md}}
+

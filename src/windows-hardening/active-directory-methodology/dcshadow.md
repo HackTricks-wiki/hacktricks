@@ -72,3 +72,4 @@ Notice that in this case you need to make **several changes,** not just one. So,
 [**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
+

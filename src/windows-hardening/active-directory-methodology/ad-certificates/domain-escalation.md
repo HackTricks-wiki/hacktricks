@@ -741,3 +741,4 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
+

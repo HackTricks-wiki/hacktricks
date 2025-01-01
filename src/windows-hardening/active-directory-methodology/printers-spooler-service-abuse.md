@@ -128,3 +128,4 @@ If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/#ntlm
 &#xNAN;_&#x52;emember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}
+

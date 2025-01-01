@@ -15,3 +15,4 @@ There are different different ways to execute commands in external systems, here
 - [**Pass the AzureAD Certificate**](https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/az-pass-the-certificate) (cloud)
 
 {{#include ../../banners/hacktricks-training.md}}
+

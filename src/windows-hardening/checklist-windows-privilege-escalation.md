@@ -112,3 +112,4 @@
 - [ ] Check if you can abuse it
 
 {{#include ../banners/hacktricks-training.md}}
+

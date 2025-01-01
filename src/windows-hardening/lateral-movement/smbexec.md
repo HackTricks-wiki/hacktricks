@@ -54,3 +54,4 @@ FOr further details check [https://blog.ropnop.com/using-credentials-to-own-wind
 {% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+

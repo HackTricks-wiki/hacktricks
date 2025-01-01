@@ -114,3 +114,4 @@ With extracted from LDAP computers list you can find every sub network even if y
 {% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+

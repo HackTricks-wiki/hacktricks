@@ -124,3 +124,4 @@ Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a pla
 {% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}
+

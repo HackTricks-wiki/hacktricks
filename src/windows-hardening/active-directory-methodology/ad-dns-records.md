@@ -18,3 +18,4 @@ cat records.csv
 For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
 
 {{#include ../../banners/hacktricks-training.md}}
+

@@ -160,3 +160,4 @@ dcsync.md
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+

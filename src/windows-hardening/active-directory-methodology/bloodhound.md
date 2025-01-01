@@ -95,3 +95,4 @@ group3r.exe -f <filepath-name.log>
 To run it, can execute the binary `PingCastle.exe` and it will start an **interactive session** presenting a menu of options. The default option to use is **`healthcheck`** which will establish a baseline **overview** of the **domain**, and find **misconfigurations** and **vulnerabilities**.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}
+

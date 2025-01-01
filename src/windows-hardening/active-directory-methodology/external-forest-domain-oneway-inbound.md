@@ -127,3 +127,4 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
+
