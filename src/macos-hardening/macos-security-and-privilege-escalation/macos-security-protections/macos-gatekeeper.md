@@ -480,3 +480,4 @@ In an ".app" bundle if the quarantine xattr is not added to it, when executing i
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
+

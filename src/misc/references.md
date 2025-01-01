@@ -47,3 +47,4 @@
 {% embed url="https://ippsec.rocks/" %}
 
 {{#include ../banners/hacktricks-training.md}}
+
