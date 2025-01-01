@@ -182,3 +182,4 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 - Take a look to [**this paper**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) about privesc with tokens.
 
 {{#include ../../banners/hacktricks-training.md}}
+

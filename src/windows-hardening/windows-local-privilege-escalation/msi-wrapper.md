@@ -20,3 +20,4 @@ And this is the most important part of the configuration:
 From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
 
 {{#include ../../banners/hacktricks-training.md}}
+

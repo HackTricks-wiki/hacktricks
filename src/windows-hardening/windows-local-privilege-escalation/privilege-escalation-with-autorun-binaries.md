@@ -349,3 +349,4 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+

@@ -213,3 +213,4 @@ int _tmain( int argc, TCHAR* argv[] )
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
+

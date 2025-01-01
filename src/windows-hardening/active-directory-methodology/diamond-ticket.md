@@ -30,3 +30,4 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
+

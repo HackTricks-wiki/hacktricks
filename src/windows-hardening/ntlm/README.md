@@ -285,3 +285,4 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 **You can use** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 
 {{#include ../../banners/hacktricks-training.md}}
+

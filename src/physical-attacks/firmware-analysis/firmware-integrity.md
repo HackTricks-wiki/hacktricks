@@ -33,3 +33,4 @@ If possible, vulnerabilities within startup scripts can be exploited to gain per
 - For further information check [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
+

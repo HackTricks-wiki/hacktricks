@@ -16,3 +16,4 @@ Using the **GetObject** function it's possible to obtain data from forms of the 
 ![](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}
+

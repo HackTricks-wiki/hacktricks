@@ -410,3 +410,4 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
 
 {{#include ../../banners/hacktricks-training.md}}
+

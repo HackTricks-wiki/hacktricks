@@ -25,3 +25,4 @@ Create an [android backup using adb](mobile-pentesting/android-app-pentesting/ad
 Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel extension that should be loaded via adb.
 
 {{#include ./banners/hacktricks-training.md}}
+

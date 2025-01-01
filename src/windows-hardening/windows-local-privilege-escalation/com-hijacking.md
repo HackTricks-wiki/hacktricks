@@ -79,3 +79,4 @@ Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5
 Then, you can just create the HKCU entry and everytime the user logs in, your backdoor will be fired.
 
 {{#include ../../banners/hacktricks-training.md}}
+

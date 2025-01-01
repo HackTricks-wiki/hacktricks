@@ -322,3 +322,4 @@ Download it from:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.
 [**Learn about some credentials protections here.**](credentials-protections.md)
 
 {{#include ../../banners/hacktricks-training.md}}
+

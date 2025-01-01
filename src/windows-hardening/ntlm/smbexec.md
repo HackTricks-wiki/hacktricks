@@ -38,3 +38,4 @@ FOr further details check [https://blog.ropnop.com/using-credentials-to-own-wind
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 {{#include ../../banners/hacktricks-training.md}}
+

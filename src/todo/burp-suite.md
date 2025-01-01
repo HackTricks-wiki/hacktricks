@@ -15,3 +15,4 @@
 [https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 
 {{#include ../banners/hacktricks-training.md}}
+

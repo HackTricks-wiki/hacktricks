@@ -38,3 +38,4 @@ If it doesn't, Flipper can **store** the **signal** and will allow you to **repl
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}
+

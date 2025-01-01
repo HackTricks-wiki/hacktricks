@@ -161,3 +161,4 @@ So, insert your new assembly code in the "**newmem**" section and remove the ori
 - **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
+

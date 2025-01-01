@@ -49,3 +49,4 @@ Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 Check [**Silver Tickets**](silver-ticket.md) to learn how you could use the hash of the computer account of a Domain Controller.
 
 {{#include ../../banners/hacktricks-training.md}}
+

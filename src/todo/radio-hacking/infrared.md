@@ -79,3 +79,4 @@ flipper-zero/fz-infrared.md
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../banners/hacktricks-training.md}}
+

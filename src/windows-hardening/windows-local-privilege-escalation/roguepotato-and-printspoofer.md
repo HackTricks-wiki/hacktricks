@@ -94,3 +94,4 @@ nt authority\system
 - [https://github.com/zcgonvh/DCOMPotato](https://github.com/zcgonvh/DCOMPotato)
 
 {{#include ../../banners/hacktricks-training.md}}
+

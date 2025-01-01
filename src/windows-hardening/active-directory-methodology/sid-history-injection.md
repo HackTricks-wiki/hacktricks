@@ -137,3 +137,4 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 - [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 
 {{#include ../../banners/hacktricks-training.md}}
+

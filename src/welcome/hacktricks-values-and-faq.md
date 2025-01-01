@@ -143,3 +143,4 @@ This license does not grant any trademark or branding rights in relation to the 
 > By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
 
 {{#include ../banners/hacktricks-training.md}}
+

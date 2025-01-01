@@ -11,3 +11,4 @@ Here I present you the main ways to can try to achieve it:
 - [**Clickjaking**](../pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ../banners/hacktricks-training.md}}
+
