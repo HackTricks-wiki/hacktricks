@@ -928,3 +928,4 @@ int main() {
 > [!CAUTION] > **Accessibility is a very powerful permission**, you could abuse it in other ways, for example you could perform the **keystrokes attack** just from it without needed to call System Events.
 
 {{#include ../../../../banners/hacktricks-training.md}}
+

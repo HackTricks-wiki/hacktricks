@@ -50,3 +50,4 @@ The thing is that even if **`python`** was signed by Apple, it **won't execute**
 2. Run _open_ **`–stdin='~$exploit.py' -a Python`**, which runs the Python app with our dropped file serving as its standard input. Python happily runs our code, and since it’s a child process of _launchd_, it isn’t bound to Word’s sandbox rules.
 
 {{#include ../../../../../banners/hacktricks-training.md}}
+
