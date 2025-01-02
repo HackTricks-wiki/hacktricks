@@ -1,173 +1,170 @@
 {{#include ./banners/hacktricks-training.md}}
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> by Carlos Polop is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
+<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>저작권 © Carlos Polop 2021. 별도로 명시되지 않는 한(책에 복사된 외부 정보는 원 저자에게 속함), Carlos Polop의 <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a>에 있는 텍스트는 <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>에 따라 라이센스가 부여됩니다.
 
-License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
-Human Readable License: https://creativecommons.org/licenses/by-nc/4.0/<br>
-Complete Legal Terms: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
-Formatting: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
+라이센스: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
+인간이 읽을 수 있는 라이센스: https://creativecommons.org/licenses/by-nc/4.0/<br>
+완전한 법적 조건: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
+형식: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
 
 # creative commons
 
 # Attribution-NonCommercial 4.0 International
 
-Creative Commons Corporation (“Creative Commons”) is not a law firm and does not provide legal services or legal advice. Distribution of Creative Commons public licenses does not create a lawyer-client or other relationship. Creative Commons makes its licenses and related information available on an “as-is” basis. Creative Commons gives no warranties regarding its licenses, any material licensed under their terms and conditions, or any related information. Creative Commons disclaims all liability for damages resulting from their use to the fullest extent possible.
+Creative Commons Corporation(“Creative Commons”)은 법률 회사가 아니며 법률 서비스나 법률 조언을 제공하지 않습니다. Creative Commons 공개 라이센스의 배포는 변호사-클라이언트 또는 기타 관계를 생성하지 않습니다. Creative Commons는 라이센스 및 관련 정보를 “있는 그대로” 제공하며, 라이센스, 그 조건 및 관련 정보에 대해 어떠한 보증도 하지 않습니다. Creative Commons는 그 사용으로 인한 손해에 대해 최대한의 범위에서 모든 책임을 부인합니다.
 
-## Using Creative Commons Public Licenses
+## Creative Commons 공개 라이센스 사용
 
-Creative Commons public licenses provide a standard set of terms and conditions that creators and other rights holders may use to share original works of authorship and other material subject to copyright and certain other rights specified in the public license below. The following considerations are for informational purposes only, are not exhaustive, and do not form part of our licenses.
+Creative Commons 공개 라이센스는 창작자 및 기타 권리 보유자가 저작권 및 아래 공개 라이센스에 명시된 특정 기타 권리에 따라 원본 저작물 및 기타 자료를 공유하는 데 사용할 수 있는 표준 조건 세트를 제공합니다. 다음 고려 사항은 정보 제공 목적으로만 제공되며, 포괄적이지 않으며, 우리의 라이센스의 일부를 형성하지 않습니다.
 
-- **Considerations for licensors:** Our public licenses are intended for use by those authorized to give the public permission to use material in ways otherwise restricted by copyright and certain other rights. Our licenses are irrevocable. Licensors should read and understand the terms and conditions of the license they choose before applying it. Licensors should also secure all rights necessary before applying our licenses so that the public can reuse the material as expected. Licensors should clearly mark any material not subject to the license. This includes other CC-licensed material, or material used under an exception or limitation to copyright. [More considerations for licensors](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+- **라이센서에 대한 고려 사항:** 우리의 공개 라이센스는 저작권 및 특정 기타 권리에 의해 제한된 방식으로 자료를 사용할 수 있도록 대중에게 허가할 권한이 있는 사람들을 위해 설계되었습니다. 우리의 라이센스는 취소할 수 없습니다. 라이센서는 선택한 라이센스의 조건을 읽고 이해해야 합니다. 라이센서는 대중이 예상대로 자료를 재사용할 수 있도록 필요한 모든 권리를 확보해야 합니다. 라이센서는 라이센스의 적용을 받지 않는 자료를 명확하게 표시해야 합니다. 여기에는 다른 CC 라이센스 자료 또는 저작권의 예외 또는 제한에 따라 사용된 자료가 포함됩니다. [라이센서에 대한 추가 고려 사항](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
-- **Considerations for the public:** By using one of our public licenses, a licensor grants the public permission to use the licensed material under specified terms and conditions. If the licensor’s permission is not necessary for any reason–for example, because of any applicable exception or limitation to copyright–then that use is not regulated by the license. Our licenses grant only permissions under copyright and certain other rights that a licensor has authority to grant. Use of the licensed material may still be restricted for other reasons, including because others have copyright or other rights in the material. A licensor may make special requests, such as asking that all changes be marked or described. Although not required by our licenses, you are encouraged to respect those requests where reasonable. [More considerations for the public](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
+- **대중에 대한 고려 사항:** 우리의 공개 라이센스 중 하나를 사용함으로써, 라이센서는 대중에게 지정된 조건 및 조건에 따라 라이센스된 자료를 사용할 수 있는 권한을 부여합니다. 라이센서의 허가가 필요하지 않은 경우—예를 들어, 저작권의 적용 가능한 예외 또는 제한으로 인해—그 사용은 라이센스에 의해 규제되지 않습니다. 우리의 라이센스는 라이센서가 부여할 권한이 있는 저작권 및 특정 기타 권리 하에만 권한을 부여합니다. 라이센스된 자료의 사용은 여전히 다른 이유로 제한될 수 있으며, 여기에는 다른 사람들이 자료에 대한 저작권 또는 기타 권리를 가지고 있는 경우가 포함됩니다. 라이센서는 모든 변경 사항이 표시되거나 설명되도록 요청할 수 있습니다. 우리의 라이센스에서 요구하지 않지만, 합리적인 경우 이러한 요청을 존중하는 것이 권장됩니다. [대중에 대한 추가 고려 사항](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
 
-# Creative Commons Attribution-NonCommercial 4.0 International Public License
+# Creative Commons Attribution-NonCommercial 4.0 International 공개 라이센스
 
-By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+라이센스된 권리를 행사함으로써(아래 정의됨), 귀하는 이 Creative Commons Attribution-NonCommercial 4.0 International 공개 라이센스("공개 라이센스")의 조건에 구속되는 것에 동의합니다. 이 공개 라이센스가 계약으로 해석될 수 있는 범위 내에서, 귀하는 이러한 조건을 수용하는 대가로 라이센스된 권리를 부여받으며, 라이센서는 이러한 조건 하에 라이센스된 자료를 제공함으로써 귀하에게 그러한 권리를 부여합니다.
 
-## Section 1 – Definitions.
+## 섹션 1 – 정의.
 
-a. **Adapted Material** means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor. For purposes of this Public License, where the Licensed Material is a musical work, performance, or sound recording, Adapted Material is always produced where the Licensed Material is synched in timed relation with a moving image.
+a. **변형 자료**는 저작권 및 유사 권리에 따라 라이센스된 자료에서 파생되거나 이를 기반으로 하며, 라이센스된 자료가 저작권 및 유사 권리에 따라 라이센서의 허가가 필요한 방식으로 번역, 변경, 배열, 변형 또는 기타 수정된 자료를 의미합니다. 이 공개 라이센스의 목적을 위해, 라이센스된 자료가 음악 작품, 공연 또는 음향 녹음인 경우, 변형 자료는 항상 라이센스된 자료가 움직이는 이미지와 시간적으로 동기화될 때 생성됩니다.
 
-b. **Adapter's License** means the license You apply to Your Copyright and Similar Rights in Your contributions to Adapted Material in accordance with the terms and conditions of this Public License.
+b. **어댑터의 라이센스**는 귀하가 변형 자료에 대한 귀하의 기여에 대해 이 공개 라이센스의 조건에 따라 귀하의 저작권 및 유사 권리에 적용하는 라이센스를 의미합니다.
 
-c. **Copyright and Similar Rights** means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized. For purposes of this Public License, the rights specified in Section 2(b)(1)-(2) are not Copyright and Similar Rights.
+c. **저작권 및 유사 권리**는 저작권 및/또는 저작권과 밀접하게 관련된 유사 권리를 의미하며, 여기에는 공연, 방송, 음향 녹음 및 Sui Generis 데이터베이스 권리가 포함되며, 권리가 어떻게 라벨링되거나 분류되는지에 관계없이 포함됩니다. 이 공개 라이센스의 목적을 위해, 섹션 2(b)(1)-(2)에 명시된 권리는 저작권 및 유사 권리가 아닙니다.
 
-d. **Effective Technological Measures** means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+d. **효과적인 기술적 조치**는 적절한 권한이 없는 경우, 1996년 12월 20일에 채택된 WIPO 저작권 조약 제11조의 의무를 이행하는 법률에 따라 우회할 수 없는 조치를 의미합니다.
 
-e. **Exceptions and Limitations** means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+e. **예외 및 제한**은 공정 사용, 공정 거래 및/또는 귀하의 라이센스된 자료 사용에 적용되는 저작권 및 유사 권리에 대한 기타 예외 또는 제한을 의미합니다.
 
-f. **Licensed Material** means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+f. **라이센스된 자료**는 라이센서가 이 공개 라이센스를 적용한 예술적 또는 문학적 작업, 데이터베이스 또는 기타 자료를 의미합니다.
 
-g. **Licensed Rights** means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+g. **라이센스된 권리**는 이 공개 라이센스의 조건에 따라 귀하에게 부여된 권리를 의미하며, 이는 귀하의 라이센스된 자료 사용에 적용되는 모든 저작권 및 유사 권리로 제한되며, 라이센서가 라이센스할 권한이 있는 권리입니다.
 
-h. **Licensor** means the individual(s) or entity(ies) granting rights under this Public License.
+h. **라이센서**는 이 공개 라이센스에 따라 권리를 부여하는 개인 또는 단체를 의미합니다.
 
-i. **NonCommercial** means not primarily intended for or directed towards commercial advantage or monetary compensation. For purposes of this Public License, the exchange of the Licensed Material for other material subject to Copyright and Similar Rights by digital file-sharing or similar means is NonCommercial provided there is no payment of monetary compensation in connection with the exchange.
+i. **비상업적**은 주로 상업적 이익이나 금전적 보상을 목적으로 하거나 지향하지 않음을 의미합니다. 이 공개 라이센스의 목적을 위해, 저작권 및 유사 권리의 적용을 받는 다른 자료와의 디지털 파일 공유 또는 유사한 수단에 의한 라이센스된 자료의 교환은 금전적 보상이 없는 경우 비상업적입니다.
 
-j. **Share** means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation, and to make material available to the public including in ways that members of the public may access the material from a place and at a time individually chosen by them.
+j. **공유**는 라이센스된 권리에 따라 허가가 필요한 모든 수단이나 프로세스를 통해 대중에게 자료를 제공하는 것을 의미하며, 여기에는 복제, 공개 전시, 공개 공연, 배포, 전파, 통신 또는 수입이 포함되며, 대중이 개별적으로 선택한 장소와 시간에서 자료에 접근할 수 있도록 자료를 대중에게 제공하는 것을 포함합니다.
 
-k. **Sui Generis Database Rights** means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+k. **Sui Generis 데이터베이스 권리**는 1996년 3월 11일 유럽 의회 및 이사회 지침 96/9/EC에 따라 데이터베이스의 법적 보호에 관한 권리를 의미하며, 수정되거나 후속된 권리 및 전 세계 어디에서나 본질적으로 동등한 권리를 포함합니다.
 
-l. **You** means the individual or entity exercising the Licensed Rights under this Public License. Your has a corresponding meaning.
+l. **귀하**는 이 공개 라이센스에 따라 라이센스된 권리를 행사하는 개인 또는 단체를 의미합니다. 귀하의 의미는 이에 상응합니다.
 
-## Section 2 – Scope.
+## 섹션 2 – 범위.
 
-a. **_License grant._**
+a. **_라이센스 부여._**
 
-1.  Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+1. 이 공개 라이센스의 조건에 따라, 라이센서는 귀하에게 라이센스된 자료에서 라이센스된 권리를 행사할 수 있는 전 세계적이고, 로열티가 없으며, 서브라이센스가 불가능하고, 비독점적이며, 취소할 수 없는 라이센스를 부여합니다:
 
-A. reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only; and
+A. 비상업적 목적으로 라이센스된 자료를 전부 또는 일부 복제하고 공유할 수 있습니다; 및
 
-B. produce, reproduce, and Share Adapted Material for NonCommercial purposes only.
+B. 비상업적 목적으로 변형 자료를 제작, 복제 및 공유할 수 있습니다.
 
-2.  **Exceptions and Limitations.** For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
-3.  **Term.** The term of this Public License is specified in Section 6(a).
+2. **예외 및 제한.** 귀하의 사용에 예외 및 제한이 적용되는 경우, 이 공개 라이센스는 적용되지 않으며, 귀하는 그 조건을 준수할 필요가 없습니다.
+3. **기간.** 이 공개 라이센스의 기간은 섹션 6(a)에 명시되어 있습니다.
 
-4.  **Media and formats; technical modifications allowed.** The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so. The Licensor waives and/or agrees not to assert any right or authority to forbid You from making technical modifications necessary to exercise the Licensed Rights, including technical modifications necessary to circumvent Effective Technological Measures. For purposes of this Public License, simply making modifications authorized by this Section 2(a)(4) never produces Adapted Material.
-5.  **Downstream recipients.**
+4. **미디어 및 형식; 기술적 수정 허용.** 라이센서는 귀하가 현재 알려진 모든 미디어 및 형식에서 라이센스된 권리를 행사할 수 있도록 허가하며, 이를 위해 필요한 기술적 수정을 할 수 있도록 허가합니다. 라이센서는 귀하가 라이센스된 권리를 행사하기 위해 필요한 기술적 수정을 금지할 권리 또는 권한을 포기하고/또는 주장하지 않기로 동의합니다. 이 공개 라이센스의 목적을 위해, 이 섹션 2(a)(4)에 의해 허가된 수정을 단순히 하는 것은 결코 변형 자료를 생성하지 않습니다.
+5. **하류 수령자.**
 
-A. **Offer from the Licensor – Licensed Material.** Every recipient of the Licensed Material automatically receives an offer from the Licensor to exercise the Licensed Rights under the terms and conditions of this Public License.
+A. **라이센서의 제안 – 라이센스된 자료.** 라이센스된 자료의 모든 수령자는 자동으로 이 공개 라이센스의 조건에 따라 라이센스된 권리를 행사할 수 있는 제안을 라이센서로부터 받습니다.
 
-B. **No downstream restrictions.** You may not offer or impose any additional or different terms or conditions on, or apply any Effective Technological Measures to, the Licensed Material if doing so restricts exercise of the Licensed Rights by any recipient of the Licensed Material.
+B. **하류 제한 없음.** 귀하는 라이센스된 자료에 대해 추가적이거나 다른 조건을 제안하거나 부과할 수 없으며, 라이센스된 자료의 수령자가 라이센스된 권리를 행사하는 것을 제한하는 효과적인 기술적 조치를 적용할 수 없습니다.
 
-6.  **No endorsement.** Nothing in this Public License constitutes or may be construed as permission to assert or imply that You are, or that Your use of the Licensed Material is, connected with, or sponsored, endorsed, or granted official status by, the Licensor or others designated to receive attribution as provided in Section 3(a)(1)(A)(i).
+6. **보증 없음.** 이 공개 라이센스의 어떤 내용도 귀하가 라이센서 또는 섹션 3(a)(1)(A)(i)에 제공된 대로 귀하에게 귀속을 받을 자로 지정된 다른 사람들과 연결되거나, 후원되거나, 보증되거나, 공식적인 지위를 부여받았다는 것을 주장하거나 암시하는 허가로 해석되지 않습니다.
 
-b. **_Other rights._**
+b. **_기타 권리._**
 
-1.  Moral rights, such as the right of integrity, are not licensed under this Public License, nor are publicity, privacy, and/or other similar personality rights; however, to the extent possible, the Licensor waives and/or agrees not to assert any such rights held by the Licensor to the limited extent necessary to allow You to exercise the Licensed Rights, but not otherwise.
+1. 도덕적 권리, 예를 들어, 무결성의 권리는 이 공개 라이센스에 따라 라이센스되지 않으며, 공공성, 개인 정보 및/또는 기타 유사한 인격권도 마찬가지입니다. 그러나 가능한 한, 라이센서는 귀하가 라이센스된 권리를 행사할 수 있도록 필요한 한도 내에서 라이센서가 보유한 그러한 권리를 포기하고/또는 주장하지 않기로 동의합니다.
 
-2.  Patent and trademark rights are not licensed under this Public License.
+2. 특허 및 상표권은 이 공개 라이센스에 따라 라이센스되지 않습니다.
 
-3.  To the extent possible, the Licensor waives any right to collect royalties from You for the exercise of the Licensed Rights, whether directly or through a collecting society under any voluntary or waivable statutory or compulsory licensing scheme. In all other cases the Licensor expressly reserves any right to collect such royalties, including when the Licensed Material is used other than for NonCommercial purposes.
+3. 가능한 한, 라이센서는 귀하가 라이센스된 권리를 행사하는 것에 대해 귀하로부터 로열티를 징수할 권리를 포기합니다. 모든 다른 경우에 라이센서는 그러한 로열티를 징수할 권리를 명시적으로 보유합니다. 라이센스된 자료가 비상업적 목적 이외의 용도로 사용되는 경우도 포함됩니다.
 
-## Section 3 – License Conditions.
+## 섹션 3 – 라이센스 조건.
 
-Your exercise of the Licensed Rights is expressly made subject to the following conditions.
+귀하의 라이센스된 권리 행사는 다음 조건에 명시적으로 구속됩니다.
 
-a. **_Attribution._**
+a. **_귀속._**
 
-1.  If You Share the Licensed Material (including in modified form), You must:
+1. 귀하가 라이센스된 자료를 공유하는 경우(변형된 형태 포함), 귀하는 다음을 수행해야 합니다:
 
-A. retain the following if it is supplied by the Licensor with the Licensed Material:
+A. 라이센서가 라이센스된 자료와 함께 제공한 경우 다음을 유지해야 합니다:
 
-i. identification of the creator(s) of the Licensed Material and any others designated to receive attribution, in any reasonable manner requested by the Licensor (including by pseudonym if designated);
+i. 라이센스된 자료의 창작자 및 귀속을 받을 자로 지정된 다른 사람들의 식별을 라이센서가 요청한 합리적인 방식으로(지정된 경우 필명을 포함하여);
 
-ii. a copyright notice;
+ii. 저작권 고지;
 
-iii. a notice that refers to this Public License;
+iii. 이 공개 라이센스를 참조하는 고지;
 
-iv. a notice that refers to the disclaimer of warranties;
+iv. 보증 부인 고지;
 
-v. a URI or hyperlink to the Licensed Material to the extent reasonably practicable;
+v. 라이센스된 자료에 대한 URI 또는 하이퍼링크를 가능한 한 합리적으로 유지;
 
-B. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+B. 귀하가 라이센스된 자료를 수정한 경우 이를 표시하고 이전 수정 사항의 표시를 유지해야 합니다; 및
 
-C. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
+C. 라이센스된 자료가 이 공개 라이센스에 따라 라이센스되었음을 표시하고, 이 공개 라이센스의 텍스트 또는 URI 또는 하이퍼링크를 포함해야 합니다.
 
-2.  You may satisfy the conditions in Section 3(a)(1) in any reasonable manner based on the medium, means, and context in which You Share the Licensed Material. For example, it may be reasonable to satisfy the conditions by providing a URI or hyperlink to a resource that includes the required information.
+2. 귀하는 라이센스된 자료를 공유하는 매체, 수단 및 맥락에 따라 섹션 3(a)(1)의 조건을 합리적인 방식으로 충족할 수 있습니다. 예를 들어, 필요한 정보를 포함하는 리소스에 대한 URI 또는 하이퍼링크를 제공하여 조건을 충족하는 것이 합리적일 수 있습니다.
 
-3.  If requested by the Licensor, You must remove any of the information required by Section 3(a)(1)(A) to the extent reasonably practicable.
+3. 라이센서가 요청하는 경우, 귀하는 섹션 3(a)(1)(A)에 의해 요구되는 정보를 가능한 한 합리적으로 제거해야 합니다.
 
-4.  If You Share Adapted Material You produce, the Adapter's License You apply must not prevent recipients of the Adapted Material from complying with this Public License.
+4. 귀하가 생성한 변형 자료를 공유하는 경우, 귀하가 적용하는 어댑터의 라이센스는 변형 자료의 수령자가 이 공개 라이센스를 준수하는 것을 방해해서는 안 됩니다.
 
-## Section 4 – Sui Generis Database Rights.
+## 섹션 4 – Sui Generis 데이터베이스 권리.
 
-Where the Licensed Rights include Sui Generis Database Rights that apply to Your use of the Licensed Material:
+라이센스된 권리가 귀하의 라이센스된 자료 사용에 적용되는 Sui Generis 데이터베이스 권리를 포함하는 경우:
 
-a. for the avoidance of doubt, Section 2(a)(1) grants You the right to extract, reuse, reproduce, and Share all or a substantial portion of the contents of the database for NonCommercial purposes only;
+a. 의심을 피하기 위해, 섹션 2(a)(1)는 귀하에게 비상업적 목적으로 데이터베이스의 모든 또는 상당 부분의 내용을 추출, 재사용, 복제 및 공유할 권리를 부여합니다;
 
-b. if You include all or a substantial portion of the database contents in a database in which You have Sui Generis Database Rights, then the database in which You have Sui Generis Database Rights (but not its individual contents) is Adapted Material; and
+b. 귀하가 Sui Generis 데이터베이스 권리를 보유한 데이터베이스에 데이터베이스 내용의 모든 또는 상당 부분을 포함하는 경우, 귀하가 Sui Generis 데이터베이스 권리를 보유한 데이터베이스(그러나 그 개별 내용은 아님)는 변형 자료입니다; 및
 
-c. You must comply with the conditions in Section 3(a) if You Share all or a substantial portion of the contents of the database.
+c. 귀하는 데이터베이스의 모든 또는 상당 부분의 내용을 공유하는 경우 섹션 3(a)의 조건을 준수해야 합니다.
 
-For the avoidance of doubt, this Section 4 supplements and does not replace Your obligations under this Public License where the Licensed Rights include other Copyright and Similar Rights.
+의심을 피하기 위해, 이 섹션 4는 라이센스된 권리가 다른 저작권 및 유사 권리를 포함하는 경우 이 공개 라이센스 하의 귀하의 의무를 보완하며 대체하지 않습니다.
 
-## Section 5 – Disclaimer of Warranties and Limitation of Liability.
+## 섹션 5 – 보증 부인 및 책임 제한.
 
-a. **Unless otherwise separately undertaken by the Licensor, to the extent possible, the Licensor offers the Licensed Material as-is and as-available, and makes no representations or warranties of any kind concerning the Licensed Material, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable. Where disclaimers of warranties are not allowed in full or in part, this disclaimer may not apply to You.**
+a. **라이센서가 별도로 약속하지 않는 한, 가능한 한, 라이센서는 라이센스된 자료를 있는 그대로 제공하며, 라이센스된 자료에 대해 어떠한 종류의 진술이나 보증도 하지 않습니다. 여기에는 제목, 상업성, 특정 목적에 대한 적합성, 비침해, 잠재적 또는 기타 결함의 부재, 정확성 또는 오류의 존재 또는 부재에 대한 보증이 포함되며, 이는 알려져 있거나 발견 가능한지 여부에 관계없이 포함됩니다. 보증 부인이 전부 또는 일부 허용되지 않는 경우, 이 부인은 귀하에게 적용되지 않을 수 있습니다.**
 
-b. **To the extent possible, in no event will the Licensor be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of this Public License or use of the Licensed Material, even if the Licensor has been advised of the possibility of such losses, costs, expenses, or damages. Where a limitation of liability is not allowed in full or in part, this limitation may not apply to You.**
+b. **가능한 한, 어떤 법적 이론(과실 포함) 또는 기타로 인해 라이센서는 귀하에게 이 공개 라이센스 또는 라이센스된 자료의 사용으로 인해 발생하는 직접적, 특별, 간접적, 우발적, 결과적, 징벌적, 모범적 또는 기타 손실, 비용, 경비 또는 손해에 대해 책임을 지지 않습니다. 라이센서가 그러한 손실, 비용, 경비 또는 손해의 가능성에 대해 통보받았더라도 마찬가지입니다. 책임 제한이 전부 또는 일부 허용되지 않는 경우, 이 제한은 귀하에게 적용되지 않을 수 있습니다.**
 
-c. The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.
+c. 위에서 제공된 보증 부인 및 책임 제한은 가능한 한 모든 책임의 절대적인 부인 및 포기를 가장 밀접하게 근접하는 방식으로 해석되어야 합니다.
 
-## Section 6 – Term and Termination.
+## 섹션 6 – 기간 및 종료.
 
-a. This Public License applies for the term of the Copyright and Similar Rights licensed here. However, if You fail to comply with this Public License, then Your rights under this Public License terminate automatically.
+a. 이 공개 라이센스는 여기에서 라이센스된 저작권 및 유사 권리의 기간 동안 적용됩니다. 그러나 귀하가 이 공개 라이센스를 준수하지 않는 경우, 귀하의 권리는 자동으로 종료됩니다.
 
-b. Where Your right to use the Licensed Material has terminated under Section 6(a), it reinstates:
+b. 귀하의 라이센스된 자료 사용 권리가 섹션 6(a)에 따라 종료된 경우, 다음과 같이 복원됩니다:
 
-1.  automatically as of the date the violation is cured, provided it is cured within 30 days of Your discovery of the violation; or
+1. 위반이 수정된 날짜에 자동으로 복원되며, 귀하가 위반을 발견한 후 30일 이내에 수정된 경우; 또는
 
-2.  upon express reinstatement by the Licensor.
+2. 라이센서의 명시적 복원에 따라.
 
-For the avoidance of doubt, this Section 6(b) does not affect any right the Licensor may have to seek remedies for Your violations of this Public License.
+의심을 피하기 위해, 이 섹션 6(b)는 라이센서가 귀하의 이 공개 라이센스 위반에 대한 구제를 요청할 수 있는 권리에 영향을 미치지 않습니다.
 
-c. For the avoidance of doubt, the Licensor may also offer the Licensed Material under separate terms or conditions or stop distributing the Licensed Material at any time; however, doing so will not terminate this Public License.
+c. 의심을 피하기 위해, 라이센서는 또한 라이센스된 자료를 별도의 조건으로 제공하거나 언제든지 배포를 중단할 수 있습니다. 그러나 그렇게 하더라도 이 공개 라이센스는 종료되지 않습니다.
 
-d. Sections 1, 5, 6, 7, and 8 survive termination of this Public License.
+d. 섹션 1, 5, 6, 7 및 8은 이 공개 라이센스의 종료 후에도 유효합니다.
 
-## Section 7 – Other Terms and Conditions.
+## 섹션 7 – 기타 조건.
 
-a. The Licensor shall not be bound by any additional or different terms or conditions communicated by You unless expressly agreed.
+a. 라이센서는 귀하가 전달한 추가적이거나 다른 조건에 구속되지 않으며, 명시적으로 동의하지 않는 한 그러합니다.
 
-b. Any arrangements, understandings, or agreements regarding the Licensed Material not stated herein are separate from and independent of the terms and conditions of this Public License.
+b. 여기에서 명시되지 않은 라이센스된 자료에 대한 모든 약정, 이해 또는 계약은 이 공개 라이센스의 조건과는 별개이며 독립적입니다.
 
-## Section 8 – Interpretation.
+## 섹션 8 – 해석.
 
-a. For the avoidance of doubt, this Public License does not, and shall not be interpreted to, reduce, limit, restrict, or impose conditions on any use of the Licensed Material that could lawfully be made without permission under this Public License.
+a. 의심을 피하기 위해, 이 공개 라이센스는 귀하가 이 공개 라이센스의 허가 없이 합법적으로 수행할 수 있는 라이센스된 자료의 사용을 줄이거나 제한하거나 조건을 부과하지 않습니다.
 
-b. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
+b. 가능한 한, 이 공개 라이센스의 어떤 조항이 집행 불가능하다고 판단되는 경우, 집행 가능하도록 필요한 최소한의 범위로 자동으로 개정됩니다. 조항이 개정될 수 없는 경우, 나머지 조건의 집행 가능성에 영향을 미치지 않고 이 공개 라이센스에서 분리됩니다.
 
-c. No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
+c. 이 공개 라이센스의 어떤 조건도 포기되지 않으며, 라이센서가 명시적으로 동의하지 않는 한 준수하지 않는 것에 대한 동의도 없습니다.
 
-d. Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
-
+d. 이 공개 라이센스의 어떤 내용도 라이센서 또는 귀하에게 적용되는 특권 및 면책의 제한 또는 포기로 해석되지 않으며, 이는 어떤 관할권 또는 권한의 법적 절차로부터도 포함됩니다.
 ```
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at [creativecommons.org/policies](http://creativecommons.org/policies), Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.
 
 Creative Commons may be contacted at [creativecommons.org](http://creativecommons.org/).
 ```
-
 {{#include ./banners/hacktricks-training.md}}
-
