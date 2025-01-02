@@ -4,7 +4,7 @@
 
 ## Pkg Podstawowe Informacje
 
-Pakiet **instalacyjny macOS** (znany również jako plik `.pkg`) to format pliku używany przez macOS do **dystrybucji oprogramowania**. Te pliki są jak **pudełko, które zawiera wszystko, czego potrzebuje oprogramowanie** do poprawnej instalacji i działania.
+Pakiet **instalacyjny macOS** (znany również jako plik `.pkg`) to format pliku używany przez macOS do **dystrybucji oprogramowania**. Te pliki są jak **pudełko, które zawiera wszystko, co potrzebne do poprawnej instalacji i uruchomienia oprogramowania**.
 
 Sam plik pakietu jest archiwum, które zawiera **hierarchię plików i katalogów, które będą instalowane na docelowym** komputerze. Może również zawierać **skrypty** do wykonywania zadań przed i po instalacji, takie jak konfigurowanie plików konfiguracyjnych lub usuwanie starych wersji oprogramowania.
 
@@ -15,8 +15,8 @@ Sam plik pakietu jest archiwum, które zawiera **hierarchię plików i katalogó
 - **Distribution (xml)**: Dostosowania (tytuł, tekst powitalny…) oraz kontrole skryptów/instalacji
 - **PackageInfo (xml)**: Informacje, wymagania instalacyjne, lokalizacja instalacji, ścieżki do skryptów do uruchomienia
 - **Bill of materials (bom)**: Lista plików do zainstalowania, zaktualizowania lub usunięcia z uprawnieniami do plików
-- **Payload (CPIO archive gzip compresses)**: Pliki do zainstalowania w `install-location` z PackageInfo
-- **Scripts (CPIO archive gzip compressed)**: Skrypty przed i po instalacji oraz inne zasoby wyodrębnione do katalogu tymczasowego do wykonania.
+- **Payload (archiwum CPIO skompresowane gzip)**: Pliki do zainstalowania w `install-location` z PackageInfo
+- **Scripts (archiwum CPIO skompresowane gzip)**: Skrypty przed i po instalacji oraz inne zasoby wyodrębnione do katalogu tymczasowego do wykonania.
 
 ### Decompress
 ```bash
@@ -36,7 +36,7 @@ Aby zobaczyć zawartość instalatora bez ręcznego dekompresowania, możesz ró
 
 ## Podstawowe informacje o DMG
 
-Pliki DMG, czyli obrazy dysków Apple, to format plików używany przez macOS firmy Apple do obrazów dysków. Plik DMG to w zasadzie **montowalny obraz dysku** (zawiera własny system plików), który zawiera surowe dane blokowe, zazwyczaj skompresowane, a czasami szyfrowane. Gdy otwierasz plik DMG, macOS **montuje go tak, jakby był fizycznym dyskiem**, co pozwala na dostęp do jego zawartości.
+Pliki DMG, czyli obrazy dysków Apple, to format plików używany przez macOS firmy Apple do obrazów dysków. Plik DMG to w zasadzie **montowalny obraz dysku** (zawiera własny system plików), który zawiera surowe dane blokowe, zazwyczaj skompresowane, a czasami zaszyfrowane. Gdy otwierasz plik DMG, macOS **montuje go tak, jakby był fizycznym dyskiem**, co pozwala na dostęp do jego zawartości.
 
 > [!CAUTION]
 > Zauważ, że instalatory **`.dmg`** obsługują **tak wiele formatów**, że w przeszłości niektóre z nich zawierające luki były wykorzystywane do uzyskania **wykonania kodu jądra**.
@@ -71,9 +71,9 @@ For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](htt
 
 ### Wykonanie przez montowanie
 
-Jeśli instalator zapisuje do `/tmp/fixedname/bla/bla`, możliwe jest **utworzenie montażu** nad `/tmp/fixedname` bez właścicieli, aby móc **zmodyfikować dowolny plik podczas instalacji** w celu nadużycia procesu instalacji.
+Jeśli instalator zapisuje do `/tmp/fixedname/bla/bla`, możliwe jest **utworzenie montażu** nad `/tmp/fixedname` bez właścicieli, aby móc **zmodyfikować dowolny plik podczas instalacji**, aby nadużyć procesu instalacji.
 
-Przykładem tego jest **CVE-2021-26089**, który zdołał **nadpisać skrypt okresowy**, aby uzyskać wykonanie jako root. Aby uzyskać więcej informacji, zapoznaj się z wykładem: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+Przykładem tego jest **CVE-2021-26089**, które udało się **nadpisać okresowy skrypt**, aby uzyskać wykonanie jako root. Aby uzyskać więcej informacji, zapoznaj się z wykładem: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
 ## pkg jako złośliwe oprogramowanie
 
@@ -153,7 +153,7 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 ## Odniesienia
 
 - [**DEF CON 27 - Rozpakowywanie pakietów: spojrzenie na pakiety instalacyjne macOS i powszechne luki w zabezpieczeniach**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "Dzikie Światy instalatorów macOS" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [**OBTS v4.0: "Dzikie Światło instalatorów macOS" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
 - [**DEF CON 27 - Rozpakowywanie pakietów: spojrzenie na pakiety instalacyjne macOS**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 

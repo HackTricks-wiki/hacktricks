@@ -35,7 +35,7 @@ uint32_t	align;		/* wyrównanie jako potęga 2 */
 };
 </code></pre>
 
-Nagłówek zawiera **magiczne** bajty, a następnie **liczbę** **architektur**, które plik **zawiera** (`nfat_arch`), a każda architektura będzie miała strukturę `fat_arch`.
+Nagłówek zawiera **magiczne** bajty, po których następuje **liczba** **architektur**, które plik **zawiera** (`nfat_arch`), a każda architektura będzie miała strukturę `fat_arch`.
 
 Sprawdź to za pomocą:
 
@@ -68,9 +68,9 @@ lub używając narzędzia [Mach-O View](https://sourceforge.net/projects/machovi
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-Jak możesz myśleć, zazwyczaj universal binary skompilowany dla 2 architektur **podwaja rozmiar** jednego skompilowanego tylko dla 1 architektury.
+Jak możesz myśleć, zazwyczaj **universal binary** skompilowane dla 2 architektur **podwaja rozmiar** jednego skompilowanego tylko dla 1 architektury.
 
-## **Mach-O Header**
+## **Nagłówek Mach-O**
 
 Nagłówek zawiera podstawowe informacje o pliku, takie jak magiczne bajty identyfikujące go jako plik Mach-O oraz informacje o docelowej architekturze. Możesz go znaleźć w: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
@@ -110,7 +110,7 @@ Istnieją różne typy plików, które można znaleźć zdefiniowane w [**kodzie
 - `MH_PRELOAD`: Wstępnie załadowany plik wykonywalny (już nieobsługiwany w XNU)
 - `MH_DYLIB`: Biblioteki dynamiczne
 - `MH_DYLINKER`: Ładowarka dynamiczna
-- `MH_BUNDLE`: "Pliki wtyczek". Generowane za pomocą -bundle w gcc i ładowane explicite przez `NSBundle` lub `dlopen`.
+- `MH_BUNDLE`: "Pliki wtyczek". Generowane za pomocą -bundle w gcc i ładowane przez `NSBundle` lub `dlopen`.
 - `MH_DYSM`: Towarzyszący plik `.dSym` (plik z symbolami do debugowania).
 - `MH_KEXT_BUNDLE`: Rozszerzenia jądra.
 ```bash
@@ -138,7 +138,7 @@ Kod źródłowy definiuje również kilka flag przydatnych do ładowania bibliot
 - `MH_NO_REEXPORTED_DYLIBS`: Biblioteka nie ma poleceń LC_REEXPORT
 - `MH_PIE`: Wykonywalny niezależny od pozycji
 - `MH_HAS_TLV_DESCRIPTORS`: Istnieje sekcja z lokalnymi zmiennymi wątku
-- `MH_NO_HEAP_EXECUTION`: Brak wykonania dla stron heap/data
+- `MH_NO_HEAP_EXECUTION`: Brak wykonania dla stron sterty/danych
 - `MH_HAS_OBJC`: Plik binarny ma sekcje oBject-C
 - `MH_SIM_SUPPORT`: Wsparcie dla symulatora
 - `MH_DYLIB_IN_CACHE`: Używane w dylibach/frameworkach w pamięci podręcznej biblioteki współdzielonej.
@@ -154,14 +154,14 @@ uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-Istnieje około **50 różnych typów poleceń ładujących**, które system obsługuje w różny sposób. Najczęstsze z nich to: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` i `LC_CODE_SIGNATURE`.
+Istnieje około **50 różnych typów poleceń ładujących**, które system obsługuje w różny sposób. Najczęściej spotykane to: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` i `LC_CODE_SIGNATURE`.
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
 > Zasadniczo ten typ polecenia ładującego definiuje **jak załadować \_\_TEXT** (kod wykonywalny) **i \_\_DATA** (dane dla procesu) **segmenty** zgodnie z **offsetami wskazanymi w sekcji danych** podczas wykonywania binarnego.
 
-Te polecenia **definiują segmenty**, które są **mapowane** do **przestrzeni pamięci wirtualnej** procesu podczas jego wykonywania.
+Te polecenia **definiują segmenty**, które są **mapowane** do **przestrzeni pamięci wirtualnej** procesu, gdy jest on wykonywany.
 
 Istnieją **różne typy** segmentów, takie jak segment **\_\_TEXT**, który zawiera kod wykonywalny programu, oraz segment **\_\_DATA**, który zawiera dane używane przez proces. Te **segmenty znajdują się w sekcji danych** pliku Mach-O.
 
@@ -225,13 +225,13 @@ Common segments loaded by this cmd:
 - `__text`: Skonstruowany kod binarny
 - `__const`: Dane stałe (tylko do odczytu)
 - `__[c/u/os_log]string`: Stałe ciągi C, Unicode lub os logów
-- `__stubs` i `__stubs_helper`: Uczestniczą w procesie ładowania dynamicznej biblioteki
+- `__stubs` i `__stubs_helper`: Uczestniczą w procesie ładowania biblioteki dynamicznej
 - `__unwind_info`: Dane o rozwijaniu stosu.
-- Zauważ, że cała ta zawartość jest podpisana, ale również oznaczona jako wykonywalna (tworząc więcej opcji do wykorzystania sekcji, które niekoniecznie potrzebują tego przywileju, jak sekcje dedykowane ciągom).
+- Zauważ, że cała ta zawartość jest podpisana, ale również oznaczona jako wykonywalna (tworząc więcej opcji dla eksploatacji sekcji, które niekoniecznie potrzebują tego przywileju, jak sekcje dedykowane ciągom).
 - **`__DATA`**: Zawiera dane, które są **czytelne** i **zapisywalne** (brak wykonywalnych)**.**
 - `__got:` Tabela Global Offset
-- `__nl_symbol_ptr`: Wskaźnik symbolu non lazy (wiąż w czasie ładowania)
-- `__la_symbol_ptr`: Wskaźnik symbolu lazy (wiąż przy użyciu)
+- `__nl_symbol_ptr`: Wskaźnik symbolu non lazy (wiąże przy ładowaniu)
+- `__la_symbol_ptr`: Wskaźnik symbolu lazy (wiąże przy użyciu)
 - `__const`: Powinny być danymi tylko do odczytu (nie do końca)
 - `__cfstring`: Ciągi CoreFoundation
 - `__data`: Zmienne globalne (które zostały zainicjowane)
@@ -243,7 +243,7 @@ Common segments loaded by this cmd:
 - Funkcje startowe: Tabela adresów startowych funkcji
 - Dane w kodzie: Wyspy danych w \_\_text
 - Tabela symboli: Symbole w binarnym
-- Tabela symboli pośrednich: Wskaźniki/stuby symboli
+- Tabela symboli pośrednich: Wskaźniki/stub symbole
 - Tabela ciągów
 - Podpis kodu
 - **`__OBJC`**: Zawiera informacje używane przez środowisko wykonawcze Objective-C. Chociaż te informacje mogą być również znalezione w segmencie \_\_DATA, w różnych sekcjach \_\_objc\_\*.
@@ -258,7 +258,7 @@ Jak można było zobaczyć w kodzie, **segmenty również wspierają flagi** (ch
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** zawiera punkt wejścia w **atrybucie entryoff.** W czasie ładowania, **dyld** po prostu **dodaje** tę wartość do (w pamięci) **bazy binarnej**, a następnie **skacze** do tej instrukcji, aby rozpocząć wykonanie kodu binarnego.
+**`LC_MAIN`** zawiera punkt wejścia w atrybucie **entryoff.** W czasie ładowania, **dyld** po prostu **dodaje** tę wartość do (w pamięci) **bazy binarnej**, a następnie **skacze** do tej instrukcji, aby rozpocząć wykonanie kodu binarnego.
 
 **`LC_UNIXTHREAD`** zawiera wartości, jakie rejestry muszą mieć przy uruchamianiu głównego wątku. To już zostało wycofane, ale **`dyld`** nadal to wykorzystuje. Można zobaczyć wartości rejestrów ustawione przez to za pomocą:
 ```bash
@@ -345,12 +345,12 @@ Niektóre potencjalne biblioteki związane z złośliwym oprogramowaniem to:
 - **CoreWLAN**: Skanowanie Wifi.
 
 > [!NOTE]
-> Plik binarny Mach-O może zawierać jeden lub **więcej** **konstruktorów**, które będą **wykonywane** **przed** adresem określonym w **LC_MAIN**.\
+> Plik binarny Mach-O może zawierać jednego lub **więcej** **konstruktorów**, które będą **wykonywane** **przed** adresem określonym w **LC_MAIN**.\
 > Offsety wszelkich konstruktorów są przechowywane w sekcji **\_\_mod_init_func** segmentu **\_\_DATA_CONST**.
 
 ## **Dane Mach-O**
 
-W rdzeniu pliku znajduje się obszar danych, który składa się z kilku segmentów, jak zdefiniowano w obszarze poleceń ładujących. **W każdym segmencie może być przechowywanych wiele sekcji danych**, z każdą sekcją **zawierającą kod lub dane** specyficzne dla danego typu.
+W rdzeniu pliku znajduje się obszar danych, który składa się z kilku segmentów zdefiniowanych w obszarze poleceń ładujących. **W każdym segmencie może być przechowywanych wiele sekcji danych**, z których każda **zawiera kod lub dane** specyficzne dla danego typu.
 
 > [!TIP]
 > Dane to zasadniczo część zawierająca wszystkie **informacje**, które są ładowane przez polecenia ładujące **LC_SEGMENTS_64**
@@ -371,7 +371,7 @@ Lub z poziomu cli:
 ```bash
 size -m /bin/ls
 ```
-## Sekcje wspólne Objective-C
+## Sekcje wspólne w Objetive-C
 
 W segmencie `__TEXT` (r-x):
 
@@ -381,10 +381,10 @@ W segmencie `__TEXT` (r-x):
 
 W segmencie `__DATA` (rw-):
 
-- `__objc_classlist`: Wskaźniki do wszystkich klas Objective-C
-- `__objc_nlclslist`: Wskaźniki do klas Objective-C bez leniwego ładowania
+- `__objc_classlist`: Wskaźniki do wszystkich klas Objetive-C
+- `__objc_nlclslist`: Wskaźniki do klas Non-Lazy Objective-C
 - `__objc_catlist`: Wskaźnik do Kategorii
-- `__objc_nlcatlist`: Wskaźnik do Kategorii bez leniwego ładowania
+- `__objc_nlcatlist`: Wskaźnik do Kategorii Non-Lazy
 - `__objc_protolist`: Lista protokołów
 - `__objc_const`: Dane stałe
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...

@@ -59,19 +59,19 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 
 Większość danych używanych przez runtime ObjectiveC zmienia się podczas wykonywania, dlatego wykorzystuje niektóre sekcje z segmentu **\_\_DATA** w pamięci:
 
-- **`__objc_msgrefs`** (`message_ref_t`): Odniesienia do wiadomości
+- **`__objc_msgrefs`** (`message_ref_t`): Referencje wiadomości
 - **`__objc_ivar`** (`ivar`): Zmienne instancji
 - **`__objc_data`** (`...`): Dane mutowalne
-- **`__objc_classrefs`** (`Class`): Odniesienia do klas
-- **`__objc_superrefs`** (`Class`): Odniesienia do klas nadrzędnych
-- **`__objc_protorefs`** (`protocol_t *`): Odniesienia do protokołów
-- **`__objc_selrefs`** (`SEL`): Odniesienia do selektorów
-- **`__objc_const`** (`...`): Dane `r/o` klasy i inne (mam nadzieję) stałe dane
+- **`__objc_classrefs`** (`Class`): Referencje klas
+- **`__objc_superrefs`** (`Class`): Referencje klas nadrzędnych
+- **`__objc_protorefs`** (`protocol_t *`): Referencje protokołów
+- **`__objc_selrefs`** (`SEL`): Referencje selektorów
+- **`__objc_const`** (`...`): Dane klas `r/o` i inne (mam nadzieję) stałe dane
 - **`__objc_imageinfo`** (`version, flags`): Używane podczas ładowania obrazu: Wersja obecnie `0`; Flagi określają wsparcie dla preoptymalizowanego GC itp.
 - **`__objc_protolist`** (`protocol_t *`): Lista protokołów
-- **`__objc_nlcatlist`** (`category_t`): Wskaźnik do kategorii Non-Lazy zdefiniowanych w tym binarnym pliku
+- **`__objc_nlcatlist`** (`category_t`): Wskaźnik do kategorii nie-leniwych zdefiniowanych w tym binarnym pliku
 - **`__objc_catlist`** (`category_t`): Wskaźnik do kategorii zdefiniowanych w tym binarnym pliku
-- **`__objc_nlclslist`** (`classref_t`): Wskaźnik do klas Objective-C Non-Lazy zdefiniowanych w tym binarnym pliku
+- **`__objc_nlclslist`** (`classref_t`): Wskaźnik do nie-leniwych klas Objective-C zdefiniowanych w tym binarnym pliku
 - **`__objc_classlist`** (`classref_t`): Wskaźniki do wszystkich klas Objective-C zdefiniowanych w tym binarnym pliku
 
 Wykorzystuje również kilka sekcji w segmencie **`__TEXT`** do przechowywania stałych wartości, jeśli nie jest możliwe zapisanie w tej sekcji:
@@ -94,12 +94,12 @@ Objective-C używa pewnego mangle'owania do kodowania selektorów i typów zmien
 ```
 Selektor to `processString:withOptions:andError:`
 
-#### Kodowanie Typu
+#### Kodowanie typów
 
 - `id` jest kodowane jako `@`
 - `char *` jest kodowane jako `*`
 
-Pełne kodowanie typu dla metody to:
+Pełne kodowanie typów dla metody to:
 ```less
 @24@0:8@16*20^@24
 ```

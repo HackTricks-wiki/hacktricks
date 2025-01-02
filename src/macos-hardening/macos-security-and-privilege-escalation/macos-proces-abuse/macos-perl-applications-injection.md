@@ -4,7 +4,7 @@
 
 ## Poprzez zmienną środowiskową `PERL5OPT` i `PERL5LIB`
 
-Używając zmiennej środowiskowej PERL5OPT, można sprawić, że perl wykona dowolne polecenia.\
+Używając zmiennej środowiskowej PERL5OPT, możliwe jest zmuszenie perla do wykonywania dowolnych poleceń.\
 Na przykład, stwórz ten skrypt:
 ```perl:test.pl
 #!/usr/bin/perl

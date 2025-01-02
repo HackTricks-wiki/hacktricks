@@ -4,17 +4,17 @@
 
 ## Podstawowe informacje
 
-Jeśli nie wiesz, czym jest Electron, możesz znaleźć [**wiele informacji tutaj**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). Ale na razie wystarczy, że wiesz, że Electron uruchamia **node**.\
+Jeśli nie wiesz, czym jest Electron, możesz znaleźć [**dużo informacji tutaj**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). Ale na razie wystarczy, że wiesz, że Electron uruchamia **node**.\
 A node ma kilka **parametrów** i **zmiennych środowiskowych**, które można wykorzystać do **wykonywania innego kodu** oprócz wskazanego pliku.
 
 ### Fuzje Electron
 
-Te techniki zostaną omówione w następnej kolejności, ale w ostatnich czasach Electron dodał kilka **flagi zabezpieczeń, aby je zapobiec**. Oto [**Fuzje Electron**](https://www.electronjs.org/docs/latest/tutorial/fuses) i to one są używane do **zapobiegania** aplikacjom Electron w macOS przed **ładowaniem dowolnego kodu**:
+Te techniki zostaną omówione w następnej kolejności, ale w ostatnich czasach Electron dodał kilka **flagi zabezpieczeń, aby je uniemożliwić**. Oto [**Fuzje Electron**](https://www.electronjs.org/docs/latest/tutorial/fuses) i to są te, które służą do **zapobiegania** ładowaniu przez aplikacje Electron w macOS **dowolnego kodu**:
 
-- **`RunAsNode`**: Jeśli jest wyłączona, zapobiega użyciu zmiennej środowiskowej **`ELECTRON_RUN_AS_NODE`** do wstrzykiwania kodu.
+- **`RunAsNode`**: Jeśli jest wyłączona, uniemożliwia użycie zmiennej środowiskowej **`ELECTRON_RUN_AS_NODE`** do wstrzykiwania kodu.
 - **`EnableNodeCliInspectArguments`**: Jeśli jest wyłączona, parametry takie jak `--inspect`, `--inspect-brk` nie będą respektowane. Unikając w ten sposób wstrzykiwania kodu.
 - **`EnableEmbeddedAsarIntegrityValidation`**: Jeśli jest włączona, załadowany **plik** **`asar`** będzie **walidowany** przez macOS. **Zapobiegając** w ten sposób **wstrzykiwaniu kodu** poprzez modyfikację zawartości tego pliku.
-- **`OnlyLoadAppFromAsar`**: Jeśli to jest włączone, zamiast szukać ładowania w następującej kolejności: **`app.asar`**, **`app`** i w końcu **`default_app.asar`**. Sprawdzi i użyje tylko app.asar, zapewniając w ten sposób, że gdy jest **połączone** z fuzją **`embeddedAsarIntegrityValidation`**, jest **niemożliwe** do **załadowania niezweryfikowanego kodu**.
+- **`OnlyLoadAppFromAsar`**: Jeśli to jest włączone, zamiast szukać ładowania w następującej kolejności: **`app.asar`**, **`app`** i w końcu **`default_app.asar`**. Sprawdzi i użyje tylko app.asar, zapewniając w ten sposób, że gdy jest **połączone** z fuzją **`embeddedAsarIntegrityValidation`**, jest **niemożliwe** **załadowanie niezweryfikowanego kodu**.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Jeśli jest włączona, proces przeglądarki używa pliku o nazwie `browser_v8_context_snapshot.bin` dla swojego zrzutu V8.
 
 Inną interesującą fuzją, która nie będzie zapobiegać wstrzykiwaniu kodu, jest:
@@ -46,7 +46,7 @@ W aplikacjach macOS zazwyczaj znajduje się to w `application.app/Contents/Frame
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Możesz załadować ten plik w [https://hexed.it/](https://hexed.it/) i wyszukać poprzedni ciąg. Po tym ciągu możesz zobaczyć w ASCII liczbę "0" lub "1", wskazującą, czy każdy bezpiecznik jest wyłączony, czy włączony. Po prostu zmodyfikuj kod hex (`0x30` to `0`, a `0x31` to `1`), aby **zmodyfikować wartości bezpieczników**.
+Możesz załadować ten plik w [https://hexed.it/](https://hexed.it/) i wyszukać poprzedni ciąg. Po tym ciągu możesz zobaczyć w ASCII liczbę "0" lub "1", wskazującą, czy każdy bezpiecznik jest wyłączony, czy włączony. Po prostu zmodyfikuj kod szesnastkowy (`0x30` to `0`, a `0x31` to `1`), aby **zmodyfikować wartości bezpieczników**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
@@ -194,8 +194,8 @@ Możesz wykorzystać tę zmienną środowiskową w plist, aby utrzymać persiste
 
 ## Run non JS Code
 
-Poprzednie techniki pozwolą ci uruchomić **kod JS wewnątrz procesu aplikacji electron**. Jednak pamiętaj, że **procesy potomne działają pod tym samym profilem piaskownicy** co aplikacja nadrzędna i **dziedziczą ich uprawnienia TCC**.\
-Dlatego, jeśli chcesz wykorzystać uprawnienia do uzyskania dostępu do kamery lub mikrofonu, możesz po prostu **uruchomić inny plik binarny z procesu**.
+Poprzednie techniki pozwolą ci uruchomić **kod JS wewnątrz procesu aplikacji electron**. Jednak pamiętaj, że **procesy podrzędne działają pod tym samym profilem piaskownicy** co aplikacja nadrzędna i **dziedziczą ich uprawnienia TCC**.\
+Dlatego, jeśli chcesz nadużyć uprawnień, aby uzyskać dostęp do kamery lub mikrofonu na przykład, możesz po prostu **uruchomić inny plik binarny z procesu**.
 
 ## Automatic Injection
 

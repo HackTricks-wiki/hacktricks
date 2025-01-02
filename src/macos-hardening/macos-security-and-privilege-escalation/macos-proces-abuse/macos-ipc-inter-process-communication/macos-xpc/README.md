@@ -20,7 +20,7 @@ Jedynym **minusem** jest to, że **oddzielanie aplikacji na kilka procesów** i 
 
 Komponenty XPC aplikacji są **wewnątrz samej aplikacji.** Na przykład, w Safari można je znaleźć w **`/Applications/Safari.app/Contents/XPCServices`**. Mają rozszerzenie **`.xpc`** (jak **`com.apple.Safari.SandboxBroker.xpc`**) i są **również pakietami** z głównym binarnym w środku: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` oraz `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Jak możesz pomyśleć, **komponent XPC będzie miał różne uprawnienia i przywileje** niż inne komponenty XPC lub główny binarny aplikacji. Z WYJĄTKIEM przypadku, gdy usługa XPC jest skonfigurowana z [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) ustawionym na „True” w swoim **pliku Info.plist**. W takim przypadku usługa XPC będzie działać w **tej samej sesji bezpieczeństwa co aplikacja**, która ją wywołała.
+Jak możesz pomyśleć, **komponent XPC będzie miał różne uprawnienia i przywileje** niż inne komponenty XPC lub główny binarny aplikacji. Z WYJĄTKIEM, gdy usługa XPC jest skonfigurowana z [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) ustawionym na „True” w swoim **pliku Info.plist**. W takim przypadku usługa XPC będzie działać w **tej samej sesji bezpieczeństwa co aplikacja**, która ją wywołała.
 
 Usługi XPC są **uruchamiane** przez **launchd** w razie potrzeby i **zatrzymywane** po zakończeniu wszystkich zadań, aby zwolnić zasoby systemowe. **Komponenty XPC specyficzne dla aplikacji mogą być wykorzystywane tylko przez aplikację**, co zmniejsza ryzyko związane z potencjalnymi lukami.
 
@@ -72,7 +72,7 @@ Każda wiadomość XPC jest obiektem słownika, który upraszcza serializację i
 Ponadto, funkcja `xpc_copy_description(object)` może być używana do uzyskania reprezentacji tekstowej obiektu, co może być przydatne do celów debugowania.\
 Te obiekty mają również pewne metody do wywołania, takie jak `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
-Obiekty `xpc_object_t` są tworzone przez wywołanie funkcji `xpc_<objetType>_create`, która wewnętrznie wywołuje `_xpc_base_create(Class, Size)`, gdzie wskazany jest typ klasy obiektu (jeden z `XPC_TYPE_*`) oraz jego rozmiar (do rozmiaru dodawane jest dodatkowe 40B na metadane). Oznacza to, że dane obiektu będą zaczynać się od przesunięcia 40B.\
+Obiekty `xpc_object_t` są tworzone przez wywołanie funkcji `xpc_<objetType>_create`, która wewnętrznie wywołuje `_xpc_base_create(Class, Size)`, gdzie wskazany jest typ klasy obiektu (jeden z `XPC_TYPE_*`) oraz jego rozmiar (do rozmiaru zostanie dodane dodatkowe 40B na metadane). Co oznacza, że dane obiektu będą zaczynały się od przesunięcia 40B.\
 Dlatego `xpc_<objectType>_t` jest rodzajem podklasy `xpc_object_t`, która byłaby podklasą `os_object_t*`.
 
 > [!WARNING]
@@ -83,7 +83,7 @@ Dlatego `xpc_<objectType>_t` jest rodzajem podklasy `xpc_object_t`, która była
 **`xpc_pipe`** to rura FIFO, którą procesy mogą używać do komunikacji (komunikacja wykorzystuje wiadomości Mach).\
 Możliwe jest utworzenie serwera XPC, wywołując `xpc_pipe_create()` lub `xpc_pipe_create_from_port()`, aby utworzyć go za pomocą konkretnego portu Mach. Następnie, aby odbierać wiadomości, można wywołać `xpc_pipe_receive` i `xpc_pipe_try_receive`.
 
-Należy zauważyć, że obiekt **`xpc_pipe`** jest **`xpc_object_t`** z informacjami w swojej strukturze o dwóch używanych portach Mach oraz nazwie (jeśli istnieje). Nazwa, na przykład, demona `secinitd` w jego plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguruje rurę o nazwie `com.apple.secinitd`.
+Należy zauważyć, że obiekt **`xpc_pipe`** jest **`xpc_object_t`** z informacjami w swojej strukturze o dwóch używanych portach Mach i nazwie (jeśli istnieje). Nazwa, na przykład, demona `secinitd` w jego plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguruje rurę o nazwie `com.apple.secinitd`.
 
 Przykładem **`xpc_pipe`** jest **bootstrap pipe** utworzona przez **`launchd`**, co umożliwia udostępnianie portów Mach.
 
@@ -128,7 +128,7 @@ macos-xpc-connecting-process-check/
 
 ## Autoryzacja XPC
 
-Apple pozwala również aplikacjom na **konfigurowanie pewnych praw i sposobów ich uzyskania**, więc jeśli wywołujący proces je ma, będzie **mógł wywołać metodę** z usługi XPC:
+Apple pozwala również aplikacjom na **konfigurowanie niektórych praw i sposobów ich uzyskania**, więc jeśli wywołujący proces je ma, będzie **mógł wywołać metodę** z usługi XPC:
 
 {{#ref}}
 macos-xpc-authorization.md
@@ -439,10 +439,10 @@ return;
 ```
 ## Remote XPC
 
-Funkcjonalność ta dostarczana przez `RemoteXPC.framework` (z `libxpc`) umożliwia komunikację za pomocą XPC między różnymi hostami.\
+Funkcjonalność ta dostarczana przez `RemoteXPC.framework` (z `libxpc`) pozwala na komunikację za pomocą XPC między różnymi hostami.\
 Usługi, które obsługują zdalne XPC, będą miały w swoim plist klucz UsesRemoteXPC, jak ma to miejsce w przypadku `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Jednakże, chociaż usługa będzie zarejestrowana w `launchd`, to `UserEventAgent` z wtyczkami `com.apple.remoted.plugin` i `com.apple.remoteservicediscovery.events.plugin` zapewnia tę funkcjonalność.
 
-Ponadto, `RemoteServiceDiscovery.framework` umożliwia uzyskanie informacji z `com.apple.remoted.plugin`, udostępniając funkcje takie jak `get_device`, `get_unique_device`, `connect`...
+Ponadto, `RemoteServiceDiscovery.framework` pozwala na uzyskanie informacji z `com.apple.remoted.plugin`, udostępniając funkcje takie jak `get_device`, `get_unique_device`, `connect`...
 
 Gdy `connect` zostanie użyty i gniazdo `fd` usługi zostanie zebrane, możliwe jest użycie klasy `remote_xpc_connection_*`.
 

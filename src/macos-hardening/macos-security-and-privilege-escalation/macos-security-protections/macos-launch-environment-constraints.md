@@ -4,20 +4,20 @@
 
 ## Basic Information
 
-Ograniczenia uruchamiania w macOS zostały wprowadzone w celu zwiększenia bezpieczeństwa poprzez **regulowanie, jak, kto i skąd proces może być inicjowany**. Wprowadzone w macOS Ventura, zapewniają ramy, które klasyfikują **każdy systemowy plik binarny w odrębne kategorie ograniczeń**, które są zdefiniowane w **cache zaufania**, liście zawierającej pliki binarne systemu i ich odpowiednie hashe. Ograniczenia te obejmują każdy wykonywalny plik binarny w systemie, co wiąże się z zestawem **reguł** określających wymagania dotyczące **uruchamiania konkretnego pliku binarnego**. Reguły obejmują ograniczenia własne, które plik binarny musi spełnić, ograniczenia rodzica, które muszą być spełnione przez jego proces nadrzędny, oraz ograniczenia odpowiedzialne, które muszą być przestrzegane przez inne odpowiednie podmioty.
+Ograniczenia uruchamiania w macOS zostały wprowadzone w celu zwiększenia bezpieczeństwa poprzez **regulowanie, jak, kto i skąd proces może być inicjowany**. Wprowadzone w macOS Ventura, zapewniają ramy, które klasyfikują **każdy systemowy plik binarny w odrębne kategorie ograniczeń**, które są zdefiniowane w **cache zaufania**, liście zawierającej pliki binarne systemu i ich odpowiednie hashe. Ograniczenia te obejmują każdy wykonywalny plik binarny w systemie, co wiąże się z zestawem **reguł** określających wymagania dotyczące **uruchamiania konkretnego pliku binarnego**. Reguły obejmują ograniczenia własne, które plik binarny musi spełnić, ograniczenia rodzica, które muszą być spełnione przez proces rodzica, oraz ograniczenia odpowiedzialności, które muszą być przestrzegane przez inne odpowiednie podmioty.
 
 Mechanizm ten rozszerza się na aplikacje firm trzecich poprzez **Ograniczenia Środowiskowe**, począwszy od macOS Sonoma, umożliwiając deweloperom ochronę swoich aplikacji poprzez określenie **zestawu kluczy i wartości dla ograniczeń środowiskowych.**
 
-Definiujesz **ograniczenia środowiska uruchamiania i biblioteki** w słownikach ograniczeń, które zapisujesz w **plikach listy właściwości `launchd`**, lub w **oddzielnych plikach listy właściwości**, które używasz w podpisywaniu kodu.
+Definiujesz **ograniczenia środowiska uruchamiania i biblioteki** w słownikach ograniczeń, które zapisujesz w **plikach listy właściwości `launchd`**, lub w **osobnych plikach listy właściwości**, które używasz w podpisywaniu kodu.
 
 Istnieją 4 typy ograniczeń:
 
 - **Ograniczenia Własne**: Ograniczenia stosowane do **uruchamianego** pliku binarnego.
 - **Proces Rodzica**: Ograniczenia stosowane do **rodzica procesu** (na przykład **`launchd`** uruchamiającego usługę XP)
-- **Ograniczenia Odpowiedzialne**: Ograniczenia stosowane do **procesu wywołującego usługę** w komunikacji XPC
+- **Ograniczenia Odpowiedzialności**: Ograniczenia stosowane do **procesu wywołującego usługę** w komunikacji XPC
 - **Ograniczenia ładowania biblioteki**: Użyj ograniczeń ładowania biblioteki, aby selektywnie opisać kod, który może być załadowany
 
-Gdy proces próbuje uruchomić inny proces — wywołując `execve(_:_:_:)` lub `posix_spawn(_:_:_:_:_:_:)` — system operacyjny sprawdza, czy plik **wykonywalny** **spełnia** swoje **własne ograniczenie własne**. Sprawdza również, czy plik wykonywalny **procesu rodzica** **spełnia** **ograniczenie rodzica** pliku wykonywalnego oraz czy plik wykonywalny **procesu odpowiedzialnego** **spełnia ograniczenie odpowiedzialnego procesu** pliku wykonywalnego. Jeśli którekolwiek z tych ograniczeń uruchamiania nie jest spełnione, system operacyjny nie uruchamia programu.
+Gdy proces próbuje uruchomić inny proces — wywołując `execve(_:_:_:)` lub `posix_spawn(_:_:_:_:_:_:)` — system operacyjny sprawdza, czy plik **wykonywalny** **spełnia** swoje **własne ograniczenie własne**. Sprawdza również, czy plik wykonywalny **procesu rodzica** **spełnia** **ograniczenie rodzica** pliku wykonywalnego oraz czy plik wykonywalny **procesu odpowiedzialnego** **spełnia ograniczenie procesu odpowiedzialnego** pliku wykonywalnego. Jeśli którekolwiek z tych ograniczeń uruchamiania nie jest spełnione, system operacyjny nie uruchamia programu.
 
 Jeśli podczas ładowania biblioteki jakakolwiek część **ograniczenia biblioteki nie jest prawdziwa**, twój proces **nie ładuje** biblioteki.
 
@@ -31,7 +31,7 @@ LC składa się z **faktów** i **operacji logicznych** (i, lub..) łączących 
 - is-sip-protected: Wartość logiczna, która wskazuje, czy plik wykonywalny musi być plikiem chronionym przez System Integrity Protection (SIP).
 - `on-authorized-authapfs-volume:` Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z autoryzowanej, uwierzytelnionej objętości APFS.
 - `on-authorized-authapfs-volume`: Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z autoryzowanej, uwierzytelnionej objętości APFS.
-- ObjVolume Cryptexes
+- Objętości Cryptexes
 - `on-system-volume:` Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z aktualnie uruchomionej objętości systemowej.
 - Wewnątrz /System...
 - ...
@@ -81,7 +81,7 @@ A w iOS wygląda to na **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
 
 Poprzednie pliki pamięci zaufania są w formacie **IMG4** i **IM4P**, przy czym IM4P to sekcja ładunku formatu IMG4.
 
-Możesz użyć [**pyimg4**](https://github.com/m1stadev/PyIMG4) do wyodrębnienia ładunku baz danych:
+Możesz użyć [**pyimg4**](https://github.com/m1stadev/PyIMG4), aby wyodrębnić ładunek baz danych:
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -141,9 +141,9 @@ Na podstawie tych danych możesz sprawdzić aplikacje z **wartością ogranicze�
 
 Ograniczenia uruchamiania mogłyby złagodzić kilka starych ataków, **zapewniając, że proces nie będzie uruchamiany w nieoczekiwanych warunkach:** Na przykład z nieoczekiwanych lokalizacji lub wywoływany przez nieoczekiwany proces nadrzędny (jeśli tylko launchd powinien go uruchamiać).
 
-Ponadto, Ograniczenia uruchamiania również **łagodzą ataki degradacyjne.**
+Ponadto, Ograniczenia uruchamiania również **łagodzą ataki downgrade.**
 
-Jednakże, **nie łagodzą powszechnych nadużyć XPC**, **wstrzyknięć** kodu **Electron** ani **wstrzyknięć dylib** bez walidacji biblioteki (chyba że znane są identyfikatory zespołów, które mogą ładować biblioteki).
+Jednakże, **nie łagodzą powszechnych nadużyć XPC**, **wstrzyknięć kodu Electron** ani **wstrzyknięć dylib** bez walidacji biblioteki (chyba że znane są identyfikatory zespołów, które mogą ładować biblioteki).
 
 ### Ochrona demona XPC
 
@@ -152,11 +152,11 @@ W wydaniu Sonoma, istotnym punktem jest **konfiguracja odpowiedzialności** usł
 - **Uruchamianie usługi XPC**: Jeśli uznane za błąd, ta konfiguracja nie pozwala na inicjowanie usługi XPC za pomocą kodu atakującego.
 - **Łączenie z aktywną usługą**: Jeśli usługa XPC już działa (prawdopodobnie aktywowana przez swoją oryginalną aplikację), nie ma przeszkód w łączeniu się z nią.
 
-Chociaż wdrożenie ograniczeń na usłudze XPC może być korzystne poprzez **zawężenie okna dla potencjalnych ataków**, nie rozwiązuje to głównego problemu. Zapewnienie bezpieczeństwa usługi XPC zasadniczo wymaga **skutecznej walidacji łączącego się klienta**. To pozostaje jedyną metodą na wzmocnienie bezpieczeństwa usługi. Warto również zauważyć, że wspomniana konfiguracja odpowiedzialności jest obecnie operacyjna, co może nie być zgodne z zamierzonym projektem.
+Chociaż wprowadzenie ograniczeń na usłudze XPC może być korzystne poprzez **zawężenie okna dla potencjalnych ataków**, nie rozwiązuje to głównego problemu. Zapewnienie bezpieczeństwa usługi XPC zasadniczo wymaga **skutecznej walidacji łączącego się klienta**. To pozostaje jedyną metodą na wzmocnienie bezpieczeństwa usługi. Warto również zauważyć, że wspomniana konfiguracja odpowiedzialności jest obecnie operacyjna, co może nie być zgodne z zamierzonym projektem.
 
 ### Ochrona Electron
 
-Nawet jeśli wymagane jest, aby aplikacja była **otwierana przez LaunchService** (w ograniczeniach rodziców). Można to osiągnąć za pomocą **`open`** (które może ustawiać zmienne środowiskowe) lub korzystając z **API usług uruchamiania** (gdzie można wskazać zmienne środowiskowe).
+Nawet jeśli wymagane jest, aby aplikacja była **otwierana przez LaunchService** (w ograniczeniach rodziców). Można to osiągnąć za pomocą **`open`** (które może ustawiać zmienne środowiskowe) lub korzystając z **API Launch Services** (gdzie można wskazać zmienne środowiskowe).
 
 ## Odniesienia
 

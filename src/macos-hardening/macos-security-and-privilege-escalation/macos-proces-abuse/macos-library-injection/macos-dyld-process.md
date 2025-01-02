@@ -11,7 +11,7 @@ Ten linker będzie musiał zlokalizować wszystkie biblioteki wykonywalne, zała
 Oczywiście, **`dyld`** nie ma żadnych zależności (używa wywołań systemowych i fragmentów libSystem).
 
 > [!OSTRZEŻENIE]
-> Jeśli ten linker zawiera jakąkolwiek lukę, ponieważ jest wykonywany przed uruchomieniem jakiejkolwiek binarnej (nawet wysoko uprzywilejowanej), możliwe byłoby **eskalowanie uprawnień**.
+> Jeśli ten linker zawiera jakąkolwiek lukę, ponieważ jest wykonywany przed uruchomieniem jakiegokolwiek binarnego (nawet wysoko uprzywilejowanych), możliwe byłoby **eskalowanie uprawnień**.
 
 ### Przepływ
 
@@ -42,13 +42,13 @@ Niektóre sekcje stub w binarnym:
 
 - **`__TEXT.__[auth_]stubs`**: Wskaźniki z sekcji `__DATA`
 - **`__TEXT.__stub_helper`**: Mały kod wywołujący dynamiczne łączenie z informacjami o funkcji do wywołania
-- **`__DATA.__[auth_]got`**: Global Offset Table (adresy do importowanych funkcji, gdy są rozwiązane, (powiązane w czasie ładowania, ponieważ jest oznaczone flagą `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Wskaźniki symboli nienaładowanych (powiązane w czasie ładowania, ponieważ jest oznaczone flagą `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__[auth_]got`**: Global Offset Table (adresy do importowanych funkcji, po rozwiązaniu, (powiązane w czasie ładowania, ponieważ oznaczone flagą `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: Wskaźniki symboli nienaładowanych (powiązane w czasie ładowania, ponieważ oznaczone flagą `S_NON_LAZY_SYMBOL_POINTERS`)
 - **`__DATA.__la_symbol_ptr`**: Wskaźniki symboli leniwych (powiązane przy pierwszym dostępie)
 
 > [!OSTRZEŻENIE]
-> Zauważ, że wskaźniki z prefiksem "auth\_" używają jednego klucza szyfrowania w procesie, aby go chronić (PAC). Ponadto, możliwe jest użycie instrukcji arm64 `BLRA[A/B]`, aby zweryfikować wskaźnik przed jego śledzeniem. A RETA\[A/B] może być użyte zamiast adresu RET.\
-> W rzeczywistości kod w **`__TEXT.__auth_stubs`** użyje **`braa`** zamiast **`bl`**, aby wywołać żądaną funkcję w celu uwierzytelnienia wskaźnika.
+> Zauważ, że wskaźniki z prefiksem "auth\_" używają jednego klucza szyfrowania w procesie do jego ochrony (PAC). Ponadto, możliwe jest użycie instrukcji arm64 `BLRA[A/B]`, aby zweryfikować wskaźnik przed jego śledzeniem. A RETA\[A/B] może być użyte zamiast adresu RET.\
+> W rzeczywistości kod w **`__TEXT.__auth_stubs`** użyje **`braa`** zamiast **`bl`** do wywołania żądanej funkcji w celu uwierzytelnienia wskaźnika.
 >
 > Zauważ również, że obecne wersje dyld ładują **wszystko jako nienaładowane**.
 
@@ -61,7 +61,7 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-Interesująca część disassembly:
+Interesująca część deasemblacji:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
@@ -95,7 +95,7 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-możesz zobaczyć, że **skaczemy do adresu GOT**, który w tym przypadku jest rozwiązywany w sposób non-lazy i będzie zawierał adres funkcji printf.
+możesz zobaczyć, że **skaczemy do adresu GOT**, który w tym przypadku jest rozwiązywany non-lazy i będzie zawierał adres funkcji printf.
 
 W innych sytuacjach zamiast bezpośrednio skakać do GOT, może skoczyć do **`__DATA.__la_symbol_ptr`**, który załadowuje wartość reprezentującą funkcję, którą próbuje załadować, a następnie skoczyć do **`__TEXT.__stub_helper`**, który skacze do **`__DATA.__nl_symbol_ptr`**, który zawiera adres **`dyld_stub_binder`**, który przyjmuje jako parametry numer funkcji i adres.\
 Ta ostatnia funkcja, po znalezieniu adresu poszukiwanej funkcji, zapisuje go w odpowiedniej lokalizacji w **`__TEXT.__stub_helper`**, aby uniknąć przyszłych wyszukiwań.
@@ -103,13 +103,13 @@ Ta ostatnia funkcja, po znalezieniu adresu poszukiwanej funkcji, zapisuje go w o
 > [!TIP]
 > Zauważ jednak, że obecne wersje dyld ładują wszystko jako non-lazy.
 
-#### Kody operacyjne dyld
+#### Opcje dyld
 
-Na koniec, **`dyld_stub_binder`** musi znaleźć wskazaną funkcję i zapisać ją w odpowiednim adresie, aby nie szukać jej ponownie. W tym celu używa kodów operacyjnych (maszyna stanów skończonych) w dyld.
+Na koniec, **`dyld_stub_binder`** musi znaleźć wskazaną funkcję i zapisać ją w odpowiednim adresie, aby nie szukać jej ponownie. W tym celu używa opcodes (maszyna stanów skończonych) w dyld.
 
-## wektor argumentów apple\[]
+## apple\[] wektor argumentów
 
-W macOS główna funkcja otrzymuje w rzeczywistości 4 argumenty zamiast 3. Czwarty nazywa się apple, a każdy wpis ma postać `key=value`. Na przykład:
+W macOS główna funkcja otrzymuje w rzeczywistości 4 argumenty zamiast 3. Czwarty nazywa się apple, a każdy wpis ma formę `key=value`. Na przykład:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -119,7 +119,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-Przykro mi, ale nie mogę pomóc w tej sprawie.
+Wynik:
 ```
 0: executable_path=./a
 1:
@@ -180,7 +180,7 @@ można zobaczyć wszystkie te interesujące wartości podczas debugowania przed 
 
 ## dyld_all_image_infos
 
-To struktura eksportowana przez dyld z informacjami o stanie dyld, które można znaleźć w [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) z informacjami takimi jak wersja, wskaźnik do tablicy dyld_image_info, do dyld_image_notifier, czy proces jest odłączony od wspólnej pamięci podręcznej, czy inicjalizator libSystem został wywołany, wskaźnik do własnego nagłówka Mach dylsa, wskaźnik do ciągu wersji dyld...
+To struktura eksportowana przez dyld z informacjami o stanie dyld, które można znaleźć w [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) z informacjami takimi jak wersja, wskaźnik do tablicy dyld_image_info, do dyld_image_notifier, czy proces jest odłączony od wspólnej pamięci, czy inicjalizator libSystem został wywołany, wskaźnik do własnego nagłówka Mach dyls, wskaźnik do ciągu wersji dyld...
 
 ## dyld env variables
 
@@ -245,7 +245,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-Drukuje, kiedy każdy inicjalizator biblioteki jest uruchamiany:
+Drukuje, kiedy każdy inicjator biblioteki jest uruchamiany:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -266,7 +266,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_CODE_SIGNATURES`: Wydrukuj operacje rejestracji podpisu kodu
 - `DYLD_PRINT_DOFS`: Wydrukuj sekcje formatu obiektów D-Trace jako załadowane
 - `DYLD_PRINT_ENV`: Wydrukuj env widziane przez dyld
-- `DYLD_PRINT_INTERPOSTING`: Wydrukuj operacje interpostingu
+- `DYLD_PRINT_INTERPOSTING`: Wydrukuj operacje interposting
 - `DYLD_PRINT_LIBRARIES`: Wydrukuj załadowane biblioteki
 - `DYLD_PRINT_OPTS`: Wydrukuj opcje ładowania
 - `DYLD_REBASING`: Wydrukuj operacje rebasingu symboli

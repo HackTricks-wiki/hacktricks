@@ -8,7 +8,7 @@ Bundli w macOS służą jako kontenery dla różnych zasobów, w tym aplikacji, 
 
 ### Kluczowe komponenty bundla
 
-W obrębie bundla, szczególnie w katalogu `<application>.app/Contents/`, znajdują się różnorodne ważne zasoby:
+W obrębie bundla, szczególnie w katalogu `<application>.app/Contents/`, znajduje się wiele ważnych zasobów:
 
 - **\_CodeSignature**: Ten katalog przechowuje szczegóły dotyczące podpisu kodu, które są niezbędne do weryfikacji integralności aplikacji. Możesz sprawdzić informacje o podpisie kodu, używając poleceń takich jak: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
 - **MacOS**: Zawiera wykonywalny plik binarny aplikacji, który uruchamia się po interakcji użytkownika.
@@ -31,7 +31,7 @@ To badanie ujawnia katalogi takie jak `_CodeSignature`, `MacOS`, `Resources` ora
 
 #### Dodatkowe katalogi bundli
 
-Poza powszechnymi katalogami, bundli mogą również zawierać:
+Poza typowymi katalogami, bundli mogą również zawierać:
 
 - **Frameworks**: Zawiera zbundlowane frameworki używane przez aplikację. Frameworki są jak dyliby z dodatkowymi zasobami.
 - **PlugIns**: Katalog dla wtyczek i rozszerzeń, które zwiększają możliwości aplikacji.

@@ -38,10 +38,10 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Zwykłe bloby zawierają Code Directory, Requirements i Entitlements oraz Cryptographic Message Syntax (CMS).\
+Powstarzane bloby zawierają Code Directory, Requirements i Entitlements oraz Cryptographic Message Syntax (CMS).\
 Ponadto, zauważ, że dane zakodowane w blobach są zakodowane w **Big Endian.**
 
-Ponadto, podpisy mogą być odłączane od binarnych plików i przechowywane w `/var/db/DetachedSignatures` (używane przez iOS).
+Ponadto, podpisy mogą być odłączane od binariów i przechowywane w `/var/db/DetachedSignatures` (używane przez iOS).
 
 ## Code Directory Blob
 
@@ -144,17 +144,17 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Zauważ, że aplikacje mogą również zawierać **blob uprawnień**, w którym zdefiniowane są wszystkie uprawnienia. Co więcej, niektóre binaria iOS mogą mieć swoje uprawnienia specyficzne w specjalnym slocie -7 (zamiast w specjalnym slocie -5 dla uprawnień).
+Zauważ, że aplikacje mogą również zawierać **entitlement blob**, w którym zdefiniowane są wszystkie uprawnienia. Co więcej, niektóre binaria iOS mogą mieć swoje uprawnienia specyficzne w specjalnym slocie -7 (zamiast w specjalnym slocie -5 dla uprawnień).
 
 ## Special Slots
 
-Aplikacje MacOS nie mają wszystkiego, co potrzebne do wykonania wewnątrz binarnego, ale korzystają również z **zewnętrznych zasobów** (zwykle wewnątrz **bundla** aplikacji). Dlatego w binarnym znajdują się pewne sloty, które będą zawierać hashe niektórych interesujących zewnętrznych zasobów, aby sprawdzić, czy nie zostały zmodyfikowane.
+Aplikacje MacOS nie mają wszystkiego, co potrzebne do wykonania wewnątrz binarnego, ale korzystają również z **zewnętrznych zasobów** (zwykle wewnątrz **bundle** aplikacji). Dlatego w binarnym znajdują się pewne sloty, które będą zawierać hashe niektórych interesujących zewnętrznych zasobów, aby sprawdzić, czy nie zostały zmodyfikowane.
 
-W rzeczywistości można zobaczyć w strukturach Code Directory parametr zwany **`nSpecialSlots`**, który wskazuje liczbę specjalnych slotów. Nie ma slotu specjalnego 0, a najczęstsze z nich (od -1 do -6) to:
+W rzeczywistości można zobaczyć w strukturach Code Directory parametr zwany **`nSpecialSlots`**, który wskazuje liczbę specjalnych slotów. Nie ma slotu specjalnego 0, a najczęściej spotykane (od -1 do -6) to:
 
 - Hash `info.plist` (lub ten wewnątrz `__TEXT.__info__plist`).
 - Hash Wymagań
-- Hash Katalogu Zasobów (hash pliku `_CodeSignature/CodeResources` wewnątrz bundla).
+- Hash Katalogu Zasobów (hash pliku `_CodeSignature/CodeResources` wewnątrz bundle).
 - Specyficzny dla aplikacji (niewykorzystany)
 - Hash uprawnień
 - Tylko podpisy kodu DMG
@@ -252,10 +252,10 @@ Możliwe jest uzyskanie dostępu do tych informacji oraz tworzenie lub modyfikow
 
 - **`SecRequirementCreateWithData`:** Tworzy `SecRequirementRef` z danych binarnych reprezentujących wymaganie.
 - **`SecRequirementCreateWithString`:** Tworzy `SecRequirementRef` z wyrażenia tekstowego wymagania.
-- **`SecRequirementCopy[Data/String]`**: Pobiera binarną reprezentację danych `SecRequirementRef`.
+- **`SecRequirementCopy[Data/String]`**: Pobiera reprezentację danych binarnych `SecRequirementRef`.
 - **`SecRequirementCreateGroup`**: Tworzy wymaganie dla członkostwa w grupie aplikacji.
 
-#### **Uzyskiwanie informacji o podpisywaniu kodu**
+#### **Uzyskiwanie informacji o podpisie kodu**
 
 - **`SecStaticCodeCreateWithPath`**: Inicjalizuje obiekt `SecStaticCodeRef` z ścieżki systemu plików do inspekcji podpisów kodu.
 - **`SecCodeCopySigningInformation`**: Uzyskuje informacje o podpisie z `SecCodeRef` lub `SecStaticCodeRef`.
@@ -279,7 +279,7 @@ Możliwe jest uzyskanie dostępu do tych informacji oraz tworzenie lub modyfikow
 - **`SecCodeGetTypeID`**: Zwraca identyfikator typu dla obiektów `SecCodeRef`.
 - **`SecRequirementGetTypeID`**: Uzyskuje CFTypeID `SecRequirementRef`.
 
-#### **Flagi i stałe podpisywania kodu**
+#### **Flagi i stałe podpisu kodu**
 
 - **`kSecCSDefaultFlags`**: Domyślne flagi używane w wielu funkcjach Security.framework do operacji podpisywania kodu.
 - **`kSecCSSigningInformation`**: Flaga używana do określenia, że informacje o podpisie powinny być pobrane.

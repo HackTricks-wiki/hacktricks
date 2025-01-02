@@ -8,7 +8,7 @@
 
 ### **Ustanawianie sesji debugowania** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-Zarządzanie komunikacją między debuggerem a debugowanym w .NET jest obsługiwane przez [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Ten komponent ustawia dwa nazwane potoki dla każdego procesu .NET, jak widać w [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), które są inicjowane przez [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Te potoki mają sufiksy **`-in`** i **`-out`**.
+Zarządzanie komunikacją między debuggerem a debugowanym w .NET odbywa się za pomocą [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Ten komponent ustawia dwa nazwane potoki dla każdego procesu .NET, jak widać w [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), które są inicjowane za pomocą [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Te potoki mają sufiksy **`-in`** i **`-out`**.
 
 Odwiedzając **`$TMPDIR`** użytkownika, można znaleźć dostępne FIFOs do debugowania aplikacji .Net.
 
@@ -93,7 +93,7 @@ vmmap -pages 35829 | grep "rwx/rwx"
 ```
 Zlokalizowanie miejsca do nadpisania wskaźnika funkcji jest konieczne, a w .NET Core można to zrobić, celując w **Dynamic Function Table (DFT)**. Ta tabela, szczegółowo opisana w [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), jest używana przez środowisko uruchomieniowe do funkcji pomocniczych kompilacji JIT.
 
-Dla systemów x64 można użyć polowania na sygnatury, aby znaleźć odniesienie do symbolu `_hlpDynamicFuncTable` w `libcorclr.dll`.
+Dla systemów x64, poszukiwanie sygnatur może być użyte do znalezienia odniesienia do symbolu `_hlpDynamicFuncTable` w `libcorclr.dll`.
 
 Funkcja debuggera `MT_GetDCB` dostarcza przydatnych informacji, w tym adresu funkcji pomocniczej, `m_helperRemoteStartAddr`, wskazującego lokalizację `libcorclr.dll` w pamięci procesu. Ten adres jest następnie używany do rozpoczęcia wyszukiwania DFT i nadpisania wskaźnika funkcji adresem shellcode.
 

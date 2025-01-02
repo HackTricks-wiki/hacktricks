@@ -34,7 +34,7 @@ Z drugiej strony:
 ls -lOd /usr/libexec
 drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 ```
-Tutaj flaga **`restricted`** wskazuje, że katalog `/usr/libexec` jest chroniony przez SIP. W katalogu chronionym przez SIP nie można tworzyć, modyfikować ani usuwać plików.
+Tutaj flaga **`restricted`** wskazuje, że katalog `/usr/libexec` jest chroniony przez SIP. W katalogu chronionym przez SIP pliki nie mogą być tworzone, modyfikowane ani usuwane.
 
 Ponadto, jeśli plik zawiera atrybut **`com.apple.rootless`** jako rozszerzony **atrybut**, ten plik również będzie **chroniony przez SIP**.
 
@@ -48,13 +48,13 @@ Ponadto, jeśli plik zawiera atrybut **`com.apple.rootless`** jako rozszerzony *
 - Modyfikowanie zmiennych NVRAM
 - Umożliwianie debugowania jądra
 
-Opcje są przechowywane w zmiennej nvram jako bitflag (`csr-active-config` na Intel i `lp-sip0` jest odczytywane z uruchomionego drzewa urządzeń dla ARM). Flagi można znaleźć w kodzie źródłowym XNU w `csr.sh`:
+Opcje są przechowywane w zmiennej nvram jako bitflag (`csr-active-config` na Intel i `lp-sip0` jest odczytywane z uruchomionego drzewa urządzeń dla ARM). Możesz znaleźć flagi w kodzie źródłowym XNU w `csr.sh`:
 
 <figure><img src="../../../images/image (1192).png" alt=""><figcaption></figcaption></figure>
 
 ### Status SIP
 
-Możesz sprawdzić, czy SIP jest włączony w twoim systemie, używając następującego polecenia:
+Możesz sprawdzić, czy SIP jest włączony w swoim systemie, używając następującego polecenia:
 ```bash
 csrutil status
 ```
@@ -86,7 +86,7 @@ csrutil enable --without debug
 - `com.apple.rootless.internal.installer-equivalent`: Nieograniczony dostęp do systemu plików
 - `com.apple.rootless.restricted-nvram-variables[.heritable]`: Pełny dostęp do NVRAM
 - `com.apple.rootless.storage.label`: Modyfikacja plików ograniczonych przez com.apple.rootless xattr z odpowiednią etykietą
-- `com.apple.rootless.volume.VM.label`: Utrzymanie VM swap na wolumenie
+- `com.apple.rootless.volume.VM.label`: Utrzymanie VM swap na woluminie
 
 ## Obejścia SIP
 
@@ -126,7 +126,7 @@ Demon **`system_installd`** zainstaluje pakiety, które zostały podpisane przez
 
 Badacze odkryli, że podczas instalacji pakietu podpisanego przez Apple (.pkg), **`system_installd`** **uruchamia** wszelkie **skrypty po instalacji** zawarte w pakiecie. Te skrypty są wykonywane przez domyślną powłokę, **`zsh`**, która automatycznie **uruchamia** polecenia z pliku **`/etc/zshenv`**, jeśli istnieje, nawet w trybie nieinteraktywnym. To zachowanie mogłoby być wykorzystane przez atakujących: tworząc złośliwy plik `/etc/zshenv` i czekając na **`system_installd`, aby wywołać `zsh`**, mogliby przeprowadzać dowolne operacje na urządzeniu.
 
-Ponadto odkryto, że **`/etc/zshenv`** mogłoby być używane jako ogólna technika ataku, nie tylko do obejścia SIP. Każdy profil użytkownika ma plik `~/.zshenv`, który zachowuje się tak samo jak `/etc/zshenv`, ale nie wymaga uprawnień root. Plik ten mógłby być używany jako mechanizm trwałości, uruchamiając się za każdym razem, gdy `zsh` się uruchamia, lub jako mechanizm podwyższenia uprawnień. Jeśli użytkownik administracyjny podniesie uprawnienia do roota, używając `sudo -s` lub `sudo <polecenie>`, plik `~/.zshenv` zostanie uruchomiony, skutecznie podnosząc uprawnienia do roota.
+Ponadto odkryto, że **`/etc/zshenv`** mogłoby być używane jako ogólna technika ataku, nie tylko do obejścia SIP. Każdy profil użytkownika ma plik `~/.zshenv`, który zachowuje się tak samo jak `/etc/zshenv`, ale nie wymaga uprawnień root. Plik ten mógłby być używany jako mechanizm trwałości, uruchamiając się za każdym razem, gdy `zsh` się uruchamia, lub jako mechanizm podwyższenia uprawnień. Jeśli użytkownik administracyjny podniesie uprawnienia do roota za pomocą `sudo -s` lub `sudo <polecenie>`, plik `~/.zshenv` zostanie uruchomiony, skutecznie podnosząc uprawnienia do roota.
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
@@ -143,7 +143,7 @@ fsck_cs /dev/diskX 1>&-
 touch /Library/Extensions/
 reboot
 ```
-Wykorzystanie tej luki ma poważne konsekwencje. Plik `Info.plist`, zazwyczaj odpowiedzialny za zarządzanie uprawnieniami dla rozszerzeń jądra, staje się nieskuteczny. Obejmuje to niemożność dodania do czarnej listy niektórych rozszerzeń, takich jak `AppleHWAccess.kext`. W konsekwencji, gdy mechanizm kontrolny SIP jest uszkodzony, to rozszerzenie może być załadowane, co daje nieautoryzowany dostęp do odczytu i zapisu pamięci RAM systemu.
+Wykorzystanie tej luki ma poważne konsekwencje. Plik `Info.plist`, normalnie odpowiedzialny za zarządzanie uprawnieniami dla rozszerzeń jądra, staje się nieskuteczny. Obejmuje to niemożność dodania do czarnej listy niektórych rozszerzeń, takich jak `AppleHWAccess.kext`. W konsekwencji, gdy mechanizm kontrolny SIP jest uszkodzony, to rozszerzenie może być załadowane, co daje nieautoryzowany dostęp do odczytu i zapisu pamięci RAM systemu.
 
 #### [Mount over SIP protected folders](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
@@ -164,7 +164,7 @@ Bezpieczeństwo tego procesu może być zagrożone, jeśli atakujący zmieni obr
 
 Kod atakującego przejmuje kontrolę podczas procesu aktualizacji, wykorzystując zaufanie systemu do instalatora. Atak postępuje poprzez modyfikację obrazu `InstallESD.dmg` za pomocą metody swizzling, szczególnie celując w metodę `extractBootBits`. Umożliwia to wstrzyknięcie złośliwego kodu przed użyciem obrazu dysku.
 
-Ponadto, w `InstallESD.dmg` znajduje się `BaseSystem.dmg`, który służy jako system plików dla kodu aktualizacji. Wstrzyknięcie dynamicznej biblioteki do tego pozwala złośliwemu kodowi działać w procesie zdolnym do modyfikacji plików na poziomie systemu operacyjnego, znacznie zwiększając potencjał kompromitacji systemu.
+Ponadto, w obrębie `InstallESD.dmg` znajduje się `BaseSystem.dmg`, który służy jako system plików dla kodu aktualizacji. Wstrzyknięcie dynamicznej biblioteki do tego pozwala złośliwemu kodowi działać w procesie zdolnym do modyfikacji plików na poziomie systemu operacyjnego, znacznie zwiększając potencjał kompromitacji systemu.
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
@@ -193,9 +193,9 @@ Zatwierdzone Zrzuty Systemu to funkcja wprowadzona przez Apple w **macOS Big Sur
 
 Oto bardziej szczegółowy opis:
 
-1. **Niemodyfikowalny System**: Zatwierdzone Zrzuty Systemu sprawiają, że wolumen systemowy macOS jest "niemodyfikowalny", co oznacza, że nie można go zmieniać. Zapobiega to wszelkim nieautoryzowanym lub przypadkowym zmianom w systemie, które mogłyby zagrozić bezpieczeństwu lub stabilności systemu.
+1. **Niemodyfikowalny System**: Zatwierdzone Zrzuty Systemu sprawiają, że wolumen systemowy macOS jest "niemodyfikowalny", co oznacza, że nie może być zmieniany. Zapobiega to wszelkim nieautoryzowanym lub przypadkowym zmianom w systemie, które mogłyby zagrozić bezpieczeństwu lub stabilności systemu.
 2. **Aktualizacje Oprogramowania Systemowego**: Gdy instalujesz aktualizacje lub ulepszenia macOS, macOS tworzy nowy zrzut systemu. Wolumen startowy macOS następnie używa **APFS (Apple File System)** do przełączenia się na ten nowy zrzut. Cały proces stosowania aktualizacji staje się bezpieczniejszy i bardziej niezawodny, ponieważ system zawsze może wrócić do poprzedniego zrzutu, jeśli coś pójdzie nie tak podczas aktualizacji.
-3. **Separacja Danych**: W połączeniu z koncepcją separacji Danych i Wolumenu Systemowego wprowadzoną w macOS Catalina, funkcja Zatwierdzonego Zrzutu Systemu zapewnia, że wszystkie twoje dane i ustawienia są przechowywane na oddzielnym wolumenie "**Dane**". Ta separacja sprawia, że twoje dane są niezależne od systemu, co upraszcza proces aktualizacji systemu i zwiększa bezpieczeństwo systemu.
+3. **Separacja Danych**: W połączeniu z koncepcją separacji danych i wolumenu systemowego wprowadzoną w macOS Catalina, funkcja Zatwierdzonego Zrzutu Systemu zapewnia, że wszystkie twoje dane i ustawienia są przechowywane na oddzielnym wolumenie "**Dane**". Ta separacja sprawia, że twoje dane są niezależne od systemu, co upraszcza proces aktualizacji systemu i zwiększa bezpieczeństwo systemu.
 
 Pamiętaj, że te zrzuty są automatycznie zarządzane przez macOS i nie zajmują dodatkowego miejsca na twoim dysku, dzięki możliwościom współdzielenia przestrzeni APFS. Ważne jest również, aby zauważyć, że te zrzuty różnią się od **zrzutów Time Machine**, które są kopią zapasową całego systemu dostępną dla użytkownika.
 
@@ -244,7 +244,7 @@ W poprzednim wyjściu można zobaczyć, że **lokacje dostępne dla użytkownika
 
 Ponadto, **zrzut wolumenu systemowego macOS** jest zamontowany w `/` i jest **zatwierdzony** (podpisany kryptograficznie przez system operacyjny). Tak więc, jeśli SIP zostanie ominięty i zmodyfikowany, **system operacyjny nie uruchomi się więcej**.
 
-Można również **zweryfikować, że pieczęć jest włączona**, uruchamiając:
+Możliwe jest również **zweryfikowanie, że pieczęć jest włączona**, uruchamiając:
 ```bash
 csrutil authenticated-root status
 Authenticated Root status: enabled

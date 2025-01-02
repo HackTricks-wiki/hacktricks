@@ -14,9 +14,9 @@ Sprawdź [**oryginalny raport tutaj**](https://www.mdsec.co.uk/2018/08/escaping-
 
 Pamiętaj, że od pierwszej ucieczki, Word może zapisywać dowolne pliki, których nazwa zaczyna się od `~$`, chociaż po poprawce poprzedniej luki nie było możliwe zapisywanie w `/Library/Application Scripts` ani w `/Library/LaunchAgents`.
 
-Odkryto, że z poziomu sandboxa można utworzyć **Login Item** (aplikacje, które będą uruchamiane, gdy użytkownik się loguje). Jednak te aplikacje **nie będą uruchamiane, chyba że** będą **notaryzowane** i **nie można dodać argumentów** (więc nie można po prostu uruchomić odwrotnego powłoki za pomocą **`bash`**).
+Odkryto, że z poziomu sandboxa można utworzyć **Login Item** (aplikacje, które będą uruchamiane, gdy użytkownik się loguje). Jednak te aplikacje **nie będą się uruchamiać, chyba że** będą **notaryzowane** i **nie można dodać argumentów** (więc nie można po prostu uruchomić odwrotnego powłoki za pomocą **`bash`**).
 
-Po poprzednim ominięciu Sandbox, Microsoft wyłączył opcję zapisywania plików w `~/Library/LaunchAgents`. Odkryto jednak, że jeśli umieścisz **plik zip jako Login Item**, `Archive Utility` po prostu **rozpakowuje** go w jego bieżącej lokalizacji. Tak więc, ponieważ domyślnie folder `LaunchAgents` w `~/Library` nie jest tworzony, możliwe było **spakowanie plist w `LaunchAgents/~$escape.plist`** i **umieszczenie** pliku zip w **`~/Library`**, aby po dekompresji dotarł do miejsca docelowego.
+Po poprzednim ominięciu Sandbox, Microsoft wyłączył opcję zapisywania plików w `~/Library/LaunchAgents`. Jednak odkryto, że jeśli umieścisz **plik zip jako Login Item**, `Archive Utility` po prostu **rozpakowuje** go w jego bieżącej lokalizacji. Tak więc, ponieważ domyślnie folder `LaunchAgents` w `~/Library` nie jest tworzony, możliwe było **spakowanie plist w `LaunchAgents/~$escape.plist`** i **umieszczenie** pliku zip w **`~/Library`**, aby po dekompresji dotarł do miejsca docelowego.
 
 Sprawdź [**oryginalny raport tutaj**](https://objective-see.org/blog/blog_0x4B.html).
 
@@ -28,7 +28,7 @@ Jednak poprzednia technika miała ograniczenie, jeśli folder **`~/Library/Launc
 
 Atakujący mógł stworzyć pliki **`.bash_profile`** i **`.zshenv`** z ładunkiem do wykonania, a następnie spakować je i **zapisać zip w folderze** użytkownika ofiary: **`~/~$escape.zip`**.
 
-Następnie, dodać plik zip do **Login Items** i następnie do aplikacji **`Terminal`**. Gdy użytkownik się ponownie zaloguje, plik zip zostanie rozpakowany w folderze użytkownika, nadpisując **`.bash_profile`** i **`.zshenv`**, a zatem terminal wykona jeden z tych plików (w zależności od tego, czy używana jest bash czy zsh).
+Następnie, dodać plik zip do **Login Items** i następnie do aplikacji **`Terminal`**. Gdy użytkownik się ponownie loguje, plik zip zostanie rozpakowany w folderze użytkownika, nadpisując **`.bash_profile`** i **`.zshenv`**, a zatem terminal wykona jeden z tych plików (w zależności od tego, czy używana jest bash czy zsh).
 
 Sprawdź [**oryginalny raport tutaj**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
 
@@ -42,7 +42,7 @@ Sprawdź [**oryginalny raport tutaj**](https://perception-point.io/blog/technica
 
 ### Ominięcie Sandbox w Wordzie z Open i stdin
 
-Narzędzie **`open`** również wspierało parametr **`--stdin`** (a po poprzednim ominięciu nie było już możliwe użycie `--env`).
+Narzędzie **`open`** obsługiwało również parametr **`--stdin`** (a po poprzednim ominięciu nie było już możliwe użycie `--env`).
 
 Chodzi o to, że nawet jeśli **`python`** był podpisany przez Apple, **nie wykona** skryptu z atrybutem **`quarantine`**. Jednak możliwe było przekazanie mu skryptu z stdin, więc nie sprawdzi, czy był kwarantannowany, czy nie:&#x20;
 

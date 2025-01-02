@@ -10,7 +10,7 @@ Jeśli **nie wiesz, czym są Windows Access Tokens**, przeczytaj tę stronę prz
 ../access-tokens.md
 {{#endref}}
 
-**Możesz być w stanie podnieść uprawnienia, wykorzystując tokeny, które już posiadasz**
+**Możesz być w stanie podnieść uprawnienia, nadużywając tokenów, które już posiadasz**
 
 ### SeImpersonatePrivilege
 
@@ -26,18 +26,18 @@ To uprawnienie, które posiada każdy proces, pozwala na impersonację (ale nie 
 
 ### SeAssignPrimaryPrivilege
 
-Jest bardzo podobne do **SeImpersonatePrivilege**, wykorzysta **tę samą metodę** do uzyskania uprawnionego tokena.\
+Jest bardzo podobne do **SeImpersonatePrivilege**, użyje **tej samej metody** do uzyskania uprawnionego tokena.\
 Następnie to uprawnienie pozwala **przypisać token główny** do nowego/zawieszonego procesu. Z uprawnionym tokenem impersonacyjnym możesz uzyskać token główny (DuplicateTokenEx).\
-Z tokenem możesz stworzyć **nowy proces** za pomocą 'CreateProcessAsUser' lub stworzyć proces zawieszony i **ustawić token** (ogólnie rzecz biorąc, nie możesz modyfikować głównego tokena działającego procesu).
+Z tym tokenem możesz stworzyć **nowy proces** za pomocą 'CreateProcessAsUser' lub stworzyć proces zawieszony i **ustawić token** (ogólnie rzecz biorąc, nie możesz modyfikować głównego tokena działającego procesu).
 
 ### SeTcbPrivilege
 
-Jeśli masz włączony ten token, możesz użyć **KERB_S4U_LOGON**, aby uzyskać **token impersonacyjny** dla dowolnego innego użytkownika bez znajomości poświadczeń, **dodać dowolną grupę** (administratorów) do tokena, ustawić **poziom integralności** tokena na "**medium**" i przypisać ten token do **bieżącego wątku** (SetThreadToken).
+Jeśli masz włączony ten token, możesz użyć **KERB_S4U_LOGON** do uzyskania **tokena impersonacyjnego** dla dowolnego innego użytkownika bez znajomości poświadczeń, **dodać dowolną grupę** (administratorów) do tokena, ustawić **poziom integralności** tokena na "**medium**" i przypisać ten token do **bieżącego wątku** (SetThreadToken).
 
 ### SeBackupPrivilege
 
 System jest zmuszony do **przyznania pełnego dostępu do odczytu** do dowolnego pliku (ograniczonego do operacji odczytu) przez to uprawnienie. Jest wykorzystywane do **odczytywania hashy haseł lokalnych kont Administratora** z rejestru, po czym narzędzia takie jak "**psexec**" lub "**wmiexec**" mogą być używane z hashem (technika Pass-the-Hash). Jednak ta technika zawodzi w dwóch warunkach: gdy konto lokalnego administratora jest wyłączone lub gdy obowiązuje polityka, która odbiera prawa administracyjne lokalnym administratorom łączącym się zdalnie.\
-Możesz **wykorzystać to uprawnienie** za pomocą:
+Możesz **nadużyć tego uprawnienia** za pomocą:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
 - [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
@@ -64,18 +64,18 @@ SeCreateTokenPrivilege to potężne uprawnienie, szczególnie przydatne, gdy uż
 
 ### SeLoadDriverPrivilege
 
-To uprawnienie pozwala na **ładowanie i odładowywanie sterowników urządzeń** poprzez utworzenie wpisu w rejestrze z określonymi wartościami dla `ImagePath` i `Type`. Ponieważ bezpośredni dostęp do zapisu do `HKLM` (HKEY_LOCAL_MACHINE) jest ograniczony, należy wykorzystać `HKCU` (HKEY_CURRENT_USER). Jednak aby `HKCU` był rozpoznawany przez jądro do konfiguracji sterownika, należy przestrzegać określonej ścieżki.
+To uprawnienie pozwala na **ładowanie i odładowywanie sterowników urządzeń** poprzez utworzenie wpisu w rejestrze z określonymi wartościami dla `ImagePath` i `Type`. Ponieważ bezpośredni dostęp do zapisu w `HKLM` (HKEY_LOCAL_MACHINE) jest ograniczony, należy zamiast tego wykorzystać `HKCU` (HKEY_CURRENT_USER). Jednak aby `HKCU` było rozpoznawane przez jądro do konfiguracji sterownika, należy przestrzegać określonej ścieżki.
 
 Ta ścieżka to `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, gdzie `<RID>` to identyfikator względny bieżącego użytkownika. Wewnątrz `HKCU` należy utworzyć tę całą ścieżkę i ustawić dwie wartości:
 
-- `ImagePath`, która jest ścieżką do binarnego pliku do wykonania
+- `ImagePath`, która jest ścieżką do wykonywanego pliku binarnego
 - `Type`, z wartością `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 
 **Kroki do wykonania:**
 
 1. Uzyskaj dostęp do `HKCU` zamiast `HKLM` z powodu ograniczonego dostępu do zapisu.
-2. Utwórz ścieżkę `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` w `HKCU`, gdzie `<RID>` reprezentuje względny identyfikator bieżącego użytkownika.
-3. Ustaw `ImagePath` na ścieżkę wykonania binarnego.
+2. Utwórz ścieżkę `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` w `HKCU`, gdzie `<RID>` reprezentuje identyfikator względny bieżącego użytkownika.
+3. Ustaw `ImagePath` na ścieżkę wykonywania pliku binarnego.
 4. Przypisz `Type` jako `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 ```python
 # Example Python code to set the registry values
@@ -88,11 +88,11 @@ reg.SetValueEx(key, "ImagePath", 0, reg.REG_SZ, "path_to_binary")
 reg.SetValueEx(key, "Type", 0, reg.REG_DWORD, 0x00000001)
 reg.CloseKey(key)
 ```
-Więcej sposobów na nadużycie tego uprawnienia w [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege)
+Więcej sposobów na nadużycie tego przywileju w [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege)
 
 ### SeTakeOwnershipPrivilege
 
-To jest podobne do **SeRestorePrivilege**. Jego główną funkcją jest umożliwienie procesowi **przyjęcia własności obiektu**, omijając wymóg wyraźnego dostępu dyskrecjonalnego poprzez przyznanie praw dostępu WRITE_OWNER. Proces polega najpierw na zabezpieczeniu własności zamierzonego klucza rejestru w celu pisania, a następnie na zmianie DACL, aby umożliwić operacje zapisu.
+Jest to podobne do **SeRestorePrivilege**. Jego główną funkcją jest umożliwienie procesowi **przyjęcia własności obiektu**, omijając wymóg wyraźnego dostępu dyskrecjonalnego poprzez przyznanie praw dostępu WRITE_OWNER. Proces polega najpierw na zabezpieczeniu własności zamierzonego klucza rejestru w celu zapisu, a następnie na zmianie DACL, aby umożliwić operacje zapisu.
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
 icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
@@ -114,7 +114,7 @@ Ten przywilej pozwala na **debugowanie innych procesów**, w tym na odczyt i zap
 
 #### Zrzut pamięci
 
-Możesz użyć [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) z [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), aby **złapać pamięć procesu**. W szczególności może to dotyczyć procesu **Local Security Authority Subsystem Service ([LSASS](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service))**, który jest odpowiedzialny za przechowywanie poświadczeń użytkowników po pomyślnym zalogowaniu się użytkownika do systemu.
+Możesz użyć [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) z [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) do **złapania pamięci procesu**. W szczególności dotyczy to procesu **Local Security Authority Subsystem Service ([LSASS](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service))**, który jest odpowiedzialny za przechowywanie poświadczeń użytkowników po pomyślnym zalogowaniu się użytkownika do systemu.
 
 Następnie możesz załadować ten zrzut w mimikatz, aby uzyskać hasła:
 ```
@@ -146,7 +146,7 @@ Dodatkowo, proces opisany w [tym artykule na Medium](https://medium.com/@raphael
 ```
 whoami /priv
 ```
-**Tokeny, które pojawiają się jako Wyłączone**, mogą być włączone, możesz faktycznie wykorzystać _Włączone_ i _Wyłączone_ tokeny.
+**Tokeny, które pojawiają się jako Wyłączone**, mogą być włączone, możesz faktycznie wykorzystać tokeny _Włączone_ i _Wyłączone_.
 
 ### Włącz wszystkie tokeny
 
@@ -159,7 +159,7 @@ Lub **skrypt** osadzony w tym [**poście**](https://www.leeholmes.com/adjusting-
 
 ## Tabela
 
-Pełna ściągawka uprawnień tokenów znajduje się pod adresem [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), poniższe podsumowanie wymieni tylko bezpośrednie sposoby na wykorzystanie uprawnienia do uzyskania sesji administratora lub odczytu wrażliwych plików.
+Pełna ściągawka uprawnień tokenów znajduje się pod adresem [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), podsumowanie poniżej wymieni tylko bezpośrednie sposoby na wykorzystanie uprawnienia do uzyskania sesji administratora lub odczytu wrażliwych plików.
 
 | Uprawnienie                | Wpływ      | Narzędzie               | Ścieżka wykonania                                                                                                                                                                                                                                                                                                                                     | Uwagi                                                                                                                                                                                                                                                                                                                        |
 | -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -167,9 +167,9 @@ Pełna ściągawka uprawnień tokenów znajduje się pod adresem [https://github
 | **`SeBackup`**             | **Zagrożenie**  | _**Wbudowane polecenia**_ | Odczytaj wrażliwe pliki za pomocą `robocopy /b`                                                                                                                                                                                                                                                                                                             | <p>- Może być bardziej interesujące, jeśli możesz odczytać %WINDIR%\MEMORY.DMP<br><br>- <code>SeBackupPrivilege</code> (i robocopy) nie są pomocne w przypadku otwartych plików.<br><br>- Robocopy wymaga zarówno SeBackup, jak i SeRestore, aby działać z parametrem /b.</p>                                                                      |
 | **`SeCreateToken`**        | _**Admin**_ | narzędzie firm trzecich | Utwórz dowolny token, w tym prawa lokalnego administratora za pomocą `NtCreateToken`.                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
 | **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Duplikuj token `lsass.exe`.                                                                                                                                                                                                                                                                                                                   | Skrypt do znalezienia na [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)                                                                                                                                                                                                         |
-| **`SeLoadDriver`**         | _**Admin**_ | narzędzie firm trzecich | <p>1. Załaduj wadliwy sterownik jądra, taki jak <code>szkg64.sys</code><br>2. Wykorzystaj lukę w sterowniku<br><br>Alternatywnie, uprawnienie może być użyte do odładowania sterowników związanych z bezpieczeństwem za pomocą wbudowanego polecenia <code>ftlMC</code>, tj.: <code>fltMC sysmondrv</code></p>                                                                           | <p>1. Luka w <code>szkg64</code> jest wymieniona jako <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">kod exploita</a> został stworzony przez <a href="https://twitter.com/parvezghh">Parvez Anwar</a></p> |
-| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Uruchom PowerShell/ISE z obecnym uprawnieniem SeRestore.<br>2. Włącz uprawnienie za pomocą <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>.<br>3. Zmień nazwę utilman.exe na utilman.old<br>4. Zmień nazwę cmd.exe na utilman.exe<br>5. Zablokuj konsolę i naciśnij Win+U</p> | <p>Atak może być wykryty przez niektóre oprogramowanie antywirusowe.</p><p>Alternatywna metoda polega na zastąpieniu binariów usług przechowywanych w "Program Files" przy użyciu tych samych uprawnień.</p>                                                                                                                                                            |
-| **`SeTakeOwnership`**      | _**Admin**_ | _**Wbudowane polecenia**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. Zmień nazwę cmd.exe na utilman.exe<br>4. Zablokuj konsolę i naciśnij Win+U</p>                                                                                                                                       | <p>Atak może być wykryty przez niektóre oprogramowanie antywirusowe.</p><p>Alternatywna metoda polega na zastąpieniu binariów usług przechowywanych w "Program Files" przy użyciu tych samych uprawnień.</p>                                                                                                                                                           |
+| **`SeLoadDriver`**         | _**Admin**_ | narzędzie firm trzecich | <p>1. Załaduj wadliwy sterownik jądra, taki jak <code>szkg64.sys</code><br>2. Wykorzystaj lukę w sterowniku<br><br>Alternatywnie, uprawnienie może być użyte do odinstalowania sterowników związanych z bezpieczeństwem za pomocą wbudowanego polecenia <code>ftlMC</code>, tj.: <code>fltMC sysmondrv</code></p>                                                                           | <p>1. Luka w <code>szkg64</code> jest wymieniona jako <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">kod exploitu</a> został stworzony przez <a href="https://twitter.com/parvezghh">Parvez Anwar</a></p> |
+| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Uruchom PowerShell/ISE z obecnym uprawnieniem SeRestore.<br>2. Włącz uprawnienie za pomocą <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>.<br>3. Zmień nazwę utilman.exe na utilman.old<br>4. Zmień nazwę cmd.exe na utilman.exe<br>5. Zablokuj konsolę i naciśnij Win+U</p> | <p>Atak może być wykryty przez niektóre oprogramowanie antywirusowe.</p><p>Alternatywna metoda polega na zastąpieniu binarnych plików usług przechowywanych w "Program Files" przy użyciu tych samych uprawnień</p>                                                                                                                                                            |
+| **`SeTakeOwnership`**      | _**Admin**_ | _**Wbudowane polecenia**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. Zmień nazwę cmd.exe na utilman.exe<br>4. Zablokuj konsolę i naciśnij Win+U</p>                                                                                                                                       | <p>Atak może być wykryty przez niektóre oprogramowanie antywirusowe.</p><p>Alternatywna metoda polega na zastąpieniu binarnych plików usług przechowywanych w "Program Files" przy użyciu tych samych uprawnień.</p>                                                                                                                                                           |
 | **`SeTcb`**                | _**Admin**_ | narzędzie firm trzecich | <p>Manipuluj tokenami, aby mieć włączone prawa lokalnego administratora. Może wymagać SeImpersonate.</p><p>Do weryfikacji.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 
 ## Odniesienie

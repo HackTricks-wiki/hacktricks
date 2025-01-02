@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Jednak spowoduje to błąd w wykonywanej aplikacji, innym, bardziej dyskretnym sposobem jest stworzenie agenta Java i użycie:
+Jednak spowoduje to błąd w uruchomionej aplikacji, innym, bardziej dyskretnym sposobem jest stworzenie agenta Java i użycie:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,7 +123,7 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## plik vmoptions
+## vmoptions file
 
 Ten plik wspiera specyfikację **parametrów Java** podczas wykonywania Java. Możesz użyć niektórych z wcześniejszych sztuczek, aby zmienić parametry java i **sprawić, że proces wykona dowolne polecenia**.\
 Co więcej, ten plik może również **zawierać inne** za pomocą katalogu `include`, więc możesz również zmienić dołączony plik.

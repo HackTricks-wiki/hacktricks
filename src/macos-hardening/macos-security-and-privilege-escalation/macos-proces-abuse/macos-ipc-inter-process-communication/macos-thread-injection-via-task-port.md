@@ -9,7 +9,7 @@
 
 ## 1. Przejęcie wątku
 
-Początkowo funkcja **`task_threads()`** jest wywoływana na porcie zadania, aby uzyskać listę wątków z zdalnego zadania. Wątek jest wybierany do przejęcia. To podejście różni się od konwencjonalnych metod wstrzykiwania kodu, ponieważ tworzenie nowego zdalnego wątku jest zabronione z powodu nowej mitigacji blokującej `thread_create_running()`.
+Początkowo wywoływana jest funkcja **`task_threads()`** na porcie zadania, aby uzyskać listę wątków z zdalnego zadania. Wątek jest wybierany do przejęcia. To podejście różni się od konwencjonalnych metod wstrzykiwania kodu, ponieważ tworzenie nowego zdalnego wątku jest zabronione z powodu nowej mitigacji blokującej `thread_create_running()`.
 
 Aby kontrolować wątek, wywoływana jest **`thread_suspend()`**, zatrzymując jego wykonanie.
 
@@ -93,7 +93,7 @@ Celem jest ustanowienie pamięci współdzielonej między lokalnymi a zdalnymi z
 1. **Alokacja Pamięci**:
 
 - Przydziel pamięć do współdzielenia za pomocą `mach_vm_allocate()`.
-- Użyj `xpc_shmem_create()`, aby stworzyć obiekt `OS_xpc_shmem` dla przydzielonego regionu pamięci. Ta funkcja zarządza tworzeniem wpisu pamięci Mach i przechowuje prawo wysyłania Mach w przesunięciu `0x18` obiektu `OS_xpc_shmem`.
+- Użyj `xpc_shmem_create()`, aby utworzyć obiekt `OS_xpc_shmem` dla przydzielonego regionu pamięci. Ta funkcja zarządza tworzeniem wpisu pamięci Mach i przechowuje prawo wysyłania Mach w przesunięciu `0x18` obiektu `OS_xpc_shmem`.
 
 2. **Tworzenie Pamięci Współdzielonej w Zdalnym Procesie**:
 
@@ -150,7 +150,7 @@ Ta kompleksowa kontrola jest zawarta w bibliotece [threadexec](https://github.co
 ## Ważne Rozważania:
 
 - Zapewnij prawidłowe użycie `memcpy()` do operacji odczytu/zapisu pamięci, aby utrzymać stabilność systemu i integralność danych.
-- Podczas transferu portów Mach lub deskryptorów plików, przestrzegaj odpowiednich protokołów i odpowiedzialnie zarządzaj zasobami, aby zapobiec wyciekom lub niezamierzonym dostępom.
+- Przy transferze portów Mach lub deskryptorów plików, przestrzegaj odpowiednich protokołów i odpowiedzialnie zarządzaj zasobami, aby zapobiec wyciekom lub niezamierzonym dostępom.
 
 Przestrzegając tych wytycznych i korzystając z biblioteki `threadexec`, można efektywnie zarządzać i interagować z procesami na szczegółowym poziomie, osiągając pełną kontrolę nad docelowym procesem.
 

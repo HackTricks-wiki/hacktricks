@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji z daną definicją. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał tylko go zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
+MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji na podstawie danej definicji. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał tylko go zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
 
 Definicja jest określona w języku definicji interfejsu (IDL) z użyciem rozszerzenia `.defs`.
 
@@ -12,7 +12,7 @@ Te definicje mają 5 sekcji:
 
 - **Deklaracja podsystemu**: Słowo kluczowe subsystem jest używane do wskazania **nazwa** i **id**. Możliwe jest również oznaczenie go jako **`KernelServer`**, jeśli serwer ma działać w jądrze.
 - **Inkluzje i importy**: MIG używa preprocesora C, więc może korzystać z importów. Ponadto możliwe jest użycie `uimport` i `simport` dla kodu generowanego przez użytkownika lub serwer.
-- **Deklaracje typów**: Możliwe jest definiowanie typów danych, chociaż zazwyczaj zaimportuje `mach_types.defs` i `std_types.defs`. Dla niestandardowych można użyć pewnej składni:
+- **Deklaracje typów**: Możliwe jest zdefiniowanie typów danych, chociaż zazwyczaj zaimportuje `mach_types.defs` i `std_types.defs`. Dla niestandardowych można użyć pewnej składni:
 - \[i`n/out]tran`: Funkcja, która musi być przetłumaczona z wiadomości przychodzącej lub do wiadomości wychodzącej
 - `c[user/server]type`: Mapowanie na inny typ C.
 - `destructor`: Wywołaj tę funkcję, gdy typ jest zwalniany.
@@ -106,7 +106,7 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 ```
 W tym przykładzie zdefiniowaliśmy tylko 1 funkcję w definicjach, ale gdybyśmy zdefiniowali więcej funkcji, byłyby one wewnątrz tablicy **`SERVERPREFmyipc_subsystem`**, a pierwsza zostałaby przypisana do ID **500**, druga do ID **501**...
 
-Jeśli oczekiwano, że funkcja wyśle **reply**, funkcja `mig_internal kern_return_t __MIG_check__Reply__<name>` również by istniała.
+Jeśli oczekiwano, że funkcja wyśle **odpowiedź**, funkcja `mig_internal kern_return_t __MIG_check__Reply__<name>` również by istniała.
 
 W rzeczywistości możliwe jest zidentyfikowanie tej relacji w strukturze **`subsystem_to_name_map_myipc`** z **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* w innych plikach):
 ```c
@@ -149,7 +149,7 @@ return FALSE;
 }
 </code></pre>
 
-Sprawdź wcześniej podkreślone linie uzyskujące dostęp do funkcji, aby wywołać według identyfikatora.
+Sprawdź wcześniej podkreślone linie uzyskujące dostęp do funkcji, aby wywołać ją według identyfikatora.
 
 Poniższy kod tworzy prosty **serwer** i **klienta**, gdzie klient może wywołać funkcje Odejmij z serwera:
 
@@ -217,7 +217,7 @@ USERPREFSubtract(port, 40, 2);
 
 ### NDR_record
 
-NDR_record jest eksportowany przez `libsystem_kernel.dylib` i jest to struktura, która pozwala MIG na **transformację danych, aby były niezależne od systemu**, w którym jest używana, ponieważ MIG był zaprojektowany do użycia między różnymi systemami (a nie tylko na tej samej maszynie).
+NDR_record jest eksportowany przez `libsystem_kernel.dylib` i jest to struktura, która pozwala MIG na **transformację danych, aby były niezależne od systemu**, w którym są używane, ponieważ MIG był zaprojektowany do użycia między różnymi systemami (a nie tylko na tej samej maszynie).
 
 To jest interesujące, ponieważ jeśli `_NDR_record` zostanie znaleziony w binarnym pliku jako zależność (`jtool2 -S <binary> | grep NDR` lub `nm`), oznacza to, że binarny plik jest klientem lub serwerem MIG.
 
@@ -264,7 +264,7 @@ rax = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (początkowy ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// Jeśli - else, if zwraca fałsz, podczas gdy else wywołuje odpowiednią funkcję i zwraca prawdę
+// Jeśli - inaczej, if zwraca fałsz, podczas gdy else wywołuje odpowiednią funkcję i zwraca prawdę
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -332,7 +332,7 @@ if (CPU_FLAGS &#x26; NE) {
 r8 = 0x1;
 }
 }
-// To samo if else jak w poprzedniej wersji
+// To samo if - else jak w poprzedniej wersji
 // Sprawdź użycie adresu 0x100004040 (tablica adresów funkcji)
 <strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;

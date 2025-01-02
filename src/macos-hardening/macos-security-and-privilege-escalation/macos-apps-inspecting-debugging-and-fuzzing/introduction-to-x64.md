@@ -13,7 +13,7 @@ x64 rozwija architekturę x86, oferując **16 rejestrów ogólnego przeznaczenia
 1. **`rax`** - Tradycyjnie używany do **wartości zwracanych** z funkcji.
 2. **`rbx`** - Często używany jako **rejestr bazowy** dla operacji pamięci.
 3. **`rcx`** - Powszechnie używany do **liczników pętli**.
-4. **`rdx`** - Używany w różnych rolach, w tym w rozszerzonych operacjach arytmetycznych.
+4. **`rdx`** - Używany w różnych rolach, w tym rozszerzonych operacjach arytmetycznych.
 5. **`rbp`** - **Wskaźnik bazowy** dla ramki stosu.
 6. **`rsp`** - **Wskaźnik stosu**, śledzący szczyt stosu.
 7. **`rsi`** i **`rdi`** - Używane do indeksów **źródłowych** i **docelowych** w operacjach na ciągach/pamięci.

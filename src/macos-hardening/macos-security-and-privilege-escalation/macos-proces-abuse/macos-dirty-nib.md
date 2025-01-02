@@ -30,9 +30,9 @@ set theDialogText to "PWND"
 display dialog theDialogText
 ```
 
-- Testuj, uruchamiając w debuggerze XCode i klikając przycisk.
+- Przetestuj, uruchamiając w debuggerze XCode i klikając przycisk.
 
-#### Celowanie w aplikację (Przykład: Pages)
+#### Celowanie w aplikację (przykład: Pages)
 
 1. **Przygotowanie**:
 - Skopiuj docelową aplikację (np. Pages) do oddzielnego katalogu (np. `/tmp/`).
@@ -57,7 +57,7 @@ W poście [https://sector7.computest.nl/post/2024-04-bringing-process-injection-
 ### Rozwiązywanie ograniczeń uruchamiania
 
 - Ograniczenia uruchamiania utrudniają wykonywanie aplikacji z nieoczekiwanych lokalizacji (np. `/tmp`).
-- Możliwe jest zidentyfikowanie aplikacji, które nie są chronione przez ograniczenia uruchamiania i celowanie w nie w celu wstrzykiwania plików NIB.
+- Możliwe jest zidentyfikowanie aplikacji, które nie są chronione przez ograniczenia uruchamiania i celowanie w nie w celu wstrzykiwania pliku NIB.
 
 ### Dodatkowe zabezpieczenia macOS
 

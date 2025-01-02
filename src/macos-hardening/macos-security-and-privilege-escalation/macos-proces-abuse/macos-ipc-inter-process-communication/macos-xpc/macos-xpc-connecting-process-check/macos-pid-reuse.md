@@ -17,7 +17,7 @@ Jak na przykład na tym obrazku (pochodzącym z odniesienia):
 
 Sprawdź ten przykład eksploitu (ponownie, pochodzący z odniesienia), aby zobaczyć 2 części eksploitu:
 
-- Jedna, która **generuje kilka forków**
+- Jeden, który **generuje kilka forków**
 - **Każdy fork** **wyśle** **ładunek** do usługi XPC, wykonując **`posix_spawn`** tuż po wysłaniu wiadomości.
 
 > [!CAUTION]

@@ -4,11 +4,11 @@
 
 ## Podstawowe informacje
 
-MacOS Sandbox (początkowo nazywany Seatbelt) **ogranicza aplikacje** działające w sandboxie do **dozwolonych działań określonych w profilu Sandbox**, z którym działa aplikacja. Pomaga to zapewnić, że **aplikacja będzie miała dostęp tylko do oczekiwanych zasobów**.
+MacOS Sandbox (początkowo nazywany Seatbelt) **ogranicza aplikacje** działające w piaskownicy do **dozwolonych działań określonych w profilu Sandbox**, z którym działa aplikacja. Pomaga to zapewnić, że **aplikacja będzie miała dostęp tylko do oczekiwanych zasobów**.
 
-Każda aplikacja z **uprawnieniem** **`com.apple.security.app-sandbox`** będzie uruchamiana w sandboxie. **Binarne pliki Apple** są zazwyczaj uruchamiane w Sandboxie, a wszystkie aplikacje z **App Store mają to uprawnienie**. Tak więc kilka aplikacji będzie uruchamianych w sandboxie.
+Każda aplikacja z **uprawnieniem** **`com.apple.security.app-sandbox`** będzie uruchamiana w piaskownicy. **Binarne pliki Apple** są zazwyczaj uruchamiane w piaskownicy, a wszystkie aplikacje z **App Store mają to uprawnienie**. Tak więc kilka aplikacji będzie uruchamianych w piaskownicy.
 
-Aby kontrolować, co proces może lub nie może robić, **Sandbox ma haki** w prawie każdej operacji, którą proces może próbować wykonać (w tym większości wywołań systemowych) przy użyciu **MACF**. Jednak w zależności od **uprawnień** aplikacji Sandbox może być bardziej liberalny w stosunku do procesu.
+Aby kontrolować, co proces może lub nie może robić, **Sandbox ma haki** w prawie każdej operacji, którą proces może próbować wykonać (w tym większości wywołań systemowych) przy użyciu **MACF**. Jednak w zależności od **uprawnień** aplikacji, Sandbox może być bardziej pobłażliwy wobec procesu.
 
 Niektóre ważne komponenty Sandbox to:
 
@@ -19,7 +19,7 @@ Niektóre ważne komponenty Sandbox to:
 
 ### Kontenery
 
-Każda aplikacja działająca w sandboxie będzie miała swój własny kontener w `~/Library/Containers/{CFBundleIdentifier}` :
+Każda aplikacja działająca w piaskownicy będzie miała swój własny kontener w `~/Library/Containers/{CFBundleIdentifier}` :
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -56,7 +56,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 tmp
 > [!CAUTION]
 > Zauważ, że nawet jeśli symlinki są tam, aby "uciec" z Sandbox i uzyskać dostęp do innych folderów, aplikacja nadal musi **mieć uprawnienia** do ich dostępu. Te uprawnienia znajdują się w **`.plist`** w `RedirectablePaths`.
 
-**`SandboxProfileData`** to skompilowany profil sandbox CFData zakodowany w B64.
+**`SandboxProfileData`** to skompilowany profil sandbox CFData zakodowany do B64.
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -106,11 +106,11 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 > [!WARNING]
-> Wszystko, co zostało utworzone/zmodyfikowane przez aplikację w piaskownicy, otrzyma **atrybut kwarantanny**. To uniemożliwi przestrzeni piaskownicy uruchomienie czegoś za pomocą **`open`**, wywołując Gatekeeper.
+> Wszystko, co zostało stworzone/zmodyfikowane przez aplikację w piaskownicy, otrzyma **atrybut kwarantanny**. To uniemożliwi przestrzeni piaskownicy uruchomienie czegoś za pomocą **`open`**, wywołując Gatekeeper.
 
 ## Profile Piaskownicy
 
-Profile piaskownicy to pliki konfiguracyjne, które wskazują, co będzie **dozwolone/zabronione** w tej **piaskownicy**. Używa języka **Sandbox Profile Language (SBPL)**, który wykorzystuje język programowania [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>).
+Profile piaskownicy to pliki konfiguracyjne, które wskazują, co będzie **dozwolone/zabronione** w tej **piaskownicy**. Używa **Języka Profilu Piaskownicy (SBPL)**, który wykorzystuje język programowania [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>).
 
 Tutaj znajdziesz przykład:
 ```scheme
@@ -141,11 +141,9 @@ Ważne **usługi systemowe** również działają w swoich własnych niestandard
 - **`/System/Library/Sandbox/Profiles`**
 - Inne profile sandboxów można sprawdzić w [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
-Aplikacje z **App Store** używają **profilu** **`/System/Library/Sandbox/Profiles/application.sb`**. Możesz sprawdzić w tym profilu, jak uprawnienia takie jak **`com.apple.security.network.server`** pozwalają procesowi na korzystanie z sieci.
+Aplikacje z **App Store** używają **profilu** **`/System/Library/Sandbox/Profiles/application.sb`**. Możesz sprawdzić w tym profilu, jak uprawnienia takie jak **`com.apple.security.network.server`** pozwalają procesowi korzystać z sieci.
 
-Następnie niektóre **usługi demonów Apple** używają różnych profili znajdujących się w `/System/Library/Sandbox/Profiles/*.sb` lub `/usr/share/sandbox/*.sb`. Te sandboxy są stosowane w głównej funkcji wywołującej API `sandbox_init_XXX`.
-
-**SIP** to profil Sandbox o nazwie platform_profile w `/System/Library/Sandbox/rootless.conf`.
+SIP to profil Sandbox o nazwie platform_profile w /System/Library/Sandbox/rootless.conf
 
 ### Przykłady profili Sandbox
 
@@ -243,7 +241,7 @@ W iOS domyślny profil nazywa się **container** i nie mamy tekstowej reprezenta
 
 ### Niestandardowy SBPL w aplikacjach App Store
 
-Możliwe jest, aby firmy uruchamiały swoje aplikacje **z niestandardowymi profilami Sandbox** (zamiast z domyślnym). Muszą używać uprawnienia **`com.apple.security.temporary-exception.sbpl`**, które musi być autoryzowane przez Apple.
+Możliwe jest, aby firmy uruchamiały swoje aplikacje **z niestandardowymi profilami Sandbox** (zamiast z domyślnym). Muszą użyć uprawnienia **`com.apple.security.temporary-exception.sbpl`**, które musi być autoryzowane przez Apple.
 
 Możliwe jest sprawdzenie definicji tego uprawnienia w **`/System/Library/Sandbox/Profiles/application.sb:`**
 ```scheme
@@ -296,7 +294,7 @@ Należy zauważyć, że rozszerzenia są również bardzo związane z uprawnieni
 
 [**Zgodnie z tym**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), funkcje **`sandbox_check`** (to jest `__mac_syscall`), mogą sprawdzić **czy operacja jest dozwolona czy nie** przez sandbox w danym PID, tokenie audytu lub unikalnym ID.
 
-Narzędzie [**sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (znajdź je [skompilowane tutaj](https://newosxbook.com/articles/hitsb.html)) może sprawdzić, czy PID może wykonać określone działania:
+[**Narzędzie sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (znajdź je [skompilowane tutaj](https://newosxbook.com/articles/hitsb.html)) może sprawdzić, czy PID może wykonać określone działania:
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access
@@ -307,7 +305,7 @@ sbtool <pid> all
 
 Możliwe jest również zawieszenie i wznowienie piaskownicy za pomocą funkcji `sandbox_suspend` i `sandbox_unsuspend` z `libsystem_sandbox.dylib`.
 
-Należy zauważyć, że aby wywołać funkcję zawieszenia, sprawdzane są pewne uprawnienia w celu autoryzacji wywołującego, takie jak:
+Zauważ, że aby wywołać funkcję zawieszenia, sprawdzane są pewne uprawnienia, aby autoryzować wywołującego do jej wywołania, takie jak:
 
 - com.apple.private.security.sandbox-manager
 - com.apple.security.print
@@ -321,7 +319,7 @@ Wywołanie funkcji `___sandbox_ms` opakowuje `mac_syscall`, wskazując w pierwsz
 
 - **set_profile (#0)**: Zastosuj skompilowany lub nazwany profil do procesu.
 - **platform_policy (#1)**: Wymuś kontrole polityki specyficzne dla platformy (różni się między macOS a iOS).
-- **check_sandbox (#2)**: Wykonaj ręczną kontrolę konkretnej operacji piaskownicy.
+- **check_sandbox (#2)**: Wykonaj ręczną kontrolę konkretnej operacji w piaskownicy.
 - **note (#3)**: Dodaje notację do piaskownicy.
 - **container (#4)**: Dołącz notację do piaskownicy, zazwyczaj w celach debugowania lub identyfikacji.
 - **extension_issue (#5)**: Generuje nową rozszerzenie dla procesu.
@@ -350,7 +348,7 @@ Wywołanie funkcji `___sandbox_ms` opakowuje `mac_syscall`, wskazując w pierwsz
 
 ## Sandbox.kext
 
-Należy zauważyć, że w iOS rozszerzenie jądra zawiera **wbudowane wszystkie profile** wewnątrz segmentu `__TEXT.__const`, aby uniknąć ich modyfikacji. Oto niektóre interesujące funkcje z rozszerzenia jądra:
+Zauważ, że w iOS rozszerzenie jądra zawiera **wbudowane wszystkie profile** wewnątrz segmentu `__TEXT.__const`, aby uniknąć ich modyfikacji. Oto niektóre interesujące funkcje z rozszerzenia jądra:
 
 - **`hook_policy_init`**: Hookuje `mpo_policy_init` i jest wywoływana po `mac_policy_register`. Wykonuje większość inicjalizacji piaskownicy. Inicjalizuje również SIP.
 - **`hook_policy_initbsd`**: Ustawia interfejs sysctl rejestrując `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` i `security.mac.sandbox.debug_mode` (jeśli uruchomione z `PE_i_can_has_debugger`).
@@ -358,9 +356,9 @@ Należy zauważyć, że w iOS rozszerzenie jądra zawiera **wbudowane wszystkie 
 
 ### MACF Hooks
 
-**`Sandbox.kext`** używa ponad stu hooków za pośrednictwem MACF. Większość hooków sprawdzi tylko niektóre trywialne przypadki, które pozwalają na wykonanie akcji, jeśli nie, wywołają **`cred_sb_evalutate`** z **poświadczeniami** z MACF i numerem odpowiadającym **operacji** do wykonania oraz **buforem** na wyjście.
+**`Sandbox.kext`** używa więcej niż stu hooków za pośrednictwem MACF. Większość hooków sprawdzi tylko niektóre trywialne przypadki, które pozwalają na wykonanie akcji, jeśli nie, wywołają **`cred_sb_evalutate`** z **poświadczeniami** z MACF i numerem odpowiadającym **operacji** do wykonania oraz **buforem** dla wyjścia.
 
-Dobrym przykładem jest funkcja **`_mpo_file_check_mmap`**, która hookuje **`mmap`** i która zacznie sprawdzać, czy nowa pamięć będzie zapisywalna (a jeśli nie, pozwoli na wykonanie), następnie sprawdzi, czy jest używana dla wspólnej pamięci dyld, a jeśli tak, pozwoli na wykonanie, a na koniec wywoła **`sb_evaluate_internal`** (lub jeden z jego wrapperów), aby przeprowadzić dalsze kontrole zezwolenia.
+Dobrym przykładem jest funkcja **`_mpo_file_check_mmap`**, która hookuje **`mmap`** i która zacznie sprawdzać, czy nowa pamięć będzie zapisywalna (a jeśli nie, pozwoli na wykonanie), następnie sprawdzi, czy jest używana dla pamięci podręcznej dyld i jeśli tak, pozwoli na wykonanie, a na koniec wywoła **`sb_evaluate_internal`** (lub jeden z jego wrapperów), aby przeprowadzić dalsze kontrole zezwolenia.
 
 Ponadto, spośród setek hooków, które używa Sandbox, są 3, które są szczególnie interesujące:
 
@@ -368,7 +366,7 @@ Ponadto, spośród setek hooków, które używa Sandbox, są 3, które są szcze
 - `mpo_vnode_check_exec`: Wywoływana, gdy proces ładuje powiązany binarny plik, następnie przeprowadzana jest kontrola profilu oraz kontrola zabraniająca wykonywania SUID/SGID.
 - `mpo_cred_label_update_execve`: Wywoływana, gdy przypisywana jest etykieta. Jest to najdłuższa, ponieważ jest wywoływana, gdy binarny plik jest w pełni załadowany, ale jeszcze nie został wykonany. Wykona takie działania jak tworzenie obiektu piaskownicy, dołączenie struktury piaskownicy do poświadczeń kauth, usunięcie dostępu do portów mach...
 
-Należy zauważyć, że **`_cred_sb_evalutate`** jest wrapperem nad **`sb_evaluate_internal`** i ta funkcja pobiera przekazane poświadczenia, a następnie wykonuje ocenę za pomocą funkcji **`eval`**, która zazwyczaj ocenia **profil platformy**, który domyślnie jest stosowany do wszystkich procesów, a następnie **specyficzny profil procesu**. Należy zauważyć, że profil platformy jest jednym z głównych komponentów **SIP** w macOS.
+Zauważ, że **`_cred_sb_evalutate`** jest wrapperem nad **`sb_evaluate_internal`** i ta funkcja pobiera przekazane poświadczenia, a następnie przeprowadza ocenę za pomocą funkcji **`eval`**, która zazwyczaj ocenia **profil platformy**, który domyślnie jest stosowany do wszystkich procesów, a następnie **specyficzny profil procesu**. Zauważ, że profil platformy jest jednym z głównych komponentów **SIP** w macOS.
 
 ## Sandboxd
 

@@ -18,7 +18,7 @@ Warto zauważyć, że w nowoczesnych systemach MacOS ten plik jest zazwyczaj szy
 
 ### Memory Pressure Logs
 
-Innym ważnym plikiem związanym z pamięcią w systemach MacOS jest **dziennik ciśnienia pamięci**. Dzienniki te znajdują się w `/var/log` i zawierają szczegółowe informacje o użyciu pamięci przez system oraz zdarzeniach ciśnienia. Mogą być szczególnie przydatne do diagnozowania problemów związanych z pamięcią lub zrozumienia, jak system zarządza pamięcią w czasie.
+Innym ważnym plikiem związanym z pamięcią w systemach MacOS jest **dziennik ciśnienia pamięci**. Te dzienniki znajdują się w `/var/log` i zawierają szczegółowe informacje o użyciu pamięci przez system oraz zdarzeniach ciśnienia. Mogą być szczególnie przydatne do diagnozowania problemów związanych z pamięcią lub zrozumienia, jak system zarządza pamięcią w czasie.
 
 ## Dumping memory with osxpmem
 

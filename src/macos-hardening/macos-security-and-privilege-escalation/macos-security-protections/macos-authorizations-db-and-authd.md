@@ -25,7 +25,7 @@ Reguły są przechowywane w tabeli `rules` wewnątrz bazy danych i zawierają na
 - **modified**: Przechowuje znacznik czasu ostatniej modyfikacji dokonanej w regule.
 - **hash**: Przechowuje wartość hasha reguły, aby zapewnić jej integralność i wykryć manipulacje.
 - **identifier**: Dostarcza unikalny identyfikator w postaci ciągu, taki jak UUID, dla zewnętrznych odniesień do reguły.
-- **requirement**: Zawiera zserializowane dane definiujące specyficzne wymagania autoryzacji i mechanizmy reguły.
+- **requirement**: Zawiera zserializowane dane definiujące specyficzne wymagania autoryzacyjne i mechanizmy reguły.
 - **comment**: Oferuje opis lub komentarz w formie czytelnej dla człowieka dotyczący reguły w celach dokumentacyjnych i jasności.
 
 ### Przykład
@@ -75,9 +75,9 @@ Ponadto w [https://www.dssw.co.uk/reference/authorization-rights/authenticate-ad
 
 To demon, który odbiera żądania autoryzacji klientów do wykonywania wrażliwych działań. Działa jako usługa XPC zdefiniowana w folderze `XPCServices/` i używa do zapisywania swoich logów w `/var/log/authd.log`.
 
-Ponadto, korzystając z narzędzia security, możliwe jest przetestowanie wielu interfejsów API `Security.framework`. Na przykład `AuthorizationExecuteWithPrivileges` uruchamiając: `security execute-with-privileges /bin/ls`
+Ponadto, korzystając z narzędzia security, możliwe jest testowanie wielu interfejsów API `Security.framework`. Na przykład `AuthorizationExecuteWithPrivileges` uruchamiając: `security execute-with-privileges /bin/ls`
 
-To spowoduje fork i exec `/usr/libexec/security_authtrampoline /bin/ls` jako root, co poprosi o uprawnienia w oknie dialogowym, aby wykonać ls jako root:
+To spowoduje fork i exec `/usr/libexec/security_authtrampoline /bin/ls` jako root, co poprosi o uprawnienia w oknie dialogowym do wykonania ls jako root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 

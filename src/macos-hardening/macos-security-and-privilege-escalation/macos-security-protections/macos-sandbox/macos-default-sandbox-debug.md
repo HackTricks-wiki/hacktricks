@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Na tej stronie znajdziesz, jak stworzyć aplikację do uruchamiania dowolnych poleceń z wnętrza domyślnego sandboxu macOS:
+Na tej stronie znajdziesz, jak stworzyć aplikację do uruchamiania dowolnych poleceń z wnętrza domyślnego sandboxa macOS:
 
 1. Skompiluj aplikację:
 ```objectivec:main.m

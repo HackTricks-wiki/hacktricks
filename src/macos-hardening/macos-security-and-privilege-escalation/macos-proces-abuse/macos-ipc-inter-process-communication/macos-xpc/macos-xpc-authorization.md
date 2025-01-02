@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Aby uzyskać więcej informacji na temat prawidłowej konfiguracji tego sprawdzenia, zobacz:
+Dla uzyskania dodatkowych informacji na temat prawidłowej konfiguracji tego sprawdzenia:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -35,7 +35,7 @@ macos-xpc-connecting-process-check/
 
 ### Prawa aplikacji
 
-Jednakże, **zachodzi pewna autoryzacja, gdy wywoływana jest metoda z HelperTool**.
+Jednakże, zachodzi pewne **autoryzowanie, gdy wywoływana jest metoda z HelperTool**.
 
 Funkcja **`applicationDidFinishLaunching`** z `App/AppDelegate.m` utworzy pusty odnośnik autoryzacji po uruchomieniu aplikacji. To powinno zawsze działać.\
 Następnie spróbuje **dodać pewne prawa** do tego odnośnika autoryzacji, wywołując `setupAuthorizationRights`:
@@ -232,7 +232,7 @@ Zauważ, że aby **sprawdzić wymagania do uzyskania** prawa do wywołania tej m
 
 W tym przypadku, aby wywołać funkcję `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` jest zdefiniowane jako `@kAuthorizationRuleClassAllow`. Tak więc **każdy może to wywołać**.
 
-### Informacje o DB
+### DB Information
 
 Wspomniano, że te informacje są przechowywane w `/var/db/auth.db`. Możesz wylistować wszystkie przechowywane reguły za pomocą:
 ```sql
@@ -252,9 +252,9 @@ Możesz znaleźć **wszystkie konfiguracje uprawnień** [**tutaj**](https://www.
 - To jest najprostszy klucz. Jeśli ustawiony na `false`, oznacza, że użytkownik nie musi podawać uwierzytelnienia, aby uzyskać to prawo.
 - Używa się go w **kombinacji z jednym z 2 poniżej lub wskazując grupę**, do której użytkownik musi należeć.
 2. **'allow-root': 'true'**
-- Jeśli użytkownik działa jako użytkownik root (który ma podwyższone uprawnienia), a ten klucz jest ustawiony na `true`, użytkownik root może potencjalnie uzyskać to prawo bez dalszego uwierzytelnienia. Jednak zazwyczaj uzyskanie statusu użytkownika root już wymaga uwierzytelnienia, więc to nie jest scenariusz "bez uwierzytelnienia" dla większości użytkowników.
+- Jeśli użytkownik działa jako użytkownik root (który ma podwyższone uprawnienia), a ten klucz jest ustawiony na `true`, użytkownik root może potencjalnie uzyskać to prawo bez dalszego uwierzytelnienia. Jednak zazwyczaj uzyskanie statusu użytkownika root już wymaga uwierzytelnienia, więc nie jest to scenariusz "bez uwierzytelnienia" dla większości użytkowników.
 3. **'session-owner': 'true'**
-- Jeśli ustawione na `true`, właściciel sesji (aktualnie zalogowany użytkownik) automatycznie uzyska to prawo. Może to obejść dodatkowe uwierzytelnienie, jeśli użytkownik jest już zalogowany.
+- Jeśli ustawiony na `true`, właściciel sesji (aktualnie zalogowany użytkownik) automatycznie uzyska to prawo. Może to obejść dodatkowe uwierzytelnienie, jeśli użytkownik jest już zalogowany.
 4. **'shared': 'true'**
 - Ten klucz nie przyznaje praw bez uwierzytelnienia. Zamiast tego, jeśli ustawiony na `true`, oznacza, że po uwierzytelnieniu prawa mogą być dzielone między wieloma procesami, bez potrzeby ponownego uwierzytelniania każdego z nich. Jednak początkowe przyznanie prawa nadal wymagałoby uwierzytelnienia, chyba że połączone z innymi kluczami, takimi jak `'authenticate-user': 'false'`.
 
@@ -277,7 +277,7 @@ Jeśli znajdziesz funkcję: **`[HelperTool checkAuthorization:command:]`**, praw
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Jeśli ta funkcja wywołuje funkcje takie jak `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, to używa [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+Jeśli ta funkcja wywołuje funkcje takie jak `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, to korzysta z [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
 Sprawdź **`/var/db/auth.db`**, aby zobaczyć, czy możliwe jest uzyskanie uprawnień do wywołania niektórej uprzywilejowanej akcji bez interakcji użytkownika.
 

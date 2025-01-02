@@ -17,14 +17,14 @@ Gdy nawiązywane jest połączenie z usługą XPC, serwer sprawdzi, czy połącz
 5. (4 lub 5) Sprawdzenie, czy proces łączący ma wzmocniony czas działania bez niebezpiecznych uprawnień (jak te, które pozwalają na ładowanie dowolnych bibliotek lub używanie zmiennych środowiskowych DYLD).
 1. Jeśli **to nie jest zweryfikowane**, klient może być **podatny na wstrzykiwanie kodu**.
 6. Sprawdzenie, czy proces łączący ma **uprawnienie**, które pozwala mu połączyć się z usługą. Dotyczy to binariów Apple.
-7. **Weryfikacja** musi być **oparta** na **tokenie audytu klienta** **zamiast** jego identyfikatora procesu (**PID**), ponieważ ten pierwszy zapobiega **atakom ponownego użycia PID**.
+7. **Weryfikacja** musi być **oparta** na **tokenie audytu klienta** **zamiast** na jego identyfikatorze procesu (**PID**), ponieważ ten pierwszy zapobiega **atakom na ponowne użycie PID**.
 - Deweloperzy **rzadko używają tokena audytu** w wywołaniach API, ponieważ jest on **prywatny**, więc Apple może **zmienić** go w dowolnym momencie. Dodatkowo, użycie prywatnych API nie jest dozwolone w aplikacjach Mac App Store.
 - Jeśli używana jest metoda **`processIdentifier`**, może być podatna.
 - **`xpc_dictionary_get_audit_token`** powinno być używane zamiast **`xpc_connection_get_audit_token`**, ponieważ to ostatnie może być również [podatne w pewnych sytuacjach](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 
 ### Communication Attacks
 
-Aby uzyskać więcej informacji na temat ataku ponownego użycia PID, sprawdź:
+Aby uzyskać więcej informacji na temat ataku na ponowne użycie PID, sprawdź:
 
 {{#ref}}
 macos-pid-reuse.md
@@ -71,7 +71,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-Jeśli deweloper nie chce sprawdzać wersji klienta, mógłby przynajmniej sprawdzić, czy klient nie jest podatny na wstrzykiwanie procesów:
+Jeśli deweloper nie chce sprawdzać wersji klienta, mógłby przynajmniej sprawdzić, że klient nie jest podatny na wstrzykiwanie procesów:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;

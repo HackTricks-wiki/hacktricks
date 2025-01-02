@@ -49,7 +49,7 @@ macos-installers-abuse.md
 
 - **`.dmg`**: Pliki obrazu dysku Apple są bardzo częste dla instalatorów.
 - **`.kext`**: Musi mieć określoną strukturę i jest wersją sterownika dla OS X. (to jest pakiet)
-- **`.plist`**: Znany również jako lista właściwości, przechowuje informacje w formacie XML lub binarnym.
+- **`.plist`**: Znane również jako lista właściwości, przechowuje informacje w formacie XML lub binarnym.
 - Może być w formacie XML lub binarnym. Pliki binarne można odczytać za pomocą:
 - `defaults read config.plist`
 - `/usr/libexec/PlistBuddy -c print config.plsit`
@@ -97,7 +97,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Niektóre ekstraktory mogą nie działać, ponieważ dyliby są wstępnie powiązane z twardo zakodowanymi adresami, przez co mogą skakać do nieznanych adresów.
+Niektóre ekstraktory nie będą działać, ponieważ dyliby są wstępnie powiązane z twardo zakodowanymi adresami, przez co mogą skakać do nieznanych adresów.
 
 > [!TIP]
 > Możliwe jest również pobranie Shared Library Cache z innych urządzeń \*OS w macos, używając emulatora w Xcode. Zostaną one pobrane w: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, jak: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
@@ -114,8 +114,8 @@ Pule gałęzi to małe dyliby Mach-O, które tworzą małe przestrzenie między 
 
 Używając zmiennych środowiskowych:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> To pozwoli załadować nową pamięć podręczną wspólnej biblioteki.
-- **`DYLD_SHARED_CACHE_DIR=avoid`** i ręcznie zastąpić biblioteki dowiązaniami do pamięci podręcznej z rzeczywistymi (będziesz musiał je wyodrębnić).
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> To pozwoli na załadowanie nowej pamięci podręcznej biblioteki współdzielonej.
+- **`DYLD_SHARED_CACHE_DIR=avoid`** i ręczne zastąpienie bibliotek dowiązaniami do pamięci podręcznej z rzeczywistymi (będziesz musiał je wyodrębnić).
 
 ## Specjalne uprawnienia plików
 
@@ -127,7 +127,7 @@ W **folderze**, **odczyt** pozwala na **wyświetlenie go**, **zapis** pozwala na
 
 Istnieją pewne flagi, które mogą być ustawione w plikach, co sprawi, że plik będzie zachowywał się inaczej. Możesz **sprawdzić flagi** plików w katalogu za pomocą `ls -lO /path/directory`
 
-- **`uchg`**: Znana jako flaga **uchange**, **zapobiegnie wszelkim działaniom** zmieniającym lub usuwającym **plik**. Aby ją ustawić, użyj: `chflags uchg file.txt`
+- **`uchg`**: Znana jako flaga **uchange**, będzie **zapobiegać jakiejkolwiek akcji** zmieniającej lub usuwającej **plik**. Aby ją ustawić, użyj: `chflags uchg file.txt`
 - Użytkownik root może **usunąć flagę** i zmodyfikować plik.
 - **`restricted`**: Ta flaga sprawia, że plik jest **chroniony przez SIP** (nie możesz dodać tej flagi do pliku).
 - **`Sticky bit`**: Jeśli katalog ma bit sticky, **tylko** właściciel **katalogu lub root mogą zmieniać nazwy lub usuwać** pliki. Zazwyczaj jest to ustawiane w katalogu /tmp, aby zapobiec zwykłym użytkownikom w usuwaniu lub przenoszeniu plików innych użytkowników.
@@ -180,11 +180,11 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 
 Atrybuty rozszerzone mają nazwę i dowolną wartość, a ich zawartość można zobaczyć za pomocą `ls -@` i manipulować nimi za pomocą polecenia `xattr`. Niektóre powszechne atrybuty rozszerzone to:
 
-- `com.apple.resourceFork`: Kompatybilność z forkami zasobów. Widoczne również jako `filename/..namedfork/rsrc`
+- `com.apple.resourceFork`: Zgodność z forkami zasobów. Widoczne również jako `filename/..namedfork/rsrc`
 - `com.apple.quarantine`: MacOS: mechanizm kwarantanny Gatekeepera (III/6)
 - `metadata:*`: MacOS: różne metadane, takie jak `_backup_excludeItem` lub `kMD*`
 - `com.apple.lastuseddate` (#PS): Data ostatniego użycia pliku
-- `com.apple.FinderInfo`: MacOS: informacje o Finderze (np. kolorowe tagi)
+- `com.apple.FinderInfo`: MacOS: Informacje o Finderze (np. kolorowe tagi)
 - `com.apple.TextEncoding`: Określa kodowanie tekstu plików ASCII
 - `com.apple.logd.metadata`: Używane przez logd w plikach w `/var/db/diagnostics`
 - `com.apple.genstore.*`: Przechowywanie generacyjne (`/.DocumentRevisions-V100` w katalogu głównym systemu plików)
@@ -196,7 +196,7 @@ Atrybuty rozszerzone mają nazwę i dowolną wartość, a ich zawartość można
 
 ### Forki zasobów | macOS ADS
 
-To sposób na uzyskanie **Alternatywnych Strumieni Danych w maszynach MacOS**. Możesz zapisać zawartość w atrybucie rozszerzonym o nazwie **com.apple.ResourceFork** wewnątrz pliku, zapisując go w **file/..namedfork/rsrc**.
+To sposób na uzyskanie **Alternatywnych Strumieni Danych w MacOS**. Możesz zapisać zawartość w atrybucie rozszerzonym o nazwie **com.apple.ResourceFork** wewnątrz pliku, zapisując go w **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -215,7 +215,7 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 
 Rozszerzony atrybut `com.apple.decmpfs` wskazuje, że plik jest przechowywany w zaszyfrowanej formie, `ls -l` zgłosi **rozmiar 0**, a skompresowane dane znajdują się w tym atrybucie. Kiedy plik jest otwierany, jest on odszyfrowywany w pamięci.
 
-Ten atrybut można zobaczyć za pomocą `ls -lO`, oznaczony jako skompresowany, ponieważ skompresowane pliki są również oznaczone flagą `UF_COMPRESSED`. Jeśli skompresowany plik zostanie usunięty z tą flagą za pomocą `chflags nocompressed </path/to/file>`, system nie będzie wiedział, że plik był skompresowany i dlatego nie będzie w stanie go dekompresować i uzyskać dostęp do danych (pomyśli, że jest on w rzeczywistości pusty).
+Ten atrybut można zobaczyć za pomocą `ls -lO`, oznaczony jako skompresowany, ponieważ skompresowane pliki są również oznaczone flagą `UF_COMPRESSED`. Jeśli skompresowany plik zostanie usunięty z tą flagą za pomocą `chflags nocompressed </path/to/file>`, system nie będzie wiedział, że plik był skompresowany i dlatego nie będzie w stanie go dekompresować i uzyskać dostępu do danych (pomyśli, że jest on w rzeczywistości pusty).
 
 Narzędzie afscexpand może być użyte do wymuszenia dekompresji pliku.
 
@@ -247,7 +247,7 @@ Katalog `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System
 ## Pliki dziennika
 
 - **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Zawiera informacje o pobranych plikach, takie jak adres URL, z którego zostały pobrane.
-- **`/var/log/system.log`**: Główny dziennik systemów OSX. com.apple.syslogd.plist jest odpowiedzialny za wykonywanie syslogowania (możesz sprawdzić, czy jest wyłączone, szukając "com.apple.syslogd" w `launchctl list`).
+- **`/var/log/system.log`**: Główny dziennik systemów OSX. com.apple.syslogd.plist jest odpowiedzialny za wykonywanie syslogowania (możesz sprawdzić, czy jest wyłączony, szukając "com.apple.syslogd" w `launchctl list`).
 - **`/private/var/log/asl/*.asl`**: To są Dzienniki Systemowe Apple, które mogą zawierać interesujące informacje.
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Przechowuje ostatnio otwierane pliki i aplikacje przez "Finder".
 - **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Przechowuje elementy do uruchomienia po starcie systemu.
