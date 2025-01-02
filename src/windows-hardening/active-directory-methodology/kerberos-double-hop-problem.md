@@ -8,96 +8,84 @@
 
 ## Introduction
 
-The Kerberos "Double Hop" problem appears when an attacker attempts to use **Kerberos authentication across two** **hops**, for example using **PowerShell**/**WinRM**.
+Kerberos "Double Hop" problem se pojavljuje kada napadač pokušava da koristi **Kerberos autentifikaciju preko dva** **hopa**, na primer koristeći **PowerShell**/**WinRM**.
 
-When an **authentication** occurs through **Kerberos**, **credentials** **aren't** cached in **memory.** Therefore, if you run mimikatz you **won't find credentials** of the user in the machine even if he is running processes.
+Kada se **autentifikacija** vrši putem **Kerberos-a**, **akreditivi** **nisu** keširani u **memoriji.** Stoga, ako pokrenete mimikatz nećete **pronaći akreditive** korisnika na mašini čak i ako on pokreće procese.
 
-This is because when connecting with Kerberos these are the steps:
+To je zato što su koraci prilikom povezivanja sa Kerberos-om sledeći:
 
-1. User1 provides credentials and **domain controller** returns a Kerberos **TGT** to the User1.
-2. User1 uses **TGT** to request a **service ticket** to **connect** to Server1.
-3. User1 **connects** to **Server1** and provides **service ticket**.
-4. **Server1** **doesn't** have **credentials** of User1 cached or the **TGT** of User1. Therefore, when User1 from Server1 tries to login to a second server, he is **not able to authenticate**.
+1. User1 pruža akreditive i **kontroler domena** vraća Kerberos **TGT** korisniku User1.
+2. User1 koristi **TGT** da zatraži **servisni tiket** za **povezivanje** sa Server1.
+3. User1 **povezuje** sa **Server1** i pruža **servisni tiket**.
+4. **Server1** **nema** **akreditive** korisnika User1 keširane ili **TGT** korisnika User1. Stoga, kada User1 sa Server1 pokušava da se prijavi na drugi server, on **nije u mogućnosti da se autentifikuje**.
 
 ### Unconstrained Delegation
 
-If **unconstrained delegation** is enabled in the PC, this won't happen as the **Server** will **get** a **TGT** of each user accessing it. Moreover, if unconstrained delegation is used you probably can **compromise the Domain Controller** from it.\
-[**More info in the unconstrained delegation page**](unconstrained-delegation.md).
+Ako je **neograničena delegacija** omogućena na PC-u, to se neće desiti jer će **Server** **dobiti** **TGT** svakog korisnika koji mu pristupa. Štaviše, ako se koristi neograničena delegacija, verovatno možete **kompromitovati Kontroler Domena** iz nje.\
+[**Više informacija na stranici o neograničenoj delegaciji**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Another way to avoid this problem which is [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) is **Credential Security Support Provider**. From Microsoft:
+Još jedan način da se izbegne ovaj problem koji je [**značajno nesiguran**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) je **Credential Security Support Provider**. Od Microsoft-a:
 
-> CredSSP authentication delegates the user credentials from the local computer to a remote computer. This practice increases the security risk of the remote operation. If the remote computer is compromised, when credentials are passed to it, the credentials can be used to control the network session.
+> CredSSP autentifikacija delegira korisničke akreditive sa lokalnog računara na udaljeni računar. Ova praksa povećava sigurnosni rizik od udaljene operacije. Ako je udaljeni računar kompromitovan, kada se akreditive proslede njemu, akreditive se mogu koristiti za kontrolu mrežne sesije.
 
-It is highly recommended that **CredSSP** be disabled on production systems, sensitive networks, and similar environments due to security concerns. To determine whether **CredSSP** is enabled, the `Get-WSManCredSSP` command can be run. This command allows for the **checking of CredSSP status** and can even be executed remotely, provided **WinRM** is enabled.
-
+Preporučuje se da **CredSSP** bude onemogućen na produkcionim sistemima, osetljivim mrežama i sličnim okruženjima zbog sigurnosnih problema. Da biste utvrdili da li je **CredSSP** omogućen, može se pokrenuti komanda `Get-WSManCredSSP`. Ova komanda omogućava **proveru statusa CredSSP** i može se čak izvršiti daljinski, pod uslovom da je **WinRM** omogućen.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
-    Get-WSManCredSSP
+Get-WSManCredSSP
 }
 ```
-
-## Workarounds
+## Obilaznice
 
 ### Invoke Command
 
-To address the double hop issue, a method involving a nested `Invoke-Command` is presented. This does not solve the problem directly but offers a workaround without needing special configurations. The approach allows executing a command (`hostname`) on a secondary server through a PowerShell command executed from an initial attacking machine or through a previously established PS-Session with the first server. Here's how it's done:
-
+Da bi se rešio problem dvostrukog skakanja, predstavljen je metod koji uključuje ugnježdeni `Invoke-Command`. Ovo ne rešava problem direktno, ali nudi obilaznicu bez potrebe za posebnim konfiguracijama. Pristup omogućava izvršavanje komande (`hostname`) na sekundarnom serveru putem PowerShell komande izvršene sa inicijalne napadačke mašine ili kroz prethodno uspostavljenu PS-Session sa prvim serverom. Evo kako se to radi:
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
-    Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
+Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
+Alternativno, preporučuje se uspostavljanje PS-Session sa prvim serverom i pokretanje `Invoke-Command` koristeći `$cred` za centralizaciju zadataka.
 
-Alternatively, establishing a PS-Session with the first server and running the `Invoke-Command` using `$cred` is suggested for centralizing tasks.
+### Registracija PSSession Konfiguracije
 
-### Register PSSession Configuration
-
-A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.
-
+Rešenje za zaobilaženje problema sa dvostrukim skakanjem uključuje korišćenje `Register-PSSessionConfiguration` sa `Enter-PSSession`. Ova metoda zahteva drugačiji pristup od `evil-winrm` i omogućava sesiju koja ne pati od ograničenja dvostrukog skakanja.
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
 klist
 ```
-
 ### PortForwarding
 
-For local administrators on an intermediary target, port forwarding allows requests to be sent to a final server. Using `netsh`, a rule can be added for port forwarding, alongside a Windows firewall rule to allow the forwarded port.
-
+Za lokalne administratore na posredničkom cilju, prosleđivanje portova omogućava slanje zahteva na konačni server. Koristeći `netsh`, pravilo se može dodati za prosleđivanje portova, zajedno sa pravilom Windows vatrozida koje omogućava prosleđeni port.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
-
 #### winrs.exe
 
-`winrs.exe` can be used for forwarding WinRM requests, potentially as a less detectable option if PowerShell monitoring is a concern. The command below demonstrates its use:
-
+`winrs.exe` se može koristiti za prosleđivanje WinRM zahteva, potencijalno kao manje uočljiva opcija ako je praćenje PowerShell-a zabrinjavajuće. Komanda ispod prikazuje njegovu upotrebu:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
-
 ### OpenSSH
 
-Installing OpenSSH on the first server enables a workaround for the double-hop issue, particularly useful for jump box scenarios. This method requires CLI installation and setup of OpenSSH for Windows. When configured for Password Authentication, this allows the intermediary server to obtain a TGT on behalf of the user.
+Instalacija OpenSSH na prvom serveru omogućava rešenje za problem dvostrukog skakanja, posebno korisno za scenarije jump box-a. Ova metoda zahteva CLI instalaciju i podešavanje OpenSSH za Windows. Kada je konfigurisano za autentifikaciju lozinkom, ovo omogućava posredničkom serveru da dobije TGT u ime korisnika.
 
-#### OpenSSH Installation Steps
+#### Koraci za instalaciju OpenSSH
 
-1. Download and move the latest OpenSSH release zip to the target server.
-2. Unzip and run the `Install-sshd.ps1` script.
-3. Add a firewall rule to open port 22 and verify SSH services are running.
+1. Preuzmite i premestite najnoviju OpenSSH zip datoteku na ciljni server.
+2. Raspakujte i pokrenite `Install-sshd.ps1` skriptu.
+3. Dodajte pravilo vatrozida za otvaranje porta 22 i proverite da li SSH usluge rade.
 
-To resolve `Connection reset` errors, permissions might need to be updated to allow everyone read and execute access on the OpenSSH directory.
-
+Da biste rešili greške `Connection reset`, možda će biti potrebno ažurirati dozvole kako bi se omogućio pristup za čitanje i izvršavanje svima na OpenSSH direktorijumu.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-
-## References
+## Reference
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
@@ -109,4 +97,3 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

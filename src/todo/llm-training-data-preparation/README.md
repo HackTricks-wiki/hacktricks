@@ -1,99 +1,98 @@
-# LLM Training - Data Preparation
+# LLM Trening - Priprema Podataka
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**Ovo su moje beleške iz veoma preporučene knjige** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **sa dodatnim informacijama.**
 
-## Basic Information
+## Osnovne Informacije
 
-You should start by reading this post for some basic concepts you should know about:
+Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba da znate:
 
 {{#ref}}
 0.-basic-llm-concepts.md
 {{#endref}}
 
-## 1. Tokenization
+## 1. Tokenizacija
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> Cilj ove inicijalne faze je veoma jednostavan: **Podeliti ulaz u tokene (ids) na način koji ima smisla**.
 
 {{#ref}}
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Data Sampling
+## 2. Uzorkovanje Podataka
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> Cilj ove druge faze je veoma jednostavan: **Uzorkovati ulazne podatke i pripremiti ih za fazu obuke obično razdvajanjem skupa podataka u rečenice određene dužine i generisanjem očekivanog odgovora.**
 
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Token Embeddings
+## 3. Token Umetanja
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> Cilj ove treće faze je veoma jednostavan: **Dodeliti svakom od prethodnih tokena u rečniku vektor željenih dimenzija za obuku modela.** Svaka reč u rečniku će biti tačka u prostoru X dimenzija.\
+> Imajte na umu da je inicijalno pozicija svake reči u prostoru "nasumično" inicijalizovana i te pozicije su parametri koji se mogu obučavati (biće poboljšani tokom obuke).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> Štaviše, tokom umetanja tokena **stvara se još jedan sloj umetanja** koji predstavlja (u ovom slučaju) **apsolutnu poziciju reči u rečenici za obuku**. Na ovaj način, reč na različitim pozicijama u rečenici će imati različitu reprezentaciju (značenje).
 
 {{#ref}}
 3.-token-embeddings.md
 {{#endref}}
 
-## 4. Attention Mechanisms
+## 4. Mehanizmi Pažnje
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> Cilj ove četvrte faze je veoma jednostavan: **Primena nekih mehanizama pažnje**. Ovi će biti mnogi **ponovljeni slojevi** koji će **uhvatiti odnos reči u rečniku sa njenim susedima u trenutnoj rečenici koja se koristi za obuku LLM-a**.\
+> Za ovo se koristi mnogo slojeva, tako da će mnogo parametara koji se mogu obučavati uhvatiti ove informacije.
 
 {{#ref}}
 4.-attention-mechanisms.md
 {{#endref}}
 
-## 5. LLM Architecture
+## 5. LLM Arhitektura
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> Cilj ove pete faze je veoma jednostavan: **Razviti arhitekturu celog LLM-a**. Spojiti sve, primeniti sve slojeve i kreirati sve funkcije za generisanje teksta ili transformaciju teksta u ID-ove i obrnuto.
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> Ova arhitektura će se koristiti i za obuku i za predikciju teksta nakon što je obučena.
 
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Pre-training & Loading models
+## 6. Predobuka i Učitavanje modela
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> Cilj ove šeste faze je veoma jednostavan: **Obučiti model od nule**. Za ovo će se koristiti prethodna LLM arhitektura sa nekim petljama koje prolaze kroz skupove podataka koristeći definisane funkcije gubitka i optimizator za obuku svih parametara modela.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. LoRA Improvements in fine-tuning
+## 7.0. LoRA Poboljšanja u finom podešavanju
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> Korišćenje **LoRA značajno smanjuje računarske resurse** potrebne za **fino podešavanje** već obučenih modela.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Fine-Tuning for Classification
+## 7.1. Fino Podešavanje za Klasifikaciju
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> Cilj ovog odeljka je da pokaže kako fino podešavati već obučeni model tako da umesto generisanja novog teksta LLM daje **verovatnoće da dati tekst bude kategorizovan u svaku od datih kategorija** (kao što je da li je tekst spam ili ne).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Fine-Tuning to follow instructions
+## 7.2. Fino Podešavanje za Praćenje Uputstava
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> Cilj ovog odeljka je da pokaže kako **fino podešavati već obučeni model da prati uputstva** umesto samo generisanja teksta, na primer, odgovaranje na zadatke kao chat bot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

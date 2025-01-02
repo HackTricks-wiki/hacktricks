@@ -3,163 +3,163 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) za lako kreiranje i **automatizaciju radnih tokova** uz pomoć **najnaprednijih** alata zajednice na svetu.\
+Pribavite pristup danas:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Access Control List (ACL)**
+## **Lista Kontrole Pristupa (ACL)**
 
-An Access Control List (ACL) consists of an ordered set of Access Control Entries (ACEs) that dictate the protections for an object and its properties. In essence, an ACL defines which actions by which security principals (users or groups) are permitted or denied on a given object.
+Lista Kontrole Pristupa (ACL) se sastoji od uređenog skupa Unosa Kontrole Pristupa (ACE) koji određuju zaštitu za objekat i njegove osobine. U suštini, ACL definiše koje akcije od strane kojih sigurnosnih principa (korisnika ili grupa) su dozvoljene ili odbijene na datom objektu.
 
-There are two types of ACLs:
+Postoje dve vrste ACL:
 
-- **Discretionary Access Control List (DACL):** Specifies which users and groups have or do not have access to an object.
-- **System Access Control List (SACL):** Governs the auditing of access attempts to an object.
+- **Diskreciona Lista Kontrole Pristupa (DACL):** Određuje koji korisnici i grupe imaju ili nemaju pristup objektu.
+- **Sistematska Lista Kontrole Pristupa (SACL):** Upravlja revizijom pokušaja pristupa objektu.
 
-The process of accessing a file involves the system checking the object's security descriptor against the user's access token to determine if access should be granted and the extent of that access, based on the ACEs.
+Proces pristupanja datoteci uključuje sistem koji proverava sigurnosni opis objekta u odnosu na pristupni token korisnika kako bi odredio da li pristup treba biti odobren i u kojoj meri, na osnovu ACE.
 
-### **Key Components**
+### **Ključne Komponente**
 
-- **DACL:** Contains ACEs that grant or deny access permissions to users and groups for an object. It's essentially the main ACL that dictates access rights.
-- **SACL:** Used for auditing access to objects, where ACEs define the types of access to be logged in the Security Event Log. This can be invaluable for detecting unauthorized access attempts or troubleshooting access issues.
+- **DACL:** Sadrži ACE koji odobravaju ili odbijaju pristupne dozvole korisnicima i grupama za objekat. To je suštinski glavna ACL koja određuje prava pristupa.
+- **SACL:** Koristi se za reviziju pristupa objektima, gde ACE definišu tipove pristupa koji se beleže u Bezbednosnom Dnevniku Događaja. Ovo može biti neprocenjivo za otkrivanje neovlašćenih pokušaja pristupa ili rešavanje problema sa pristupom.
 
-### **System Interaction with ACLs**
+### **Interakcija Sistema sa ACL**
 
-Each user session is associated with an access token that contains security information relevant to that session, including user, group identities, and privileges. This token also includes a logon SID that uniquely identifies the session.
+Svaka korisnička sesija je povezana sa pristupnim tokenom koji sadrži sigurnosne informacije relevantne za tu sesiju, uključujući identitete korisnika, grupa i privilegije. Ovaj token takođe uključuje SID za prijavu koji jedinstveno identifikuje sesiju.
 
-The Local Security Authority (LSASS) processes access requests to objects by examining the DACL for ACEs that match the security principal attempting access. Access is immediately granted if no relevant ACEs are found. Otherwise, LSASS compares the ACEs against the security principal's SID in the access token to determine access eligibility.
+Lokalna Bezbednosna Autoritet (LSASS) obrađuje zahteve za pristup objektima ispitujući DACL za ACE koji odgovaraju sigurnosnom principu koji pokušava pristup. Pristup se odmah odobrava ako se ne pronađu relevantni ACE. U suprotnom, LSASS upoređuje ACE sa SID-om sigurnosnog principa u pristupnom tokenu kako bi odredio podobnost za pristup.
 
-### **Summarized Process**
+### **Sažeti Proces**
 
-- **ACLs:** Define access permissions through DACLs and audit rules through SACLs.
-- **Access Token:** Contains user, group, and privilege information for a session.
-- **Access Decision:** Made by comparing DACL ACEs with the access token; SACLs are used for auditing.
+- **ACL:** Definišu pristupne dozvole kroz DACL i pravila revizije kroz SACL.
+- **Pristupni Token:** Sadrži informacije o korisniku, grupi i privilegijama za sesiju.
+- **Odluka o Pristupu:** Donosi se upoređivanjem DACL ACE sa pristupnim tokenom; SACL se koristi za reviziju.
 
 ### ACEs
 
-There arey **three main types of Access Control Entries (ACEs)**:
+Postoje **tri glavne vrste Unosa Kontrole Pristupa (ACE)**:
 
-- **Access Denied ACE**: This ACE explicitly denies access to an object for specified users or groups (in a DACL).
-- **Access Allowed ACE**: This ACE explicitly grants access to an object for specified users or groups (in a DACL).
-- **System Audit ACE**: Positioned within a System Access Control List (SACL), this ACE is responsible for generating audit logs upon access attempts to an object by users or groups. It documents whether access was allowed or denied and the nature of the access.
+- **ACE Odbijen Pristup**: Ovaj ACE izričito odbija pristup objektu za određene korisnike ili grupe (u DACL).
+- **ACE Dozvoljen Pristup**: Ovaj ACE izričito odobrava pristup objektu za određene korisnike ili grupe (u DACL).
+- **Sistematski Revizorski ACE**: Postavljen unutar Sistematske Liste Kontrole Pristupa (SACL), ovaj ACE je odgovoran za generisanje revizorskih logova prilikom pokušaja pristupa objektu od strane korisnika ili grupa. Beleži da li je pristup bio odobren ili odbijen i prirodu pristupa.
 
-Each ACE has **four critical components**:
+Svaki ACE ima **četiri ključne komponente**:
 
-1. The **Security Identifier (SID)** of the user or group (or their principal name in a graphical representation).
-2. A **flag** that identifies the ACE type (access denied, allowed, or system audit).
-3. **Inheritance flags** that determine if child objects can inherit the ACE from their parent.
-4. An [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), a 32-bit value specifying the object's granted rights.
+1. **Identifikator Sigurnosti (SID)** korisnika ili grupe (ili njihovog imena u grafičkom prikazu).
+2. **Zastavicu** koja identifikuje tip ACE (pristup odbijen, dozvoljen ili sistematski revizorski).
+3. **Zastavice nasleđivanja** koje određuju da li deca objekti mogu nasleđivati ACE od svog roditelja.
+4. [**Pristupnu masku**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), 32-bitnu vrednost koja specificira odobrena prava objekta.
 
-Access determination is conducted by sequentially examining each ACE until:
+Određivanje pristupa se vrši sekvencijalnim ispitivanjem svakog ACE dok:
 
-- An **Access-Denied ACE** explicitly denies the requested rights to a trustee identified in the access token.
-- **Access-Allowed ACE(s)** explicitly grant all requested rights to a trustee in the access token.
-- Upon checking all ACEs, if any requested right has **not been explicitly allowed**, access is implicitly **denied**.
+- **ACE Odbijen Pristup** izričito odbija tražena prava poveriocu identifikovanom u pristupnom tokenu.
+- **ACE Dozvoljen Pristup** izričito odobrava sva tražena prava poveriocu u pristupnom tokenu.
+- Nakon provere svih ACE, ako bilo koje traženo pravo **nije izričito odobreno**, pristup je implicitno **odbijen**.
 
-### Order of ACEs
+### Redosled ACE
 
-The way **ACEs** (rules that say who can or cannot access something) are put in a list called **DACL** is very important. This is because once the system gives or denies access based on these rules, it stops looking at the rest.
+Način na koji su **ACE** (pravila koja kažu ko može ili ne može pristupiti nečemu) postavljeni u listu nazvanu **DACL** je veoma važan. To je zato što, kada sistem odobri ili odbije pristup na osnovu ovih pravila, prestaje da gleda na ostatak.
 
-There is a best way to organize these ACEs, and it is called **"canonical order."** This method helps make sure everything works smoothly and fairly. Here is how it goes for systems like **Windows 2000** and **Windows Server 2003**:
+Postoji najbolji način za organizovanje ovih ACE, a to se naziva **"kanonski redosled."** Ova metoda pomaže da se osigura da sve funkcioniše glatko i pravedno. Evo kako to ide za sisteme kao što su **Windows 2000** i **Windows Server 2003**:
 
-- First, put all the rules that are made **specifically for this item** before the ones that come from somewhere else, like a parent folder.
-- In those specific rules, put the ones that say **"no" (deny)** before the ones that say **"yes" (allow)**.
-- For the rules that come from somewhere else, start with the ones from the **closest source**, like the parent, and then go back from there. Again, put **"no"** before **"yes."**
+- Prvo, stavite sva pravila koja su napravljena **specifično za ovu stavku** pre onih koja dolaze od nekuda drugde, poput roditeljskog foldera.
+- U tim specifičnim pravilima, stavite ona koja kažu **"ne" (odbiti)** pre onih koja kažu **"da" (dozvoliti)**.
+- Za pravila koja dolaze od nekuda drugde, počnite sa onima iz **najbližeg izvora**, poput roditelja, a zatim se vraćajte odatle. Ponovo, stavite **"ne"** pre **"da."**
 
-This setup helps in two big ways:
+Ova postavka pomaže na dva velika načina:
 
-- It makes sure that if there is a specific **"no,"** it is respected, no matter what other **"yes"** rules are there.
-- It lets the owner of an item have the **final say** on who gets in, before any rules from parent folders or further back come into play.
+- Osigurava da, ako postoji specifično **"ne,"** to bude poštovano, bez obzira na ostala **"da"** pravila.
+- Omogućava vlasniku stavke da ima **konačnu reč** o tome ko može da uđe, pre nego što se primene bilo koja pravila iz roditeljskih foldera ili dalje.
 
-By doing things this way, the owner of a file or folder can be very precise about who gets access, making sure the right people can get in and the wrong ones can't.
+Na ovaj način, vlasnik datoteke ili foldera može biti veoma precizan u vezi sa tim ko dobija pristup, osiguravajući da prave osobe mogu da uđu, a pogrešne ne mogu.
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-So, this **"canonical order"** is all about making sure the access rules are clear and work well, putting specific rules first and organizing everything in a smart way.
+Dakle, ovaj **"kanonski redosled"** se odnosi na osiguranje da su pravila pristupa jasna i da dobro funkcionišu, stavljajući specifična pravila na prvo mesto i organizujući sve na pametan način.
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) za lako kreiranje i **automatizaciju radnih tokova** uz pomoć **najnaprednijih** alata zajednice na svetu.\
+Pribavite pristup danas:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-### GUI Example
+### GUI Primer
 
-[**Example from here**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
+[**Primer odavde**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
-This is the classic security tab of a folder showing the ACL, DACL and ACEs:
+Ovo je klasična sigurnosna kartica foldera koja prikazuje ACL, DACL i ACE:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-If we click the **Advanced button** we will get more options like inheritance:
+Ako kliknemo na **Napredni dugme**, dobićemo više opcija kao što su nasleđivanje:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
-And if you add or edit a Security Principal:
+I ako dodate ili izmenite Sigurnosni Princip:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-And last we have the SACL in the Auditing tab:
+I na kraju imamo SACL u kartici Revizija:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Explaining Access Control in a Simplified Manner
+### Objašnjenje Kontrole Pristupa na Pojednostavljen Način
 
-When managing access to resources, like a folder, we use lists and rules known as Access Control Lists (ACLs) and Access Control Entries (ACEs). These define who can or cannot access certain data.
+Kada upravljamo pristupom resursima, poput foldera, koristimo liste i pravila poznata kao Liste Kontrole Pristupa (ACL) i Unosi Kontrole Pristupa (ACE). Ovi definišu ko može ili ne može pristupiti određenim podacima.
 
-#### Denying Access to a Specific Group
+#### Odbijanje Pristupa Specifičnoj Grupi
 
-Imagine you have a folder named Cost, and you want everyone to access it except for a marketing team. By setting up the rules correctly, we can ensure that the marketing team is explicitly denied access before allowing everyone else. This is done by placing the rule to deny access to the marketing team before the rule that allows access to everyone.
+Zamislite da imate folder nazvan Troškovi, i želite da svi imaju pristup osim marketinškog tima. Postavljanjem pravila na pravi način, možemo osigurati da marketinškom timu bude izričito odbijen pristup pre nego što dozvolimo svima ostalima. To se postiže postavljanjem pravila za odbijanje pristupa marketinškom timu pre pravila koje dozvoljava pristup svima.
 
-#### Allowing Access to a Specific Member of a Denied Group
+#### Dozvoljavanje Pristupa Specifičnom Članu Odbijene Grupe
 
-Let's say Bob, the marketing director, needs access to the Cost folder, even though the marketing team generally shouldn't have access. We can add a specific rule (ACE) for Bob that grants him access, and place it before the rule that denies access to the marketing team. This way, Bob gets access despite the general restriction on his team.
+Recimo da Bob, direktor marketinga, treba pristup folderu Troškovi, iako marketinški tim generalno ne bi trebao imati pristup. Možemo dodati specifično pravilo (ACE) za Boba koje mu odobrava pristup, i postaviti ga pre pravila koje odbija pristup marketinškom timu. Na taj način, Bob dobija pristup uprkos opštem ograničenju na njegov tim.
 
-#### Understanding Access Control Entries
+#### Razumevanje Unosa Kontrole Pristupa
 
-ACEs are the individual rules in an ACL. They identify users or groups, specify what access is allowed or denied, and determine how these rules apply to sub-items (inheritance). There are two main types of ACEs:
+ACE su pojedinačna pravila u ACL. Ona identifikuju korisnike ili grupe, specificiraju koji pristup je dozvoljen ili odbijen, i određuju kako se ova pravila primenjuju na podstavke (nasleđivanje). Postoje dve glavne vrste ACE:
 
-- **Generic ACEs**: These apply broadly, affecting either all types of objects or distinguishing only between containers (like folders) and non-containers (like files). For example, a rule that allows users to see the contents of a folder but not to access the files within it.
-- **Object-Specific ACEs**: These provide more precise control, allowing rules to be set for specific types of objects or even individual properties within an object. For instance, in a directory of users, a rule might allow a user to update their phone number but not their login hours.
+- **Generički ACE:** Ovi se primenjuju široko, utičući ili na sve tipove objekata ili razlikujući samo između kontejnera (poput foldera) i nekontejnera (poput datoteka). Na primer, pravilo koje dozvoljava korisnicima da vide sadržaj foldera, ali ne i da pristupe datotekama unutar njega.
+- **Specifični ACE:** Ovi pružaju precizniju kontrolu, omogućavajući postavljanje pravila za specifične tipove objekata ili čak pojedinačne osobine unutar objekta. Na primer, u direktorijumu korisnika, pravilo može dozvoliti korisniku da ažurira svoj broj telefona, ali ne i svoje radno vreme.
 
-Each ACE contains important information like who the rule applies to (using a Security Identifier or SID), what the rule allows or denies (using an access mask), and how it's inherited by other objects.
+Svaki ACE sadrži važne informacije kao što su ko se pravilo primenjuje (koristeći Identifikator Sigurnosti ili SID), šta pravilo dozvoljava ili odbija (koristeći pristupnu masku), i kako se nasleđuje od drugih objekata.
 
-#### Key Differences Between ACE Types
+#### Ključne Razlike između Tipova ACE
 
-- **Generic ACEs** are suitable for simple access control scenarios, where the same rule applies to all aspects of an object or to all objects within a container.
-- **Object-Specific ACEs** are used for more complex scenarios, especially in environments like Active Directory, where you might need to control access to specific properties of an object differently.
+- **Generički ACE** su pogodna za jednostavne scenarije kontrole pristupa, gde se isto pravilo primenjuje na sve aspekte objekta ili na sve objekte unutar kontejnera.
+- **Specifični ACE** se koriste za složenije scenarije, posebno u okruženjima kao što je Active Directory, gde možda treba kontrolisati pristup specifičnim osobinama objekta na različite načine.
 
-In summary, ACLs and ACEs help define precise access controls, ensuring that only the right individuals or groups have access to sensitive information or resources, with the ability to tailor access rights down to the level of individual properties or object types.
+U sažetku, ACL i ACE pomažu u definisanju preciznih kontrola pristupa, osiguravajući da samo prave osobe ili grupe imaju pristup osetljivim informacijama ili resursima, uz mogućnost prilagođavanja prava pristupa do nivoa pojedinačnih osobina ili tipova objekata.
 
-### Access Control Entry Layout
+### Raspored Unosa Kontrole Pristupa
 
-| ACE Field   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ACE Polje   | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type        | Flag that indicates the type of ACE. Windows 2000 and Windows Server 2003 support six types of ACE: Three generic ACE types that are attached to all securable objects. Three object-specific ACE types that can occur for Active Directory objects.                                                                                                                                                                                                                                                            |
-| Flags       | Set of bit flags that control inheritance and auditing.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Size        | Number of bytes of memory that are allocated for the ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Access mask | 32-bit value whose bits correspond to access rights for the object. Bits can be set either on or off, but the setting's meaning depends on the ACE type. For example, if the bit that corresponds to the right to read permissions is turned on, and the ACE type is Deny, the ACE denies the right to read the object's permissions. If the same bit is set on but the ACE type is Allow, the ACE grants the right to read the object's permissions. More details of the Access mask appear in the next table. |
-| SID         | Identifies a user or group whose access is controlled or monitored by this ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Tip         | Zastavica koja označava tip ACE. Windows 2000 i Windows Server 2003 podržavaju šest tipova ACE: Tri generička tipa ACE koja su prikačena za sve sigurnosne objekte. Tri specifična tipa ACE koja se mogu pojaviti za objekte Active Directory.                                                                                                                                                                                                                                                            |
+| Zastavice   | Skup bit zastavica koje kontrolišu nasleđivanje i reviziju.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Veličina    | Broj bajtova memorije koji su dodeljeni za ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Pristupna maska | 32-bitna vrednost čiji bitovi odgovaraju pravima pristupa za objekat. Bitovi se mogu postaviti ili uključiti ili isključiti, ali značenje postavke zavisi od tipa ACE. Na primer, ako je bit koji odgovara pravu na čitanje dozvola uključen, a tip ACE je Odbij, ACE odbija pravo na čitanje dozvola objekta. Ako je isti bit uključen, ali je tip ACE Dozvoliti, ACE odobrava pravo na čitanje dozvola objekta. Više detalja o pristupnoj maski pojavljuje se u sledećoj tabeli. |
+| SID         | Identifikuje korisnika ili grupu čiji je pristup kontrolisan ili praćen ovim ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-### Access Mask Layout
+### Raspored Pristupne Maske
 
-| Bit (Range) | Meaning                            | Description/Example                       |
+| Bit (Opseg) | Značenje                            | Opis/Primer                       |
 | ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | Object Specific Access Rights      | Read data, Execute, Append data           |
-| 16 - 22     | Standard Access Rights             | Delete, Write ACL, Write Owner            |
-| 23          | Can access security ACL            |                                           |
-| 24 - 27     | Reserved                           |                                           |
-| 28          | Generic ALL (Read, Write, Execute) | Everything below                          |
-| 29          | Generic Execute                    | All things necessary to execute a program |
-| 30          | Generic Write                      | All things necessary to write to a file   |
-| 31          | Generic Read                       | All things necessary to read a file       |
+| 0 - 15      | Specifična Prava Pristupa      | Čitaj podatke, Izvrši, Dodaj podatke           |
+| 16 - 22     | Standardna Prava Pristupa             | Obriši, Piši ACL, Piši Vlasnika            |
+| 23          | Može pristupiti sigurnosnom ACL            |                                           |
+| 24 - 27     | Rezervisano                           |                                           |
+| 28          | Generički SVI (Čitaj, Piši, Izvrši) | Sve ispod                          |
+| 29          | Generički Izvrši                    | Sve što je potrebno za izvršavanje programa |
+| 30          | Generički Piši                      | Sve što je potrebno za pisanje u datoteku   |
+| 31          | Generički Čitaj                       | Sve što je potrebno za čitanje datoteke       |
 
-## References
+## Reference
 
 - [https://www.ntfs.com/ntfs-permissions-acl-use.htm](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
 - [https://secureidentity.se/acl-dacl-sacl-and-the-ace/](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
@@ -170,8 +170,7 @@ In summary, ACLs and ACEs help define precise access controls, ensuring that onl
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) za lako kreiranje i **automatizaciju radnih tokova** uz pomoć **najnaprednijih** alata zajednice na svetu.\
+Pribavite pristup danas:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
-

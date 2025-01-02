@@ -4,18 +4,17 @@
 
 ## Diamond Ticket
 
-**Like a golden ticket**, a diamond ticket is a TGT which can be used to **access any service as any user**. A golden ticket is forged completely offline, encrypted with the krbtgt hash of that domain, and then passed into a logon session for use. Because domain controllers don't track TGTs it (or they) have legitimately issued, they will happily accept TGTs that are encrypted with its own krbtgt hash.
+**Kao zlatna karta**, dijamantska karta je TGT koja se može koristiti za **pristup bilo kojoj usluzi kao bilo koji korisnik**. Zlatna karta se potpuno falsifikuje van mreže, enkriptovana je sa krbtgt hash-om te domene, a zatim se koristi u sesiji prijavljivanja. Pošto kontroleri domena ne prate TGT-ove koje su legitimno izdale, rado će prihvatiti TGT-ove koji su enkriptovani sa vlastitim krbtgt hash-om.
 
-There are two common techniques to detect the use of golden tickets:
+Postoje dve uobičajene tehnike za otkrivanje korišćenja zlatnih karata:
 
-- Look for TGS-REQs that have no corresponding AS-REQ.
-- Look for TGTs that have silly values, such as Mimikatz's default 10-year lifetime.
+- Tražite TGS-REQ-ove koji nemaju odgovarajući AS-REQ.
+- Tražite TGT-ove koji imaju smešne vrednosti, kao što je podrazumevani vek trajanja od 10 godina u Mimikatz-u.
 
-A **diamond ticket** is made by **modifying the fields of a legitimate TGT that was issued by a DC**. This is achieved by **requesting** a **TGT**, **decrypting** it with the domain's krbtgt hash, **modifying** the desired fields of the ticket, then **re-encrypting it**. This **overcomes the two aforementioned shortcomings** of a golden ticket because:
+**Dijamantska karta** se pravi **modifikovanjem polja legitimnog TGT-a koji je izdao DC**. To se postiže **zahtevom** za **TGT**, **dekripcijom** sa krbtgt hash-om domene, **modifikovanjem** željenih polja karte, a zatim **ponovnim enkriptovanjem**. Ovo **prevazilazi dva prethodno pomenuta nedostatka** zlatne karte jer:
 
-- TGS-REQs will have a preceding AS-REQ.
-- The TGT was issued by a DC which means it will have all the correct details from the domain's Kerberos policy. Even though these can be accurately forged in a golden ticket, it's more complex and open to mistakes.
-
+- TGS-REQ-ovi će imati prethodni AS-REQ.
+- TGT je izdao DC što znači da će imati sve tačne detalje iz Kerberos politike domene. Iako se ovi detalji mogu tačno falsifikovati u zlatnoj karti, to je složenije i otvoreno za greške.
 ```bash
 # Get user RID
 powershell Get-DomainUser -Identity <username> -Properties objectsid
@@ -28,6 +27,4 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 # /groups are the desired group RIDs (512 being Domain Admins).
 # /krbkey is the krbtgt AES256 hash.
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

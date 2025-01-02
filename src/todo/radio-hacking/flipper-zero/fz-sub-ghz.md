@@ -4,102 +4,101 @@
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+Flipper Zero može **prijemati i prenositi radio frekvencije u opsegu od 300-928 MHz** sa svojim ugrađenim modulom, koji može čitati, čuvati i emulirati daljinske upravljače. Ovi upravljači se koriste za interakciju sa kapijama, barijerama, radio bravama, daljinskim prekidačima, bežičnim zvonima, pametnim svetlima i još mnogo toga. Flipper Zero može vam pomoći da saznate da li je vaša sigurnost ugrožena.
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
-## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
+## Sub-GHz hardver <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+Flipper Zero ima ugrađeni sub-1 GHz modul zasnovan na [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 čipu](https://www.ti.com/lit/ds/symlink/cc1101.pdf) i radio antenu (maksimalni domet je 50 metara). I CC1101 čip i antena su dizajnirani da rade na frekvencijama u opsezima 300-348 MHz, 387-464 MHz i 779-928 MHz.
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Akcije
 
-### Frequency Analyser
-
-> [!NOTE]
-> How to find which frequency is the remote using
-
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
-
-To determine the remote's frequency, do the following:
-
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
-
-### Read
+### Analizator frekvencije
 
 > [!NOTE]
-> Find info about the frequency used (also another way to find which frequency is used)
+> Kako pronaći koja frekvencija se koristi za daljinski upravljač
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+Kada analizira, Flipper Zero skenira jačinu signala (RSSI) na svim frekvencijama dostupnim u konfiguraciji frekvencije. Flipper Zero prikazuje frekvenciju sa najvišom vrednošću RSSI, sa jačinom signala višom od -90 [dBm](https://en.wikipedia.org/wiki/DBm).
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+Da biste odredili frekvenciju daljinskog upravljača, uradite sledeće:
+
+1. Postavite daljinski upravljač vrlo blizu levo od Flipper Zero.
+2. Idite na **Glavni meni** **→ Sub-GHz**.
+3. Izaberite **Analizator frekvencije**, zatim pritisnite i držite dugme na daljinskom upravljaču koje želite da analizirate.
+4. Pregledajte vrednost frekvencije na ekranu.
+
+### Čitanje
+
+> [!NOTE]
+> Pronađite informacije o korišćenoj frekvenciji (takođe drugi način da saznate koja frekvencija se koristi)
+
+Opcija **Čitanje** **sluša na konfigurisanom frekvenciji** na naznačenoj modulaciji: 433.92 AM po defaultu. Ako **se nešto pronađe** prilikom čitanja, **informacije se daju** na ekranu. Ove informacije mogu se koristiti za repliciranje signala u budućnosti.
+
+Dok je Čitanje u upotrebi, moguće je pritisnuti **levo dugme** i **konfigurisati ga**.\
+U ovom trenutku ima **4 modulacije** (AM270, AM650, FM328 i FM476), i **several relevant frequencies** pohranjene:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+Možete postaviti **bilo koju koja vas zanima**, međutim, ako niste **sigurni koja frekvencija** bi mogla biti ona koju koristi vaš daljinski upravljač, **postavite Hopping na ON** (Isključeno po defaultu), i pritisnite dugme nekoliko puta dok Flipper ne uhvati i ne pruži vam informacije koje su vam potrebne za postavljanje frekvencije.
 
 > [!CAUTION]
-> Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+> Prebacivanje između frekvencija traje neko vreme, stoga se signali koji se prenose u trenutku prebacivanja mogu propustiti. Za bolju prijem signala, postavite fiksnu frekvenciju određenu od strane Analizatora frekvencije.
 
-### **Read Raw**
+### **Čitaj sirovo**
 
 > [!NOTE]
-> Steal (and replay) a signal in the configured frequency
+> Ukrao (i ponovo emitovao) signal na konfigurisanom frekvenciji
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+Opcija **Čitaj sirovo** **snima signale** koji se šalju na slušanoj frekvenciji. Ovo se može koristiti za **krađu** signala i **ponavljanje** istog.
 
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
+Po defaultu **Čitaj sirovo je takođe na 433.92 u AM650**, ali ako ste sa opcijom Čitanje otkrili da je signal koji vas zanima na **drugoj frekvenciji/modulaciji, možete to takođe izmeniti** pritiskom levo (dok ste unutar opcije Čitaj sirovo).
 
 ### Brute-Force
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Ako znate protokol koji koristi, na primer, garažna vrata, moguće je **generisati sve kodove i poslati ih sa Flipper Zero.** Ovo je primer koji podržava opšte uobičajene tipove garaža: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
-### Add Manually
+### Dodaj ručno
 
 > [!NOTE]
-> Add signals from a configured list of protocols
+> Dodajte signale iz konfigurisane liste protokola
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### Lista [podržanih protokola](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
+| Princeton_433 (radi sa većinom sistema sa statičkim kodovima) | 433.92 | Statički  |
 | -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Static  |
-| Nice Flo 24bit_433                                             | 433.92 | Static  |
-| CAME 12bit_433                                                 | 433.92 | Static  |
-| CAME 24bit_433                                                 | 433.92 | Static  |
-| Linear_300                                                     | 300.00 | Static  |
-| CAME TWEE                                                      | 433.92 | Static  |
-| Gate TX_433                                                    | 433.92 | Static  |
-| DoorHan_315                                                    | 315.00 | Dynamic |
-| DoorHan_433                                                    | 433.92 | Dynamic |
-| LiftMaster_315                                                 | 315.00 | Dynamic |
-| LiftMaster_390                                                 | 390.00 | Dynamic |
-| Security+2.0_310                                               | 310.00 | Dynamic |
-| Security+2.0_315                                               | 315.00 | Dynamic |
-| Security+2.0_390                                               | 390.00 | Dynamic |
+| Nice Flo 12bit_433                                             | 433.92 | Statički  |
+| Nice Flo 24bit_433                                             | 433.92 | Statički  |
+| CAME 12bit_433                                                 | 433.92 | Statički  |
+| CAME 24bit_433                                                 | 433.92 | Statički  |
+| Linear_300                                                     | 300.00 | Statički  |
+| CAME TWEE                                                      | 433.92 | Statički  |
+| Gate TX_433                                                    | 433.92 | Statički  |
+| DoorHan_315                                                    | 315.00 | Dinamički |
+| DoorHan_433                                                    | 433.92 | Dinamički |
+| LiftMaster_315                                                 | 315.00 | Dinamički |
+| LiftMaster_390                                                 | 390.00 | Dinamički |
+| Security+2.0_310                                               | 310.00 | Dinamički |
+| Security+2.0_315                                               | 315.00 | Dinamički |
+| Security+2.0_390                                               | 390.00 | Dinamički |
 
-### Supported Sub-GHz vendors
+### Podržani Sub-GHz dobavljači
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Proverite listu na [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
-### Supported Frequencies by region
+### Podržane frekvencije po regionu
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Proverite listu na [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Test
 
 > [!NOTE]
-> Get dBms of the saved frequencies
+> Dobijte dBms sa sačuvanih frekvencija
 
 ## Reference
 
 - [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

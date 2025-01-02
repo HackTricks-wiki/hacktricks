@@ -2,42 +2,41 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Uvod
 
-For more info about what is an iButton check:
+Za više informacija o tome šta je iButton pogledajte:
 
 {{#ref}}
 ../ibutton.md
 {{#endref}}
 
-## Design
+## Dizajn
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
+**Plavi** deo sledeće slike je kako treba da **postavite pravi iButton** da bi Flipper mogao da **pročita.** **Zeleni** deo je kako treba da **dodirnete čitač** sa Flipper zero da bi **ispravno emulirali iButton**.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Akcije
 
-### Read
+### Čitanje
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
+U režimu čitanja Flipper čeka da iButton ključ dodirne i može da obradi bilo koji od tri tipa ključeva: **Dallas, Cyfral, i Metakom**. Flipper će **samo odrediti tip ključa**. Ime protokola ključa biće prikazano na ekranu iznad ID broja.
 
-### Add manually
+### Ručno dodavanje
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+Moguće je **ručno dodati** iButton tipa: **Dallas, Cyfral, i Metakom**
 
-### **Emulate**
+### **Emulacija**
 
-It's possible to **emulate** saved iButtons (read or manually added).
+Moguće je **emulirati** sačuvane iButtons (pročitane ili ručno dodate).
 
 > [!NOTE]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> Ako ne možete da ostvarite očekivane kontakte Flipper Zero sa čitačem, možete **koristiti spoljašnji GPIO:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Reference
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

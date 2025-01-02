@@ -6,114 +6,103 @@
 
 ## WDigest
 
-The [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protocol, introduced with Windows XP, is designed for authentication via the HTTP Protocol and is **enabled by default on Windows XP through Windows 8.0 and Windows Server 2003 to Windows Server 2012**. This default setting results in **plain-text password storage in LSASS** (Local Security Authority Subsystem Service). An attacker can use Mimikatz to **extract these credentials** by executing:
-
+Protokol [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), uveden sa Windows XP, je dizajniran za autentifikaciju putem HTTP protokola i je **omogućen po defaultu na Windows XP do Windows 8.0 i Windows Server 2003 do Windows Server 2012**. Ova podrazumevana postavka rezultira u **čuvanju lozinki u običnom tekstu u LSASS** (Local Security Authority Subsystem Service). Napadač može koristiti Mimikatz da **izvuče ove kredencijale** izvršavanjem:
 ```bash
 sekurlsa::wdigest
 ```
-
-To **toggle this feature off or on**, the _**UseLogonCredential**_ and _**Negotiate**_ registry keys within _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ must be set to "1". If these keys are **absent or set to "0"**, WDigest is **disabled**:
-
+Da biste **isključili ili uključili ovu funkciju**, _**UseLogonCredential**_ i _**Negotiate**_ registry ključevi unutar _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ moraju biti postavljeni na "1". Ako su ovi ključevi **odsutni ili postavljeni na "0"**, WDigest je **onemogućen**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
+## LSA zaštita
 
-## LSA Protection
-
-Starting with **Windows 8.1**, Microsoft enhanced the security of LSA to **block unauthorized memory reads or code injections by untrusted processes**. This enhancement hinders the typical functioning of commands like `mimikatz.exe sekurlsa:logonpasswords`. To **enable this enhanced protection**, the _**RunAsPPL**_ value in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ should be adjusted to 1:
-
+Počevši od **Windows 8.1**, Microsoft je poboljšao bezbednost LSA da **blokira neovlašćeno čitanje memorije ili injekcije koda od strane nepouzdanih procesa**. Ovo poboljšanje ometa tipično funkcionisanje komandi kao što je `mimikatz.exe sekurlsa:logonpasswords`. Da bi se **omogućila ova poboljšana zaštita**, _**RunAsPPL**_ vrednost u _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ treba prilagoditi na 1:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-
 ### Bypass
 
-It is possible to bypass this protection using Mimikatz driver mimidrv.sys:
+Moguće je zaobići ovu zaštitu koristeći Mimikatz drajver mimidrv.sys:
 
 ![](../../images/mimidrv.png)
 
 ## Credential Guard
 
-**Credential Guard**, a feature exclusive to **Windows 10 (Enterprise and Education editions)**, enhances the security of machine credentials using **Virtual Secure Mode (VSM)** and **Virtualization Based Security (VBS)**. It leverages CPU virtualization extensions to isolate key processes within a protected memory space, away from the main operating system's reach. This isolation ensures that even the kernel cannot access the memory in VSM, effectively safeguarding credentials from attacks like **pass-the-hash**. The **Local Security Authority (LSA)** operates within this secure environment as a trustlet, while the **LSASS** process in the main OS acts merely as a communicator with the VSM's LSA.
+**Credential Guard**, funkcija ekskluzivna za **Windows 10 (Enterprise i Education edicije)**, poboljšava sigurnost mašinskih kredencijala koristeći **Virtual Secure Mode (VSM)** i **Virtualization Based Security (VBS)**. Iskorišćava CPU virtuelizacione ekstenzije da izoluje ključne procese unutar zaštićenog memorijskog prostora, daleko od dometa glavnog operativnog sistema. Ova izolacija osigurava da čak ni kernel ne može pristupiti memoriji u VSM, efikasno štiteći kredencijale od napada poput **pass-the-hash**. **Local Security Authority (LSA)** funkcioniše unutar ovog sigurnog okruženja kao trustlet, dok **LSASS** proces u glavnom OS-u deluje samo kao komunikator sa VSM-ovim LSA.
 
-By default, **Credential Guard** is not active and requires manual activation within an organization. It's critical for enhancing security against tools like **Mimikatz**, which are hindered in their ability to extract credentials. However, vulnerabilities can still be exploited through the addition of custom **Security Support Providers (SSP)** to capture credentials in clear text during login attempts.
+Podrazumevano, **Credential Guard** nije aktivan i zahteva ručnu aktivaciju unutar organizacije. Ključno je za poboljšanje sigurnosti protiv alata poput **Mimikatz**, koji su ometeni u svojoj sposobnosti da izvuku kredencijale. Međutim, ranjivosti se i dalje mogu iskoristiti dodavanjem prilagođenih **Security Support Providers (SSP)** za hvatanje kredencijala u čistom tekstu tokom pokušaja prijavljivanja.
 
-To verify **Credential Guard**'s activation status, the registry key _**LsaCfgFlags**_ under _**HKLM\System\CurrentControlSet\Control\LSA**_ can be inspected. A value of "**1**" indicates activation with **UEFI lock**, "**2**" without lock, and "**0**" denotes it is not enabled. This registry check, while a strong indicator, is not the sole step for enabling Credential Guard. Detailed guidance and a PowerShell script for enabling this feature are available online.
-
+Da biste proverili status aktivacije **Credential Guard**, registry ključ _**LsaCfgFlags**_ pod _**HKLM\System\CurrentControlSet\Control\LSA**_ može se pregledati. Vrednost "**1**" označava aktivaciju sa **UEFI zaključavanjem**, "**2**" bez zaključavanja, a "**0**" označava da nije omogućeno. Ova provera registra, iako jak indikator, nije jedini korak za omogućavanje Credential Guard-a. Detaljna uputstva i PowerShell skripta za omogućavanje ove funkcije dostupni su online.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
+Za sveobuhvatno razumevanje i uputstva o omogućavanju **Credential Guard** u Windows 10 i njegovoj automatskoj aktivaciji u kompatibilnim sistemima **Windows 11 Enterprise i Education (verzija 22H2)**, posetite [Microsoftovu dokumentaciju](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
-For a comprehensive understanding and instructions on enabling **Credential Guard** in Windows 10 and its automatic activation in compatible systems of **Windows 11 Enterprise and Education (version 22H2)**, visit [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
-
-Further details on implementing custom SSPs for credential capture are provided in [this guide](../active-directory-methodology/custom-ssp.md).
+Dodatne informacije o implementaciji prilagođenih SSP-ova za hvatanje kredencijala su date u [ovom vodiču](../active-directory-methodology/custom-ssp.md).
 
 ## RDP RestrictedAdmin Mode
 
-**Windows 8.1 and Windows Server 2012 R2** introduced several new security features, including the _**Restricted Admin mode for RDP**_. This mode was designed to enhance security by mitigating the risks associated with [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) attacks.
+**Windows 8.1 i Windows Server 2012 R2** su uveli nekoliko novih bezbednosnih funkcija, uključujući _**Restricted Admin mode za RDP**_. Ovaj režim je dizajniran da poboljša bezbednost smanjenjem rizika povezanih sa [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) napadima.
 
-Traditionally, when connecting to a remote computer via RDP, your credentials are stored on the target machine. This poses a significant security risk, especially when using accounts with elevated privileges. However, with the introduction of _**Restricted Admin mode**_, this risk is substantially reduced.
+Tradicionalno, kada se povežete na udaljeni računar putem RDP-a, vaši kredencijali se čuvaju na ciljnim mašinama. Ovo predstavlja značajan bezbednosni rizik, posebno kada se koriste računi sa povišenim privilegijama. Međutim, uvođenjem _**Restricted Admin mode**_, ovaj rizik je značajno smanjen.
 
-When initiating an RDP connection using the command **mstsc.exe /RestrictedAdmin**, authentication to the remote computer is performed without storing your credentials on it. This approach ensures that, in the event of a malware infection or if a malicious user gains access to the remote server, your credentials are not compromised, as they are not stored on the server.
+Kada započnete RDP vezu koristeći komandu **mstsc.exe /RestrictedAdmin**, autentifikacija na udaljeni računar se vrši bez čuvanja vaših kredencijala na njemu. Ovaj pristup osigurava da, u slučaju infekcije malverom ili ako zlonameran korisnik dobije pristup udaljenom serveru, vaši kredencijali nisu kompromitovani, jer nisu sačuvani na serveru.
 
-It's important to note that in **Restricted Admin mode**, attempts to access network resources from the RDP session will not use your personal credentials; instead, the **machine's identity** is used.
+Važno je napomenuti da u **Restricted Admin mode**, pokušaji pristupa mrežnim resursima iz RDP sesije neće koristiti vaše lične kredencijale; umesto toga, koristi se **identitet mašine**.
 
-This feature marks a significant step forward in securing remote desktop connections and protecting sensitive information from being exposed in case of a security breach.
+Ova funkcija predstavlja značajan korak napred u obezbeđivanju veza sa udaljenim desktopom i zaštiti osetljivih informacija od izlaganja u slučaju bezbednosnog proboja.
 
 ![](../../images/RAM.png)
 
-For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Za detaljnije informacije posetite [ovaj resurs](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 ## Cached Credentials
 
-Windows secures **domain credentials** through the **Local Security Authority (LSA)**, supporting logon processes with security protocols like **Kerberos** and **NTLM**. A key feature of Windows is its capability to cache the **last ten domain logins** to ensure users can still access their computers even if the **domain controller is offline**—a boon for laptop users often away from their company's network.
+Windows obezbeđuje **domen kredencijale** putem **Local Security Authority (LSA)**, podržavajući procese prijavljivanja sa bezbednosnim protokolima kao što su **Kerberos** i **NTLM**. Ključna karakteristika Windows-a je njegova sposobnost da kešira **poslednjih deset domen prijava** kako bi osigurao da korisnici i dalje mogu pristupiti svojim računarima čak i ako je **domen kontroler van mreže**—što je korisno za korisnike laptopova koji često nisu u mreži svoje kompanije.
 
-The number of cached logins is adjustable via a specific **registry key or group policy**. To view or change this setting, the following command is utilized:
-
+Broj keširanih prijava se može prilagoditi putem specifičnog **registry key-a ili grupne politike**. Da biste pregledali ili promenili ovu postavku, koristi se sledeća komanda:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
+Pristup ovim keširanim kredencijalima je strogo kontrolisan, pri čemu samo **SYSTEM** nalog ima potrebne dozvole za njihov pregled. Administratori koji trebaju pristupiti ovim informacijama moraju to učiniti sa privilegijama SYSTEM korisnika. Kredencijali se čuvaju na: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-Access to these cached credentials is tightly controlled, with only the **SYSTEM** account having the necessary permissions to view them. Administrators needing to access this information must do so with SYSTEM user privileges. The credentials are stored at: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+**Mimikatz** se može koristiti za ekstrakciju ovih keširanih kredencijala koristeći komandu `lsadump::cache`.
 
-**Mimikatz** can be employed to extract these cached credentials using the command `lsadump::cache`.
+Za više detalja, originalni [izvor](http://juggernaut.wikidot.com/cached-credentials) pruža sveobuhvatne informacije.
 
-For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.
+## Zaštićeni korisnici
 
-## Protected Users
+Članstvo u **grupi zaštićenih korisnika** uvodi nekoliko bezbednosnih poboljšanja za korisnike, osiguravajući viši nivo zaštite od krađe i zloupotrebe kredencijala:
 
-Membership in the **Protected Users group** introduces several security enhancements for users, ensuring higher levels of protection against credential theft and misuse:
+- **Delegacija kredencijala (CredSSP)**: Čak i ako je postavka grupne politike za **Dozvoli delegiranje podrazumevanih kredencijala** omogućena, plain text kredencijali zaštićenih korisnika neće biti keširani.
+- **Windows Digest**: Počevši od **Windows 8.1 i Windows Server 2012 R2**, sistem neće keširati plain text kredencijale zaštićenih korisnika, bez obzira na status Windows Digest-a.
+- **NTLM**: Sistem neće keširati plain text kredencijale zaštićenih korisnika ili NT one-way funkcije (NTOWF).
+- **Kerberos**: Za zaštićene korisnike, Kerberos autentifikacija neće generisati **DES** ili **RC4 ključeve**, niti će keširati plain text kredencijale ili dugoročne ključeve nakon inicijalne akvizicije Ticket-Granting Ticket (TGT).
+- **Offline prijavljivanje**: Zaštićeni korisnici neće imati keširan verifikator kreiran prilikom prijavljivanja ili otključavanja, što znači da offline prijavljivanje nije podržano za ove naloge.
 
-- **Credential Delegation (CredSSP)**: Even if the Group Policy setting for **Allow delegating default credentials** is enabled, plain text credentials of Protected Users will not be cached.
-- **Windows Digest**: Starting from **Windows 8.1 and Windows Server 2012 R2**, the system will not cache plain text credentials of Protected Users, regardless of the Windows Digest status.
-- **NTLM**: The system will not cache Protected Users' plain text credentials or NT one-way functions (NTOWF).
-- **Kerberos**: For Protected Users, Kerberos authentication will not generate **DES** or **RC4 keys**, nor will it cache plain text credentials or long-term keys beyond the initial Ticket-Granting Ticket (TGT) acquisition.
-- **Offline Sign-In**: Protected Users will not have a cached verifier created at sign-in or unlock, meaning offline sign-in is not supported for these accounts.
+Ove zaštite se aktiviraju u trenutku kada se korisnik, koji je član **grupe zaštićenih korisnika**, prijavi na uređaj. Ovo osigurava da su kritične bezbednosne mere na snazi kako bi se zaštitili od različitih metoda kompromitacije kredencijala.
 
-These protections are activated the moment a user, who is a member of the **Protected Users group**, signs into the device. This ensures that critical security measures are in place to safeguard against various methods of credential compromise.
+Za detaljnije informacije, konsultujte zvaničnu [dokumentaciju](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 
-For more detailed information, consult the official [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
-
-**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Tabela iz** [**dokumentacije**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
-| Account Operators       | Account Operators        | Account Operators                                                             | Account Operators            |
+| Operatori naloga       | Operatori naloga        | Operatori naloga                                                             | Operatori naloga            |
 | Administrator           | Administrator            | Administrator                                                                 | Administrator                |
-| Administrators          | Administrators           | Administrators                                                                | Administrators               |
-| Backup Operators        | Backup Operators         | Backup Operators                                                              | Backup Operators             |
-| Cert Publishers         |                          |                                                                               |                              |
-| Domain Admins           | Domain Admins            | Domain Admins                                                                 | Domain Admins                |
-| Domain Controllers      | Domain Controllers       | Domain Controllers                                                            | Domain Controllers           |
-| Enterprise Admins       | Enterprise Admins        | Enterprise Admins                                                             | Enterprise Admins            |
-|                         |                          |                                                                               | Enterprise Key Admins        |
-|                         |                          |                                                                               | Key Admins                   |
+| Administratori          | Administratori           | Administratori                                                                | Administratori               |
+| Operatori rezervnih kopija | Operatori rezervnih kopija | Operatori rezervnih kopija                                                  | Operatori rezervnih kopija   |
+| Izdavači sertifikata    |                          |                                                                               |                              |
+| Administratori domena   | Administratori domena    | Administratori domena                                                         | Administratori domena        |
+| Kontrolori domena      | Kontrolori domena       | Kontrolori domena                                                            | Kontrolori domena           |
+| Administratori preduzeća | Administratori preduzeća | Administratori preduzeća                                                     | Administratori preduzeća     |
+|                         |                          |                                                                               | Administratori ključeva preduzeća |
+|                         |                          |                                                                               | Administratori ključeva      |
 | Krbtgt                  | Krbtgt                   | Krbtgt                                                                        | Krbtgt                       |
-| Print Operators         | Print Operators          | Print Operators                                                               | Print Operators              |
-|                         |                          | Read-only Domain Controllers                                                  | Read-only Domain Controllers |
-| Replicator              | Replicator               | Replicator                                                                    | Replicator                   |
-| Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
-| Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
+| Operatori štampe        | Operatori štampe        | Operatori štampe                                                               | Operatori štampe            |
+|                         |                          | Kontrolori domena samo za čitanje                                            | Kontrolori domena samo za čitanje |
+| Replikator              | Replikator               | Replikator                                                                    | Replikator                   |
+| Administratori šeme     | Administratori šeme      | Administratori šeme                                                           | Administratori šeme          |
+| Operatori servera       | Operatori servera        | Operatori servera                                                              | Operatori servera           |
 
 {{#include ../../banners/hacktricks-training.md}}
-

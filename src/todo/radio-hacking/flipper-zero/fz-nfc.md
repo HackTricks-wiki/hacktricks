@@ -4,77 +4,76 @@
 
 ## Intro <a href="#id-9wrzi" id="id-9wrzi"></a>
 
-For info about RFID and NFC check the following page:
+Za informacije o RFID i NFC pogledajte sledeću stranicu:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Supported NFC cards <a href="#id-9wrzi" id="id-9wrzi"></a>
+## Podržane NFC kartice <a href="#id-9wrzi" id="id-9wrzi"></a>
 
 > [!CAUTION]
-> Apart from NFC cards Flipper Zero supports **other type of High-frequency cards** such as several **Mifare** Classic and Ultralight and **NTAG**.
+> Pored NFC kartica, Flipper Zero podržava **drugi tip visokofrekventnih kartica** kao što su nekoliko **Mifare** Classic i Ultralight i **NTAG**.
 
-New types of NFC cards will be added to the list of supported cards. Flipper Zero supports the following **NFC cards type A** (ISO 14443A):
+Novi tipovi NFC kartica biće dodati na listu podržanih kartica. Flipper Zero podržava sledeće **NFC kartice tip A** (ISO 14443A):
 
-- **Bank cards (EMV)** — only read UID, SAK, and ATQA without saving.
-- **Unknown cards** — read (UID, SAK, ATQA) and emulate an UID.
+- **Bankovne kartice (EMV)** — samo čitanje UID, SAK i ATQA bez čuvanja.
+- **Nepoznate kartice** — čitanje (UID, SAK, ATQA) i emulacija UID.
 
-For **NFC cards type B, type F, and type V**, Flipper Zero is able to read an UID without saving it.
+Za **NFC kartice tip B, tip F i tip V**, Flipper Zero može da pročita UID bez čuvanja.
 
-### NFC cards type A <a href="#uvusf" id="uvusf"></a>
+### NFC kartice tip A <a href="#uvusf" id="uvusf"></a>
 
-#### Bank card (EMV) <a href="#kzmrp" id="kzmrp"></a>
+#### Bankovna kartica (EMV) <a href="#kzmrp" id="kzmrp"></a>
 
-Flipper Zero can only read an UID, SAK, ATQA, and stored data on bank cards **without saving**.
+Flipper Zero može samo da pročita UID, SAK, ATQA i sačuvane podatke na bankovnim karticama **bez čuvanja**.
 
-Bank card reading screenFor bank cards, Flipper Zero can only read data **without saving and emulating it**.
+Ekran za čitanje bankovnih karticaZa bankovne kartice, Flipper Zero može samo da pročita podatke **bez čuvanja i emulacije**.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=916&#x26;w=2662" alt=""><figcaption></figcaption></figure>
 
-#### Unknown cards <a href="#id-37eo8" id="id-37eo8"></a>
+#### Nepoznate kartice <a href="#id-37eo8" id="id-37eo8"></a>
 
-When Flipper Zero is **unable to determine NFC card's type**, then only an **UID, SAK, and ATQA** can be **read and saved**.
+Kada Flipper Zero **nije u mogućnosti da odredi tip NFC kartice**, tada se može **pročitati i sačuvati** samo **UID, SAK i ATQA**.
 
-Unknown card reading screenFor unknown NFC cards, Flipper Zero can emulate only an UID.
+Ekran za čitanje nepoznatih karticaZa nepoznate NFC kartice, Flipper Zero može da emulira samo UID.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
 
-### NFC cards types B, F, and V <a href="#wyg51" id="wyg51"></a>
+### NFC kartice tipova B, F i V <a href="#wyg51" id="wyg51"></a>
 
-For **NFC cards types B, F, and V**, Flipper Zero can only **read and display an UID** without saving it.
+Za **NFC kartice tipova B, F i V**, Flipper Zero može samo **pročitati i prikazati UID** bez čuvanja.
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=1080&#x26;w=2704" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Akcije
 
-For an intro about NFC [**read this page**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
+Za uvod o NFC [**pročitajte ovu stranicu**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
 
-### Read
+### Čitanje
 
-Flipper Zero can **read NFC cards**, however, it **doesn't understand all the protocols** that are based on ISO 14443. However, since **UID is a low-level attribute**, you might find yourself in a situation when **UID is already read, but the high-level data transfer protocol is still unknown**. You can read, emulate and manually input UID using Flipper for the primitive readers that use UID for authorization.
+Flipper Zero može **čitati NFC kartice**, međutim, **ne razume sve protokole** koji se zasnivaju na ISO 14443. Ipak, pošto je **UID niska atribut**, možete se naći u situaciji kada je **UID već pročitan, ali je visoko nivo protokol prenosa podataka još uvek nepoznat**. Možete čitati, emulirati i ručno unositi UID koristeći Flipper za primitivne čitače koji koriste UID za autorizaciju.
 
-#### Reading the UID VS Reading the Data Inside <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### Čitanje UID VS Čitanje Podataka Unutra <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../images/image (217).png" alt=""><figcaption></figcaption></figure>
 
-In Flipper, reading 13.56 MHz tags can be divided into two parts:
+U Flipperu, čitanje 13.56 MHz oznaka može se podeliti na dva dela:
 
-- **Low-level read** — reads only the UID, SAK, and ATQA. Flipper tries to guess the high-level protocol based on this data read from the card. You can't be 100% certain with this, as it is just an assumption based on certain factors.
-- **High-level read** — reads the data from the card's memory using a specific high-level protocol. That would be reading the data on a Mifare Ultralight, reading the sectors from a Mifare Classic, or reading the card's attributes from PayPass/Apple Pay.
+- **Nisko nivo čitanje** — čita samo UID, SAK i ATQA. Flipper pokušava da pogodi visoko nivo protokol na osnovu ovih podataka pročitanih sa kartice. Ne možete biti 100% sigurni u ovo, jer je to samo pretpostavka zasnovana na određenim faktorima.
+- **Visoko nivo čitanje** — čita podatke iz memorije kartice koristeći specifičan visoko nivo protokol. To bi bilo čitanje podataka na Mifare Ultralight, čitanje sektora sa Mifare Classic, ili čitanje atributa kartice sa PayPass/Apple Pay.
 
-### Read Specific
+### Čitaj Specifično
 
-In case Flipper Zero isn't capable of finding the type of card from the low level data, in `Extra Actions` you can select `Read Specific Card Type` and **manually** **indicate the type of card you would like to read**.
+U slučaju da Flipper Zero nije u mogućnosti da pronađe tip kartice iz niskonivo podataka, u `Extra Actions` možete odabrati `Read Specific Card Type` i **ručno** **naznačiti tip kartice koju želite da pročitate**.
 
-#### EMV Bank Cards (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
+#### EMV Bankovne Kartice (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-Apart from simply reading the UID, you can extract a lot more data from a bank card. It's possible to **get the full card number** (the 16 digits on the front of the card), **validity date**, and in some cases even the **owner's name** along with a list of the **most recent transactions**.\
-However, you **can't read the CVV this way** (the 3 digits on the back of the card). Also **bank cards are protected from replay attacks**, so copying it with Flipper and then trying to emulate it to pay for something won't work.
+Pored jednostavnog čitanja UID, možete izvući mnogo više podataka sa bankovne kartice. Moguće je **dobiti puni broj kartice** (16 cifara na prednjoj strani kartice), **datum važenja**, i u nekim slučajevima čak i **ime vlasnika** zajedno sa listom **najnovijih transakcija**.\
+Međutim, ne možete pročitati CVV na ovaj način** (3 cifre na poleđini kartice). Takođe, **bankovne kartice su zaštićene od replay napada**, tako da kopiranje sa Flipperom i zatim pokušaj emulacije za plaćanje ne funkcioniše.
 
-## References
+## Reference
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

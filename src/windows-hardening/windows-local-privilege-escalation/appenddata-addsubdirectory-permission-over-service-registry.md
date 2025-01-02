@@ -1,29 +1,28 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-**The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**Originalni post je** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
-## Summary
+## Sažetak
 
-Two registry keys were found to be writable by the current user:
+Dva ključa registra su pronađena kao zapisiva od strane trenutnog korisnika:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 
-It was suggested to check the permissions of the **RpcEptMapper** service using the **regedit GUI**, specifically the **Advanced Security Settings** window's **Effective Permissions** tab. This approach enables the assessment of granted permissions to specific users or groups without the need to examine each Access Control Entry (ACE) individually.
+Preporučeno je da se provere dozvole servisa **RpcEptMapper** koristeći **regedit GUI**, posebno karticu **Effective Permissions** u prozoru **Advanced Security Settings**. Ovaj pristup omogućava procenu dodeljenih dozvola određenim korisnicima ili grupama bez potrebe da se ispituje svaki Access Control Entry (ACE) pojedinačno.
 
-A screenshot showed the permissions assigned to a low-privileged user, among which the **Create Subkey** permission was notable. This permission, also referred to as **AppendData/AddSubdirectory**, corresponds with the script's findings.
+Snimak ekrana je prikazao dozvole dodeljene korisniku sa niskim privilegijama, među kojima je bila istaknuta dozvola **Create Subkey**. Ova dozvola, takođe poznata kao **AppendData/AddSubdirectory**, odgovara nalazima skripte.
 
-The inability to modify certain values directly, yet the capability to create new subkeys, was noted. An example highlighted was an attempt to alter the **ImagePath** value, which resulted in an access denied message.
+Primećena je nemogućnost direktne izmene određenih vrednosti, ali sposobnost kreiranja novih podključeva. Primer koji je istaknut bio je pokušaj izmene vrednosti **ImagePath**, što je rezultiralo porukom o odbijenom pristupu.
 
-Despite these limitations, a potential for privilege escalation was identified through the possibility of leveraging the **Performance** subkey within the **RpcEptMapper** service's registry structure, a subkey not present by default. This could enable DLL registration and performance monitoring.
+Uprkos ovim ograničenjima, identifikovana je potencijalna mogućnost eskalacije privilegija kroz mogućnost korišćenja podključa **Performance** unutar registra servisa **RpcEptMapper**, podključa koji nije prisutan po defaultu. Ovo bi omogućilo registraciju DLL-a i praćenje performansi.
 
-Documentation on the **Performance** subkey and its utilization for performance monitoring was consulted, leading to the development of a proof-of-concept DLL. This DLL, demonstrating the implementation of **OpenPerfData**, **CollectPerfData**, and **ClosePerfData** functions, was tested via **rundll32**, confirming its operational success.
+Dokumentacija o podključe **Performance** i njegovoj upotrebi za praćenje performansi je konsultovana, što je dovelo do razvoja dokaza o konceptu DLL-a. Ovaj DLL, koji demonstrira implementaciju funkcija **OpenPerfData**, **CollectPerfData** i **ClosePerfData**, testiran je putem **rundll32**, potvrđujući njegovu operativnu uspešnost.
 
-The goal was to coerce the **RPC Endpoint Mapper service** into loading the crafted Performance DLL. Observations revealed that executing WMI class queries related to Performance Data via PowerShell resulted in the creation of a log file, enabling the execution of arbitrary code under the **LOCAL SYSTEM** context, thus granting elevated privileges.
+Cilj je bio primorati **RPC Endpoint Mapper service** da učita kreirani Performance DLL. Posmatranja su pokazala da izvršavanje WMI klasa upita vezanih za Performance Data putem PowerShell-a rezultira kreiranjem log fajla, omogućavajući izvršavanje proizvoljnog koda pod kontekstom **LOCAL SYSTEM**, čime se dodeljuju povišene privilegije.
 
-The persistence and potential implications of this vulnerability were underscored, highlighting its relevance for post-exploitation strategies, lateral movement, and evasion of antivirus/EDR systems.
+Istaknuta je postojanost i potencijalne posledice ove ranjivosti, naglašavajući njenu relevantnost za strategije post-eksploatacije, lateralno kretanje i izbegavanje antivirusnih/EDR sistema.
 
-Although the vulnerability was initially disclosed unintentionally through the script, it was emphasized that its exploitation is constrained to outdated Windows versions (e.g., **Windows 7 / Server 2008 R2**) and requires local access.
+Iako je ranjivost prvobitno otkrivena nenamerno kroz skriptu, naglašeno je da je njena eksploatacija ograničena na zastarele verzije Windows-a (npr. **Windows 7 / Server 2008 R2**) i zahteva lokalni pristup.
 
 {{#include ../../banners/hacktricks-training.md}}
-

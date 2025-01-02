@@ -2,16 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Uvod
 
-**Low-Power Wide Area Network** (LPWAN) is a group of wireless, low-power, wide area network technologies designed for **long-range communications** at a low bit rate.\
-They can reach more than **six miles** and their **batteries** can last up to **20 years**.
+**Low-Power Wide Area Network** (LPWAN) je grupa bežičnih, niskopotrošnih, širokopojasnih mrežnih tehnologija dizajniranih za **dugometražne komunikacije** pri niskoj brzini prenosa podataka.\
+Mogu dostići više od **šest milja** i njihove **baterije** mogu trajati do **20 godina**.
 
-Long Range (**LoRa**) it’s popular in multiple countries and has an open source specification called **LoRaWAN**.
+Long Range (**LoRa**) je popularan u više zemalja i ima otvorenu specifikaciju pod nazivom **LoRaWAN**.
 
-### LPWAN, LoRa, and LoRaWAN
+### LPWAN, LoRa i LoRaWAN
 
 [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
 
 {{#include ../../banners/hacktricks-training.md}}
-

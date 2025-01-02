@@ -2,163 +2,162 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije aktivne igre i njihovu promenu.\
+Kada ga preuzmete i pokrenete, **dobijate** **tutorijal** o tome kako koristiti alat. Ako želite da naučite kako da koristite alat, toplo se preporučuje da ga završite.
 
-## What are you searching?
+## Šta tražite?
 
 ![](<../../images/image (762).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+Ovaj alat je veoma koristan za pronalaženje **gde je neki podatak** (obično broj) **sačuvan u memoriji** programa.\
+**Obično se brojevi** čuvaju u **4bajta** formatu, ali ih možete pronaći i u **double** ili **float** formatima, ili možda želite da tražite nešto **drugo osim broja**. Zbog toga morate biti sigurni da **izaberete** ono što želite da **tražite**:
 
 ![](<../../images/image (324).png>)
 
-Also you can indicate **different** types of **searches**:
+Takođe možete označiti **različite** tipove **pretraga**:
 
 ![](<../../images/image (311).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+Možete takođe označiti opciju da **zaustavite igru dok skenirate memoriju**:
 
 ![](<../../images/image (1052).png>)
 
-### Hotkeys
+### Prečice
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+U _**Edit --> Settings --> Hotkeys**_ možete postaviti različite **prečice** za različite svrhe kao što su **zaustavljanje** **igre** (što je veoma korisno ako u nekom trenutku želite da skenirate memoriju). Druge opcije su dostupne:
 
 ![](<../../images/image (864).png>)
 
-## Modifying the value
+## Modifikovanje vrednosti
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+Kada **pronađete** gde je **vrednost** koju tražite (više o tome u sledećim koracima), možete je **modifikovati** dvostrukim klikom na nju, a zatim dvostrukim klikom na njenu vrednost:
 
 ![](<../../images/image (563).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+I konačno **označite kvačicu** da biste izvršili modifikaciju u memoriji:
 
 ![](<../../images/image (385).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+**Promena** u **memoriji** će odmah biti **primenjena** (napomena: dok igra ne koristi ovu vrednost ponovo, vrednost **neće biti ažurirana u igri**).
 
-## Searching the value
+## Traženje vrednosti
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+Dakle, pretpostavićemo da postoji važna vrednost (kao što je život vašeg korisnika) koju želite da poboljšate, i tražite ovu vrednost u memoriji)
 
-### Through a known change
+### Kroz poznatu promenu
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+Pretpostavljajući da tražite vrednost 100, **izvršite skeniranje** tražeći tu vrednost i pronađite mnogo podudaranja:
 
 ![](<../../images/image (108).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+Zatim, uradite nešto tako da **vrednost promeni**, i **zaustavite** igru i **izvršite** **sledeće skeniranje**:
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-&#xNAN;_&#x49;f you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engine će tražiti **vrednosti** koje su **prešle sa 100 na novu vrednost**. Čestitam, **pronašli ste** **adresu** vrednosti koju ste tražili, sada je možete modifikovati.\
+&#xNAN;_&#x49;f još uvek imate nekoliko vrednosti, uradite nešto da ponovo modifikujete tu vrednost, i izvršite još jedno "sledeće skeniranje" da filtrirate adrese._
 
-### Unknown Value, known change
+### Nepoznata vrednost, poznata promena
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+U scenariju kada **ne znate vrednost** ali znate **kako da je promenite** (i čak vrednost promene) možete tražiti svoj broj.
 
-So, start by performing a scan of type "**Unknown initial value**":
+Dakle, počnite tako što ćete izvršiti skeniranje tipa "**Nepoznata početna vrednost**":
 
 ![](<../../images/image (890).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+Zatim, promenite vrednost, navedite **kako** se **vrednost** **promenila** (u mom slučaju je smanjena za 1) i izvršite **sledeće skeniranje**:
 
 ![](<../../images/image (371).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+Bićete predstavljeni **svim vrednostima koje su modifikovane na odabrani način**:
 
 ![](<../../images/image (569).png>)
 
-Once you have found your value, you can modify it.
+Kada pronađete svoju vrednost, možete je modifikovati.
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+Napomena da postoji **mnogo mogućih promena** i možete ponavljati ove **korake koliko god želite** da filtrirate rezultate:
 
 ![](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### Nasumična adresa u memoriji - Pronalaženje koda
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
+Do sada smo naučili kako da pronađemo adresu koja čuva vrednost, ali je veoma verovatno da u **različitim izvršavanjima igre ta adresa bude na različitim mestima u memoriji**. Dakle, hajde da saznamo kako da uvek pronađemo tu adresu.
 
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+Koristeći neke od pomenutih trikova, pronađite adresu gde vaša trenutna igra čuva važnu vrednost. Zatim (zaustavljajući igru ako želite) uradite **desni klik** na pronađenu **adresu** i izaberite "**Saznajte šta pristupa ovoj adresi**" ili "**Saznajte šta piše na ovoj adresi**":
 
 ![](<../../images/image (1067).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+**Prva opcija** je korisna da saznate koje **delove** **koda** koriste ovu **adresu** (što je korisno za više stvari kao što je **znanje gde možete modifikovati kod** igre).\
+**Druga opcija** je više **specifična**, i biće korisnija u ovom slučaju jer nas zanima da saznamo **odakle se ova vrednost piše**.
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+Kada izaberete jednu od tih opcija, **debugger** će biti **priključen** na program i novi **prazan prozor** će se pojaviti. Sada, **igrajte** **igru** i **modifikujte** tu **vrednost** (bez ponovnog pokretanja igre). **Prozor** bi trebao biti **ispunjen** sa **adresama** koje **modifikuju** **vrednost**:
 
 ![](<../../images/image (91).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+Sada kada ste pronašli adresu koja modifikuje vrednost, možete **modifikovati kod po vašoj želji** (Cheat Engine vam omogućava da ga brzo modifikujete za NOPs):
 
 ![](<../../images/image (1057).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+Dakle, sada možete modifikovati tako da kod ne utiče na vaš broj, ili će uvek pozitivno uticati.
 
-### Random Memory Address - Finding the pointer
+### Nasumična adresa u memoriji - Pronalaženje pokazivača
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+Prateći prethodne korake, pronađite gde se vrednost koja vas zanima nalazi. Zatim, koristeći "**Saznajte šta piše na ovoj adresi**" saznajte koja adresa piše ovu vrednost i dvostruko kliknite na nju da biste dobili prikaz disasembly-a:
 
 ![](<../../images/image (1039).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+Zatim, izvršite novo skeniranje **tražeći heksadecimalnu vrednost između "\[]"** (vrednost $edx u ovom slučaju):
 
 ![](<../../images/image (994).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+(_Ako se pojavi više njih, obično vam je potrebna najmanja adresa_)\
+Sada smo **pronašli pokazivač koji će modifikovati vrednost koja nas zanima**.
 
-Click on "**Add Address Manually**":
+Kliknite na "**Dodaj adresu ručno**":
 
 ![](<../../images/image (990).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+Sada, kliknite na kvačicu "Pokazivač" i dodajte pronađenu adresu u tekstualno polje (u ovom scenariju, pronađena adresa na prethodnoj slici je bila "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+(Napomena kako je prva "Adresa" automatski popunjena iz adrese pokazivača koju ste uneli)
 
-Click OK and a new pointer will be created:
+Kliknite na OK i biće kreiran novi pokazivač:
 
 ![](<../../images/image (308).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+Sada, svaki put kada modifikujete tu vrednost, **modifikujete važnu vrednost čak i ako je adresa u memoriji gde se vrednost nalazi drugačija.**
 
-### Code Injection
+### Injekcija koda
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+Injekcija koda je tehnika gde injektujete deo koda u ciljni proces, a zatim preusmeravate izvršenje koda da ide kroz vaš vlastiti napisani kod (kao što je davanje poena umesto oduzimanja).
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+Dakle, zamislite da ste pronašli adresu koja oduzima 1 od života vašeg igrača:
 
 ![](<../../images/image (203).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+Kliknite na Prikaži disassembler da biste dobili **disassemble kod**.\
+Zatim, kliknite **CTRL+a** da pozovete prozor Auto assemble i izaberite _**Template --> Injekcija koda**_
 
 ![](<../../images/image (902).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+Popunite **adresu instrukcije koju želite da modifikujete** (ovo se obično automatski popunjava):
 
 ![](<../../images/image (744).png>)
 
-A template will be generated:
+Generisaće se šablon:
 
 ![](<../../images/image (944).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed\*\*.\*\* In this example the injected code will add 2 points instead of substracting 1:
+Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite originalni kod iz sekcije "**originalcode**" ako ne želite da se izvršava\*\*.\*\* U ovom primeru, injektovani kod će dodati 2 poena umesto oduzimanja 1:
 
 ![](<../../images/image (521).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**Kliknite na izvrši i tako dalje i vaš kod bi trebao biti injektovan u program menjajući ponašanje funkcionalnosti!**
 
-## **References**
+## **Reference**
 
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- **Cheat Engine tutorijal, završite ga da biste naučili kako da započnete sa Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,38 +1,35 @@
 {{#include ../banners/hacktricks-training.md}}
 
-In a ping response TTL:\
+U ping odgovoru TTL:\
 127 = Windows\
 254 = Cisco\
-Lo demás,algunlinux
+Ostalo, neki linux
 
 $1$- md5\
-$2$or $2a$ - Blowfish\
+$2$ili $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
-If you do not know what is behind a service, try to make and HTTP GET request.
+Ako ne znate šta se nalazi iza usluge, pokušajte da napravite HTTP GET zahtev.
 
-**UDP Scans**\
+**UDP skeniranja**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
-An empty UDP packet is sent to a specific port. If the UDP port is open, no reply is sent back from the target machine. If the UDP port is closed, an ICMP port unreachable packet should be sent back from the target machine.\
+Prazan UDP paket se šalje na određeni port. Ako je UDP port otvoren, nema odgovora sa ciljne mašine. Ako je UDP port zatvoren, ICMP paket o nedostupnom portu treba da se vrati sa ciljne mašine.\
+UDP skeniranje portova je često nepouzdano, jer vatrozidi i ruteri mogu odbaciti ICMP\
+pakete. To može dovesti do lažnih pozitivnih rezultata u vašem skeniranju, i redovno ćete videti\
+UDP skeniranja portova koja prikazuju sve UDP portove otvorene na skeniranoj mašini.\
+Većina skenera portova ne skenira sve dostupne portove, i obično imaju unapred postavljenu listu\
+“zanimljivih portova” koji se skeniraju.
 
-UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
- packets. This can lead to false positives in your scan, and you will regularly see\
- UDP port scans showing all UDP ports open on a scanned machine.\
- o Most port scanners do not scan all available ports, and usually have a preset list\
- of “interesting ports” that are scanned.
+# CTF - Trikovi
 
-# CTF - Tricks
-
-In **Windows** use **Winzip** to search for files.\
-**Alternate data Streams**: _dir /r | find ":$DATA"_\
-
+U **Windows** koristite **Winzip** za pretragu datoteka.\
+**Alternativni podaci Strimovi**: _dir /r | find ":$DATA"_\
 ```
 binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
-
 ## Crypto
 
 **featherduster**\
@@ -40,22 +37,21 @@ binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and 
 **Basae64**(6—>8) —> 0...9, a...z, A…Z,+,/\
 **Base32**(5 —>8) —> A…Z, 2…7\
 **Base85** (Ascii85, 7—>8) —> 0...9, a...z, A...Z, ., -, :, +, =, ^, !, /, \*, ?, &, <, >, (, ), \[, ], {, }, @, %, $, #\
-**Uuencode** --> Start with "_begin \<mode> \<filename>_" and weird chars\
-**Xxencoding** --> Start with "_begin \<mode> \<filename>_" and B64\
+**Uuencode** --> Počnite sa "_begin \<mode> \<filename>_" i čudnim karakterima\
+**Xxencoding** --> Počnite sa "_begin \<mode> \<filename>_" i B64\
 \
-**Vigenere** (frequency analysis) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
-**Scytale** (offset of characters) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
+**Vigenere** (analiza frekvencije) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
+**Scytale** (pomak karaktera) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
 
 **25x25 = QR**
 
 factordb.com\
 rsatool
 
-Snow --> Hide messages using spaces and tabs
+Snow --> Sakrijte poruke koristeći razmake i tabove
 
 # Characters
 
-%E2%80%AE => RTL Character (writes payloads backwards)
+%E2%80%AE => RTL karakter (piše payload-ove unazad)
 
 {{#include ../banners/hacktricks-training.md}}
-

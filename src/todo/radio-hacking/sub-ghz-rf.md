@@ -2,82 +2,82 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Garage Doors
+## Garažna Vrata
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+Garažna vrata obično rade na frekvencijama u opsegu od 300-190 MHz, pri čemu su najčešće frekvencije 300 MHz, 310 MHz, 315 MHz i 390 MHz. Ovaj opseg frekvencija se često koristi za garažna vrata jer je manje zagušen od drugih frekvencijskih opsega i manje je verovatno da će doći do smetnji od drugih uređaja.
 
-## Car Doors
+## Automobilska Vrata
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
+Većina automobila koristi ključeve koji rade na **315 MHz ili 433 MHz**. Ove frekvencije su radio frekvencije i koriste se u raznim aplikacijama. Glavna razlika između dve frekvencije je ta što 433 MHz ima duži domet od 315 MHz. To znači da je 433 MHz bolji za aplikacije koje zahtevaju duži domet, kao što je daljinsko otključavanje.\
+U Evropi se često koristi 433.92MHz, dok se u SAD-u i Japanu koristi 315MHz.
 
-## **Brute-force Attack**
+## **Brute-force Napad**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+Ako umesto slanja svakog koda 5 puta (poslato ovako da bi se osiguralo da prijemnik to primi) pošaljete samo jednom, vreme se smanjuje na 6 minuta:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+i ako **uklonite 2 ms čekanja** između signala, možete **smanjiti vreme na 3 minuta.**
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
+Štaviše, korišćenjem De Bruijn sekvence (način za smanjenje broja bitova potrebnih za slanje svih potencijalnih binarnih brojeva za brute-force) ovo **vreme se smanjuje na samo 8 sekundi**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+Primer ovog napada je implementiran u [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 
-Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
+Zahtevajući **preambulu će izbeći optimizaciju De Bruijn sekvence** i **rolni kodovi će sprečiti ovaj napad** (pod pretpostavkom da je kod dovoljno dug da ne može biti brute-forcovan).
 
-## Sub-GHz Attack
+## Sub-GHz Napad
 
-To attack these signals with Flipper Zero check:
+Da biste napali ove signale sa Flipper Zero, proverite:
 
 {{#ref}}
 flipper-zero/fz-sub-ghz.md
 {{#endref}}
 
-## Rolling Codes Protection
+## Zaštita od Rolnih Kodova
 
-Automatic garage door openers typically use a wireless remote control to open and close the garage door. The remote control **sends a radio frequency (RF) signal** to the garage door opener, which activates the motor to open or close the door.
+Automatski otvarači garažnih vrata obično koriste bežični daljinski upravljač za otvaranje i zatvaranje garažnih vrata. Daljinski upravljač **šalje radio frekvencijski (RF) signal** otvaraču garažnih vrata, koji aktivira motor za otvaranje ili zatvaranje vrata.
 
-It is possible for someone to use a device known as a code grabber to intercept the RF signal and record it for later use. This is known as a **replay attack**. To prevent this type of attack, many modern garage door openers use a more secure encryption method known as a **rolling code** system.
+Moguće je da neko koristi uređaj poznat kao "code grabber" da presretne RF signal i snimi ga za kasniju upotrebu. Ovo je poznato kao **replay attack**. Da bi se sprečio ovaj tip napada, mnogi moderni otvarači garažnih vrata koriste sigurniju metodu enkripcije poznatu kao **rolling code** sistem.
 
-The **RF signal is typically transmitted using a rolling code**, which means that the code changes with each use. This makes it **difficult** for someone to **intercept** the signal and **use** it to gain **unauthorised** access to the garage.
+**RF signal se obično prenosi koristeći rolling code**, što znači da se kod menja sa svakom upotrebom. To otežava nekome da **presretne** signal i **iskoristi** ga za sticanje **neovlašćenog** pristupa garaži.
 
-In a rolling code system, the remote control and the garage door opener have a **shared algorithm** that **generates a new code** every time the remote is used. The garage door opener will only respond to the **correct code**, making it much more difficult for someone to gain unauthorised access to the garage just by capturing a code.
+U sistemu rolnih kodova, daljinski upravljač i otvarač garažnih vrata imaju **zajednički algoritam** koji **generiše novi kod** svaki put kada se daljinski upravljač koristi. Otvarač garažnih vrata će reagovati samo na **ispravan kod**, što znatno otežava nekome da dobije neovlašćen pristup garaži samo hvatanjem koda.
 
-### **Missing Link Attack**
+### **Napad na Nedostajući Link**
 
-Basically, you listen for the button and **capture the signal whilst the remote is out of range** of the device (say the car or garage). You then move to the device and **use the captured code to open it**.
+U suštini, slušate dugme i **hvata signal dok je daljinski upravljač van dometa** uređaja (recimo automobila ili garaže). Zatim se pomerate do uređaja i **koristite uhvaćeni kod da ga otvorite**.
 
-### Full Link Jamming Attack
+### Napad na Potpunu Blokadu Linka
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.
+Napadač bi mogao **blokirati signal blizu vozila ili prijemnika** tako da **prijemnik zapravo ne može ‘čuti’ kod**, i kada se to dogodi, možete jednostavno **uhvatiti i ponovo poslati** kod kada prestanete sa blokiranjem.
 
-The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
-
-> [!WARNING]
-> **Jamming works**, but it's noticeable as if the **person locking the car simply tests the doors** to ensure they are locked they would notice the car unlocked. Additionally if they were aware of such attacks they could even listen to the fact that the doors never made the lock **sound** or the cars **lights** never flashed when they pressed the ‘lock’ button.
-
-### **Code Grabbing Attack ( aka ‘RollJam’ )**
-
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.\
-Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
-
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+Žrtva će u nekom trenutku koristiti **ključeve da zaključa automobil**, ali tada će napad **snimiti dovoljno "zatvori vrata" kodova** koji se nadaju da bi mogli biti ponovo poslati da otvore vrata (možda će biti potrebna **promena frekvencije** jer postoje automobili koji koriste iste kodove za otvaranje i zatvaranje, ali slušaju za obe komande na različitim frekvencijama).
 
 > [!WARNING]
-> Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
+> **Blokiranje funkcioniše**, ali je primetno jer ako **osoba koja zaključava automobil jednostavno testira vrata** da bi se uverila da su zaključana, primetiće da je automobil otključan. Pored toga, ako su bili svesni takvih napada, mogli bi čak i da čuju da vrata nikada nisu napravila **zvuk** zaključavanja ili da svetla automobila nikada nisu trepnula kada su pritisnuli dugme ‘zaključaj’.
+
+### **Napad na Hvatanje Koda (aka ‘RollJam’)**
+
+Ovo je **tehnika blokiranja koja je manje uočljiva**. Napadač će blokirati signal, tako da kada žrtva pokuša da zaključa vrata, to neće raditi, ali će napadač **snimiti ovaj kod**. Zatim će žrtva **ponovo pokušati da zaključa automobil** pritiskom na dugme i automobil će **snimiti ovaj drugi kod**.\
+Odmah nakon toga, **napadač može poslati prvi kod** i **automobil će se zaključati** (žrtva će pomisliti da je drugi pritisak zatvorio). Tada će napadač moći da **pošalje drugi ukradeni kod da otvori** automobil (pod pretpostavkom da se **"zatvori automobil" kod može takođe koristiti za otvaranje**). Možda će biti potrebna promena frekvencije (jer postoje automobili koji koriste iste kodove za otvaranje i zatvaranje, ali slušaju za obe komande na različitim frekvencijama).
+
+Napadač može **blokirati prijemnik automobila, a ne svoj prijemnik** jer ako prijemnik automobila sluša, na primer, na 1MHz širokom opsegu, napadač neće **blokirati** tačnu frekvenciju koju koristi daljinski upravljač, već **blisku u tom spektru**, dok će **prijemnik napadača slušati u manjem opsegu** gde može slušati signal daljinskog upravljača **bez signala blokade**.
+
+> [!WARNING]
+> Druge implementacije viđene u specifikacijama pokazuju da je **rolling code deo** ukupnog koda koji se šalje. Naime, kod koji se šalje je **24-bitni ključ** gde je prvih **12 rolling code**, **drugih 8 je komanda** (kao što su zaključavanje ili otključavanje) i poslednja 4 je **kontrolna suma**. Vozila koja implementiraju ovu vrstu su takođe prirodno podložna jer napadač jednostavno treba da zameni segment rolling code da bi mogao da **koristi bilo koji rolling code na obe frekvencije**.
 
 > [!CAUTION]
-> Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+> Imajte na umu da ako žrtva pošalje treći kod dok napadač šalje prvi, prvi i drugi kod će biti nevažeći.
 
-### Alarm Sounding Jamming Attack
+### Napad na Alarmno Zvono
 
-Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
+Testirajući protiv aftermarket rolling code sistema instaliranog na automobilu, **slanje istog koda dva puta** odmah **aktivira alarm** i imobilizator, pružajući jedinstvenu **priliku za uskraćivanje usluge**. Ironično, sredstvo za **onemogućavanje alarma** i imobilizatora je bilo **pritiskanje** **daljinskog**, pružajući napadaču mogućnost da **neprekidno izvodi DoS napad**. Ili kombinujte ovaj napad sa **prethodnim da dobijete više kodova** jer bi žrtva želela da što pre zaustavi napad.
 
-## References
+## Reference
 
 - [https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/](https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/)
 - [https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
@@ -85,4 +85,3 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 - [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}
-

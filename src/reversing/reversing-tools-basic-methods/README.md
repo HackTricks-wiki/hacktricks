@@ -1,118 +1,108 @@
-# Reversing Tools & Basic Methods
+# Alati za reverziju i osnovne metode
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ImGui Based Reversing tools
+## Alati za reverziju zasnovani na ImGui
 
-Software:
+Softver:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## Wasm decompiler / Wat compiler
+## Wasm dekompajler / Wat kompajler
 
 Online:
 
-- Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) to **decompile** from wasm (binary) to wat (clear text)
-- Use [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) to **compile** from wat to wasm
-- you can also try to use [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) to decompile
+- Koristite [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) da **dekompajlirate** iz wasm (binarni) u wat (čisti tekst)
+- Koristite [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) da **kompajlirate** iz wat u wasm
+- takođe možete pokušati da koristite [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) za dekompilaciju
 
-Software:
+Softver:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## .NET decompiler
+## .NET dekompajler
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek is a decompiler that **decompiles and examines multiple formats**, including **libraries** (.dll), **Windows metadata file**s (.winmd), and **executables** (.exe). Once decompiled, an assembly can be saved as a Visual Studio project (.csproj).
+dotPeek je dekompajler koji **dekompajlira i ispituje više formata**, uključujući **biblioteke** (.dll), **Windows metapodatkovne datoteke** (.winmd) i **izvršne datoteke** (.exe). Kada se dekompajlira, skup može biti sačuvan kao Visual Studio projekat (.csproj).
 
-The merit here is that if a lost source code requires restoration from a legacy assembly, this action can save time. Further, dotPeek provides handy navigation throughout the decompiled code, making it one of the perfect tools for **Xamarin algorithm analysis.**
+Vrednost ovde je da ako izgubljeni izvorni kod zahteva obnavljanje iz nasleđenog skupa, ova akcija može uštedeti vreme. Pored toga, dotPeek pruža praktičnu navigaciju kroz dekompajlirani kod, čineći ga jednim od savršenih alata za **analizu Xamarin algoritama.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-With a comprehensive add-in model and an API that extends the tool to suit your exact needs, .NET reflector saves time and simplifies development. Let's take a look at the plethora of reverse engineering services this tool provides:
+Sa sveobuhvatnim modelom dodataka i API-jem koji proširuje alat da odgovara vašim tačnim potrebama, .NET reflector štedi vreme i pojednostavljuje razvoj. Pogledajmo mnoštvo usluga inženjeringa unazad koje ovaj alat pruža:
 
-- Provides an insight into how the data flows through a library or component
-- Provides insight into the implementation and usage of .NET languages and frameworks
-- Finds undocumented and unexposed functionality to get more out of the APIs and technologies used.
-- Finds dependencies and different assemblies
-- Tracks down the exact location of errors in your code, third-party components, and libraries.
-- Debugs into the source of all the .NET code you work with.
+- Pruža uvid u to kako podaci prolaze kroz biblioteku ili komponentu
+- Pruža uvid u implementaciju i korišćenje .NET jezika i okvira
+- Pronalazi nedokumentovanu i neizloženu funkcionalnost kako bi se dobilo više iz API-ja i tehnologija koje se koriste.
+- Pronalazi zavisnosti i različite skupove
+- Prati tačnu lokaciju grešaka u vašem kodu, komponentama trećih strana i bibliotekama.
+- Debaguje u izvor svih .NET kodova sa kojima radite.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): You can have it in any OS (you can install it directly from VSCode, no need to download the git. Click on **Extensions** and **search ILSpy**).\
-If you need to **decompile**, **modify** and **recompile** again you can use [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) or an actively maintained fork of it, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** to change something inside a function).
+[ILSpy dodatak za Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Možete ga imati na bilo kom operativnom sistemu (možete ga instalirati direktno iz VSCode, nema potrebe da preuzimate git. Kliknite na **Ekstenzije** i **pretražite ILSpy**).\
+Ako vam je potrebno da **dekompajlirate**, **modifikujete** i **ponovo kompajlirate**, možete koristiti [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) ili aktivno održavanu verziju, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Desni klik -> Modifikuj metodu** da promenite nešto unutar funkcije).
 
-### DNSpy Logging
+### DNSpy Logovanje
 
-In order to make **DNSpy log some information in a file**, you could use this snippet:
-
+Da biste **DNSpy-u omogućili da zabeleži neke informacije u datoteku**, možete koristiti ovaj isječak:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-
 ### DNSpy Debugging
 
-In order to debug code using DNSpy you need to:
+Da biste debagovali kod koristeći DNSpy, potrebno je da:
 
-First, change the **Assembly attributes** related to **debugging**:
+Prvo, promenite **atribute Assembly** vezane za **debugging**:
 
 ![](<../../images/image (973).png>)
-
-From:
-
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-
-To:
-
+Na:
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-
-And click on **compile**:
+I kliknite na **compile**:
 
 ![](<../../images/image (314) (1).png>)
 
-Then save the new file via _**File >> Save module...**_:
+Zatim sačuvajte novu datoteku putem _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-This is necessary because if you don't do this, at **runtime** several **optimisations** will be applied to the code and it could be possible that while debugging a **break-point is never hit** or some **variables don't exist**.
+To je neophodno jer ako to ne uradite, tokom **runtime** nekoliko **optimizacija** će biti primenjenih na kod i može se desiti da tokom debagovanja **break-point nikada ne bude dostignut** ili da neke **varijable ne postoje**.
 
-Then, if your .NET application is being **run** by **IIS** you can **restart** it with:
-
+Zatim, ako vaša .NET aplikacija radi pod **IIS**, možete je **restartovati** sa:
 ```
 iisreset /noforce
 ```
-
-Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
+Zatim, da biste započeli debagovanje, trebate zatvoriti sve otvorene datoteke i unutar **Debug Tab** odabrati **Attach to Process...**:
 
 ![](<../../images/image (318).png>)
 
-Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
+Zatim odaberite **w3wp.exe** da se povežete sa **IIS serverom** i kliknite na **attach**:
 
 ![](<../../images/image (113).png>)
 
-Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
+Sada kada debagujemo proces, vreme je da ga zaustavimo i učitamo sve module. Prvo kliknite na _Debug >> Break All_ a zatim kliknite na _**Debug >> Windows >> Modules**_:
 
 ![](<../../images/image (132).png>)
 
 ![](<../../images/image (834).png>)
 
-Click any module on **Modules** and select **Open All Modules**:
+Kliknite na bilo koji modul u **Modules** i odaberite **Open All Modules**:
 
 ![](<../../images/image (922).png>)
 
-Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
+Desni klik na bilo koji modul u **Assembly Explorer** i kliknite na **Sort Assemblies**:
 
 ![](<../../images/image (339).png>)
 
@@ -121,48 +111,48 @@ Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLLs
+## Debagovanje DLL-ova
 
-### Using IDA
+### Koristeći IDA
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- Select **Windbg** debugger
-- Select "**Suspend on library load/unload**"
+- **Učitajte rundll32** (64bit u C:\Windows\System32\rundll32.exe i 32 bit u C:\Windows\SysWOW64\rundll32.exe)
+- Odaberite **Windbg** debager
+- Odaberite "**Suspend on library load/unload**"
 
 ![](<../../images/image (868).png>)
 
-- Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
+- Konfigurišite **parametre** izvršenja postavljanjem **puta do DLL-a** i funkcije koju želite da pozovete:
 
 ![](<../../images/image (704).png>)
 
-Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
+Zatim, kada započnete debagovanje, **izvršenje će biti zaustavljeno kada se svaki DLL učita**, zatim, kada rundll32 učita vaš DLL, izvršenje će biti zaustavljeno.
 
-But, how can you get to the code of the DLL that was lodaded? Using this method, I don't know how.
+Ali, kako možete doći do koda DLL-a koji je učitan? Koristeći ovu metodu, ne znam kako.
 
-### Using x64dbg/x32dbg
+### Koristeći x64dbg/x32dbg
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- **Change the Command Line** ( _File --> Change Command Line_ ) and set the path of the dll and the function that you want to call, for example: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Change _Options --> Settings_ and select "**DLL Entry**".
-- Then **start the execution**, the debugger will stop at each dll main, at some point you will **stop in the dll Entry of your dll**. From there, just search for the points where you want to put a breakpoint.
+- **Učitajte rundll32** (64bit u C:\Windows\System32\rundll32.exe i 32 bit u C:\Windows\SysWOW64\rundll32.exe)
+- **Promenite Command Line** (_File --> Change Command Line_) i postavite putanju DLL-a i funkciju koju želite da pozovete, na primer: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- Promenite _Options --> Settings_ i odaberite "**DLL Entry**".
+- Zatim **pokrenite izvršenje**, debager će se zaustaviti na svakom glavnom DLL-u, u nekom trenutku ćete **stati u DLL Entry vašeg DLL-a**. Odatle, samo potražite tačke gde želite da postavite breakpoint.
 
-Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
+Primetite da kada je izvršenje zaustavljeno iz bilo kog razloga u win64dbg možete videti **u kojem kodu se nalazite** gledajući **na vrhu win64dbg prozora**:
 
 ![](<../../images/image (842).png>)
 
-Then, looking to this ca see when the execution was stopped in the dll you want to debug.
+Zatim, gledajući ovo možete videti kada je izvršenje zaustavljeno u DLL-u koji želite da debagujete.
 
-## GUI Apps / Videogames
+## GUI aplikacije / Video igre
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije pokrenute igre i njihovu promenu. Više informacija u:
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) je front-end/alati za reverzno inženjerstvo za GNU Project Debugger (GDB), fokusiran na igre. Međutim, može se koristiti za bilo šta vezano za reverzno inženjerstvo.
 
-[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
+[**Decompiler Explorer**](https://dogbolt.org/) je web front-end za nekoliko dekompilatora. Ova web usluga vam omogućava da uporedite izlaz različitih dekompilatora na malim izvršnim datotekama.
 
 ## ARM & MIPS
 
@@ -170,49 +160,48 @@ cheat-engine.md
 
 ## Shellcodes
 
-### Debugging a shellcode with blobrunner
+### Debagovanje shellcode-a sa blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.\
-Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) će **alokovati** **shellcode** unutar prostora memorije, **pokazaće** vam **adresu memorije** gde je shellcode alokovan i **zaustaviće** izvršenje.\
+Zatim, trebate **priključiti debager** (Ida ili x64dbg) na proces i postaviti **breakpoint na naznačenoj adresi memorije** i **nastaviti** izvršenje. Na ovaj način ćete debagovati shellcode.
 
-The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+Stranica sa izdanjima na github-u sadrži zip-ove koji sadrže kompajlirane verzije: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Možete pronaći malo izmenjenu verziju Blobrunner-a na sledećem linku. Da biste je kompajlirali, jednostavno **napravite C/C++ projekat u Visual Studio Code, kopirajte i nalepite kod i izgradite ga**.
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging a shellcode with jmp2it
+### Debagovanje shellcode-a sa jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) je vrlo sličan blobrunner-u. On će **alokovati** **shellcode** unutar prostora memorije i započeti **večnu petlju**. Zatim trebate **priključiti debager** na proces, **pokrenuti, sačekati 2-5 sekundi i pritisnuti stop** i naći ćete se unutar **večne petlje**. Preskočite na sledeću instrukciju večne petlje jer će to biti poziv na shellcode, i na kraju ćete se naći kako izvršavate shellcode.
 
 ![](<../../images/image (509).png>)
 
-You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
+Možete preuzeti kompajliranu verziju [jmp2it na stranici izdanja](https://github.com/adamkramer/jmp2it/releases/).
 
-### Debugging shellcode using Cutter
+### Debagovanje shellcode-a koristeći Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) je GUI radara. Koristeći cutter možete emulirati shellcode i dinamički ga inspekcirati.
 
-Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
+Napomena da Cutter omogućava "Open File" i "Open Shellcode". U mom slučaju, kada sam otvorio shellcode kao datoteku, ispravno ga je dekompilirao, ali kada sam ga otvorio kao shellcode, nije:
 
 ![](<../../images/image (562).png>)
 
-In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
+Da biste započeli emulaciju na mestu koje želite, postavite bp tamo i očigledno će cutter automatski započeti emulaciju odatle:
 
 ![](<../../images/image (589).png>)
 
 ![](<../../images/image (387).png>)
 
-You can see the stack for example inside a hex dump:
+Možete videti stek, na primer, unutar hex dump-a:
 
 ![](<../../images/image (186).png>)
 
-### Deobfuscating shellcode and getting executed functions
+### Deobfuskacija shellcode-a i dobijanje izvršenih funkcija
 
-You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
-
+Trebalo bi da probate [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
+Reći će vam stvari kao što su **koje funkcije** shellcode koristi i da li se shellcode **dekodira** u memoriji.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -221,67 +210,64 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-
-scDbg also counts with a graphical launcher where you can select the options you want and execute the shellcode
+scDbg takođe ima grafički pokretač gde možete odabrati opcije koje želite i izvršiti shellcode
 
 ![](<../../images/image (258).png>)
 
-The **Create Dump** option will dump the final shellcode if any change is done to the shellcode dynamically in memory (useful to download the decoded shellcode). The **start offset** can be useful to start the shellcode at a specific offset. The **Debug Shell** option is useful to debug the shellcode using the scDbg terminal (however I find any of the options explained before better for this matter as you will be able to use Ida or x64dbg).
+Opcija **Create Dump** će dumpovati konačni shellcode ako se bilo koja promena izvrši na shellcode-u dinamički u memoriji (korisno za preuzimanje dekodiranog shellcode-a). **Start offset** može biti koristan za pokretanje shellcode-a na specifičnom offsetu. Opcija **Debug Shell** je korisna za debagovanje shellcode-a koristeći scDbg terminal (međutim, smatram da su bilo koje od opcija objašnjenih pre bolje za ovu svrhu jer ćete moći da koristite Ida ili x64dbg).
 
 ### Disassembling using CyberChef
 
-Upload your shellcode file as input and use the following recipe to decompile it: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Otpremite svoj shellcode fajl kao ulaz i koristite sledeći recept za dekompilaciju: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-This obfuscator **modifies all the instructions for `mov`**(yeah, really cool). It also uses interruptions to change executions flows. For more information about how does it works:
+Ovaj obfuskator **modifikuje sve instrukcije za `mov`** (da, stvarno kul). Takođe koristi prekide za promenu toka izvršenja. Za više informacija o tome kako funkcioniše:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-If you are lucky [demovfuscator](https://github.com/kirschju/demovfuscator) will deofuscate the binary. It has several dependencies
-
+Ako imate sreće, [demovfuscator](https://github.com/kirschju/demovfuscator) će deofuskovati binarni fajl. Ima nekoliko zavisnosti
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
+I [instalirajte keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
-
-If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Ako igrate **CTF, ovo rešenje za pronalaženje zastavice** može biti veoma korisno: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-To find the **entry point** search the functions by `::main` like in:
+Da pronađete **ulaznu tačku** pretražujte funkcije po `::main` kao u:
 
 ![](<../../images/image (1080).png>)
 
-In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
-Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
+U ovom slučaju, binarni fajl se zvao authenticator, tako da je prilično očigledno da je ovo zanimljiva glavna funkcija.\
+Imajući **ime** **funkcija** koje se pozivaju, pretražujte ih na **Internetu** da biste saznali više o njihovim **ulazima** i **izlazima**.
 
 ## **Delphi**
 
-For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Za Delphi kompajlirane binarne fajlove možete koristiti [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-If you have to reverse a Delphi binary I would suggest you to use the IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Ako morate da obrnite Delphi binarni fajl, preporučujem da koristite IDA dodatak [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
-Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
+Samo pritisnite **ATL+f7** (import python plugin u IDA) i izaberite python dodatak.
 
-This plugin will execute the binary and resolve function names dynamically at the start of the debugging. After starting the debugging press again the Start button (the green one or f9) and a breakpoint will hit in the beginning of the real code.
+Ovaj dodatak će izvršiti binarni fajl i dinamički rešiti imena funkcija na početku debagovanja. Nakon pokretanja debagovanja ponovo pritisnite dugme Start (zeleno ili f9) i breakpoint će se aktivirati na početku pravog koda.
 
-It is also very interesting because if you press a button in the graphic application the debugger will stop in the function executed by that bottom.
+Takođe je veoma zanimljivo jer ako pritisnete dugme u grafičkoj aplikaciji, debager će se zaustaviti u funkciji koja je izvršena tim dugmetom.
 
 ## Golang
 
-If you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Ako morate da obrnite Golang binarni fajl, preporučujem da koristite IDA dodatak [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
-Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
+Samo pritisnite **ATL+f7** (import python plugin u IDA) i izaberite python dodatak.
 
-This will resolve the names of the functions.
+Ovo će rešiti imena funkcija.
 
-## Compiled Python
+## Kompajlirani Python
 
-In this page you can find how to get the python code from an ELF/EXE python compiled binary:
+Na ovoj stranici možete pronaći kako da dobijete python kod iz ELF/EXE python kompajliranog binarnog fajla:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -289,19 +275,18 @@ In this page you can find how to get the python code from an ELF/EXE python comp
 
 ## GBA - Game Body Advance
 
-If you get the **binary** of a GBA game you can use different tools to **emulate** and **debug** it:
+Ako dobijete **binarni** fajl GBA igre, možete koristiti različite alate za **emulaciju** i **debugovanje**:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Contains a debugger with interface
-- [**mgba** ](https://mgba.io)- Contains a CLI debugger
-- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
-- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Preuzmite debug verziju_) - Sadrži debager sa interfejsom
+- [**mgba** ](https://mgba.io)- Sadrži CLI debager
+- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra dodatak
+- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra dodatak
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_\*\* \*\* you can see how to press the Game Boy Advance **buttons**
+U [**no$gba**](https://problemkaputt.de/gba.htm), u _**Options --> Emulation Setup --> Controls**_\*\* \*\* možete videti kako da pritisnete **dugmiće** Game Boy Advance
 
 ![](<../../images/image (581).png>)
 
-When pressed, each **key has a value** to identify it:
-
+Kada se pritisne, svaki **taster ima vrednost** koja ga identifikuje:
 ```
 A = 1
 B = 2
@@ -314,100 +299,92 @@ DOWN = 128
 R = 256
 L = 256
 ```
-
-So, in this kind of program, the interesting part will be **how the program treats the user input**. In the address **0x4000130** you will find the commonly found function: **KEYINPUT**.
+Dakle, u ovom tipu programa, zanimljiv deo će biti **kako program obrađuje korisnički unos**. Na adresi **0x4000130** pronaći ćete funkciju koja se često sreće: **KEYINPUT**.
 
 ![](<../../images/image (447).png>)
 
-In the previous image you can find that the function is called from **FUN_080015a8** (addresses: _0x080015fa_ and _0x080017ac_).
+Na prethodnoj slici možete videti da se funkcija poziva iz **FUN_080015a8** (adrese: _0x080015fa_ i _0x080017ac_).
 
-In that function, after some init operations (without any importance):
-
+U toj funkciji, nakon nekih inicijalizacijskih operacija (bez ikakvog značaja):
 ```c
 void FUN_080015a8(void)
 
 {
-  ushort uVar1;
-  undefined4 uVar2;
-  undefined4 uVar3;
-  ushort uVar4;
-  int iVar5;
-  ushort *puVar6;
-  undefined *local_2c;
+ushort uVar1;
+undefined4 uVar2;
+undefined4 uVar3;
+ushort uVar4;
+int iVar5;
+ushort *puVar6;
+undefined *local_2c;
 
-  DISPCNT = 0x1140;
-  FUN_08000a74();
-  FUN_08000ce4(1);
-  DISPCNT = 0x404;
-  FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
-  FUN_08000354(&DAT_030000dc,0x3c);
-  uVar4 = DAT_030004d8;
+DISPCNT = 0x1140;
+FUN_08000a74();
+FUN_08000ce4(1);
+DISPCNT = 0x404;
+FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
+FUN_08000354(&DAT_030000dc,0x3c);
+uVar4 = DAT_030004d8;
 ```
-
-It's found this code:
-
+Pronađen je ovaj kod:
 ```c
-  do {
-    DAT_030004da = uVar4; //This is the last key pressed
-    DAT_030004d8 = KEYINPUT | 0xfc00;
-    puVar6 = &DAT_0200b03c;
-    uVar4 = DAT_030004d8;
-    do {
-      uVar2 = DAT_030004dc;
-      uVar1 = *puVar6;
-      if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
+do {
+DAT_030004da = uVar4; //This is the last key pressed
+DAT_030004d8 = KEYINPUT | 0xfc00;
+puVar6 = &DAT_0200b03c;
+uVar4 = DAT_030004d8;
+do {
+uVar2 = DAT_030004dc;
+uVar1 = *puVar6;
+if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-
-The last if is checking **`uVar4`** is in the **last Keys** and not is the current key, also called letting go off a button (current key is stored in **`uVar1`**).
-
+Poslednji if proverava da li je **`uVar4`** u **poslednjim ključevima** i da nije trenutnji ključ, takođe nazvan puštanje dugmeta (trenutnji ključ je sačuvan u **`uVar1`**).
 ```c
-        if (uVar1 == 4) {
-          DAT_030000d4 = 0;
-          uVar3 = FUN_08001c24(DAT_030004dc);
-          FUN_08001868(uVar2,0,uVar3);
-          DAT_05000000 = 0x1483;
-          FUN_08001844(&DAT_0200ba18);
-          FUN_08001844(&DAT_0200ba20,&DAT_0200ba40);
-          DAT_030000d8 = 0;
-          uVar4 = DAT_030004d8;
-        }
-        else {
-          if (uVar1 == 8) {
-            if (DAT_030000d8 == 0xf3) {
-              DISPCNT = 0x404;
-              FUN_08000dd0(&DAT_02008aac,0x6000000,&DAT_030000dc);
-              FUN_08000354(&DAT_030000dc,0x3c);
-              uVar4 = DAT_030004d8;
-            }
-          }
-          else {
-            if (DAT_030000d4 < 8) {
-              DAT_030000d4 = DAT_030000d4 + 1;
-              FUN_08000864();
-              if (uVar1 == 0x10) {
-                DAT_030000d8 = DAT_030000d8 + 0x3a;
+if (uVar1 == 4) {
+DAT_030000d4 = 0;
+uVar3 = FUN_08001c24(DAT_030004dc);
+FUN_08001868(uVar2,0,uVar3);
+DAT_05000000 = 0x1483;
+FUN_08001844(&DAT_0200ba18);
+FUN_08001844(&DAT_0200ba20,&DAT_0200ba40);
+DAT_030000d8 = 0;
+uVar4 = DAT_030004d8;
+}
+else {
+if (uVar1 == 8) {
+if (DAT_030000d8 == 0xf3) {
+DISPCNT = 0x404;
+FUN_08000dd0(&DAT_02008aac,0x6000000,&DAT_030000dc);
+FUN_08000354(&DAT_030000dc,0x3c);
+uVar4 = DAT_030004d8;
+}
+}
+else {
+if (DAT_030000d4 < 8) {
+DAT_030000d4 = DAT_030000d4 + 1;
+FUN_08000864();
+if (uVar1 == 0x10) {
+DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
+U prethodnom kodu možete videti da upoređujemo **uVar1** (mesto gde se nalazi **vrednost pritisnute dugmadi**) sa nekim vrednostima:
 
-In the previous code you can see that we are comparing **uVar1** (the place where the **value of the pressed button** is) with some values:
+- Prvo, upoređuje se sa **vrednost 4** (**SELECT** dugme): U izazovu ovo dugme briše ekran.
+- Zatim, upoređuje se sa **vrednost 8** (**START** dugme): U izazovu ovo proverava da li je kod validan za dobijanje zastavice.
+- U ovom slučaju var **`DAT_030000d8`** se upoređuje sa 0xf3 i ako je vrednost ista, izvršava se neki kod.
+- U svim drugim slučajevima, proverava se neki kont (`DAT_030000d4`). To je kont jer dodaje 1 odmah nakon ulaska u kod.\
+**Ako** je manje od 8, nešto što uključuje **dodavanje** vrednosti u \*\*`DAT_030000d8` \*\* se radi (u suštini dodaje vrednosti pritisnutih tastera u ovoj varijabli sve dok je kont manji od 8).
 
-- First, it's compared with the **value 4** (**SELECT** button): In the challenge this button clears the screen
-- Then, it's comparing it with the **value 8** (**START** button): In the challenge this checks is the code is valid to get the flag.
-  - In this case the var **`DAT_030000d8`** is compared with 0xf3 and if the value is the same some code is executed.
-- In any other cases, some cont (`DAT_030000d4`) is checked. It's a cont because it's adding 1 right after entering in the code.\
-  **I**f less than 8 something that involves **adding** values to \*\*`DAT_030000d8` \*\* is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
+Dakle, u ovom izazovu, znajući vrednosti dugmadi, trebalo je da **pritisnete kombinaciju dužine manje od 8 koja rezultira sabiranjem 0xf3.**
 
-So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
-
-**Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
+**Referenca za ovaj tutorijal:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 
 {% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
 
-## Courses
+## Kursevi
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binarna deobfuskacija)
 
 {{#include ../../banners/hacktricks-training.md}}
-

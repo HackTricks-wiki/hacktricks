@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values (if possible).
+Veoma jednostavno, ovaj alat će nam pomoći da pronađemo vrednosti za promenljive koje treba da zadovolje određene uslove, a ručno izračunavanje bi bilo veoma dosadno. Stoga, možete Z3 da navedete uslove koje promenljive treba da zadovolje i on će pronaći neke vrednosti (ako je moguće).
 
-**Some texts and examples are extracted from [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
+**Neki tekstovi i primeri su preuzeti sa [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
-# Basic Operations
+# Osnovne Operacije
 
-## Booleans/And/Or/Not
-
+## Booleovi/And/Or/Not
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -22,9 +21,7 @@ s.add(And(Or(x,y,Not(z)),y))
 s.check() #If response is "sat" then the model is satifable, if "unsat" something is wrong
 print(s.model()) #Print valid values to satisfy the model
 ```
-
 ## Ints/Simplify/Reals
-
 ```python
 from z3 import *
 
@@ -44,9 +41,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-
-## Printing Model
-
+## Štampanje modela
 ```python
 from z3 import *
 
@@ -58,13 +53,11 @@ s.check()
 m = s.model()
 print ("x = %s" % m[x])
 for d in m.decls():
-    print("%s = %s" % (d.name(), m[d]))
+print("%s = %s" % (d.name(), m[d]))
 ```
+# Mašinska Aritmetika
 
-# Machine Arithmetic
-
-Modern CPUs and main-stream programming languages use arithmetic over **fixed-size bit-vectors**. Machine arithmetic is available in Z3Py as **Bit-Vectors**.
-
+Moderni CPU-i i mainstream programski jezici koriste aritmetiku nad **fiksno velikim bit-vektorima**. Mašinska aritmetika je dostupna u Z3Py kao **Bit-Vektori**.
 ```python
 from z3 import *
 
@@ -79,11 +72,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
+## Potpisani/Ne potpisani brojevi
 
-## Signed/Unsigned Numbers
-
-Z3 provides special signed versions of arithmetical operations where it makes a difference whether the **bit-vector is treated as signed or unsigned**. In Z3Py, the operators **<, <=, >, >=, /, % and >>** correspond to the **signed** versions. The corresponding **unsigned** operators are **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
-
+Z3 pruža posebne potpisane verzije aritmetičkih operacija gde je važno da li se **bit-vektor tretira kao potpisan ili ne potpisan**. U Z3Py, operatori **<, <=, >, >=, /, % i >>** odgovaraju **potpisanim** verzijama. Odgovarajući **ne potpisani** operatori su **ULT, ULE, UGT, UGE, UDiv, URem i LShR.**
 ```python
 from z3 import *
 
@@ -101,13 +92,11 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
+## Funkcije
 
-## Functions
+**Interpretirane funkcije** kao što su aritmetičke gde **funkcija +** ima **fiksnu standardnu interpretaciju** (sabira dva broja). **Neinterpretirane funkcije** i konstante su **maksimalno fleksibilne**; omogućavaju **bilo koju interpretaciju** koja je **dosledna** sa **ograničenjima** nad funkcijom ili konstantom.
 
-**Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** (it adds two numbers). **Uninterpreted functions** and constants are **maximally flexible**; they allow **any interpretation** that is **consistent** with the **constraints** over the function or constant.
-
-Example: f applied twice to x results in x again, but f applied once to x is different from x.
-
+Primer: f primenjena dva puta na x rezultira ponovo u x, ali f primenjena jednom na x je različita od x.
 ```python
 from z3 import *
 
@@ -126,64 +115,60 @@ s.add(f(x) == 4) #Find the value that generates 4 as response
 s.check()
 print(m.model())
 ```
+# Primeri
 
-# Examples
-
-## Sudoku solver
-
+## Rešavač Sudokua
 ```python
 # 9x9 matrix of integer variables
 X = [ [ Int("x_%s_%s" % (i+1, j+1)) for j in range(9) ]
-      for i in range(9) ]
+for i in range(9) ]
 
 # each cell contains a value in {1, ..., 9}
 cells_c  = [ And(1 <= X[i][j], X[i][j] <= 9)
-             for i in range(9) for j in range(9) ]
+for i in range(9) for j in range(9) ]
 
 # each row contains a digit at most once
 rows_c   = [ Distinct(X[i]) for i in range(9) ]
 
 # each column contains a digit at most once
 cols_c   = [ Distinct([ X[i][j] for i in range(9) ])
-             for j in range(9) ]
+for j in range(9) ]
 
 # each 3x3 square contains a digit at most once
 sq_c     = [ Distinct([ X[3*i0 + i][3*j0 + j]
-                        for i in range(3) for j in range(3) ])
-             for i0 in range(3) for j0 in range(3) ]
+for i in range(3) for j in range(3) ])
+for i0 in range(3) for j0 in range(3) ]
 
 sudoku_c = cells_c + rows_c + cols_c + sq_c
 
 # sudoku instance, we use '0' for empty cells
 instance = ((0,0,0,0,9,4,0,3,0),
-            (0,0,0,5,1,0,0,0,7),
-            (0,8,9,0,0,0,0,4,0),
-            (0,0,0,0,0,0,2,0,8),
-            (0,6,0,2,0,1,0,5,0),
-            (1,0,2,0,0,0,0,0,0),
-            (0,7,0,0,0,0,5,2,0),
-            (9,0,0,0,6,5,0,0,0),
-            (0,4,0,9,7,0,0,0,0))
+(0,0,0,5,1,0,0,0,7),
+(0,8,9,0,0,0,0,4,0),
+(0,0,0,0,0,0,2,0,8),
+(0,6,0,2,0,1,0,5,0),
+(1,0,2,0,0,0,0,0,0),
+(0,7,0,0,0,0,5,2,0),
+(9,0,0,0,6,5,0,0,0),
+(0,4,0,9,7,0,0,0,0))
 
 instance_c = [ If(instance[i][j] == 0,
-                  True,
-                  X[i][j] == instance[i][j])
-               for i in range(9) for j in range(9) ]
+True,
+X[i][j] == instance[i][j])
+for i in range(9) for j in range(9) ]
 
 s = Solver()
 s.add(sudoku_c + instance_c)
 if s.check() == sat:
-    m = s.model()
-    r = [ [ m.evaluate(X[i][j]) for j in range(9) ]
-          for i in range(9) ]
-    print_matrix(r)
+m = s.model()
+r = [ [ m.evaluate(X[i][j]) for j in range(9) ]
+for i in range(9) ]
+print_matrix(r)
 else:
-    print "failed to solve"
+print "failed to solve"
 ```
-
-## References
+## Reference
 
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
 {{#include ../../banners/hacktricks-training.md}}
-

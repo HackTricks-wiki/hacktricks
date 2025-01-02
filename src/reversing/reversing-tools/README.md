@@ -1,33 +1,33 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Wasm Decompilation and Wat Compilation Guide
+# Vodič za dekompilaciju Wasm i kompilaciju Wat
 
-In the realm of **WebAssembly**, tools for **decompiling** and **compiling** are essential for developers. This guide introduces some online resources and software for handling **Wasm (WebAssembly binary)** and **Wat (WebAssembly text)** files.
+U oblasti **WebAssembly**, alati za **dekompilaciju** i **kompilaciju** su neophodni za programere. Ovaj vodič uvodi neke online resurse i softver za rukovanje **Wasm (WebAssembly binarni)** i **Wat (WebAssembly tekst)** datotekama.
 
-## Online Tools
+## Online alati
 
-- To **decompile** Wasm to Wat, the tool available at [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) comes in handy.
-- For **compiling** Wat back to Wasm, [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/) serves the purpose.
-- Another decompilation option can be found at [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
+- Za **dekompilaciju** Wasm u Wat, alat dostupan na [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) je koristan.
+- Za **kompilaciju** Wat nazad u Wasm, [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/) služi toj svrsi.
+- Druga opcija za dekompilaciju može se naći na [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
 
-## Software Solutions
+## Softverska rešenja
 
-- For a more robust solution, [JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) offers extensive features.
-- The open-source project [wasmdec](https://github.com/wwwg/wasmdec) is also available for decompilation tasks.
+- Za robusnije rešenje, [JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) nudi opsežne funkcije.
+- Open-source projekat [wasmdec](https://github.com/wwwg/wasmdec) je takođe dostupan za zadatke dekompilacije.
 
-# .Net Decompilation Resources
+# Resursi za dekompilaciju .Net
 
-Decompiling .Net assemblies can be accomplished with tools such as:
+Dekompilacija .Net biblioteka može se ostvariti pomoću alata kao što su:
 
-- [ILSpy](https://github.com/icsharpcode/ILSpy), which also offers a [plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), allowing cross-platform usage.
-- For tasks involving **decompilation**, **modification**, and **recompilation**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) is highly recommended. **Right-clicking** a method and choosing **Modify Method** enables code changes.
-- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) is another alternative for decompiling .Net assemblies.
+- [ILSpy](https://github.com/icsharpcode/ILSpy), koji takođe nudi [plugin za Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), omogućavajući korišćenje na više platformi.
+- Za zadatke koji uključuju **dekompilaciju**, **modifikaciju** i **rekompilaciju**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) se toplo preporučuje. **Desni klik** na metodu i izbor **Modify Method** omogućava promene u kodu.
+- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) je još jedna alternativa za dekompilaciju .Net biblioteka.
 
-## Enhancing Debugging and Logging with DNSpy
+## Unapređenje debagovanja i logovanja sa DNSpy
 
-### DNSpy Logging
+### DNSpy logovanje
 
-To log information to a file using DNSpy, incorporate the following .Net code snippet:
+Da biste logovali informacije u datoteku koristeći DNSpy, uključite sledeći .Net kod:
 
 %%%cpp
 using System.IO;
@@ -35,81 +35,80 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 %%%
 
-### DNSpy Debugging
+### DNSpy debagovanje
 
-For effective debugging with DNSpy, a sequence of steps is recommended to adjust **Assembly attributes** for debugging, ensuring that optimizations that could hinder debugging are disabled. This process includes changing the `DebuggableAttribute` settings, recompiling the assembly, and saving the changes.
+Za efikasno debagovanje sa DNSpy, preporučuje se niz koraka za podešavanje **atributa biblioteke** za debagovanje, osiguravajući da su optimizacije koje bi mogle ometati debagovanje onemogućene. Ovaj proces uključuje promenu `DebuggableAttribute` podešavanja, rekonstrukciju biblioteke i čuvanje izmena.
 
-Moreover, to debug a .Net application run by **IIS**, executing `iisreset /noforce` restarts IIS. To attach DNSpy to the IIS process for debugging, the guide instructs on selecting the **w3wp.exe** process within DNSpy and starting the debugging session.
+Pored toga, da biste debagovali .Net aplikaciju koju pokreće **IIS**, izvršavanje `iisreset /noforce` ponovo pokreće IIS. Da biste priključili DNSpy na IIS proces za debagovanje, vodič objašnjava kako da izaberete **w3wp.exe** proces unutar DNSpy i započnete sesiju debagovanja.
 
-For a comprehensive view of loaded modules during debugging, accessing the **Modules** window in DNSpy is advised, followed by opening all modules and sorting assemblies for easier navigation and debugging.
+Za sveobuhvatan pregled učitanih modula tokom debagovanja, preporučuje se pristup **Modules** prozoru u DNSpy, nakon čega se otvaraju svi moduli i sortiraju biblioteke radi lakše navigacije i debagovanja.
 
-This guide encapsulates the essence of WebAssembly and .Net decompilation, offering a pathway for developers to navigate these tasks with ease.
+Ovaj vodič obuhvata suštinu WebAssembly i .Net dekompilacije, nudeći put za programere da lako navigiraju ovim zadacima.
 
-## **Java Decompiler**
+## **Java dekompilator**
 
-To decompile Java bytecode, these tools can be very helpful:
+Za dekompilaciju Java bajtkoda, ovi alati mogu biti veoma korisni:
 
 - [jadx](https://github.com/skylot/jadx)
 - [JD-GUI](https://github.com/java-decompiler/jd-gui/releases)
 
-## **Debugging DLLs**
+## **Debagovanje DLL-ova**
 
-### Using IDA
+### Korišćenje IDA
 
-- **Rundll32** is loaded from specific paths for 64-bit and 32-bit versions.
-- **Windbg** is selected as the debugger with the option to suspend on library load/unload enabled.
-- Execution parameters include the DLL path and function name. This setup halts execution upon each DLL's loading.
+- **Rundll32** se učitava iz specifičnih putanja za 64-bitne i 32-bitne verzije.
+- **Windbg** se bira kao debager sa opcijom da se pauzira prilikom učitavanja/izbacivanja biblioteka.
+- Parametri izvršenja uključuju putanju DLL-a i naziv funkcije. Ova postavka zaustavlja izvršenje prilikom svakog učitavanja DLL-a.
 
-### Using x64dbg/x32dbg
+### Korišćenje x64dbg/x32dbg
 
-- Similar to IDA, **rundll32** is loaded with command line modifications to specify the DLL and function.
-- Settings are adjusted to break on DLL entry, allowing breakpoint setting at the desired DLL entry point.
+- Slično IDA, **rundll32** se učitava sa izmenama komandne linije kako bi se odredili DLL i funkcija.
+- Podešavanja se prilagođavaju da se prekine na ulazu DLL-a, omogućavajući postavljanje tačke prekida na željenoj tački ulaza DLL-a.
 
-### Images
+### Slike
 
-- Execution stopping points and configurations are illustrated through screenshots.
+- Tačke zaustavljanja izvršenja i konfiguracije su ilustrovane kroz snimke ekrana.
 
 ## **ARM & MIPS**
 
-- For emulation, [arm_now](https://github.com/nongiach/arm_now) is a useful resource.
+- Za emulaciju, [arm_now](https://github.com/nongiach/arm_now) je koristan resurs.
 
 ## **Shellcodes**
 
-### Debugging Techniques
+### Tehnike debagovanja
 
-- **Blobrunner** and **jmp2it** are tools for allocating shellcodes in memory and debugging them with Ida or x64dbg.
-  - Blobrunner [releases](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
-  - jmp2it [compiled version](https://github.com/adamkramer/jmp2it/releases/)
-- **Cutter** offers GUI-based shellcode emulation and inspection, highlighting differences in shellcode handling as a file versus direct shellcode.
+- **Blobrunner** i **jmp2it** su alati za alokaciju shellcode-a u memoriji i debagovanje sa Idom ili x64dbg.
+- Blobrunner [izdanja](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
+- jmp2it [kompilovana verzija](https://github.com/adamkramer/jmp2it/releases/)
+- **Cutter** nudi emulaciju i inspekciju shellcode-a zasnovanu na GUI, ističući razlike u rukovanju shellcode-om kao datotekom naspram direktnog shellcode-a.
 
-### Deobfuscation and Analysis
+### Deobfuskacija i analiza
 
-- **scdbg** provides insights into shellcode functions and deobfuscation capabilities.
-  %%%bash
-  scdbg.exe -f shellcode # Basic info
-  scdbg.exe -f shellcode -r # Analysis report
-  scdbg.exe -f shellcode -i -r # Interactive hooks
-  scdbg.exe -f shellcode -d # Dump decoded shellcode
-  scdbg.exe -f shellcode /findsc # Find start offset
-  scdbg.exe -f shellcode /foff 0x0000004D # Execute from offset
-  %%%
+- **scdbg** pruža uvide u funkcije shellcode-a i mogućnosti deobfuskacije.
+%%%bash
+scdbg.exe -f shellcode # Osnovne informacije
+scdbg.exe -f shellcode -r # Izveštaj o analizi
+scdbg.exe -f shellcode -i -r # Interaktivne petlje
+scdbg.exe -f shellcode -d # Ispis dekodiranog shellcode-a
+scdbg.exe -f shellcode /findsc # Pronađi početni offset
+scdbg.exe -f shellcode /foff 0x0000004D # Izvrši od offseta
+%%%
 
-- **CyberChef** for disassembling shellcode: [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
+- **CyberChef** za disasembleranje shellcode-a: [CyberChef recept](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
 
 ## **Movfuscator**
 
-- An obfuscator that replaces all instructions with `mov`.
-- Useful resources include a [YouTube explanation](https://www.youtube.com/watch?v=2VF_wPkiBJY) and [PDF slides](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
-- **demovfuscator** might reverse movfuscator's obfuscation, requiring dependencies like `libcapstone-dev` and `libz3-dev`, and installing [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
+- Obfuskator koji zamenjuje sve instrukcije sa `mov`.
+- Korisni resursi uključuju [YouTube objašnjenje](https://www.youtube.com/watch?v=2VF_wPkiBJY) i [PDF prezentacije](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
+- **demovfuscator** može da obrne obfuskaciju movfuscatora, zahtevajući zavisnosti kao što su `libcapstone-dev` i `libz3-dev`, i instaliranje [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
 
 ## **Delphi**
 
-- For Delphi binaries, [IDR](https://github.com/crypto2011/IDR) is recommended.
+- Za Delphi binarne datoteke, [IDR](https://github.com/crypto2011/IDR) se preporučuje.
 
-# Courses
+# Kursevi
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Binary deobfuscation\)
 
 {{#include ../../banners/hacktricks-training.md}}
-

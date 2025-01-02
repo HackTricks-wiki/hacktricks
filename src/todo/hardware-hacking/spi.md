@@ -2,59 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Osnovne informacije
 
-SPI (Serial Peripheral Interface) is an Synchronous Serial Communication Protocol used in embedded systems for short distance communication between ICs (Integrated Circuits). SPI Communication Protocol makes use of the master-slave architecture which is orchastrated by the Clock and Chip Select Signal. A master-slave architecture consists of a master (usually a microprocessor) that manages external peripherals like EEPROM, sensors, control devices, etc. which are considered to be the slaves.
+SPI (Serial Peripheral Interface) je sinhroni serijski komunikacioni protokol koji se koristi u ugrađenim sistemima za kratkodistansku komunikaciju između IC-ova (integrisanih kola). SPI komunikacioni protokol koristi arhitekturu master-slave koju orkestrira signal sata i signal odabira čipa. Arhitektura master-slave se sastoji od mastera (obično mikroprocesora) koji upravlja spoljnim perifernim uređajima kao što su EEPROM, senzori, kontrolni uređaji itd., koji se smatraju slugama.
 
-Multiple slaves can be connected to a master but slaves can't communicate with each other. Slaves are administrated by two pins, clock and chip select. As SPI is an synchronous communication protocol, the input and output pins follow the clock signals. The chip select is used by the master to select a slave and interact with it. When the chip select is high, the slave device is not selected whereas when it's low, the chip has been selected and the master would be interacting with the slave.
+Više sluga može biti povezano sa masterom, ali sluge ne mogu međusobno komunicirati. Slugama upravljaju dva pina, sat i odabir čipa. Pošto je SPI sinhroni komunikacioni protokol, ulazni i izlazni pinovi prate signale sata. Signal odabira čipa koristi master da odabere slugu i komunicira s njom. Kada je signal odabira čipa visok, uređaj sluge nije odabran, dok kada je nizak, čip je odabran i master bi komunicirao sa slugom.
 
-The MOSI (Master Out, Slave In) and MISO (Master In, Slave Out) are responsible for data sending and recieving data. Data is sent to the slave device through the MOSI pin while the chip select is held low. The input data contains instructions, memory addresses or data as per the datasheet of the slave device vendor. Upon a valid input, the MISO pin is responsible for transmitting data to the master. The output data is sent exactly at the next clock cycle after the input ends. The MISO pins transmits data till the data is fully transmitter or the master sets the chip select pin high (in that case, the slave would stop transmitting and master would not listen after that clock cycle).
+MOSI (Master Out, Slave In) i MISO (Master In, Slave Out) su odgovorni za slanje i primanje podataka. Podaci se šalju uređaju sluge putem MOSI pina dok je signal odabira čipa nizak. Ulazni podaci sadrže instrukcije, adrese u memoriji ili podatke prema tehničkoj dokumentaciji dobavljača uređaja sluge. Nakon validnog ulaza, MISO pin je odgovoran za prenos podataka ka masteru. Izlazni podaci se šalju tačno u sledećem ciklusu sata nakon što ulaz završi. MISO pin prenosi podatke sve dok podaci nisu potpuno preneseni ili dok master ne postavi pin odabira čipa na visok (u tom slučaju, sluga bi prestao sa prenosom i master ne bi slušao nakon tog ciklusa sata).
 
-## Dumping Firmware from EEPROMs
+## Dumpovanje firmvera sa EEPROM-a
 
-Dumping firmware can be useful for analysing the firmware and finding vulnerabilities in them. Often times, the firmware is not available on the internet or is irrelevant due to variations of factors like model number, version, etc. Hence, extracting the firmware directly from the physical device can be helpful to be specific while hunting for threats.
+Dumpovanje firmvera može biti korisno za analizu firmvera i pronalaženje ranjivosti u njima. Često, firmver nije dostupan na internetu ili je nerelevantan zbog varijacija faktora kao što su broj modela, verzija itd. Stoga, direktno izvlačenje firmvera sa fizičkog uređaja može biti korisno da se bude specifičan prilikom lova na pretnje.
 
-Getting Serial Console can be helpful, but often times it happens that the files are read-only. This constrains the analysis due to various reasons. For example, a tools that are required to send and recieve packages would not be there in the firmware. So extracting the binaries to reverse engineer them is not feasible. Hence, having the whole firmware dumped on the system and extracting the binaries for analysis can be very helpful.
+Dobijanje serijske konzole može biti korisno, ali često se dešava da su datoteke samo za čitanje. To ograničava analizu iz raznih razloga. Na primer, alati koji su potrebni za slanje i primanje paketa ne bi bili prisutni u firmveru. Dakle, izvlačenje binarnih datoteka za obrnuto inženjerstvo nije izvodljivo. Stoga, imati ceo firmver dumpovan na sistemu i izvlačiti binarne datoteke za analizu može biti veoma korisno.
 
-Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping.
+Takođe, tokom red reaming-a i dobijanja fizičkog pristupa uređajima, dumpovanje firmvera može pomoći u modifikaciji datoteka ili injektovanju zlonamernih datoteka, a zatim ponovnom flešovanju u memoriju, što može biti korisno za implantaciju backdoora u uređaj. Stoga, postoji brojne mogućnosti koje se mogu otključati dumpovanjem firmvera.
 
-### CH341A EEPROM Programmer and Reader
+### CH341A EEPROM programer i čitač
 
-This device is an inexpensive tool for dumping firmwares from EEPROMs and also reflashing them with firmware files. This has been a popular choice for working with computer BIOS chips (which are just EEPROMs). This device connects over USB and needs minimal tools to get started. Also, it usually gets the task done quickly, so can be helpful in physical device access too.
+Ovaj uređaj je jeftin alat za dumpovanje firmvera sa EEPROM-a i takođe ponovo flešovanje sa datotekama firmvera. Ovo je popularan izbor za rad sa BIOS čipovima računara (koji su samo EEPROM-ovi). Ovaj uređaj se povezuje preko USB-a i zahteva minimalne alate za početak. Takođe, obično brzo obavlja zadatak, pa može biti koristan i za fizički pristup uređaju.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Connect the EEPROM memory with the CH341a Programmer and plug the device into the computer. Incase the device is not getting detected, try installing drivers into the computer. Also, make sure that the EEPROM is connected in proper orientation (usually, place the VCC Pin in reverse orientation to the USB connector) or else, the software would not be able to detect the chip. Refer to the diagram if required:
+Povežite EEPROM memoriju sa CH341a programerom i priključite uređaj na računar. U slučaju da uređaj nije prepoznat, pokušajte da instalirate drajvere na računar. Takođe, uverite se da je EEPROM povezan u pravom položaju (obično, postavite VCC pin u obrnutom položaju u odnosu na USB konektor) ili softver neće moći da prepozna čip. Pogledajte dijagram ako je potrebno:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Finally, use softwares like flashrom, G-Flash (GUI), etc. for dumping the firmware. G-Flash is a minimal GUI tool is fast and detects the EEPROM automatically. This can be helpful in the firmware needs to be extracted quickly, without much tinkering with the documentation.
+Na kraju, koristite softvere kao što su flashrom, G-Flash (GUI), itd. za dumpovanje firmvera. G-Flash je minimalni GUI alat koji je brz i automatski prepoznaje EEPROM. Ovo može biti korisno kada je potrebno brzo izvući firmver, bez mnogo petljanja sa dokumentacijom.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-After dumping the firmware, the analysis can be done on the binary files. Tools like strings, hexdump, xxd, binwalk, etc. can be used to extract a lot of information about the firmware as well as the whole file system too.
+Nakon dumpovanja firmvera, analiza se može obaviti na binarnim datotekama. Alati kao što su strings, hexdump, xxd, binwalk, itd. mogu se koristiti za ekstrakciju mnogo informacija o firmveru kao i o celom fajl sistemu.
 
-To extract the contents from the firmware, binwalk can be used. Binwalk analyses for hex signatures and identifies the files in the binary file and is capabale of extracting them.
-
+Za ekstrakciju sadržaja iz firmvera može se koristiti binwalk. Binwalk analizira heksadecimalne potpise i identifikuje datoteke u binarnoj datoteci i sposoban je da ih ekstrakuje.
 ```
 binwalk -e <filename>
 ```
-
-The can be .bin or .rom as per the tools and configurations used.
+Može biti .bin ili .rom u zavisnosti od alata i konfiguracija koje se koriste.
 
 > [!CAUTION]
-> Note that firmware extraction is a delicate process and requires a lot of patience. Any mishandling can potentially corrupt the firmware or even erase it completely and make the device unusable. It is recommended to study the specific device before attempting to extract the firmware.
+> Imajte na umu da je ekstrakcija firmvera delikatan proces i zahteva puno strpljenja. Svako nepravilno rukovanje može potencijalno oštetiti firmver ili čak potpuno obrisati i učiniti uređaj neupotrebljivim. Preporučuje se proučavanje specifičnog uređaja pre nego što pokušate da ekstraktujete firmver.
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and **MISO** to connect to SPI however some SPIs may indicate pins as DI and DO. **MOSI -> DI, MISO -> DO**
+Imajte na umu da čak i ako PINOUT Pirate Bus-a ukazuje na pinove za **MOSI** i **MISO** za povezivanje sa SPI, neki SPIs mogu označavati pinove kao DI i DO. **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) to dump the content of the flash memory running something like:
-
+U Windows-u ili Linux-u možete koristiti program [**`flashrom`**](https://www.flashrom.org/Flashrom) da dump-ujete sadržaj flash memorije pokrećući nešto poput:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
@@ -63,6 +60,4 @@ In Windows or Linux you can use the program [**`flashrom`**](https://www.flashro
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

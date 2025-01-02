@@ -1,47 +1,45 @@
-# Cookies Policy
+# Politika kolačića
 
-Last updated: 02/04/2023
+Poslednje ažuriranje: 02/04/2023
 
-### Introduction
+### Uvod
 
-This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
+Ova Politika kolačića se primenjuje na sledeće veb sajtove u vlasništvu i pod upravom HackTricks tima ("HackTricks", "mi", "nas" ili "naš"):
 
 * hacktricks.xyz
 * [www.hacktricks.xyz](http://www.hacktricks.xyz/)
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
+Korišćenjem bilo kog od ovih veb sajtova, slažete se sa upotrebom kolačića u skladu sa ovom Politikom kolačića. Ako se ne slažete, molimo vas da onemogućite kolačiće u podešavanjima vašeg pregledača ili se suzdržite od korišćenja naših veb sajtova.
 
-### What are cookies?
+### Šta su kolačići?
 
-Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work, improve their functionality, and provide a more personalized user experience.
+Kolačići su mali tekstualni fajlovi koji se čuvaju na vašem računaru ili mobilnom uređaju kada posetite veb sajt. Široko se koriste za omogućavanje rada veb sajtova, poboljšanje njihove funkcionalnosti i pružanje personalizovanijeg korisničkog iskustva.
 
-### How we use cookies
+### Kako koristimo kolačiće
 
-We use cookies on our websites for the following purposes:
+Koristimo kolačiće na našim veb sajtovima u sledeće svrhe:
 
-1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
-2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
-3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
-4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
+1. Neophodni kolačići: Ovi kolačići su neophodni za osnovnu funkcionalnost naših veb sajtova, kao što su omogućavanje autentifikacije korisnika, održavanje bezbednosti i pamćenje vaših preferencija.
+2. Kolačići za performanse: Ovi kolačići nam pomažu da razumemo kako posetioci interaguju sa našim veb sajtovima, prikupljajući i izveštavajući informacije anonimno. To nam omogućava da poboljšamo performanse našeg veb sajta i korisničko iskustvo.
+3. Kolačići za funkcionalnost: Ovi kolačići omogućavaju našim veb sajtovima da pamte izbore koje napravite, kao što su vaš jezik ili region, kako bi pružili personalizovanije iskustvo.
+4. Kolačići za ciljanje/reklamu: Ovi kolačići se koriste za isporuku relevantnih oglasa i marketinških komunikacija na osnovu vaših interesa, istorije pretraživanja i interakcija sa našim veb sajtovima.
 
-Moreover, the pages book.hacktricks.xyz and cloud.hacktricks.xyz are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Pored toga, stranice book.hacktricks.xyz i cloud.hacktricks.xyz su hostovane na Gitbook-u. Možete pronaći više informacija o kolačićima Gitbook-a na [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
-### Third-party cookies
+### Kolačići trećih strana
 
-In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
+Pored naših kolačića, možemo takođe koristiti kolačiće trećih strana za izveštavanje o statistikama korišćenja veb sajta, isporuku oglasa i omogućavanje dugmadi za deljenje na društvenim mrežama. Korišćenje kolačića trećih strana podložno je njihovim odgovarajućim politikama privatnosti.
 
-Managing cookies
+Upravljanje kolačićima
 
-Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
+Većina veb pregledača omogućava vam da upravljate kolačićima putem svojih podešavanja. Možete izabrati da blokirate, obrišete ili ograničite upotrebu kolačića na vašem uređaju. Međutim, imajte na umu da onemogućavanje kolačića može uticati na funkcionalnost i performanse naših veb sajtova.
 
-Changes to this Cookies Policy
+Izmene ove Politike kolačića
 
-We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
+Možemo povremeno ažurirati ovu Politiku kolačića kako bismo odražavali promene u našim praksama ili relevantnim zakonima. Preporučujemo vam da povremeno pregledate ovu stranicu za najnovije informacije o našim praksama kolačića.
 
-### Contact us
+### Kontaktirajte nas
 
-If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
-
-
+Ako imate bilo kakva pitanja ili nedoumice u vezi sa ovom Politikom kolačića, molimo vas da nas kontaktirate na [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
