@@ -48,3 +48,5 @@ TODO
 The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

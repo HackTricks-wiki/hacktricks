@@ -32,3 +32,5 @@ The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

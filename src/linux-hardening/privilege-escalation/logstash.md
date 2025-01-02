@@ -59,3 +59,5 @@ With **config.reload.automatic: true** in **/etc/logstash/logstash.yml**, Logsta
 ## References
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

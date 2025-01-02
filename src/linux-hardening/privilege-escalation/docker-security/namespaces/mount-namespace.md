@@ -134,3 +134,5 @@ vmware-root_662-2689143848
 - [https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux](https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux)
 
 {{#include ../../../../banners/hacktricks-training.md}}
+
+

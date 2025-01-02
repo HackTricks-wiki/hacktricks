@@ -70,3 +70,5 @@ nsenter -T TARGET_PID --pid /bin/bash
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
+
+

