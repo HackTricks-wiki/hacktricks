@@ -1,92 +1,87 @@
-# macOS Launch/Environment Constraints & Trust Cache
+# macOS 启动/环境约束与信任缓存
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-Launch constraints in macOS were introduced to enhance security by **regulating how, who, and from where a process can be initiated**. Initiated in macOS Ventura, they provide a framework that categorizes **each system binary into distinct constraint categories**, which are defined within the **trust cache**, a list containing system binaries and their respective hashes​. These constraints extend to every executable binary within the system, entailing a set of **rules** delineating the requirements for **launching a particular binary**. The rules encompass self constraints that a binary must satisfy, parent constraints required to be met by its parent process, and responsible constraints to be adhered to by other relevant entities​.
+macOS 中的启动约束旨在通过**规范进程的启动方式、启动者和启动来源**来增强安全性。自 macOS Ventura 开始引入，它们提供了一个框架，将**每个系统二进制文件分类为不同的约束类别**，这些类别在**信任缓存**中定义，该列表包含系统二进制文件及其各自的哈希值。这些约束扩展到系统中的每个可执行二进制文件，涉及一组**规则**，规定了**启动特定二进制文件的要求**。规则包括二进制文件必须满足的自我约束、其父进程必须满足的父约束，以及其他相关实体必须遵守的责任约束​。
 
-The mechanism extends to third-party apps through **Environment Constraints**, beginning from macOS Sonoma, allowing developers to protect their apps by specifying a **set of keys and values for environment constraints.**
+该机制通过**环境约束**扩展到第三方应用程序，自 macOS Sonoma 开始，允许开发者通过指定**一组环境约束的键和值**来保护他们的应用程序。
 
-You define **launch environment and library constraints** in constraint dictionaries that you either save in **`launchd` property list files**, or in **separate property list** files that you use in code signing.
+您可以在约束字典中定义**启动环境和库约束**，这些字典可以保存在**`launchd` 属性列表文件**中，或在代码签名中使用的**单独属性列表**文件中。
 
-There are 4 types of constraints:
+约束有 4 种类型：
 
-- **Self Constraints**: Constrains applied to the **running** binary.
-- **Parent Process**: Constraints applied to the **parent of the process** (for example **`launchd`** running a XP service)
-- **Responsible Constraints**: Constraints applied to the **process calling the service** in a XPC communication
-- **Library load constraints**: Use library load constraints to selectively describe code that can be loaded
+- **自我约束**：应用于**运行中的**二进制文件的约束。
+- **父进程**：应用于**进程的父进程**的约束（例如 **`launchd`** 运行 XP 服务）
+- **责任约束**：应用于**在 XPC 通信中调用服务的进程**的约束
+- **库加载约束**：使用库加载约束选择性地描述可以加载的代码
 
-So when a process tries to launch another process — by calling `execve(_:_:_:)` or `posix_spawn(_:_:_:_:_:_:)` — the operating system checks that the **executable** file **satisfies** its **own self constraint**. It also checks that the **parent** **process’s** executable **satisfies** the executable’s **parent constraint**, and that the **responsible** **process’s** executable **satisfies the executable’s responsible process constrain**t. If any of these launch constraints aren’t satisfied, the operating system doesn’t run the program.
+因此，当一个进程尝试通过调用 `execve(_:_:_:)` 或 `posix_spawn(_:_:_:_:_:_:)` 启动另一个进程时，操作系统会检查**可执行**文件是否**满足**其**自身的自我约束**。它还会检查**父进程**的可执行文件是否**满足**可执行文件的**父约束**，以及**责任进程**的可执行文件是否**满足**可执行文件的责任进程约束。如果这些启动约束中的任何一个不满足，操作系统将不会运行该程序。
 
-If when loading a library any part of the **library constraint isn’t true**, your process **doesn’t load** the library.
+如果在加载库时，**库约束**的任何部分不成立，您的进程**将不会加载**该库。
 
-## LC Categories
+## LC 类别
 
-A LC as composed by **facts** and **logical operations** (and, or..) that combines facts.
+LC 由**事实**和**逻辑操作**（与，或..）组成，结合事实。
 
-The[ **facts that a LC can use are documented**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). For example:
+[**LC 可以使用的事实已记录**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints)。例如：
 
-- is-init-proc: A Boolean value that indicates whether the executable must be the operating system’s initialization process (`launchd`).
-- is-sip-protected: A Boolean value that indicates whether the executable must be a file protected by System Integrity Protection (SIP).
-- `on-authorized-authapfs-volume:` A Boolean value that indicates whether the operating system loaded the executable from an authorized, authenticated APFS volume.
-- `on-authorized-authapfs-volume`: A Boolean value that indicates whether the operating system loaded the executable from an authorized, authenticated APFS volume.
-  - Cryptexes volume
-- `on-system-volume:`A Boolean value that indicates whether the operating system loaded the executable from the currently-booted system volume.
-  - Inside /System...
+- is-init-proc：一个布尔值，指示可执行文件是否必须是操作系统的初始化进程（`launchd`）。
+- is-sip-protected：一个布尔值，指示可执行文件是否必须是受系统完整性保护（SIP）保护的文件。
+- `on-authorized-authapfs-volume:` 一个布尔值，指示操作系统是否从授权的、经过身份验证的 APFS 卷加载了可执行文件。
+- `on-authorized-authapfs-volume`：一个布尔值，指示操作系统是否从授权的、经过身份验证的 APFS 卷加载了可执行文件。
+- Cryptexes 卷
+- `on-system-volume:` 一个布尔值，指示操作系统是否从当前启动的系统卷加载了可执行文件。
+- 在 /System 内...
 - ...
 
-When an Apple binary is signed it **assigns it to a LC category** inside the **trust cache**.
+当 Apple 二进制文件被签名时，它**将其分配到信任缓存**中的 LC 类别。
 
-- **iOS 16 LC categories** were [**reversed and documented in here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
-- Current **LC categories (macOS 14** - Somona) have been reversed and their [**descriptions can be found here**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
+- **iOS 16 LC 类别**已在此处[**反向工程并记录**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)。
+- 当前的 **LC 类别（macOS 14 - Sonoma）**已被反向工程，其[**描述可以在这里找到**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)。
 
-For example Category 1 is:
-
+例如，类别 1 是：
 ```
 Category 1:
-        Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
-        Parent Constraint: is-init-proc
+Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
+Parent Constraint: is-init-proc
 ```
+- `(on-authorized-authapfs-volume || on-system-volume)`：必须在系统或Cryptexes卷中。
+- `launch-type == 1`：必须是系统服务（LaunchDaemons中的plist）。
+- `validation-category == 1`：操作系统可执行文件。
+- `is-init-proc`：Launchd
 
-- `(on-authorized-authapfs-volume || on-system-volume)`: Must be in System or Cryptexes volume.
-- `launch-type == 1`: Must be a system service (plist in LaunchDaemons).
-- `validation-category == 1`: An operating system executable.
-- `is-init-proc`: Launchd
+### 反向工程 LC 类别
 
-### Reversing LC Categories
+您可以在这里找到更多信息 [**关于它**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints)，但基本上，它们在 **AMFI (AppleMobileFileIntegrity)** 中定义，因此您需要下载内核开发工具包以获取 **KEXT**。以 **`kConstraintCategory`** 开头的符号是 **有趣** 的。提取它们后，您将获得一个 DER (ASN.1) 编码流，您需要使用 [ASN.1 解码器](https://holtstrom.com/michael/tools/asn1decoder.php) 或 python-asn1 库及其 `dump.py` 脚本 [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) 进行解码，这将为您提供一个更易于理解的字符串。
 
-You have more information [**about it in here**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), but basically, They are defined in **AMFI (AppleMobileFileIntegrity)**, so you need to download the Kernel Development Kit to get the **KEXT**. The symbols starting with **`kConstraintCategory`** are the **interesting** ones. Extracting them you will get a DER (ASN.1) encoded stream that you will need to decode with [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) or the python-asn1 library and its `dump.py` script, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) which will give you a more understandable string.
+## 环境约束
 
-## Environment Constraints
+这些是配置在 **第三方应用程序** 中的启动约束。开发人员可以选择在其应用程序中使用的 **事实** 和 **逻辑运算符** 来限制对自身的访问。
 
-These are the Launch Constraints set configured in **third party applications**. The developer can select the **facts** and **logical operands to use** in his application to restrict the access to itself.
-
-It's possible to enumerate the Environment Constraints of an application with:
-
+可以使用以下命令枚举应用程序的环境约束：
 ```bash
 codesign -d -vvvv app.app
 ```
+## 信任缓存
 
-## Trust Caches
-
-In **macOS** there are a few trust caches:
+在 **macOS** 中有几个信任缓存：
 
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/BaseSystemTrustCache.img4`**
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**
 - **`/System/Library/Security/OSLaunchPolicyData`**
 
-And in iOS it looks like it's in **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
+在 iOS 中，它看起来在 **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**。
 
 > [!WARNING]
-> On macOS running on Apple Silicon devices, if an Apple signed binary is not in the trust cache, AMFI will refuse to load it.
+> 在运行在 Apple Silicon 设备上的 macOS 上，如果 Apple 签名的二进制文件不在信任缓存中，AMFI 将拒绝加载它。
 
-### Enumerating Trust Caches
+### 枚举信任缓存
 
-The previous trust cache files are in format **IMG4** and **IM4P**, being IM4P the payload section of a IMG4 format.
+之前的信任缓存文件格式为 **IMG4** 和 **IM4P**，IM4P 是 IMG4 格式的有效载荷部分。
 
-You can use [**pyimg4**](https://github.com/m1stadev/PyIMG4) to extract the payload of databases:
-
+您可以使用 [**pyimg4**](https://github.com/m1stadev/PyIMG4) 来提取数据库的有效载荷：
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -102,11 +97,9 @@ pyimg4 im4p extract -i /tmp/StaticTrustCache.im4p -o /tmp/StaticTrustCache.data
 
 pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLaunchPolicyData.data
 ```
+（另一个选项是使用工具 [**img4tool**](https://github.com/tihmstar/img4tool)，即使发布版本较旧，它也可以在 M1 上运行，并且如果您将其安装在正确的位置，它也可以在 x86_64 上运行）。
 
-(Another option could be to use the tool [**img4tool**](https://github.com/tihmstar/img4tool), which will run even in M1 even if the release is old and for x86_64 if you install it in the proper locations).
-
-Now you can use the tool [**trustcache**](https://github.com/CRKatri/trustcache) to get the information in a readable format:
-
+现在您可以使用工具 [**trustcache**](https://github.com/CRKatri/trustcache) 以可读格式获取信息：
 ```bash
 # Install
 wget https://github.com/CRKatri/trustcache/releases/download/v2.0/trustcache_macos_arm64
@@ -130,45 +123,42 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-
-The trust cache follows the following structure, so The **LC category is the 4th column**
-
+信任缓存遵循以下结构，因此 **LC 类别是第 4 列**
 ```c
 struct trust_cache_entry2 {
-	uint8_t cdhash[CS_CDHASH_LEN];
-	uint8_t hash_type;
-	uint8_t flags;
-	uint8_t constraintCategory;
-	uint8_t reserved0;
+uint8_t cdhash[CS_CDHASH_LEN];
+uint8_t hash_type;
+uint8_t flags;
+uint8_t constraintCategory;
+uint8_t reserved0;
 } __attribute__((__packed__));
 ```
+然后，您可以使用像[**这个**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30)这样的脚本来提取数据。
 
-Then, you could use a script such as [**this one**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) to extract data.
+从这些数据中，您可以检查具有**启动约束值为`0`**的应用程序，这些应用程序没有受到约束（[**在这里检查**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)每个值的含义）。
 
-From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).
+## 攻击缓解
 
-## Attack Mitigations
+启动约束将通过**确保进程不会在意外条件下执行**来缓解几种旧攻击：例如，从意外位置启动或被意外的父进程调用（如果只有launchd应该启动它）。
 
-Launch Constrains would have mitigated several old attacks by **making sure that the process won't be executed in unexpected conditions:** For example from unexpected locations or being invoked by an unexpected parent process (if only launchd should be launching it)
+此外，启动约束还**缓解降级攻击**。
 
-Moreover, Launch Constraints also **mitigates downgrade attacks.**
+然而，它们**并不缓解常见的XPC**滥用、**Electron**代码注入或**dylib注入**，而不进行库验证（除非已知可以加载库的团队ID）。
 
-However, they **don't mitigate common XPC** abuses, **Electron** code injections or **dylib injections** without library validation (unless the team IDs that can load libraries are known).
+### XPC守护进程保护
 
-### XPC Daemon Protection
+在Sonoma版本中，一个显著的点是守护进程XPC服务的**责任配置**。XPC服务对自己负责，而不是连接的客户端负责。这在反馈报告FB13206884中有记录。这个设置可能看起来有缺陷，因为它允许与XPC服务进行某些交互：
 
-In the Sonoma release, a notable point is the daemon XPC service's **responsibility configuration**. The XPC service is accountable for itself, as opposed to the connecting client being responsible. This is documented in the feedback report FB13206884. This setup might seem flawed, as it allows certain interactions with the XPC service:
+- **启动XPC服务**：如果被认为是一个bug，这个设置不允许通过攻击者代码启动XPC服务。
+- **连接到活动服务**：如果XPC服务已经在运行（可能由其原始应用程序激活），则没有连接到它的障碍。
 
-- **Launching the XPC Service**: If assumed to be a bug, this setup does not permit initiating the XPC service through attacker code.
-- **Connecting to an Active Service**: If the XPC service is already running (possibly activated by its original application), there are no barriers to connecting to it.
+虽然对XPC服务实施约束可能通过**缩小潜在攻击的窗口**而有益，但它并没有解决主要问题。确保XPC服务的安全性根本上需要**有效验证连接的客户端**。这仍然是加强服务安全性的唯一方法。此外，值得注意的是，提到的责任配置目前是有效的，这可能与预期设计不符。
 
-While implementing constraints on the XPC service might be beneficial by **narrowing the window for potential attacks**, it doesn't address the primary concern. Ensuring the security of the XPC service fundamentally requires **validating the connecting client effectively**. This remains the sole method to fortify the service's security. Also, it's worth noting that the mentioned responsibility configuration is currently operational, which might not align with the intended design.
+### Electron保护
 
-### Electron Protection
+即使要求应用程序必须由**LaunchService**打开（在父约束中）。这可以通过使用**`open`**（可以设置环境变量）或使用**Launch Services API**（可以指示环境变量）来实现。
 
-Even if it's required that the application has to be **opened by LaunchService** (in the parents constraints). This can be achieved using **`open`** (which can set env variables) or using the **Launch Services API** (where env variables can be indicated).
-
-## References
+## 参考文献
 
 - [https://youtu.be/f1HA5QhLQ7Y?t=24146](https://youtu.be/f1HA5QhLQ7Y?t=24146)
 - [https://theevilbit.github.io/posts/launch_constraints_deep_dive/](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
@@ -176,4 +166,3 @@ Even if it's required that the application has to be **opened by LaunchService**
 - [https://developer.apple.com/videos/play/wwdc2023/10266/](https://developer.apple.com/videos/play/wwdc2023/10266/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

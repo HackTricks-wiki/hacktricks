@@ -2,43 +2,43 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-Bundles in macOS serve as containers for a variety of resources including applications, libraries, and other necessary files, making them appear as single objects in Finder, such as the familiar `*.app` files. The most commonly encountered bundle is the `.app` bundle, though other types like `.framework`, `.systemextension`, and `.kext` are also prevalent.
+macOS 中的 Bundles 作为各种资源的容器，包括应用程序、库和其他必要文件，使它们在 Finder 中看起来像单一对象，例如熟悉的 `*.app` 文件。最常见的 bundle 是 `.app` bundle，尽管 `.framework`、`.systemextension` 和 `.kext` 等其他类型也很普遍。
 
-### Essential Components of a Bundle
+### Bundle 的基本组成部分
 
-Within a bundle, particularly within the `<application>.app/Contents/` directory, a variety of important resources are housed:
+在 bundle 内，特别是在 `<application>.app/Contents/` 目录中，存放着各种重要资源：
 
-- **\_CodeSignature**: This directory stores code-signing details vital for verifying the integrity of the application. You can inspect the code-signing information using commands like: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
-- **MacOS**: Contains the executable binary of the application that runs upon user interaction.
-- **Resources**: A repository for the application's user interface components including images, documents, and interface descriptions (nib/xib files).
-- **Info.plist**: Acts as the application's main configuration file, crucial for the system to recognize and interact with the application appropriately.
+- **\_CodeSignature**: 此目录存储代码签名详细信息，对于验证应用程序的完整性至关重要。您可以使用以下命令检查代码签名信息： %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
+- **MacOS**: 包含在用户交互时运行的应用程序的可执行二进制文件。
+- **Resources**: 应用程序用户界面组件的存储库，包括图像、文档和界面描述（nib/xib 文件）。
+- **Info.plist**: 作为应用程序的主要配置文件，对于系统正确识别和与应用程序交互至关重要。
 
-#### Important Keys in Info.plist
+#### Info.plist 中的重要键
 
-The `Info.plist` file is a cornerstone for application configuration, containing keys such as:
+`Info.plist` 文件是应用程序配置的基石，包含以下键：
 
-- **CFBundleExecutable**: Specifies the name of the main executable file located in the `Contents/MacOS` directory.
-- **CFBundleIdentifier**: Provides a global identifier for the application, used extensively by macOS for application management.
-- **LSMinimumSystemVersion**: Indicates the minimum version of macOS required for the application to run.
+- **CFBundleExecutable**: 指定位于 `Contents/MacOS` 目录中的主可执行文件的名称。
+- **CFBundleIdentifier**: 提供应用程序的全局标识符，macOS 在应用程序管理中广泛使用。
+- **LSMinimumSystemVersion**: 指示运行应用程序所需的最低 macOS 版本。
 
-### Exploring Bundles
+### 探索 Bundles
 
-To explore the contents of a bundle, such as `Safari.app`, the following command can be used: `bash ls -lR /Applications/Safari.app/Contents`
+要探索 bundle 的内容，例如 `Safari.app`，可以使用以下命令： `bash ls -lR /Applications/Safari.app/Contents`
 
-This exploration reveals directories like `_CodeSignature`, `MacOS`, `Resources`, and files like `Info.plist`, each serving a unique purpose from securing the application to defining its user interface and operational parameters.
+此探索揭示了如 `_CodeSignature`、`MacOS`、`Resources` 等目录，以及 `Info.plist` 等文件，每个文件都在保护应用程序、定义其用户界面和操作参数方面发挥独特作用。
 
-#### Additional Bundle Directories
+#### 其他 Bundle 目录
 
-Beyond the common directories, bundles may also include:
+除了常见目录，bundles 还可能包括：
 
-- **Frameworks**: Contains bundled frameworks used by the application. Frameworks are like dylibs with extra resources.
-- **PlugIns**: A directory for plug-ins and extensions that enhance the application's capabilities.
-- **XPCServices**: Holds XPC services used by the application for out-of-process communication.
+- **Frameworks**: 包含应用程序使用的捆绑框架。框架类似于 dylibs，但具有额外资源。
+- **PlugIns**: 用于增强应用程序功能的插件和扩展的目录。
+- **XPCServices**: 存放应用程序用于进程间通信的 XPC 服务。
 
-This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
+这种结构确保所有必要组件都封装在 bundle 内，促进模块化和安全的应用程序环境。
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+有关 `Info.plist` 键及其含义的更多详细信息，Apple 开发者文档提供了广泛的资源：[Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)。
 
 {{#include ../../../banners/hacktricks-training.md}}

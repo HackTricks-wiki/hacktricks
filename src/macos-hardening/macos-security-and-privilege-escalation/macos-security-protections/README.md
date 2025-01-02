@@ -1,126 +1,117 @@
-# macOS Security Protections
+# macOS 安全保护
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Gatekeeper
 
-Gatekeeper is usually used to refer to the combination of **Quarantine + Gatekeeper + XProtect**, 3 macOS security modules that will try to **prevent users from executing potentially malicious software downloaded**.
+Gatekeeper 通常用于指代 **Quarantine + Gatekeeper + XProtect** 的组合，这三个 macOS 安全模块将尝试 **防止用户执行潜在恶意软件**。
 
-More information in:
+更多信息请参见：
 
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
 
-## Processes Limitants
+## 进程限制
 
 ### MACF
 
-### SIP - System Integrity Protection
+### SIP - 系统完整性保护
 
 {{#ref}}
 macos-sip.md
 {{#endref}}
 
-### Sandbox
+### 沙盒
 
-MacOS Sandbox **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+MacOS 沙盒 **限制应用程序** 在沙盒内运行时的 **允许操作，这些操作在沙盒配置文件中指定**。这有助于确保 **应用程序仅访问预期的资源**。
 
 {{#ref}}
 macos-sandbox/
 {{#endref}}
 
-### TCC - **Transparency, Consent, and Control**
+### TCC - **透明性、同意和控制**
 
-**TCC (Transparency, Consent, and Control)** is a security framework. It's designed to **manage the permissions** of applications, specifically by regulating their access to sensitive features. This includes elements like **location services, contacts, photos, microphone, camera, accessibility, and full disk access**. TCC ensures that apps can only access these features after obtaining explicit user consent, thereby bolstering privacy and control over personal data.
+**TCC (透明性、同意和控制)** 是一个安全框架。它旨在 **管理应用程序的权限**，特别是通过调节它们对敏感功能的访问。这包括 **位置服务、联系人、照片、麦克风、相机、无障碍和完整磁盘访问** 等元素。TCC 确保应用程序只能在获得用户明确同意后访问这些功能，从而增强对个人数据的隐私和控制。
 
 {{#ref}}
 macos-tcc/
 {{#endref}}
 
-### Launch/Environment Constraints & Trust Cache
+### 启动/环境约束与信任缓存
 
-Launch constraints in macOS are a security feature to **regulate process initiation** by defining **who can launch** a process, **how**, and **from where**. Introduced in macOS Ventura, they categorize system binaries into constraint categories within a **trust cache**. Every executable binary has set **rules** for its **launch**, including **self**, **parent**, and **responsible** constraints. Extended to third-party apps as **Environment** Constraints in macOS Sonoma, these features help mitigate potential system exploitations by governing process launching conditions.
+macOS 中的启动约束是一种安全功能，用于 **调节进程启动**，通过定义 **谁可以启动** 进程、**如何** 启动以及 **从哪里** 启动。该功能在 macOS Ventura 中引入，将系统二进制文件分类为信任缓存中的约束类别。每个可执行二进制文件都有设定的 **启动规则**，包括 **自我**、**父级** 和 **责任** 约束。扩展到第三方应用程序作为 macOS Sonoma 中的 **环境** 约束，这些功能通过管理进程启动条件来帮助减轻潜在的系统利用。
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-## MRT - Malware Removal Tool
+## MRT - 恶意软件移除工具
 
-The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
+恶意软件移除工具 (MRT) 是 macOS 安全基础设施的另一个组成部分。顾名思义，MRT 的主要功能是 **从感染的系统中移除已知恶意软件**。
 
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
+一旦在 Mac 上检测到恶意软件（无论是通过 XProtect 还是其他方式），可以使用 MRT 自动 **移除恶意软件**。MRT 在后台静默运行，通常在系统更新或下载新恶意软件定义时运行（看起来 MRT 检测恶意软件的规则在二进制文件内）。
 
-While both XProtect and MRT are part of macOS's security measures, they perform different functions:
+虽然 XProtect 和 MRT 都是 macOS 安全措施的一部分，但它们执行不同的功能：
 
-- **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
-- **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
+- **XProtect** 是一种预防工具。它 **检查下载的文件**（通过某些应用程序），如果检测到任何已知类型的恶意软件，它 **阻止文件打开**，从而防止恶意软件首先感染您的系统。
+- **MRT** 则是一个 **反应工具**。它在系统检测到恶意软件后运行，旨在移除有问题的软件以清理系统。
 
-The MRT application is located in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+MRT 应用程序位于 **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-## Background Tasks Management
+## 背景任务管理
 
-**macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.
+**macOS** 现在 **在每次工具使用众所周知的 **技术来保持代码执行**（如登录项、守护进程...）时发出警报，以便用户更好地了解 **哪些软件在持续运行**。
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-This runs with a **daemon** located in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` and the **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+这通过位于 `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` 的 **守护进程** 和位于 `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app` 的 **代理** 运行。
 
-The way **`backgroundtaskmanagementd`** knows something is installed in a persistent folder is by **getting the FSEvents** and creating some **handlers** for those.
+**`backgroundtaskmanagementd`** 知道某些东西安装在持久文件夹中的方式是通过 **获取 FSEvents** 并为这些事件创建一些 **处理程序**。
 
-Moreover, there is a plist file that contains **well known applications** that frequently persists maintained by apple located in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
-
+此外，还有一个 plist 文件，包含 **众所周知的应用程序**，这些应用程序经常保持由苹果维护，位于：`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
-    "AssociatedBundleIdentifiers" => [
-      0 => "us.zoom.xos"
-    ]
-    "Attribution" => "Zoom"
-    "Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
-    "ProgramArguments" => [
-      0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
-    ]
-    "TeamIdentifier" => "BJ4HAAB9B3"
-  }
+"AssociatedBundleIdentifiers" => [
+0 => "us.zoom.xos"
+]
+"Attribution" => "Zoom"
+"Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+"ProgramArguments" => [
+0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+]
+"TeamIdentifier" => "BJ4HAAB9B3"
+}
 [...]
 ```
+### 枚举
 
-### Enumeration
-
-It's possible to **enumerate all** the configured background items running the Apple cli tool:
-
+可以使用 Apple cli 工具 **枚举所有** 配置的后台项目：
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-
-Moreover, it's also possible to list this information with [**DumpBTM**](https://github.com/objective-see/DumpBTM).
-
+此外，还可以使用 [**DumpBTM**](https://github.com/objective-see/DumpBTM) 列出这些信息。
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
+此信息存储在 **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** 中，终端需要 FDA。
 
-This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.
+### 操作 BTM
 
-### Messing with BTM
+当发现新的持久性时，会发生类型为 **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** 的事件。因此，任何 **防止** 该 **事件** 被发送或 **代理不警告** 用户的方法都将帮助攻击者 _**绕过**_ BTM。
 
-When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.
-
-- **Reseting the database**: Running the following command will reset the database (should rebuild it from the ground), however, for some reason, after running this, **no new persistence will be alerted until the system is rebooted**.
-  - **root** is required.
-
+- **重置数据库**：运行以下命令将重置数据库（应该从头开始重建），但是，由于某种原因，在运行此命令后，**在系统重启之前不会警告任何新的持久性**。
+- **需要 root 权限**。
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-
-- **Stop the Agent**: It's possible to send a stop signal to the agent so it **won't be alerting the user** when new detections are found.
-
+- **停止代理**：可以向代理发送停止信号，以便它**不会在发现新检测时提醒用户**。
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -133,14 +124,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
+- **错误**：如果**创建持久性的进程在其后快速存在**，守护进程将尝试**获取信息**，**失败**，并且**无法发送事件**，指示新的事物正在持久化。
 
-- **Bug**: If the **process that created the persistence exists fast right after it**, the daemon will try to **get information** about it, **fail**, and **won't be able to send the event** indicating that a new thing is persisting.
-
-References and **more information about BTM**:
+参考和**关于BTM的更多信息**：
 
 - [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 - [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 - [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

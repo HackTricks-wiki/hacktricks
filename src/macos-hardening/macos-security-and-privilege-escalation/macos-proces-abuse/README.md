@@ -1,277 +1,210 @@
-# macOS Process Abuse
+# macOS 进程滥用
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Processes Basic Information
+## 进程基本信息
 
-A process is an instance of a running executable, however processes doesn't run code, these are threads. Therefore **processes are just containers for running threads** providing the memory, descriptors, ports, permissions...
+进程是正在运行的可执行文件的实例，但进程并不运行代码，这些是线程。因此，**进程只是运行线程的容器**，提供内存、描述符、端口、权限等...
 
-Traditionally, processes where started within other processes (except PID 1) by calling **`fork`** which would create a exact copy of the current process and then the **child process** would generally call **`execve`** to load the new executable and run it. Then, **`vfork`** was introduced to make this process faster without any memory copying.\
-Then **`posix_spawn`** was introduced combining **`vfork`** and **`execve`** in one call and accepting flags:
+传统上，进程是在其他进程中启动的（除了 PID 1），通过调用 **`fork`** 创建当前进程的精确副本，然后**子进程**通常会调用 **`execve`** 来加载新的可执行文件并运行它。随后，引入了 **`vfork`** 以加快此过程而无需任何内存复制。\
+然后引入了 **`posix_spawn`**，将 **`vfork`** 和 **`execve`** 结合在一个调用中，并接受标志：
 
-- `POSIX_SPAWN_RESETIDS`: Reset effective ids to real ids
-- `POSIX_SPAWN_SETPGROUP`: Set process group affiliation
-- `POSUX_SPAWN_SETSIGDEF`: Set signal default behaviour
-- `POSIX_SPAWN_SETSIGMASK`: Set signal mask
-- `POSIX_SPAWN_SETEXEC`: Exec in the same process (like `execve` with more options)
-- `POSIX_SPAWN_START_SUSPENDED`: Start suspended
-- `_POSIX_SPAWN_DISABLE_ASLR`: Start without ASLR
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` Use libmalloc's Nano allocator
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Allow `rwx` on data segments
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Close all file descriptions on exec(2) by default
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomize high bits of ASLR slide
+- `POSIX_SPAWN_RESETIDS`: 将有效 ID 重置为真实 ID
+- `POSIX_SPAWN_SETPGROUP`: 设置进程组归属
+- `POSUX_SPAWN_SETSIGDEF`: 设置信号默认行为
+- `POSIX_SPAWN_SETSIGMASK`: 设置信号掩码
+- `POSIX_SPAWN_SETEXEC`: 在同一进程中执行（类似于 `execve`，但有更多选项）
+- `POSIX_SPAWN_START_SUSPENDED`: 启动时挂起
+- `_POSIX_SPAWN_DISABLE_ASLR`: 无 ASLR 启动
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` 使用 libmalloc 的 Nano 分配器
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` 允许数据段的 `rwx`
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: 默认情况下在 exec(2) 时关闭所有文件描述符
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` 随机化 ASLR 滑动的高位
 
-Moreover, `posix_spawn` allows to specify an array of **`posix_spawnattr`** that controls some aspects of the spawned process, and **`posix_spawn_file_actions`** to modify the state of the descriptors.
+此外，`posix_spawn` 允许指定一个 **`posix_spawnattr`** 数组，以控制生成进程的某些方面，以及 **`posix_spawn_file_actions`** 来修改描述符的状态。
 
-When a process dies it send the **return code to the parent process** (if the parent died, the new parent is PID 1) with the signal `SIGCHLD`. The parent needs to get this value calling `wait4()` or `waitid()` and until that happen the child stays in a zombie state where it's still listed but doesn't consume resources.
+当一个进程终止时，它会通过信号 `SIGCHLD` 将 **返回代码发送给父进程**（如果父进程已终止，则新父进程为 PID 1）。父进程需要通过调用 `wait4()` 或 `waitid()` 来获取此值，直到那时，子进程保持在僵尸状态，仍然被列出但不消耗资源。
 
 ### PIDs
 
-PIDs, process identifiers, identifies a uniq process. In XNU the **PIDs** are of **64bits** increasing monotonically and **never wrap** (to avoid abuses).
+PID，进程标识符，标识一个唯一的进程。在 XNU 中，**PIDs** 是 **64 位**，单调递增且 **永不回绕**（以避免滥用）。
 
-### Process Groups, Sessions & Coalations
+### 进程组、会话和联盟
 
-**Processes** can be inserted in **groups** to make it easier to handle them. For example, commands in a shell script will be in the same process group so it's possible to **signal them together** using kill for example.\
-It's also possible to **group processes in sessions**. When a process starts a session (`setsid(2)`), the children processes are set inside the session, unless they start their own session.
+**进程** 可以被插入到 **组** 中，以便更容易处理它们。例如，shell 脚本中的命令将处于同一进程组中，因此可以使用 kill 等方式 **一起发送信号**。\
+也可以 **将进程分组到会话中**。当一个进程启动一个会话（`setsid(2)`）时，子进程被设置在该会话中，除非它们启动自己的会话。
 
-Coalition is another waya to group processes in Darwin. A process joining a coalation allows it to access pool resources, sharing a ledger or facing Jetsam. Coalations have different roles: Leader, XPC service, Extension.
+联盟是另一种在 Darwin 中分组进程的方式。加入联盟的进程可以访问池资源，共享账本或面对 Jetsam。联盟有不同的角色：领导者、XPC 服务、扩展。
 
-### Credentials & Personae
+### 凭证与角色
 
-Each process with hold **credentials** that **identify its privileges** in the system. Each process will have one primary `uid` and one primary `gid` (although might belong to several groups).\
-It's also possible to change the user and group id if the binary has the `setuid/setgid` bit.\
-There are several functions to **set new uids/gids**.
+每个进程都持有 **凭证**，以 **识别其在系统中的权限**。每个进程将有一个主要的 `uid` 和一个主要的 `gid`（尽管可能属于多个组）。\
+如果二进制文件具有 `setuid/setgid` 位，也可以更改用户和组 ID。\
+有几个函数可以 **设置新的 uids/gids**。
 
-The syscall **`persona`** provides an **alternate** set of **credentials**. Adopting a persona assumes its uid, gid and group memberships **at one**. In the [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) it's possible to find the struct:
-
+系统调用 **`persona`** 提供了一组 **替代** 的 **凭证**。采用一个角色会同时假定其 uid、gid 和组成员资格。在 [**源代码**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) 中可以找到该结构：
 ```c
 struct kpersona_info { uint32_t persona_info_version;
-    uid_t    persona_id; /* overlaps with UID */
-    int      persona_type;
-    gid_t    persona_gid;
-    uint32_t persona_ngroups;
-    gid_t    persona_groups[NGROUPS];
-    uid_t    persona_gmuid;
-    char     persona_name[MAXLOGNAME + 1];
+uid_t    persona_id; /* overlaps with UID */
+int      persona_type;
+gid_t    persona_gid;
+uint32_t persona_ngroups;
+gid_t    persona_groups[NGROUPS];
+uid_t    persona_gmuid;
+char     persona_name[MAXLOGNAME + 1];
 
-    /* TODO: MAC policies?! */
+/* TODO: MAC policies?! */
 }
 ```
+## 线程基本信息
 
-## Threads Basic Information
+1. **POSIX 线程 (pthreads):** macOS 支持 POSIX 线程 (`pthreads`)，这是 C/C++ 的标准线程 API 的一部分。macOS 中 pthreads 的实现位于 `/usr/lib/system/libsystem_pthread.dylib`，该库来自公开可用的 `libpthread` 项目。此库提供创建和管理线程所需的函数。
+2. **创建线程:** `pthread_create()` 函数用于创建新线程。在内部，此函数调用 `bsdthread_create()`，这是一个特定于 XNU 内核的低级系统调用（macOS 基于的内核）。此系统调用接受来自 `pthread_attr`（属性）的各种标志，这些标志指定线程行为，包括调度策略和堆栈大小。
+- **默认堆栈大小:** 新线程的默认堆栈大小为 512 KB，足以满足典型操作，但如果需要更多或更少的空间，可以通过线程属性进行调整。
+3. **线程初始化:** `__pthread_init()` 函数在线程设置过程中至关重要，利用 `env[]` 参数解析环境变量，这些变量可以包含有关堆栈位置和大小的详细信息。
 
-1. **POSIX Threads (pthreads):** macOS supports POSIX threads (`pthreads`), which are part of a standard threading API for C/C++. The implementation of pthreads in macOS is found in `/usr/lib/system/libsystem_pthread.dylib`, which comes from the publicly available `libpthread` project. This library provides the necessary functions to create and manage threads.
-2. **Creating Threads:** The `pthread_create()` function is used to create new threads. Internally, this function calls `bsdthread_create()`, which is a lower-level system call specific to the XNU kernel (the kernel macOS is based on). This system call takes various flags derived from `pthread_attr` (attributes) that specify thread behavior, including scheduling policies and stack size.
-   - **Default Stack Size:** The default stack size for new threads is 512 KB, which is sufficient for typical operations but can be adjusted via thread attributes if more or less space is needed.
-3. **Thread Initialization:** The `__pthread_init()` function is crucial during thread setup, utilizing the `env[]` argument to parse environment variables that can include details about the stack's location and size.
+#### macOS 中的线程终止
 
-#### Thread Termination in macOS
+1. **退出线程:** 线程通常通过调用 `pthread_exit()` 来终止。此函数允许线程干净地退出，执行必要的清理，并允许线程将返回值发送回任何加入者。
+2. **线程清理:** 调用 `pthread_exit()` 后，将调用 `pthread_terminate()` 函数，该函数处理所有相关线程结构的移除。它会释放 Mach 线程端口（Mach 是 XNU 内核中的通信子系统），并调用 `bsdthread_terminate`，这是一个移除与线程相关的内核级结构的系统调用。
 
-1. **Exiting Threads:** Threads are typically terminated by calling `pthread_exit()`. This function allows a thread to exit cleanly, performing necessary cleanup and allowing the thread to send a return value back to any joiners.
-2. **Thread Cleanup:** Upon calling `pthread_exit()`, the function `pthread_terminate()` is invoked, which handles the removal of all associated thread structures. It deallocates Mach thread ports (Mach is the communication subsystem in the XNU kernel) and calls `bsdthread_terminate`, a syscall that removes the kernel-level structures associated with the thread.
+#### 同步机制
 
-#### Synchronization Mechanisms
+为了管理对共享资源的访问并避免竞争条件，macOS 提供了几种同步原语。这些在多线程环境中对于确保数据完整性和系统稳定性至关重要：
 
-To manage access to shared resources and avoid race conditions, macOS provides several synchronization primitives. These are critical in multi-threading environments to ensure data integrity and system stability:
-
-1. **Mutexes:**
-   - **Regular Mutex (Signature: 0x4D555458):** Standard mutex with a memory footprint of 60 bytes (56 bytes for the mutex and 4 bytes for the signature).
-   - **Fast Mutex (Signature: 0x4d55545A):** Similar to a regular mutex but optimized for faster operations, also 60 bytes in size.
-2. **Condition Variables:**
-   - Used for waiting for certain conditions to occur, with a size of 44 bytes (40 bytes plus a 4-byte signature).
-   - **Condition Variable Attributes (Signature: 0x434e4441):** Configuration attributes for condition variables, sized at 12 bytes.
-3. **Once Variable (Signature: 0x4f4e4345):**
-   - Ensures that a piece of initialization code is executed only once. Its size is 12 bytes.
-4. **Read-Write Locks:**
-   - Allows multiple readers or one writer at a time, facilitating efficient access to shared data.
-   - **Read Write Lock (Signature: 0x52574c4b):** Sized at 196 bytes.
-   - **Read Write Lock Attributes (Signature: 0x52574c41):** Attributes for read-write locks, 20 bytes in size.
+1. **互斥锁:**
+- **常规互斥锁 (签名: 0x4D555458):** 标准互斥锁，内存占用为 60 字节（互斥锁 56 字节，签名 4 字节）。
+- **快速互斥锁 (签名: 0x4d55545A):** 类似于常规互斥锁，但经过优化以实现更快的操作，大小也为 60 字节。
+2. **条件变量:**
+- 用于等待某些条件的发生，大小为 44 字节（40 字节加 4 字节签名）。
+- **条件变量属性 (签名: 0x434e4441):** 条件变量的配置属性，大小为 12 字节。
+3. **一次变量 (签名: 0x4f4e4345):**
+- 确保一段初始化代码仅执行一次。其大小为 12 字节。
+4. **读写锁:**
+- 允许多个读者或一个写者同时访问，促进对共享数据的高效访问。
+- **读写锁 (签名: 0x52574c4b):** 大小为 196 字节。
+- **读写锁属性 (签名: 0x52574c41):** 读写锁的属性，大小为 20 字节。
 
 > [!TIP]
-> The last 4 bytes of those objects are used to deetct overflows.
+> 这些对象的最后 4 字节用于检测溢出。
 
-### Thread Local Variables (TLV)
+### 线程局部变量 (TLV)
 
-**Thread Local Variables (TLV)** in the context of Mach-O files (the format for executables in macOS) are used to declare variables that are specific to **each thread** in a multi-threaded application. This ensures that each thread has its own separate instance of a variable, providing a way to avoid conflicts and maintain data integrity without needing explicit synchronization mechanisms like mutexes.
+**线程局部变量 (TLV)** 在 Mach-O 文件（macOS 中可执行文件的格式）的上下文中用于声明特定于 **每个线程** 的变量，以便在多线程应用程序中使用。这确保每个线程都有自己单独的变量实例，提供了一种避免冲突并维护数据完整性的方法，而无需像互斥锁那样的显式同步机制。
 
-In C and related languages, you can declare a thread-local variable using the **`__thread`** keyword. Here’s how it works in your example:
-
+在 C 及相关语言中，可以使用 **`__thread`** 关键字声明线程局部变量。以下是您示例中的工作原理：
 ```c
 cCopy code__thread int tlv_var;
 
 void main (int argc, char **argv){
-    tlv_var = 10;
+tlv_var = 10;
 }
 ```
+这个片段将 `tlv_var` 定义为线程局部变量。每个运行此代码的线程将拥有自己的 `tlv_var`，一个线程对 `tlv_var` 的更改不会影响另一个线程中的 `tlv_var`。
 
-This snippet defines `tlv_var` as a thread-local variable. Each thread running this code will have its own `tlv_var`, and changes one thread makes to `tlv_var` will not affect `tlv_var` in another thread.
+在 Mach-O 二进制文件中，与线程局部变量相关的数据被组织成特定的部分：
 
-In the Mach-O binary, the data related to thread local variables is organized into specific sections:
+- **`__DATA.__thread_vars`**：此部分包含有关线程局部变量的元数据，如它们的类型和初始化状态。
+- **`__DATA.__thread_bss`**：此部分用于未显式初始化的线程局部变量。它是为零初始化数据保留的内存的一部分。
 
-- **`__DATA.__thread_vars`**: This section contains the metadata about the thread-local variables, like their types and initialization status.
-- **`__DATA.__thread_bss`**: This section is used for thread-local variables that are not explicitly initialized. It's a part of memory set aside for zero-initialized data.
+Mach-O 还提供了一个特定的 API，称为 **`tlv_atexit`**，用于管理线程退出时的线程局部变量。此 API 允许您 **注册析构函数**——在线程终止时清理线程局部数据的特殊函数。
 
-Mach-O also provides a specific API called **`tlv_atexit`** to manage thread-local variables when a thread exits. This API allows you to **register destructors**—special functions that clean up thread-local data when a thread terminates.
+### 线程优先级
 
-### Threading Priorities
+理解线程优先级涉及查看操作系统如何决定运行哪些线程以及何时运行。这一决定受到分配给每个线程的优先级级别的影响。在 macOS 和类 Unix 系统中，这通过 `nice`、`renice` 和服务质量 (QoS) 类等概念来处理。
 
-Understanding thread priorities involves looking at how the operating system decides which threads to run and when. This decision is influenced by the priority level assigned to each thread. In macOS and Unix-like systems, this is handled using concepts like `nice`, `renice`, and Quality of Service (QoS) classes.
+#### Nice 和 Renice
 
-#### Nice and Renice
+1. **Nice：**
+- 进程的 `nice` 值是一个影响其优先级的数字。每个进程都有一个范围从 -20（最高优先级）到 19（最低优先级）的 nice 值。进程创建时的默认 nice 值通常为 0。
+- 较低的 nice 值（接近 -20）使进程更“自私”，相对于其他具有较高 nice 值的进程，给予其更多的 CPU 时间。
+2. **Renice：**
+- `renice` 是一个用于更改已运行进程的 nice 值的命令。这可以用于动态调整进程的优先级，基于新的 nice 值增加或减少其 CPU 时间分配。
+- 例如，如果一个进程暂时需要更多的 CPU 资源，您可能会使用 `renice` 降低其 nice 值。
 
-1. **Nice:**
-   - The `nice` value of a process is a number that affects its priority. Every process has a nice value ranging from -20 (the highest priority) to 19 (the lowest priority). The default nice value when a process is created is typically 0.
-   - A lower nice value (closer to -20) makes a process more "selfish," giving it more CPU time compared to other processes with higher nice values.
-2. **Renice:**
-   - `renice` is a command used to change the nice value of an already running process. This can be used to dynamically adjust the priority of processes, either increasing or decreasing their CPU time allocation based on new nice values.
-   - For example, if a process needs more CPU resources temporarily, you might lower its nice value using `renice`.
+#### 服务质量 (QoS) 类
 
-#### Quality of Service (QoS) Classes
+QoS 类是处理线程优先级的更现代的方法，特别是在支持 **Grand Central Dispatch (GCD)** 的 macOS 等系统中。QoS 类允许开发人员根据任务的重要性或紧急性将工作 **分类** 为不同级别。macOS 根据这些 QoS 类自动管理线程优先级：
 
-QoS classes are a more modern approach to handling thread priorities, particularly in systems like macOS that support **Grand Central Dispatch (GCD)**. QoS classes allow developers to **categorize** work into different levels based on their importance or urgency. macOS manages thread prioritization automatically based on these QoS classes:
+1. **用户交互：**
+- 此类用于当前与用户交互或需要立即结果以提供良好用户体验的任务。这些任务被赋予最高优先级，以保持界面的响应性（例如，动画或事件处理）。
+2. **用户启动：**
+- 用户启动并期望立即结果的任务，例如打开文档或单击需要计算的按钮。这些任务优先级高，但低于用户交互。
+3. **实用程序：**
+- 这些任务是长时间运行的，通常显示进度指示器（例如，下载文件、导入数据）。它们的优先级低于用户启动的任务，并且不需要立即完成。
+4. **后台：**
+- 此类用于在后台运行且对用户不可见的任务。这些可以是索引、同步或备份等任务。它们的优先级最低，对系统性能的影响最小。
 
-1. **User Interactive:**
-   - This class is for tasks that are currently interacting with the user or require immediate results to provide a good user experience. These tasks are given the highest priority to keep the interface responsive (e.g., animations or event handling).
-2. **User Initiated:**
-   - Tasks that the user initiates and expects immediate results, such as opening a document or clicking a button that requires computations. These are high priority but below user interactive.
-3. **Utility:**
-   - These tasks are long-running and typically show a progress indicator (e.g., downloading files, importing data). They are lower in priority than user-initiated tasks and do not need to finish immediately.
-4. **Background:**
-   - This class is for tasks that operate in the background and are not visible to the user. These can be tasks like indexing, syncing, or backups. They have the lowest priority and minimal impact on system performance.
+使用 QoS 类，开发人员不需要管理确切的优先级数字，而是专注于任务的性质，系统会相应地优化 CPU 资源。
 
-Using QoS classes, developers do not need to manage the exact priority numbers but rather focus on the nature of the task, and the system optimizes the CPU resources accordingly.
+此外，还有不同的 **线程调度策略**，用于指定调度器将考虑的一组调度参数。这可以通过 `thread_policy_[set/get]` 来完成。这在竞争条件攻击中可能会很有用。
 
-Moreover, there are different **thread scheduling policies** that flows to specify a set of scheduling parameters that the scheduler will take into consideration. This can be done using `thread_policy_[set/get]`. This might be useful in race condition attacks.
+## MacOS 进程滥用
 
-## MacOS Process Abuse
+MacOS 像其他操作系统一样，提供多种方法和机制供 **进程交互、通信和共享数据**。虽然这些技术对系统的高效运行至关重要，但也可能被威胁行为者滥用以 **执行恶意活动**。
 
-MacOS, like any other operating system, provides a variety of methods and mechanisms for **processes to interact, communicate, and share data**. While these techniques are essential for efficient system functioning, they can also be abused by threat actors to **perform malicious activities**.
+### 库注入
 
-### Library Injection
-
-Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
+库注入是一种技术，攻击者 **强制进程加载恶意库**。一旦注入，库将在目标进程的上下文中运行，攻击者将获得与该进程相同的权限和访问权限。
 
 {{#ref}}
 macos-library-injection/
 {{#endref}}
 
-### Function Hooking
+### 函数钩子
 
-Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+函数钩子涉及 **拦截软件代码中的函数调用** 或消息。通过钩住函数，攻击者可以 **修改进程的行为**、观察敏感数据，甚至控制执行流程。
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### Inter Process Communication
+### 进程间通信
 
-Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
+进程间通信 (IPC) 指的是不同方法，通过这些方法，独立进程 **共享和交换数据**。虽然 IPC 对许多合法应用程序至关重要，但也可能被滥用以破坏进程隔离、泄露敏感信息或执行未经授权的操作。
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Electron Applications Injection
+### Electron 应用程序注入
 
-Electron applications executed with specific env variables could be vulnerable to process injection:
+使用特定环境变量执行的 Electron 应用程序可能容易受到进程注入的攻击：
 
 {{#ref}}
 macos-electron-applications-injection.md
 {{#endref}}
 
-### Chromium Injection
+### Chromium 注入
 
-It's possible to use the flags `--load-extension` and `--use-fake-ui-for-media-stream` to perform a **man in the browser attack** allowing to steal keystrokes, traffic, cookies, inject scripts in pages...:
+可以使用标志 `--load-extension` 和 `--use-fake-ui-for-media-stream` 执行 **浏览器中的人攻击**，从而窃取击键、流量、cookie，向页面注入脚本...：
 
 {{#ref}}
 macos-chromium-injection.md
 {{#endref}}
 
-### Dirty NIB
+### 脏 NIB
 
-NIB files **define user interface (UI) elements** and their interactions within an application. However, they can **execute arbitrary commands** and **Gatekeeper doesn't stop** an already executed application from being executed if a **NIB file is modified**. Therefore, they could be used to make arbitrary programs execute arbitrary commands:
+NIB 文件 **定义用户界面 (UI) 元素** 及其在应用程序中的交互。然而，它们可以 **执行任意命令**，而且 **Gatekeeper 不会阻止** 已执行的应用程序在 **NIB 文件被修改** 的情况下继续执行。因此，它们可以用于使任意程序执行任意命令：
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Java Applications Injection
+### Java 应用程序注入
 
-It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
+可以滥用某些 Java 功能（如 **`_JAVA_OPTS`** 环境变量）使 Java 应用程序执行 **任意代码/命令**。
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
-### .Net Applications Injection
+### .Net 应用程序注入
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+可以通过 **滥用 .Net 调试功能**（未受到 macOS 保护，如运行时强化）向 .Net 应用程序注入代码。
 
 {{#ref}}
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Perl Injection
-
-Check different options to make a Perl script execute arbitrary code in:
-
-{{#ref}}
-macos-perl-applications-injection.md
-{{#endref}}
-
-### Ruby Injection
-
-I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
-
-{{#ref}}
-macos-ruby-applications-injection.md
-{{#endref}}
-
-### Python Injection
-
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\
-However, note that **`PYTHONSTARTUP`** script won't be executed when **`PYTHONINSPECT`** creates the interactive session.
-
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary code.
-
-Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
-
-> [!CAUTION]
-> Overall I couldn't find a way to make python execute arbitrary code abusing environment variables.\
-> However, most of the people install pyhton using **Hombrew**, which will install pyhton in a **writable location** for the default admin user. You can hijack it with something like:
->
-> ```bash
-> mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
-> cat > /opt/homebrew/bin/python3 <<EOF
-> #!/bin/bash
-> # Extra hijack code
-> /opt/homebrew/bin/python3.old "$@"
-> EOF
-> chmod +x /opt/homebrew/bin/python3
-> ```
->
-> Even **root** will run this code when running python.
-
-## Detection
-
-### Shield
-
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) is an open source application that can **detect and block process injection** actions:
-
-- Using **Environmental Variables**: It will monitor the presence of any of the following environmental variables: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** and **`ELECTRON_RUN_AS_NODE`**
-- Using **`task_for_pid`** calls: To find when one process wants to get the **task port of another** which allows to inject code in the process.
-- **Electron apps params**: Someone can use **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`** command line argument to start an Electron app in debugging mode, and thus inject code to it.
-- Using **symlinks** or **hardlinks**: Typically the most common abuse is to **place a link with our user privileges**, and **point it to a higher privilege** location. The detection is very simple for both hardlink and symlinks. If the process creating the link has a **different privilege level** than the target file, we create an **alert**. Unfortunately in the case of symlinks blocking is not possible, as we don’t have information about the destination of the link prior creation. This is a limitation of Apple’s EndpointSecuriy framework.
-
-### Calls made by other processes
-
-In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.
-
-Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
-
-## References
-
-- [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
-- [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
-
-{{#include ../../../banners/hacktricks-training.md}}
+### Perl

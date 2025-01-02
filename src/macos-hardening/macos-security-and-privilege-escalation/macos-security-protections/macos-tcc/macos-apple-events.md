@@ -2,22 +2,21 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-**Apple Events** are a feature in Apple's macOS that allows applications to communicate with each other. They are part of the **Apple Event Manager**, which is a component of the macOS operating system responsible for handling interprocess communication. This system enables one application to send a message to another application to request that it perform a particular operation, like opening a file, retrieving data, or executing a command.
+**Apple Events** 是苹果 macOS 中的一个功能，允许应用程序相互通信。它们是 **Apple Event Manager** 的一部分，这是 macOS 操作系统中负责处理进程间通信的组件。该系统使一个应用程序能够向另一个应用程序发送消息，请求其执行特定操作，例如打开文件、检索数据或执行命令。
 
-The mina daemon is `/System/Library/CoreServices/appleeventsd` which registers the service `com.apple.coreservices.appleevents`.
+mina 守护进程是 `/System/Library/CoreServices/appleeventsd`，它注册了服务 `com.apple.coreservices.appleevents`。
 
-Every application that can receive events will checking with this daemon providing its Apple Event Mach Port. And when an app wants to send an event to to it, the app will request this port from the daemon.
+每个可以接收事件的应用程序都会与此守护进程检查，提供其 Apple Event Mach Port。当一个应用程序想要向其发送事件时，该应用程序将向守护进程请求此端口。
 
-Sandboxed applications requires privileges like `allow appleevent-send` and `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` in order to be able to send events. Noten that entitlements like `com.apple.security.temporary-exception.apple-events` could restrict who have access to send events which will need entitlements like `com.apple.private.appleevents`.
+沙盒应用程序需要特权，如 `allow appleevent-send` 和 `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))`，才能发送事件。注意，像 `com.apple.security.temporary-exception.apple-events` 的权限可能会限制谁可以发送事件，这将需要像 `com.apple.private.appleevents` 的权限。
 
 > [!TIP]
-> It's possible to use the env variable **`AEDebugSends`** in order to log informtion about the message sent:
+> 可以使用环境变量 **`AEDebugSends`** 来记录发送的消息的信息：
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

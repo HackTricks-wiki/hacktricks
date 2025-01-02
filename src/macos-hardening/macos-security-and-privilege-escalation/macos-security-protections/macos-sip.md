@@ -2,226 +2,206 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Basic Information**
+## **基本信息**
 
-**System Integrity Protection (SIP)** in macOS is a mechanism designed to prevent even the most privileged users from making unauthorized changes to key system folders. This feature plays a crucial role in maintaining the integrity of the system by restricting actions like adding, modifying, or deleting files in protected areas. The primary folders shielded by SIP include:
+**系统完整性保护 (SIP)** 在 macOS 中是一种机制，旨在防止即使是最特权的用户也对关键系统文件夹进行未经授权的更改。此功能在通过限制在受保护区域内添加、修改或删除文件等操作来维护系统的完整性方面发挥着至关重要的作用。SIP 保护的主要文件夹包括：
 
 - **/System**
 - **/bin**
 - **/sbin**
 - **/usr**
 
-The rules that govern SIP's behavior are defined in the configuration file located at **`/System/Library/Sandbox/rootless.conf`**. Within this file, paths that are prefixed with an asterisk (\*) are denoted as exceptions to the otherwise stringent SIP restrictions.
+管理 SIP 行为的规则定义在位于 **`/System/Library/Sandbox/rootless.conf`** 的配置文件中。在此文件中，以星号 (\*) 开头的路径被视为对其他严格 SIP 限制的例外。
 
-Consider the example below:
-
+考虑下面的示例：
 ```javascript
 /usr
 * /usr/libexec/cups
 * /usr/local
 * /usr/share/man
 ```
+这个片段暗示，虽然 SIP 通常保护 **`/usr`** 目录，但有特定的子目录（`/usr/libexec/cups`、`/usr/local` 和 `/usr/share/man`）可以进行修改，如路径前的星号（*）所示。
 
-This snippet implies that while SIP generally secures the **`/usr`** directory, there are specific subdirectories (`/usr/libexec/cups`, `/usr/local`, and `/usr/share/man`) where modifications are permissible, as indicated by the asterisk (\*) preceding their paths.
-
-To verify whether a directory or file is protected by SIP, you can use the **`ls -lOd`** command to check for the presence of the **`restricted`** or **`sunlnk`** flag. For example:
-
+要验证某个目录或文件是否受到 SIP 保护，可以使用 **`ls -lOd`** 命令检查是否存在 **`restricted`** 或 **`sunlnk`** 标志。例如：
 ```bash
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
+在这种情况下，**`sunlnk`** 标志表示 `/usr/libexec/cups` 目录本身 **无法被删除**，尽管可以创建、修改或删除其中的文件。
 
-In this case, the **`sunlnk`** flag signifies that the `/usr/libexec/cups` directory itself **cannot be deleted**, though files within it can be created, modified, or deleted.
-
-On the other hand:
-
+另一方面：
 ```bash
 ls -lOd /usr/libexec
 drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 ```
+这里，**`restricted`** 标志表示 `/usr/libexec` 目录受到 SIP 保护。在 SIP 保护的目录中，无法创建、修改或删除文件。
 
-Here, the **`restricted`** flag indicates that the `/usr/libexec` directory is protected by SIP. In a SIP-protected directory, files cannot be created, modified, or deleted.
-
-Moreover, if a file contains the attribute **`com.apple.rootless`** extended **attribute**, that file will also be **protected by SIP**.
+此外，如果一个文件包含 **`com.apple.rootless`** 扩展 **属性**，该文件也将受到 **SIP 保护**。
 
 > [!TIP]
-> Note that **Sandbox** hook **`hook_vnode_check_setextattr`** prevents any attempt to modify the extended attribute **`com.apple.rootless`.**
+> 请注意，**Sandbox** 钩子 **`hook_vnode_check_setextattr`** 阻止任何尝试修改扩展属性 **`com.apple.rootless`** 的行为。
 
-**SIP also limits other root actions** like:
+**SIP 还限制其他根操作**，例如：
 
-- Loading untrusted kernel extensions
-- Getting task-ports for Apple-signed processes
-- Modifying NVRAM variables
-- Allowing kernel debugging
+- 加载不受信任的内核扩展
+- 获取 Apple 签名进程的任务端口
+- 修改 NVRAM 变量
+- 允许内核调试
 
-Options are maintained in nvram variable as a bitflag (`csr-active-config` on Intel and `lp-sip0` is read from the booted Device Tree for ARM). You can find the flags in the XNU source code in `csr.sh`:
+选项以位标志的形式保存在 nvram 变量中（在 Intel 上为 `csr-active-config`，在 ARM 上从启动的设备树读取 `lp-sip0`）。您可以在 `csr.sh` 中找到这些标志：
 
 <figure><img src="../../../images/image (1192).png" alt=""><figcaption></figcaption></figure>
 
-### SIP Status
+### SIP 状态
 
-You can check if SIP is enabled on your system with the following command:
-
+您可以使用以下命令检查系统上是否启用了 SIP：
 ```bash
 csrutil status
 ```
-
-If you need to disable SIP, you must restart your computer in recovery mode (by pressing Command+R during startup), then execute the following command:
-
+如果您需要禁用 SIP，您必须在恢复模式下重启计算机（在启动时按 Command+R），然后执行以下命令：
 ```bash
 csrutil disable
 ```
-
-If you wish to keep SIP enabled but remove debugging protections, you can do so with:
-
+如果您希望保持 SIP 启用但移除调试保护，可以使用：
 ```bash
 csrutil enable --without debug
 ```
+### 其他限制
 
-### Other Restrictions
+- **禁止加载未签名的内核扩展** (kexts)，确保只有经过验证的扩展与系统内核交互。
+- **防止调试** macOS 系统进程，保护核心系统组件免受未经授权的访问和修改。
+- **抑制工具** 如 dtrace 检查系统进程，进一步保护系统操作的完整性。
 
-- **Disallows loading of unsigned kernel extensions** (kexts), ensuring only verified extensions interact with the system kernel.
-- **Prevents the debugging** of macOS system processes, safeguarding core system components from unauthorized access and modification.
-- **Inhibits tools** like dtrace from inspecting system processes, further protecting the integrity of the system's operation.
+[**在此演讲中了解更多关于 SIP 的信息**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**
 
-[**Learn more about SIP info in this talk**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**
+### **与 SIP 相关的权限**
 
-### **SIP related Entitlements**
-
-- `com.apple.rootless.xpc.bootstrap`: Control launchd
-- `com.apple.rootless.install[.heritable]`: Access file system
+- `com.apple.rootless.xpc.bootstrap`: 控制 launchd
+- `com.apple.rootless.install[.heritable]`: 访问文件系统
 - `com.apple.rootless.kext-management`: `kext_request`
-- `com.apple.rootless.datavault.controller`: Manage UF_DATAVAULT
-- `com.apple.rootless.xpc.bootstrap`: XPC setup capabilities
-- `com.apple.rootless.xpc.effective-root`: Root via launchd XPC
-- `com.apple.rootless.restricted-block-devices`: Access to raw block devices
-- `com.apple.rootless.internal.installer-equivalent`: Unfettered filesystem access
-- `com.apple.rootless.restricted-nvram-variables[.heritable]`: Full access to NVRAM
-- `com.apple.rootless.storage.label`: Modify files restricted by com.apple.rootless xattr with the corresponding label
-- `com.apple.rootless.volume.VM.label`: Maintain VM swap on volume
+- `com.apple.rootless.datavault.controller`: 管理 UF_DATAVAULT
+- `com.apple.rootless.xpc.bootstrap`: XPC 设置能力
+- `com.apple.rootless.xpc.effective-root`: 通过 launchd XPC 获取 root 权限
+- `com.apple.rootless.restricted-block-devices`: 访问原始块设备
+- `com.apple.rootless.internal.installer-equivalent`: 不受限制的文件系统访问
+- `com.apple.rootless.restricted-nvram-variables[.heritable]`: 完全访问 NVRAM
+- `com.apple.rootless.storage.label`: 修改由 com.apple.rootless xattr 限制的文件，使用相应的标签
+- `com.apple.rootless.volume.VM.label`: 在卷上维护 VM 交换
 
-## SIP Bypasses
+## SIP 绕过
 
-Bypassing SIP enables an attacker to:
+绕过 SIP 使攻击者能够：
 
-- **Access User Data**: Read sensitive user data like mail, messages, and Safari history from all user accounts.
-- **TCC Bypass**: Directly manipulate the TCC (Transparency, Consent, and Control) database to grant unauthorized access to the webcam, microphone, and other resources.
-- **Establish Persistence**: Place malware in SIP-protected locations, making it resistant to removal, even by root privileges. This also includes the potential to tamper with the Malware Removal Tool (MRT).
-- **Load Kernel Extensions**: Although there are additional safeguards, bypassing SIP simplifies the process of loading unsigned kernel extensions.
+- **访问用户数据**：读取所有用户帐户的敏感用户数据，如邮件、消息和 Safari 历史记录。
+- **TCC 绕过**：直接操纵 TCC（透明性、同意和控制）数据库，以授予对网络摄像头、麦克风和其他资源的未经授权访问。
+- **建立持久性**：在 SIP 保护的位置放置恶意软件，使其即使在 root 权限下也难以删除。这还包括篡改恶意软件删除工具（MRT）的潜在能力。
+- **加载内核扩展**：尽管有额外的保护，绕过 SIP 简化了加载未签名内核扩展的过程。
 
-### Installer Packages
+### 安装包
 
-**Installer packages signed with Apple's certificate** can bypass its protections. This means that even packages signed by standard developers will be blocked if they attempt to modify SIP-protected directories.
+**使用 Apple 证书签名的安装包** 可以绕过其保护。这意味着即使是标准开发者签名的包，如果试图修改 SIP 保护的目录，也会被阻止。
 
-### Inexistent SIP file
+### 不存在的 SIP 文件
 
-One potential loophole is that if a file is specified in **`rootless.conf` but does not currently exist**, it can be created. Malware could exploit this to **establish persistence** on the system. For example, a malicious program could create a .plist file in `/System/Library/LaunchDaemons` if it is listed in `rootless.conf` but not present.
+一个潜在的漏洞是，如果在 **`rootless.conf` 中指定了一个文件但当前不存在**，则可以创建该文件。恶意软件可以利用这一点在系统上 **建立持久性**。例如，如果恶意程序在 `rootless.conf` 中列出但不存在，它可以在 `/System/Library/LaunchDaemons` 中创建一个 .plist 文件。
 
 ### com.apple.rootless.install.heritable
 
 > [!CAUTION]
-> The entitlement **`com.apple.rootless.install.heritable`** allows to bypass SIP
+> 权限 **`com.apple.rootless.install.heritable`** 允许绕过 SIP
 
 #### [CVE-2019-8561](https://objective-see.org/blog/blog_0x42.html) <a href="#cve" id="cve"></a>
 
-It was discovered that it was possible to **swap the installer package after the system verified its code** signature and then, the system would install the malicious package instead of the original. As these actions were performed by **`system_installd`**, it would allow to bypass SIP.
+发现可以在 **系统验证其代码** 签名后 **交换安装包**，然后系统将安装恶意包而不是原始包。由于这些操作是由 **`system_installd`** 执行的，因此可以绕过 SIP。
 
 #### [CVE-2020–9854](https://objective-see.org/blog/blog_0x4D.html) <a href="#cve-unauthd-chain" id="cve-unauthd-chain"></a>
 
-If a package was installed from a mounted image or external drive the **installer** would **execute** the binary from **that file system** (instead from a SIP protected location), making **`system_installd`** execute an arbitrary binary.
+如果从挂载的映像或外部驱动器安装包，**安装程序** 将 **执行** 来自 **该文件系统** 的二进制文件（而不是来自 SIP 保护的位置），使 **`system_installd`** 执行任意二进制文件。
 
 #### CVE-2021-30892 - Shrootless
 
-[**Researchers from this blog post**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) discovered a vulnerability in macOS's System Integrity Protection (SIP) mechanism, dubbed the 'Shrootless' vulnerability. This vulnerability centers around the **`system_installd`** daemon, which has an entitlement, **`com.apple.rootless.install.heritable`**, that allows any of its child processes to bypass SIP's file system restrictions.
+[**来自此博客文章的研究人员**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) 发现了 macOS 的系统完整性保护（SIP）机制中的一个漏洞，称为 'Shrootless' 漏洞。该漏洞围绕 **`system_installd`** 守护进程，该进程具有权限 **`com.apple.rootless.install.heritable`**，允许其任何子进程绕过 SIP 的文件系统限制。
 
-**`system_installd`** daemon will install packages that have been signed by **Apple**.
+**`system_installd`** 守护进程将安装由 **Apple** 签名的包。
 
-Researchers found that during the installation of an Apple-signed package (.pkg file), **`system_installd`** **runs** any **post-install** scripts included in the package. These scripts are executed by the default shell, **`zsh`**, which automatically **runs** commands from the **`/etc/zshenv`** file, if it exists, even in non-interactive mode. This behaviour could be exploited by attackers: by creating a malicious `/etc/zshenv` file and waiting for **`system_installd` to invoke `zsh`**, they could perform arbitrary operations on the device.
+研究人员发现，在安装 Apple 签名的包（.pkg 文件）期间，**`system_installd`** **运行** 包中包含的任何 **后安装** 脚本。这些脚本由默认 shell **`zsh`** 执行，如果存在，它会自动 **运行** 来自 **`/etc/zshenv`** 文件的命令，即使在非交互模式下。攻击者可以利用这种行为：通过创建恶意的 `/etc/zshenv` 文件并等待 **`system_installd` 调用 `zsh`**，他们可以在设备上执行任意操作。
 
-Moreover, it was discovered that **`/etc/zshenv` could be used as a general attack technique**, not just for a SIP bypass. Each user profile has a `~/.zshenv` file, which behaves the same way as `/etc/zshenv` but doesn't require root permissions. This file could be used as a persistence mechanism, triggering every time `zsh` starts, or as an elevation of privilege mechanism. If an admin user elevates to root using `sudo -s` or `sudo <command>`, the `~/.zshenv` file would be triggered, effectively elevating to root.
+此外，发现 **`/etc/zshenv` 可以作为一种通用攻击技术**，不仅仅用于 SIP 绕过。每个用户配置文件都有一个 `~/.zshenv` 文件，其行为与 `/etc/zshenv` 相同，但不需要 root 权限。该文件可以用作持久性机制，每次 `zsh` 启动时触发，或作为提升权限的机制。如果管理员用户使用 `sudo -s` 或 `sudo <command>` 提升到 root，`~/.zshenv` 文件将被触发，有效地提升到 root。
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-In [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) it was discovered that the same **`system_installd`** process could still be abused because it was putting the **post-install script inside a random named folder protected by SIP inside `/tmp`**. The thing is that **`/tmp` itself isn't protected by SIP**, so it was possible to **mount** a **virtual image on it**, then the **installer** would put in there the **post-install script**, **unmount** the virtual image, **recreate** all the **folders** and **add** the **post installation** script with the **payload** to execute.
+在 [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) 中发现同样的 **`system_installd`** 进程仍然可以被滥用，因为它将 **后安装脚本放在 SIP 保护的 `/tmp` 中的随机命名文件夹内**。问题在于 **`/tmp` 本身并不受 SIP 保护**，因此可以 **挂载** 一个 **虚拟映像**，然后 **安装程序** 会将 **后安装脚本** 放入其中，**卸载** 虚拟映像，**重新创建** 所有 **文件夹** 并 **添加** 带有 **有效负载** 的 **后安装** 脚本以执行。
 
-#### [fsck_cs utility](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
+#### [fsck_cs 工具](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
-A vulnerability was identified where **`fsck_cs`** was misled into corrupting a crucial file, due to its ability to follow **symbolic links**. Specifically, attackers crafted a link from _`/dev/diskX`_ to the file `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Executing **`fsck_cs`** on _`/dev/diskX`_ led to the corruption of `Info.plist`. This file's integrity is vital for the operating system's SIP (System Integrity Protection), which controls the loading of kernel extensions. Once corrupted, SIP's ability to manage kernel exclusions is compromised.
+发现了一个漏洞，其中 **`fsck_cs`** 被误导以破坏一个关键文件，因为它能够跟随 **符号链接**。具体来说，攻击者从 _`/dev/diskX`_ 创建了一个指向文件 `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist` 的链接。在 _`/dev/diskX`_ 上执行 **`fsck_cs`** 导致 `Info.plist` 的损坏。该文件的完整性对操作系统的 SIP（系统完整性保护）至关重要，SIP 控制内核扩展的加载。一旦损坏，SIP 管理内核排除的能力就会受到影响。
 
-The commands to exploit this vulnerability are:
-
+利用此漏洞的命令是：
 ```bash
 ln -s /System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist /dev/diskX
 fsck_cs /dev/diskX 1>&-
 touch /Library/Extensions/
 reboot
 ```
+该漏洞的利用具有严重的影响。`Info.plist` 文件，通常负责管理内核扩展的权限，变得无效。这包括无法将某些扩展列入黑名单，例如 `AppleHWAccess.kext`。因此，随着 SIP 的控制机制失效，该扩展可以被加载，从而授予对系统 RAM 的未经授权的读写访问。
 
-The exploitation of this vulnerability has severe implications. The `Info.plist` file, normally responsible for managing permissions for kernel extensions, becomes ineffective. This includes the inability to blacklist certain extensions, such as `AppleHWAccess.kext`. Consequently, with the SIP's control mechanism out of order, this extension can be loaded, granting unauthorized read and write access to the system's RAM.
+#### [在 SIP 保护的文件夹上挂载](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
-#### [Mount over SIP protected folders](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
-
-It was possible to mount a new file system over **SIP protected folders to bypass the protection**.
-
+可以在 **SIP 保护的文件夹上挂载新的文件系统以绕过保护**。
 ```bash
 mkdir evil
 # Add contento to the folder
 hdiutil create -srcfolder evil evil.dmg
 hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 ```
+#### [升级绕过 (2016)](https://objective-see.org/blog/blog_0x14.html)
 
-#### [Upgrader bypass (2016)](https://objective-see.org/blog/blog_0x14.html)
-
-The system is set to boot from an embedded installer disk image within the `Install macOS Sierra.app` to upgrade the OS, utilizing the `bless` utility. The command used is as follows:
-
+系统设置为从 `Install macOS Sierra.app` 中的嵌入式安装程序磁盘映像启动以升级操作系统，利用 `bless` 工具。使用的命令如下：
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
+该过程的安全性可能会受到威胁，如果攻击者在启动之前更改升级映像（`InstallESD.dmg`）。该策略涉及用恶意版本（`libBaseIA.dylib`）替换动态加载器（dyld）。此替换导致在启动程序时执行攻击者的代码。
 
-The security of this process can be compromised if an attacker alters the upgrade image (`InstallESD.dmg`) before booting. The strategy involves substituting a dynamic loader (dyld) with a malicious version (`libBaseIA.dylib`). This replacement results in the execution of the attacker's code when the installer is initiated.
+攻击者的代码在升级过程中获得控制权，利用系统对安装程序的信任。攻击通过通过方法调换更改`InstallESD.dmg`映像，特别针对`extractBootBits`方法。这允许在使用磁盘映像之前注入恶意代码。
 
-The attacker's code gains control during the upgrade process, exploiting the system's trust in the installer. The attack proceeds by altering the `InstallESD.dmg` image via method swizzling, particularly targeting the `extractBootBits` method. This allows the injection of malicious code before the disk image is employed.
-
-Moreover, within the `InstallESD.dmg`, there's a `BaseSystem.dmg`, which serves as the upgrade code's root file system. Injecting a dynamic library into this allows the malicious code to operate within a process capable of altering OS-level files, significantly increasing the potential for system compromise.
+此外，在`InstallESD.dmg`中，有一个`BaseSystem.dmg`，它作为升级代码的根文件系统。将动态库注入其中使得恶意代码能够在能够更改操作系统级文件的进程中运行，显著增加了系统被攻陷的潜力。
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
-In this talk from [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), it's shown how **`systemmigrationd`** (which can bypass SIP) executes a **bash** and a **perl** script, which can be abused via env variables **`BASH_ENV`** and **`PERL5OPT`**.
+在[**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk)的演讲中，展示了如何**`systemmigrationd`**（可以绕过SIP）执行**bash**和**perl**脚本，这可以通过环境变量**`BASH_ENV`**和**`PERL5OPT`**进行滥用。
 
 #### CVE-2023-42860 <a href="#cve-a-detailed-look" id="cve-a-detailed-look"></a>
 
-As [**detailed in this blog post**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), a `postinstall` script from `InstallAssistant.pkg` packages allowed was executing:
-
+正如[**这篇博客文章中详细说明的**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts)，`InstallAssistant.pkg`包中的`postinstall`脚本允许执行：
 ```bash
 /usr/bin/chflags -h norestricted "${SHARED_SUPPORT_PATH}/SharedSupport.dmg"
 ```
-
-and it was possible to crate a symlink in `${SHARED_SUPPORT_PATH}/SharedSupport.dmg` that would allow a user to **unrestrict any file, bypassing SIP protection**.
+并且可以在 `${SHARED_SUPPORT_PATH}/SharedSupport.dmg` 中创建一个符号链接，这将允许用户 **解除任何文件的限制，绕过 SIP 保护**。
 
 ### **com.apple.rootless.install**
 
 > [!CAUTION]
-> The entitlement **`com.apple.rootless.install`** allows to bypass SIP
+> 权限 **`com.apple.rootless.install`** 允许绕过 SIP
 
-The entitlement `com.apple.rootless.install` is known to bypass System Integrity Protection (SIP) on macOS. This was notably mentioned in relation to [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).
+权限 `com.apple.rootless.install` 被认为可以绕过 macOS 的系统完整性保护 (SIP)。这在与 [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/) 相关时特别提到。
 
-In this specific case, the system XPC service located at `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` possesses this entitlement. This allows the related process to circumvent SIP constraints. Furthermore, this service notably presents a method that permits the movement of files without enforcing any security measures.
+在这个特定情况下，位于 `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` 的系统 XPC 服务拥有此权限。这使得相关进程能够规避 SIP 限制。此外，该服务显著提供了一种方法，允许在不执行任何安全措施的情况下移动文件。
 
-## Sealed System Snapshots
+## 密封系统快照
 
-Sealed System Snapshots are a feature introduced by Apple in **macOS Big Sur (macOS 11)** as a part of its **System Integrity Protection (SIP)** mechanism to provide an additional layer of security and system stability. They are essentially read-only versions of the system volume.
+密封系统快照是 Apple 在 **macOS Big Sur (macOS 11)** 中引入的一项功能，作为其 **系统完整性保护 (SIP)** 机制的一部分，以提供额外的安全性和系统稳定性。它们本质上是系统卷的只读版本。
 
-Here's a more detailed look:
+以下是更详细的介绍：
 
-1. **Immutable System**: Sealed System Snapshots make the macOS system volume "immutable", meaning that it cannot be modified. This prevents any unauthorised or accidental changes to the system that could compromise security or system stability.
-2. **System Software Updates**: When you install macOS updates or upgrades, macOS creates a new system snapshot. The macOS startup volume then uses **APFS (Apple File System)** to switch to this new snapshot. The entire process of applying updates becomes safer and more reliable as the system can always revert to the previous snapshot if something goes wrong during the update.
-3. **Data Separation**: In conjunction with the concept of Data and System volume separation introduced in macOS Catalina, the Sealed System Snapshot feature makes sure that all your data and settings are stored on a separate "**Data**" volume. This separation makes your data independent from the system, which simplifies the process of system updates and enhances system security.
+1. **不可变系统**：密封系统快照使 macOS 系统卷变为“不可变”，这意味着它无法被修改。这防止了任何未经授权或意外的更改，从而可能危及安全性或系统稳定性。
+2. **系统软件更新**：当您安装 macOS 更新或升级时，macOS 会创建一个新的系统快照。macOS 启动卷随后使用 **APFS (Apple 文件系统)** 切换到这个新快照。应用更新的整个过程变得更安全、更可靠，因为系统始终可以在更新过程中出现问题时恢复到先前的快照。
+3. **数据分离**：结合在 macOS Catalina 中引入的数据和系统卷分离的概念，密封系统快照功能确保您的所有数据和设置存储在一个单独的“**数据**”卷上。这种分离使您的数据独立于系统，从而简化了系统更新的过程并增强了系统安全性。
 
-Remember that these snapshots are automatically managed by macOS and don't take up additional space on your disk, thanks to the space sharing capabilities of APFS. It’s also important to note that these snapshots are different from **Time Machine snapshots**, which are user-accessible backups of the entire system.
+请记住，这些快照由 macOS 自动管理，并且由于 APFS 的空间共享能力，不会占用您磁盘上的额外空间。还需要注意的是，这些快照与 **时间机器快照** 不同，后者是用户可访问的整个系统的备份。
 
-### Check Snapshots
+### 检查快照
 
-The command **`diskutil apfs list`** lists the **details of the APFS volumes** and their layout:
+命令 **`diskutil apfs list`** 列出 **APFS 卷的详细信息** 及其布局：
 
 <pre><code>+-- Container disk3 966B902E-EDBA-4775-B743-CF97A0556A13
 |   ====================================================
@@ -238,11 +218,11 @@ The command **`diskutil apfs list`** lists the **details of the APFS volumes** a
 |   +-> Volume disk3s1 7A27E734-880F-4D91-A703-FB55861D49B7
 |   |   ---------------------------------------------------
 <strong>|   |   APFS Volume Disk (Role):   disk3s1 (System)
-</strong>|   |   Name:                      Macintosh HD (Case-insensitive)
+</strong>|   |   Name:                      Macintosh HD (不区分大小写)
 <strong>|   |   Mount Point:               /System/Volumes/Update/mnt1
 </strong>|   |   Capacity Consumed:         12819210240 B (12.8 GB)
 |   |   Sealed:                    Broken
-|   |   FileVault:                 Yes (Unlocked)
+|   |   FileVault:                 Yes (解锁)
 |   |   Encrypted:                 No
 |   |   |
 |   |   Snapshot:                  FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
@@ -251,32 +231,27 @@ The command **`diskutil apfs list`** lists the **details of the APFS volumes** a
 </strong><strong>|   |   Snapshot Sealed:           Yes
 </strong>[...]
 +-> Volume disk3s5 281959B7-07A1-4940-BDDF-6419360F3327
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk3s5 (Data)
-    |   Name:                      Macintosh HD - Data (Case-insensitive)
+|   ---------------------------------------------------
+|   APFS Volume Disk (Role):   disk3s5 (Data)
+|   Name:                      Macintosh HD - Data (不区分大小写)
 <strong>    |   Mount Point:               /System/Volumes/Data
 </strong><strong>    |   Capacity Consumed:         412071784448 B (412.1 GB)
 </strong>    |   Sealed:                    No
-    |   FileVault:                 Yes (Unlocked)
+|   FileVault:                 Yes (解锁)
 </code></pre>
 
-In the previous output it's possible to see that **user-accessible locations** are mounted under `/System/Volumes/Data`.
+在之前的输出中，可以看到 **用户可访问的位置** 被挂载在 `/System/Volumes/Data` 下。
 
-Moreover, **macOS System volume snapshot** is mounted in `/` and it's **sealed** (cryptographically signed by the OS). So, if SIP is bypassed and modifies it, the **OS won't boot anymore**.
+此外，**macOS 系统卷快照** 被挂载在 `/` 并且是 **密封的**（由操作系统进行加密签名）。因此，如果绕过 SIP 并进行修改，**操作系统将无法启动**。
 
-It's also possible to **verify that seal is enabled** by running:
-
+还可以通过运行来 **验证密封是否启用**：
 ```bash
 csrutil authenticated-root status
 Authenticated Root status: enabled
 ```
-
-Moreover, the snapshot disk is also mounted as **read-only**:
-
+此外，快照磁盘也被挂载为**只读**：
 ```bash
 mount
 /dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}
-

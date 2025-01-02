@@ -2,74 +2,69 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX permissions combinations
+## POSIX 权限组合
 
-Permissions in a **directory**:
+**目录**中的权限：
 
-- **read** - you can **enumerate** the directory entries
-- **write** - you can **delete/write** **files** in the directory and you can **delete empty folders**.
-  - But you **cannot delete/modify non-empty folders** unless you have write permissions over it.
-  - You **cannot modify the name of a folder** unless you own it.
-- **execute** - you are **allowed to traverse** the directory - if you don’t have this right, you can’t access any files inside it, or in any subdirectories.
+- **读取** - 你可以 **枚举** 目录条目
+- **写入** - 你可以 **删除/写入** 目录中的 **文件**，并且你可以 **删除空文件夹**。
+- 但是你 **不能删除/修改非空文件夹**，除非你对其拥有写入权限。
+- 你 **不能修改文件夹的名称**，除非你拥有它。
+- **执行** - 你被 **允许遍历** 目录 - 如果你没有这个权限，你无法访问其中的任何文件或任何子目录。
 
-### Dangerous Combinations
+### 危险组合
 
-**How to overwrite a file/folder owned by root**, but:
+**如何覆盖一个由 root 拥有的文件/文件夹**，但：
 
-- One parent **directory owner** in the path is the user
-- One parent **directory owner** in the path is a **users group** with **write access**
-- A users **group** has **write** access to the **file**
+- 路径中的一个父 **目录所有者** 是用户
+- 路径中的一个父 **目录所有者** 是具有 **写入访问** 的 **用户组**
+- 一个用户 **组** 对 **文件** 具有 **写入** 访问
 
-With any of the previous combinations, an attacker could **inject** a **sym/hard link** the expected path to obtain a privileged arbitrary write.
+在任何之前的组合中，攻击者可以 **注入** 一个 **符号/硬链接** 到预期路径，以获得特权的任意写入。
 
-### Folder root R+X Special case
+### 文件夹 root R+X 特殊情况
 
-If there are files in a **directory** where **only root has R+X access**, those are **not accessible to anyone else**. So a vulnerability allowing to **move a file readable by a user**, that cannot be read because of that **restriction**, from this folder **to a different one**, could be abuse to read these files.
+如果在一个 **目录** 中有文件，**只有 root 拥有 R+X 访问权限**，那么这些文件对 **其他任何人** 都是 **不可访问的**。因此，允许 **将一个用户可读的文件** 移动的漏洞，因该 **限制** 而无法读取，从这个文件夹 **到另一个文件夹**，可能被滥用以读取这些文件。
 
-Example in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+示例在：[https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Symbolic Link / Hard Link
+## 符号链接 / 硬链接
 
-If a privileged process is writing data in **file** that could be **controlled** by a **lower privileged user**, or that could be **previously created** by a lower privileged user. The user could just **point it to another file** via a Symbolic or Hard link, and the privileged process will write on that file.
+如果一个特权进程正在写入一个 **文件**，该文件可能被 **低特权用户控制**，或者可能是 **之前由低特权用户创建**。用户可以通过符号链接或硬链接 **指向另一个文件**，特权进程将写入该文件。
 
-Check in the other sections where an attacker could **abuse an arbitrary write to escalate privileges**.
+查看其他部分，攻击者可能 **滥用任意写入以提升特权**。
 
 ## .fileloc
 
-Files with **`.fileloc`** extension can point to other applications or binaries so when they are open, the application/binary will be the one executed.\
-Example:
-
+具有 **`.fileloc`** 扩展名的文件可以指向其他应用程序或二进制文件，因此当它们被打开时，执行的将是该应用程序/二进制文件。\
+示例：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>URL</key>
-    <string>file:///System/Applications/Calculator.app</string>
-    <key>URLPrefix</key>
-    <integer>0</integer>
+<key>URL</key>
+<string>file:///System/Applications/Calculator.app</string>
+<key>URLPrefix</key>
+<integer>0</integer>
 </dict>
 </plist>
 ```
+## 任意文件描述符
 
-## Arbitrary FD
+如果您可以让一个 **进程以高权限打开一个文件或文件夹**，您可以利用 **`crontab`** 以 **`EDITOR=exploit.py`** 打开 `/etc/sudoers.d` 中的一个文件，这样 `exploit.py` 将获得对 `/etc/sudoers` 中文件的文件描述符并加以利用。
 
-If you can make a **process open a file or a folder with high privileges**, you can abuse **`crontab`** to open a file in `/etc/sudoers.d` with **`EDITOR=exploit.py`**, so the `exploit.py` will get the FD to the file inside `/etc/sudoers` and abuse it.
+例如: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-For example: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+## 避免隔离 xattrs 技巧
 
-## Avoid quarantine xattrs tricks
-
-### Remove it
-
+### 移除它
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
+### uchg / uchange / uimmutable 标志
 
-### uchg / uchange / uimmutable flag
-
-If a file/folder has this immutable attribute it won't be possible to put an xattr on it
-
+如果一个文件/文件夹具有此不可变属性，则无法在其上设置 xattr。
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -79,11 +74,9 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-
 ### defvfs mount
 
-A **devfs** mount **doesn't support xattr**, more info in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
-
+一个 **devfs** 挂载 **不支持 xattr**，更多信息请参见 [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -92,11 +85,9 @@ mkdir /tmp/mnt/lol
 xattr -w com.apple.quarantine "" /tmp/mnt/lol
 xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
-
 ### writeextattr ACL
 
-This ACL prevents from adding `xattrs` to the file
-
+此 ACL 防止向文件添加 `xattrs`
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -117,17 +108,15 @@ open test.zip
 sleep 1
 ls -le /tmp/test
 ```
-
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** file format copies a file including its ACEs.
+**AppleDouble** 文件格式复制一个文件及其 ACE。
 
-In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
+在 [**源代码**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) 中可以看到，存储在名为 **`com.apple.acl.text`** 的 xattr 中的 ACL 文本表示将被设置为解压缩文件中的 ACL。因此，如果你将一个应用程序压缩成一个带有 ACL 的 **AppleDouble** 文件格式的 zip 文件，该 ACL 阻止其他 xattrs 被写入... 那么隔离 xattr 并没有被设置到应用程序中：
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
+查看 [**原始报告**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) 以获取更多信息。
 
-To replicate this we first need to get the correct acl string:
-
+要复制这个，我们首先需要获取正确的 acl 字符串：
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -145,7 +134,6 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-
 (Note that even if this works the sandbox write the quarantine xattr before)
 
 Not really needed but I leave it there just in case:
@@ -154,66 +142,61 @@ Not really needed but I leave it there just in case:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Bypass Code Signatures
+## 绕过代码签名
 
-Bundles contains the file **`_CodeSignature/CodeResources`** which contains the **hash** of every single **file** in the **bundle**. Note that the hash of CodeResources is also **embedded in the executable**, so we can't mess with that, either.
+Bundles 包含文件 **`_CodeSignature/CodeResources`**，其中包含每个 **file** 在 **bundle** 中的 **hash**。请注意，CodeResources 的 hash 也 **嵌入在可执行文件中**，因此我们也不能对其进行修改。
 
-However, there are some files whose signature won't be checked, these have the key omit in the plist, like:
-
+然而，有一些文件的签名不会被检查，这些文件在 plist 中具有 omit 键，例如：
 ```xml
 <dict>
 ...
-	<key>rules</key>
-	<dict>
+<key>rules</key>
+<dict>
 ...
-		<key>^Resources/.*\.lproj/locversion.plist$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>1100</real>
-		</dict>
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
 ...
-	</dict>
-	<key>rules2</key>
+</dict>
+<key>rules2</key>
 ...
-		<key>^(.*/)?\.DS_Store$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>2000</real>
-		</dict>
+<key>^(.*/)?\.DS_Store$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>2000</real>
+</dict>
 ...
-		<key>^PkgInfo$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>20</real>
-		</dict>
+<key>^PkgInfo$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>20</real>
+</dict>
 ...
-		<key>^Resources/.*\.lproj/locversion.plist$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>1100</real>
-		</dict>
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
 ...
 </dict>
 ```
-
-It's possible to calculate the signature of a resource from the cli with:
-
+可以通过命令行计算资源的签名：
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-
 ## Mount dmgs
 
-A user can mount a custom dmg created even on top of some existing folders. This is how you could create a custom dmg package with custom content:
-
+用户可以挂载一个自定义的 dmg，即使是在某些现有文件夹上。这就是您如何创建一个包含自定义内容的自定义 dmg 包：
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -234,55 +217,51 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
+通常，macOS 通过 `com.apple.DiskArbitrarion.diskarbitrariond` Mach 服务（由 `/usr/libexec/diskarbitrationd` 提供）挂载磁盘。如果在 LaunchDaemons plist 文件中添加参数 `-d` 并重启，它将把日志存储在 `/var/log/diskarbitrationd.log` 中。\
+然而，可以使用像 `hdik` 和 `hdiutil` 这样的工具直接与 `com.apple.driver.DiskImages` kext 进行通信。
 
-Usually macOS mounts disk talking to the `com.apple.DiskArbitrarion.diskarbitrariond` Mach service (provided by `/usr/libexec/diskarbitrationd`). If adding the param `-d` to the LaunchDaemons plist file and restarted, it will store logs it will store logs in `/var/log/diskarbitrationd.log`.\
-However, it's possible to use tools like `hdik` and `hdiutil` to communicate directly with the `com.apple.driver.DiskImages` kext.
+## 任意写入
 
-## Arbitrary Writes
+### 定期 sh 脚本
 
-### Periodic sh scripts
+如果您的脚本可以被解释为 **shell 脚本**，您可以覆盖 **`/etc/periodic/daily/999.local`** shell 脚本，该脚本将每天触发。
 
-If your script could be interpreted as a **shell script** you could overwrite the **`/etc/periodic/daily/999.local`** shell script that will be triggered every day.
+您可以通过以下方式 **伪造** 此脚本的执行：**`sudo periodic daily`**
 
-You can **fake** an execution of this script with: **`sudo periodic daily`**
+### 守护进程
 
-### Daemons
-
-Write an arbitrary **LaunchDaemon** like **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** with a plist executing an arbitrary script like:
-
+编写一个任意的 **LaunchDaemon**，例如 **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**，其中 plist 执行一个任意脚本，如：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <dict>
-        <key>Label</key>
-        <string>com.sample.Load</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>/Applications/Scripts/privesc.sh</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-    </dict>
+<dict>
+<key>Label</key>
+<string>com.sample.Load</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Scripts/privesc.sh</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
+</dict>
 </plist>
 ```
+生成脚本 `/Applications/Scripts/privesc.sh`，其中包含您希望以 root 身份运行的 **命令**。
 
-Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
+### Sudoers 文件
 
-### Sudoers File
+如果您具有 **任意写入** 权限，您可以在 **`/etc/sudoers.d/`** 文件夹内创建一个文件，从而授予自己 **sudo** 权限。
 
-If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
+### PATH 文件
 
-### PATH files
+文件 **`/etc/paths`** 是填充 PATH 环境变量的主要位置之一。您必须是 root 才能覆盖它，但如果 **特权进程** 执行某些 **命令而没有完整路径**，您可能能够通过修改此文件来 **劫持** 它。
 
-The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
+您还可以在 **`/etc/paths.d`** 中写入文件，以将新文件夹加载到 `PATH` 环境变量中。
 
-You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
+## 以其他用户身份生成可写文件
 
-## Generate writable files as other users
-
-This will generate a file that belongs to root that is writable by me ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). This might also work as privesc:
-
+这将生成一个属于 root 的文件，该文件对我可写 ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh))。这也可能作为特权提升工作：
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -294,15 +273,13 @@ MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDont
 FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
+## POSIX 共享内存
 
-## POSIX Shared Memory
-
-**POSIX shared memory** allows processes in POSIX-compliant operating systems to access a common memory area, facilitating faster communication compared to other inter-process communication methods. It involves creating or opening a shared memory object with `shm_open()`, setting its size with `ftruncate()`, and mapping it into the process's address space using `mmap()`. Processes can then directly read from and write to this memory area. To manage concurrent access and prevent data corruption, synchronization mechanisms such as mutexes or semaphores are often used. Finally, processes unmap and close the shared memory with `munmap()` and `close()`, and optionally remove the memory object with `shm_unlink()`. This system is especially effective for efficient, fast IPC in environments where multiple processes need to access shared data rapidly.
+**POSIX 共享内存** 允许在 POSIX 兼容操作系统中的进程访问一个公共内存区域，与其他进程间通信方法相比，促进了更快的通信。它涉及使用 `shm_open()` 创建或打开一个共享内存对象，使用 `ftruncate()` 设置其大小，并使用 `mmap()` 将其映射到进程的地址空间。进程可以直接从这个内存区域读取和写入。为了管理并发访问并防止数据损坏，通常使用互斥锁或信号量等同步机制。最后，进程使用 `munmap()` 和 `close()` 解除映射并关闭共享内存，并可选择使用 `shm_unlink()` 删除内存对象。该系统在多个进程需要快速访问共享数据的环境中，尤其有效于高效、快速的 IPC。
 
 <details>
 
-<summary>Producer Code Example</summary>
-
+<summary>生产者代码示例</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -313,46 +290,44 @@ echo $FILENAME
 #include <stdlib.h>
 
 int main() {
-    const char *name = "/my_shared_memory";
-    const int SIZE = 4096; // Size of the shared memory object
+const char *name = "/my_shared_memory";
+const int SIZE = 4096; // Size of the shared memory object
 
-    // Create the shared memory object
-    int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        return EXIT_FAILURE;
-    }
+// Create the shared memory object
+int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+if (shm_fd == -1) {
+perror("shm_open");
+return EXIT_FAILURE;
+}
 
-    // Configure the size of the shared memory object
-    if (ftruncate(shm_fd, SIZE) == -1) {
-        perror("ftruncate");
-        return EXIT_FAILURE;
-    }
+// Configure the size of the shared memory object
+if (ftruncate(shm_fd, SIZE) == -1) {
+perror("ftruncate");
+return EXIT_FAILURE;
+}
 
-    // Memory map the shared memory
-    void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        return EXIT_FAILURE;
-    }
+// Memory map the shared memory
+void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+return EXIT_FAILURE;
+}
 
-    // Write to the shared memory
-    sprintf(ptr, "Hello from Producer!");
+// Write to the shared memory
+sprintf(ptr, "Hello from Producer!");
 
-    // Unmap and close, but do not unlink
-    munmap(ptr, SIZE);
-    close(shm_fd);
+// Unmap and close, but do not unlink
+munmap(ptr, SIZE);
+close(shm_fd);
 
-    return 0;
+return 0;
 }
 ```
-
 </details>
 
 <details>
 
-<summary>Consumer Code Example</summary>
-
+<summary>消费者代码示例</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -363,51 +338,49 @@ int main() {
 #include <stdlib.h>
 
 int main() {
-    const char *name = "/my_shared_memory";
-    const int SIZE = 4096; // Size of the shared memory object
+const char *name = "/my_shared_memory";
+const int SIZE = 4096; // Size of the shared memory object
 
-    // Open the shared memory object
-    int shm_fd = shm_open(name, O_RDONLY, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        return EXIT_FAILURE;
-    }
+// Open the shared memory object
+int shm_fd = shm_open(name, O_RDONLY, 0666);
+if (shm_fd == -1) {
+perror("shm_open");
+return EXIT_FAILURE;
+}
 
-    // Memory map the shared memory
-    void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        return EXIT_FAILURE;
-    }
+// Memory map the shared memory
+void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+return EXIT_FAILURE;
+}
 
-    // Read from the shared memory
-    printf("Consumer received: %s\n", (char *)ptr);
+// Read from the shared memory
+printf("Consumer received: %s\n", (char *)ptr);
 
-    // Cleanup
-    munmap(ptr, SIZE);
-    close(shm_fd);
-    shm_unlink(name); // Optionally unlink
+// Cleanup
+munmap(ptr, SIZE);
+close(shm_fd);
+shm_unlink(name); // Optionally unlink
 
-    return 0;
+return 0;
 }
 
 ```
-
 </details>
 
-## macOS Guarded Descriptors
+## macOS 受保护描述符
 
-**macOSCguarded descriptors** are a security feature introduced in macOS to enhance the safety and reliability of **file descriptor operations** in user applications. These guarded descriptors provide a way to associate specific restrictions or "guards" with file descriptors, which are enforced by the kernel.
+**macOS 受保护描述符** 是在 macOS 中引入的一项安全功能，旨在增强用户应用程序中 **文件描述符操作** 的安全性和可靠性。这些受保护的描述符提供了一种将特定限制或“保护”与文件描述符关联的方法，这些限制由内核强制执行。
 
-This feature is particularly useful for preventing certain classes of security vulnerabilities such as **unauthorized file access** or **race conditions**. These vulnerabilities occurs when for example a thread is accessing a file description giving **another vulnerable thread access over it** or when a file descriptor is **inherited** by a vulnerable child process. Some functions related to this functionality are:
+此功能特别有助于防止某些类型的安全漏洞，例如 **未经授权的文件访问** 或 **竞争条件**。这些漏洞发生在例如一个线程正在访问一个文件描述符，导致 **另一个脆弱线程对其的访问**，或者当一个文件描述符被 **继承** 给一个脆弱的子进程时。与此功能相关的一些函数包括：
 
-- `guarded_open_np`: Opend a FD with a guard
-- `guarded_close_np`: Close it
-- `change_fdguard_np`: Change guard flags on a descriptor (even removing the guard protection)
+- `guarded_open_np`: 以保护方式打开文件描述符
+- `guarded_close_np`: 关闭它
+- `change_fdguard_np`: 更改描述符上的保护标志（甚至移除保护）
 
-## References
+## 参考
 
 - [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

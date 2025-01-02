@@ -1,176 +1,160 @@
-# macOS Thread Injection via Task port
+# macOS 通过任务端口进行线程注入
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Code
+## 代码
 
 - [https://github.com/bazad/threadexec](https://github.com/bazad/threadexec)
 - [https://gist.github.com/knightsc/bd6dfeccb02b77eb6409db5601dcef36](https://gist.github.com/knightsc/bd6dfeccb02b77eb6409db5601dcef36)
 
-## 1. Thread Hijacking
+## 1. 线程劫持
 
-Initially, the **`task_threads()`** function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code injection methods as creating a new remote thread is prohibited due to the new mitigation blocking `thread_create_running()`.
+最初，**`task_threads()`** 函数在任务端口上被调用，以从远程任务中获取线程列表。选择一个线程进行劫持。这种方法与传统的代码注入方法不同，因为由于新的缓解措施阻止了 `thread_create_running()`，创建新的远程线程是被禁止的。
 
-To control the thread, **`thread_suspend()`** is called, halting its execution.
+为了控制线程，调用 **`thread_suspend()`**，暂停其执行。
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it, **retrieving** and **modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring **`pc`** to target the desired function, and activating the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
+在远程线程上允许的唯一操作涉及 **停止** 和 **启动** 它，**检索** 和 **修改** 其寄存器值。通过将寄存器 `x0` 到 `x7` 设置为 **参数**，配置 **`pc`** 以指向所需函数，并激活线程，来发起远程函数调用。确保线程在返回后不崩溃需要检测返回。
 
-One strategy involves **registering an exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s triple_fetch exploit, `lr` is set to loop infinitely. The thread's registers are then continuously monitored until **`pc` points to that instruction**.
+一种策略是使用 `thread_set_exception_ports()` 为远程线程 **注册异常处理程序**，在函数调用之前将 `lr` 寄存器设置为无效地址。这会在函数执行后触发异常，向异常端口发送消息，使线程的状态可以被检查以恢复返回值。或者，借鉴 Ian Beer 的 triple_fetch 漏洞，将 `lr` 设置为无限循环。然后持续监控线程的寄存器，直到 **`pc` 指向该指令**。
 
-## 2. Mach ports for communication
+## 2. 用于通信的 Mach 端口
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send and receive rights between tasks.
+接下来的阶段涉及建立 Mach 端口，以促进与远程线程的通信。这些端口在任务之间传输任意的发送和接收权限中起着重要作用。
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
+为了实现双向通信，创建两个 Mach 接收权限：一个在本地任务中，另一个在远程任务中。随后，将每个端口的发送权限转移到对应的任务，从而实现消息交换。
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
+关注本地端口，接收权限由本地任务持有。该端口通过 `mach_port_allocate()` 创建。挑战在于将此端口的发送权限转移到远程任务中。
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
+一种策略是利用 `thread_set_special_port()` 将本地端口的发送权限放置在远程线程的 `THREAD_KERNEL_PORT` 中。然后，指示远程线程调用 `mach_thread_self()` 以检索发送权限。
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
+对于远程端口，过程基本上是反向的。指示远程线程通过 `mach_reply_port()` 生成一个 Mach 端口（因为 `mach_port_allocate()` 由于其返回机制不适用）。在端口创建后，在远程线程中调用 `mach_port_insert_right()` 来建立发送权限。然后使用 `thread_set_special_port()` 将该权限存储在内核中。在本地任务中，使用 `thread_get_special_port()` 在远程线程上获取对远程任务中新分配的 Mach 端口的发送权限。
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
+完成这些步骤后，建立了 Mach 端口，为双向通信奠定了基础。
 
-## 3. Basic Memory Read/Write Primitives
+## 3. 基本内存读/写原语
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read and write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+在本节中，重点是利用执行原语建立基本的内存读写原语。这些初步步骤对于获得对远程进程的更多控制至关重要，尽管此阶段的原语不会发挥太多作用。很快，它们将升级为更高级的版本。
 
-### Memory Reading and Writing Using Execute Primitive
+### 使用执行原语进行内存读取和写入
 
-The goal is to perform memory reading and writing using specific functions. For reading memory, functions resembling the following structure are used:
-
+目标是使用特定函数执行内存读取和写入。用于读取内存的函数类似于以下结构：
 ```c
 uint64_t read_func(uint64_t *address) {
-    return *address;
+return *address;
 }
 ```
-
-And for writing to memory, functions similar to this structure are used:
-
+用于写入内存的函数类似于以下结构：
 ```c
 void write_func(uint64_t *address, uint64_t value) {
-    *address = value;
+*address = value;
 }
 ```
-
-These functions correspond to the given assembly instructions:
-
+这些函数对应于给定的汇编指令：
 ```
 _read_func:
-    ldr x0, [x0]
-    ret
+ldr x0, [x0]
+ret
 _write_func:
-    str x1, [x0]
-    ret
+str x1, [x0]
+ret
 ```
+### 识别合适的函数
 
-### Identifying Suitable Functions
+对常见库的扫描揭示了这些操作的合适候选者：
 
-A scan of common libraries revealed appropriate candidates for these operations:
-
-1. **Reading Memory:**
-   The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
-
+1. **读取内存：**
+`property_getName()` 函数来自 [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html)，被识别为读取内存的合适函数。该函数如下所述：
 ```c
 const char *property_getName(objc_property_t prop) {
-      return prop->name;
+return prop->name;
 }
 ```
+这个函数有效地充当了 `read_func`，通过返回 `objc_property_t` 的第一个字段。
 
-This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
-
-2. **Writing Memory:**
-   Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
-
+2. **写入内存：**
+找到一个预构建的写入内存的函数更具挑战性。然而，来自 libxpc 的 `_xpc_int64_set_value()` 函数是一个合适的候选者，具有以下反汇编：
 ```c
 __xpc_int64_set_value:
-    str x1, [x0, #0x18]
-    ret
+str x1, [x0, #0x18]
+ret
 ```
-
-To perform a 64-bit write at a specific address, the remote call is structured as:
-
+要在特定地址执行64位写入，远程调用的结构为：
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
+通过建立这些原语，创建共享内存的阶段已经设定，这标志着对远程进程控制的重大进展。
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
+## 4. 共享内存设置
 
-## 4. Shared Memory Setup
+目标是在本地和远程任务之间建立共享内存，简化数据传输并促进带有多个参数的函数调用。该方法涉及利用 `libxpc` 及其 `OS_xpc_shmem` 对象类型，该类型建立在 Mach 内存条目之上。
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach involves leveraging `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
+### 过程概述：
 
-### Process Overview:
+1. **内存分配**：
 
-1. **Memory Allocation**:
+- 使用 `mach_vm_allocate()` 分配共享内存。
+- 使用 `xpc_shmem_create()` 为分配的内存区域创建一个 `OS_xpc_shmem` 对象。此函数将管理 Mach 内存条目的创建，并在 `OS_xpc_shmem` 对象的偏移量 `0x18` 存储 Mach 发送权限。
 
-   - Allocate the memory for sharing using `mach_vm_allocate()`.
-   - Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated memory region. This function will manage the creation of the Mach memory entry and store the Mach send right at offset `0x18` of the `OS_xpc_shmem` object.
+2. **在远程进程中创建共享内存**：
 
-2. **Creating Shared Memory in Remote Process**:
+- 通过对 `malloc()` 的远程调用，在远程进程中为 `OS_xpc_shmem` 对象分配内存。
+- 将本地 `OS_xpc_shmem` 对象的内容复制到远程进程。然而，这个初始复制在偏移量 `0x18` 处将具有不正确的 Mach 内存条目名称。
 
-   - Allocate memory for the `OS_xpc_shmem` object in the remote process with a remote call to `malloc()`.
-   - Copy the contents of the local `OS_xpc_shmem` object to the remote process. However, this initial copy will have incorrect Mach memory entry names at offset `0x18`.
+3. **修正 Mach 内存条目**：
 
-3. **Correcting the Mach Memory Entry**:
+- 利用 `thread_set_special_port()` 方法将 Mach 内存条目的发送权限插入到远程任务中。
+- 通过用远程内存条目的名称覆盖偏移量 `0x18` 处的 Mach 内存条目字段来修正它。
 
-   - Utilize the `thread_set_special_port()` method to insert a send right for the Mach memory entry into the remote task.
-   - Correct the Mach memory entry field at offset `0x18` by overwriting it with the remote memory entry's name.
+4. **完成共享内存设置**：
+- 验证远程 `OS_xpc_shmem` 对象。
+- 通过对 `xpc_shmem_remote()` 的远程调用建立共享内存映射。
 
-4. **Finalizing Shared Memory Setup**:
-   - Validate the remote `OS_xpc_shmem` object.
-   - Establish the shared memory mapping with a remote call to `xpc_shmem_remote()`.
+通过遵循这些步骤，本地和远程任务之间的共享内存将有效设置，从而允许简单的数据传输和执行需要多个参数的函数。
 
-By following these steps, shared memory between the local and remote tasks will be efficiently set up, allowing for straightforward data transfers and the execution of functions requiring multiple arguments.
+## 额外代码片段
 
-## Additional Code Snippets
-
-For memory allocation and shared memory object creation:
-
+用于内存分配和共享内存对象创建：
 ```c
 mach_vm_allocate();
 xpc_shmem_create();
 ```
-
-For creating and correcting the shared memory object in the remote process:
-
+在远程进程中创建和修正共享内存对象：
 ```c
 malloc(); // for allocating memory remotely
 thread_set_special_port(); // for inserting send right
 ```
+记得正确处理Mach端口和内存条目名称的细节，以确保共享内存设置正常工作。
 
-Remember to handle the details of Mach ports and memory entry names correctly to ensure that the shared memory setup functions properly.
+## 5. 实现完全控制
 
-## 5. Achieving Full Control
+在成功建立共享内存并获得任意执行能力后，我们基本上获得了对目标进程的完全控制。实现这种控制的关键功能包括：
 
-Upon successfully establishing shared memory and gaining arbitrary execution capabilities, we have essentially gained full control over the target process. The key functionalities enabling this control are:
+1. **任意内存操作**：
 
-1. **Arbitrary Memory Operations**:
+- 通过调用`memcpy()`从共享区域复制数据，执行任意内存读取。
+- 通过使用`memcpy()`将数据传输到共享区域，执行任意内存写入。
 
-   - Perform arbitrary memory reads by invoking `memcpy()` to copy data from the shared region.
-   - Execute arbitrary memory writes by using `memcpy()` to transfer data to the shared region.
+2. **处理多个参数的函数调用**：
 
-2. **Handling Function Calls with Multiple Arguments**:
+- 对于需要超过8个参数的函数，按照调用约定将额外参数安排在栈上。
 
-   - For functions requiring more than 8 arguments, arrange the additional arguments on the stack in compliance with the calling convention.
+3. **Mach端口传输**：
 
-3. **Mach Port Transfer**:
+- 通过先前建立的端口，通过Mach消息在任务之间传输Mach端口。
 
-   - Transfer Mach ports between tasks through Mach messages via previously established ports.
+4. **文件描述符传输**：
+- 使用fileports在进程之间传输文件描述符，这一技术由Ian Beer在`triple_fetch`中强调。
 
-4. **File Descriptor Transfer**:
-   - Transfer file descriptors between processes using fileports, a technique highlighted by Ian Beer in `triple_fetch`.
+这种全面控制被封装在[threadexec](https://github.com/bazad/threadexec)库中，提供了详细的实现和用户友好的API，以便与受害进程进行交互。
 
-This comprehensive control is encapsulated within the [threadexec](https://github.com/bazad/threadexec) library, providing a detailed implementation and a user-friendly API for interaction with the victim process.
+## 重要考虑事项：
 
-## Important Considerations:
+- 确保正确使用`memcpy()`进行内存读/写操作，以维护系统稳定性和数据完整性。
+- 在传输Mach端口或文件描述符时，遵循适当的协议并负责任地处理资源，以防止泄漏或意外访问。
 
-- Ensure proper use of `memcpy()` for memory read/write operations to maintain system stability and data integrity.
-- When transferring Mach ports or file descriptors, follow proper protocols and handle resources responsibly to prevent leaks or unintended access.
+通过遵循这些指南并利用`threadexec`库，可以有效地管理和与进程进行细粒度交互，实现对目标进程的完全控制。
 
-By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
-
-## References
+## 参考文献
 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 

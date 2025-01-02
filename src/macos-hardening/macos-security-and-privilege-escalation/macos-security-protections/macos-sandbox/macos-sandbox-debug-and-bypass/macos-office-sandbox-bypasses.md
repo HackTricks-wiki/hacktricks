@@ -4,50 +4,49 @@
 
 ### Word Sandbox bypass via Launch Agents
 
-The application uses a **custom Sandbox** using the entitlement **`com.apple.security.temporary-exception.sbpl`** and this custom sandbox allows to write files anywhere as long as the filename started with `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+该应用程序使用 **custom Sandbox** 和权限 **`com.apple.security.temporary-exception.sbpl`**，这个自定义沙箱允许在任何地方写入文件，只要文件名以 `~$` 开头：`(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
-Therefore, escaping was as easy as **writing a `plist`** LaunchAgent in `~/Library/LaunchAgents/~$escape.plist`.
+因此，逃逸的方式就是 **编写一个 `plist`** LaunchAgent 在 `~/Library/LaunchAgents/~$escape.plist` 中。
 
-Check the [**original report here**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).
+查看 [**原始报告在这里**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/)。
 
 ### Word Sandbox bypass via Login Items and zip
 
-Remember that from the first escape, Word can write arbitrary files whose name start with `~$` although after the patch of the previous vuln it wasn't possible to write in `/Library/Application Scripts` or in `/Library/LaunchAgents`.
+请记住，从第一次逃逸开始，Word 可以写入以 `~$` 开头的任意文件，尽管在之前漏洞的补丁后，无法在 `/Library/Application Scripts` 或 `/Library/LaunchAgents` 中写入。
 
-It was discovered that from within the sandbox it's possible to create a **Login Item** (apps that will be executed when the user logs in). However, these apps **won't execute unless** they are **notarized** and it's **not possible to add args** (so you cannot just run a reverse shell using **`bash`**).
+发现从沙箱内可以创建一个 **Login Item**（用户登录时将执行的应用程序）。然而，这些应用程序 **不会执行，除非** 它们 **经过公证**，并且 **无法添加参数**（因此不能仅使用 **`bash`** 运行反向 shell）。
 
-From the previous Sandbox bypass, Microsoft disabled the option to write files in `~/Library/LaunchAgents`. However, it was discovered that if you put a **zip file as a Login Item** the `Archive Utility` will just **unzip** it on its current location. So, because by default the folder `LaunchAgents` from `~/Library` is not created, it was possible to **zip a plist in `LaunchAgents/~$escape.plist`** and **place** the zip file in **`~/Library`** so when decompress it will reach the persistence destination.
+在之前的沙箱绕过中，Microsoft 禁用了在 `~/Library/LaunchAgents` 中写入文件的选项。然而，发现如果将 **zip 文件作为 Login Item**，`Archive Utility` 将会在其当前位置 **解压** 它。因此，由于默认情况下 `~/Library` 中的 `LaunchAgents` 文件夹未创建，可以 **将 plist 压缩到 `LaunchAgents/~$escape.plist`** 并 **放置** zip 文件在 **`~/Library`** 中，这样在解压时将到达持久性目标。
 
-Check the [**original report here**](https://objective-see.org/blog/blog_0x4B.html).
+查看 [**原始报告在这里**](https://objective-see.org/blog/blog_0x4B.html)。
 
 ### Word Sandbox bypass via Login Items and .zshenv
 
-(Remember that from the first escape, Word can write arbitrary files whose name start with `~$`).
+（请记住，从第一次逃逸开始，Word 可以写入以 `~$` 开头的任意文件）。
 
-However, the previous technique had a limitation, if the folder **`~/Library/LaunchAgents`** exists because some other software created it, it would fail. So a different Login Items chain was discovered for this.
+然而，之前的技术有一个限制，如果文件夹 **`~/Library/LaunchAgents`** 存在，因为其他软件创建了它，则会失败。因此，发现了一个不同的 Login Items 链。
 
-An attacker could create the the files **`.bash_profile`** and **`.zshenv`** with the payload to execute and then zip them and **write the zip in the victims** user folder: **`~/~$escape.zip`**.
+攻击者可以创建 **`.bash_profile`** 和 **`.zshenv`** 文件，包含要执行的有效载荷，然后将它们压缩并 **写入受害者** 的用户文件夹：**`~/~$escape.zip`**。
 
-Then, add the zip file to the **Login Items** and then the **`Terminal`** app. When the user relogins, the zip file would be uncompressed in the users file, overwriting **`.bash_profile`** and **`.zshenv`** and therefore, the terminal will execute one of these files (depending if bash or zsh is used).
+然后，将 zip 文件添加到 **Login Items** 中，然后是 **`Terminal`** 应用程序。当用户重新登录时，zip 文件将被解压到用户文件中，覆盖 **`.bash_profile`** 和 **`.zshenv`**，因此，终端将执行其中一个文件（取决于使用的是 bash 还是 zsh）。
 
-Check the [**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
+查看 [**原始报告在这里**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)。
 
 ### Word Sandbox Bypass with Open and env variables
 
-From sandboxed processes it's still possible to invoke other processes using the **`open`** utility. Moreover, these processes will run **within their own sandbox**.
+从沙箱进程中，仍然可以使用 **`open`** 工具调用其他进程。此外，这些进程将在 **它们自己的沙箱内** 运行。
 
-It was discovered that the open utility has the **`--env`** option to run an app with **specific env** variables. Therefore, it was possible to create the **`.zshenv` file** within a folder **inside** the **sandbox** and the use `open` with `--env` setting the **`HOME` variable** to that folder opening that `Terminal` app, which will execute the `.zshenv` file (for some reason it was also needed to set the variable `__OSINSTALL_ENVIROMENT`).
+发现 open 工具有 **`--env`** 选项，可以使用 **特定的 env** 变量运行应用程序。因此，可以在 **沙箱内** 的文件夹中创建 **`.zshenv` 文件**，并使用 `open` 和 `--env` 将 **`HOME` 变量** 设置为该文件夹，打开 `Terminal` 应用程序，这将执行 `.zshenv` 文件（出于某种原因，还需要设置变量 `__OSINSTALL_ENVIROMENT`）。
 
-Check the [**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).
+查看 [**原始报告在这里**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)。
 
 ### Word Sandbox Bypass with Open and stdin
 
-The **`open`** utility also supported the **`--stdin`** param (and after the previous bypass it was no longer possible to use `--env`).
+**`open`** 工具还支持 **`--stdin`** 参数（在之前的绕过后，无法再使用 `--env`）。
 
-The thing is that even if **`python`** was signed by Apple, it **won't execute** a script with the **`quarantine`** attribute. However, it was possible to pass it a script from stdin so it won't check if it was quarantined or not:&#x20;
+问题是，即使 **`python`** 是由 Apple 签名的，它 **不会执行** 带有 **`quarantine`** 属性的脚本。然而，可以通过 stdin 传递一个脚本，这样它就不会检查是否被隔离：
 
-1. Drop a **`~$exploit.py`** file with arbitrary Python commands.
-2. Run _open_ **`–stdin='~$exploit.py' -a Python`**, which runs the Python app with our dropped file serving as its standard input. Python happily runs our code, and since it’s a child process of _launchd_, it isn’t bound to Word’s sandbox rules.
+1. 放置一个 **`~$exploit.py`** 文件，包含任意 Python 命令。
+2. 运行 _open_ **`–stdin='~$exploit.py' -a Python`**，这将使用我们放置的文件作为标准输入运行 Python 应用程序。Python 高兴地运行我们的代码，并且由于它是 _launchd_ 的子进程，因此不受 Word 沙箱规则的限制。
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
