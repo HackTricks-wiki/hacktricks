@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-**Silver Ticket**攻撃は、Active Directory (AD) 環境におけるサービスチケットの悪用を含みます。この手法は、**サービスアカウントのNTLMハッシュを取得すること**に依存しており、コンピュータアカウントなどを利用して、チケットグラントサービス (TGS) チケットを偽造します。この偽造されたチケットを使用することで、攻撃者はネットワーク上の特定のサービスにアクセスでき、**任意のユーザーを偽装**し、通常は管理者権限を狙います。チケットを偽造する際にAESキーを使用することが、より安全で検出されにくいことが強調されています。
+**Silver Ticket**攻撃は、Active Directory (AD) 環境におけるサービスチケットの悪用を含みます。この手法は、**サービスアカウントのNTLMハッシュを取得すること**に依存しており、コンピュータアカウントなどを使用して、チケットグラントサービス (TGS) チケットを偽造します。この偽造されたチケットを使用することで、攻撃者はネットワーク上の特定のサービスにアクセスでき、**任意のユーザーを偽装**し、通常は管理者権限を狙います。チケットを偽造する際にAESキーを使用することが、より安全で検出されにくいことが強調されています。
 
 チケット作成には、オペレーティングシステムに基づいて異なるツールが使用されます。
 
@@ -39,13 +35,13 @@ CIFSサービスは、被害者のファイルシステムにアクセスする�
 | サービスタイプ                               | サービスシルバーチケット                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShellリモーティング                   | <p>HOST</p><p>HTTP</p><p>OSによっては:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>場合によっては: WINRMを要求することができます</p> |
-| スケジュールされたタスク                   | HOST                                                                       |
-| Windowsファイル共有、psexecも含む          | CIFS                                                                       |
-| LDAP操作、DCSyncを含む                     | LDAP                                                                       |
-| Windowsリモートサーバー管理ツール          | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| ゴールデンチケット                         | krbtgt                                                                     |
+| PowerShellリモーティング                        | <p>HOST</p><p>HTTP</p><p>OSによっては:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>場合によっては、単に要求することができます: WINRM</p> |
+| スケジュールされたタスク                            | HOST                                                                       |
+| Windowsファイル共有、またpsexec            | CIFS                                                                       |
+| LDAP操作、DCSyncを含む                       | LDAP                                                                       |
+| Windowsリモートサーバー管理ツール | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| ゴールデンチケット                             | krbtgt                                                                     |
 
 **Rubeus**を使用すると、次のパラメータを使用して**すべての**チケットを**要求**できます：
 
@@ -59,11 +55,11 @@ CIFSサービスは、被害者のファイルシステムにアクセスする�
 
 ## サービスタケットの悪用
 
-次の例では、チケットが管理者アカウントを偽装して取得されたと仮定します。
+次の例では、チケットが管理者アカウントを偽装して取得されたと想定します。
 
 ### CIFS
 
-このチケットを使用すると、**SMB**を介して`C$`および`ADMIN$`フォルダーにアクセスし（公開されている場合）、リモートファイルシステムの一部にファイルをコピーすることができます。
+このチケットを使用すると、`C$`および`ADMIN$`フォルダーに**SMB**を介してアクセスでき（公開されている場合）、リモートファイルシステムの一部にファイルをコピーすることができます。
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -113,7 +109,7 @@ winrmアクセスを介してコンピュータに**アクセス**し、PowerShe
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-以下のページを確認して、**winrmを使用してリモートホストに接続する他の方法**を学んでください：
+次のページを確認して、**winrmを使用してリモートホストに接続する方法**を学んでください：
 
 {{#ref}}
 ../lateral-movement/winrm.md
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**バグバウンティのヒント**：**サインアップ**して**Intigriti**に参加しましょう。これは**ハッカーによって、ハッカーのために作られたプレミアムバグバウンティプラットフォーム**です！今日、[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**の報酬を得始めましょう！
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

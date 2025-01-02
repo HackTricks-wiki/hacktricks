@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# SELinux in Containers
+# コンテナにおけるSELinux
 
-[Introduction and example from the redhat docs](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
+[Red Hatのドキュメントからの紹介と例](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) は **ラベリング** **システム** です。すべての **プロセス** とすべての **ファイル** システムオブジェクトには **ラベル** があります。SELinuxポリシーは、**プロセスラベルがシステム上の他のすべてのラベルに対して何をすることが許可されているか** に関するルールを定義します。
 
-Container engines launch **container processes with a single confined SELinux label**, usually `container_t`, and then set the container inside of the container to be labeled `container_file_t`. The SELinux policy rules basically say that the **`container_t` processes can only read/write/execute files labeled `container_file_t`**. If a container process escapes the container and attempts to write to content on the host, the Linux kernel denies access and only allows the container process to write to content labeled `container_file_t`.
-
+コンテナエンジンは、通常 `container_t` の単一の制限されたSELinuxラベルを持つ **コンテナプロセス** を起動し、その後コンテナ内のコンテナを `container_file_t` とラベル付けします。SELinuxポリシールールは基本的に、**`container_t` プロセスは `container_file_t` とラベル付けされたファイルをのみ読み書き/実行できる** と述べています。コンテナプロセスがコンテナから脱出し、ホスト上のコンテンツに書き込もうとすると、Linuxカーネルはアクセスを拒否し、コンテナプロセスが `container_file_t` とラベル付けされたコンテンツにのみ書き込むことを許可します。
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -15,9 +14,8 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
+# SELinuxユーザー
 
-# SELinux Users
-
-There are SELinux users in addition to the regular Linux users. SELinux users are part of an SELinux policy. Each Linux user is mapped to a SELinux user as part of the policy. This allows Linux users to inherit the restrictions and security rules and mechanisms placed on SELinux users.
+通常のLinuxユーザーに加えて、SELinuxユーザーも存在します。SELinuxユーザーはSELinuxポリシーの一部です。各Linuxユーザーはポリシーの一部としてSELinuxユーザーにマッピングされます。これにより、LinuxユーザーはSELinuxユーザーに課せられた制限やセキュリティルール、メカニズムを継承することができます。
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,53 +1,53 @@
-# Enrolling Devices in Other Organisations
+# 他の組織へのデバイスの登録
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## はじめに
 
-As [**previously commented**](./#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected.
+[**以前にコメントしたように**](./#what-is-mdm-mobile-device-management)**、**デバイスを組織に登録するためには、**その組織に属するシリアル番号のみが必要です**。デバイスが登録されると、いくつかの組織が新しいデバイスに機密データをインストールします：証明書、アプリケーション、WiFiパスワード、VPN設定[など](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf)。\
+したがって、登録プロセスが適切に保護されていない場合、これは攻撃者にとって危険な入り口となる可能性があります。
 
-**The following is a summary of the research [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Check it for further technical details!**
+**以下は、研究の要約です[https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)。さらなる技術的詳細については確認してください！**
 
-## Overview of DEP and MDM Binary Analysis
+## DEPとMDMバイナリ分析の概要
 
-This research delves into the binaries associated with the Device Enrollment Program (DEP) and Mobile Device Management (MDM) on macOS. Key components include:
+この研究は、macOS上のデバイス登録プログラム（DEP）およびモバイルデバイス管理（MDM）に関連するバイナリに深く掘り下げています。主要なコンポーネントは以下の通りです：
 
-- **`mdmclient`**: Communicates with MDM servers and triggers DEP check-ins on macOS versions before 10.13.4.
-- **`profiles`**: Manages Configuration Profiles, and triggers DEP check-ins on macOS versions 10.13.4 and later.
-- **`cloudconfigurationd`**: Manages DEP API communications and retrieves Device Enrollment profiles.
+- **`mdmclient`**：MDMサーバーと通信し、macOSバージョン10.13.4以前でのDEPチェックインをトリガーします。
+- **`profiles`**：構成プロファイルを管理し、macOSバージョン10.13.4以降でのDEPチェックインをトリガーします。
+- **`cloudconfigurationd`**：DEP API通信を管理し、デバイス登録プロファイルを取得します。
 
-DEP check-ins utilize the `CPFetchActivationRecord` and `CPGetActivationRecord` functions from the private Configuration Profiles framework to fetch the Activation Record, with `CPFetchActivationRecord` coordinating with `cloudconfigurationd` through XPC.
+DEPチェックインは、プライベート構成プロファイルフレームワークからの`CPFetchActivationRecord`および`CPGetActivationRecord`関数を利用してアクティベーションレコードを取得し、`CPFetchActivationRecord`がXPCを介して`cloudconfigurationd`と調整します。
 
-## Tesla Protocol and Absinthe Scheme Reverse Engineering
+## TeslaプロトコルとAbsintheスキームのリバースエンジニアリング
 
-The DEP check-in involves `cloudconfigurationd` sending an encrypted, signed JSON payload to _iprofiles.apple.com/macProfile_. The payload includes the device's serial number and the action "RequestProfileConfiguration". The encryption scheme used is referred to internally as "Absinthe". Unraveling this scheme is complex and involves numerous steps, which led to exploring alternative methods for inserting arbitrary serial numbers in the Activation Record request.
+DEPチェックインは、`cloudconfigurationd`が暗号化された署名付きJSONペイロードを_iprofiles.apple.com/macProfile_に送信することを含みます。ペイロードにはデバイスのシリアル番号と「RequestProfileConfiguration」というアクションが含まれています。使用される暗号化スキームは内部的に「Absinthe」と呼ばれています。このスキームを解明することは複雑で、多くのステップを含み、アクティベーションレコードリクエストに任意のシリアル番号を挿入するための代替手法を探ることにつながりました。
 
-## Proxying DEP Requests
+## DEPリクエストのプロキシ
 
-Attempts to intercept and modify DEP requests to _iprofiles.apple.com_ using tools like Charles Proxy were hindered by payload encryption and SSL/TLS security measures. However, enabling the `MCCloudConfigAcceptAnyHTTPSCertificate` configuration allows bypassing the server certificate validation, although the payload's encrypted nature still prevents modification of the serial number without the decryption key.
+Charles Proxyのようなツールを使用して_iprofiles.apple.com_へのDEPリクエストを傍受し、変更しようとする試みは、ペイロードの暗号化とSSL/TLSセキュリティ対策によって妨げられました。しかし、`MCCloudConfigAcceptAnyHTTPSCertificate`構成を有効にすることで、サーバー証明書の検証をバイパスすることが可能ですが、ペイロードの暗号化された性質により、復号化キーなしでシリアル番号を変更することは依然として不可能です。
 
-## Instrumenting System Binaries Interacting with DEP
+## DEPと相互作用するシステムバイナリの計測
 
-Instrumenting system binaries like `cloudconfigurationd` requires disabling System Integrity Protection (SIP) on macOS. With SIP disabled, tools like LLDB can be used to attach to system processes and potentially modify the serial number used in DEP API interactions. This method is preferable as it avoids the complexities of entitlements and code signing.
+`cloudconfigurationd`のようなシステムバイナリを計測するには、macOSでシステム整合性保護（SIP）を無効にする必要があります。SIPが無効になっている場合、LLDBのようなツールを使用してシステムプロセスにアタッチし、DEP APIとの相互作用で使用されるシリアル番号を変更する可能性があります。この方法は、権限やコード署名の複雑さを回避できるため、好ましいです。
 
-**Exploiting Binary Instrumentation:**
-Modifying the DEP request payload before JSON serialization in `cloudconfigurationd` proved effective. The process involved:
+**バイナリ計測の悪用：**
+`cloudconfigurationd`でJSONシリアル化の前にDEPリクエストペイロードを変更することが効果的であることが証明されました。このプロセスには以下が含まれます：
 
-1. Attaching LLDB to `cloudconfigurationd`.
-2. Locating the point where the system serial number is fetched.
-3. Injecting an arbitrary serial number into the memory before the payload is encrypted and sent.
+1. `cloudconfigurationd`にLLDBをアタッチします。
+2. システムシリアル番号が取得されるポイントを特定します。
+3. ペイロードが暗号化されて送信される前に、メモリに任意のシリアル番号を注入します。
 
-This method allowed for retrieving complete DEP profiles for arbitrary serial numbers, demonstrating a potential vulnerability.
+この方法により、任意のシリアル番号に対して完全なDEPプロファイルを取得できることが示され、潜在的な脆弱性が明らかになりました。
 
-### Automating Instrumentation with Python
+### Pythonによる計測の自動化
 
-The exploitation process was automated using Python with the LLDB API, making it feasible to programmatically inject arbitrary serial numbers and retrieve corresponding DEP profiles.
+悪用プロセスは、LLDB APIを使用してPythonで自動化され、任意のシリアル番号をプログラム的に注入し、対応するDEPプロファイルを取得することが可能になりました。
 
-### Potential Impacts of DEP and MDM Vulnerabilities
+### DEPとMDMの脆弱性の潜在的影響
 
-The research highlighted significant security concerns:
+この研究は、重要なセキュリティ上の懸念を浮き彫りにしました：
 
-1. **Information Disclosure**: By providing a DEP-registered serial number, sensitive organizational information contained in the DEP profile can be retrieved.
+1. **情報漏洩**：DEPに登録されたシリアル番号を提供することで、DEPプロファイルに含まれる機密の組織情報を取得できます。
 
 {{#include ../../../banners/hacktricks-training.md}}

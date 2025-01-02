@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## **MSSQL 列挙 / 発見**
 
 ### Python
 
-[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) ツールは impacket に基づいており、kerberos チケットを使用して認証し、リンクチェーンを通じて攻撃することも可能です。
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) ツールはimpacketに基づいており、kerberosチケットを使用して認証することも可能で、リンクチェーンを通じて攻撃を行うことができます。
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -205,13 +202,13 @@ metasploitを使用して、信頼できるリンクを簡単に確認できま�
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-注意してください、metasploitはMSSQLの`openquery()`関数のみを悪用しようとします（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
+メタスプリットはMSSQLの`openquery()`関数のみを悪用しようとすることに注意してください（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
 
 ### 手動 - Openquery()
 
 **Linux**からは、**sqsh**と**mssqlclient.py**を使用してMSSQLコンソールシェルを取得できます。
 
-**Windows**からも、リンクを見つけて**MSSQLクライアントのような**[**HeidiSQL**](https://www.heidisql.com)を使用してコマンドを手動で実行できます。
+**Windows**からも、リンクを見つけて手動でコマンドを実行することができる**MSSQLクライアントのような** [**HeidiSQL**](https://www.heidisql.com)を使用できます。
 
 _Windows認証を使用してログイン：_
 
@@ -231,7 +228,7 @@ EXEC sp_linkedservers;
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> ダブルクオートとシングルクオートがどこで使用されているか確認してください。その使い方は重要です。
+> ダブルクオートとシングルクオートがどこで使用されているか確認してください。それらをそのように使用することが重要です。
 
 ![](<../../images/image (643).png>)
 
@@ -257,12 +254,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQLローカルユーザー**は通常、**`SeImpersonatePrivilege`**と呼ばれる特別な種類の特権を持っています。これにより、アカウントは「認証後にクライアントを偽装する」ことができます。
 
-多くの著者が考案した戦略は、攻撃者が作成した悪意のあるまたは中間者サービスにSYSTEMサービスを認証させることです。この悪意のあるサービスは、SYSTEMサービスが認証を試みている間にそれを偽装することができます。
+多くの著者が考案した戦略は、攻撃者が作成した悪意のあるまたは中間者サービスにSYSTEMサービスを認証させることです。この悪意のあるサービスは、認証を試みている間にSYSTEMサービスを偽装することができます。
 
-[SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションがあります。
+[SweetPotato](https://github.com/CCob/SweetPotato)は、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションを持っています。
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

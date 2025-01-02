@@ -2,59 +2,55 @@
 
 ## Logstash
 
-Logstash is used to **gather, transform, and dispatch logs** through a system known as **pipelines**. These pipelines are made up of **input**, **filter**, and **output** stages. An interesting aspect arises when Logstash operates on a compromised machine.
+Logstashは**ログを収集、変換、配信する**ために使用され、**パイプライン**として知られるシステムを通じて行われます。これらのパイプラインは**入力**、**フィルター**、および**出力**ステージで構成されています。Logstashが侵害されたマシンで動作する際に興味深い側面が現れます。
 
-### Pipeline Configuration
+### パイプラインの設定
 
-Pipelines are configured in the file **/etc/logstash/pipelines.yml**, which lists the locations of the pipeline configurations:
-
+パイプラインは**/etc/logstash/pipelines.yml**ファイルで設定されており、パイプライン設定の場所がリストされています：
 ```yaml
 # Define your pipelines here. Multiple pipelines can be defined.
 # For details on multiple pipelines, refer to the documentation:
 # https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
 
 - pipeline.id: main
-  path.config: "/etc/logstash/conf.d/*.conf"
+path.config: "/etc/logstash/conf.d/*.conf"
 - pipeline.id: example
-  path.config: "/usr/share/logstash/pipeline/1*.conf"
-  pipeline.workers: 6
+path.config: "/usr/share/logstash/pipeline/1*.conf"
+pipeline.workers: 6
 ```
+このファイルは、パイプライン構成を含む **.conf** ファイルがどこにあるかを明らかにします。 **Elasticsearch output module** を使用する際、**pipelines** には **Elasticsearch credentials** が含まれることが一般的で、これは Logstash が Elasticsearch にデータを書き込む必要があるため、広範な権限を持つことがよくあります。構成パスのワイルドカードにより、Logstash は指定されたディレクトリ内のすべての一致するパイプラインを実行できます。
 
-This file reveals where the **.conf** files, containing pipeline configurations, are located. When employing an **Elasticsearch output module**, it's common for **pipelines** to include **Elasticsearch credentials**, which often possess extensive privileges due to Logstash's need to write data to Elasticsearch. Wildcards in configuration paths allow Logstash to execute all matching pipelines in the designated directory.
+### 書き込み可能なパイプラインによる特権昇格
 
-### Privilege Escalation via Writable Pipelines
+特権昇格を試みるには、まず Logstash サービスが実行されているユーザーを特定します。通常は **logstash** ユーザーです。次の **いずれか** の条件を満たしていることを確認してください：
 
-To attempt privilege escalation, first identify the user under which the Logstash service is running, typically the **logstash** user. Ensure you meet **one** of these criteria:
+- パイプラインの **.conf** ファイルに **書き込みアクセス** を持っている **または**
+- **/etc/logstash/pipelines.yml** ファイルがワイルドカードを使用しており、ターゲットフォルダーに書き込むことができる
 
-- Possess **write access** to a pipeline **.conf** file **or**
-- The **/etc/logstash/pipelines.yml** file uses a wildcard, and you can write to the target folder
+さらに、次の **いずれか** の条件を満たす必要があります：
 
-Additionally, **one** of these conditions must be fulfilled:
+- Logstash サービスを再起動する能力 **または**
+- **/etc/logstash/logstash.yml** ファイルに **config.reload.automatic: true** が設定されている
 
-- Capability to restart the Logstash service **or**
-- The **/etc/logstash/logstash.yml** file has **config.reload.automatic: true** set
-
-Given a wildcard in the configuration, creating a file that matches this wildcard allows for command execution. For instance:
-
+構成にワイルドカードがある場合、このワイルドカードに一致するファイルを作成することでコマンドを実行できます。例えば：
 ```bash
 input {
-  exec {
-    command => "whoami"
-    interval => 120
-  }
+exec {
+command => "whoami"
+interval => 120
+}
 }
 
 output {
-  file {
-    path => "/tmp/output.log"
-    codec => rubydebug
-  }
+file {
+path => "/tmp/output.log"
+codec => rubydebug
+}
 }
 ```
+ここで、**interval**は実行頻度を秒単位で決定します。与えられた例では、**whoami**コマンドが120秒ごとに実行され、その出力は**/tmp/output.log**に送られます。
 
-Here, **interval** determines the execution frequency in seconds. In the given example, the **whoami** command runs every 120 seconds, with its output directed to **/tmp/output.log**.
-
-With **config.reload.automatic: true** in **/etc/logstash/logstash.yml**, Logstash will automatically detect and apply new or modified pipeline configurations without needing a restart. If there's no wildcard, modifications can still be made to existing configurations, but caution is advised to avoid disruptions.
+**/etc/logstash/logstash.yml**に**config.reload.automatic: true**が設定されている場合、Logstashは再起動することなく新しいまたは変更されたパイプライン構成を自動的に検出して適用します。ワイルドカードがない場合でも、既存の構成に対して変更を加えることは可能ですが、混乱を避けるために注意が必要です。
 
 ## References
 

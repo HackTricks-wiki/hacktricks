@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは**ハッカーによって、ハッカーのために作られたプレミアムバグバウンティプラットフォーム**です！今日、[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加し、最大**$100,000**のバウンティを獲得し始めましょう！
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
-**Wmic**は**スタートアップ**でプログラムを実行するために使用できます。スタートアップで実行されるようにプログラムされたバイナリを確認するには、次のコマンドを使用します:
+**Wmic**は**スタートアップ**でプログラムを実行するために使用できます。スタートアップで実行されるようにプログラムされているバイナリを確認するには、次のコマンドを使用します:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -42,7 +38,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## レジストリ
 
 > [!NOTE]
-> [ここからの注意](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** レジストリエントリは、64ビットのWindowsバージョンを実行していることを示します。オペレーティングシステムは、このキーを使用して、64ビットのWindowsバージョンで実行される32ビットアプリケーションのためにHKEY_LOCAL_MACHINE\SOFTWAREの別のビューを表示します。
+> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** レジストリエントリは、64ビットのWindowsバージョンを実行していることを示します。オペレーティングシステムは、このキーを使用して、64ビットWindowsバージョンで実行される32ビットアプリケーションのためにHKEY_LOCAL_MACHINE\SOFTWAREの別のビューを表示します。
 
 ### 実行
 
@@ -152,7 +148,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 **スタートアップ**フォルダーに配置されたショートカットは、ユーザーのログオンまたはシステムの再起動時にサービスやアプリケーションを自動的に起動します。**スタートアップ**フォルダーの場所は、**ローカルマシン**と**現在のユーザー**のスコープの両方でレジストリに定義されています。これは、これらの指定された**スタートアップ**の場所に追加されたショートカットが、ログオンまたは再起動プロセスに続いてリンクされたサービスやプログラムが起動することを保証することを意味し、プログラムを自動的に実行するための簡単な方法となります。
 
 > [!NOTE]
-> **HKLM**の下の任意の\[User] Shell Folderを上書きできる場合、あなたが制御するフォルダーを指すように設定でき、ユーザーがシステムにログインするたびに実行されるバックドアを配置することができ、特権を昇格させることができます。
+> **HKLM**の下の任意の\[User] Shell Folderを上書きできる場合、あなたが制御するフォルダーを指すように設定でき、ユーザーがシステムにログインするたびに実行されるバックドアを配置することができます。
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -194,7 +190,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### セーフモードコマンドプロンプトの変更
 
-Windowsレジストリの`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`には、デフォルトで`cmd.exe`に設定された**`AlternateShell`**値があります。これは、起動時に「コマンドプロンプト付きセーフモード」を選択すると（F8を押すことによって）、`cmd.exe`が使用されることを意味します。しかし、F8を押して手動で選択することなく、このモードで自動的に起動するようにコンピュータを設定することも可能です。
+Windowsレジストリの`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`には、デフォルトで`cmd.exe`に設定された**`AlternateShell`**値があります。これは、起動時に「コマンドプロンプト付きセーフモード」を選択すると（F8を押すことによって）、`cmd.exe`が使用されることを意味します。しかし、F8を押して手動で選択することなく、このモードで自動的に起動するようにコンピュータを設定することが可能です。
 
 「コマンドプロンプト付きセーフモード」で自動的に起動するためのブートオプションを作成する手順：
 
@@ -205,7 +201,7 @@ Windowsレジストリの`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`には�
 5. 元のファイル属性を再適用します：`attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1:** **AlternateShell**レジストリキーを変更することで、カスタムコマンドシェルの設定が可能になり、不正アクセスの可能性があります。
-- **Exploit 2 (PATH書き込み権限):** システム**PATH**変数の任意の部分に書き込み権限がある場合、特に`C:\Windows\system32`の前にある場合、カスタム`cmd.exe`を実行でき、セーフモードでシステムが起動した場合はバックドアになる可能性があります。
+- **Exploit 2 (PATH書き込み権限):** システムの**PATH**変数の任意の部分に書き込み権限があると、特に`C:\Windows\system32`の前にある場合、カスタム`cmd.exe`を実行でき、セーフモードでシステムが起動した場合はバックドアになる可能性があります。
 - **Exploit 3 (PATHとboot.ini書き込み権限):** `boot.ini`への書き込みアクセスにより、自動的なセーフモード起動が可能になり、次回の再起動時に不正アクセスを容易にします。
 
 現在の**AlternateShell**設定を確認するには、これらのコマンドを使用します：
@@ -231,7 +227,7 @@ Active Setupは、以下のレジストリキーを通じて管理されます�
 - `1`はコマンドが各ユーザーごとに一度実行されることを意味し、`IsInstalled`値が欠如している場合のデフォルトの動作です。
 - **StubPath:** Active Setupによって実行されるコマンドを定義します。`notepad`を起動するなど、任意の有効なコマンドラインである可能性があります。
 
-**セキュリティの洞察：**
+**セキュリティインサイト：**
 
 - **`IsInstalled`**が`"1"`に設定され、特定の**`StubPath`**を持つキーを変更または書き込むことは、権限昇格のための不正なコマンド実行につながる可能性があります。
 - いかなる**`StubPath`**値で参照されるバイナリファイルを変更することも、十分な権限があれば権限昇格を達成する可能性があります。
@@ -297,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-注意すべきは、autorunsを見つけることができるすべてのサイトは**すでに**[**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)によって検索されています。しかし、**自動実行される**ファイルの**より包括的なリスト**を得るには、Sysinternalsの[autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用することができます:
+autorunsを見つけることができるすべてのサイトは、**すでに**[**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)によって検索されています。しかし、**自動実行される**ファイルの**より包括的なリスト**を得るには、Sysinternalsの[autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用することができます:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**バグバウンティのヒント**: **Intigritiにサインアップ**してください。これは**ハッカーによって、ハッカーのために作られたプレミアムバグバウンティプラットフォーム**です！今日、[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**のバウンティを獲得し始めましょう！
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

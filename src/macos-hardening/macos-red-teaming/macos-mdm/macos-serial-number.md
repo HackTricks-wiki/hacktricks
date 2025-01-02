@@ -1,40 +1,40 @@
-# macOS Serial Number
+# macOS シリアル番号
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-Apple devices post-2010 have serial numbers consisting of **12 alphanumeric characters**, each segment conveying specific information:
+2010年以降のAppleデバイスのシリアル番号は、**12の英数字**で構成されており、各セグメントは特定の情報を伝えます：
 
-- **First 3 Characters**: Indicate the **manufacturing location**.
-- **Characters 4 & 5**: Denote the **year and week of manufacture**.
-- **Characters 6 to 8**: Serve as a **unique identifier** for each device.
-- **Last 4 Characters**: Specify the **model number**.
+- **最初の3文字**: **製造場所**を示します。
+- **4文字目と5文字目**: **製造年と週**を示します。
+- **6文字目から8文字目**: 各デバイスのための**ユニーク識別子**として機能します。
+- **最後の4文字**: **モデル番号**を指定します。
 
-For instance, the serial number **C02L13ECF8J2** follows this structure.
+例えば、シリアル番号**C02L13ECF8J2**はこの構造に従っています。
 
-### **Manufacturing Locations (First 3 Characters)**
+### **製造場所（最初の3文字）**
 
-Certain codes represent specific factories:
+特定のコードは特定の工場を表します：
 
-- **FC, F, XA/XB/QP/G8**: Various locations in the USA.
-- **RN**: Mexico.
-- **CK**: Cork, Ireland.
-- **VM**: Foxconn, Czech Republic.
-- **SG/E**: Singapore.
-- **MB**: Malaysia.
-- **PT/CY**: Korea.
-- **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Different locations in China.
-- **C0, C3, C7**: Specific cities in China.
-- **RM**: Refurbished devices.
+- **FC, F, XA/XB/QP/G8**: アメリカのさまざまな場所。
+- **RN**: メキシコ。
+- **CK**: アイルランドのコーク。
+- **VM**: チェコ共和国のフォックスコン。
+- **SG/E**: シンガポール。
+- **MB**: マレーシア。
+- **PT/CY**: 韓国。
+- **EE/QT/UV**: 台湾。
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: 中国のさまざまな場所。
+- **C0, C3, C7**: 中国の特定の都市。
+- **RM**: 再生品デバイス。
 
-### **Year of Manufacturing (4th Character)**
+### **製造年（4文字目）**
 
-This character varies from 'C' (representing the first half of 2010) to 'Z' (second half of 2019), with different letters indicating different half-year periods.
+この文字は、'C'（2010年の前半を表す）から'Z'（2019年の後半）まで変化し、異なる文字が異なる半年を示します。
 
-### **Week of Manufacturing (5th Character)**
+### **製造週（5文字目）**
 
-Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
+数字1-9は週1-9に対応します。文字C-Y（母音と'S'を除く）は週10-27を表します。年の後半では、この数字に26が加算されます。
 
 {{#include ../../../banners/hacktricks-training.md}}

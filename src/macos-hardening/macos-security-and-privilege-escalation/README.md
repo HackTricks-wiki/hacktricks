@@ -1,33 +1,18 @@
-# macOS Security & Privilege Escalation
+# macOSのセキュリティと特権昇格
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
+## 基本的なMacOS
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+macOSに不慣れな場合は、macOSの基本を学び始めるべきです：
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
-
-## Basic MacOS
-
-If you are not familiar with macOS, you should start learning the basics of macOS:
-
-- Special macOS **files & permissions:**
+- 特殊なmacOS **ファイルと権限：**
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Common macOS **users**
+- 一般的なmacOS **ユーザー**
 
 {{#ref}}
 macos-users.md
@@ -39,112 +24,97 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- The **architecture** of the k**ernel**
+- k**ernel**の**アーキテクチャ**
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Common macOS n**etwork services & protocols**
+- 一般的なmacOS n**etworkサービスとプロトコル**
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
-- **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-  - To download a `tar.gz` change a URL such as [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) to [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- **オープンソース** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
+- `tar.gz`をダウンロードするには、[https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/)のようなURLを[https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)に変更します。
 
 ### MacOS MDM
 
-In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
+企業では、**macOS**システムはMDMで**管理される**可能性が非常に高いです。したがって、攻撃者の視点からは、**それがどのように機能するか**を知ることが興味深いです：
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - Inspecting, Debugging and Fuzzing
+### MacOS - 検査、デバッグ、ファジング
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Security Protections
+## MacOSのセキュリティ保護
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Attack Surface
+## 攻撃面
 
-### File Permissions
+### ファイル権限
 
-If a **process running as root writes** a file that can be controlled by a user, the user could abuse this to **escalate privileges**.\
-This could occur in the following situations:
+**rootとして実行されているプロセスが**ユーザーによって制御可能なファイルを書き込むと、ユーザーはこれを悪用して**特権を昇格**させることができます。\
+これは以下の状況で発生する可能性があります：
 
-- File used was already created by a user (owned by the user)
-- File used is writable by the user because of a group
-- File used is inside a directory owned by the user (the user could create the file)
-- File used is inside a directory owned by root but user has write access over it because of a group (the user could create the file)
+- 使用されたファイルがすでにユーザーによって作成されている（ユーザーが所有）
+- 使用されたファイルがグループのためにユーザーによって書き込み可能
+- 使用されたファイルがユーザーが所有するディレクトリ内にある（ユーザーがファイルを作成できる）
+- 使用されたファイルがrootが所有するディレクトリ内にあるが、ユーザーがグループのために書き込みアクセスを持っている（ユーザーがファイルを作成できる）
 
-Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
+**rootによって使用される**ファイルを**作成する**ことができると、ユーザーはその**内容を利用する**ことができたり、別の場所を指す**シンボリックリンク/ハードリンク**を作成することができます。
 
-For this kind of vulnerabilities don't forget to **check vulnerable `.pkg` installers**:
+この種の脆弱性については、**脆弱な`.pkg`インストーラーを確認することを忘れないでください**：
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### File Extension & URL scheme app handlers
+### ファイル拡張子とURLスキームアプリハンドラー
 
-Weird apps registered by file extensions could be abused and different applications can be register to open specific protocols
+ファイル拡張子によって登録された奇妙なアプリは悪用される可能性があり、異なるアプリケーションが特定のプロトコルを開くために登録されることがあります。
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP Privilege Escalation
+## macOS TCC / SIP特権昇格
 
-In macOS **applications and binaries can have permissions** to access folders or settings that make them more privileged than others.
+macOSでは、**アプリケーションとバイナリがフォルダーや設定にアクセスする権限を持つ**ことがあり、これにより他のものよりも特権が高くなります。
 
-Therefore, an attacker that wants to successfully compromise a macOS machine will need to **escalate its TCC privileges** (or even **bypass SIP**, depending on his needs).
+したがって、macOSマシンを成功裏に侵害したい攻撃者は、**TCC特権を昇格させる**必要があります（または、ニーズに応じて**SIPをバイパスする**必要があります）。
 
-These privileges are usually given in the form of **entitlements** the application is signed with, or the application might requested some accesses and after the **user approving them** they can be found in the **TCC databases**. Another way a process can obtain these privileges is by being a **child of a process** with those **privileges** as they are usually **inherited**.
+これらの特権は通常、アプリケーションが署名されている**権利**の形で与えられるか、アプリケーションがいくつかのアクセスを要求し、**ユーザーがそれらを承認した後**に**TCCデータベース**に見つけることができます。プロセスがこれらの特権を取得する別の方法は、**その特権を持つプロセスの子プロセス**であることです。これらは通常**継承されます**。
 
-Follow these links to find different was to [**escalate privileges in TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), to [**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) and how in the past [**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses).
+これらのリンクをたどって、[**TCCで特権を昇格させる**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses)、[**TCCをバイパスする**](macos-security-protections/macos-tcc/macos-tcc-bypasses/)方法や、過去に[**SIPがバイパスされた**](macos-security-protections/macos-sip.md#sip-bypasses)方法を見つけてください。
 
-## macOS Traditional Privilege Escalation
+## macOSの伝統的な特権昇格
 
-Of course from a red teams perspective you should be also interested in escalating to root. Check the following post for some hints:
+もちろん、レッドチームの視点からは、rootに昇格することにも興味があるはずです。以下の投稿をチェックして、いくつかのヒントを得てください：
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## macOS Compliance
+## macOSコンプライアンス
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## References
+## 参考文献
 
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [**OS Xインシデントレスポンス：スクリプティングと分析**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 - [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 - [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
 
 {{#include ../../banners/hacktricks-training.md}}

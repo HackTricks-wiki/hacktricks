@@ -4,36 +4,36 @@
 
 ## XNU Kernel
 
-The **core of macOS is XNU**, which stands for "X is Not Unix". This kernel is fundamentally composed of the **Mach microkerne**l (to be discussed later), **and** elements from Berkeley Software Distribution (**BSD**). XNU also provides a platform for **kernel drivers via a system called the I/O Kit**. The XNU kernel is part of the Darwin open source project, which means **its source code is freely accessible**.
+**macOSのコアはXNUです**。これは「X is Not Unix」の略です。このカーネルは基本的に**Machマイクロカーネル**（後で説明します）と**Berkeley Software Distribution（BSD）**の要素で構成されています。XNUはまた、**I/O Kitというシステムを介してカーネルドライバのプラットフォームを提供します**。XNUカーネルはDarwinオープンソースプロジェクトの一部であり、**そのソースコードは自由にアクセス可能です**。
 
-From a perspective of a security researcher or a Unix developer, **macOS** can feel quite **similar** to a **FreeBSD** system with an elegant GUI and a host of custom applications. Most applications developed for BSD will compile and run on macOS without needing modifications, as the command-line tools familiar to Unix users are all present in macOS. However, because the XNU kernel incorporates Mach, there are some significant differences between a traditional Unix-like system and macOS, and these differences might cause potential issues or provide unique advantages.
+セキュリティ研究者やUnix開発者の視点から見ると、**macOS**は**FreeBSD**システムに非常に**似ている**と感じるかもしれません。洗練されたGUIと多数のカスタムアプリケーションがあります。BSD向けに開発されたほとんどのアプリケーションは、macOS上で修正なしにコンパイルおよび実行できます。Unixユーザーに馴染みのあるコマンドラインツールはすべてmacOSに存在します。しかし、XNUカーネルがMachを取り入れているため、従来のUnixライクなシステムとmacOSの間にはいくつかの重要な違いがあり、これらの違いが潜在的な問題を引き起こしたり、独自の利点を提供したりする可能性があります。
 
-Open source version of XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
+XNUのオープンソース版: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
-Mach is a **microkernel** designed to be **UNIX-compatible**. One of its key design principles was to **minimize** the amount of **code** running in the **kernel** space and instead allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level tasks**.
+Machは**UNIX互換**に設計された**マイクロカーネル**です。その主要な設計原則の1つは、**カーネル**空間で実行される**コード**の量を**最小限に抑え**、ファイルシステム、ネットワーキング、I/Oなどの多くの典型的なカーネル機能を**ユーザーレベルのタスクとして実行できるようにすること**でした。
 
-In XNU, Mach is **responsible for many of the critical low-level operations** a kernel typically handles, such as processor scheduling, multitasking, and virtual memory management.
+XNUでは、Machはカーネルが通常処理する多くの重要な低レベル操作、例えばプロセッサスケジューリング、マルチタスク、および仮想メモリ管理を**担当しています**。
 
 ### BSD
 
-The XNU **kernel** also **incorporates** a significant amount of code derived from the **FreeBSD** project. This code **runs as part of the kernel along with Mach**, in the same address space. However, the FreeBSD code within XNU may differ substantially from the original FreeBSD code because modifications were required to ensure its compatibility with Mach. FreeBSD contributes to many kernel operations including:
+XNUの**カーネル**は、**FreeBSD**プロジェクトから派生したかなりの量のコードも**取り入れています**。このコードは**Machとともにカーネルの一部として同じアドレス空間で実行されます**。ただし、XNU内のFreeBSDコードは、Machとの互換性を確保するために修正が必要だったため、元のFreeBSDコードとは大きく異なる場合があります。FreeBSDは以下を含む多くのカーネル操作に寄与しています：
 
-- Process management
-- Signal handling
-- Basic security mechanisms, including user and group management
-- System call infrastructure
-- TCP/IP stack and sockets
-- Firewall and packet filtering
+- プロセス管理
+- シグナル処理
+- ユーザーおよびグループ管理を含む基本的なセキュリティメカニズム
+- システムコールインフラ
+- TCP/IPスタックとソケット
+- ファイアウォールとパケットフィルタリング
 
-Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
+BSDとMachの相互作用を理解することは、異なる概念的枠組みのために複雑です。たとえば、BSDはプロセスを基本的な実行単位として使用しますが、Machはスレッドに基づいて動作します。この不一致は、**各BSDプロセスを1つのMachスレッドを含むMachタスクに関連付けることによってXNUで調整されます**。BSDのfork()システムコールが使用されると、カーネル内のBSDコードはMach関数を使用してタスクとスレッド構造を作成します。
 
-Moreover, **Mach and BSD each maintain different security models**: **Mach's** security model is based on **port rights**, whereas BSD's security model operates based on **process ownership**. Disparities between these two models have occasionally resulted in local privilege-escalation vulnerabilities. Apart from typical system calls, there are also **Mach traps that allow user-space programs to interact with the kernel**. These different elements together form the multifaceted, hybrid architecture of the macOS kernel.
+さらに、**MachとBSDはそれぞれ異なるセキュリティモデルを維持しています**：**Machの**セキュリティモデルは**ポート権**に基づいていますが、BSDのセキュリティモデルは**プロセス所有権**に基づいています。これら2つのモデルの不一致は、時折ローカル特権昇格の脆弱性を引き起こすことがあります。典型的なシステムコールに加えて、**ユーザースペースプログラムがカーネルと相互作用することを可能にするMachトラップもあります**。これらの異なる要素が組み合わさって、macOSカーネルの多面的でハイブリッドなアーキテクチャを形成しています。
 
 ### I/O Kit - Drivers
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+I/O Kitは、XNUカーネル内のオープンソースのオブジェクト指向**デバイスドライバフレームワーク**であり、**動的にロードされるデバイスドライバ**を処理します。これにより、さまざまなハードウェアをサポートするために、カーネルにモジュラーコードを動的に追加できます。
 
 {{#ref}}
 macos-iokit.md
@@ -47,9 +47,9 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS is **super restrictive to load Kernel Extensions** (.kext) because of the high privileges that code will run with. Actually, by default is virtually impossible (unless a bypass is found).
+macOSは**カーネル拡張**（.kext）をロードすることに非常に制限があります。これは、そのコードが高い特権で実行されるためです。実際、デフォルトではバイパスが見つからない限り、ほぼ不可能です。
 
-In the following page you can also see how to recover the `.kext` that macOS loads inside its **kernelcache**:
+次のページでは、macOSがその**kernelcache**内でロードする`.kext`を回復する方法も見ることができます：
 
 {{#ref}}
 macos-kernel-extensions.md
@@ -57,7 +57,7 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-Instead of using Kernel Extensions macOS created the System Extensions, which offers in user level APIs to interact with the kernel. This way, developers can avoid to use kernel extensions.
+カーネル拡張の代わりに、macOSはシステム拡張を作成しました。これにより、カーネルと相互作用するためのユーザーレベルのAPIが提供されます。この方法で、開発者はカーネル拡張を使用することを避けることができます。
 
 {{#ref}}
 macos-system-extensions.md

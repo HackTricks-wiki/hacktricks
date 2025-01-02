@@ -2,13 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフロー**を簡単に構築し、**自動化**します。\
-今すぐアクセスを取得：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 ## 管理権限を持つよく知られたグループ
 
 - **Administrators**
@@ -27,7 +20,7 @@ Get-NetGroupMember -Identity "Account Operators" -Recurse
 
 ## AdminSDHolder グループ
 
-**AdminSDHolder** グループのアクセス制御リスト (ACL) は重要であり、Active Directory 内のすべての「保護されたグループ」、特に高特権グループの権限を設定します。このメカニズムは、無許可の変更を防ぐことによって、これらのグループのセキュリティを確保します。
+**AdminSDHolder** グループのアクセス制御リスト (ACL) は、Active Directory 内のすべての「保護されたグループ」、特に高特権グループの権限を設定するため、重要です。このメカニズムは、無許可の変更を防ぐことによって、これらのグループのセキュリティを確保します。
 
 攻撃者は、**AdminSDHolder** グループの ACL を変更し、標準ユーザーに完全な権限を付与することでこれを悪用する可能性があります。これにより、そのユーザーはすべての保護されたグループに対して完全な制御を持つことになります。このユーザーの権限が変更または削除された場合、システムの設計により、1時間以内に自動的に復元されます。
 
@@ -71,7 +64,7 @@ Get-NetGroupMember -Identity "Backup Operators" -Recurse
 
 これらの特権をローカルで活用するために、以下の手順が使用されます：
 
-1. 必要なライブラリをインポートする：
+1. 必要なライブラリをインポートします：
 ```bash
 Import-Module .\SeBackupPrivilegeUtils.dll
 Import-Module .\SeBackupPrivilegeCmdLets.dll
@@ -174,11 +167,11 @@ sc.exe \\dc01 start dns
 
 #### Mimilib.dll
 
-特定のコマンドやリバースシェルを実行するように変更することで、mimilib.dllを使用してコマンドを実行することも可能です。 [この投稿を確認してください](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) さらなる情報のために。
+特定のコマンドやリバースシェルを実行するように変更することで、mimilib.dllを使用してコマンドを実行することも可能です。[この投稿を確認してください](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) さらなる情報のために。
 
 ### WPADレコードによるMitM
 
-DnsAdminsは、グローバルクエリブロックリストを無効にした後にWPADレコードを作成することで、DNSレコードを操作してMan-in-the-Middle (MitM) 攻撃を実行できます。 ResponderやInveighのようなツールを使用して、スプーフィングやネットワークトラフィックのキャプチャが可能です。
+DnsAdminsは、グローバルクエリブロックリストを無効にした後にWPADレコードを作成することで、DNSレコードを操作してMan-in-the-Middle (MitM) 攻撃を実行できます。ResponderやInveighのようなツールを使用して、スプーフィングやネットワークトラフィックのキャプチャが可能です。
 
 ### イベントログリーダー
 メンバーはイベントログにアクセスでき、プレーンテキストのパスワードやコマンド実行の詳細など、機密情報を見つける可能性があります。
@@ -189,7 +182,7 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Exchange Windows Permissions
 
-このグループはドメインオブジェクトのDACLを変更でき、DCSync権限を付与する可能性があります。このグループを利用した特権昇格の手法は、Exchange-AD-Privesc GitHubリポジトリに詳述されています。
+このグループは、ドメインオブジェクトのDACLを変更でき、DCSync権限を付与する可能性があります。このグループを利用した特権昇格の手法は、Exchange-AD-Privesc GitHubリポジトリに詳述されています。
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
@@ -200,7 +193,7 @@ Hyper-V 管理者は Hyper-V への完全なアクセス権を持ち、これを
 
 ### 攻撃の例
 
-Firefox の Mozilla Maintenance Service は、Hyper-V 管理者によって SYSTEM としてコマンドを実行するために悪用される可能性があります。これには、保護された SYSTEM ファイルへのハードリンクを作成し、それを悪意のある実行可能ファイルに置き換えることが含まれます：
+Firefox の Mozilla Maintenance Service は、Hyper-V 管理者によって SYSTEM としてコマンドを実行するために悪用される可能性があります。これには、保護された SYSTEM ファイルへのハードリンクを作成し、それを悪意のある実行可能ファイルに置き換えることが含まれます。
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -210,13 +203,13 @@ sc.exe start MozillaMaintenance
 
 ## 組織管理
 
-**Microsoft Exchange**が展開されている環境では、**Organization Management**と呼ばれる特別なグループが重要な権限を持っています。このグループは**すべてのドメインユーザーのメールボックスにアクセスする**特権を持ち、**'Microsoft Exchange Security Groups'**組織単位（OU）に対して**完全な制御**を維持しています。この制御には、特権昇格に悪用可能な**`Exchange Windows Permissions`**グループが含まれます。
+**Microsoft Exchange** が展開されている環境では、**Organization Management** と呼ばれる特別なグループが重要な権限を持っています。このグループは **すべてのドメインユーザーのメールボックスにアクセスする** 特権を持ち、**'Microsoft Exchange Security Groups'** 組織単位 (OU) に対して **完全な制御** を維持しています。この制御には、特権昇格に悪用可能な **`Exchange Windows Permissions`** グループが含まれます。
 
 ### 特権の悪用とコマンド
 
 #### プリントオペレーター
 
-**Print Operators**グループのメンバーは、**`SeLoadDriverPrivilege`**を含むいくつかの特権を付与されており、これにより**ドメインコントローラーにローカルでログオン**し、シャットダウンし、プリンターを管理することができます。これらの特権を悪用するには、特に**`SeLoadDriverPrivilege`**が昇格されていないコンテキストで表示されない場合、ユーザーアカウント制御（UAC）をバイパスする必要があります。
+**Print Operators** グループのメンバーは、**`SeLoadDriverPrivilege`** を含むいくつかの特権を付与されており、これにより **ドメインコントローラーにローカルでログオン** し、シャットダウンし、プリンターを管理することができます。これらの特権を悪用するには、特に **`SeLoadDriverPrivilege`** が昇格されていないコンテキストで表示されない場合、ユーザーアカウント制御 (UAC) をバイパスする必要があります。
 
 このグループのメンバーをリストするには、次のPowerShellコマンドが使用されます:
 ```powershell
@@ -235,7 +228,7 @@ RDPの悪用に関するさらなる洞察は、専用のペンテストリソ�
 
 #### リモート管理ユーザー
 
-メンバーは**Windows Remote Management (WinRM)**を介してPCにアクセスできます。これらのメンバーの列挙は、次の方法で達成されます:
+メンバーは**Windows Remote Management (WinRM)**を介してPCにアクセスできます。これらのメンバーの列挙は、次の方法で達成されます：
 ```powershell
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
@@ -244,11 +237,11 @@ Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Us
 
 #### サーバーオペレーター
 
-このグループは、ドメインコントローラー上でさまざまな構成を実行する権限を持っており、バックアップおよび復元の権限、システム時間の変更、システムのシャットダウンが含まれます。メンバーを列挙するために提供されているコマンドは次のとおりです:
+このグループは、ドメインコントローラー上でさまざまな構成を実行する権限を持っており、バックアップおよび復元の権限、システム時間の変更、システムのシャットダウンが含まれます。メンバーを列挙するためのコマンドは次のとおりです:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
-## References <a href="#references" id="references"></a>
+## 参考文献 <a href="#references" id="references"></a>
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築し、**自動化**します。\
-今すぐアクセスを取得：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

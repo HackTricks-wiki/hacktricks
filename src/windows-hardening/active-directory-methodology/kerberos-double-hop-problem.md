@@ -2,33 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Introduction
 
-Kerberosの「ダブルホップ」問題は、攻撃者が**2つのホップ間でKerberos認証を使用しようとする**ときに発生します。例えば、**PowerShell**/**WinRM**を使用する場合です。
+Kerberosの「ダブルホップ」問題は、攻撃者が**2つのホップ**にわたって**Kerberos認証**を使用しようとする際に発生します。例えば、**PowerShell**/**WinRM**を使用する場合です。
 
-**Kerberos**を通じて**認証**が行われると、**資格情報**は**メモリ**にキャッシュされません。したがって、mimikatzを実行しても、ユーザーの資格情報はマシン内に見つかりません。たとえそのユーザーがプロセスを実行していてもです。
+**Kerberos**を通じて**認証**が行われると、**資格情報**は**メモリ**にキャッシュされません。したがって、mimikatzを実行しても、ユーザーがプロセスを実行している場合でも、そのマシンにユーザーの**資格情報**は見つかりません。
 
 これは、Kerberosで接続する際の手順が以下の通りだからです：
 
 1. User1が資格情報を提供し、**ドメインコントローラー**がUser1にKerberosの**TGT**を返します。
-2. User1が**TGT**を使用して**サービスチケット**を要求し、**Server1**に接続します。
+2. User1が**TGT**を使用して**Server1**に接続するための**サービスチケット**を要求します。
 3. User1が**Server1**に接続し、**サービスチケット**を提供します。
-4. **Server1**はUser1の**資格情報**やUser1の**TGT**をキャッシュしていません。したがって、Server1からUser1が2番目のサーバーにログインしようとすると、**認証できません**。
+4. **Server1**はUser1の**資格情報**やUser1の**TGT**をキャッシュしていません。したがって、User1がServer1から2番目のサーバーにログインしようとすると、**認証できません**。
 
 ### Unconstrained Delegation
 
-PCで**制約のない委任**が有効になっている場合、これは発生しません。なぜなら、**サーバー**はアクセスする各ユーザーの**TGT**を取得するからです。さらに、制約のない委任が使用される場合、そこから**ドメインコントローラーを侵害する**可能性があります。\
+PCで**制約のない委任**が有効になっている場合、これは発生しません。なぜなら、**サーバー**はアクセスする各ユーザーの**TGT**を取得するからです。さらに、制約のない委任が使用される場合、**ドメインコントローラー**を**侵害**する可能性があります。\
 [**制約のない委任ページの詳細**](unconstrained-delegation.md)。
 
 ### CredSSP
 
 この問題を回避するもう一つの方法は、[**特に安全でない**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) **Credential Security Support Provider**です。Microsoftによると：
 
-> CredSSP認証は、ローカルコンピュータからリモートコンピュータにユーザーの資格情報を委任します。この実践は、リモート操作のセキュリティリスクを高めます。リモートコンピュータが侵害された場合、資格情報が渡されると、その資格情報を使用してネットワークセッションを制御できます。
+> CredSSP認証は、ローカルコンピュータからリモートコンピュータにユーザーの資格情報を委任します。この手法は、リモート操作のセキュリティリスクを高めます。リモートコンピュータが侵害された場合、資格情報が渡されると、その資格情報を使用してネットワークセッションを制御できます。
 
 セキュリティ上の懸念から、**CredSSP**は本番システム、敏感なネットワーク、および同様の環境では無効にすることを強く推奨します。**CredSSP**が有効かどうかを確認するには、`Get-WSManCredSSP`コマンドを実行できます。このコマンドは**CredSSPの状態を確認**することができ、**WinRM**が有効であればリモートで実行することも可能です。
 ```powershell
@@ -51,7 +47,7 @@ Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 
 ### PSSession構成の登録
 
-ダブルホップ問題を回避するための解決策は、`Enter-PSSession`とともに`Register-PSSessionConfiguration`を使用することです。この方法は`evil-winrm`とは異なるアプローチを必要とし、ダブルホップの制限を受けないセッションを可能にします。
+ダブルホップの問題を回避するための解決策は、`Enter-PSSession`とともに`Register-PSSessionConfiguration`を使用することです。この方法は`evil-winrm`とは異なるアプローチを必要とし、ダブルホップの制限を受けないセッションを可能にします。
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
@@ -79,9 +75,9 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 
 1. 最新のOpenSSHリリースzipをダウンロードしてターゲットサーバーに移動します。
 2. 解凍して`Install-sshd.ps1`スクリプトを実行します。
-3. ポート22を開くためのファイアウォールルールを追加し、SSHサービスが実行されていることを確認します。
+3. ポート22を開くためのファイアウォールルールを追加し、SSHサービスが実行中であることを確認します。
 
-`Connection reset`エラーを解決するには、OpenSSHディレクトリに対してすべてのユーザーが読み取りおよび実行アクセスを許可するように権限を更新する必要があるかもしれません。
+`Connection reset`エラーを解決するには、OpenSSHディレクトリに対してすべてのユーザーが読み取りおよび実行アクセスを持つように権限を更新する必要があるかもしれません。
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
@@ -92,8 +88,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

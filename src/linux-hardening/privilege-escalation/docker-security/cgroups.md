@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-**Linux Control Groups**, or **cgroups**, are a feature of the Linux kernel that allows the allocation, limitation, and prioritization of system resources like CPU, memory, and disk I/O among process groups. They offer a mechanism for **managing and isolating the resource usage** of process collections, beneficial for purposes such as resource limitation, workload isolation, and resource prioritization among different process groups.
+**Linux Control Groups**、または**cgroups**は、プロセスグループ間でCPU、メモリ、ディスクI/Oなどのシステムリソースの割り当て、制限、優先順位付けを可能にするLinuxカーネルの機能です。これは、リソース制限、ワークロードの分離、異なるプロセスグループ間のリソース優先順位付けなどの目的に役立つ、プロセスコレクションのリソース使用を**管理および分離する**ためのメカニズムを提供します。
 
-There are **two versions of cgroups**: version 1 and version 2. Both can be used concurrently on a system. The primary distinction is that **cgroups version 2** introduces a **hierarchical, tree-like structure**, enabling more nuanced and detailed resource distribution among process groups. Additionally, version 2 brings various enhancements, including:
+**cgroupsには2つのバージョン**があります：バージョン1とバージョン2。両方はシステム上で同時に使用できます。主な違いは、**cgroupsバージョン2**が**階層的なツリー状の構造**を導入し、プロセスグループ間でのリソース配分をより微妙かつ詳細に行えるようにすることです。さらに、バージョン2は以下のようなさまざまな改善をもたらします：
 
-In addition to the new hierarchical organization, cgroups version 2 also introduced **several other changes and improvements**, such as support for **new resource controllers**, better support for legacy applications, and improved performance.
+新しい階層的な組織に加えて、cgroupsバージョン2は**新しいリソースコントローラー**のサポート、レガシーアプリケーションへのより良いサポート、パフォーマンスの向上など、**いくつかの他の変更と改善**も導入しました。
 
-Overall, cgroups **version 2 offers more features and better performance** than version 1, but the latter may still be used in certain scenarios where compatibility with older systems is a concern.
+全体として、cgroups **バージョン2はバージョン1よりも多くの機能と優れたパフォーマンスを提供**しますが、後者は古いシステムとの互換性が懸念される特定のシナリオではまだ使用される可能性があります。
 
-You can list the v1 and v2 cgroups for any process by looking at its cgroup file in /proc/\<pid>. You can start by looking at your shell’s cgroups with this command:
-
+任意のプロセスのv1およびv2 cgroupsをリストするには、そのcgroupファイルを/proc/\<pid>で確認します。次のコマンドを使用して、シェルのcgroupsを確認することから始めることができます：
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -28,63 +27,54 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
+- **番号 2–12**: cgroups v1、各行は異なる cgroup を表します。これらのコントローラーは番号の隣に指定されています。
+- **番号 1**: 同じく cgroups v1 ですが、管理目的のみに使用され（例: systemd によって設定）、コントローラーはありません。
+- **番号 0**: cgroups v2 を表します。コントローラーはリストされておらず、この行は cgroups v2 のみを実行しているシステムで独占的です。
+- **名前は階層的**で、ファイルパスに似ており、異なる cgroup 間の構造と関係を示しています。
+- **/user.slice や /system.slice** のような名前は cgroup の分類を指定し、user.slice は通常 systemd によって管理されるログインセッション用、system.slice はシステムサービス用です。
 
-The output structure is as follows:
+### cgroups の表示
 
-- **Numbers 2–12**: cgroups v1, with each line representing a different cgroup. Controllers for these are specified adjacent to the number.
-- **Number 1**: Also cgroups v1, but solely for management purposes (set by, e.g., systemd), and lacks a controller.
-- **Number 0**: Represents cgroups v2. No controllers are listed, and this line is exclusive on systems only running cgroups v2.
-- The **names are hierarchical**, resembling file paths, indicating the structure and relationship between different cgroups.
-- **Names like /user.slice or /system.slice** specify the categorization of cgroups, with user.slice typically for login sessions managed by systemd and system.slice for system services.
-
-### Viewing cgroups
-
-The filesystem is typically utilized for accessing **cgroups**, diverging from the Unix system call interface traditionally used for kernel interactions. To investigate a shell's cgroup configuration, one should examine the **/proc/self/cgroup** file, which reveals the shell's cgroup. Then, by navigating to the **/sys/fs/cgroup** (or **`/sys/fs/cgroup/unified`**) directory and locating a directory that shares the cgroup's name, one can observe various settings and resource usage information pertinent to the cgroup.
+ファイルシステムは通常、**cgroups** へのアクセスに利用され、カーネルとのインタラクションに伝統的に使用される Unix システムコールインターフェースとは異なります。シェルの cgroup 設定を調査するには、**/proc/self/cgroup** ファイルを確認し、シェルの cgroup を明らかにします。その後、**/sys/fs/cgroup**（または **`/sys/fs/cgroup/unified`**）ディレクトリに移動し、cgroup の名前を共有するディレクトリを見つけることで、cgroup に関連するさまざまな設定やリソース使用情報を観察できます。
 
 ![Cgroup Filesystem](<../../../images/image (1128).png>)
 
-The key interface files for cgroups are prefixed with **cgroup**. The **cgroup.procs** file, which can be viewed with standard commands like cat, lists the processes within the cgroup. Another file, **cgroup.threads**, includes thread information.
+cgroups の主要なインターフェースファイルは **cgroup** で始まります。**cgroup.procs** ファイルは、cat などの標準コマンドで表示でき、cgroup 内のプロセスをリストします。別のファイル **cgroup.threads** にはスレッド情報が含まれています。
 
 ![Cgroup Procs](<../../../images/image (281).png>)
 
-Cgroups managing shells typically encompass two controllers that regulate memory usage and process count. To interact with a controller, files bearing the controller's prefix should be consulted. For instance, **pids.current** would be referenced to ascertain the count of threads in the cgroup.
+シェルを管理する cgroups は通常、メモリ使用量とプロセス数を制御する 2 つのコントローラーを含みます。コントローラーと対話するには、コントローラーのプレフィックスを持つファイルを参照する必要があります。たとえば、**pids.current** を参照して cgroup 内のスレッド数を確認します。
 
 ![Cgroup Memory](<../../../images/image (677).png>)
 
-The indication of **max** in a value suggests the absence of a specific limit for the cgroup. However, due to the hierarchical nature of cgroups, limits might be imposed by a cgroup at a lower level in the directory hierarchy.
+値に **max** が示されている場合、cgroup に特定の制限がないことを示唆しています。ただし、cgroups の階層的な性質により、ディレクトリ階層の下位レベルの cgroup によって制限が課される可能性があります。
 
-### Manipulating and Creating cgroups
+### cgroups の操作と作成
 
-Processes are assigned to cgroups by **writing their Process ID (PID) to the `cgroup.procs` file**. This requires root privileges. For instance, to add a process:
-
+プロセスは **`cgroup.procs` ファイルにそのプロセス ID (PID) を書き込むことによって** cgroups に割り当てられます。これには root 権限が必要です。たとえば、プロセスを追加するには:
 ```bash
 echo [pid] > cgroup.procs
 ```
-
-Similarly, **modifying cgroup attributes, like setting a PID limit**, is done by writing the desired value to the relevant file. To set a maximum of 3,000 PIDs for a cgroup:
-
+同様に、**PID制限を設定するなどのcgroup属性の変更**は、関連するファイルに希望の値を書き込むことで行われます。cgroupの最大3,000 PIDを設定するには：
 ```bash
 echo 3000 > pids.max
 ```
+**新しいcgroupsの作成**は、cgroup階層内に新しいサブディレクトリを作成することを含み、これによりカーネルは必要なインターフェースファイルを自動的に生成します。アクティブなプロセスのないcgroupsは`rmdir`で削除できますが、いくつかの制約に注意してください：
 
-**Creating new cgroups** involves making a new subdirectory within the cgroup hierarchy, which prompts the kernel to automatically generate necessary interface files. Though cgroups without active processes can be removed with `rmdir`, be aware of certain constraints:
-
-- **Processes can only be placed in leaf cgroups** (i.e., the most nested ones in a hierarchy).
-- **A cgroup cannot possess a controller absent in its parent**.
-- **Controllers for child cgroups must be explicitly declared** in the `cgroup.subtree_control` file. For example, to enable CPU and PID controllers in a child cgroup:
-
+- **プロセスはリーフcgroupsにのみ配置できます**（つまり、階層内で最もネストされたもの）。
+- **cgroupは親に存在しないコントローラーを持つことはできません**。
+- **子cgroupsのコントローラーは`cgroup.subtree_control`ファイルで明示的に宣言する必要があります**。たとえば、子cgroupでCPUとPIDコントローラーを有効にするには：
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
+**ルートcgroup**はこれらのルールの例外であり、プロセスを直接配置することを許可します。これを使用して、systemd管理からプロセスを削除することができます。
 
-The **root cgroup** is an exception to these rules, allowing direct process placement. This can be used to remove processes from systemd management.
+**cgroup内のCPU使用量の監視**は、`cpu.stat`ファイルを通じて可能で、消費された総CPU時間を表示し、サービスのサブプロセス全体の使用状況を追跡するのに役立ちます：
 
-**Monitoring CPU usage** within a cgroup is possible through the `cpu.stat` file, displaying total CPU time consumed, helpful for tracking usage across a service's subprocesses:
+<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>cpu.statファイルに表示されるCPU使用統計</p></figcaption></figure>
 
-<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
+## 参考文献
 
-## References
-
-- **Book: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
+- **書籍: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
 
 {{#include ../../../banners/hacktricks-training.md}}

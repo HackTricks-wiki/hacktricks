@@ -2,17 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket)を使用して、世界で最も高度なコミュニティツールによって駆動される**ワークフロー**を簡単に構築し、**自動化**します。\
-今すぐアクセスを取得：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
-
 ## パス・ザ・チケット (PTT)
 
-**パス・ザ・チケット (PTT)**攻撃手法では、攻撃者は**ユーザーの認証チケットを盗む**ことで、パスワードやハッシュ値を盗むのではありません。この盗まれたチケットは、**ユーザーを偽装する**ために使用され、ネットワーク内のリソースやサービスへの不正アクセスを得ることができます。
+**パス・ザ・チケット (PTT)** 攻撃手法では、攻撃者は **ユーザーの認証チケットを盗む** ことで、パスワードやハッシュ値を盗むのではありません。この盗まれたチケットは **ユーザーになりすます** ために使用され、ネットワーク内のリソースやサービスに不正にアクセスします。
 
 **読む**:
 
@@ -21,7 +13,7 @@
 
 ### **プラットフォーム間でのLinuxとWindowsのチケットの交換**
 
-[**ticket_converter**](https://github.com/Zer1t0/ticket_converter)ツールは、チケット自体と出力ファイルを使用してチケット形式を変換します。
+[**ticket_converter**](https://github.com/Zer1t0/ticket_converter) ツールは、チケット自体と出力ファイルを使用してチケット形式を変換します。
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -29,7 +21,7 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
-Windowsでは[Kekeo](https://github.com/gentilkiwi/kekeo)を使用できます。
+Windowsでは[Kekeo](https://github.com/gentilkiwi/kekeo)が使用できます。
 
 ### パス・ザ・チケット攻撃
 ```bash:Linux
@@ -47,13 +39,5 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ## 参考文献
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket)を使用して、世界で最も高度なコミュニティツールによって駆動される**ワークフロー**を簡単に構築し、**自動化**します。\
-今すぐアクセスを取得：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}

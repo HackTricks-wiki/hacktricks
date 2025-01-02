@@ -1,32 +1,24 @@
 # Kerberoast
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフロー**を簡単に構築し、**自動化**します。\
-今すぐアクセスを取得：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kerberoast
 
-Kerberoastingは、**Active Directory (AD)**内の**ユーザーアカウント**に関連するサービスに特に関係する**TGSチケット**の取得に焦点を当てています。**コンピューターアカウント**は除外されます。これらのチケットの暗号化は、**ユーザーパスワード**から派生したキーを利用しており、**オフラインの資格情報クラッキング**の可能性を許可します。サービスとしてのユーザーアカウントの使用は、非空の**"ServicePrincipalName"**プロパティによって示されます。
+Kerberoastingは、**Active Directory (AD)**内の**ユーザーアカウント**に関連する**TGSチケット**の取得に焦点を当てており、**コンピューターアカウント**は除外されます。これらのチケットの暗号化は**ユーーパスワード**から生成されたキーを使用しており、**オフラインの資格情報クラッキング**の可能性を提供します。ユーザーアカウントをサービスとして使用することは、非空の**"ServicePrincipalName"**プロパティによって示されます。
 
-**Kerberoasting**を実行するには、**TGSチケット**を要求できるドメインアカウントが必要ですが、このプロセスは**特別な権限**を要求せず、**有効なドメイン資格情報**を持つ誰でもアクセス可能です。
+**Kerberoasting**を実行するには、**TGSチケット**を要求できるドメインアカウントが必要ですが、このプロセスは**特別な権限**を必要とせず、**有効なドメイン資格情報**を持つ誰でもアクセス可能です。
 
-### 主なポイント：
+### Key Points:
 
-- **Kerberoasting**は、**AD**内の**ユーザーアカウントサービス**のための**TGSチケット**をターゲットにします。
-- **ユーザーパスワード**からのキーで暗号化されたチケットは**オフラインでクラッキング**可能です。
+- **Kerberoasting**は**AD**内の**ユーザーアカウントサービス**のための**TGSチケット**をターゲットにします。
+- **ユーーパスワード**からのキーで暗号化されたチケットは**オフラインでクラッキング**可能です。
 - サービスは、nullでない**ServicePrincipalName**によって識別されます。
-- **特別な権限**は必要なく、**有効なドメイン資格情報**だけが必要です。
+- **特別な権限**は必要なく、**有効なドメイン資格情報**のみが必要です。
 
-### **攻撃**
+### **Attack**
 
 > [!WARNING]
-> **Kerberoastingツール**は、攻撃を実行しTGS-REQリクエストを開始する際に通常**`RC4暗号化`**を要求します。これは、**RC4が** [**より弱い**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795)ため、Hashcatなどのツールを使用して他の暗号化アルゴリズム（AES-128やAES-256など）よりもオフラインでクラッキングしやすいからです。\
+> **Kerberoastingツール**は、攻撃を実行しTGS-REQリクエストを開始する際に通常**`RC4暗号`**を要求します。これは、**RC4が** [**より弱い**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795)ため、Hashcatなどのツールを使用して他の暗号アルゴリズム（AES-128やAES-256など）よりもオフラインでクラッキングしやすいからです。\
 > RC4（タイプ23）ハッシュは**`$krb5tgs$23$*`**で始まり、AES-256（タイプ18）は**`$krb5tgs$18$*`**で始まります。`.`
 
 #### **Linux**
@@ -93,14 +85,6 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 > [!WARNING]
 > TGSが要求されると、Windowsイベント `4769 - A Kerberos service ticket was requested` が生成されます。
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) を使用して、世界で最も**高度な**コミュニティツールによって駆動される**ワークフローを簡単に構築し、**自動化**します。\
-今すぐアクセスを取得：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 ### クラッキング
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
@@ -109,26 +93,26 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Persistence
 
-ユーザーに対して**十分な権限**があれば、そのユーザーを**kerberoastable**にすることができます：
+もしユーザーに対して**十分な権限**があれば、そのユーザーを**kerberoastable**にすることができます：
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
 有用な**ツール**はここで見つけることができます: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Linuxからこの**エラー**が表示された場合: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** は、ローカル時間が原因です。ホストをDCと同期させる必要があります。いくつかのオプションがあります:
+Linuxからこの**エラー**が表示された場合: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** これはローカル時間のためで、ホストをDCと同期させる必要があります。いくつかのオプションがあります:
 
 - `ntpdate <IP of DC>` - Ubuntu 16.04以降は非推奨
 - `rdate -n <IP of DC>`
 
 ### 緩和策
 
-Kerberoastingは、悪用可能な場合、高度な隠密性で実施できます。この活動を検出するためには、**Security Event ID 4769**に注意を払う必要があります。これは、Kerberosチケットが要求されたことを示します。しかし、このイベントの頻度が高いため、疑わしい活動を特定するために特定のフィルターを適用する必要があります:
+Kerberoastingは、悪用可能な場合、高度な隠密性で実施できます。この活動を検出するためには、**Security Event ID 4769**に注意を払う必要があります。これはKerberosチケットが要求されたことを示します。しかし、このイベントの頻度が高いため、疑わしい活動を特定するために特定のフィルターを適用する必要があります:
 
 - サービス名は**krbtgt**であってはならず、これは通常のリクエストです。
 - **$**で終わるサービス名は、サービスに使用されるマシンアカウントを含まないように除外する必要があります。
 - マシンからのリクエストは、**machine@domain**形式のアカウント名を除外することでフィルタリングする必要があります。
 - 成功したチケットリクエストのみを考慮し、失敗コード**'0x0'**で識別します。
-- **最も重要なこと**は、チケットの暗号化タイプが**0x17**である必要があり、これはKerberoasting攻撃でよく使用されます。
+- **最も重要なこと**は、チケット暗号化タイプが**0x17**である必要があり、これはKerberoasting攻撃でよく使用されます。
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
@@ -167,11 +151,3 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築し、自動化**します。\
-今すぐアクセスを取得： 
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}

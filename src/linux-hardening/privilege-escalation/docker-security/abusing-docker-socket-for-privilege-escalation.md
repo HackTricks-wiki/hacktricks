@@ -1,43 +1,43 @@
-# Abusing Docker Socket for Privilege Escalation
+# Dockerソケットを悪用して特権昇格を行う
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-There are some occasions were you just have **access to the docker socket** and you want to use it to **escalate privileges**. Some actions might be very suspicious and you may want to avoid them, so here you can find different flags that can be useful to escalate privileges:
+Dockerソケットに**アクセス**できる場合があり、それを使用して**特権を昇格**させたいことがあります。いくつかのアクションは非常に疑わしい場合があり、それを避けたいかもしれません。ここでは、特権を昇格させるのに役立つさまざまなフラグを見つけることができます。
 
-### Via mount
+### マウントを介して
 
-You can **mount** different parts of the **filesystem** in a container running as root and **access** them.\
-You could also **abuse a mount to escalate privileges** inside the container.
+ルートとして実行されているコンテナ内で**ファイルシステム**の異なる部分を**マウント**し、それに**アクセス**できます。\
+コンテナ内で特権を昇格させるために**マウントを悪用する**こともできます。
 
-- **`-v /:/host`** -> Mount the host filesystem in the container so you can **read the host filesystem.**
-  - If you want to **feel like you are in the host** but being on the container you could disable other defense mechanisms using flags like:
-    - `--privileged`
-    - `--cap-add=ALL`
-    - `--security-opt apparmor=unconfined`
-    - `--security-opt seccomp=unconfined`
-    - `-security-opt label:disable`
-    - `--pid=host`
-    - `--userns=host`
-    - `--uts=host`
-    - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> This is similar to the previous method, but here we are **mounting the device disk**. Then, inside the container run `mount /dev/sda1 /mnt` and you can **access** the **host filesystem** in `/mnt`
-  - Run `fdisk -l` in the host to find the `</dev/sda1>` device to mount
-- **`-v /tmp:/host`** -> If for some reason you can **just mount some directory** from the host and you have access inside the host. Mount it and create a **`/bin/bash`** with **suid** in the mounted directory so you can **execute it from the host and escalate to root**.
+- **`-v /:/host`** -> ホストのファイルシステムをコンテナにマウントし、**ホストのファイルシステムを読み取る**ことができます。
+- **ホストにいるように感じたい**がコンテナにいる場合、次のようなフラグを使用して他の防御メカニズムを無効にすることができます：
+- `--privileged`
+- `--cap-add=ALL`
+- `--security-opt apparmor=unconfined`
+- `--security-opt seccomp=unconfined`
+- `-security-opt label:disable`
+- `--pid=host`
+- `--userns=host`
+- `--uts=host`
+- `--cgroupns=host`
+- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> これは前の方法に似ていますが、ここでは**デバイスディスクをマウント**しています。その後、コンテナ内で `mount /dev/sda1 /mnt` を実行すると、**/mnt**で**ホストのファイルシステムにアクセス**できます。
+- ホストで `fdisk -l` を実行して、マウントする `</dev/sda1>` デバイスを見つけます。
+- **`-v /tmp:/host`** -> 何らかの理由で**ホストから特定のディレクトリのみをマウント**でき、ホスト内にアクセスできる場合、それをマウントし、マウントされたディレクトリに**suid**を持つ**`/bin/bash`**を作成して、**ホストから実行してルートに昇格**できます。
 
 > [!NOTE]
-> Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+> `/tmp`フォルダをマウントできないかもしれませんが、**異なる書き込み可能なフォルダ**をマウントできることに注意してください。書き込み可能なディレクトリを見つけるには、`find / -writable -type d 2>/dev/null`を使用します。
 >
-> **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+> **Linuxマシンのすべてのディレクトリがsuidビットをサポートするわけではありません！** どのディレクトリがsuidビットをサポートしているかを確認するには、`mount | grep -v "nosuid"`を実行します。たとえば、通常、`/dev/shm`、`/run`、`/proc`、`/sys/fs/cgroup`、および`/var/lib/lxcfs`はsuidビットをサポートしていません。
 >
-> Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+> また、**`/etc`**や**設定ファイルを含む他のフォルダ**を**マウント**できる場合、コンテナ内からルートとしてそれらを変更し、**ホストで悪用して特権を昇格**させることができます（たとえば、`/etc/shadow`を変更するなど）。
 
-### Escaping from the container
+### コンテナからの脱出
 
-- **`--privileged`** -> With this flag you [remove all the isolation from the container](docker-privileged.md#what-affects). Check techniques to [escape from privileged containers as root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> To [escalate abusing capabilities](../linux-capabilities.md), **grant that capability to the container** and disable other protection methods that may prevent the exploit to work.
+- **`--privileged`** -> このフラグを使用すると、[コンテナからのすべての隔離を削除します](docker-privileged.md#what-affects)。特権コンテナから[ルートとして脱出する技術](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape)を確認してください。
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> [特権を昇格させるために能力を悪用する](../linux-capabilities.md)、**その能力をコンテナに付与し、エクスプロイトが機能するのを妨げる可能性のある他の保護方法を無効にします。**
 
 ### Curl
 
-In this page we have discussed ways to escalate privileges using docker flags, you can find **ways to abuse these methods using curl** command in the page:
+このページでは、Dockerフラグを使用して特権を昇格させる方法について説明しました。**curl**コマンドを使用してこれらの方法を悪用する方法をページで見つけることができます。
 
 {{#include ../../../banners/hacktricks-training.md}}

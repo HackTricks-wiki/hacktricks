@@ -1,71 +1,64 @@
-# Mount Namespace
+# マウントネームスペース
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-A mount namespace is a Linux kernel feature that provides isolation of the file system mount points seen by a group of processes. Each mount namespace has its own set of file system mount points, and **changes to the mount points in one namespace do not affect other namespaces**. This means that processes running in different mount namespaces can have different views of the file system hierarchy.
+マウントネームスペースは、プロセスのグループが見るファイルシステムのマウントポイントを隔離するLinuxカーネルの機能です。各マウントネームスペースは独自のファイルシステムマウントポイントのセットを持ち、**あるネームスペースのマウントポイントへの変更は他のネームスペースに影響を与えません**。これは、異なるマウントネームスペースで実行されているプロセスがファイルシステム階層の異なるビューを持つことができることを意味します。
 
-Mount namespaces are particularly useful in containerization, where each container should have its own file system and configuration, isolated from other containers and the host system.
+マウントネームスペースは、各コンテナが他のコンテナやホストシステムから隔離された独自のファイルシステムと構成を持つべきであるコンテナ化に特に便利です。
 
-### How it works:
+### 仕組み:
 
-1. When a new mount namespace is created, it is initialized with a **copy of the mount points from its parent namespace**. This means that, at creation, the new namespace shares the same view of the file system as its parent. However, any subsequent changes to the mount points within the namespace will not affect the parent or other namespaces.
-2. When a process modifies a mount point within its namespace, such as mounting or unmounting a file system, the **change is local to that namespace** and does not affect other namespaces. This allows each namespace to have its own independent file system hierarchy.
-3. Processes can move between namespaces using the `setns()` system call, or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWNS` flag. When a process moves to a new namespace or creates one, it will start using the mount points associated with that namespace.
-4. **File descriptors and inodes are shared across namespaces**, meaning that if a process in one namespace has an open file descriptor pointing to a file, it can **pass that file descriptor** to a process in another namespace, and **both processes will access the same file**. However, the file's path may not be the same in both namespaces due to differences in mount points.
+1. 新しいマウントネームスペースが作成されると、**親ネームスペースからのマウントポイントのコピーで初期化されます**。これは、作成時に新しいネームスペースが親と同じファイルシステムのビューを共有することを意味します。しかし、その後のネームスペース内のマウントポイントへの変更は、親や他のネームスペースに影響を与えません。
+2. プロセスがそのネームスペース内のマウントポイントを変更すると、例えばファイルシステムをマウントまたはアンマウントする場合、**変更はそのネームスペースにローカルであり**、他のネームスペースには影響を与えません。これにより、各ネームスペースは独自の独立したファイルシステム階層を持つことができます。
+3. プロセスは`setns()`システムコールを使用してネームスペース間を移動することができ、`unshare()`または`clone()`システムコールを`CLONE_NEWNS`フラグと共に使用して新しいネームスペースを作成することができます。プロセスが新しいネームスペースに移動するか、新しいネームスペースを作成すると、そのネームスペースに関連付けられたマウントポイントを使用し始めます。
+4. **ファイルディスクリプタとinodeはネームスペース間で共有されます**。つまり、あるネームスペースのプロセスがファイルを指すオープンファイルディスクリプタを持っている場合、その**ファイルディスクリプタを他のネームスペースのプロセスに渡すことができ**、**両方のプロセスが同じファイルにアクセスします**。ただし、マウントポイントの違いにより、ファイルのパスは両方のネームスペースで同じではない場合があります。
 
-## Lab:
+## ラボ:
 
-### Create different Namespaces
+### 異なるネームスペースを作成する
 
 #### CLI
-
 ```bash
 sudo unshare -m [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+新しいインスタンスの `/proc` ファイルシステムを `--mount-proc` パラメータを使用してマウントすることで、新しいマウントネームスペースがそのネームスペースに特有のプロセス情報の**正確で隔離されたビュー**を持つことを保証します。
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>エラー: bash: fork: メモリを割り当てることができません</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+`unshare` が `-f` オプションなしで実行されると、Linux が新しい PID (プロセス ID) ネームスペースを処理する方法のためにエラーが発生します。重要な詳細と解決策は以下の通りです：
 
-1. **Problem Explanation**:
+1. **問題の説明**：
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Linux カーネルは、プロセスが `unshare` システムコールを使用して新しいネームスペースを作成することを許可します。しかし、新しい PID ネームスペースの作成を開始するプロセス（「unshare」プロセスと呼ばれる）は新しいネームスペースに入らず、その子プロセスのみが入ります。
+- `%unshare -p /bin/bash%` を実行すると、`unshare` と同じプロセスで `/bin/bash` が開始されます。その結果、`/bin/bash` とその子プロセスは元の PID ネームスペースに存在します。
+- 新しいネームスペース内の `/bin/bash` の最初の子プロセスは PID 1 になります。このプロセスが終了すると、他にプロセスがない場合、ネームスペースのクリーンアップがトリガーされます。PID 1 は孤児プロセスを引き取る特別な役割を持っています。Linux カーネルはそのネームスペース内での PID 割り当てを無効にします。
 
-2. **Consequence**:
+2. **結果**：
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- 新しいネームスペース内での PID 1 の終了は、`PIDNS_HASH_ADDING` フラグのクリーンアップを引き起こします。これにより、新しいプロセスを作成する際に `alloc_pid` 関数が新しい PID を割り当てることに失敗し、「メモリを割り当てることができません」というエラーが発生します。
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **解決策**：
+- この問題は、`unshare` に `-f` オプションを使用することで解決できます。このオプションは、`unshare` が新しい PID ネームスペースを作成した後に新しいプロセスをフォークします。
+- `%unshare -fp /bin/bash%` を実行すると、`unshare` コマンド自体が新しいネームスペース内で PID 1 になります。これにより、`/bin/bash` とその子プロセスはこの新しいネームスペース内に安全に収容され、PID 1 の早期終了を防ぎ、正常な PID 割り当てを可能にします。
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+`unshare` が `-f` フラグで実行されることを保証することで、新しい PID ネームスペースが正しく維持され、`/bin/bash` とそのサブプロセスがメモリ割り当てエラーに遭遇することなく動作できるようになります。
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;プロセスがどの名前空間にあるかを確認する
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'
 ```
-
-### Find all Mount namespaces
-
+### すべてのマウントネームスペースを見つける
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -75,19 +68,15 @@ sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 findmnt
 ```
-
-### Enter inside a Mount namespace
-
+### マウントネームスペースに入る
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash
 ```
+また、**ルートでなければ他のプロセスネームスペースに入ることはできません**。そして、**ディスクリプタ**がそれを指していない限り、他のネームスペースに**入ることはできません**（例えば `/proc/self/ns/mnt` のように）。
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/mnt`).
+新しいマウントはネームスペース内でのみアクセス可能であるため、ネームスペースにはそれからのみアクセス可能な機密情報が含まれている可能性があります。
 
-Because new mounts are only accessible within the namespace it's possible that a namespace contains sensitive information that can only be accessible from it.
-
-### Mount something
-
+### 何かをマウントする
 ```bash
 # Generate new mount ns
 unshare -m /bin/bash
@@ -127,8 +116,7 @@ systemd-private-3d87c249e8a84451994ad692609cd4b6-systemd-timesyncd.service-FAnDq
 vmware-root_662-2689143848
 
 ```
-
-## References
+## 参考文献
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 - [https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux](https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux)

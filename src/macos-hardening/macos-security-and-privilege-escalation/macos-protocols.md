@@ -1,19 +1,18 @@
-# macOS Network Services & Protocols
+# macOS ネットワークサービスとプロトコル
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Remote Access Services
+## リモートアクセスサービス
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+これらはリモートでアクセスするための一般的な macOS サービスです。\
+これらのサービスは `System Settings` --> `Sharing` で有効/無効にできます。
 
-- **VNC**, known as “Screen Sharing” (tcp:5900)
-- **SSH**, called “Remote Login” (tcp:22)
-- **Apple Remote Desktop** (ARD), or “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, known as “Remote Apple Event” (tcp:3031)
+- **VNC**、別名「画面共有」 (tcp:5900)
+- **SSH**、別名「リモートログイン」 (tcp:22)
+- **Apple Remote Desktop** (ARD)、または「リモート管理」 (tcp:3283, tcp:5900)
+- **AppleEvent**、別名「リモート Apple イベント」 (tcp:3031)
 
-Check if any is enabled running:
-
+有効になっているかどうかを確認するには、次のコマンドを実行します:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -23,103 +22,90 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
+Apple Remote Desktop (ARD) は、macOS 向けに特別に設計された [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) の強化版で、追加機能を提供します。ARD の顕著な脆弱性は、制御画面パスワードの認証方法で、パスワードの最初の 8 文字のみを使用するため、デフォルトのレート制限がないため、Hydra や [GoRedShell](https://github.com/ahhh/GoRedShell/) のようなツールを使用した [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) に対して脆弱です。
 
-Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
+脆弱なインスタンスは、**nmap** の `vnc-info` スクリプトを使用して特定できます。`VNC Authentication (2)` をサポートするサービスは、8 文字のパスワード切り捨てのため、特にブルートフォース攻撃に対して脆弱です。
 
-To enable ARD for various administrative tasks like privilege escalation, GUI access, or user monitoring, use the following command:
-
+特権昇格、GUI アクセス、またはユーザー監視などのさまざまな管理タスクのために ARD を有効にするには、次のコマンドを使用します:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
+ARDは、観察、共有制御、完全制御を含む多様な制御レベルを提供し、ユーザーパスワードの変更後もセッションが持続します。これにより、Unixコマンドを直接送信し、管理者ユーザーとしてrootで実行することができます。タスクスケジューリングやリモートSpotlight検索は、複数のマシンにわたる機密ファイルのリモートでの低影響検索を容易にする注目すべき機能です。
 
-ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
+## Bonjourプロトコル
 
-## Bonjour Protocol
+Bonjourは、Appleが設計した技術で、**同じネットワーク上のデバイスが互いに提供するサービスを検出する**ことを可能にします。Rendezvous、**ゼロコンフィギュレーション**、またはZeroconfとも呼ばれ、デバイスがTCP/IPネットワークに参加し、**自動的にIPアドレスを選択し**、他のネットワークデバイスにサービスをブロードキャストすることを可能にします。
 
-Bonjour, an Apple-designed technology, allows **devices on the same network to detect each other's offered services**. Known also as Rendezvous, **Zero Configuration**, or Zeroconf, it enables a device to join a TCP/IP network, **automatically choose an IP address**, and broadcast its services to other network devices.
+Bonjourが提供するゼロコンフィギュレーションネットワーキングにより、デバイスは以下を実現できます：
 
-Zero Configuration Networking, provided by Bonjour, ensures that devices can:
+- **DHCPサーバーがない場合でも自動的にIPアドレスを取得**する。
+- **DNSサーバーを必要とせずに名前からアドレスへの変換を行う**。
+- **ネットワーク上の利用可能なサービスを発見する**。
 
-- **Automatically obtain an IP Address** even in the absence of a DHCP server.
-- Perform **name-to-address translation** without requiring a DNS server.
-- **Discover services** available on the network.
+Bonjourを使用するデバイスは、**169.254/16範囲のIPアドレスを自分に割り当て**、ネットワーク上での一意性を確認します。Macはこのサブネットのルーティングテーブルエントリを維持し、`netstat -rn | grep 169`で確認できます。
 
-Devices using Bonjour will assign themselves an **IP address from the 169.254/16 range** and verify its uniqueness on the network. Macs maintain a routing table entry for this subnet, verifiable via `netstat -rn | grep 169`.
+DNSに関して、Bonjourは**マルチキャストDNS（mDNS）プロトコル**を利用します。mDNSは**ポート5353/UDP**で動作し、**標準DNSクエリ**を使用しますが、**マルチキャストアドレス224.0.0.251**をターゲットにします。このアプローチにより、ネットワーク上のすべてのリスニングデバイスがクエリを受信し応答できるようになり、レコードの更新が促進されます。
 
-For DNS, Bonjour utilizes the **Multicast DNS (mDNS) protocol**. mDNS operates over **port 5353/UDP**, employing **standard DNS queries** but targeting the **multicast address 224.0.0.251**. This approach ensures that all listening devices on the network can receive and respond to the queries, facilitating the update of their records.
+ネットワークに参加すると、各デバイスは通常**.local**で終わる名前を自己選択し、これはホスト名から派生するか、ランダムに生成されることがあります。
 
-Upon joining the network, each device self-selects a name, typically ending in **.local**, which may be derived from the hostname or randomly generated.
+ネットワーク内のサービス発見は、**DNSサービスディスカバリー（DNS-SD）**によって促進されます。DNS SRVレコードの形式を利用し、DNS-SDは**DNS PTRレコード**を使用して複数のサービスのリストを可能にします。特定のサービスを求めるクライアントは`<Service>.<Domain>`のPTRレコードを要求し、サービスが複数のホストから利用可能な場合、`<Instance>.<Service>.<Domain>`形式のPTRレコードのリストを受け取ります。
 
-Service discovery within the network is facilitated by **DNS Service Discovery (DNS-SD)**. Leveraging the format of DNS SRV records, DNS-SD uses **DNS PTR records** to enable the listing of multiple services. A client seeking a specific service will request a PTR record for `<Service>.<Domain>`, receiving in return a list of PTR records formatted as `<Instance>.<Service>.<Domain>` if the service is available from multiple hosts.
+`dns-sd`ユーティリティは、**ネットワークサービスの発見と広告**に使用できます。以下はその使用例です：
 
-The `dns-sd` utility can be employed for **discovering and advertising network services**. Here are some examples of its usage:
+### SSHサービスの検索
 
-### Searching for SSH Services
-
-To search for SSH services on the network, the following command is used:
-
+ネットワーク上のSSHサービスを検索するには、次のコマンドを使用します：
 ```bash
 dns-sd -B _ssh._tcp
 ```
+このコマンドは、\_ssh.\_tcp サービスのブラウジングを開始し、タイムスタンプ、フラグ、インターフェース、ドメイン、サービスの種類、インスタンス名などの詳細を出力します。
 
-This command initiates browsing for \_ssh.\_tcp services and outputs details such as timestamp, flags, interface, domain, service type, and instance name.
+### HTTP サービスの広告
 
-### Advertising an HTTP Service
-
-To advertise an HTTP service, you can use:
-
+HTTP サービスを広告するには、次のようにします:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
+このコマンドは、ポート80で`/index.html`のパスを持つ「Index」という名前のHTTPサービスを登録します。
 
-This command registers an HTTP service named "Index" on port 80 with a path of `/index.html`.
-
-To then search for HTTP services on the network:
-
+次に、ネットワーク上のHTTPサービスを検索するには:
 ```bash
 dns-sd -B _http._tcp
 ```
+サービスが開始されると、その存在をマルチキャストしてサブネット上のすべてのデバイスに利用可能であることを通知します。これらのサービスに興味のあるデバイスはリクエストを送信する必要はなく、単にこれらの通知を聞くだけです。
 
-When a service starts, it announces its availability to all devices on the subnet by multicasting its presence. Devices interested in these services don't need to send requests but simply listen for these announcements.
+よりユーザーフレンドリーなインターフェースのために、Apple App Storeで入手可能な**Discovery - DNS-SD Browser**アプリは、ローカルネットワーク上で提供されているサービスを視覚化できます。
 
-For a more user-friendly interface, the **Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
-
-Alternatively, custom scripts can be written to browse and discover services using the `python-zeroconf` library. The [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script demonstrates creating a service browser for `_http._tcp.local.` services, printing added or removed services:
-
+また、カスタムスクリプトを作成して`python-zeroconf`ライブラリを使用してサービスをブラウズおよび発見することもできます。[**python-zeroconf**](https://github.com/jstasiak/python-zeroconf)スクリプトは、`_http._tcp.local.`サービスのためのサービスブラウザを作成し、追加または削除されたサービスを印刷することを示しています。
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
 class MyListener:
 
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
+def remove_service(self, zeroconf, type, name):
+print("Service %s removed" % (name,))
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        print("Service %s added, service info: %s" % (name, info))
+def add_service(self, zeroconf, type, name):
+info = zeroconf.get_service_info(type, name)
+print("Service %s added, service info: %s" % (name, info))
 
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 try:
-    input("Press enter to exit...\n\n")
+input("Press enter to exit...\n\n")
 finally:
-    zeroconf.close()
+zeroconf.close()
 ```
+### Bonjourの無効化
 
-### Disabling Bonjour
-
-If there are concerns about security or other reasons to disable Bonjour, it can be turned off using the following command:
-
+セキュリティに関する懸念やその他の理由でBonjourを無効にする必要がある場合、次のコマンドを使用してオフにできます：
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-
-## References
+## 参考文献
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

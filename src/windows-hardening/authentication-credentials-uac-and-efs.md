@@ -2,23 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築し、自動化**します。\
-今すぐアクセスを取得：
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## AppLocker Policy
 
 アプリケーションホワイトリストは、システム上で存在し実行されることが許可された承認済みのソフトウェアアプリケーションまたは実行可能ファイルのリストです。目的は、環境を有害なマルウェアや、組織の特定のビジネスニーズに合致しない未承認のソフトウェアから保護することです。
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker)は、マイクロソフトの**アプリケーションホワイトリストソリューション**であり、システム管理者に**ユーザーが実行できるアプリケーションやファイルを制御する**権限を与えます。実行可能ファイル、スクリプト、Windowsインストーラーファイル、DLL、パッケージアプリ、パックされたアプリインストーラーに対して**詳細な制御**を提供します。\
-組織が**cmd.exeとPowerShell.exeをブロックし、特定のディレクトリへの書き込みアクセスを制限する**ことは一般的ですが、**これらはすべて回避可能です**。
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) は、マイクロソフトの**アプリケーションホワイトリストソリューション**であり、システム管理者に**ユーザーが実行できるアプリケーションとファイルを制御する**機能を提供します。これは、実行可能ファイル、スクリプト、Windowsインストーラーファイル、DLL、パッケージアプリ、およびパックされたアプリインストーラーに対して**詳細な制御**を提供します。\
+組織が**cmd.exeとPowerShell.exe**をブロックし、特定のディレクトリへの書き込みアクセスを制限することは一般的ですが、**これらはすべて回避可能です**。
 
 ### Check
 
-ブラックリスト/ホワイトリストに登録されているファイル/拡張子を確認します：
+ブラックリストまたはホワイトリストに登録されているファイル/拡張子を確認します：
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -33,7 +26,7 @@ $a.rulecollections
 
 ### バイパス
 
-- AppLockerポリシーをバイパスするための便利な**書き込み可能フォルダー**：AppLockerが`C:\Windows\System32`または`C:\Windows`内の任意の実行を許可している場合、**このバイパスに使用できる書き込み可能フォルダー**があります。
+- AppLockerポリシーをバイパスするための便利な**書き込み可能フォルダー**：AppLockerが`C:\Windows\System32`または`C:\Windows`内の任意のものを実行することを許可している場合、**このバイパスに使用できる書き込み可能フォルダー**があります。
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -80,7 +73,7 @@ LSAはディスクにいくつかの資格情報を保存することがあり�
 
 ### チェック
 
-**Defender**の**ステータス**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認して、アクティブかどうかを知ることができます）：
+**Defender**の**状態**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認して、アクティブかどうかを知ることができます）：
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -110,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用してファイルを暗号化します。この鍵はユーザーの**公開鍵**で暗号化され、暗号化されたファイルの$EFS **代替データストリーム**内に保存されます。復号が必要な場合、ユーザーのデジタル証明書の対応する**秘密鍵**を使用して$EFSストリームからFEKを復号します。詳細は[こちら](https://en.wikipedia.org/wiki/Encrypting_File_System)で確認できます。
+EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用してファイルを暗号化することで保護します。この鍵はユーザーの**公開鍵**で暗号化され、暗号化されたファイルの$EFS **代替データストリーム**内に保存されます。復号が必要な場合、ユーザーのデジタル証明書の対応する**秘密鍵**を使用して$EFSストリームからFEKを復号します。詳細は[こちら](https://en.wikipedia.org/wiki/Encrypting_File_System)で確認できます。
 
 **ユーザーの操作なしでの復号シナリオ**には以下が含まれます：
 
@@ -122,8 +115,8 @@ EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用し
 **重要なポイント**：
 
 - EFSは、ユーザーの公開鍵で暗号化された対称FEKを使用します。
-- 復号には、ユーザーの秘密鍵を使用してFEKにアクセスします。
-- FAT32へのコピーやネットワーク送信など、特定の条件下で自動復号が行われます。
+- 復号にはユーザーの秘密鍵を使用してFEKにアクセスします。
+- FAT32へのコピーやネットワーク送信など、特定の条件下で自動的に復号が行われます。
 - 暗号化ファイルは、追加の手順なしで所有者がアクセスできます。
 
 ### EFS情報の確認
@@ -137,7 +130,7 @@ EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用し
 
 #### 権限のあるシステムであること
 
-この方法では、**被害者ユーザー**がホスト内で**プロセス**を**実行**している必要があります。その場合、`meterpreter`セッションを使用してユーザーのプロセスのトークンを偽装することができます（`incognito`の`impersonate_token`）。または、ユーザーのプロセスに`migrate`することもできます。
+この方法では、**被害者ユーザー**がホスト内で**プロセス**を**実行している**必要があります。その場合、`meterpreter`セッションを使用してユーザーのプロセスのトークンを偽装することができます（`incognito`の`impersonate_token`）。または、ユーザーのプロセスに`migrate`することもできます。
 
 #### ユーザーのパスワードを知っていること
 
@@ -145,7 +138,7 @@ EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用し
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoftは、ITインフラストラクチャにおけるサービスアカウントの管理を簡素化するために**グループ管理サービスアカウント（gMSA）**を開発しました。従来のサービスアカウントは「**パスワードは期限切れにならない**」設定が有効なことが多いですが、gMSAはより安全で管理しやすいソリューションを提供します：
+Microsoftは、ITインフラストラクチャにおけるサービスアカウントの管理を簡素化するために**グループ管理サービスアカウント（gMSA）**を開発しました。従来のサービスアカウントは「**パスワードは期限切れにならない**」設定が有効であることが多いのに対し、gMSAはより安全で管理しやすいソリューションを提供します：
 
 - **自動パスワード管理**：gMSAは、ドメインまたはコンピュータポリシーに従って自動的に変更される複雑な240文字のパスワードを使用します。このプロセスはMicrosoftのキー配布サービス（KDC）によって処理され、手動でのパスワード更新が不要になります。
 - **強化されたセキュリティ**：これらのアカウントはロックアウトに対して免疫があり、対話的ログインには使用できないため、セキュリティが向上します。
@@ -163,11 +156,11 @@ gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存�
 ```
 [**この投稿で詳細情報を見つける**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-また、**gMSA**の**パスワード**を**読み取る**ための**NTLMリレー攻撃**を実行する方法については、この[ウェブページ](https://cube0x0.github.io/Relaying-for-gMSA/)を確認してください。
+また、**gMSA**の**パスワード**を**読み取る**ための**NTLMリレー攻撃**を実行する方法については、こちらの[ウェブページ](https://cube0x0.github.io/Relaying-for-gMSA/)を確認してください。
 
 ## LAPS
 
-**ローカル管理者パスワードソリューション (LAPS)**は、[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)からダウンロード可能で、ローカル管理者パスワードの管理を可能にします。これらのパスワードは**ランダム化**され、ユニークで、**定期的に変更**され、Active Directoryに中央集権的に保存されます。これらのパスワードへのアクセスは、ACLを通じて認可されたユーザーに制限されています。十分な権限が付与されると、ローカル管理者パスワードを読み取る能力が提供されます。
+**ローカル管理者パスワードソリューション (LAPS)**は、[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)からダウンロード可能で、ローカル管理者パスワードの管理を可能にします。これらのパスワードは**ランダム化**され、ユニークで、**定期的に変更**され、Active Directoryに中央集権的に保存されます。これらのパスワードへのアクセスは、ACLを通じて承認されたユーザーに制限されています。十分な権限が付与されると、ローカル管理者パスワードを読み取る能力が提供されます。
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -224,13 +217,13 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Security Support Provider Interface (SSPI)
+## セキュリティサポートプロバイダインターフェース (SSPI)
 
 ユーザーを認証するために使用できるAPIです。
 
-SSPIは、通信を希望する2台のマシンに適切なプロトコルを見つける役割を担います。これに対する推奨方法はKerberosです。次に、SSPIは使用される認証プロトコルを交渉します。これらの認証プロトコルはSecurity Support Provider (SSP)と呼ばれ、各Windowsマシン内にDLLの形で存在し、両方のマシンが同じものをサポートする必要があります。
+SSPIは、通信を希望する2台のマシンに適切なプロトコルを見つける役割を担います。これに対する推奨方法はKerberosです。次に、SSPIは使用される認証プロトコルを交渉します。これらの認証プロトコルはセキュリティサポートプロバイダ（SSP）と呼ばれ、各Windowsマシン内にDLLの形で存在し、両方のマシンが同じものをサポートする必要があります。
 
-### Main SSPs
+### 主なSSP
 
 - **Kerberos**: 推奨されるもの
 - %windir%\Windows\System32\kerberos.dll
@@ -245,22 +238,12 @@ SSPIは、通信を希望する2台のマシンに適切なプロトコルを見
 
 #### 交渉は複数の方法を提供することもあれば、1つだけを提供することもあります。
 
-## UAC - User Account Control
+## UAC - ユーザーアカウント制御
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)は、**昇格された活動のための同意プロンプトを有効にする**機能です。
+[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) は、**昇格された活動のための同意プロンプトを有効にする**機能です。
 
 {{#ref}}
 windows-security-controls/uac-user-account-control.md
 {{#endref}}
-
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も**高度な**コミュニティツールによって駆動される**ワークフローを簡単に構築および自動化**します。\
-今すぐアクセスを取得：
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
----
 
 {{#include ../banners/hacktricks-training.md}}

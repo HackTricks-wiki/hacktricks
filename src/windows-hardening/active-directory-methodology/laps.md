@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## 基本情報
 
-Local Administrator Password Solution (LAPS) は、**管理者パスワード**を管理するためのツールであり、これらのパスワードは**ユニークでランダム化され、頻繁に変更されます**。これらはドメインに参加しているコンピュータに適用されます。これらのパスワードはActive Directory内に安全に保存されており、Access Control Lists (ACLs) を通じて権限を付与されたユーザーのみがアクセスできます。クライアントからサーバーへのパスワード送信のセキュリティは、**Kerberos version 5** と **Advanced Encryption Standard (AES)** の使用によって確保されています。
+Local Administrator Password Solution (LAPS) は、**管理者パスワード**を管理するためのツールであり、これらのパスワードは**ユニークでランダム化され、頻繁に変更されます**。これらはドメインに参加しているコンピュータに適用されます。これらのパスワードはActive Directory内に安全に保存されており、アクセス制御リスト (ACL) を通じて権限を付与されたユーザーのみがアクセスできます。クライアントからサーバーへのパスワードの送信のセキュリティは、**Kerberos version 5** と **Advanced Encryption Standard (AES)** の使用によって確保されています。
 
-ドメインのコンピュータオブジェクトにおいて、LAPSの実装により、2つの新しい属性が追加されます：**`ms-mcs-AdmPwd`** と **`ms-mcs-AdmPwdExpirationTime`**。これらの属性は、それぞれ**平文の管理者パスワード**と**その有効期限**を保存します。
+ドメインのコンピュータオブジェクトにおいて、LAPSの実装は2つの新しい属性の追加をもたらします: **`ms-mcs-AdmPwd`** と **`ms-mcs-AdmPwdExpirationTime`**。これらの属性はそれぞれ、**平文の管理者パスワード**と**その有効期限**を保存します。
 
 ### 有効化されているか確認する
 ```bash
@@ -29,7 +25,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 
 あなたは **生の LAPS ポリシーをダウンロードすることができます** `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` そして **`Parse-PolFile`** を使用することができます [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) パッケージから、このファイルを人間が読みやすい形式に変換するために。
 
-さらに、**ネイティブ LAPS PowerShell cmdlets** は、私たちがアクセスできるマシンにインストールされている場合に使用できます:
+さらに、**ネイティブ LAPS PowerShell cmdlets** は、私たちがアクセスできるマシンにインストールされている場合に使用できます：
 ```powershell
 Get-Command *AdmPwd*
 
@@ -62,7 +58,7 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 
 [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) は、いくつかの機能を使用して LAPS の列挙を容易にします。\
 その一つは、**LAPS が有効なすべてのコンピュータ**のために **`ExtendedRights`** を解析することです。これにより、**LAPS パスワードを読み取るために特に委任されたグループ**が表示され、これらはしばしば保護されたグループのユーザーです。\
-**ドメインにコンピュータを参加させた** **アカウント**は、そのホストに対して `All Extended Rights` を受け取り、この権利により **パスワードを読み取る**能力が与えられます。列挙により、ホスト上で LAPS パスワードを読み取ることができるユーザーアカウントが表示される場合があります。これにより、LAPS パスワードを読み取ることができる特定の AD ユーザーを**ターゲットにする**のに役立ちます。
+**コンピュータ**をドメインに参加させた **アカウント** は、そのホストに対して `All Extended Rights` を受け取り、この権利により **パスワードを読み取る** 能力が与えられます。列挙により、ホスト上で LAPS パスワードを読み取ることができるユーザーアカウントが表示されることがあります。これにより、LAPS パスワードを読み取ることができる特定の AD ユーザーを **ターゲットにする** のに役立ちます。
 ```powershell
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -106,7 +102,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **有効期限**
 
-管理者になったら、**パスワードを取得**し、**有効期限を未来に設定することによって**マシンが**パスワードを更新するのを防ぐ**ことが可能です。
+管理者になったら、**パスワードを取得**し、**有効期限を未来に設定することで**マシンが**パスワードを更新するのを防ぐ**ことが可能です。
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -120,16 +116,13 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 ### バックドア
 
-LAPSの元のソースコードは[こちら](https://github.com/GreyCorbel/admpwd)にあります。したがって、コードにバックドアを仕込むことが可能です（例えば、`Main/AdmPwd.PS/Main.cs`の`Get-AdmPwdPassword`メソッド内）で、新しいパスワードを**外部に送信したり、どこかに保存したり**することができます。
+LAPSの元のソースコードは[こちら](https://github.com/GreyCorbel/admpwd)で見つけることができるため、コードにバックドアを仕込むことが可能です（例えば、`Main/AdmPwd.PS/Main.cs`の`Get-AdmPwdPassword`メソッド内）で、新しいパスワードを**外部に送信したり、どこかに保存したり**することができます。
 
-その後、新しい`AdmPwd.PS.dll`をコンパイルし、`C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll`にアップロードします（そして、変更時間を変更します）。
+その後、新しい`AdmPwd.PS.dll`をコンパイルし、`C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll`にアップロードします（そして、修正時間を変更します）。
 
 ## 参考文献
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -40,11 +37,11 @@
 - [https://github.com/hahwul/XSpear](https://github.com/hahwul/XSpear)
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
-- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : ドメイン名を非同期でブルートフォース
+- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : 非同期でドメイン名をブルートフォース
 - [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : サブドメインブルートフォース
 - [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): ドメイン内のウェブサーバーがアクセス可能か確認する
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : サブドメイン発見
-- [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : GitHub内のサブドメイン発見
+- [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : GitHubでのサブドメイン発見
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : 高速ポートスキャン
 - [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : ウェブ内のJSファイルからのサブドメインとURL
 - [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : ウェブファイル辞書
@@ -56,9 +53,9 @@
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burpプラグイン、ドメイン、サブドメイン、IPを発見するためのオフライン分析
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): 様々なツールのリスト
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : 脆弱性を見つけるためのBurpSuiteプラグイン（SQLi、XSS、SSTI）
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : post-messages関数を追跡するためのChrome拡張機能
-- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : 自動認証テスト（クッキーを削除してリクエストを送信しようとする）
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCrossは再構築、スキャナー、ペネトレーション/バグバウンティテスト用のツールです。このツールは（XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI）脆弱性をテストするために作られました。
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : ポストメッセージ関数を追跡するためのChrome拡張
+- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : 自動認証テスト（クッキーを削除し、リクエストを送信しようとする）
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCrossは再構築、スキャナー、ペネトレーション/バグバウンティテスト用のツールです。このツールは（XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI）脆弱性をテストするために構築されました。
 
 # Windows
 
@@ -105,22 +102,19 @@
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
 - [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : 静的コード分析
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : ゆっくりと無限のバナーを送信するSSHターピット。
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSHターピットがゆっくりと無限のバナーを送信します。
 - AWSおよびクラウドツール：[https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
 - フィッシング用のIFS（Interplanetary File System）：[https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
 - IPローテーションサービス：[https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
 - Linuxルートキット：[https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : オンラインIDE
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : バグバウンティを始めるためのリソース
-- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOSペンテストツール
+- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOSペネトレーションテストツール
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : キーワード
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : IoTのハッキング（Wifi、BLE、SSDP、MDNS）
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : スキャンの自動化
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : このリストはElectron.jsのセキュリティ関連のトピックをカバーすることを目的としています。
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : BBプログラムに関する情報
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}
