@@ -2,27 +2,26 @@
 
 {{#include ./banners/hacktricks-training.md}}
 
-## Locked Device
+## ロックされたデバイス
 
-To start extracting data from an Android device it has to be unlocked. If it's locked you can:
+Androidデバイスからデータを抽出するには、デバイスのロックを解除する必要があります。ロックされている場合は、次のことができます：
 
-- Check if the device has debugging via USB activated.
-- Check for a possible [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
-- Try with [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
+- デバイスにUSB経由のデバッグが有効になっているか確認する。
+- 可能な[スムッジ攻撃](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)を確認する。
+- [ブルートフォース](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)を試みる。
 
-## Data Adquisition
+## データ取得
 
-Create an [android backup using adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) and extract it using [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+[adbを使用してandroidバックアップを作成](mobile-pentesting/android-app-pentesting/adb-commands.md#backup)し、[Android Backup Extractor](https://sourceforge.net/projects/adbextractor/)を使用して抽出します：`java -jar abe.jar unpack file.backup file.tar`
 
-### If root access or physical connection to JTAG interface
+### ルートアクセスまたはJTAGインターフェースへの物理接続がある場合
 
-- `cat /proc/partitions` (search the path to the flash memory, generally the first entry is _mmcblk0_ and corresponds to the whole flash memory).
-- `df /data` (Discover the block size of the system).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (execute it with the information gathered from the block size).
+- `cat /proc/partitions`（フラッシュメモリへのパスを検索します。一般的に最初のエントリは _mmcblk0_ で、全体のフラッシュメモリに対応します）。
+- `df /data`（システムのブロックサイズを確認します）。
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096（ブロックサイズから得た情報を使用して実行します）。
 
-### Memory
+### メモリ
 
-Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel extension that should be loaded via adb.
+Linux Memory Extractor (LiME)を使用してRAM情報を抽出します。これは、adb経由でロードする必要があるカーネル拡張です。
 
 {{#include ./banners/hacktricks-training.md}}
-

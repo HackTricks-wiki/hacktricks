@@ -1,9 +1,4 @@
-You can remove this content before sending the PR:
+## 帰属
+私たちはあなたの知識を重視し、コンテンツの共有を奨励します。アップロードするコンテンツは、あなた自身のものであるか、元の著者から共有の許可を得ていることを確認してください（追加したテキスト内または修正しているページの最後に著者への参照を追加するか、またはその両方）。知的財産権へのあなたの尊重は、誰にとっても信頼できる合法的な共有環境を育みます。
 
-## Attribution
-We value your knowledge and encourage you to share content. Please ensure that you only upload content that you own or that have permission to share it from the original author (adding a reference to the author in the added text or at the end of the page you are modifying or both). Your respect for intellectual property rights fosters a trustworthy and legal sharing environment for everyone.
-
-
-Thank you for contributing to HackTricks!
-
-
+HackTricksへの貢献ありがとうございます！
