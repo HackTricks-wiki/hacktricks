@@ -4,43 +4,40 @@
 
 ## Integrity Levels
 
-In Windows Vista and later versions, all protected items come with an **integrity level** tag. This setup mostly assigns a "medium" integrity level to files and registry keys, except for certain folders and files that Internet Explorer 7 can write to at a low integrity level. The default behavior is for processes initiated by standard users to have a medium integrity level, whereas services typically operate at a system integrity level. A high-integrity label safeguards the root directory.
+在 Windows Vista 及更高版本中，所有受保护的项目都有一个 **完整性级别** 标签。此设置通常将“中等”完整性级别分配给文件和注册表项，除了某些 Internet Explorer 7 可以以低完整性级别写入的文件和文件夹。默认情况下，标准用户启动的进程具有中等完整性级别，而服务通常在系统完整性级别下运行。高完整性标签保护根目录。
 
-A key rule is that objects can't be modified by processes with a lower integrity level than the object's level. The integrity levels are:
+一个关键规则是，具有低于对象级别的完整性级别的进程无法修改对象。完整性级别如下：
 
-- **Untrusted**: This level is for processes with anonymous logins. %%%Example: Chrome%%%
-- **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
-- **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
-- **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
-- **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
-- **Installer**: A unique level that stands above all others, enabling objects at this level to uninstall any other object.
+- **不可信**：此级别适用于匿名登录的进程。 %%%示例：Chrome%%%
+- **低**：主要用于互联网交互，特别是在 Internet Explorer 的受保护模式下，影响相关文件和进程，以及某些文件夹，如 **临时 Internet 文件夹**。低完整性进程面临重大限制，包括无法写入注册表和有限的用户配置文件写入访问权限。
+- **中**：大多数活动的默认级别，分配给标准用户和没有特定完整性级别的对象。即使是管理员组的成员默认也在此级别操作。
+- **高**：保留给管理员，允许他们修改低完整性级别的对象，包括高完整性级别的对象。
+- **系统**：Windows 内核和核心服务的最高操作级别，甚至管理员也无法触及，确保保护重要的系统功能。
+- **安装程序**：一个独特的级别，超越所有其他级别，使该级别的对象能够卸载任何其他对象。
 
-You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
+您可以使用 **Sysinternals** 的 **Process Explorer** 获取进程的完整性级别，访问进程的 **属性** 并查看 "**安全性**" 选项卡：
 
 ![](<../../images/image (824).png>)
 
-You can also get your **current integrity level** using `whoami /groups`
+您还可以使用 `whoami /groups` 获取您的 **当前完整性级别**
 
 ![](<../../images/image (325).png>)
 
 ### Integrity Levels in File-system
 
-A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.\
-For example, lets **create a regular from a regular user console file and check the permissions**:
-
+文件系统中的对象可能需要 **最低完整性级别要求**，如果进程没有此完整性级别，则无法与其交互。\
+例如，让我们 **从普通用户控制台创建一个常规文件并检查权限**：
 ```
 echo asd >asd.txt
 icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-
-Now, lets assign a minimum integrity level of **High** to the file. This **must be done from a console** running as **administrator** as a **regular console** will be running in Medium Integrity level and **won't be allowed** to assign High Integrity level to an object:
-
+现在，让我们为文件分配最低的完整性级别为 **高**。这 **必须在以** 管理员 **身份运行的控制台中完成**，因为 **常规控制台** 将在中等完整性级别下运行，并且 **不允许** 将高完整性级别分配给对象：
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -48,16 +45,14 @@ Successfully processed 1 files; Failed processing 0 files
 
 C:\Users\Public>icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
-        Mandatory Label\High Mandatory Level:(NW)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
+Mandatory Label\High Mandatory Level:(NW)
 ```
-
-This is where things get interesting. You can see that the user `DESKTOP-IDJHTKP\user` has **FULL privileges** over the file (indeed this was the user that created the file), however, due to the minimum integrity level implemented he won't be able to modify the file anymore unless he is running inside a High Integrity Level (note that he will be able to read it):
-
+这就是事情变得有趣的地方。你可以看到用户 `DESKTOP-IDJHTKP\user` 对文件拥有 **完全权限**（实际上这是创建该文件的用户），然而，由于实施的最低完整性级别，他将无法再修改该文件，除非他在高完整性级别下运行（请注意，他仍然可以读取该文件）：
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -66,35 +61,31 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-
 > [!NOTE]
-> **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
+> **因此，当一个文件具有最低完整性级别时，要修改它，您需要至少在该完整性级别运行。**
 
-### Integrity Levels in Binaries
+### 二进制中的完整性级别
 
-I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
-
+我在 `C:\Windows\System32\cmd-low.exe` 中复制了 `cmd.exe` 并从管理员控制台将其设置为 **低完整性级别：**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
-                                BUILTIN\Administrators:(I)(F)
-                                BUILTIN\Users:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
-                                Mandatory Label\Low Mandatory Level:(NW)
+BUILTIN\Administrators:(I)(F)
+BUILTIN\Users:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
+Mandatory Label\Low Mandatory Level:(NW)
 ```
-
-Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
+现在，当我运行 `cmd-low.exe` 时，它将**在低完整性级别下运行**，而不是中等级别：
 
 ![](<../../images/image (313).png>)
 
-For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
+对于好奇的人，如果你将高完整性级别分配给一个二进制文件（`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`），它不会自动以高完整性级别运行（如果你从中等完整性级别调用它 -- 默认情况下 -- 它将以中等完整性级别运行）。
 
-### Integrity Levels in Processes
+### 进程中的完整性级别
 
-Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
+并非所有文件和文件夹都有最低完整性级别，**但所有进程都在完整性级别下运行**。与文件系统发生的情况类似，**如果一个进程想要在另一个进程内部写入，它必须至少具有相同的完整性级别**。这意味着低完整性级别的进程无法以完全访问权限打开中等完整性级别进程的句柄。
 
-Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
+由于本节和前一节中提到的限制，从安全角度来看，始终**建议以尽可能低的完整性级别运行进程**。
 
 {{#include ../../banners/hacktricks-training.md}}
-

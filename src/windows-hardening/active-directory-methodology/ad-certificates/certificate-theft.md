@@ -1,13 +1,12 @@
-# AD CS Certificate Theft
+# AD CS 证书盗窃
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a small summary of the Theft chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**这是来自[https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)的精彩研究中盗窃章节的小总结**
 
-## What can I do with a certificate
+## 我可以用证书做什么
 
-Before checking how to steal the certificates here you have some info about how to find what the certificate is useful for:
-
+在检查如何盗取证书之前，这里有一些关于如何找到证书用途的信息：
 ```powershell
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -19,35 +18,33 @@ $Cert.EnhancedKeyUsageList
 # cmd
 certutil.exe -dump -v cert.pfx
 ```
+## 导出证书使用 Crypto APIs – THEFT1
 
-## Exporting Certificates Using the Crypto APIs – THEFT1
+在 **交互式桌面会话**中，提取用户或机器证书及其私钥非常简单，特别是如果 **私钥是可导出的**。可以通过导航到 `certmgr.msc` 中的证书，右键单击并选择 `所有任务 → 导出` 来生成一个受密码保护的 .pfx 文件。
 
-In an **interactive desktop session**, extracting a user or machine certificate, along with the private key, can be easily done, particularly if the **private key is exportable**. This can be achieved by navigating to the certificate in `certmgr.msc`, right-clicking on it, and selecting `All Tasks → Export` to generate a password-protected .pfx file.
+对于 **编程方法**，可以使用 PowerShell 的 `ExportPfxCertificate` cmdlet 或像 [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) 这样的项目。这些工具利用 **Microsoft CryptoAPI** (CAPI) 或加密 API：下一代 (CNG) 与证书存储进行交互。这些 API 提供了一系列加密服务，包括证书存储和身份验证所需的服务。
 
-For a **programmatic approach**, tools such as the PowerShell `ExportPfxCertificate` cmdlet or projects like [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) are available. These utilize the **Microsoft CryptoAPI** (CAPI) or the Cryptography API: Next Generation (CNG) to interact with the certificate store. These APIs provide a range of cryptographic services, including those necessary for certificate storage and authentication.
+然而，如果私钥被设置为不可导出，CAPI 和 CNG 通常会阻止提取此类证书。为了绕过此限制，可以使用 **Mimikatz** 工具。Mimikatz 提供 `crypto::capi` 和 `crypto::cng` 命令来修补相应的 API，从而允许导出私钥。具体而言，`crypto::capi` 修补当前进程中的 CAPI，而 `crypto::cng` 针对 **lsass.exe** 的内存进行修补。
 
-However, if a private key is set as non-exportable, both CAPI and CNG will normally block the extraction of such certificates. To bypass this restriction, tools like **Mimikatz** can be employed. Mimikatz offers `crypto::capi` and `crypto::cng` commands to patch the respective APIs, allowing for the exportation of private keys. Specifically, `crypto::capi` patches the CAPI within the current process, while `crypto::cng` targets the memory of **lsass.exe** for patching.
+## 通过 DPAPI 进行用户证书盗窃 – THEFT2
 
-## User Certificate Theft via DPAPI – THEFT2
-
-More info about DPAPI in:
+有关 DPAPI 的更多信息，请参见：
 
 {{#ref}}
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-In Windows, **certificate private keys are safeguarded by DPAPI**. It's crucial to recognize that the **storage locations for user and machine private keys** are distinct, and the file structures vary depending on the cryptographic API utilized by the operating system. **SharpDPAPI** is a tool that can navigate these differences automatically when decrypting the DPAPI blobs.
+在 Windows 中，**证书私钥由 DPAPI 保护**。重要的是要认识到 **用户和机器私钥的存储位置**是不同的，文件结构因操作系统使用的加密 API 而异。**SharpDPAPI** 是一个可以在解密 DPAPI blobs 时自动导航这些差异的工具。
 
-**User certificates** are predominantly housed in the registry under `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, but some can also be found in the directory `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. The corresponding **private keys** for these certificates are typically stored in `%APPDATA%\Microsoft\Crypto\RSA\User SID\` for **CAPI** keys and `%APPDATA%\Microsoft\Crypto\Keys\` for **CNG** keys.
+**用户证书**主要存放在注册表下的 `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`，但有些也可以在目录 `%APPDATA%\Microsoft\SystemCertificates\My\Certificates` 中找到。这些证书的相应 **私钥** 通常存储在 `%APPDATA%\Microsoft\Crypto\RSA\User SID\` 中用于 **CAPI** 密钥，而用于 **CNG** 密钥则存储在 `%APPDATA%\Microsoft\Crypto\Keys\` 中。
 
-To **extract a certificate and its associated private key**, the process involves:
+要 **提取证书及其相关私钥**，过程包括：
 
-1. **Selecting the target certificate** from the user’s store and retrieving its key store name.
-2. **Locating the required DPAPI masterkey** to decrypt the corresponding private key.
-3. **Decrypting the private key** by utilizing the plaintext DPAPI masterkey.
+1. **从用户的存储中选择目标证书** 并检索其密钥存储名称。
+2. **定位所需的 DPAPI 主密钥** 以解密相应的私钥。
+3. **利用明文 DPAPI 主密钥解密私钥**。
 
-For **acquiring the plaintext DPAPI masterkey**, the following approaches can be used:
-
+对于 **获取明文 DPAPI 主密钥**，可以使用以下方法：
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -55,9 +52,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-
-To streamline the decryption of masterkey files and private key files, the `certificates` command from [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) proves beneficial. It accepts `/pvk`, `/mkfile`, `/password`, or `{GUID}:KEY` as arguments to decrypt the private keys and linked certificates, subsequently generating a `.pem` file.
-
+为了简化主密钥文件和私钥文件的解密，来自 [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) 的 `certificates` 命令非常有用。它接受 `/pvk`、`/mkfile`、`/password` 或 `{GUID}:KEY` 作为参数来解密私钥和相关证书，随后生成一个 `.pem` 文件。
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -65,28 +60,26 @@ SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
 # Converting .pem to .pfx
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
+## 机器证书盗窃通过 DPAPI – THEFT3
 
-## Machine Certificate Theft via DPAPI – THEFT3
+Windows 在注册表中存储的机器证书位于 `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates`，相关的私钥位于 `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys`（用于 CAPI）和 `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys`（用于 CNG），这些证书使用机器的 DPAPI 主密钥进行加密。这些密钥无法使用域的 DPAPI 备份密钥解密；相反，需要 **DPAPI_SYSTEM LSA 密钥**，只有 SYSTEM 用户可以访问。
 
-Machine certificates stored by Windows in the registry at `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` and the associated private keys located in `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (for CAPI) and `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (for CNG) are encrypted using the machine's DPAPI master keys. These keys cannot be decrypted with the domain’s DPAPI backup key; instead, the **DPAPI_SYSTEM LSA secret**, which only the SYSTEM user can access, is required.
+手动解密可以通过在 **Mimikatz** 中执行 `lsadump::secrets` 命令来提取 DPAPI_SYSTEM LSA 密钥，然后使用该密钥解密机器主密钥。或者，在修补 CAPI/CNG 后，可以使用 Mimikatz 的 `crypto::certificates /export /systemstore:LOCAL_MACHINE` 命令。
 
-Manual decryption can be achieved by executing the `lsadump::secrets` command in **Mimikatz** to extract the DPAPI_SYSTEM LSA secret, and subsequently using this key to decrypt the machine masterkeys. Alternatively, Mimikatz’s `crypto::certificates /export /systemstore:LOCAL_MACHINE` command can be used after patching CAPI/CNG as previously described.
+**SharpDPAPI** 提供了一种更自动化的方法，通过其证书命令。当使用 `/machine` 标志并具有提升的权限时，它会提升到 SYSTEM，转储 DPAPI_SYSTEM LSA 密钥，使用它解密机器 DPAPI 主密钥，然后将这些明文密钥用作查找表以解密任何机器证书私钥。
 
-**SharpDPAPI** offers a more automated approach with its certificates command. When the `/machine` flag is used with elevated permissions, it escalates to SYSTEM, dumps the DPAPI_SYSTEM LSA secret, uses it to decrypt the machine DPAPI masterkeys, and then employs these plaintext keys as a lookup table to decrypt any machine certificate private keys.
+## 查找证书文件 – THEFT4
 
-## Finding Certificate Files – THEFT4
+证书有时直接在文件系统中找到，例如在文件共享或下载文件夹中。针对 Windows 环境的最常见证书文件类型是 `.pfx` 和 `.p12` 文件。虽然不太常见，但扩展名为 `.pkcs12` 和 `.pem` 的文件也会出现。其他值得注意的与证书相关的文件扩展名包括：
 
-Certificates are sometimes found directly within the filesystem, such as in file shares or the Downloads folder. The most commonly encountered types of certificate files targeted towards Windows environments are `.pfx` and `.p12` files. Though less frequently, files with extensions `.pkcs12` and `.pem` also appear. Additional noteworthy certificate-related file extensions include:
+- `.key` 用于私钥，
+- `.crt`/`.cer` 仅用于证书，
+- `.csr` 用于证书签名请求，不包含证书或私钥，
+- `.jks`/`.keystore`/`.keys` 用于 Java 密钥库，可能包含 Java 应用程序使用的证书和私钥。
 
-- `.key` for private keys,
-- `.crt`/`.cer` for certificates only,
-- `.csr` for Certificate Signing Requests, which do not contain certificates or private keys,
-- `.jks`/`.keystore`/`.keys` for Java Keystores, which may hold certificates along with private keys utilized by Java applications.
+可以使用 PowerShell 或命令提示符通过查找上述扩展名来搜索这些文件。
 
-These files can be searched for using PowerShell or the command prompt by looking for the mentioned extensions.
-
-In cases where a PKCS#12 certificate file is found and it is protected by a password, the extraction of a hash is possible through the use of `pfx2john.py`, available at [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Subsequently, JohnTheRipper can be employed to attempt to crack the password.
-
+在找到受密码保护的 PKCS#12 证书文件的情况下，可以通过使用 `pfx2john.py` 提取哈希，该工具可在 [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html) 获取。随后，可以使用 JohnTheRipper 尝试破解密码。
 ```powershell
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys
@@ -97,22 +90,18 @@ pfx2john.py certificate.pfx > hash.txt
 # Command to crack the hash with JohnTheRipper
 john --wordlist=passwords.txt hash.txt
 ```
+## NTLM 凭证盗窃通过 PKINIT – THEFT5
 
-## NTLM Credential Theft via PKINIT – THEFT5
+给定内容解释了一种通过 PKINIT 进行 NTLM 凭证盗窃的方法，特别是通过标记为 THEFT5 的盗窃方法。以下是被动语态的重新解释，内容在适用时进行了匿名化和总结：
 
-The given content explains a method for NTLM credential theft via PKINIT, specifically through the theft method labeled as THEFT5. Here's a re-explanation in passive voice, with the content anonymized and summarized where applicable:
+为了支持不便于 Kerberos 认证的应用程序的 NTLM 认证 [MS-NLMP]，KDC 被设计为在使用 PKCA 时返回用户的 NTLM 单向函数 (OWF)，具体在 `PAC_CREDENTIAL_INFO` 缓冲区中。因此，如果一个账户通过 PKINIT 进行身份验证并获取票据授权票 (TGT)，则固有地提供了一种机制，使当前主机能够从 TGT 中提取 NTLM 哈希，以维持遗留认证协议。此过程涉及对 `PAC_CREDENTIAL_DATA` 结构的解密，该结构本质上是 NTLM 明文的 NDR 序列化表示。
 
-To support NTLM authentication [MS-NLMP] for applications that do not facilitate Kerberos authentication, the KDC is designed to return the user's NTLM one-way function (OWF) within the privilege attribute certificate (PAC), specifically in the `PAC_CREDENTIAL_INFO` buffer, when PKCA is utilized. Consequently, should an account authenticate and secure a Ticket-Granting Ticket (TGT) via PKINIT, a mechanism is inherently provided which enables the current host to extract the NTLM hash from the TGT to uphold legacy authentication protocols. This process entails the decryption of the `PAC_CREDENTIAL_DATA` structure, which is essentially an NDR serialized depiction of the NTLM plaintext.
-
-The utility **Kekeo**, accessible at [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), is mentioned as capable of requesting a TGT containing this specific data, thereby facilitating the retrieval of the user's NTLM. The command utilized for this purpose is as follows:
-
+提到的工具 **Kekeo**，可在 [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo) 获取，能够请求包含此特定数据的 TGT，从而便于检索用户的 NTLM。用于此目的的命令如下：
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
+此外，值得注意的是，Kekeo 可以处理智能卡保护的证书，只要可以检索到 PIN，参考 [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe)。同样的功能也被 **Rubeus** 支持，地址为 [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)。
 
-Additionally, it is noted that Kekeo can process smartcard-protected certificates, given the pin can be retrieved, with reference made to [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). The same capability is indicated to be supported by **Rubeus**, available at [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
-
-This explanation encapsulates the process and tools involved in NTLM credential theft via PKINIT, focusing on the retrieval of NTLM hashes through TGT obtained using PKINIT, and the utilities that facilitate this process.
+此解释概述了通过 PKINIT 进行 NTLM 凭据盗窃的过程和工具，重点是通过使用 PKINIT 获得的 TGT 检索 NTLM 哈希，以及促进此过程的实用程序。
 
 {{#include ../../../banners/hacktricks-training.md}}
-

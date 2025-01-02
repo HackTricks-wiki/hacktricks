@@ -6,98 +6,86 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Introduction
+## 介绍
 
-The Kerberos "Double Hop" problem appears when an attacker attempts to use **Kerberos authentication across two** **hops**, for example using **PowerShell**/**WinRM**.
+Kerberos "双跳" 问题出现在攻击者试图在两个跳之间使用 **Kerberos 认证** 时，例如使用 **PowerShell**/**WinRM**。
 
-When an **authentication** occurs through **Kerberos**, **credentials** **aren't** cached in **memory.** Therefore, if you run mimikatz you **won't find credentials** of the user in the machine even if he is running processes.
+当通过 **Kerberos** 进行 **认证** 时，**凭据** **不会** 被缓存到 **内存** 中。因此，如果你运行 mimikatz，你 **不会找到用户的凭据** 在机器上，即使他正在运行进程。
 
-This is because when connecting with Kerberos these are the steps:
+这是因为在使用 Kerberos 连接时，步骤如下：
 
-1. User1 provides credentials and **domain controller** returns a Kerberos **TGT** to the User1.
-2. User1 uses **TGT** to request a **service ticket** to **connect** to Server1.
-3. User1 **connects** to **Server1** and provides **service ticket**.
-4. **Server1** **doesn't** have **credentials** of User1 cached or the **TGT** of User1. Therefore, when User1 from Server1 tries to login to a second server, he is **not able to authenticate**.
+1. User1 提供凭据，**域控制器** 返回一个 Kerberos **TGT** 给 User1。
+2. User1 使用 **TGT** 请求一个 **服务票据** 以 **连接** 到 Server1。
+3. User1 **连接** 到 **Server1** 并提供 **服务票据**。
+4. **Server1** **没有** 缓存 User1 的 **凭据** 或 User1 的 **TGT**。因此，当 User1 从 Server1 尝试登录到第二台服务器时，他 **无法进行认证**。
 
-### Unconstrained Delegation
+### 不受限制的委派
 
-If **unconstrained delegation** is enabled in the PC, this won't happen as the **Server** will **get** a **TGT** of each user accessing it. Moreover, if unconstrained delegation is used you probably can **compromise the Domain Controller** from it.\
-[**More info in the unconstrained delegation page**](unconstrained-delegation.md).
+如果在 PC 上启用了 **不受限制的委派**，则不会发生这种情况，因为 **服务器** 将 **获取** 每个访问它的用户的 **TGT**。此外，如果使用不受限制的委派，你可能可以 **从中妥协域控制器**。\
+[**更多信息请参见不受限制的委派页面**](unconstrained-delegation.md)。
 
 ### CredSSP
 
-Another way to avoid this problem which is [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) is **Credential Security Support Provider**. From Microsoft:
+另一种避免此问题的方法是 [**显著不安全**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) 的 **凭据安全支持提供程序**。来自微软的说明：
 
-> CredSSP authentication delegates the user credentials from the local computer to a remote computer. This practice increases the security risk of the remote operation. If the remote computer is compromised, when credentials are passed to it, the credentials can be used to control the network session.
+> CredSSP 认证将用户凭据从本地计算机委派到远程计算机。这种做法增加了远程操作的安全风险。如果远程计算机被攻破，当凭据被传递给它时，这些凭据可以用于控制网络会话。
 
-It is highly recommended that **CredSSP** be disabled on production systems, sensitive networks, and similar environments due to security concerns. To determine whether **CredSSP** is enabled, the `Get-WSManCredSSP` command can be run. This command allows for the **checking of CredSSP status** and can even be executed remotely, provided **WinRM** is enabled.
-
+由于安全问题，强烈建议在生产系统、敏感网络和类似环境中禁用 **CredSSP**。要确定 **CredSSP** 是否启用，可以运行 `Get-WSManCredSSP` 命令。此命令允许 **检查 CredSSP 状态**，并且可以在启用 **WinRM** 的情况下远程执行。
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
-    Get-WSManCredSSP
+Get-WSManCredSSP
 }
 ```
-
-## Workarounds
+## 解决方法
 
 ### Invoke Command
 
-To address the double hop issue, a method involving a nested `Invoke-Command` is presented. This does not solve the problem directly but offers a workaround without needing special configurations. The approach allows executing a command (`hostname`) on a secondary server through a PowerShell command executed from an initial attacking machine or through a previously established PS-Session with the first server. Here's how it's done:
-
+为了解决双跳问题，提出了一种涉及嵌套 `Invoke-Command` 的方法。这并不能直接解决问题，但提供了一种无需特殊配置的变通方法。该方法允许通过从初始攻击机器执行的 PowerShell 命令或通过与第一服务器之前建立的 PS-Session，在辅助服务器上执行命令（`hostname`）。以下是具体操作步骤：
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
-    Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
+Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
+另外，建议与第一个服务器建立 PS-Session，并使用 `$cred` 运行 `Invoke-Command` 来集中任务。
 
-Alternatively, establishing a PS-Session with the first server and running the `Invoke-Command` using `$cred` is suggested for centralizing tasks.
+### 注册 PSSession 配置
 
-### Register PSSession Configuration
-
-A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.
-
+绕过双跳问题的解决方案涉及使用 `Register-PSSessionConfiguration` 和 `Enter-PSSession`。这种方法需要与 `evil-winrm` 不同的方式，并允许创建不受双跳限制的会话。
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
 klist
 ```
-
 ### PortForwarding
 
-For local administrators on an intermediary target, port forwarding allows requests to be sent to a final server. Using `netsh`, a rule can be added for port forwarding, alongside a Windows firewall rule to allow the forwarded port.
-
+对于中介目标上的本地管理员，端口转发允许请求发送到最终服务器。使用 `netsh`，可以添加一个端口转发规则，以及一个 Windows 防火墙规则以允许转发的端口。
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
-
 #### winrs.exe
 
-`winrs.exe` can be used for forwarding WinRM requests, potentially as a less detectable option if PowerShell monitoring is a concern. The command below demonstrates its use:
-
+`winrs.exe` 可用于转发 WinRM 请求，如果 PowerShell 监控是一个问题，它可能是一个不太容易被检测到的选项。下面的命令演示了它的用法：
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
-
 ### OpenSSH
 
-Installing OpenSSH on the first server enables a workaround for the double-hop issue, particularly useful for jump box scenarios. This method requires CLI installation and setup of OpenSSH for Windows. When configured for Password Authentication, this allows the intermediary server to obtain a TGT on behalf of the user.
+在第一台服务器上安装 OpenSSH 可以为双跳问题提供解决方法，特别适用于跳板机场景。此方法需要在 Windows 上进行 CLI 安装和配置 OpenSSH。当配置为密码认证时，这允许中介服务器代表用户获取 TGT。
 
-#### OpenSSH Installation Steps
+#### OpenSSH 安装步骤
 
-1. Download and move the latest OpenSSH release zip to the target server.
-2. Unzip and run the `Install-sshd.ps1` script.
-3. Add a firewall rule to open port 22 and verify SSH services are running.
+1. 下载并将最新的 OpenSSH 发布 zip 移动到目标服务器。
+2. 解压并运行 `Install-sshd.ps1` 脚本。
+3. 添加防火墙规则以打开 22 端口，并验证 SSH 服务是否正在运行。
 
-To resolve `Connection reset` errors, permissions might need to be updated to allow everyone read and execute access on the OpenSSH directory.
-
+要解决 `Connection reset` 错误，可能需要更新权限以允许所有人对 OpenSSH 目录的读取和执行访问。
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-
-## References
+## 参考文献
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
@@ -109,4 +97,3 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

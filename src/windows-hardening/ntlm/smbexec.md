@@ -2,40 +2,35 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How it Works
+## 工作原理
 
-**Smbexec** is a tool used for remote command execution on Windows systems, similar to **Psexec**, but it avoids placing any malicious files on the target system.
+**Smbexec** 是一个用于在 Windows 系统上进行远程命令执行的工具，类似于 **Psexec**，但它避免在目标系统上放置任何恶意文件。
 
-### Key Points about **SMBExec**
+### 关于 **SMBExec** 的关键点
 
-- It operates by creating a temporary service (for example, "BTOBTO") on the target machine to execute commands via cmd.exe (%COMSPEC%), without dropping any binaries.
-- Despite its stealthy approach, it does generate event logs for each command executed, offering a form of non-interactive "shell".
-- The command to connect using **Smbexec** looks like this:
-
+- 它通过在目标机器上创建一个临时服务（例如，“BTOBTO”）来执行命令，通过 cmd.exe (%COMSPEC%)，而不放置任何二进制文件。
+- 尽管采用隐蔽的方法，但它确实为每个执行的命令生成事件日志，提供了一种非交互式的“shell”。
+- 使用 **Smbexec** 连接的命令如下所示：
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ```
+### 执行无二进制文件的命令
 
-### Executing Commands Without Binaries
+- **Smbexec** 通过服务 binPaths 直接执行命令，消除了在目标上需要物理二进制文件的需求。
+- 这种方法对于在 Windows 目标上执行一次性命令非常有用。例如，将其与 Metasploit 的 `web_delivery` 模块配对，可以执行针对 PowerShell 的反向 Meterpreter 有效载荷。
+- 通过在攻击者的机器上创建一个远程服务，并将 binPath 设置为通过 cmd.exe 运行提供的命令，可以成功执行有效载荷，实现回调和有效载荷执行与 Metasploit 监听器，即使发生服务响应错误。
 
-- **Smbexec** enables direct command execution through service binPaths, eliminating the need for physical binaries on the target.
-- This method is useful for executing one-time commands on a Windows target. For instance, pairing it with Metasploit's `web_delivery` module allows for the execution of a PowerShell-targeted reverse Meterpreter payload.
-- By creating a remote service on the attacker's machine with binPath set to run the provided command through cmd.exe, it's possible to execute the payload successfully, achieving callback and payload execution with the Metasploit listener, even if service response errors occur.
+### 命令示例
 
-### Commands Example
-
-Creating and starting the service can be accomplished with the following commands:
-
+创建和启动服务可以通过以下命令完成：
 ```bash
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]
 ```
+有关更多详细信息，请查看 [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-FOr further details check [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
-## References
+## 参考文献
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

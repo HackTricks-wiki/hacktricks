@@ -1,146 +1,143 @@
-# HackTricks Values & FAQ
+# HackTricks 值与常见问题
 
 {{#include ../banners/hacktricks-training.md}}
 
-## HackTricks Values
+## HackTricks 值
 
 > [!TIP]
-> These are the **values of the HackTricks Project**:
+> 这些是 **HackTricks 项目的价值观**：
 >
-> - Give **FREE** access to **EDUCATIONAL hacking** resources to **ALL** Internet.
->   - Hacking is about learning, and learning should be as free as possible.
->   - The purpose of this book is to serve as a comprehensive **educational resource**.
-> - **STORE** awesome **hacking** techniques that the community publishes giving the **ORIGINAL** **AUTHORS** all the **credits**.
->   - **We don't want the credit from other people**, we just want to store cool tricks for everyone.
->   - We also write **our own researches** in HackTricks.
->   - In several cases we will just write **in HackTricks a summary of the important parts** of the technique and will **encourage the lector to visit the original post** for more details.
-> - **ORGANIZE** all the hacking techniques in the book so it's **MORE ACCESSIBLE**
->   - The HackTricks team has dedicated thousands of hours for free **only to organize the content** so people can **learn faster**
+> - 为 **所有** 互联网用户提供 **免费** 的 **教育黑客** 资源。
+>   - 黑客是关于学习的，而学习应该尽可能免费。
+>   - 本书的目的是作为一个全面的 **教育资源**。
+> - **存储** 社区发布的精彩 **黑客** 技术，给予 **原始** **作者** 所有的 **荣誉**。
+>   - **我们不想要其他人的荣誉**，我们只想为大家存储酷炫的技巧。
+>   - 我们还在 HackTricks 中撰写 **我们自己的研究**。
+>   - 在某些情况下，我们将仅在 HackTricks 中写 **技术重要部分的摘要**，并 **鼓励读者访问原始帖子** 以获取更多细节。
+> - **组织** 书中的所有黑客技术，使其 **更易获取**
+>   - HackTricks 团队为 **仅仅组织内容** 而免费投入了数千小时，以便人们可以 **更快学习**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
-## HackTricks faq
+## HackTricks 常见问题
 
 > [!TIP]
 >
-> - **Thank you so much for these resources, how can I thank you?**
+> - **非常感谢这些资源，我该如何感谢你们？**
 
-You can publicly thanks HackTricks teams for putting together all these resources publicly in a tweet mentioning [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-If you are specially grateful you can also [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
-And don't forget to **give a star in the Github projects!** (Find the links below).
+您可以在推特上公开感谢 HackTricks 团队将所有这些资源汇集在一起，提及 [**@hacktricks_live**](https://twitter.com/hacktricks_live)。\
+如果您特别感激，您也可以 [**在这里赞助该项目**](https://github.com/sponsors/carlospolop)。\
+并且不要忘记 **在 Github 项目中给个星星！**（在下面找到链接）。
 
 > [!TIP]
 >
-> - **How can I contribute to the project?**
+> - **我该如何为该项目做贡献？**
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:
+您可以 **与社区分享新的技巧和窍门或修复您在书中发现的错误**，向相应的 Github 页面发送 **Pull Request**：
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Don't forget to **give a star in the Github projects!**
+不要忘记 **在 Github 项目中给个星星！**
 
 > [!TIP]
 >
-> - **Can I copy some content from HackTricks and put it in my blog?**
+> - **我可以复制一些 HackTricks 的内容并放在我的博客上吗？**
 
-Yes, you can, but **don't forget to mention the specific link(s)** where the content was taken from.
+可以，但 **不要忘记提及具体的链接**，内容是从哪里获取的。
 
 > [!TIP]
 >
-> - **How can I cite a page of HackTricks?**
+> - **我该如何引用 HackTricks 的页面？**
 
-As long as the link **of** the page(s) were you took the information from appears it's enough.\
-If you need a bibtex you can use something like:
-
+只要您引用的信息页面的 **链接** 出现即可。\
+如果您需要 bibtex，您可以使用类似的格式：
 ```latex
 @misc{hacktricks-bibtexing,
-  author = {"HackTricks Team" or the Authors name of the specific page/trick},
-  title = {Title of the Specific Page},
-  year = {Year of Last Update (check it at the end of the page)},
-  url = {\url{https://book.hacktricks.xyz/specific-page}},
+author = {"HackTricks Team" or the Authors name of the specific page/trick},
+title = {Title of the Specific Page},
+year = {Year of Last Update (check it at the end of the page)},
+url = {\url{https://book.hacktricks.xyz/specific-page}},
 }
 ```
+> [!WARNING]
+>
+> - **我可以在我的博客中复制所有HackTricks吗？**
+
+**我不建议这样做**。这对任何人都**没有好处**，因为所有的**内容已经在官方HackTricks书籍中免费公开**。
+
+如果你担心它会消失，只需在Github上分叉或下载，如我所说，它已经是免费的。
 
 > [!WARNING]
 >
-> - **Can I copy all HackTricks in my blog?**
+> - **你们为什么有赞助商？HackTricks书籍是商业用途吗？**
 
-**I would rather not**. Thats **not going to benefit anyone** as all the **content is already publicly available** in the official HackTricks books for free.
+第一个**HackTricks** **价值**是为**全世界**提供**免费的**黑客教育资源。HackTricks团队已经**投入了数千小时**来提供这些内容，再次强调，都是**免费的**。
 
-If you fear that it will disappear, just fork it in Github or download it, as I said it's already free.
+如果你认为HackTricks书籍是为了**商业目的**而制作的，你是**完全错误的**。
 
-> [!WARNING]
->
-> - **Why do you have sponsors? Are HackTricks books for commercial purposes?**
+我们有赞助商，因为即使所有内容都是免费的，我们希望**给社区提供欣赏我们工作的可能性**，如果他们愿意。因此，我们提供人们通过[**Github赞助商**](https://github.com/sponsors/carlospolop)捐赠给HackTricks的选项，以及**相关的网络安全公司**赞助HackTricks并在书中**放置一些广告**，这些**广告**总是放在**可见**但**不干扰学习**过程的地方，以便人们专注于内容。
 
-The first **HackTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
-
-If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
-
-We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
-
-You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
+你不会发现HackTricks充满了烦人的广告，就像其他内容远不如HackTricks的博客，因为HackTricks不是为了商业目的而制作的。
 
 > [!CAUTION]
 >
-> - **What should I do if some HackTricks page is based on my blog post but it isn't referenced?**
+> - **如果某个HackTricks页面基于我的博客文章但没有引用，我该怎么办？**
 
-**We are very sorry. This shouldn't have happened**. Please, let us know via Github issues, Twitter, Discord... the link of the HackTricks page with the content and the link of your blog and **we will check it and add it ASAP**.
-
-> [!CAUTION]
->
-> - **What should I do if there is content from my blog in HackTricks and I don't want it there?**
-
-Note that having links to your page in HackTricks:
-
-- Improve your **SEO**
-- The content gets **translated to more than 15 languages** making possible for more people to access this content
-- **HackTricks encourages** people to **check your page** (several people has mentioned us that since some page of them is in HackTricks they receive more visits)
-
-However, If you still want the content of your blog to be removed from HackTricks just let us know and we will definitely **remove every link to your blog**, and any content based on it.
+**我们非常抱歉。这不应该发生**。请通过Github问题、Twitter、Discord等告知我们HackTricks页面的链接和你的博客链接，**我们会检查并尽快添加**。
 
 > [!CAUTION]
 >
-> - **What should I do if I find copy-pasted content in HackTricks?**
+> - **如果HackTricks中有我博客的内容而我不想要它，我该怎么办？**
 
-We always **give the original authors all the credits**. If you find a page with copy-pasted content without original source referenced, let us know and we will either **remove it**, **add the link before the text**, or **rewrite it adding the link**.
+请注意，在HackTricks中有链接到你的页面：
+
+- 改善你的**SEO**
+- 内容被**翻译成超过15种语言**，使更多人能够访问这些内容
+- **HackTricks鼓励**人们**查看你的页面**（有几个人提到，自从他们的某个页面在HackTricks中，他们的访问量增加了）
+
+然而，如果你仍然希望从HackTricks中删除你博客的内容，请告知我们，我们将**删除所有指向你博客的链接**，以及任何基于它的内容。
+
+> [!CAUTION]
+>
+> - **如果我在HackTricks中发现复制粘贴的内容，我该怎么办？**
+
+我们始终**给予原作者所有的信用**。如果你发现某个页面有复制粘贴的内容而没有引用原始来源，请告知我们，我们将**删除它**、**在文本前添加链接**，或**重写并添加链接**。
 
 ## LICENSE
 
-Copyright © All rights reserved unless otherwise specified.
+Copyright © 保留所有权利，除非另有说明。
 
 #### License Summary:
 
-- Attribution: You are free to:
-  - Share — copy and redistribute the material in any medium or format.
-  - Adapt — remix, transform, and build upon the material.
+- Attribution: 你可以自由地：
+- Share — 以任何媒介或格式复制和重新分发材料。
+- Adapt — 混合、转变和基于材料进行构建。
 
 #### Additional Terms:
 
-- Third-Party Content: Some parts of this blog/book may include content from other sources, such as excerpts from other blogs or publications. The use of such content is done under the principles of fair use or with explicit permission from the respective copyright holders. Please refer to the original sources for specific licensing information regarding third-party content.
-- Authorship: The original content authored by HackTricks is subject to the terms of this license. You are encouraged to attribute this work to the author when sharing or adapting it.
+- Third-Party Content: 本博客/书籍的某些部分可能包含来自其他来源的内容，例如其他博客或出版物的摘录。使用此类内容是基于合理使用原则或获得相关版权持有者的明确许可。有关第三方内容的具体许可信息，请参考原始来源。
+- Authorship: HackTricks创作的原始内容受此许可条款的约束。鼓励在分享或改编时将此作品归功于作者。
 
 #### Exemptions:
 
-- Commercial Use: For inquiries regarding commercial use of this content, please contact me.
+- Commercial Use: 有关此内容商业使用的查询，请与我联系。
 
-This license does not grant any trademark or branding rights in relation to the content. All trademarks and branding featured in this blog/book are the property of their respective owners.
+此许可不授予与内容相关的任何商标或品牌权利。所有在本博客/书籍中出现的商标和品牌均为其各自所有者的财产。
 
-**By accessing or using HackTricks, you agree to abide by the terms of this license. If you do not agree with these terms, please, do not access this website.**
+**通过访问或使用HackTricks，你同意遵守此许可的条款。如果你不同意这些条款，请不要访问此网站。**
 
-## **Disclaimer**
+## **免责声明**
 
 > [!CAUTION]
-> This book, 'HackTricks,' is intended for educational and informational purposes only. The content within this book is provided on an 'as is' basis, and the authors and publishers make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability of the information, products, services, or related graphics contained within this book. Any reliance you place on such information is therefore strictly at your own risk.
+> 本书《HackTricks》仅用于教育和信息目的。书中的内容按“现状”提供，作者和出版商不对书中包含的信息、产品、服务或相关图形的完整性、准确性、可靠性、适用性或可用性作出任何明示或暗示的陈述或保证。因此，你对这些信息的任何依赖均严格自担风险。
 >
-> The authors and publishers shall in no event be liable for any loss or damage, including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this book.
+> 作者和出版商在任何情况下均不对因使用本书而导致的任何损失或损害承担责任，包括但不限于间接或后果性损失或损害，或因数据或利润损失而产生的任何损失或损害。
 >
-> Furthermore, the techniques and tips described in this book are provided for educational and informational purposes only, and should not be used for any illegal or malicious activities. The authors and publishers do not condone or support any illegal or unethical activities, and any use of the information contained within this book is at the user's own risk and discretion.
+> 此外，本书中描述的技术和技巧仅用于教育和信息目的，不应用于任何非法或恶意活动。作者和出版商不支持或纵容任何非法或不道德的活动，使用本书中包含的信息的任何行为均由用户自行承担风险和判断。
 >
-> The user is solely responsible for any actions taken based on the information contained within this book, and should always seek professional advice and assistance when attempting to implement any of the techniques or tips described herein.
+> 用户对基于本书中包含的信息采取的任何行动负全部责任，并应在尝试实施本书中描述的任何技术或技巧时始终寻求专业建议和帮助。
 >
-> By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
+> 使用本书即表示用户同意解除作者和出版商对因使用本书或其中任何信息而可能导致的任何损害、损失或伤害的责任和责任。
 
 {{#include ../banners/hacktricks-training.md}}
-

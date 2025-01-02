@@ -1,9 +1,8 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
+本备忘单的一部分基于 [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)。
 
-# Installation
-
+# 安装
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -11,9 +10,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-
-# Basic Actions
-
+# 基本操作
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -31,11 +28,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
+# 加载的和主对象信息
 
-# Loaded and Main object information
-
-## Loaded Data
-
+## 加载的数据
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -45,22 +40,20 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-             ('libc.so.6',
-              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-             ('ld-linux-x86-64.so.2',
-              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-             ('extern-address space',
-              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-             ('cle##tls',
-              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+('libc.so.6',
+<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+('ld-linux-x86-64.so.2',
+<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+('extern-address space',
+<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+('cle##tls',
+<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-
-## Main Object
-
+## 主要目标
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -74,9 +67,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-
-## Symbols and Relocations
-
+## 符号和重定位
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -93,9 +84,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-
-## Blocks
-
+## 块
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -103,11 +92,9 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
+# 动态分析
 
-# Dynamic Analysis
-
-## Simulation Manager, States
-
+## 仿真管理器，状态
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -130,15 +117,13 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+## 调用函数
 
-## Calling functions
+- 你可以通过 `args` 传递参数列表，通过 `env` 传递环境变量字典到 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或位向量，并将被序列化为模拟执行的参数和环境。默认的 `args` 是一个空列表，因此如果你分析的程序期望至少找到一个 `argv[0]`，你应该始终提供它！
+- 如果你希望 `argc` 是符号的，可以将一个符号位向量作为 `argc` 传递给 `entry_state` 和 `full_init_state` 构造函数。不过要小心：如果这样做，你还应该向结果状态添加一个约束，确保你的 argc 值不能大于你传递给 `args` 的参数数量。
+- 要使用调用状态，你应该使用 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是你想要调用的函数的地址，`argN` 是该函数的第 N 个参数，可以是 Python 整数、字符串、数组或位向量。如果你想分配内存并实际传递一个对象的指针，你应该将其包装在 PointerWrapper 中，即 `angr.PointerWrapper("point to me!")`。这个 API 的结果可能有点不可预测，但我们正在努力改进它。
 
-- You can pass a list of arguments through `args` and a dictionary of environment variables through `env` into `entry_state` and `full_init_state`. The values in these structures can be strings or bitvectors, and will be serialized into the state as the arguments and environment to the simulated execution. The default `args` is an empty list, so if the program you're analyzing expects to find at least an `argv[0]`, you should always provide that!
-- If you'd like to have `argc` be symbolic, you can pass a symbolic bitvector as `argc` to the `entry_state` and `full_init_state` constructors. Be careful, though: if you do this, you should also add a constraint to the resulting state that your value for argc cannot be larger than the number of args you passed into `args`.
-- To use the call state, you should call it with `.call_state(addr, arg1, arg2, ...)`, where `addr` is the address of the function you want to call and `argN` is the Nth argument to that function, either as a python integer, string, or array, or a bitvector. If you want to have memory allocated and actually pass in a pointer to an object, you should wrap it in an PointerWrapper, i.e. `angr.PointerWrapper("point to me!")`. The results of this API can be a little unpredictable, but we're working on it.
-
-## BitVectors
-
+## 位向量
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -147,9 +132,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-
-## Symbolic BitVectors & Constraints
-
+## 符号位向量与约束
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -183,9 +166,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-
-## Hooking
-
+## 钩子
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -203,10 +184,8 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
+此外，您可以使用 `proj.hook_symbol(name, hook)`，将符号的名称作为第一个参数，以挂钩符号所在的地址。
 
-Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a symbol as the first argument, to hook the address where the symbol lives
-
-# Examples
+# 示例
 
 {{#include ../../../banners/hacktricks-training.md}}
-

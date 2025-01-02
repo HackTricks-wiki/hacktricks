@@ -1,33 +1,33 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Wasm Decompilation and Wat Compilation Guide
+# Wasm 反编译和 Wat 编译指南
 
-In the realm of **WebAssembly**, tools for **decompiling** and **compiling** are essential for developers. This guide introduces some online resources and software for handling **Wasm (WebAssembly binary)** and **Wat (WebAssembly text)** files.
+在 **WebAssembly** 领域，反编译和编译工具对开发者至关重要。本指南介绍了一些处理 **Wasm (WebAssembly 二进制)** 和 **Wat (WebAssembly 文本)** 文件的在线资源和软件。
 
-## Online Tools
+## 在线工具
 
-- To **decompile** Wasm to Wat, the tool available at [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) comes in handy.
-- For **compiling** Wat back to Wasm, [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/) serves the purpose.
-- Another decompilation option can be found at [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
+- 要将 Wasm 反编译为 Wat，可以使用 [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)。
+- 要将 Wat 编译回 Wasm，可以使用 [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/)。
+- 另一个反编译选项可以在 [web-wasmdec](https://wwwg.github.io/web-wasmdec/) 找到。
 
-## Software Solutions
+## 软件解决方案
 
-- For a more robust solution, [JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) offers extensive features.
-- The open-source project [wasmdec](https://github.com/wwwg/wasmdec) is also available for decompilation tasks.
+- 对于更强大的解决方案，[JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) 提供了广泛的功能。
+- 开源项目 [wasmdec](https://github.com/wwwg/wasmdec) 也可用于反编译任务。
 
-# .Net Decompilation Resources
+# .Net 反编译资源
 
-Decompiling .Net assemblies can be accomplished with tools such as:
+反编译 .Net 程序集可以使用以下工具：
 
-- [ILSpy](https://github.com/icsharpcode/ILSpy), which also offers a [plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), allowing cross-platform usage.
-- For tasks involving **decompilation**, **modification**, and **recompilation**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) is highly recommended. **Right-clicking** a method and choosing **Modify Method** enables code changes.
-- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) is another alternative for decompiling .Net assemblies.
+- [ILSpy](https://github.com/icsharpcode/ILSpy)，它还提供了 [Visual Studio Code 插件](https://github.com/icsharpcode/ilspy-vscode)，允许跨平台使用。
+- 对于涉及 **反编译**、**修改** 和 **重新编译** 的任务，强烈推荐 [dnSpy](https://github.com/0xd4d/dnSpy/releases)。**右键单击** 方法并选择 **修改方法** 可以进行代码更改。
+- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) 是另一个反编译 .Net 程序集的替代方案。
 
-## Enhancing Debugging and Logging with DNSpy
+## 使用 DNSpy 增强调试和日志记录
 
-### DNSpy Logging
+### DNSpy 日志记录
 
-To log information to a file using DNSpy, incorporate the following .Net code snippet:
+要使用 DNSpy 将信息记录到文件中，可以加入以下 .Net 代码片段：
 
 %%%cpp
 using System.IO;
@@ -35,81 +35,80 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 %%%
 
-### DNSpy Debugging
+### DNSpy 调试
 
-For effective debugging with DNSpy, a sequence of steps is recommended to adjust **Assembly attributes** for debugging, ensuring that optimizations that could hinder debugging are disabled. This process includes changing the `DebuggableAttribute` settings, recompiling the assembly, and saving the changes.
+为了有效地使用 DNSpy 进行调试，建议按照一系列步骤调整 **程序集属性** 以进行调试，确保禁用可能妨碍调试的优化。此过程包括更改 `DebuggableAttribute` 设置、重新编译程序集并保存更改。
 
-Moreover, to debug a .Net application run by **IIS**, executing `iisreset /noforce` restarts IIS. To attach DNSpy to the IIS process for debugging, the guide instructs on selecting the **w3wp.exe** process within DNSpy and starting the debugging session.
+此外，要调试由 **IIS** 运行的 .Net 应用程序，执行 `iisreset /noforce` 以重启 IIS。要将 DNSpy 附加到 IIS 进程进行调试，指南指示在 DNSpy 中选择 **w3wp.exe** 进程并开始调试会话。
 
-For a comprehensive view of loaded modules during debugging, accessing the **Modules** window in DNSpy is advised, followed by opening all modules and sorting assemblies for easier navigation and debugging.
+为了在调试期间全面查看加载的模块，建议访问 DNSpy 中的 **模块** 窗口，然后打开所有模块并对程序集进行排序，以便于导航和调试。
 
-This guide encapsulates the essence of WebAssembly and .Net decompilation, offering a pathway for developers to navigate these tasks with ease.
+本指南概括了 WebAssembly 和 .Net 反编译的本质，为开发者提供了轻松处理这些任务的途径。
 
-## **Java Decompiler**
+## **Java 反编译器**
 
-To decompile Java bytecode, these tools can be very helpful:
+要反编译 Java 字节码，这些工具非常有用：
 
 - [jadx](https://github.com/skylot/jadx)
 - [JD-GUI](https://github.com/java-decompiler/jd-gui/releases)
 
-## **Debugging DLLs**
+## **调试 DLL**
 
-### Using IDA
+### 使用 IDA
 
-- **Rundll32** is loaded from specific paths for 64-bit and 32-bit versions.
-- **Windbg** is selected as the debugger with the option to suspend on library load/unload enabled.
-- Execution parameters include the DLL path and function name. This setup halts execution upon each DLL's loading.
+- **Rundll32** 从特定路径加载 64 位和 32 位版本。
+- **Windbg** 被选为调试器，并启用了在库加载/卸载时暂停的选项。
+- 执行参数包括 DLL 路径和函数名称。此设置在每个 DLL 加载时暂停执行。
 
-### Using x64dbg/x32dbg
+### 使用 x64dbg/x32dbg
 
-- Similar to IDA, **rundll32** is loaded with command line modifications to specify the DLL and function.
-- Settings are adjusted to break on DLL entry, allowing breakpoint setting at the desired DLL entry point.
+- 类似于 IDA，**rundll32** 通过命令行修改加载 DLL 和函数。
+- 设置调整为在 DLL 入口处中断，允许在所需的 DLL 入口点设置断点。
 
-### Images
+### 图像
 
-- Execution stopping points and configurations are illustrated through screenshots.
+- 执行停止点和配置通过截图进行说明。
 
 ## **ARM & MIPS**
 
-- For emulation, [arm_now](https://github.com/nongiach/arm_now) is a useful resource.
+- 对于仿真，[arm_now](https://github.com/nongiach/arm_now) 是一个有用的资源。
 
 ## **Shellcodes**
 
-### Debugging Techniques
+### 调试技术
 
-- **Blobrunner** and **jmp2it** are tools for allocating shellcodes in memory and debugging them with Ida or x64dbg.
-  - Blobrunner [releases](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
-  - jmp2it [compiled version](https://github.com/adamkramer/jmp2it/releases/)
-- **Cutter** offers GUI-based shellcode emulation and inspection, highlighting differences in shellcode handling as a file versus direct shellcode.
+- **Blobrunner** 和 **jmp2it** 是用于在内存中分配 shellcodes 并使用 Ida 或 x64dbg 调试它们的工具。
+- Blobrunner [发布](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
+- jmp2it [编译版本](https://github.com/adamkramer/jmp2it/releases/)
+- **Cutter** 提供基于 GUI 的 shellcode 仿真和检查，突出显示作为文件与直接 shellcode 处理的差异。
 
-### Deobfuscation and Analysis
+### 去混淆和分析
 
-- **scdbg** provides insights into shellcode functions and deobfuscation capabilities.
-  %%%bash
-  scdbg.exe -f shellcode # Basic info
-  scdbg.exe -f shellcode -r # Analysis report
-  scdbg.exe -f shellcode -i -r # Interactive hooks
-  scdbg.exe -f shellcode -d # Dump decoded shellcode
-  scdbg.exe -f shellcode /findsc # Find start offset
-  scdbg.exe -f shellcode /foff 0x0000004D # Execute from offset
-  %%%
+- **scdbg** 提供对 shellcode 函数和去混淆能力的洞察。
+%%%bash
+scdbg.exe -f shellcode # 基本信息
+scdbg.exe -f shellcode -r # 分析报告
+scdbg.exe -f shellcode -i -r # 交互式钩子
+scdbg.exe -f shellcode -d # 转储解码的 shellcode
+scdbg.exe -f shellcode /findsc # 查找起始偏移
+scdbg.exe -f shellcode /foff 0x0000004D # 从偏移执行
+%%%
 
-- **CyberChef** for disassembling shellcode: [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
+- **CyberChef** 用于反汇编 shellcode: [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
 
 ## **Movfuscator**
 
-- An obfuscator that replaces all instructions with `mov`.
-- Useful resources include a [YouTube explanation](https://www.youtube.com/watch?v=2VF_wPkiBJY) and [PDF slides](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
-- **demovfuscator** might reverse movfuscator's obfuscation, requiring dependencies like `libcapstone-dev` and `libz3-dev`, and installing [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
+- 一种将所有指令替换为 `mov` 的混淆器。
+- 有用的资源包括 [YouTube 解释](https://www.youtube.com/watch?v=2VF_wPkiBJY) 和 [PDF 幻灯片](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)。
+- **demovfuscator** 可能会逆转 movfuscator 的混淆，需要依赖项如 `libcapstone-dev` 和 `libz3-dev`，并安装 [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md)。
 
 ## **Delphi**
 
-- For Delphi binaries, [IDR](https://github.com/crypto2011/IDR) is recommended.
+- 对于 Delphi 二进制文件，推荐使用 [IDR](https://github.com/crypto2011/IDR)。
 
-# Courses
+# 课程
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Binary deobfuscation\)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(二进制去混淆\)
 
 {{#include ../../banners/hacktricks-training.md}}
-

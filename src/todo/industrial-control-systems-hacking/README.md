@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# 工业控制系统黑客技术
 
-## About this Section
+## 关于本节
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+本节包含有关工业控制系统的所有内容，包括概念以及利用各种安全问题进行黑客攻击的方法论。
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+工业控制系统无处不在，因为工业对国家的经济发展至关重要。但这些ICS难以更新，且在该领域的进展较少。因此，发现安全漏洞在这里很常见。这里使用的大多数协议和标准是在90年代开发的，与当前的攻击场景相比，能力较弱。
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+保护这些系统变得重要，因为破坏它们可能会造成巨大的经济损失，甚至在最坏的情况下危及生命。要理解工业控制系统的安全性，了解它们的内部结构是必要的。
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+由于工业控制系统是按照设定标准安装的，了解每个组件将有助于将控制系统中的其他机制互联。像PLC和SCADA系统这样的设备在各个行业的安装方式不同，因此信息收集至关重要。
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+工业控制系统有时可能会很复杂，因此在进行任何操作时需要大量的耐心。在计划攻击和开发任何漏洞之前，所有的工作都是关于探测和侦察。
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+这些技术也可以用于保护工业控制系统免受攻击和蓝队防御。

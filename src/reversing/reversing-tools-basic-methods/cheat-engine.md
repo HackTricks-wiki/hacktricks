@@ -2,163 +2,162 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) 是一个有用的程序，可以找到正在运行的游戏内重要值在内存中的存储位置并进行更改。\
+当你下载并运行它时，你会**看到**一个**教程**，介绍如何使用该工具。如果你想学习如何使用该工具，强烈建议完成这个教程。
 
-## What are you searching?
+## 你在搜索什么？
 
 ![](<../../images/image (762).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+这个工具非常有用，可以找到**某个值**（通常是一个数字）**在程序内存中的存储位置**。\
+**通常数字**以**4字节**形式存储，但你也可以找到**双精度**或**浮点**格式，或者你可能想寻找一些**不同于数字**的东西。因此，你需要确保你**选择**你想要**搜索的内容**：
 
 ![](<../../images/image (324).png>)
 
-Also you can indicate **different** types of **searches**:
+你还可以指示**不同**类型的**搜索**：
 
 ![](<../../images/image (311).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+你还可以勾选框以**在扫描内存时停止游戏**：
 
 ![](<../../images/image (1052).png>)
 
-### Hotkeys
+### 热键
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+在 _**编辑 --> 设置 --> 热键**_ 中，你可以为不同的目的设置不同的**热键**，例如**停止**游戏（如果你想在某个时刻扫描内存，这非常有用）。还有其他选项可用：
 
 ![](<../../images/image (864).png>)
 
-## Modifying the value
+## 修改值
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+一旦你**找到**你正在**寻找的值**（更多内容在后面的步骤中），你可以通过双击它来**修改**它，然后双击其值：
 
 ![](<../../images/image (563).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+最后**勾选**以在内存中完成修改：
 
 ![](<../../images/image (385).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+对**内存**的**更改**将立即**应用**（请注意，直到游戏再次使用此值，该值**不会在游戏中更新**）。
 
-## Searching the value
+## 搜索值
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+所以，我们假设有一个重要的值（比如你用户的生命值）你想要提高，并且你正在内存中寻找这个值）
 
-### Through a known change
+### 通过已知的变化
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+假设你在寻找值100，你**执行扫描**以搜索该值，并且你发现了很多匹配项：
 
 ![](<../../images/image (108).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+然后，你做一些事情使得**值发生变化**，你**停止**游戏并**执行**下一次扫描：
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-&#xNAN;_&#x49;f you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engine 将搜索**从100变为新值**的**值**。恭喜你，你**找到了**你正在寻找的**值的地址**，现在你可以修改它。\
+如果你仍然有多个值，做一些事情再次修改该值，并执行另一次“下一次扫描”以过滤地址。
 
-### Unknown Value, known change
+### 未知值，已知变化
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+在你**不知道值**但你知道**如何使其变化**（甚至变化的值）的情况下，你可以寻找你的数字。
 
-So, start by performing a scan of type "**Unknown initial value**":
+所以，首先执行一种类型为“**未知初始值**”的扫描：
 
 ![](<../../images/image (890).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+然后，使值发生变化，指示**值**是**如何变化的**（在我的例子中是减少了1），并执行**下一次扫描**：
 
 ![](<../../images/image (371).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+你将看到**所有以所选方式被修改的值**：
 
 ![](<../../images/image (569).png>)
 
-Once you have found your value, you can modify it.
+一旦你找到了你的值，你可以修改它。
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+请注意，有很多可能的变化，你可以根据需要多次执行这些**步骤**以过滤结果：
 
 ![](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### 随机内存地址 - 查找代码
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
+到目前为止，我们学习了如何找到存储值的地址，但在**不同的游戏执行中，该地址很可能在内存中的不同位置**。所以让我们找出如何始终找到该地址。
 
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+使用一些提到的技巧，找到当前游戏存储重要值的地址。然后（如果你愿意，可以停止游戏）右键单击找到的**地址**，选择“**查找访问此地址的内容**”或“**查找写入此地址的内容**”：
 
 ![](<../../images/image (1067).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+**第一个选项**有助于了解**代码**的**哪些部分**在**使用**此**地址**（这对于更多事情很有用，比如**知道你可以在哪里修改游戏的代码**）。\
+**第二个选项**更为**具体**，在这种情况下更有帮助，因为我们想知道**这个值是从哪里写入的**。
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+一旦你选择了其中一个选项，**调试器**将**附加**到程序，并且会出现一个新的**空窗口**。现在，**玩**游戏并**修改**该**值**（无需重新启动游戏）。**窗口**应该会**填充**正在**修改**该**值**的**地址**：
 
 ![](<../../images/image (91).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+现在你找到了修改值的地址，你可以**随意修改代码**（Cheat Engine 允许你快速将其修改为 NOP）：
 
 ![](<../../images/image (1057).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+因此，你现在可以修改它，使得代码不会影响你的数字，或者总是以积极的方式影响它。
 
-### Random Memory Address - Finding the pointer
+### 随机内存地址 - 查找指针
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+按照之前的步骤，找到你感兴趣的值。然后，使用“**查找写入此地址的内容**”找出哪个地址写入此值，并双击它以获取反汇编视图：
 
 ![](<../../images/image (1039).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+然后，执行新的扫描**搜索“\[]”之间的十六进制值**（在这种情况下是$edx的值）：
 
 ![](<../../images/image (994).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+（_如果出现多个，通常需要最小的地址_）\
+现在，我们已经**找到了将修改我们感兴趣的值的指针**。
 
-Click on "**Add Address Manually**":
+点击“**手动添加地址**”：
 
 ![](<../../images/image (990).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+现在，勾选“指针”复选框，并在文本框中添加找到的地址（在这种情况下，前一张图片中找到的地址是“Tutorial-i386.exe”+2426B0）：
 
 ![](<../../images/image (392).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+（注意第一个“地址”是从你输入的指针地址自动填充的）
 
-Click OK and a new pointer will be created:
+点击确定，一个新的指针将被创建：
 
 ![](<../../images/image (308).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+现在，每次你修改该值时，即使值所在的内存地址不同，你也在**修改重要值**。
 
-### Code Injection
+### 代码注入
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+代码注入是一种技术，你将一段代码注入目标进程，然后重新路由代码的执行以通过你自己编写的代码（例如给你积分而不是减少它们）。
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+所以，想象一下你找到了一个地址，它正在将1从你的玩家生命中减去：
 
 ![](<../../images/image (203).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+点击显示反汇编以获取**反汇编代码**。\
+然后，点击**CTRL+a**以调用自动汇编窗口并选择 _**模板 --> 代码注入**_
 
 ![](<../../images/image (902).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+填写**你想要修改的指令的地址**（这通常是自动填充的）：
 
 ![](<../../images/image (744).png>)
 
-A template will be generated:
+将生成一个模板：
 
 ![](<../../images/image (944).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed\*\*.\*\* In this example the injected code will add 2 points instead of substracting 1:
+因此，将你的新汇编代码插入到“**newmem**”部分，并从“**originalcode**”中删除原始代码，如果你不想让它被执行\*\*.\*\* 在这个例子中，注入的代码将增加2点而不是减少1：
 
 ![](<../../images/image (521).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**点击执行等等，你的代码应该被注入到程序中，改变功能的行为！**
 
-## **References**
+## **参考**
 
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- **Cheat Engine 教程，完成它以学习如何开始使用 Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
-

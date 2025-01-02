@@ -1,14 +1,13 @@
-# About the author
+# 关于作者
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Hello!!
+### 你好！！
 
-First of all, it's needed to indicate that all **credits of techniques from researches from other sites belongs to the original authors** (there are references in the pages). Kudos to every research that shares knowledge to improve the security of the internet.
+首先，需要指出的是，所有**来自其他网站研究的技术的信用归原作者所有**（页面中有引用）。感谢每一个分享知识以提高互联网安全的研究。
 
-HackTricks is a educational Wiki that compiles knowledge about **cyber-security** lead by Carlos with hundreds of collaborators! It's a **huge collection of hacking tricks** that is updated by the community much as possible to keep it up to date. If you find something is missing or outdated, please, send a **Pull Request** to the [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
+HackTricks 是一个由 Carlos 主导的教育 Wiki，汇集了关于**网络安全**的知识，拥有数百名合作者！这是一个**巨大的黑客技巧集合**，由社区尽可能地更新，以保持最新。如果您发现有缺失或过时的内容，请发送**Pull Request**到 [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)！
 
-HackTricks is also a wiki were **a lot of researches also share their latest findings**, so it's a great place to keep up to date with the latest hacking techniques.
+HackTricks 也是一个许多研究人员分享他们最新发现的 Wiki，因此这是一个跟上最新黑客技术的好地方。
 
 {{#include ../banners/hacktricks-training.md}}
-

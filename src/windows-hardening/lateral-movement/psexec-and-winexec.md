@@ -4,40 +4,37 @@
 
 {% embed url="https://websec.nl/" %}
 
-## How do they work
+## 它们是如何工作的
 
-The process is outlined in the steps below, illustrating how service binaries are manipulated to achieve remote execution on a target machine via SMB:
+该过程在以下步骤中概述，说明如何通过 SMB 操纵服务二进制文件以实现对目标机器的远程执行：
 
-1. **Copying of a service binary to the ADMIN$ share over SMB** is performed.
-2. **Creation of a service on the remote machine** is done by pointing to the binary.
-3. The service is **started remotely**.
-4. Upon exit, the service is **stopped, and the binary is deleted**.
+1. **通过 SMB 复制服务二进制文件到 ADMIN$ 共享**。
+2. **在远程机器上创建服务**，指向该二进制文件。
+3. 服务被 **远程启动**。
+4. 退出时，服务被 **停止，二进制文件被删除**。
 
-### **Process of Manually Executing PsExec**
+### **手动执行 PsExec 的过程**
 
-Assuming there is an executable payload (created with msfvenom and obfuscated using Veil to evade antivirus detection), named 'met8888.exe', representing a meterpreter reverse_http payload, the following steps are taken:
+假设有一个可执行有效载荷（使用 msfvenom 创建并使用 Veil 混淆以规避防病毒检测），名为 'met8888.exe'，代表一个 meterpreter reverse_http 有效载荷，采取以下步骤：
 
-- **Copying the binary**: The executable is copied to the ADMIN$ share from a command prompt, though it may be placed anywhere on the filesystem to remain concealed.
-- **Creating a service**: Utilizing the Windows `sc` command, which allows for querying, creating, and deleting Windows services remotely, a service named "meterpreter" is created to point to the uploaded binary.
-- **Starting the service**: The final step involves starting the service, which will likely result in a "time-out" error due to the binary not being a genuine service binary and failing to return the expected response code. This error is inconsequential as the primary goal is the binary's execution.
+- **复制二进制文件**：可执行文件从命令提示符复制到 ADMIN$ 共享，尽管它可以放置在文件系统的任何位置以保持隐蔽。
+- **创建服务**：利用 Windows `sc` 命令，该命令允许远程查询、创建和删除 Windows 服务，创建一个名为 "meterpreter" 的服务，指向上传的二进制文件。
+- **启动服务**：最后一步涉及启动服务，这可能会导致 "超时" 错误，因为该二进制文件不是一个真正的服务二进制文件，未能返回预期的响应代码。此错误无关紧要，因为主要目标是执行该二进制文件。
 
-Observation of the Metasploit listener will reveal that the session has been initiated successfully.
+观察 Metasploit 监听器将显示会话已成功启动。
 
-[Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
+[了解更多关于 `sc` 命令的信息](https://technet.microsoft.com/en-us/library/bb490995.aspx)。
 
-Find moe detailed steps in: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+在这里找到更详细的步骤: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**You could also use the Windows Sysinternals binary PsExec.exe:**
+**您还可以使用 Windows Sysinternals 二进制文件 PsExec.exe：**
 
 ![](<../../images/image (928).png>)
 
-You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
+您还可以使用 [**SharpLateral**](https://github.com/mertdas/SharpLateral)：
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,47 +1,47 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Check for possible actions inside the GUI application
+# 检查 GUI 应用程序内可能的操作
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+**常见对话框**是指**保存文件**、**打开文件**、选择字体、颜色等选项。大多数情况下，它们将**提供完整的资源管理器功能**。这意味着如果您可以访问这些选项，您将能够访问资源管理器的功能：
 
-- Close/Close as
-- Open/Open with
-- Print
-- Export/Import
-- Search
-- Scan
+- 关闭/另存为
+- 打开/使用其他程序打开
+- 打印
+- 导出/导入
+- 搜索
+- 扫描
 
-You should check if you can:
+您应该检查是否可以：
 
-- Modify or create new files
-- Create symbolic links
-- Get access to restricted areas
-- Execute other apps
+- 修改或创建新文件
+- 创建符号链接
+- 访问受限区域
+- 执行其他应用程序
 
-## Command Execution
+## 命令执行
 
-Maybe **using a `Open with`** option\*\* you can open/execute some kind of shell.
+也许**使用 `Open with`** 选项，您可以打开/执行某种 shell。
 
 ### Windows
 
-For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+例如 _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ 在这里找到更多可以用来执行命令（并执行意外操作）的二进制文件：[https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 ### \*NIX \_\_
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gtfobins.github.io)
 
 # Windows
 
-## Bypassing path restrictions
+## 绕过路径限制
 
-- **Environment variables**: There are a lot of environment variables that are pointing to some path
-- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Symbolic links**
-- **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-  - Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
-- **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
-  - **More UNC paths:**
+- **环境变量**：有很多环境变量指向某个路径
+- **其他协议**：_about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **符号链接**
+- **快捷方式**：CTRL+N（打开新会话），CTRL+R（执行命令），CTRL+SHIFT+ESC（任务管理器），Windows+E（打开资源管理器），CTRL-B，CTRL-I（收藏夹），CTRL-H（历史记录），CTRL-L，CTRL-O（文件/打开对话框），CTRL-P（打印对话框），CTRL-S（另存为）
+- 隐藏的管理菜单：CTRL-ALT-F8，CTRL-ESC-F9
+- **Shell URIs**：_shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
+- **UNC 路径**：连接到共享文件夹的路径。您应该尝试连接到本地计算机的 C$（"\\\127.0.0.1\c$\Windows\System32"）
+- **更多 UNC 路径：**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -55,13 +55,13 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-## Download Your Binaries
+## 下载您的二进制文件
 
-Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
-Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+控制台：[https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
+资源管理器：[https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
+注册表编辑器：[https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-## Accessing filesystem from the browser
+## 从浏览器访问文件系统
 
 | PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
@@ -73,47 +73,47 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-## ShortCuts
+## 快捷键
 
-- Sticky Keys – Press SHIFT 5 times
+- Sticky Keys – 按 SHIFT 5 次
 - Mouse Keys – SHIFT+ALT+NUMLOCK
 - High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Hold NUMLOCK for 5 seconds
-- Filter Keys – Hold right SHIFT for 12 seconds
-- WINDOWS+F1 – Windows Search
-- WINDOWS+D – Show Desktop
-- WINDOWS+E – Launch Windows Explorer
-- WINDOWS+R – Run
-- WINDOWS+U – Ease of Access Centre
-- WINDOWS+F – Search
-- SHIFT+F10 – Context Menu
-- CTRL+SHIFT+ESC – Task Manager
-- CTRL+ALT+DEL – Splash screen on newer Windows versions
-- F1 – Help F3 – Search
-- F6 – Address Bar
-- F11 – Toggle full screen within Internet Explorer
-- CTRL+H – Internet Explorer History
-- CTRL+T – Internet Explorer – New Tab
-- CTRL+N – Internet Explorer – New Page
-- CTRL+O – Open File
-- CTRL+S – Save CTRL+N – New RDP / Citrix
+- Toggle Keys – 按住 NUMLOCK 5 秒
+- Filter Keys – 按住右 SHIFT 12 秒
+- WINDOWS+F1 – Windows 搜索
+- WINDOWS+D – 显示桌面
+- WINDOWS+E – 启动 Windows 资源管理器
+- WINDOWS+R – 运行
+- WINDOWS+U – 辅助功能中心
+- WINDOWS+F – 搜索
+- SHIFT+F10 – 上下文菜单
+- CTRL+SHIFT+ESC – 任务管理器
+- CTRL+ALT+DEL – 在较新版本的 Windows 上显示启动画面
+- F1 – 帮助 F3 – 搜索
+- F6 – 地址栏
+- F11 – 在 Internet Explorer 中切换全屏
+- CTRL+H – Internet Explorer 历史记录
+- CTRL+T – Internet Explorer – 新标签
+- CTRL+N – Internet Explorer – 新页面
+- CTRL+O – 打开文件
+- CTRL+S – 保存 CTRL+N – 新 RDP / Citrix
 
-## Swipes
+## 滑动操作
 
-- Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-- Swipe up from the bottom to show the taskbar in a full screen app.
+- 从左侧向右滑动以查看所有打开的窗口，最小化 KIOSK 应用程序并直接访问整个操作系统；
+- 从右侧向左滑动以打开操作中心，最小化 KIOSK 应用程序并直接访问整个操作系统；
+- 从顶部边缘向下滑动以使全屏模式下的应用程序的标题栏可见；
+- 从底部向上滑动以在全屏应用程序中显示任务栏。
 
-## Internet Explorer Tricks
+## Internet Explorer 技巧
 
-### 'Image Toolbar'
+### '图像工具栏'
 
-It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
+这是一个在图像被点击时出现在左上角的工具栏。您将能够保存、打印、发送邮件、在资源管理器中打开“我的图片”。Kiosk 需要使用 Internet Explorer。
 
-### Shell Protocol
+### Shell 协议
 
-Type this URLs to obtain an Explorer view:
+输入这些 URL 以获取资源管理器视图：
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -132,54 +132,54 @@ Type this URLs to obtain an Explorer view:
 - `Shell:System`
 - `Shell:ControlPanelFolder`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
-- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> 控制面板
+- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> 我的电脑
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> 我的网络位置
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-## Show File Extensions
+## 显示文件扩展名
 
-Check this page for more information: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+请查看此页面以获取更多信息：[https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-# Browsers tricks
+# 浏览器技巧
 
-Backup iKat versions:
+备份 iKat 版本：
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`  
-Source: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+使用 JavaScript 创建一个通用对话框并访问文件资源管理器：`document.write('<input/type=file>')`
+来源：https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 # iPad
 
-## Gestures and bottoms
+## 手势和按钮
 
-- Swipe up with four (or five) fingers / Double-tap Home button: To view the multitask view and change App
+- 用四个（或五个）手指向上滑动 / 双击主屏幕按钮：查看多任务视图并更改应用程序
 
-- Swipe one way or another with four or five fingers: In order to change to the next/last App
+- 用四个或五个手指向一个方向滑动：以更改到下一个/上一个应用程序
 
-- Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up: To access Home
+- 用五个手指捏合屏幕 / 按住主屏幕按钮 / 用一根手指快速从屏幕底部向上滑动：访问主屏幕
 
-- Swipe one finger from the bottom of the screen just 1-2 inches (slow): The dock will appear
+- 用一根手指从屏幕底部滑动 1-2 英寸（慢）：停靠栏将出现
 
-- Swipe down from the top of the display with 1 finger: To view your notifications
+- 用一根手指从显示器顶部向下滑动：查看通知
 
-- Swipe down with 1 finger the top-right corner of the screen: To see iPad Pro's control centre
+- 用一根手指从屏幕右上角向下滑动：查看 iPad Pro 的控制中心
 
-- Swipe 1 finger from the left of the screen 1-2 inches: To see Today view
+- 用一根手指从屏幕左侧滑动 1-2 英寸：查看今日视图
 
-- Swipe fast 1 finger from the centre of the screen to the right or left: To change to next/last App
+- 用一根手指快速从屏幕中心向右或向左滑动：更改到下一个/上一个应用程序
 
-- Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right: To power off
+- 按住右上角的开/关/睡眠按钮 + 将滑块移动到右侧以**关闭电源**：关闭电源
 
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**: To force a hard power off
+- 按住右上角的开/关/睡眠按钮和主屏幕按钮几秒钟：强制硬关机
 
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**: To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
+- 快速按住右上角的开/关/睡眠按钮和主屏幕按钮：截屏，截屏将弹出在显示器的左下角。两者同时按下非常短暂，如果按住几秒钟将执行硬关机。
 
-## Shortcuts
+## 快捷键
 
-You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
+您应该有一个 iPad 键盘或 USB 键盘适配器。这里只显示可能帮助您逃离应用程序的快捷键。
 
 | Key | Name         |
 | --- | ------------ |
@@ -194,79 +194,79 @@ You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that 
 | ↑   | Up Arrow     |
 | ↓   | Down Arrow   |
 
-### System shortcuts
+### 系统快捷键
 
-These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
+这些快捷键用于视觉设置和声音设置，具体取决于 iPad 的使用。
 
 | Shortcut | Action                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Dim Sscreen                                                                    |
-| F2       | Brighten screen                                                                |
-| F7       | Back one song                                                                  |
-| F8       | Play/pause                                                                     |
-| F9       | Skip song                                                                      |
-| F10      | Mute                                                                           |
-| F11      | Decrease volume                                                                |
-| F12      | Increase volume                                                                |
-| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
+| F1       | 调暗屏幕                                                                    |
+| F2       | 提亮屏幕                                                                |
+| F7       | 返回一首歌曲                                                                  |
+| F8       | 播放/暂停                                                                     |
+| F9       | 跳过歌曲                                                                      |
+| F10      | 静音                                                                           |
+| F11      | 降低音量                                                                |
+| F12      | 增加音量                                                                |
+| ⌘ Space  | 显示可用语言列表；要选择一种，请再次按空格键。 |
 
-### iPad navigation
+### iPad 导航
 
 | Shortcut                                           | Action                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Go to Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
-| ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
-| ⌘\~                                                | Go t the last App                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
-| ⌘⇧4                                                | Screenshot and open it in the editor                    |
-| Press and hold ⌘                                   | List of shortcuts available for the App                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
-| ^⌥H (Control-Option-H)                             | Home button                                             |
-| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Item chooser                                            |
-| Escape                                             | Back button                                             |
-| → (Right arrow)                                    | Next item                                               |
-| ← (Left arrow)                                     | Previous item                                           |
-| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
-| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
-| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
-| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
-| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
-| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
-| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
+| ⌘H                                                 | 返回主屏幕                                              |
+| ⌘⇧H (Command-Shift-H)                              | 返回主屏幕                                              |
+| ⌘ (Space)                                          | 打开 Spotlight                                          |
+| ⌘⇥ (Command-Tab)                                   | 列出最近使用的十个应用程序                                 |
+| ⌘\~                                                | 返回上一个应用程序                                       |
+| ⌘⇧3 (Command-Shift-3)                              | 截屏（悬停在左下角以保存或操作） |
+| ⌘⇧4                                                | 截屏并在编辑器中打开                    |
+| 按住 ⌘                                           | 列出可用于该应用程序的快捷键                 |
+| ⌘⌥D (Command-Option/Alt-D)                         | 显示停靠栏                                      |
+| ^⌥H (Control-Option-H)                             | 主屏幕按钮                                             |
+| ^⌥H H (Control-Option-H-H)                         | 显示多任务栏                                      |
+| ^⌥I (Control-Option-i)                             | 项目选择器                                            |
+| Escape                                             | 返回按钮                                             |
+| → (右箭头)                                    | 下一个项目                                               |
+| ← (左箭头)                                     | 上一个项目                                           |
+| ↑↓ (上箭头, 下箭头)                          | 同时点击选定项目                        |
+| ⌥ ↓ (Option-Down arrow)                            | 向下滚动                                             |
+| ⌥↑ (Option-Up arrow)                               | 向上滚动                                               |
+| ⌥← 或 ⌥→ (Option-Left arrow 或 Option-Right arrow) | 向左或向右滚动                                    |
+| ^⌥S (Control-Option-S)                             | 开启或关闭 VoiceOver 语音                         |
+| ⌘⇧⇥ (Command-Shift-Tab)                            | 切换到上一个应用程序                              |
+| ⌘⇥ (Command-Tab)                                   | 切换回原始应用程序                         |
+| ←+→, 然后 Option + ← 或 Option+→                   | 在停靠栏中导航                                   |
 
-### Safari shortcuts
+### Safari 快捷键
 
 | Shortcut                | Action                                           |
 | ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Open Location                                    |
-| ⌘T                      | Open a new tab                                   |
-| ⌘W                      | Close the current tab                            |
-| ⌘R                      | Refresh the current tab                          |
-| ⌘.                      | Stop loading the current tab                     |
-| ^⇥                      | Switch to the next tab                           |
-| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
-| ⌘L                      | Select the text input/URL field to modify it     |
-| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
-| ⌘\[                     | Goes back one page in your browsing history      |
-| ⌘]                      | Goes forward one page in your browsing history   |
-| ⌘⇧R                     | Activate Reader Mode                             |
+| ⌘L (Command-L)          | 打开位置                                    |
+| ⌘T                      | 打开新标签                                   |
+| ⌘W                      | 关闭当前标签                            |
+| ⌘R                      | 刷新当前标签                          |
+| ⌘.                      | 停止加载当前标签                     |
+| ^⇥                      | 切换到下一个标签                           |
+| ^⇧⇥ (Control-Shift-Tab) | 移动到上一个标签                         |
+| ⌘L                      | 选择文本输入/URL 字段以进行修改     |
+| ⌘⇧T (Command-Shift-T)   | 打开最后关闭的标签（可以多次使用） |
+| ⌘\[                     | 在浏览历史中返回一页      |
+| ⌘]                      | 在浏览历史中前进一页   |
+| ⌘⇧R                     | 激活阅读模式                             |
 
-### Mail shortcuts
+### 邮件快捷键
 
 | Shortcut                   | Action                       |
 | -------------------------- | ---------------------------- |
-| ⌘L                         | Open Location                |
-| ⌘T                         | Open a new tab               |
-| ⌘W                         | Close the current tab        |
-| ⌘R                         | Refresh the current tab      |
-| ⌘.                         | Stop loading the current tab |
-| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
+| ⌘L                         | 打开位置                |
+| ⌘T                         | 打开新标签               |
+| ⌘W                         | 关闭当前标签        |
+| ⌘R                         | 刷新当前标签      |
+| ⌘.                         | 停止加载当前标签 |
+| ⌘⌥F (Command-Option/Alt-F) | 在您的邮箱中搜索       |
 
-# References
+# 参考文献
 
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
@@ -274,4 +274,3 @@ These shortcuts are for the visual settings and sound settings, depending on the
 - [http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-

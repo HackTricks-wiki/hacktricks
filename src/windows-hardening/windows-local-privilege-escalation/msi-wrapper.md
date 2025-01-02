@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
-Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
+从 [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) 下载免费版本的应用程序，执行它并将“恶意”二进制文件包装在其中。\
+请注意，如果您**只**想**执行** **命令行（而不是选择 cmd.exe，选择 .bat 文件）**，您可以包装一个“**.bat**”文件。
 
 ![](<../../images/image (417).png>)
 
-And this is the most important part of the configuration:
+这是配置中最重要的部分：
 
 ![](<../../images/image (312).png>)
 
@@ -15,9 +15,8 @@ And this is the most important part of the configuration:
 
 ![](<../../images/image (1072).png>)
 
-(Please, note that if you try to pack your own binary you will be able to modify these values)
+（请注意，如果您尝试打包自己的二进制文件，您将能够修改这些值）
 
-From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
+从这里开始，只需点击**下一步按钮**和最后的**构建按钮，您的安装程序/包装器将被生成。**
 
 {{#include ../../banners/hacktricks-training.md}}
-

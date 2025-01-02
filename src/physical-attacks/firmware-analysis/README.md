@@ -1,46 +1,45 @@
-# Firmware Analysis
+# 固件分析
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Introduction**
+## **介绍**
 
-Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
+固件是使设备正常运行的基本软件，通过管理和促进硬件组件与用户交互的软件之间的通信。它存储在永久内存中，确保设备在开机时能够访问重要指令，从而启动操作系统。检查和可能修改固件是识别安全漏洞的关键步骤。
 
-## **Gathering Information**
+## **收集信息**
 
-**Gathering information** is a critical initial step in understanding a device's makeup and the technologies it uses. This process involves collecting data on:
+**收集信息**是理解设备构成和所用技术的关键初步步骤。此过程涉及收集以下数据：
 
-- The CPU architecture and operating system it runs
-- Bootloader specifics
-- Hardware layout and datasheets
-- Codebase metrics and source locations
-- External libraries and license types
-- Update histories and regulatory certifications
-- Architectural and flow diagrams
-- Security assessments and identified vulnerabilities
+- CPU架构和运行的操作系统
+- 引导加载程序的具体信息
+- 硬件布局和数据表
+- 代码库指标和源位置
+- 外部库和许可证类型
+- 更新历史和监管认证
+- 架构和流程图
+- 安全评估和已识别的漏洞
 
-For this purpose, **open-source intelligence (OSINT)** tools are invaluable, as is the analysis of any available open-source software components through manual and automated review processes. Tools like [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore) offer free static analysis that can be leveraged to find potential issues.
+为此，**开源情报（OSINT）**工具是不可或缺的，同时通过手动和自动审查过程分析任何可用的开源软件组件也很重要。像[Coverity Scan](https://scan.coverity.com)和[Semmle’s LGTM](https://lgtm.com/#explore)这样的工具提供免费的静态分析，可以用来发现潜在问题。
 
-## **Acquiring the Firmware**
+## **获取固件**
 
-Obtaining firmware can be approached through various means, each with its own level of complexity:
+获取固件可以通过多种方式进行，每种方式的复杂程度不同：
 
-- **Directly** from the source (developers, manufacturers)
-- **Building** it from provided instructions
-- **Downloading** from official support sites
-- Utilizing **Google dork** queries for finding hosted firmware files
-- Accessing **cloud storage** directly, with tools like [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Intercepting **updates** via man-in-the-middle techniques
-- **Extracting** from the device through connections like **UART**, **JTAG**, or **PICit**
-- **Sniffing** for update requests within device communication
-- Identifying and using **hardcoded update endpoints**
-- **Dumping** from the bootloader or network
-- **Removing and reading** the storage chip, when all else fails, using appropriate hardware tools
+- **直接**从源头（开发者、制造商）
+- **根据**提供的说明进行**构建**
+- **从**官方支持网站**下载**
+- 利用**Google dork**查询查找托管的固件文件
+- 直接访问**云存储**，使用工具如[S3Scanner](https://github.com/sa7mon/S3Scanner)
+- 通过中间人技术**拦截**更新
+- 通过**UART**、**JTAG**或**PICit**等连接**提取**设备中的固件
+- 在设备通信中**嗅探**更新请求
+- 识别并使用**硬编码的更新端点**
+- 从引导加载程序或网络**转储**
+- 在万不得已时，**拆卸并读取**存储芯片，使用适当的硬件工具
 
-## Analyzing the firmware
+## 分析固件
 
-Now that you **have the firmware**, you need to extract information about it to know how to treat it. Different tools you can use for that:
-
+现在你**拥有固件**，你需要提取有关它的信息，以了解如何处理它。你可以使用的不同工具有：
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -49,26 +48,24 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
+如果你使用这些工具没有找到太多信息，可以使用 `binwalk -E <bin>` 检查图像的 **熵**，如果熵低，那么它不太可能被加密。如果熵高，则很可能被加密（或以某种方式压缩）。
 
-If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).
-
-Moreover, you can use these tools to extract **files embedded inside the firmware**:
+此外，你可以使用这些工具提取 **嵌入固件中的文件**：
 
 {{#ref}}
 ../../forensics/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
+或者 [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) 来检查文件。
 
-### Getting the Filesystem
+### 获取文件系统
 
-With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
-Binwalk usually extracts it inside a **folder named as the filesystem type**, which usually is one of the following: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+使用之前提到的工具，如 `binwalk -ev <bin>`，你应该能够 **提取文件系统**。\
+Binwalk 通常会将其提取到一个 **以文件系统类型命名的文件夹** 中，通常是以下之一：squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs。
 
-#### Manual Filesystem Extraction
+#### 手动文件系统提取
 
-Sometimes, binwalk will **not have the magic byte of the filesystem in its signatures**. In these cases, use binwalk to **find the offset of the filesystem and carve the compressed filesystem** from the binary and **manually extract** the filesystem according to its type using the steps below.
-
+有时，binwalk **在其签名中没有文件系统的魔术字节**。在这些情况下，使用 binwalk **找到文件系统的偏移量并从二进制文件中切割压缩的文件系统**，并根据其类型使用以下步骤 **手动提取** 文件系统。
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -80,9 +77,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-
-Run the following **dd command** carving the Squashfs filesystem.
-
+运行以下 **dd 命令** 切割 Squashfs 文件系统。
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -92,39 +87,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-
-Alternatively, the following command could also be run.
+另外，可以运行以下命令。
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- For squashfs (used in the example above)
+- 对于 squashfs（在上面的示例中使用）
 
 `$ unsquashfs dir.squashfs`
 
-Files will be in "`squashfs-root`" directory afterwards.
+文件将随后位于 "`squashfs-root`" 目录中。
 
-- CPIO archive files
+- CPIO 存档文件
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- For jffs2 filesystems
+- 对于 jffs2 文件系统
 
 `$ jefferson rootfsfile.jffs2`
 
-- For ubifs filesystems with NAND flash
+- 对于带 NAND 闪存的 ubifs 文件系统
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## Analyzing Firmware
+## 分析固件
 
-Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
+一旦获得固件，拆解它以理解其结构和潜在漏洞是至关重要的。此过程涉及利用各种工具分析和提取固件映像中的有价值数据。
 
-### Initial Analysis Tools
+### 初步分析工具
 
-A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
-
+提供了一组命令用于对二进制文件（称为 `<bin>`）进行初步检查。这些命令有助于识别文件类型、提取字符串、分析二进制数据以及理解分区和文件系统细节：
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -133,123 +126,115 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
+为了评估图像的加密状态，使用 `binwalk -E <bin>` 检查 **entropy**。低熵表明缺乏加密，而高熵则表示可能存在加密或压缩。
 
-To assess the encryption status of the image, the **entropy** is checked with `binwalk -E <bin>`. Low entropy suggests a lack of encryption, while high entropy indicates possible encryption or compression.
+对于提取 **embedded files**，建议使用 **file-data-carving-recovery-tools** 文档和 **binvis.io** 进行文件检查的工具和资源。
 
-For extracting **embedded files**, tools and resources like the **file-data-carving-recovery-tools** documentation and **binvis.io** for file inspection are recommended.
+### 提取文件系统
 
-### Extracting the Filesystem
-
-Using `binwalk -ev <bin>`, one can usually extract the filesystem, often into a directory named after the filesystem type (e.g., squashfs, ubifs). However, when **binwalk** fails to recognize the filesystem type due to missing magic bytes, manual extraction is necessary. This involves using `binwalk` to locate the filesystem's offset, followed by the `dd` command to carve out the filesystem:
-
+使用 `binwalk -ev <bin>`，通常可以提取文件系统，通常提取到一个以文件系统类型命名的目录中（例如，squashfs，ubifs）。然而，当 **binwalk** 由于缺少魔术字节而无法识别文件系统类型时，需要手动提取。这涉及使用 `binwalk` 定位文件系统的偏移量，然后使用 `dd` 命令提取文件系统：
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
+之后，根据文件系统类型（例如，squashfs、cpio、jffs2、ubifs），使用不同的命令手动提取内容。
 
-Afterwards, depending on the filesystem type (e.g., squashfs, cpio, jffs2, ubifs), different commands are used to manually extract the contents.
+### 文件系统分析
 
-### Filesystem Analysis
+提取文件系统后，开始寻找安全漏洞。关注不安全的网络守护进程、硬编码的凭据、API 端点、更新服务器功能、未编译的代码、启动脚本和编译的二进制文件以进行离线分析。
 
-With the filesystem extracted, the search for security flaws begins. Attention is paid to insecure network daemons, hardcoded credentials, API endpoints, update server functionalities, uncompiled code, startup scripts, and compiled binaries for offline analysis.
+**关键位置**和**项目**检查包括：
 
-**Key locations** and **items** to inspect include:
+- **etc/shadow** 和 **etc/passwd** 中的用户凭据
+- **etc/ssl** 中的 SSL 证书和密钥
+- 配置和脚本文件中的潜在漏洞
+- 嵌入的二进制文件以进行进一步分析
+- 常见 IoT 设备的网络服务器和二进制文件
 
-- **etc/shadow** and **etc/passwd** for user credentials
-- SSL certificates and keys in **etc/ssl**
-- Configuration and script files for potential vulnerabilities
-- Embedded binaries for further analysis
-- Common IoT device web servers and binaries
+几个工具有助于揭示文件系统中的敏感信息和漏洞：
 
-Several tools assist in uncovering sensitive information and vulnerabilities within the filesystem:
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) 和 [**Firmwalker**](https://github.com/craigz28/firmwalker) 用于敏感信息搜索
+- [**固件分析和比较工具 (FACT)**](https://github.com/fkie-cad/FACT_core) 用于全面的固件分析
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer)、[**ByteSweep**](https://gitlab.com/bytesweep/bytesweep)、[**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) 和 [**EMBA**](https://github.com/e-m-b-a/emba) 用于静态和动态分析
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) for sensitive information search
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) for comprehensive firmware analysis
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), and [**EMBA**](https://github.com/e-m-b-a/emba) for static and dynamic analysis
+### 对编译二进制文件的安全检查
 
-### Security Checks on Compiled Binaries
+必须仔细检查文件系统中发现的源代码和编译的二进制文件以寻找漏洞。像 **checksec.sh** 这样的工具用于 Unix 二进制文件，**PESecurity** 用于 Windows 二进制文件，帮助识别可能被利用的未保护二进制文件。
 
-Both source code and compiled binaries found in the filesystem must be scrutinized for vulnerabilities. Tools like **checksec.sh** for Unix binaries and **PESecurity** for Windows binaries help identify unprotected binaries that could be exploited.
+## 模拟固件进行动态分析
 
-## Emulating Firmware for Dynamic Analysis
+模拟固件的过程使得可以对设备的操作或单个程序进行**动态分析**。这种方法可能会遇到硬件或架构依赖性的问题，但将根文件系统或特定二进制文件转移到具有匹配架构和字节序的设备（例如 Raspberry Pi）或预构建的虚拟机上，可以促进进一步的测试。
 
-The process of emulating firmware enables **dynamic analysis** either of a device's operation or an individual program. This approach can encounter challenges with hardware or architecture dependencies, but transferring the root filesystem or specific binaries to a device with matching architecture and endianness, such as a Raspberry Pi, or to a pre-built virtual machine, can facilitate further testing.
+### 模拟单个二进制文件
 
-### Emulating Individual Binaries
+在检查单个程序时，识别程序的字节序和 CPU 架构至关重要。
 
-For examining single programs, identifying the program's endianness and CPU architecture is crucial.
+#### MIPS 架构示例
 
-#### Example with MIPS Architecture
-
-To emulate a MIPS architecture binary, one can use the command:
-
+要模拟 MIPS 架构的二进制文件，可以使用以下命令：
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-
-And to install the necessary emulation tools:
-
+并安装必要的仿真工具：
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
+对于 MIPS（大端），使用 `qemu-mips`，而对于小端二进制文件，选择 `qemu-mipsel`。
 
-For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
+#### ARM 架构仿真
 
-#### ARM Architecture Emulation
+对于 ARM 二进制文件，过程类似，使用 `qemu-arm` 模拟器进行仿真。
 
-For ARM binaries, the process is similar, with the `qemu-arm` emulator being utilized for emulation.
+### 完整系统仿真
 
-### Full System Emulation
+像 [Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) 等工具，促进完整固件仿真，自动化过程并帮助动态分析。
 
-Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
+## 实践中的动态分析
 
-## Dynamic Analysis in Practice
+在此阶段，使用真实或仿真设备环境进行分析。保持对操作系统和文件系统的 shell 访问至关重要。仿真可能无法完美模拟硬件交互，因此需要偶尔重新启动仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在后门漏洞至关重要。
 
-At this stage, either a real or emulated device environment is used for analysis. It's essential to maintain shell access to the OS and filesystem. Emulation may not perfectly mimic hardware interactions, necessitating occasional emulation restarts. Analysis should revisit the filesystem, exploit exposed webpages and network services, and explore bootloader vulnerabilities. Firmware integrity tests are critical to identify potential backdoor vulnerabilities.
+## 运行时分析技术
 
-## Runtime Analysis Techniques
+运行时分析涉及在其操作环境中与进程或二进制文件交互，使用工具如 gdb-multiarch、Frida 和 Ghidra 设置断点，并通过模糊测试和其他技术识别漏洞。
 
-Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
+## 二进制利用和概念验证
 
-## Binary Exploitation and Proof-of-Concept
+为识别的漏洞开发 PoC 需要对目标架构和低级语言编程有深入理解。嵌入式系统中的二进制运行时保护很少见，但在存在时，可能需要使用如返回导向编程（ROP）等技术。
 
-Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
+## 准备好的操作系统用于固件分析
 
-## Prepared Operating Systems for Firmware Analysis
+像 [AttifyOS](https://github.com/adi0x90/attifyos) 和 [EmbedOS](https://github.com/scriptingxss/EmbedOS) 这样的操作系统提供预配置的固件安全测试环境，配备必要的工具。
 
-Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) provide pre-configured environments for firmware security testing, equipped with necessary tools.
+## 准备好的操作系统用于分析固件
 
-## Prepared OSs to analyze Firmware
+- [**AttifyOS**](https://github.com/adi0x90/attifyos)：AttifyOS 是一个旨在帮助您对物联网（IoT）设备进行安全评估和渗透测试的发行版。它通过提供一个预配置的环境，加载所有必要工具，节省了您大量时间。
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS)：基于 Ubuntu 18.04 的嵌入式安全测试操作系统，预装固件安全测试工具。
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
+## 漏洞固件练习
 
-## Vulnerable firmware to practice
-
-To practice discovering vulnerabilities in firmware, use the following vulnerable firmware projects as a starting point.
+要练习发现固件中的漏洞，可以使用以下漏洞固件项目作为起点。
 
 - OWASP IoTGoat
-  - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- The Damn Vulnerable Router Firmware Project
-  - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
+- [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
+- Damn Vulnerable Router Firmware Project
+- [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
 - Damn Vulnerable ARM Router (DVAR)
-  - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
+- [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
-  - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
+- [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
 - Azeria Labs VM 2.0
-  - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
+- [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
 - Damn Vulnerable IoT Device (DVID)
-  - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
+- [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## References
+## 参考文献
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 
-## Trainning and Cert
+## 培训和认证
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
 {{#include ../../banners/hacktricks-training.md}}
-

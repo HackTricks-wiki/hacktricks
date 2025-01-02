@@ -1,9 +1,7 @@
-# Side Channel Analysis Attacks 
+# Side Channel Analysis Attacks
 
-Side Channel Analysis Attacks refers to determining the information from a device or entity by some other channel or source that has an indirect influence on it and information can be extracted from it. This can be explained better with an example: 
+侧信道分析攻击是指通过某种其他渠道或来源来确定设备或实体的信息，这些渠道或来源对其有间接影响，并且可以从中提取信息。这可以通过一个例子更好地解释：
 
-Analysing the vibrations in glass sheets which is near the sound source, but the sound source is not accessible. The vibrations in glass are influenced by the sound source and if monitored and analysed, the sound can be decoded and interpreted.
+分析靠近声源的玻璃板中的振动，但声源是不可接触的。玻璃中的振动受到声源的影响，如果进行监测和分析，可以解码和解释声音。
 
-These attacks are very popular in case of leaking data such as private keys or finding operations in the processors. An electronic circuit is has a lot of channels from which, information is constantly leaked. Monitoring and analysing can be useful for diclosing a lot of information about the circuit and internals of it. 
-
-
+在泄露数据的情况下，例如私钥或查找处理器中的操作，这些攻击非常流行。电子电路有很多渠道，从中不断泄露信息。监测和分析可以用于披露关于电路及其内部的很多信息。

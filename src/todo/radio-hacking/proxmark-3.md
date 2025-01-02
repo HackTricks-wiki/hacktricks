@@ -2,18 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Attacking RFID Systems with Proxmark3
+## 使用 Proxmark3 攻击 RFID 系统
 
-The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+您需要做的第一件事是拥有一个 [**Proxmark3**](https://proxmark.com) 并 [**安装软件及其依赖项**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)。
 
-### Attacking MIFARE Classic 1KB
+### 攻击 MIFARE Classic 1KB
 
-It has **16 sectors**, each of them has **4 blocks** and each block contains **16B**. The UID is in sector 0 block 0 (and can't be altered).\
-To access each sector you need **2 keys** (**A** and **B**) which are stored in **block 3 of each sector** (sector trailer). The sector trailer also stores the **access bits** that give the **read and write** permissions on **each block** using the 2 keys.\
-2 keys are useful to give permissions to read if you know the first one and write if you know the second one (for example).
+它有 **16 个扇区**，每个扇区有 **4 个块**，每个块包含 **16B**。UID 位于扇区 0 块 0（无法更改）。\
+要访问每个扇区，您需要 **2 个密钥**（**A** 和 **B**），这些密钥存储在 **每个扇区的块 3**（扇区尾部）。扇区尾部还存储 **访问位**，这些位使用 2 个密钥提供 **每个块的读写**权限。\
+2 个密钥可以用于提供读取权限，如果您知道第一个密钥，则可以读取；如果您知道第二个密钥，则可以写入（例如）。
 
-Several attacks can be performed
-
+可以执行多种攻击
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -32,34 +31,28 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
+Proxmark3 允许执行其他操作，例如 **窃听** 标签与读卡器之间的通信，以尝试找到敏感数据。在这张卡中，您可以仅仅嗅探通信并计算所使用的密钥，因为 **使用的加密操作很弱**，并且知道明文和密文后，您可以计算它（`mfkey64` 工具）。
 
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **cryptographic operations used are weak** and knowing the plain and cipher text you can calculate it (`mfkey64` tool).
+### 原始命令
 
-### Raw Commands
-
-IoT systems sometimes use **nonbranded or noncommercial tags**. In this case, you can use Proxmark3 to send custom **raw commands to the tags**.
-
+物联网系统有时使用 **非品牌或非商业标签**。在这种情况下，您可以使用 Proxmark3 向标签发送自定义 **原始命令**。
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
 TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
-  proprietary non iso14443-4 card found, RATS not supported
-  No chinese magic backdoor command detected
-  Prng detection: WEAK
-  Valid ISO14443A Tag Found - Quiting Search
+proprietary non iso14443-4 card found, RATS not supported
+No chinese magic backdoor command detected
+Prng detection: WEAK
+Valid ISO14443A Tag Found - Quiting Search
 ```
+通过这些信息，您可以尝试搜索有关卡片的信息以及与其通信的方法。Proxmark3 允许发送原始命令，例如：`hf 14a raw -p -b 7 26`
 
-With this information you could try to search information about the card and about the way to communicate with it. Proxmark3 allows to send raw commands like: `hf 14a raw -p -b 7 26`
+### 脚本
 
-### Scripts
-
-The Proxmark3 software comes with a preloaded list of **automation scripts** that you can use to perform simple tasks. To retrieve the full list, use the `script list` command. Next, use the `script run` command, followed by the script’s name:
-
+Proxmark3 软件附带了一份预加载的 **自动化脚本** 列表，您可以使用这些脚本来执行简单任务。要检索完整列表，请使用 `script list` 命令。接下来，使用 `script run` 命令，后跟脚本的名称：
 ```
 proxmark3> script run mfkeys
 ```
-
-You can create a script to **fuzz tag readers**, so copying the data of a **valid card** just write a **Lua script** that **randomize** one or more random **bytes** and check if the **reader crashes** with any iteration.
+您可以创建一个脚本来**模糊标签读取器**，因此复制**有效卡片**的数据，只需编写一个**Lua脚本**，对一个或多个随机**字节**进行**随机化**，并检查**读取器是否崩溃**。 
 
 {{#include ../../banners/hacktricks-training.md}}
-

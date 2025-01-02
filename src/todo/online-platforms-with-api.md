@@ -1,128 +1,127 @@
-# Online Platforms with API
+# 在线平台与API
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+您可以询问某个IP是否与可疑/恶意活动相关。完全免费。
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+检查IP地址是否与注册账户的机器人相关。它还可以检查用户名和电子邮件。最初免费。
 
 ## [Hunter](https://hunter.io/)
 
-Find and verify emails.\
-Some free API requests free, for more you need to pay.\
-Commercial?
+查找和验证电子邮件。\
+一些免费API请求，更多需要付费。\
+商业？
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+查找与IP和域名相关的恶意活动。免费。
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email (profiles on other platforms), domain (basic company info ,mails and people working) and companies (get company info from mail).\
-You need to pay to access all the possibilities.\
-Commercial?
+查找与电子邮件（其他平台上的个人资料）、域名（基本公司信息、邮件和工作的人）和公司（从邮件获取公司信息）相关的个人数据。\
+您需要付费才能访问所有可能性。\
+商业？
 
 ## [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...\
-Commercial?
+网站使用的技术。昂贵...\
+商业？
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Check if a host (domain or IP) is related with suspicious/malicious activities. Have some free API access.\
-Commercial?
+检查主机（域名或IP）是否与可疑/恶意活动相关。提供一些免费API访问。\
+商业？
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Check if a host (domain or IP) is related with suspicious/malicious activities. Have some free API access.
+检查主机（域名或IP）是否与可疑/恶意活动相关。提供一些免费API访问。
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+指示主机是否与垃圾邮件活动相关。提供一些免费API访问。
 
 ## [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+基于意见和其他指标判断某个域名是否与可疑/恶意信息相关。
 
 ## [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+获取IP地址的基本信息。您每月可以测试最多100K。
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email (find related domains), IP history of domains (find the host behind CloudFlare), all domains using a nameserver....\
-You have some free access.
+该平台提供有关域名和IP地址的信息，例如IP或域名服务器内的域名、由电子邮件拥有的域名（查找相关域名）、域名的IP历史（查找CloudFlare背后的主机）、使用某个名称服务器的所有域名....\
+您有一些免费访问。
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+允许通过电子邮件、域名或公司名称进行搜索并检索相关的“个人”信息。它还可以验证电子邮件。有一些免费访问。
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+即使在免费/社区版本中，也有大量关于域名和IP的信息。
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+搜索域名、IP和电子邮件并获取来自数据泄露的信息。提供一些免费访问。
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+通过IP搜索并收集与可疑活动相关的信息。提供一些免费访问。
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+通过IP或IP范围搜索并获取有关扫描互联网的IP的信息。15天免费访问。
 
 ## [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+获取IP地址的扫描信息。提供一些免费API访问。
 
 ## [Censys](https://censys.io/)
 
-Very similar to shodan
+与shodan非常相似
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+通过关键字查找开放的S3桶。
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains\
-Commercial?
+查找电子邮件甚至域名的泄露凭据\
+商业？
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+搜索电子邮件出现的pastebins。商业？
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+获取邮件的声誉。商业？
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+获取泄露电子邮件的密码。商业？
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+从IP获取有趣的信息
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+通过域名和电子邮件搜索并获取是否被攻破及密码。商业？
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-It detects IP geolocation, data center, ASN and even VPN information. It offers free 30K queries per month.
+它检测IP地理位置、数据中心、ASN甚至VPN信息。每月提供免费30K查询。
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(in a commercial tool?)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(在商业工具中？)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (in a commercial tool?)
+[https://www.netcraft.com/](https://www.netcraft.com/) (在商业工具中？)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (in a commercial tool?)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (在商业工具中？)
 
 {{#include ../banners/hacktricks-training.md}}
-

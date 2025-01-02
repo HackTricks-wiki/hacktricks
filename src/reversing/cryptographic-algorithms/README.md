@@ -1,186 +1,185 @@
-# Cryptographic/Compression Algorithms
+# 加密/压缩算法
 
-## Cryptographic/Compression Algorithms
+## 加密/压缩算法
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Identifying Algorithms
+## 识别算法
 
-If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+如果你在代码中**使用了右移和左移、异或以及几种算术操作**，那么它很可能是**加密算法**的实现。这里将展示一些**识别所使用算法的方法，而无需逐步反向工程**。
 
-### API functions
+### API 函数
 
 **CryptDeriveKey**
 
-If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+如果使用了此函数，可以通过检查第二个参数的值来找到**所使用的算法**：
 
 ![](<../../images/image (375) (1) (1) (1) (1).png>)
 
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+在这里查看可能的算法及其分配值的表格：[https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Compresses and decompresses a given buffer of data.
+压缩和解压缩给定的数据缓冲区。
 
 **CryptAcquireContext**
 
-From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+来自[文档](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta)：**CryptAcquireContext**函数用于获取特定加密服务提供程序（CSP）中某个密钥容器的句柄。**此返回的句柄用于调用使用所选CSP的CryptoAPI**函数。
 
 **CryptCreateHash**
 
-Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+初始化数据流的哈希。如果使用了此函数，可以通过检查第二个参数的值来找到**所使用的算法**：
 
 ![](<../../images/image (376).png>)
 
 \
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+在这里查看可能的算法及其分配值的表格：[https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Code constants
+### 代码常量
 
-Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+有时，由于需要使用特殊且唯一的值，识别算法非常简单。
 
 ![](<../../images/image (370).png>)
 
-If you search for the first constant in Google this is what you get:
+如果你在谷歌中搜索第一个常量，这就是你得到的结果：
 
 ![](<../../images/image (371).png>)
 
-Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
-You can search any of the other constants and you will obtain (probably) the same result.
+因此，你可以假设反编译的函数是**sha256计算器**。\
+你可以搜索其他常量，可能会得到相同的结果。
 
-### data info
+### 数据信息
 
-If the code doesn't have any significant constant it may be **loading information from the .data section**.\
-You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+如果代码没有任何显著的常量，它可能在**加载来自.data部分的信息**。\
+你可以访问该数据，**分组第一个dword**并在谷歌中搜索，就像我们在前面的部分所做的那样：
 
 ![](<../../images/image (372).png>)
 
-In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
+在这种情况下，如果你搜索**0xA56363C6**，你会发现它与**AES算法的表**相关。
 
-## RC4 **(Symmetric Crypt)**
+## RC4 **(对称加密)**
 
-### Characteristics
+### 特点
 
-It's composed of 3 main parts:
+它由三个主要部分组成：
 
-- **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
-- **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
-- **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
+- **初始化阶段/**：创建一个**从0x00到0xFF的值表**（总共256字节，0x100）。这个表通常称为**替代盒**（或SBox）。
+- **打乱阶段**：将**循环遍历之前创建的表**（0x100次迭代的循环），用**半随机**字节修改每个值。为了创建这些半随机字节，使用RC4**密钥**。RC4**密钥**的长度可以**在1到256字节之间**，但通常建议长度超过5字节。通常，RC4密钥为16字节。
+- **异或阶段**：最后，明文或密文与**之前创建的值进行异或**。加密和解密的函数是相同的。为此，将根据需要对创建的256字节进行循环。通常，在反编译的代码中可以通过**%256（模256）**来识别。
 
 > [!NOTE]
-> **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
+> **为了在反汇编/反编译代码中识别RC4，你可以检查两个大小为0x100的循环（使用密钥），然后将输入数据与之前在两个循环中创建的256个值进行异或，可能使用%256（模256）**
 
-### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+### **初始化阶段/替代盒：**（注意用作计数器的数字256，以及在256个字符的每个位置写入0的方式）
 
 ![](<../../images/image (377).png>)
 
-### **Scrambling Stage:**
+### **打乱阶段：**
 
 ![](<../../images/image (378).png>)
 
-### **XOR Stage:**
+### **异或阶段：**
 
 ![](<../../images/image (379).png>)
 
-## **AES (Symmetric Crypt)**
+## **AES (对称加密)**
 
-### **Characteristics**
+### **特点**
 
-- Use of **substitution boxes and lookup tables**
-  - It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
-- The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
+- 使用**替代盒和查找表**
+- 由于使用特定查找表值（常量），可以**区分AES**。_注意**常量**可以**存储**在二进制中**或动态**_**创建**。_
+- **加密密钥**必须是**16的倍数**（通常为32B），并且通常使用16B的**IV**。
 
-### SBox constants
+### SBox 常量
 
 ![](<../../images/image (380).png>)
 
-## Serpent **(Symmetric Crypt)**
+## Serpent **(对称加密)**
 
-### Characteristics
+### 特点
 
-- It's rare to find some malware using it but there are examples (Ursnif)
-- Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
+- 很少发现某些恶意软件使用它，但有例子（Ursnif）
+- 根据其长度（极长的函数）简单判断算法是否为Serpent
 
-### Identifying
+### 识别
 
-In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
-Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+在下图中注意常量**0x9E3779B9**的使用（注意该常量也被其他加密算法如**TEA** - Tiny Encryption Algorithm使用）。\
+还要注意**循环的大小**（**132**）和**反汇编**指令中的**异或操作**数量以及**代码**示例：
 
 ![](<../../images/image (381).png>)
 
-As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
+如前所述，这段代码可以在任何反编译器中可视化为**非常长的函数**，因为其中**没有跳转**。反编译的代码可能看起来如下：
 
 ![](<../../images/image (382).png>)
 
-Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
+因此，可以通过检查**魔法数字**和**初始异或**来识别此算法，看到**非常长的函数**并**比较**一些**指令**与长函数的**实现**（如左移7和左旋转22）。
 
-## RSA **(Asymmetric Crypt)**
+## RSA **(非对称加密)**
 
-### Characteristics
+### 特点
 
-- More complex than symmetric algorithms
-- There are no constants! (custom implementation are difficult to determine)
-- KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
+- 比对称算法更复杂
+- 没有常量！（自定义实现难以确定）
+- KANAL（加密分析器）未能显示RSA的提示，因为它依赖于常量。
 
-### Identifying by comparisons
+### 通过比较识别
 
 ![](<../../images/image (383).png>)
 
-- In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
-- Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
+- 在第11行（左侧）有一个`+7) >> 3`，与第35行（右侧）相同：`+7) / 8`
+- 第12行（左侧）检查`modulus_len < 0x040`，而第36行（右侧）检查`inputLen+11 > modulusLen`
 
-## MD5 & SHA (hash)
+## MD5 & SHA（哈希）
 
-### Characteristics
+### 特点
 
-- 3 functions: Init, Update, Final
-- Similar initialize functions
+- 3个函数：Init、Update、Final
+- 初始化函数相似
 
-### Identify
+### 识别
 
 **Init**
 
-You can identify both of them checking the constants. Note that the sha_init has 1 constant that MD5 doesn't have:
+你可以通过检查常量来识别它们。注意sha_init有一个MD5没有的常量：
 
 ![](<../../images/image (385).png>)
 
 **MD5 Transform**
 
-Note the use of more constants
+注意使用了更多常量
 
 ![](<../../images/image (253) (1) (1) (1).png>)
 
-## CRC (hash)
+## CRC（哈希）
 
-- Smaller and more efficient as it's function is to find accidental changes in data
-- Uses lookup tables (so you can identify constants)
+- 更小且更高效，因为它的功能是查找数据中的意外更改
+- 使用查找表（因此你可以识别常量）
 
-### Identify
+### 识别
 
-Check **lookup table constants**:
+检查**查找表常量**：
 
 ![](<../../images/image (387).png>)
 
-A CRC hash algorithm looks like:
+一个CRC哈希算法看起来像：
 
 ![](<../../images/image (386).png>)
 
-## APLib (Compression)
+## APLib（压缩）
 
-### Characteristics
+### 特点
 
-- Not recognizable constants
-- You can try to write the algorithm in python and search for similar things online
+- 没有可识别的常量
+- 你可以尝试用python编写算法并在线搜索类似的东西
 
-### Identify
+### 识别
 
-The graph is quiet large:
+图表相当大：
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Check **3 comparisons to recognise it**:
+检查**3个比较以识别它**：
 
 ![](<../../images/image (384).png>)
 
 {{#include ../../banners/hacktricks-training.md}}
-

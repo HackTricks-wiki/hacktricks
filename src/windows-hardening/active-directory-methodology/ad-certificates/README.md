@@ -2,111 +2,106 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## 介绍
 
-### Components of a Certificate
+### 证书的组成部分
 
-- The **Subject** of the certificate denotes its owner.
-- A **Public Key** is paired with a privately held key to link the certificate to its rightful owner.
-- The **Validity Period**, defined by **NotBefore** and **NotAfter** dates, marks the certificate's effective duration.
-- A unique **Serial Number**, provided by the Certificate Authority (CA), identifies each certificate.
-- The **Issuer** refers to the CA that has issued the certificate.
-- **SubjectAlternativeName** allows for additional names for the subject, enhancing identification flexibility.
-- **Basic Constraints** identify if the certificate is for a CA or an end entity and define usage restrictions.
-- **Extended Key Usages (EKUs)** delineate the certificate's specific purposes, like code signing or email encryption, through Object Identifiers (OIDs).
-- The **Signature Algorithm** specifies the method for signing the certificate.
-- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.
+- 证书的 **主题** 表示其所有者。
+- **公钥** 与私有密钥配对，将证书与其合法所有者关联。
+- **有效期** 由 **NotBefore** 和 **NotAfter** 日期定义，标记证书的有效持续时间。
+- 由证书颁发机构 (CA) 提供的唯一 **序列号** 识别每个证书。
+- **颁发者** 指的是颁发证书的 CA。
+- **SubjectAlternativeName** 允许为主题提供额外名称，增强识别灵活性。
+- **基本约束** 确定证书是用于 CA 还是最终实体，并定义使用限制。
+- **扩展密钥使用 (EKUs)** 通过对象标识符 (OIDs) 划分证书的特定用途，如代码签名或电子邮件加密。
+- **签名算法** 指定签署证书的方法。
+- 使用颁发者的私钥创建的 **签名** 确保证书的真实性。
 
-### Special Considerations
+### 特殊考虑
 
-- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.
+- **主题备用名称 (SANs)** 扩展证书的适用性到多个身份，对于具有多个域的服务器至关重要。安全的颁发流程对于避免攻击者操纵 SAN 规范进行冒充风险至关重要。
 
-### Certificate Authorities (CAs) in Active Directory (AD)
+### Active Directory (AD) 中的证书颁发机构 (CAs)
 
-AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:
+AD CS 通过指定的容器在 AD 林中承认 CA 证书，每个容器承担独特角色：
 
-- **Certification Authorities** container holds trusted root CA certificates.
-- **Enrolment Services** container details Enterprise CAs and their certificate templates.
-- **NTAuthCertificates** object includes CA certificates authorized for AD authentication.
-- **AIA (Authority Information Access)** container facilitates certificate chain validation with intermediate and cross CA certificates.
+- **Certification Authorities** 容器保存受信任的根 CA 证书。
+- **Enrolment Services** 容器详细说明企业 CA 及其证书模板。
+- **NTAuthCertificates** 对象包括被授权用于 AD 认证的 CA 证书。
+- **AIA (Authority Information Access)** 容器通过中间和交叉 CA 证书促进证书链验证。
 
-### Certificate Acquisition: Client Certificate Request Flow
+### 证书获取：客户端证书请求流程
 
-1. The request process begins with clients finding an Enterprise CA.
-2. A CSR is created, containing a public key and other details, after generating a public-private key pair.
-3. The CA assesses the CSR against available certificate templates, issuing the certificate based on the template's permissions.
-4. Upon approval, the CA signs the certificate with its private key and returns it to the client.
+1. 请求过程从客户端查找企业 CA 开始。
+2. 在生成公私钥对后，创建包含公钥和其他详细信息的 CSR。
+3. CA 根据可用证书模板评估 CSR，基于模板的权限颁发证书。
+4. 经批准后，CA 使用其私钥签署证书并将其返回给客户端。
 
-### Certificate Templates
+### 证书模板
 
-Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.
+在 AD 中定义，这些模板概述了颁发证书的设置和权限，包括允许的 EKUs 和注册或修改权限，对于管理证书服务的访问至关重要。
 
-## Certificate Enrollment
+## 证书注册
 
-The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.
+证书的注册过程由管理员 **创建证书模板** 开始，然后由企业证书颁发机构 (CA) **发布**。这使得模板可用于客户端注册，通过将模板名称添加到 Active Directory 对象的 `certificatetemplates` 字段来实现。
 
-For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
+为了让客户端请求证书，必须授予 **注册权限**。这些权限由证书模板和企业 CA 本身的安全描述符定义。必须在两个位置授予权限，才能成功请求。
 
-### Template Enrollment Rights
+### 模板注册权限
 
-These rights are specified through Access Control Entries (ACEs), detailing permissions like:
+这些权限通过访问控制条目 (ACEs) 指定，详细说明权限，如：
 
-- **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.
-- **ExtendedRights**, allowing all extended permissions.
-- **FullControl/GenericAll**, providing complete control over the template.
+- **Certificate-Enrollment** 和 **Certificate-AutoEnrollment** 权限，每个权限与特定 GUID 相关联。
+- **ExtendedRights**，允许所有扩展权限。
+- **FullControl/GenericAll**，提供对模板的完全控制。
 
-### Enterprise CA Enrollment Rights
+### 企业 CA 注册权限
 
-The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
+CA 的权限在其安全描述符中列出，可以通过证书颁发机构管理控制台访问。有些设置甚至允许低权限用户远程访问，这可能是一个安全隐患。
 
-### Additional Issuance Controls
+### 额外的颁发控制
 
-Certain controls may apply, such as:
+某些控制可能适用，例如：
 
-- **Manager Approval**: Places requests in a pending state until approved by a certificate manager.
-- **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
+- **经理批准**：将请求置于待处理状态，直到由证书经理批准。
+- **注册代理和授权签名**：指定 CSR 上所需的签名数量和必要的应用程序策略 OIDs。
 
-### Methods to Request Certificates
+### 请求证书的方法
 
-Certificates can be requested through:
+可以通过以下方式请求证书：
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
-2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
-3. The **certificate enrollment web interface**, with the Certificate Authority Web Enrollment role installed.
-4. The **Certificate Enrollment Service** (CES), in conjunction with the Certificate Enrollment Policy (CEP) service.
-5. The **Network Device Enrollment Service** (NDES) for network devices, using the Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows 客户端证书注册协议** (MS-WCCE)，使用 DCOM 接口。
+2. **ICertPassage 远程协议** (MS-ICPR)，通过命名管道或 TCP/IP。
+3. **证书注册 Web 界面**，安装了证书颁发机构 Web 注册角色。
+4. **证书注册服务** (CES)，与证书注册策略 (CEP) 服务结合使用。
+5. **网络设备注册服务** (NDES) 用于网络设备，使用简单证书注册协议 (SCEP)。
 
-Windows users can also request certificates via the GUI (`certmgr.msc` or `certlm.msc`) or command-line tools (`certreq.exe` or PowerShell's `Get-Certificate` command).
-
+Windows 用户还可以通过 GUI (`certmgr.msc` 或 `certlm.msc`) 或命令行工具 (`certreq.exe` 或 PowerShell 的 `Get-Certificate` 命令) 请求证书。
 ```powershell
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
+## 证书认证
 
-## Certificate Authentication
+Active Directory (AD) 支持证书认证，主要利用 **Kerberos** 和 **安全通道 (Schannel)** 协议。
 
-Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.
+### Kerberos 认证过程
 
-### Kerberos Authentication Process
-
-In the Kerberos authentication process, a user's request for a Ticket Granting Ticket (TGT) is signed using the **private key** of the user's certificate. This request undergoes several validations by the domain controller, including the certificate's **validity**, **path**, and **revocation status**. Validations also include verifying that the certificate comes from a trusted source and confirming the issuer's presence in the **NTAUTH certificate store**. Successful validations result in the issuance of a TGT. The **`NTAuthCertificates`** object in AD, found at:
-
+在 Kerberos 认证过程中，用户请求的票证授予票证 (TGT) 使用用户证书的 **私钥** 进行签名。该请求经过域控制器的多项验证，包括证书的 **有效性**、**路径** 和 **撤销状态**。验证还包括确认证书来自受信任的来源，并确认发行者在 **NTAUTH 证书存储** 中的存在。成功的验证将导致 TGT 的发放。AD 中的 **`NTAuthCertificates`** 对象位于：
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
+在证书认证中建立信任是至关重要的。
 
-is central to establishing trust for certificate authentication.
+### 安全通道 (Schannel) 认证
 
-### Secure Channel (Schannel) Authentication
+Schannel 促进安全的 TLS/SSL 连接，在握手过程中，客户端提供一个证书，如果成功验证，则授权访问。将证书映射到 AD 账户可能涉及 Kerberos 的 **S4U2Self** 函数或证书的 **主题备用名称 (SAN)**，以及其他方法。
 
-Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access. The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.
+### AD 证书服务枚举
 
-### AD Certificate Services Enumeration
+AD 的证书服务可以通过 LDAP 查询进行枚举，揭示有关 **企业证书颁发机构 (CAs)** 及其配置的信息。这对任何经过域认证的用户都是可访问的，无需特殊权限。工具如 **[Certify](https://github.com/GhostPack/Certify)** 和 **[Certipy](https://github.com/ly4k/Certipy)** 用于在 AD CS 环境中的枚举和漏洞评估。
 
-AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges. Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
-
-Commands for using these tools include:
-
+使用这些工具的命令包括：
 ```bash
 # Enumerate trusted root CA certificates and Enterprise CAs with Certify
 Certify.exe cas
@@ -120,11 +115,9 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-
-## References
+## 参考
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

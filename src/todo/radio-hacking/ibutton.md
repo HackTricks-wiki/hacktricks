@@ -2,45 +2,44 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Intro
+## 介绍
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
+iButton 是一种电子识别钥匙的通用名称，装在一个 **硬币形状的金属容器** 中。它也被称为 **Dallas Touch** Memory 或接触式存储器。尽管它常常被错误地称为“磁性”钥匙，但里面 **没有任何磁性**。实际上，里面隐藏着一个完整的 **微芯片**，它在数字协议上运行。
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### 什么是 iButton？ <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+通常，iButton 指的是钥匙和读卡器的物理形态 - 一个带有两个接触点的圆形硬币。围绕它的框架有很多变体，从最常见的带孔塑料支架到戒指、挂件等。
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+当钥匙接触到读卡器时，**接触点接触**，钥匙被供电以 **传输** 其 ID。有时钥匙 **不会立即被读取**，因为 **对讲机的接触 PSD 较大**。因此，钥匙和读卡器的外部轮廓无法接触。如果是这种情况，您需要将钥匙按在读卡器的一个墙面上。
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
-### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
+### **1-Wire 协议** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Dallas 钥匙使用 1-wire 协议交换数据。仅用一个接触点进行数据传输 (!!)，双向传输，从主设备到从设备，反之亦然。1-wire 协议按照主从模型工作。在这种拓扑中，主设备始终发起通信，从设备遵循其指令。
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+当钥匙（从设备）接触到对讲机（主设备）时，钥匙内部的芯片开启，由对讲机供电，钥匙被初始化。随后，对讲机请求钥匙 ID。接下来，我们将更详细地查看这个过程。
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Flipper 可以在主模式和从模式下工作。在钥匙读取模式下，Flipper 充当读卡器，也就是说它作为主设备工作。而在钥匙仿真模式下，Flipper 假装是钥匙，处于从模式。
 
-### Dallas, Cyfral & Metakom keys
+### Dallas、Cyfral 和 Metakom 钥匙
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+有关这些钥匙如何工作的更多信息，请查看页面 [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
-### Attacks
+### 攻击
 
-iButtons can be attacked with Flipper Zero:
+iButtons 可以通过 Flipper Zero 进行攻击：
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## References
+## 参考
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

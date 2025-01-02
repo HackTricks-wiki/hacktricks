@@ -2,42 +2,41 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## 介绍
 
-For more info about what is an iButton check:
+有关 iButton 的更多信息，请查看：
 
 {{#ref}}
 ../ibutton.md
 {{#endref}}
 
-## Design
+## 设计
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
+下图的 **蓝色** 部分是您需要 **放置真实 iButton** 的位置，以便 Flipper 可以 **读取它。** **绿色** 部分是您需要用 Flipper zero **接触读卡器** 的方式，以 **正确模拟 iButton**。
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## 操作
 
-### Read
+### 读取
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
+在读取模式下，Flipper 正在等待 iButton 密钥接触，并能够处理三种类型的密钥：**Dallas, Cyfral, 和 Metakom**。Flipper 将 **自动识别密钥类型**。密钥协议的名称将显示在 ID 号码上方的屏幕上。
 
-### Add manually
+### 手动添加
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+可以 **手动添加** 类型为：**Dallas, Cyfral, 和 Metakom** 的 iButton。
 
-### **Emulate**
+### **模拟**
 
-It's possible to **emulate** saved iButtons (read or manually added).
+可以 **模拟** 已保存的 iButtons（读取或手动添加）。
 
 > [!NOTE]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> 如果您无法使 Flipper Zero 的预期接触点接触读卡器，您可以 **使用外部 GPIO：**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## 参考
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

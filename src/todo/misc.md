@@ -1,38 +1,36 @@
 {{#include ../banners/hacktricks-training.md}}
 
-In a ping response TTL:\
+在 ping 响应 TTL：\
 127 = Windows\
 254 = Cisco\
-Lo demás,algunlinux
+其他，某些 Linux
 
 $1$- md5\
-$2$or $2a$ - Blowfish\
+$2$或 $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
-If you do not know what is behind a service, try to make and HTTP GET request.
+如果你不知道某个服务背后是什么，尝试发起一个 HTTP GET 请求。
 
-**UDP Scans**\
+**UDP 扫描**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
-An empty UDP packet is sent to a specific port. If the UDP port is open, no reply is sent back from the target machine. If the UDP port is closed, an ICMP port unreachable packet should be sent back from the target machine.\
+一个空的 UDP 数据包被发送到特定端口。如果 UDP 端口是开放的，目标机器不会回复。如果 UDP 端口是关闭的，目标机器应该会发送一个 ICMP 端口不可达的数据包。\
 
-UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
- packets. This can lead to false positives in your scan, and you will regularly see\
- UDP port scans showing all UDP ports open on a scanned machine.\
- o Most port scanners do not scan all available ports, and usually have a preset list\
- of “interesting ports” that are scanned.
+UDP 端口扫描通常不可靠，因为防火墙和路由器可能会丢弃 ICMP\
+数据包。这可能导致扫描中的假阳性，你会经常看到\
+UDP 端口扫描显示被扫描机器上的所有 UDP 端口都是开放的。\
+大多数端口扫描器不会扫描所有可用端口，通常有一个预设的“有趣端口”列表\
+进行扫描。
 
-# CTF - Tricks
+# CTF - 技巧
 
-In **Windows** use **Winzip** to search for files.\
-**Alternate data Streams**: _dir /r | find ":$DATA"_\
-
+在 **Windows** 上使用 **Winzip** 搜索文件。\
+**备用数据流**：_dir /r | find ":$DATA"_\
 ```
 binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
-
 ## Crypto
 
 **featherduster**\
@@ -40,22 +38,21 @@ binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and 
 **Basae64**(6—>8) —> 0...9, a...z, A…Z,+,/\
 **Base32**(5 —>8) —> A…Z, 2…7\
 **Base85** (Ascii85, 7—>8) —> 0...9, a...z, A...Z, ., -, :, +, =, ^, !, /, \*, ?, &, <, >, (, ), \[, ], {, }, @, %, $, #\
-**Uuencode** --> Start with "_begin \<mode> \<filename>_" and weird chars\
-**Xxencoding** --> Start with "_begin \<mode> \<filename>_" and B64\
+**Uuencode** --> Start with "_begin \<mode> \<filename>_" 和奇怪的字符\
+**Xxencoding** --> Start with "_begin \<mode> \<filename>_" 和 B64\
 \
-**Vigenere** (frequency analysis) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
-**Scytale** (offset of characters) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
+**Vigenere** (频率分析) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
+**Scytale** (字符偏移) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
 
 **25x25 = QR**
 
 factordb.com\
 rsatool
 
-Snow --> Hide messages using spaces and tabs
+Snow --> 使用空格和制表符隐藏消息
 
 # Characters
 
-%E2%80%AE => RTL Character (writes payloads backwards)
+%E2%80%AE => RTL 字符 (反向书写有效载荷)
 
 {{#include ../banners/hacktricks-training.md}}
-

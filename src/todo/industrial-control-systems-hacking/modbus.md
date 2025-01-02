@@ -1,35 +1,31 @@
-# The Modbus Protocol 
+# Modbus协议
 
-## Introduction to Modbus Protocol 
+## Modbus协议简介
 
-The Modbus protocol is a widely used protocol in Industrial Automation and Control Systems. Modbus allows communication between various devices such as programmable logic controllers (PLCs), sensors, actuators, and other industrial devices. Understanding the Modbus Protocol is essential since this is the single most used communication protocol in the ICS and has a lot of potential attack surface for sniffing and even injecting commands into PLCs.
+Modbus协议是工业自动化和控制系统中广泛使用的协议。Modbus允许可编程逻辑控制器（PLC）、传感器、执行器和其他工业设备之间的通信。理解Modbus协议至关重要，因为这是ICS中使用最广泛的通信协议，并且具有大量的潜在攻击面，可以进行嗅探甚至向PLC注入命令。
 
-Here, concepts are stated point-wise providing context of the protcol and it's nature of operation. The biggest challenge in ICS system security is the cost of implementation and upgradation. These protocols and standards where designed in the early 80s and 90s which are still widely used. Since an industry has a lot of devices and connections, upgrading devices is very difficult, which provides hackers with an edge of dealing with outdated protocols. Attacks on Modbus is like practically unevitable since it is going to be used without upgradation is it's operation is critical to the industry. 
+在这里，概念以要点形式陈述，提供协议的背景及其操作性质。ICS系统安全的最大挑战是实施和升级的成本。这些协议和标准是在80年代和90年代早期设计的，至今仍被广泛使用。由于一个行业有很多设备和连接，升级设备非常困难，这使得黑客在处理过时协议时占据了优势。对Modbus的攻击几乎是不可避免的，因为它将在没有升级的情况下使用，而其操作对行业至关重要。
 
-## The Client-Server Architecture
+## 客户端-服务器架构
 
-Modbus Protocol is typically used as in Client Server Architecture where a master device (client) initiates communication with one or more slave devices (servers). This is also referred to as Master-Slave architecture, which is widely used in electronics and IoT with SPI, I2C, etc. 
+Modbus协议通常用作客户端-服务器架构，其中主设备（客户端）与一个或多个从设备（服务器）发起通信。这也被称为主从架构，广泛用于电子和物联网中，如SPI、I2C等。
 
-## Serial and Etherent Versions
+## 串行和以太网版本
 
-Modbus Protocol is designed for both, Serial Communication as well as Ethernet Communications. The Serial Communication is widely used in legacy systems while modern devices support Ethernet which offers high data rates and is more suitable for modern industrial networks. 
+Modbus协议设计用于串行通信和以太网通信。串行通信在遗留系统中广泛使用，而现代设备支持以太网，提供更高的数据传输速率，更适合现代工业网络。
 
-## Data Representation 
+## 数据表示
 
-Data is transmitted in Modbus protocol as ASCII or Binary, although the binary format is used due to it's compactibility with older devices. 
+数据在Modbus协议中以ASCII或二进制形式传输，尽管由于与旧设备的兼容性，通常使用二进制格式。
 
-## Function Codes 
+## 功能代码
 
- ModBus Protocol works with transmission of specific function codes that are used to operate the PLCs and various control devices. This portion is important to undertstand since replay attacks can be done by retransmitting function codes. Legacy devices do not support any encryption towards data transmission and usually have long wires which connect them, which results to tampering of these wires and capturing/injected data. 
+ModBus协议通过传输特定的功能代码来操作PLC和各种控制设备。这部分很重要，因为重放攻击可以通过重新传输功能代码来实现。遗留设备不支持任何数据传输加密，通常有长电缆连接，这导致这些电缆被篡改并捕获/注入数据。
 
- ## Addressing of Modbus 
+## Modbus的寻址
 
-Each device in the network has some unique address which is essential for communication between devices. Protocols like Modbus RTU, Modbus TCP, etc. are used to implement addressing and serves like a transport layer to the data transmission. The data that is transferred is in the Modbus protocol format that contains the message.
+网络中的每个设备都有一些唯一地址，这对于设备之间的通信至关重要。像Modbus RTU、Modbus TCP等协议用于实现寻址，并作为数据传输的传输层。传输的数据是Modbus协议格式，包含消息。
 
-Furthermore, Modbus also implements error checks to ensure the integrity of the transmitted data. But most of al, Modbus is a Open Standard and anyone can implement it in their devices. This made this protocol to go on global standard and it's widespread in the industrial automation industry. 
+此外，Modbus还实现了错误检查，以确保传输数据的完整性。但最重要的是，Modbus是开放标准，任何人都可以在其设备中实现。这使得该协议成为全球标准，并在工业自动化行业中广泛应用。
 
-Due to it's large scale use and lack of upgradations, attacking Modbus provides a significant advantage with it's attack surface. ICS is highly dependent on communication between devices and any attacks made on them can be dangerous for the operation of the industrial systems. Attacks like replay, data injection, data sniffing and leaking, Denial of Service, data forgery, etc. can be carried out if the medium of transmission is identified by the attacker. 
-
-
-
-
+由于其大规模使用和缺乏升级，攻击Modbus提供了显著的优势，具有广泛的攻击面。ICS高度依赖设备之间的通信，任何对它们的攻击都可能对工业系统的操作造成危险。如果攻击者识别出传输媒介，可以进行重放、数据注入、数据嗅探和泄露、拒绝服务、数据伪造等攻击。

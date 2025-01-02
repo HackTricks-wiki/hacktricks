@@ -4,63 +4,63 @@
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)是一个免费的数字信号分析仪，适用于GNU/Linux和macOS，旨在提取未知无线电信号的信息。它通过SoapySDR支持多种SDR设备，并允许可调的FSK、PSK和ASK信号解调，解码模拟视频，分析突发信号并实时收听模拟语音通道。
 
 ### Basic Config
 
-After installing there are a few things that you could consider configuring.\
-In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\\
+安装后，有一些您可以考虑配置的内容。\
+在设置（第二个选项卡按钮）中，您可以选择**SDR设备**或**选择一个文件**进行读取，以及要调谐的频率和采样率（如果您的PC支持，建议最高可达2.56Msps）\\
 
 ![](<../../images/image (245).png>)
 
-In the GUI behaviour it's recommended to enable a few things if your PC support it:
+在GUI行为中，如果您的PC支持，建议启用一些选项：
 
 ![](<../../images/image (472).png>)
 
 > [!NOTE]
-> If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
+> 如果您发现您的PC没有捕获到信号，请尝试禁用OpenGL并降低采样率。
 
 ### Uses
 
-- Just to **capture some time of a signal and analyze it** just maintain the button "Push to capture" as long as you need.
+- 只需**捕获信号的一段时间并分析它**，只需按住“Push to capture”按钮，直到您需要的时间。
 
 ![](<../../images/image (960).png>)
 
-- The **Tuner** of SigDigger helps to **capture better signals** (but it can also degrade them). Ideally start with 0 and keep **making it bigger until** you find the **noise** introduce is **bigger** than the **improvement of the signal** you need).
+- SigDigger的**调谐器**有助于**捕获更好的信号**（但也可能会降低信号质量）。理想情况下，从0开始，继续**增大**，直到您发现引入的**噪声**大于您所需的**信号改善**。
 
 ![](<../../images/image (1099).png>)
 
 ### Synchronize with radio channel
 
-With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:
+使用[**SigDigger** ](https://github.com/BatchDrake/SigDigger)与您想要收听的频道同步，配置“基带音频预览”选项，配置带宽以获取所有发送的信息，然后将调谐器设置到噪声真正开始增加之前的水平：
 
 ![](<../../images/image (585).png>)
 
 ## Interesting tricks
 
-- When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
-- In frames of information you usually should **find different frames well aligned between them**:
+- 当设备发送信息突发时，通常**第一部分是前导码**，因此您**不必担心**如果您**没有找到信息**或**那里有一些错误**。
+- 在信息帧中，您通常应该**找到不同的帧彼此对齐**：
 
 ![](<../../images/image (1076).png>)
 
 ![](<../../images/image (597).png>)
 
-- **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
-- Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
+- **在恢复比特后，您可能需要以某种方式处理它们**。例如，在曼彻斯特编码中，上+下将是1或0，下+上将是另一个。因此，1和0的对（上和下）将是真实的1或真实的0。
+- 即使信号使用曼彻斯特编码（不可能找到连续两个0或1），您也可能在前导码中**找到多个1或0**！
 
 ### Uncovering modulation type with IQ
 
-There are 3 ways to store information in signals: Modulating the **amplitude**, **frequency** or **phase**.\
-If you are checking a signal there are different ways to try to figure out what is being used to store information (fin more ways below) but a good one is to check the IQ graph.
+有3种方式在信号中存储信息：调制**幅度**、**频率**或**相位**。\
+如果您正在检查信号，有不同的方法可以尝试找出用于存储信息的方式（更多方法见下文），但一个好的方法是检查IQ图。
 
 ![](<../../images/image (788).png>)
 
-- **Detecting AM**: If in the IQ graph appears for example **2 circles** (probably one in 0 and other in a different amplitude), it could means that this is an AM signal. This is because in the IQ graph the distance between the 0 and the circle is the amplitude of the signal, so it's easy to visualize different amplitudes being used.
-- **Detecting PM**: Like in the previous image, if you find small circles not related between them it probably means that a phase modulation is used. This is because in the IQ graph, the angle between the point and the 0,0 is the phase of the signal, so that means that 4 different phases are used.
-  - Note that if the information is hidden in the fact that a phase is changed and not in the phase itself, you won't see different phases clearly differentiated.
-- **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-  Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-  Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+- **检测AM**：如果在IQ图中出现例如**2个圆圈**（可能一个在0，另一个在不同的幅度），这可能意味着这是一个AM信号。这是因为在IQ图中，0和圆圈之间的距离是信号的幅度，因此很容易可视化使用的不同幅度。
+- **检测PM**：如前图所示，如果您发现小圆圈彼此无关，这可能意味着使用了相位调制。这是因为在IQ图中，点与0,0之间的角度是信号的相位，这意味着使用了4种不同的相位。
+- 请注意，如果信息隐藏在相位变化的事实中，而不是相位本身，您将不会看到不同的相位清晰区分。
+- **检测FM**：IQ没有识别频率的字段（到中心的距离是幅度，角度是相位）。\
+因此，要识别FM，您应该**在此图中基本上只看到一个圆**。\
+此外，不同的频率通过IQ图的**速度加速穿过圆**来“表示”（因此在SysDigger中选择信号时，IQ图被填充，如果您发现创建的圆中的加速或方向变化，这可能意味着这是FM）：
 
 ## AM Example
 
@@ -70,29 +70,29 @@ If you are checking a signal there are different ways to try to figure out what 
 
 #### Checking the envelope
 
-Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:
+使用[**SigDigger** ](https://github.com/BatchDrake/SigDigger)检查AM信息，仅查看**包络**，您可以看到不同的清晰幅度水平。所使用的信号以AM发送脉冲信息，这就是一个脉冲的样子：
 
 ![](<../../images/image (590).png>)
 
-And this is how part of the symbol looks like with the waveform:
+这就是符号的一部分与波形的样子：
 
 ![](<../../images/image (734).png>)
 
 #### Checking the Histogram
 
-You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
+您可以**选择包含信息的整个信号**，选择**幅度**模式和**选择**，然后单击**直方图**。您可以观察到仅找到2个清晰的水平
 
 ![](<../../images/image (264).png>)
 
-For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
+例如，如果您在此AM信号中选择频率而不是幅度，您只会找到1个频率（没有信息调制在频率上仅使用1个频率）。
 
 ![](<../../images/image (732).png>)
 
-If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
+如果您发现很多频率，这可能不会是FM，可能信号频率只是因为频道而被修改。
 
 #### With IQ
 
-In this example you can see how there is a **big circle** but also **a lot of points in the centre.**
+在此示例中，您可以看到有一个**大圆**，但也有**很多点在中心**。
 
 ![](<../../images/image (222).png>)
 
@@ -100,44 +100,44 @@ In this example you can see how there is a **big circle** but also **a lot of po
 
 #### With one symbol
 
-Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz).
+选择您能找到的最小符号（以确保它只是1），并检查“选择频率”。在这种情况下，它将是1.013kHz（即1kHz）。
 
 ![](<../../images/image (78).png>)
 
 #### With a group of symbols
 
-You can also indicate the number of symbols you are going to select and SigDigger will calculate the frequency of 1 symbol (the more symbols selected the better probably). In this scenario I selected 10 symbols and the "Selection freq" is 1.004 Khz:
+您还可以指示要选择的符号数量，SigDigger将计算1个符号的频率（选择的符号越多，可能越好）。在这种情况下，我选择了10个符号，“选择频率”为1.004 kHz：
 
 ![](<../../images/image (1008).png>)
 
 ### Get Bits
 
-Having found this is an **AM modulated** signal and the **symbol rate** (and knowing that in this case something up means 1 and something down means 0), it's very easy to **obtain the bits** encoded in the signal. So, select the signal with info and configure the sampling and decision and press sample (check that **Amplitude** is selected, the discovered **Symbol rate** is configured and the **Gadner clock recovery** is selected):
+发现这是一个**AM调制**信号和**符号率**（并且知道在这种情况下上升表示1，下降表示0），非常容易**获取信号中编码的比特**。因此，选择包含信息的信号并配置采样和决策，然后按下采样（检查**幅度**已选择，发现的**符号率**已配置，并选择了**Gadner时钟恢复**）：
 
 ![](<../../images/image (965).png>)
 
-- **Sync to selection intervals** means that if you previously selected intervals to find the symbol rate, that symbol rate will be used.
-- **Manual** means that the indicated symbol rate is going to be used
-- In **Fixed interval selection** you indicate the number of intervals that should be selected and it calculates the symbol rate from it
-- **Gadner clock recovery** is usually the best option, but you still need to indicate some approximate symbol rate.
+- **同步到选择间隔**意味着如果您之前选择了间隔以找到符号率，则将使用该符号率。
+- **手动**意味着将使用指示的符号率
+- 在**固定间隔选择**中，您指示应选择的间隔数量，并从中计算符号率
+- **Gadner时钟恢复**通常是最佳选项，但您仍需指示一些近似的符号率。
 
-Pressing sample this appears:
+按下采样后，出现以下内容：
 
 ![](<../../images/image (644).png>)
 
-Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
+现在，为了让SigDigger理解**信息承载的水平范围**，您需要单击**较低水平**并保持按住，直到达到最高水平：
 
 ![](<../../images/image (439).png>)
 
-If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
+如果例如有**4个不同的幅度水平**，您应该将**每个符号的比特数配置为2**，并从最小值选择到最大值。
 
-Finally **increasing** the **Zoom** and **changing the Row size** you can see the bits (and you can select all and copy to get all the bits):
+最后，通过**增加****缩放**和**更改行大小**，您可以看到比特（您可以选择所有并复制以获取所有比特）：
 
 ![](<../../images/image (276).png>)
 
-If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no way to know which symbol is** 00, 01, 10, 11, so it will use different **grey scales** the represent each (and if you copy the bits it will use **numbers from 0 to 3**, you will need to treat them).
+如果信号每个符号有超过1个比特（例如2），SigDigger**无法知道哪个符号是**00、01、10、11，因此它将使用不同的**灰度**来表示每个（如果您复制比特，它将使用**0到3的数字**，您需要处理它们）。
 
-Also, use **codifications** such as **Manchester**, and **up+down** can be **1 or 0** and an down+up can be a 1 or 0. In those cases you need to **treat the obtained ups (1) and downs (0)** to substitute the pairs of 01 or 10 as 0s or 1s.
+此外，使用**编码**如**曼彻斯特**，上+下可以是**1或0**，而下+上可以是1或0。在这些情况下，您需要**处理获得的上升（1）和下降（0）**以替换成对的01或10为0或1。
 
 ## FM Example
 
@@ -147,19 +147,19 @@ Also, use **codifications** such as **Manchester**, and **up+down** can be **1 o
 
 #### Checking the frequencies and waveform
 
-Signal example sending information modulated in FM:
+发送信息调制在FM的信号示例：
 
 ![](<../../images/image (725).png>)
 
-In the previous image you can observe pretty good that **2 frequencies are used** but if you **observe** the **waveform** you might n**ot be able to identify correctly the 2 different frequencies**:
+在前面的图像中，您可以很好地观察到**使用了2个频率**，但如果您**观察**波形，您可能**无法正确识别这2个不同的频率**：
 
 ![](<../../images/image (717).png>)
 
-This is because I capture the signal in booth frequencies, therefore one is approximately the other in negative:
+这是因为我在两个频率上捕获了信号，因此一个大约是另一个的负值：
 
 ![](<../../images/image (942).png>)
 
-If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
+如果同步频率**更接近一个频率而不是另一个**，您可以轻松看到这2个不同的频率：
 
 ![](<../../images/image (422).png>)
 
@@ -167,33 +167,32 @@ If the synchronized frequency is **closer to one frequency than to the other** y
 
 #### Checking the histogram
 
-Checking the frequency histogram of the signal with information you can easily see 2 different signals:
+检查带有信息的信号的频率直方图，您可以轻松看到2个不同的信号：
 
 ![](<../../images/image (871).png>)
 
-In this case if you check the **Amplitude histogram** you will find **only one amplitude**, so it **cannot be AM** (if you find a lot of amplitudes it might be because the signal has been losing power along the channel):
+在这种情况下，如果您检查**幅度直方图**，您将发现**只有一个幅度**，因此**不能是AM**（如果您发现很多幅度，可能是因为信号在频道中失去了功率）：
 
 ![](<../../images/image (817).png>)
 
-And this is would be phase histogram (which makes very clear the signal is not modulated in phase):
+这将是相位直方图（这清楚表明信号不是相位调制）：
 
 ![](<../../images/image (996).png>)
 
 #### With IQ
 
-IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+IQ没有识别频率的字段（到中心的距离是幅度，角度是相位）。\
+因此，要识别FM，您应该**在此图中基本上只看到一个圆**。\
+此外，不同的频率通过IQ图的**速度加速穿过圆**来“表示”（因此在SysDigger中选择信号时，IQ图被填充，如果您发现创建的圆中的加速或方向变化，这可能意味着这是FM）：
 
 ![](<../../images/image (81).png>)
 
 ### Get Symbol Rate
 
-You can use the **same technique as the one used in the AM example** to get the symbol rate once you have found the frequencies carrying symbols.
+您可以使用**与AM示例中使用的相同技术**来获取符号率，一旦您找到了承载符号的频率。
 
 ### Get Bits
 
-You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
+您可以使用**与AM示例中使用的相同技术**来获取比特，一旦您**发现信号是频率调制的**和**符号率**。
 
 {{#include ../../banners/hacktricks-training.md}}
-

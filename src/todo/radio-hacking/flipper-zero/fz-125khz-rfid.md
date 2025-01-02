@@ -6,51 +6,51 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Intro
+## 介绍
 
-For more info about how 125kHz tags work check:
+有关125kHz标签工作原理的更多信息，请查看：
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## 操作
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+有关这些类型标签的更多信息 [**请阅读此介绍**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)。
 
-### Read
+### 读取
 
-Tries to **read** the card info. Then it can **emulate** them.
+尝试**读取**卡片信息。然后可以**模拟**它们。
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> 请注意，一些对讲机试图通过在读取之前发送写入命令来保护自己免受密钥复制。如果写入成功，则该标签被视为假标签。当Flipper模拟RFID时，读卡器无法将其与原始标签区分开，因此不会出现此类问题。
 
-### Add Manually
+### 手动添加
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+您可以在Flipper Zero中创建**指示您手动输入数据的假卡**，然后模拟它。
 
-#### IDs on cards
+#### 卡片上的ID
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+有时，当您获得一张卡时，您会发现卡片上可见的ID（或部分ID）。
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
+例如，在这张EM-Marin卡中，可以**清晰地读取最后3个字节中的5个字节**。\
+如果您无法从卡片上读取其他2个字节，可以通过暴力破解来获取。
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+在这张HID卡中也是如此，只有3个字节中的2个可以在卡片上找到。
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### 模拟/写入
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+在**复制**一张卡或**手动输入**ID后，可以使用Flipper Zero**模拟**它或在真实卡片上**写入**它。
 
-## References
+## 参考
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
@@ -59,4 +59,3 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

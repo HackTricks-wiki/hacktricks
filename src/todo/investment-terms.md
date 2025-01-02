@@ -1,70 +1,68 @@
-# Investment Terms
+# 投资术语
 
-## Spot
+## 现货
 
-This is the most basic way to do some trading. You can **indicate the amount of the asset and the price** that you want to buy or sell, and whenever that price is reached the operation is done.
+这是进行交易的最基本方式。您可以**指明资产的数量和您想要买入或卖出的价格**，一旦达到该价格，交易就会完成。
 
-Usually you can also use the **current market price** in order to perform the transaction as fast as possible to the current price.
+通常，您还可以使用**当前市场价格**以尽快以当前价格进行交易。
 
-**Stop Loss - Limit**: You can also indicate amount and the price of the assets to buy or sell while also indicating a lower price to buy or sell in case it's reached (to stop losses).
+**止损 - 限制**：您还可以指明买入或卖出的资产数量和价格，同时指明一个较低的价格以便在达到时买入或卖出（以止损）。
 
-## Futures
+## 期货
 
-A future is a contract where 2 parts comes to an agreement to **acquire something in the future at a fixed price**. For example to sell 1 bitcoin in 6 months at 70.000$.
+期货是一种合同，其中两方达成协议**在未来以固定价格获取某物**。例如，在6个月内以70,000美元出售1个比特币。
 
-Obviously if by 6 months the bitcoin value is 80.000$ the seller part loses money and the buying part earns it. If in 6 months the bitcoin value is 60.000$, the opposite happens.
+显然，如果到6个月时比特币的价值为80,000美元，卖方将亏损，而买方将获利。如果在6个月时比特币的价值为60,000美元，则情况正好相反。
 
-However, this is interesting for example for business which are generating a product and need to have the security that thy will be able to sell it at a price to pay the costs. Or business which want to assure fixed prices in the future for something eve if higher.
+然而，这对于例如正在生产产品并需要确保能够以支付成本的价格出售的企业来说是有趣的。或者希望确保未来某物的固定价格的企业，即使价格更高。
 
-Although in exchanges this is usually used to try to make a profit.
+尽管在交易所中，这通常用于尝试获利。
 
-* Notice that a "Long position" means that someone if betting that a price is going to increase
-* While a "short position" means that someone if betting that a price is going to go down
+* 请注意，“多头头寸”意味着某人押注价格将上涨
+* 而“空头头寸”意味着某人押注价格将下跌
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+### 使用期货对冲 <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-If a fund manager is afraid that some stocks are going to go down he might take a short position over some assets like bitcoins or S\&P 500 futures contracts. This would be similar to buying or having some assets and create a contract of selling those at a future time at a bigger price.&#x20;
+如果基金经理担心某些股票会下跌，他可能会对一些资产（如比特币或标准普尔500期货合约）采取空头头寸。这类似于购买或持有一些资产并创建一个在未来以更高价格出售这些资产的合同。
 
-In case the price goes down the fund manager will earn benefits because he will sell the assets at a bigger price. If the price of the assets goes up the manager won't earn that benefit but he will still keep his assets.
+如果价格下跌，基金经理将获利，因为他将以更高的价格出售资产。如果资产价格上涨，经理将无法获得该收益，但他仍将保留他的资产。
 
-### Perpetual Futures
+### 永续期货
 
-**These are "futures" that will last indefinitely** (without an ending contract date). It's very common to find them for example in crypto exchanges where you can go in an out of futures based on the price of cryptos.
+**这些是“期货”，将无限期持续**（没有结束合同日期）。在加密货币交易所中，您可以根据加密货币的价格进出期货，这种情况非常常见。
 
-Notice that in these cases the benefits and lose can be in real time, if the price increases 1% you win a 1%, if the price decreases 1%, you will lose it.
+请注意，在这些情况下，收益和损失可以实时发生，如果价格上涨1%，您将赢得1%；如果价格下跌1%，您将损失1%。
 
-### Futures with Leverage
+### 带杠杆的期货
 
-**Leverage** allows you to control a larger position in the market with a smaller amount of money. It basically allows you to "bet" much more money than you have risking only the money that you actually have.
+**杠杆**允许您用较少的资金控制市场中的更大头寸。它基本上允许您“下注”比您拥有的更多资金，仅冒您实际拥有的资金的风险。
 
-For example, if you open a future position in the BTC/USDT with 100$ a 50x leverage this means that if the price is increased 1%, then you would be winning 1x50 = 50% of your initial investment (50$). And therefore you will have 150$.\
-However, if the price decreases 1%, you will lost 50% of your funds (59$ in this case). And if the price decreases 2% you will lose all your bet (2x50 = 100%).
+例如，如果您以100美元的50倍杠杆在BTC/USDT中开设期货头寸，这意味着如果价格上涨1%，您将赢得1x50 = 50%的初始投资（50美元）。因此，您将拥有150美元。\
+然而，如果价格下跌1%，您将损失50%的资金（在这种情况下为59美元）。如果价格下跌2%，您将失去所有的赌注（2x50 = 100%）。
 
-Therefore, leveraging allows to control the amount of money you bet while increasing the winnings and loses.
+因此，杠杆允许您控制您下注的资金量，同时增加收益和损失。
 
-## Differences Futures & Options
+## 期货与期权的区别
 
-The main difference between futures and options is that the contract is optional for the buyer: He can decide to execute it or not (usually he will only if he will benefit for it). The seller must sell if the buyer wants to use the option.\
-However, the buyer will be paying some fee to the seller for opening the option (so the seller, who is taking more risk aparently, starts earning some money).
+期货和期权之间的主要区别在于合同对买方是可选的：他可以决定是否执行（通常只有在他能从中获益时才会执行）。如果买方希望使用期权，卖方必须出售。\
+然而，买方将向卖方支付一些费用以开启期权（因此卖方，表面上承担更多风险，开始赚取一些钱）。
 
-### 1. **Obligation vs. Right:**
+### 1. **义务与权利：**
 
-* **Futures:** When you buy or sell a futures contract, you're entering a **binding agreement** to buy or sell an asset at a specific price on a future date. Both the buyer and the seller are **obligated** to fulfill the contract at expiration (unless the contract is closed before then).
-* **Options:** With options, you have the **right, but not the obligation**, to buy (in the case of a **call option**) or sell (in the case of a **put option**) an asset at a specific price before or at a certain expiration date. The **buyer** has the option to execute, while the **seller** is obligated to fulfill the trade if the buyer decides to exercise the option.
+* **期货：** 当您买入或卖出期货合同时，您正在进入一个**具有约束力的协议**，以在未来某个日期以特定价格买入或卖出资产。买方和卖方都**有义务**在到期时履行合同（除非合同在此之前关闭）。
+* **期权：** 通过期权，您有**权利，但没有义务**，在特定价格之前或在某个到期日以特定价格买入（在**看涨期权**的情况下）或卖出（在**看跌期权**的情况下）资产。**买方**有选择执行的权利，而**卖方**在买方决定行使期权时有义务完成交易。
 
-### 2. **Risk:**
+### 2. **风险：**
 
-* **Futures:** Both the buyer and the seller take on **unlimited risk** because they are obligated to complete the contract. The risk is the difference between the agreed-upon price and the market price at the expiration date.
-* **Options:** The buyer’s risk is limited to the **premium** paid to purchase the option. If the market doesn't move in favor of the option holder, they can simply let the option expire. However, the **seller** (writer) of the option has unlimited risk if the market moves significantly against them.
+* **期货：** 买方和卖方都承担**无限风险**，因为他们有义务完成合同。风险是到期时约定价格与市场价格之间的差额。
+* **期权：** 买方的风险仅限于为购买期权支付的**权利金**。如果市场没有朝着期权持有者有利的方向移动，他们可以简单地让期权到期。然而，期权的**卖方**（写手）在市场大幅不利于他们时面临无限风险。
 
-### 3. **Cost:**
+### 3. **成本：**
 
-* **Futures:** There is no upfront cost beyond the margin required to hold the position, as the buyer and seller are both obligated to complete the trade.
-* **Options:** The buyer must pay an **option premium** upfront for the right to exercise the option. This premium is essentially the cost of the option.
+* **期货：** 除了持有头寸所需的保证金外，没有其他前期成本，因为买方和卖方都有义务完成交易。
+* **期权：** 买方必须为行使期权的权利提前支付**期权权利金**。这个权利金本质上是期权的成本。
 
-### 4. **Profit Potential:**
+### 4. **利润潜力：**
 
-* **Futures:** The profit or loss is based on the difference between the market price at expiration and the agreed-upon price in the contract.
-* **Options:** The buyer profits when the market moves favorably beyond the strike price by more than the premium paid. The seller profits by keeping the premium if the option is not exercised.
-
-
+* **期货：** 利润或损失基于到期时市场价格与合同中约定价格之间的差额。
+* **期权：** 当市场在超过支付的权利金的行使价格的方向上有利移动时，买方获利。如果期权未被行使，卖方通过保留权利金获利。

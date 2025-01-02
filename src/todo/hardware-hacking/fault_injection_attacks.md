@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# Fault Injection Attacks
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+故障注入攻击包括在电子电路中引入外部干扰以影响其行为，从而泄露信息或甚至绕过电路中的某些限制。这种攻击为攻击电子电路打开了许多可能性。这种攻击也被称为电子电路的故障。
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+有很多方法和媒介可以向电子电路注入故障。

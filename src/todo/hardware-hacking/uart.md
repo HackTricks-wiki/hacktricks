@@ -2,84 +2,77 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
+UART是一种串行协议，这意味着它一次传输一个比特的数据。相比之下，平行通信协议通过多个通道同时传输数据。常见的串行协议包括RS-232、I2C、SPI、CAN、以太网、HDMI、PCI Express和USB。
 
-Generally, the line is held high (at a logical 1 value) while UART is in the idle state. Then, to signal the start of a data transfer, the transmitter sends a start bit to the receiver, during which the signal is held low (at a logical 0 value). Next, the transmitter sends five to eight data bits containing the actual message, followed by an optional parity bit and one or two stop bits (with a logical 1 value), depending on the configuration. The parity bit, used for error checking, is rarely seen in practice. The stop bit (or bits) signify the end of transmission.
+通常，在UART处于空闲状态时，线路保持高电平（逻辑1值）。然后，为了信号数据传输的开始，发射器向接收器发送一个起始位，此时信号保持低电平（逻辑0值）。接下来，发射器发送五到八个数据位，包含实际消息，后面跟着一个可选的奇偶校验位和一个或两个停止位（逻辑1值），具体取决于配置。用于错误检查的奇偶校验位在实际中很少见。停止位（或位）表示传输结束。
 
-We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
+我们称最常见的配置为8N1：八个数据位，无奇偶校验和一个停止位。例如，如果我们想在8N1 UART配置中发送字符C，或ASCII中的0x43，我们将发送以下位：0（起始位）；0, 1, 0, 0, 0, 0, 1, 1（0x43的二进制值），和0（停止位）。
 
 ![](<../../images/image (764).png>)
 
-Hardware tools to communicate with UART:
+与UART通信的硬件工具：
 
-- USB-to-serial adapter
-- Adapters with the CP2102 or PL2303 chips
-- Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
+- USB转串行适配器
+- 带有CP2102或PL2303芯片的适配器
+- 多功能工具，如：Bus Pirate、Adafruit FT232H、Shikra或Attify Badge
 
-### Identifying UART Ports
+### 识别UART端口
 
-UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
+UART有4个端口：**TX**（发送）、**RX**（接收）、**Vcc**（电压）和**GND**（接地）。您可能会在PCB上找到带有**`TX`**和**`RX`**字母的4个端口。但如果没有指示，您可能需要使用**万用表**或**逻辑分析仪**自己寻找它们。
 
-With a **multimeter** and the device powered off:
+使用**万用表**并关闭设备电源：
 
-- To identify the **GND** pin use the **Continuity Test** mode, place the back lead into ground and test with the red one until you hear a sound from the multimeter. Several GND pins can be found the PCB, so you might have found or not the one belonging to UART.
-- To identify the **VCC port**, set the **DC voltage mode** and set it up to 20 V of voltage. Black probe on ground and red probe on the pin. Power on the device. If the multimeter measures a constant voltage of either 3.3 V or 5 V, you’ve found the Vcc pin. If you get other voltages, retry with other ports.
-- To identify the **TX** **port**, **DC voltage mode** up to 20 V of voltage, black probe on ground, and red probe on the pin, and power on the device. If you find the voltage fluctuates for a few seconds and then stabilizes at the Vcc value, you’ve most likely found the TX port. This is because when powering on, it sends some debug data.
-- The **RX port** would be the closest one to the other 3, it has the lowest voltage fluctuation and lowest overall value of all the UART pins.
+- 要识别**GND**引脚，请使用**连续性测试**模式，将黑色引线放入接地，并用红色引线测试，直到您听到万用表发出声音。PCB上可能会找到多个GND引脚，因此您可能找到或未找到属于UART的引脚。
+- 要识别**VCC端口**，请设置**直流电压模式**并将其设置为20 V电压。黑色探头接地，红色探头接引脚。打开设备电源。如果万用表测量到恒定电压为3.3 V或5 V，则您找到了Vcc引脚。如果您得到其他电压，请尝试其他端口。
+- 要识别**TX** **端口**，将**直流电压模式**设置为20 V电压，黑色探头接地，红色探头接引脚，并打开设备电源。如果您发现电压波动几秒钟后稳定在Vcc值，则您很可能找到了TX端口。这是因为在开机时，它会发送一些调试数据。
+- **RX端口**将是与其他3个端口最接近的，它的电压波动最低，所有UART引脚中整体值最低。
 
-You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
+您可以混淆TX和RX端口，没什么问题，但如果混淆GND和VCC端口，可能会烧毁电路。
 
-In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires.
+在某些目标设备中，制造商通过禁用RX或TX甚至两者来禁用UART端口。在这种情况下，追踪电路板中的连接并找到一些断点可能会有所帮助。确认没有检测到UART和电路断开的一个强烈提示是检查设备保修。如果设备附带某些保修，制造商会留下某些调试接口（在这种情况下为UART），因此，必须已断开UART并在调试时重新连接。这些断点引脚可以通过焊接或跳线连接。
 
-### Identifying the UART Baud Rate
+### 识别UART波特率
 
-The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
+识别正确波特率的最简单方法是查看**TX引脚的输出并尝试读取数据**。如果您收到的数据不可读，请切换到下一个可能的波特率，直到数据变得可读。您可以使用USB转串行适配器或像Bus Pirate这样的多功能设备来做到这一点，并配合一个辅助脚本，例如[baudrate.py](https://github.com/devttys0/baudrate/)。最常见的波特率为9600、38400、19200、57600和115200。
 
 > [!CAUTION]
-> It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
+> 重要的是要注意，在此协议中，您需要将一个设备的TX连接到另一个设备的RX！
 
-## CP210X UART to TTY Adapter
+## CP210X UART到TTY适配器
 
-The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target.
+CP210X芯片广泛用于许多原型板，如NodeMCU（带esp8266）进行串行通信。这些适配器相对便宜，可以用于连接目标的UART接口。该设备有5个引脚：5V、GND、RXD、TXD、3.3V。确保连接目标支持的电压，以避免任何损坏。最后，将适配器的RXD引脚连接到目标的TXD，将适配器的TXD引脚连接到目标的RXD。
 
-Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used.
+如果适配器未被检测到，请确保主机系统中已安装CP210X驱动程序。一旦适配器被检测到并连接，可以使用picocom、minicom或screen等工具。
 
-To list the devices connected to Linux/MacOS systems:
-
+要列出连接到Linux/MacOS系统的设备：
 ```
 ls /dev/
 ```
-
-For basic interaction with the UART interface, use the following command:
-
+要与UART接口进行基本交互，请使用以下命令：
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-
-For minicom, use the following command to configure it:
-
+对于minicom，请使用以下命令进行配置：
 ```
 minicom -s
 ```
+在 `Serial port setup` 选项中配置波特率和设备名称等设置。
 
-Configure the settings such as baudrate and device name in the `Serial port setup` option.
+配置完成后，使用命令 `minicom` 启动以获取 UART 控制台。
 
-After configuration, use the command `minicom` to start get the UART Console.
+## 通过 Arduino UNO R3 的 UART（可拆卸的 Atmel 328p 芯片板）
 
-## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
+如果没有 UART 串行到 USB 适配器，可以使用 Arduino UNO R3 进行快速破解。由于 Arduino UNO R3 通常随处可用，这可以节省很多时间。
 
-Incase UART Serial to USB adapters are not available, Arduino UNO R3 can be used with a quick hack. Since Arduino UNO R3 is usually available anywhere, this can save a lot of time.
+Arduino UNO R3 板上内置了 USB 到串行适配器。要获取 UART 连接，只需将 Atmel 328p 微控制器芯片从板上拔出。此破解适用于 Atmel 328p 未焊接在板上的 Arduino UNO R3 变体（使用的是 SMD 版本）。将 Arduino 的 RX 引脚（数字引脚 0）连接到 UART 接口的 TX 引脚，将 Arduino 的 TX 引脚（数字引脚 1）连接到 UART 接口的 RX 引脚。
 
-Arduino UNO R3 has a USB to Serial adapter built on the board itself. To get UART connection, just plug out the Atmel 328p microcontroller chip from the board. This hack works on Arduino UNO R3 variants having the Atmel 328p not soldered on the board (SMD version is used in it). Connect the RX pin of Arduino (Digital Pin 0) to the TX pin of the UART Interface and TX pin of the Arduino (Digital Pin 1) to the RX pin of the UART interface.
-
-Finally, it is recommended to use Arduino IDE to get the Serial Console. In the `tools` section in the menu, select `Serial Console` option and set the baud rate as per the UART interface.
+最后，建议使用 Arduino IDE 获取串行控制台。在菜单的 `tools` 部分，选择 `Serial Console` 选项，并根据 UART 接口设置波特率。
 
 ## Bus Pirate
 
-In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
-
+在这种情况下，我们将嗅探 Arduino 的 UART 通信，该通信将程序的所有打印信息发送到串行监视器。
 ```bash
 # Check the modes
 UART>m
@@ -99,39 +92,39 @@ x. exit(without change)
 # Select UART
 (1)>3
 Set serial port speed: (bps)
- 1. 300
- 2. 1200
- 3. 2400
- 4. 4800
- 5. 9600
- 6. 19200
- 7. 38400
- 8. 57600
- 9. 115200
+1. 300
+2. 1200
+3. 2400
+4. 4800
+5. 9600
+6. 19200
+7. 38400
+8. 57600
+9. 115200
 10. BRG raw value
 
 # Select the speed the communication is occurring on (you BF all this until you find readable things)
 # Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
- 1. 8, NONE *default
- 2. 8, EVEN
- 3. 8, ODD
- 4. 9, NONE
+1. 8, NONE *default
+2. 8, EVEN
+3. 8, ODD
+4. 9, NONE
 
- # From now on pulse enter for default
+# From now on pulse enter for default
 (1)>
 Stop bits:
- 1. 1 *default
- 2. 2
+1. 1 *default
+2. 2
 (1)>
 Receive polarity:
- 1. Idle 1 *default
- 2. Idle 0
+1. Idle 1 *default
+2. Idle 0
 (1)>
 Select output type:
- 1. Open drain (H=Hi-Z, L=GND)
- 2. Normal (H=3.3V, L=GND)
+1. Open drain (H=Hi-Z, L=GND)
+2. Normal (H=3.3V, L=GND)
 
 (1)>
 Clutch disengaged!!!
@@ -151,36 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
+## 通过 UART 控制台转储固件
 
-## Dumping Firmware with UART Console
+UART 控制台提供了一种在运行时环境中处理底层固件的好方法。但是，当 UART 控制台访问为只读时，可能会引入许多限制。在许多嵌入式设备中，固件存储在 EEPROM 中，并在具有易失性内存的处理器中执行。因此，固件保持只读状态，因为制造时的原始固件就在 EEPROM 内部，任何新文件都可能因易失性内存而丢失。因此，在处理嵌入式固件时，转储固件是一项有价值的工作。
 
-UART Console provides a great way to work with the underlying firmware in runtime environment. But when the UART Console access is read-only, it might introduce a lot of constrains. In many embedded devices, the firmware is stored in EEPROMs and executed in processors that have volatile memory. Hence, the firmware is kept read-only since the original firmware during manufacturing is inside the EEPROM itself and any new files would get lost due to volatile memory. Hence, dumping firmware is a valuable effort while working with embedded firmwares.
+有很多方法可以做到这一点，SPI 部分涵盖了从 EEPROM 中直接提取固件的各种设备的方法。尽管如此，建议首先尝试通过 UART 转储固件，因为使用物理设备和外部交互转储固件可能存在风险。
 
-There are a lot of ways to do this and the SPI section covers methods to extract firmware directly from the EEPROM with various devices. Although, it is recommended to first try dumping firmware with UART since dumping firmware with physical devices and external interactions can be risky.
+从 UART 控制台转储固件需要首先获取对引导加载程序的访问权限。许多流行的供应商使用 uboot（通用引导加载程序）作为其引导加载程序来加载 Linux。因此，获取对 uboot 的访问权限是必要的。
 
-Dumping firmware from UART Console requires first getting access to bootloaders. Many popular vendors make use of uboot (Universal Bootloader) as their bootloader to load Linux. Hence, getting access to uboot is necessary.
+要访问引导加载程序，请将 UART 端口连接到计算机，并使用任何串行控制台工具，同时保持设备的电源断开。一旦设置完成，按下 Enter 键并保持不放。最后，连接设备的电源并让其启动。
 
-To get access to boot bootloader, connect the UART port to the computer and use any of the Serial Console tools and keep the power supply to the device disconnected. Once the setup is ready, press the Enter Key and hold it. Finally, connect the power supply to the device and let it boot.
+这样做会中断 uboot 的加载并提供一个菜单。建议了解 uboot 命令并使用帮助菜单列出它们。这可能是 `help` 命令。由于不同的供应商使用不同的配置，因此有必要分别理解每个配置。
 
-Doing this will interrupt uboot from loading and will provide a menu. It is recommended to understand uboot commands and using help menu to list them. This might be `help` command. Since different vendors use different configurations, it is necessary to understand each of them seperately.
-
-Usually, the command to dump the firmware is:
-
+通常，转储固件的命令是：
 ```
 md
 ```
+这代表“内存转储”。这将把内存（EEPROM 内容）转储到屏幕上。建议在开始程序之前记录串行控制台输出，以捕获内存转储。
 
-which stands for "memory dump". This will dump the memory (EEPROM Content) on the screen. It is recommended to log the Serial Console output before starting the proceedure to capture the memory dump.
-
-Finally, just strip out all the unnecessary data from the log file and store the file as `filename.rom` and use binwalk to extract the contents:
-
+最后，只需从日志文件中剥离所有不必要的数据，并将文件存储为 `filename.rom`，然后使用 binwalk 提取内容：
 ```
 binwalk -e <filename.rom>
 ```
+这将根据在十六进制文件中找到的签名列出 EEPROM 的可能内容。
 
-This will list the possible contents from the EEPROM as per the signatures found in the hex file.
-
-Although, it is necessary to note that it's not always the case that the uboot is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if uboot is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention uboot while booting.
+不过，需要注意的是，即使正在使用 uboot，它并不总是解锁的。如果 Enter 键没有任何反应，请检查其他键，如空格键等。如果引导加载程序被锁定且没有被中断，则此方法将无效。要检查 uboot 是否是设备的引导加载程序，请在设备启动时检查 UART 控制台上的输出。它可能在启动时提到 uboot。
 
 {{#include ../../banners/hacktricks-training.md}}
-

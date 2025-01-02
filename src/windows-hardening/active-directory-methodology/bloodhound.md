@@ -4,95 +4,84 @@
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is from Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) 来自 Sysinternal Suite:
 
-> An advanced Active Directory (AD) viewer and editor. You can use AD Explorer to navigate an AD database easily, define favourite locations, view object properties, and attributes without opening dialog boxes, edit permissions, view an object's schema, and execute sophisticated searches that you can save and re-execute.
+> 一个高级的 Active Directory (AD) 查看器和编辑器。您可以使用 AD Explorer 轻松浏览 AD 数据库，定义收藏位置，查看对象属性和属性而无需打开对话框，编辑权限，查看对象的架构，并执行可以保存和重新执行的复杂搜索。
 
 ### Snapshots
 
-AD Explorer can create snapshots of an AD so you can check it offline.\
-It can be used to discover vulns offline, or to compare different states of the AD DB across the time.
+AD Explorer 可以创建 AD 的快照，以便您可以离线检查。\
+它可以用于离线发现漏洞，或比较 AD 数据库在不同时间的不同状态。
 
-You will be requires the username, password, and direction to connect (any AD user is required).
+您需要提供用户名、密码和连接方向（需要任何 AD 用户）。
 
-To take a snapshot of AD, go to `File` --> `Create Snapshot` and enter a name for the snapshot.
+要创建 AD 的快照，请转到 `File` --> `Create Snapshot` 并输入快照的名称。
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) is a tool which extracts and combines various artefacts out of an AD environment. The information can be presented in a **specially formatted** Microsoft Excel **report** that includes summary views with metrics to facilitate analysis and provide a holistic picture of the current state of the target AD environment.
-
+[**ADRecon**](https://github.com/adrecon/ADRecon) 是一个从 AD 环境中提取和组合各种工件的工具。信息可以以 **特别格式化** 的 Microsoft Excel **报告** 的形式呈现，其中包括带有指标的摘要视图，以便于分析并提供目标 AD 环境当前状态的整体图景。
 ```bash
 # Run it
 .\ADRecon.ps1
 ```
-
 ## BloodHound
 
-From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+来自 [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound is a single page Javascript web application, built on top of [Linkurious](http://linkurio.us/), compiled with [Electron](http://electron.atom.io/), with a [Neo4j](https://neo4j.com/) database fed by a C# data collector.
+> BloodHound 是一个单页面的 Javascript 网络应用程序，建立在 [Linkurious](http://linkurio.us/) 之上，使用 [Electron](http://electron.atom.io/) 编译，并配备一个由 C# 数据收集器提供数据的 [Neo4j](https://neo4j.com/) 数据库。
 
-BloodHound uses graph theory to reveal the hidden and often unintended relationships within an Active Directory or Azure environment. Attackers can use BloodHound to easily identify highly complex attack paths that would otherwise be impossible to quickly identify. Defenders can use BloodHound to identify and eliminate those same attack paths. Both blue and red teams can use BloodHound to easily gain a deeper understanding of privilege relationships in an Active Directory or Azure environment.
+BloodHound 使用图论来揭示 Active Directory 或 Azure 环境中隐藏的、通常是无意的关系。攻击者可以使用 BloodHound 轻松识别高度复杂的攻击路径，这些路径在其他情况下将无法快速识别。防御者可以使用 BloodHound 识别并消除这些相同的攻击路径。蓝队和红队都可以使用 BloodHound 更深入地理解 Active Directory 或 Azure 环境中的权限关系。
 
-So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
+因此，[Bloodhound](https://github.com/BloodHoundAD/BloodHound) 是一个惊人的工具，可以自动枚举域，保存所有信息，查找可能的权限提升路径，并使用图形显示所有信息。
 
-Booldhound is composed of 2 main parts: **ingestors** and the **visualisation application**.
+BloodHound 由两个主要部分组成：**ingestors** 和 **visualisation application**。
 
-The **ingestors** are used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.
+**ingestors** 用于 **枚举域并提取所有信息**，以便可视化应用程序理解的格式。
 
-The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
+**visualisation application 使用 neo4j** 来显示所有信息之间的关系，并展示在域中提升权限的不同方式。
 
-### Installation
+### 安装
 
-After the creation of BloodHound CE, the entire project was updated for ease of use with Docker. The easiest way to get started is to use its pre-configured Docker Compose configuration.
+在创建 BloodHound CE 后，整个项目进行了更新，以便于使用 Docker。开始的最简单方法是使用其预配置的 Docker Compose 配置。
 
-1. Install Docker Compose. This should be included with the [Docker Desktop](https://www.docker.com/products/docker-desktop/) installation.
-2. Run:
-
+1. 安装 Docker Compose。这应该包含在 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 安装中。
+2. 运行：
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
+3. 在 Docker Compose 的终端输出中找到随机生成的密码。  
+4. 在浏览器中，导航到 http://localhost:8080/ui/login。使用用户名 admin 和日志中的随机生成密码登录。  
 
-3. Locate the randomly generated password in the terminal output of Docker Compose.
-4. In a browser, navigate to http://localhost:8080/ui/login. Login with a username of admin and the randomly generated password from the logs.
+之后，您需要更改随机生成的密码，您将准备好新的界面，从中可以直接下载 ingestors。  
 
-After this you will need to change the randomly generated password and you will have the new interface ready, from which you can directly download the ingestors.
+### SharpHound  
 
-### SharpHound
-
-They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
-
+他们有几个选项，但如果您想从加入域的 PC 上运行 SharpHound，使用您当前的用户并提取所有信息，您可以这样做：
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
+> 您可以在 [这里](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained) 阅读更多关于 **CollectionMethod** 和循环会话的信息。
 
-> You can read more about **CollectionMethod** and loop session [here](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
-
-If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
-
+如果您希望使用不同的凭据执行 SharpHound，您可以创建一个 CMD netonly 会话并从那里运行 SharpHound：
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
-
-[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+[**了解更多关于 Bloodhound的信息，请访问 ired.team。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) is a tool to find **vulnerabilities** in Active Directory associated **Group Policy**. \
-You need to **run group3r** from a host inside the domain using **any domain user**.
-
+[**Group3r**](https://github.com/Group3r/Group3r) 是一个用于查找与 **组策略** 相关的 Active Directory 中的 **漏洞** 的工具。\
+您需要使用 **任何域用户** 从域内的主机上 **运行 group3r**。
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
 # -f send results to file
 ```
-
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **evaluates the security posture of an AD environment** and provides a nice **report** with graphs.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **评估AD环境的安全态势**并提供一个漂亮的**报告**和图表。
 
-To run it, can execute the binary `PingCastle.exe` and it will start an **interactive session** presenting a menu of options. The default option to use is **`healthcheck`** which will establish a baseline **overview** of the **domain**, and find **misconfigurations** and **vulnerabilities**.&#x20;
+要运行它，可以执行二进制文件`PingCastle.exe`，它将启动一个**交互式会话**，呈现选项菜单。默认选项是**`healthcheck`**，它将建立一个**域**的基线**概述**，并查找**错误配置**和**漏洞**。&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}
-
