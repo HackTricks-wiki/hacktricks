@@ -19,13 +19,11 @@
     try {
       const response = await fetch(url, { method: "GET" })
       if (!response.ok) {
-        console.log(response)
         throw new Error(`Response status: ${response.status}`)
       }
 
       const json = await response.json()
       var sponsor = json.sponsor
-      console.log("boop", sponsor)
       sponsorImg.src = sponsor.image_url
       sponsorTitle.textContent = sponsor.name
       sponsorDescription.innerHTML = sponsor.description
