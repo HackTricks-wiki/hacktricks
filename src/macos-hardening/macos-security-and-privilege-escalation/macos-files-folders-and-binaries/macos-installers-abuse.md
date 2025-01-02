@@ -164,3 +164,5 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

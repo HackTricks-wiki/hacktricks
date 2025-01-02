@@ -369,3 +369,4 @@ struct cs_blob {
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+

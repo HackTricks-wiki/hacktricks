@@ -268,3 +268,5 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

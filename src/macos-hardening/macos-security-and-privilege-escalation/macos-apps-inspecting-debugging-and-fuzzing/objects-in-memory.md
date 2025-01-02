@@ -151,3 +151,5 @@ Then, the struct has a pointer to the struct `class_ro_t` stored on disk which c
 During runtime and additional structure `class_rw_t` is used containing pointers which can be altered such as methods, protocols, properties...
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+
