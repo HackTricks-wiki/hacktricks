@@ -1,126 +1,117 @@
-# macOS Security Protections
+# macOS सुरक्षा सुरक्षा
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Gatekeeper
+## गेटकीपर
 
-Gatekeeper is usually used to refer to the combination of **Quarantine + Gatekeeper + XProtect**, 3 macOS security modules that will try to **prevent users from executing potentially malicious software downloaded**.
+गेटकीपर आमतौर पर **Quarantine + Gatekeeper + XProtect** के संयोजन को संदर्भित करने के लिए उपयोग किया जाता है, जो 3 macOS सुरक्षा मॉड्यूल हैं जो **उपयोगकर्ताओं को संभावित रूप से दुर्भावनापूर्ण सॉफ़्टवेयर डाउनलोड करने से रोकने की कोशिश करेंगे**।
 
-More information in:
+अधिक जानकारी के लिए:
 
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
 
-## Processes Limitants
+## प्रक्रियाओं की सीमाएँ
 
 ### MACF
 
-### SIP - System Integrity Protection
+### SIP - सिस्टम इंटीग्रिटी प्रोटेक्शन
 
 {{#ref}}
 macos-sip.md
 {{#endref}}
 
-### Sandbox
+### सैंडबॉक्स
 
-MacOS Sandbox **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+MacOS सैंडबॉक्स **सैंडबॉक्स के अंदर चलने वाले अनुप्रयोगों** को **सैंडबॉक्स प्रोफ़ाइल में निर्दिष्ट अनुमत क्रियाओं** तक सीमित करता है जिसके साथ ऐप चल रहा है। यह सुनिश्चित करने में मदद करता है कि **अनुप्रयोग केवल अपेक्षित संसाधनों तक पहुँच रहा है**।
 
 {{#ref}}
 macos-sandbox/
 {{#endref}}
 
-### TCC - **Transparency, Consent, and Control**
+### TCC - **पारदर्शिता, सहमति, और नियंत्रण**
 
-**TCC (Transparency, Consent, and Control)** is a security framework. It's designed to **manage the permissions** of applications, specifically by regulating their access to sensitive features. This includes elements like **location services, contacts, photos, microphone, camera, accessibility, and full disk access**. TCC ensures that apps can only access these features after obtaining explicit user consent, thereby bolstering privacy and control over personal data.
+**TCC (पारदर्शिता, सहमति, और नियंत्रण)** एक सुरक्षा ढांचा है। यह **अनुप्रयोगों के अनुमतियों का प्रबंधन** करने के लिए डिज़ाइन किया गया है, विशेष रूप से संवेदनशील सुविधाओं तक उनकी पहुँच को विनियमित करके। इसमें **स्थान सेवाएँ, संपर्क, फ़ोटो, माइक्रोफ़ोन, कैमरा, पहुँच, और पूर्ण डिस्क पहुँच** जैसी तत्व शामिल हैं। TCC सुनिश्चित करता है कि ऐप्स केवल स्पष्ट उपयोगकर्ता सहमति प्राप्त करने के बाद इन सुविधाओं तक पहुँच सकते हैं, इस प्रकार व्यक्तिगत डेटा पर गोपनीयता और नियंत्रण को बढ़ाता है।
 
 {{#ref}}
 macos-tcc/
 {{#endref}}
 
-### Launch/Environment Constraints & Trust Cache
+### लॉन्च/पर्यावरण प्रतिबंध और ट्रस्ट कैश
 
-Launch constraints in macOS are a security feature to **regulate process initiation** by defining **who can launch** a process, **how**, and **from where**. Introduced in macOS Ventura, they categorize system binaries into constraint categories within a **trust cache**. Every executable binary has set **rules** for its **launch**, including **self**, **parent**, and **responsible** constraints. Extended to third-party apps as **Environment** Constraints in macOS Sonoma, these features help mitigate potential system exploitations by governing process launching conditions.
+macOS में लॉन्च प्रतिबंध एक सुरक्षा विशेषता है जो **प्रक्रिया प्रारंभ को विनियमित** करती है, यह परिभाषित करके कि **कौन प्रक्रिया लॉन्च कर सकता है**, **कैसे**, और **कहाँ से**। macOS वेंचुरा में पेश किया गया, यह सिस्टम बाइनरीज़ को **ट्रस्ट कैश** के भीतर प्रतिबंध श्रेणियों में वर्गीकृत करता है। प्रत्येक निष्पादन योग्य बाइनरी के लिए इसके **लॉन्च** के लिए **नियम** सेट होते हैं, जिसमें **स्वयं**, **माता-पिता**, और **जिम्मेदार** प्रतिबंध शामिल हैं। macOS सोनोमा में तीसरे पक्ष के ऐप्स के लिए **पर्यावरण** प्रतिबंधों के रूप में विस्तारित, ये सुविधाएँ प्रक्रिया लॉन्चिंग की शर्तों को नियंत्रित करके संभावित सिस्टम शोषण को कम करने में मदद करती हैं।
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-## MRT - Malware Removal Tool
+## MRT - मैलवेयर हटाने का उपकरण
 
-The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
+मैलवेयर हटाने का उपकरण (MRT) macOS की सुरक्षा अवसंरचना का एक और हिस्सा है। नाम से ही स्पष्ट है, MRT का मुख्य कार्य **संक्रमित सिस्टम से ज्ञात मैलवेयर को हटाना** है।
 
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
+एक बार जब मैलवेयर Mac पर पता लगाया जाता है (या तो XProtect द्वारा या किसी अन्य तरीके से), MRT का उपयोग स्वचालित रूप से **मैलवेयर को हटाने** के लिए किया जा सकता है। MRT चुपचाप पृष्ठभूमि में काम करता है और आमतौर पर तब चलता है जब सिस्टम अपडेट होता है या जब एक नया मैलवेयर परिभाषा डाउनलोड किया जाता है (यह ऐसा लगता है कि मैलवेयर का पता लगाने के लिए MRT के पास जो नियम हैं वे बाइनरी के अंदर हैं)।
 
-While both XProtect and MRT are part of macOS's security measures, they perform different functions:
+हालांकि XProtect और MRT दोनों macOS के सुरक्षा उपायों का हिस्सा हैं, वे विभिन्न कार्य करते हैं:
 
-- **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
-- **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
+- **XProtect** एक निवारक उपकरण है। यह **फाइलों की जांच करता है जब वे डाउनलोड होती हैं** (कुछ अनुप्रयोगों के माध्यम से), और यदि यह ज्ञात प्रकार के किसी भी मैलवेयर का पता लगाता है, तो यह **फाइल को खोलने से रोकता है**, इस प्रकार मैलवेयर को आपके सिस्टम को पहले स्थान पर संक्रमित करने से रोकता है।
+- **MRT**, दूसरी ओर, एक **प्रतिक्रियाशील उपकरण** है। यह उस समय काम करता है जब सिस्टम पर मैलवेयर का पता लगाया गया हो, जिसका लक्ष्य offending सॉफ़्टवेयर को हटाकर सिस्टम को साफ करना है।
 
-The MRT application is located in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+MRT एप्लिकेशन **`/Library/Apple/System/Library/CoreServices/MRT.app`** में स्थित है।
 
-## Background Tasks Management
+## पृष्ठभूमि कार्य प्रबंधन
 
-**macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.
+**macOS** अब **हर बार अलर्ट करता है जब एक उपकरण एक ज्ञात **तकनीक का उपयोग करता है कोड निष्पादन को बनाए रखने के लिए** (जैसे लॉगिन आइटम, डेमन...), ताकि उपयोगकर्ता बेहतर जान सके **कौन सा सॉफ़्टवेयर बनाए रखा जा रहा है**।
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-This runs with a **daemon** located in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` and the **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+यह एक **डेमन** के साथ चलता है जो `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` में स्थित है और **एजेंट** `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app` में है।
 
-The way **`backgroundtaskmanagementd`** knows something is installed in a persistent folder is by **getting the FSEvents** and creating some **handlers** for those.
+जिस तरह से **`backgroundtaskmanagementd`** जानता है कि कुछ स्थायी फ़ोल्डर में स्थापित है वह **FSEvents प्राप्त करके** और उनके लिए कुछ **हैंडलर्स** बनाकर है।
 
-Moreover, there is a plist file that contains **well known applications** that frequently persists maintained by apple located in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
-
+इसके अलावा, एक plist फ़ाइल है जिसमें **ज्ञात अनुप्रयोगों** की सूची है जो अक्सर बनाए रखी जाती है, जो एप्पल द्वारा `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist` में स्थित है।
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
-    "AssociatedBundleIdentifiers" => [
-      0 => "us.zoom.xos"
-    ]
-    "Attribution" => "Zoom"
-    "Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
-    "ProgramArguments" => [
-      0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
-    ]
-    "TeamIdentifier" => "BJ4HAAB9B3"
-  }
+"AssociatedBundleIdentifiers" => [
+0 => "us.zoom.xos"
+]
+"Attribution" => "Zoom"
+"Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+"ProgramArguments" => [
+0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+]
+"TeamIdentifier" => "BJ4HAAB9B3"
+}
 [...]
 ```
-
 ### Enumeration
 
-It's possible to **enumerate all** the configured background items running the Apple cli tool:
-
+यह संभव है कि **सभी** कॉन्फ़िगर किए गए बैकग्राउंड आइटम्स को एप्पल CLI टूल का उपयोग करके सूचीबद्ध किया जा सके:
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-
-Moreover, it's also possible to list this information with [**DumpBTM**](https://github.com/objective-see/DumpBTM).
-
+इसके अलावा, इस जानकारी को [**DumpBTM**](https://github.com/objective-see/DumpBTM) के साथ सूचीबद्ध करना भी संभव है।
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
+यह जानकारी **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** में संग्रहीत की जा रही है और टर्मिनल को FDA की आवश्यकता है।
 
-This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.
+### BTM के साथ छेड़छाड़
 
-### Messing with BTM
+जब एक नई स्थिरता पाई जाती है, तो एक प्रकार की घटना **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** होती है। इसलिए, किसी भी तरीके से इस **घटना** को भेजने से रोकना या **एजेंट को उपयोगकर्ता को चेतावनी देने से रोकना** एक हमलावर को BTM को _**बायपास**_ करने में मदद करेगा।
 
-When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.
-
-- **Reseting the database**: Running the following command will reset the database (should rebuild it from the ground), however, for some reason, after running this, **no new persistence will be alerted until the system is rebooted**.
-  - **root** is required.
-
+- **डेटाबेस को रीसेट करना**: निम्नलिखित कमांड चलाने से डेटाबेस रीसेट हो जाएगा (इसे जमीन से फिर से बनाना चाहिए), हालाँकि, किसी कारणवश, इसे चलाने के बाद, **कोई नई स्थिरता तब तक चेतावनी नहीं दी जाएगी जब तक कि सिस्टम को पुनः चालू नहीं किया जाता**।
+- **root** की आवश्यकता है।
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-
-- **Stop the Agent**: It's possible to send a stop signal to the agent so it **won't be alerting the user** when new detections are found.
-
+- **एजेंट को रोकें**: एजेंट को एक स्टॉप सिग्नल भेजना संभव है ताकि यह **उपयोगकर्ता को सूचित न करे** जब नए डिटेक्शन पाए जाते हैं।
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -133,14 +124,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
+- **बग**: यदि **स्थायीता बनाने वाली प्रक्रिया तुरंत उसके बाद मौजूद है**, तो डेमन **इसके बारे में जानकारी प्राप्त करने** की कोशिश करेगा, **असफल** होगा, और **घटना भेजने में असमर्थ होगा** जो यह संकेत देती है कि एक नई चीज स्थायी हो रही है।
 
-- **Bug**: If the **process that created the persistence exists fast right after it**, the daemon will try to **get information** about it, **fail**, and **won't be able to send the event** indicating that a new thing is persisting.
-
-References and **more information about BTM**:
+संदर्भ और **BTM के बारे में अधिक जानकारी**:
 
 - [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 - [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 - [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

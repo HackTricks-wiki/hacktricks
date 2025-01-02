@@ -2,39 +2,36 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Check it for further details!**
+**यह पोस्ट का सारांश है [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). आगे की जानकारी के लिए इसे देखें!**
 
 ## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-### **Establishing a Debugging Session** <a href="#net-core-debugging" id="net-core-debugging"></a>
+### **डिबगिंग सत्र स्थापित करना** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-The handling of communication between debugger and debuggee in .NET is managed by [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). This component sets up two named pipes per .NET process as seen in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), which are initiated via [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). These pipes are suffixed with **`-in`** and **`-out`**.
+.NET में डिबगर और डिबगी के बीच संचार का प्रबंधन [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) द्वारा किया जाता है। यह घटक प्रत्येक .NET प्रक्रिया के लिए दो नामित पाइप सेट करता है, जैसा कि [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) में देखा गया है, जो [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) के माध्यम से आरंभ होते हैं। इन पाइपों के अंत में **`-in`** और **`-out`** जोड़ा गया है।
 
-By visiting the user's **`$TMPDIR`**, one can find debugging FIFOs available for debugging .Net applications.
+उपयोगकर्ता के **`$TMPDIR`** पर जाकर, कोई भी .Net अनुप्रयोगों के लिए उपलब्ध डिबगिंग FIFOs पा सकता है।
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) is responsible for managing communication from a debugger. To initiate a new debugging session, a debugger must send a message via the `out` pipe starting with a `MessageHeader` struct, detailed in the .NET source code:
-
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) संचार प्रबंधन के लिए जिम्मेदार है। एक नया डिबगिंग सत्र शुरू करने के लिए, एक डिबगर को `out` पाइप के माध्यम से एक संदेश भेजना चाहिए जो `MessageHeader` संरचना से शुरू होता है, जो .NET स्रोत कोड में विस्तृत है:
 ```c
 struct MessageHeader {
-    MessageType   m_eType;        // Message type
-    DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
-    DWORD         m_dwId;         // Message ID from sender
-    DWORD         m_dwReplyId;    // Reply-to Message ID
-    DWORD         m_dwLastSeenId; // Last seen Message ID by sender
-    DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
-        union {
-            struct {
-                DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
-                DWORD         m_dwMinorVersion;
-            } VersionInfo;
-          ...
-        } TypeSpecificData;
-    BYTE          m_sMustBeZero[8];
+MessageType   m_eType;        // Message type
+DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
+DWORD         m_dwId;         // Message ID from sender
+DWORD         m_dwReplyId;    // Reply-to Message ID
+DWORD         m_dwLastSeenId; // Last seen Message ID by sender
+DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
+union {
+struct {
+DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
+DWORD         m_dwMinorVersion;
+} VersionInfo;
+...
+} TypeSpecificData;
+BYTE          m_sMustBeZero[8];
 }
 ```
-
-To request a new session, this struct is populated as follows, setting the message type to `MT_SessionRequest` and the protocol version to the current version:
-
+नए सत्र का अनुरोध करने के लिए, इस संरचना को इस प्रकार भरा जाता है, संदेश प्रकार को `MT_SessionRequest` और प्रोटोकॉल संस्करण को वर्तमान संस्करण पर सेट किया जाता है:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
@@ -45,25 +42,19 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-
-This header is then sent over to the target using the `write` syscall, followed by the `sessionRequestData` struct containing a GUID for the session:
-
+यह हेडर फिर `write` syscall का उपयोग करके लक्ष्य पर भेजा जाता है, इसके बाद `sessionRequestData` संरचना होती है जिसमें सत्र के लिए एक GUID होता है:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
-
-A read operation on the `out` pipe confirms the success or failure of the debugging session establishment:
-
+`out` पाइप पर एक पढ़ने की क्रिया डिबगिंग सत्र की स्थापना की सफलता या विफलता की पुष्टि करती है:
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
+## मेमोरी पढ़ना
 
-## Reading Memory
-
-Once a debugging session is established, memory can be read using the [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) message type. The function readMemory is detailed, performing the necessary steps to send a read request and retrieve the response:
-
+एक डिबगिंग सत्र स्थापित होने के बाद, मेमोरी को [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) संदेश प्रकार का उपयोग करके पढ़ा जा सकता है। फ़ंक्शन readMemory का विवरण दिया गया है, जो पढ़ने के अनुरोध को भेजने और प्रतिक्रिया प्राप्त करने के लिए आवश्यक कदम उठाता है:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 // Allocation and initialization
@@ -75,13 +66,11 @@ bool readMemory(void *addr, int len, unsigned char **output) {
 return true;
 }
 ```
+पूर्ण प्रमाण अवधारणा (POC) [यहां](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b) उपलब्ध है।
 
-The complete proof of concept (POC) is available [here](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+## मेमोरी लिखना
 
-## Writing Memory
-
-Similarly, memory can be written using the `writeMemory` function. The process involves setting the message type to `MT_WriteMemory`, specifying the address and length of the data, and then sending the data:
-
+इसी तरह, `writeMemory` फ़ंक्शन का उपयोग करके मेमोरी में लिखा जा सकता है। प्रक्रिया में संदेश प्रकार को `MT_WriteMemory` पर सेट करना, डेटा का पता और लंबाई निर्दिष्ट करना, और फिर डेटा भेजना शामिल है:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -93,27 +82,24 @@ bool writeMemory(void *addr, int len, unsigned char *input) {
 return true;
 }
 ```
+संबंधित POC [यहाँ](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5) उपलब्ध है।
 
-The associated POC is available [here](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
+## .NET Core कोड निष्पादन <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-## .NET Core Code Execution <a href="#net-core-code-execution" id="net-core-code-execution"></a>
-
-To execute code, one needs to identify a memory region with rwx permissions, which can be done using vmmap -pages:
-
+कोड निष्पादित करने के लिए, एक को स्मृति क्षेत्र की पहचान करनी होती है जिसमें rwx अनुमतियाँ होती हैं, जिसे vmmap -pages: का उपयोग करके किया जा सकता है।
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
+एक फ़ंक्शन पॉइंटर को ओवरराइट करने के लिए स्थान ढूंढना आवश्यक है, और .NET Core में, यह **Dynamic Function Table (DFT)** को लक्षित करके किया जा सकता है। यह तालिका, [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h) में विस्तृत, रनटाइम द्वारा JIT संकलन सहायक फ़ंक्शनों के लिए उपयोग की जाती है।
 
-Locating a place to overwrite a function pointer is necessary, and in .NET Core, this can be done by targeting the **Dynamic Function Table (DFT)**. This table, detailed in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), is used by the runtime for JIT compilation helper functions.
+x64 सिस्टम के लिए, सिग्नेचर हंटिंग का उपयोग `_hlpDynamicFuncTable` प्रतीक के संदर्भ को `libcorclr.dll` में खोजने के लिए किया जा सकता है।
 
-For x64 systems, signature hunting can be used to find a reference to the symbol `_hlpDynamicFuncTable` in `libcorclr.dll`.
+`MT_GetDCB` डिबगर फ़ंक्शन उपयोगी जानकारी प्रदान करता है, जिसमें एक सहायक फ़ंक्शन का पता, `m_helperRemoteStartAddr`, शामिल है, जो प्रक्रिया मेमोरी में `libcorclr.dll` के स्थान को इंगित करता है। इस पते का उपयोग DFT के लिए खोज शुरू करने और फ़ंक्शन पॉइंटर को शेलकोड के पते के साथ ओवरराइट करने के लिए किया जाता है।
 
-The `MT_GetDCB` debugger function provides useful information, including the address of a helper function, `m_helperRemoteStartAddr`, indicating the location of `libcorclr.dll` in the process memory. This address is then used to start a search for the DFT and overwrite a function pointer with the shellcode's address.
+PowerShell में इंजेक्शन के लिए पूरा POC कोड [यहाँ](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6) उपलब्ध है।
 
-The full POC code for injection into PowerShell is accessible [here](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
-
-## References
+## संदर्भ
 
 - [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
 

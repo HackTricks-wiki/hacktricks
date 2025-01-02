@@ -4,41 +4,41 @@
 
 ## Basic Information
 
-Bundles in macOS serve as containers for a variety of resources including applications, libraries, and other necessary files, making them appear as single objects in Finder, such as the familiar `*.app` files. The most commonly encountered bundle is the `.app` bundle, though other types like `.framework`, `.systemextension`, and `.kext` are also prevalent.
+macOS में बंडल विभिन्न संसाधनों के लिए कंटेनर के रूप में कार्य करते हैं, जिसमें एप्लिकेशन, पुस्तकालय और अन्य आवश्यक फ़ाइलें शामिल हैं, जिससे वे फ़ाइंडर में एकल वस्तुओं के रूप में दिखाई देते हैं, जैसे कि परिचित `*.app` फ़ाइलें। सबसे सामान्य बंडल `.app` बंडल है, हालांकि अन्य प्रकार जैसे `.framework`, `.systemextension`, और `.kext` भी प्रचलित हैं।
 
 ### Essential Components of a Bundle
 
-Within a bundle, particularly within the `<application>.app/Contents/` directory, a variety of important resources are housed:
+एक बंडल के भीतर, विशेष रूप से `<application>.app/Contents/` निर्देशिका के भीतर, कई महत्वपूर्ण संसाधन housed होते हैं:
 
-- **\_CodeSignature**: This directory stores code-signing details vital for verifying the integrity of the application. You can inspect the code-signing information using commands like: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
-- **MacOS**: Contains the executable binary of the application that runs upon user interaction.
-- **Resources**: A repository for the application's user interface components including images, documents, and interface descriptions (nib/xib files).
-- **Info.plist**: Acts as the application's main configuration file, crucial for the system to recognize and interact with the application appropriately.
+- **\_CodeSignature**: यह निर्देशिका कोड-हस्ताक्षर विवरण संग्रहीत करती है जो एप्लिकेशन की अखंडता को सत्यापित करने के लिए महत्वपूर्ण है। आप कोड-हस्ताक्षर जानकारी की जांच कर सकते हैं जैसे: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
+- **MacOS**: एप्लिकेशन का निष्पादन योग्य बाइनरी होता है जो उपयोगकर्ता की बातचीत पर चलता है।
+- **Resources**: एप्लिकेशन के उपयोगकर्ता इंटरफ़ेस घटकों के लिए एक भंडार जिसमें चित्र, दस्तावेज़, और इंटरफ़ेस विवरण (nib/xib फ़ाइलें) शामिल हैं।
+- **Info.plist**: एप्लिकेशन की मुख्य कॉन्फ़िगरेशन फ़ाइल के रूप में कार्य करता है, जो सिस्टम को एप्लिकेशन को सही तरीके से पहचानने और बातचीत करने के लिए महत्वपूर्ण है।
 
 #### Important Keys in Info.plist
 
-The `Info.plist` file is a cornerstone for application configuration, containing keys such as:
+`Info.plist` फ़ाइल एप्लिकेशन कॉन्फ़िगरेशन के लिए एक आधारशिला है, जिसमें कुंजी जैसे शामिल हैं:
 
-- **CFBundleExecutable**: Specifies the name of the main executable file located in the `Contents/MacOS` directory.
-- **CFBundleIdentifier**: Provides a global identifier for the application, used extensively by macOS for application management.
-- **LSMinimumSystemVersion**: Indicates the minimum version of macOS required for the application to run.
+- **CFBundleExecutable**: `Contents/MacOS` निर्देशिका में स्थित मुख्य निष्पादन योग्य फ़ाइल का नाम निर्दिष्ट करता है।
+- **CFBundleIdentifier**: एप्लिकेशन के लिए एक वैश्विक पहचानकर्ता प्रदान करता है, जिसका उपयोग macOS द्वारा एप्लिकेशन प्रबंधन के लिए व्यापक रूप से किया जाता है।
+- **LSMinimumSystemVersion**: एप्लिकेशन के चलने के लिए आवश्यक macOS का न्यूनतम संस्करण दर्शाता है।
 
 ### Exploring Bundles
 
-To explore the contents of a bundle, such as `Safari.app`, the following command can be used: `bash ls -lR /Applications/Safari.app/Contents`
+बंडल की सामग्री का पता लगाने के लिए, जैसे `Safari.app`, निम्नलिखित कमांड का उपयोग किया जा सकता है: `bash ls -lR /Applications/Safari.app/Contents`
 
-This exploration reveals directories like `_CodeSignature`, `MacOS`, `Resources`, and files like `Info.plist`, each serving a unique purpose from securing the application to defining its user interface and operational parameters.
+यह अन्वेषण `_CodeSignature`, `MacOS`, `Resources` जैसे निर्देशिकाओं और `Info.plist` जैसी फ़ाइलों को प्रकट करता है, प्रत्येक का एक अद्वितीय उद्देश्य होता है, एप्लिकेशन को सुरक्षित करने से लेकर इसके उपयोगकर्ता इंटरफ़ेस और संचालन पैरामीटर को परिभाषित करने तक।
 
 #### Additional Bundle Directories
 
-Beyond the common directories, bundles may also include:
+सामान्य निर्देशिकाओं के अलावा, बंडल में निम्नलिखित भी शामिल हो सकते हैं:
 
-- **Frameworks**: Contains bundled frameworks used by the application. Frameworks are like dylibs with extra resources.
-- **PlugIns**: A directory for plug-ins and extensions that enhance the application's capabilities.
-- **XPCServices**: Holds XPC services used by the application for out-of-process communication.
+- **Frameworks**: एप्लिकेशन द्वारा उपयोग किए जाने वाले बंडल किए गए ढांचे को शामिल करता है। ढांचे dylibs के समान होते हैं जिनमें अतिरिक्त संसाधन होते हैं।
+- **PlugIns**: एक निर्देशिका प्लग-इन्स और एक्सटेंशन के लिए जो एप्लिकेशन की क्षमताओं को बढ़ाते हैं।
+- **XPCServices**: एप्लिकेशन द्वारा आउट-ऑफ-प्रोसेस संचार के लिए उपयोग की जाने वाली XPC सेवाओं को रखता है।
 
-This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
+यह संरचना सुनिश्चित करती है कि सभी आवश्यक घटक बंडल के भीतर समाहित हैं, जिससे एक मॉड्यूलर और सुरक्षित एप्लिकेशन वातावरण को बढ़ावा मिलता है।
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+`Info.plist` कुंजी और उनके अर्थों पर अधिक विस्तृत जानकारी के लिए, Apple डेवलपर दस्तावेज़ व्यापक संसाधन प्रदान करता है: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
 {{#include ../../../banners/hacktricks-training.md}}

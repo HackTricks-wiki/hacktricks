@@ -1,89 +1,88 @@
-# macOS Files, Folders, Binaries & Memory
+# macOS फ़ाइलें, फ़ोल्डर, बाइनरी और मेमोरी
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## File hierarchy layout
+## फ़ाइल पदानुक्रम लेआउट
 
-- **/Applications**: The installed apps should be here. All the users will be able to access them.
-- **/bin**: Command line binaries
-- **/cores**: If exists, it's used to store core dumps
-- **/dev**: Everything is treated as a file so you may see hardware devices stored here.
-- **/etc**: Configuration files
-- **/Library**: A lot of subdirectories and files related to preferences, caches and logs can be found here. A Library folder exists in root and on each user's directory.
-- **/private**: Undocumented but a lot of the mentioned folders are symbolic links to the private directory.
-- **/sbin**: Essential system binaries (related to administration)
-- **/System**: File fo making OS X run. You should find mostly only Apple specific files here (not third party).
-- **/tmp**: Files are deleted after 3 days (it's a soft link to /private/tmp)
-- **/Users**: Home directory for users.
-- **/usr**: Config and system binaries
-- **/var**: Log files
-- **/Volumes**: The mounted drives will apear here.
-- **/.vol**: Running `stat a.txt` you obtain something like `16777223 7545753 -rw-r--r-- 1 username wheel ...` where the first number is the id number of the volume where the file exists and the second one is the inode number. You can access the content of this file through /.vol/ with that information running `cat /.vol/16777223/7545753`
+- **/Applications**: स्थापित ऐप्स यहाँ होने चाहिए। सभी उपयोगकर्ता इन्हें एक्सेस कर सकेंगे।
+- **/bin**: कमांड लाइन बाइनरी
+- **/cores**: यदि मौजूद है, तो इसका उपयोग कोर डंप्स को स्टोर करने के लिए किया जाता है
+- **/dev**: सब कुछ एक फ़ाइल के रूप में माना जाता है इसलिए आप यहाँ हार्डवेयर उपकरण देख सकते हैं।
+- **/etc**: कॉन्फ़िगरेशन फ़ाइलें
+- **/Library**: यहाँ प्राथमिकताओं, कैश और लॉग से संबंधित कई उपनिर्देशिकाएँ और फ़ाइलें मिल सकती हैं। एक लाइब्रेरी फ़ोल्डर रूट में और प्रत्येक उपयोगकर्ता के निर्देशिका में मौजूद है।
+- **/private**: अप्रलेखित लेकिन कई उल्लेखित फ़ोल्डर निजी निर्देशिका के प्रतीकात्मक लिंक हैं।
+- **/sbin**: आवश्यक सिस्टम बाइनरी (प्रशासन से संबंधित)
+- **/System**: OS X को चलाने के लिए फ़ाइल। आपको यहाँ मुख्य रूप से केवल Apple विशिष्ट फ़ाइलें मिलनी चाहिए (तीसरे पक्ष की नहीं)।
+- **/tmp**: फ़ाइलें 3 दिनों के बाद हटा दी जाती हैं (यह /private/tmp का एक सॉफ्ट लिंक है)
+- **/Users**: उपयोगकर्ताओं के लिए होम निर्देशिका।
+- **/usr**: कॉन्फ़िग और सिस्टम बाइनरी
+- **/var**: लॉग फ़ाइलें
+- **/Volumes**: माउंट किए गए ड्राइव यहाँ दिखाई देंगे।
+- **/.vol**: `stat a.txt` चलाने पर आपको कुछ ऐसा प्राप्त होता है `16777223 7545753 -rw-r--r-- 1 username wheel ...` जहाँ पहला नंबर उस वॉल्यूम का आईडी नंबर है जहाँ फ़ाइल मौजूद है और दूसरा इनोड नंबर है। आप इस फ़ाइल की सामग्री को /.vol/ के माध्यम से उस जानकारी के साथ एक्सेस कर सकते हैं `cat /.vol/16777223/7545753`
 
-### Applications Folders
+### ऐप्स फ़ोल्डर
 
-- **System applications** are located under `/System/Applications`
-- **Installed** applications are usually installed in `/Applications` or in `~/Applications`
-- **Application data** can be found in `/Library/Application Support` for the applications running as root and `~/Library/Application Support` for applications running as the user.
-- Third-party applications **daemons** that **need to run as root** as usually located in `/Library/PrivilegedHelperTools/`
-- **Sandboxed** apps are mapped into the `~/Library/Containers` folder. Each app has a folder named according to the application’s bundle ID (`com.apple.Safari`).
-- The **kernel** is located in `/System/Library/Kernels/kernel`
-- **Apple's kernel extensions** are located in `/System/Library/Extensions`
-- **Third-party kernel extensions** are stored in `/Library/Extensions`
+- **सिस्टम ऐप्स** `/System/Applications` के अंतर्गत स्थित हैं
+- **स्थापित** ऐप्स आमतौर पर `/Applications` या `~/Applications` में स्थापित होते हैं
+- **ऐप्लिकेशन डेटा** `/Library/Application Support` में उन ऐप्स के लिए मिल सकता है जो रूट के रूप में चल रहे हैं और `~/Library/Application Support` में उपयोगकर्ता के रूप में चल रहे ऐप्स के लिए।
+- तीसरे पक्ष के ऐप्स **डेमन** जो **रूट के रूप में चलने की आवश्यकता है** आमतौर पर `/Library/PrivilegedHelperTools/` में स्थित होते हैं
+- **सैंडबॉक्स** ऐप्स `~/Library/Containers` फ़ोल्डर में मैप किए जाते हैं। प्रत्येक ऐप का एक फ़ोल्डर होता है जिसका नाम ऐप्लिकेशन के बंडल आईडी (`com.apple.Safari`) के अनुसार होता है।
+- **कर्नेल** `/System/Library/Kernels/kernel` में स्थित है
+- **Apple के कर्नेल एक्सटेंशन** `/System/Library/Extensions` में स्थित हैं
+- **तीसरे पक्ष के कर्नेल एक्सटेंशन** `/Library/Extensions` में संग्रहीत होते हैं
 
-### Files with Sensitive Information
+### संवेदनशील जानकारी वाली फ़ाइलें
 
-MacOS stores information such as passwords in several places:
+MacOS कई स्थानों पर पासवर्ड जैसी जानकारी संग्रहीत करता है:
 
 {{#ref}}
 macos-sensitive-locations.md
 {{#endref}}
 
-### Vulnerable pkg installers
+### कमजोर pkg इंस्टॉलर
 
 {{#ref}}
 macos-installers-abuse.md
 {{#endref}}
 
-## OS X Specific Extensions
+## OS X विशिष्ट एक्सटेंशन
 
-- **`.dmg`**: Apple Disk Image files are very frequent for installers.
-- **`.kext`**: It must follow a specific structure and it's the OS X version of a driver. (it's a bundle)
-- **`.plist`**: Also known as property list stores information in XML or binary format.
-  - Can be XML or binary. Binary ones can be read with:
-    - `defaults read config.plist`
-    - `/usr/libexec/PlistBuddy -c print config.plsit`
-    - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
-    - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
-    - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-- **`.app`**: Apple applications that follows directory structure (It's a bundle).
-- **`.dylib`**: Dynamic libraries (like Windows DLL files)
-- **`.pkg`**: Are the same as xar (eXtensible Archive format). The installer command can be use to install the contents of these files.
-- **`.DS_Store`**: This file is on each directory, it saves the attributes and customisations of the directory.
-- **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
-- **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
-- **`.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
-- **`.sdef`**: Files inside bundles specifying how it's possible to interact wth the application from an AppleScript.
+- **`.dmg`**: Apple डिस्क इमेज फ़ाइलें इंस्टॉलर्स के लिए बहुत सामान्य हैं।
+- **`.kext`**: इसे एक विशिष्ट संरचना का पालन करना चाहिए और यह OS X का एक ड्राइवर है। (यह एक बंडल है)
+- **`.plist`**: जिसे प्रॉपर्टी लिस्ट के रूप में भी जाना जाता है, यह XML या बाइनरी प्रारूप में जानकारी संग्रहीत करता है।
+- यह XML या बाइनरी हो सकता है। बाइनरी को पढ़ा जा सकता है:
+- `defaults read config.plist`
+- `/usr/libexec/PlistBuddy -c print config.plsit`
+- `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
+- `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
+- `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
+- **`.app`**: Apple ऐप्स जो निर्देशिका संरचना का पालन करते हैं (यह एक बंडल है)।
+- **`.dylib`**: डायनामिक लाइब्रेरी (जैसे Windows DLL फ़ाइलें)
+- **`.pkg`**: ये xar (eXtensible Archive format) के समान हैं। इंस्टॉलर कमांड का उपयोग इन फ़ाइलों की सामग्री को स्थापित करने के लिए किया जा सकता है।
+- **`.DS_Store`**: यह फ़ाइल प्रत्येक निर्देशिका में होती है, यह निर्देशिका के गुण और अनुकूलन को सहेजती है।
+- **`.Spotlight-V100`**: यह फ़ोल्डर सिस्टम पर प्रत्येक वॉल्यूम के रूट निर्देशिका में दिखाई देता है।
+- **`.metadata_never_index`**: यदि यह फ़ाइल किसी वॉल्यूम के रूट पर है तो Spotlight उस वॉल्यूम को इंडेक्स नहीं करेगा।
+- **`.noindex`**: इस एक्सटेंशन वाली फ़ाइलें और फ़ोल्डर Spotlight द्वारा इंडेक्स नहीं किए जाएंगे।
+- **`.sdef`**: बंडलों के अंदर फ़ाइलें जो यह निर्दिष्ट करती हैं कि AppleScript से ऐप्लिकेशन के साथ कैसे इंटरैक्ट करना संभव है।
 
-### macOS Bundles
+### macOS बंडल
 
-A bundle is a **directory** which **looks like an object in Finder** (a Bundle example are `*.app` files).
+एक बंडल एक **निर्देशिका** है जो **Finder में एक ऑब्जेक्ट की तरह दिखती है** (एक बंडल उदाहरण `*.app` फ़ाइलें हैं)।
 
 {{#ref}}
 macos-bundles.md
 {{#endref}}
 
-## Dyld Shared Library Cache (SLC)
+## Dyld साझा लाइब्रेरी कैश (SLC)
 
-On macOS (and iOS) all system shared libraries, like frameworks and dylibs, are **combined into a single file**, called the **dyld shared cache**. This improved performance, since code can be loaded faster.
+macOS (और iOS) पर सभी सिस्टम साझा लाइब्रेरी, जैसे फ्रेमवर्क और dylibs, को **एकल फ़ाइल** में **संयुक्त** किया गया है, जिसे **dyld साझा कैश** कहा जाता है। इससे प्रदर्शन में सुधार हुआ, क्योंकि कोड को तेजी से लोड किया जा सकता है।
 
-This is located in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` and in older versions you might be able to find the **shared cache** in **`/System/Library/dyld/`**.\
-In iOS you can find them in **`/System/Library/Caches/com.apple.dyld/`**.
+यह macOS में `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` में स्थित है और पुराने संस्करणों में आप **`/System/Library/dyld/`** में **साझा कैश** पा सकते हैं।\
+iOS में आप इन्हें **`/System/Library/Caches/com.apple.dyld/`** में पा सकते हैं।
 
-Similar to the dyld shared cache, the kernel and the kernel extensions are also compiled into a kernel cache, which is loaded at boot time.
+dyld साझा कैश के समान, कर्नेल और कर्नेल एक्सटेंशन भी एक कर्नेल कैश में संकलित होते हैं, जिसे बूट समय पर लोड किया जाता है।
 
-In order to extract the libraries from the single file dylib shared cache it was possible to use the binary [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) which might not be working nowadays but you can also use [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
-
+एकल फ़ाइल dylib साझा कैश से लाइब्रेरी निकालने के लिए बाइनरी [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) का उपयोग करना संभव था जो आजकल काम नहीं कर सकता है लेकिन आप [**dyldextractor**](https://github.com/arandomdev/dyldextractor) का भी उपयोग कर सकते हैं:
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -93,119 +92,111 @@ dyldex -l [dyld_shared_cache_path] # List libraries
 dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
-
 > [!TIP]
-> Note that even if `dyld_shared_cache_util` tool doesn't work, you can pass the **shared dyld binary to Hopper** and Hopper will be able to identify all the libraries and let you **select which one** you want to investigate:
+> ध्यान दें कि भले ही `dyld_shared_cache_util` उपकरण काम न करे, आप **साझा dyld बाइनरी को Hopper** में पास कर सकते हैं और Hopper सभी पुस्तकालयों की पहचान कर सकेगा और आपको **चुनने देगा कि आप किसे** जांचना चाहते हैं:
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Some extractors won't work as dylibs are prelinked with hard coded addresses in therefore they might be jumping to unknown addresses
+कुछ एक्सट्रैक्टर्स काम नहीं करेंगे क्योंकि dylibs को हार्ड कोडेड पते के साथ प्रीलिंक किया गया है, इसलिए वे अज्ञात पते पर कूद सकते हैं।
 
 > [!TIP]
-> It's also possible to download the Shared Library Cache of other \*OS devices in macos by using an emulator in Xcode. They will be downloaded inside: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, like:`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> यह भी संभव है कि अन्य \*OS उपकरणों का साझा पुस्तकालय कैश macos में Xcode में एक एमुलेटर का उपयोग करके डाउनलोड किया जाए। वे इस पथ में डाउनलोड किए जाएंगे: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, जैसे: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
-### Mapping SLC
+### SLC का मानचित्रण
 
-**`dyld`** uses the syscall **`shared_region_check_np`** to know if the SLC has been mapped (which returns the address) and **`shared_region_map_and_slide_np`** to map the SLC.
+**`dyld`** syscall **`shared_region_check_np`** का उपयोग करता है यह जानने के लिए कि क्या SLC मैप किया गया है (जो पता लौटाता है) और **`shared_region_map_and_slide_np`** SLC को मैप करने के लिए।
 
-Note that even if the SLC is slid on the first use, all the **processes** use the **same copy**, which **eliminated the ASLR** protection if the attacker was able to run processes in the system. This was actually exploited in the past and fixed with shared region pager.
+ध्यान दें कि भले ही SLC पहले उपयोग पर स्लाइड हो, सभी **प्रक्रियाएँ** **एक ही प्रति** का उपयोग करती हैं, जो **ASLR** सुरक्षा को समाप्त कर देती है यदि हमलावर सिस्टम में प्रक्रियाएँ चलाने में सक्षम था। इसका वास्तव में अतीत में शोषण किया गया था और साझा क्षेत्र पेजर के साथ ठीक किया गया था।
 
-Branch pools are little Mach-O dylibs that creates small spaces between image mappings making impossible to interpose the functions.
+ब्रांच पूल छोटे Mach-O dylibs हैं जो छवि मैपिंग के बीच छोटे स्थान बनाते हैं जिससे कार्यों को इंटरपोज़ करना असंभव हो जाता है।
 
-### Override SLCs
+### SLC को ओवरराइड करना
 
-Using the the env variables:
+env वेरिएबल का उपयोग करते हुए:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> This will allow to load a new shared library cache
-- **`DYLD_SHARED_CACHE_DIR=avoid`** and manually replace the libraries with symlinks to the shared cache with the real ones (you will need to extract them)
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> यह एक नया साझा पुस्तकालय कैश लोड करने की अनुमति देगा।
+- **`DYLD_SHARED_CACHE_DIR=avoid`** और वास्तविक पुस्तकालयों के साथ साझा कैश के लिए सिम्लिंक्स के साथ पुस्तकालयों को मैन्युअल रूप से बदलें (आपको उन्हें निकालने की आवश्यकता होगी)।
 
-## Special File Permissions
+## विशेष फ़ाइल अनुमतियाँ
 
-### Folder permissions
+### फ़ोल्डर अनुमतियाँ
 
-In a **folder**, **read** allows to **list it**, **write** allows to **delete** and **write** files on it, and **execute** allows to **traverse** the directory. So, for example, a user with **read permission over a file** inside a directory where he **doesn't have execute** permission **won't be able to read** the file.
+एक **फ़ोल्डर** में, **पढ़ने** की अनुमति **सूचीबद्ध** करने की अनुमति देती है, **लिखने** की अनुमति **हटाने** और **लिखने** की अनुमति देती है, और **निष्पादित** करने की अनुमति **निर्देशिका** को **पार** करने की अनुमति देती है। इसलिए, उदाहरण के लिए, एक उपयोगकर्ता जिसके पास एक फ़ाइल पर **पढ़ने की अनुमति** है, उस निर्देशिका में जहां उसके पास **निष्पादित** करने की अनुमति नहीं है, वह **फ़ाइल को पढ़ने में असमर्थ होगा**।
 
-### Flag modifiers
+### ध्वज संशोधक
 
-There are some flags that could be set in the files that will make file behave differently. You can **check the flags** of the files inside a directory with `ls -lO /path/directory`
+कुछ ध्वज हैं जो फ़ाइलों में सेट किए जा सकते हैं जो फ़ाइल के व्यवहार को अलग तरीके से बना देंगे। आप `ls -lO /path/directory` के साथ एक निर्देशिका के अंदर फ़ाइलों के ध्वज **जांच सकते हैं**।
 
-- **`uchg`**: Known as **uchange** flag will **prevent any action** changing or deleting the **file**. To set it do: `chflags uchg file.txt`
-  - The root user could **remove the flag** and modify the file
-- **`restricted`**: This flag makes the file be **protected by SIP** (you cannot add this flag to a file).
-- **`Sticky bit`**: If a directory with sticky bit, **only** the **directories owner or root can remane or delete** files. Typically this is set on the /tmp directory to prevent ordinary users from deleting or moving other users’ files.
+- **`uchg`**: जिसे **uchange** ध्वज के रूप में जाना जाता है, यह **फ़ाइल** को बदलने या हटाने की **किसी भी क्रिया** को **रोक देगा**। इसे सेट करने के लिए करें: `chflags uchg file.txt`
+- रूट उपयोगकर्ता **ध्वज को हटा** सकता है और फ़ाइल को संशोधित कर सकता है।
+- **`restricted`**: यह ध्वज फ़ाइल को **SIP द्वारा संरक्षित** बनाता है (आप इस ध्वज को फ़ाइल में नहीं जोड़ सकते)।
+- **`Sticky bit`**: यदि एक निर्देशिका में स्टिकी बिट है, तो **केवल** **निर्देशिका का मालिक या रूट फ़ाइलों का नाम बदलने या हटाने** में सक्षम हो सकता है। आमतौर पर इसे /tmp निर्देशिका पर सेट किया जाता है ताकि सामान्य उपयोगकर्ता अन्य उपयोगकर्ताओं की फ़ाइलों को हटाने या स्थानांतरित करने से रोक सकें।
 
-All the flags can be found in the file `sys/stat.h` (find it using `mdfind stat.h | grep stat.h`) and are:
+सभी ध्वज फ़ाइल `sys/stat.h` में पाए जा सकते हैं (इसे `mdfind stat.h | grep stat.h` का उपयोग करके खोजें) और हैं:
 
-- `UF_SETTABLE` 0x0000ffff: Mask of owner changeable flags.
-- `UF_NODUMP` 0x00000001: Do not dump file.
-- `UF_IMMUTABLE` 0x00000002: File may not be changed.
-- `UF_APPEND` 0x00000004: Writes to file may only append.
-- `UF_OPAQUE` 0x00000008: Directory is opaque wrt. union.
-- `UF_COMPRESSED` 0x00000020: File is compressed (some file-systems).
-- `UF_TRACKED` 0x00000040: No notifications for deletes/renames for files with this set.
-- `UF_DATAVAULT` 0x00000080: Entitlement required for reading and writing.
-- `UF_HIDDEN` 0x00008000: Hint that this item should not be displayed in a GUI.
-- `SF_SUPPORTED` 0x009f0000: Mask of superuser supported flags.
-- `SF_SETTABLE` 0x3fff0000: Mask of superuser changeable flags.
-- `SF_SYNTHETIC` 0xc0000000: Mask of system read-only synthetic flags.
-- `SF_ARCHIVED` 0x00010000: File is archived.
-- `SF_IMMUTABLE` 0x00020000: File may not be changed.
-- `SF_APPEND` 0x00040000: Writes to file may only append.
-- `SF_RESTRICTED` 0x00080000: Entitlement required for writing.
-- `SF_NOUNLINK` 0x00100000: Item may not be removed, renamed or mounted on.
-- `SF_FIRMLINK` 0x00800000: File is a firmlink.
-- `SF_DATALESS` 0x40000000: File is dataless object.
+- `UF_SETTABLE` 0x0000ffff: मालिक द्वारा बदले जाने योग्य ध्वज का मास्क।
+- `UF_NODUMP` 0x00000001: फ़ाइल को डंप न करें।
+- `UF_IMMUTABLE` 0x00000002: फ़ाइल को नहीं बदला जा सकता।
+- `UF_APPEND` 0x00000004: फ़ाइल में केवल जोड़ने के लिए लिखें।
+- `UF_OPAQUE` 0x00000008: निर्देशिका संघ के संबंध में अपारदर्शी है।
+- `UF_COMPRESSED` 0x00000020: फ़ाइल संकुचित है (कुछ फ़ाइल-प्रणालियाँ)।
+- `UF_TRACKED` 0x00000040: इस सेट के साथ फ़ाइलों के लिए हटाने/नाम बदलने के लिए कोई सूचनाएँ नहीं।
+- `UF_DATAVAULT` 0x00000080: पढ़ने और लिखने के लिए अधिकार की आवश्यकता है।
+- `UF_HIDDEN` 0x00008000: संकेत कि इस आइटम को GUI में नहीं दिखाया जाना चाहिए।
+- `SF_SUPPORTED` 0x009f0000: सुपरयूजर द्वारा समर्थित ध्वज का मास्क।
+- `SF_SETTABLE` 0x3fff0000: सुपरयूजर द्वारा बदले जाने योग्य ध्वज का मास्क।
+- `SF_SYNTHETIC` 0xc0000000: सिस्टम केवल-पढ़ने वाले सिंथेटिक ध्वज का मास्क।
+- `SF_ARCHIVED` 0x00010000: फ़ाइल संग्रहित है।
+- `SF_IMMUTABLE` 0x00020000: फ़ाइल को नहीं बदला जा सकता।
+- `SF_APPEND` 0x00040000: फ़ाइल में केवल जोड़ने के लिए लिखें।
+- `SF_RESTRICTED` 0x00080000: लिखने के लिए अधिकार की आवश्यकता है।
+- `SF_NOUNLINK` 0x00100000: आइटम को हटाया, नाम बदला या माउंट नहीं किया जा सकता।
+- `SF_FIRMLINK` 0x00800000: फ़ाइल एक फर्मलिंक है।
+- `SF_DATALESS` 0x40000000: फ़ाइल एक डेटा रहित वस्तु है।
 
-### **File ACLs**
+### **फ़ाइल ACLs**
 
-File **ACLs** contain **ACE** (Access Control Entries) where more **granular permissions** can be assigned to different users.
+फ़ाइल **ACLs** में **ACE** (एक्सेस कंट्रोल एंट्रीज़) होती हैं जहां विभिन्न उपयोगकर्ताओं को अधिक **सूक्ष्म अनुमतियाँ** दी जा सकती हैं।
 
-It's possible to grant a **directory** these permissions: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
-Ans to a **file**: `read`, `write`, `append`, `execute`.
+एक **निर्देशिका** को ये अनुमतियाँ दी जा सकती हैं: `सूची`, `खोज`, `फाइल जोड़ें`, `उपनिर्देशिका जोड़ें`, `बच्चे को हटाएँ`, `बच्चे को हटाएँ`।\
+और एक **फ़ाइल** के लिए: `पढ़ें`, `लिखें`, `जोड़ें`, `निष्पादित करें`।
 
-When the file contains ACLs you will **find a "+" when listing the permissions like in**:
-
+जब फ़ाइल में ACLs होती हैं, तो आप अनुमतियों की सूची बनाते समय **"+" पाएंगे** जैसे:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-
-You can **read the ACLs** of the file with:
-
+आप फ़ाइल के **ACLs** को इस तरह पढ़ सकते हैं:
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
- 0: group:everyone deny delete
+0: group:everyone deny delete
 ```
-
-You can find **all the files with ACLs** with (this is veeery slow):
-
+आप **सभी फ़ाइलों को ACLs के साथ** (यह बहुत धीमा है) पा सकते हैं:
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
+### विस्तारित विशेषताएँ
 
-### Extended Attributes
+विस्तारित विशेषताओं का एक नाम और कोई भी इच्छित मान होता है, और इन्हें `ls -@` का उपयोग करके देखा जा सकता है और `xattr` कमांड का उपयोग करके संशोधित किया जा सकता है। कुछ सामान्य विस्तारित विशेषताएँ हैं:
 
-Extended attributes have a name and any desired value, and can be seen using `ls -@` and manipulated using the `xattr` command. Some common extended attributes are:
+- `com.apple.resourceFork`: संसाधन फोर्क संगतता। `filename/..namedfork/rsrc` के रूप में भी दिखाई देता है
+- `com.apple.quarantine`: MacOS: गेटकीपर क्वारंटाइन तंत्र (III/6)
+- `metadata:*`: MacOS: विभिन्न मेटाडेटा, जैसे कि `_backup_excludeItem`, या `kMD*`
+- `com.apple.lastuseddate` (#PS): अंतिम फ़ाइल उपयोग तिथि
+- `com.apple.FinderInfo`: MacOS: फ़ाइंडर जानकारी (जैसे, रंग टैग)
+- `com.apple.TextEncoding`: ASCII टेक्स्ट फ़ाइलों के टेक्स्ट एन्कोडिंग को निर्दिष्ट करता है
+- `com.apple.logd.metadata`: `/var/db/diagnostics` में फ़ाइलों पर logd द्वारा उपयोग किया जाता है
+- `com.apple.genstore.*`: पीढ़ीगत भंडारण (`/.DocumentRevisions-V100` फ़ाइल सिस्टम की जड़ में)
+- `com.apple.rootless`: MacOS: फ़ाइल को लेबल करने के लिए सिस्टम इंटीग्रिटी प्रोटेक्शन द्वारा उपयोग किया जाता है (III/10)
+- `com.apple.uuidb.boot-uuid`: अद्वितीय UUID के साथ बूट युगों के logd मार्किंग
+- `com.apple.decmpfs`: MacOS: पारदर्शी फ़ाइल संकुचन (II/7)
+- `com.apple.cprotect`: \*OS: प्रति-फ़ाइल एन्क्रिप्शन डेटा (III/11)
+- `com.apple.installd.*`: \*OS: installd द्वारा उपयोग किया जाने वाला मेटाडेटा, जैसे कि `installType`, `uniqueInstallID`
 
-- `com.apple.resourceFork`: Resource fork compatibility. Also visible as `filename/..namedfork/rsrc`
-- `com.apple.quarantine`: MacOS: Gatekeeper quarantine mechanism (III/6)
-- `metadata:*`: MacOS: various metadata, such as `_backup_excludeItem`, or `kMD*`
-- `com.apple.lastuseddate` (#PS): Last file use date
-- `com.apple.FinderInfo`: MacOS: Finder information (e.g., color Tags)
-- `com.apple.TextEncoding`: Specifies text encoding of ASCII text files
-- `com.apple.logd.metadata`: Used by logd on files in `/var/db/diagnostics`
-- `com.apple.genstore.*`: Generational storage (`/.DocumentRevisions-V100` in root of filesystem)
-- `com.apple.rootless`: MacOS: Used by System Integrity Protection to label file (III/10)
-- `com.apple.uuidb.boot-uuid`: logd markings of boot epochs with unique UUID
-- `com.apple.decmpfs`: MacOS: Transparent file compression (II/7)
-- `com.apple.cprotect`: \*OS: Per-file encryption data (III/11)
-- `com.apple.installd.*`: \*OS: Metadata used by installd, e.g., `installType`, `uniqueInstallID`
+### संसाधन फोर्क | macOS ADS
 
-### Resource Forks | macOS ADS
-
-This is a way to obtain **Alternate Data Streams in MacOS** machines. You can save content inside an extended attribute called **com.apple.ResourceFork** inside a file by saving it in **file/..namedfork/rsrc**.
-
+यह **MacOS** मशीनों में **वैकल्पिक डेटा धाराओं** को प्राप्त करने का एक तरीका है। आप **file/..namedfork/rsrc** में एक फ़ाइल के अंदर **com.apple.ResourceFork** नामक विस्तारित विशेषता के अंदर सामग्री सहेज सकते हैं।
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -216,24 +207,21 @@ com.apple.ResourceFork: Hello Mac ADS
 ls -l a.txt #The file length is still q
 -rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
 ```
-
-You can **find all the files containing this extended attribute** with:
-
+आप **इस विस्तारित विशेषता वाले सभी फ़ाइलों को खोज सकते हैं**:
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
-
 ### decmpfs
 
-The extended attribute `com.apple.decmpfs` indicates that the file is stored encrypted, `ls -l` will report a **size of 0** and the compressed data is inside this attribute. Whenever the file is accessed it'll be decrypted in memory.
+विस्तारित विशेषता `com.apple.decmpfs` इंगित करती है कि फ़ाइल एन्क्रिप्टेड रूप में संग्रहीत है, `ls -l` **आकार 0** की रिपोर्ट करेगा और संकुचित डेटा इस विशेषता के अंदर है। जब भी फ़ाइल को एक्सेस किया जाएगा, इसे मेमोरी में डिक्रिप्ट किया जाएगा।
 
-This attr can be seen with `ls -lO` indicated as compressed because compressed files are also tagged with the flag `UF_COMPRESSED`. If a compressed file is removed this flag with `chflags nocompressed </path/to/file>`, the system won't know that the file was compressed and therefore it won't be able to decompress and access the data (it will think that it's actually empty).
+इस attr को `ls -lO` के साथ देखा जा सकता है जो संकुचित के रूप में संकेतित है क्योंकि संकुचित फ़ाइलों को `UF_COMPRESSED` ध्वज के साथ भी टैग किया जाता है। यदि एक संकुचित फ़ाइल को `chflags nocompressed </path/to/file>` के साथ हटा दिया जाता है, तो सिस्टम नहीं जान पाएगा कि फ़ाइल संकुचित थी और इसलिए यह डेटा को डिक्रिप्ट और एक्सेस नहीं कर पाएगा (यह सोचेगा कि यह वास्तव में खाली है)।
 
-The tool afscexpand can be used to force decompress a dile.
+उपकरण afscexpand का उपयोग एक फ़ाइल को मजबूर करने के लिए डिक्रिप्ट करने के लिए किया जा सकता है।
 
 ## **Universal binaries &** Mach-o Format
 
-Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
+Mac OS बाइनरी आमतौर पर **यूनिवर्सल बाइनरी** के रूप में संकलित होती हैं। एक **यूनिवर्सल बाइनरी** **एक ही फ़ाइल में कई आर्किटेक्चर का समर्थन कर सकती है**।
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md
@@ -249,22 +237,22 @@ macos-memory-dumping.md
 
 ## Risk Category Files Mac OS
 
-The directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` is where information about the **risk associated with different file extensions is stored**. This directory categorizes files into various risk levels, influencing how Safari handles these files upon download. The categories are as follows:
+डायरेक्टरी `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` वह स्थान है जहाँ **विभिन्न फ़ाइल एक्सटेंशन से संबंधित जोखिम की जानकारी संग्रहीत होती है**। यह डायरेक्टरी फ़ाइलों को विभिन्न जोखिम स्तरों में वर्गीकृत करती है, जो यह प्रभावित करती है कि Safari इन फ़ाइलों को डाउनलोड करने पर कैसे संभालता है। श्रेणियाँ इस प्रकार हैं:
 
-- **LSRiskCategorySafe**: Files in this category are considered **completely safe**. Safari will automatically open these files after they are downloaded.
-- **LSRiskCategoryNeutral**: These files come with no warnings and are **not automatically opened** by Safari.
-- **LSRiskCategoryUnsafeExecutable**: Files under this category **trigger a warning** indicating that the file is an application. This serves as a security measure to alert the user.
-- **LSRiskCategoryMayContainUnsafeExecutable**: This category is for files, such as archives, that might contain an executable. Safari will **trigger a warning** unless it can verify that all contents are safe or neutral.
+- **LSRiskCategorySafe**: इस श्रेणी में फ़ाइलें **पूर्ण रूप से सुरक्षित** मानी जाती हैं। Safari स्वचालित रूप से इन फ़ाइलों को डाउनलोड करने के बाद खोलेगा।
+- **LSRiskCategoryNeutral**: ये फ़ाइलें बिना किसी चेतावनी के आती हैं और Safari द्वारा **स्वचालित रूप से नहीं खोली जाती** हैं।
+- **LSRiskCategoryUnsafeExecutable**: इस श्रेणी के तहत फ़ाइलें **एक चेतावनी को ट्रिगर करती हैं** जो इंगित करती है कि फ़ाइल एक एप्लिकेशन है। यह उपयोगकर्ता को सूचित करने के लिए एक सुरक्षा उपाय के रूप में कार्य करता है।
+- **LSRiskCategoryMayContainUnsafeExecutable**: यह श्रेणी उन फ़ाइलों के लिए है, जैसे कि आर्काइव, जो एक निष्पादन योग्य फ़ाइल को शामिल कर सकती हैं। Safari **एक चेतावनी को ट्रिगर करेगा** जब तक कि यह सत्यापित नहीं कर सकता कि सभी सामग्री सुरक्षित या तटस्थ हैं।
 
 ## Log files
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contains information about downloaded files, like the URL from where they were downloaded.
-- **`/var/log/system.log`**: Main log of OSX systems. com.apple.syslogd.plist is responsible for the execution of syslogging (you can check if it's disabled looking for "com.apple.syslogd" in `launchctl list`.
-- **`/private/var/log/asl/*.asl`**: These are the Apple System Logs which may contain interesting information.
-- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Stores recently accessed files and applications through "Finder".
-- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Stores items to launch upon system startup
-- **`$HOME/Library/Logs/DiskUtility.log`**: Log file for thee DiskUtility App (info about drives, including USBs)
-- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
-- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: डाउनलोड की गई फ़ाइलों के बारे में जानकारी रखता है, जैसे कि URL जहाँ से उन्हें डाउनलोड किया गया था।
+- **`/var/log/system.log`**: OSX सिस्टम का मुख्य लॉग। com.apple.syslogd.plist syslogging के निष्पादन के लिए जिम्मेदार है (आप देख सकते हैं कि यह निष्क्रिय है या नहीं `launchctl list` में "com.apple.syslogd" की खोज करके)।
+- **`/private/var/log/asl/*.asl`**: ये Apple सिस्टम लॉग हैं जो दिलचस्प जानकारी रख सकते हैं।
+- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: "Finder" के माध्यम से हाल ही में एक्सेस की गई फ़ाइलों और अनुप्रयोगों को संग्रहीत करता है।
+- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: सिस्टम स्टार्टअप पर लॉन्च करने के लिए आइटम संग्रहीत करता है।
+- **`$HOME/Library/Logs/DiskUtility.log`**: DiskUtility ऐप के लिए लॉग फ़ाइल (ड्राइव के बारे में जानकारी, जिसमें USB शामिल हैं)।
+- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: वायरलेस एक्सेस पॉइंट के बारे में डेटा।
+- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: निष्क्रिय किए गए डेमनों की सूची।
 
 {{#include ../../../banners/hacktricks-training.md}}

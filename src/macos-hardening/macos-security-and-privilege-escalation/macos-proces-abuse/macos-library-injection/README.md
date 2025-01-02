@@ -3,11 +3,11 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!CAUTION]
-> The code of **dyld is open source** and can be found in [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) and cab be downloaded a tar using a **URL such as** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+> **dyld का कोड ओपन सोर्स है** और इसे [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) पर पाया जा सकता है और इसे **URL जैसे** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) का उपयोग करके डाउनलोड किया जा सकता है।
 
 ## **Dyld Process**
 
-Take a look on how Dyld loads libraries inside binaries in:
+देखें कि Dyld बाइनरी के अंदर लाइब्रेरी कैसे लोड करता है:
 
 {{#ref}}
 macos-dyld-process.md
@@ -15,40 +15,40 @@ macos-dyld-process.md
 
 ## **DYLD_INSERT_LIBRARIES**
 
-This is like the [**LD_PRELOAD on Linux**](../../../../linux-hardening/privilege-escalation/#ld_preload). It allows to indicate a process that is going to be run to load a specific library from a path (if the env var is enabled)
+यह [**LD_PRELOAD on Linux**](../../../../linux-hardening/privilege-escalation/#ld_preload) की तरह है। यह एक प्रक्रिया को इंगित करने की अनुमति देता है जो चलने वाली है कि एक विशेष लाइब्रेरी को एक पथ से लोड किया जाए (यदि env var सक्षम है)।
 
-This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
+यह तकनीक **ASEP तकनीक के रूप में भी उपयोग की जा सकती है** क्योंकि हर स्थापित एप्लिकेशन में "Info.plist" नामक एक plist होती है जो **पर्यावरणीय चर असाइन करने** की अनुमति देती है, जिसका उपयोग `LSEnvironmental` नामक कुंजी से किया जाता है।
 
 > [!NOTE]
-> Since 2012 **Apple has drastically reduced the power** of the **`DYLD_INSERT_LIBRARIES`**.
+> 2012 से **Apple ने `DYLD_INSERT_LIBRARIES`** की **शक्ति को काफी कम कर दिया है**।
 >
-> Go to the code and **check `src/dyld.cpp`**. In the function **`pruneEnvironmentVariables`** you can see that **`DYLD_*`** variables are removed.
+> कोड पर जाएं और **`src/dyld.cpp`** की जांच करें। फ़ंक्शन **`pruneEnvironmentVariables`** में आप देख सकते हैं कि **`DYLD_*`** चर हटा दिए गए हैं।
 >
-> In the function **`processRestricted`** the reason of the restriction is set. Checking that code you can see that the reasons are:
+> फ़ंक्शन **`processRestricted`** में प्रतिबंध का कारण सेट किया गया है। उस कोड की जांच करने पर आप देख सकते हैं कि कारण हैं:
 >
-> - The binary is `setuid/setgid`
-> - Existence of `__RESTRICT/__restrict` section in the macho binary.
-> - The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables) entitlement
->   - Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
+> - बाइनरी `setuid/setgid` है
+> - macho बाइनरी में `__RESTRICT/__restrict` अनुभाग का अस्तित्व।
+> - सॉफ़्टवेयर में अधिकार हैं (हर्डनड रनटाइम) बिना [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables) अधिकार के
+>   - बाइनरी के **अधिकार** की जांच करें: `codesign -dv --entitlements :- </path/to/bin>`
 >
-> In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
+> अधिक अपडेटेड संस्करणों में आप इस तर्क को फ़ंक्शन **`configureProcessRestrictions`** के दूसरे भाग में पा सकते हैं। हालाँकि, जो नए संस्करणों में निष्पादित होता है वह फ़ंक्शन के **शुरुआती जांच** हैं (आप iOS या सिमुलेशन से संबंधित ifs को हटा सकते हैं क्योंकि वे macOS में उपयोग नहीं किए जाएंगे)।
 
-### Library Validation
+### लाइब्रेरी मान्यता
 
-Even if the binary allows to use the **`DYLD_INSERT_LIBRARIES`** env variable, if the binary checks the signature of the library to load it won't load a custom what.
+यहां तक कि यदि बाइनरी **`DYLD_INSERT_LIBRARIES`** env चर का उपयोग करने की अनुमति देती है, यदि बाइनरी लोड करने के लिए लाइब्रेरी के हस्ताक्षर की जांच करती है, तो यह एक कस्टम को लोड नहीं करेगी।
 
-In order to load a custom library, the binary needs to have **one of the following entitlements**:
+कस्टम लाइब्रेरी को लोड करने के लिए, बाइनरी में **निम्नलिखित अधिकारों में से एक होना चाहिए**:
 
 - [`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 - [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-or the binary **shouldn't** have the **hardened runtime flag** or the **library validation flag**.
+या बाइनरी में **हर्डनड रनटाइम फ्लैग** या **लाइब्रेरी मान्यता फ्लैग** नहीं होना चाहिए।
 
-You can check if a binary has **hardened runtime** with `codesign --display --verbose <bin>` checking the flag runtime in **`CodeDirectory`** like: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+आप यह जांच सकते हैं कि क्या बाइनरी में **हर्डनड रनटाइम** है `codesign --display --verbose <bin>` के साथ, **`CodeDirectory`** में फ्लैग रनटाइम की जांच करते हुए जैसे: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-You can also load a library if it's **signed with the same certificate as the binary**.
+आप एक लाइब्रेरी को भी लोड कर सकते हैं यदि यह **बाइनरी के समान प्रमाणपत्र से हस्ताक्षरित है**।
 
-Find a example on how to (ab)use this and check the restrictions in:
+इसका (दुरुपयोग) करने का एक उदाहरण खोजें और प्रतिबंधों की जांच करें:
 
 {{#ref}}
 macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -57,56 +57,56 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dylib Hijacking
 
 > [!CAUTION]
-> Remember that **previous Library Validation restrictions also apply** to perform Dylib hijacking attacks.
+> याद रखें कि **पिछले लाइब्रेरी मान्यता प्रतिबंध भी लागू होते हैं** Dylib हाइजैकिंग हमलों को करने के लिए।
 
-As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code** (well, actually froma regular user this coul not be possible as you might need a TCC permission towrite inside an `.app` bundle and hijack a library).\
-However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
+Windows की तरह, MacOS में आप भी **dylibs को हाइजैक** कर सकते हैं ताकि **एप्लिकेशन** **मनमाने** **कोड** को **निष्पादित** कर सकें (ठीक है, वास्तव में एक सामान्य उपयोगकर्ता के लिए यह संभव नहीं हो सकता क्योंकि आपको एक `.app` बंडल के अंदर लिखने के लिए TCC अनुमति की आवश्यकता हो सकती है और एक लाइब्रेरी को हाइजैक करना)।\
+हालांकि, **MacOS** एप्लिकेशन **लाइब्रेरी** को लोड करने का तरीका **Windows की तुलना में अधिक प्रतिबंधित** है। इसका मतलब है कि **मैलवेयर** डेवलपर्स अभी भी **स्टेल्थ** के लिए इस तकनीक का उपयोग कर सकते हैं, लेकिन **अधिकारों को बढ़ाने के लिए इसका दुरुपयोग करने की संभावना बहुत कम है**।
 
-First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
+सबसे पहले, यह **अधिक सामान्य** है कि **MacOS बाइनरी लाइब्रेरी को लोड करने के लिए पूर्ण पथ** को इंगित करती हैं। और दूसरा, **MacOS कभी भी लाइब्रेरी के लिए **$PATH** के फ़ोल्डरों में खोज नहीं करता है।
 
-The **main** part of the **code** related to this functionality is in **`ImageLoader::recursiveLoadLibraries`** in `ImageLoader.cpp`.
+इस कार्यक्षमता से संबंधित **कोड** का **मुख्य** भाग **`ImageLoader::recursiveLoadLibraries`** में है `ImageLoader.cpp`।
 
-There are **4 different header Commands** a macho binary can use to load libraries:
+एक macho बाइनरी लाइब्रेरी लोड करने के लिए **4 विभिन्न हेडर कमांड** का उपयोग कर सकती है:
 
-- **`LC_LOAD_DYLIB`** command is the common command to load a dylib.
-- **`LC_LOAD_WEAK_DYLIB`** command works like the previous one, but if the dylib is not found, execution continues without any error.
-- **`LC_REEXPORT_DYLIB`** command it proxies (or re-exports) the symbols from a different library.
-- **`LC_LOAD_UPWARD_DYLIB`** command is used when two libraries depend on each other (this is called an _upward dependency_).
+- **`LC_LOAD_DYLIB`** कमांड एक dylib लोड करने के लिए सामान्य कमांड है।
+- **`LC_LOAD_WEAK_DYLIB`** कमांड पिछले वाले की तरह काम करता है, लेकिन यदि dylib नहीं पाया जाता है, तो निष्पादन बिना किसी त्रुटि के जारी रहता है।
+- **`LC_REEXPORT_DYLIB`** कमांड यह प्रतीक को एक अलग लाइब्रेरी से प्रॉक्सी (या फिर से निर्यात) करता है।
+- **`LC_LOAD_UPWARD_DYLIB`** कमांड का उपयोग तब किया जाता है जब दो लाइब्रेरी एक-दूसरे पर निर्भर करती हैं (इसे _upward dependency_ कहा जाता है)।
 
-However, there are **2 types of dylib hijacking**:
+हालांकि, **dylib हाइजैकिंग** के **2 प्रकार** हैं:
 
-- **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC_LOAD_WEAK_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
-  - The fact that the link is "weak" means that the application will continue running even if the library isn't found.
-  - The **code related** to this is in the function `ImageLoaderMachO::doGetDependentLibraries` of `ImageLoaderMachO.cpp` where `lib->required` is only `false` when `LC_LOAD_WEAK_DYLIB` is true.
-  - **Find weak linked libraries** in binaries with (you have later an example on how to create hijacking libraries):
-    - ```bash
-      otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
-      cmdsize 56
-      name /var/tmp/lib/libUtl.1.dylib (offset 24)
-      time stamp 2 Wed Jun 21 12:23:31 1969
-      current version 1.0.0
-      compatibility version 1.0.0
-      ```
-- **Configured with @rpath**: Mach-O binaries can have the commands **`LC_RPATH`** and **`LC_LOAD_DYLIB`**. Base on the **values** of those commands, **libraries** are going to be **loaded** from **different directories**.
-  - **`LC_RPATH`** contains the paths of some folders used to load libraries by the binary.
-  - **`LC_LOAD_DYLIB`** contains the path to specific libraries to load. These paths can contain **`@rpath`**, which will be **replaced** by the values in **`LC_RPATH`**. If there are several paths in **`LC_RPATH`** everyone will be used to search the library to load. Example:
-    - If **`LC_LOAD_DYLIB`** contains `@rpath/library.dylib` and **`LC_RPATH`** contains `/application/app.app/Contents/Framework/v1/` and `/application/app.app/Contents/Framework/v2/`. Both folders are going to be used to load `library.dylib`**.** If the library doesn't exist in `[...]/v1/` and attacker could place it there to hijack the load of the library in `[...]/v2/` as the order of paths in **`LC_LOAD_DYLIB`** is followed.
-  - **Find rpath paths and libraries** in binaries with: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
+- **गायब कमजोर लिंक की गई लाइब्रेरी**: इसका मतलब है कि एप्लिकेशन एक लाइब्रेरी लोड करने की कोशिश करेगा जो **LC_LOAD_WEAK_DYLIB** के साथ कॉन्फ़िगर की गई नहीं है। फिर, **यदि एक हमलावर एक dylib को उस स्थान पर रखता है जहां इसे लोड करने की उम्मीद है**।
+- लिंक "कमजोर" होने का मतलब है कि एप्लिकेशन तब भी चलना जारी रखेगा जब लाइब्रेरी नहीं पाई जाती।
+- इस से संबंधित **कोड** `ImageLoaderMachO::doGetDependentLibraries` फ़ंक्शन में है `ImageLoaderMachO.cpp` जहां `lib->required` केवल तब `false` है जब `LC_LOAD_WEAK_DYLIB` सत्य है।
+- बाइनरी में **कमजोर लिंक की गई लाइब्रेरी** खोजें (आपके पास बाद में हाइजैकिंग लाइब्रेरी बनाने का एक उदाहरण है):
+- ```bash
+otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
+cmdsize 56
+name /var/tmp/lib/libUtl.1.dylib (offset 24)
+time stamp 2 Wed Jun 21 12:23:31 1969
+current version 1.0.0
+compatibility version 1.0.0
+```
+- **@rpath के साथ कॉन्फ़िगर किया गया**: Mach-O बाइनरी में **`LC_RPATH`** और **`LC_LOAD_DYLIB`** कमांड हो सकते हैं। उन कमांड के **मानों** के आधार पर, **लाइब्रेरी** **विभिन्न निर्देशिकाओं** से **लोड** की जाएगी।
+- **`LC_RPATH`** में कुछ फ़ोल्डरों के पथ होते हैं जो बाइनरी द्वारा लाइब्रेरी लोड करने के लिए उपयोग किए जाते हैं।
+- **`LC_LOAD_DYLIB`** में लोड करने के लिए विशिष्ट लाइब्रेरी का पथ होता है। ये पथ **`@rpath`** को शामिल कर सकते हैं, जिसे **`LC_RPATH`** में मानों द्वारा **बदल दिया जाएगा**। यदि **`LC_RPATH`** में कई पथ हैं, तो सभी का उपयोग लाइब्रेरी को लोड करने के लिए किया जाएगा। उदाहरण:
+- यदि **`LC_LOAD_DYLIB`** में `@rpath/library.dylib` है और **`LC_RPATH`** में `/application/app.app/Contents/Framework/v1/` और `/application/app.app/Contents/Framework/v2/` है। दोनों फ़ोल्डर `library.dylib` को लोड करने के लिए उपयोग किए जाएंगे। यदि लाइब्रेरी `[...]/v1/` में मौजूद नहीं है और हमलावर इसे वहां रख सकता है ताकि `[...]/v2/` में लाइब्रेरी के लोड को हाइजैक किया जा सके क्योंकि **`LC_LOAD_DYLIB`** में पथों का क्रम का पालन किया जाता है।
+- बाइनरी में **rpath पथ और लाइब्रेरी** खोजें: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
-> [!NOTE] > **`@executable_path`**: Is the **path** to the directory containing the **main executable file**.
+> [!NOTE] > **`@executable_path`**: यह **मुख्य निष्पादन फ़ाइल** को समाहित करने वाले **निर्देशिका** का **पथ** है।
 >
-> **`@loader_path`**: Is the **path** to the **directory** containing the **Mach-O binary** which contains the load command.
+> **`@loader_path`**: यह **लोड कमांड** को समाहित करने वाले **Mach-O बाइनरी** के **निर्देशिका** का **पथ** है।
 >
-> - When used in an executable, **`@loader_path`** is effectively the **same** as **`@executable_path`**.
-> - When used in a **dylib**, **`@loader_path`** gives the **path** to the **dylib**.
+> - जब एक निष्पादन योग्य में उपयोग किया जाता है, तो **`@loader_path`** प्रभावी रूप से **`@executable_path`** के समान होता है।
+> - जब एक **dylib** में उपयोग किया जाता है, तो **`@loader_path`** **dylib** का **पथ** देता है।
 
-The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
+इस कार्यक्षमता का **दुरुपयोग** करके **अधिकारों को बढ़ाने** का तरीका तब होगा जब एक **एप्लिकेशन** जो **रूट** द्वारा **निष्पादित** किया जा रहा है, किसी **निर्देशिका में लाइब्रेरी की तलाश कर रहा है जहां हमलावर के पास लिखने की अनुमति है।**
 
 > [!TIP]
-> A nice **scanner** to find **missing libraries** in applications is [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) or a [**CLI version**](https://github.com/pandazheng/DylibHijack).\
-> A nice **report with technical details** about this technique can be found [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x).
+> अनुप्रयोगों में **गायब लाइब्रेरी** खोजने के लिए एक अच्छा **स्कैनर** है [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) या एक [**CLI संस्करण**](https://github.com/pandazheng/DylibHijack).\
+> इस तकनीक के बारे में **तकनीकी विवरण** के साथ एक अच्छा **रिपोर्ट** [**यहां**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x) पाया जा सकता है।
 
-**Example**
+**उदाहरण**
 
 {{#ref}}
 macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -115,61 +115,60 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dlopen Hijacking
 
 > [!CAUTION]
-> Remember that **previous Library Validation restrictions also apply** to perform Dlopen hijacking attacks.
+> याद रखें कि **पिछले लाइब्रेरी मान्यता प्रतिबंध भी लागू होते हैं** Dlopen हाइजैकिंग हमलों को करने के लिए।
 
-From **`man dlopen`**:
+**`man dlopen`** से:
 
-- When path **does not contain a slash character** (i.e. it is just a leaf name), **dlopen() will do searching**. If **`$DYLD_LIBRARY_PATH`** was set at launch, dyld will first **look in that director**y. Next, if the calling mach-o file or the main executable specify an **`LC_RPATH`**, then dyld will **look in those** directories. Next, if the process is **unrestricted**, dyld will search in the **current working directory**. Lastly, for old binaries, dyld will try some fallbacks. If **`$DYLD_FALLBACK_LIBRARY_PATH`** was set at launch, dyld will search in **those directories**, otherwise, dyld will look in **`/usr/local/lib/`** (if the process is unrestricted), and then in **`/usr/lib/`** (this info was taken from **`man dlopen`**).
-  1. `$DYLD_LIBRARY_PATH`
-  2. `LC_RPATH`
-  3. `CWD`(if unrestricted)
-  4. `$DYLD_FALLBACK_LIBRARY_PATH`
-  5. `/usr/local/lib/` (if unrestricted)
-  6. `/usr/lib/`
-
-> [!CAUTION]
-> If no slashes in the name, there would be 2 ways to do an hijacking:
->
-> - If any **`LC_RPATH`** is **writable** (but signature is checked, so for this you also need the binary to be unrestricted)
-> - If the binary is **unrestricted** and then it's possible to load something from the CWD (or abusing one of the mentioned env variables)
-
-- When path **looks like a framework** path (e.g. `/stuff/foo.framework/foo`), if **`$DYLD_FRAMEWORK_PATH`** was set at launch, dyld will first look in that directory for the **framework partial path** (e.g. `foo.framework/foo`). Next, dyld will try the **supplied path as-is** (using current working directory for relative paths). Lastly, for old binaries, dyld will try some fallbacks. If **`$DYLD_FALLBACK_FRAMEWORK_PATH`** was set at launch, dyld will search those directories. Otherwise, it will search **`/Library/Frameworks`** (on macOS if process is unrestricted), then **`/System/Library/Frameworks`**.
-  1. `$DYLD_FRAMEWORK_PATH`
-  2. supplied path (using current working directory for relative paths if unrestricted)
-  3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
-  4. `/Library/Frameworks` (if unrestricted)
-  5. `/System/Library/Frameworks`
+- जब पथ **स्लैश वर्ण** को शामिल नहीं करता है (यानी यह केवल एक पत्ते का नाम है), **dlopen() खोज करेगा**। यदि **`$DYLD_LIBRARY_PATH`** लॉन्च पर सेट किया गया था, तो dyld पहले **उस निर्देशिका में देखेगा**। अगला, यदि कॉलिंग mach-o फ़ाइल या मुख्य निष्पादन फ़ाइल **`LC_RPATH`** निर्दिष्ट करती है, तो dyld **उन** निर्देशिकाओं में देखेगा। अगला, यदि प्रक्रिया **अप्रतिबंधित** है, तो dyld **वर्तमान कार्यशील निर्देशिका** में खोज करेगा। अंत में, पुराने बाइनरी के लिए, dyld कुछ फॉलबैक का प्रयास करेगा। यदि **`$DYLD_FALLBACK_LIBRARY_PATH`** लॉन्च पर सेट किया गया था, तो dyld उन निर्देशिकाओं में खोज करेगा, अन्यथा, dyld **`/usr/local/lib/`** में देखेगा (यदि प्रक्रिया अप्रतिबंधित है), और फिर **`/usr/lib/`** में (यह जानकारी **`man dlopen`** से ली गई थी)।
+1. `$DYLD_LIBRARY_PATH`
+2. `LC_RPATH`
+3. `CWD`(यदि अप्रतिबंधित)
+4. `$DYLD_FALLBACK_LIBRARY_PATH`
+5. `/usr/local/lib/` (यदि अप्रतिबंधित)
+6. `/usr/lib/`
 
 > [!CAUTION]
-> If a framework path, the way to hijack it would be:
+> यदि नाम में कोई स्लैश नहीं है, तो हाइजैकिंग करने के लिए 2 तरीके होंगे:
 >
-> - If the process is **unrestricted**, abusing the **relative path from CWD** the mentioned env variables (even if it's not said in the docs if the process is restricted DYLD\_\* env vars are removed)
+> - यदि कोई **`LC_RPATH`** **लिखने योग्य** है (लेकिन हस्ताक्षर की जांच की जाती है, इसलिए इसके लिए आपको बाइनरी को अप्रतिबंधित भी होना चाहिए)
+> - यदि बाइनरी **अप्रतिबंधित** है और फिर CWD से कुछ लोड करना संभव है (या उल्लेखित env चर में से एक का दुरुपयोग करना)
 
-- When path **contains a slash but is not a framework path** (i.e. a full path or a partial path to a dylib), dlopen() first looks in (if set) in **`$DYLD_LIBRARY_PATH`** (with leaf part from path ). Next, dyld **tries the supplied path** (using current working directory for relative paths (but only for unrestricted processes)). Lastly, for older binaries, dyld will try fallbacks. If **`$DYLD_FALLBACK_LIBRARY_PATH`** was set at launch, dyld will search in those directories, otherwise, dyld will look in **`/usr/local/lib/`** (if the process is unrestricted), and then in **`/usr/lib/`**.
-  1. `$DYLD_LIBRARY_PATH`
-  2. supplied path (using current working directory for relative paths if unrestricted)
-  3. `$DYLD_FALLBACK_LIBRARY_PATH`
-  4. `/usr/local/lib/` (if unrestricted)
-  5. `/usr/lib/`
+- जब पथ **फ्रेमवर्क** पथ की तरह दिखता है (जैसे `/stuff/foo.framework/foo`), यदि **`$DYLD_FRAMEWORK_PATH`** लॉन्च पर सेट किया गया था, तो dyld पहले उस निर्देशिका में **फ्रेमवर्क आंशिक पथ** (जैसे `foo.framework/foo`) के लिए देखेगा। अगला, dyld **प्रदान किए गए पथ को जैसा है** (सापेक्ष पथों के लिए वर्तमान कार्यशील निर्देशिका का उपयोग करते हुए) का प्रयास करेगा। अंत में, पुराने बाइनरी के लिए, dyld कुछ फॉलबैक का प्रयास करेगा। यदि **`$DYLD_FALLBACK_FRAMEWORK_PATH`** लॉन्च पर सेट किया गया था, तो dyld उन निर्देशिकाओं में खोज करेगा। अन्यथा, यह **`/Library/Frameworks`** (macOS पर यदि प्रक्रिया अप्रतिबंधित है), फिर **`/System/Library/Frameworks`** में खोज करेगा।
+1. `$DYLD_FRAMEWORK_PATH`
+2. प्रदान किया गया पथ (यदि अप्रतिबंधित है तो सापेक्ष पथों के लिए वर्तमान कार्यशील निर्देशिका का उपयोग करना)
+3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
+4. `/Library/Frameworks` (यदि अप्रतिबंधित है)
+5. `/System/Library/Frameworks`
 
 > [!CAUTION]
-> If slashes in the name and not a framework, the way to hijack it would be:
+> यदि एक फ्रेमवर्क पथ है, तो इसे हाइजैक करने का तरीका होगा:
 >
-> - If the binary is **unrestricted** and then it's possible to load something from the CWD or `/usr/local/lib` (or abusing one of the mentioned env variables)
+> - यदि प्रक्रिया **अप्रतिबंधित** है, तो CWD से **सापेक्ष पथ** का दुरुपयोग करते हुए उल्लेखित env चर (यहां तक कि यदि यह दस्तावेज़ों में नहीं कहा गया है यदि प्रक्रिया प्रतिबंधित है तो DYLD_* env vars हटा दिए जाते हैं)
+
+- जब पथ **स्लैश को शामिल करता है लेकिन एक फ्रेमवर्क पथ नहीं है** (यानी एक पूर्ण पथ या dylib के लिए आंशिक पथ), dlopen() पहले (यदि सेट है) **`$DYLD_LIBRARY_PATH`** में देखता है (पथ से पत्ते का भाग)। अगला, dyld **प्रदान किए गए पथ** का प्रयास करता है (सापेक्ष पथों के लिए वर्तमान कार्यशील निर्देशिका का उपयोग करते हुए (लेकिन केवल अप्रतिबंधित प्रक्रियाओं के लिए))। अंत में, पुराने बाइनरी के लिए, dyld फॉलबैक का प्रयास करेगा। यदि **`$DYLD_FALLBACK_LIBRARY_PATH`** लॉन्च पर सेट किया गया था, तो dyld उन निर्देशिकाओं में खोज करेगा, अन्यथा, dyld **`/usr/local/lib/`** में देखेगा (यदि प्रक्रिया अप्रतिबंधित है), और फिर **`/usr/lib/`** में।
+1. `$DYLD_LIBRARY_PATH`
+2. प्रदान किया गया पथ (यदि अप्रतिबंधित है तो सापेक्ष पथों के लिए वर्तमान कार्यशील निर्देशिका का उपयोग करना)
+3. `$DYLD_FALLBACK_LIBRARY_PATH`
+4. `/usr/local/lib/` (यदि अप्रतिबंधित है)
+5. `/usr/lib/`
+
+> [!CAUTION]
+> यदि नाम में स्लैश हैं और फ्रेमवर्क नहीं है, तो इसे हाइजैक करने का तरीका होगा:
+>
+> - यदि बाइनरी **अप्रतिबंधित** है और फिर CWD या `/usr/local/lib` से कुछ लोड करना संभव है (या उल्लेखित env चर में से एक का दुरुपयोग करना)
 
 > [!NOTE]
-> Note: There are **no** configuration files to **control dlopen searching**.
+> नोट: **dlopen खोज** को **नियंत्रित करने** के लिए कोई कॉन्फ़िगरेशन फ़ाइलें नहीं हैं।
 >
-> Note: If the main executable is a **set\[ug]id binary or codesigned with entitlements**, then **all environment variables are ignored**, and only a full path can be used ([check DYLD_INSERT_LIBRARIES restrictions](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) for more detailed info)
+> नोट: यदि मुख्य निष्पादन योग्य एक **set\[ug]id बाइनरी या अधिकारों के साथ कोडसाइन किया गया है**, तो **सभी पर्यावरण चर अनदेखा कर दिए जाते हैं**, और केवल एक पूर्ण पथ का उपयोग किया जा सकता है ([DYLD_INSERT_LIBRARIES प्रतिबंधों की जांच करें](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) अधिक विस्तृत जानकारी के लिए)
 >
-> Note: Apple platforms use "universal" files to combine 32-bit and 64-bit libraries. This means there are **no separate 32-bit and 64-bit search paths**.
+> नोट: Apple प्लेटफार्मों पर "यूनिवर्सल" फ़ाइलों का उपयोग 32-बिट और 64-बिट लाइब्रेरी को संयोजित करने के लिए किया जाता है। इसका मतलब है कि **कोई अलग 32-बिट और 64-बिट खोज पथ नहीं हैं**।
 >
-> Note: On Apple platforms most OS dylibs are **combined into the dyld cache** and do not exist on disk. Therefore, calling **`stat()`** to preflight if an OS dylib exists **won't work**. However, **`dlopen_preflight()`** uses the same steps as **`dlopen()`** to find a compatible mach-o file.
+> नोट: Apple प्लेटफार्मों पर अधिकांश OS dylibs **dyld कैश में संयोजित** होते हैं और डिस्क पर मौजूद नहीं होते हैं। इसलिए, यह पूर्व-फ्लाइट के लिए **`stat()`** को कॉल करना यदि एक OS dylib मौजूद है **काम नहीं करेगा**। हालाँकि, **`dlopen_preflight()`** एक संगत mach-o फ़ाइल खोजने के लिए **`dlopen()`** के समान चरणों का उपयोग करता है।
 
-**Check paths**
+**पथों की जांच करें**
 
-Lets check all the options with the following code:
-
+आइए निम्नलिखित कोड के साथ सभी विकल्पों की जांच करें:
 ```c
 // gcc dlopentest.c -o dlopentest -Wl,-rpath,/tmp/test
 #include <dlfcn.h>
@@ -177,107 +176,99 @@ Lets check all the options with the following code:
 
 int main(void)
 {
-    void* handle;
+void* handle;
 
-    fprintf("--- No slash ---\n");
-    handle = dlopen("just_name_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-    }
+fprintf("--- No slash ---\n");
+handle = dlopen("just_name_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+}
 
-    fprintf("--- Relative framework ---\n");
-    handle = dlopen("a/framework/rel_framework_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-    }
+fprintf("--- Relative framework ---\n");
+handle = dlopen("a/framework/rel_framework_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+}
 
-    fprintf("--- Abs framework ---\n");
-    handle = dlopen("/a/abs/framework/abs_framework_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-    }
+fprintf("--- Abs framework ---\n");
+handle = dlopen("/a/abs/framework/abs_framework_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+}
 
-    fprintf("--- Relative Path ---\n");
-    handle = dlopen("a/folder/rel_folder_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-    }
+fprintf("--- Relative Path ---\n");
+handle = dlopen("a/folder/rel_folder_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+}
 
-    fprintf("--- Abs Path ---\n");
-    handle = dlopen("/a/abs/folder/abs_folder_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-    }
+fprintf("--- Abs Path ---\n");
+handle = dlopen("/a/abs/folder/abs_folder_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+}
 
-    return 0;
+return 0;
 }
 ```
-
-If you compile and execute it you can see **where each library was unsuccessfully searched for**. Also, you could **filter the FS logs**:
-
+यदि आप इसे संकलित और निष्पादित करते हैं, तो आप देख सकते हैं **कि प्रत्येक पुस्तकालय के लिए कहाँ असफलता से खोज की गई थी**। इसके अलावा, आप **FS लॉग को फ़िल्टर कर सकते हैं**:
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
+## सापेक्ष पथ हाइजैकिंग
 
-## Relative Path Hijacking
+यदि एक **विशिष्ट बाइनरी/ऐप** (जैसे SUID या कुछ बाइनरी जिसमें शक्तिशाली अधिकार हैं) एक **सापेक्ष पथ** लाइब्रेरी को **लोड कर रहा है** (उदाहरण के लिए `@executable_path` या `@loader_path` का उपयोग करके) और **लाइब्रेरी सत्यापन अक्षम** है, तो यह संभव हो सकता है कि बाइनरी को एक स्थान पर ले जाया जाए जहाँ हमलावर **सापेक्ष पथ लोड की गई लाइब्रेरी** को **संशोधित** कर सके, और इसे प्रक्रिया में कोड इंजेक्ट करने के लिए दुरुपयोग कर सके।
 
-If a **privileged binary/app** (like a SUID or some binary with powerful entitlements) is **loading a relative path** library (for example using `@executable_path` or `@loader_path`) and has **Library Validation disabled**, it could be possible to move the binary to a location where the attacker could **modify the relative path loaded library**, and abuse it to inject code on the process.
+## `DYLD_*` और `LD_LIBRARY_PATH` पर्यावरण चर को छाँटें
 
-## Prune `DYLD_*` and `LD_LIBRARY_PATH` env variables
+फाइल `dyld-dyld-832.7.1/src/dyld2.cpp` में **`pruneEnvironmentVariables`** फ़ंक्शन पाया जा सकता है, जो किसी भी पर्यावरण चर को हटा देगा जो **`DYLD_`** से **शुरू होता है** और **`LD_LIBRARY_PATH=`**।
 
-In the file `dyld-dyld-832.7.1/src/dyld2.cpp` it's possible to fund the function **`pruneEnvironmentVariables`**, which will remove any env variable that **starts with `DYLD_`** and **`LD_LIBRARY_PATH=`**.
+यह विशेष रूप से **suid** और **sgid** बाइनरी के लिए पर्यावरण चर **`DYLD_FALLBACK_FRAMEWORK_PATH`** और **`DYLD_FALLBACK_LIBRARY_PATH`** को **null** पर सेट करेगा।
 
-It'll also set to **null** specifically the env variables **`DYLD_FALLBACK_FRAMEWORK_PATH`** and **`DYLD_FALLBACK_LIBRARY_PATH`** for **suid** and **sgid** binaries.
-
-This function is called from the **`_main`** function of the same file if targeting OSX like this:
-
+यह फ़ंक्शन उसी फ़ाइल के **`_main`** फ़ंक्शन से इस तरह से बुलाया जाता है यदि OSX को लक्षित किया गया हो:
 ```cpp
 #if TARGET_OS_OSX
-    if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
-		pruneEnvironmentVariables(envp, &apple);
+if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
+pruneEnvironmentVariables(envp, &apple);
 ```
-
-and those boolean flags are set in the same file in the code:
-
+और उन बूलियन फ्लैग्स को कोड में उसी फ़ाइल में सेट किया गया है:
 ```cpp
 #if TARGET_OS_OSX
-	// support chrooting from old kernel
-	bool isRestricted = false;
-	bool libraryValidation = false;
-	// any processes with setuid or setgid bit set or with __RESTRICT segment is restricted
-	if ( issetugid() || hasRestrictedSegment(mainExecutableMH) ) {
-		isRestricted = true;
-	}
-	bool usingSIP = (csr_check(CSR_ALLOW_TASK_FOR_PID) != 0);
-	uint32_t flags;
-	if ( csops(0, CS_OPS_STATUS, &flags, sizeof(flags)) != -1 ) {
-		// On OS X CS_RESTRICT means the program was signed with entitlements
-		if ( ((flags & CS_RESTRICT) == CS_RESTRICT) && usingSIP ) {
-			isRestricted = true;
-		}
-		// Library Validation loosens searching but requires everything to be code signed
-		if ( flags & CS_REQUIRE_LV ) {
-			isRestricted = false;
-			libraryValidation = true;
-		}
-	}
-	gLinkContext.allowAtPaths                = !isRestricted;
-	gLinkContext.allowEnvVarsPrint           = !isRestricted;
-	gLinkContext.allowEnvVarsPath            = !isRestricted;
-	gLinkContext.allowEnvVarsSharedCache     = !libraryValidation || !usingSIP;
-	gLinkContext.allowClassicFallbackPaths   = !isRestricted;
-	gLinkContext.allowInsertFailures         = false;
-	gLinkContext.allowInterposing         	 = true;
+// support chrooting from old kernel
+bool isRestricted = false;
+bool libraryValidation = false;
+// any processes with setuid or setgid bit set or with __RESTRICT segment is restricted
+if ( issetugid() || hasRestrictedSegment(mainExecutableMH) ) {
+isRestricted = true;
+}
+bool usingSIP = (csr_check(CSR_ALLOW_TASK_FOR_PID) != 0);
+uint32_t flags;
+if ( csops(0, CS_OPS_STATUS, &flags, sizeof(flags)) != -1 ) {
+// On OS X CS_RESTRICT means the program was signed with entitlements
+if ( ((flags & CS_RESTRICT) == CS_RESTRICT) && usingSIP ) {
+isRestricted = true;
+}
+// Library Validation loosens searching but requires everything to be code signed
+if ( flags & CS_REQUIRE_LV ) {
+isRestricted = false;
+libraryValidation = true;
+}
+}
+gLinkContext.allowAtPaths                = !isRestricted;
+gLinkContext.allowEnvVarsPrint           = !isRestricted;
+gLinkContext.allowEnvVarsPath            = !isRestricted;
+gLinkContext.allowEnvVarsSharedCache     = !libraryValidation || !usingSIP;
+gLinkContext.allowClassicFallbackPaths   = !isRestricted;
+gLinkContext.allowInsertFailures         = false;
+gLinkContext.allowInterposing         	 = true;
 ```
+जो मूल रूप से यह मतलब है कि यदि बाइनरी **suid** या **sgid** है, या इसके हेडर में **RESTRICT** खंड है या इसे **CS_RESTRICT** ध्वज के साथ हस्ताक्षरित किया गया है, तो **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** सत्य है और env वेरिएबल्स को हटाया जाता है।
 
-Which basically means that if the binary is **suid** or **sgid**, or has a **RESTRICT** segment in the headers or it was signed with the **CS_RESTRICT** flag, then **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** is true and the env variables are pruned.
+ध्यान दें कि यदि CS_REQUIRE_LV सत्य है, तो वेरिएबल्स को नहीं हटाया जाएगा लेकिन लाइब्रेरी मान्यता यह जांचेगी कि वे मूल बाइनरी के समान प्रमाणपत्र का उपयोग कर रहे हैं।
 
-Note that if CS_REQUIRE_LV is true, then the variables won't be pruned but the library validation will check they are using the same certificate as the original binary.
-
-## Check Restrictions
+## प्रतिबंधों की जांच करें
 
 ### SUID & SGID
-
 ```bash
 # Make it owned by root and suid
 sudo chown root hello
@@ -288,18 +279,14 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 # Remove suid
 sudo chmod -s hello
 ```
-
 ### Section `__RESTRICT` with segment `__restrict`
-
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
 ```
-
 ### Hardened runtime
 
-Create a new certificate in the Keychain and use it to sign the binary:
-
+Keychain में एक नया प्रमाणपत्र बनाएं और इसका उपयोग बाइनरी पर हस्ताक्षर करने के लिए करें:
 ```bash
 # Apply runtime proetction
 codesign -s <cert-name> --option=runtime ./hello
@@ -319,17 +306,16 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed
 codesign -f -s <cert-name> --option=restrict hello-signed
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
-
 > [!CAUTION]
-> Note that even if there are binaries signed with flags **`0x0(none)`**, they can get the **`CS_RESTRICT`** flag dynamically when executed and therefore this technique won't work in them.
+> ध्यान दें कि भले ही कुछ बाइनरीज़ **`0x0(none)`** फ्लैग के साथ साइन की गई हों, वे निष्पादित होने पर **`CS_RESTRICT`** फ्लैग को गतिशील रूप से प्राप्त कर सकती हैं और इसलिए यह तकनीक उन पर काम नहीं करेगी।
 >
-> You can check if a proc has this flag with (get [**csops here**](https://github.com/axelexic/CSOps)):
+> आप यह जांच सकते हैं कि किसी प्रक्रिया में यह फ्लैग है या नहीं (get [**csops here**](https://github.com/axelexic/CSOps)):
 >
 > ```bash
 > csops -status <pid>
 > ```
 >
-> and then check if the flag 0x800 is enabled.
+> और फिर जांचें कि क्या फ्लैग 0x800 सक्षम है।
 
 ## References
 
@@ -337,4 +323,3 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

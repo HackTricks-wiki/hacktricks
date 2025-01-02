@@ -2,72 +2,72 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**For further detail about the technique check the original post from:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) and the following post by [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Here is a summary:
+**तकनीक के बारे में अधिक जानकारी के लिए मूल पोस्ट देखें:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) और [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)** द्वारा निम्नलिखित पोस्ट।** यहाँ एक सारांश है:
 
-### What are Nib files
+### Nib फ़ाइलें क्या हैं
 
-Nib (short for NeXT Interface Builder) files, part of Apple's development ecosystem, are intended for defining **UI elements** and their interactions in applications. They encompass serialized objects such as windows and buttons, and are loaded at runtime. Despite their ongoing usage, Apple now advocates for Storyboards for more comprehensive UI flow visualization.
+Nib (NeXT Interface Builder के लिए संक्षिप्त) फ़ाइलें, Apple के विकास पारिस्थितिकी तंत्र का हिस्सा, अनुप्रयोगों में **UI तत्वों** और उनके इंटरैक्शन को परिभाषित करने के लिए बनाई गई हैं। इनमें विंडो और बटन जैसी अनुक्रमित वस्तुएं शामिल हैं, और इन्हें रनटाइम पर लोड किया जाता है। उनके निरंतर उपयोग के बावजूद, Apple अब अधिक व्यापक UI प्रवाह दृश्यता के लिए Storyboards की सिफारिश करता है।
 
-The main Nib file is referenced in the value **`NSMainNibFile`** inside the `Info.plist` file of the application and is loaded by the function **`NSApplicationMain`** executed in the `main` function of the application.
+मुख्य Nib फ़ाइल का संदर्भ **`NSMainNibFile`** के मान में `Info.plist` फ़ाइल के अंदर होता है और इसे **`NSApplicationMain`** फ़ंक्शन द्वारा लोड किया जाता है, जो अनुप्रयोग के `main` फ़ंक्शन में निष्पादित होता है।
 
-### Dirty Nib Injection Process
+### Dirty Nib इंजेक्शन प्रक्रिया
 
-#### Creating and Setting Up a NIB File
+#### NIB फ़ाइल बनाना और सेट करना
 
-1. **Initial Setup**:
-   - Create a new NIB file using XCode.
-   - Add an Object to the interface, setting its class to `NSAppleScript`.
-   - Configure the initial `source` property via User Defined Runtime Attributes.
-2. **Code Execution Gadget**:
-   - The setup facilitates running AppleScript on demand.
-   - Integrate a button to activate the `Apple Script` object, specifically triggering the `executeAndReturnError:` selector.
-3. **Testing**:
+1. **प्रारंभिक सेटअप**:
+- XCode का उपयोग करके एक नई NIB फ़ाइल बनाएं।
+- इंटरफ़ेस में एक ऑब्जेक्ट जोड़ें, इसकी कक्षा को `NSAppleScript` सेट करें।
+- उपयोगकर्ता परिभाषित रनटाइम विशेषताओं के माध्यम से प्रारंभिक `source` प्रॉपर्टी को कॉन्फ़िगर करें।
+2. **कोड निष्पादन गैजेट**:
+- सेटअप AppleScript को मांग पर चलाने की सुविधा प्रदान करता है।
+- `Apple Script` ऑब्जेक्ट को सक्रिय करने के लिए एक बटन एकीकृत करें, विशेष रूप से `executeAndReturnError:` चयनकर्ता को ट्रिगर करना।
+3. **परीक्षण**:
 
-   - A simple Apple Script for testing purposes:
+- परीक्षण उद्देश्यों के लिए एक सरल Apple Script:
 
-     ```bash
-     set theDialogText to "PWND"
-     display dialog theDialogText
-     ```
+```bash
+set theDialogText to "PWND"
+display dialog theDialogText
+```
 
-   - Test by running in the XCode debugger and clicking the button.
+- XCode डिबगर में चलाकर और बटन पर क्लिक करके परीक्षण करें।
 
-#### Targeting an Application (Example: Pages)
+#### एक अनुप्रयोग को लक्षित करना (उदाहरण: Pages)
 
-1. **Preparation**:
-   - Copy the target app (e.g., Pages) into a separate directory (e.g., `/tmp/`).
-   - Initiate the app to sidestep Gatekeeper issues and cache it.
-2. **Overwriting NIB File**:
-   - Replace an existing NIB file (e.g., About Panel NIB) with the crafted DirtyNIB file.
-3. **Execution**:
-   - Trigger the execution by interacting with the app (e.g., selecting the `About` menu item).
+1. **तैयारी**:
+- लक्षित ऐप (जैसे, Pages) को एक अलग निर्देशिका (जैसे, `/tmp/`) में कॉपी करें।
+- गेटकीपर समस्याओं से बचने के लिए ऐप को प्रारंभ करें और इसे कैश करें।
+2. **NIB फ़ाइल को अधिलेखित करना**:
+- एक मौजूदा NIB फ़ाइल (जैसे, About Panel NIB) को तैयार की गई DirtyNIB फ़ाइल से बदलें।
+3. **निष्पादन**:
+- ऐप के साथ इंटरैक्ट करके निष्पादन को ट्रिगर करें (जैसे, `About` मेनू आइटम का चयन करना)।
 
-#### Proof of Concept: Accessing User Data
+#### प्रमाण का सिद्धांत: उपयोगकर्ता डेटा तक पहुंच
 
-- Modify the AppleScript to access and extract user data, such as photos, without user consent.
+- उपयोगकर्ता की सहमति के बिना, फ़ोटो जैसी उपयोगकर्ता डेटा तक पहुंचने और निकालने के लिए AppleScript को संशोधित करें।
 
-### Code Sample: Malicious .xib File
+### कोड नमूना: दुर्भावनापूर्ण .xib फ़ाइल
 
-- Access and review a [**sample of a malicious .xib file**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) that demonstrates executing arbitrary code.
+- एक [**दुर्भावनापूर्ण .xib फ़ाइल का नमूना**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) देखें और समीक्षा करें जो मनमाने कोड को निष्पादित करने का प्रदर्शन करती है।
 
-### Other Example
+### अन्य उदाहरण
 
-In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.&#x20;
+पोस्ट [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) में आप एक गंदे nib बनाने के लिए ट्यूटोरियल पा सकते हैं।&#x20;
 
-### Addressing Launch Constraints
+### लॉन्च प्रतिबंधों का समाधान
 
-- Launch Constraints hinder app execution from unexpected locations (e.g., `/tmp`).
-- It's possible to identify apps not protected by Launch Constraints and target them for NIB file injection.
+- लॉन्च प्रतिबंध ऐप के अप्रत्याशित स्थानों (जैसे, `/tmp`) से निष्पादन में बाधा डालते हैं।
+- यह पहचानना संभव है कि कौन से ऐप लॉन्च प्रतिबंधों से सुरक्षित नहीं हैं और उन्हें NIB फ़ाइल इंजेक्शन के लिए लक्षित करें।
 
-### Additional macOS Protections
+### अतिरिक्त macOS सुरक्षा
 
-From macOS Sonoma onwards, modifications inside App bundles are restricted. However, earlier methods involved:
+macOS Sonoma से आगे, ऐप बंडलों के अंदर संशोधन प्रतिबंधित हैं। हालाँकि, पहले के तरीकों में शामिल थे:
 
-1. Copying the app to a different location (e.g., `/tmp/`).
-2. Renaming directories within the app bundle to bypass initial protections.
-3. After running the app to register with Gatekeeper, modifying the app bundle (e.g., replacing MainMenu.nib with Dirty.nib).
-4. Renaming directories back and rerunning the app to execute the injected NIB file.
+1. ऐप को एक अलग स्थान (जैसे, `/tmp/`) में कॉपी करना।
+2. प्रारंभिक सुरक्षा को बायपास करने के लिए ऐप बंडल के भीतर निर्देशिकाओं का नाम बदलना।
+3. गेटकीपर के साथ पंजीकरण करने के लिए ऐप चलाने के बाद, ऐप बंडल में संशोधन करना (जैसे, MainMenu.nib को Dirty.nib से बदलना)।
+4. निर्देशिकाओं का नाम वापस बदलना और इंजेक्ट की गई NIB फ़ाइल को निष्पादित करने के लिए ऐप को फिर से चलाना।
 
-**Note**: Recent macOS updates have mitigated this exploit by preventing file modifications within app bundles post Gatekeeper caching, rendering the exploit ineffective.
+**नोट**: हाल के macOS अपडेट ने गेटकीपर कैशिंग के बाद ऐप बंडलों के भीतर फ़ाइल संशोधनों को रोककर इस शोषण को कम कर दिया है, जिससे यह शोषण अप्रभावी हो गया है।
 
 {{#include ../../../banners/hacktricks-training.md}}

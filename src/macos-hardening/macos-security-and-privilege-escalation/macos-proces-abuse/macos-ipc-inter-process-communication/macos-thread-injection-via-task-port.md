@@ -9,168 +9,152 @@
 
 ## 1. Thread Hijacking
 
-Initially, the **`task_threads()`** function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code injection methods as creating a new remote thread is prohibited due to the new mitigation blocking `thread_create_running()`.
+शुरुआत में, **`task_threads()`** फ़ंक्शन को कार्य पोर्ट पर दूरस्थ कार्य से थ्रेड सूची प्राप्त करने के लिए लागू किया जाता है। एक थ्रेड को हाईजैकिंग के लिए चुना जाता है। यह दृष्टिकोण पारंपरिक कोड इंजेक्शन विधियों से भिन्न है क्योंकि नए दूरस्थ थ्रेड को बनाने की अनुमति नहीं है क्योंकि नई रोकथाम `thread_create_running()` को अवरुद्ध करती है।
 
-To control the thread, **`thread_suspend()`** is called, halting its execution.
+थ्रेड को नियंत्रित करने के लिए, **`thread_suspend()`** को कॉल किया जाता है, जिससे इसकी निष्पादन रुक जाती है।
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it, **retrieving** and **modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring **`pc`** to target the desired function, and activating the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
+दूरस्थ थ्रेड पर केवल **रोकना** और **शुरू करना**, **पंजीकरण मान** प्राप्त करना और **संशोधित करना** की अनुमति है। दूरस्थ फ़ंक्शन कॉल को पंजीकरण `x0` से `x7` को **आर्गुमेंट्स** पर सेट करके, **`pc`** को लक्षित फ़ंक्शन पर कॉन्फ़िगर करके, और थ्रेड को सक्रिय करके आरंभ किया जाता है। यह सुनिश्चित करना कि थ्रेड लौटने के बाद क्रैश न हो, लौटने का पता लगाने की आवश्यकता होती है।
 
-One strategy involves **registering an exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s triple_fetch exploit, `lr` is set to loop infinitely. The thread's registers are then continuously monitored until **`pc` points to that instruction**.
+एक रणनीति में दूरस्थ थ्रेड के लिए **एक्सेप्शन हैंडलर** को `thread_set_exception_ports()` का उपयोग करके पंजीकृत करना शामिल है, फ़ंक्शन कॉल से पहले `lr` पंजीकरण को एक अमान्य पते पर सेट करना। यह फ़ंक्शन निष्पादन के बाद एक अपवाद को ट्रिगर करता है, अपवाद पोर्ट पर एक संदेश भेजता है, थ्रेड की स्थिति की जांच करने की अनुमति देता है ताकि लौटने का मान पुनर्प्राप्त किया जा सके। वैकल्पिक रूप से, इयान बीयर के ट्रिपल_fetch एक्सप्लॉइट से अपनाई गई विधि में, `lr` को अनंत लूप में सेट किया जाता है। थ्रेड के पंजीकरण को तब लगातार मॉनिटर किया जाता है जब तक **`pc` उस निर्देश की ओर इशारा नहीं करता**।
 
 ## 2. Mach ports for communication
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send and receive rights between tasks.
+अगले चरण में दूरस्थ थ्रेड के साथ संचार को सुविधाजनक बनाने के लिए Mach पोर्ट स्थापित करना शामिल है। ये पोर्ट कार्यों के बीच मनमाने भेजने और प्राप्त करने के अधिकारों को स्थानांतरित करने में महत्वपूर्ण हैं।
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
+द्विदिशीय संचार के लिए, दो Mach प्राप्त करने के अधिकार बनाए जाते हैं: एक स्थानीय में और दूसरा दूरस्थ कार्य में। इसके बाद, प्रत्येक पोर्ट के लिए एक भेजने का अधिकार समकक्ष कार्य में स्थानांतरित किया जाता है, जिससे संदेशों का आदान-प्रदान संभव होता है।
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
+स्थानीय पोर्ट पर ध्यान केंद्रित करते हुए, प्राप्त करने का अधिकार स्थानीय कार्य द्वारा रखा जाता है। पोर्ट को `mach_port_allocate()` के साथ बनाया जाता है। चुनौती इस पोर्ट के लिए एक भेजने के अधिकार को दूरस्थ कार्य में स्थानांतरित करने में है।
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
+एक रणनीति में `thread_set_special_port()` का उपयोग करके दूरस्थ थ्रेड के `THREAD_KERNEL_PORT` में स्थानीय पोर्ट के लिए एक भेजने का अधिकार रखना शामिल है। फिर, दूरस्थ थ्रेड को `mach_thread_self()` को कॉल करने के लिए निर्देशित किया जाता है ताकि भेजने का अधिकार प्राप्त किया जा सके।
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
+दूरस्थ पोर्ट के लिए, प्रक्रिया मूल रूप से उलट होती है। दूरस्थ थ्रेड को `mach_reply_port()` के माध्यम से एक Mach पोर्ट उत्पन्न करने के लिए निर्देशित किया जाता है (क्योंकि `mach_port_allocate()` इसकी वापसी तंत्र के कारण अनुपयुक्त है)। पोर्ट निर्माण के बाद, `mach_port_insert_right()` को दूरस्थ थ्रेड में एक भेजने का अधिकार स्थापित करने के लिए लागू किया जाता है। यह अधिकार फिर `thread_set_special_port()` का उपयोग करके कर्नेल में रखा जाता है। स्थानीय कार्य में वापस, `thread_get_special_port()` का उपयोग दूरस्थ कार्य में नए आवंटित Mach पोर्ट के लिए भेजने के अधिकार को प्राप्त करने के लिए किया जाता है।
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
+इन चरणों के पूरा होने से Mach पोर्ट स्थापित होते हैं, जो द्विदिशीय संचार के लिए आधार तैयार करते हैं।
 
 ## 3. Basic Memory Read/Write Primitives
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read and write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+इस अनुभाग में, बुनियादी मेमोरी पढ़ने और लिखने की प्राइमिटिव स्थापित करने के लिए निष्पादित प्राइमिटिव का उपयोग करने पर ध्यान केंद्रित किया गया है। ये प्रारंभिक कदम दूरस्थ प्रक्रिया पर अधिक नियंत्रण प्राप्त करने के लिए महत्वपूर्ण हैं, हालांकि इस चरण में प्राइमिटिव का बहुत अधिक उपयोग नहीं होगा। जल्द ही, उन्हें अधिक उन्नत संस्करणों में अपग्रेड किया जाएगा।
 
 ### Memory Reading and Writing Using Execute Primitive
 
-The goal is to perform memory reading and writing using specific functions. For reading memory, functions resembling the following structure are used:
-
+उद्देश्य विशिष्ट फ़ंक्शंस का उपयोग करके मेमोरी पढ़ने और लिखने का प्रदर्शन करना है। मेमोरी पढ़ने के लिए, निम्नलिखित संरचना के समान फ़ंक्शंस का उपयोग किया जाता है:
 ```c
 uint64_t read_func(uint64_t *address) {
-    return *address;
+return *address;
 }
 ```
-
-And for writing to memory, functions similar to this structure are used:
-
+और मेमोरी में लिखने के लिए, इस संरचना के समान फ़ंक्शन का उपयोग किया जाता है:
 ```c
 void write_func(uint64_t *address, uint64_t value) {
-    *address = value;
+*address = value;
 }
 ```
-
-These functions correspond to the given assembly instructions:
-
+ये फ़ंक्शन दिए गए असेंबली निर्देशों के अनुरूप हैं:
 ```
 _read_func:
-    ldr x0, [x0]
-    ret
+ldr x0, [x0]
+ret
 _write_func:
-    str x1, [x0]
-    ret
+str x1, [x0]
+ret
 ```
+### उपयुक्त फ़ंक्शंस की पहचान करना
 
-### Identifying Suitable Functions
+सामान्य पुस्तकालयों का स्कैन इन ऑपरेशनों के लिए उपयुक्त उम्मीदवारों को प्रकट करता है:
 
-A scan of common libraries revealed appropriate candidates for these operations:
-
-1. **Reading Memory:**
-   The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
-
+1. **मेमोरी पढ़ना:**
+`property_getName()` फ़ंक्शन [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) से मेमोरी पढ़ने के लिए एक उपयुक्त फ़ंक्शन के रूप में पहचाना गया है। फ़ंक्शन नीचे वर्णित है:
 ```c
 const char *property_getName(objc_property_t prop) {
-      return prop->name;
+return prop->name;
 }
 ```
+यह फ़ंक्शन प्रभावी रूप से `read_func` की तरह कार्य करता है, जो `objc_property_t` के पहले फ़ील्ड को लौटाता है।
 
-This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
-
-2. **Writing Memory:**
-   Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
-
+2. **मेमोरी लिखना:**
+मेमोरी लिखने के लिए एक पूर्व-निर्मित फ़ंक्शन खोजना अधिक चुनौतीपूर्ण है। हालाँकि, libxpc से `_xpc_int64_set_value()` फ़ंक्शन एक उपयुक्त उम्मीदवार है, जिसमें निम्नलिखित डिस्सेम्बली है:
 ```c
 __xpc_int64_set_value:
-    str x1, [x0, #0x18]
-    ret
+str x1, [x0, #0x18]
+ret
 ```
-
-To perform a 64-bit write at a specific address, the remote call is structured as:
-
+एक विशिष्ट पते पर 64-बिट लिखने के लिए, दूरस्थ कॉल को इस प्रकार संरचित किया जाता है:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
+इन प्राइमिटिव्स की स्थापना के साथ, साझा मेमोरी बनाने के लिए मंच तैयार है, जो दूरस्थ प्रक्रिया को नियंत्रित करने में एक महत्वपूर्ण प्रगति है।
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
+## 4. साझा मेमोरी सेटअप
 
-## 4. Shared Memory Setup
+उद्देश्य स्थानीय और दूरस्थ कार्यों के बीच साझा मेमोरी स्थापित करना है, डेटा ट्रांसफर को सरल बनाना और कई तर्कों के साथ कार्यों को कॉल करने की सुविधा प्रदान करना है। यह दृष्टिकोण `libxpc` और इसके `OS_xpc_shmem` ऑब्जेक्ट प्रकार का लाभ उठाने में शामिल है, जो मच मेमोरी प्रविष्टियों पर आधारित है।
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach involves leveraging `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
+### प्रक्रिया अवलोकन:
 
-### Process Overview:
+1. **मेमोरी आवंटन**:
 
-1. **Memory Allocation**:
+- साझा करने के लिए मेमोरी आवंटित करें `mach_vm_allocate()` का उपयोग करके।
+- आवंटित मेमोरी क्षेत्र के लिए `OS_xpc_shmem` ऑब्जेक्ट बनाने के लिए `xpc_shmem_create()` का उपयोग करें। यह फ़ंक्शन मच मेमोरी प्रविष्टि के निर्माण का प्रबंधन करेगा और `OS_xpc_shmem` ऑब्जेक्ट के ऑफसेट `0x18` पर मच भेजने का अधिकार संग्रहीत करेगा।
 
-   - Allocate the memory for sharing using `mach_vm_allocate()`.
-   - Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated memory region. This function will manage the creation of the Mach memory entry and store the Mach send right at offset `0x18` of the `OS_xpc_shmem` object.
+2. **दूरस्थ प्रक्रिया में साझा मेमोरी बनाना**:
 
-2. **Creating Shared Memory in Remote Process**:
+- दूरस्थ प्रक्रिया में `malloc()` के लिए एक दूरस्थ कॉल के साथ `OS_xpc_shmem` ऑब्जेक्ट के लिए मेमोरी आवंटित करें।
+- स्थानीय `OS_xpc_shmem` ऑब्जेक्ट की सामग्री को दूरस्थ प्रक्रिया में कॉपी करें। हालाँकि, यह प्रारंभिक कॉपी ऑफसेट `0x18` पर गलत मच मेमोरी प्रविष्टि नाम होगा।
 
-   - Allocate memory for the `OS_xpc_shmem` object in the remote process with a remote call to `malloc()`.
-   - Copy the contents of the local `OS_xpc_shmem` object to the remote process. However, this initial copy will have incorrect Mach memory entry names at offset `0x18`.
+3. **मच मेमोरी प्रविष्टि को सही करना**:
 
-3. **Correcting the Mach Memory Entry**:
+- दूरस्थ कार्य में मच मेमोरी प्रविष्टि के लिए एक भेजने के अधिकार को सम्मिलित करने के लिए `thread_set_special_port()` विधि का उपयोग करें।
+- दूरस्थ मेमोरी प्रविष्टि के नाम के साथ इसे ओवरराइट करके ऑफसेट `0x18` पर मच मेमोरी प्रविष्टि फ़ील्ड को सही करें।
 
-   - Utilize the `thread_set_special_port()` method to insert a send right for the Mach memory entry into the remote task.
-   - Correct the Mach memory entry field at offset `0x18` by overwriting it with the remote memory entry's name.
+4. **साझा मेमोरी सेटअप को अंतिम रूप देना**:
+- दूरस्थ `OS_xpc_shmem` ऑब्जेक्ट को मान्य करें।
+- `xpc_shmem_remote()` के लिए एक दूरस्थ कॉल के साथ साझा मेमोरी मैपिंग स्थापित करें।
 
-4. **Finalizing Shared Memory Setup**:
-   - Validate the remote `OS_xpc_shmem` object.
-   - Establish the shared memory mapping with a remote call to `xpc_shmem_remote()`.
+इन चरणों का पालन करके, स्थानीय और दूरस्थ कार्यों के बीच साझा मेमोरी को प्रभावी ढंग से सेट किया जाएगा, जिससे डेटा ट्रांसफर और कई तर्कों की आवश्यकता वाले कार्यों के निष्पादन के लिए सीधा रास्ता मिलेगा।
 
-By following these steps, shared memory between the local and remote tasks will be efficiently set up, allowing for straightforward data transfers and the execution of functions requiring multiple arguments.
+## अतिरिक्त कोड स्निपेट्स
 
-## Additional Code Snippets
-
-For memory allocation and shared memory object creation:
-
+मेमोरी आवंटन और साझा मेमोरी ऑब्जेक्ट निर्माण के लिए:
 ```c
 mach_vm_allocate();
 xpc_shmem_create();
 ```
-
-For creating and correcting the shared memory object in the remote process:
-
+दूरस्थ प्रक्रिया में साझा मेमोरी ऑब्जेक्ट बनाने और सुधारने के लिए:
 ```c
 malloc(); // for allocating memory remotely
 thread_set_special_port(); // for inserting send right
 ```
+याद रखें कि साझा मेमोरी सेटअप को सही ढंग से कार्य करने के लिए Mach पोर्ट और मेमोरी एंट्री नामों के विवरण को सही तरीके से संभालना आवश्यक है।
 
-Remember to handle the details of Mach ports and memory entry names correctly to ensure that the shared memory setup functions properly.
+## 5. पूर्ण नियंत्रण प्राप्त करना
 
-## 5. Achieving Full Control
+साझा मेमोरी स्थापित करने और मनमाने निष्पादन क्षमताओं को प्राप्त करने में सफल होने पर, हमने मूल रूप से लक्षित प्रक्रिया पर पूर्ण नियंत्रण प्राप्त कर लिया है। इस नियंत्रण को सक्षम करने वाली मुख्य कार्यक्षमताएँ हैं:
 
-Upon successfully establishing shared memory and gaining arbitrary execution capabilities, we have essentially gained full control over the target process. The key functionalities enabling this control are:
+1. **मनमानी मेमोरी संचालन**:
 
-1. **Arbitrary Memory Operations**:
+- साझा क्षेत्र से डेटा कॉपी करने के लिए `memcpy()` को कॉल करके मनमानी मेमोरी पढ़ें।
+- साझा क्षेत्र में डेटा स्थानांतरित करने के लिए `memcpy()` का उपयोग करके मनमानी मेमोरी लिखें।
 
-   - Perform arbitrary memory reads by invoking `memcpy()` to copy data from the shared region.
-   - Execute arbitrary memory writes by using `memcpy()` to transfer data to the shared region.
+2. **कई तर्कों के साथ फ़ंक्शन कॉल को संभालना**:
 
-2. **Handling Function Calls with Multiple Arguments**:
+- उन फ़ंक्शनों के लिए जो 8 से अधिक तर्कों की आवश्यकता होती है, कॉलिंग कन्वेंशन के अनुसार अतिरिक्त तर्कों को स्टैक पर व्यवस्थित करें।
 
-   - For functions requiring more than 8 arguments, arrange the additional arguments on the stack in compliance with the calling convention.
+3. **Mach पोर्ट ट्रांसफर**:
 
-3. **Mach Port Transfer**:
+- पहले से स्थापित पोर्ट के माध्यम से Mach संदेशों के माध्यम से कार्यों के बीच Mach पोर्ट का स्थानांतरण करें।
 
-   - Transfer Mach ports between tasks through Mach messages via previously established ports.
+4. **फाइल डिस्क्रिप्टर ट्रांसफर**:
+- `triple_fetch` में Ian Beer द्वारा उजागर की गई तकनीक का उपयोग करके प्रक्रियाओं के बीच फाइल डिस्क्रिप्टर्स का स्थानांतरण करें।
 
-4. **File Descriptor Transfer**:
-   - Transfer file descriptors between processes using fileports, a technique highlighted by Ian Beer in `triple_fetch`.
+यह व्यापक नियंत्रण [threadexec](https://github.com/bazad/threadexec) पुस्तकालय के भीतर संकुचित है, जो पीड़ित प्रक्रिया के साथ बातचीत के लिए एक विस्तृत कार्यान्वयन और उपयोगकर्ता के अनुकूल API प्रदान करता है।
 
-This comprehensive control is encapsulated within the [threadexec](https://github.com/bazad/threadexec) library, providing a detailed implementation and a user-friendly API for interaction with the victim process.
+## महत्वपूर्ण विचार:
 
-## Important Considerations:
+- सिस्टम स्थिरता और डेटा अखंडता बनाए रखने के लिए मेमोरी पढ़ने/लिखने के संचालन के लिए `memcpy()` का उचित उपयोग सुनिश्चित करें।
+- Mach पोर्ट या फाइल डिस्क्रिप्टर्स का स्थानांतरण करते समय, उचित प्रोटोकॉल का पालन करें और रिसोर्सेस को जिम्मेदारी से संभालें ताकि लीक या अनपेक्षित पहुंच से बचा जा सके।
 
-- Ensure proper use of `memcpy()` for memory read/write operations to maintain system stability and data integrity.
-- When transferring Mach ports or file descriptors, follow proper protocols and handle resources responsibly to prevent leaks or unintended access.
+इन दिशानिर्देशों का पालन करके और `threadexec` पुस्तकालय का उपयोग करके, कोई भी प्रक्रियाओं का कुशलतापूर्वक प्रबंधन और बातचीत कर सकता है, लक्षित प्रक्रिया पर पूर्ण नियंत्रण प्राप्त कर सकता है।
 
-By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
-
-## References
+## संदर्भ
 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 

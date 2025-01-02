@@ -4,15 +4,15 @@
 
 ## Basic Information
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Chromium-आधारित ब्राउज़र जैसे Google Chrome, Microsoft Edge, Brave, और अन्य। ये ब्राउज़र Chromium ओपन-सोर्स प्रोजेक्ट पर आधारित हैं, जिसका मतलब है कि वे एक सामान्य आधार साझा करते हैं और इसलिए, उनके पास समान कार्यक्षमताएँ और डेवलपर विकल्प होते हैं।
 
 #### `--load-extension` Flag
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+`--load-extension` फ्लैग का उपयोग कमांड लाइन या स्क्रिप्ट से Chromium-आधारित ब्राउज़र शुरू करते समय किया जाता है। यह फ्लैग **ब्राउज़र के प्रारंभ होने पर एक या अधिक एक्सटेंशन को स्वचालित रूप से लोड करने** की अनुमति देता है।
 
 #### `--use-fake-ui-for-media-stream` Flag
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+`--use-fake-ui-for-media-stream` फ्लैग एक और कमांड-लाइन विकल्प है जिसका उपयोग Chromium-आधारित ब्राउज़र शुरू करने के लिए किया जा सकता है। यह फ्लैग **कैमरा और माइक्रोफोन से मीडिया स्ट्रीम तक पहुँचने के लिए अनुमति मांगने वाले सामान्य उपयोगकर्ता संकेतों को बायपास करने** के लिए डिज़ाइन किया गया है। जब इस फ्लैग का उपयोग किया जाता है, तो ब्राउज़र किसी भी वेबसाइट या एप्लिकेशन को स्वचालित रूप से अनुमति देता है जो कैमरा या माइक्रोफोन तक पहुँचने का अनुरोध करता है।
 
 ### Tools
 
@@ -20,15 +20,13 @@ The `--use-fake-ui-for-media-stream` flag is another command-line option that ca
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
 ### Example
-
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+उदाहरणों को उपकरणों के लिंक में खोजें
 
-Find more examples in the tools links
-
-## References
+## संदर्भ
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 
