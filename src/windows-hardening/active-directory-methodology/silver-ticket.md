@@ -2,19 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **melden Sie sich an** bei **Intigriti**, einer Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) heute bei und beginnen Sie, Belohnungen von bis zu **100.000 $** zu verdienen!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-Der **Silver Ticket**-Angriff beinhaltet die Ausnutzung von Diensttickets in Active Directory (AD)-Umgebungen. Diese Methode basiert auf der **Erwerbung des NTLM-Hashes eines Dienstkontos**, wie z.B. eines Computer-Kontos, um ein Ticket Granting Service (TGS)-Ticket zu fälschen. Mit diesem gefälschten Ticket kann ein Angreifer auf bestimmte Dienste im Netzwerk zugreifen und **jede Benutzeridentität nachahmen**, wobei typischerweise administrative Berechtigungen angestrebt werden. Es wird betont, dass die Verwendung von AES-Schlüsseln zur Fälschung von Tickets sicherer und weniger nachweisbar ist.
+Der **Silver Ticket**-Angriff beinhaltet die Ausnutzung von Diensttickets in Active Directory (AD)-Umgebungen. Diese Methode basiert auf **dem Erwerb des NTLM-Hashes eines Dienstkontos**, wie z.B. eines Computer-Kontos, um ein Ticket Granting Service (TGS) Ticket zu fälschen. Mit diesem gefälschten Ticket kann ein Angreifer auf bestimmte Dienste im Netzwerk zugreifen, **indem er sich als beliebiger Benutzer ausgibt**, wobei typischerweise administrative Berechtigungen angestrebt werden. Es wird betont, dass die Verwendung von AES-Schlüsseln zur Fälschung von Tickets sicherer und weniger nachweisbar ist.
 
 Für die Ticket-Erstellung werden je nach Betriebssystem unterschiedliche Werkzeuge eingesetzt:
 
-### Auf Linux
+### On Linux
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -36,26 +32,26 @@ Der CIFS-Dienst wird als häufiges Ziel hervorgehoben, um auf das Dateisystem de
 
 ## Verfügbare Dienste
 
-| Diensttyp                                  | Dienst-Silber-Tickets                                                    |
-| ------------------------------------------ | ------------------------------------------------------------------------ |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
+| Diensttyp                                  | Dienst Silber-Tickets                                                      |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Je nach Betriebssystem auch:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>In einigen Fällen können Sie einfach nachfragen: WINRM</p> |
-| Geplante Aufgaben                          | HOST                                                                   |
-| Windows-Dateifreigabe, auch psexec        | CIFS                                                                   |
-| LDAP-Operationen, einschließlich DCSync   | LDAP                                                                   |
-| Windows Remote Server Administration Tools  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                     |
-| Goldene Tickets                            | krbtgt                                                                 |
+| Geplante Aufgaben                          | HOST                                                                      |
+| Windows-Dateifreigabe, auch psexec        | CIFS                                                                      |
+| LDAP-Operationen, einschließlich DCSync   | LDAP                                                                      |
+| Windows Remote Server Administration Tools  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
+| Goldene Tickets                            | krbtgt                                                                    |
 
 Mit **Rubeus** können Sie **alle** diese Tickets mit dem Parameter anfordern:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Ereignis-IDs für Silber-Tickets
+### Silberne Ticket-Ereignis-IDs
 
 - 4624: Kontoanmeldung
 - 4634: Abmeldung des Kontos
-- 4672: Anmeldung des Administrators
+- 4672: Admin-Anmeldung
 
 ## Missbrauch von Diensttickets
 
@@ -63,7 +59,7 @@ In den folgenden Beispielen stellen wir uns vor, dass das Ticket unter Verwendun
 
 ### CIFS
 
-Mit diesem Ticket können Sie auf den `C$`- und `ADMIN$`-Ordner über **SMB** zugreifen (wenn sie exponiert sind) und Dateien in einen Teil des Remote-Dateisystems kopieren, indem Sie einfach etwas tun wie:
+Mit diesem Ticket können Sie auf den `C$`- und `ADMIN$`-Ordner über **SMB** zugreifen (wenn sie exponiert sind) und Dateien in einen Teil des Remote-Dateisystems kopieren, indem Sie einfach etwas wie Folgendes tun:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -101,7 +97,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Finde **weitere Informationen über wmiexec** auf der folgenden Seite:
+Finden Sie **weitere Informationen über wmiexec** auf der folgenden Seite:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -109,11 +105,11 @@ Finde **weitere Informationen über wmiexec** auf der folgenden Seite:
 
 ### HOST + WSMAN (WINRM)
 
-Mit winrm-Zugriff auf einen Computer kannst du **darauf zugreifen** und sogar eine PowerShell erhalten:
+Mit winrm-Zugriff auf einen Computer können Sie **darauf zugreifen** und sogar eine PowerShell erhalten:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Überprüfen Sie die folgende Seite, um **mehr Möglichkeiten zu erfahren, sich mit einem Remote-Host über winrm zu verbinden**:
+Überprüfen Sie die folgende Seite, um **weitere Möglichkeiten zu erfahren, um sich mit einem Remote-Host über winrm zu verbinden**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug-Bounty-Tipp**: **Melden Sie sich an** bei **Intigriti**, einer Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) heute bei und beginnen Sie, Prämien von bis zu **$100.000** zu verdienen!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

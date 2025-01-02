@@ -2,9 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Intro
 
@@ -20,10 +17,10 @@ Für weitere Informationen über diese Arten von Tags [**lesen Sie diese Einfüh
 
 ### Lesen
 
-Versucht, die **Karteninformationen zu lesen**. Dann kann es sie **emulieren**.
+Versucht, die **Karteninformationen** zu **lesen**. Dann kann sie **emuliert** werden.
 
 > [!WARNING]
-> Beachten Sie, dass einige Gegensprechanlagen versuchen, sich vor Schlüsselduplikationen zu schützen, indem sie einen Schreibbefehl vor dem Lesen senden. Wenn das Schreiben erfolgreich ist, wird dieses Tag als gefälscht betrachtet. Wenn Flipper RFID emuliert, gibt es keine Möglichkeit für den Leser, es von dem Original zu unterscheiden, sodass keine solchen Probleme auftreten.
+> Beachten Sie, dass einige Gegensprechanlagen versuchen, sich vor Schlüsselduplikationen zu schützen, indem sie einen Schreibbefehl vor dem Lesen senden. Wenn das Schreiben erfolgreich ist, wird dieses Tag als gefälscht betrachtet. Wenn Flipper RFID emuliert, gibt es keine Möglichkeit für den Leser, es vom Original zu unterscheiden, sodass keine solchen Probleme auftreten.
 
 ### Manuell hinzufügen
 
@@ -54,8 +51,5 @@ Nach dem **Kopieren** einer Karte oder dem **manuellen Eingeben** der ID ist es 
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

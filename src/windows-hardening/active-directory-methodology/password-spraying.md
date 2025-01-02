@@ -2,15 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Vertiefen Sie Ihr Fachwissen in **Mobile Security** mit der 8kSec Academy. Meistern Sie die Sicherheit von iOS und Android durch unsere selbstgesteuerten Kurse und erhalten Sie ein Zertifikat:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 ## **Passwort-Spraying**
 
-Sobald Sie mehrere **gültige Benutzernamen** gefunden haben, können Sie die häufigsten **Passwörter** ausprobieren (denken Sie an die Passwort-Richtlinien der Umgebung) mit jedem der entdeckten Benutzer.\
+Sobald Sie mehrere **gültige Benutzernamen** gefunden haben, können Sie die häufigsten **Passwörter** ausprobieren (denken Sie an die Passwort-Richtlinie der Umgebung) mit jedem der entdeckten Benutzer.\
 Standardmäßig beträgt die **minimale** **Passwort** **länge** **7**.
 
 Listen mit häufigen Benutzernamen könnten ebenfalls nützlich sein: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
@@ -130,10 +124,5 @@ Um eines dieser Tools zu verwenden, benötigen Sie eine Benutzerliste und ein Pa
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Vertiefen Sie Ihr Fachwissen in **Mobile Security** mit der 8kSec Academy. Meistern Sie die Sicherheit von iOS und Android durch unsere selbstgesteuerten Kurse und erhalten Sie ein Zertifikat:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

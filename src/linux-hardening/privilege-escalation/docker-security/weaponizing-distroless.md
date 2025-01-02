@@ -2,29 +2,29 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What is Distroless
+## Was ist Distroless
 
-A distroless container is a type of container that **contains only the necessary dependencies to run a specific application**, without any additional software or tools that are not required. These containers are designed to be as **lightweight** and **secure** as possible, and they aim to **minimize the attack surface** by removing any unnecessary components.
+Ein distroless Container ist eine Art von Container, der **nur die notwendigen Abhängigkeiten enthält, um eine bestimmte Anwendung auszuführen**, ohne zusätzliche Software oder Tools, die nicht erforderlich sind. Diese Container sind darauf ausgelegt, so **leichtgewichtig** und **sicher** wie möglich zu sein, und sie zielen darauf ab, die **Angriffsfläche zu minimieren**, indem sie unnötige Komponenten entfernen.
 
-Distroless containers are often used in **production environments where security and reliability are paramount**.
+Distroless-Container werden häufig in **Produktionsumgebungen eingesetzt, in denen Sicherheit und Zuverlässigkeit von größter Bedeutung sind**.
 
-Some **examples** of **distroless containers** are:
+Einige **Beispiele** für **distroless Container** sind:
 
-- Provided by **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
-- Provided by **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
+- Bereitgestellt von **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
+- Bereitgestellt von **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
 ## Weaponizing Distroless
 
-The goal of weaponize a distroless container is to be able to **execute arbitrary binaries and payloads even with the limitations** implied by **distroless** (lack of common binaries in the system) and also protections commonly found in containers such as **read-only** or **no-execute** in `/dev/shm`.
+Das Ziel, einen distroless Container zu weaponizen, besteht darin, **willkürliche Binaries und Payloads auszuführen, selbst mit den Einschränkungen**, die durch **distroless** (Fehlen gängiger Binaries im System) und auch durch Schutzmaßnahmen, die häufig in Containern zu finden sind, wie **schreibgeschützt** oder **nicht ausführbar** in `/dev/shm`, impliziert werden.
 
-### Through memory
+### Durch Speicher
 
-Coming at some point of 2023...
+Kommt irgendwann im Jahr 2023...
 
-### Via Existing binaries
+### Über vorhandene Binaries
 
 #### openssl
 
-\***\*[**In this post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) it is explained that the binary **`openssl`** is frequently found in these containers, potentially because it's **needed\*\* by the software that is going to be running inside the container.
+\***\*[**In diesem Beitrag,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) wird erklärt, dass die Binary **`openssl`** häufig in diesen Containern zu finden ist, möglicherweise weil sie **benötigt** wird von der Software, die im Container ausgeführt werden soll.
 
 {{#include ../../../banners/hacktricks-training.md}}

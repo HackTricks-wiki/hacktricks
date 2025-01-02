@@ -1,18 +1,10 @@
 # Kerberoast
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Verwenden Sie [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast), um einfach **Workflows** zu erstellen und zu **automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.\
-Zugang heute erhalten:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kerberoast
 
-Kerberoasting konzentriert sich auf den Erwerb von **TGS-Tickets**, insbesondere solchen, die mit Diensten verbunden sind, die unter **Benutzerkonten** in **Active Directory (AD)** betrieben werden, ausgenommen **Computer-Konten**. Die Verschlüsselung dieser Tickets verwendet Schlüssel, die von **Benutzerpasswörtern** stammen, was die Möglichkeit des **Offline-Credential-Crackings** ermöglicht. Die Verwendung eines Benutzerkontos als Dienst wird durch eine nicht leere **"ServicePrincipalName"**-Eigenschaft angezeigt.
+Kerberoasting konzentriert sich auf den Erwerb von **TGS-Tickets**, insbesondere solchen, die mit Diensten verbunden sind, die unter **Benutzerkonten** in **Active Directory (AD)** betrieben werden, ausgenommen **Computer-Konten**. Die Verschlüsselung dieser Tickets verwendet Schlüssel, die aus **Benutzerpasswörtern** stammen, was die Möglichkeit des **Offline-Credential-Crackings** eröffnet. Die Verwendung eines Benutzerkontos als Dienst wird durch eine nicht leere **"ServicePrincipalName"**-Eigenschaft angezeigt.
 
 Für die Durchführung von **Kerberoasting** ist ein Domänenkonto erforderlich, das in der Lage ist, **TGS-Tickets** anzufordern; dieser Prozess erfordert jedoch keine **besonderen Berechtigungen**, was ihn für jeden mit **gültigen Domänenanmeldeinformationen** zugänglich macht.
 
@@ -40,7 +32,7 @@ GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USERN
 kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -o kerberoastable # 1. Enumerate kerberoastable users
 kerberoast spnroast 'kerberos+password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes # 2. Dump hashes
 ```
-Multi-Feature-Tools einschließlich eines Dumps von kerberoastbaren Benutzern:
+Multi-Feature-Tools einschließlich eines Dumps von kerberoastable Benutzern:
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
 adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
@@ -93,14 +85,6 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 > [!WARNING]
 > Wenn ein TGS angefordert wird, wird das Windows-Ereignis `4769 - Ein Kerberos-Dienstticket wurde angefordert` generiert.
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Verwenden Sie [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast), um einfach **Workflows** zu erstellen und **zu automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.\
-Zugang heute erhalten:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 ### Knacken
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
@@ -141,9 +125,9 @@ Durch die Implementierung dieser Maßnahmen können Organisationen das Risiko, d
 
 ## Kerberoast ohne Domänenkonto
 
-Im **September 2022** wurde eine neue Möglichkeit zur Ausnutzung eines Systems von einem Forscher namens Charlie Clark bekannt gemacht, die über seine Plattform [exploit.ph](https://exploit.ph/) geteilt wurde. Diese Methode ermöglicht den Erwerb von **Service Tickets (ST)** über eine **KRB_AS_REQ**-Anfrage, die bemerkenswerterweise keine Kontrolle über ein Active Directory-Konto erfordert. Im Wesentlichen, wenn ein Principal so eingerichtet ist, dass er keine Vorab-Authentifizierung benötigt – ein Szenario, das in der Cybersicherheitswelt als **AS-REP Roasting-Angriff** bekannt ist – kann dieses Merkmal genutzt werden, um den Anfrageprozess zu manipulieren. Insbesondere wird das System durch die Änderung des **sname**-Attributs im Anfragekörper getäuscht, sodass es ein **ST** anstelle des standardmäßigen verschlüsselten Ticket Granting Ticket (TGT) ausstellt.
+Im **September 2022** wurde eine neue Möglichkeit zur Ausnutzung eines Systems von einem Forscher namens Charlie Clark bekannt gemacht, die über seine Plattform [exploit.ph](https://exploit.ph/) geteilt wurde. Diese Methode ermöglicht den Erwerb von **Service Tickets (ST)** über eine **KRB_AS_REQ**-Anfrage, die bemerkenswerterweise keine Kontrolle über ein Active Directory-Konto erfordert. Im Wesentlichen, wenn ein Principal so eingerichtet ist, dass er keine Vorab-Authentifizierung benötigt – ein Szenario, das im Bereich der Cybersicherheit als **AS-REP Roasting-Angriff** bekannt ist – kann dieses Merkmal genutzt werden, um den Anfrageprozess zu manipulieren. Insbesondere wird das System durch die Änderung des **sname**-Attributs im Anfragekörper getäuscht, sodass es ein **ST** anstelle des standardmäßigen verschlüsselten Ticket Granting Ticket (TGT) ausstellt.
 
-Die Technik wird in diesem Artikel ausführlich erklärt: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
+Die Technik wird in diesem Artikel ausführlich erklärt: [Semperis Blogbeitrag](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
 > [!WARNING]
 > Sie müssen eine Liste von Benutzern bereitstellen, da wir kein gültiges Konto haben, um das LDAP mit dieser Technik abzufragen.
@@ -167,11 +151,3 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Verwenden Sie [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast), um einfach **Workflows** zu erstellen und **zu automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.\
-Zugang heute erhalten:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}

@@ -2,13 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
+## Grundlegende Informationen
 
-## Grundinformationen
-
-Local Administrator Password Solution (LAPS) ist ein Tool zur Verwaltung eines Systems, bei dem **Administratorpasswörter**, die **einzigartig, zufällig und häufig geändert** werden, auf domänenverbundenen Computern angewendet werden. Diese Passwörter werden sicher in Active Directory gespeichert und sind nur für Benutzer zugänglich, die durch Access Control Lists (ACLs) Berechtigungen erhalten haben. Die Sicherheit der Passwortübertragungen vom Client zum Server wird durch die Verwendung von **Kerberos Version 5** und **Advanced Encryption Standard (AES)** gewährleistet.
+Local Administrator Password Solution (LAPS) ist ein Tool zur Verwaltung eines Systems, bei dem **Administratorpasswörter**, die **einzigartig, zufällig und häufig geändert** werden, auf domänenverbundenen Computern angewendet werden. Diese Passwörter werden sicher in Active Directory gespeichert und sind nur für Benutzer zugänglich, die durch Access Control Lists (ACLs) die Berechtigung erhalten haben. Die Sicherheit der Passwortübertragungen vom Client zum Server wird durch die Verwendung von **Kerberos Version 5** und **Advanced Encryption Standard (AES)** gewährleistet.
 
 Bei den Computerobjekten der Domäne führt die Implementierung von LAPS zur Hinzufügung von zwei neuen Attributen: **`ms-mcs-AdmPwd`** und **`ms-mcs-AdmPwdExpirationTime`**. Diese Attribute speichern das **Klartext-Administratorpasswort** und **seine Ablaufzeit**.
 
@@ -27,7 +24,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 ```
 ### LAPS Passwortzugriff
 
-Sie können die **rohe LAPS-Richtlinie** von `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` herunterladen und dann **`Parse-PolFile`** aus dem [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) Paket verwenden, um diese Datei in ein menschenlesbares Format zu konvertieren.
+Sie könnten **die rohe LAPS-Richtlinie herunterladen** von `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` und dann **`Parse-PolFile`** aus dem [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) Paket verwenden, um diese Datei in ein menschenlesbares Format zu konvertieren.
 
 Darüber hinaus können die **nativ LAPS PowerShell-Cmdlets** verwendet werden, wenn sie auf einem Rechner installiert sind, auf den wir Zugriff haben:
 ```powershell
@@ -92,7 +89,7 @@ Wenn kein Zugriff auf eine PowerShell besteht, können Sie dieses Privileg remot
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
-Dies wird alle Passwörter dumpen, die der Benutzer lesen kann, und Ihnen ermöglichen, mit einem anderen Benutzer einen besseren Fuß zu fassen.
+Dies wird alle Passwörter dumpen, die der Benutzer lesen kann, und Ihnen ermöglichen, mit einem anderen Benutzer einen besseren Fuß in die Tür zu bekommen.
 
 ## ** Verwendung des LAPS-Passworts **
 ```
@@ -120,7 +117,7 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 ### Backdoor
 
-Der ursprüngliche Quellcode für LAPS ist [hier](https://github.com/GreyCorbel/admpwd) zu finden, daher ist es möglich, eine Backdoor in den Code einzufügen (innerhalb der `Get-AdmPwdPassword` Methode in `Main/AdmPwd.PS/Main.cs`, zum Beispiel), die irgendwie **neue Passwörter exfiltriert oder sie irgendwo speichert**.
+Der ursprüngliche Quellcode für LAPS ist [hier](https://github.com/GreyCorbel/admpwd) zu finden, daher ist es möglich, eine Backdoor in den Code einzufügen (innerhalb der `Get-AdmPwdPassword` Methode in `Main/AdmPwd.PS/Main.cs` zum Beispiel), die irgendwie **neue Passwörter exfiltriert oder sie irgendwo speichert**.
 
 Dann einfach die neue `AdmPwd.PS.dll` kompilieren und auf die Maschine in `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` hochladen (und die Änderungszeit ändern).
 
@@ -128,8 +125,5 @@ Dann einfach die neue `AdmPwd.PS.dll` kompilieren und auf die Maschine in `C:\To
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,16 +1,12 @@
-# Privilegienerweiterung mit Autoruns
+# Privilegienerhöhung mit Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug-Bounty-Tipp**: **Melden Sie sich an** für **Intigriti**, eine Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns bei unter [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) heute und beginnen Sie, Prämien von bis zu **$100.000** zu verdienen!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
-**Wmic** kann verwendet werden, um Programme beim **Startup** auszuführen. Sehen Sie, welche Binaries so programmiert sind, dass sie beim Startup ausgeführt werden:
+**Wmic** kann verwendet werden, um Programme beim **Start** auszuführen. Sehen Sie, welche Binaries so programmiert sind, dass sie beim Start ausgeführt werden:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -62,7 +58,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 Registrierungsschlüssel, die als **Run** und **RunOnce** bekannt sind, sind dafür ausgelegt, Programme automatisch auszuführen, jedes Mal wenn ein Benutzer sich im System anmeldet. Die Befehlszeile, die als Datenwert eines Schlüssels zugewiesen ist, ist auf 260 Zeichen oder weniger beschränkt.
 
-**Dienstausführungen** (kann den automatischen Start von Diensten während des Bootvorgangs steuern):
+**Service-Ausführungen** (kann den automatischen Start von Diensten während des Bootvorgangs steuern):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -215,7 +211,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 ```
 ### Installierte Komponente
 
-Active Setup ist eine Funktion in Windows, die **vor dem vollständigen Laden der Desktopumgebung initiiert** wird. Sie priorisiert die Ausführung bestimmter Befehle, die abgeschlossen sein müssen, bevor die Benutzeranmeldung fortgesetzt wird. Dieser Prozess erfolgt sogar vor anderen Starteinträgen, wie denen in den Registry-Bereichen Run oder RunOnce.
+Active Setup ist eine Funktion in Windows, die **vor dem vollständigen Laden der Desktop-Umgebung initiiert wird**. Sie priorisiert die Ausführung bestimmter Befehle, die abgeschlossen sein müssen, bevor die Benutzeranmeldung fortgesetzt wird. Dieser Prozess erfolgt sogar vor anderen Starteinträgen, wie denen in den Registry-Bereichen Run oder RunOnce.
 
 Active Setup wird über die folgenden Registrierungsschlüssel verwaltet:
 
@@ -234,7 +230,7 @@ Innerhalb dieser Schlüssel existieren verschiedene Unterschlüssel, die jeweils
 **Sicherheitsinformationen:**
 
 - Das Ändern oder Schreiben in einen Schlüssel, bei dem **`IsInstalled`** auf `"1"` gesetzt ist, mit einem bestimmten **`StubPath`** kann zu unbefugter Befehlsausführung führen, möglicherweise zur Erhöhung von Rechten.
-- Das Ändern der Binärdatei, die in einem **`StubPath`**-Wert referenziert wird, könnte ebenfalls zur Erhöhung von Rechten führen, sofern ausreichende Berechtigungen vorhanden sind.
+- Das Ändern der Binärdatei, die in einem beliebigen **`StubPath`**-Wert referenziert wird, könnte ebenfalls zur Erhöhung von Rechten führen, sofern ausreichende Berechtigungen vorhanden sind.
 
 Um die **`StubPath`**-Konfigurationen über Active Setup-Komponenten zu überprüfen, können diese Befehle verwendet werden:
 ```bash
@@ -256,9 +252,9 @@ Um BHOs, die auf einem System registriert sind, zu erkunden, können Sie die fol
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Jeder BHO wird durch seine **CLSID** in der Registrierung dargestellt, die als eindeutiger Identifikator dient. Detaillierte Informationen zu jeder CLSID finden Sie unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Jedes BHO wird durch seine **CLSID** in der Registrierung dargestellt, die als eindeutiger Identifikator dient. Detaillierte Informationen zu jeder CLSID finden Sie unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Um BHOs in der Registrierung abzufragen, können diese Befehle verwendet werden:
+Für die Abfrage von BHOs in der Registrierung können diese Befehle verwendet werden:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -297,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Beachten Sie, dass alle Seiten, auf denen Sie Autoruns finden können, **bereits von** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) durchsucht wurden. Für eine **umfassendere Liste von automatisch ausgeführten** Dateien könnten Sie [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) von Sysinternals verwenden:
+Beachten Sie, dass alle Sites, auf denen Sie Autoruns finden können, **bereits von** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) durchsucht wurden. Für eine **umfassendere Liste von automatisch ausgeführten** Dateien können Sie [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) von Sysinternals verwenden:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug-Bounty-Tipp**: **Melden Sie sich an** für **Intigriti**, eine Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) noch heute bei und beginnen Sie, Prämien von bis zu **$100.000** zu verdienen!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

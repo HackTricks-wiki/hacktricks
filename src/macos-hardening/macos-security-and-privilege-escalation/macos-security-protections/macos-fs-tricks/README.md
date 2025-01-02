@@ -24,15 +24,21 @@ Mit einer der vorherigen Kombinationen könnte ein Angreifer einen **sym/hard li
 
 ### Ordner root R+X Sonderfall
 
-Wenn es Dateien in einem **Verzeichnis** gibt, in dem **nur root R+X-Zugriff hat**, sind diese **für niemanden sonst zugänglich**. Eine Schwachstelle, die es ermöglicht, eine von einem Benutzer lesbare Datei, die aufgrund dieser **Einschränkung** nicht gelesen werden kann, von diesem Ordner **in einen anderen** zu **verschieben**, könnte ausgenutzt werden, um diese Dateien zu lesen.
+Wenn es Dateien in einem **Verzeichnis** gibt, in dem **nur root R+X-Zugriff hat**, sind diese **für niemanden sonst zugänglich**. Eine Schwachstelle, die es ermöglicht, eine von einem Benutzer lesbare Datei, die aufgrund dieser **Einschränkung** nicht gelesen werden kann, von diesem Ordner **in einen anderen** zu verschieben, könnte ausgenutzt werden, um diese Dateien zu lesen.
 
 Beispiel in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Symbolischer Link / Harte Verknüpfung
+## Symbolischer Link / Harte Links
 
-Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor von einem weniger privilegierten Benutzer erstellt** worden sein könnte. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in dieser Datei schreiben.
+### Nachsichtige Datei/Ordner
+
+Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor von einem weniger privilegierten Benutzer erstellt** wurde. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in diese Datei schreiben.
 
 Überprüfen Sie in den anderen Abschnitten, wo ein Angreifer **einen beliebigen Schreibzugriff ausnutzen könnte, um Privilegien zu eskalieren**.
+
+### Offen `O_NOFOLLOW`
+
+Das Flag `O_NOFOLLOW`, wenn es von der Funktion `open` verwendet wird, folgt einem Symlink im letzten Pfadkomponenten nicht, folgt aber dem Rest des Pfades. Der richtige Weg, um das Folgen von Symlinks im Pfad zu verhindern, ist die Verwendung des Flags `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -50,11 +56,15 @@ Beispiel:
 </dict>
 </plist>
 ```
-## Arbitrary FD
+## Dateideskriptoren
 
-Wenn Sie einen **Prozess dazu bringen können, eine Datei oder einen Ordner mit hohen Rechten zu öffnen**, können Sie **`crontab`** missbrauchen, um eine Datei in `/etc/sudoers.d` mit **`EDITOR=exploit.py`** zu öffnen, sodass `exploit.py` den FD zur Datei in `/etc/sudoers` erhält und ihn ausnutzt.
+### Leak FD (kein `O_CLOEXEC`)
 
-Zum Beispiel: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Wenn ein Aufruf von `open` das Flag `O_CLOEXEC` nicht hat, wird der Dateideskriptor vom Kindprozess geerbt. Wenn also ein privilegierter Prozess eine privilegierte Datei öffnet und einen vom Angreifer kontrollierten Prozess ausführt, wird der Angreifer **den FD über die privilegierte Datei erben**.
+
+Wenn Sie einen **Prozess dazu bringen können, eine Datei oder einen Ordner mit hohen Rechten zu öffnen**, können Sie **`crontab`** missbrauchen, um eine Datei in `/etc/sudoers.d` mit **`EDITOR=exploit.py`** zu öffnen, sodass `exploit.py` den FD zur Datei in `/etc/sudoers` erhält und diesen ausnutzt.
+
+Zum Beispiel: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), Code: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## Vermeiden Sie Quarantäne-xattrs-Tricks
 
@@ -76,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-Ein **devfs**-Mount **unterstützt keine xattr**, weitere Informationen in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Ein **devfs**-Mount **unterstützt kein xattr**, weitere Informationen in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -112,7 +122,7 @@ ls -le /tmp/test
 
 Das **AppleDouble**-Dateiformat kopiert eine Datei einschließlich ihrer ACEs.
 
-Im [**Quellcode**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) ist zu sehen, dass die ACL-Textdarstellung, die im xattr mit dem Namen **`com.apple.acl.text`** gespeichert ist, als ACL in der dekomprimierten Datei gesetzt wird. Wenn Sie also eine Anwendung in eine Zip-Datei mit dem **AppleDouble**-Dateiformat komprimiert haben, mit einer ACL, die das Schreiben anderer xattrs verhindert... wurde das Quarantäne-xattr nicht in die Anwendung gesetzt:
+Im [**Quellcode**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) ist zu sehen, dass die ACL-Textdarstellung, die im xattr mit dem Namen **`com.apple.acl.text`** gespeichert ist, als ACL in der dekomprimierten Datei gesetzt wird. Wenn Sie also eine Anwendung in eine Zip-Datei im **AppleDouble**-Dateiformat mit einer ACL komprimiert haben, die das Schreiben anderer xattrs verhindert... wurde das Quarantäne-xattr nicht in die Anwendung gesetzt:
 
 Überprüfen Sie den [**ursprünglichen Bericht**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) für weitere Informationen.
 
@@ -136,13 +146,34 @@ ls -le test
 ```
 (Note that even if this works the sandbox write the quarantine xattr before)
 
-Not really needed but I leave it there just in case:
+Nicht wirklich notwendig, aber ich lasse es hier, nur für den Fall:
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Umgehung von Codesignaturen
+## Umgehung von Signaturprüfungen
+
+### Umgehung von Plattform-Binärprüfungen
+
+Einige Sicherheitsprüfungen überprüfen, ob die Binärdatei eine **Plattform-Binärdatei** ist, um beispielsweise die Verbindung zu einem XPC-Dienst zu ermöglichen. Wie in einem Umgehungstrick in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ dargelegt, ist es möglich, diese Überprüfung zu umgehen, indem man eine Plattform-Binärdatei (wie /bin/ls) erhält und den Exploit über dyld mit einer Umgebungsvariable `DYLD_INSERT_LIBRARIES` injiziert.
+
+### Umgehung der Flags `CS_REQUIRE_LV` und `CS_FORCED_LV`
+
+Es ist möglich, dass eine ausführende Binärdatei ihre eigenen Flags ändert, um Prüfungen mit einem Code wie folgt zu umgehen:
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
+## Bypass Code Signatures
 
 Bundles enthalten die Datei **`_CodeSignature/CodeResources`**, die den **Hash** jeder einzelnen **Datei** im **Bundle** enthält. Beachten Sie, dass der Hash von CodeResources auch **in der ausführbaren Datei eingebettet** ist, sodass wir damit ebenfalls nichts anstellen können.
 
@@ -196,7 +227,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 ```
 ## Mount dmgs
 
-Ein Benutzer kann ein benutzerdefiniertes dmg, das sogar über einigen vorhandenen Ordnern erstellt wurde, einbinden. So könnten Sie ein benutzerdefiniertes dmg-Paket mit benutzerdefiniertem Inhalt erstellen:
+Ein Benutzer kann ein benutzerdefiniertes dmg, das sogar über einige vorhandene Ordner erstellt wurde, einbinden. So könnten Sie ein benutzerdefiniertes dmg-Paket mit benutzerdefiniertem Inhalt erstellen:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -217,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitrarion.diskarbitrariond` Mach-Dienst (bereitgestellt von `/usr/libexec/diskarbitrationd`) kommuniziert. Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden die Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
+Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitration.diskarbitrationd` Mach-Dienst (bereitgestellt von `/usr/libexec/diskarbitrationd`) kommuniziert. Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden die Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
 Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt mit dem `com.apple.driver.DiskImages` kext zu kommunizieren.
 
 ## Arbiträre Schreibvorgänge
@@ -226,7 +257,7 @@ Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt m
 
 Wenn Ihr Skript als **Shell-Skript** interpretiert werden könnte, könnten Sie das **`/etc/periodic/daily/999.local`** Shell-Skript überschreiben, das jeden Tag ausgelöst wird.
 
-Sie können eine Ausführung dieses Skripts fälschen mit: **`sudo periodic daily`**
+Sie können eine **falsche** Ausführung dieses Skripts mit: **`sudo periodic daily`** faken.
 
 ### Daemons
 
@@ -247,11 +278,11 @@ Schreiben Sie einen beliebigen **LaunchDaemon** wie **`/Library/LaunchDaemons/xy
 </dict>
 </plist>
 ```
-Erstellen Sie einfach das Skript `/Applications/Scripts/privesc.sh` mit den **Befehlen**, die Sie als root ausführen möchten.
+Erstellen Sie das Skript `/Applications/Scripts/privesc.sh` mit den **Befehlen**, die Sie als root ausführen möchten.
 
 ### Sudoers-Datei
 
-Wenn Sie **willkürlichen Schreibzugriff** haben, könnten Sie eine Datei im Ordner **`/etc/sudoers.d/`** erstellen, die Ihnen **sudo**-Rechte gewährt.
+Wenn Sie **willkürlichen Schreibzugriff** haben, könnten Sie eine Datei im Ordner **`/etc/sudoers.d/`** erstellen, die Ihnen **sudo**-Berechtigungen gewährt.
 
 ### PATH-Dateien
 
@@ -259,9 +290,29 @@ Die Datei **`/etc/paths`** ist einer der Hauptorte, die die PATH-Umgebungsvariab
 
 Sie können auch Dateien in **`/etc/paths.d`** schreiben, um neue Ordner in die `PATH`-Umgebungsvariable zu laden.
 
-## Schreibbare Dateien als andere Benutzer generieren
+### cups-files.conf
 
-Dies wird eine Datei erstellen, die root gehört und von mir beschreibbar ist ([**Code von hier**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als privesc funktionieren:
+Diese Technik wurde in [diesem Bericht](https://www.kandji.io/blog/macos-audit-story-part1) verwendet.
+
+Erstellen Sie die Datei `/etc/cups/cups-files.conf` mit folgendem Inhalt:
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+Dies wird die Datei `/etc/sudoers.d/lpe` mit den Berechtigungen 777 erstellen. Der zusätzliche Müll am Ende dient dazu, die Erstellung des Fehlerprotokolls auszulösen.
+
+Dann schreibe in `/etc/sudoers.d/lpe` die benötigte Konfiguration, um Privilegien zu eskalieren, wie `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Ändere dann die Datei `/etc/cups/cups-files.conf` erneut und gebe `LogFilePerm 700` an, damit die neue sudoers-Datei gültig wird, indem `cupsctl` aufgerufen wird.
+
+### Sandbox Escape
+
+Es ist möglich, die macOS-Sandbox mit einem FS-arbiträren Schreibzugriff zu verlassen. Für einige Beispiele siehe die Seite [macOS Auto Start](../../../../macos-auto-start-locations.md), aber ein gängiger ist, eine Terminal-Präferenzdatei in `~/Library/Preferences/com.apple.Terminal.plist` zu schreiben, die einen Befehl beim Start ausführt und diesen mit `open` aufruft.
+
+## Generiere beschreibbare Dateien als andere Benutzer
+
+Dies wird eine Datei erzeugen, die root gehört und von mir beschreibbar ist ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als Privilegieneskalation funktionieren:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -275,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX Shared Memory
 
-**POSIX Shared Memory** ermöglicht es Prozessen in POSIX-konformen Betriebssystemen, auf einen gemeinsamen Speicherbereich zuzugreifen, was eine schnellere Kommunikation im Vergleich zu anderen Methoden der interprozesslichen Kommunikation ermöglicht. Es beinhaltet das Erstellen oder Öffnen eines Shared-Memory-Objekts mit `shm_open()`, das Festlegen seiner Größe mit `ftruncate()` und das Mappen in den Adressraum des Prozesses mit `mmap()`. Prozesse können dann direkt aus diesem Speicherbereich lesen und schreiben. Um den gleichzeitigen Zugriff zu verwalten und Datenkorruption zu verhindern, werden häufig Synchronisationsmechanismen wie Mutexes oder Semaphoren verwendet. Schließlich entmappen und schließen die Prozesse den Shared Memory mit `munmap()` und `close()`, und entfernen optional das Speicherobjekt mit `shm_unlink()`. Dieses System ist besonders effektiv für effiziente, schnelle IPC in Umgebungen, in denen mehrere Prozesse schnell auf gemeinsame Daten zugreifen müssen.
+**POSIX Shared Memory** ermöglicht es Prozessen in POSIX-konformen Betriebssystemen, auf einen gemeinsamen Speicherbereich zuzugreifen, was eine schnellere Kommunikation im Vergleich zu anderen Methoden der interprozesslichen Kommunikation erleichtert. Es beinhaltet das Erstellen oder Öffnen eines Shared Memory-Objekts mit `shm_open()`, das Festlegen seiner Größe mit `ftruncate()` und das Mappen in den Adressraum des Prozesses mit `mmap()`. Prozesse können dann direkt aus diesem Speicherbereich lesen und in ihn schreiben. Um den gleichzeitigen Zugriff zu verwalten und Datenkorruption zu verhindern, werden häufig Synchronisationsmechanismen wie Mutexes oder Semaphoren verwendet. Schließlich entmappen und schließen Prozesse den Shared Memory mit `munmap()` und `close()`, und entfernen optional das Speicherobjekt mit `shm_unlink()`. Dieses System ist besonders effektiv für effiziente, schnelle IPC in Umgebungen, in denen mehrere Prozesse schnell auf gemeinsame Daten zugreifen müssen.
 
 <details>
 

@@ -2,10 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 **Dies ist eine Zusammenfassung der Abschnitte zu Eskalationstechniken der Beiträge:**
 
 - [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)
@@ -20,12 +16,12 @@
 
 - **Die Anmelderechte werden von der Enterprise CA an Benutzer mit niedrigen Rechten gewährt.**
 - **Die Genehmigung des Managers ist nicht erforderlich.**
-- **Keine Unterschriften von autorisiertem Personal sind erforderlich.**
+- **Es sind keine Unterschriften von autorisiertem Personal erforderlich.**
 - **Sicherheitsbeschreibungen auf Zertifikatvorlagen sind übermäßig permissiv, was es Benutzern mit niedrigen Rechten ermöglicht, Anmelderechte zu erhalten.**
 - **Zertifikatvorlagen sind so konfiguriert, dass sie EKUs definieren, die die Authentifizierung erleichtern:**
-- Erweiterte Schlüsselverwendungs (EKU) Identifikatoren wie Client-Authentifizierung (OID 1.3.6.1.5.5.7.3.2), PKINIT-Client-Authentifizierung (1.3.6.1.5.2.3.4), Smart Card-Anmeldung (OID 1.3.6.1.4.1.311.20.2.2), beliebiger Zweck (OID 2.5.29.37.0) oder keine EKU (SubCA) sind enthalten.
+- Erweiterte Schlüsselverwendungs (EKU) Identifikatoren wie Client-Authentifizierung (OID 1.3.6.1.5.5.7.3.2), PKINIT-Client-Authentifizierung (1.3.6.1.5.2.3.4), Smart Card-Anmeldung (OID 1.3.6.1.4.1.311.20.2.2), Beliebiger Zweck (OID 2.5.29.37.0) oder keine EKU (SubCA) sind enthalten.
 - **Die Möglichkeit für Antragsteller, einen subjectAltName in der Certificate Signing Request (CSR) einzuschließen, wird durch die Vorlage erlaubt:**
-- Das Active Directory (AD) priorisiert den subjectAltName (SAN) in einem Zertifikat zur Identitätsverifizierung, wenn vorhanden. Das bedeutet, dass durch die Angabe des SAN in einer CSR ein Zertifikat angefordert werden kann, um sich als jeder Benutzer (z. B. ein Domänenadministrator) auszugeben. Ob ein SAN vom Antragsteller angegeben werden kann, wird im AD-Objekt der Zertifikatvorlage durch die `mspki-certificate-name-flag`-Eigenschaft angezeigt. Diese Eigenschaft ist ein Bitmaskenwert, und das Vorhandensein des `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`-Flags erlaubt die Angabe des SAN durch den Antragsteller.
+- Das Active Directory (AD) priorisiert den subjectAltName (SAN) in einem Zertifikat zur Identitätsverifizierung, wenn vorhanden. Das bedeutet, dass durch die Angabe des SAN in einer CSR ein Zertifikat angefordert werden kann, um sich als jeder Benutzer (z. B. ein Domänenadministrator) auszugeben. Ob ein SAN vom Antragsteller angegeben werden kann, wird im AD-Objekt der Zertifikatvorlage durch die Eigenschaft `mspki-certificate-name-flag` angezeigt. Diese Eigenschaft ist ein Bitmaskenwert, und das Vorhandensein des `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`-Flags erlaubt die Angabe des SAN durch den Antragsteller.
 
 > [!CAUTION]
 > Die beschriebene Konfiguration erlaubt es Benutzern mit niedrigen Rechten, Zertifikate mit beliebigem SAN ihrer Wahl anzufordern, was die Authentifizierung als jedes Domänenprinzip über Kerberos oder SChannel ermöglicht.
@@ -53,7 +49,7 @@ certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.lo
 ```
 Die Windows-Binärdateien "Certreq.exe" und "Certutil.exe" können verwendet werden, um das PFX zu generieren: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-Die Aufzählung der Zertifikatvorlagen innerhalb des AD-Forest-Konfigurationsschemas, insbesondere derjenigen, die keine Genehmigung oder Unterschriften erfordern, die über eine Client-Authentifizierung oder Smart Card Logon EKU verfügen und mit dem `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`-Flag aktiviert sind, kann durch Ausführen der folgenden LDAP-Abfrage erfolgen:
+Die Aufzählung der Zertifikatvorlagen innerhalb des Konfigurationsschemas des AD Forests, insbesondere derjenigen, die keine Genehmigung oder Unterschriften erfordern, die über eine Client-Authentifizierung oder Smart Card Logon EKU verfügen und bei denen das `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`-Flag aktiviert ist, kann durch Ausführen der folgenden LDAP-Abfrage erfolgen:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
@@ -66,26 +62,26 @@ Das zweite Missbrauchsszenario ist eine Variation des ersten:
 1. Die Anmelderechte werden von der Enterprise CA an niedrig privilegierte Benutzer vergeben.
 2. Die Anforderung einer Genehmigung durch den Manager ist deaktiviert.
 3. Die Notwendigkeit für autorisierte Unterschriften wird weggelassen.
-4. Ein zu permissiver Sicherheitsdescriptor auf der Zertifikatvorlage gewährt niedrig privilegierten Benutzern das Recht zur Zertifikatsanmeldung.
+4. Ein zu permissiver Sicherheitsdescriptor auf der Zertifikatvorlage gewährt niedrig privilegierten Benutzern die Rechte zur Zertifikatsanmeldung.
 5. **Die Zertifikatvorlage ist so definiert, dass sie die Any Purpose EKU oder keine EKU enthält.**
 
 Die **Any Purpose EKU** erlaubt es einem Angreifer, ein Zertifikat für **jeden Zweck** zu erhalten, einschließlich Client-Authentifizierung, Server-Authentifizierung, Code-Signierung usw. Die gleiche **Technik, die für ESC3 verwendet wird**, kann genutzt werden, um dieses Szenario auszunutzen.
 
 Zertifikate mit **keinen EKUs**, die als untergeordnete CA-Zertifikate fungieren, können für **jeden Zweck** ausgenutzt werden und können **auch verwendet werden, um neue Zertifikate zu signieren**. Daher könnte ein Angreifer beliebige EKUs oder Felder in den neuen Zertifikaten angeben, indem er ein untergeordnetes CA-Zertifikat verwendet.
 
-Allerdings funktionieren neue Zertifikate, die für die **Domänenauthentifizierung** erstellt werden, nicht, wenn die untergeordnete CA nicht vom **`NTAuthCertificates`**-Objekt vertraut wird, was die Standardeinstellung ist. Dennoch kann ein Angreifer weiterhin **neue Zertifikate mit beliebiger EKU** und beliebigen Zertifikatwerten erstellen. Diese könnten potenziell für eine Vielzahl von Zwecken (z. B. Code-Signierung, Server-Authentifizierung usw.) **missbraucht** werden und könnten erhebliche Auswirkungen auf andere Anwendungen im Netzwerk wie SAML, AD FS oder IPSec haben.
+Allerdings funktionieren neue Zertifikate, die für die **Domänenauthentifizierung** erstellt werden, nicht, wenn die untergeordnete CA nicht vom **`NTAuthCertificates`**-Objekt vertraut wird, was die Standardeinstellung ist. Dennoch kann ein Angreifer weiterhin **neue Zertifikate mit beliebiger EKU** und beliebigen Zertifikatswerten erstellen. Diese könnten potenziell **missbraucht** werden für eine Vielzahl von Zwecken (z. B. Code-Signierung, Server-Authentifizierung usw.) und könnten erhebliche Auswirkungen auf andere Anwendungen im Netzwerk wie SAML, AD FS oder IPSec haben.
 
 Um Vorlagen zu enumerieren, die zu diesem Szenario innerhalb des Konfigurationsschemas des AD Forest passen, kann die folgende LDAP-Abfrage ausgeführt werden:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*))))
 ```
-## Fehlkonfigurierte Enrollment-Agent-Vorlagen - ESC3
+## Fehlkonfigurierte Enrollment Agent Vorlagen - ESC3
 
 ### Erklärung
 
 Dieses Szenario ist wie das erste und zweite, aber **missbraucht** eine **andere EKU** (Zertifikatsanforderungsagent) und **2 verschiedene Vorlagen** (daher hat es 2 Sets von Anforderungen),
 
-Die **Zertifikatsanforderungsagent EKU** (OID 1.3.6.1.4.1.311.20.2.1), bekannt als **Enrollment Agent** in der Microsoft-Dokumentation, ermöglicht es einem Principal, sich **im Namen eines anderen Benutzers** für ein **Zertifikat** **anzumelden**.
+Die **Zertifikatsanforderungsagent EKU** (OID 1.3.6.1.4.1.311.20.2.1), bekannt als **Enrollment Agent** in der Microsoft-Dokumentation, erlaubt einem Principal, sich **im Namen eines anderen Benutzers** für ein **Zertifikat** **anzumelden**.
 
 Der **„enrollment agent“** meldet sich in einer solchen **Vorlage** an und verwendet das resultierende **Zertifikat, um einen CSR im Namen des anderen Benutzers mitzuunterzeichnen**. Er **sendet** dann den **mitunterzeichneten CSR** an die CA, meldet sich in einer **Vorlage** an, die **„Anmeldung im Namen von“** erlaubt, und die CA antwortet mit einem **Zertifikat, das dem „anderen“ Benutzer gehört**.
 
@@ -101,7 +97,7 @@ Der **„enrollment agent“** meldet sich in einer solchen **Vorlage** an und v
 
 - Die Enterprise CA gewährt Anmelderechte an niedrig privilegierte Benutzer.
 - Die Genehmigung des Managers wird umgangen.
-- Die Schema-Version der Vorlage ist entweder 1 oder übersteigt 2, und sie gibt eine Anforderung für die Anwendungsrichtlinie an, die die Zertifikatsanforderungsagent EKU erfordert.
+- Die Schema-Version der Vorlage ist entweder 1 oder übersteigt 2, und sie spezifiziert eine Anforderung für die Ausstellung von Anwendungsrichtlinien, die die Zertifikatsanforderungsagent EKU erfordert.
 - Eine in der Zertifikatvorlage definierte EKU erlaubt die Domänenauthentifizierung.
 - Einschränkungen für Enrollment Agents werden auf der CA nicht angewendet.
 
@@ -137,9 +133,9 @@ Bemerkenswerte Berechtigungen, die für Zertifikatvorlagen gelten, sind:
 
 - **Besitzer:** Gewährt implizite Kontrolle über das Objekt, was die Änderung aller Attribute ermöglicht.
 - **Vollzugriff:** Ermöglicht vollständige Autorität über das Objekt, einschließlich der Fähigkeit, alle Attribute zu ändern.
-- **BesitzerÄndern:** Erlaubt die Änderung des Besitzers des Objekts auf ein Prinzip unter der Kontrolle des Angreifers.
-- **DaclÄndern:** Ermöglicht die Anpassung der Zugriffskontrollen, was einem Angreifer möglicherweise Vollzugriff gewährt.
-- **EigenschaftÄndern:** Ermächtigt zur Bearbeitung aller Objektattribute.
+- **Besitzer schreiben:** Erlaubt die Änderung des Besitzers des Objekts auf ein Prinzip unter der Kontrolle des Angreifers.
+- **Dacl schreiben:** Ermöglicht die Anpassung der Zugriffskontrollen, was einem Angreifer möglicherweise Vollzugriff gewährt.
+- **Eigenschaft schreiben:** Ermächtigt zur Bearbeitung aller Objektattribute.
 
 ### Missbrauch
 
@@ -168,7 +164,25 @@ certipy template -username john@corp.local -password Passw0rd -template ESC4-Tes
 
 ### Erklärung
 
-Das umfangreiche Netz von miteinander verbundenen, ACL-b
+Das umfangreiche Netz von miteinander verbundenen, ACL-basierten Beziehungen, das mehrere Objekte über Zertifikatvorlagen und die Zertifizierungsstelle hinaus umfasst, kann die Sicherheit des gesamten AD CS-Systems beeinträchtigen. Diese Objekte, die die Sicherheit erheblich beeinflussen können, umfassen:
+
+- Das AD-Computerobjekt des CA-Servers, das durch Mechanismen wie S4U2Self oder S4U2Proxy kompromittiert werden kann.
+- Den RPC/DCOM-Server des CA-Servers.
+- Jedes nachfolgende AD-Objekt oder Container innerhalb des spezifischen Containerpfads `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. Dieser Pfad umfasst, ist aber nicht beschränkt auf, Container und Objekte wie den Container für Zertifikatvorlagen, den Container für Zertifizierungsstellen, das NTAuthCertificates-Objekt und den Container für Registrierungsdienste.
+
+Die Sicherheit des PKI-Systems kann gefährdet sein, wenn es einem niedrig privilegierten Angreifer gelingt, die Kontrolle über eines dieser kritischen Komponenten zu erlangen.
+
+## EDITF_ATTRIBUTESUBJECTALTNAME2 - ESC6
+
+### Erklärung
+
+Das im [**CQure Academy-Beitrag**](https://cqureacademy.com/blog/enhanced-key-usage) behandelte Thema berührt auch die Implikationen des **`EDITF_ATTRIBUTESUBJECTALTNAME2`**-Flags, wie von Microsoft dargelegt. Diese Konfiguration, wenn sie auf einer Zertifizierungsstelle (CA) aktiviert ist, erlaubt die Einbeziehung von **benutzerdefinierten Werten** im **subject alternative name** für **jede Anfrage**, einschließlich derjenigen, die aus Active Directory® erstellt werden. Folglich ermöglicht diese Bestimmung einem **Eindringling**, sich über **jede Vorlage** zu registrieren, die für die **Authentifizierung** im Domänenbereich eingerichtet ist—insbesondere solche, die für die Registrierung von **nicht privilegierten** Benutzern offen sind, wie die Standardbenutzervorlage. Infolgedessen kann ein Zertifikat gesichert werden, das es dem Eindringling ermöglicht, sich als Domänenadministrator oder **jede andere aktive Entität** innerhalb der Domäne zu authentifizieren.
+
+**Hinweis**: Der Ansatz zum Hinzufügen von **alternativen Namen** in eine Zertifikatsanforderung (CSR) über das Argument `-attrib "SAN:"` in `certreq.exe` (als „Name-Wert-Paare“ bezeichnet) stellt einen **Kontrast** zur Ausnutzungsstrategie von SANs in ESC1 dar. Hier liegt der Unterschied darin, **wie Kontoinformationen verkapselt sind**—innerhalb eines Zertifikatsattributs, anstatt einer Erweiterung.
+
+### Missbrauch
+
+Um zu überprüfen, ob die Einstellung aktiviert ist, können Organisationen den folgenden Befehl mit `certutil.exe` verwenden:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -getreg "policy\EditFlags"
 ```
@@ -194,8 +208,8 @@ Um diese Konfiguration in Ihrer Umgebung zu deaktivieren, kann das Flag mit folg
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
 > [!WARNING]
-> Nach den Sicherheitsupdates von Mai 2022 enthalten neu ausgestellte **Zertifikate** eine **Sicherheits-erweiterung**, die die **`objectSid`-Eigenschaft des Anforderers** integriert. Für ESC1 wird diese SID aus dem angegebenen SAN abgeleitet. Für **ESC6** spiegelt die SID jedoch die **`objectSid` des Anforderers** wider, nicht das SAN.\
-> Um ESC6 auszunutzen, muss das System anfällig für ESC10 (Schwache Zertifikatzuordnungen) sein, das das **SAN über die neue Sicherheits-erweiterung** priorisiert.
+> Nach den Sicherheitsupdates vom Mai 2022 enthalten neu ausgestellte **Zertifikate** eine **Sicherheits-erweiterung**, die die **`objectSid`-Eigenschaft des Anforderers** integriert. Für ESC1 wird diese SID aus dem angegebenen SAN abgeleitet. Für **ESC6** spiegelt die SID jedoch die **`objectSid` des Anforderers** wider, nicht das SAN.\
+> Um ESC6 auszunutzen, ist es entscheidend, dass das System anfällig für ESC10 (Schwache Zertifikatzuweisungen) ist, das das **SAN über die neue Sicherheits-erweiterung** priorisiert.
 
 ## Verwundbare Zertifizierungsstelle Zugriffssteuerung - ESC7
 
@@ -207,7 +221,7 @@ Die Zugriffssteuerung für eine Zertifizierungsstelle wird durch eine Reihe von 
 ```bash
 Get-CertificationAuthority -ComputerName dc.domain.local | Get-CertificationAuthorityAcl | select -expand Access
 ```
-Dies bietet Einblicke in die primären Rechte, nämlich **`ManageCA`** und **`ManageCertificates`**, die den Rollen des „CA-Administrators“ und des „Zertifikatsmanagers“ entsprechen.
+Dies bietet Einblicke in die primären Rechte, nämlich **`ManageCA`** und **`ManageCertificates`**, die den Rollen des „CA-Administrators“ bzw. „Zertifikatsmanagers“ entsprechen.
 
 #### Missbrauch
 
@@ -215,7 +229,7 @@ Das Vorhandensein von **`ManageCA`**-Rechten auf einer Zertifizierungsstelle erm
 
 Die Vereinfachung dieses Prozesses ist durch die Verwendung des **Enable-PolicyModuleFlag**-Cmdlets von PSPKI möglich, das Änderungen ohne direkte GUI-Interaktion ermöglicht.
 
-Der Besitz von **`ManageCertificates`**-Rechten erleichtert die Genehmigung ausstehender Anfragen und umgeht effektiv die Schutzmaßnahme „Genehmigung durch den CA-Zertifikatsmanager“.
+Der Besitz von **`ManageCertificates`**-Rechten erleichtert die Genehmigung ausstehender Anfragen und umgeht effektiv die Sicherheitsmaßnahme „Genehmigung durch den CA-Zertifikatsmanager“.
 
 Eine Kombination aus **Certify**- und **PSPKI**-Modulen kann verwendet werden, um ein Zertifikat anzufordern, zu genehmigen und herunterzuladen:
 ```powershell
@@ -238,17 +252,17 @@ Certify.exe download /ca:dc.domain.local\theshire-DC-CA /id:336
 #### Erklärung
 
 > [!WARNING]
-> Im **vorherigen Angriff** wurden die Berechtigungen **`Manage CA`** verwendet, um das **EDITF_ATTRIBUTESUBJECTALTNAME2**-Flag zu **aktivieren**, um den **ESC6-Angriff** durchzuführen, aber dies hat keine Auswirkungen, bis der CA-Dienst (`CertSvc`) neu gestartet wird. Wenn ein Benutzer das Zugriffsrecht **`Manage CA`** hat, darf der Benutzer auch den **Dienst neu starten**. Es **bedeutet jedoch nicht, dass der Benutzer den Dienst remote neu starten kann**. Darüber hinaus könnte E**SC6 in den meisten gepatchten Umgebungen nicht sofort funktionieren** aufgrund der Sicherheitsupdates vom Mai 2022.
+> Bei dem **vorherigen Angriff** wurden die Berechtigungen **`Manage CA`** verwendet, um das **EDITF_ATTRIBUTESUBJECTALTNAME2**-Flag zu **aktivieren**, um den **ESC6-Angriff** durchzuführen, aber dies hat keine Auswirkungen, bis der CA-Dienst (`CertSvc`) neu gestartet wird. Wenn ein Benutzer das Zugriffsrecht **`Manage CA`** hat, darf der Benutzer auch den **Dienst neu starten**. Es **bedeutet jedoch nicht, dass der Benutzer den Dienst remote neu starten kann**. Darüber hinaus **funktioniert ESC6 möglicherweise nicht sofort** in den meisten gepatchten Umgebungen aufgrund der Sicherheitsupdates von Mai 2022.
 
 Daher wird hier ein weiterer Angriff vorgestellt.
 
 Voraussetzungen:
 
-- Nur **`ManageCA`-Berechtigung**
-- **`Manage Certificates`**-Berechtigung (kann von **`ManageCA`** gewährt werden)
+- Nur die Berechtigung **`ManageCA`**
+- Berechtigung **`Manage Certificates`** (kann von **`ManageCA`** gewährt werden)
 - Das Zertifikat-Template **`SubCA`** muss **aktiviert** sein (kann von **`ManageCA`** aktiviert werden)
 
-Die Technik beruht auf der Tatsache, dass Benutzer mit dem Zugriffsrecht **`Manage CA`** _und_ **`Manage Certificates`** **fehlgeschlagene Zertifikatsanfragen** **ausstellen** können. Das Zertifikat-Template **`SubCA`** ist **anfällig für ESC1**, aber **nur Administratoren** können sich für das Template registrieren. Daher kann ein **Benutzer** **beantragen**, sich für die **`SubCA`** zu registrieren - was **abgelehnt** wird - aber **dann später vom Manager ausgestellt** wird.
+Die Technik beruht auf der Tatsache, dass Benutzer mit den Zugriffsrechten **`Manage CA`** _und_ **`Manage Certificates`** **fehlgeschlagene Zertifikatsanfragen** **ausstellen** können. Das Zertifikat-Template **`SubCA`** ist **anfällig für ESC1**, aber **nur Administratoren** können sich in das Template einschreiben. Daher kann ein **Benutzer** **beantragen**, sich in die **`SubCA`** einzuschreiben - was **abgelehnt** wird - aber **dann später vom Manager ausgestellt** wird.
 
 #### Missbrauch
 
@@ -304,17 +318,17 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Loaded private key from '785.key'
 [*] Saved certificate and private key to 'administrator.pfx'
 ```
-## NTLM Relay zu AD CS HTTP-Endpunkten – ESC8
+## NTLM Relay zu AD CS HTTP Endpunkten – ESC8
 
 ### Erklärung
 
 > [!NOTE]
-> In Umgebungen, in denen **AD CS installiert ist**, wenn ein **anfälliger Web-Registrierungsendpunkt** existiert und mindestens eine **Zertifikatvorlage veröffentlicht ist**, die **die Registrierung von Domänencomputern und die Client-Authentifizierung** erlaubt (wie die Standard-**`Machine`**-Vorlage), wird es möglich, dass **jeder Computer mit aktivem Spooler-Dienst von einem Angreifer kompromittiert werden kann**!
+> In Umgebungen, in denen **AD CS installiert ist**, wenn ein **verwundbarer Web-Registrierungsendpunkt** existiert und mindestens eine **Zertifikatvorlage veröffentlicht ist**, die **die Registrierung von Domänencomputern und die Client-Authentifizierung** erlaubt (wie die Standard-**`Machine`** Vorlage), wird es möglich, dass **jeder Computer mit aktivem Spooler-Dienst von einem Angreifer kompromittiert werden kann**!
 
-Mehrere **HTTP-basierte Registrierungsverfahren** werden von AD CS unterstützt, die durch zusätzliche Serverrollen verfügbar gemacht werden, die Administratoren installieren können. Diese Schnittstellen für die HTTP-basierte Zertifikatsregistrierung sind anfällig für **NTLM-Relay-Angriffe**. Ein Angreifer kann von einem **kompromittierten Computer aus jedes AD-Konto impersonieren, das über eingehendes NTLM authentifiziert**. Während er das Opferkonto impersoniert, können diese Webschnittstellen von einem Angreifer genutzt werden, um **ein Client-Authentifizierungszertifikat mit den `User`- oder `Machine`-Zertifikatvorlagen anzufordern**.
+Mehrere **HTTP-basierte Registrierungsverfahren** werden von AD CS unterstützt, die durch zusätzliche Serverrollen verfügbar gemacht werden, die Administratoren installieren können. Diese Schnittstellen für die HTTP-basierte Zertifikatsregistrierung sind anfällig für **NTLM-Relay-Angriffe**. Ein Angreifer kann von einem **kompromittierten Computer aus jedes AD-Konto impersonieren, das über eingehendes NTLM authentifiziert**. Während er das Opferkonto impersoniert, können diese Webschnittstellen von einem Angreifer genutzt werden, um **ein Client-Authentifizierungszertifikat mit den `User` oder `Machine` Zertifikatvorlagen anzufordern**.
 
-- Die **Web-Registrierungsoberfläche** (eine ältere ASP-Anwendung, die unter `http://<caserver>/certsrv/` verfügbar ist), verwendet standardmäßig nur HTTP, was keinen Schutz gegen NTLM-Relay-Angriffe bietet. Darüber hinaus erlaubt sie ausdrücklich nur NTLM-Authentifizierung über ihren Authorization-HTTP-Header, wodurch sicherere Authentifizierungsmethoden wie Kerberos nicht anwendbar sind.
-- Der **Zertifikatsregistrierungsdienst** (CES), der **Zertifikatsregistrierungspolitik** (CEP) Webdienst und der **Netzwerkgerätregistrierungsdienst** (NDES) unterstützen standardmäßig die Verhandlungsauthentifizierung über ihren Authorization-HTTP-Header. Die Verhandlungsauthentifizierung **unterstützt sowohl** Kerberos als auch **NTLM**, was es einem Angreifer ermöglicht, während Relay-Angriffen auf **NTLM**-Authentifizierung herabzustufen. Obwohl diese Webdienste standardmäßig HTTPS aktivieren, **schützt HTTPS allein nicht vor NTLM-Relay-Angriffen**. Schutz vor NTLM-Relay-Angriffen für HTTPS-Dienste ist nur möglich, wenn HTTPS mit Channel Binding kombiniert wird. Leider aktiviert AD CS keinen erweiterten Schutz für die Authentifizierung auf IIS, der für Channel Binding erforderlich ist.
+- Die **Web-Registrierungsoberfläche** (eine ältere ASP-Anwendung, die unter `http://<caserver>/certsrv/` verfügbar ist), verwendet standardmäßig nur HTTP, was keinen Schutz gegen NTLM-Relay-Angriffe bietet. Darüber hinaus erlaubt sie ausdrücklich nur NTLM-Authentifizierung über ihren Authorization HTTP-Header, wodurch sicherere Authentifizierungsmethoden wie Kerberos unbrauchbar werden.
+- Der **Zertifikatsregistrierungsdienst** (CES), der **Zertifikatsregistrierungspolitik** (CEP) Webdienst und der **Netzwerkgerätregistrierungsdienst** (NDES) unterstützen standardmäßig die Verhandlungsauthentifizierung über ihren Authorization HTTP-Header. Die Verhandlungsauthentifizierung **unterstützt sowohl** Kerberos als auch **NTLM**, was es einem Angreifer ermöglicht, während Relay-Angriffen auf NTLM-Authentifizierung **herunterzustufen**. Obwohl diese Webdienste standardmäßig HTTPS aktivieren, **schützt HTTPS allein nicht vor NTLM-Relay-Angriffen**. Schutz vor NTLM-Relay-Angriffen für HTTPS-Dienste ist nur möglich, wenn HTTPS mit Channel Binding kombiniert wird. Leider aktiviert AD CS keinen erweiterten Schutz für die Authentifizierung auf IIS, der für Channel Binding erforderlich ist.
 
 Ein häufiges **Problem** bei NTLM-Relay-Angriffen ist die **kurze Dauer von NTLM-Sitzungen** und die Unfähigkeit des Angreifers, mit Diensten zu interagieren, die **NTLM-Signing** erfordern.
 
@@ -332,7 +346,7 @@ Eine weitere Einschränkung von NTLM-Relay-Angriffen ist, dass **ein vom Angreif
 
 ### **Missbrauch**
 
-[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumeriert **aktivierte HTTP AD CS-Endpunkte**:
+[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumeriert **aktivierte HTTP AD CS Endpunkte**:
 ```
 Certify.exe cas
 ```
@@ -366,7 +380,7 @@ execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <
 ```
 #### Missbrauch mit [Certipy](https://github.com/ly4k/Certipy)
 
-Die Anfrage für ein Zertifikat erfolgt standardmäßig durch Certipy basierend auf der Vorlage `Machine` oder `User`, abhängig davon, ob der Kontoname, der weitergeleitet wird, mit `$` endet. Die Angabe einer alternativen Vorlage kann durch die Verwendung des Parameters `-template` erreicht werden.
+Die Anfrage für ein Zertifikat erfolgt standardmäßig durch Certipy basierend auf der Vorlage `Machine` oder `User`, abhängig davon, ob der übertragene Kontoname mit `$` endet. Die Angabe einer alternativen Vorlage kann durch die Verwendung des Parameters `-template` erreicht werden.
 
 Eine Technik wie [PetitPotam](https://github.com/ly4k/PetitPotam) kann dann verwendet werden, um die Authentifizierung zu erzwingen. Bei der Arbeit mit Domänencontrollern ist die Angabe von `-template DomainController` erforderlich.
 ```bash
@@ -381,17 +395,17 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
-## No Security Extension - ESC9 <a href="#id-5485" id="id-5485"></a>
+## Keine Sicherheits-Erweiterung - ESC9 <a href="#id-5485" id="id-5485"></a>
 
 ### Erklärung
 
-Der neue Wert **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) für **`msPKI-Enrollment-Flag`**, auch als ESC9 bezeichnet, verhindert das Einbetten der **neuen `szOID_NTDS_CA_SECURITY_EXT` Sicherheits-erweiterung** in ein Zertifikat. Dieses Flag wird relevant, wenn `StrongCertificateBindingEnforcement` auf `1` (die Standardeinstellung) gesetzt ist, was im Gegensatz zu einer Einstellung von `2` steht. Seine Relevanz erhöht sich in Szenarien, in denen eine schwächere Zertifikatzuordnung für Kerberos oder Schannel ausgenutzt werden könnte (wie in ESC10), da das Fehlen von ESC9 die Anforderungen nicht ändern würde.
+Der neue Wert **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) für **`msPKI-Enrollment-Flag`**, bekannt als ESC9, verhindert das Einbetten der **neuen `szOID_NTDS_CA_SECURITY_EXT` Sicherheits-Erweiterung** in ein Zertifikat. Dieses Flag wird relevant, wenn `StrongCertificateBindingEnforcement` auf `1` (die Standardeinstellung) gesetzt ist, was im Gegensatz zu einer Einstellung von `2` steht. Seine Relevanz steigt in Szenarien, in denen eine schwächere Zertifikatzuordnung für Kerberos oder Schannel ausgenutzt werden könnte (wie in ESC10), da das Fehlen von ESC9 die Anforderungen nicht ändern würde.
 
-Die Bedingungen, unter denen die Einstellung dieses Flags signifikant wird, umfassen:
+Die Bedingungen, unter denen die Einstellung dieses Flags bedeutend wird, umfassen:
 
-- `StrongCertificateBindingEnforcement` ist nicht auf `2` eingestellt (wobei die Standardeinstellung `1` ist), oder `CertificateMappingMethods` enthält das `UPN`-Flag.
+- `StrongCertificateBindingEnforcement` ist nicht auf `2` eingestellt (mit der Standardeinstellung `1`), oder `CertificateMappingMethods` enthält das `UPN`-Flag.
 - Das Zertifikat ist mit dem `CT_FLAG_NO_SECURITY_EXTENSION`-Flag innerhalb der `msPKI-Enrollment-Flag`-Einstellung gekennzeichnet.
-- Ein beliebiges Client-Authentifizierungs-EKU wird durch das Zertifikat angegeben.
+- Ein beliebiger Client-Authentifizierungs-EKU wird durch das Zertifikat angegeben.
 - `GenericWrite`-Berechtigungen sind über ein beliebiges Konto verfügbar, um ein anderes zu kompromittieren.
 
 ### Missbrauchsszenario
@@ -402,11 +416,11 @@ Zunächst wird der Hash von `Jane` mithilfe von Shadow Credentials erlangt, dank
 ```bash
 certipy shadow auto -username John@corp.local -password Passw0rd! -account Jane
 ```
-Anschließend wird `Jane`'s `userPrincipalName` in `Administrator` geändert, wobei der Teil `@corp.local` absichtlich weggelassen wird:
+Anschließend wird `Jane`'s `userPrincipalName` auf `Administrator` geändert, wobei der `@corp.local`-Domänenteil absichtlich weggelassen wird:
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
-Diese Modifikation verstößt nicht gegen die Einschränkungen, da `Administrator@corp.local` als `Administrator`'s `userPrincipalName` eindeutig bleibt.
+Diese Modifikation verstößt nicht gegen die Einschränkungen, da `Administrator@corp.local` als `userPrincipalName` von `Administrator` eindeutig bleibt.
 
 Daraufhin wird die als anfällig gekennzeichnete `ESC9`-Zertifikatvorlage als `Jane` angefordert:
 ```bash
@@ -414,7 +428,7 @@ certipy req -username jane@corp.local -hashes <hash> -ca corp-DC-CA -template ES
 ```
 Es wird festgestellt, dass der `userPrincipalName` des Zertifikats `Administrator` widerspiegelt, ohne eine „object SID“.
 
-Der `userPrincipalName` von `Jane` wird dann auf ihren ursprünglichen Wert `Jane@corp.local` zurückgesetzt:
+Der `userPrincipalName` von `Jane` wird dann auf ihren ursprünglichen Wert, `Jane@corp.local`, zurückgesetzt:
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
@@ -441,9 +455,9 @@ Wenn `CertificateMappingMethods` das `UPN`-Bit (`0x4`) enthält.
 
 ### Missbrauchsfall 1
 
-Mit `StrongCertificateBindingEnforcement`, das auf `0` konfiguriert ist, kann ein Konto A mit `GenericWrite`-Berechtigungen ausgenutzt werden, um jedes Konto B zu kompromittieren.
+Mit `StrongCertificateBindingEnforcement`, das auf `0` konfiguriert ist, kann ein Konto A mit `GenericWrite`-Berechtigungen ausgenutzt werden, um ein beliebiges Konto B zu kompromittieren.
 
-Zum Beispiel, wenn ein Angreifer `GenericWrite`-Berechtigungen über `Jane@corp.local` hat, zielt er darauf ab, `Administrator@corp.local` zu kompromittieren. Das Verfahren spiegelt ESC9 wider und ermöglicht die Nutzung jeder Zertifikatvorlage.
+Zum Beispiel, wenn ein Angreifer `GenericWrite`-Berechtigungen über `Jane@corp.local` hat, zielt er darauf ab, `Administrator@corp.local` zu kompromittieren. Das Verfahren spiegelt ESC9 wider und ermöglicht die Nutzung beliebiger Zertifikatvorlagen.
 
 Zunächst wird der Hash von `Jane` mithilfe von Shadow Credentials abgerufen, wobei `GenericWrite` ausgenutzt wird.
 ```bash
@@ -467,9 +481,9 @@ certipy auth -pfx administrator.pfx -domain corp.local
 ```
 ### Missbrauchsfall 2
 
-Mit den `CertificateMappingMethods`, die das `UPN`-Bit-Flag (`0x4`) enthalten, kann ein Konto A mit `GenericWrite`-Berechtigungen jedes Konto B, das über keine `userPrincipalName`-Eigenschaft verfügt, einschließlich Maschinenkonten und des integrierten Domänenadministrators `Administrator`, kompromittieren.
+Mit den `CertificateMappingMethods`, die das `UPN`-Bit-Flag (`0x4`) enthalten, kann ein Konto A mit `GenericWrite`-Berechtigungen jedes Konto B, das über keine `userPrincipalName`-Eigenschaft verfügt, kompromittieren, einschließlich Maschinenkonten und des integrierten Domänenadministrators `Administrator`.
 
-Hier besteht das Ziel darin, `DC$@corp.local` zu kompromittieren, beginnend mit dem Erhalten von `Jane`'s Hash durch Shadow Credentials, unter Ausnutzung des `GenericWrite`.
+Hier besteht das Ziel darin, `DC$@corp.local` zu kompromittieren, beginnend mit dem Erhalten von `Janes` Hash durch Shadow Credentials, unter Ausnutzung des `GenericWrite`.
 ```bash
 certipy shadow auto -username John@corp.local -p Passw0rd! -account Jane
 ```
@@ -477,7 +491,7 @@ certipy shadow auto -username John@corp.local -p Passw0rd! -account Jane
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'DC$@corp.local'
 ```
-Ein Zertifikat für die Client-Authentifizierung wird als `Jane` unter Verwendung der Standardvorlage `User` angefordert.
+Ein Zertifikat zur Client-Authentifizierung wird als `Jane` unter Verwendung der Standardvorlage `User` angefordert.
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
@@ -493,7 +507,7 @@ Durch die LDAP-Shell ermöglichen Befehle wie `set_rbcd` Angriffe mit Resource-B
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-Diese Schwachstelle erstreckt sich auch auf jedes Benutzerkonto, das keinen `userPrincipalName` hat oder bei dem dieser nicht mit dem `sAMAccountName` übereinstimmt, wobei das Standardkonto `Administrator@corp.local` ein Hauptziel ist, aufgrund seiner erhöhten LDAP-Berechtigungen und des Fehlens eines `userPrincipalName` standardmäßig.
+Diese Schwachstelle erstreckt sich auch auf jedes Benutzerkonto, das keinen `userPrincipalName` hat oder bei dem dieser nicht mit dem `sAMAccountName` übereinstimmt, wobei das Standardkonto `Administrator@corp.local` aufgrund seiner erhöhten LDAP-Berechtigungen und des Fehlens eines `userPrincipalName` standardmäßig ein Hauptziel ist.
 
 ## Relaying NTLM zu ICPR - ESC11
 
@@ -541,7 +555,7 @@ Certipy v4.7.0 - by Oliver Lyak (ly4k)
 ```
 Hinweis: Für Domänencontroller müssen wir `-template` in DomainController angeben.
 
-Oder mit [sploutchy's Fork von impacket](https://github.com/sploutchy/impacket) :
+Oder mit [sploutchy's Fork von impacket](https://github.com/sploutchy/impacket):
 ```bash
 $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -smb2support
 ```
@@ -551,7 +565,7 @@ $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -s
 
 Administratoren können die Zertifizierungsstelle so einrichten, dass sie auf einem externen Gerät wie dem "Yubico YubiHSM2" gespeichert wird.
 
-Wenn ein USB-Gerät über einen USB-Port mit dem CA-Server verbunden ist oder ein USB-Geräteserver im Falle des CA-Servers eine virtuelle Maschine ist, ist ein Authentifizierungsschlüssel (manchmal als "Passwort" bezeichnet) erforderlich, damit der Key Storage Provider Schlüssel im YubiHSM generieren und nutzen kann.
+Wenn ein USB-Gerät über einen USB-Port mit dem CA-Server verbunden ist oder ein USB-Geräteserver verwendet wird, falls der CA-Server eine virtuelle Maschine ist, ist ein Authentifizierungsschlüssel (manchmal als "Passwort" bezeichnet) erforderlich, damit der Key Storage Provider Schlüssel im YubiHSM generieren und nutzen kann.
 
 Dieses Schlüssel/Passwort wird im Registrierungseditor unter `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` im Klartext gespeichert.
 
@@ -575,7 +589,7 @@ Verwenden Sie schließlich den certutil `-sign` Befehl, um ein neues beliebiges 
 
 ### Erklärung
 
-Das Attribut `msPKI-Certificate-Policy` ermöglicht es, die Ausstellungsrichtlinie zum Zertifikatstemplate hinzuzufügen. Die `msPKI-Enterprise-Oid` Objekte, die für die Ausstellung von Richtlinien verantwortlich sind, können im Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) des PKI OID Containers entdeckt werden. Eine Richtlinie kann mit einer AD-Gruppe verknüpft werden, indem das Attribut `msDS-OIDToGroupLink` dieses Objekts verwendet wird, wodurch ein System einen Benutzer autorisieren kann, der das Zertifikat vorlegt, als ob er ein Mitglied der Gruppe wäre. [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
+Das Attribut `msPKI-Certificate-Policy` ermöglicht es, die Ausgabe-Policy zum Zertifikatstemplate hinzuzufügen. Die `msPKI-Enterprise-Oid` Objekte, die für die Ausgabe-Policies verantwortlich sind, können im Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) des PKI OID Containers entdeckt werden. Eine Policy kann mit einer AD-Gruppe verknüpft werden, indem das Attribut `msDS-OIDToGroupLink` dieses Objekts verwendet wird, wodurch ein System einen Benutzer autorisieren kann, der das Zertifikat präsentiert, als ob er ein Mitglied der Gruppe wäre. [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
 
 Mit anderen Worten, wenn ein Benutzer die Berechtigung hat, ein Zertifikat zu beantragen und das Zertifikat mit einer OID-Gruppe verknüpft ist, kann der Benutzer die Privilegien dieser Gruppe erben.
 
@@ -615,17 +629,14 @@ certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target 
 
 ### Brechen von Waldvertrauen durch kompromittierte CAs
 
-Die Konfiguration für **cross-forest enrollment** ist relativ unkompliziert. Das **Root-CA-Zertifikat** aus dem Ressourcenwald wird von Administratoren **in die Konto-Wälder veröffentlicht**, und die **Enterprise-CA**-Zertifikate aus dem Ressourcenwald werden **zu den `NTAuthCertificates` und AIA-Containern in jedem Konto-Wald hinzugefügt**. Um das zu verdeutlichen, gewährt diese Anordnung der **CA im Ressourcenwald die vollständige Kontrolle** über alle anderen Wälder, für die sie PKI verwaltet. Sollte diese CA von **Angreifern kompromittiert werden**, könnten Zertifikate für alle Benutzer in sowohl dem Ressourcen- als auch dem Konto-Wald von ihnen **gefälscht werden**, wodurch die Sicherheitsgrenze des Waldes gebrochen wird.
+Die Konfiguration für **Cross-Forest-Enrollment** ist relativ unkompliziert. Das **Root-CA-Zertifikat** aus dem Ressourcenwald wird von Administratoren **in die Konto-Wälder veröffentlicht**, und die **Enterprise-CA**-Zertifikate aus dem Ressourcenwald werden **zu den `NTAuthCertificates` und AIA-Containern in jedem Konto-Wald hinzugefügt**. Um das zu verdeutlichen, gewährt diese Anordnung der **CA im Ressourcenwald die vollständige Kontrolle** über alle anderen Wälder, für die sie PKI verwaltet. Sollte diese CA von **Angreifern kompromittiert werden**, könnten Zertifikate für alle Benutzer in sowohl dem Ressourcen- als auch dem Konto-Wald von ihnen **gefälscht werden**, wodurch die Sicherheitsgrenze des Waldes durchbrochen wird.
 
 ### Einschreiberechte, die ausländischen Prinzipalen gewährt werden
 
-In Multi-Wald-Umgebungen ist Vorsicht geboten hinsichtlich Enterprise CAs, die **Zertifikatvorlagen veröffentlichen**, die **Authenticated Users oder ausländischen Prinzipalen** (Benutzer/Gruppen außerhalb des Waldes, zu dem die Enterprise CA gehört) **Einschreib- und Bearbeitungsrechte** gewähren.\
-Nach der Authentifizierung über ein Vertrauen wird die **Authenticated Users SID** dem Token des Benutzers von AD hinzugefügt. Wenn also eine Domäne eine Enterprise CA mit einer Vorlage besitzt, die **Authenticated Users Einschreiberechte gewährt**, könnte eine Vorlage potenziell von einem Benutzer aus einem anderen Wald **eingeschrieben werden**. Ebenso, wenn **Einschreiberechte explizit durch eine Vorlage an einen ausländischen Prinzipal gewährt werden**, wird eine **cross-forest access-control-Beziehung geschaffen**, die es einem Prinzipal aus einem Wald ermöglicht, **in eine Vorlage aus einem anderen Wald einzuschreiben**.
+In Multi-Wald-Umgebungen ist Vorsicht geboten hinsichtlich Enterprise CAs, die **Zertifikatvorlagen veröffentlichen**, die **authentifizierten Benutzern oder ausländischen Prinzipalen** (Benutzern/Gruppen, die extern zum Wald sind, zu dem die Enterprise CA gehört) **Einschreibungs- und Bearbeitungsrechte** gewähren.\
+Nach der Authentifizierung über ein Vertrauen wird die **SID der authentifizierten Benutzer** vom AD zum Token des Benutzers hinzugefügt. Wenn also eine Domäne eine Enterprise CA mit einer Vorlage besitzt, die **authentifizierten Benutzern Einschreiberechte gewährt**, könnte eine Vorlage potenziell von einem Benutzer aus einem anderen Wald **eingeschrieben werden**. Ebenso, wenn **Einschreiberechte explizit durch eine Vorlage an einen ausländischen Prinzipal gewährt werden**, wird eine **Cross-Forest-Zugriffssteuerungsbeziehung geschaffen**, die es einem Prinzipal aus einem Wald ermöglicht, **sich in eine Vorlage aus einem anderen Wald einzuschreiben**.
 
-Beide Szenarien führen zu einer **Erhöhung der Angriffsfläche** von einem Wald zum anderen. Die Einstellungen der Zertifikatvorlage könnten von einem Angreifer ausgenutzt werden, um zusätzliche Privilegien in einer fremden Domäne zu erlangen.
+Beide Szenarien führen zu einer **Erhöhung der Angriffsfläche** von einem Wald zum anderen. Die Einstellungen der Zertifikatvorlage könnten von einem Angreifer ausgenutzt werden, um zusätzliche Privilegien in einer ausländischen Domäne zu erlangen.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,12 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Vertiefen Sie Ihr Fachwissen in **Mobile Security** mit der 8kSec Academy. Meistern Sie die Sicherheit von iOS und Android durch unsere selbstgesteuerten Kurse und erhalten Sie ein Zertifikat:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **Diese Seite basiert auf einer von [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Überprüfen Sie das Original für weitere Informationen!
 
 ## LM und Klartext im Speicher
@@ -41,10 +35,10 @@ Das Manipulieren von Ereignisprotokollen in Mimikatz umfasst zwei Hauptaktionen:
 
 #### Löschen von Ereignisprotokollen
 
-- **Befehl**: Diese Aktion zielt darauf ab, die Ereignisprotokolle zu löschen, um es schwieriger zu machen, böswillige Aktivitäten nachzuvollziehen.
-- Mimikatz bietet in seiner Standarddokumentation keinen direkten Befehl zum Löschen von Ereignisprotokollen über die Befehlszeile. Das Manipulieren von Ereignisprotokollen umfasst jedoch typischerweise die Verwendung von Systemtools oder Skripten außerhalb von Mimikatz, um spezifische Protokolle zu löschen (z. B. mit PowerShell oder dem Windows-Ereignisanzeiger).
+- **Befehl**: Diese Aktion zielt darauf ab, die Ereignisprotokolle zu löschen, um es schwieriger zu machen, böswillige Aktivitäten nachzuverfolgen.
+- Mimikatz bietet in seiner Standarddokumentation keinen direkten Befehl zum Löschen von Ereignisprotokollen über die Befehlszeile. Das Manipulieren von Ereignisprotokollen umfasst jedoch typischerweise die Verwendung von Systemtools oder Skripten außerhalb von Mimikatz, um spezifische Protokolle zu löschen (z. B. mit PowerShell oder dem Windows-Ereignisanzeige).
 
-#### Experimentelles Feature: Patchen des Ereignisdienstes
+#### Experimentelle Funktion: Patchen des Ereignisdienstes
 
 - **Befehl**: `event::drop`
 - Dieser experimentelle Befehl ist darauf ausgelegt, das Verhalten des Ereignisprotokollierungsdienstes zu ändern, wodurch effektiv verhindert wird, dass neue Ereignisse aufgezeichnet werden.
@@ -85,14 +79,14 @@ Beispiel:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### Trust Ticket Erstellung
+### Erstellung von Vertrauens-Tickets
 
-Trust Tickets werden verwendet, um auf Ressourcen über Domänen hinweg zuzugreifen, indem Vertrauensverhältnisse genutzt werden. Wichtiger Befehl und Parameter:
+Vertrauens-Tickets werden verwendet, um auf Ressourcen über Domänen hinweg zuzugreifen, indem Vertrauensverhältnisse genutzt werden. Wichtiger Befehl und Parameter:
 
 - Befehl: Ähnlich wie Golden Ticket, aber für Vertrauensverhältnisse.
 - Parameter:
 - `/target`: Der FQDN der Ziel-Domäne.
-- `/rc4`: Der NTLM-Hash für das Vertrauenskonto.
+- `/rc4`: Der NTLM-Hash für das Vertrauens-Konto.
 
 Beispiel:
 ```bash
@@ -170,7 +164,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **PRIVILEGE::Debug**: Debug-Rechte erhalten.
 - `mimikatz "privilege::debug" exit`
 
-### Anmeldeinformationen dumpen
+### Anmeldeinformationen Dumping
 
 - **SEKURLSA::LogonPasswords**: Anmeldeinformationen für angemeldete Benutzer anzeigen.
 
@@ -203,10 +197,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Passwörter aus dem Windows Vault extrahieren.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Vertiefen Sie Ihr Fachwissen in **Mobiler Sicherheit** mit der 8kSec Academy. Meistern Sie die Sicherheit von iOS und Android durch unsere selbstgesteuerten Kurse und lassen Sie sich zertifizieren:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

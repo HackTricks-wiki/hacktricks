@@ -1,43 +1,43 @@
-# Abusing Docker Socket for Privilege Escalation
+# Missbrauch des Docker-Sockets zur Privilegieneskalation
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-There are some occasions were you just have **access to the docker socket** and you want to use it to **escalate privileges**. Some actions might be very suspicious and you may want to avoid them, so here you can find different flags that can be useful to escalate privileges:
+Es gibt einige Gelegenheiten, bei denen Sie **Zugriff auf den Docker-Socket** haben und ihn nutzen möchten, um **Privilegien zu eskalieren**. Einige Aktionen könnten sehr verdächtig sein, und Sie möchten sie möglicherweise vermeiden. Hier finden Sie verschiedene Flags, die nützlich sein können, um Privilegien zu eskalieren:
 
-### Via mount
+### Über Mount
 
-You can **mount** different parts of the **filesystem** in a container running as root and **access** them.\
-You could also **abuse a mount to escalate privileges** inside the container.
+Sie können verschiedene Teile des **Dateisystems** in einem als Root laufenden Container **einbinden** und auf sie **zugreifen**.\
+Sie könnten auch **einen Mount missbrauchen, um Privilegien** innerhalb des Containers zu eskalieren.
 
-- **`-v /:/host`** -> Mount the host filesystem in the container so you can **read the host filesystem.**
-  - If you want to **feel like you are in the host** but being on the container you could disable other defense mechanisms using flags like:
-    - `--privileged`
-    - `--cap-add=ALL`
-    - `--security-opt apparmor=unconfined`
-    - `--security-opt seccomp=unconfined`
-    - `-security-opt label:disable`
-    - `--pid=host`
-    - `--userns=host`
-    - `--uts=host`
-    - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> This is similar to the previous method, but here we are **mounting the device disk**. Then, inside the container run `mount /dev/sda1 /mnt` and you can **access** the **host filesystem** in `/mnt`
-  - Run `fdisk -l` in the host to find the `</dev/sda1>` device to mount
-- **`-v /tmp:/host`** -> If for some reason you can **just mount some directory** from the host and you have access inside the host. Mount it and create a **`/bin/bash`** with **suid** in the mounted directory so you can **execute it from the host and escalate to root**.
+- **`-v /:/host`** -> Binden Sie das Host-Dateisystem im Container ein, damit Sie das **Host-Dateisystem lesen** können.
+- Wenn Sie **das Gefühl haben möchten, dass Sie sich im Host** befinden, aber im Container sind, könnten Sie andere Abwehrmechanismen mit Flags wie deaktivieren:
+- `--privileged`
+- `--cap-add=ALL`
+- `--security-opt apparmor=unconfined`
+- `--security-opt seccomp=unconfined`
+- `-security-opt label:disable`
+- `--pid=host`
+- `--userns=host`
+- `--uts=host`
+- `--cgroupns=host`
+- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Dies ist ähnlich wie die vorherige Methode, aber hier binden wir das **Gerätedisk** ein. Führen Sie dann im Container `mount /dev/sda1 /mnt` aus, und Sie können auf das **Host-Dateisystem** in `/mnt` **zugreifen**.
+- Führen Sie `fdisk -l` im Host aus, um das `</dev/sda1>`-Gerät zu finden, das Sie einbinden möchten.
+- **`-v /tmp:/host`** -> Wenn Sie aus irgendeinem Grund **nur ein Verzeichnis** vom Host einbinden können und Sie Zugriff innerhalb des Hosts haben. Binden Sie es ein und erstellen Sie eine **`/bin/bash`** mit **suid** im eingebundenen Verzeichnis, damit Sie es **vom Host aus ausführen und zu root eskalieren** können.
 
 > [!NOTE]
-> Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+> Beachten Sie, dass Sie möglicherweise den Ordner `/tmp` nicht einbinden können, aber Sie können ein **anderes beschreibbares Verzeichnis** einbinden. Sie können beschreibbare Verzeichnisse mit `find / -writable -type d 2>/dev/null` finden.
 >
-> **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+> **Beachten Sie, dass nicht alle Verzeichnisse auf einem Linux-Rechner das suid-Bit unterstützen!** Um zu überprüfen, welche Verzeichnisse das suid-Bit unterstützen, führen Sie `mount | grep -v "nosuid"` aus. Zum Beispiel unterstützen normalerweise `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` und `/var/lib/lxcfs` nicht das suid-Bit.
 >
-> Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+> Beachten Sie auch, dass Sie, wenn Sie **`/etc`** oder einen anderen Ordner **mit Konfigurationsdateien** einbinden können, diese vom Docker-Container aus als Root ändern können, um sie **im Host zu missbrauchen** und Privilegien zu eskalieren (vielleicht durch Modifikation von `/etc/shadow`).
 
-### Escaping from the container
+### Aus dem Container entkommen
 
-- **`--privileged`** -> With this flag you [remove all the isolation from the container](docker-privileged.md#what-affects). Check techniques to [escape from privileged containers as root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> To [escalate abusing capabilities](../linux-capabilities.md), **grant that capability to the container** and disable other protection methods that may prevent the exploit to work.
+- **`--privileged`** -> Mit diesem Flag [entfernen Sie alle Isolationen vom Container](docker-privileged.md#what-affects). Überprüfen Sie Techniken, um [aus privilegierten Containern als Root zu entkommen](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Um [Privilegien durch Missbrauch von Fähigkeiten zu eskalieren](../linux-capabilities.md), **gewähren Sie diese Fähigkeit dem Container** und deaktivieren Sie andere Schutzmethoden, die verhindern könnten, dass der Exploit funktioniert.
 
 ### Curl
 
-In this page we have discussed ways to escalate privileges using docker flags, you can find **ways to abuse these methods using curl** command in the page:
+Auf dieser Seite haben wir Möglichkeiten zur Eskalation von Privilegien unter Verwendung von Docker-Flags diskutiert. Sie finden **Möglichkeiten, diese Methoden mit dem curl**-Befehl zu missbrauchen, auf der Seite:
 
 {{#include ../../../banners/hacktricks-training.md}}

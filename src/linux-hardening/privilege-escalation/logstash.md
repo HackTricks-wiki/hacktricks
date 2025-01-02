@@ -2,59 +2,55 @@
 
 ## Logstash
 
-Logstash is used to **gather, transform, and dispatch logs** through a system known as **pipelines**. These pipelines are made up of **input**, **filter**, and **output** stages. An interesting aspect arises when Logstash operates on a compromised machine.
+Logstash wird verwendet, um **Protokolle zu sammeln, zu transformieren und zu versenden** durch ein System, das als **Pipelines** bekannt ist. Diese Pipelines bestehen aus **Eingabe**, **Filter** und **Ausgabe**-Stufen. Ein interessantes Aspekt tritt auf, wenn Logstash auf einer kompromittierten Maschine arbeitet.
 
-### Pipeline Configuration
+### Pipeline-Konfiguration
 
-Pipelines are configured in the file **/etc/logstash/pipelines.yml**, which lists the locations of the pipeline configurations:
-
+Pipelines werden in der Datei **/etc/logstash/pipelines.yml** konfiguriert, die die Standorte der Pipeline-Konfigurationen auflistet:
 ```yaml
 # Define your pipelines here. Multiple pipelines can be defined.
 # For details on multiple pipelines, refer to the documentation:
 # https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
 
 - pipeline.id: main
-  path.config: "/etc/logstash/conf.d/*.conf"
+path.config: "/etc/logstash/conf.d/*.conf"
 - pipeline.id: example
-  path.config: "/usr/share/logstash/pipeline/1*.conf"
-  pipeline.workers: 6
+path.config: "/usr/share/logstash/pipeline/1*.conf"
+pipeline.workers: 6
 ```
+Diese Datei zeigt, wo sich die **.conf**-Dateien mit den Pipeline-Konfigurationen befinden. Bei der Verwendung eines **Elasticsearch output module** ist es üblich, dass **Pipelines** **Elasticsearch-Anmeldeinformationen** enthalten, die oft umfangreiche Berechtigungen besitzen, da Logstash Daten in Elasticsearch schreiben muss. Platzhalter in den Konfigurationspfaden ermöglichen es Logstash, alle übereinstimmenden Pipelines im angegebenen Verzeichnis auszuführen.
 
-This file reveals where the **.conf** files, containing pipeline configurations, are located. When employing an **Elasticsearch output module**, it's common for **pipelines** to include **Elasticsearch credentials**, which often possess extensive privileges due to Logstash's need to write data to Elasticsearch. Wildcards in configuration paths allow Logstash to execute all matching pipelines in the designated directory.
+### Privilegieneskalation über beschreibbare Pipelines
 
-### Privilege Escalation via Writable Pipelines
+Um eine Privilegieneskalation zu versuchen, identifizieren Sie zunächst den Benutzer, unter dem der Logstash-Dienst läuft, typischerweise den **logstash**-Benutzer. Stellen Sie sicher, dass Sie **eine** dieser Kriterien erfüllen:
 
-To attempt privilege escalation, first identify the user under which the Logstash service is running, typically the **logstash** user. Ensure you meet **one** of these criteria:
+- Besitzen Sie **Schreibzugriff** auf eine Pipeline-**.conf**-Datei **oder**
+- Die **/etc/logstash/pipelines.yml**-Datei verwendet einen Platzhalter, und Sie können in den Zielordner schreiben
 
-- Possess **write access** to a pipeline **.conf** file **or**
-- The **/etc/logstash/pipelines.yml** file uses a wildcard, and you can write to the target folder
+Zusätzlich muss **eine** dieser Bedingungen erfüllt sein:
 
-Additionally, **one** of these conditions must be fulfilled:
+- Fähigkeit, den Logstash-Dienst neu zu starten **oder**
+- Die **/etc/logstash/logstash.yml**-Datei hat **config.reload.automatic: true** gesetzt
 
-- Capability to restart the Logstash service **or**
-- The **/etc/logstash/logstash.yml** file has **config.reload.automatic: true** set
-
-Given a wildcard in the configuration, creating a file that matches this wildcard allows for command execution. For instance:
-
+Angesichts eines Platzhalters in der Konfiguration ermöglicht das Erstellen einer Datei, die mit diesem Platzhalter übereinstimmt, die Ausführung von Befehlen. Zum Beispiel:
 ```bash
 input {
-  exec {
-    command => "whoami"
-    interval => 120
-  }
+exec {
+command => "whoami"
+interval => 120
+}
 }
 
 output {
-  file {
-    path => "/tmp/output.log"
-    codec => rubydebug
-  }
+file {
+path => "/tmp/output.log"
+codec => rubydebug
+}
 }
 ```
+Hier bestimmt **interval** die Ausführungsfrequenz in Sekunden. Im gegebenen Beispiel wird der **whoami**-Befehl alle 120 Sekunden ausgeführt, wobei die Ausgabe an **/tmp/output.log** geleitet wird.
 
-Here, **interval** determines the execution frequency in seconds. In the given example, the **whoami** command runs every 120 seconds, with its output directed to **/tmp/output.log**.
-
-With **config.reload.automatic: true** in **/etc/logstash/logstash.yml**, Logstash will automatically detect and apply new or modified pipeline configurations without needing a restart. If there's no wildcard, modifications can still be made to existing configurations, but caution is advised to avoid disruptions.
+Mit **config.reload.automatic: true** in **/etc/logstash/logstash.yml** wird Logstash automatisch neue oder modifizierte Pipeline-Konfigurationen erkennen und anwenden, ohne dass ein Neustart erforderlich ist. Wenn es kein Wildcard gibt, können weiterhin Änderungen an bestehenden Konfigurationen vorgenommen werden, jedoch ist Vorsicht geboten, um Unterbrechungen zu vermeiden.
 
 ## References
 

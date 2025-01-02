@@ -2,10 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Einführung
 
 Das Kerberos "Double Hop" Problem tritt auf, wenn ein Angreifer versucht, **Kerberos-Authentifizierung über zwei** **Hops** zu verwenden, zum Beispiel mit **PowerShell**/**WinRM**.
@@ -17,18 +13,18 @@ Das liegt daran, dass beim Verbinden mit Kerberos folgende Schritte durchgeführ
 1. Benutzer1 gibt Anmeldeinformationen ein und der **Domänencontroller** gibt ein Kerberos **TGT** an Benutzer1 zurück.
 2. Benutzer1 verwendet das **TGT**, um ein **Dienstticket** anzufordern, um sich mit Server1 zu **verbinden**.
 3. Benutzer1 **verbindet** sich mit **Server1** und gibt das **Dienstticket** an.
-4. **Server1** hat **keine** Anmeldeinformationen von Benutzer1 zwischengespeichert oder das **TGT** von Benutzer1. Daher kann Benutzer1 von Server1 aus nicht auf einen zweiten Server zugreifen, da er **sich nicht authentifizieren kann**.
+4. **Server1** hat **keine** Anmeldeinformationen von Benutzer1 zwischengespeichert oder das **TGT** von Benutzer1. Daher kann Benutzer1 von Server1 aus nicht auf einen zweiten Server zugreifen, da er sich **nicht authentifizieren kann**.
 
-### Unbeschränkte Delegation
+### Unbeschränkte Delegierung
 
-Wenn die **unbeschränkte Delegation** auf dem PC aktiviert ist, tritt dies nicht auf, da der **Server** ein **TGT** für jeden Benutzer erhält, der darauf zugreift. Darüber hinaus können Sie, wenn unbeschränkte Delegation verwendet wird, wahrscheinlich den **Domänencontroller** von dort aus **kompromittieren**.\
-[**Weitere Informationen auf der Seite zur unbeschränkten Delegation**](unconstrained-delegation.md).
+Wenn die **unbeschränkte Delegierung** auf dem PC aktiviert ist, tritt dies nicht auf, da der **Server** ein **TGT** für jeden Benutzer erhält, der darauf zugreift. Darüber hinaus können Sie, wenn unbeschränkte Delegierung verwendet wird, wahrscheinlich den **Domänencontroller** von dort aus **kompromittieren**.\
+[**Weitere Informationen auf der Seite zur unbeschränkten Delegierung**](unconstrained-delegation.md).
 
 ### CredSSP
 
 Eine weitere Möglichkeit, dieses Problem zu vermeiden, die [**auffällig unsicher**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) ist, ist der **Credential Security Support Provider**. Von Microsoft:
 
-> Die CredSSP-Authentifizierung delegiert die Benutzeranmeldeinformationen vom lokalen Computer an einen Remote-Computer. Diese Praxis erhöht das Sicherheitsrisiko der Remote-Operation. Wenn der Remote-Computer kompromittiert ist, können die Anmeldeinformationen, wenn sie an ihn übergeben werden, verwendet werden, um die Netzwerksitzung zu steuern.
+> CredSSP-Authentifizierung delegiert die Benutzeranmeldeinformationen vom lokalen Computer an einen Remote-Computer. Diese Praxis erhöht das Sicherheitsrisiko der Remote-Operation. Wenn der Remote-Computer kompromittiert wird, können die Anmeldeinformationen, wenn sie an ihn übergeben werden, verwendet werden, um die Netzwerksitzung zu steuern.
 
 Es wird dringend empfohlen, **CredSSP** auf Produktionssystemen, sensiblen Netzwerken und ähnlichen Umgebungen aus Sicherheitsgründen zu deaktivieren. Um festzustellen, ob **CredSSP** aktiviert ist, kann der Befehl `Get-WSManCredSSP` ausgeführt werden. Dieser Befehl ermöglicht die **Überprüfung des CredSSP-Status** und kann sogar remote ausgeführt werden, vorausgesetzt, **WinRM** ist aktiviert.
 ```powershell
@@ -73,7 +69,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-Die Installation von OpenSSH auf dem ersten Server ermöglicht eine Umgehung des Double-Hop-Problems, was besonders nützlich für Jump-Box-Szenarien ist. Diese Methode erfordert die CLI-Installation und -Einrichtung von OpenSSH für Windows. Wenn es für die Passwortauthentifizierung konfiguriert ist, ermöglicht dies dem Zwischenserver, ein TGT im Namen des Benutzers zu erhalten.
+Die Installation von OpenSSH auf dem ersten Server ermöglicht eine Umgehung des Double-Hop-Problems, das besonders nützlich für Jump-Box-Szenarien ist. Diese Methode erfordert die CLI-Installation und -Einrichtung von OpenSSH für Windows. Wenn es für die Passwortauthentifizierung konfiguriert ist, ermöglicht dies dem Zwischenserver, ein TGT im Namen des Benutzers zu erhalten.
 
 #### OpenSSH Installationsschritte
 
@@ -92,8 +88,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

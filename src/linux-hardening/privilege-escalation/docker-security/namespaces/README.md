@@ -2,43 +2,43 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID namespace**
+### **PID-Namespace**
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **Mount namespace**
+### **Mount-Namespace**
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **Network namespace**
+### **Netzwerk-Namespace**
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC Namespace**
+### **IPC-Namespace**
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS namespace**
+### **UTS-Namespace**
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### Time Namespace
+### Zeit-Namespace
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### User namespace
+### Benutzer-Namespace
 
 {{#ref}}
 user-namespace.md

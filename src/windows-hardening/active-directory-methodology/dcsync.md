@@ -1,22 +1,14 @@
 # DCSync
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Verwenden Sie [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync), um einfach **Workflows** zu erstellen und zu **automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.\
-Zugang heute erhalten:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## DCSync
 
-Die **DCSync**-Berechtigung impliziert, diese Berechtigungen über die Domäne selbst zu haben: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** und **Replicating Directory Changes In Filtered Set**.
+Die **DCSync**-Berechtigung impliziert, dass man diese Berechtigungen über die Domäne selbst hat: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** und **Replicating Directory Changes In Filtered Set**.
 
 **Wichtige Hinweise zu DCSync:**
 
-- Der **DCSync-Angriff simuliert das Verhalten eines Domain Controllers und fordert andere Domain Controllers auf, Informationen zu replizieren**, indem er das Directory Replication Service Remote Protocol (MS-DRSR) verwendet. Da MS-DRSR eine gültige und notwendige Funktion von Active Directory ist, kann es nicht deaktiviert oder abgeschaltet werden.
+- Der **DCSync-Angriff simuliert das Verhalten eines Domain Controllers und fordert andere Domain Controllers auf, Informationen zu replizieren** unter Verwendung des Directory Replication Service Remote Protocol (MS-DRSR). Da MS-DRSR eine gültige und notwendige Funktion von Active Directory ist, kann es nicht deaktiviert oder abgeschaltet werden.
 - Standardmäßig haben nur die Gruppen **Domain Admins, Enterprise Admins, Administrators und Domain Controllers** die erforderlichen Berechtigungen.
 - Wenn Passwörter von Konten mit umkehrbarer Verschlüsselung gespeichert sind, steht in Mimikatz eine Option zur Verfügung, um das Passwort im Klartext zurückzugeben.
 
@@ -70,11 +62,3 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Verwenden Sie [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync), um einfach **Workflows** zu erstellen und **zu automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.\
-Zugang heute erhalten:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}

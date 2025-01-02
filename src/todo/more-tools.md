@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -56,9 +53,9 @@
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp-Plugin, Offline-Analyse zur Entdeckung von Domains, Subdomains und IPs
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Liste verschiedener Tools
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : BurpSuite-Plugin zur Auffindung von Schwachstellen (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome-Erweiterung zum Verfolgen von Post-Nachrichtenfunktionen
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome-Erweiterung zur Verfolgung von Post-Nachrichtenfunktionen
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Automatische Authentifizierungstests (Cookies entfernen und versuchen, die Anfrage zu senden)
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross ist ein Rekonstruktions-, Scanner- und Tool für Penetration/BugBounty-Tests. Dieses Tool wurde entwickelt, um (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) Schwachstellen zu testen
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross ist ein Rekonstruktionstool, Scanner und ein Werkzeug für Penetration/BugBounty-Tests. Dieses Tool wurde entwickelt, um (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) Schwachstellen zu testen
 
 # Windows
 
@@ -95,7 +92,7 @@ Hier eine Firmware mit Schwachstellen zur Analyse: [https://github.com/scripting
 
 und hier die OWASP-Methodologie zur Analyse von Firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Firmware-Emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) ist eine Plattform zur Automatisierung der Emulation und dynamischen Analyse von Linux-basierten Firmware.
+Firmware-Emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) ist eine Plattform zur Automatisierung der Emulation und dynamischen Analyse von Linux-basierter Firmware.
 
 # ANDERE
 
@@ -105,11 +102,11 @@ Firmware-Emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) ist eine
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
 - [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Statische Codeanalyse
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH Tarpit, das langsam ein endloses Banner sendet.
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH-Tarpit, das langsam ein endloses Banner sendet.
 - AWS und Cloud-Tools: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
 - IFS (Interplanetary File System) für Phishing: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
 - IP-Rotationsdienste: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
-- Linux Rootkit: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
+- Linux-Rootkit: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : Online IDE
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Ressourcen für den Einstieg in BugBounties
 - [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOS-Pentesting-Tools
@@ -119,8 +116,5 @@ Firmware-Emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) ist eine
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Diese Liste zielt darauf ab, sicherheitsrelevante Themen zu Electron.js abzudecken.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Informationen über BB-Programme
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

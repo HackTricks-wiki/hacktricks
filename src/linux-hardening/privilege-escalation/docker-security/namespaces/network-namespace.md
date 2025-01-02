@@ -1,84 +1,74 @@
-# Network Namespace
+# Netzwerk-Namespace
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Grundlegende Informationen
 
-A network namespace is a Linux kernel feature that provides isolation of the network stack, allowing **each network namespace to have its own independent network configuration**, interfaces, IP addresses, routing tables, and firewall rules. This isolation is useful in various scenarios, such as containerization, where each container should have its own network configuration, independent of other containers and the host system.
+Ein Netzwerk-Namespace ist eine Funktion des Linux-Kernels, die die Isolation des Netzwerk-Stacks ermöglicht und **jedem Netzwerk-Namespace eine eigene unabhängige Netzwerk-Konfiguration**, Schnittstellen, IP-Adressen, Routing-Tabellen und Firewall-Regeln zuweist. Diese Isolation ist in verschiedenen Szenarien nützlich, wie z.B. bei der Containerisierung, wo jeder Container seine eigene Netzwerk-Konfiguration haben sollte, unabhängig von anderen Containern und dem Host-System.
 
-### How it works:
+### So funktioniert es:
 
-1. When a new network namespace is created, it starts with a **completely isolated network stack**, with **no network interfaces** except for the loopback interface (lo). This means that processes running in the new network namespace cannot communicate with processes in other namespaces or the host system by default.
-2. **Virtual network interfaces**, such as veth pairs, can be created and moved between network namespaces. This allows for establishing network connectivity between namespaces or between a namespace and the host system. For example, one end of a veth pair can be placed in a container's network namespace, and the other end can be connected to a **bridge** or another network interface in the host namespace, providing network connectivity to the container.
-3. Network interfaces within a namespace can have their **own IP addresses, routing tables, and firewall rules**, independent of other namespaces. This allows processes in different network namespaces to have different network configurations and operate as if they are running on separate networked systems.
-4. Processes can move between namespaces using the `setns()` system call, or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWNET` flag. When a process moves to a new namespace or creates one, it will start using the network configuration and interfaces associated with that namespace.
+1. Wenn ein neuer Netzwerk-Namespace erstellt wird, beginnt er mit einem **vollständig isolierten Netzwerk-Stack**, mit **keinen Netzwerk-Schnittstellen** außer der Loopback-Schnittstelle (lo). Das bedeutet, dass Prozesse, die im neuen Netzwerk-Namespace ausgeführt werden, standardmäßig nicht mit Prozessen in anderen Namespaces oder dem Host-System kommunizieren können.
+2. **Virtuelle Netzwerk-Schnittstellen**, wie veth-Paare, können erstellt und zwischen Netzwerk-Namespaces verschoben werden. Dies ermöglicht die Herstellung einer Netzwerkverbindung zwischen Namespaces oder zwischen einem Namespace und dem Host-System. Zum Beispiel kann ein Ende eines veth-Paares im Netzwerk-Namespace eines Containers platziert werden, und das andere Ende kann mit einem **Bridge** oder einer anderen Netzwerk-Schnittstelle im Host-Namespace verbunden werden, um dem Container Netzwerkverbindung zu bieten.
+3. Netzwerk-Schnittstellen innerhalb eines Namespace können ihre **eigenen IP-Adressen, Routing-Tabellen und Firewall-Regeln** haben, unabhängig von anderen Namespaces. Dies ermöglicht es Prozessen in verschiedenen Netzwerk-Namespaces, unterschiedliche Netzwerk-Konfigurationen zu haben und so zu arbeiten, als ob sie auf separaten vernetzten Systemen ausgeführt werden.
+4. Prozesse können zwischen Namespaces mit dem `setns()` Systemaufruf wechseln oder neue Namespaces mit den Systemaufrufen `unshare()` oder `clone()` mit dem `CLONE_NEWNET`-Flag erstellen. Wenn ein Prozess in einen neuen Namespace wechselt oder einen erstellt, beginnt er, die Netzwerk-Konfiguration und Schnittstellen zu verwenden, die mit diesem Namespace verbunden sind.
 
-## Lab:
+## Labor:
 
-### Create different Namespaces
+### Verschiedene Namespaces erstellen
 
 #### CLI
-
 ```bash
 sudo unshare -n [--mount-proc] /bin/bash
 # Run ifconfig or ip -a
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Durch das Einhängen einer neuen Instanz des `/proc`-Dateisystems, wenn Sie den Parameter `--mount-proc` verwenden, stellen Sie sicher, dass der neue Mount-Namespace eine **genaue und isolierte Sicht auf die prozessspezifischen Informationen hat, die für diesen Namespace spezifisch sind**.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Fehler: bash: fork: Kann Speicher nicht zuweisen</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Wenn `unshare` ohne die Option `-f` ausgeführt wird, tritt ein Fehler auf, der auf die Art und Weise zurückzuführen ist, wie Linux neue PID (Process ID) Namespaces behandelt. Die wichtigsten Details und die Lösung sind unten aufgeführt:
 
-1. **Problem Explanation**:
+1. **Problemerklärung**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Der Linux-Kernel erlaubt es einem Prozess, neue Namespaces mit dem Systemaufruf `unshare` zu erstellen. Der Prozess, der die Erstellung eines neuen PID-Namespace initiiert (als "unshare"-Prozess bezeichnet), tritt jedoch nicht in den neuen Namespace ein; nur seine Kindprozesse tun dies.
+- Das Ausführen von `%unshare -p /bin/bash%` startet `/bin/bash` im selben Prozess wie `unshare`. Folglich befinden sich `/bin/bash` und seine Kindprozesse im ursprünglichen PID-Namespace.
+- Der erste Kindprozess von `/bin/bash` im neuen Namespace wird PID 1. Wenn dieser Prozess beendet wird, wird die Bereinigung des Namespaces ausgelöst, wenn keine anderen Prozesse vorhanden sind, da PID 1 die besondere Rolle hat, verwaiste Prozesse zu übernehmen. Der Linux-Kernel deaktiviert dann die PID-Zuweisung in diesem Namespace.
 
-2. **Consequence**:
+2. **Folge**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Das Beenden von PID 1 in einem neuen Namespace führt zur Bereinigung des `PIDNS_HASH_ADDING`-Flags. Dies führt dazu, dass die Funktion `alloc_pid` fehlschlägt, wenn versucht wird, eine neue PID zuzuweisen, was den Fehler "Kann Speicher nicht zuweisen" erzeugt.
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Lösung**:
+- Das Problem kann gelöst werden, indem die Option `-f` mit `unshare` verwendet wird. Diese Option bewirkt, dass `unshare` einen neuen Prozess nach der Erstellung des neuen PID-Namespace forked.
+- Das Ausführen von `%unshare -fp /bin/bash%` stellt sicher, dass der `unshare`-Befehl selbst PID 1 im neuen Namespace wird. `/bin/bash` und seine Kindprozesse sind dann sicher in diesem neuen Namespace enthalten, wodurch das vorzeitige Beenden von PID 1 verhindert wird und eine normale PID-Zuweisung ermöglicht wird.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Durch die Sicherstellung, dass `unshare` mit dem `-f`-Flag ausgeführt wird, wird der neue PID-Namespace korrekt aufrechterhalten, sodass `/bin/bash` und seine Unterprozesse ohne den Speicherzuweisungsfehler arbeiten können.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Überprüfen, in welchem Namespace sich Ihr Prozess befindet
 ```bash
 ls -l /proc/self/ns/net
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/net -> 'net:[4026531840]'
 ```
-
-### Find all Network namespaces
-
+### Alle Netzwerk-Namensräume finden
 ```bash
 sudo find /proc -maxdepth 3 -type l -name net -exec readlink {} \; 2>/dev/null | sort -u | grep "net:"
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name net -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside a Network namespace
-
+### Betreten Sie einen Netzwerk-Namespace
 ```bash
 nsenter -n TARGET_PID --pid /bin/bash
 ```
-
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/net`).
+Außerdem können Sie **nur in einen anderen Prozess-Namespace eintreten, wenn Sie root sind**. Und Sie **können** **nicht** **in** einen anderen Namespace **eintreten**, **ohne einen Deskriptor**, der darauf verweist (wie `/proc/self/ns/net`).
 
 ## References
 

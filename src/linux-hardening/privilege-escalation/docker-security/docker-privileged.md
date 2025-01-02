@@ -2,28 +2,25 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What Affects
+## Was betroffen ist
 
-When you run a container as privileged these are the protections you are disabling:
+Wenn Sie einen Container als privilegiert ausführen, deaktivieren Sie die folgenden Schutzmaßnahmen:
 
 ### Mount /dev
 
-In a privileged container, all the **devices can be accessed in `/dev/`**. Therefore you can **escape** by **mounting** the disk of the host.
+In einem privilegierten Container können alle **Geräte in `/dev/`** zugegriffen werden. Daher können Sie durch **Mounten** der Festplatte des Hosts **entkommen**.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
-
 ```bash
 # docker run --rm -it alpine sh
 ls /dev
 console  fd       mqueue   ptmx     random   stderr   stdout   urandom
 core     full     null     pts      shm      stdin    tty      zero
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Innerhalb des privilegierten Containers"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -33,17 +30,15 @@ core             mqueue           ptmx             stdin            tty26       
 cpu              nbd0             pts              stdout           tty27            tty47            ttyS0
 [...]
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-### Read-only kernel file systems
+### Schreibgeschützte Kernel-Dateisysteme
 
-Kernel file systems provide a mechanism for a process to modify the behavior of the kernel. However, when it comes to container processes, we want to prevent them from making any changes to the kernel. Therefore, we mount kernel file systems as **read-only** within the container, ensuring that the container processes cannot modify the kernel.
+Kernel-Dateisysteme bieten einen Mechanismus, um das Verhalten des Kernels durch einen Prozess zu ändern. Wenn es jedoch um Containerprozesse geht, wollen wir verhindern, dass sie Änderungen am Kernel vornehmen. Daher montieren wir Kernel-Dateisysteme als **schreibgeschützt** innerhalb des Containers, um sicherzustellen, dass die Containerprozesse den Kernel nicht ändern können.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
-
 ```bash
 # docker run --rm -it alpine sh
 mount | grep '(ro'
@@ -52,28 +47,24 @@ cpuset on /sys/fs/cgroup/cpuset type cgroup (ro,nosuid,nodev,noexec,relatime,cpu
 cpu on /sys/fs/cgroup/cpu type cgroup (ro,nosuid,nodev,noexec,relatime,cpu)
 cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,cpuacct)
 ```
-
 {{#endtab}}
 
 {{#tab name="Inside Privileged Container"}}
-
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-### Masking over kernel file systems
+### Maskierung über Kernel-Dateisysteme
 
-The **/proc** file system is selectively writable but for security, certain parts are shielded from write and read access by overlaying them with **tmpfs**, ensuring container processes can't access sensitive areas.
+Das **/proc**-Dateisystem ist selektiv beschreibbar, aber aus Sicherheitsgründen sind bestimmte Teile durch Überlagerung mit **tmpfs** vor Lese- und Schreibzugriff geschützt, sodass Containerprozesse nicht auf sensible Bereiche zugreifen können.
 
-> [!NOTE] > **tmpfs** is a file system that stores all the files in virtual memory. tmpfs doesn't create any files on your hard drive. So if you unmount a tmpfs file system, all the files residing in it are lost for ever.
+> [!NOTE] > **tmpfs** ist ein Dateisystem, das alle Dateien im virtuellen Speicher speichert. tmpfs erstellt keine Dateien auf Ihrer Festplatte. Wenn Sie ein tmpfs-Dateisystem aushängen, gehen alle darin befindlichen Dateien für immer verloren.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
-
 ```bash
 # docker run --rm -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -81,22 +72,19 @@ tmpfs on /proc/acpi type tmpfs (ro,relatime)
 tmpfs on /proc/kcore type tmpfs (rw,nosuid,size=65536k,mode=755)
 tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Innerhalb des privilegierten Containers"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-### Linux capabilities
+### Linux-Fähigkeiten
 
-Container engines launch the containers with a **limited number of capabilities** to control what goes on inside of the container by default. **Privileged** ones have **all** the **capabilities** accesible. To learn about capabilities read:
+Container-Engines starten die Container mit einer **begrenzten Anzahl von Fähigkeiten**, um standardmäßig zu kontrollieren, was im Inneren des Containers passiert. **Privilegierte** haben **alle** **Fähigkeiten** zugänglich. Um mehr über Fähigkeiten zu erfahren, lesen Sie:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -104,7 +92,6 @@ Container engines launch the containers with a **limited number of capabilities*
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
-
 ```bash
 # docker run --rm -it alpine sh
 apk add -U libcap; capsh --print
@@ -113,11 +100,9 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 [...]
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Innerhalb des privilegierten Containers"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -126,15 +111,14 @@ Current: =eip cap_perfmon,cap_bpf,cap_checkpoint_restore-eip
 Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read
 [...]
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-You can manipulate the capabilities available to a container without running in `--privileged` mode by using the `--cap-add` and `--cap-drop` flags.
+Sie können die verfügbaren Berechtigungen für einen Container manipulieren, ohne im `--privileged`-Modus zu laufen, indem Sie die Flags `--cap-add` und `--cap-drop` verwenden.
 
 ### Seccomp
 
-**Seccomp** is useful to **limit** the **syscalls** a container can call. A default seccomp profile is enabled by default when running docker containers, but in privileged mode it is disabled. Learn more about Seccomp here:
+**Seccomp** ist nützlich, um die **syscalls**, die ein Container aufrufen kann, **einzuschränken**. Ein standardmäßiges Seccomp-Profil ist standardmäßig aktiviert, wenn Docker-Container ausgeführt werden, aber im privilegierten Modus ist es deaktiviert. Erfahren Sie hier mehr über Seccomp:
 
 {{#ref}}
 seccomp.md
@@ -142,100 +126,86 @@ seccomp.md
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
-
 ```bash
 # docker run --rm -it alpine sh
 grep Seccomp /proc/1/status
 Seccomp:	2
 Seccomp_filters:	1
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Innerhalb des privilegierten Containers"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
 Seccomp:	0
 Seccomp_filters:	0
 ```
-
 {{#endtab}}
 {{#endtabs}}
-
 ```bash
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-
-Also, note that when Docker (or other CRIs) are used in a **Kubernetes** cluster, the **seccomp filter is disabled by default**
+Beachten Sie auch, dass, wenn Docker (oder andere CRIs) in einem **Kubernetes**-Cluster verwendet werden, der **seccomp-Filter standardmäßig deaktiviert** ist.
 
 ### AppArmor
 
-**AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**. When you run with the `--privileged` flag, this protection is disabled.
+**AppArmor** ist eine Kernel-Erweiterung, um **Container** auf eine **begrenzte** Menge von **Ressourcen** mit **programmbezogenen Profilen** zu beschränken. Wenn Sie mit dem `--privileged`-Flag ausführen, ist dieser Schutz deaktiviert.
 
 {{#ref}}
 apparmor.md
 {{#endref}}
-
 ```bash
 # You can manually disable seccomp in docker with
 --security-opt apparmor=unconfined
 ```
-
 ### SELinux
 
-Running a container with the `--privileged` flag disables **SELinux labels**, causing it to inherit the label of the container engine, typically `unconfined`, granting full access similar to the container engine. In rootless mode, it uses `container_runtime_t`, while in root mode, `spc_t` is applied.
+Das Ausführen eines Containers mit dem `--privileged`-Flag deaktiviert **SELinux-Labels**, wodurch er das Label der Container-Engine erbt, typischerweise `unconfined`, was vollen Zugriff ähnlich der Container-Engine gewährt. Im rootlosen Modus wird `container_runtime_t` verwendet, während im Root-Modus `spc_t` angewendet wird.
 
 {{#ref}}
 ../selinux.md
 {{#endref}}
-
 ```bash
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
-
-## What Doesn't Affect
+## Was Nicht Beeinflusst
 
 ### Namespaces
 
-Namespaces are **NOT affected** by the `--privileged` flag. Even though they don't have the security constraints enabled, they **do not see all of the processes on the system or the host network, for example**. Users can disable individual namespaces by using the **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** container engines flags.
+Namespaces sind **NICHT betroffen** von dem `--privileged` Flag. Auch wenn sie die Sicherheitsbeschränkungen nicht aktiviert haben, **sehen sie beispielsweise nicht alle Prozesse im System oder im Host-Netzwerk**. Benutzer können einzelne Namespaces deaktivieren, indem sie die **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** Container-Engine-Flags verwenden.
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}
-
 ```bash
 # docker run --rm --privileged -it alpine sh
 ps -ef
 PID   USER     TIME  COMMAND
-    1 root      0:00 sh
-   18 root      0:00 ps -ef
+1 root      0:00 sh
+18 root      0:00 ps -ef
 ```
-
 {{#endtab}}
 
 {{#tab name="Inside --pid=host Container"}}
-
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef
 PID   USER     TIME  COMMAND
-    1 root      0:03 /sbin/init
-    2 root      0:00 [kthreadd]
-    3 root      0:00 [rcu_gp]ount | grep /proc.*tmpfs
+1 root      0:03 /sbin/init
+2 root      0:00 [kthreadd]
+3 root      0:00 [rcu_gp]ount | grep /proc.*tmpfs
 [...]
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-### User namespace
+### Benutzer-Namespace
 
-**By default, container engines don't utilize user namespaces, except for rootless containers**, which require them for file system mounting and using multiple UIDs. User namespaces, integral for rootless containers, cannot be disabled and significantly enhance security by restricting privileges.
+**Standardmäßig nutzen Container-Engines keine Benutzer-Namensräume, außer für rootlose Container**, die sie für die Dateisystemeinbindung und die Verwendung mehrerer UIDs benötigen. Benutzer-Namensräume, die für rootlose Container unerlässlich sind, können nicht deaktiviert werden und verbessern die Sicherheit erheblich, indem sie die Berechtigungen einschränken.
 
-## References
+## Referenzen
 
 - [https://www.redhat.com/sysadmin/privileged-flag-container-engines](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 

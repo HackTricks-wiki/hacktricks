@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# SELinux in Containers
+# SELinux in Containern
 
-[Introduction and example from the redhat docs](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
+[Einführung und Beispiel aus den Red Hat-Dokumenten](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) ist ein **Kennzeichnungssystem**. Jedes **Prozess** und jedes **Dateisystemobjekt** hat ein **Label**. SELinux-Richtlinien definieren Regeln darüber, was ein **Prozesslabel mit all den anderen Labels** im System tun darf.
 
-Container engines launch **container processes with a single confined SELinux label**, usually `container_t`, and then set the container inside of the container to be labeled `container_file_t`. The SELinux policy rules basically say that the **`container_t` processes can only read/write/execute files labeled `container_file_t`**. If a container process escapes the container and attempts to write to content on the host, the Linux kernel denies access and only allows the container process to write to content labeled `container_file_t`.
-
+Container-Engines starten **Containerprozesse mit einem einzigen eingeschränkten SELinux-Label**, normalerweise `container_t`, und setzen dann den Container innerhalb des Containers auf das Label `container_file_t`. Die SELinux-Richtlinien besagen im Wesentlichen, dass die **`container_t` Prozesse nur Dateien mit dem Label `container_file_t` lesen/schreiben/ausführen können**. Wenn ein Containerprozess den Container verlässt und versucht, auf Inhalte auf dem Host zu schreiben, verweigert der Linux-Kernel den Zugriff und erlaubt dem Containerprozess nur, auf Inhalte mit dem Label `container_file_t` zu schreiben.
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -15,9 +14,8 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
+# SELinux-Benutzer
 
-# SELinux Users
-
-There are SELinux users in addition to the regular Linux users. SELinux users are part of an SELinux policy. Each Linux user is mapped to a SELinux user as part of the policy. This allows Linux users to inherit the restrictions and security rules and mechanisms placed on SELinux users.
+Es gibt SELinux-Benutzer zusätzlich zu den regulären Linux-Benutzern. SELinux-Benutzer sind Teil einer SELinux-Richtlinie. Jeder Linux-Benutzer ist im Rahmen der Richtlinie einem SELinux-Benutzer zugeordnet. Dies ermöglicht es Linux-Benutzern, die Einschränkungen und Sicherheitsregeln sowie -mechanismen zu erben, die auf SELinux-Benutzer angewendet werden.
 
 {{#include ../../banners/hacktricks-training.md}}
