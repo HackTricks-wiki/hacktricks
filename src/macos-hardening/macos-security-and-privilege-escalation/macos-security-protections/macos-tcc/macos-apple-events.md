@@ -4,20 +4,19 @@
 
 ## Basic Information
 
-**Apple Events** are a feature in Apple's macOS that allows applications to communicate with each other. They are part of the **Apple Event Manager**, which is a component of the macOS operating system responsible for handling interprocess communication. This system enables one application to send a message to another application to request that it perform a particular operation, like opening a file, retrieving data, or executing a command.
+**Apple Events** ni kipengele katika macOS ya Apple kinachowezesha programu kuwasiliana na kila mmoja. Ni sehemu ya **Meneja wa Matukio ya Apple**, ambao ni kipengele cha mfumo wa uendeshaji wa macOS kinachohusika na kushughulikia mawasiliano kati ya michakato. Mfumo huu unaruhusu programu moja kutuma ujumbe kwa programu nyingine kuomba ifanye operesheni fulani, kama kufungua faili, kupata data, au kutekeleza amri.
 
-The mina daemon is `/System/Library/CoreServices/appleeventsd` which registers the service `com.apple.coreservices.appleevents`.
+Daemoni ya mina ni `/System/Library/CoreServices/appleeventsd` ambayo inasajili huduma `com.apple.coreservices.appleevents`.
 
-Every application that can receive events will checking with this daemon providing its Apple Event Mach Port. And when an app wants to send an event to to it, the app will request this port from the daemon.
+Kila programu inayoweza kupokea matukio itakuwa ikikagua na daemoni hii ikitoa Apple Event Mach Port yake. Na wakati programu inataka kutuma tukio kwake, programu hiyo itahitaji port hii kutoka kwa daemoni.
 
-Sandboxed applications requires privileges like `allow appleevent-send` and `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` in order to be able to send events. Noten that entitlements like `com.apple.security.temporary-exception.apple-events` could restrict who have access to send events which will need entitlements like `com.apple.private.appleevents`.
+Programu zilizowekwa kwenye sandbox zinahitaji ruhusa kama `allow appleevent-send` na `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` ili kuweza kutuma matukio. Kumbuka kwamba ruhusa kama `com.apple.security.temporary-exception.apple-events` zinaweza kuzuia nani anayeweza kutuma matukio ambayo yatahitaji ruhusa kama `com.apple.private.appleevents`.
 
 > [!TIP]
-> It's possible to use the env variable **`AEDebugSends`** in order to log informtion about the message sent:
+> Inawezekana kutumia variable ya env **`AEDebugSends`** ili kurekodi taarifa kuhusu ujumbe uliopelekwa:
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

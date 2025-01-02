@@ -6,26 +6,25 @@
 
 ### Swap Files
 
-Swap files, such as `/private/var/vm/swapfile0`, serve as **caches when the physical memory is full**. When there's no more room in physical memory, its data is transferred to a swap file and then brought back to physical memory as needed. Multiple swap files might be present, with names like swapfile0, swapfile1, and so on.
+Faili za kubadilishana, kama `/private/var/vm/swapfile0`, hutumikia kama **cache wakati kumbukumbu ya kimwili imejaa**. Wakati hakuna nafasi zaidi katika kumbukumbu ya kimwili, data yake inahamishwa kwenye faili ya kubadilishana na kisha inarudishwa kwenye kumbukumbu ya kimwili inapohitajika. Faili nyingi za kubadilishana zinaweza kuwepo, zikiwa na majina kama swapfile0, swapfile1, na kadhalika.
 
 ### Hibernate Image
 
-The file located at `/private/var/vm/sleepimage` is crucial during **hibernation mode**. **Data from memory is stored in this file when OS X hibernates**. Upon waking the computer, the system retrieves memory data from this file, allowing the user to continue where they left off.
+Faili iliyoko kwenye `/private/var/vm/sleepimage` ni muhimu wakati wa **hali ya hibernation**. **Data kutoka kwenye kumbukumbu huhifadhiwa katika faili hii wakati OS X inahibernation**. Wakati kompyuta inapoamka, mfumo unapata data ya kumbukumbu kutoka faili hii, ikiruhusu mtumiaji kuendelea mahali alipoacha.
 
-It's worth noting that on modern MacOS systems, this file is typically encrypted for security reasons, making recovery difficult.
+Inafaa kutaja kwamba kwenye mifumo ya kisasa ya MacOS, faili hii kwa kawaida imefungwa kwa sababu za usalama, na kufanya urejeleaji kuwa mgumu.
 
-- To check if encryption is enabled for the sleepimage, the command `sysctl vm.swapusage` can be run. This will show if the file is encrypted.
+- Ili kuangalia kama usimbaji umewezeshwa kwa sleepimage, amri `sysctl vm.swapusage` inaweza kutumika. Hii itaonyesha kama faili imefungwa.
 
 ### Memory Pressure Logs
 
-Another important memory-related file in MacOS systems is the **memory pressure log**. These logs are located in `/var/log` and contain detailed information about the system's memory usage and pressure events. They can be particularly useful for diagnosing memory-related issues or understanding how the system manages memory over time.
+Faili nyingine muhimu inayohusiana na kumbukumbu katika mifumo ya MacOS ni **kumbukumbu ya shinikizo la kumbukumbu**. Kumbukumbu hizi ziko katika `/var/log` na zina maelezo ya kina kuhusu matumizi ya kumbukumbu ya mfumo na matukio ya shinikizo. Zinweza kuwa na manufaa hasa katika kutambua matatizo yanayohusiana na kumbukumbu au kuelewa jinsi mfumo unavyosimamia kumbukumbu kwa muda.
 
 ## Dumping memory with osxpmem
 
-In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+Ili kutupa kumbukumbu katika mashine ya MacOS unaweza kutumia [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Note**: The following instructions will only work for Macs with Intel architecture. This tool is now archived and the last release was in 2017. The binary downloaded using the instructions below targets Intel chips as Apple Silicon wasn't around in 2017. It may be possible to compile the binary for arm64 architecture but you'll have to try for yourself.
-
+**Kumbuka**: Maagizo yafuatayo yatatumika tu kwa Macs zenye usanifu wa Intel. Chombo hiki sasa kimehifadhiwa na toleo la mwisho lilikuwa mwaka wa 2017. Binary iliyopakuliwa kwa kutumia maagizo hapa chini inalenga chips za Intel kwani Apple Silicon haikuwapo mwaka wa 2017. Inaweza kuwa inawezekana kukusanya binary kwa usanifu wa arm64 lakini itabidi ujaribu mwenyewe.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
@@ -33,23 +32,18 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 #Dump aff4 format
 sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
 ```
-
-If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` You can fix it doing:
-
+Ikiwa unakutana na kosa hili: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` Unaweza kulitatua kwa kufanya:
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
 sudo kextutil "/tmp/MacPmem.kext"
 #Allow the kext in "Security & Privacy --> General"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
+**Makosa mengine** yanaweza kurekebishwa kwa **kuruhusu upakiaji wa kext** katika "Usalama & Faragha --> Kawaida", tu **ruhusu**.
 
-**Other errors** might be fixed by **allowing the load of the kext** in "Security & Privacy --> General", just **allow** it.
-
-You can also use this **oneliner** to download the application, load the kext and dump the memory:
-
+Unaweza pia kutumia hii **oneliner** kupakua programu, kupakia kext na kutupa kumbukumbu:
 ```bash
 sudo su
 cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

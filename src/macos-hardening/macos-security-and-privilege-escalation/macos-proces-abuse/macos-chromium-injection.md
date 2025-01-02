@@ -4,15 +4,15 @@
 
 ## Basic Information
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Vivinjari vinavyotegemea Chromium kama Google Chrome, Microsoft Edge, Brave, na vinginevyo. Vivinjari hivi vimejengwa kwenye mradi wa wazi wa Chromium, ambayo inamaanisha vinashiriki msingi wa kawaida na, kwa hivyo, vina kazi na chaguzi za maendeleo zinazofanana.
 
 #### `--load-extension` Flag
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+Lipu la `--load-extension` linatumika wakati wa kuanzisha kivinjari kinachotegemea Chromium kutoka kwa mstari wa amri au skripti. Lipu hili linaruhusu **kuongeza moja au zaidi ya nyongeza** kwenye kivinjari wakati wa kuanzishwa.
 
 #### `--use-fake-ui-for-media-stream` Flag
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+Lipu la `--use-fake-ui-for-media-stream` ni chaguo jingine la mstari wa amri ambalo linaweza kutumika kuanzisha vivinjari vinavyotegemea Chromium. Lipu hili limetengenezwa ili **kupita maonyo ya kawaida ya mtumiaji yanayouliza ruhusa ya kufikia mitiririko ya media kutoka kwa kamera na kipaza sauti**. Wakati lipu hili linatumika, kivinjari kinatoa ruhusa moja kwa moja kwa tovuti au programu yoyote inayohitaji kufikia kamera au kipaza sauti.
 
 ### Tools
 
@@ -20,15 +20,13 @@ The `--use-fake-ui-for-media-stream` flag is another command-line option that ca
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
 ### Example
-
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Pata mifano zaidi katika viungo vya zana
 
-Find more examples in the tools links
-
-## References
+## Marejeleo
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

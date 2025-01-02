@@ -2,72 +2,72 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**For further detail about the technique check the original post from:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) and the following post by [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Here is a summary:
+**Kwa maelezo zaidi kuhusu mbinu hii angalia chapisho la asili kutoka:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) na chapisho linalofuata na [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Hapa kuna muhtasari:
 
-### What are Nib files
+### Nini Nib files
 
-Nib (short for NeXT Interface Builder) files, part of Apple's development ecosystem, are intended for defining **UI elements** and their interactions in applications. They encompass serialized objects such as windows and buttons, and are loaded at runtime. Despite their ongoing usage, Apple now advocates for Storyboards for more comprehensive UI flow visualization.
+Nib (fupi kwa NeXT Interface Builder) files, sehemu ya mfumo wa maendeleo wa Apple, zinakusudia kufafanua **vipengele vya UI** na mwingiliano wao katika programu. Zinajumuisha vitu vilivyopangwa kama vile madirisha na vifungo, na hupakuliwa wakati wa wakati wa utekelezaji. Licha ya matumizi yao yaendelea, Apple sasa inashauri Storyboards kwa ajili ya uonyeshaji wa mtiririko wa UI wa kina zaidi.
 
-The main Nib file is referenced in the value **`NSMainNibFile`** inside the `Info.plist` file of the application and is loaded by the function **`NSApplicationMain`** executed in the `main` function of the application.
+Faili kuu ya Nib inarejelea katika thamani **`NSMainNibFile`** ndani ya faili ya `Info.plist` ya programu na inapakuliwa na kazi **`NSApplicationMain`** inayotekelezwa katika kazi ya `main` ya programu.
 
-### Dirty Nib Injection Process
+### Mchakato wa Uingizaji wa Dirty Nib
 
-#### Creating and Setting Up a NIB File
+#### Kuunda na Kuweka Faili ya NIB
 
-1. **Initial Setup**:
-   - Create a new NIB file using XCode.
-   - Add an Object to the interface, setting its class to `NSAppleScript`.
-   - Configure the initial `source` property via User Defined Runtime Attributes.
-2. **Code Execution Gadget**:
-   - The setup facilitates running AppleScript on demand.
-   - Integrate a button to activate the `Apple Script` object, specifically triggering the `executeAndReturnError:` selector.
-3. **Testing**:
+1. **Mipangilio ya Awali**:
+- Unda faili mpya ya NIB kwa kutumia XCode.
+- Ongeza Kitu kwenye interface, ukipanga darasa lake kuwa `NSAppleScript`.
+- Sanidi mali ya awali ya `source` kupitia Sifa za Wakati wa Uendeshaji Zilizofanywa na Mtumiaji.
+2. **Gadget ya Utekelezaji wa Kanuni**:
+- Mipangilio inarahisisha kuendesha AppleScript kwa mahitaji.
+- Jumuisha kifungo ili kuamsha kitu cha `Apple Script`, hasa kuanzisha mteule wa `executeAndReturnError:`.
+3. **Kujaribu**:
 
-   - A simple Apple Script for testing purposes:
+- Apple Script rahisi kwa ajili ya majaribio:
 
-     ```bash
-     set theDialogText to "PWND"
-     display dialog theDialogText
-     ```
+```bash
+set theDialogText to "PWND"
+display dialog theDialogText
+```
 
-   - Test by running in the XCode debugger and clicking the button.
+- Jaribu kwa kuendesha katika debugger ya XCode na kubofya kifungo.
 
-#### Targeting an Application (Example: Pages)
+#### Kulenga Programu (Mfano: Pages)
 
-1. **Preparation**:
-   - Copy the target app (e.g., Pages) into a separate directory (e.g., `/tmp/`).
-   - Initiate the app to sidestep Gatekeeper issues and cache it.
-2. **Overwriting NIB File**:
-   - Replace an existing NIB file (e.g., About Panel NIB) with the crafted DirtyNIB file.
-3. **Execution**:
-   - Trigger the execution by interacting with the app (e.g., selecting the `About` menu item).
+1. **Maandalizi**:
+- Nakili programu lengwa (mfano, Pages) kwenye directory tofauti (mfano, `/tmp/`).
+- Anzisha programu ili kuepuka matatizo ya Gatekeeper na kuikadiria.
+2. **Kufuta Faili ya NIB**:
+- Badilisha faili ya NIB iliyopo (mfano, About Panel NIB) na faili ya DirtyNIB iliyoundwa.
+3. **Utekelezaji**:
+- Amsha utekelezaji kwa kuingiliana na programu (mfano, kuchagua kipengee cha menyu `About`).
 
-#### Proof of Concept: Accessing User Data
+#### Ushahidi wa Dhihirisho: Kupata Takwimu za Mtumiaji
 
-- Modify the AppleScript to access and extract user data, such as photos, without user consent.
+- Badilisha AppleScript ili kufikia na kutoa takwimu za mtumiaji, kama picha, bila idhini ya mtumiaji.
 
-### Code Sample: Malicious .xib File
+### Mfano wa Kanuni: Faili ya .xib Mbaya
 
-- Access and review a [**sample of a malicious .xib file**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) that demonstrates executing arbitrary code.
+- Fikia na kagua [**mfano wa faili mbaya ya .xib**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) inayodhihirisha kuendesha kanuni zisizo na mipaka.
 
-### Other Example
+### Mfano Mwingine
 
-In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.&#x20;
+Katika chapisho [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) unaweza kupata mafunzo juu ya jinsi ya kuunda nib mbaya.&#x20;
 
-### Addressing Launch Constraints
+### Kushughulikia Vikwazo vya Uzinduzi
 
-- Launch Constraints hinder app execution from unexpected locations (e.g., `/tmp`).
-- It's possible to identify apps not protected by Launch Constraints and target them for NIB file injection.
+- Vikwazo vya Uzinduzi vinakwamisha utekelezaji wa programu kutoka maeneo yasiyotarajiwa (mfano, `/tmp`).
+- Inawezekana kubaini programu ambazo hazijalindwa na Vikwazo vya Uzinduzi na kuzilenga kwa ajili ya uingizaji wa faili ya NIB.
 
-### Additional macOS Protections
+### Ulinzi Mwingine wa macOS
 
-From macOS Sonoma onwards, modifications inside App bundles are restricted. However, earlier methods involved:
+Kuanzia macOS Sonoma kuendelea, mabadiliko ndani ya vifurushi vya Programu yamezuiliwa. Hata hivyo, mbinu za awali zilihusisha:
 
-1. Copying the app to a different location (e.g., `/tmp/`).
-2. Renaming directories within the app bundle to bypass initial protections.
-3. After running the app to register with Gatekeeper, modifying the app bundle (e.g., replacing MainMenu.nib with Dirty.nib).
-4. Renaming directories back and rerunning the app to execute the injected NIB file.
+1. Nakala ya programu kwenye eneo tofauti (mfano, `/tmp/`).
+2. Kubadilisha majina ya directories ndani ya kifurushi cha programu ili kupita ulinzi wa awali.
+3. Baada ya kuendesha programu ili kujiandikisha na Gatekeeper, kubadilisha kifurushi cha programu (mfano, kubadilisha MainMenu.nib na Dirty.nib).
+4. Kubadilisha majina ya directories nyuma na kuendesha tena programu ili kutekeleza faili ya NIB iliyowekwa.
 
-**Note**: Recent macOS updates have mitigated this exploit by preventing file modifications within app bundles post Gatekeeper caching, rendering the exploit ineffective.
+**Kumbuka**: Sasisho za hivi karibuni za macOS zimepunguza exploit hii kwa kuzuia mabadiliko ya faili ndani ya vifurushi vya programu baada ya caching ya Gatekeeper, na kufanya exploit hiyo isifanye kazi.
 
 {{#include ../../../banners/hacktricks-training.md}}

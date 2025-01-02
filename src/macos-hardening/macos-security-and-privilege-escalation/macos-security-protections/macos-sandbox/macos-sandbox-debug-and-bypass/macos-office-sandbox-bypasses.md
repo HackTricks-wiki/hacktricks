@@ -4,50 +4,49 @@
 
 ### Word Sandbox bypass via Launch Agents
 
-The application uses a **custom Sandbox** using the entitlement **`com.apple.security.temporary-exception.sbpl`** and this custom sandbox allows to write files anywhere as long as the filename started with `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+Programu inatumia **custom Sandbox** kwa kutumia ruhusa **`com.apple.security.temporary-exception.sbpl`** na sandbox hii ya kawaida inaruhusu kuandika faili popote mradi jina la faili lianze na `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
-Therefore, escaping was as easy as **writing a `plist`** LaunchAgent in `~/Library/LaunchAgents/~$escape.plist`.
+Hivyo, kutoroka ilikuwa rahisi kama **kuandika `plist`** LaunchAgent katika `~/Library/LaunchAgents/~$escape.plist`.
 
-Check the [**original report here**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).
+Angalia [**ripoti ya asili hapa**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).
 
 ### Word Sandbox bypass via Login Items and zip
 
-Remember that from the first escape, Word can write arbitrary files whose name start with `~$` although after the patch of the previous vuln it wasn't possible to write in `/Library/Application Scripts` or in `/Library/LaunchAgents`.
+Kumbuka kwamba kutoka kwa kutoroka kwanza, Word inaweza kuandika faili za kawaida ambazo jina lake linaanza na `~$` ingawa baada ya patch ya vuln iliyopita haikuwezekana kuandika katika `/Library/Application Scripts` au katika `/Library/LaunchAgents`.
 
-It was discovered that from within the sandbox it's possible to create a **Login Item** (apps that will be executed when the user logs in). However, these apps **won't execute unless** they are **notarized** and it's **not possible to add args** (so you cannot just run a reverse shell using **`bash`**).
+Iligundulika kwamba kutoka ndani ya sandbox inawezekana kuunda **Login Item** (programu ambazo zitatekelezwa wakati mtumiaji anapoingia). Hata hivyo, programu hizi **hazitaweza kutekelezwa isipokuwa** zime **notarized** na **haiwezekani kuongeza args** (hivyo huwezi tu kuendesha shell ya kinyume kwa kutumia **`bash`**).
 
-From the previous Sandbox bypass, Microsoft disabled the option to write files in `~/Library/LaunchAgents`. However, it was discovered that if you put a **zip file as a Login Item** the `Archive Utility` will just **unzip** it on its current location. So, because by default the folder `LaunchAgents` from `~/Library` is not created, it was possible to **zip a plist in `LaunchAgents/~$escape.plist`** and **place** the zip file in **`~/Library`** so when decompress it will reach the persistence destination.
+Kutoka kwa kutoroka kwa Sandbox iliyopita, Microsoft ilizima chaguo la kuandika faili katika `~/Library/LaunchAgents`. Hata hivyo, iligundulika kwamba ikiwa utaweka **faili ya zip kama Login Item** `Archive Utility` itachambua tu **zip** katika eneo lake la sasa. Hivyo, kwa sababu kwa kawaida folda `LaunchAgents` kutoka `~/Library` haijaundwa, ilikuwa inawezekana **kuzipa plist katika `LaunchAgents/~$escape.plist`** na **kuiweka** faili ya zip katika **`~/Library`** ili wakati wa kufungua itafikia mahali pa kudumu.
 
-Check the [**original report here**](https://objective-see.org/blog/blog_0x4B.html).
+Angalia [**ripoti ya asili hapa**](https://objective-see.org/blog/blog_0x4B.html).
 
 ### Word Sandbox bypass via Login Items and .zshenv
 
-(Remember that from the first escape, Word can write arbitrary files whose name start with `~$`).
+(Kumbuka kwamba kutoka kwa kutoroka kwanza, Word inaweza kuandika faili za kawaida ambazo jina lake linaanza na `~$`).
 
-However, the previous technique had a limitation, if the folder **`~/Library/LaunchAgents`** exists because some other software created it, it would fail. So a different Login Items chain was discovered for this.
+Hata hivyo, mbinu iliyopita ilikuwa na kikomo, ikiwa folda **`~/Library/LaunchAgents`** ipo kwa sababu programu nyingine iliiunda, ingekuwa na makosa. Hivyo, mnyororo tofauti wa Login Items uligundulika kwa hili.
 
-An attacker could create the the files **`.bash_profile`** and **`.zshenv`** with the payload to execute and then zip them and **write the zip in the victims** user folder: **`~/~$escape.zip`**.
+Mshambuliaji angeweza kuunda faili **`.bash_profile`** na **`.zshenv`** zikiwa na payload ya kutekeleza na kisha kuzipa na **kuandika zip katika** folda ya mtumiaji wa wahanga: **`~/~$escape.zip`**.
 
-Then, add the zip file to the **Login Items** and then the **`Terminal`** app. When the user relogins, the zip file would be uncompressed in the users file, overwriting **`.bash_profile`** and **`.zshenv`** and therefore, the terminal will execute one of these files (depending if bash or zsh is used).
+Kisha, ongeza faili ya zip kwenye **Login Items** na kisha programu ya **`Terminal`**. Wakati mtumiaji anapoingia tena, faili ya zip itafunguliwa katika faili za watumiaji, ikipunguza **`.bash_profile`** na **`.zshenv`** na hivyo, terminal itatekeleza moja ya faili hizi (kulingana na ikiwa bash au zsh inatumika).
 
-Check the [**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
+Angalia [**ripoti ya asili hapa**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
 
 ### Word Sandbox Bypass with Open and env variables
 
-From sandboxed processes it's still possible to invoke other processes using the **`open`** utility. Moreover, these processes will run **within their own sandbox**.
+Kutoka kwa michakato ya sandboxed bado inawezekana kuita michakato mingine kwa kutumia **`open`** utility. Zaidi ya hayo, michakato hii itakimbia **ndani ya sandbox yao wenyewe**.
 
-It was discovered that the open utility has the **`--env`** option to run an app with **specific env** variables. Therefore, it was possible to create the **`.zshenv` file** within a folder **inside** the **sandbox** and the use `open` with `--env` setting the **`HOME` variable** to that folder opening that `Terminal` app, which will execute the `.zshenv` file (for some reason it was also needed to set the variable `__OSINSTALL_ENVIROMENT`).
+Ilipatikana kwamba utility ya open ina chaguo la **`--env`** kuendesha programu na **mabadiliko maalum**. Hivyo, ilikuwa inawezekana kuunda **faili ya `.zshenv`** ndani ya folda **ndani** ya **sandbox** na kutumia `open` na `--env` kuweka **`HOME` variable** kwa folda hiyo ikifungua programu hiyo ya `Terminal`, ambayo itatekeleza faili ya `.zshenv` (kwa sababu fulani ilikuwa pia inahitajika kuweka variable `__OSINSTALL_ENVIROMENT`).
 
-Check the [**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).
+Angalia [**ripoti ya asili hapa**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).
 
 ### Word Sandbox Bypass with Open and stdin
 
-The **`open`** utility also supported the **`--stdin`** param (and after the previous bypass it was no longer possible to use `--env`).
+Utility ya **`open`** pia ilisaidia param ya **`--stdin`** (na baada ya kutoroka kwa awali haikuwezekana tena kutumia `--env`).
 
-The thing is that even if **`python`** was signed by Apple, it **won't execute** a script with the **`quarantine`** attribute. However, it was possible to pass it a script from stdin so it won't check if it was quarantined or not:&#x20;
+Jambo ni kwamba hata kama **`python`** ilitiwa saini na Apple, haitatekeleza **script** yenye sifa ya **`quarantine`**. Hata hivyo, ilikuwa inawezekana kuipatia script kutoka stdin hivyo haitakagua ikiwa ilikuwa imewekwa karantini au la:&#x20;
 
-1. Drop a **`~$exploit.py`** file with arbitrary Python commands.
-2. Run _open_ **`–stdin='~$exploit.py' -a Python`**, which runs the Python app with our dropped file serving as its standard input. Python happily runs our code, and since it’s a child process of _launchd_, it isn’t bound to Word’s sandbox rules.
+1. Angusha faili **`~$exploit.py`** yenye amri za Python za kawaida.
+2. Kimbia _open_ **`–stdin='~$exploit.py' -a Python`**, ambayo inakimbia programu ya Python na faili yetu iliyotupwa ikihudumu kama ingizo lake la kawaida. Python kwa furaha inakimbia msimbo wetu, na kwa kuwa ni mchakato wa mtoto wa _launchd_, haifungwi na sheria za sandbox za Word.
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-

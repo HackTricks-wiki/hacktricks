@@ -4,32 +4,31 @@
 
 ## **Athorizarions DB**
 
-The database located in `/var/db/auth.db` is database used to store permissions to perform sensitive operations. These operations are performed completely in **user space** and are usually used by **XPC services** which need to check **if the calling client is authorized** to perform certain action checking this database.
+Hifadhidata iliyoko katika `/var/db/auth.db` ni hifadhidata inayotumika kuhifadhi ruhusa za kufanya operesheni nyeti. Operesheni hizi zinafanywa kabisa katika **nafasi ya mtumiaji** na kwa kawaida hutumiwa na **XPC services** ambazo zinahitaji kuangalia **kama mteja anayepiga simu ameidhinishwa** kufanya kitendo fulani kwa kuangalia hifadhidata hii.
 
-Initially this database is created from the content of `/System/Library/Security/authorization.plist`. Then, some services might add or modify this dataabse to add other permissions to it.
+Kwanza, hifadhidata hii inaundwa kutoka kwa maudhui ya `/System/Library/Security/authorization.plist`. Kisha, baadhi ya huduma zinaweza kuongeza au kubadilisha hifadhidata hii ili kuongeza ruhusa nyingine.
 
-The rules are stored in the `rules` table inside the database and contains the folliwing colmns:
+Sheria zinaifadhiwa katika jedwali la `rules` ndani ya hifadhidata na zina nguzo zifuatazo:
 
-- **id**: A unique identifier for each rule, automatically incremented and serving as the primary key.
-- **name**: The unique name of the rule used to identify and reference it within the authorization system.
-- **type**: Specifies the type of the rule, restricted to values 1 or 2 to define its authorization logic.
-- **class**: Categorizes the rule into a specific class, ensuring it is a positive integer.
-  - "allow" for allow, "deny" for deny, "user" if the group property indicated a group which membership allows the access, "rule" indicates in an array a rule to be fulfilled, "evaluate-mechanisms" followed by a `mechanisms` array which are either builtins or a name of a bundle inside `/System/Library/CoreServices/SecurityAgentPlugins/` or /Library/Security//SecurityAgentPlugins
-- **group**: Indicates the user group associated with the rule for group-based authorization.
-- **kofn**: Represents the "k-of-n" parameter, determining how many subrules must be satisfied out of a total number.
-- **timeout**: Defines the duration in seconds before the authorization granted by the rule expires.
-- **flags**: Contains various flags that modify the behavior and characteristics of the rule.
-- **tries**: Limits the number of allowed authorization attempts to enhance security.
-- **version**: Tracks the version of the rule for version control and updates.
-- **created**: Records the timestamp when the rule was created for auditing purposes.
-- **modified**: Stores the timestamp of the last modification made to the rule.
-- **hash**: Holds a hash value of the rule to ensure its integrity and detect tampering.
-- **identifier**: Provides a unique string identifier, such as a UUID, for external references to the rule.
-- **requirement**: Contains serialized data defining the rule's specific authorization requirements and mechanisms.
-- **comment**: Offers a human-readable description or comment about the rule for documentation and clarity.
+- **id**: Kitambulisho cha kipekee kwa kila sheria, kinachoongezeka kiotomatiki na kutumikia kama funguo kuu.
+- **name**: Jina la kipekee la sheria linalotumika kuitambulisha na kuirejelea ndani ya mfumo wa idhini.
+- **type**: Inaelezea aina ya sheria, iliyozuiliwa kwa thamani 1 au 2 ili kufafanua mantiki yake ya idhini.
+- **class**: Inagawanya sheria katika darasa maalum, kuhakikisha ni nambari chanya.
+- "allow" kwa ruhusu, "deny" kwa kataa, "user" ikiwa mali ya kundi inaonyesha kundi ambalo uanachama wake unaruhusu ufikiaji, "rule" inaonyesha katika orodha sheria inayopaswa kutimizwa, "evaluate-mechanisms" ikifuatwa na orodha ya `mechanisms` ambazo ni ama za ndani au jina la kifurushi ndani ya `/System/Library/CoreServices/SecurityAgentPlugins/` au /Library/Security//SecurityAgentPlugins
+- **group**: Inaonyesha kundi la mtumiaji lililohusishwa na sheria kwa ajili ya idhini ya msingi ya kundi.
+- **kofn**: Inawakilisha parameter ya "k-of-n", ikiamua ni subrules ngapi zinapaswa kutimizwa kutoka kwa jumla.
+- **timeout**: Inaelezea muda kwa sekunde kabla ya idhini iliyotolewa na sheria kuisha.
+- **flags**: Inashikilia bendera mbalimbali zinazobadilisha tabia na sifa za sheria.
+- **tries**: Inapunguza idadi ya majaribio ya idhini yanayoruhusiwa ili kuongeza usalama.
+- **version**: Inafuatilia toleo la sheria kwa ajili ya udhibiti wa toleo na masasisho.
+- **created**: Inarekodi muda wa kuunda sheria kwa ajili ya madhumuni ya ukaguzi.
+- **modified**: Inahifadhi muda wa marekebisho ya mwisho yaliyofanywa kwa sheria.
+- **hash**: Inashikilia thamani ya hash ya sheria ili kuhakikisha uaminifu wake na kugundua udanganyifu.
+- **identifier**: Inatoa kitambulisho cha kipekee cha mfuatano, kama UUID, kwa marejeleo ya nje kwa sheria.
+- **requirement**: Inashikilia data iliyosawazishwa inayofafanua mahitaji maalum ya idhini ya sheria na mitambo.
+- **comment**: Inatoa maelezo yanayoweza kusomeka na binadamu au maoni kuhusu sheria kwa ajili ya nyaraka na uwazi.
 
 ### Example
-
 ```bash
 # List by name and comments
 sudo sqlite3 /var/db/auth.db "select name, comment from rules"
@@ -40,50 +39,46 @@ security authorizationdb read com.apple.tcc.util.admin
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>class</key>
-	<string>rule</string>
-	<key>comment</key>
-	<string>For modification of TCC settings.</string>
-	<key>created</key>
-	<real>701369782.01043606</real>
-	<key>modified</key>
-	<real>701369782.01043606</real>
-	<key>rule</key>
-	<array>
-		<string>authenticate-admin-nonshared</string>
-	</array>
-	<key>version</key>
-	<integer>0</integer>
+<key>class</key>
+<string>rule</string>
+<key>comment</key>
+<string>For modification of TCC settings.</string>
+<key>created</key>
+<real>701369782.01043606</real>
+<key>modified</key>
+<real>701369782.01043606</real>
+<key>rule</key>
+<array>
+<string>authenticate-admin-nonshared</string>
+</array>
+<key>version</key>
+<integer>0</integer>
 </dict>
 </plist>
 ```
-
-Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:
-
+Zaidi ya hayo katika [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) inawezekana kuona maana ya `authenticate-admin-nonshared`:
 ```json
 {
-  "allow-root": "false",
-  "authenticate-user": "true",
-  "class": "user",
-  "comment": "Authenticate as an administrator.",
-  "group": "admin",
-  "session-owner": "false",
-  "shared": "false",
-  "timeout": "30",
-  "tries": "10000",
-  "version": "1"
+"allow-root": "false",
+"authenticate-user": "true",
+"class": "user",
+"comment": "Authenticate as an administrator.",
+"group": "admin",
+"session-owner": "false",
+"shared": "false",
+"timeout": "30",
+"tries": "10000",
+"version": "1"
 }
 ```
-
 ## Authd
 
-It's a deamon that will receive requests to authorize clients to perform sensitive actions. It works as a XPC service defined inside the `XPCServices/` folder and use to write its logs in `/var/log/authd.log`.
+Ni deamon ambayo itapokea maombi ya kuidhinisha wateja kufanya vitendo nyeti. Inafanya kazi kama huduma ya XPC iliyofafanuliwa ndani ya folda ya `XPCServices/` na hutumia kuandika kumbukumbu zake katika `/var/log/authd.log`.
 
-Moreover using the security tool it's possible to test many `Security.framework` APIs. For example the `AuthorizationExecuteWithPrivileges` running: `security execute-with-privileges /bin/ls`
+Zaidi ya hayo, kwa kutumia zana ya usalama inawezekana kujaribu APIs nyingi za `Security.framework`. Kwa mfano, `AuthorizationExecuteWithPrivileges` ikikimbia: `security execute-with-privileges /bin/ls`
 
-That will fork and exec `/usr/libexec/security_authtrampoline /bin/ls` as root, which will ask for permissions in a prompt to execute ls as root:
+Hii itafork na exec `/usr/libexec/security_authtrampoline /bin/ls` kama root, ambayo itauliza ruhusa katika dirisha la kuonyesha ili kutekeleza ls kama root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 {{#include ../../../banners/hacktricks-training.md}}
-

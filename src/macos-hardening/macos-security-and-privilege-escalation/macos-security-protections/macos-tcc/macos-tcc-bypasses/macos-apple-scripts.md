@@ -4,32 +4,27 @@
 
 ## Apple Scripts
 
-It's a scripting language used for task automation **interacting with remote processes**. It makes pretty easy to **ask other processes to perform some actions**. **Malware** may abuse these features to abuse functions exported by other processes.\
-For example, a malware could **inject arbitrary JS code in browser opened pages**. Or **auto click** some allow permissions requested to the user;
-
+Ni lugha ya skripti inayotumika kwa ajili ya automatisering ya kazi **kuhusiana na michakato ya mbali**. Inafanya iwe rahisi **kuomba michakato mingine kutekeleza vitendo vingine**. **Malware** inaweza kutumia vipengele hivi kuharibu kazi zinazotolewa na michakato mingine.\
+Kwa mfano, malware inaweza **kuingiza msimbo wa JS wa kiholela katika kurasa zilizofunguliwa na kivinjari**. Au **kubonyeza kiotomatiki** baadhi ya ruhusa zinazohitajika kwa mtumiaji;
 ```applescript
 tell window 1 of process "SecurityAgent"
-     click button "Always Allow" of group 1
+click button "Always Allow" of group 1
 end tell
 ```
+Hapa kuna mifano: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
+Pata maelezo zaidi kuhusu malware ukitumia applescripts [**hapa**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
 
-Here you have some examples: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
-Find more info about malware using applescripts [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
+Apple scripts zinaweza "kuandikwa" kwa urahisi. Matoleo haya yanaweza "kufutwa" kwa urahisi kwa kutumia `osadecompile`
 
-Apple scripts may be easily "**compiled**". These versions can be easily "**decompiled**" with `osadecompile`
-
-However, this scripts can also be **exported as "Read only"** (via the "Export..." option):
+Hata hivyo, scripts hizi zinaweza pia **kuzuiliwa kama "Soma tu"** (kupitia chaguo la "Export..."): 
 
 <figure><img src="https://github.com/carlospolop/hacktricks/raw/master/images/image%20(556).png" alt=""><figcaption></figcaption></figure>
-
 ```
 file mal.scpt
 mal.scpt: AppleScript compiled
 ```
+na katika kesi hii maudhui hayawezi kufanywa decompile hata na `osadecompile`
 
-and tin this case the content cannot be decompiled even with `osadecompile`
-
-However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) will be very useful to understand how the script works.
+Hata hivyo, bado kuna zana ambazo zinaweza kutumika kuelewa aina hii ya executable, [**soma utafiti huu kwa maelezo zaidi**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). Zana [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) pamoja na [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) itakuwa muhimu sana kuelewa jinsi script inavyofanya kazi.
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-

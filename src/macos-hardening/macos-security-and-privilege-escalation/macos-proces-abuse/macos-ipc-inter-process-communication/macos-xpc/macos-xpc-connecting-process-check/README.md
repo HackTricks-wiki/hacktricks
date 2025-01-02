@@ -1,60 +1,57 @@
-# macOS XPC Connecting Process Check
+# macOS XPC Kuangalia Mchakato wa Kuunganisha
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## XPC Connecting Process Check
+## XPC Kuangalia Mchakato wa Kuunganisha
 
-When a connection is stablished to an XPC service, the server will check if the connection is allowed. These are the checks it would usually perform:
+Wakati muunganisho unapoanzishwa na huduma ya XPC, seva itakagua ikiwa muunganisho unaruhusiwa. Hizi ndizo ukaguzi ambao kawaida hufanywa:
 
-1. Check if the connecting **process is signed with an Apple-signed** certificate (only given out by Apple).
-   - If this **isn't verified**, an attacker could create a **fake certificate** to match any other check.
-2. Check if the connecting process is signed with the **organization’s certificate**, (team ID verification).
-   - If this **isn't verified**, **any developer certificate** from Apple can be used for signing, and connect to the service.
-3. Check if the connecting process **contains a proper bundle ID**.
-   - If this **isn't verified**, any tool **signed by the same org** could be used to interact with the XPC service.
-4. (4 or 5) Check if the connecting process has a **proper software version number**.
-   - If this **isn't verified,** an old, insecure clients, vulnerable to process injection could be used to connect to the XPC service even with the other checks in place.
-5. (4 or 5) Check if the connecting process has hardened runtime without dangerous entitlements (like the ones that allows to load arbitrary libraries or use DYLD env vars)
-   1. If this **isn't verified,** the client might be **vulnerable to code injection**
-6. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
-7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents **PID reuse attacks**.
-   - Developers **rarely use the audit token** API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
-     - If the method **`processIdentifier`** is used, it might be vulnerable
-     - **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
+1. Angalia ikiwa **mchakato unaounganisha umeandikwa na cheti kilichosainiwa na Apple** (ambacho kinatolewa tu na Apple).
+- Ikiwa hii **haihakikishwi**, mshambuliaji anaweza kuunda **cheti bandia** ili kufanana na ukaguzi mwingine wowote.
+2. Angalia ikiwa mchakato unaounganisha umeandikwa na **cheti cha shirika**, (uthibitisho wa kitambulisho cha timu).
+- Ikiwa hii **haihakikishwi**, **cheti chochote cha mende** kutoka Apple kinaweza kutumika kwa kusaini, na kuungana na huduma.
+3. Angalia ikiwa mchakato unaounganisha **una kitambulisho sahihi cha bundle**.
+- Ikiwa hii **haihakikishwi**, chombo chochote **kilichosainiwa na shirika hilo hilo** kinaweza kutumika kuingiliana na huduma ya XPC.
+4. (4 au 5) Angalia ikiwa mchakato unaounganisha una **nambari sahihi ya toleo la programu**.
+- Ikiwa hii **haihakikishwi,** wateja wa zamani, wasio salama, walio hatarini kwa sindano ya mchakato wanaweza kutumika kuungana na huduma ya XPC hata na ukaguzi mwingine ukiwa mahali.
+5. (4 au 5) Angalia ikiwa mchakato unaounganisha una runtime iliyoharden bila ruhusa hatari (kama zile zinazoruhusu kupakia maktaba zisizo na mipaka au kutumia DYLD env vars)
+1. Ikiwa hii **haihakikishwi,** mteja anaweza kuwa **hatari kwa sindano ya msimbo**
+6. Angalia ikiwa mchakato unaounganisha una **ruhusa** inayoruhusu kuungana na huduma. Hii inatumika kwa binaries za Apple.
+7. **Uthibitisho** lazima uwe **kulingana** na **tokeni ya ukaguzi ya mteja** **badala** ya kitambulisho chake cha mchakato (**PID**) kwani ya kwanza inazuia **shambulio la upya PID**.
+- Wandevu **hawatumii mara kwa mara API ya tokeni ya ukaguzi** kwani ni **binafsi**, hivyo Apple inaweza **kubadilisha** wakati wowote. Zaidi ya hayo, matumizi ya API binafsi hayaruhusiwi katika programu za Mac App Store.
+- Ikiwa njia **`processIdentifier`** inatumika, inaweza kuwa hatarini
+- **`xpc_dictionary_get_audit_token`** inapaswa kutumika badala ya **`xpc_connection_get_audit_token`**, kwani ya mwisho inaweza pia kuwa [hatari katika hali fulani](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 
-### Communication Attacks
+### Mashambulizi ya Mawasiliano
 
-For more information about the PID reuse attack check:
+Kwa maelezo zaidi kuhusu shambulio la upya PID angalia:
 
 {{#ref}}
 macos-pid-reuse.md
 {{#endref}}
 
-For more information **`xpc_connection_get_audit_token`** attack check:
+Kwa maelezo zaidi kuhusu shambulio la **`xpc_connection_get_audit_token`** angalia:
 
 {{#ref}}
 macos-xpc_connection_get_audit_token-attack.md
 {{#endref}}
 
-### Trustcache - Downgrade Attacks Prevention
+### Trustcache - Kuzuia Mashambulizi ya Kudunisha
 
-Trustcache is a defensive method introduced in Apple Silicon machines that stores a database of CDHSAH of Apple binaries so only allowed non modified binaries can be executed. Which prevent the execution of downgrade versions.
+Trustcache ni njia ya kujihami iliyowekwa katika mashine za Apple Silicon ambayo inahifadhi hifadhidata ya CDHSAH ya binaries za Apple ili tu binaries zisizobadilishwa zinazoruhusiwa ziweze kutekelezwa. Hii inazuia utekelezaji wa toleo la kudunisha.
 
-### Code Examples
+### Mifano ya Msimbo
 
-The server will implement this **verification** in a function called **`shouldAcceptNewConnection`**.
-
+Seva itatekeleza **uthibitisho** huu katika kazi inayoitwa **`shouldAcceptNewConnection`**.
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
-    //Check connection
-    return YES;
+//Check connection
+return YES;
 }
 ```
+Obiect NSXPCConnection ina mali **ya faragha** **`auditToken`** (ile ambayo inapaswa kutumika lakini inaweza kubadilika) na mali **ya umma** **`processIdentifier`** (ile ambayo haipaswi kutumika).
 
-The object NSXPCConnection has a **private** property **`auditToken`** (the one that should be used but could change) and a the **public** property **`processIdentifier`** (the one that shouldn't be used).
-
-The connecting process could be verified with something like:
-
+Mchakato unaounganisha unaweza kuthibitishwa kwa kitu kama:
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;
@@ -74,9 +71,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-
-If a developer doesn't want to check the version of the client, he could check that the client is not vulnerable to process injection at least:
-
+Ikiwa mendelevu hataki kuangalia toleo la mteja, anaweza kuangalia kwamba mteja si hatarishi kwa sindano ya mchakato angalau:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;
@@ -88,9 +83,7 @@ const uint32_t cs_restrict = 0x800;    // Prevent debugging
 const uint32_t cs_require_lv = 0x2000; // Library Validation
 const uint32_t cs_runtime = 0x10000;   // hardened runtime
 if ((csFlags & (cs_hard | cs_require_lv)) {
-    return Yes; // Accept connection
+return Yes; // Accept connection
 }
 ```
-
 {{#include ../../../../../../banners/hacktricks-training.md}}
-

@@ -9,168 +9,152 @@
 
 ## 1. Thread Hijacking
 
-Initially, the **`task_threads()`** function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code injection methods as creating a new remote thread is prohibited due to the new mitigation blocking `thread_create_running()`.
+Kwanza, **`task_threads()`** inaitwa kwenye task port ili kupata orodha ya nyuzi kutoka kwa kazi ya mbali. Nyuzi moja inachaguliwa kwa ajili ya hijacking. Njia hii inatofautiana na mbinu za kawaida za kuingiza msimbo kwani kuunda nyuzi mpya za mbali kunakatazwa kutokana na kuzuia mpya inayozuia `thread_create_running()`.
 
-To control the thread, **`thread_suspend()`** is called, halting its execution.
+Ili kudhibiti nyuzi, **`thread_suspend()`** inaitwa, ikisimamisha utekelezaji wake.
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it, **retrieving** and **modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring **`pc`** to target the desired function, and activating the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
+Operesheni pekee zinazoruhusiwa kwenye nyuzi ya mbali zinahusisha **kusimamisha** na **kuanzisha** hiyo, **kupata** na **kubadilisha** thamani za register zake. Kuitwa kwa kazi za mbali kunaanzishwa kwa kuweka register `x0` hadi `x7` kwa **hoja**, kuunda **`pc`** ili kuelekeza kwenye kazi inayotakiwa, na kuanzisha nyuzi. Kuhakikisha kuwa nyuzi haiporomoki baada ya kurudi kunahitaji kugundua kurudi.
 
-One strategy involves **registering an exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s triple_fetch exploit, `lr` is set to loop infinitely. The thread's registers are then continuously monitored until **`pc` points to that instruction**.
+Stratejia moja inahusisha **kujiandikisha kwa mpangaji wa makosa** kwa nyuzi ya mbali kwa kutumia `thread_set_exception_ports()`, kuweka register `lr` kwenye anwani isiyo sahihi kabla ya wito wa kazi. Hii inasababisha makosa baada ya utekelezaji wa kazi, ikituma ujumbe kwenye bandari ya makosa, ikiruhusu ukaguzi wa hali ya nyuzi ili kurejesha thamani ya kurudi. Vinginevyo, kama ilivyopitishwa kutoka kwa exploit ya triple_fetch ya Ian Beer, `lr` inawekwa ili kuzunguka bila kikomo. Register za nyuzi kisha zinafuatiliwa kwa muda mrefu hadi **`pc` inapoelekeza kwenye hiyo amri**.
 
 ## 2. Mach ports for communication
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send and receive rights between tasks.
+Awamu inayofuata inahusisha kuanzisha Mach ports ili kuwezesha mawasiliano na nyuzi ya mbali. Bandari hizi ni muhimu katika kuhamasisha haki za kutuma na kupokea zisizo na mipaka kati ya kazi.
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
+Kwa mawasiliano ya pande mbili, haki mbili za kupokea Mach zinaundwa: moja katika kazi ya ndani na nyingine katika kazi ya mbali. Kisha, haki ya kutuma kwa kila bandari inahamishwa kwa kazi ya upande mwingine, ikiruhusu kubadilishana ujumbe.
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
+Kuzingatia bandari ya ndani, haki ya kupokea inashikiliwa na kazi ya ndani. Bandari inaundwa kwa `mach_port_allocate()`. Changamoto iko katika kuhamasisha haki ya kutuma kwa bandari hii kwenye kazi ya mbali.
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
+Stratejia moja inahusisha kutumia `thread_set_special_port()` kuweka haki ya kutuma kwa bandari ya ndani kwenye `THREAD_KERNEL_PORT` ya nyuzi ya mbali. Kisha, nyuzi ya mbali inaelekezwa kuita `mach_thread_self()` ili kupata haki ya kutuma.
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
+Kwa bandari ya mbali, mchakato kimsingi unarudiwa. Nyuzi ya mbali inaelekezwa kuunda bandari ya Mach kupitia `mach_reply_port()` (kama `mach_port_allocate()` haiwezi kutumika kutokana na mfumo wake wa kurudi). Baada ya kuundwa kwa bandari, `mach_port_insert_right()` inaitwa kwenye nyuzi ya mbali ili kuanzisha haki ya kutuma. Haki hii kisha inahifadhiwa kwenye kernel kwa kutumia `thread_set_special_port()`. Kurudi kwenye kazi ya ndani, `thread_get_special_port()` inatumika kwenye nyuzi ya mbali ili kupata haki ya kutuma kwa bandari mpya iliyotolewa katika kazi ya mbali.
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
+Kukamilika kwa hatua hizi kunasababisha kuanzishwa kwa Mach ports, kuweka msingi wa mawasiliano ya pande mbili.
 
 ## 3. Basic Memory Read/Write Primitives
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read and write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+Katika sehemu hii, lengo ni kutumia primitive ya kutekeleza ili kuanzisha primitive za msingi za kusoma na kuandika kumbukumbu. Hatua hizi za awali ni muhimu kwa kupata udhibiti zaidi juu ya mchakato wa mbali, ingawa primitive katika hatua hii hazitakuwa na matumizi mengi. Hivi karibuni, zitaimarishwa kuwa toleo za juu zaidi.
 
 ### Memory Reading and Writing Using Execute Primitive
 
-The goal is to perform memory reading and writing using specific functions. For reading memory, functions resembling the following structure are used:
-
+Lengo ni kufanya kusoma na kuandika kumbukumbu kwa kutumia kazi maalum. Kwa kusoma kumbukumbu, kazi zinazofanana na muundo ufuatao zinatumika:
 ```c
 uint64_t read_func(uint64_t *address) {
-    return *address;
+return *address;
 }
 ```
-
-And for writing to memory, functions similar to this structure are used:
-
+Na kwa kuandika kwenye kumbukumbu, kazi zinazofanana na muundo huu hutumiwa:
 ```c
 void write_func(uint64_t *address, uint64_t value) {
-    *address = value;
+*address = value;
 }
 ```
-
-These functions correspond to the given assembly instructions:
-
+Hizi kazi zinahusiana na maagizo ya mkusanyiko yaliyotolewa:
 ```
 _read_func:
-    ldr x0, [x0]
-    ret
+ldr x0, [x0]
+ret
 _write_func:
-    str x1, [x0]
-    ret
+str x1, [x0]
+ret
 ```
+### Kutambua Kazi Zinazofaa
 
-### Identifying Suitable Functions
+Kuchunguza maktaba za kawaida kumefichua wagombea wanaofaa kwa ajili ya operesheni hizi:
 
-A scan of common libraries revealed appropriate candidates for these operations:
-
-1. **Reading Memory:**
-   The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
-
+1. **Kusoma Kumbukumbu:**
+Funguo `property_getName()` kutoka kwa [maktaba ya wakati wa kukimbia ya Objective-C](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) inatambuliwa kama kazi inayofaa kwa kusoma kumbukumbu. Kazi hiyo imeelezwa hapa chini:
 ```c
 const char *property_getName(objc_property_t prop) {
-      return prop->name;
+return prop->name;
 }
 ```
+Hii kazi inafanya kazi kama `read_func` kwa kurudisha uwanja wa kwanza wa `objc_property_t`.
 
-This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
-
-2. **Writing Memory:**
-   Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
-
+2. **Kuandika Kumbukumbu:**
+Kupata kazi iliyojengwa awali ya kuandika kumbukumbu ni changamoto zaidi. Hata hivyo, kazi ya `_xpc_int64_set_value()` kutoka libxpc ni mgombea mzuri ikiwa na disassembly ifuatayo:
 ```c
 __xpc_int64_set_value:
-    str x1, [x0, #0x18]
-    ret
+str x1, [x0, #0x18]
+ret
 ```
-
-To perform a 64-bit write at a specific address, the remote call is structured as:
-
+Ili kufanya kuandika 64-bit katika anwani maalum, wito wa mbali umeundwa kama:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
+Kwa kutumia hizi primitives zilizowekwa, hatua imewekwa kwa ajili ya kuunda kumbukumbu ya pamoja, ikionyesha maendeleo makubwa katika kudhibiti mchakato wa mbali.
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
+## 4. Mipangilio ya Kumbukumbu ya Pamoja
 
-## 4. Shared Memory Setup
+Lengo ni kuanzisha kumbukumbu ya pamoja kati ya kazi za ndani na za mbali, kuifanya iwe rahisi kuhamasisha data na kuwezesha wito wa kazi zenye hoja nyingi. Njia hii inahusisha kutumia `libxpc` na aina ya kitu chake `OS_xpc_shmem`, ambayo imejengwa juu ya entries za kumbukumbu za Mach.
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach involves leveraging `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
+### Muonekano wa Mchakato:
 
-### Process Overview:
+1. **Usambazaji wa Kumbukumbu**:
 
-1. **Memory Allocation**:
+- Panga kumbukumbu kwa ajili ya kushiriki kwa kutumia `mach_vm_allocate()`.
+- Tumia `xpc_shmem_create()` kuunda kitu cha `OS_xpc_shmem` kwa ajili ya eneo la kumbukumbu lililotengwa. Kazi hii itasimamia uundaji wa entry ya kumbukumbu ya Mach na kuhifadhi haki ya kutuma ya Mach kwenye offset `0x18` ya kitu cha `OS_xpc_shmem`.
 
-   - Allocate the memory for sharing using `mach_vm_allocate()`.
-   - Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated memory region. This function will manage the creation of the Mach memory entry and store the Mach send right at offset `0x18` of the `OS_xpc_shmem` object.
+2. **Kuunda Kumbukumbu ya Pamoja katika Mchakato wa Mbali**:
 
-2. **Creating Shared Memory in Remote Process**:
+- Panga kumbukumbu kwa ajili ya kitu cha `OS_xpc_shmem` katika mchakato wa mbali kwa wito wa mbali kwa `malloc()`.
+- Nakili maudhui ya kitu cha ndani cha `OS_xpc_shmem` kwenye mchakato wa mbali. Hata hivyo, nakala hii ya awali itakuwa na majina yasiyo sahihi ya entry za kumbukumbu za Mach kwenye offset `0x18`.
 
-   - Allocate memory for the `OS_xpc_shmem` object in the remote process with a remote call to `malloc()`.
-   - Copy the contents of the local `OS_xpc_shmem` object to the remote process. However, this initial copy will have incorrect Mach memory entry names at offset `0x18`.
+3. **Kurekebisha Entry ya Kumbukumbu ya Mach**:
 
-3. **Correcting the Mach Memory Entry**:
+- Tumia njia ya `thread_set_special_port()` kuingiza haki ya kutuma kwa entry ya kumbukumbu ya Mach kwenye kazi ya mbali.
+- Rekebisha uwanja wa entry ya kumbukumbu ya Mach kwenye offset `0x18` kwa kuandika upya kwa jina la entry ya kumbukumbu ya mbali.
 
-   - Utilize the `thread_set_special_port()` method to insert a send right for the Mach memory entry into the remote task.
-   - Correct the Mach memory entry field at offset `0x18` by overwriting it with the remote memory entry's name.
+4. **Kumaliza Mipangilio ya Kumbukumbu ya Pamoja**:
+- Thibitisha kitu cha mbali cha `OS_xpc_shmem`.
+- Kuanzisha ramani ya kumbukumbu ya pamoja kwa wito wa mbali kwa `xpc_shmem_remote()`.
 
-4. **Finalizing Shared Memory Setup**:
-   - Validate the remote `OS_xpc_shmem` object.
-   - Establish the shared memory mapping with a remote call to `xpc_shmem_remote()`.
+Kwa kufuata hatua hizi, kumbukumbu ya pamoja kati ya kazi za ndani na za mbali itakuwa imewekwa kwa ufanisi, ikiruhusu uhamasishaji wa data kwa urahisi na utekelezaji wa kazi zinazohitaji hoja nyingi.
 
-By following these steps, shared memory between the local and remote tasks will be efficiently set up, allowing for straightforward data transfers and the execution of functions requiring multiple arguments.
+## Vipande vya Kodi vya Ziada
 
-## Additional Code Snippets
-
-For memory allocation and shared memory object creation:
-
+Kwa usambazaji wa kumbukumbu na uundaji wa kitu cha kumbukumbu ya pamoja:
 ```c
 mach_vm_allocate();
 xpc_shmem_create();
 ```
-
-For creating and correcting the shared memory object in the remote process:
-
+Ili kuunda na kurekebisha kitu cha kumbukumbu kilichoshirikiwa katika mchakato wa mbali:
 ```c
 malloc(); // for allocating memory remotely
 thread_set_special_port(); // for inserting send right
 ```
+Kumbuka kushughulikia maelezo ya Mach ports na majina ya kuingia kwenye kumbukumbu kwa usahihi ili kuhakikisha kuwa usanidi wa kumbukumbu ya pamoja unafanya kazi ipasavyo.
 
-Remember to handle the details of Mach ports and memory entry names correctly to ensure that the shared memory setup functions properly.
+## 5. Kufikia Udhibiti Kamili
 
-## 5. Achieving Full Control
+Baada ya kufanikiwa kuanzisha kumbukumbu ya pamoja na kupata uwezo wa kutekeleza bila kikomo, tumepata udhibiti kamili juu ya mchakato wa lengo. Kazi muhimu zinazowezesha udhibiti huu ni:
 
-Upon successfully establishing shared memory and gaining arbitrary execution capabilities, we have essentially gained full control over the target process. The key functionalities enabling this control are:
+1. **Operesheni za Kumbukumbu za Kijumla**:
 
-1. **Arbitrary Memory Operations**:
+- Fanya usomaji wa kumbukumbu za kijumla kwa kuita `memcpy()` ili nakala data kutoka eneo la pamoja.
+- Fanya uandishi wa kumbukumbu za kijumla kwa kutumia `memcpy()` kuhamasisha data kwenye eneo la pamoja.
 
-   - Perform arbitrary memory reads by invoking `memcpy()` to copy data from the shared region.
-   - Execute arbitrary memory writes by using `memcpy()` to transfer data to the shared region.
+2. **Kushughulikia Kuitwa kwa Kazi zenye Hoja Nyingi**:
 
-2. **Handling Function Calls with Multiple Arguments**:
+- Kwa kazi zinazohitaji zaidi ya hoja 8, panga hoja za ziada kwenye stack kwa kufuata kanuni ya kuita.
 
-   - For functions requiring more than 8 arguments, arrange the additional arguments on the stack in compliance with the calling convention.
+3. **Uhamisho wa Mach Port**:
 
-3. **Mach Port Transfer**:
+- Hamisha Mach ports kati ya kazi kupitia ujumbe wa Mach kupitia bandari zilizowekwa awali.
 
-   - Transfer Mach ports between tasks through Mach messages via previously established ports.
+4. **Uhamisho wa File Descriptor**:
+- Hamisha file descriptors kati ya michakato kwa kutumia fileports, mbinu iliyosisitizwa na Ian Beer katika `triple_fetch`.
 
-4. **File Descriptor Transfer**:
-   - Transfer file descriptors between processes using fileports, a technique highlighted by Ian Beer in `triple_fetch`.
+Udhibiti huu wa kina umejumuishwa ndani ya maktaba ya [threadexec](https://github.com/bazad/threadexec), ikitoa utekelezaji wa kina na API rafiki kwa mtumiaji kwa mwingiliano na mchakato wa mwathirika.
 
-This comprehensive control is encapsulated within the [threadexec](https://github.com/bazad/threadexec) library, providing a detailed implementation and a user-friendly API for interaction with the victim process.
+## Maelezo Muhimu:
 
-## Important Considerations:
+- Hakikisha matumizi sahihi ya `memcpy()` kwa operesheni za kusoma/kandika kumbukumbu ili kudumisha utulivu wa mfumo na uadilifu wa data.
+- Unapohamisha Mach ports au file descriptors, fuata itifaki sahihi na shughuikia rasilimali kwa uwajibikaji ili kuzuia leaks au ufikiaji usio na makusudi.
 
-- Ensure proper use of `memcpy()` for memory read/write operations to maintain system stability and data integrity.
-- When transferring Mach ports or file descriptors, follow proper protocols and handle resources responsibly to prevent leaks or unintended access.
+Kwa kufuata miongozo hii na kutumia maktaba ya `threadexec`, mtu anaweza kudhibiti kwa ufanisi na kuingiliana na michakato kwa kiwango kidogo, akipata udhibiti kamili juu ya mchakato wa lengo.
 
-By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
-
-## References
+## Marejeo
 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 

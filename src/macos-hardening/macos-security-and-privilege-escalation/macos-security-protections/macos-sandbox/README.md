@@ -4,23 +4,22 @@
 
 ## Basic Information
 
-MacOS Sandbox (initially called Seatbelt) **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+MacOS Sandbox (mwanzo ilijulikana kama Seatbelt) **inapunguza programu** zinazotembea ndani ya sandbox kwa **vitendo vilivyokubaliwa vilivyobainishwa katika profaili ya Sandbox** ambayo programu inatumia. Hii husaidia kuhakikisha kwamba **programu itakuwa ikipata rasilimali zinazotarajiwa tu**.
 
-Any app with the **entitlement** **`com.apple.security.app-sandbox`** will be executed inside the sandbox. **Apple binaries** are usually executed inside a Sandbox, and all applications from the **App Store have that entitlement**. So several applications will be executed inside the sandbox.
+Programu yoyote yenye **entitlement** **`com.apple.security.app-sandbox`** itatekelezwa ndani ya sandbox. **Apple binaries** kwa kawaida hutekelezwa ndani ya Sandbox, na programu zote kutoka kwa **App Store zina entitlement hiyo**. Hivyo programu kadhaa zitatekelezwa ndani ya sandbox.
 
-In order to control what a process can or cannot do the **Sandbox has hooks** in almost any operation a process might try (including most syscalls) using **MACF**. However, d**epending** on the **entitlements** of the app the Sandbox might be more permissive with the process.
+Ili kudhibiti kile mchakato unaweza au hawezi kufanya, **Sandbox ina hooks** katika karibu kila operesheni ambayo mchakato unaweza kujaribu (ikiwemo syscalls nyingi) kwa kutumia **MACF**. Hata hivyo, **kutegemea** na **entitlements** za programu, Sandbox inaweza kuwa na uvumilivu zaidi kwa mchakato.
 
-Some important components of the Sandbox are:
+Baadhi ya vipengele muhimu vya Sandbox ni:
 
-- The **kernel extension** `/System/Library/Extensions/Sandbox.kext`
-- The **private framework** `/System/Library/PrivateFrameworks/AppSandbox.framework`
-- A **daemon** running in userland `/usr/libexec/sandboxd`
-- The **containers** `~/Library/Containers`
+- **kernel extension** `/System/Library/Extensions/Sandbox.kext`
+- **private framework** `/System/Library/PrivateFrameworks/AppSandbox.framework`
+- **daemon** inayotembea katika userland `/usr/libexec/sandboxd`
+- **containers** `~/Library/Containers`
 
 ### Containers
 
-Every sandboxed application will have its own container in `~/Library/Containers/{CFBundleIdentifier}` :
-
+Kila programu iliyowekwa sandbox itakuwa na chombo chake katika `~/Library/Containers/{CFBundleIdentifier}` :
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -31,9 +30,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-
-Inside each bundle id folder you can find the **plist** and the **Data directory** of the App with a structure that mimics the Home folder:
-
+Ndani ya kila folda ya kitambulisho cha kifurushi unaweza kupata **plist** na **Data directory** ya App yenye muundo unaofanana na folda ya Nyumbani:
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -56,12 +53,10 @@ lrwxr-xr-x   1 username  staff    20 Mar 24 18:02 Pictures -> ../../../../Pictur
 drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
-
 > [!CAUTION]
-> Note that even if the symlinks are there to "escape" from the Sandbox and access other folders, the App still needs to **have permissions** to access them. These permissions are inside the **`.plist`** in the `RedirectablePaths`.
+> Kumbuka kwamba hata kama symlinks zipo ili "kutoroka" kutoka Sandbox na kufikia folda nyingine, App bado inahitaji **kuwa na ruhusa** za kuzifikia. Ruhusa hizi ziko ndani ya **`.plist`** katika `RedirectablePaths`.
 
-The **`SandboxProfileData`** is the compiled sandbox profile CFData escaped to B64.
-
+**`SandboxProfileData`** ni profaili ya sandbox iliyokusanywa CFData iliyokwepwa hadi B64.
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -74,52 +69,50 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 
 # In this file you can find the entitlements:
 <key>Entitlements</key>
-	<dict>
-		<key>com.apple.MobileAsset.PhishingImageClassifier2</key>
-		<true/>
-		<key>com.apple.accounts.appleaccount.fullaccess</key>
-		<true/>
-		<key>com.apple.appattest.spi</key>
-		<true/>
-		<key>keychain-access-groups</key>
-		<array>
-			<string>6N38VWS5BX.ru.keepcoder.Telegram</string>
-			<string>6N38VWS5BX.ru.keepcoder.TelegramShare</string>
-		</array>
+<dict>
+<key>com.apple.MobileAsset.PhishingImageClassifier2</key>
+<true/>
+<key>com.apple.accounts.appleaccount.fullaccess</key>
+<true/>
+<key>com.apple.appattest.spi</key>
+<true/>
+<key>keychain-access-groups</key>
+<array>
+<string>6N38VWS5BX.ru.keepcoder.Telegram</string>
+<string>6N38VWS5BX.ru.keepcoder.TelegramShare</string>
+</array>
 [...]
 
 # Some parameters
 <key>Parameters</key>
-	<dict>
-		<key>_HOME</key>
-		<string>/Users/username</string>
-		<key>_UID</key>
-		<string>501</string>
-		<key>_USER</key>
-		<string>username</string>
+<dict>
+<key>_HOME</key>
+<string>/Users/username</string>
+<key>_UID</key>
+<string>501</string>
+<key>_USER</key>
+<string>username</string>
 [...]
 
 # The paths it can access
 <key>RedirectablePaths</key>
-	<array>
-		<string>/Users/username/Downloads</string>
-		<string>/Users/username/Documents</string>
-		<string>/Users/username/Library/Calendars</string>
-		<string>/Users/username/Desktop</string>
+<array>
+<string>/Users/username/Downloads</string>
+<string>/Users/username/Documents</string>
+<string>/Users/username/Library/Calendars</string>
+<string>/Users/username/Desktop</string>
 <key>RedirectedPaths</key>
-	<array/>
+<array/>
 [...]
 ```
-
 > [!WARNING]
-> Everything created/modified by a Sandboxed application will get the **quarantine attribut**e. This will prevent a sandbox space by triggering Gatekeeper if the sandbox app tries to execute something with **`open`**.
+> Kila kitu kilichoundwa/kilibadilishwa na programu ya Sandboxed kitapata **sifa ya karantini**. Hii itazuia nafasi ya sandbox kwa kuanzisha Gatekeeper ikiwa programu ya sandbox inajaribu kutekeleza kitu kwa kutumia **`open`**.
 
-## Sandbox Profiles
+## Profaili za Sandbox
 
-The Sandbox profiles are configuration files that indicate what is going to be **allowed/forbidden** in that **Sandbox**. It uses the **Sandbox Profile Language (SBPL)**, which uses the [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) programming language.
+Profaili za Sandbox ni faili za usanidi zinazoonyesha kile kitakachokuwa **kuruhusiwa/kuzuiwa** katika hiyo **Sandbox**. Inatumia **Sandbox Profile Language (SBPL)**, ambayo inatumia lugha ya programu ya [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>).
 
-Here you can find an example:
-
+Hapa unaweza kupata mfano:
 ```scheme
 (version 1) ; First you get the version
 
@@ -128,42 +121,38 @@ Here you can find an example:
 (allow network*) ; You can use wildcards and allow everything
 
 (allow file-read* ; You can specify where to apply the rule
-    (subpath "/Users/username/")
-    (literal "/tmp/afile")
-    (regex #"^/private/etc/.*")
+(subpath "/Users/username/")
+(literal "/tmp/afile")
+(regex #"^/private/etc/.*")
 )
 
 (allow mach-lookup
-    (global-name "com.apple.analyticsd")
+(global-name "com.apple.analyticsd")
 )
 ```
-
 > [!TIP]
-> Check this [**research**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **to check more actions that could be allowed or denied.**
+> Angalia hii [**utafiti**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **kuangalia hatua zaidi ambazo zinaweza kuruhusiwa au kukataliwa.**
 >
-> Note that in the compiled version of a profile the name of the operations are substituded by their entries in an array known by the dylib and the kext, making the compiled version shorter and more difficult to read.
+> Kumbuka kwamba katika toleo lililokusanywa la wasifu, majina ya operesheni yanabadilishwa na entries zao katika array inayojulikana na dylib na kext, na kufanya toleo lililokusanywa kuwa fupi na gumu kusoma.
 
-Important **system services** also run inside their own custom **sandbox** such as the `mdnsresponder` service. You can view these custom **sandbox profiles** inside:
+Huduma muhimu za **sistimu** pia zinaendesha ndani ya **sandbox** yao maalum kama huduma ya `mdnsresponder`. Unaweza kuona hizi **sandbox profiles** maalum ndani ya:
 
 - **`/usr/share/sandbox`**
 - **`/System/Library/Sandbox/Profiles`**
-- Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
+- Profaili nyingine za sandbox zinaweza kuangaliwa katika [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
-**App Store** apps use the **profile** **`/System/Library/Sandbox/Profiles/application.sb`**. You can check in this profile how entitlements such as **`com.apple.security.network.server`** allows a process to use the network.
+Programu za **App Store** zinatumia **wasifu** **`/System/Library/Sandbox/Profiles/application.sb`**. Unaweza kuangalia katika wasifu huu jinsi ruhusa kama **`com.apple.security.network.server`** inavyoruhusu mchakato kutumia mtandao.
 
-SIP is a Sandbox profile called platform_profile in /System/Library/Sandbox/rootless.conf
+SIP ni wasifu wa Sandbox unaoitwa platform_profile katika /System/Library/Sandbox/rootless.conf
 
-### Sandbox Profile Examples
+### Mifano ya Wasifu wa Sandbox
 
-To start an application with an **specific sandbox profile** you can use:
-
+Ili kuanzisha programu na **wasifu maalum wa sandbox** unaweza kutumia:
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
-
 {{#tabs}}
 {{#tab name="touch"}}
-
 ```scheme:touch.sb
 (version 1)
 (deny default)
@@ -205,93 +194,86 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 (allow file-read-data (literal "/"))
 ; This one will work
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
 > [!NOTE]
-> Note that the **Apple-authored** **software** that runs on **Windows** **doesn’t have additional security precautions**, such as application sandboxing.
+> Kumbuka kwamba **programu** **iliyoundwa na Apple** inayofanya kazi kwenye **Windows** **haina tahadhari za ziada za usalama**, kama vile sandboxing ya programu.
 
-Bypasses examples:
+Mifano ya kupita:
 
 - [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
-- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (they are able to write files outside the sandbox whose name starts with `~$`).
+- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (wanaweza kuandika faili nje ya sandbox ambayo jina lake linaanza na `~$`).
 
-### Sandbox Tracing
+### Ufuatiliaji wa Sandbox
 
-#### Via profile
+#### Kupitia profaili
 
-It's possible to trace all the checks sandbox performs every time an action is checked. For it just create the following profile:
-
+Inawezekana kufuatilia ukaguzi wote sandbox inafanya kila wakati kitendo kinapokaguliwa. Kwa hivyo, tengeneza profaili ifuatayo:
 ```scheme:trace.sb
 (version 1)
 (trace /tmp/trace.out)
 ```
-
-Ans then just execute something using that profile:
-
+Kisha tekeleza kitu chochote ukitumia profaili hiyo:
 ```bash
 sandbox-exec -f /tmp/trace.sb /bin/ls
 ```
+Katika `/tmp/trace.out` utaweza kuona kila ukaguzi wa sandbox uliofanywa kila wakati ulipokuwa ukitolewa (hivyo, kuna nakala nyingi).
 
-In `/tmp/trace.out` you will be able to see each sandbox check performed every-time it was called (so, lots of duplicates).
+Pia inawezekana kufuatilia sandbox kwa kutumia **`-t`** parameter: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
-It's also possible to trace the sandbox using the **`-t`** parameter: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
+#### Kupitia API
 
-#### Via API
+Kazi `sandbox_set_trace_path` iliyosafirishwa na `libsystem_sandbox.dylib` inaruhusu kuweka jina la faili la kufuatilia ambapo ukaguzi wa sandbox utaandikwa.\
+Pia inawezekana kufanya kitu kama hicho kwa kuita `sandbox_vtrace_enable()` na kisha kupata makosa ya log kutoka kwenye buffer kwa kuita `sandbox_vtrace_report()`.
 
-The function `sandbox_set_trace_path` exported by `libsystem_sandbox.dylib` allows to specify a trace filename where sandbox checks will be written to.\
-It's also possible to do something similar calling `sandbox_vtrace_enable()` and getting then the logs error from the buffer calling `sandbox_vtrace_report()`.
+### Ukaguzi wa Sandbox
 
-### Sandbox Inspection
-
-`libsandbox.dylib` exports a function called sandbox_inspect_pid which gives a list of the sandbox state of a process (including extensions). However, only platform binaries can use this function.
+`libsandbox.dylib` inasafirisha kazi inayoitwa sandbox_inspect_pid ambayo inatoa orodha ya hali ya sandbox ya mchakato (ikiwemo nyongeza). Hata hivyo, ni binaries za jukwaa pekee ndizo zinaweza kutumia kazi hii.
 
 ### MacOS & iOS Sandbox Profiles
 
-MacOS stores system sandbox profiles in two locations: **/usr/share/sandbox/** and **/System/Library/Sandbox/Profiles**.
+MacOS inahifadhi wasifu wa sandbox wa mfumo katika maeneo mawili: **/usr/share/sandbox/** na **/System/Library/Sandbox/Profiles**.
 
-And if a third-party application carry the _**com.apple.security.app-sandbox**_ entitlement, the system applies the **/System/Library/Sandbox/Profiles/application.sb** profile to that process.
+Na ikiwa programu ya upande wa tatu ina _**com.apple.security.app-sandbox**_ ruhusa, mfumo unatumia wasifu **/System/Library/Sandbox/Profiles/application.sb** kwa mchakato huo.
 
-In iOS, the default profile is called **container** and we don't have the SBPL text representation. In memory, this sandbox is represented as Allow/Deny binary tree for each permissions from the sandbox.
+Katika iOS, wasifu wa kawaida unaitwa **container** na hatuna uwakilishi wa maandiko wa SBPL. Katika kumbukumbu, sandbox hii inawakilishwa kama mti wa binary wa Ruhusu/Kataa kwa kila ruhusa kutoka sandbox.
 
-### Custom SBPL in App Store apps
+### SBPL Maalum katika programu za App Store
 
-It could be possible for companies to make their apps run **with custom Sandbox profiles** (instead of with the default one). They need to use the entitlement **`com.apple.security.temporary-exception.sbpl`** which needs to be authorized by Apple.
+Inawezekana kwa kampuni kufanya programu zao zifanye kazi **na wasifu wa Sandbox maalum** (badala ya wa kawaida). Wanahitaji kutumia ruhusa **`com.apple.security.temporary-exception.sbpl`** ambayo inahitaji kuidhinishwa na Apple.
 
-It's possible to check the definition of this entitlement in **`/System/Library/Sandbox/Profiles/application.sb:`**
-
+Inawezekana kuangalia ufafanuzi wa ruhusa hii katika **`/System/Library/Sandbox/Profiles/application.sb:`**
 ```scheme
 (sandbox-array-entitlement
-  "com.apple.security.temporary-exception.sbpl"
-  (lambda (string)
-    (let* ((port (open-input-string string)) (sbpl (read port)))
-      (with-transparent-redirection (eval sbpl)))))
+"com.apple.security.temporary-exception.sbpl"
+(lambda (string)
+(let* ((port (open-input-string string)) (sbpl (read port)))
+(with-transparent-redirection (eval sbpl)))))
 ```
+Hii itafanya **eval string baada ya haki hii** kama profaili ya Sandbox.
 
-This will **eval the string after this entitlement** as an Sandbox profile.
+### Kuunda & Kuondoa Profaili ya Sandbox
 
-### Compiling & decompiling a Sandbox Profile
+Zana ya **`sandbox-exec`** inatumia kazi `sandbox_compile_*` kutoka `libsandbox.dylib`. Kazi kuu zilizotolewa ni: `sandbox_compile_file` (inatarajia njia ya faili, param `-f`), `sandbox_compile_string` (inatarajia string, param `-p`), `sandbox_compile_name` (inatarajia jina la kontena, param `-n`), `sandbox_compile_entitlements` (inatarajia entitlements plist).
 
-The **`sandbox-exec`** tool uses the functions `sandbox_compile_*` from `libsandbox.dylib`. The main functions exported are: `sandbox_compile_file` (expects a file path, param `-f`), `sandbox_compile_string` (expects a string, param `-p`), `sandbox_compile_name` (expects a name of a container, param `-n`), `sandbox_compile_entitlements` (expects entitlements plist).
+Toleo hili lililogeuzwa na [**toleo la chanzo wazi la zana sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) linaruhusu **`sandbox-exec`** kuandika kwenye faili profaili ya sandbox iliyokusanywa.
 
-This reversed and [**open sourced version of the tool sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) allows to make **`sandbox-exec`** write into a file the compiled sandbox profile.
+Zaidi ya hayo, ili kufunga mchakato ndani ya kontena inaweza kuita `sandbox_spawnattrs_set[container/profilename]` na kupitisha kontena au profaili iliyopo.
 
-Moreover, to confine a process inside a container it might call `sandbox_spawnattrs_set[container/profilename]` and pass a container or pre-existing profile.
+## Debug & Kupita Sandbox
 
-## Debug & Bypass Sandbox
+Katika macOS, tofauti na iOS ambapo michakato imewekwa kwenye sandbox tangu mwanzo na kernel, **michakato lazima ijitolee kwenye sandbox yenyewe**. Hii inamaanisha katika macOS, mchakato haujawekewa vizuizi na sandbox hadi uamuzi wa kuingia, ingawa programu za App Store daima zimewekwa kwenye sandbox.
 
-On macOS, unlike iOS where processes are sandboxed from the start by the kernel, **processes must opt-in to the sandbox themselves**. This means on macOS, a process is not restricted by the sandbox until it actively decides to enter it, although App Store apps are always sandboxed.
-
-Processes are automatically Sandboxed from userland when they start if they have the entitlement: `com.apple.security.app-sandbox`. For a detailed explanation of this process check:
+Michakato huwekwa kwenye Sandbox moja kwa moja kutoka userland wanapoanza ikiwa wana haki: `com.apple.security.app-sandbox`. Kwa maelezo ya kina kuhusu mchakato huu angalia:
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
 {{#endref}}
 
-## **Sandbox Extensions**
+## **Marekebisho ya Sandbox**
 
-Extensions allow to give further privileges to an object and are giving calling one of the functions:
+Marekebisho yanaruhusu kutoa haki zaidi kwa kitu na yanatoa wito kwa moja ya kazi:
 
 - `sandbox_issue_extension`
 - `sandbox_extension_issue_file[_with_new_type]`
@@ -301,31 +283,29 @@ Extensions allow to give further privileges to an object and are giving calling 
 - `sandbox_extension_issue_generic`
 - `sandbox_extension_issue_posix_ipc`
 
-The extensions are stored in the second MACF label slot accessible from the process credentials. The following **`sbtool`** can access this information.
+Marekebisho yanawekwa katika slot ya pili ya lebo ya MACF inayoweza kufikiwa kutoka kwa akidi za mchakato. Zifuatazo **`sbtool`** inaweza kufikia habari hii.
 
-Note that extensions are usually granted by allowed processes, for example, `tccd` will grant the extension token of `com.apple.tcc.kTCCServicePhotos` when a process tried to access the photos and was allowed in a XPC message. Then, the process will need to consume the extension token so it gets added to it.\
-Note that the extension tokens are long hexadecimals that encode the granted permissions. However they don't have the allowed PID hardcoded which means that any process with access to the token might be **consumed by multiple processes**.
+Kumbuka kwamba marekebisho kwa kawaida yanatolewa na michakato inayoruhusiwa, kwa mfano, `tccd` itatoa token ya marekebisho ya `com.apple.tcc.kTCCServicePhotos` wakati mchakato unajaribu kufikia picha na kuruhusiwa katika ujumbe wa XPC. Kisha, mchakato utahitaji kutumia token ya marekebisho ili iongezwe kwake.\
+Kumbuka kwamba token za marekebisho ni hexadecimals ndefu ambazo zinaandika ruhusa zilizotolewa. Hata hivyo hazina PID inayoruhusiwa iliyowekwa kwa hivyo mchakato wowote wenye ufikiaji wa token unaweza **kutumiwa na michakato mingi**.
 
-Note that extensions are very related to entitlements also, so having certain entitlements might automatically grant certain extensions.
+Kumbuka kwamba marekebisho yanahusiana sana na haki pia, hivyo kuwa na haki fulani kunaweza kutoa moja kwa moja marekebisho fulani.
 
-### **Check PID Privileges**
+### **Angalia Haki za PID**
 
-[**According to this**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), the **`sandbox_check`** functions (it's a `__mac_syscall`), can check **if an operation is allowed or not** by the sandbox in a certain PID, audit token or unique ID.
+[**Kulingana na hii**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), kazi za **`sandbox_check`** (ni `__mac_syscall`), zinaweza kuangalia **kama operesheni inaruhusiwa au la** na sandbox katika PID fulani, token ya ukaguzi au kitambulisho cha kipekee.
 
-The [**tool sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (find it [compiled here](https://newosxbook.com/articles/hitsb.html)) can check if a PID can perform a certain actions:
-
+[**Zana sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (ipate [iliyokusanywa hapa](https://newosxbook.com/articles/hitsb.html)) inaweza kuangalia ikiwa PID inaweza kutekeleza vitendo fulani:
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access
 sbtool <pid> inspect #Gives you an explanation of the sandbox profile and extensions
 sbtool <pid> all
 ```
-
 ### \[un]suspend
 
-It's also possible to suspend and unsuspend the sandbox using the functions `sandbox_suspend` and `sandbox_unsuspend` from `libsystem_sandbox.dylib`.
+Inawezekana pia kusitisha na kuondoa kusitishwa kwa sandbox kwa kutumia kazi `sandbox_suspend` na `sandbox_unsuspend` kutoka `libsystem_sandbox.dylib`.
 
-Note that to call the suspend function some entitlements are checked in order to authorize the caller to call it like:
+Kumbuka kwamba ili kuita kazi ya kusitisha, haki fulani zinakaguliwa ili kuidhinisha mwito kama:
 
 - com.apple.private.security.sandbox-manager
 - com.apple.security.print
@@ -333,68 +313,67 @@ Note that to call the suspend function some entitlements are checked in order to
 
 ## mac_syscall
 
-This system call (#381) expects one string first argument which will indicate the module to run, and then a code in the second argument which will indicate the function to run. Then the third argument will depend on the function executed.
+Kito hiki cha mfumo (#381) kinatarajia hoja ya kwanza ya maandiko ambayo itaonyesha moduli ya kuendesha, na kisha msimbo katika hoja ya pili ambayo itaonyesha kazi ya kuendesha. Kisha hoja ya tatu itategemea kazi iliyotekelezwa.
 
-The function `___sandbox_ms` call wraps `mac_syscall` indicating in the first argument `"Sandbox"` just like `___sandbox_msp` is a wrapper of `mac_set_proc` (#387). Then, the some of supported codes by `___sandbox_ms` can be found in this table:
+Kazi `___sandbox_ms` inafunga `mac_syscall` ikionyesha katika hoja ya kwanza `"Sandbox"` kama vile `___sandbox_msp` ni kifungashio cha `mac_set_proc` (#387). Kisha, baadhi ya misimbo inayoungwa mkono na `___sandbox_ms` inaweza kupatikana katika jedwali hili:
 
-- **set_profile (#0)**: Apply a compiled or named profile to a process.
-- **platform_policy (#1)**: Enforce platform-specific policy checks (varies between macOS and iOS).
-- **check_sandbox (#2)**: Perform a manual check of a specific sandbox operation.
-- **note (#3)**: Adds ana nontation to a Sandbox
-- **container (#4)**: Attach an annotation to a sandbox, typically for debugging or identification.
-- **extension_issue (#5)**: Generate a new extension for a process.
-- **extension_consume (#6)**: Consume a given extension.
-- **extension_release (#7)**: Release the memory tied to a consumed extension.
-- **extension_update_file (#8)**: Modify parameters of an existing file extension within the sandbox.
-- **extension_twiddle (#9)**: Adjust or modify an existing file extension (e.g., TextEdit, rtf, rtfd).
-- **suspend (#10)**: Temporarily suspend all sandbox checks (requires appropriate entitlements).
-- **unsuspend (#11)**: Resume all previously suspended sandbox checks.
-- **passthrough_access (#12)**: Allow direct passthrough access to a resource, bypassing sandbox checks.
-- **set_container_path (#13)**: (iOS only) Set a container path for an app group or signing ID.
-- **container_map (#14)**: (iOS only) Retrieve a container path from `containermanagerd`.
-- **sandbox_user_state_item_buffer_send (#15)**: (iOS 10+) Set user mode metadata in the sandbox.
-- **inspect (#16)**: Provide debug information about a sandboxed process.
-- **dump (#18)**: (macOS 11) Dump the current profile of a sandbox for analysis.
-- **vtrace (#19)**: Trace sandbox operations for monitoring or debugging.
-- **builtin_profile_deactivate (#20)**: (macOS < 11) Deactivate named profiles (e.g., `pe_i_can_has_debugger`).
-- **check_bulk (#21)**: Perform multiple `sandbox_check` operations in a single call.
-- **reference_retain_by_audit_token (#28)**: Create a reference for an audit token for use in sandbox checks.
-- **reference_release (#29)**: Release a previously retained audit token reference.
-- **rootless_allows_task_for_pid (#30)**: Verify whether `task_for_pid` is allowed (similar to `csr` checks).
-- **rootless_whitelist_push (#31)**: (macOS) Apply a System Integrity Protection (SIP) manifest file.
-- **rootless_whitelist_check (preflight) (#32)**: Check the SIP manifest file before execution.
-- **rootless_protected_volume (#33)**: (macOS) Apply SIP protections to a disk or partition.
-- **rootless_mkdir_protected (#34)**: Apply SIP/DataVault protection to a directory creation process.
+- **set_profile (#0)**: Tumia wasifu uliokamilishwa au uliotajwa kwa mchakato.
+- **platform_policy (#1)**: Lazimisha ukaguzi wa sera maalum za jukwaa (hubadilika kati ya macOS na iOS).
+- **check_sandbox (#2)**: Fanya ukaguzi wa mkono wa operesheni maalum ya sandbox.
+- **note (#3)**: Ongeza anoteshini kwa Sandbox
+- **container (#4)**: Unganisha anoteshini kwa sandbox, kawaida kwa ajili ya ufuatiliaji au utambulisho.
+- **extension_issue (#5)**: Tengeneza nyongeza mpya kwa mchakato.
+- **extension_consume (#6)**: Tumia nyongeza iliyotolewa.
+- **extension_release (#7)**: Achilia kumbukumbu iliyohusishwa na nyongeza iliyotumiwa.
+- **extension_update_file (#8)**: Badilisha vigezo vya nyongeza ya faili iliyopo ndani ya sandbox.
+- **extension_twiddle (#9)**: Rekebisha au badilisha nyongeza ya faili iliyopo (mfano, TextEdit, rtf, rtfd).
+- **suspend (#10)**: Kusitisha kwa muda ukaguzi wote wa sandbox (inahitaji haki zinazofaa).
+- **unsuspend (#11)**: Anza tena ukaguzi wote wa sandbox uliositishwa hapo awali.
+- **passthrough_access (#12)**: Ruhusu ufikiaji wa moja kwa moja kwa rasilimali, ukipita ukaguzi wa sandbox.
+- **set_container_path (#13)**: (iOS pekee) Weka njia ya kontena kwa kikundi cha programu au kitambulisho cha saini.
+- **container_map (#14)**: (iOS pekee) Pata njia ya kontena kutoka `containermanagerd`.
+- **sandbox_user_state_item_buffer_send (#15)**: (iOS 10+) Weka metadata ya hali ya mtumiaji katika sandbox.
+- **inspect (#16)**: Toa taarifa za ufuatiliaji kuhusu mchakato wa sandboxed.
+- **dump (#18)**: (macOS 11) Dump wasifu wa sasa wa sandbox kwa ajili ya uchambuzi.
+- **vtrace (#19)**: Fuata operesheni za sandbox kwa ajili ya ufuatiliaji au ufuatiliaji.
+- **builtin_profile_deactivate (#20)**: (macOS < 11) Zima wasifu uliotajwa (mfano, `pe_i_can_has_debugger`).
+- **check_bulk (#21)**: Fanya operesheni nyingi za `sandbox_check` katika wito mmoja.
+- **reference_retain_by_audit_token (#28)**: Tengeneza rejeleo kwa tokeni ya ukaguzi kwa matumizi katika ukaguzi wa sandbox.
+- **reference_release (#29)**: Achilia rejeleo la tokeni ya ukaguzi iliyoshikiliwa hapo awali.
+- **rootless_allows_task_for_pid (#30)**: Thibitisha ikiwa `task_for_pid` inaruhusiwa (kama vile ukaguzi wa `csr`).
+- **rootless_whitelist_push (#31)**: (macOS) Tumia faili ya orodha ya Ulinzi wa Uadilifu wa Mfumo (SIP).
+- **rootless_whitelist_check (preflight) (#32)**: Kagua faili ya orodha ya SIP kabla ya utekelezaji.
+- **rootless_protected_volume (#33)**: (macOS) Tumia ulinzi wa SIP kwa diski au sehemu.
+- **rootless_mkdir_protected (#34)**: Tumia ulinzi wa SIP/DataVault kwa mchakato wa kuunda directory.
 
 ## Sandbox.kext
 
-Note that in iOS the kernel extension contains **hardcoded all the profiles** inside the `__TEXT.__const` segment to avoid them being modified. The following are some interesting functions from the kernel extension:
+Kumbuka kwamba katika iOS, nyongeza ya kernel ina **wasifu wote waliowekwa kwa nguvu** ndani ya sehemu ya `__TEXT.__const` ili kuzuia kubadilishwa. Ifuatayo ni baadhi ya kazi za kuvutia kutoka kwa nyongeza ya kernel:
 
-- **`hook_policy_init`**: It hooks `mpo_policy_init` and it's called after `mac_policy_register`. It performs most of the initializations of the Sandbox. It also initializes SIP.
-- **`hook_policy_initbsd`**: It sets up the sysctl interface registering `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` and `security.mac.sandbox.debug_mode` (if booed with `PE_i_can_has_debugger`).
-- **`hook_policy_syscall`**: It's called by `mac_syscall` with "Sandbox" as first argument and code indicating the operation in the second one. A switch is used to find the code to run according to the requested code.
+- **`hook_policy_init`**: Inachanganya `mpo_policy_init` na inaitwa baada ya `mac_policy_register`. Inatekeleza sehemu kubwa ya uanzishaji wa Sandbox. Pia inaanzisha SIP.
+- **`hook_policy_initbsd`**: Inatayarisha interface ya sysctl ikijiandikisha `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` na `security.mac.sandbox.debug_mode` (ikiwa imebood kwa `PE_i_can_has_debugger`).
+- **`hook_policy_syscall`**: Inaitwa na `mac_syscall` ikiwa na "Sandbox" kama hoja ya kwanza na msimbo unaoashiria operesheni katika ya pili. Switch inatumika kupata msimbo wa kuendesha kulingana na msimbo uliotakiwa.
 
 ### MACF Hooks
 
-**`Sandbox.kext`** uses more than a hundred of hooks via MACF. Most of the hooks will just check some trivial cases that allows to perform the action if it not, they will call **`cred_sb_evalutate`** with the **credentials** from MACF and a number corresponding to the **operation** to perform and a **buffer** for the output.
+**`Sandbox.kext`** inatumia zaidi ya mia moja ya hooks kupitia MACF. Mengi ya hooks haya yatakagua tu hali fulani za kawaida ambazo zinaruhusu kutekeleza kitendo, ikiwa sivyo, wataita **`cred_sb_evalutate`** na **credentials** kutoka MACF na nambari inayohusiana na **operesheni** ya kutekeleza na **buffer** kwa ajili ya matokeo.
 
-A good example of that is the function **`_mpo_file_check_mmap`** which hooked **`mmap`** and which will start checking if the new memory is going to be writable (and if not allow the execution), then it'll check if its used for the dyld shared cache and if so allow the execution, and finally it'll call **`sb_evaluate_internal`** (or one of its wrappers) to perform further allowance checks.
+Mfano mzuri wa hiyo ni kazi **`_mpo_file_check_mmap`** ambayo inachanganya **`mmap`** na ambayo itaanza kukagua ikiwa kumbukumbu mpya itakuwa inayoandikwa (na ikiwa sivyo ruhusu utekelezaji), kisha itakagua ikiwa inatumika kwa cache ya pamoja ya dyld na ikiwa ndivyo ruhusu utekelezaji, na hatimaye itaita **`sb_evaluate_internal`** (au moja ya vifungashio vyake) ili kufanya ukaguzi zaidi wa ruhusa.
 
-Moreover, out of the hundred(s) hooks Sandbox uses, there are 3 in particular that are very interesting:
+Zaidi ya hayo, kati ya hooks mia moja ambazo Sandbox inatumia, kuna 3 kwa haswa ambazo ni za kuvutia sana:
 
-- `mpo_proc_check_for`: It applies the profile if needed and if it wasn't previously applied
-- `mpo_vnode_check_exec`: Called when a process loads the associated binary, then a profile check is perfomed and also a check forbidding SUID/SGID executions.
-- `mpo_cred_label_update_execve`: This is called when the label is assigned. This is the longest one as it's called when the binary is fully loaded but it hasn't been executed yet. It'll perform actions such as creating the sandbox object, attach sandbox struct to the kauth credentials, remove access to mach ports...
+- `mpo_proc_check_for`: Inatumia wasifu ikiwa inahitajika na ikiwa haijatumika hapo awali
+- `mpo_vnode_check_exec`: Inaitwa wakati mchakato unapoleta binary inayohusiana, kisha ukaguzi wa wasifu unafanywa na pia ukaguzi unaozuia utekelezaji wa SUID/SGID.
+- `mpo_cred_label_update_execve`: Hii inaitwa wakati lebo inatolewa. Hii ni ndefu zaidi kwani inaitwa wakati binary imepakiwa kikamilifu lakini haijatekelezwa bado. Itafanya vitendo kama kuunda kitu cha sandbox, kuunganisha muundo wa sandbox kwa credentials za kauth, kuondoa ufikiaji wa mach ports...
 
-Note that **`_cred_sb_evalutate`** is a wrapper over **`sb_evaluate_internal`** and this function gets the credentials passed and then performs the evaluation using the **`eval`** function which usually evaluates the **platform profile** which is by default applied to all processes and then the **specific process profile**. Note that the platform profile is one of the main components of **SIP** in macOS.
+Kumbuka kwamba **`_cred_sb_evalutate`** ni kifungashio juu ya **`sb_evaluate_internal`** na kazi hii inapata credentials zilizopitishwa na kisha inafanya tathmini kwa kutumia kazi ya **`eval`** ambayo kawaida inakagua **wasifu wa jukwaa** ambao kwa default unatumika kwa mchakato wote na kisha **wasifu maalum wa mchakato**. Kumbuka kwamba wasifu wa jukwaa ni moja ya sehemu kuu za **SIP** katika macOS.
 
 ## Sandboxd
 
-Sandbox also has a user daemon running exposing the XPC Mach service `com.apple.sandboxd` and binding the special port 14 (`HOST_SEATBELT_PORT`) which the kernel extension uses to communicate with it. It exposes some functions using MIG.
+Sandbox pia ina daemon ya mtumiaji inayofanya kazi ikionyesha huduma ya XPC Mach `com.apple.sandboxd` na kuunganisha bandari maalum 14 (`HOST_SEATBELT_PORT`) ambayo nyongeza ya kernel inatumia kuwasiliana nayo. Inatoa baadhi ya kazi kwa kutumia MIG.
 
 ## References
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
