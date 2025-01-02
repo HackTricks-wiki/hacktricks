@@ -529,3 +529,4 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
+

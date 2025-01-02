@@ -53,3 +53,5 @@ cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

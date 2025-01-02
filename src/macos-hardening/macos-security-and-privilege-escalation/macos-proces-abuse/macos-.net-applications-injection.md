@@ -118,3 +118,5 @@ The full POC code for injection into PowerShell is accessible [here](https://gis
 - [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+
