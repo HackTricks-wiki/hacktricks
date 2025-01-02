@@ -1,53 +1,52 @@
-# Hardware Hacking
+# Hardeware Hacking
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## JTAG
 
-JTAG allows to perform a boundary scan. The boundary scan analyzes certain circuitry, including embedded boundary-scan cells and registers for each pin.
+JTAG laat 'n grensskandering toe. Die grensskandering analiseer sekere stroombane, insluitend ingebedde grensskandeercelle en registers vir elke pen.
 
-The JTAG standard defines **specific commands for conducting boundary scans**, including the following:
+Die JTAG-standaard definieer **spesifieke opdragte vir die uitvoering van grensskanderings**, insluitend die volgende:
 
-- **BYPASS** allows you to test a specific chip without the overhead of passing through other chips.
-- **SAMPLE/PRELOAD** takes a sample of the data entering and leaving the device when it’s in its normal functioning mode.
-- **EXTEST** sets and reads pin states.
+- **BYPASS** laat jou toe om 'n spesifieke skyf te toets sonder die oorhoofse koste van die deurgee van ander skywe.
+- **SAMPLE/PRELOAD** neem 'n monster van die data wat die toestel binnekom en verlaat wanneer dit in sy normale funksioneringsmodus is.
+- **EXTEST** stel en lees penstate.
 
-It can also support other commands such as:
+Dit kan ook ander opdragte ondersteun soos:
 
-- **IDCODE** for identifying a device
-- **INTEST** for the internal testing of the device
+- **IDCODE** vir die identifisering van 'n toestel
+- **INTEST** vir die interne toetsing van die toestel
 
-You might come across these instructions when you use a tool like the JTAGulator.
+Jy mag hierdie instruksies teëkom wanneer jy 'n hulpmiddel soos die JTAGulator gebruik.
 
-### The Test Access Port
+### Die Toets Toegang Poort
 
-Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a general-purpose port that provides **access to the JTAG test support** functions built into a component. TAP uses the following five signals:
+Grensskanderings sluit toetse van die vier-draad **Toets Toegang Poort (TAP)** in, 'n algemene poort wat **toegang tot die JTAG toetsondersteuning** funksies wat in 'n komponent ingebou is, bied. TAP gebruik die volgende vyf seine:
 
-- Test clock input (**TCK**) The TCK is the **clock** that defines how often the TAP controller will take a single action (in other words, jump to the next state in the state machine).
-- Test mode select (**TMS**) input TMS controls the **finite state machine**. On each beat of the clock, the device’s JTAG TAP controller checks the voltage on the TMS pin. If the voltage is below a certain threshold, the signal is considered low and interpreted as 0, whereas if the voltage is above a certain threshold, the signal is considered high and interpreted as 1.
-- Test data input (**TDI**) TDI is the pin that sends **data into the chip through the scan cells**. Each vendor is responsible for defining the communication protocol over this pin, because JTAG doesn’t define this.
-- Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
-- Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
+- Toets klok invoer (**TCK**) Die TCK is die **klok** wat definieer hoe gereeld die TAP-beheerder 'n enkele aksie sal neem (met ander woorde, na die volgende toestand in die toestandmasjien spring).
+- Toets modus seleksie (**TMS**) invoer TMS beheer die **eindige toestandmasjien**. Op elke klop van die klok, kontroleer die toestel se JTAG TAP-beheerder die spanning op die TMS-pen. As die spanning onder 'n sekere drempel is, word die sein as laag beskou en as 0 geïnterpreteer, terwyl, as die spanning bo 'n sekere drempel is, die sein as hoog beskou word en as 1 geïnterpreteer word.
+- Toets data invoer (**TDI**) TDI is die pen wat **data in die skyf deur die skandeercelle** stuur. Elke verskaffer is verantwoordelik vir die definisie van die kommunikasieprotokol oor hierdie pen, omdat JTAG dit nie definieer nie.
+- Toets data uitvoer (**TDO**) TDO is die pen wat **data uit die skyf** stuur.
+- Toets reset (**TRST**) invoer Die opsionele TRST reset die eindige toestandmasjien **na 'n bekende goeie toestand**. Alternatiewelik, as die TMS op 1 gehou word vir vyf agtereenvolgende klok siklusse, roep dit 'n reset op, op dieselfde manier as wat die TRST-pen sou doen, wat die rede is waarom TRST opsioneel is.
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
+Soms sal jy in staat wees om daardie penne op die PCB gemerk te vind. In ander gevalle mag jy moet **hulle vind**.
 
-### Identifying JTAG pins
+### Identifisering van JTAG penne
 
-The fastest but most expensive way to detect JTAG ports is by using the **JTAGulator**, a device created specifically for this purpose (although it can **also detect UART pinouts**).
+Die vinnigste maar duurste manier om JTAG-poorte te detecteer, is deur die gebruik van die **JTAGulator**, 'n toestel wat spesifiek vir hierdie doel geskep is (alhoewel dit **ook UART pinouts kan opspoor**).
 
-It has **24 channels** you can connect to the boards pins. Then it performs a **BF attack** of all the possible combinations sending **IDCODE** and **BYPASS** boundary scan commands. If it receives a response, it displays the channel corresponding to each JTAG signal
+Dit het **24 kanale** wat jy aan die bord se penne kan koppel. Dan voer dit 'n **BF-aanval** van al die moontlike kombinasies uit deur **IDCODE** en **BYPASS** grensskandeeropdragte te stuur. As dit 'n antwoord ontvang, vertoon dit die kanaal wat ooreenstem met elke JTAG sein.
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) loaded on an Arduino-compatible microcontroller.
+'n Goedkoper maar baie stadiger manier om JTAG pinouts te identifiseer, is deur die [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) wat op 'n Arduino-ondersteunde mikrobeheerder gelaai is.
 
-Using **JTAGenum**, you’d first **define the pins of the probing** device that you’ll use for the enumeration.You’d have to reference the device’s pinout diagram, and then connect these pins with the test points on your target device.
+Met **JTAGenum**, sal jy eers die **penne van die proef toestel** wat jy vir die enumerasie gaan gebruik, moet **definieer**. Jy sal die toestel se penuitdiagram moet verwys, en dan hierdie penne met die toetspunte op jou teiken toestel verbind.
 
-A **third way** to identify JTAG pins is by **inspecting the PCB** for one of the pinouts. In some cases, PCBs might conveniently provide the **Tag-Connect interface**, which is a clear indication that the board has a JTAG connector, too. You can see what that interface looks like at [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Additionally, inspecting the **datasheets of the chipsets on the PCB** might reveal pinout diagrams that point to JTAG interfaces.
+'n **Derde manier** om JTAG penne te identifiseer, is deur die **PCB te inspekteer** vir een van die pinouts. In sommige gevalle mag PCB's gerieflik die **Tag-Connect interface** bied, wat 'n duidelike aanduiding is dat die bord ook 'n JTAG-connector het. Jy kan sien hoe daardie interface lyk by [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Boonop mag die inspeksie van die **datasheets van die chipsets op die PCB** pinuitdiagramme onthul wat na JTAG interfaces dui.
 
 ## SDW
 
-SWD is an ARM-specific protocol designed for debugging.
+SWD is 'n ARM-spesifieke protokol wat ontwerp is vir foutopsporing.
 
-The SWD interface requires **two pins**: a bidirectional **SWDIO** signal, which is the equivalent of JTAG’s **TDI and TDO pins and a clock**, and **SWCLK**, which is the equivalent of **TCK** in JTAG. Many devices support the **Serial Wire or JTAG Debug Port (SWJ-DP)**, a combined JTAG and SWD interface that enables you to connect either a SWD or JTAG probe to the target.
+Die SWD-interface vereis **twee penne**: 'n bidireksionele **SWDIO** sein, wat die ekwivalent is van JTAG se **TDI en TDO penne en 'n klok**, en **SWCLK**, wat die ekwivalent is van **TCK** in JTAG. Baie toestelle ondersteun die **Serial Wire of JTAG Debug Port (SWJ-DP)**, 'n gekombineerde JTAG en SWD-interface wat jou in staat stel om óf 'n SWD óf JTAG-sonde aan die teiken te koppel.
 
 {{#include ../../banners/hacktricks-training.md}}
-

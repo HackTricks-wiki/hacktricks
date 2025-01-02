@@ -1,21 +1,21 @@
-# HackTricks Values & FAQ
+# HackTricks Waardes & FAQ
 
 {{#include ../banners/hacktricks-training.md}}
 
-## HackTricks Values
+## HackTricks Waardes
 
 > [!TIP]
-> These are the **values of the HackTricks Project**:
+> Dit is die **waardes van die HackTricks Projek**:
 >
-> - Give **FREE** access to **EDUCATIONAL hacking** resources to **ALL** Internet.
->   - Hacking is about learning, and learning should be as free as possible.
->   - The purpose of this book is to serve as a comprehensive **educational resource**.
-> - **STORE** awesome **hacking** techniques that the community publishes giving the **ORIGINAL** **AUTHORS** all the **credits**.
->   - **We don't want the credit from other people**, we just want to store cool tricks for everyone.
->   - We also write **our own researches** in HackTricks.
->   - In several cases we will just write **in HackTricks a summary of the important parts** of the technique and will **encourage the lector to visit the original post** for more details.
-> - **ORGANIZE** all the hacking techniques in the book so it's **MORE ACCESSIBLE**
->   - The HackTricks team has dedicated thousands of hours for free **only to organize the content** so people can **learn faster**
+> - Gee **VRYE** toegang tot **OPVOEDKUNDIGE hacking** hulpbronne aan **AL** Internet.
+>   - Hacking gaan oor leer, en leer moet so vry as moontlik wees.
+>   - Die doel van hierdie boek is om as 'n omvattende **opvoedkundige hulpbron** te dien.
+> - **BEREKEN** wonderlike **hacking** tegnieke wat die gemeenskap publiseer en gee die **ORIGINELE** **SKRYVERS** al die **krediete**.
+>   - **Ons wil nie die krediet van ander mense nie**, ons wil net cool truuks stoor vir almal.
+>   - Ons skryf ook **ons eie navorsings** in HackTricks.
+>   - In verskeie gevalle sal ons net **in HackTricks 'n opsomming van die belangrike dele** van die tegniek skryf en sal ons **die leser aanmoedig om die oorspronklike pos te besoek** vir meer besonderhede.
+> - **ORGANISEER** al die hacking tegnieke in die boek sodat dit **MEER TOEGANKLIK** is.
+>   - Die HackTricks span het duisende ure gratis gewy **net om die inhoud te organiseer** sodat mense **vinniger kan leer**.
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -23,124 +23,121 @@
 
 > [!TIP]
 >
-> - **Thank you so much for these resources, how can I thank you?**
+> - **Baie dankie vir hierdie hulpbronne, hoe kan ek julle bedank?**
 
-You can publicly thanks HackTricks teams for putting together all these resources publicly in a tweet mentioning [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-If you are specially grateful you can also [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
-And don't forget to **give a star in the Github projects!** (Find the links below).
+Jy kan die HackTricks span publiek bedank vir die saamstel van al hierdie hulpbronne in 'n tweet wat [**@hacktricks_live**](https://twitter.com/hacktricks_live) noem.\
+As jy veral dankbaar is, kan jy ook [**die projek hier borg**](https://github.com/sponsors/carlospolop).\
+En moenie vergeet om **'n ster in die Github projekte te gee nie!** (Vind die skakels hieronder).
 
 > [!TIP]
 >
-> - **How can I contribute to the project?**
+> - **Hoe kan ek by die projek bydra?**
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:
+Jy kan **nuwe wenke en truuks met die gemeenskap deel of foute regmaak** wat jy in die boeke vind deur 'n **Pull Request** na die onderskeie Github bladsye te stuur:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Don't forget to **give a star in the Github projects!**
+Moet nie vergeet om **'n ster in die Github projekte te gee nie!**
 
 > [!TIP]
 >
-> - **Can I copy some content from HackTricks and put it in my blog?**
+> - **Kan ek 'n paar inhoud van HackTricks kopieer en dit in my blog plaas?**
 
-Yes, you can, but **don't forget to mention the specific link(s)** where the content was taken from.
+Ja, jy kan, maar **moet nie vergeet om die spesifieke skakel(s)** waar die inhoud geneem is te noem nie.
 
 > [!TIP]
 >
-> - **How can I cite a page of HackTricks?**
+> - **Hoe kan ek 'n bladsy van HackTricks aanhaal?**
 
-As long as the link **of** the page(s) were you took the information from appears it's enough.\
-If you need a bibtex you can use something like:
-
+Solank as die skakel **van** die bladsy(e) waar jy die inligting geneem het verskyn, is dit genoeg.\
+As jy 'n bibtex nodig het, kan jy iets soos gebruik:
 ```latex
 @misc{hacktricks-bibtexing,
-  author = {"HackTricks Team" or the Authors name of the specific page/trick},
-  title = {Title of the Specific Page},
-  year = {Year of Last Update (check it at the end of the page)},
-  url = {\url{https://book.hacktricks.xyz/specific-page}},
+author = {"HackTricks Team" or the Authors name of the specific page/trick},
+title = {Title of the Specific Page},
+year = {Year of Last Update (check it at the end of the page)},
+url = {\url{https://book.hacktricks.xyz/specific-page}},
 }
 ```
+> [!WARNING]
+>
+> - **Kan ek al die HackTricks in my blog kopieer?**
+
+**Ek verkies om nie**. Dit **gaan niemand bevoordeel nie** aangesien al die **inhoud reeds publiek beskikbaar** is in die amptelike HackTricks boeke gratis.
+
+As jy bang is dat dit sal verdwyn, fork dit net in Github of laai dit af, soos ek gesê het, dit is reeds gratis.
 
 > [!WARNING]
 >
-> - **Can I copy all HackTricks in my blog?**
+> - **Waarom het julle borge? Is HackTricks boeke vir kommersiële doeleindes?**
 
-**I would rather not**. Thats **not going to benefit anyone** as all the **content is already publicly available** in the official HackTricks books for free.
+Die eerste **HackTricks** **waarde** is om **GRATIS** hacking opvoedkundige hulpbronne aan **AL** die wêreld te bied. Die HackTricks span het **duisende ure** toegewy om hierdie inhoud aan te bied, weer, **GRATIS**.
 
-If you fear that it will disappear, just fork it in Github or download it, as I said it's already free.
+As jy dink HackTricks boeke is gemaak vir **kommersiële doeleindes** is jy **HEELTEMAL FOUT**.
 
-> [!WARNING]
->
-> - **Why do you have sponsors? Are HackTricks books for commercial purposes?**
+Ons het borge omdat, selfs al is al die inhoud **GRATIS**, ons wil **die gemeenskap die moontlikheid bied om ons werk te waardeer** as hulle wil. Daarom bied ons mense die opsie om aan HackTricks te skenk via [**Github sponsors**](https://github.com/sponsors/carlospolop), en **relevante kuberveiligheidsmaatskappye** om HackTricks te borg en om **'n paar advertensies** in die boek te hê, wat die **advertensies** altyd geplaas word in plekke waar hulle **sigbaar** is maar **nie die leer** proses steur as iemand op die inhoud fokus nie.
 
-The first **HackTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
-
-If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
-
-We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
-
-You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
+Jy sal nie HackTricks vol irritante advertensies vind soos ander blogs met baie minder inhoud as HackTricks nie, omdat HackTricks nie gemaak is vir kommersiële doeleindes nie.
 
 > [!CAUTION]
 >
-> - **What should I do if some HackTricks page is based on my blog post but it isn't referenced?**
+> - **Wat moet ek doen as 'n HackTricks bladsy gebaseer is op my blogpos maar dit nie verwys word nie?**
 
-**We are very sorry. This shouldn't have happened**. Please, let us know via Github issues, Twitter, Discord... the link of the HackTricks page with the content and the link of your blog and **we will check it and add it ASAP**.
-
-> [!CAUTION]
->
-> - **What should I do if there is content from my blog in HackTricks and I don't want it there?**
-
-Note that having links to your page in HackTricks:
-
-- Improve your **SEO**
-- The content gets **translated to more than 15 languages** making possible for more people to access this content
-- **HackTricks encourages** people to **check your page** (several people has mentioned us that since some page of them is in HackTricks they receive more visits)
-
-However, If you still want the content of your blog to be removed from HackTricks just let us know and we will definitely **remove every link to your blog**, and any content based on it.
+**Ons is baie jammer. Dit moes nie gebeur het nie**. Laat weet ons asseblief via Github issues, Twitter, Discord... die skakel van die HackTricks bladsy met die inhoud en die skakel van jou blog en **ons sal dit nagaan en dit ASAP byvoeg**.
 
 > [!CAUTION]
 >
-> - **What should I do if I find copy-pasted content in HackTricks?**
+> - **Wat moet ek doen as daar inhoud van my blog in HackTricks is en ek wil nie dit daar hê nie?**
 
-We always **give the original authors all the credits**. If you find a page with copy-pasted content without original source referenced, let us know and we will either **remove it**, **add the link before the text**, or **rewrite it adding the link**.
+Let daarop dat om skakels na jou bladsy in HackTricks te hê:
+
+- Verbeter jou **SEO**
+- Die inhoud word **vertaal na meer as 15 tale** wat dit moontlik maak vir meer mense om toegang tot hierdie inhoud te hê
+- **HackTricks moedig** mense aan om **jou bladsy te kyk** (verskeie mense het vir ons genoem dat sedert 'n paar van hulle se bladsye in HackTricks is, hulle meer besoeke ontvang)
+
+As jy egter steeds wil hê dat die inhoud van jou blog verwyder moet word uit HackTricks, laat weet ons net en ons sal beslis **elke skakel na jou blog verwyder**, en enige inhoud gebaseer daarop.
+
+> [!CAUTION]
+>
+> - **Wat moet ek doen as ek gekopieerde inhoud in HackTricks vind?**
+
+Ons **gee altyd die oorspronklike outeurs al die krediet**. As jy 'n bladsy vind met gekopieerde inhoud sonder oorspronklike bron verwysing, laat weet ons en ons sal of **dit verwyder**, **die skakel voor die teks byvoeg**, of **dit herskryf met die skakel**.
 
 ## LICENSE
 
-Copyright © All rights reserved unless otherwise specified.
+Copyright © Alle regte voorbehou tensy anders vermeld.
 
 #### License Summary:
 
-- Attribution: You are free to:
-  - Share — copy and redistribute the material in any medium or format.
-  - Adapt — remix, transform, and build upon the material.
+- Attribution: Jy is vry om:
+- Deel — kopieer en herverdeel die materiaal in enige medium of formaat.
+- Pas aan — remix, transformeer, en bou voort op die materiaal.
 
 #### Additional Terms:
 
-- Third-Party Content: Some parts of this blog/book may include content from other sources, such as excerpts from other blogs or publications. The use of such content is done under the principles of fair use or with explicit permission from the respective copyright holders. Please refer to the original sources for specific licensing information regarding third-party content.
-- Authorship: The original content authored by HackTricks is subject to the terms of this license. You are encouraged to attribute this work to the author when sharing or adapting it.
+- Third-Party Content: Sommige dele van hierdie blog/boek mag inhoud van ander bronne insluit, soos uittreksels van ander blogs of publikasies. Die gebruik van sulke inhoud word gedoen onder die beginsels van billike gebruik of met eksplisiete toestemming van die onderskeie kopiereghouers. Verwys asseblief na die oorspronklike bronne vir spesifieke lisensiëringsinligting rakende derdeparty-inhoud.
+- Authorship: Die oorspronklike inhoud geskryf deur HackTricks is onderhewig aan die bepalings van hierdie lisensie. Jy word aangemoedig om hierdie werk aan die outeur toe te ken wanneer jy dit deel of aanpas.
 
 #### Exemptions:
 
-- Commercial Use: For inquiries regarding commercial use of this content, please contact me.
+- Commercial Use: Vir navrae rakende kommersiële gebruik van hierdie inhoud, kontak asseblief my.
 
-This license does not grant any trademark or branding rights in relation to the content. All trademarks and branding featured in this blog/book are the property of their respective owners.
+Hierdie lisensie gee nie enige handelsmerk of handelsnaam regte in verband met die inhoud nie. Alle handelsmerke en handelsname wat in hierdie blog/boek verskyn, is die eiendom van hul onderskeie eienaars.
 
-**By accessing or using HackTricks, you agree to abide by the terms of this license. If you do not agree with these terms, please, do not access this website.**
+**Deur toegang te verkry tot of HackTricks te gebruik, stem jy in om die bepalings van hierdie lisensie na te kom. As jy nie met hierdie bepalings saamstem nie, asseblief, moenie toegang tot hierdie webwerf verkry nie.**
 
 ## **Disclaimer**
 
 > [!CAUTION]
-> This book, 'HackTricks,' is intended for educational and informational purposes only. The content within this book is provided on an 'as is' basis, and the authors and publishers make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability of the information, products, services, or related graphics contained within this book. Any reliance you place on such information is therefore strictly at your own risk.
+> Hierdie boek, 'HackTricks,' is bedoel vir opvoedkundige en informele doeleindes slegs. Die inhoud binne hierdie boek word op 'n 'soos dit is' basis verskaf, en die outeurs en uitgewers maak geen verteenwoordigings of waarborge van enige aard, uitdruklik of geïmpliseer, oor die volledigheid, akkuraatheid, betroubaarheid, geskiktheid, of beskikbaarheid van die inligting, produkte, dienste, of verwante grafika wat in hierdie boek bevat is nie. Enige vertroue wat jy op sulke inligting plaas, is dus streng op jou eie risiko.
 >
-> The authors and publishers shall in no event be liable for any loss or damage, including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this book.
+> Die outeurs en uitgewers sal in geen geval aanspreeklik wees vir enige verlies of skade, insluitend sonder beperking, indirekte of gevolglike verlies of skade, of enige verlies of skade wat ontstaan uit verlies van data of wins wat ontstaan uit, of in verband met, die gebruik van hierdie boek.
 >
-> Furthermore, the techniques and tips described in this book are provided for educational and informational purposes only, and should not be used for any illegal or malicious activities. The authors and publishers do not condone or support any illegal or unethical activities, and any use of the information contained within this book is at the user's own risk and discretion.
+> Verder, die tegnieke en wenke wat in hierdie boek beskryf word, word slegs vir opvoedkundige en informele doeleindes verskaf, en moet nie vir enige onwettige of kwaadwillige aktiwiteite gebruik word nie. Die outeurs en uitgewers keur geen onwettige of onetiese aktiwiteite goed nie, en enige gebruik van die inligting wat in hierdie boek bevat is, is op die gebruiker se eie risiko en diskresie.
 >
-> The user is solely responsible for any actions taken based on the information contained within this book, and should always seek professional advice and assistance when attempting to implement any of the techniques or tips described herein.
+> Die gebruiker is slegs verantwoordelik vir enige aksies wat geneem word op grond van die inligting wat in hierdie boek bevat is, en moet altyd professionele advies en hulp soek wanneer hy probeer om enige van die tegnieke of wenke wat hier beskryf word, te implementeer.
 >
-> By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
+> Deur hierdie boek te gebruik, stem die gebruiker in om die outeurs en uitgewers van enige en alle aanspreeklikheid en verantwoordelikheid vir enige skade, verliese, of skade wat mag voortvloei uit die gebruik van hierdie boek of enige van die inligting wat daarin bevat is, vry te stel.
 
 {{#include ../banners/hacktricks-training.md}}
-

@@ -2,50 +2,41 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## **Extracting Data from Files**
+## **Data uit Lêers Onthul**
 
 ### **Binwalk**
 
-A tool for searching binary files for embedded hidden files and data. It's installed via `apt` and its source is available on [GitHub](https://github.com/ReFirmLabs/binwalk).
-
+'n Gereedskap om binêre lêers te soek na ingebedde versteekte lêers en data. Dit word geïnstalleer via `apt` en sy bron is beskikbaar op [GitHub](https://github.com/ReFirmLabs/binwalk).
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
 binwalk --dd ".*" file # Extracts all data
 ```
-
 ### **Foremost**
 
-Recovers files based on their headers and footers, useful for png images. Installed via `apt` with its source on [GitHub](https://github.com/korczis/foremost).
-
+Herstel lêers gebaseer op hul kop- en voetstukke, nuttig vir png-prente. Geïnstalleer via `apt` met sy bron op [GitHub](https://github.com/korczis/foremost).
 ```bash
 foremost -i file # Extracts data
 ```
-
 ### **Exiftool**
 
-Helps to view file metadata, available [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
-
+Help om lêer metadata te sien, beskikbaar [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
-
 ### **Exiv2**
 
-Similar to exiftool, for metadata viewing. Installable via `apt`, source on [GitHub](https://github.com/Exiv2/exiv2), and has an [official website](http://www.exiv2.org/).
-
+Soortgelyk aan exiftool, vir metadata weergawes. Installeerbaar via `apt`, bron op [GitHub](https://github.com/Exiv2/exiv2), en het 'n [amptelike webwerf](http://www.exiv2.org/).
 ```bash
 exiv2 file # Shows the metadata
 ```
+### **Lêer**
 
-### **File**
-
-Identify the type of file you're dealing with.
+Identifiseer die tipe lêer waarmee jy te doen het.
 
 ### **Strings**
 
-Extracts readable strings from files, using various encoding settings to filter the output.
-
+Onthaal leesbare strings uit lêers, met verskillende koderinginstellings om die uitvoer te filter.
 ```bash
 strings -n 6 file # Extracts strings with a minimum length of 6
 strings -n 6 file | head -n 20 # First 20 strings
@@ -57,95 +48,84 @@ strings -e b -n 6 file # 16bit strings (big-endian)
 strings -e L -n 6 file # 32bit strings (little-endian)
 strings -e B -n 6 file # 32bit strings (big-endian)
 ```
+### **Vergelyking (cmp)**
 
-### **Comparison (cmp)**
-
-Useful for comparing a modified file with its original version found online.
-
+Nuttig om 'n gewysigde lêer te vergelyk met sy oorspronklike weergawe wat aanlyn gevind is.
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
+## **Onttrek van Verborgen Gegewens in Tekst**
 
-## **Extracting Hidden Data in Text**
+### **Verborgen Gegewens in Spasies**
 
-### **Hidden Data in Spaces**
+Onsigbare karakters in blykbaar leë spasies mag inligting verberg. Om hierdie data te onttrek, besoek [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
 
-Invisible characters in seemingly empty spaces may hide information. To extract this data, visit [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
+## **Onttrek van Gegewens uit Beelde**
 
-## **Extracting Data from Images**
+### **Identifisering van Beeldbesonderhede met GraphicMagick**
 
-### **Identifying Image Details with GraphicMagick**
-
-[GraphicMagick](https://imagemagick.org/script/download.php) serves to determine image file types and identify potential corruption. Execute the command below to inspect an image:
-
+[GraphicMagick](https://imagemagick.org/script/download.php) dien om beeldlêertipes te bepaal en potensiële korrupsie te identifiseer. Voer die onderstaande opdrag uit om 'n beeld te inspekteer:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-
-To attempt repair on a damaged image, adding a metadata comment might help:
-
+Om 'n poging te doen om 'n beskadigde beeld te herstel, kan dit help om 'n metadata kommentaar by te voeg:
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
+### **Steghide vir Data Verborge**
 
-### **Steghide for Data Concealment**
+Steghide fasiliteer die verborge van data binne `JPEG, BMP, WAV, en AU` lêers, en is in staat om versleutelde data in te sluit en uit te trek. Installasie is eenvoudig met `apt`, en sy [bronskode is beskikbaar op GitHub](https://github.com/StefanoDeVuono/steghide).
 
-Steghide facilitates hiding data within `JPEG, BMP, WAV, and AU` files, capable of embedding and extracting encrypted data. Installation is straightforward using `apt`, and its [source code is available on GitHub](https://github.com/StefanoDeVuono/steghide).
+**Opdragte:**
 
-**Commands:**
+- `steghide info file` onthul of 'n lêer verborge data bevat.
+- `steghide extract -sf file [--passphrase password]` trek die verborge data uit, wagwoord is opsioneel.
 
-- `steghide info file` reveals if a file contains hidden data.
-- `steghide extract -sf file [--passphrase password]` extracts the hidden data, password optional.
+Vir web-gebaseerde onttrekking, besoek [hierdie webwerf](https://futureboy.us/stegano/decinput.html).
 
-For web-based extraction, visit [this website](https://futureboy.us/stegano/decinput.html).
+**Bruteforce Aanval met Stegcracker:**
 
-**Bruteforce Attack with Stegcracker:**
-
-- To attempt password cracking on Steghide, use [stegcracker](https://github.com/Paradoxis/StegCracker.git) as follows:
-
+- Om 'n wagwoord te probeer kraak op Steghide, gebruik [stegcracker](https://github.com/Paradoxis/StegCracker.git) soos volg:
 ```bash
 stegcracker <file> [<wordlist>]
 ```
+### **zsteg vir PNG en BMP Lêers**
 
-### **zsteg for PNG and BMP Files**
+zsteg spesialiseer in die ontdekking van versteekte data in PNG en BMP lêers. Installasie word gedoen via `gem install zsteg`, met sy [bron op GitHub](https://github.com/zed-0xff/zsteg).
 
-zsteg specializes in uncovering hidden data in PNG and BMP files. Installation is done via `gem install zsteg`, with its [source on GitHub](https://github.com/zed-0xff/zsteg).
+**Opdragte:**
 
-**Commands:**
+- `zsteg -a file` pas alle opsporingsmetodes op 'n lêer toe.
+- `zsteg -E file` spesifiseer 'n payload vir data-ekstraksie.
 
-- `zsteg -a file` applies all detection methods on a file.
-- `zsteg -E file` specifies a payload for data extraction.
+### **StegoVeritas en Stegsolve**
 
-### **StegoVeritas and Stegsolve**
+**stegoVeritas** kontroleer metadata, voer beeldtransformasies uit, en pas LSB brute forcing toe onder andere funksies. Gebruik `stegoveritas.py -h` vir 'n volledige lys van opsies en `stegoveritas.py stego.jpg` om alle kontroles uit te voer.
 
-**stegoVeritas** checks metadata, performs image transformations, and applies LSB brute forcing among other features. Use `stegoveritas.py -h` for a full list of options and `stegoveritas.py stego.jpg` to execute all checks.
+**Stegsolve** pas verskeie kleurfilters toe om versteekte teks of boodskappe binne beelde te onthul. Dit is beskikbaar op [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
-**Stegsolve** applies various color filters to reveal hidden texts or messages within images. It's available on [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
+### **FFT vir Versteekte Inhoud Opsporing**
 
-### **FFT for Hidden Content Detection**
-
-Fast Fourier Transform (FFT) techniques can unveil concealed content in images. Useful resources include:
+Fast Fourier Transform (FFT) tegnieke kan verborge inhoud in beelde onthul. Nuttige hulpbronne sluit in:
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-- [FFTStegPic on GitHub](https://github.com/0xcomposure/FFTStegPic)
+- [FFTStegPic op GitHub](https://github.com/0xcomposure/FFTStegPic)
 
-### **Stegpy for Audio and Image Files**
+### **Stegpy vir Klank en Beeld Lêers**
 
-Stegpy allows embedding information into image and audio files, supporting formats like PNG, BMP, GIF, WebP, and WAV. It's available on [GitHub](https://github.com/dhsdshdhk/stegpy).
+Stegpy laat die insluiting van inligting in beeld- en klanklêers toe, wat formate soos PNG, BMP, GIF, WebP, en WAV ondersteun. Dit is beskikbaar op [GitHub](https://github.com/dhsdshdhk/stegpy).
 
-### **Pngcheck for PNG File Analysis**
+### **Pngcheck vir PNG Lêer Analise**
 
-To analyze PNG files or to validate their authenticity, use:
-
+Om PNG lêers te analiseer of om hul egtheid te valideer, gebruik:
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
 ```
+### **Addisionele Gereedskap vir Beeldanalise**
 
-### **Additional Tools for Image Analysis**
-
-For further exploration, consider visiting:
+Vir verdere verkenning, oorweeg om te besoek:
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -153,69 +133,62 @@ For further exploration, consider visiting:
 - [OpenStego](https://www.openstego.com/)
 - [DIIT](https://diit.sourceforge.net/)
 
-## **Extracting Data from Audios**
+## **Data Uittrekking uit Klank**
 
-**Audio steganography** offers a unique method to conceal information within sound files. Different tools are utilized for embedding or retrieving hidden content.
+**Klank steganografie** bied 'n unieke metode om inligting binne klanklêers te verberg. Verskeie gereedskap word gebruik om versteekte inhoud in te sluit of te onttrek.
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide is a versatile tool designed for hiding data in JPEG, BMP, WAV, and AU files. Detailed instructions are provided in the [stego tricks documentation](stego-tricks.md#steghide).
+Steghide is 'n veelsydige gereedskap wat ontwerp is om data in JPEG, BMP, WAV, en AU-lêers te verberg. Gedetailleerde instruksies word verskaf in die [stego tricks documentation](stego-tricks.md#steghide).
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
-This tool is compatible with a variety of formats including PNG, BMP, GIF, WebP, and WAV. For more information, refer to [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
+Hierdie gereedskap is versoenbaar met 'n verskeidenheid formate, insluitend PNG, BMP, GIF, WebP, en WAV. Vir meer inligting, verwys na [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
 
 ### **ffmpeg**
 
-ffmpeg is crucial for assessing the integrity of audio files, highlighting detailed information and pinpointing any discrepancies.
-
+ffmpeg is noodsaaklik vir die beoordeling van die integriteit van klanklêers, wat gedetailleerde inligting uitlig en enige afwykings identifiseer.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-
 ### **WavSteg (WAV)**
 
-WavSteg excels in concealing and extracting data within WAV files using the least significant bit strategy. It is accessible on [GitHub](https://github.com/ragibson/Steganography#WavSteg). Commands include:
-
+WavSteg presteer in die verborge en onttrekking van data binne WAV-lêers deur die minste betekenisvolle bit strategie te gebruik. Dit is beskikbaar op [GitHub](https://github.com/ragibson/Steganography#WavSteg). Opdragte sluit in:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
 python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 ```
-
 ### **Deepsound**
 
-Deepsound allows for the encryption and detection of information within sound files using AES-256. It can be downloaded from [the official page](http://jpinsoft.net/deepsound/download.aspx).
+Deepsound stel die versleuteling en opsporing van inligting binne klanklêers moontlik deur gebruik te maak van AES-256. Dit kan afgelaai word van [the official page](http://jpinsoft.net/deepsound/download.aspx).
 
 ### **Sonic Visualizer**
 
-An invaluable tool for visual and analytical inspection of audio files, Sonic Visualizer can unveil hidden elements undetectable by other means. Visit the [official website](https://www.sonicvisualiser.org/) for more.
+'n Onskatbare hulpmiddel vir visuele en analitiese inspeksie van klanklêers, Sonic Visualizer kan versteekte elemente onthul wat deur ander middele onopspoorbaar is. Besoek die [official website](https://www.sonicvisualiser.org/) vir meer.
 
 ### **DTMF Tones - Dial Tones**
 
-Detecting DTMF tones in audio files can be achieved through online tools such as [this DTMF detector](https://unframework.github.io/dtmf-detect/) and [DialABC](http://dialabc.com/sound/detect/index.html).
+Die opsporing van DTMF-tones in klanklêers kan bereik word deur aanlyn hulpmiddels soos [this DTMF detector](https://unframework.github.io/dtmf-detect/) en [DialABC](http://dialabc.com/sound/detect/index.html).
 
 ## **Other Techniques**
 
 ### **Binary Length SQRT - QR Code**
 
-Binary data that squares to a whole number might represent a QR code. Use this snippet to check:
-
+Binaire data wat tot 'n heelgetal kwadrate, mag 'n QR-kode verteenwoordig. Gebruik hierdie snit om te kontroleer:
 ```python
 import math
 math.sqrt(2500) #50
 ```
+Vir binêre na beeld omskakeling, kyk na [dcode](https://www.dcode.fr/binary-image). Om QR-kodes te lees, gebruik [hierdie aanlyn strepieskode leser](https://online-barcode-reader.inliteresearch.com/).
 
-For binary to image conversion, check [dcode](https://www.dcode.fr/binary-image). To read QR codes, use [this online barcode reader](https://online-barcode-reader.inliteresearch.com/).
+### **Braille Vertaling**
 
-### **Braille Translation**
+Vir die vertaling van Braille, is die [Branah Braille Translator](https://www.branah.com/braille-translator) 'n uitstekende hulpbron.
 
-For translating Braille, the [Branah Braille Translator](https://www.branah.com/braille-translator) is an excellent resource.
-
-## **References**
+## **Verwysings**
 
 - [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../banners/hacktricks-training.md}}
-

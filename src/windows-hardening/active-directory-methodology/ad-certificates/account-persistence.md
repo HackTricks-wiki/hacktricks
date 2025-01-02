@@ -1,56 +1,45 @@
-# AD CS Account Persistence
+# AD CS Rekening Volharding
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a small summary of the machine persistence chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Dit is 'n klein opsomming van die masjien volharding hoofstukke van die wonderlike navorsing van [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## **Understanding Active User Credential Theft with Certificates – PERSIST1**
+## **Begrip van Aktiewe Gebruiker Kredensiaal Diefstal met Sertifikate – PERSIST1**
 
-In a scenario where a certificate that allows domain authentication can be requested by a user, an attacker has the opportunity to **request** and **steal** this certificate to **maintain persistence** on a network. By default, the `User` template in Active Directory allows such requests, though it may sometimes be disabled.
+In 'n scenario waar 'n sertifikaat wat domeinverifikasie toelaat deur 'n gebruiker aangevra kan word, het 'n aanvaller die geleentheid om hierdie sertifikaat te **aanspreek** en **steel** om **volharding** op 'n netwerk te **onderhou**. Standaard laat die `User` sjabloon in Active Directory sulke versoeke toe, alhoewel dit soms gedeaktiveer kan wees.
 
-Using a tool named [**Certify**](https://github.com/GhostPack/Certify), one can search for valid certificates that enable persistent access:
-
+Deur 'n hulpmiddel genaamd [**Certify**](https://github.com/GhostPack/Certify) te gebruik, kan 'n mens soek na geldige sertifikate wat volhoubare toegang moontlik maak:
 ```bash
 Certify.exe find /clientauth
 ```
+Dit word beklemtoon dat 'n sertifikaat se krag lê in sy vermoë om **as die gebruiker** waarvoor dit behoort te **authentiseer**, ongeag enige wagwoordveranderings, solank die sertifikaat **geld** bly.
 
-It's highlighted that a certificate's power lies in its ability to **authenticate as the user** it belongs to, regardless of any password changes, as long as the certificate remains **valid**.
-
-Certificates can be requested through a graphical interface using `certmgr.msc` or through the command line with `certreq.exe`. With **Certify**, the process to request a certificate is simplified as follows:
-
+Sertifikate kan aangevra word deur 'n grafiese koppelvlak met `certmgr.msc` of deur die opdraglyn met `certreq.exe`. Met **Certify** word die proses om 'n sertifikaat aan te vra vereenvoudig soos volg:
 ```bash
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
-
-Upon successful request, a certificate along with its private key is generated in `.pem` format. To convert this into a `.pfx` file, which is usable on Windows systems, the following command is utilized:
-
+Na 'n suksesvolle versoek word 'n sertifikaat saam met sy privaat sleutel in `.pem` formaat gegenereer. Om dit in 'n `.pfx` lêer te omskakel, wat op Windows-stelsels gebruik kan word, word die volgende opdrag gebruik:
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-
-The `.pfx` file can then be uploaded to a target system and used with a tool called [**Rubeus**](https://github.com/GhostPack/Rubeus) to request a Ticket Granting Ticket (TGT) for the user, extending the attacker's access for as long as the certificate is **valid** (typically one year):
-
+Die `.pfx` lêer kan dan na 'n teikenstelsel opgelaai word en gebruik word met 'n hulpmiddel genaamd [**Rubeus**](https://github.com/GhostPack/Rubeus) om 'n Ticket Granting Ticket (TGT) vir die gebruiker aan te vra, wat die aanvaller se toegang verleng solank die sertifikaat **geld** (tipies een jaar):
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
+'n Belangrike waarskuwing word gedeel oor hoe hierdie tegniek, gekombineer met 'n ander metode wat in die **THEFT5** afdeling uiteengesit word, 'n aanvaller in staat stel om volhoubaar 'n rekening se **NTLM hash** te verkry sonder om met die Local Security Authority Subsystem Service (LSASS) te interaksie, en vanuit 'n nie-verhoogde konteks, wat 'n meer stil metode vir langtermyn geloofsbriefdiefstal bied.
 
-An important warning is shared about how this technique, combined with another method outlined in the **THEFT5** section, allows an attacker to persistently obtain an account’s **NTLM hash** without interacting with the Local Security Authority Subsystem Service (LSASS), and from a non-elevated context, providing a stealthier method for long-term credential theft.
+## **Masjien Volhoubaarheid Verkry met Sertifikate - PERSIST2**
 
-## **Gaining Machine Persistence with Certificates - PERSIST2**
-
-Another method involves enrolling a compromised system’s machine account for a certificate, utilizing the default `Machine` template which allows such actions. If an attacker gains elevated privileges on a system, they can use the **SYSTEM** account to request certificates, providing a form of **persistence**:
-
+'n Ander metode behels die inskrywing van 'n gecompromitteerde stelsel se masjienrekening vir 'n sertifikaat, wat die standaard `Machine` sjabloon gebruik wat sulke aksies toelaat. As 'n aanvaller verhoogde voorregte op 'n stelsel verkry, kan hulle die **SYSTEM** rekening gebruik om sertifikate aan te vra, wat 'n vorm van **volhoubaarheid** bied:
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
+Hierdie toegang stel die aanvaller in staat om te autentiseer by **Kerberos** as die masjienrekening en **S4U2Self** te gebruik om Kerberos-dienskaartjies vir enige diens op die gasheer te verkry, wat effektief die aanvaller volgehoue toegang tot die masjien bied.
 
-This access enables the attacker to authenticate to **Kerberos** as the machine account and utilize **S4U2Self** to obtain Kerberos service tickets for any service on the host, effectively granting the attacker persistent access to the machine.
+## **Uitbreiding van Volgehoue Toegang Deur Sertifikaat Vernuwing - PERSIST3**
 
-## **Extending Persistence Through Certificate Renewal - PERSIST3**
+Die finale metode wat bespreek word, behels die benutting van die **geldigheid** en **vernuwingperiodes** van sertifikaat sjablone. Deur 'n sertifikaat voor sy vervaldatum te **vernuwe**, kan 'n aanvaller die autentisering na Active Directory handhaaf sonder die behoefte aan addisionele kaartjie inskrywings, wat spore op die Sertifikaat Owerheid (CA) bediener kan agterlaat.
 
-The final method discussed involves leveraging the **validity** and **renewal periods** of certificate templates. By **renewing** a certificate before its expiration, an attacker can maintain authentication to Active Directory without the need for additional ticket enrolments, which could leave traces on the Certificate Authority (CA) server.
-
-This approach allows for an **extended persistence** method, minimizing the risk of detection through fewer interactions with the CA server and avoiding the generation of artifacts that could alert administrators to the intrusion.
+Hierdie benadering stel 'n **verlengde volgehoue toegang** metode in, wat die risiko van opsporing minimaliseer deur minder interaksies met die CA bediener en die generering van artefakte te vermy wat administrateurs op die indringing kan waarsku.
 
 {{#include ../../../banners/hacktricks-training.md}}
-

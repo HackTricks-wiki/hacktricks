@@ -1,99 +1,98 @@
-# LLM Training - Data Preparation
+# LLM Opleiding - Data Voorbereiding
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**Dit is my aantekeninge uit die baie aanbevole boek** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **met 'n paar ekstra inligting.**
 
-## Basic Information
+## Basiese Inligting
 
-You should start by reading this post for some basic concepts you should know about:
+Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet weet:
 
 {{#ref}}
 0.-basic-llm-concepts.md
 {{#endref}}
 
-## 1. Tokenization
+## 1. Tokenisering
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> Die doel van hierdie aanvanklike fase is baie eenvoudig: **Verdeel die invoer in tokens (ids) op 'n manier wat sin maak**.
 
 {{#ref}}
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Data Sampling
+## 2. Data Monsters
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> Die doel van hierdie tweede fase is baie eenvoudig: **Monster die invoerdata en berei dit voor vir die opleidingsfase deur gewoonlik die datastel in sinne van 'n spesifieke lengte te skei en ook die verwagte reaksie te genereer.**
 
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Token Embeddings
+## 3. Token Inbedings
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> Die doel van hierdie derde fase is baie eenvoudig: **Ken elkeen van die vorige tokens in die woordeskat 'n vektor van die verlangde dimensies toe om die model te oefen.** Elke woord in die woordeskat sal 'n punt in 'n ruimte van X dimensies wees.\
+> Let daarop dat die posisie van elke woord in die ruimte aanvanklik net "ewekansig" geinitialiseer word en hierdie posisies is opleibare parameters (sal verbeter word tydens die opleiding).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> Boonop, tydens die token inbedding **word 'n ander laag van inbeddings geskep** wat (in hierdie geval) die **absolute posisie van die woord in die opleidingssin** verteenwoordig. Op hierdie manier sal 'n woord in verskillende posisies in die sin 'n ander voorstelling (betekenis) hê.
 
 {{#ref}}
 3.-token-embeddings.md
 {{#endref}}
 
-## 4. Attention Mechanisms
+## 4. Aandag Meganismes
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> Die doel van hierdie vierde fase is baie eenvoudig: **Pas 'n paar aandag meganismes toe**. Hierdie gaan baie **herhaalde lae** wees wat gaan **die verhouding van 'n woord in die woordeskat met sy bure in die huidige sin wat gebruik word om die LLM op te lei, vasvang**.\
+> 'n Baie lae word hiervoor gebruik, so 'n baie opleibare parameters gaan hierdie inligting vasvang.
 
 {{#ref}}
 4.-attention-mechanisms.md
 {{#endref}}
 
-## 5. LLM Architecture
+## 5. LLM Argitektuur
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> Die doel van hierdie vyfde fase is baie eenvoudig: **Ontwikkel die argitektuur van die volle LLM**. Sit alles saam, pas al die lae toe en skep al die funksies om teks te genereer of teks na IDs en terug te transformeer.
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> Hierdie argitektuur sal vir beide, opleiding en voorspellings van teks gebruik word nadat dit opgelei is.
 
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Pre-training & Loading models
+## 6. Voor-Opleiding & Laai Modelle
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> Die doel van hierdie sesde fase is baie eenvoudig: **Oefen die model van nuuts af**. Hiervoor sal die vorige LLM argitektuur gebruik word met 'n paar lusse wat oor die datastelle gaan met die gedefinieerde verliesfunksies en optimizer om al die parameters van die model op te lei.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. LoRA Improvements in fine-tuning
+## 7.0. LoRA Verbeterings in fyn-afstemming
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> Die gebruik van **LoRA verminder baie die berekening** wat nodig is om **fyn af te stel** reeds opgelei modelle.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Fine-Tuning for Classification
+## 7.1. Fyn-Afstemming vir Kategorisering
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> Die doel van hierdie afdeling is om te wys hoe om 'n reeds voor-opgeleide model fyn af te stel sodat die LLM eerder as om nuwe teks te genereer, die **waarskynlikhede van die gegewe teks wat in elkeen van die gegewe kategorieë gekategoriseer word** (soos of 'n teks spam is of nie) sal gee.
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Fine-Tuning to follow instructions
+## 7.2. Fyn-Afstemming om Instruksies te Volg
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> Die doel van hierdie afdeling is om te wys hoe om **'n reeds voor-opgeleide model fyn af te stel om instruksies te volg** eerder as net om teks te genereer, byvoorbeeld, om op take te reageer as 'n chat bot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

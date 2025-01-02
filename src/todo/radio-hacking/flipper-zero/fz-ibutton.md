@@ -4,7 +4,7 @@
 
 ## Intro
 
-For more info about what is an iButton check:
+Vir meer inligting oor wat 'n iButton is, kyk:
 
 {{#ref}}
 ../ibutton.md
@@ -12,7 +12,7 @@ For more info about what is an iButton check:
 
 ## Design
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
+Die **blou** deel van die volgende beeld is hoe jy die **regte iButton** moet **plaas** sodat die Flipper dit kan **lees.** Die **groen** deel is hoe jy die **leser** met die Flipper zero moet **raak** om 'n iButton **korrek na te boots**.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,18 +20,18 @@ The **blue** part of the following imageis how you would need to **put the real 
 
 ### Read
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
+In Leesmodus wag die Flipper vir die iButton-sleutel om aan te raak en kan dit enige van drie tipes sleutels verteer: **Dallas, Cyfral, en Metakom**. Flipper sal **die tipe van die sleutel self uitvind**. Die naam van die sleutelprotokol sal op die skerm bo die ID-nommer vertoon word.
 
 ### Add manually
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+Dit is moontlik om 'n iButton van tipe: **Dallas, Cyfral, en Metakom** **handmatig by te voeg**.
 
 ### **Emulate**
 
-It's possible to **emulate** saved iButtons (read or manually added).
+Dit is moontlik om **iButtons** wat gestoor is (gelees of handmatig bygevoeg) te **emuleer**.
 
 > [!NOTE]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> As jy nie die verwagte kontakte van die Flipper Zero kan laat aanraak nie, kan jy die **eksterne GPIO gebruik:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
@@ -40,4 +40,3 @@ It's possible to **emulate** saved iButtons (read or manually added).
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

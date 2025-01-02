@@ -3,163 +3,163 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) om maklik te bou en **werkvloei** te **automate** wat deur die wêreld se **mees gevorderde** gemeenskapstoestelle aangedryf word.\
+Kry Toegang Vandag:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Access Control List (ACL)**
+## **Toegangsbeheerlys (ACL)**
 
-An Access Control List (ACL) consists of an ordered set of Access Control Entries (ACEs) that dictate the protections for an object and its properties. In essence, an ACL defines which actions by which security principals (users or groups) are permitted or denied on a given object.
+'n Toegangsbeheerlys (ACL) bestaan uit 'n geordende stel Toegangsbeheeringe (ACEs) wat die beskerming van 'n objek en sy eienskappe bepaal. In wese definieer 'n ACL watter aksies deur watter sekuriteitsbeginsels (gebruikers of groepe) toegelaat of geweier word op 'n gegewe objek.
 
-There are two types of ACLs:
+Daar is twee tipes ACLs:
 
-- **Discretionary Access Control List (DACL):** Specifies which users and groups have or do not have access to an object.
-- **System Access Control List (SACL):** Governs the auditing of access attempts to an object.
+- **Diskresionêre Toegangsbeheerlys (DACL):** Spesifiseer watter gebruikers en groepe toegang tot 'n objek het of nie het nie.
+- **Stelsels Toegangsbeheerlys (SACL):** Beheer die ouditering van toegangspogings tot 'n objek.
 
-The process of accessing a file involves the system checking the object's security descriptor against the user's access token to determine if access should be granted and the extent of that access, based on the ACEs.
+Die proses om toegang tot 'n lêer te verkry behels dat die stelsel die objek se sekuriteitsbeskrywer teen die gebruiker se toegangstoken nagaan om te bepaal of toegang toegestaan moet word en die omvang van daardie toegang, gebaseer op die ACEs.
 
-### **Key Components**
+### **Belangrike Komponente**
 
-- **DACL:** Contains ACEs that grant or deny access permissions to users and groups for an object. It's essentially the main ACL that dictates access rights.
-- **SACL:** Used for auditing access to objects, where ACEs define the types of access to be logged in the Security Event Log. This can be invaluable for detecting unauthorized access attempts or troubleshooting access issues.
+- **DACL:** Bevat ACEs wat toegangstoestemmings aan gebruikers en groepe vir 'n objek toeken of weier. Dit is in wese die hoof ACL wat toegangregte bepaal.
+- **SACL:** Word gebruik vir die ouditering van toegang tot objek, waar ACEs die tipes toegang definieer wat in die Sekuriteitsgebeurtenislogboek geregistreer moet word. Dit kan van onskatbare waarde wees om ongeoorloofde toegangspogings te ontdek of toegangkwessies op te los.
 
-### **System Interaction with ACLs**
+### **Stelselinteraksie met ACLs**
 
-Each user session is associated with an access token that contains security information relevant to that session, including user, group identities, and privileges. This token also includes a logon SID that uniquely identifies the session.
+Elke gebruikersessie is geassosieer met 'n toegangstoken wat sekuriteitsinligting bevat wat relevant is vir daardie sessie, insluitend gebruiker, groep identiteite, en voorregte. Hierdie token sluit ook 'n aanmeld SID in wat die sessie uniek identifiseer.
 
-The Local Security Authority (LSASS) processes access requests to objects by examining the DACL for ACEs that match the security principal attempting access. Access is immediately granted if no relevant ACEs are found. Otherwise, LSASS compares the ACEs against the security principal's SID in the access token to determine access eligibility.
+Die Plaaslike Sekuriteitsowerheid (LSASS) verwerk toegang versoeke tot objek deur die DACL vir ACEs te ondersoek wat ooreenstem met die sekuriteitsbeginsel wat toegang probeer verkry. Toegang word onmiddellik toegestaan as daar geen relevante ACEs gevind word nie. Andersins vergelyk LSASS die ACEs teen die sekuriteitsbeginsel se SID in die toegangstoken om toegangsgeschiktheid te bepaal.
 
-### **Summarized Process**
+### **Samegevatte Proses**
 
-- **ACLs:** Define access permissions through DACLs and audit rules through SACLs.
-- **Access Token:** Contains user, group, and privilege information for a session.
-- **Access Decision:** Made by comparing DACL ACEs with the access token; SACLs are used for auditing.
+- **ACLs:** Definieer toegangstoestemmings deur DACLs en ouditreëls deur SACLs.
+- **Toegangstoken:** Bevat gebruiker, groep, en voorregte-inligting vir 'n sessie.
+- **Toegangbesluit:** Gemaak deur DACL ACEs met die toegangstoken te vergelyk; SACLs word gebruik vir ouditering.
 
 ### ACEs
 
-There arey **three main types of Access Control Entries (ACEs)**:
+Daar is **drie hoof tipes Toegangsbeheeringe (ACEs)**:
 
-- **Access Denied ACE**: This ACE explicitly denies access to an object for specified users or groups (in a DACL).
-- **Access Allowed ACE**: This ACE explicitly grants access to an object for specified users or groups (in a DACL).
-- **System Audit ACE**: Positioned within a System Access Control List (SACL), this ACE is responsible for generating audit logs upon access attempts to an object by users or groups. It documents whether access was allowed or denied and the nature of the access.
+- **Toegang Geweier ACE**: Hierdie ACE weier eksplisiet toegang tot 'n objek vir gespesifiseerde gebruikers of groepe (in 'n DACL).
+- **Toegang Toegelaat ACE**: Hierdie ACE grant eksplisiet toegang tot 'n objek vir gespesifiseerde gebruikers of groepe (in 'n DACL).
+- **Stelselaudit ACE**: Geplaas binne 'n Stelsels Toegangsbeheerlys (SACL), is hierdie ACE verantwoordelik vir die generering van ouditlogboek wanneer toegangspogings tot 'n objek deur gebruikers of groepe plaasvind. Dit dokumenteer of toegang toegestaan of geweier is en die aard van die toegang.
 
-Each ACE has **four critical components**:
+Elke ACE het **vier kritieke komponente**:
 
-1. The **Security Identifier (SID)** of the user or group (or their principal name in a graphical representation).
-2. A **flag** that identifies the ACE type (access denied, allowed, or system audit).
-3. **Inheritance flags** that determine if child objects can inherit the ACE from their parent.
-4. An [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), a 32-bit value specifying the object's granted rights.
+1. Die **Sekuriteitsidentifiseerder (SID)** van die gebruiker of groep (of hul beginselnaam in 'n grafiese voorstelling).
+2. 'n **vlag** wat die ACE tipe identifiseer (toegang geweier, toegestaan, of stelselaudit).
+3. **Erfenisvlagte** wat bepaal of kindobjekte die ACE van hul ouer kan erf.
+4. 'n [**toegangsmasker**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), 'n 32-bis waarde wat die objek se toegepaste regte spesifiseer.
 
-Access determination is conducted by sequentially examining each ACE until:
+Toegangsbepaling word uitgevoer deur elke ACE een vir een te ondersoek totdat:
 
-- An **Access-Denied ACE** explicitly denies the requested rights to a trustee identified in the access token.
-- **Access-Allowed ACE(s)** explicitly grant all requested rights to a trustee in the access token.
-- Upon checking all ACEs, if any requested right has **not been explicitly allowed**, access is implicitly **denied**.
+- 'n **Toegang-Geweier ACE** eksplisiet die aangevraagde regte aan 'n trustee in die toegangstoken weier.
+- **Toegang-Toegelaat ACE(s)** eksplisiet al die aangevraagde regte aan 'n trustee in die toegangstoken grant.
+- Na die nagaan van al die ACEs, as enige aangevraagde regte **nie eksplisiet toegestaan** is nie, word toegang implisiet **geweier**.
 
-### Order of ACEs
+### Volgorde van ACEs
 
-The way **ACEs** (rules that say who can or cannot access something) are put in a list called **DACL** is very important. This is because once the system gives or denies access based on these rules, it stops looking at the rest.
+Die manier waarop **ACEs** (reëls wat sê wie toegang kan of nie kan hê nie) in 'n lys genaamd **DACL** geplaas word, is baie belangrik. Dit is omdat sodra die stelsel toegang op grond van hierdie reëls gee of weier, dit ophou om na die res te kyk.
 
-There is a best way to organize these ACEs, and it is called **"canonical order."** This method helps make sure everything works smoothly and fairly. Here is how it goes for systems like **Windows 2000** and **Windows Server 2003**:
+Daar is 'n beste manier om hierdie ACEs te organiseer, en dit word **"kanonieke orde"** genoem. Hierdie metode help om te verseker dat alles glad en regverdig werk. Hier is hoe dit gaan vir stelsels soos **Windows 2000** en **Windows Server 2003**:
 
-- First, put all the rules that are made **specifically for this item** before the ones that come from somewhere else, like a parent folder.
-- In those specific rules, put the ones that say **"no" (deny)** before the ones that say **"yes" (allow)**.
-- For the rules that come from somewhere else, start with the ones from the **closest source**, like the parent, and then go back from there. Again, put **"no"** before **"yes."**
+- Eerstens, plaas al die reëls wat **spesifiek vir hierdie item** gemaak is voor diegene wat van elders kom, soos 'n ouer gids.
+- In daardie spesifieke reëls, plaas diegene wat sê **"nee" (weier)** voor diegene wat sê **"ja" (toelaat)**.
+- Vir die reëls wat van elders kom, begin met diegene van die **nabyste bron**, soos die ouer, en gaan dan terug van daar. Weer eens, plaas **"nee"** voor **"ja."**
 
-This setup helps in two big ways:
+Hierdie opstelling help op twee groot maniere:
 
-- It makes sure that if there is a specific **"no,"** it is respected, no matter what other **"yes"** rules are there.
-- It lets the owner of an item have the **final say** on who gets in, before any rules from parent folders or further back come into play.
+- Dit verseker dat as daar 'n spesifieke **"nee"** is, dit gerespekteer word, ongeag watter ander **"ja"** reëls daar is.
+- Dit laat die eienaar van 'n item die **laaste sê** hê oor wie binnekom, voordat enige reëls van ouer gidse of verder terug in werking tree.
 
-By doing things this way, the owner of a file or folder can be very precise about who gets access, making sure the right people can get in and the wrong ones can't.
+Deur dinge op hierdie manier te doen, kan die eienaar van 'n lêer of gids baie presies wees oor wie toegang kry, en verseker dat die regte mense kan inkom en die verkeerde nie.
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-So, this **"canonical order"** is all about making sure the access rules are clear and work well, putting specific rules first and organizing everything in a smart way.
+So, hierdie **"kanonieke orde"** is alles oor om te verseker dat die toegang reëls duidelik en goed werk, spesifieke reëls eerste te plaas en alles op 'n slim manier te organiseer.
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik te bou en **werkvloei** te **automate** wat deur die wêreld se **mees gevorderde** gemeenskapstoestelle aangedryf word.\
+Kry Toegang Vandag:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-### GUI Example
+### GUI Voorbeeld
 
-[**Example from here**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
+[**Voorbeeld van hier**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
-This is the classic security tab of a folder showing the ACL, DACL and ACEs:
+Dit is die klassieke sekuriteitstab van 'n gids wat die ACL, DACL en ACEs wys:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-If we click the **Advanced button** we will get more options like inheritance:
+As ons op die **Gevorderde knoppie** klik, sal ons meer opsies kry soos erfenis:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
-And if you add or edit a Security Principal:
+En as jy 'n Sekuriteitsbeginsel byvoeg of wysig:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-And last we have the SACL in the Auditing tab:
+En laastens het ons die SACL in die Ou dit tab:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Explaining Access Control in a Simplified Manner
+### Toegangsbeheer in 'n Vereenvoudigde Wyse Verduidelik
 
-When managing access to resources, like a folder, we use lists and rules known as Access Control Lists (ACLs) and Access Control Entries (ACEs). These define who can or cannot access certain data.
+Wanneer ons toegang tot hulpbronne bestuur, soos 'n gids, gebruik ons lyste en reëls bekend as Toegangsbeheerlys (ACLs) en Toegangsbeheeringe (ACEs). Hierdie definieer wie toegang kan of nie kan hê tot sekere data.
 
-#### Denying Access to a Specific Group
+#### Toegang tot 'n Spesifieke Groep Weier
 
-Imagine you have a folder named Cost, and you want everyone to access it except for a marketing team. By setting up the rules correctly, we can ensure that the marketing team is explicitly denied access before allowing everyone else. This is done by placing the rule to deny access to the marketing team before the rule that allows access to everyone.
+Stel jou voor jy het 'n gids genaamd Kostes, en jy wil hê dat almal toegang moet hê behalwe vir 'n bemarking span. Deur die reëls korrek op te stel, kan ons verseker dat die bemarking span eksplisiet toegang geweier word voordat ons almal anders toelaat. Dit word gedoen deur die reël om toegang tot die bemarking span te weier voor die reël wat toegang aan almal toelaat.
 
-#### Allowing Access to a Specific Member of a Denied Group
+#### Toegang aan 'n Spesifieke Lid van 'n Geweerde Groep Toelaat
 
-Let's say Bob, the marketing director, needs access to the Cost folder, even though the marketing team generally shouldn't have access. We can add a specific rule (ACE) for Bob that grants him access, and place it before the rule that denies access to the marketing team. This way, Bob gets access despite the general restriction on his team.
+Kom ons sê Bob, die bemarkingsdirekteur, het toegang tot die Kostes gids nodig, alhoewel die bemarking span oor die algemeen nie toegang moet hê nie. Ons kan 'n spesifieke reël (ACE) vir Bob byvoeg wat hom toegang grant, en dit voor die reël wat toegang aan die bemarking span weier plaas. Op hierdie manier kry Bob toegang ten spyte van die algemene beperking op sy span.
 
-#### Understanding Access Control Entries
+#### Toegangsbeheeringe Verstaan
 
-ACEs are the individual rules in an ACL. They identify users or groups, specify what access is allowed or denied, and determine how these rules apply to sub-items (inheritance). There are two main types of ACEs:
+ACEs is die individuele reëls in 'n ACL. Hulle identifiseer gebruikers of groepe, spesifiseer watter toegang toegestaan of geweier word, en bepaal hoe hierdie reëls op sub-items van toepassing is (erfenis). Daar is twee hoof tipes ACEs:
 
-- **Generic ACEs**: These apply broadly, affecting either all types of objects or distinguishing only between containers (like folders) and non-containers (like files). For example, a rule that allows users to see the contents of a folder but not to access the files within it.
-- **Object-Specific ACEs**: These provide more precise control, allowing rules to be set for specific types of objects or even individual properties within an object. For instance, in a directory of users, a rule might allow a user to update their phone number but not their login hours.
+- **Generiese ACEs**: Hierdie geld breedweg, wat óf al die tipes objek beïnvloed of net tussen houers (soos gidse) en nie-houers (soos lêers) onderskei. Byvoorbeeld, 'n reël wat gebruikers toelaat om die inhoud van 'n gids te sien, maar nie om toegang tot die lêers daarin te verkry nie.
+- **Objek-Spesifieke ACEs**: Hierdie bied meer presiese beheer, wat toelaat dat reëls vir spesifieke tipes objek of selfs individuele eienskappe binne 'n objek gestel word. Byvoorbeeld, in 'n gids van gebruikers, kan 'n reël 'n gebruiker toelaat om hul telefoonnommer op te dateer, maar nie hul aanmeldure nie.
 
-Each ACE contains important information like who the rule applies to (using a Security Identifier or SID), what the rule allows or denies (using an access mask), and how it's inherited by other objects.
+Elke ACE bevat belangrike inligting soos wie die reël van toepassing is (met 'n Sekuriteitsidentifiseerder of SID), wat die reël toelaat of weier (met 'n toegangsmasker), en hoe dit geërf word deur ander objek.
 
-#### Key Differences Between ACE Types
+#### Sleutelverskille Tussen ACE Tipes
 
-- **Generic ACEs** are suitable for simple access control scenarios, where the same rule applies to all aspects of an object or to all objects within a container.
-- **Object-Specific ACEs** are used for more complex scenarios, especially in environments like Active Directory, where you might need to control access to specific properties of an object differently.
+- **Generiese ACEs** is geskik vir eenvoudige toegangsbeheer scenario's, waar dieselfde reël op alle aspekte van 'n objek of op alle objek binne 'n houer van toepassing is.
+- **Objek-Spesifieke ACEs** word gebruik vir meer komplekse scenario's, veral in omgewings soos Aktiewe Gids, waar jy toegang tot spesifieke eienskappe van 'n objek anders kan moet beheer.
 
-In summary, ACLs and ACEs help define precise access controls, ensuring that only the right individuals or groups have access to sensitive information or resources, with the ability to tailor access rights down to the level of individual properties or object types.
+In samevatting help ACLs en ACEs om presiese toegangsbeheer te definieer, wat verseker dat slegs die regte individue of groepe toegang tot sensitiewe inligting of hulpbronne het, met die vermoë om toegangregte tot die vlak van individuele eienskappe of objek tipes aan te pas.
 
-### Access Control Entry Layout
+### Toegangsbeheeringe Uitleg
 
-| ACE Field   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ACE Veld    | Beskrywing                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type        | Flag that indicates the type of ACE. Windows 2000 and Windows Server 2003 support six types of ACE: Three generic ACE types that are attached to all securable objects. Three object-specific ACE types that can occur for Active Directory objects.                                                                                                                                                                                                                                                            |
-| Flags       | Set of bit flags that control inheritance and auditing.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Size        | Number of bytes of memory that are allocated for the ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Access mask | 32-bit value whose bits correspond to access rights for the object. Bits can be set either on or off, but the setting's meaning depends on the ACE type. For example, if the bit that corresponds to the right to read permissions is turned on, and the ACE type is Deny, the ACE denies the right to read the object's permissions. If the same bit is set on but the ACE type is Allow, the ACE grants the right to read the object's permissions. More details of the Access mask appear in the next table. |
-| SID         | Identifies a user or group whose access is controlled or monitored by this ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Tipe        | Vlag wat die tipe ACE aandui. Windows 2000 en Windows Server 2003 ondersteun ses tipes ACE: Drie generiese ACE tipes wat aan alle beveiligbare objek geheg is. Drie objek-spesifieke ACE tipes wat vir Aktiewe Gids objek kan voorkom.                                                                                                                                                                                                                                                            |
+| Vlagte      | Stel van bitvlagte wat erfenis en ouditering beheer.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Grootte     | Aantal bytes geheue wat vir die ACE toegeken is.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Toegangsmasker | 32-bis waarde waarvan die bits ooreenstem met toegangregte vir die objek. Bits kan of aan of af gestel word, maar die betekenis van die instelling hang af van die ACE tipe. Byvoorbeeld, as die bit wat ooreenstem met die reg om toestemmings te lees aangeskakel is, en die ACE tipe is Weier, weier die ACE die reg om die objek se toestemmings te lees. As dieselfde bit aangeskakel is maar die ACE tipe is Toelaat, grant die ACE die reg om die objek se toestemmings te lees. Meer besonderhede van die Toegangsmasker verskyn in die volgende tabel. |
+| SID         | Identifiseer 'n gebruiker of groep wie se toegang deur hierdie ACE beheer of gemonitor word.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-### Access Mask Layout
+### Toegangsmasker Uitleg
 
-| Bit (Range) | Meaning                            | Description/Example                       |
+| Bit (Bereik) | Betekenis                            | Beskrywing/Voorbeeld                       |
 | ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | Object Specific Access Rights      | Read data, Execute, Append data           |
-| 16 - 22     | Standard Access Rights             | Delete, Write ACL, Write Owner            |
-| 23          | Can access security ACL            |                                           |
-| 24 - 27     | Reserved                           |                                           |
-| 28          | Generic ALL (Read, Write, Execute) | Everything below                          |
-| 29          | Generic Execute                    | All things necessary to execute a program |
-| 30          | Generic Write                      | All things necessary to write to a file   |
-| 31          | Generic Read                       | All things necessary to read a file       |
+| 0 - 15      | Objek Spesifieke Toegang Regte      | Lees data, Voer uit, Voeg data by           |
+| 16 - 22     | Standaard Toegang Regte             | Verwyder, Skryf ACL, Skryf Eienaar            |
+| 23          | Kan toegang tot sekuriteits ACL            |                                           |
+| 24 - 27     | Gereserveer                           |                                           |
+| 28          | Generies ALLES (Lees, Skryf, Voer uit) | Alles hieronder                          |
+| 29          | Generies Voer uit                    | Alle dinge wat nodig is om 'n program uit te voer |
+| 30          | Generies Skryf                      | Alle dinge wat nodig is om na 'n lêer te skryf   |
+| 31          | Generies Lees                       | Alle dinge wat nodig is om na 'n lêer te lees       |
 
-## References
+## Verwysings
 
 - [https://www.ntfs.com/ntfs-permissions-acl-use.htm](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
 - [https://secureidentity.se/acl-dacl-sacl-and-the-ace/](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
@@ -170,8 +170,7 @@ In summary, ACLs and ACEs help define precise access controls, ensuring that onl
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) om maklik te bou en **werkvloei** te **automate** wat deur die wêreld se **mees gevorderde** gemeenskapstoestelle aangedryf word.\
+Kry Toegang Vandag:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
-

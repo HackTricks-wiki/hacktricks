@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-With [**Flipper Zero**](https://flipperzero.one/) you can:
+Met [**Flipper Zero**](https://flipperzero.one/) kan jy:
 
-- **Listen/Capture/Replay radio frequencies:** [**Sub-GHz**](fz-sub-ghz.md)
-- **Read/Capture/Emulate NFC cards:** [**NFC**](fz-nfc.md)
-- **Read/Capture/Emulate 125kHz tags:** [**125kHz RFID**](fz-125khz-rfid.md)
-- **Read/Capture/Send Infrared signals:** [**Infrared**](fz-infrared.md)
-- **Read/Capture/Emulate iButtons:** [**iButton**](../ibutton.md)
-- **Use is as Bad USB**
-- **Use it as security key (U2F)**
-- **Play Snake**
+- **Luister/Vang/Herhaal radiofrekwensies:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Lees/Vang/Emuleer NFC kaarte:** [**NFC**](fz-nfc.md)
+- **Lees/Vang/Emuleer 125kHz etikette:** [**125kHz RFID**](fz-125khz-rfid.md)
+- **Lees/Vang/Stuur Infrarooi seine:** [**Infrarooi**](fz-infrared.md)
+- **Lees/Vang/Emuleer iButtons:** [**iButton**](../ibutton.md)
+- **Gebruik dit as Bad USB**
+- **Gebruik dit as sekuriteitsleutel (U2F)**
+- **Speel Snake**
 
-**Other Flipper Zero resources in** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
+**Ander Flipper Zero hulpbronne in** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

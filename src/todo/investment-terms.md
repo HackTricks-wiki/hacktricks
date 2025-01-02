@@ -1,70 +1,68 @@
-# Investment Terms
+# Beleggings Terme
 
 ## Spot
 
-This is the most basic way to do some trading. You can **indicate the amount of the asset and the price** that you want to buy or sell, and whenever that price is reached the operation is done.
+Dit is die mees basiese manier om handel te dryf. Jy kan **die hoeveelheid van die bate en die prys** wat jy wil koop of verkoop, aandui, en wanneer daardie prys bereik word, word die transaksie gedoen.
 
-Usually you can also use the **current market price** in order to perform the transaction as fast as possible to the current price.
+Gewoonlik kan jy ook die **huidige markprys** gebruik om die transaksie so vinnig as moontlik teen die huidige prys uit te voer.
 
-**Stop Loss - Limit**: You can also indicate amount and the price of the assets to buy or sell while also indicating a lower price to buy or sell in case it's reached (to stop losses).
+**Stop Loss - Limiet**: Jy kan ook die hoeveelheid en die prys van die bates om te koop of te verkoop aandui terwyl jy ook 'n laer prys aandui om te koop of te verkoop in die geval dit bereik word (om verliese te stop).
 
-## Futures
+## Termynkontrakte
 
-A future is a contract where 2 parts comes to an agreement to **acquire something in the future at a fixed price**. For example to sell 1 bitcoin in 6 months at 70.000$.
+'n Termynkontrak is 'n kontrak waar 2 partye 'n ooreenkoms bereik om **iets in die toekoms teen 'n vaste prys te verkry**. Byvoorbeeld om 1 bitcoin in 6 maande vir 70.000$ te verkoop.
 
-Obviously if by 6 months the bitcoin value is 80.000$ the seller part loses money and the buying part earns it. If in 6 months the bitcoin value is 60.000$, the opposite happens.
+Dit is duidelik dat as die bitcoin waarde in 6 maande 80.000$ is, die verkoper geld verloor en die koper geld verdien. As die bitcoin waarde in 6 maande 60.000$ is, gebeur die teenoorgestelde.
 
-However, this is interesting for example for business which are generating a product and need to have the security that thy will be able to sell it at a price to pay the costs. Or business which want to assure fixed prices in the future for something eve if higher.
+Dit is egter interessant vir byvoorbeeld besighede wat 'n produk genereer en die sekerheid nodig het dat hulle dit teen 'n prys kan verkoop om die koste te dek. Of besighede wat vasgestelde pryse in die toekoms vir iets wil verseker, selfs al is dit hoër.
 
-Although in exchanges this is usually used to try to make a profit.
+Alhoewel dit in beurse gewoonlik gebruik word om 'n wins te probeer maak.
 
-* Notice that a "Long position" means that someone if betting that a price is going to increase
-* While a "short position" means that someone if betting that a price is going to go down
+* Let daarop dat 'n "Lang posisie" beteken dat iemand wed dat 'n prys gaan styg
+* Terwyl 'n "kort posisie" beteken dat iemand wed dat 'n prys gaan daal
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+### Hedging Met Termynkontrakte <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-If a fund manager is afraid that some stocks are going to go down he might take a short position over some assets like bitcoins or S\&P 500 futures contracts. This would be similar to buying or having some assets and create a contract of selling those at a future time at a bigger price.&#x20;
+As 'n fondsbestuurder bang is dat sommige aandele gaan daal, kan hy 'n kort posisie oor sommige bates soos bitcoins of S&P 500 termynkontrakte neem. Dit sou soortgelyk wees aan die aankoop of besit van sommige bates en die skep van 'n kontrak om dit teen 'n groter prys in die toekoms te verkoop.&#x20;
 
-In case the price goes down the fund manager will earn benefits because he will sell the assets at a bigger price. If the price of the assets goes up the manager won't earn that benefit but he will still keep his assets.
+In die geval dat die prys daal, sal die fondsbestuurder voordele verdien omdat hy die bates teen 'n groter prys sal verkoop. As die prys van die bates styg, sal die bestuurder nie daardie voordeel verdien nie, maar hy sal steeds sy bates hou.
 
-### Perpetual Futures
+### Perpetuele Termynkontrakte
 
-**These are "futures" that will last indefinitely** (without an ending contract date). It's very common to find them for example in crypto exchanges where you can go in an out of futures based on the price of cryptos.
+**Dit is "termynkontrakte" wat onbepaald sal duur** (sonder 'n einddatum vir die kontrak). Dit is baie algemeen om hulle byvoorbeeld in kripto-beurse te vind waar jy in en uit termynkontrakte kan gaan gebaseer op die prys van kripto's.
 
-Notice that in these cases the benefits and lose can be in real time, if the price increases 1% you win a 1%, if the price decreases 1%, you will lose it.
+Let daarop dat in hierdie gevalle die voordele en verliese in werklike tyd kan wees, as die prys met 1% styg, wen jy 1%, as die prys met 1% daal, sal jy dit verloor.
 
-### Futures with Leverage
+### Termynkontrakte met Hefboom
 
-**Leverage** allows you to control a larger position in the market with a smaller amount of money. It basically allows you to "bet" much more money than you have risking only the money that you actually have.
+**Hefboom** stel jou in staat om 'n groter posisie in die mark te beheer met 'n kleiner bedrag geld. Dit stel jou basies in staat om "te wed" met baie meer geld as wat jy het, terwyl jy net die geld wat jy werklik het, risiko.
 
-For example, if you open a future position in the BTC/USDT with 100$ a 50x leverage this means that if the price is increased 1%, then you would be winning 1x50 = 50% of your initial investment (50$). And therefore you will have 150$.\
-However, if the price decreases 1%, you will lost 50% of your funds (59$ in this case). And if the price decreases 2% you will lose all your bet (2x50 = 100%).
+Byvoorbeeld, as jy 'n termynposisie in die BTC/USDT met 100$ en 'n 50x hefboom oopmaak, beteken dit dat as die prys met 1% styg, jy 1x50 = 50% van jou aanvanklike belegging (50$) sal wen. En daarom sal jy 150$ hê.\
+As die prys egter met 1% daal, sal jy 50% van jou fondse verloor (59$ in hierdie geval). En as die prys met 2% daal, sal jy al jou weddenskap verloor (2x50 = 100%).
 
-Therefore, leveraging allows to control the amount of money you bet while increasing the winnings and loses.
+Daarom stel hefboom jou in staat om die bedrag geld wat jy wed, te beheer terwyl jy die winste en verliese verhoog.
 
-## Differences Futures & Options
+## Verskille tussen Termynkontrakte & Opsies
 
-The main difference between futures and options is that the contract is optional for the buyer: He can decide to execute it or not (usually he will only if he will benefit for it). The seller must sell if the buyer wants to use the option.\
-However, the buyer will be paying some fee to the seller for opening the option (so the seller, who is taking more risk aparently, starts earning some money).
+Die hoofverskil tussen termynkontrakte en opsies is dat die kontrak opsioneel is vir die koper: Hy kan besluit om dit uit te voer of nie (gewoonlik sal hy dit net doen as hy daarby baat). Die verkoper moet verkoop as die koper die opsie wil gebruik.\
+Die koper sal egter 'n fooi aan die verkoper betaal om die opsie te open (sodat die verkoper, wat blykbaar meer risiko neem, 'n bietjie geld begin verdien).
 
-### 1. **Obligation vs. Right:**
+### 1. **Verpligting vs. Reg:**
 
-* **Futures:** When you buy or sell a futures contract, you're entering a **binding agreement** to buy or sell an asset at a specific price on a future date. Both the buyer and the seller are **obligated** to fulfill the contract at expiration (unless the contract is closed before then).
-* **Options:** With options, you have the **right, but not the obligation**, to buy (in the case of a **call option**) or sell (in the case of a **put option**) an asset at a specific price before or at a certain expiration date. The **buyer** has the option to execute, while the **seller** is obligated to fulfill the trade if the buyer decides to exercise the option.
+* **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, sluit jy 'n **bindende ooreenkoms** om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Beide die koper en die verkoper is **verplig** om die kontrak by verstryking na te kom (tenzij die kontrak voor dit gesluit word).
+* **Opsies:** Met opsies het jy die **reg, maar nie die verpligting** om 'n bate (in die geval van 'n **oproepopsie**) te koop of te verkoop (in die geval van 'n **sitopsie**) teen 'n spesifieke prys voor of op 'n sekere vervaldatum. Die **koper** het die opsie om uit te voer, terwyl die **verkoper** verplig is om die transaksie na te kom as die koper besluit om die opsie uit te oefen.
 
-### 2. **Risk:**
+### 2. **Risiko:**
 
-* **Futures:** Both the buyer and the seller take on **unlimited risk** because they are obligated to complete the contract. The risk is the difference between the agreed-upon price and the market price at the expiration date.
-* **Options:** The buyer’s risk is limited to the **premium** paid to purchase the option. If the market doesn't move in favor of the option holder, they can simply let the option expire. However, the **seller** (writer) of the option has unlimited risk if the market moves significantly against them.
+* **Termynkontrakte:** Beide die koper en die verkoper neem **onbeperkte risiko** omdat hulle verplig is om die kontrak te voltooi. Die risiko is die verskil tussen die ooreengekome prys en die markprys op die vervaldatum.
+* **Opsies:** Die koper se risiko is beperk tot die **premie** wat betaal is om die opsie te koop. As die mark nie in die guns van die opsiehouer beweeg nie, kan hulle eenvoudig die opsie laat verval. Die **verkoper** (skrywer) van die opsie het egter onbeperkte risiko as die mark aansienlik teen hulle beweeg.
 
-### 3. **Cost:**
+### 3. **Koste:**
 
-* **Futures:** There is no upfront cost beyond the margin required to hold the position, as the buyer and seller are both obligated to complete the trade.
-* **Options:** The buyer must pay an **option premium** upfront for the right to exercise the option. This premium is essentially the cost of the option.
+* **Termynkontrakte:** Daar is geen vooraf koste behalwe die marge wat vereis word om die posisie te hou nie, aangesien die koper en verkoper albei verplig is om die transaksie te voltooi.
+* **Opsies:** Die koper moet 'n **opsie-premie** vooraf betaal vir die reg om die opsie uit te oefen. Hierdie premie is basies die koste van die opsie.
 
-### 4. **Profit Potential:**
+### 4. **Wins Potensiaal:**
 
-* **Futures:** The profit or loss is based on the difference between the market price at expiration and the agreed-upon price in the contract.
-* **Options:** The buyer profits when the market moves favorably beyond the strike price by more than the premium paid. The seller profits by keeping the premium if the option is not exercised.
-
-
+* **Termynkontrakte:** Die wins of verlies is gebaseer op die verskil tussen die markprys op vervaldatum en die ooreengekome prys in die kontrak.
+* **Opsies:** Die koper verdien wanneer die mark gunstig beweeg bo die uitoefenprys deur meer as die betaalde premie. Die verkoper verdien deur die premie te hou as die opsie nie uitgeoefen word nie.

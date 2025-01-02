@@ -1,13 +1,12 @@
-# External Forest Domain - One-Way (Outbound)
+# Eksterne Woud-Domein - Eenrigting (Uitgaand)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
+In hierdie scenario **jou domein** is **vertrou** op sommige **privileges** aan 'n hoof van **verskillende domeine**.
 
-## Enumeration
+## Enumerasie
 
-### Outbound Trust
-
+### Uitgaande Vertroue
 ```powershell
 # Notice Outbound trust
 Get-DomainTrust
@@ -29,56 +28,46 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
-
 ## Trust Account Attack
 
-A security vulnerability exists when a trust relationship is established between two domains, identified here as domain **A** and domain **B**, where domain **B** extends its trust to domain **A**. In this setup, a special account is created in domain **A** for domain **B**, which plays a crucial role in the authentication process between the two domains. This account, associated with domain **B**, is utilized for encrypting tickets for accessing services across the domains.
+'n Sekuriteitskwesie bestaan wanneer 'n vertrouensverhouding tussen twee domeine gevestig word, hier geïdentifiseer as domein **A** en domein **B**, waar domein **B** sy vertroue na domein **A** uitbrei. In hierdie opstelling word 'n spesiale rekening in domein **A** geskep vir domein **B**, wat 'n belangrike rol speel in die verifikasieproses tussen die twee domeine. Hierdie rekening, geassosieer met domein **B**, word gebruik om kaartjies te enkripteer vir toegang tot dienste oor die domeine.
 
-The critical aspect to understand here is that the password and hash of this special account can be extracted from a Domain Controller in domain **A** using a command line tool. The command to perform this action is:
-
+Die kritieke aspek om hier te verstaan, is dat die wagwoord en hash van hierdie spesiale rekening uit 'n Domeinbeheerder in domein **A** onttrek kan word met behulp van 'n opdraglyn hulpmiddel. Die opdrag om hierdie aksie uit te voer is:
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
+Hierdie ekstraksie is moontlik omdat die rekening, geïdentifiseer met 'n **$** na sy naam, aktief is en behoort tot die "Domain Users" groep van domein **A**, wat die regte wat met hierdie groep geassosieer word, erf. Dit stel individue in staat om teen domein **A** te autentiseer met die kredensiale van hierdie rekening.
 
-This extraction is possible because the account, identified with a **$** after its name, is active and belongs to the "Domain Users" group of domain **A**, thereby inheriting permissions associated with this group. This allows individuals to authenticate against domain **A** using the credentials of this account.
+**Waarskuwing:** Dit is haalbaar om hierdie situasie te benut om 'n voet in die deur te kry in domein **A** as 'n gebruiker, hoewel met beperkte regte. Hierdie toegang is egter voldoende om enumerasie op domein **A** uit te voer.
 
-**Warning:** It is feasible to leverage this situation to gain a foothold in domain **A** as a user, albeit with limited permissions. However, this access is sufficient to perform enumeration on domain **A**.
-
-In a scenario where `ext.local` is the trusting domain and `root.local` is the trusted domain, a user account named `EXT$` would be created within `root.local`. Through specific tools, it is possible to dump the Kerberos trust keys, revealing the credentials of `EXT$` in `root.local`. The command to achieve this is:
-
+In 'n scenario waar `ext.local` die vertrouende domein is en `root.local` die vertroude domein is, sal 'n gebruikersrekening genaamd `EXT$` binne `root.local` geskep word. Deur spesifieke gereedskap is dit moontlik om die Kerberos vertrouingssleutels te dump, wat die kredensiale van `EXT$` in `root.local` onthul. Die opdrag om dit te bereik is:
 ```bash
 lsadump::trust /patch
 ```
-
-Following this, one could use the extracted RC4 key to authenticate as `root.local\EXT$` within `root.local` using another tool command:
-
+Hierdie kan gebruik word om die onttrokken RC4-sleutel te gebruik om as `root.local\EXT$` binne `root.local` te autentiseer met 'n ander hulpmiddelopdrag:
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-
-This authentication step opens up the possibility to enumerate and even exploit services within `root.local`, such as performing a Kerberoast attack to extract service account credentials using:
-
+Hierdie autentikasie stap maak die moontlikheid oop om dienste binne `root.local` te enumerate en selfs te exploiteer, soos om 'n Kerberoast-aanval uit te voer om diensrekening geloofsbriewe te onttrek met:
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
+### Versameling van duidelike teks vertrou password
 
-### Gathering cleartext trust password
+In die vorige vloei is die vertrou hash gebruik in plaas van die **duidelike teks wagwoord** (wat ook **deur mimikatz gedump** is).
 
-In the previous flow it was used the trust hash instead of the **clear text password** (that was also **dumped by mimikatz**).
-
-The cleartext password can be obtained by converting the \[ CLEAR ] output from mimikatz from hexadecimal and removing null bytes ‘\x00’:
+Die duidelike teks wagwoord kan verkry word deur die \[ CLEAR ] uitvoer van mimikatz van heksadesimaal te omskakel en null bytes ‘\x00’ te verwyder:
 
 ![](<../../images/image (938).png>)
 
-Sometimes when creating a trust relationship, a password must be typed in by the user for the trust. In this demonstration, the key is the original trust password and therefore human readable. As the key cycles (30 days), the cleartext will not be human-readable but technically still usable.
+Soms, wanneer 'n vertrou verhouding geskep word, moet 'n wagwoord deur die gebruiker vir die vertrou ingetik word. In hierdie demonstrasie is die sleutel die oorspronklike vertrou wagwoord en dus menslik leesbaar. Soos die sleutel siklusse (30 dae), sal die duidelike teks nie menslik leesbaar wees nie, maar tegnies steeds bruikbaar.
 
-The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT using the Kerberos secret key of the trust account. Here, querying root.local from ext.local for members of Domain Admins:
+Die duidelike teks wagwoord kan gebruik word om gereelde outentisering as die vertrou rekening uit te voer, 'n alternatief om 'n TGT aan te vra met die Kerberos geheime sleutel van die vertrou rekening. Hier, om root.local van ext.local te vra vir lede van Domain Admins:
 
 ![](<../../images/image (792).png>)
 
-## References
+## Verwysings
 
 - [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
 
 {{#include ../../banners/hacktricks-training.md}}
-

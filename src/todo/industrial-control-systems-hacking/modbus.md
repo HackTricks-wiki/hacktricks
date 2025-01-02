@@ -1,35 +1,31 @@
-# The Modbus Protocol 
+# Die Modbus Protokol
 
-## Introduction to Modbus Protocol 
+## Inleiding tot die Modbus Protokol
 
-The Modbus protocol is a widely used protocol in Industrial Automation and Control Systems. Modbus allows communication between various devices such as programmable logic controllers (PLCs), sensors, actuators, and other industrial devices. Understanding the Modbus Protocol is essential since this is the single most used communication protocol in the ICS and has a lot of potential attack surface for sniffing and even injecting commands into PLCs.
+Die Modbus-protokol is 'n wyd gebruikte protokol in Industriële Outomatisering en Beheerstelsels. Modbus stel kommunikasie tussen verskeie toestelle soos programmeerbare logika-beheerders (PLC's), sensors, actuators en ander industriële toestelle moontlik. Om die Modbus-protokol te verstaan, is noodsaaklik, aangesien dit die mees gebruikte kommunikasieprotokol in die ICS is en 'n groot potensiële aanvalsvlak het vir sniffing en selfs die inspuiting van opdragte in PLC's.
 
-Here, concepts are stated point-wise providing context of the protcol and it's nature of operation. The biggest challenge in ICS system security is the cost of implementation and upgradation. These protocols and standards where designed in the early 80s and 90s which are still widely used. Since an industry has a lot of devices and connections, upgrading devices is very difficult, which provides hackers with an edge of dealing with outdated protocols. Attacks on Modbus is like practically unevitable since it is going to be used without upgradation is it's operation is critical to the industry. 
+Hier word konsepte puntgewys uiteengesit om die konteks van die protokol en sy werking te verskaf. Die grootste uitdaging in ICS-stelselsekuriteit is die koste van implementering en opgradering. Hierdie protokolle en standaarde is in die vroeë 80's en 90's ontwerp en word steeds wyd gebruik. Aangesien 'n industrie baie toestelle en verbindings het, is dit baie moeilik om toestelle op te gradeer, wat hackers 'n voordeel gee om met verouderde protokolle te werk. Aanvalle op Modbus is prakties onontkombaar, aangesien dit gebruik gaan word sonder opgradering, en sy werking is krities vir die industrie.
 
-## The Client-Server Architecture
+## Die Kliënt-Server Argitektuur
 
-Modbus Protocol is typically used as in Client Server Architecture where a master device (client) initiates communication with one or more slave devices (servers). This is also referred to as Master-Slave architecture, which is widely used in electronics and IoT with SPI, I2C, etc. 
+Modbus-protokol word tipies gebruik in 'n Kliënt-Server Argitektuur waar 'n meester toestel (kliënt) kommunikasie met een of meer slaaf toestelle (servers) begin. Dit word ook as Meester-Slaaf argitektuur verwys, wat wyd in elektronika en IoT met SPI, I2C, ens. gebruik word.
 
-## Serial and Etherent Versions
+## Serial en Ethernet Weergawes
 
-Modbus Protocol is designed for both, Serial Communication as well as Ethernet Communications. The Serial Communication is widely used in legacy systems while modern devices support Ethernet which offers high data rates and is more suitable for modern industrial networks. 
+Modbus-protokol is ontwerp vir beide, Seriële Kommunikasie sowel as Ethernet Kommunikasies. Die Seriële Kommunikasie word wyd in erfenisstelsels gebruik terwyl moderne toestelle Ethernet ondersteun, wat hoë datarates bied en meer geskik is vir moderne industriële netwerke.
 
-## Data Representation 
+## Data Verteenwoordiging
 
-Data is transmitted in Modbus protocol as ASCII or Binary, although the binary format is used due to it's compactibility with older devices. 
+Data word in die Modbus-protokol as ASCII of Binêr oorgedra, alhoewel die binêre formaat gebruik word weens sy kompakteerbaarheid met ouer toestelle.
 
-## Function Codes 
+## Funksiekodes
 
- ModBus Protocol works with transmission of specific function codes that are used to operate the PLCs and various control devices. This portion is important to undertstand since replay attacks can be done by retransmitting function codes. Legacy devices do not support any encryption towards data transmission and usually have long wires which connect them, which results to tampering of these wires and capturing/injected data. 
+ModBus-protokol werk met die oordrag van spesifieke funksiekodes wat gebruik word om die PLC's en verskeie beheertoestelle te bedryf. Hierdie gedeelte is belangrik om te verstaan, aangesien herhalingsaanvalle gedoen kan word deur funksiekodes weer te stuur. Erfenistoestelle ondersteun nie enige versleuteling vir datatransmissie nie en het gewoonlik lang drade wat hulle verbind, wat lei tot die manipulasie van hierdie drade en die vang/inspuiting van data.
 
- ## Addressing of Modbus 
+## Adressering van Modbus
 
-Each device in the network has some unique address which is essential for communication between devices. Protocols like Modbus RTU, Modbus TCP, etc. are used to implement addressing and serves like a transport layer to the data transmission. The data that is transferred is in the Modbus protocol format that contains the message.
+Elke toestel in die netwerk het 'n unieke adres wat noodsaaklik is vir kommunikasie tussen toestelle. Protokolle soos Modbus RTU, Modbus TCP, ens. word gebruik om adressering te implementeer en dien as 'n vervoervlak vir die datatransmissie. Die data wat oorgedra word, is in die Modbus-protokol formaat wat die boodskap bevat.
 
-Furthermore, Modbus also implements error checks to ensure the integrity of the transmitted data. But most of al, Modbus is a Open Standard and anyone can implement it in their devices. This made this protocol to go on global standard and it's widespread in the industrial automation industry. 
+Boonop implementeer Modbus ook foutkontroles om die integriteit van die oorgedrade data te verseker. Maar die belangrikste is, Modbus is 'n Open Standard en enige iemand kan dit in hul toestelle implementeer. Dit het hierdie protokol 'n globale standaard gemaak en dit is wydverspreid in die industriële outomatiseringsbedryf.
 
-Due to it's large scale use and lack of upgradations, attacking Modbus provides a significant advantage with it's attack surface. ICS is highly dependent on communication between devices and any attacks made on them can be dangerous for the operation of the industrial systems. Attacks like replay, data injection, data sniffing and leaking, Denial of Service, data forgery, etc. can be carried out if the medium of transmission is identified by the attacker. 
-
-
-
-
+As gevolg van sy groot skaal gebruik en gebrek aan opgraderings, bied die aanval op Modbus 'n beduidende voordeel met sy aanvalsvlak. ICS is hoogs afhanklik van kommunikasie tussen toestelle en enige aanvalle wat daarop gemaak word, kan gevaarlik wees vir die werking van die industriële stelsels. Aanvalle soos herhaling, datainspuiting, datasniffing en lek, Denial of Service, data vervalsing, ens. kan uitgevoer word as die medium van transmissie deur die aanvaller geïdentifiseer word.

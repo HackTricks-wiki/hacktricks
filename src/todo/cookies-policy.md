@@ -1,47 +1,45 @@
-# Cookies Policy
+# Koekiesbeleid
 
-Last updated: 02/04/2023
+Laas opgedateer: 02/04/2023
 
-### Introduction
+### Inleiding
 
-This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
+Hierdie Koekiesbeleid is van toepassing op die volgende webwerwe wat besit en bedryf word deur die HackTricks-span ("HackTricks", "ons" of "ons"):
 
 * hacktricks.xyz
 * [www.hacktricks.xyz](http://www.hacktricks.xyz/)
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
+Deur enige van hierdie webwerwe te gebruik, stem jy in tot die gebruik van koekies in ooreenstemming met hierdie Koekiesbeleid. As jy nie saamstem nie, skakel asseblief koekies in jou blaaiersinstellings af of onthou om ons webwerwe nie te gebruik nie.
 
-### What are cookies?
+### Wat is koekies?
 
-Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work, improve their functionality, and provide a more personalized user experience.
+Koekies is klein tekslêers wat op jou rekenaar of mobiele toestel gestoor word wanneer jy 'n webwerf besoek. Hulle word wyd gebruik om webwerwe te laat werk, hul funksionaliteit te verbeter en 'n meer persoonlike gebruikerservaring te bied.
 
-### How we use cookies
+### Hoe ons koekies gebruik
 
-We use cookies on our websites for the following purposes:
+Ons gebruik koekies op ons webwerwe vir die volgende doeleindes:
 
-1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
-2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
-3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
-4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
+1. Essensiële koekies: Hierdie koekies is noodsaaklik vir die basiese funksionaliteit van ons webwerwe, soos om gebruikersverifikasie moontlik te maak, sekuriteit te handhaaf en jou voorkeure te onthou.
+2. Prestasie koekies: Hierdie koekies help ons om te verstaan hoe besoekers met ons webwerwe interaksie het, deur anoniem inligting te versamel en te rapporteer. Dit stel ons in staat om ons webwerf se prestasie en gebruikerservaring te verbeter.
+3. Funksionaliteit koekies: Hierdie koekies stel ons webwerwe in staat om keuses wat jy maak te onthou, soos jou taal of streek, om 'n meer persoonlike ervaring te bied.
+4. Teiken/advertering koekies: Hierdie koekies word gebruik om relevante advertensies en bemarkingskommunikasies te lewer gebaseer op jou belangstellings, blaai geskiedenis, en interaksies met ons webwerwe.
 
-Moreover, the pages book.hacktricks.xyz and cloud.hacktricks.xyz are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Boonop is die bladsye book.hacktricks.xyz en cloud.hacktricks.xyz gehos in Gitbook. Jy kan meer inligting oor Gitbook se koekies vind in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
-### Third-party cookies
+### Derdeparty koekies
 
-In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
+Benewens ons eie koekies, mag ons ook derdeparty koekies gebruik om webwerfgebruikstatistieke te rapporteer, advertensies te lewer, en sosiale media deelknoppies moontlik te maak. Die gebruik van derdeparty koekies is onderhewig aan hul onderskeie privaatheidsbeleide.
 
-Managing cookies
+Koekies bestuur
 
-Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
+Die meeste webblaaiers laat jou toe om koekies deur hul instellings te bestuur. Jy kan kies om koekies op jou toestel te blokkeer, te verwyder of die gebruik daarvan te beperk. Hou egter in gedagte dat die deaktivering van koekies die funksionaliteit en prestasie van ons webwerwe kan beïnvloed.
 
-Changes to this Cookies Policy
+Veranderinge aan hierdie Koekiesbeleid
 
-We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
+Ons mag hierdie Koekiesbeleid van tyd tot tyd opdateer om veranderinge in ons praktyke of relevante wette te weerspieël. Ons moedig jou aan om hierdie bladsy periodiek te hersien vir die nuutste inligting oor ons koekiepraktyke.
 
-### Contact us
+### Kontak ons
 
-If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
-
-
+As jy enige vrae of bekommernisse oor hierdie Koekiesbeleid het, kontak ons asseblief by [support@hacktricks.xyz](mailto:support@hacktricks.xyz)

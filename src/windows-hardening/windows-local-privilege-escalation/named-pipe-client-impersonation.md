@@ -1,10 +1,9 @@
-# Named Pipe Client Impersonation
+# Genoemde Pyp Klient Imersie
 
-## Named Pipe Client Impersonation
-
-{{#include ../../banners/hacktricks-training.md}}
-
-Check: [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
+## Genoemde Pyp Klient Imersie
 
 {{#include ../../banners/hacktricks-training.md}}
 
+Kontroleer: [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
+
+{{#include ../../banners/hacktricks-training.md}}

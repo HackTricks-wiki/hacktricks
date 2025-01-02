@@ -1,9 +1,8 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
+'n Deel van hierdie cheatsheet is gebaseer op die [angr dokumentasie](https://docs.angr.io/_/downloads/en/stable/pdf/).
 
-# Installation
-
+# Installasie
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -11,9 +10,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-
-# Basic Actions
-
+# Basiese Aksies
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -31,11 +28,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
+# Gelaaide en Hoof objekinligting
 
-# Loaded and Main object information
-
-## Loaded Data
-
+## Gelaaide Gegewens
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -45,22 +40,20 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-             ('libc.so.6',
-              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-             ('ld-linux-x86-64.so.2',
-              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-             ('extern-address space',
-              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-             ('cle##tls',
-              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+('libc.so.6',
+<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+('ld-linux-x86-64.so.2',
+<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+('extern-address space',
+<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+('cle##tls',
+<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-
-## Main Object
-
+## Hoof Voorwerp
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -74,9 +67,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-
-## Symbols and Relocations
-
+## Simbole en Herlokasies
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -93,9 +84,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-
-## Blocks
-
+## Blokke
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -103,11 +92,9 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
+# Dinamiese Analise
 
-# Dynamic Analysis
-
-## Simulation Manager, States
-
+## Simulasie Bestuurder, Toestande
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -130,15 +117,13 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+## Funksies aanroep
 
-## Calling functions
-
-- You can pass a list of arguments through `args` and a dictionary of environment variables through `env` into `entry_state` and `full_init_state`. The values in these structures can be strings or bitvectors, and will be serialized into the state as the arguments and environment to the simulated execution. The default `args` is an empty list, so if the program you're analyzing expects to find at least an `argv[0]`, you should always provide that!
-- If you'd like to have `argc` be symbolic, you can pass a symbolic bitvector as `argc` to the `entry_state` and `full_init_state` constructors. Be careful, though: if you do this, you should also add a constraint to the resulting state that your value for argc cannot be larger than the number of args you passed into `args`.
-- To use the call state, you should call it with `.call_state(addr, arg1, arg2, ...)`, where `addr` is the address of the function you want to call and `argN` is the Nth argument to that function, either as a python integer, string, or array, or a bitvector. If you want to have memory allocated and actually pass in a pointer to an object, you should wrap it in an PointerWrapper, i.e. `angr.PointerWrapper("point to me!")`. The results of this API can be a little unpredictable, but we're working on it.
+- Jy kan 'n lys van argumente deur `args` en 'n woordeboek van omgewingsveranderlikes deur `env` in `entry_state` en `full_init_state` deurgee. Die waardes in hierdie strukture kan strings of bitvectors wees, en sal in die toestand geserialiseer word as die argumente en omgewing vir die gesimuleerde uitvoering. Die standaard `args` is 'n leë lys, so as die program wat jy analiseer verwag om ten minste 'n `argv[0]` te vind, moet jy dit altyd verskaf!
+- As jy wil hê dat `argc` simbolies moet wees, kan jy 'n simboliese bitvector as `argc` aan die `entry_state` en `full_init_state` konstruktors deurgee. Wees versigtig, though: as jy dit doen, moet jy ook 'n beperking by die resultaat toestand voeg dat jou waarde vir argc nie groter kan wees as die aantal args wat jy in `args` deurgegee het nie.
+- Om die aanroep toestand te gebruik, moet jy dit aanroep met `.call_state(addr, arg1, arg2, ...)`, waar `addr` die adres van die funksie is wat jy wil aanroep en `argN` die Nde argument vir daardie funksie is, hetsy as 'n python heelgetal, string, of array, of 'n bitvector. As jy geheue wil toewys en werklik 'n pointeur na 'n objek wil deurgee, moet jy dit in 'n PointerWrapper verpak, d.w.z. `angr.PointerWrapper("point to me!")`. Die resultate van hierdie API kan 'n bietjie onvoorspelbaar wees, maar ons werk daaraan.
 
 ## BitVectors
-
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -147,9 +132,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-
-## Symbolic BitVectors & Constraints
-
+## Simboliese BitVektore & Beperkings
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -183,9 +166,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-
-## Hooking
-
+## Haking
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -203,10 +184,8 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
+Verder kan jy `proj.hook_symbol(name, hook)` gebruik, wat die naam van 'n simbool as die eerste argument verskaf, om die adres te haak waar die simbool woon.
 
-Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a symbol as the first argument, to hook the address where the symbol lives
-
-# Examples
+# Voorbeelde
 
 {{#include ../../../banners/hacktricks-training.md}}
-

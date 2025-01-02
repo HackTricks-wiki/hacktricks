@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# Industriële Beheerstelsels Hacking
 
-## About this Section
+## Oor hierdie Afdeling
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+Hierdie afdeling bevat alles oor Industriële Beheerstelsels, insluitend konsepte sowel as metodologieë om hulle te hack met verskeie sekuriteitskwessies wat daarin bestaan.
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+Industriële Beheerstelsels is oral, aangesien industrieë noodsaaklik is vir die ekonomiese ontwikkeling van 'n nasie. Maar hierdie ICS is moeilik om op te dateer en daar is minder vooruitgang in hierdie veld gemaak. Daarom is dit algemeen om sekuriteitsfoute hier te vind. Meeste van die protokolle en standaarde wat hier gebruik word, is in die 90's ontwikkel en het baie minder vermoëns in vergelyking met huidige aanvalscenario's.
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+Dit het belangrik geword om hierdie stelsels te beveilig, aangesien skade aan hulle baie kan kos en selfs lewens in die ergste geval. Om die sekuriteit van Industriële Beheerstelsels te verstaan, is dit nodig om die interne werking daarvan te ken.
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+Aangesien Industriële Beheerstelsels geïnstalleer word volgens vasgestelde standaarde, sal kennis van elke komponent help om elke ander meganisme in die beheerstelsel met mekaar te verbind. Die installasie van hierdie toestelle soos PLC's en SCADA-stelsels verskil in verskillende industrieë, daarom is inligtingversameling krities.
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+Industriële Beheerstelsels kan soms ingewikkeld wees en vereis dus baie geduld om enigiets te doen. Dit gaan alles oor ondersoek en verkenning voordat daar aanvalle beplan en enige eksploit ontwikkel word.
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+Hierdie tegnieke kan ook gebruik word om teen aanvalle te beskerm en blou spanwerk vir industriële beheerstelsels te doen.

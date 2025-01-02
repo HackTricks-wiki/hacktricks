@@ -1,82 +1,81 @@
-# Infrared
+# Infrarooi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Hoe die Infrarooi Werk <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**Infrarooi lig is onsigbaar vir mense**. IR golflengte is van **0.7 tot 1000 mikron**. Huishoudelike afstandsbedienings gebruik 'n IR sein vir datatransmissie en werk in die golflengte-reeks van 0.75..1.4 mikron. 'n Mikrocontroller in die afstandsbediening laat 'n infrarooi LED flikker met 'n spesifieke frekwensie, wat die digitale sein in 'n IR sein omskakel.
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+Om IR seine te ontvang, word 'n **fotoreceiver** gebruik. Dit **omskakel IR lig in spanning pulsies**, wat reeds **digitale seine** is. Gewoonlik is daar 'n **donker ligfilter binne die ontvanger**, wat **slegs die gewenste golflengte deurlaat** en geraas uitsny.
 
-### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### Verskeidenheid van IR Protokolle <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+IR protokolle verskil in 3 faktore:
 
-- bit encoding
-- data structure
-- carrier frequency — often in range 36..38 kHz
+- bit kodering
+- datastruktuur
+- draerfrekwensie — dikwels in die reeks 36..38 kHz
 
-#### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Bit kodering maniere <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Pulse Distance Encoding**
+**1. Pulsafstand Kodering**
 
-Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
+Bits word gekodeer deur die duur van die spasie tussen pulsies te moduler. Die breedte van die puls self is konstant.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. Pulse Width Encoding**
+**2. Pulsbreedte Kodering**
 
-Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
+Bits word gekodeer deur modulasie van die pulsbreedte. Die breedte van die spasie na die pulsuitbarsting is konstant.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. Phase Encoding**
+**3. Fase Kodering**
 
-It is also known as Manchester encoding. The logical value is defined by the polarity of the transition between pulse burst and space. "Space to pulse burst" denotes logic "0", "pulse burst to space" denotes logic "1".
+Dit is ook bekend as Manchester kodering. Die logiese waarde word gedefinieer deur die polariteit van die oorgang tussen pulsuitbarsting en spasie. "Spasie na pulsuitbarsting" dui logika "0" aan, "pulsuitbarsting na spasie" dui logika "1" aan.
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combination of previous ones and other exotics**
+**4. Kombinasie van vorige en ander eksotiese metodes**
 
 > [!NOTE]
-> There are IR protocols that are **trying to become universal** for several types of devices. The most famous ones are RC5 and NEC. Unfortunately, the most famous **does not mean the most common**. In my environment, I met just two NEC remotes and no RC5 ones.
+> Daar is IR protokolle wat **probeer om universeel te word** vir verskeie tipes toestelle. Die bekendste is RC5 en NEC. Ongelukkig beteken die bekendste **nie die mees algemene** nie. In my omgewing het ek net twee NEC afstandsbedienings ontmoet en geen RC5 nie.
 >
-> Manufacturers love to use their own unique IR protocols, even within the same range of devices (for example, TV-boxes). Therefore, remotes from different companies and sometimes from different models from the same company, are unable to work with other devices of the same type.
+> Fabrikante hou daarvan om hul eie unieke IR protokolle te gebruik, selfs binne dieselfde reeks toestelle (byvoorbeeld, TV-doosies). Daarom kan afstandsbedienings van verskillende maatskappye en soms van verskillende modelle van dieselfde maatskappy, nie met ander toestelle van dieselfde tipe werk nie.
 
-### Exploring an IR signal
+### Verkenning van 'n IR sein
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+Die mees betroubare manier om te sien hoe die afstandsbediening se IR sein lyk, is om 'n oscilloskoop te gebruik. Dit demoduleer of keer nie die ontvangde sein om nie, dit word net "soos dit is" vertoon. Dit is nuttig vir toetsing en foutopsporing. Ek sal die verwagte sein op die voorbeeld van die NEC IR protokol wys.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Usually, there is a preamble at the beginning of an encoded packet. This allows the receiver to determine the level of gain and background. There are also protocols without preamble, for example, Sharp.
+Gewoonlik is daar 'n preamble aan die begin van 'n gekodeerde pakket. Dit laat die ontvanger toe om die vlak van versterking en agtergrond te bepaal. Daar is ook protokolle sonder preamble, byvoorbeeld, Sharp.
 
-Then data is transmitted. The structure, preamble, and bit encoding method are determined by the specific protocol.
+Dan word data oorgedra. Die struktuur, preamble, en bit kodering metode word deur die spesifieke protokol bepaal.
 
-**NEC IR protocol** contains a short command and a repeat code, which is sent while the button is pressed. Both the command and the repeat code have the same preamble at the beginning.
+**NEC IR protokol** bevat 'n kort opdrag en 'n herhalingskode, wat gestuur word terwyl die knoppie ingedruk word. Beide die opdrag en die herhalingskode het dieselfde preamble aan die begin.
 
-NEC **command**, in addition to the preamble, consists of an address byte and a command-number byte, by which the device understands what needs to be performed. Address and command-number bytes are duplicated with inverse values, to check the integrity of the transmission. There is an additional stop bit at the end of the command.
+NEC **opdrag**, benewens die preamble, bestaan uit 'n adresbyte en 'n opdrag-nommer byte, waardeur die toestel verstaan wat gedoen moet word. Adres en opdrag-nommer bytes word gedupliseer met omgekeerde waardes, om die integriteit van die transmissie te kontroleer. Daar is 'n bykomende stopbit aan die einde van die opdrag.
 
-The **repeat code** has a "1" after the preamble, which is a stop bit.
+Die **herhalingskode** het 'n "1" na die preamble, wat 'n stopbit is.
 
-For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst is transmitted after which there is a pause, its length sets the value of the bit.
+Vir **logika "0" en "1"** gebruik NEC Pulsafstand Kodering: eerstens word 'n pulsuitbarsting oorgedra waarna daar 'n pouse is, waarvan die lengte die waarde van die bit bepaal.
 
-### Air Conditioners
+### Lugversorgers
 
-Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
+In teenstelling met ander afstandsbedienings, **stuur lugversorgers nie net die kode van die ingedrukte knoppie nie**. Hulle **stuur ook al die inligting** wanneer 'n knoppie ingedruk word om te verseker dat die **lugversorgingsmasjien en die afstandsbediening gesinchroniseer is**.\
+Dit sal verhoed dat 'n masjien wat op 20ºC gestel is, verhoog word na 21ºC met een afstandsbediening, en dan wanneer 'n ander afstandsbediening, wat steeds die temperatuur as 20ºC het, gebruik word om die temperatuur verder te verhoog, dit "verhoog" dit na 21ºC (en nie na 22ºC nie, dink dit is op 21ºC).
 
-### Attacks
+### Aanvalle
 
-You can attack Infrared with Flipper Zero:
+Jy kan Infrarooi aanval met Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-## References
+## Verwysings
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

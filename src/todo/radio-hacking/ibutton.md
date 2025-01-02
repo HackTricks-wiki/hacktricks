@@ -4,43 +4,42 @@
 
 ## Intro
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
+iButton is 'n generiese naam vir 'n elektroniese identifikasiesleutel wat in 'n **muntvormige metaalhouer** gepak is. Dit word ook **Dallas Touch** Memory of kontakgeheue genoem. Alhoewel dit dikwels verkeerdelik as 'n “magnetiese” sleutel verwys word, is daar **niks magneties** daarin nie. Trouens, 'n volwaardige **mikrochip** wat op 'n digitale protokol werk, is binne-in versteek.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### Wat is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+Gewoonlik impliseer iButton die fisiese vorm van die sleutel en leser - 'n ronde munt met twee kontakte. Vir die raam wat dit omring, is daar baie variasies van die mees algemene plastiekhouer met 'n gat tot ringe, hangers, ens.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+Wanneer die sleutel die leser bereik, **raak die kontakte aan** en die sleutel word van krag voorsien om sy ID te **verzenden**. Soms word die sleutel **nie onmiddellik gelees** nie omdat die **kontak PSD van 'n interkom groter** is as wat dit moet wees. So die buite kontour van die sleutel en die leser kon nie aanraak nie. As dit die geval is, sal jy die sleutel oor een van die mure van die leser moet druk.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
-### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
+### **1-Wire protokol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Dallas sleutels ruil data uit met behulp van die 1-wire protokol. Met slegs een kontak vir datatransfer (!!) in beide rigtings, van meester na slaaf en omgekeerd. Die 1-wire protokol werk volgens die Meester-Slaaf model. In hierdie topologie begin die Meester altyd kommunikasie en die Slaaf volg sy instruksies.
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+Wanneer die sleutel (Slaaf) die interkom (Meester) kontak, draai die chip binne-in die sleutel aan, aangedryf deur die interkom, en die sleutel word geïnitialiseer. Daarna versoek die interkom die sleutel ID. Volgende, sal ons hierdie proses in meer detail ondersoek.
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Flipper kan beide in Meester en Slaaf modi werk. In die sleutel leesmodus, tree Flipper op as 'n leser, dit wil sê dit werk as 'n Meester. En in die sleutel emulasie modus, doen die flipper asof dit 'n sleutel is, dit is in die Slaaf modus.
 
-### Dallas, Cyfral & Metakom keys
+### Dallas, Cyfral & Metakom sleutels
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+Vir inligting oor hoe hierdie sleutels werk, kyk die bladsy [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
-### Attacks
+### Aanvalle
 
-iButtons can be attacked with Flipper Zero:
+iButtons kan aangeval word met Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## References
+## Verwysings
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,41 +1,40 @@
-# FZ - Infrared
+# FZ - Infrarooi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-For more info about how Infrared works check:
+Vir meer inligting oor hoe Infrarooi werk, kyk:
 
 {{#ref}}
 ../infrared.md
 {{#endref}}
 
-## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## IR Seinontvanger in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper uses a digital IR signal receiver TSOP, which **allows intercepting signals from IR remotes**. There are some **smartphones** like Xiaomi, which also have an IR port, but keep in mind that **most of them can only transmit** signals and are **unable to receive** them.
+Flipper gebruik 'n digitale IR seinontvanger TSOP, wat **toelaat om seine van IR afstandsbedienings te onderskep**. Daar is 'n paar **smartphones** soos Xiaomi, wat ook 'n IR-poort het, maar hou in gedagte dat **meeste van hulle slegs kan oordra** seine en **nie kan ontvang** nie.
 
-The Flipper infrared **receiver is quite sensitive**. You can even **catch the signal** while remaining **somewhere in between** the remote and the TV. Pointing the remote directly at Flipper's IR port is unnecessary. This comes in handy when someone is switching channels while standing near the TV, and both you and Flipper are some distance away.
+Die Flipper infrarooi **ontvanger is redelik sensitief**. Jy kan selfs die **sein vang** terwyl jy **ergens tussen** die afstandsbediening en die TV bly. Dit is nie nodig om die afstandsbediening direk na Flipper se IR-poort te wys nie. Dit is handig wanneer iemand kanale verander terwyl hy naby die TV staan, en beide jy en Flipper is 'n afstand weg.
 
-As the **decoding of the infrared** signal happens on the **software** side, Flipper Zero potentially supports the **reception and transmission of any IR remote codes**. In the case of **unknown** protocols which could not be recognized - it **records and plays back** the raw signal exactly as received.
+Aangesien die **ontleding van die infrarooi** sein aan die **sagteware** kant gebeur, ondersteun Flipper Zero potensieel die **ontvangs en oordrag van enige IR afstandsbediening kode**. In die geval van **onbekende** protokolle wat nie herken kon word nie - dit **neem op en speel die** rou sein presies soos ontvang.
 
-## Actions
+## Aksies
 
-### Universal Remotes
+### Universele Afstandsbedienings
 
-Flipper Zero can be used as a **universal remote to control any TV, air conditioner, or media center**. In this mode, Flipper **bruteforces** all **known codes** of all supported manufacturers **according to the dictionary from the SD card**. You don't need to choose a particular remote to turn off a restaurant TV.
+Flipper Zero kan gebruik word as 'n **universele afstandsbediening om enige TV, lugversorger of mediacentrum te beheer**. In hierdie modus, Flipper **bruteforces** al die **bekende kodes** van al die ondersteunde vervaardigers **volgens die woordeboek van die SD-kaart**. Jy hoef nie 'n spesifieke afstandsbediening te kies om 'n restaurant TV af te skakel nie.
 
-It is enough to press the power button in the Universal Remote mode, and Flipper will **sequentially send "Power Off"** commands of all the TVs it knows: Sony, Samsung, Panasonic... and so on. When the TV receives its signal, it will react and turn off.
+Dit is genoeg om die aan/af-knoppie in die Universele Afstandsbediening modus te druk, en Flipper sal **volgordelik "Power Off"** opdragte van al die TV's wat hy ken, stuur: Sony, Samsung, Panasonic... ensovoorts. Wanneer die TV sy sein ontvang, sal dit reageer en afskakel.
 
-Such brute-force takes time. The larger the dictionary, the longer it will take to finish. It is impossible to find out which signal exactly the TV recognized since there is no feedback from the TV.
+So 'n brute-kracht neem tyd. Hoe groter die woordeboek, hoe langer sal dit neem om te voltooi. Dit is onmoontlik om uit te vind watter sein presies die TV herken het, aangesien daar geen terugvoer van die TV is nie.
 
-### Learn New Remote
+### Leer Nuwe Afstandsbediening
 
-It's possible to **capture an infrared signal** with Flipper Zero. If it **finds the signal in the database** Flipper will automatically **know which device this is** and will let you interact with it.\
-If it doesn't, Flipper can **store** the **signal** and will allow you to **replay it**.
+Dit is moontlik om 'n **infrarooi sein** met Flipper Zero te **vang**. As dit **die sein in die databasis vind**, sal Flipper outomaties **weet watter toestel dit is** en jou toelaat om daarmee te interaksie.\
+As dit nie, kan Flipper die **sein** **stoor** en sal dit jou toelaat om dit te **herhaal**.
 
-## References
+## Verwysings
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

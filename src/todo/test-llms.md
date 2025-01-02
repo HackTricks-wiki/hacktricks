@@ -1,52 +1,50 @@
-# Test LLMs
+# Toets LLMs
 
-## Run & train models locally
+## Loop & oplei modelle plaaslik
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers is one of the most popular open-source libraries for using, training, and deploying LLMs such as GPT, BERT, and many others. It offers a comprehensive ecosystem that includes pre-trained models, datasets, and seamless integration with the Hugging Face Hub for fine-tuning and deployment.
+Hugging Face Transformers is een van die gewildste oopbron biblioteke vir die gebruik, opleiding en ontplooiing van LLMs soos GPT, BERT, en vele ander. Dit bied 'n omvattende ekosisteem wat vooraf-geleerde modelle, datastelle, en naatlose integrasie met die Hugging Face Hub vir fyn-afstemming en ontplooiing insluit.
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain is a framework designed for building applications with LLMs. It allows developers to connect language models with external data sources, APIs, and databases. LangChain provides tools for advanced prompt engineering, managing conversation history, and integrating LLMs into complex workflows.
+LangChain is 'n raamwerk ontwerp vir die bou van toepassings met LLMs. Dit stel ontwikkelaars in staat om taalmodelle met eksterne databasisse, API's, en databronne te verbind. LangChain bied gereedskap vir gevorderde promptingenieurskap, bestuur van gesprekgeskiedenis, en integrasie van LLMs in komplekse werksvloei.
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT is a project developed by Lightning AI that leverages the Lightning framework to facilitate the training, fine-tuning, and deployment of GPT-based models. It integrates seamlessly with other Lightning AI tools, providing optimized workflows for handling large-scale language models with enhanced performance and scalability.
+LitGPT is 'n projek ontwikkel deur Lightning AI wat die Lightning-raamwerk benut om die opleiding, fyn-afstemming, en ontplooiing van GPT-gebaseerde modelle te fasiliteer. Dit integreer naatloos met ander Lightning AI gereedskap, wat geoptimaliseerde werksvloei bied vir die hantering van grootmaat taalmodelle met verbeterde prestasie en skaalbaarheid.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
-**Description:**\
-LitServe is a deployment tool from Lightning AI designed for quickly and efficiently deploying AI models. It simplifies the integration of LLMs into real-time applications by providing scalable and optimized serving capabilities.
+**Beskrywing:**\
+LitServe is 'n ontplooiingstoestel van Lightning AI ontwerp vir vinnige en doeltreffende ontplooiing van AI-modelle. Dit vereenvoudig die integrasie van LLMs in regte tyd toepassings deur skaalbare en geoptimaliseerde bedieningsvermoëns te bied.
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl is a cloud-based platform designed to streamline the deployment, scaling, and management of AI models, including LLMs. It offers features such as automated scaling, monitoring, and integration with various cloud services, making it easier to deploy models in production environments without extensive infrastructure management.
+Axolotl is 'n wolk-gebaseerde platform ontwerp om die ontplooiing, skaal en bestuur van AI-modelle, insluitend LLMs, te stroomlyn. Dit bied funksies soos outomatiese skaal, monitering, en integrasie met verskeie wolkdienste, wat dit makliker maak om modelle in produksie omgewings te ontplooi sonder uitgebreide infrastruktuur bestuur.
 
-## Try models online
+## Probeer modelle aanlyn
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** is a leading platform and community for machine learning, particularly known for its work in natural language processing (NLP). It provides tools, libraries, and resources that make it easier to develop, share, and deploy machine learning models.\
-It offers several sections like:
+**Hugging Face** is 'n toonaangewende platform en gemeenskap vir masjienleer, veral bekend vir sy werk in natuurlike taalverwerking (NLP). Dit bied gereedskap, biblioteke, en hulpbronne wat dit makliker maak om masjienleer modelle te ontwikkel, te deel, en te ontplooi.\
+Dit bied verskeie afdelings soos:
 
-* **Models**: A vast repository of **pre-trained machine learning models** where users can browse, download, and integrate models for various tasks like text generation, translation, image recognition, and more.
-* **Datasets:** A comprehensive **collection of datasets** used for training and evaluating models. It facilitates easy access to diverse data sources, enabling users to find and utilize data for their specific machine learning projects.
-* **Spaces:** A platform for hosting and sharing **interactive machine learning applications** and demos. It allows developers to **showcase** their models in action, create user-friendly interfaces, and collaborate with others by sharing live demos.
+* **Modelle**: 'n Groot versameling van **vooraf-geleerde masjienleer modelle** waar gebruikers kan blaai, aflaai, en modelle vir verskeie take soos teksgenerasie, vertaling, beeldherkenning, en meer kan integreer.
+* **Datastelle:** 'n Omvattende **versameling van datastelle** wat gebruik word vir die opleiding en evaluering van modelle. Dit fasiliteer maklike toegang tot diverse databronne, wat gebruikers in staat stel om data vir hul spesifieke masjienleer projekte te vind en te benut.
+* **Ruimtes:** 'n platform vir die gasheer en deel van **interaktiewe masjienleer toepassings** en demo's. Dit stel ontwikkelaars in staat om hul modelle in aksie te **ten toon te stel**, gebruikersvriendelike koppelvlakke te skep, en saam te werk met ander deur live demo's te deel.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** is a comprehensive repository of reusable machine learning modules developed by Google. It focuses on facilitating the sharing and deployment of machine learning models, especially those built with TensorFlow.
+**TensorFlow Hub** is 'n omvattende versameling van herbruikbare masjienleer modules ontwikkel deur Google. Dit fokus op die fasilitering van die deel en ontplooiing van masjienleer modelle, veral dié wat met TensorFlow gebou is.
 
-* **Modules:** A vast collection of pre-trained models and model components where users can browse, download, and integrate modules for tasks such as image classification, text embedding, and more.
-* **Tutorials:** Step-by-step guides and examples which helps users understand how to implement and fine-tune models using TensorFlow Hub.
-* **Documentation:** Comprehensive guides and API references that assist developers in effectively utilizing the repository’s resources.
+* **Modules:** 'n Groot versameling van vooraf-geleerde modelle en modelkomponente waar gebruikers kan blaai, aflaai, en modules vir take soos beeldklassifikasie, teksinbeding, en meer kan integreer.
+* **Tutorials:** Stap-vir-stap gidse en voorbeelde wat gebruikers help om te verstaan hoe om modelle te implementeer en fyn-af te stem met behulp van TensorFlow Hub.
+* **Dokumentasie:** Omvattende gidse en API verwysings wat ontwikkelaars help om die hulpbronne van die versameling effektief te benut.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** is a platform that allows developers to run machine learning models in the cloud via a simple API. It focuses on making ML models easily accessible and deployable without the need for extensive infrastructure setup.
+**Replicate** is 'n platform wat ontwikkelaars toelaat om masjienleer modelle in die wolk te laat loop via 'n eenvoudige API. Dit fokus op die maak van ML modelle maklik toeganklik en ontplooibaar sonder die behoefte aan uitgebreide infrastruktuur opstelling.
 
-* **Models:** A repository of machine learning models contributed by the community which users can browse, try, and integrate models into their applications with minimal effort.
-* **API Access:** Simple APIs for running models the enable developers to deploy and scale models effortlessly within their own applications.
-
-
+* **Modelle:** 'n versameling van masjienleer modelle wat deur die gemeenskap bygedra is wat gebruikers kan blaai, probeer, en modelle met minimale moeite in hul toepassings kan integreer.
+* **API Toegang:** Eenvoudige API's vir die uitvoering van modelle wat ontwikkelaars in staat stel om modelle moeiteloos binne hul eie toepassings te ontplooi en te skaal.

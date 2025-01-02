@@ -1,13 +1,12 @@
-# Access Tokens
+# Toegangstokens
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Access Tokens
+## Toegangstokens
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+Elke **gebruiker wat** op die stelsel **ingelog is, hou 'n toegangstoken met sekuriteitsinligting** vir daardie aanmeldsessie. Die stelsel skep 'n toegangstoken wanneer die gebruiker aanmeld. **Elke proses wat uitgevoer word** namens die gebruiker **het 'n kopie van die toegangstoken**. Die token identifiseer die gebruiker, die gebruiker se groepe, en die gebruiker se voorregte. 'n Token bevat ook 'n aanmeld SID (Sekuriteitsidentifiseerder) wat die huidige aanmeldsessie identifiseer.
 
-You can see this information executing `whoami /all`
-
+Jy kan hierdie inligting sien deur `whoami /all` uit te voer.
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+of deur _Process Explorer_ van Sysinternals (kies proses en toegang "Sekuriteit" tab):
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### Plaaslike administrateur
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+Wanneer 'n plaaslike administrateur aanmeld, **word twee toegangstokens geskep**: Een met administrateurregte en die ander een met normale regte. **Standaard**, wanneer hierdie gebruiker 'n proses uitvoer, word die een met **reguliere** (nie-administrateur) **regte gebruik**. Wanneer hierdie gebruiker probeer om **enige iets** **as administrateur** uit te voer ("Hardloop as Administrateur" byvoorbeeld) sal die **UAC** gebruik word om toestemming te vra.\
+As jy wil [**meer oor die UAC leer, lees hierdie bladsy**](../authentication-credentials-uac-and-efs/#uac)**.**
 
-### Credentials user impersonation
+### Kredensiële gebruiker impersonasie
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+As jy **geldige kredensiale van enige ander gebruiker** het, kan jy 'n **nuwe aanmeldsessie** met daardie kredensiale **skep**:
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+Die **toegangsteken** het ook 'n **verwysing** van die aanmeldsessies binne die **LSASS**, dit is nuttig as die proses toegang tot sommige voorwerpe van die netwerk benodig.\
+Jy kan 'n proses begin wat **verskillende akrediteer vir toegang tot netwerkdienste** gebruik met:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+Dit is nuttig as jy nuttige akrediteerbare inligting het om toegang te verkry tot voorwerpe in die netwerk, maar daardie akrediteerbare inligting is nie geldig binne die huidige gasheer nie, aangesien dit slegs in die netwerk gebruik gaan word (in die huidige gasheer sal jou huidige gebruikersprivileges gebruik word).
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### Tipes tokens
 
-### Types of tokens
+Daar is twee tipes tokens beskikbaar:
 
-There are two types of tokens available:
+- **Primêre Token**: Dit dien as 'n voorstelling van 'n proses se sekuriteitsakrediteerbare inligting. Die skepping en assosiasie van primêre tokens met prosesse is aksies wat verhoogde privileges vereis, wat die beginsel van privilege-skeiding beklemtoon. Gewoonlik is 'n verifikasiediens verantwoordelik vir token skepping, terwyl 'n aanmelddiens die assosiasie met die gebruiker se bedryfstelsel-skal hanteer. Dit is die moeite werd om te noem dat prosesse die primêre token van hul ouer proses by skepping erf.
+- **Impersonasie Token**: Bemagtig 'n bedienertoepassing om die kliënt se identiteit tydelik aan te neem om toegang tot veilige voorwerpe te verkry. Hierdie meganisme is gelaag in vier vlakke van werking:
+- **Anoniem**: Gee bediener toegang soortgelyk aan dié van 'n onbekende gebruiker.
+- **Identifikasie**: Laat die bediener toe om die kliënt se identiteit te verifieer sonder om dit vir voorwerp toegang te gebruik.
+- **Impersonasie**: Stel die bediener in staat om onder die kliënt se identiteit te werk.
+- **Delegasie**: Soortgelyk aan Impersonasie, maar sluit die vermoë in om hierdie identiteit aanneming na afgeleë stelsels wat die bediener mee werk, uit te brei, wat akrediteerbare inligting se bewaring verseker.
 
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+#### Imiteer Tokens
 
-#### Impersonate Tokens
-
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+Deur die _**incognito**_ module van metasploit te gebruik, as jy genoeg privileges het, kan jy maklik **lys** en **imiteer** ander **tokens**. Dit kan nuttig wees om **aksies uit te voer asof jy die ander gebruiker was**. Jy kan ook **privileges verhoog** met hierdie tegniek.
 
 ### Token Privileges
 
-Learn which **token privileges can be abused to escalate privileges:**
+Leer watter **token privileges misbruik kan word om privileges te verhoog:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+Kyk na [**alle moontlike token privileges en 'n paar definisies op hierdie eksterne bladsy**](https://github.com/gtworek/Priv2Admin).
 
-## References
+## Verwysings
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+Leer meer oor tokens in hierdie tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) en [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-

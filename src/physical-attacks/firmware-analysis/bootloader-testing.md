@@ -1,53 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+Die volgende stappe word aanbeveel om toestel opstartkonfigurasies en bootloaders soos U-boot te wysig:
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **Toegang tot Bootloader se Interpreter Shell**:
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- Gedurende opstart, druk "0", spasie, of ander geïdentifiseerde "magiese kodes" om toegang te verkry tot die bootloader se interpreter shell.
 
-2. **Modify Boot Arguments**:
+2. **Wysig Boot Argumente**:
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- Voer die volgende opdragte uit om '`init=/bin/sh`' by die boot argumente te voeg, wat die uitvoering van 'n shell opdrag toelaat:
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **Stel TFTP Bediening in**:
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- Konfigureer 'n TFTP bediener om beelde oor 'n plaaslike netwerk te laai:
+%%%
+#setenv ipaddr 192.168.2.2 #lokale IP van die toestel
+#setenv serverip 192.168.2.1 #TFTP bediener IP
+#saveenv
+#reset
+#ping 192.168.2.1 #kontroleer netwerktoegang
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr neem die adres om die lêer in te laai en die lêernaam van die beeld op die TFTP bediener
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **Gebruik `ubootwrite.py`**:
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- Gebruik `ubootwrite.py` om die U-boot beeld te skryf en 'n gewysigde firmware te druk om worteltoegang te verkry.
 
-5. **Check Debug Features**:
+5. **Kontroleer Debug Kenmerke**:
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- Verifieer of debug kenmerke soos gedetailleerde logging, laai van arbitrêre kerne, of opstart vanaf onbetroubare bronne geaktiveer is.
 
-6. **Cautionary Hardware Interference**:
+6. **Versigtigheid met Hardeware Interferensie**:
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- Wees versigtig wanneer jy een pen aan grond verbind en met SPI of NAND flash skywe interaksie het tydens die toestel se opstartvolgorde, veral voordat die kern ontspan. Raadpleeg die NAND flash skyf se datasheet voordat jy penne kortsluit.
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **Stel Rogue DHCP Bediening in**:
+- Stel 'n rogue DHCP bediener op met kwaadwillige parameters vir 'n toestel om in te neem tydens 'n PXE opstart. Gebruik gereedskap soos Metasploit se (MSF) DHCP bystandbediener. Wysig die 'FILENAME' parameter met opdraginjektie opdragte soos `'a";/bin/sh;#'` om invoervalidasie vir toestel opstart prosedures te toets.
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**Let wel**: Die stappe wat fisiese interaksie met toestel penne behels (\*gemerk met asterisks) moet met uiterste versigtigheid benader word om te voorkom dat die toestel beskadig word.
 
-## References
+## Verwysings
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

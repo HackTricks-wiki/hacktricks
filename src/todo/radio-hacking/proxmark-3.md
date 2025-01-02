@@ -2,18 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Attacking RFID Systems with Proxmark3
+## Aanval op RFID-stelsels met Proxmark3
 
-The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Die eerste ding wat jy moet doen is om 'n [**Proxmark3**](https://proxmark.com) te hê en [**die sagteware en sy afhanklikhede te installeer**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
-### Attacking MIFARE Classic 1KB
+### Aanval op MIFARE Classic 1KB
 
-It has **16 sectors**, each of them has **4 blocks** and each block contains **16B**. The UID is in sector 0 block 0 (and can't be altered).\
-To access each sector you need **2 keys** (**A** and **B**) which are stored in **block 3 of each sector** (sector trailer). The sector trailer also stores the **access bits** that give the **read and write** permissions on **each block** using the 2 keys.\
-2 keys are useful to give permissions to read if you know the first one and write if you know the second one (for example).
+Dit het **16 sektore**, elkeen het **4 blokke** en elke blok bevat **16B**. Die UID is in sektor 0 blok 0 (en kan nie verander word nie).\
+Om toegang tot elke sektor te verkry, het jy **2 sleutels** (**A** en **B**) wat in **blok 3 van elke sektor** gestoor is (sektor trailer). Die sektor trailer stoor ook die **toegangsbits** wat die **lees en skryf** regte op **elke blok** gee met behulp van die 2 sleutels.\
+2 sleutels is nuttig om regte te gee om te lees as jy die eerste een ken en te skryf as jy die tweede een ken (byvoorbeeld).
 
-Several attacks can be performed
-
+Verskeie aanvalle kan uitgevoer word
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -32,34 +31,28 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
+Die Proxmark3 maak dit moontlik om ander aksies uit te voer soos **afluister** 'n **Tag na Leser kommunikasie** om te probeer om sensitiewe data te vind. In hierdie kaart kan jy net die kommunikasie snuffel en die gebruikte sleutel bereken omdat die **kryptografiese operasies wat gebruik word swak is** en deur die plain en cipher teks te ken, kan jy dit bereken (`mfkey64` tool).
 
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **cryptographic operations used are weak** and knowing the plain and cipher text you can calculate it (`mfkey64` tool).
+### Rauwe Opdragte
 
-### Raw Commands
-
-IoT systems sometimes use **nonbranded or noncommercial tags**. In this case, you can use Proxmark3 to send custom **raw commands to the tags**.
-
+IoT-stelsels gebruik soms **nie-gemerkte of nie-kommersiële tags**. In hierdie geval kan jy Proxmark3 gebruik om pasgemaakte **rauwe opdragte na die tags** te stuur.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
 TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
-  proprietary non iso14443-4 card found, RATS not supported
-  No chinese magic backdoor command detected
-  Prng detection: WEAK
-  Valid ISO14443A Tag Found - Quiting Search
+proprietary non iso14443-4 card found, RATS not supported
+No chinese magic backdoor command detected
+Prng detection: WEAK
+Valid ISO14443A Tag Found - Quiting Search
 ```
+Met hierdie inligting kan jy probeer om inligting oor die kaart en oor die manier om met dit te kommunikeer, te soek. Proxmark3 laat jou toe om rou opdragte te stuur soos: `hf 14a raw -p -b 7 26`
 
-With this information you could try to search information about the card and about the way to communicate with it. Proxmark3 allows to send raw commands like: `hf 14a raw -p -b 7 26`
+### Skripte
 
-### Scripts
-
-The Proxmark3 software comes with a preloaded list of **automation scripts** that you can use to perform simple tasks. To retrieve the full list, use the `script list` command. Next, use the `script run` command, followed by the script’s name:
-
+Die Proxmark3 sagteware kom met 'n vooraf gelaaide lys van **outomatiseringsskripte** wat jy kan gebruik om eenvoudige take uit te voer. Om die volledige lys te verkry, gebruik die `script list` opdrag. Gebruik dan die `script run` opdrag, gevolg deur die skrip se naam:
 ```
 proxmark3> script run mfkeys
 ```
-
-You can create a script to **fuzz tag readers**, so copying the data of a **valid card** just write a **Lua script** that **randomize** one or more random **bytes** and check if the **reader crashes** with any iteration.
+U kan 'n skrif skep om **fuzz tag readers** te doen, so om die data van 'n **geldige kaart** te kopieer, skryf net 'n **Lua-skrif** wat een of meer willekeurige **bytes** randomiseer en kyk of die **leser crash** met enige iterasie. 
 
 {{#include ../../banners/hacktricks-training.md}}
-

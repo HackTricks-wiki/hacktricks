@@ -1,17 +1,16 @@
-# Low-Power Wide Area Network
+# Lae-Power Wye Gebied Netwerk
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Inleiding
 
-**Low-Power Wide Area Network** (LPWAN) is a group of wireless, low-power, wide area network technologies designed for **long-range communications** at a low bit rate.\
-They can reach more than **six miles** and their **batteries** can last up to **20 years**.
+**Lae-Power Wye Gebied Netwerk** (LPWAN) is 'n groep draadlose, lae-krag, wye gebied netwerk tegnologieë wat ontwerp is vir **langafstand kommunikasie** teen 'n lae bitoordrag.\
+Hulle kan meer as **ses myl** bereik en hul **batterye** kan tot **20 jaar** hou.
 
-Long Range (**LoRa**) it’s popular in multiple countries and has an open source specification called **LoRaWAN**.
+Langafstand (**LoRa**) is gewild in verskeie lande en het 'n oopbron spesifikasie genaamd **LoRaWAN**.
 
-### LPWAN, LoRa, and LoRaWAN
+### LPWAN, LoRa, en LoRaWAN
 
 [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# Foutinjektie-aanvalle
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+Foutinjektie-aanvalle sluit die bekendstelling van eksterne versteurings in elektroniese kringe in om die gedrag daarvan te beïnvloed, wat lei tot die bekendstelling van inligting of selfs die omseiling van sekere beperkings in die kring. Hierdie aanvalle bied 'n groot aantal moontlikhede om elektroniese kringe aan te val. Hierdie aanval word ook verwys na as die glitsing van elektroniese kringe.
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+Daar is baie metodes en media om fout in 'n elektroniese kring in te spuit.
