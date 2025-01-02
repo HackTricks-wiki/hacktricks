@@ -7,9 +7,9 @@ Reading time: {{ #reading_time }}
 _Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 > [!TIP]
-> **Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
+> **Καλώς ήρθατε στο wiki όπου θα βρείτε κάθε κόλπο/τεχνική/οτιδήποτε έχω μάθει από CTFs, πραγματικές εφαρμογές, διαβάζοντας έρευνες και ειδήσεις.**
 
-To get started follow this page where you will find the **typical flow** that **you should follow when pentesting** one or more **machines:**
+Για να ξεκινήσετε, ακολουθήστε αυτή τη σελίδα όπου θα βρείτε τη **τυπική ροή** που **πρέπει να ακολουθήσετε όταν κάνετε pentesting** σε μία ή περισσότερες **μηχανές:**
 
 {{#ref}}
 generic-methodologies-and-resources/pentesting-methodology.md
@@ -21,11 +21,11 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
+[**STM Cyber**](https://www.stmcyber.com) είναι μια εξαιρετική εταιρεία κυβερνοασφάλειας της οποίας το σλόγκαν είναι **HACK THE UNHACKABLE**. Εκτελούν τη δική τους έρευνα και αναπτύσσουν τα δικά τους εργαλεία hacking για να **προσφέρουν πολλές πολύτιμες υπηρεσίες κυβερνοασφάλειας** όπως pentesting, Red teams και εκπαίδευση.
 
-You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Μπορείτε να ελέγξετε το **blog** τους στο [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-**STM Cyber** also support cybersecurity open source projects like HackTricks :)
+**STM Cyber** υποστηρίζει επίσης έργα ανοιχτού κώδικα στον τομέα της κυβερνοασφάλειας όπως το HackTricks :)
 
 ---
 
@@ -33,7 +33,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+[**RootedCON**](https://www.rootedcon.com) είναι η πιο σχετική εκδήλωση κυβερνοασφάλειας στην **Ισπανία** και μία από τις πιο σημαντικές στην **Ευρώπη**. Με **αποστολή την προώθηση της τεχνικής γνώσης**, αυτό το συνέδριο είναι ένα καυτό σημείο συνάντησης για επαγγελματίες της τεχνολογίας και της κυβερνοασφάλειας σε κάθε πειθαρχία.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -43,9 +43,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
+**Intigriti** είναι η **#1** ηθική hacking και **bug bounty platform** στην **Ευρώπη**.
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **εγγραφείτε** στο **Intigriti**, μια premium **bug bounty platform που δημιουργήθηκε από hackers, για hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα και αρχίστε να κερδίζετε βραβεία έως **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -56,9 +56,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.
+Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) για να δημιουργήσετε εύκολα και να **αυτοματοποιήσετε ροές εργασίας** που υποστηρίζονται από τα **πιο προηγμένα** εργαλεία της κοινότητας.
 
-Get Access Today:
+Αποκτήστε πρόσβαση σήμερα:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -68,23 +68,23 @@ Get Access Today:
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Εγγραφείτε στον [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server για να επικοινωνήσετε με έμπειρους hackers και κυνηγούς bug bounty!
 
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
+- **Hacking Insights:** Συμμετάσχετε σε περιεχόμενο που εμβαθύνει στην αδρεναλίνη και τις προκλήσεις του hacking
+- **Real-Time Hack News:** Μείνετε ενημερωμένοι με τον ταχύτατο κόσμο του hacking μέσω ειδήσεων και πληροφοριών σε πραγματικό χρόνο
+- **Latest Announcements:** Μείνετε ενημερωμένοι με τις πιο πρόσφατες εκκινήσεις bug bounties και κρίσιμες ενημερώσεις πλατφόρμας
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Ελάτε μαζί μας στο** [**Discord**](https://discord.com/invite/N3FrSbmwdy) και αρχίστε να συνεργάζεστε με κορυφαίους hackers σήμερα!
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - The essential penetration testing toolkit
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Το απαραίτητο εργαλείο για penetration testing
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+**Αποκτήστε την προοπτική ενός hacker για τις εφαρμογές σας, το δίκτυο και το cloud**
 
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
+**Βρείτε και αναφέρετε κρίσιμες, εκμεταλλεύσιμες ευπάθειες με πραγματικό επιχειρηματικό αντίκτυπο.** Χρησιμοποιήστε τα 20+ προσαρμοσμένα εργαλεία μας για να χαρτογραφήσετε την επιφάνεια επίθεσης, να βρείτε ζητήματα ασφαλείας που σας επιτρέπουν να κλιμακώσετε προνόμια και να χρησιμοποιήσετε αυτοματοποιημένα exploits για να συλλέξετε βασικά αποδεικτικά στοιχεία, μετατρέποντας τη σκληρή δουλειά σας σε πειστικές αναφορές.
 
 {% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
@@ -94,22 +94,22 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** offers fast and easy real-time APIs to **access search engine results**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
+**SerpApi** προσφέρει γρήγορες και εύκολες APIs σε πραγματικό χρόνο για **πρόσβαση στα αποτελέσματα μηχανών αναζήτησης**. Scrape μηχανές αναζήτησης, χειρίζονται proxies, λύνουν captchas και αναλύουν όλα τα πλούσια δομημένα δεδομένα για εσάς.
 
-A subscription to one of SerpApi’s plans includes access to over 50 different APIs for scraping different search engines, including Google, Bing, Baidu, Yahoo, Yandex, and more.\
-Unlike other providers, **SerpApi doesn’t just scrape organic results**. SerpApi responses consistently include all ads, inline images and videos, knowledge graphs, and other elements and features present in the search results.
+Μια συνδρομή σε ένα από τα σχέδια του SerpApi περιλαμβάνει πρόσβαση σε πάνω από 50 διαφορετικά APIs για scraping διαφορετικών μηχανών αναζήτησης, συμπεριλαμβανομένων των Google, Bing, Baidu, Yahoo, Yandex και άλλων.\
+Σε αντίθεση με άλλους παρόχους, **η SerpApi δεν κάνει μόνο scraping οργανικών αποτελεσμάτων**. Οι απαντήσεις της SerpApi περιλαμβάνουν σταθερά όλες τις διαφημίσεις, inline εικόνες και βίντεο, γραφήματα γνώσεων και άλλα στοιχεία και χαρακτηριστικά που υπάρχουν στα αποτελέσματα αναζήτησης.
 
-Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
-For more information check out their [**blog**](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**\
-You can **create a free account** [**here**](https://serpapi.com/users/sign_up)**.**
+Οι τρέχοντες πελάτες της SerpApi περιλαμβάνουν **Apple, Shopify και GrubHub**.\
+Για περισσότερες πληροφορίες, ελέγξτε το [**blog**](https://serpapi.com/blog/)**,** ή δοκιμάστε ένα παράδειγμα στο [**playground**](https://serpapi.com/playground)**.**\
+Μπορείτε να **δημιουργήσετε έναν δωρεάν λογαριασμό** [**εδώ**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### 8kSec Academy – In-Depth Mobile Security Courses
+### 8kSec Academy – Σε βάθος μαθήματα ασφάλειας κινητών
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+Μάθετε τις τεχνολογίες και τις δεξιότητες που απαιτούνται για να εκτελέσετε έρευνα ευπαθειών, penetration testing και reverse engineering για να προστατεύσετε τις κινητές εφαρμογές και τις συσκευές. **Κατακτήστε την ασφάλεια iOS και Android** μέσω των on-demand μαθημάτων μας και **λάβετε πιστοποίηση**:
 
 {% embed url="https://academy.8ksec.io/" %}
 
@@ -119,19 +119,19 @@ Learn the technologies and skills required to perform vulnerability research, pe
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
+[**WebSec**](https://websec.nl) είναι μια επαγγελματική εταιρεία κυβερνοασφάλειας με έδρα το **Άμστερνταμ** που βοηθά **στην προστασία** επιχειρήσεων **σε όλο τον κόσμο** από τις τελευταίες απειλές κυβερνοασφάλειας παρέχοντας **υπηρεσίες επιθετικής ασφάλειας** με **σύγχρονη** προσέγγιση.
 
-WebSec is an **all-in-one security company** which means they do it all; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing and much more.
+Η WebSec είναι μια **all-in-one εταιρεία ασφάλειας**, που σημαίνει ότι τα κάνει όλα: Pentesting, **Security** Audits, Εκπαιδεύσεις Ευαισθητοποίησης, Καμπάνιες Phishing, Ανασκόπηση Κώδικα, Ανάπτυξη Exploit, Εξωτερική Ανάθεση Ειδικών Ασφαλείας και πολλά άλλα.
 
-Another cool thing about WebSec is that unlike the industry average WebSec is **very confident in their skills**, to such an extent that they **guarantee the best quality results**, it states on their website "**If we can't hack it, You don't pay it!**". For more info take a look at their [**website**](https://websec.nl/en/) and [**blog**](https://websec.nl/blog/)!
+Ένα άλλο ενδιαφέρον στοιχείο για την WebSec είναι ότι, σε αντίθεση με τον μέσο όρο της βιομηχανίας, η WebSec είναι **πολύ σίγουρη για τις δεξιότητές της**, σε τέτοιο βαθμό που **εγγυάται τα καλύτερα ποιοτικά αποτελέσματα**, δηλώνει στην ιστοσελίδα της "**Αν δεν μπορούμε να το χακάρουμε, δεν το πληρώνετε!**". Για περισσότερες πληροφορίες, ρίξτε μια ματιά στην [**ιστοσελίδα**](https://websec.nl/en/) και το [**blog**](https://websec.nl/blog/) τους!
 
-In addition to the above WebSec is also a **committed supporter of HackTricks.**
+Επιπλέον, η WebSec είναι επίσης **δεσμευμένος υποστηρικτής του HackTricks.**
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
 
 ## License & Disclaimer
 
-Check them in:
+Ελέγξτε τους στο:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md

@@ -1,173 +1,170 @@
 {{#include ./banners/hacktricks-training.md}}
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> by Carlos Polop is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
+<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Πνευματικά δικαιώματα © Carlos Polop 2021. Εκτός αν ορίζεται διαφορετικά (οι εξωτερικές πληροφορίες που αντιγράφηκαν στο βιβλίο ανήκουν στους αρχικούς συγγραφείς), το κείμενο στο <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> από τον Carlos Polop είναι αδειοδοτημένο υπό την <a href="https://creativecommons.org/licenses/by-nc/4.0/">Δημιουργική Κοινότητα Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
 
-License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
-Human Readable License: https://creativecommons.org/licenses/by-nc/4.0/<br>
-Complete Legal Terms: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
-Formatting: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
+Άδεια: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
+Αναγνώσιμη Άδεια: https://creativecommons.org/licenses/by-nc/4.0/<br>
+Πλήρεις Νομικοί Όροι: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
+Μορφοποίηση: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
 
 # creative commons
 
 # Attribution-NonCommercial 4.0 International
 
-Creative Commons Corporation (“Creative Commons”) is not a law firm and does not provide legal services or legal advice. Distribution of Creative Commons public licenses does not create a lawyer-client or other relationship. Creative Commons makes its licenses and related information available on an “as-is” basis. Creative Commons gives no warranties regarding its licenses, any material licensed under their terms and conditions, or any related information. Creative Commons disclaims all liability for damages resulting from their use to the fullest extent possible.
+Η Creative Commons Corporation (“Creative Commons”) δεν είναι δικηγορική εταιρεία και δεν παρέχει νομικές υπηρεσίες ή νομικές συμβουλές. Η διανομή των δημόσιων αδειών Creative Commons δεν δημιουργεί σχέση δικηγόρου-πελάτη ή άλλη σχέση. Η Creative Commons παρέχει τις άδειές της και τις σχετικές πληροφορίες σε βάση “ως έχει”. Η Creative Commons δεν παρέχει καμία εγγύηση σχετικά με τις άδειές της, οποιοδήποτε υλικό αδειοδοτημένο υπό τους όρους και τις προϋποθέσεις τους, ή οποιαδήποτε σχετική πληροφορία. Η Creative Commons αποποιείται κάθε ευθύνη για ζημίες που προκύπτουν από τη χρήση τους στο μέγιστο δυνατό βαθμό.
 
-## Using Creative Commons Public Licenses
+## Χρήση Δημόσιων Αδειών Creative Commons
 
-Creative Commons public licenses provide a standard set of terms and conditions that creators and other rights holders may use to share original works of authorship and other material subject to copyright and certain other rights specified in the public license below. The following considerations are for informational purposes only, are not exhaustive, and do not form part of our licenses.
+Οι δημόσιες άδειες Creative Commons παρέχουν ένα τυπικό σύνολο όρων και προϋποθέσεων που οι δημιουργοί και άλλοι κάτοχοι δικαιωμάτων μπορούν να χρησιμοποιήσουν για να μοιραστούν πρωτότυπα έργα συγγραφής και άλλο υλικό που υπόκειται σε πνευματικά δικαιώματα και ορισμένα άλλα δικαιώματα που καθορίζονται στην παρακάτω δημόσια άδεια. Οι παρακάτω παρατηρήσεις είναι μόνο για ενημερωτικούς σκοπούς, δεν είναι εξαντλητικές και δεν αποτελούν μέρος των αδειών μας.
 
-- **Considerations for licensors:** Our public licenses are intended for use by those authorized to give the public permission to use material in ways otherwise restricted by copyright and certain other rights. Our licenses are irrevocable. Licensors should read and understand the terms and conditions of the license they choose before applying it. Licensors should also secure all rights necessary before applying our licenses so that the public can reuse the material as expected. Licensors should clearly mark any material not subject to the license. This includes other CC-licensed material, or material used under an exception or limitation to copyright. [More considerations for licensors](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+- **Σκέψεις για τους αδειοδότες:** Οι δημόσιες άδειές μας προορίζονται για χρήση από εκείνους που είναι εξουσιοδοτημένοι να δίνουν στο κοινό άδεια να χρησιμοποιεί υλικό με τρόπους που περιορίζονται από πνευματικά δικαιώματα και ορισμένα άλλα δικαιώματα. Οι άδειές μας είναι αμετάκλητες. Οι αδειοδότες θα πρέπει να διαβάσουν και να κατανοήσουν τους όρους και τις προϋποθέσεις της άδειας που επιλέγουν πριν την εφαρμόσουν. Οι αδειοδότες θα πρέπει επίσης να εξασφαλίσουν όλα τα απαραίτητα δικαιώματα πριν εφαρμόσουν τις άδειές μας ώστε το κοινό να μπορεί να επαναχρησιμοποιήσει το υλικό όπως αναμένεται. Οι αδειοδότες θα πρέπει να επισημαίνουν σαφώς οποιοδήποτε υλικό δεν υπόκειται στην άδεια. Αυτό περιλαμβάνει άλλο υλικό που έχει άδεια CC ή υλικό που χρησιμοποιείται υπό εξαίρεση ή περιορισμό στα πνευματικά δικαιώματα. [Περισσότερες σκέψεις για τους αδειοδότες](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
-- **Considerations for the public:** By using one of our public licenses, a licensor grants the public permission to use the licensed material under specified terms and conditions. If the licensor’s permission is not necessary for any reason–for example, because of any applicable exception or limitation to copyright–then that use is not regulated by the license. Our licenses grant only permissions under copyright and certain other rights that a licensor has authority to grant. Use of the licensed material may still be restricted for other reasons, including because others have copyright or other rights in the material. A licensor may make special requests, such as asking that all changes be marked or described. Although not required by our licenses, you are encouraged to respect those requests where reasonable. [More considerations for the public](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
+- **Σκέψεις για το κοινό:** Χρησιμοποιώντας μία από τις δημόσιες άδειές μας, ένας αδειοδότης παραχωρεί στο κοινό άδεια να χρησιμοποιεί το αδειοδοτημένο υλικό υπό καθορισμένους όρους και προϋποθέσεις. Εάν η άδεια του αδειοδότη δεν είναι απαραίτητη για οποιονδήποτε λόγο – για παράδειγμα, λόγω οποιασδήποτε εφαρμοστέας εξαίρεσης ή περιορισμού στα πνευματικά δικαιώματα – τότε αυτή η χρήση δεν ρυθμίζεται από την άδεια. Οι άδειές μας παρέχουν μόνο άδειες υπό πνευματικά δικαιώματα και ορισμένα άλλα δικαιώματα που έχει εξουσία να παραχωρήσει ο αδειοδότης. Η χρήση του αδειοδοτημένου υλικού μπορεί να περιορίζεται για άλλους λόγους, συμπεριλαμβανομένου του ότι άλλοι έχουν πνευματικά δικαιώματα ή άλλα δικαιώματα στο υλικό. Ένας αδειοδότης μπορεί να κάνει ειδικά αιτήματα, όπως να ζητήσει να επισημανθούν ή να περιγραφούν όλες οι αλλαγές. Αν και δεν απαιτείται από τις άδειές μας, σας ενθαρρύνουμε να σεβαστείτε αυτά τα αιτήματα όπου είναι λογικό. [Περισσότερες σκέψεις για το κοινό](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
 
-# Creative Commons Attribution-NonCommercial 4.0 International Public License
+# Δημόσια Άδεια Creative Commons Attribution-NonCommercial 4.0 International
 
-By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+Ασκώντας τα Δικαιώματα που Αδειοδοτούνται (ορισμένα παρακάτω), αποδέχεστε και συμφωνείτε να δεσμεύεστε από τους όρους και τις προϋποθέσεις αυτής της Δημόσιας Άδειας Creative Commons Attribution-NonCommercial 4.0 International ("Δημόσια Άδεια"). Στο βαθμό που αυτή η Δημόσια Άδεια μπορεί να ερμηνευθεί ως σύμβαση, σας παραχωρούνται τα Δικαιώματα που Αδειοδοτούνται σε αντάλλαγμα της αποδοχής σας αυτών των όρων και προϋποθέσεων, και ο Αδειοδότης σας παραχωρεί τέτοια δικαιώματα σε αντάλλαγμα των οφελών που λαμβάνει από την παροχή του Αδειοδοτημένου Υλικού υπό αυτούς τους όρους και προϋποθέσεις.
 
-## Section 1 – Definitions.
+## Τμήμα 1 – Ορισμοί.
 
-a. **Adapted Material** means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor. For purposes of this Public License, where the Licensed Material is a musical work, performance, or sound recording, Adapted Material is always produced where the Licensed Material is synched in timed relation with a moving image.
+a. **Προσαρμοσμένο Υλικό** σημαίνει υλικό που υπόκειται σε Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα που προέρχεται από ή βασίζεται στο Αδειοδοτημένο Υλικό και στο οποίο το Αδειοδοτημένο Υλικό έχει μεταφραστεί, τροποποιηθεί, διαρθρωθεί, μετασχηματιστεί ή αλλιώς τροποποιηθεί με τρόπο που απαιτεί άδεια σύμφωνα με τα Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα που κατέχει ο Αδειοδότης. Για τους σκοπούς αυτής της Δημόσιας Άδειας, όταν το Αδειοδοτημένο Υλικό είναι μουσικό έργο, εκτέλεση ή ηχογράφηση, το Προσαρμοσμένο Υλικό παράγεται πάντα όταν το Αδειοδοτημένο Υλικό συγχρονίζεται σε χρονική σχέση με μια κινούμενη εικόνα.
 
-b. **Adapter's License** means the license You apply to Your Copyright and Similar Rights in Your contributions to Adapted Material in accordance with the terms and conditions of this Public License.
+b. **Άδεια Προσαρμοστή** σημαίνει την άδεια που εφαρμόζετε στα Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα στις συνεισφορές σας στο Προσαρμοσμένο Υλικό σύμφωνα με τους όρους και τις προϋποθέσεις αυτής της Δημόσιας Άδειας.
 
-c. **Copyright and Similar Rights** means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized. For purposes of this Public License, the rights specified in Section 2(b)(1)-(2) are not Copyright and Similar Rights.
+c. **Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα** σημαίνει πνευματικά δικαιώματα και/ή παρόμοια δικαιώματα που σχετίζονται στενά με τα πνευματικά δικαιώματα, συμπεριλαμβανομένων, χωρίς περιορισμό, εκτέλεσης, μετάδοσης, ηχογράφησης και Δικαιωμάτων Βάσης Δεδομένων Sui Generis, χωρίς να λαμβάνεται υπόψη πώς τα δικαιώματα ονομάζονται ή κατηγοριοποιούνται. Για τους σκοπούς αυτής της Δημόσιας Άδειας, τα δικαιώματα που καθορίζονται στο Τμήμα 2(b)(1)-(2) δεν είναι Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα.
 
-d. **Effective Technological Measures** means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+d. **Αποτελεσματικά Τεχνολογικά Μέτρα** σημαίνει τα μέτρα που, απουσία κατάλληλης εξουσίας, δεν μπορούν να παρακαμφθούν σύμφωνα με νόμους που εκπληρώνουν υποχρεώσεις σύμφωνα με το Άρθρο 11 της Συνθήκης Πνευματικών Δικαιωμάτων WIPO που υιοθετήθηκε στις 20 Δεκεμβρίου 1996, και/ή παρόμοιες διεθνείς συμφωνίες.
 
-e. **Exceptions and Limitations** means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+e. **Εξαιρέσεις και Περιορισμοί** σημαίνει δίκαιη χρήση, δίκαιη συναλλαγή και/ή οποιαδήποτε άλλη εξαίρεση ή περιορισμός στα Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα που ισχύει για τη χρήση σας του Αδειοδοτημένου Υλικού.
 
-f. **Licensed Material** means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+f. **Αδειοδοτημένο Υλικό** σημαίνει το καλλιτεχνικό ή λογοτεχνικό έργο, τη βάση δεδομένων ή άλλο υλικό στο οποίο ο Αδειοδότης έχει εφαρμόσει αυτή τη Δημόσια Άδεια.
 
-g. **Licensed Rights** means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+g. **Δικαιώματα που Αδειοδοτούνται** σημαίνει τα δικαιώματα που σας παραχωρούνται υπό τους όρους και τις προϋποθέσεις αυτής της Δημόσιας Άδειας, τα οποία περιορίζονται σε όλα τα Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα που ισχύουν για τη χρήση σας του Αδειοδοτημένου Υλικού και που ο Αδειοδότης έχει εξουσία να αδειοδοτήσει.
 
-h. **Licensor** means the individual(s) or entity(ies) granting rights under this Public License.
+h. **Αδειοδότης** σημαίνει το άτομο ή τα άτομα ή ο φορέας που παραχωρεί δικαιώματα υπό αυτή τη Δημόσια Άδεια.
 
-i. **NonCommercial** means not primarily intended for or directed towards commercial advantage or monetary compensation. For purposes of this Public License, the exchange of the Licensed Material for other material subject to Copyright and Similar Rights by digital file-sharing or similar means is NonCommercial provided there is no payment of monetary compensation in connection with the exchange.
+i. **Μη Εμπορικό** σημαίνει ότι δεν προορίζεται κυρίως για ή δεν κατευθύνεται προς εμπορικό όφελος ή χρηματική αποζημίωση. Για τους σκοπούς αυτής της Δημόσιας Άδειας, η ανταλλαγή του Αδειοδοτημένου Υλικού για άλλο υλικό που υπόκειται σε Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα μέσω ψηφιακής ανταλλαγής αρχείων ή παρόμοιων μέσων είναι Μη Εμπορική εφόσον δεν υπάρχει πληρωμή χρηματικής αποζημίωσης σε σχέση με την ανταλλαγή.
 
-j. **Share** means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation, and to make material available to the public including in ways that members of the public may access the material from a place and at a time individually chosen by them.
+j. **Μοιράζομαι** σημαίνει να παρέχω υλικό στο κοινό με οποιοδήποτε μέσο ή διαδικασία που απαιτεί άδεια σύμφωνα με τα Δικαιώματα που Αδειοδοτούνται, όπως αναπαραγωγή, δημόσια εμφάνιση, δημόσια εκτέλεση, διανομή, διάδοση, επικοινωνία ή εισαγωγή, και να κάνω το υλικό διαθέσιμο στο κοινό, συμπεριλαμβανομένων τρόπων που τα μέλη του κοινού μπορούν να έχουν πρόσβαση στο υλικό από ένα μέρος και σε μια στιγμή που επιλέγουν ατομικά.
 
-k. **Sui Generis Database Rights** means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+k. **Δικαιώματα Βάσης Δεδομένων Sui Generis** σημαίνει δικαιώματα εκτός από πνευματικά δικαιώματα που προκύπτουν από την Οδηγία 96/9/ΕΚ του Ευρωπαϊκού Κοινοβουλίου και του Συμβουλίου της 11ης Μαρτίου 1996 σχετικά με τη νομική προστασία των βάσεων δεδομένων, όπως έχει τροποποιηθεί και/ή διαδεχθεί, καθώς και άλλα ουσιαστικά ισοδύναμα δικαιώματα οπουδήποτε στον κόσμο.
 
-l. **You** means the individual or entity exercising the Licensed Rights under this Public License. Your has a corresponding meaning.
+l. **Εσείς** σημαίνει το άτομο ή ο φορέας που ασκεί τα Δικαιώματα που Αδειοδοτούνται υπό αυτή τη Δημόσια Άδεια. Το "σας" έχει αντίστοιχη σημασία.
 
-## Section 2 – Scope.
+## Τμήμα 2 – Πεδίο εφαρμογής.
 
-a. **_License grant._**
+a. **_Παραχώρηση άδειας._**
 
-1.  Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+1.  Υπό τους όρους και τις προϋποθέσεις αυτής της Δημόσιας Άδειας, ο Αδειοδότης σας παραχωρεί παγκόσμια, χωρίς δικαιώματα, μη υποαδειοδοτούμενη, μη αποκλειστική, αμετάκλητη άδεια να ασκήσετε τα Δικαιώματα που Αδειοδοτούνται στο Αδειοδοτημένο Υλικό για:
 
-A. reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only; and
+A. αναπαραγωγή και Μοιρασιά του Αδειοδοτημένου Υλικού, εν όλω ή εν μέρει, μόνο για Μη Εμπορικούς σκοπούς; και
 
-B. produce, reproduce, and Share Adapted Material for NonCommercial purposes only.
+B. παραγωγή, αναπαραγωγή και Μοιρασιά Προσαρμοσμένου Υλικού μόνο για Μη Εμπορικούς σκοπούς.
 
-2.  **Exceptions and Limitations.** For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
-3.  **Term.** The term of this Public License is specified in Section 6(a).
+2.  **Εξαιρέσεις και Περιορισμοί.** Για την αποφυγή αμφιβολιών, όπου ισχύουν Εξαιρέσεις και Περιορισμοί για τη χρήση σας, αυτή η Δημόσια Άδεια δεν ισχύει, και δεν χρειάζεται να συμμορφωθείτε με τους όρους και τις προϋποθέσεις της.
+3.  **Διάρκεια.** Η διάρκεια αυτής της Δημόσιας Άδειας καθορίζεται στο Τμήμα 6(a).
 
-4.  **Media and formats; technical modifications allowed.** The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so. The Licensor waives and/or agrees not to assert any right or authority to forbid You from making technical modifications necessary to exercise the Licensed Rights, including technical modifications necessary to circumvent Effective Technological Measures. For purposes of this Public License, simply making modifications authorized by this Section 2(a)(4) never produces Adapted Material.
-5.  **Downstream recipients.**
+4.  **Μέσα και μορφές; επιτρέπονται τεχνικές τροποποιήσεις.** Ο Αδειοδότης σας εξουσιοδοτεί να ασκήσετε τα Δικαιώματα που Αδειοδοτούνται σε όλα τα μέσα και τις μορφές, είτε είναι γνωστά τώρα είτε δημιουργηθούν αργότερα, και να κάνετε τις τεχνικές τροποποιήσεις που είναι απαραίτητες για να το κάνετε αυτό. Ο Αδειοδότης παραιτείται και/ή συμφωνεί να μην ισχυριστεί κανένα δικαίωμα ή εξουσία να σας απαγορεύσει να κάνετε τεχνικές τροποποιήσεις που είναι απαραίτητες για να ασκήσετε τα Δικαιώματα που Αδειοδοτούνται, συμπεριλαμβανομένων των τεχνικών τροποποιήσεων που είναι απαραίτητες για να παρακαμφθούν τα Αποτελεσματικά Τεχνολογικά Μέτρα. Για τους σκοπούς αυτής της Δημόσιας Άδειας, η απλή πραγματοποίηση τροποποιήσεων που επιτρέπονται από αυτό το Τμήμα 2(a)(4) δεν παράγει ποτέ Προσαρμοσμένο Υλικό.
+5.  **Δεχόμενοι παραλήπτες.**
 
-A. **Offer from the Licensor – Licensed Material.** Every recipient of the Licensed Material automatically receives an offer from the Licensor to exercise the Licensed Rights under the terms and conditions of this Public License.
+A. **Προσφορά από τον Αδειοδότη – Αδειοδοτημένο Υλικό.** Κάθε παραλήπτης του Αδειοδοτημένου Υλικού λαμβάνει αυτόματα μια προσφορά από τον Αδειοδότη να ασκήσει τα Δικαιώματα που Αδειοδοτούνται υπό τους όρους και τις προϋποθέσεις αυτής της Δημόσιας Άδειας.
 
-B. **No downstream restrictions.** You may not offer or impose any additional or different terms or conditions on, or apply any Effective Technological Measures to, the Licensed Material if doing so restricts exercise of the Licensed Rights by any recipient of the Licensed Material.
+B. **Καμία περιοριστική διάταξη.** Δεν μπορείτε να προσφέρετε ή να επιβάλετε οποιουσδήποτε πρόσθετους ή διαφορετικούς όρους ή προϋποθέσεις, ή να εφαρμόσετε οποιαδήποτε Αποτελεσματικά Τεχνολογικά Μέτρα στο Αδειοδοτημένο Υλικό εάν αυτό περιορίζει την άσκηση των Δικαιωμάτων που Αδειοδοτούνται από οποιονδήποτε παραλήπτη του Αδειοδοτημένου Υλικού.
 
-6.  **No endorsement.** Nothing in this Public License constitutes or may be construed as permission to assert or imply that You are, or that Your use of the Licensed Material is, connected with, or sponsored, endorsed, or granted official status by, the Licensor or others designated to receive attribution as provided in Section 3(a)(1)(A)(i).
+6.  **Καμία έγκριση.** Τίποτα σε αυτή τη Δημόσια Άδεια δεν συνιστά ή μπορεί να ερμηνευθεί ως άδεια να ισχυριστείτε ή να υπονοήσετε ότι είστε, ή ότι η χρήση σας του Αδειοδοτημένου Υλικού είναι, συνδεδεμένη με, ή χορηγούμενη, υποστηριζόμενη ή παραχωρημένη επίσημη κατάσταση από, τον Αδειοδότη ή άλλους που έχουν οριστεί να λάβουν αναγνώριση όπως παρέχεται στο Τμήμα 3(a)(1)(A)(i).
 
-b. **_Other rights._**
+b. **_Άλλα δικαιώματα._**
 
-1.  Moral rights, such as the right of integrity, are not licensed under this Public License, nor are publicity, privacy, and/or other similar personality rights; however, to the extent possible, the Licensor waives and/or agrees not to assert any such rights held by the Licensor to the limited extent necessary to allow You to exercise the Licensed Rights, but not otherwise.
+1.  Ηθικά δικαιώματα, όπως το δικαίωμα της ακεραιότητας, δεν αδειοδοτούνται υπό αυτή τη Δημόσια Άδεια, ούτε είναι δικαιώματα δημοσιότητας, ιδιωτικότητας και/ή άλλα παρόμοια δικαιώματα προσωπικότητας. Ωστόσο, στο βαθμό που είναι δυνατόν, ο Αδειοδότης παραιτείται και/ή συμφωνεί να μην ισχυριστεί κανένα τέτοιο δικαίωμα που κατέχει ο Αδειοδότης στο περιορισμένο βαθμό που είναι απαραίτητο για να σας επιτρέψει να ασκήσετε τα Δικαιώματα που Αδειοδοτούνται, αλλά όχι διαφορετικά.
 
-2.  Patent and trademark rights are not licensed under this Public License.
+2.  Δικαιώματα πατέντας και εμπορικών σημάτων δεν αδειοδοτούνται υπό αυτή τη Δημόσια Άδεια.
 
-3.  To the extent possible, the Licensor waives any right to collect royalties from You for the exercise of the Licensed Rights, whether directly or through a collecting society under any voluntary or waivable statutory or compulsory licensing scheme. In all other cases the Licensor expressly reserves any right to collect such royalties, including when the Licensed Material is used other than for NonCommercial purposes.
+3.  Στο βαθμό που είναι δυνατόν, ο Αδειοδότης παραιτείται από οποιοδήποτε δικαίωμα να συλλέξει δικαιώματα από εσάς για την άσκηση των Δικαιωμάτων που Αδειοδοτούνται, είτε άμεσα είτε μέσω συλλογικής κοινωνίας υπό οποιοδήποτε εθελοντικό ή παραιτηθέν νομικό ή υποχρεωτικό καθεστώς αδειοδότησης. Σε όλες τις άλλες περιπτώσεις, ο Αδειοδότης ρητά διατηρεί οποιοδήποτε δικαίωμα να συλλέξει τέτοια δικαιώματα, συμπεριλαμβανομένου όταν το Αδειοδοτημένο Υλικό χρησιμοποιείται διαφορετικά από Μη Εμπορικούς σκοπούς.
 
-## Section 3 – License Conditions.
+## Τμήμα 3 – Όροι Άδειας.
 
-Your exercise of the Licensed Rights is expressly made subject to the following conditions.
+Η άσκηση των Δικαιωμάτων που Αδειοδοτούνται από εσάς υπόκειται ρητά στους παρακάτω όρους.
 
-a. **_Attribution._**
+a. **_Αναγνώριση._**
 
-1.  If You Share the Licensed Material (including in modified form), You must:
+1.  Εάν Μοιράζεστε το Αδειοδοτημένο Υλικό (συμπεριλαμβανομένου σε τροποποιημένη μορφή), πρέπει:
 
-A. retain the following if it is supplied by the Licensor with the Licensed Material:
+A. να διατηρήσετε τα παρακάτω εάν παρέχονται από τον Αδειοδότη με το Αδειοδοτημένο Υλικό:
 
-i. identification of the creator(s) of the Licensed Material and any others designated to receive attribution, in any reasonable manner requested by the Licensor (including by pseudonym if designated);
+i. αναγνώριση του δημιουργού(ών) του Αδειοδοτημένου Υλικού και οποιωνδήποτε άλλων που έχουν οριστεί να λάβουν αναγνώριση, με οποιονδήποτε λογικό τρόπο ζητηθεί από τον Αδειοδότη (συμπεριλαμβανομένου με ψευδώνυμο εάν οριστεί);
 
-ii. a copyright notice;
+ii. μια ειδοποίηση πνευματικών δικαιωμάτων;
 
-iii. a notice that refers to this Public License;
+iii. μια ειδοποίηση που αναφέρεται σε αυτή τη Δημόσια Άδεια;
 
-iv. a notice that refers to the disclaimer of warranties;
+iv. μια ειδοποίηση που αναφέρεται στην αποποίηση εγγυήσεων;
 
-v. a URI or hyperlink to the Licensed Material to the extent reasonably practicable;
+v. μια URI ή υπερσύνδεσμο προς το Αδειοδοτημένο Υλικό στο βαθμό που είναι λογικά εφικτό;
 
-B. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+B. να υποδείξετε εάν τροποποιήσατε το Αδειοδοτημένο Υλικό και να διατηρήσετε μια ένδειξη οποιωνδήποτε προηγούμενων τροποποιήσεων; και
 
-C. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
+C. να υποδείξετε ότι το Αδειοδοτημένο Υλικό είναι αδειοδοτημένο υπό αυτή τη Δημόσια Άδεια, και να συμπεριλάβετε το κείμενο της, ή την URI ή υπερσύνδεσμο προς αυτή τη Δημόσια Άδεια.
 
-2.  You may satisfy the conditions in Section 3(a)(1) in any reasonable manner based on the medium, means, and context in which You Share the Licensed Material. For example, it may be reasonable to satisfy the conditions by providing a URI or hyperlink to a resource that includes the required information.
+2.  Μπορείτε να ικανοποιήσετε τους όρους στο Τμήμα 3(a)(1) με οποιονδήποτε λογικό τρόπο με βάση το μέσο, τα μέσα και το πλαίσιο στο οποίο Μοιράζεστε το Αδειοδοτημένο Υλικό. Για παράδειγμα, μπορεί να είναι λογικό να ικανοποιήσετε τους όρους παρέχοντας μια URI ή υπερσύνδεσμο προς μια πηγή που περιλαμβάνει τις απαιτούμενες πληροφορίες.
 
-3.  If requested by the Licensor, You must remove any of the information required by Section 3(a)(1)(A) to the extent reasonably practicable.
+3.  Εάν ζητηθεί από τον Αδειοδότη, πρέπει να αφαιρέσετε οποιαδήποτε από τις πληροφορίες που απαιτούνται από το Τμήμα 3(a)(1)(A) στο βαθμό που είναι λογικά εφικτό.
 
-4.  If You Share Adapted Material You produce, the Adapter's License You apply must not prevent recipients of the Adapted Material from complying with this Public License.
+4.  Εάν Μοιράζεστε Προσαρμοσμένο Υλικό που παράγετε, η Άδεια Προσαρμοστή που εφαρμόζετε δεν πρέπει να εμποδίζει τους παραλήπτες του Προσαρμοσμένου Υλικού να συμμορφωθούν με αυτή τη Δημόσια Άδεια.
 
-## Section 4 – Sui Generis Database Rights.
+## Τμήμα 4 – Δικαιώματα Βάσης Δεδομένων Sui Generis.
 
-Where the Licensed Rights include Sui Generis Database Rights that apply to Your use of the Licensed Material:
+Όπου τα Δικαιώματα που Αδειοδοτούνται περιλαμβάνουν Δικαιώματα Βάσης Δεδομένων Sui Generis που ισχύουν για τη χρήση σας του Αδειοδοτημένου Υλικού:
 
-a. for the avoidance of doubt, Section 2(a)(1) grants You the right to extract, reuse, reproduce, and Share all or a substantial portion of the contents of the database for NonCommercial purposes only;
+a. για την αποφυγή αμφιβολιών, το Τμήμα 2(a)(1) σας παραχωρεί το δικαίωμα να εξάγετε, να επαναχρησιμοποιείτε, να αναπαράγετε και να Μοιράζεστε όλο ή ένα ουσιαστικό μέρος του περιεχομένου της βάσης δεδομένων μόνο για Μη Εμπορικούς σκοπούς;
 
-b. if You include all or a substantial portion of the database contents in a database in which You have Sui Generis Database Rights, then the database in which You have Sui Generis Database Rights (but not its individual contents) is Adapted Material; and
+b. εάν συμπεριλάβετε όλο ή ένα ουσιαστικό μέρος του περιεχομένου της βάσης δεδομένων σε μια βάση δεδομένων στην οποία έχετε Δικαιώματα Βάσης Δεδομένων Sui Generis, τότε η βάση δεδομένων στην οποία έχετε Δικαιώματα Βάσης Δεδομένων Sui Generis (αλλά όχι τα ατομικά της περιεχόμενα) είναι Προσαρμοσμένο Υλικό; και
 
-c. You must comply with the conditions in Section 3(a) if You Share all or a substantial portion of the contents of the database.
+c. πρέπει να συμμορφωθείτε με τους όρους στο Τμήμα 3(a) εάν Μοιράζεστε όλο ή ένα ουσιαστικό μέρος του περιεχομένου της βάσης δεδομένων.
 
-For the avoidance of doubt, this Section 4 supplements and does not replace Your obligations under this Public License where the Licensed Rights include other Copyright and Similar Rights.
+Για την αποφυγή αμφιβολιών, αυτό το Τμήμα 4 συμπληρώνει και δεν αντικαθιστά τις υποχρεώσεις σας υπό αυτή τη Δημόσια Άδεια όπου τα Δικαιώματα που Αδειοδοτούνται περιλαμβάνουν άλλα Πνευματικά Δικαιώματα και Παρόμοια Δικαιώματα.
 
-## Section 5 – Disclaimer of Warranties and Limitation of Liability.
+## Τμήμα 5 – Αποποίηση Εγγυήσεων και Περιορισμός Ευθύνης.
 
-a. **Unless otherwise separately undertaken by the Licensor, to the extent possible, the Licensor offers the Licensed Material as-is and as-available, and makes no representations or warranties of any kind concerning the Licensed Material, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable. Where disclaimers of warranties are not allowed in full or in part, this disclaimer may not apply to You.**
+a. **Εκτός εάν αναληφθεί διαφορετικά από τον Αδειοδότη, στο βαθμό που είναι δυνατόν, ο Αδειοδότης προσφέρει το Αδειοδοτημένο Υλικό όπως είναι και όπως διατίθεται, και δεν παρέχει καμία δήλωση ή εγγύηση οποιουδήποτε είδους σχετικά με το Αδειοδοτημένο Υλικό, είτε ρητή, σιωπηρή, νομική ή άλλη. Αυτό περιλαμβάνει, χωρίς περιορισμό, εγγυήσεις τίτλου, εμπορευσιμότητας, καταλληλότητας για συγκεκριμένο σκοπό, μη παραβίασης, απουσίας κρυφών ή άλλων ελαττωμάτων, ακρίβειας ή παρουσίας ή απουσίας σφαλμάτων, είτε είναι γνωστά είτε ανακαλύψιμα. Όπου οι αποποιήσεις εγγυήσεων δεν επιτρέπονται πλήρως ή εν μέρει, αυτή η αποποίηση μπορεί να μην ισχύει για εσάς.**
 
-b. **To the extent possible, in no event will the Licensor be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of this Public License or use of the Licensed Material, even if the Licensor has been advised of the possibility of such losses, costs, expenses, or damages. Where a limitation of liability is not allowed in full or in part, this limitation may not apply to You.**
+b. **Στο βαθμό που είναι δυνατόν, σε καμία περίπτωση ο Αδειοδότης δεν θα είναι υπεύθυνος προς εσάς με οποιαδήποτε νομική θεωρία (συμπεριλαμβανομένης, χωρίς περιορισμό, της αμέλειας) ή αλλιώς για οποιαδήποτε άμεσες, ειδικές, έμμεσες, παρεπόμενες, αποζημιωτικές, παραδειγματικές ή άλλες ζημίες, κόστη, έξοδα ή ζημίες που προκύπτουν από αυτή τη Δημόσια Άδεια ή τη χρήση του Αδειοδοτημένου Υλικού, ακόμη και αν ο Αδειοδότης έχει ενημερωθεί για την πιθανότητα τέτοιων ζημιών, κόστη, εξόδων ή ζημιών. Όπου ένας περιορισμός ευθύνης δεν επιτρέπεται πλήρως ή εν μέρει, αυτός ο περιορισμός μπορεί να μην ισχύει για εσάς.**
 
-c. The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.
+c. Η αποποίηση εγγυήσεων και ο περιορισμός ευθύνης που παρέχονται παραπάνω θα ερμηνεύονται με τρόπο που, στο βαθμό που είναι δυνατόν, προσεγγίζει περισσότερο μια απόλυτη αποποίηση και παραίτηση από κάθε ευθύνη.
 
-## Section 6 – Term and Termination.
+## Τμήμα 6 – Διάρκεια και Τερματισμός.
 
-a. This Public License applies for the term of the Copyright and Similar Rights licensed here. However, if You fail to comply with this Public License, then Your rights under this Public License terminate automatically.
+a. Αυτή η Δημόσια Άδεια ισχύει για τη διάρκεια των Πνευματικών Δικαιωμάτων και Παρόμοιων Δικαιωμάτων που αδειοδοτούνται εδώ. Ωστόσο, εάν δεν συμμορφωθείτε με αυτή τη Δημόσια Άδεια, τότε τα δικαιώματά σας υπό αυτή τη Δημόσια Άδεια τερματίζονται αυτόματα.
 
-b. Where Your right to use the Licensed Material has terminated under Section 6(a), it reinstates:
+b. Όπου το δικαίωμά σας να χρησιμοποιήσετε το Αδειοδοτημένο Υλικό έχει τερματιστεί σύμφωνα με το Τμήμα 6(a), επαναφέρεται:
 
-1.  automatically as of the date the violation is cured, provided it is cured within 30 days of Your discovery of the violation; or
+1.  αυτόματα από την ημερομηνία που διορθώνεται η παράβαση, εφόσον διορθωθεί εντός 30 ημερών από την ανακάλυψη της παράβασης; ή
 
-2.  upon express reinstatement by the Licensor.
+2.  κατόπιν ρητής επαναφοράς από τον Αδειοδότη.
 
-For the avoidance of doubt, this Section 6(b) does not affect any right the Licensor may have to seek remedies for Your violations of this Public License.
+Για την αποφυγή αμφιβολιών, αυτό το Τμήμα 6(b) δεν επηρεάζει κανένα δικαίωμα που μπορεί να έχει ο Αδειοδότης να ζητήσει αποζημιώσεις για τις παραβάσεις σας αυτής της Δημόσιας Άδειας.
 
-c. For the avoidance of doubt, the Licensor may also offer the Licensed Material under separate terms or conditions or stop distributing the Licensed Material at any time; however, doing so will not terminate this Public License.
+c. Για την αποφυγή αμφιβολιών, ο Αδειοδότης μπορεί επίσης να προσφέρει το Αδειοδοτημένο Υλικό υπό ξεχωριστούς όρους ή προϋποθέσεις ή να σταματήσει τη διανομή του Αδειοδοτημένου Υλικού ανά πάσα στιγμή. Ωστόσο, αυτό δεν θα τερματίσει αυτή τη Δημόσια Άδεια.
 
-d. Sections 1, 5, 6, 7, and 8 survive termination of this Public License.
+d. Τα Τμήματα 1, 5, 6, 7 και 8 επιβιώνουν της λήξης αυτής της Δημόσιας Άδειας.
 
-## Section 7 – Other Terms and Conditions.
+## Τμήμα 7 – Άλλοι Όροι και Προϋποθέσεις.
 
-a. The Licensor shall not be bound by any additional or different terms or conditions communicated by You unless expressly agreed.
+a. Ο Αδειοδότης δεν θα δεσμεύεται από οποιουσδήποτε πρόσθετους ή διαφορετικούς όρους ή προϋποθέσεις που επικοινωνούνται από εσάς εκτός εάν συμφωνηθεί ρητά.
 
-b. Any arrangements, understandings, or agreements regarding the Licensed Material not stated herein are separate from and independent of the terms and conditions of this Public License.
+b. Οποιεσδήποτε ρυθμίσεις, κατανοήσεις ή συμφωνίες σχετικά με το Αδειοδοτημένο Υλικό που δεν αναφέρονται εδώ είναι ξεχωριστές και ανεξάρτητες από τους όρους και τις προϋποθέσεις αυτής της Δημόσιας Άδειας.
 
-## Section 8 – Interpretation.
+## Τμήμα 8 – Ερμηνεία.
 
-a. For the avoidance of doubt, this Public License does not, and shall not be interpreted to, reduce, limit, restrict, or impose conditions on any use of the Licensed Material that could lawfully be made without permission under this Public License.
+a. Για την αποφυγή αμφιβολιών, αυτή η Δημόσια Άδεια δεν μειώνει, περιορίζει, περιορίζει ή επιβάλλει όρους σε οποιαδήποτε χρήση του Αδειοδοτημένου Υλικού που θα μπορούσε να γίνει νόμιμα χωρίς άδεια υπό αυτή τη Δημόσια Άδεια.
 
-b. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
+b. Στο βαθμό που είναι δυνατόν, εάν οποιαδήποτε διάταξη αυτής της Δημόσιας Άδειας κριθεί μη εκτελέσιμη, θα αναμορφωθεί αυτόματα στο ελάχιστο βαθμό που είναι απαραίτητο για να καταστεί εκτελέσιμη. Εάν η διάταξη δεν μπορεί να αναμορφωθεί, θα αποσπαστεί από αυτή τη Δημόσια Άδεια χωρίς να επηρεάζεται η εκτελεστότητα των υπόλοιπων όρων και προϋποθέσεων.
 
-c. No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
+c. Κανένας όρος ή προϋπόθεση αυτής της Δημόσιας Άδειας δεν θα παραληφθεί και καμία αποτυχία συμμόρφωσης δεν θα γίνει αποδεκτή εκτός εάν συμφωνηθεί ρητά από τον Αδειοδότη.
 
-d. Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
-
+d. Τίποτα σε αυτή τη Δημόσια Άδεια δεν συνιστά ή μπορεί να ερμηνευθεί ως περιορισμός ή παραίτηση από οποιαδήποτε προνόμια και ασυλίες που ισχύουν για τον Αδειοδότη ή εσάς, συμπεριλαμβανομένων από τις νομικές διαδικασίες οποιασδήποτε δικαιοδοσίας ή αρχής.
 ```
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at [creativecommons.org/policies](http://creativecommons.org/policies), Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.
 
 Creative Commons may be contacted at [creativecommons.org](http://creativecommons.org/).
 ```
-
 {{#include ./banners/hacktricks-training.md}}
-

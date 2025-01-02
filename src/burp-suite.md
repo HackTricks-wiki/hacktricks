@@ -1,18 +1,17 @@
 {{#include ./banners/hacktricks-training.md}}
 
-# Basic Payloads
+# Βασικοί Φορτωτές
 
-- **Simple List:** Just a list containing an entry in each line
-- **Runtime File:** A list read in runtime (not loaded in memory). For supporting big lists.
-- **Case Modification:** Apply some changes to a list of strings(No change, to lower, to UPPER, to Proper name - First capitalized and the rest to lower-, to Proper Name -First capitalized an the rest remains the same-.
-- **Numbers:** Generate numbers from X to Y using Z step or randomly.
-- **Brute Forcer:** Character set, min & max length.
+- **Απλή Λίστα:** Απλώς μια λίστα που περιέχει μια καταχώρηση σε κάθε γραμμή
+- **Αρχείο Εκτέλεσης:** Μια λίστα που διαβάζεται κατά την εκτέλεση (δεν φορτώνεται στη μνήμη). Για υποστήριξη μεγάλων λιστών.
+- **Τροποποίηση Περίπτωσης:** Εφαρμόστε κάποιες αλλαγές σε μια λίστα από συμβολοσειρές (Καμία αλλαγή, σε μικρά, σε ΜΕΓΑΛΑ, σε Κανονικό όνομα - Πρώτο κεφαλαίο και τα υπόλοιπα σε μικρά-, σε Κανονικό Όνομα - Πρώτο κεφαλαίο και τα υπόλοιπα παραμένουν τα ίδια-).
+- **Αριθμοί:** Δημιουργήστε αριθμούς από X έως Y χρησιμοποιώντας βήμα Z ή τυχαία.
+- **Brute Forcer:** Σύνολο χαρακτήρων, ελάχιστο & μέγιστο μήκος.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload to execute commands and grab the output via DNS requests to burpcollab.
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Φορτωτής για την εκτέλεση εντολών και την απόκτηση της εξόδου μέσω DNS αιτημάτων προς το burpcollab.
 
 {% embed url="https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e" %}
 
 [https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 
 {{#include ./banners/hacktricks-training.md}}
-

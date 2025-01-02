@@ -1,9 +1,6 @@
-You can remove this content before sending the PR:
+Μπορείτε να αφαιρέσετε αυτό το περιεχόμενο πριν στείλετε το PR:
 
 ## Attribution
-We value your knowledge and encourage you to share content. Please ensure that you only upload content that you own or that have permission to share it from the original author (adding a reference to the author in the added text or at the end of the page you are modifying or both). Your respect for intellectual property rights fosters a trustworthy and legal sharing environment for everyone.
+Εκτιμούμε τις γνώσεις σας και σας ενθαρρύνουμε να μοιραστείτε περιεχόμενο. Παρακαλούμε βεβαιωθείτε ότι ανεβάζετε μόνο περιεχόμενο που κατέχετε ή για το οποίο έχετε άδεια να το μοιραστείτε από τον αρχικό συγγραφέα (προσθέτοντας μια αναφορά στον συγγραφέα στο προστιθέμενο κείμενο ή στο τέλος της σελίδας που τροποποιείτε ή και τα δύο). Ο σεβασμός σας στα δικαιώματα πνευματικής ιδιοκτησίας προάγει ένα αξιόπιστο και νόμιμο περιβάλλον κοινοποίησης για όλους.
 
-
-Thank you for contributing to HackTricks!
-
-
+Σας ευχαριστούμε που συμβάλλετε στο HackTricks!
