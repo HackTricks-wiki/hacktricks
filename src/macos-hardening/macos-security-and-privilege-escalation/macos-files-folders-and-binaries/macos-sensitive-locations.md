@@ -2,35 +2,30 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Passwords
+## Mots de passe
 
-### Shadow Passwords
+### Mots de passe Shadow
 
-Shadow password is stored with the user's configuration in plists located in **`/var/db/dslocal/nodes/Default/users/`**.\
-The following oneliner can be use to dump **all the information about the users** (including hash info):
-
+Le mot de passe shadow est stocké avec la configuration de l'utilisateur dans des plists situées dans **`/var/db/dslocal/nodes/Default/users/`**.\
+La ligne de commande suivante peut être utilisée pour extraire **toutes les informations sur les utilisateurs** (y compris les informations de hachage) :
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
+[**Des scripts comme celui-ci**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) ou [**celui-ci**](https://github.com/octomagon/davegrohl.git) peuvent être utilisés pour transformer le hash au **format** **hashcat**.
 
-[**Scripts like this one**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) or [**this one**](https://github.com/octomagon/davegrohl.git) can be used to transform the hash to **hashcat** **format**.
-
-An alternative one-liner which will dump creds of all non-service accounts in hashcat format `-m 7100` (macOS PBKDF2-SHA512):
-
+Une alternative en une ligne qui va extraire les identifiants de tous les comptes non-service au format hashcat `-m 7100` (macOS PBKDF2-SHA512) :
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
-
-Another way to obtain the `ShadowHashData` of a user is by using `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+Une autre façon d'obtenir le `ShadowHashData` d'un utilisateur est d'utiliser `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
 ### /etc/master.passwd
 
-This file is **only used** when the system id running in **single-user mode** (so not very frequently).
+Ce fichier est **uniquement utilisé** lorsque le système fonctionne en **mode utilisateur unique** (donc pas très fréquemment).
 
 ### Keychain Dump
 
-Note that when using the security binary to **dump the passwords decrypted**, several prompts will ask the user to allow this operation.
-
+Notez que lors de l'utilisation du binaire de sécurité pour **extraire les mots de passe déchiffrés**, plusieurs invites demanderont à l'utilisateur de permettre cette opération.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -39,54 +34,46 @@ security list-smartcards #List smartcards
 security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
-
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 > [!CAUTION]
-> Based on this comment [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like these tools aren't working anymore in Big Sur.
+> D'après ce commentaire [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760), il semble que ces outils ne fonctionnent plus dans Big Sur.
 
-### Keychaindump Overview
+### Aperçu de Keychaindump
 
-A tool named **keychaindump** has been developed to extract passwords from macOS keychains, but it faces limitations on newer macOS versions like Big Sur, as indicated in a [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). The use of **keychaindump** requires the attacker to gain access and escalate privileges to **root**. The tool exploits the fact that the keychain is unlocked by default upon user login for convenience, allowing applications to access it without requiring the user's password repeatedly. However, if a user opts to lock their keychain after each use, **keychaindump** becomes ineffective.
+Un outil nommé **keychaindump** a été développé pour extraire des mots de passe des porte-clés macOS, mais il rencontre des limitations sur les versions macOS plus récentes comme Big Sur, comme indiqué dans une [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). L'utilisation de **keychaindump** nécessite que l'attaquant obtienne un accès et élève ses privilèges à **root**. L'outil exploite le fait que le porte-clé est déverrouillé par défaut lors de la connexion de l'utilisateur pour des raisons de commodité, permettant aux applications d'y accéder sans nécessiter le mot de passe de l'utilisateur à plusieurs reprises. Cependant, si un utilisateur choisit de verrouiller son porte-clé après chaque utilisation, **keychaindump** devient inefficace.
 
-**Keychaindump** operates by targeting a specific process called **securityd**, described by Apple as a daemon for authorization and cryptographic operations, crucial for accessing the keychain. The extraction process involves identifying a **Master Key** derived from the user's login password. This key is essential for reading the keychain file. To locate the **Master Key**, **keychaindump** scans the memory heap of **securityd** using the `vmmap` command, looking for potential keys within areas flagged as `MALLOC_TINY`. The following command is used to inspect these memory locations:
-
+**Keychaindump** fonctionne en ciblant un processus spécifique appelé **securityd**, décrit par Apple comme un démon pour les opérations d'autorisation et cryptographiques, crucial pour accéder au porte-clé. Le processus d'extraction implique l'identification d'une **Master Key** dérivée du mot de passe de connexion de l'utilisateur. Cette clé est essentielle pour lire le fichier du porte-clé. Pour localiser la **Master Key**, **keychaindump** scanne le tas de mémoire de **securityd** en utilisant la commande `vmmap`, à la recherche de clés potentielles dans des zones marquées comme `MALLOC_TINY`. La commande suivante est utilisée pour inspecter ces emplacements mémoire :
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-
-After identifying potential master keys, **keychaindump** searches through the heaps for a specific pattern (`0x0000000000000018`) that indicates a candidate for the master key. Further steps, including deobfuscation, are required to utilize this key, as outlined in **keychaindump**'s source code. Analysts focusing on this area should note that the crucial data for decrypting the keychain is stored within the memory of the **securityd** process. An example command to run **keychaindump** is:
-
+Après avoir identifié des clés maîtresses potentielles, **keychaindump** recherche dans les tas un motif spécifique (`0x0000000000000018`) qui indique un candidat pour la clé maîtresse. D'autres étapes, y compris la déobfuscation, sont nécessaires pour utiliser cette clé, comme indiqué dans le code source de **keychaindump**. Les analystes se concentrant sur ce domaine doivent noter que les données cruciales pour déchiffrer le trousseau sont stockées dans la mémoire du processus **securityd**. Une commande exemple pour exécuter **keychaindump** est :
 ```bash
 sudo ./keychaindump
 ```
-
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can be used to extract the following types of information from an OSX keychain in a forensically sound manner:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) peut être utilisé pour extraire les types d'informations suivants d'un trousseau OSX de manière forensiquement valide :
 
-- Hashed Keychain password, suitable for cracking with [hashcat](https://hashcat.net/hashcat/) or [John the Ripper](https://www.openwall.com/john/)
-- Internet Passwords
-- Generic Passwords
-- Private Keys
-- Public Keys
-- X509 Certificates
-- Secure Notes
-- Appleshare Passwords
+- Mot de passe de trousseau haché, adapté pour le craquage avec [hashcat](https://hashcat.net/hashcat/) ou [John the Ripper](https://www.openwall.com/john/)
+- Mots de passe Internet
+- Mots de passe génériques
+- Clés privées
+- Clés publiques
+- Certificats X509
+- Notes sécurisées
+- Mots de passe Appleshare
 
-Given the keychain unlock password, a master key obtained using [volafox](https://github.com/n0fate/volafox) or [volatility](https://github.com/volatilityfoundation/volatility), or an unlock file such as SystemKey, Chainbreaker will also provide plaintext passwords.
+Étant donné le mot de passe de déverrouillage du trousseau, une clé maître obtenue en utilisant [volafox](https://github.com/n0fate/volafox) ou [volatility](https://github.com/volatilityfoundation/volatility), ou un fichier de déverrouillage tel que SystemKey, Chainbreaker fournira également des mots de passe en texte clair.
 
-Without one of these methods of unlocking the Keychain, Chainbreaker will display all other available information.
+Sans l'une de ces méthodes de déverrouillage du trousseau, Chainbreaker affichera toutes les autres informations disponibles.
 
 #### **Dump keychain keys**
-
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
-
-#### **Dump keychain keys (with passwords) with SystemKey**
-
+#### **Dump des clés de trousseau (avec mots de passe) avec SystemKey**
 ```bash
 # First, get the keychain decryption key
 # To get this decryption key you need to be root and SIP must be disabled
@@ -94,9 +81,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-
-#### **Dump keychain keys (with passwords) cracking the hash**
-
+#### **Dump des clés de trousseau (avec mots de passe) en craquant le hash**
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -105,11 +90,9 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
+#### **Extraire les clés du trousseau (avec mots de passe) avec un dump mémoire**
 
-#### **Dump keychain keys (with passwords) with memory dump**
-
-[Follow these steps](../#dumping-memory-with-osxpmem) to perform a **memory dump**
-
+[Suivez ces étapes](../#dumping-memory-with-osxpmem) pour effectuer un **dump mémoire**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -118,27 +101,23 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
+#### **Dump des clés de trousseau (avec mots de passe) en utilisant le mot de passe de l'utilisateur**
 
-#### **Dump keychain keys (with passwords) using users password**
-
-If you know the users password you can use it to **dump and decrypt keychains that belong to the user**.
-
+Si vous connaissez le mot de passe de l'utilisateur, vous pouvez l'utiliser pour **dump et déchiffrer les trousseaux qui appartiennent à l'utilisateur**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
-
 ### kcpassword
 
-The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password (which isn't very secure).
+Le fichier **kcpassword** est un fichier qui contient le **mot de passe de connexion de l'utilisateur**, mais seulement si le propriétaire du système a **activé la connexion automatique**. Par conséquent, l'utilisateur sera automatiquement connecté sans qu'on lui demande un mot de passe (ce qui n'est pas très sécurisé).
 
-The password is stored in the file **`/etc/kcpassword`** xored with the key **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. If the users password is longer than the key, the key will be reused.\
-This makes the password pretty easy to recover, for example using scripts like [**this one**](https://gist.github.com/opshope/32f65875d45215c3677d).
+Le mot de passe est stocké dans le fichier **`/etc/kcpassword`** xored avec la clé **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si le mot de passe de l'utilisateur est plus long que la clé, la clé sera réutilisée.\
+Cela rend le mot de passe assez facile à récupérer, par exemple en utilisant des scripts comme [**celui-ci**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
-## Interesting Information in Databases
+## Informations intéressantes dans les bases de données
 
 ### Messages
-
 ```bash
 sqlite3 $HOME/Library/Messages/chat.db .tables
 sqlite3 $HOME/Library/Messages/chat.db 'select * from message'
@@ -146,130 +125,117 @@ sqlite3 $HOME/Library/Messages/chat.db 'select * from attachment'
 sqlite3 $HOME/Library/Messages/chat.db 'select * from deleted_messages'
 sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
-
 ### Notifications
 
-You can find the Notifications data in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
+Vous pouvez trouver les données de Notifications dans `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-Most of the interesting information is going to be in **blob**. So you will need to **extract** that content and **transform** it to **human** **readable** or use **`strings`**. To access it you can do:
-
+La plupart des informations intéressantes se trouveront dans **blob**. Vous devrez donc **extraire** ce contenu et le **transformer** en **lisible** **par** **humain** ou utiliser **`strings`**. Pour y accéder, vous pouvez faire :
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
 ```
-
 ### Notes
 
-The users **notes** can be found in `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
-
+Les **notes** des utilisateurs peuvent être trouvées dans `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
 
 #To dump it in a readable format:
 for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.Z ; done
 ```
+## Préférences
 
-## Preferences
+Dans les applications macOS, les préférences se trouvent dans **`$HOME/Library/Preferences`** et dans iOS, elles se trouvent dans `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
-In macOS apps preferences are located in **`$HOME/Library/Preferences`** and in iOS they are in `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+Dans macOS, l'outil cli **`defaults`** peut être utilisé pour **modifier le fichier de préférences**.
 
-In macOS the cli tool **`defaults`** can be used to **modify the Preferences file**.
-
-**`/usr/sbin/cfprefsd`** claims the XPC services `com.apple.cfprefsd.daemon` and `com.apple.cfprefsd.agent` and can be called to perform actions such as modify preferences.
+**`/usr/sbin/cfprefsd`** revendique les services XPC `com.apple.cfprefsd.daemon` et `com.apple.cfprefsd.agent` et peut être appelé pour effectuer des actions telles que modifier les préférences.
 
 ## OpenDirectory permissions.plist
 
-The file `/System/Library/OpenDirectory/permissions.plist` contains permissions applied on node attributes and is protected by SIP.\
-This file grants permissions to specific users by UUID (and not uid) so they are able to access specific sensitive information like `ShadowHashData`, `HeimdalSRPKey` and `KerberosKeys` among others:
-
+Le fichier `/System/Library/OpenDirectory/permissions.plist` contient des permissions appliquées sur les attributs de nœud et est protégé par SIP.\
+Ce fichier accorde des permissions à des utilisateurs spécifiques par UUID (et non par uid) afin qu'ils puissent accéder à des informations sensibles spécifiques telles que `ShadowHashData`, `HeimdalSRPKey` et `KerberosKeys`, entre autres :
 ```xml
 [...]
 <key>dsRecTypeStandard:Computers</key>
 <dict>
-	<key>dsAttrTypeNative:ShadowHashData</key>
-	<array>
-		<dict>
-			<!-- allow wheel even though it's implicit -->
-			<key>uuid</key>
-			<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
-			<key>permissions</key>
-			<array>
-				<string>readattr</string>
-				<string>writeattr</string>
-			</array>
-		</dict>
-	</array>
-	<key>dsAttrTypeNative:KerberosKeys</key>
-	<array>
-		<dict>
-			<!-- allow wheel even though it's implicit -->
-			<key>uuid</key>
-			<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
-			<key>permissions</key>
-			<array>
-				<string>readattr</string>
-				<string>writeattr</string>
-			</array>
-		</dict>
-	</array>
+<key>dsAttrTypeNative:ShadowHashData</key>
+<array>
+<dict>
+<!-- allow wheel even though it's implicit -->
+<key>uuid</key>
+<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
+<key>permissions</key>
+<array>
+<string>readattr</string>
+<string>writeattr</string>
+</array>
+</dict>
+</array>
+<key>dsAttrTypeNative:KerberosKeys</key>
+<array>
+<dict>
+<!-- allow wheel even though it's implicit -->
+<key>uuid</key>
+<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
+<key>permissions</key>
+<array>
+<string>readattr</string>
+<string>writeattr</string>
+</array>
+</dict>
+</array>
 [...]
 ```
+## Notifications du système
 
-## System Notifications
+### Notifications Darwin
 
-### Darwin Notifications
+Le principal démon pour les notifications est **`/usr/sbin/notifyd`**. Afin de recevoir des notifications, les clients doivent s'enregistrer via le port Mach `com.apple.system.notification_center` (vérifiez-les avec `sudo lsmp -p <pid notifyd>`). Le démon est configurable avec le fichier `/etc/notify.conf`.
 
-The main daemon for notifications is **`/usr/sbin/notifyd`**. In order to receive notifications, clients must register through the `com.apple.system.notification_center` Mach port (check them with `sudo lsmp -p <pid notifyd>`). The daemon is configurable with the file `/etc/notify.conf`.
+Les noms utilisés pour les notifications sont des notations DNS inversées uniques et lorsqu'une notification est envoyée à l'un d'eux, le(s) client(s) qui ont indiqué qu'ils peuvent la gérer la recevront.
 
-The names used for notifications are unique reverse DNS notations and when a notification is sent to one of them, the client(s) that have indicated that can handle it will receive it.
-
-It's possible to dump the current status (and see all the names) sending the signal SIGUSR2 to the notifyd process and reading the generated file: `/var/run/notifyd_<pid>.status`:
-
+Il est possible de vider l'état actuel (et de voir tous les noms) en envoyant le signal SIGUSR2 au processus notifyd et en lisant le fichier généré : `/var/run/notifyd_<pid>.status` :
 ```bash
 ps -ef | grep -i notifyd
-    0   376     1   0 15Mar24 ??        27:40.97 /usr/sbin/notifyd
+0   376     1   0 15Mar24 ??        27:40.97 /usr/sbin/notifyd
 
 sudo kill -USR2 376
 
 cat /var/run/notifyd_376.status
 [...]
 pid: 94379   memory 5   plain 0   port 0   file 0   signal 0   event 0   common 10
-  memory: com.apple.system.timezone
-  common: com.apple.analyticsd.running
-  common: com.apple.CFPreferences._domainsChangedExternally
-  common: com.apple.security.octagon.joined-with-bottle
+memory: com.apple.system.timezone
+common: com.apple.analyticsd.running
+common: com.apple.CFPreferences._domainsChangedExternally
+common: com.apple.security.octagon.joined-with-bottle
 [...]
 ```
+### Centre de Notification Distribué
 
-### Distributed Notification Center
+Le **Centre de Notification Distribué** dont le binaire principal est **`/usr/sbin/distnoted`**, est un autre moyen d'envoyer des notifications. Il expose certains services XPC et effectue des vérifications pour essayer de vérifier les clients.
 
-The **Distributed Notification Center** whose main binary is **`/usr/sbin/distnoted`**, is another way to send notifications. It exposes some XPC services and it performs some check to try to verify clients.
+### Notifications Push Apple (APN)
 
-### Apple Push Notifications (APN)
+Dans ce cas, les applications peuvent s'inscrire à des **sujets**. Le client générera un jeton en contactant les serveurs d'Apple via **`apsd`**.\
+Ensuite, les fournisseurs auront également généré un jeton et pourront se connecter aux serveurs d'Apple pour envoyer des messages aux clients. Ces messages seront reçus localement par **`apsd`** qui relayera la notification à l'application qui l'attend.
 
-In this case, applications can register for **topics**. The client will generate a token contacting Apple's servers through **`apsd`**.\
-Then, providers, will have also generated a token and will be able to connect with Apple's servers to send messages to the clients. These messages will be locally received by **`apsd`** which will relay the notification to the application waiting for it.
+Les préférences sont situées dans `/Library/Preferences/com.apple.apsd.plist`.
 
-The preferences are located in `/Library/Preferences/com.apple.apsd.plist`.
-
-There is a local database of messages located in macOS in `/Library/Application\ Support/ApplePushService/aps.db` and in iOS in `/var/mobile/Library/ApplePushService`. It has 3 tables: `incoming_messages`, `outgoing_messages` and `channel`.
-
+Il existe une base de données locale de messages située dans macOS à `/Library/Application\ Support/ApplePushService/aps.db` et dans iOS à `/var/mobile/Library/ApplePushService`. Elle contient 3 tables : `incoming_messages`, `outgoing_messages` et `channel`.
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
-
-It's also possible to get information about the daemon and connections using:
-
+Il est également possible d'obtenir des informations sur le démon et les connexions en utilisant :
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```
+## Notifications Utilisateur
 
-## User Notifications
+Ce sont des notifications que l'utilisateur devrait voir à l'écran :
 
-These are notifications that the user should see in the screen:
-
-- **`CFUserNotification`**: These API provides a way to show in the screen a pop-up with a message.
-- **The Bulletin Board**: This shows in iOS a banner that disappears and will be stored in the Notification Center.
-- **`NSUserNotificationCenter`**: This is the iOS bulletin board in MacOS. The database with the notifications in located in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
+- **`CFUserNotification`** : Cette API fournit un moyen d'afficher à l'écran une fenêtre contextuelle avec un message.
+- **Le Tableau d'Affichage** : Cela affiche sur iOS une bannière qui disparaît et sera stockée dans le Centre de Notifications.
+- **`NSUserNotificationCenter`** : C'est le tableau d'affichage iOS sur MacOS. La base de données avec les notifications est située dans `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
 {{#include ../../../banners/hacktricks-training.md}}

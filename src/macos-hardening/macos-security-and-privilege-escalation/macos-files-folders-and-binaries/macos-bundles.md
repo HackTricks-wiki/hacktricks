@@ -2,43 +2,43 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informations de base
 
-Bundles in macOS serve as containers for a variety of resources including applications, libraries, and other necessary files, making them appear as single objects in Finder, such as the familiar `*.app` files. The most commonly encountered bundle is the `.app` bundle, though other types like `.framework`, `.systemextension`, and `.kext` are also prevalent.
+Les bundles dans macOS servent de conteneurs pour une variété de ressources, y compris des applications, des bibliothèques et d'autres fichiers nécessaires, les faisant apparaître comme des objets uniques dans le Finder, tels que les fichiers familiers `*.app`. Le bundle le plus couramment rencontré est le bundle `.app`, bien que d'autres types comme `.framework`, `.systemextension` et `.kext` soient également répandus.
 
-### Essential Components of a Bundle
+### Composants essentiels d'un bundle
 
-Within a bundle, particularly within the `<application>.app/Contents/` directory, a variety of important resources are housed:
+Au sein d'un bundle, en particulier dans le répertoire `<application>.app/Contents/`, une variété de ressources importantes sont hébergées :
 
-- **\_CodeSignature**: This directory stores code-signing details vital for verifying the integrity of the application. You can inspect the code-signing information using commands like: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
-- **MacOS**: Contains the executable binary of the application that runs upon user interaction.
-- **Resources**: A repository for the application's user interface components including images, documents, and interface descriptions (nib/xib files).
-- **Info.plist**: Acts as the application's main configuration file, crucial for the system to recognize and interact with the application appropriately.
+- **\_CodeSignature** : Ce répertoire stocke les détails de signature de code essentiels pour vérifier l'intégrité de l'application. Vous pouvez inspecter les informations de signature de code en utilisant des commandes comme : %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
+- **MacOS** : Contient le binaire exécutable de l'application qui s'exécute lors de l'interaction de l'utilisateur.
+- **Resources** : Un dépôt pour les composants de l'interface utilisateur de l'application, y compris des images, des documents et des descriptions d'interface (fichiers nib/xib).
+- **Info.plist** : Sert de fichier de configuration principal de l'application, crucial pour que le système reconnaisse et interagisse avec l'application de manière appropriée.
 
-#### Important Keys in Info.plist
+#### Clés importantes dans Info.plist
 
-The `Info.plist` file is a cornerstone for application configuration, containing keys such as:
+Le fichier `Info.plist` est une pierre angulaire pour la configuration de l'application, contenant des clés telles que :
 
-- **CFBundleExecutable**: Specifies the name of the main executable file located in the `Contents/MacOS` directory.
-- **CFBundleIdentifier**: Provides a global identifier for the application, used extensively by macOS for application management.
-- **LSMinimumSystemVersion**: Indicates the minimum version of macOS required for the application to run.
+- **CFBundleExecutable** : Spécifie le nom du fichier exécutable principal situé dans le répertoire `Contents/MacOS`.
+- **CFBundleIdentifier** : Fournit un identifiant global pour l'application, utilisé de manière extensive par macOS pour la gestion des applications.
+- **LSMinimumSystemVersion** : Indique la version minimale de macOS requise pour que l'application fonctionne.
 
-### Exploring Bundles
+### Exploration des bundles
 
-To explore the contents of a bundle, such as `Safari.app`, the following command can be used: `bash ls -lR /Applications/Safari.app/Contents`
+Pour explorer le contenu d'un bundle, tel que `Safari.app`, la commande suivante peut être utilisée : `bash ls -lR /Applications/Safari.app/Contents`
 
-This exploration reveals directories like `_CodeSignature`, `MacOS`, `Resources`, and files like `Info.plist`, each serving a unique purpose from securing the application to defining its user interface and operational parameters.
+Cette exploration révèle des répertoires comme `_CodeSignature`, `MacOS`, `Resources`, et des fichiers comme `Info.plist`, chacun ayant un but unique allant de la sécurisation de l'application à la définition de son interface utilisateur et de ses paramètres opérationnels.
 
-#### Additional Bundle Directories
+#### Répertoires supplémentaires de bundle
 
-Beyond the common directories, bundles may also include:
+Au-delà des répertoires communs, les bundles peuvent également inclure :
 
-- **Frameworks**: Contains bundled frameworks used by the application. Frameworks are like dylibs with extra resources.
-- **PlugIns**: A directory for plug-ins and extensions that enhance the application's capabilities.
-- **XPCServices**: Holds XPC services used by the application for out-of-process communication.
+- **Frameworks** : Contient des frameworks regroupés utilisés par l'application. Les frameworks sont comme des dylibs avec des ressources supplémentaires.
+- **PlugIns** : Un répertoire pour les plug-ins et extensions qui améliorent les capacités de l'application.
+- **XPCServices** : Contient des services XPC utilisés par l'application pour la communication inter-processus.
 
-This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
+Cette structure garantit que tous les composants nécessaires sont encapsulés au sein du bundle, facilitant un environnement d'application modulaire et sécurisé.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Pour des informations plus détaillées sur les clés `Info.plist` et leurs significations, la documentation des développeurs Apple fournit des ressources étendues : [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
 {{#include ../../../banners/hacktricks-training.md}}

